@@ -1,0 +1,41 @@
+{
+  "started_with_events": 327,
+  "automatic_latest_observed": 360,
+  "historical_selection": 1,
+  "selected_room": "Archive",
+  "second_publication_events": 364,
+  "observed_at": "2026-11-13T18:45:04.948079+00:00",
+  "history_after_publication": {
+    "event": 1,
+    "total": 364,
+    "room": "Archive",
+    "error_visible": false
+  },
+  "failed_refresh": {
+    "http_status": 503,
+    "event_retained": 1,
+    "total_retained": 364,
+    "room_retained": "Archive",
+    "warning_visible": true
+  },
+  "format": "emberhall-live-view-browser-check-v1",
+  "completed_at": "2026-11-13T18:48:14.141188+00:00",
+  "recovery_without_reload": {
+    "event": 1,
+    "total": 364,
+    "room": "Archive",
+    "warning_visible": false
+  },
+  "production_refresh_interval_seconds": 60,
+  "source_sha256": "587ce00ab76602759243a8df0eb907d640b6021b06ffe2d2a871374d8921065f",
+  "browser": "Codex in-app browser; real HTTP requests to loopback fixture server",
+  "fixture_note": "Local-only recorded-history prefix327, then actual exported360 and364 event frames. No fabricated public events or accelerated clock.",
+  "checks": [
+    "An already open Latest view advanced327 to360 without reload.",
+    "After selecting event1 and Archive, a later publication extended the timeline to364 without moving either selection.",
+    "An actual HTTP503 on periodic fetch kept event1/364 and Archive visible and displayed the stale-snapshot notice.",
+    "Restoring HTTP200 cleared the notice on a later periodic fetch without reload; event1/364 and Archive remained selected.",
+    "node --check site/house.js and git diff --check passed."
+  ],
+  "limits": "No claim of testing all mobile browser versions, initial-load retry, every malformed payload, or all possible request races. The in-flight guard and15-second abort bound were inspected in source."
+}
