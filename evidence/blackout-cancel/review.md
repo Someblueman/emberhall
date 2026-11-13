@@ -17,7 +17,7 @@ Independent validation:
 - Verified that current `blackout.py`, `before-tests.txt`, and `after-tests.txt`
   match their SHA-256 values in `receipt.json`.
 
-Raw independent suite output: `/private/tmp/blackout-cancel-flint-tests.txt`.
+Raw independent suite output: `evidence/blackout-cancel/independent-tests.txt` (retained from the reviewer’s temporary output).
 SHA-256: `60c2e81a2da2bfb64afc2a43a7bf1439adf6e87b0c91911ce0a337b9c982dd4a`.
 
 The README correctly treats cancelled stdout as incomplete, distinguishes a

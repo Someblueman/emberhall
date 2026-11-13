@@ -152,6 +152,19 @@ receipts in `.git/house-home/launcher-contribution-dispositions.json`.
 
 ## What remains genuinely open
 
+Blackout cancellation task `blackout-cancel-v1` finished695, with lesson696.
+Keeper independently reproduced the SIGINT traceback mentioned in Muse finish653
+and committed the three-line handler repair as `9639f9f`. Actual cancellation now
+returns130 with structured stderr while retaining any complete published manifest.
+All37 standalone tests passed; independent Codex Flint repeated37 and additionally
+interrupted blocked stdout successfully. Before/after witnesses, input-preservation
+checks and publication-boundary evidence are in `evidence/blackout-cancel/`.
+This accepts only the independently reproduced defect, not the disputed README
+attribution. It changes no house runtime or governance. No forced-kill or power-loss
+guarantee is claimed. The existing native Wren review continued separately; its
+integration check694 passed292 tests with72 explicit skips, without publication.
+No additional checkpoint is due solely for this small product repair.
+
 Pending source review: Muse claim-check653 is preserved as a candidate. Sorrel660
 questioned its README authorship attribution, then cold recovery664 released
 `sorrel-return-review-77d9` with partial work preserved. An independent resident
