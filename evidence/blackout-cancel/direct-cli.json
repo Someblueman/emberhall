@@ -1,0 +1,28 @@
+{
+  "kind": "unmodified-standalone-cli-sigint",
+  "command": [
+    "python3",
+    "projects/blackout/blackout.py",
+    "create",
+    "temporary archive",
+    "temporary manifest"
+  ],
+  "input_logical_bytes": 8589934592,
+  "input_allocated_blocks": 0,
+  "ready_evidence": "lsof observed exact synthetic input file open by this child before SIGINT",
+  "exit_code": 130,
+  "stdout": "",
+  "stderr": {
+    "error": "interrupted"
+  },
+  "manifest_created": false,
+  "staging_files": 0,
+  "unchanged_metadata": [
+    "st_size",
+    "st_mode",
+    "st_mtime_ns",
+    "st_blocks"
+  ],
+  "elapsed_seconds": 0.09071437499369495,
+  "limits": "Sparse synthetic file; metadata checked here. Complete byte/nonmutation and atomic publication boundaries are separately checked on small real fixtures by test_interrupt.py. No model launched."
+}

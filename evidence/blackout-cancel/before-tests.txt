@@ -1,0 +1,128 @@
+test_cancel_after_publish_preserves_complete_exclusive_manifest (test_interrupt.InterruptTests.test_cancel_after_publish_preserves_complete_exclusive_manifest) ... FAIL
+test_cancel_before_publish_removes_only_staging_file (test_interrupt.InterruptTests.test_cancel_before_publish_removes_only_staging_file) ... FAIL
+test_closed_error_pipe_does_not_mask_cancellation (test_interrupt.InterruptTests.test_closed_error_pipe_does_not_mask_cancellation) ... FAIL
+test_scan_interrupts_all_commands_without_touching_input (test_interrupt.InterruptTests.test_scan_interrupts_all_commands_without_touching_input) ... FAIL
+
+======================================================================
+FAIL: test_cancel_after_publish_preserves_complete_exclusive_manifest (test_interrupt.InterruptTests.test_cancel_after_publish_preserves_complete_exclusive_manifest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 104, in test_cancel_after_publish_preserves_complete_exclusive_manifest
+    self.interrupt("create", "after-publish")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 82, in interrupt
+    self.assertEqual(process.returncode, 130, err)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: -2 != 130 : Traceback (most recent call last):
+  File "<string>", line 24, in <module>
+    runpy.run_path(cli, run_name="__main__")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 277, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 262, in main
+    save_manifest(manifest, args.manifest, args.root)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 226, in save_manifest
+    os.link(temporary, destination)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 20, in link
+    gate()
+    ~~~~^^
+  File "<string>", line 7, in gate
+    signal.pause()
+    ~~~~~~~~~~~~^^
+KeyboardInterrupt
+
+
+======================================================================
+FAIL: test_cancel_before_publish_removes_only_staging_file (test_interrupt.InterruptTests.test_cancel_before_publish_removes_only_staging_file)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 99, in test_cancel_before_publish_removes_only_staging_file
+    self.interrupt("create", "before-publish")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 82, in interrupt
+    self.assertEqual(process.returncode, 130, err)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: -2 != 130 : Traceback (most recent call last):
+  File "<string>", line 24, in <module>
+    runpy.run_path(cli, run_name="__main__")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 277, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 262, in main
+    save_manifest(manifest, args.manifest, args.root)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 226, in save_manifest
+    os.link(temporary, destination)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 18, in link
+    gate()
+    ~~~~^^
+  File "<string>", line 7, in gate
+    signal.pause()
+    ~~~~~~~~~~~~^^
+KeyboardInterrupt
+
+
+======================================================================
+FAIL: test_closed_error_pipe_does_not_mask_cancellation (test_interrupt.InterruptTests.test_closed_error_pipe_does_not_mask_cancellation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 111, in test_closed_error_pipe_does_not_mask_cancellation
+    self.interrupt("create", "scan", closed_stderr=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 82, in interrupt
+    self.assertEqual(process.returncode, 130, err)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: -2 != 130
+
+======================================================================
+FAIL: test_scan_interrupts_all_commands_without_touching_input (test_interrupt.InterruptTests.test_scan_interrupts_all_commands_without_touching_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 88, in test_scan_interrupts_all_commands_without_touching_input
+    self.interrupt("create", "scan")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/test_interrupt.py", line 82, in interrupt
+    self.assertEqual(process.returncode, 130, err)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: -2 != 130 : Traceback (most recent call last):
+  File "<string>", line 24, in <module>
+    runpy.run_path(cli, run_name="__main__")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 277, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 261, in main
+    manifest = inventory(args.root)
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 104, in inventory
+    _walk(descriptor, "", entries)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/projects/blackout/blackout.py", line 86, in _walk
+    while chunk := os.read(child, 1024 * 1024):
+                   ~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 11, in read
+    gate()
+    ~~~~^^
+  File "<string>", line 7, in gate
+    signal.pause()
+    ~~~~~~~~~~~~^^
+KeyboardInterrupt
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.119s
+
+FAILED (failures=4)

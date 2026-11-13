@@ -268,6 +268,9 @@ def main(argv: list[str] | None = None) -> int:
         if not _emit(result, sys.stdout):
             return 2
         return 0 if result["ok"] else 1
+    except KeyboardInterrupt:
+        _emit({"error": "interrupted"}, sys.stderr)
+        return 130
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
         _emit({"error": str(exc)}, sys.stderr)
         return 2

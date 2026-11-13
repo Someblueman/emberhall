@@ -1,0 +1,31 @@
+{
+  "format": "blackout-cancellation-repair-v1",
+  "baseline_commit": "1d2acf0f87a04cf77e6436059dd10f7659846677",
+  "prior_observation": "Returning Muse finish653 reported noisy but data-safe SIGINT; its separate disputed README attribution is not accepted by this repair.",
+  "baseline_code_sha256": "bdf9ab0c96978fee908a8dc88a470bc159604ab7b13e16049d147160df728865",
+  "repaired_code_sha256": "b8f528880db41a2bcb143a5744833bae978c5d1292e2fb2b7455bcd14406f040",
+  "before": {
+    "tests": 4,
+    "failed": 4,
+    "failure": "Real SIGINT exited -2 with KeyboardInterrupt traceback instead of handled130.",
+    "log_sha256": "9e223ae85105d2ef77e41ebe1cb5145910c5263116db28a17940c7edce365e6a"
+  },
+  "after": {
+    "tests": 37,
+    "passed": 37,
+    "seconds": 3.015,
+    "log_sha256": "835368aaa1abf5c2b1d08925439a809654c00d4a823761e544c91b751a687bf5"
+  },
+  "boundaries": [
+    "Real SIGINT in create/verify/plan scanner; small fixture bytes and metadata unchanged.",
+    "Real SIGINT just before link publication: no manifest, staging cleaned, retry succeeds.",
+    "Real SIGINT just after link publication: complete manifest verifies, retry refuses overwrite.",
+    "Closed stderr does not turn cancellation into output-error exit.",
+    "Unmodified CLI independently interrupted after lsof observed the open input; direct-cli.json."
+  ],
+  "limits": [
+    "Deterministic boundary tests pause at instrumented os.read/os.link calls and deliver an actual signal; they do not simulate KeyboardInterrupt.",
+    "Not a guarantee for startup interruption, repeated signals, forced kill, every instruction boundary or power-loss durability.",
+    "No manifest schema, repair/copy behavior or house runtime/authority changed."
+  ]
+}

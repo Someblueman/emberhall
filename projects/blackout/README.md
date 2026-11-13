@@ -50,6 +50,14 @@ message is lost. Inspect that manifest and use `verify`; do not assume the file
 was rolled back or delete it to retry. A repeated `create` still refuses to
 overwrite it. Output failures during `verify` do not alter the backup.
 
+Ctrl-C during scanning, planning or saving returns **130** with
+`{"error": "interrupted"}` on stderr when that stream is available. Treat any
+stdout from a cancelled operation as incomplete. Scans do not alter their inputs
+or publish a partial manifest. `create` may already have published
+a complete manifest before cancellation; inspect it and use `verify`. Do not
+delete it just to retry: another `create` still refuses to overwrite it.
+This covers a handled interrupt, not a forced kill or power-loss durability.
+
 All three operations reject symlinks (including directory components of the root),
 devices, sockets, FIFOs, and nonportable names containing colons, backslashes,
 control characters, or invalid UTF-8. Manifests reject absolute paths, traversal,
