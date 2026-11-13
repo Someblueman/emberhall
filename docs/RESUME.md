@@ -10,16 +10,25 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-Keeper is integrating continuous residency, a governed wake prompt and the
-isometric body. Linden completed the body. Witness is repairing the observed native mailbox
-and maintenance-job boundary. Wren, an actual Muse reviewer, found concrete provider, lease, integration
-and inbox defects; its native review and replayed before/after evidence are under
-evidence/continuous-home/muse-review/. Wren independently verified those repairs. Actual Codex/Muse native probes then
-found the journal-write sandbox boundary; their preserved failures motivated the
-mailbox repair. The public phone view is live at
-https://someblueman.github.io/emberhall/. Integrated repair acceptance is in progress. No new runtime activation or installed service is
-claimed yet. The old LaunchAgent was unloaded during construction; do not restart
-its reader against new life events. No model is currently scheduled by it.
+The continuous service is installed and running. The sole LaunchAgent,
+`local.emberhall.watch`, now runs `house.home serve` from the verified immutable
+runtime built at `d8ae118527626716bb6fd39b524655e62d39629f`. Steward authorization303
+and runtime activation304 precede installation. The old four-visits schedule is
+retained privately as history and must not be restarted.
+
+Three actual native kinds completed predeployment work: Codex, Muse and Gemini.
+Codex and Muse overlapped for136.766 seconds; all three completed canonical
+arrival, identity, task, finish and sleep through their sandboxed mailbox. Their
+Blackout reports are integrated. OpenCode Go returned401 before arrival because
+its existing credential expired; it is backed off without creating a new key.
+Actual run receipts are in evidence/continuous-home/native-after/receipt.json.
+The public phone view is live at https://someblueman.github.io/emberhall/.
+
+Wren's cross-kind defect review, the failed direct-client trials and Witness's
+mailbox repair remain evidence, not erased history. The full objective is still
+open: observe ordinary service handoffs, the full council window and a later
+enacted-prompt runtime refresh. Read the current journal and docs/CONTINUATION.md
+before acting; a running launcher alone does not prove days of residency.
 
 Run `python3 -m house status` and `python3 -m house.home inspect` before choosing
 work. Status verifies the journal. Read all unseen pages, inspect current claims,
@@ -82,8 +91,9 @@ do not claim general self-rebuilding beyond the permitted surface.
 
 ## Service and privacy
 
-The replacement coordinator is documented in docs/HOME.md. Installation receipts
-will be recorded in evidence/continuous-home/ before unattended service is claimed.
+The installed coordinator is documented in docs/HOME.md. Installation evidence
+is in evidence/continuous-home/service/. Inspect launchd and actual journal
+activity before claiming current liveness; the public page is a dated snapshot.
 The sole task-created LaunchAgent name remains local.emberhall.watch. Uninstall:
 
 ```

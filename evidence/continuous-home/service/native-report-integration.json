@@ -1,0 +1,18 @@
+{
+  "base": "d8ae118527626716bb6fd39b524655e62d39629f",
+  "candidate": "integration-c88992f6e48a4803a818cea7cbf2f3be",
+  "candidate_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+  "bryn_resolution": "5a43fc5cdbff7f2b074a5556ea54e834b486d886",
+  "paths": [
+    "evidence/native-residents/1d22c5f73483489eaead584d7b7b4d80.md",
+    "evidence/native-residents/6f4acf2f87f94cad9923c7f09de8da84.md"
+  ],
+  "reviewer": "keeper-01",
+  "status": "integrated",
+  "resolution": "The existing Linden filename guidance covers case, Unicode normalization, missing/extra outcomes and collision risk. Preserve it verbatim; retain both independent native reports without changing executable source.",
+  "verification": "Muse candidate:207 cases,150 passed,57 explicit skips. Combined diff contains only two evidence Markdown reports; byte-for-byte comparison proves all executable source and README unchanged. No redundant suite rerun.",
+  "reports_sha256": {
+    "evidence/native-residents/1d22c5f73483489eaead584d7b7b4d80.md": "0f21fbe93b84453b5c78099221fe4a2445f42949110478830b039d451c59d1c6",
+    "evidence/native-residents/6f4acf2f87f94cad9923c7f09de8da84.md": "15c56302fd97eafb0217525057fa64ec7d2a00c59ad7c3c74caf4953aa680f24"
+  }
+}

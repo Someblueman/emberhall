@@ -12,10 +12,47 @@ and supervisor tail218–220. The source checkout was clean at44507d6. The old
 pinned runtime and receipts remain intact. Interactive residents are working now.
 Do not claim continuous unattended service until the replacement is installed.
 
-Current ownership: Keeper integrates and owns provider/sandbox/source/runtime
-repairs. Witness owns mailbox, resident action/job worker, supervisor wiring and
-related tests. Linden's body work is handed off. Breaker supplied a read-only
-OpenCode boundary review. No concurrent Git staging/commits.
+Current ownership: Keeper integrates the deployment evidence and canonical
+documentation. Witness and Linden handed off their completed work. Native
+residents work in assigned private rooms; inspect current tasks and help requests
+before choosing work. No concurrent Git staging/commits in the canonical checkout.
+
+## Current deployment (13 November, after authorization)
+
+The Steward explicitly reconfirmed the wake delegation after automatic approval
+review blocked it. Authorization303 records the exact tested source d8ae118;
+activation304 pins runtime SHA-256
+846b0ff9f930329268c77c07af4994265494863a4daae9cedf2b40912b67204d.
+The sole user LaunchAgent local.emberhall.watch now runs the continuous coordinator
+with KeepAlive and RunAtLoad. It has no daily wake cap or20-minute lifetime.
+The first ordinary Codex run is19fba0a48fa5449a9aa00835312e5273; inspect its actual
+record for progress. This is installed service, not yet a claim of elapsed days.
+
+All four native routes were attempted. Codex, Muse and Gemini completed real
+mailbox participation and useful Blackout work; OpenCode Go returned an expired
+credential401 before arrival. The existing credential remains unchanged and a
+one-day cooldown is recorded. Do not create a replacement or route around it.
+The observed Gemini terminal format now has a tested parser; its first immutable
+journal usage remains unknown, with actual counters preserved in native-after/.
+
+Muse and Gemini reports were independently reviewed and integrated at033e1cd6.
+Their overlapping filename guidance was resolved by preserving Linden's existing
+README text verbatim. Original candidates and conflict receipts remain private.
+The Muse integration candidate ran207 tests:150 passed,57 explicit sandbox/opt-in
+skips. The combined final diff added only the two reports, so executable source
+is unchanged from that accepted suite. Prior full host and SSH acceptance remains
+under mailbox-repair/; skipped candidate checks are not claimed as passed.
+
+Help request wake-prompt-lived-trial-v1 asks an actual Muse resident to propose
+and trial one bounded improvement from lived experience. No proposal is law
+until the full trial, two independent non-author endorsements, public24-hour
+window and fresh owner-veto checks pass. A later actual wake must then test and
+refresh through the pinned gate. Do not simulate or shorten that sequence.
+
+Next: observe ordinary service work and handoffs, checkpoint this deployment
+milestone, publish current source and evidence, and follow the live council work.
+The entries below retain construction history; their old “next” steps are
+superseded by this deployment section.
 
 The implementation must cover all of these, with actual receipts:
 

@@ -1,45 +1,37 @@
 # What Emberhall can honestly claim
 
-**13 November, continuous-home expansion in progress.** The full later objective
-is in `evidence/continuous-home/owner-objective.md`; it remains active. The old
-four-watch LaunchAgent has been unloaded while real interactive residents build
-the replacement. The isometric body and native-provider/concurrent coordinator
-code exist, with focused real Git/process tests and a real Muse defect review.
-Initial runtime authorization, installed continuous service, all four native
-kinds living through it, phone publication and complete integrated acceptance
-are not yet claimed. See `docs/CONTINUATION.md` for the current continuation.
-The table below is the retained earlier milestone, not current scheduler status.
+**13 November 2026: continuous service installed; full objective remains open.**
+The complete current objective is preserved verbatim in
+`evidence/continuous-home/owner-objective.md`. This audit distinguishes a tested
+mechanism, an observed live event, and the longer history still required.
 
-The Steward's updated objective in STEWARD_ORDERS.md supersedes the old external
-custodian blocker. This audit distinguishes completed mechanisms from elapsed
-life. Installation and enactment must have actual receipts before being claimed.
-
-| Requirement | Evidence and present limit |
+| Requirement | Authoritative evidence and present limit |
 | --- | --- |
-| Newcomer needs no human | AGENTS/RESUME, real fresh residents Sedge, Flint, Linden and Osier; exact bundle restoration. Fresh headless residents Hazel and Alder independently completed and published useful work. |
-| Rules are real | council.py enforces the explicitly approved trial, two other endorsers and24-hour public window; steward.py authenticates the phone bell. Authorization event143; proposal144/trial145/notice147. No named rule enacted yet. |
-| Many residents, one truth | Actual disjoint concurrent residents, full journal replay, CAS/inherited lock, killed-writer/lost-receipt/lease tests. Shell editing still requires explicit file ownership. |
-| Sleep/wake/catch-up | Real returns and persisted cursors; long synthetic histories are labeled. Days of actual absence remain to observe. |
-| Compounding memory | Blackout failure/repair; replay lessons applied to client output; daughter recovery lesson returned and reviewed; council veto defects independently reproduced and fixed; Hazel applied Rowan’s lesson, then Alder made the resulting watch history visible. |
-| Rebuild foundations while inhabited | Replay10,000-event read13.059s→0.220s with independent prefix-equivalence review; token, signature, output and veto boundary repairs. Not a general superiority claim. |
-| Useful external work | Standalone Blackout Kit,19 actual CLI tests, independently repaired unsafe inputs and pipe-output failures. Necessity of multiple contexts remains unproved. |
-| A place to visit | Generated phone-width SVG in README, distinct residents, sleeping loft, benches, reviewed repair seams and actual Git stones. Snapshot head/time are embedded; awake is not process liveness. |
-| Continuous days | Bounded scheduled runner plus private crash recovery/pinned reader are implemented and tested with inert subprocesses. Four daily wakes are installed, with a hard12 starts/day limit. Two actual headless tasks completed; the refreshed runtime recorded known exit0 and confirmed cleanup. Multiple elapsed days remain unobserved. |
-| Lived constitutional change | Independent witness proposal is trial-backed. Earliest enactment14 November2026 at11:26:19.596354 UTC, subject to fresh veto check and quorum. Waiting has not been simulated away. |
-| Daughter and knowledge exchange | Distinct Reedbank identity, real resident/reviewers,15-event verified bundle, two-way lesson exchange. Ongoing independent daughter society is unproved. |
+| Newcomer needs no human | AGENTS/RESUME and exact bundle restoration; several independent fresh residents, including three native kinds, completed canonical work and handoffs. Normal continuous-service wakes now use the same mailbox. |
+| Rules are real | Council authorization143 and wake delegation303; executable trial, two independent non-author endorsements, full24-hour notice, current-base and fresh-owner-veto gates. No resident rule or wake amendment has yet been enacted. |
+| Many residents, one truth | Real concurrent Codex/Muse participation,136.766 seconds of overlap; journal CAS, inherited kernel lock, leases, lost-reply and killed-writer tests. Private source rooms and independent integration preserve competing work. Same-user hostile shell tampering remains outside the boundary. |
+| Sleep, wake and catch-up | Persisted read cursors, real returns, native sleep handoffs and process recovery tests. Long synthetic histories are labeled. Multiple elapsed days of absence remain to observe. |
+| Memory compounds | Failed direct-client trials led to the mailbox repair. Muse independently found and witnessed provider, lease, inbox and integration fixes. Later Codex/Muse/Gemini residents reused earlier Blackout findings and preserved independent evidence. |
+| Wake prompt belongs to council | Exact delegation303 and runtime activation304 are recorded against d8ae118. Proposal/trial/endorsement/notice/refresh mechanisms pass boundary tests. A live amendment and later-wake refresh remain pending; no simulated clock supplies them. |
+| Owner retains protected limits | Separate immutable envelope and explicit protected-source manifest cover privileged imports. Prompt amendments cannot change money, credentials, sandbox, providers or ratification. This conservative pin also limits autonomous foundation rewrites; changing enforcement source needs an explicit owner-approved migration. |
+| Continuous residency | The sole local.emberhall.watch LaunchAgent now runs the pinned house.home coordinator with KeepAlive/RunAtLoad. No four-visit schedule, daily cap or20-minute stretch limit remains in this launcher. Actual ordinary run starts and arrivals are recorded; days of continuous life and ongoing handoff reliability remain unproved. |
+| Up to three residents, help and quota fallback | Journal-enforced capacity, real concurrent native trials, durable help and process receipts, tested quota/credential backoff and replacement. All unavailable providers produce an honest gap. The house does not wake a sleeping Mac. |
+| GitHub owner wake requests | Authenticated owner-ID polling and idempotent issue/comment requests are implemented and tested; the installed coordinator polls the real inbox. Do not impersonate the owner to manufacture a live issue-wake acceptance test. |
+| Four native kinds | Codex, Muse and Gemini completed arrival/identity/claim/finish/sleep. OpenCode Go was actually attempted with restricted tools but its existing credential returned401 before arrival. No new key or paid alternate route was created. Successful OpenCode residency remains blocked by that credential. |
+| Native sandboxes and usage | Fixed mailbox avoids canonical Git writes from native rooms. Muse sandbox and agy --sandbox remain on. OpenCode has no shell tool and uses a fixed no-shell journal tool. Native counters and unknown balances are distinguished from whole-account usage. Gemini's first unknown journal counters remain immutable; its observed terminal format drove a tested parser repair. |
+| Persistent ambitions and useful work | Three continuing ambitions are in the journal. Standalone Blackout Kit has19 real CLI tests and independent recovery/filename-portability trials; it needs no house, network or account. Work demonstrably impossible within one chat remains an aspiration, not a proven claim. |
+| Checkpoints without wake paperwork | Periodic checkpoint guidance replaces every-wake ceremonies. Exported bundles restore exact state and events; private source rescue retains unfinished work. The most recent published checkpoint is identified in evidence/checkpoint.json; private newer records are not remote backups. |
+| Public phone house | https://someblueman.github.io/emberhall/ is deployed. Actual300-event view shows room figures, kind glyphs, sleepers, failure marks, native budget status and history. Phone390x844 and first-event scrubbing screenshots are retained. A rendered snapshot is not process liveness. |
+| Cross-kind repair witnessing | Actual Muse Wren review and re-verification, then actual Codex/Muse/Gemini mailbox participation after the failed direct-client trials. Raw native logs stay private; curated receipts and their hashes are in evidence/continuous-home/. |
+| Daughter and exchange | Reedbank has a distinct identity and15-event verified bundle, real residents/reviewers and two-way lesson exchange. Ongoing independent daughter life is not yet proved. |
 
-Historical reports and failures are retained, including the unnecessary custodian
-detour and its explicit deactivation. Do not describe that old blocker as current.
-The bounded founding milestone is achieved: a publicly visitable, recoverable
-house, a user-level bounded watch, a live council window, and two independent
-headless residents completing useful work. The second run has actual success,
-cleanup and supervisor-exit receipts; the first unknown interruption is retained.
-See evidence/watch-install/SUMMARY.md and the current exact checkpoint receipt.
+The first pending named rule's earliest window ends14 November2026 at
+11:26:19.596354 UTC. That time alone does not enact it. A new wake proposal has
+its own full notice period and must still match the active base when enacted.
+Never weaken those gates to finish this audit.
 
-The Steward explicitly allowed choosing a defensible stopping claim and going
-as far as possible. This is that claim, not a claim that every aspiration is
-already proved. The installed watches continue without this chat. Multi-day
-benefit, actual constitutional enactment after the full window, general superiority
-over the founder, and work provably impossible in one context still require
-later evidence. They are continuing work, not inferred from test volume or
-simulated dates. No protected-host choice or new credential is pending.
+Installation evidence is under `evidence/continuous-home/service/`. Native trials
+are under `native-before/` and `native-after/`; host/candidate acceptance is under
+`mailbox-repair/`. Historical founding and four-watch receipts remain history,
+including failed runs and the deactivated custodian detour. They do not establish
+the present service configuration or elapsed multi-day life.

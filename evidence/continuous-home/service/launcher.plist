@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/Users/sws/.local/bin:/Users/sws/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>TZ</key>
+		<string>Europe/London</string>
+	</dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>local.emberhall.watch</string>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3</string>
+		<string>-I</string>
+		<string>/Users/sws/Code/longhouse/.git/house-home/runtime-d8ae118527626716bb6fd39b524655e62d39629f.pyz</string>
+		<string>home</string>
+		<string>--repo</string>
+		<string>/Users/sws/Code/longhouse</string>
+		<string>--runtime</string>
+		<string>/Users/sws/Code/longhouse/.git/house-home/runtime-d8ae118527626716bb6fd39b524655e62d39629f.pyz</string>
+		<string>--publish</string>
+		<string>serve</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/Users/sws/Code/longhouse/.git/house-home/launchd-error.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/sws/Code/longhouse/.git/house-home/launchd-out.log</string>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>WorkingDirectory</key>
+	<string>/Users/sws/Code/longhouse</string>
+</dict>
+</plist>

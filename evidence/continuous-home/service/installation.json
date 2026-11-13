@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-11-13T18:25:56.394344+00:00",
+  "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+  "runtime_source": "d8ae118527626716bb6fd39b524655e62d39629f",
+  "runtime_sha256": "846b0ff9f930329268c77c07af4994265494863a4daae9cedf2b40912b67204d",
+  "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+  "authorization": {
+    "sequence": 303,
+    "head": "d86004501606407f52b08c7eade1fcff5d5eb704",
+    "request": "wake-policy-authorization-v1"
+  },
+  "activation_sequence": 304,
+  "launchd": {
+    "label": "local.emberhall.watch",
+    "state": "running",
+    "pid": 34711,
+    "process": "34711     1 02:22 /Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3 -I /Users/sws/Code/longhouse/.git/house-home/runtime-d8ae118527626716bb6fd39b524655e62d39629f.pyz home --repo /Users/sws/Code/longhouse --runtime /Users/sws/Code/longhouse/.git/house-home/runtime-d8ae118527626716bb6fd39b524655e62d39629f.pyz --publish serve",
+    "keep_alive": true,
+    "run_at_load": true,
+    "throttle_seconds": 30,
+    "plist_sha256": "eab4499b85f2121c1d77be8be73cb611eaef1b159356cfad5cb4e75180b878fa"
+  },
+  "journal": {
+    "sequence": 320,
+    "head": "830ea183581d875d45fe43e4ea132b6fafb89bc5"
+  },
+  "ordinary_runs": {
+    "19fba0a48fa5449a9aa00835312e5273": {
+      "agent": "codex",
+      "kind": "run-start",
+      "mode": "review",
+      "model": "gpt-6.1-sol",
+      "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+      "resident": "resident-9309d3aacbb4418ba3db22805d98e199",
+      "run": "19fba0a48fa5449a9aa00835312e5273",
+      "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+      "workspace": "residents/19fba0a48fa5449a9aa00835312e5273",
+      "status": "active",
+      "started_at": 1794594217.667386,
+      "started_sequence": 307,
+      "pgid": 34766,
+      "launched_sequence": 308
+    },
+    "cf1c7aa0edba45ff806cdf7893ad7b0f": {
+      "agent": "muse",
+      "help_request": "wake-prompt-lived-trial-v1",
+      "kind": "run-start",
+      "mode": "review",
+      "model": "muse-ember-1.0",
+      "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+      "resident": "resident-13e0adccca494d19822e5bdc5e652e64",
+      "run": "cf1c7aa0edba45ff806cdf7893ad7b0f",
+      "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+      "workspace": "residents/cf1c7aa0edba45ff806cdf7893ad7b0f",
+      "status": "active",
+      "started_at": 1794594261.8665779,
+      "started_sequence": 314,
+      "pgid": 35413,
+      "launched_sequence": 315
+    }
+  },
+  "accepted_residents": {
+    "resident-9309d3aacbb4418ba3db22805d98e199": {
+      "name": "Sorrel",
+      "awake": true,
+      "cursor": 0,
+      "note": "Just arrived.",
+      "agent": "codex",
+      "model": "gpt-6.1-sol"
+    },
+    "resident-13e0adccca494d19822e5bdc5e652e64": {
+      "name": "Ember",
+      "awake": true,
+      "cursor": 0,
+      "note": "Just arrived."
+    }
+  },
+  "limits": "Observed installation and actual ordinary arrivals, not elapsed days or a completed ordinary handoff. OpenCode existing credential remains expired. No resident council amendment enacted yet."
+}
