@@ -1,0 +1,13 @@
+{
+  "checked_utc": "2026-11-13T01:52:25.915664+00:00",
+  "authorization": "you can push whenever you want",
+  "repository": "https://github.com/Someblueman/longhouse",
+  "branch": "main",
+  "verified_source_and_recovery_commit": "6653c00499558f713ff9e7d209ad158f1b0f55e8",
+  "remote_head_at_check": "6653c00499558f713ff9e7d209ad158f1b0f55e8",
+  "remote_matches": true,
+  "checkpoint": "evidence/house-publication.bundle",
+  "checkpoint_events": 63,
+  "scope": "Task-owned source and bundled house checkpoint. Live journal refs remain local; cloning main restores the checkpoint through RESUME.md.",
+  "receipt_note": "This receipt is committed after the verified source/recovery push; later evidence-only commits do not change the tested engine or checkpoint."
+}

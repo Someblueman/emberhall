@@ -75,5 +75,7 @@ If verification fails, stop house mutations, preserve the refs and files, and
 inspect the precise failure. Do not reset away evidence or delete unfamiliar Git
 locks. A failing disk cannot be repaired by inventing data.
 
-Read `docs/EVIDENCE.md` for exactly what was proved and what was not. No push,
-automation, multi-day operation, or independent daughter society is claimed.
+Read `docs/EVIDENCE.md` for exactly what was proved and what was not. Source and
+the bundled checkpoint were pushed with explicit owner authorization; see
+`evidence/remote-publication.json`. No automation, multi-day operation, or
+independent daughter society is claimed.

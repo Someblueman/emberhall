@@ -1,10 +1,11 @@
-# Owner-approved local publication
+# Owner-approved publication
 
 The owner explicitly answered **“Allow unsigned local commits for this task.”**
 This resolves the earlier source-signing blocker. Publication uses a per-command
 `git -c commit.gpgsign=false commit` override; persistent Git signing settings
-remain unchanged. Nothing is authorized for push, authority enrollment, or rule
-ratification by this answer.
+remain unchanged. The owner subsequently said **“you can push whenever you
+want”**, authorizing pushes for this task. Neither answer enrolls authority or
+ratifies a rule.
 
 The source implementation was reviewed and checked before publication. The house
 has 29 passing boundary tests, Blackout Kit has 16 passing CLI tests, and the
@@ -16,7 +17,8 @@ per-command override. A fresh independent `--no-local --single-branch` clone
 restored all 63 checkpoint events and matched the full canonical state and event
 hashes. Its 29 house tests and 16 Blackout CLI tests passed. The sealed charter
 and pending amendment were preserved. Git's persistent signing setting remains
-`true`; nothing was pushed.
+`true`. The owner-authorized push to `origin/main` then succeeded; the remote
+matched `6653c00499558f713ff9e7d209ad158f1b0f55e8` when checked.
 
 `evidence/publication.json` records the actual commands, commit, recovery results,
 source hashes and test receipts. A subsequent evidence-only commit records these
@@ -29,3 +31,9 @@ and the updated return note.
 
 The full goal is still not complete. See GOAL_AUDIT.md for missing isolated
 governance, ratification, multi-day operation and work beyond a single context.
+
+`evidence/remote-publication.json` records that remote verification. Source and
+the portable 63-event checkpoint are included in main. The live journal refs are
+local; a fresh clone uses RESUME.md to restore the bundled history. Pushes remain
+authorized for this task after relevant checks; no further routine permission
+request is needed. This does not authorize worktrees or governance changes.

@@ -98,8 +98,9 @@ an already-used contract.
 - **The daughter is seeded, not independently alive.** Reedbank has a verified
   journal and attributed advice, but no separate multi-day resident community.
 - **Durability is bounded.** The tests cover process death, not sudden power loss,
-  disk destruction, disk exhaustion, or network-filesystem semantics. The bundle
-  is a local checkpoint, not an off-device backup. Nothing was pushed.
+  disk destruction, disk exhaustion, or network-filesystem semantics. The verified
+  checkpoint was subsequently pushed in the source branch; the remote receipt is
+  in `evidence/remote-publication.json`.
 - **Shared shell edits remain shared shell edits.** Leases protect accepted journal
   results. Exclusive path ownership and integrator review protected this session's
   working files; they are not filesystem access controls.
@@ -132,5 +133,7 @@ The owner explicitly allowed unsigned local commits for this task. Source commit
 source clone restored all63 checkpoint events with identical state/event hashes
 and passed29 house tests plus16 Blackout tests. The exact commands and results
 are in `evidence/publication.json` and the two `evidence/clone-*-tests.txt` files.
-Persistent signing configuration remains enabled; nothing was pushed. This source
-publication does not enroll authority or ratify the proposed charter amendment.
+Persistent signing configuration remains enabled. The owner then authorized pushes;
+source and checkpoint were pushed to origin/main and remote equality was checked.
+See `evidence/remote-publication.json`. Publication does not enroll authority or
+ratify the proposed charter amendment.
