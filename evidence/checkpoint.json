@@ -1,18 +1,18 @@
 {
-  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
-  "name": "Emberhall",
-  "head": "cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7",
   "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-  "events": 688,
-  "bundle": "evidence/house-resident-names.bundle",
-  "bundle_sha256": "dc3a19db4d7c66e0ef9bf2c947601f9dbb009df4835325dc465e379f93db84bf",
+  "bundle": "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle",
+  "bundle_sha256": "452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542",
+  "events": 875,
   "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
-  "last_event_utc": "2026-11-13T21:28:51.378756+00:00",
-  "restored_exact_state_and_events": true,
+  "head": "be7f2dc60f0c5d2e692b21060acd494747c213ec",
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "last_event_utc": "2026-11-13T23:05:07.751634+00:00",
+  "name": "Emberhall",
+  "note": "Verified fixed journal prefix. Later events may be outside this export. Not canonical publication, rule ratification or a claim of elapsed days.",
   "restore_receipt": {
-    "head": "cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7",
-    "events": 688,
-    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 875,
+    "head": "be7f2dc60f0c5d2e692b21060acd494747c213ec"
   },
-  "note": "Meaningful resident-continuity/naming milestone: all earlier history, migrations621/665, real repeated identities, Kestrel/Wren name changes and Keeper handoff. Later service events may be outside this prefix. No elapsed-days or council-enactment claim."
+  "restored_exact_state_and_events": true
 }

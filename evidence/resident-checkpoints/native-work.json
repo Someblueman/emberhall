@@ -1,0 +1,25 @@
+{
+  "run": "64166209ac5c4f1fada25c11f6711f4e",
+  "resident": "resident-9c6665447fde49358635443e47216acd",
+  "name": "Sable",
+  "kind": "muse",
+  "source_base": "4acf5d83ca7e4d71142cbc1e8b0309614fc61a2d",
+  "contribution": "5f4e7b101bff57d0f749129cd97efaa4adfa921b",
+  "paths": {
+    "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle": "452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542",
+    "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.json": "8dc8158c0b660089a0e22e31718334a7005b4b84bcd38230923fcb06dfacbc66",
+    "evidence/checkpoint.json": "8dc8158c0b660089a0e22e31718334a7005b4b84bcd38230923fcb06dfacbc66"
+  },
+  "finish": 876,
+  "sleep": 878,
+  "terminal": 881,
+  "outcome": "success",
+  "reviewer": "keeper-01",
+  "exact_native_bytes_preserved": true,
+  "root_edits": [
+    "docs/RESUME.md restore command and handoff",
+    "docs/CONTINUATION.md milestone",
+    "docs/GOAL_AUDIT.md bounded capability evidence"
+  ],
+  "note": "No native bundle bytes embedded in journal; existing prior checkpoint bundles retained."
+}

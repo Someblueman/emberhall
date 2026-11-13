@@ -1,0 +1,18 @@
+{
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "bundle": "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle",
+  "bundle_sha256": "452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542",
+  "events": 875,
+  "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+  "head": "be7f2dc60f0c5d2e692b21060acd494747c213ec",
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "last_event_utc": "2026-11-13T23:05:07.751634+00:00",
+  "name": "Emberhall",
+  "note": "Verified fixed journal prefix. Later events may be outside this export. Not canonical publication, rule ratification or a claim of elapsed days.",
+  "restore_receipt": {
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 875,
+    "head": "be7f2dc60f0c5d2e692b21060acd494747c213ec"
+  },
+  "restored_exact_state_and_events": true
+}

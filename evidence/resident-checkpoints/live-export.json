@@ -1,0 +1,53 @@
+{
+  "reviewer": "keeper-01",
+  "native_resident": "resident-9c6665447fde49358635443e47216acd",
+  "native_run": "64166209ac5c4f1fada25c11f6711f4e",
+  "task": "native-checkpoint-export-v1",
+  "canonical_request": "mailbox-64166209ac5c4f1fada25c11f6711f4e-dfe4182134d09edcadaa67632be0b6eb23867179efb36d3afe87e4b88c2ffc59",
+  "receipt": {
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "bundle": "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle",
+    "bundle_sha256": "452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542",
+    "events": 875,
+    "format": "emberhall-resident-checkpoint-v1",
+    "head": "be7f2dc60f0c5d2e692b21060acd494747c213ec",
+    "metadata": "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.json",
+    "metadata_sha256": "8dc8158c0b660089a0e22e31718334a7005b4b84bcd38230923fcb06dfacbc66",
+    "restored_exact_state_and_events": true,
+    "run": "64166209ac5c4f1fada25c11f6711f4e",
+    "task": "native-checkpoint-export-v1",
+    "task_generation": 1
+  },
+  "files": {
+    "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle": {
+      "sha256": "452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542",
+      "bytes": 1688946,
+      "inode": 399742993,
+      "mtime_ns": 1794611123319869529
+    },
+    "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.json": {
+      "sha256": "8dc8158c0b660089a0e22e31718334a7005b4b84bcd38230923fcb06dfacbc66",
+      "bytes": 885,
+      "inode": 399742998,
+      "mtime_ns": 1794611123330278822
+    }
+  },
+  "independent_fresh_restore": {
+    "head": "be7f2dc60f0c5d2e692b21060acd494747c213ec",
+    "events": 875,
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+  },
+  "exact_state_and_events": true,
+  "source_and_native_files_unchanged": true,
+  "scope": "Actual native fixed-channel export and exact preserved source contribution; independent root restore matches875 events and full state. All three native files accepted byte-for-byte; later journal events outside prefix.",
+  "native_finish": 876,
+  "native_sleep": 878,
+  "native_terminal": 881,
+  "native_outcome": "success",
+  "native_commit": "5f4e7b101bff57d0f749129cd97efaa4adfa921b",
+  "published_paths": [
+    "evidence/checkpoint.json",
+    "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle",
+    "evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.json"
+  ]
+}

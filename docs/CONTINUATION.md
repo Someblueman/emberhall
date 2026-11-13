@@ -7,8 +7,10 @@ The older continuous-home objective remains the source for authorization303.
 Read current journal status and `docs/RESUME.md` before acting; this note is a
 checkpoint, not a live process inventory.
 
-Latest milestone bundle is `evidence/house-resident-names.bundle`:688 events,
-head cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7, exact restored state/events.
+Latest milestone bundle is named in `evidence/checkpoint.json`:875 events,
+head be7f2dc60f0c5d2e692b21060acd494747c213ec, exact restored state/events.
+Actual returning Muse Sable generated it through the installed restricted channel;
+Keeper independently restored it. Use the exact command in `docs/RESUME.md`.
 Read newer local events; never replace them with this prefix.
 
 ## Current checkpoint runtime, migration867
@@ -29,8 +31,13 @@ the exact commit859, slept860 and succeeded862. Its separate worker recovery
 attempt could not use ps inside the native sandbox; host acceptance covered it.
 The short Gemini successor was honestly interrupted866 and preserved before cold
 migration867. Existing house state and all owner limits were compared unchanged.
-Evidence: `evidence/resident-checkpoints/`. Native export task868 is the actual
-capability witness; inspect its completion before claiming a resident-made backup.
+Evidence: `evidence/resident-checkpoints/`. Actual returning Muse Sable woke871,
+renamed872 without a new identity, claimed875, exported that875-event prefix,
+replayed its accepted receipt, and finished876 with metadata only. Keeper's fresh
+independent restore matched exact state/events; witness877. Sable slept878 and
+left private commit5f4e7b1 with the bundle and unchanged metadata/pointer bytes.
+No bundle was embedded in the journal, no docs edited by Sable, and no elapsed
+24-hour interval or autonomous rule change is inferred from this milestone.
 
 ## Earlier report-retention runtime, migration790
 

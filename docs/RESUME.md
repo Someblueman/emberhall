@@ -87,16 +87,21 @@ coordinator activity and a rendered snapshot do not prove those milestones.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-resident-names.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This checkpoint contains688 events through13 November21:28:51 UTC, head
-`cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7`. It retains earned room opening,
-all spent OpenCode permits and the actual remote401, plus real returning residents,
-completed recovery work, migrations621/665, Kestrel/Wren name changes and Keeper's
-handoff688. Full events and projected state restored exactly in a new empty
-repository. SHA-256 and receipt: `evidence/checkpoint.json`.
+This checkpoint contains875 events through13 November23:05:07 UTC, head
+`be7f2dc60f0c5d2e692b21060acd494747c213ec`. Actual returning Muse Sable exported
+it through the installed fixed channel after migration867. The trusted action
+verified a fresh restore; Keeper independently repeated the exact full state/events
+comparison in another empty repository, with native files unchanged. The bundle
+is1,688,946 bytes, SHA256
+`452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542`.
+Sable's metadata bytes are preserved in `evidence/checkpoint.json`; live proof is
+`evidence/resident-checkpoints/live-export.json`. The prefix includes migrations
+790/867 and the actual returning identities/name repairs. Sable's later finish,
+sleep and the final acceptance are outside that prefix; read newer local events.
 Earlier bundles remain intact. Use the current reader; old runtime archives may
 not understand newer owner-migration events. No successful OpenCode residency,
 council enactment or elapsed days are claimed by this checkpoint.
