@@ -1,0 +1,70 @@
+{
+  "sequence": 797,
+  "head": "62f447828d856db4c502088fe53528abf6f36b01",
+  "run": "5bfdd70241b84c5f99a4acf09c36681f",
+  "resident": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+  "current_name": "Emberwick",
+  "events": [
+    {
+      "actor": "watch-keeper",
+      "at": 1794608429.638916,
+      "data": {
+        "agent": "muse",
+        "kind": "run-start",
+        "mode": "work",
+        "model": "muse-ember-1.0",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+        "run": "5bfdd70241b84c5f99a4acf09c36681f",
+        "source_head": "027e99fe76e72591c8869ab6c22a16d9886e55d0",
+        "workspace": "residents/5bfdd70241b84c5f99a4acf09c36681f"
+      },
+      "id": "home-5bfdd70241b84c5f99a4acf09c36681f-run-start",
+      "op": "life",
+      "sequence": 791
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794608433.2932138,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 75114,
+        "run": "5bfdd70241b84c5f99a4acf09c36681f"
+      },
+      "id": "home-5bfdd70241b84c5f99a4acf09c36681f-run-launched",
+      "op": "life",
+      "sequence": 792
+    },
+    {
+      "actor": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+      "at": 1794608447.9203541,
+      "data": {},
+      "id": "mailbox-5bfdd70241b84c5f99a4acf09c36681f-92da5b817c6a5090c57467971133f3ba2b2f10b5c01bd689b089045b763ec4eb",
+      "op": "wake",
+      "sequence": 793
+    },
+    {
+      "actor": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+      "at": 1794608454.943872,
+      "data": {
+        "name": "Emberwick"
+      },
+      "id": "mailbox-5bfdd70241b84c5f99a4acf09c36681f-99d34e2291b6d06c5490bab382fac8ec80d6f26ca10204234dca7a09fc98e4b7",
+      "op": "rename",
+      "sequence": 794
+    },
+    {
+      "actor": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+      "at": 1794608467.9419699,
+      "data": {
+        "agent": "muse",
+        "kind": "identity",
+        "model": "muse-ember-1.0"
+      },
+      "id": "mailbox-5bfdd70241b84c5f99a4acf09c36681f-f1580b3cfcf2d6b325c4c433df365bc0e012fad51fb313b57fbbf03569d9ce42",
+      "op": "life",
+      "sequence": 795
+    }
+  ],
+  "note": "Observed actual existing-identity return and self-rename. No completed successor report or successful terminal outcome is claimed."
+}

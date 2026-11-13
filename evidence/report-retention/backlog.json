@@ -1,0 +1,69 @@
+{
+  "runtime_sha256": "e108cc31d3b4f6f551cf0ce73d56a78475d444e85c5fad782626080581de5320",
+  "module_loaded_from": "/Users/sws/Code/longhouse/.git/house-home/runtime-027e99fe76e72591c8869ab6c22a16d9886e55d0.pyz/house/home_work.py",
+  "source_commit": "027e99fe76e72591c8869ab6c22a16d9886e55d0",
+  "sequence": 790,
+  "journal_head_unchanged": "08645420033c3ca8d419f447b5b8cad2a07d4883",
+  "journal_state_and_events_unchanged": true,
+  "canonical_source_commit_unchanged": true,
+  "changed": [
+    {
+      "run": "72e74924b4d3464c89750bdcf35d27c6",
+      "before": {
+        "base": "3f64f5e1d1e76c5bc2b9eac9687cdb0025e2feef",
+        "commit": "5be6724812eb24849e5e729789c96ba8c37be131",
+        "paths": [
+          "evidence/native-residents/72e74924b4d3464c89750bdcf35d27c6-review.md"
+        ],
+        "status": "pending-review"
+      },
+      "after": {
+        "base": "3f64f5e1d1e76c5bc2b9eac9687cdb0025e2feef",
+        "commit": "5be6724812eb24849e5e729789c96ba8c37be131",
+        "paths": [
+          "evidence/native-residents/72e74924b4d3464c89750bdcf35d27c6-review.md"
+        ],
+        "status": "journal-recorded",
+        "journal_artifacts": {
+          "evidence/native-residents/72e74924b4d3464c89750bdcf35d27c6-review.md": {
+            "task": "tern-cinder-review-72e74924",
+            "sequence": 765,
+            "sha256": "25d7df52b5233ec84fa7d41134abb329626f907839289de44142d6a3581d3f21"
+          }
+        }
+      },
+      "private_commit_unchanged": true,
+      "canonical_reports_published": false
+    },
+    {
+      "run": "cbe3b8c1388f4f78bbb1b9daeaff131e",
+      "before": {
+        "base": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+        "commit": "decc0fe58bbe43a623809f142a687ae73d9815ee",
+        "paths": [
+          "evidence/native-residents/cbe3b8c1388f4f78bbb1b9daeaff131e.md"
+        ],
+        "status": "pending-review"
+      },
+      "after": {
+        "base": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+        "commit": "decc0fe58bbe43a623809f142a687ae73d9815ee",
+        "paths": [
+          "evidence/native-residents/cbe3b8c1388f4f78bbb1b9daeaff131e.md"
+        ],
+        "status": "journal-recorded",
+        "journal_artifacts": {
+          "evidence/native-residents/cbe3b8c1388f4f78bbb1b9daeaff131e.md": {
+            "task": "review-pending-integrations",
+            "sequence": 753,
+            "sha256": "35bb61e31a8f9e9683eb9d20c9823b6d2465ba7e156070e60e12ccc0d0576133"
+          }
+        }
+      },
+      "private_commit_unchanged": true,
+      "canonical_reports_published": false
+    }
+  ],
+  "ineligible_unchanged": [],
+  "remaining_pending": []
+}

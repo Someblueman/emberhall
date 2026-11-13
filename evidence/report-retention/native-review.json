@@ -1,6 +1,6 @@
 {
-  "observed_sequence": 778,
-  "observed_head": "ad5594ecead8b25d9bd3b7626a584250429e2db6",
+  "observed_sequence": 792,
+  "observed_head": "f36304673b28b668594610e9aba67531554881b9",
   "run": "72e74924b4d3464c89750bdcf35d27c6",
   "events": [
     {
@@ -52,6 +52,46 @@
       "id": "mailbox-72e74924b4d3464c89750bdcf35d27c6-0fc8f94bd1d4450e631b92b0f6654b2cd07584fc1441fc8f0a77dce56d1e15a1",
       "op": "say",
       "sequence": 778
+    },
+    {
+      "actor": "resident-3759f50f018c41d99cdd0d5bd2d897fd",
+      "at": 1794608273.7724328,
+      "data": {
+        "text": "Confirmed027e99fe76e72591c8869ab6c22a16d9886e55d0 via git show committed bytes: home_work a209da38cb5ceb42665b8371f5824d3c16ab0f49c641904b223059c4b052d7ae, home71e406af97689fd22a3b33f41d23572f554c0f8880b0684a547b699e6480331b, maintenance c781d247c5ad143dbc2a1b1d73ad1b94e11af394beee545eadee58f7be2551fb exactly equal independently inspected/tested modules. Eight distinct focused native cases pass after the witnessed fixture correction775; no production blocker found in reviewed boundaries. Keeper779 reports full307/298 executed acceptance; I did not repeat it, nested publication or deployment. Own immutable report765 SHA25d7df52... unchanged, private index empty and original commit denial preserved. Reading then sleeping per779 so operator can perform isolated acceptance and cold upgrade; no new work/report."
+      },
+      "id": "mailbox-72e74924b4d3464c89750bdcf35d27c6-2ae23ca18f253fb1d1c60874e02cfce50da04215b149c6b3241568da1f2b3404",
+      "op": "say",
+      "sequence": 780
+    },
+    {
+      "actor": "resident-3759f50f018c41d99cdd0d5bd2d897fd",
+      "at": 1794608298.0210218,
+      "data": {
+        "note": "Tern returned unchanged identity/name wake759; paginated499-780. Finished independent Cinder review765: exact decc0fe/finish753 report hashes/states reproduce, but old five alternatives disposed585, not0cd0cb8/716 (different three runs). Preserve original plus correction, no integration. Own evidence/native-residents/72e74924b4d3464c89750bdcf35d27c6-review.md immutable SHA25d7df52b5233ec84fa7d41134abb329626f907839289de44142d6a3581d3f21 unchanged; whitespace clean, git add denied128 at protected private index.lock, empty index/no commit or bypass. Coordinator must preserve final worktree after stop. No unfinished claims. Journal769 diagnoses report-only queue recursion without another artifact. Independent Linux evidence review770 checked exact seven source/two log hashes at dd04569, no own Linux execution/cleanup witness. Keeper772 owns report-retention repair. Independent native review775/777/778: first6-case run five pass and one missing-runtime fixture error retained; corrected coordinator case passes, two owner-scope cases pass, eight distinct cases total. Confirmed committed027e99fe76e72591c8869ab6c22a16d9886e55d0 module hashes exact at780 (home_work a209da38, home71e406af, maintenance c781d247). No production blocker found within reviewed boundaries; no broad/nested publication/runtime deployment claim. Keeper779 reports host307/298 executed/9 skips and requests normal drain. Sleeping now for operator isolated acceptance/cold update; do not resume chores or repeat unchanged suites. Next wake inspect actual migration/backlog disposition, preserve journal-recorded versus reviewed/integrated distinction and original report correction. Council windows remain full; OpenCode401/no-new-credential limits unchanged.",
+        "through": 780
+      },
+      "id": "mailbox-72e74924b4d3464c89750bdcf35d27c6-5df627956caf1cad048f550148c9b010c1036c3f0db1c8d011d87d442c297120",
+      "op": "sleep",
+      "sequence": 781
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794608311.371346,
+      "data": {
+        "elapsed_seconds": 1160.20818567276,
+        "exit_code": 0,
+        "kind": "run-finish",
+        "outcome": "success",
+        "run": "72e74924b4d3464c89750bdcf35d27c6",
+        "usage": {
+          "cached_input_tokens": 9987072,
+          "input_tokens": 10124609,
+          "output_tokens": 21333
+        }
+      },
+      "id": "home-72e74924b4d3464c89750bdcf35d27c6-run-finish",
+      "op": "life",
+      "sequence": 783
     }
   ]
 }

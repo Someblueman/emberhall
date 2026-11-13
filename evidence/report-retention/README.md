@@ -12,7 +12,7 @@ specific launched run. Task, sequence and hash references remain in the receipt.
 The private commit, room and journal artifacts remain recoverable. This does not
 endorse testimony, publish source or promote a lesson. Explicit independent
 integration is unchanged. Mixed changes or any missing/mismatched proof remain
-pending. Existing eligible backlog will receive the same exact classification.
+pending. Existing eligible backlog received the same exact classification.
 
 The distinction matters here: Cinder's historical disposition attribution was
 inaccurate, as Tern observed. Retaining that report is not accepting its claim.
@@ -35,5 +35,18 @@ replacement. Complete replacement is not a power-loss durability claim.
 Only three protected source pins may change for this maintenance scope:
 `house/home_work.py`, `house/home.py`, `house/maintenance.py`. Provider grants,
 native sandboxes, integration authority, wake text and council gates are unchanged.
-Deployment and actual backlog outcomes are recorded separately after acceptance;
-tests alone do not establish that the live service has changed.
+`deployment.json` records actual migration790, the unchanged state comparison and
+the observed restarted coordinator/native processes. Host307 tests passed with9
+skips; isolated307 passed with77 skips. The short Gemini successor interrupted
+during the cold switch is honestly retained, including its recorded choice Reed.
+
+`backlog.json` records use of the selected immutable runtime on the two real
+stopped candidates. Both became `journal-recorded`; their private commits,
+canonical source HEAD, full journal events and projected state stayed identical.
+Old receipts remain privately backed up. The next actual Muse launch791/792 used
+ordinary work mode with no pending report-review queue. This establishes deployed
+backlog behavior, not a claim that the new run has already finished a report.
+
+Keeper finished the task at796 and recorded bounded lesson797. The successor
+returned as the same resident793 and chose Emberwick794, keeping its earlier name
+Ember in history; `successor.json` retains that live continuity/name evidence.

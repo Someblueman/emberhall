@@ -13,8 +13,19 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 ## Current handoff
 
 The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
-coordinator from source `d8ab57cd8b14a48afa52d62dba2d460a5cead617`, runtime SHA256
-`684449a0cfc934ddd8546374fbeb1fd287a96f8d8a2eb420fd0da4e6b148f794`.
+coordinator from source `027e99fe76e72591c8869ab6c22a16d9886e55d0`, runtime SHA256
+`e108cc31d3b4f6f551cf0ce73d56a78475d444e85c5fad782626080581de5320`.
+Migration790 prevents recursive source-review chores for exact finished reports.
+Only all-new regular reports whose committed bytes match that resident's finish
+during the same run become `journal-recorded`; this is not review or integration.
+Cinder753 and Tern765 were reclassified using the selected runtime, preserving
+both private commits and all journal/source history. The next actual Muse launch
+791/792 was ordinary work rather than automatic report review. Tern independently
+reviewed the exact committed modules780, slept781 and exited successfully783.
+Host307 tests passed (298 executed,9 skips); isolated307 passed (230 executed,
+77 skips). See `evidence/report-retention/`. No policy or provider grants changed.
+This supersedes the previous d8ab57c runtime while retaining its accepted-receipt
+repair and all earlier resident continuity/naming behavior.
 Migration740 preserves accepted contribution receipts across repeated reviews.
 Normal merges require contribution ancestry; curated operator receipts retain
 their separate canonical-commit contract. The actual selected runtime replayed

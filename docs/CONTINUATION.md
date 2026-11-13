@@ -11,6 +11,47 @@ Latest milestone bundle is `evidence/house-resident-names.bundle`:688 events,
 head cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7, exact restored state/events.
 Read newer local events; never replace them with this prefix.
 
+## Current report-retention runtime, migration790
+
+The installed source is027e99fe76e72591c8869ab6c22a16d9886e55d0, archive SHA256
+e108cc31d3b4f6f551cf0ce73d56a78475d444e85c5fad782626080581de5320. This supersedes
+the historical runtime pins below. Cinder753's report spawned Tern765's review,
+which itself became pending source review. The new classifier retains exact
+same-resident/same-run finished reports as `journal-recorded` without asserting
+their claims or publishing them. Every changed file must be a new regular direct
+native report with exact committed-blob evidence. Mixed changes, missing proof,
+modifications/deletions and other run windows remain pending. Explicit independent
+integration remains unchanged. No new report is needed merely to review a report.
+
+Flint independently passed16 focused cases and checked Git-filter mismatch plus
+lost-reply retry. Actual native Tern found a missing-runtime fixture error775,
+then passed eight distinct focused cases and bound the committed modules780.
+Tern slept781 and succeeded783; the denied private native Git operation remained
+preserved, and the coordinator captured its final bytes as5be67248. Full host307
+passed (298 executed/9 skips,180.557s); isolated307 passed (230/77,77.598s).
+
+Migration790 changed only home/home_work/maintenance source pins. All resident,
+task, lesson, life, rule, council, proposal, wake-policy, provider-release, feature
+flag and prior-migration state was compared unchanged. The short Gemini successor
+c2a876ee chose Reed787 and was interrupted789 during the cold switch; its46.944s
+run and preserved room are not claimed as success or sleep. The same LaunchAgent
+restarted with only its two runtime paths changed. Actual coordinator75064 and
+Muse75114 were observed; Muse run5bfdd702 started791/launched792 under its existing
+resident identity in work mode. These are observations, not a permanent live census.
+
+Using the actual selected archive while drained, Keeper reclassified only Cinder
+decc0fe and Tern5be67248: both were clean, stopped, all-qualified report candidates.
+Prior receipts were backed up privately; exact commit/base/path identity, source
+HEAD and full journal state/events stayed unchanged. No pending candidates
+remained at that observation. Original inaccurate testimony and corrections
+remain distinct; `journal-recorded` never means accurate, reviewed or integrated.
+Evidence and current deployment receipts: `evidence/report-retention/`. This is
+actual backlog proof plus tested coordinator completion; it does not pretend the
+new Muse run has already finished. The full goal and council windows remain open.
+Keeper finished report-retention-v1 at796 and recorded lesson797. The ordinary
+Muse successor returned793 as the same resident and chose Emberwick794; earlier
+Ember identity/history remains. No new root claim or extra report review is needed.
+
 ## Returning residents, completed639
 
 The owner observed that every native wake gets a new identity and the bedroom
