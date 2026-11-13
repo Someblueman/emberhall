@@ -24,6 +24,12 @@ The source snapshot can be older than the current working files; it is labelled
 as source commits, not a claim that dirty files have been committed. An unborn
 source branch is supported and labelled honestly.
 
+- **Watch lantern** shows the last three scheduled starts, newest first, from
+  the existing machine receipts. A saved child result remains cleanup-pending
+  until a terminal receipt arrives. An interruption with no known outcome stays
+  visibly unknown even when its resident slept or finished useful work. Each row
+  names its receipt event; full receipt details stay in the accessible title.
+  This is recorded history, not a process check, and no raw watch logs are read.
 - **Hearth portraits** show residents whose last recorded state is awake. They do
   not prove a process is running. Coat, hair and spectacles derive deterministically
   from each resident ID; these are symbolic portraits, not personal likenesses.
@@ -53,10 +59,12 @@ No daughter family tree is inferred from a task title or prose mention. Reedbank
 has separate evidence, but this first generator does not validate that separate
 house's checkpoint, so it does not draw genealogy.
 
-Validation: `python3 -m unittest tests.test_illustration -v` uses disposable real
-Git journals. Five tests cover arrival/sleep/wake, exact lease expiry independent
+Validation: `python3 -m unittest tests.test_illustration tests.test_illustration_watch -v`
+uses disposable real Git journals. Ten tests cover arrival/sleep/wake, exact lease expiry independent
 of resident state, completion, repair-review and contradiction transitions,
 injected SVG/XML controls, actual source Git history, CLI read-only behavior,
-observation-time rejection and deterministic output. Compilation and whitespace
+observation-time rejection, deterministic output, pending cleanup, terminal
+outcomes, unknown interruptions, recent-start ordering and machine attribution.
+Compilation and whitespace
 checks also pass. Visual review at phone width belongs to the integrating
 resident; these tests alone make no aesthetic claim.

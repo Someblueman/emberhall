@@ -14,6 +14,7 @@ import time
 from xml.sax.saxutils import escape, quoteattr
 
 from .record import Record
+from .watch import entries as watch_entries, TERMINAL
 
 INK = "#ede0c4"
 MUTED = "#bcb7ad"
@@ -112,6 +113,8 @@ def render(record: Record, observed_at: float | None = None) -> str:
              if v["status"] == "observed" and v["reviews"] and
              re.search(r"repair|repaired|fix|regression", v["evidence"], re.I)]
     pending = sum(p["status"] == "pending" for p in state["proposals"].values())
+    watch_history = watch_entries(events)
+    watches = [entry for entry in watch_history if entry["kind"] == "start"][-3:]
     out = []
     y = 224
 
@@ -124,6 +127,31 @@ def render(record: Record, observed_at: float | None = None) -> str:
         out.append(text(48, top + 60, subtitle, 14, MUTED))
         y += height
         return top
+
+    if watches:
+        top = room("The watch lantern", "Recent starts · newest first", 111 + 82 * len(watches))
+        for i, start in enumerate(reversed(watches)):
+            history = [entry for entry in watch_history if entry["run"] == start["run"]]
+            terminal = next((entry for entry in reversed(history) if entry["kind"] in TERMINAL), None)
+            result = next((entry for entry in reversed(history) if entry["kind"] == "execution-result"), None)
+            receipt = terminal or result or start
+            if terminal:
+                label = ("Interrupted · outcome unknown" if terminal["kind"] == "recovered-interruption"
+                         else f'Finished · {terminal["outcome"]}')
+            else:
+                label = "Result saved · cleanup pending" if result else "No terminal receipt yet"
+            name = residents.get(start["resident"], {}).get("name", start["resident"])
+            sy = top + 88 + i * 82
+            color = GOLD if not terminal or terminal.get("outcome") == "success" else "#e9a07b"
+            out.append(f'<g data-watch={attr(start["run"])} data-state="{ "terminal" if terminal else "pending" }">'
+                       f'<title>{xml(name)}. {xml(label)}. Receipt event {receipt["sequence"]}. '
+                       f'{xml(json.dumps(receipt, sort_keys=True))}</title>')
+            out.append(f'<circle cx="57" cy="{sy-5}" r="6" fill="{color}"/>')
+            out.append(text(74, sy, textwrap.shorten(name, width=24, placeholder="…"), 16))
+            out.append(text(74, sy + 23, label, 14, color))
+            out.append(text(74, sy + 43, f'Event {receipt["sequence"]}', 12, MUTED))
+            out.append('</g>')
+        out.append(text(48, y - 18, "Recorded outcomes, not a live process check.", 13, MUTED))
 
     h = 142 + math.ceil(len(awake) / 3) * 139
     top = room("The hearth", f'{len(awake)} recorded awake · the lamp is lit', max(h, 166), "#3d4038")
@@ -218,7 +246,8 @@ def render(record: Record, observed_at: float | None = None) -> str:
     metadata = {"journal_head": head, "source_head": source, "observed_at": observed_at,
                 "sequence": state["sequence"], "house_id": state["house_id"],
                 "resident_ids": list(residents), "unfinished_tasks": [k for k, _ in tasks],
-                "expired_claims": sorted(expired), "repair_lessons": [k for k, _ in scars]}
+                "expired_claims": sorted(expired), "repair_lessons": [k for k, _ in scars],
+                "watch_runs": [entry["run"] for entry in watches]}
     roof = (f'<rect width="440" height="{height}" fill="#192b32"/>'
             '<circle cx="369" cy="58" r="24" fill="#e4d9ae"/>'
             '<circle cx="378" cy="51" r="24" fill="#192b32"/>'

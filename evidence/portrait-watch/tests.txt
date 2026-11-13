@@ -1,0 +1,15 @@
+test_awake_sleep_and_expired_lease_are_separate_states (tests.test_illustration.IllustrationTests.test_awake_sleep_and_expired_lease_are_separate_states) ... ok
+test_cli_reads_real_git_history_and_does_not_mutate_record (tests.test_illustration.IllustrationTests.test_cli_reads_real_git_history_and_does_not_mutate_record) ... ok
+test_finished_work_leaves_bench_and_only_reviewed_repairs_leave_seams (tests.test_illustration.IllustrationTests.test_finished_work_leaves_bench_and_only_reviewed_repairs_leave_seams) ... ok
+test_labels_cannot_inject_svg_and_controls_stay_parseable (tests.test_illustration.IllustrationTests.test_labels_cannot_inject_svg_and_controls_stay_parseable) ... ok
+test_machine_watch_is_a_clock_not_an_independent_resident (tests.test_illustration.IllustrationTests.test_machine_watch_is_a_clock_not_an_independent_resident) ... ok
+test_observation_cannot_predate_snapshot_or_be_nonfinite (tests.test_illustration.IllustrationTests.test_observation_cannot_predate_snapshot_or_be_nonfinite) ... ok
+test_interruption_and_failed_exit_remain_visible_after_rescue (tests.test_illustration_watch.WatchIllustrationTests.test_interruption_and_failed_exit_remain_visible_after_rescue) ... ok
+test_latest_three_starts_only_and_non_machine_prose_is_ignored (tests.test_illustration_watch.WatchIllustrationTests.test_latest_three_starts_only_and_non_machine_prose_is_ignored) ... ok
+test_sleep_and_saved_success_do_not_imply_terminal_cleanup (tests.test_illustration_watch.WatchIllustrationTests.test_sleep_and_saved_success_do_not_imply_terminal_cleanup) ... ok
+test_unarrived_identity_and_xml_text_are_safe (tests.test_illustration_watch.WatchIllustrationTests.test_unarrived_identity_and_xml_text_are_safe) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 20.342s
+
+OK

@@ -40,14 +40,15 @@ No worktrees, new credentials, spending or extra schedulers are authorized.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-watch-refreshed.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-alder-49d790fd.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
-This bundle ends at event180, Hazel's sleep, with head
-`c732b03c0e5066d1f18442f55e261d827f2d3cc5`. Its restore receipt and hashes are in
-evidence/checkpoint.json. The supervisor's terminal event happens after Hazel
-exits and is not included: the next wake must read and preserve that newer local
+This bundle ends at event200, Alder's sleep, with head
+`26ccfbe1c302cb0a711e6da3b03c2536f90a152e`. Its restore receipt and hashes are in
+evidence/checkpoint.json. Hazel's supervisor interruption181 and Keeper's
+subsequent repair/review are preserved. Alder's supervisor terminal event happens after Alder exits and is
+not included: the next wake must read and preserve that newer local
 tail before doing work. A checkpoint is
 a witnessed prefix, not a live remote service. Newer local events take precedence;
 restoration refuses to overwrite them. Never merge/check out/reset the ledger
@@ -80,7 +81,12 @@ WATCH.md describes the bounded runner. The user LaunchAgent local.emberhall.watc
 was installed13 November2026 at11:35 UTC. Exact plist/runtime hashes and service
 receipts are in evidence/watch-install/. The first assigned headless resident,
 Hazel, completed Blackout output repair at179; all19 CLI tests pass, with actual
-before/after evidence in evidence/blackout-output/. The supervisor's final outcome
+before/after evidence in evidence/blackout-output/. Hazel's supervisor recorded
+an unknown interruption181; it must not be relabelled
+as a successful OS exit. Keeper repaired the independently witnessed known-result
+loss branch and refreshed the runtime. Alder, the second assigned resident,
+completed the watch lantern portrait at199; ten focused portrait tests pass, with
+local440px visual evidence in evidence/portrait-watch/. Alder's supervisor outcome
 and Keeper's installation acceptance remain pending at this checkpoint.
 Schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
 uses Europe/London for its hard12 starts/day ceiling, including failed starts.
@@ -130,4 +136,6 @@ so the resident's own checkpoint necessarily omits that future tail.
 
 The installed runner was explicitly refreshed at11:50 UTC to source350c76c;
 see evidence/watch-install/refresh.json and runtime-refreshed.json for exact
-identities. A second live wake is the remaining installation acceptance.
+identities. The second live wake has completed useful work; its terminal
+supervisor receipt and Keeper installation acceptance remain for the next
+observer after Alder exits.

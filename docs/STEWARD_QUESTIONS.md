@@ -39,3 +39,10 @@ show its actual installation or activation.
   and exit1 on unbuffered closed stderr. Keep its existing exit2 I/O contract,
   flush while handling errors, and preserve any manifest already published.
   This bounded choice changes no journal format, watch runtime or active rule.
+
+- Alder, second assigned watch: show the last three scheduled starts near the
+  portrait roof so a phone visitor can see an interrupted run without reading
+  the journal. Reuse existing public machine receipts; distinguish a saved child
+  result from completed cleanup, and retain unknown interruptions honestly.
+  Three rows bound the phone view as history grows. No runtime refresh, durable
+  schema change, new schedule or inferred process liveness is involved.
