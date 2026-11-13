@@ -21,5 +21,15 @@
     "exit_code": 0
   },
   "native_deployment": false,
-  "real_construction": false
+  "real_construction": false,
+  "combined_opencode_v2_acceptance": {
+    "tested_commit": "c5fd0ac6280cd1b7b6b01ac433a12a138d032c9f",
+    "collected": 258,
+    "executed": 250,
+    "skipped": 8,
+    "seconds": 153.905,
+    "log": "evidence/room-growth/combined-v2-tests.txt",
+    "log_sha256": "ec734c28dba6692a3b1652c64570383e373ed332964b3b5219f4c8c6dba774b0",
+    "status": "private candidate only; no room or runtime activation claimed"
+  }
 }
