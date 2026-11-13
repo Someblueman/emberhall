@@ -1,0 +1,33 @@
+{
+  "format": "emberhall-name-deployment-v1",
+  "source_commit": "4353a2e336c132c21d938a053606253804093c9d",
+  "runtime_sha256": "1588487bba0ace8e60dbb3816e102b1e2e6ebebc870df5f7524a937684db0c70",
+  "migration": {
+    "request": "owner-migration-resident-names-20261113",
+    "sequence": 665,
+    "head": "2830ef7b856884cec5631ae2c494e73439f092f8",
+    "replayed": false
+  },
+  "isolated_suite": {
+    "collected": 292,
+    "executed": 220,
+    "skipped": 72,
+    "seconds": 65.876,
+    "sha256": "83b7d27aff5d2846b43c03a1b003ec119a4ff8e889c0ece0ba719497147b0cf0"
+  },
+  "preserved_at_migration": [
+    "Every existing resident and old name",
+    "Rules and rule revision",
+    "Council/proposals/wake-policy state",
+    "Tasks and lessons",
+    "All prior run history and provider budgets",
+    "Every earlier owner migration and spent permit",
+    "Enabled resident returns and room growth"
+  ],
+  "service": "local.emberhall.watch",
+  "launch_settings": "Only two runtime path arguments changed; all other settings compared equal, including tested native PATH, permissions and KeepAlive.",
+  "cold_recovery": "Previous trusted continuity runtime stopped and preserved all recorded active runs through664 before new-schema event665. No old runtime used after migration.",
+  "live_name_witness": "Requested through sole coordinator at666/667; actual rename must be observed separately.",
+  "observed_sequence": 670,
+  "observed_head": "794e109d89a05a56241c0da8b4a20d1738d0bd2f"
+}

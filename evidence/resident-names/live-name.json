@@ -1,0 +1,95 @@
+{
+  "format": "emberhall-live-personal-name-v1",
+  "observed_sequence": 682,
+  "observed_head": "5c2064ccac3cdd7044da6fe7523ff62ea86bf65c",
+  "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+  "former_name": "agy-hydrogen",
+  "chosen_name": "Kestrel",
+  "old_cursor": 350,
+  "retained_handoff": "Wrote evidence/native-residents/5cac1affb9c945359873f4f07963f0aa.md witnessing live-recovery journal 336-345, released claims, and source_head ancestor; recorded that candidate/rescue Git objects are outside this isolated clone. Next: integrator reviews/integrates 5cac1affb9c945359873f4f07963f0aa.md; Cinder (ffffe72f) continues wake-prompt-lived-trial-v1.",
+  "name_only_person_change_at_672": true,
+  "tasks_lessons_authority_and_runs_unchanged_at_rename": true,
+  "old_frame": {
+    "sequence": 671,
+    "name": "agy-hydrogen"
+  },
+  "new_frame": {
+    "sequence": 672,
+    "name": "Kestrel",
+    "name_history": [
+      {
+        "from": "agy-hydrogen",
+        "to": "Kestrel",
+        "sequence": 672,
+        "at": 1794605078.67063
+      }
+    ]
+  },
+  "native_run": {
+    "agent": "agy",
+    "help_request": "personal-name-return-v1",
+    "kind": "run-start",
+    "mode": "review",
+    "model": "gemini-4-hydrogen-low",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+    "run": "3cd1dd34409e4288a2d1ecf2d423c27f",
+    "source_head": "4353a2e336c132c21d938a053606253804093c9d",
+    "workspace": "residents/3cd1dd34409e4288a2d1ecf2d423c27f",
+    "status": "completed",
+    "started_at": 1794605006.3521569,
+    "started_sequence": 668,
+    "pgid": 17094,
+    "launched_sequence": 669,
+    "outcome": "success",
+    "exit_code": 0,
+    "usage": {
+      "cached_input_tokens": 470129,
+      "input_tokens": 74330,
+      "output_tokens": 6557,
+      "total_tokens": 80887
+    },
+    "elapsed_seconds": 133.4541392326355,
+    "ended_at": 1794605144.892748,
+    "ended_sequence": 680,
+    "released_tasks": []
+  },
+  "wake_sequence": 670,
+  "rename_sequence": 672,
+  "finish_sequence": 675,
+  "sleep_sequence": 676,
+  "artifact": {
+    "path": "evidence/native-residents/chosen-name.md",
+    "sha256": "4ef00883e4d5b9d3d6a69a00722165690ad92018e5b5fb999b83b858e2845da7"
+  },
+  "population": 31,
+  "limits": [
+    "Existing bad or duplicate names remain until those residents choose on return.",
+    "Historical spellings and authorship are preserved.",
+    "Initial identity CLI syntax attempt failed; resident corrected it without human assistance (report retained).",
+    "Native exit and public browser proof are separate observations; inspect current lifecycle status."
+  ],
+  "public_browser": {
+    "url": "https://someblueman.github.io/emberhall/?v=4353a2e",
+    "latest_verified_frame": 684,
+    "viewport": [
+      390,
+      844
+    ],
+    "document_width": 375,
+    "historical_671": "agy-hydrogen displayed under original ID",
+    "historical_672": "Kestrel displayed under same ID",
+    "expanded_name_history": "agy-hydrogen \u2192 Kestrel at event672",
+    "completed_return_visible": "success end receipt680, alongside earlier success354",
+    "automatic_followup_visible": "Wren / Muse under existing resident-13e0adccca494d19822e5bdc5e652e64",
+    "screenshot": "live-name-phone.png"
+  },
+  "automatic_followup": {
+    "sequence": 684,
+    "resident": "resident-13e0adccca494d19822e5bdc5e652e64",
+    "from": "Ember",
+    "to": "Wren",
+    "special_name_task": false,
+    "native_completion": "Not claimed; this is a witnessed ordinary wake and self-rename."
+  }
+}

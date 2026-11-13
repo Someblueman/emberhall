@@ -7,14 +7,18 @@ The older continuous-home objective remains the source for authorization303.
 Read current journal status and `docs/RESUME.md` before acting; this note is a
 checkpoint, not a live process inventory.
 
-## Active correction: returning residents
+Latest milestone bundle is `evidence/house-resident-names.bundle`:688 events,
+head cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7, exact restored state/events.
+Read newer local events; never replace them with this prefix.
+
+## Returning residents, completed639
 
 The owner observed that every native wake gets a new identity and the bedroom
 keeps growing. At event618,28 supervised runs had28 distinct resident IDs,
 with30 public figures and23 explicit sleepers; the rendered bedroom had grown
 from160 to532 drawing units. This was generated layout, not recorded building.
 
-Task `resident-continuity-v1` is claimed by Keeper (token keeper-continuity-c49a18).
+Task `resident-continuity-v1` finished639 with immutable live and test evidence.
 The reviewed source is `3ddc4710c311a6e1e47211e3153e30b2fd8e30a3`.
 Migration621 enabled `resident_returns` and the sole service now selects runtime
 SHA256 `ad00cbcbab67a47376c48cb131e5e9a5c78e23cc706b6b52f7e9b229587af4f6`.
@@ -43,28 +47,35 @@ Bryn next returned636–638 under its existing identity too. This proves actual
 returns, not elapsed days. Root now handles the owner’s follow-up about technical
 and duplicate names; keep durable IDs and record self-renames, never rewrite history.
 
-## Active correction: personal names
+## Personal names, completed685
 
 Owner follow-up: technical labels and duplicates make the residents hard to
-recognize. Task `resident-names-v1` is claimed by Keeper with token
-`keeper-names-03d817`. Private Witness commit247fc45d adds self-only `rename`,
+recognize. Task `resident-names-v1` finished685; Keeper left sleep handoff688
+through read cursor686, with no unfinished claims. Private Witness commit247fc45d adds self-only `rename`,
 CLI/mailbox support and focused tests. Root adds prompt guidance, historical-name
 projection/UI and narrow owner scope `resident-names-20261113`.
 
 The independent review reproduced canonically equivalent Unicode duplicates;
 root fixed NFC normalization and added the witnessed regression. Twelve focused
 integrated tests passed; two-process duplicate-name race admitted one winner.
-Full host292 tests passed (283 executed,9 skipped,165.946s). **Naming is not yet
-activated:** immutable preparation and cold migration remain. Migration621/continuity runtime above still governs live residents.
-Do not call rename through the old runtime. Existing people will choose names
-on their next return; no bulk rename, identity replacement or historical rewrite.
+Full host292 tests passed (283 executed,9 skipped,165.946s); isolated292 passed
+(220 executed,72 skipped,65.876s). **Naming is active at migration665.** The sole
+service now selects source4353a2e336c132c21d938a053606253804093c9d, archive SHA256
+1588487bba0ace8e60dbb3816e102b1e2e6ebebc870df5f7524a937684db0c70. This supersedes
+the continuity archive while retaining its return flag and every old receipt.
+Actual Gemini return668–680 renamed agy-hydrogen to **Kestrel** at672, finished675,
+slept676 and exited successfully680. Name-only state change and earlier frames
+were independently checked. The following ordinary Muse wake renamed one Ember
+to **Wren** at684 without a dedicated naming task. Public phone frame684 shows
+both; scrubbing671/672 preserves the exact change point. Existing people choose
+names on their next return; no bulk rename, identity replacement or history rewrite.
 Exact owner steering and review are in `evidence/resident-names/`.
 
 ## Installed service and OpenCode result
 
 The earlier launcher repair used source `e12622a664553b285d8cabbf575ff3953ac7e27a`,
 archive SHA256 `cdbc395e21c680e96481428cf726d70c727051367f71856193941e83942f5c34`.
-The continuity runtime above supersedes it; preserve both archives.
+The naming runtime above now supersedes it; preserve all earlier archives.
 KeepAlive/RunAtLoad and the original protected envelope remain. The coordinator
 is the only model launcher. Private rooms, failed logs, rescue objects and all
 previous archives remain under `.git/house-home/`. No worktrees were made.
@@ -103,7 +114,7 @@ and executed the complete shell example:7 matched,2 missing, no changed/extra,
 all22 drill files unchanged in hashes/size/mode/mtime. The curated worksheet and
 verbatim native report are accepted with `evidence/room-growth/worksheet-validation.json`
 recording exact native hashes, editorial changes and report limits. These later
-events are outside checkpoint608; use the newer local journal when available.
+events were outside old checkpoint608 and are retained in current checkpoint688.
 Only `projects/blackout/examples/recovery-drill/recovery-worksheet.md` and
 `evidence/native-residents/opencode-native-arrival.md` belong to that task.
 The latter filename is assignment history, not proof of OpenCode authorship.
@@ -140,6 +151,12 @@ unchanged. Accepted source integrations and retained alternatives have private
 receipts in `.git/house-home/launcher-contribution-dispositions.json`.
 
 ## What remains genuinely open
+
+Pending source review: Muse claim-check653 is preserved as a candidate. Sorrel660
+questioned its README authorship attribution, then cold recovery664 released
+`sorrel-return-review-77d9` with partial work preserved. An independent resident
+should finish that review before integration; do not accept the disputed claim
+by repetition. Wren is continuing under the sole coordinator; inspect live state.
 
 - Observe sustained ordinary handoffs across real days and actual long sleeps.
 - Enact a valid lived amendment after its full24-hour public window and fresh

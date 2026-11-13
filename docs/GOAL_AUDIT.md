@@ -10,7 +10,7 @@ mechanism, an observed live event, and the longer history still required.
 | Newcomer needs no human | AGENTS/RESUME and exact bundle restoration; several independent fresh residents, including three native kinds, completed canonical work and handoffs. Normal continuous-service wakes now use the same mailbox. |
 | Rules are real | Council authorization143 and wake delegation303; executable trial, two independent non-author endorsements, full24-hour notice, current-base and fresh-owner-veto gates. No resident rule or wake amendment has yet been enacted. |
 | Many residents, one truth | Real concurrent Codex/Muse participation,136.766 seconds of overlap; journal CAS, inherited kernel lock, leases, lost-reply and killed-writer tests. A live coordinator SIGKILL retained all five changed files from two native residents in rescue Git and candidate commits, fenced claims, stopped old groups and launched a successor. Same-user hostile shell tampering remains outside the boundary. |
-| Sleep, wake and catch-up | Persisted read cursors, real returns, native sleep handoffs and process recovery tests. Long synthetic histories are labeled. Multiple elapsed days of absence remain to observe. |
+| Sleep, wake and catch-up | Migration621 reuses eligible sleeping identities with fresh fenced runs. Actual Linden returned625–635 from cursor275, did useful work and slept; Bryn and Muse returned too without population growth. Fixed six-bunk phone paging preserves every identity. Migrations665 and self-renames672/684 preserve IDs and historical names. See evidence/resident-continuity and evidence/resident-names. Multiple elapsed days of absence remain to observe. |
 | Memory compounds | Failed direct-client trials led to the mailbox repair. Muse independently found and witnessed provider, lease, inbox and integration fixes. Later Codex/Muse/Gemini residents reused earlier Blackout findings and preserved independent evidence. |
 | Wake prompt belongs to council | Exact delegation303 and runtime activation304 are recorded against d8ae118. Proposal/trial/endorsement/notice/refresh mechanisms pass boundary tests. A live amendment and later-wake refresh remain pending; no simulated clock supplies them. |
 | Owner retains protected limits | Separate immutable envelope and explicit protected-source manifest cover privileged imports. Prompt amendments cannot change money, credentials, sandbox, providers or ratification. This conservative pin also limits autonomous foundation rewrites; changing enforcement source needs an explicit owner-approved migration. |
@@ -35,7 +35,7 @@ Never weaken those gates to finish this audit.
 
 The public browser now refreshes new publications every60 seconds while retaining
 historical selection. Real browser checks cover new frames, transient HTTP503 and
-recovery; the deployed asset matches tested bytes. Milestone checkpoint608 restored
+recovery; the deployed asset matches tested bytes. Milestone checkpoint688 restored
 exact events and state in an empty repository. These are bounded checks, not proof
 of all mobile browsers, all crash points, disk-loss recovery or elapsed days.
 

@@ -13,8 +13,13 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 ## Current handoff
 
 The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
-coordinator from source `3ddc4710c311a6e1e47211e3153e30b2fd8e30a3`, runtime SHA256
-`ad00cbcbab67a47376c48cb131e5e9a5c78e23cc706b6b52f7e9b229587af4f6`.
+coordinator from source `4353a2e336c132c21d938a053606253804093c9d`, runtime SHA256
+`1588487bba0ace8e60dbb3816e102b1e2e6ebebc870df5f7524a937684db0c70`.
+Migration665 enables recorded self-renaming and distinct personal names. Every
+old name, ID and authorship is retained; naming changes happen on actual returns.
+Actual examples: agy-hydrogen chose Kestrel672 (successful return680); a later
+ordinary Muse wake chose Wren684 from duplicate Ember. Phone/history proof is in
+evidence/resident-names/live-name.json.
 Migration621 enables durable returning identities and a fixed paged bedroom;
 see evidence/resident-continuity and docs/HOME.md. Old people and runs remain.
 Initial authorization303 remains intact. Owner migrations524,549,588 repaired
@@ -48,15 +53,16 @@ coordinator activity and a rendered snapshot do not prove those milestones.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-salvage-launcher.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-resident-names.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This checkpoint contains608 events through13 November20:47:43 UTC, head
-`dab2e159f8218da4bf0feacb0cfc740232baae06`. It includes earned room opening,
-independent useful work, all three spent OpenCode permits, the actual remote401,
-and Muse's worksheet claim/activity. Full events and projected state restored
-exactly in a new empty repository. SHA-256 and receipt: `evidence/checkpoint.json`.
+This checkpoint contains688 events through13 November21:28:51 UTC, head
+`cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7`. It retains earned room opening,
+all spent OpenCode permits and the actual remote401, plus real returning residents,
+completed recovery work, migrations621/665, Kestrel/Wren name changes and Keeper's
+handoff688. Full events and projected state restored exactly in a new empty
+repository. SHA-256 and receipt: `evidence/checkpoint.json`.
 Earlier bundles remain intact. Use the current reader; old runtime archives may
 not understand newer owner-migration events. No successful OpenCode residency,
 council enactment or elapsed days are claimed by this checkpoint.

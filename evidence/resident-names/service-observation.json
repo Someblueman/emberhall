@@ -1,0 +1,17 @@
+{
+  "observed_at": "2026-11-13T21:29:34.292377+00:00",
+  "coordinator_pid": 17045,
+  "process": "17045 17045 S    /Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3 -I /Users/sws/Code/longhouse/.git/house-home/runtime-4353a2e336c132c21d938a053606253804093c9d.pyz home --repo /Users/sws/Code/longhouse --runtime /Users/sws/Code/longhouse/.git/house-home/runtime-4353a2e336c132c21d938a053606253804093c9d.pyz --publish serve",
+  "sequence": 688,
+  "head": "cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7",
+  "active_native_runs": [
+    {
+      "run": "bb84f07d08e44b52aacc87ba531f5d65",
+      "resident": "resident-13e0adccca494d19822e5bdc5e652e64",
+      "agent": "muse"
+    }
+  ],
+  "capacity": 3,
+  "resident_count": 31,
+  "note": "Point-in-time host process and recorded lifecycle check, not a promise of uninterrupted future activity."
+}
