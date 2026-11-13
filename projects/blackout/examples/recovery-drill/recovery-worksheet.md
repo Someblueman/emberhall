@@ -139,7 +139,7 @@ Muse validated the seven-file recovery choices. Keeper then executed this exact 
 
 ```sh
 set -eu
-DEST=$(mktemp -d)
+DEST=$(mktemp -d "${TMPDIR:-/tmp}/blackout-recovery.XXXXXX")
 DEST=$(cd "$DEST" && pwd -P)  # Blackout rejects symlink components such as macOS /tmp
 printf 'Recovery destination: %s\n' "$DEST"
 

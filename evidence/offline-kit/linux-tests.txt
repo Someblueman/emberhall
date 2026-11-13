@@ -1,0 +1,70 @@
+test_allowlist_excludes_private_and_cache (test_bundle.BundleTests.test_allowlist_excludes_private_and_cache) ... ok
+test_atomic_no_clobber_competing_writer (test_bundle.BundleTests.test_atomic_no_clobber_competing_writer) ... ok
+test_build_is_deterministic (test_bundle.BundleTests.test_build_is_deterministic) ... ok
+test_build_preserves_inputs (test_bundle.BundleTests.test_build_preserves_inputs) ... ok
+test_build_produces_allowlisted_zip (test_bundle.BundleTests.test_build_produces_allowlisted_zip) ... ok
+test_build_refuses_existing_output (test_bundle.BundleTests.test_build_refuses_existing_output) ... ok
+test_build_with_explicit_root (test_bundle.BundleTests.test_build_with_explicit_root) ... ok
+test_extracted_kit_create_and_reuse (test_bundle.BundleTests.test_extracted_kit_create_and_reuse) ... ok
+test_extracted_kit_is_byte_identical_and_standalone (test_bundle.BundleTests.test_extracted_kit_is_byte_identical_and_standalone) ... ok
+test_missing_allowlist_file_fails_closed (test_bundle.BundleTests.test_missing_allowlist_file_fails_closed) ... ok
+test_output_parent_must_be_directory (test_bundle.BundleTests.test_output_parent_must_be_directory) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.647s
+
+OK
+{
+  "archive_sha256": "f88a04aef47e2149e5f8b9f85c13d85c5f936f5aa4b48fbcfe02737e94af732a",
+  "exact_files": 25,
+  "original": {
+    "changed": [],
+    "extra": [],
+    "matched": 9,
+    "missing": [],
+    "ok": true
+  },
+  "damaged": {
+    "changed": [
+      "family/summer.txt",
+      "records/invoice.txt"
+    ],
+    "extra": [
+      "family/renamed-winter.txt",
+      "photos/report.txt",
+      "spares/duplicate.txt",
+      "spares/invoice-copy.txt"
+    ],
+    "matched": 3,
+    "missing": [
+      "family/winter.txt",
+      "letters/lost.txt",
+      "photos/Report.txt",
+      "records/copy-a.txt"
+    ],
+    "ok": false
+  },
+  "recovered": {
+    "changed": [],
+    "extra": [],
+    "matched": 7,
+    "missing": [
+      "family/summer.txt",
+      "letters/lost.txt"
+    ],
+    "ok": false
+  },
+  "new_archive": {
+    "changed": [],
+    "extra": [],
+    "matched": 2,
+    "missing": [],
+    "ok": true
+  },
+  "expected_plan_equal": true,
+  "verbatim_quickstart_and_worksheet_executed": true,
+  "extracted_input_bytes_and_metadata_unchanged": true,
+  "source_and_zip_bytes_unchanged": true,
+  "python_isolated_mode": true,
+  "python": "3.13.18 (main, Nov  5 2026, 08:08:09) [GCC 14.2.0]"
+}

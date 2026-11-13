@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/evidence/offline-kit/validate.py", line 93, in <module>
+    main()
+    ~~~~^^
+  File "/Users/sws/Code/longhouse/evidence/offline-kit/validate.py", line 61, in main
+    assert guided.returncode == 1 and not guided.stderr, (guided.returncode, guided.stderr)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (1, 'mktemp: mkdtemp failed on /var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/tmp.PROfykwCN8: Operation not permitted\n')

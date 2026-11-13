@@ -1,0 +1,121 @@
+--- native-finish821/projects/blackout/QUICKSTART.md
++++ canonical/projects/blackout/QUICKSTART.md
+@@ -19,18 +19,20 @@
+ python3 projects/blackout/bundle.py build -o /tmp/blackout-kit.zip
+ ```
+ 
+-Building is deterministic: same source makes byte-identical ZIPs, never overwrites, never changes source files. Standard library only.
++Build from a quiet, unchanged source checkout. The builder uses fixed ZIP metadata
++and uncompressed entries for reproducible bytes. It refuses to replace an existing
++output and does not change source files. Standard library only; no claim of a
++transactional snapshot of concurrently changing source files.
+ 
+ ## Try the synthetic example from a fresh directory
+ 
+ If you are holding only the ZIP, extract it to a fresh unique directory and work there so the synthetic tree stays pristine. This uses a fresh `mktemp` directory with physical-path resolution so the checker does not trip on a `/tmp` alias:
+ 
+ ```sh
+-unzip /path/to/blackout-kit.zip -d /tmp/fresh-kit
+-# or: python3 -m zipfile -e /path/to/blackout-kit.zip /tmp/fresh-kit
+-cd /tmp/fresh-kit
+-# Resolve a symlink-free scratch dir for copying (not needed for the verify below)
+-DEST=$(mktemp -d) && DEST=$(cd "$DEST" && pwd -P) && printf '%s\n' "$DEST"
++KIT=$(mktemp -d "${TMPDIR:-/tmp}/blackout-kit.XXXXXX") || exit
++KIT=$(cd "$KIT" && pwd -P) || exit
++python3 -m zipfile -e /path/to/blackout-kit.zip "$KIT" || exit
++cd "$KIT" || exit
+ python3 projects/blackout/blackout.py verify projects/blackout/examples/recovery-drill/surviving projects/blackout/examples/recovery-drill/manifest.json
+ python3 projects/blackout/blackout.py plan projects/blackout/examples/recovery-drill/surviving projects/blackout/examples/recovery-drill/manifest.json
+ ```
+--- native-finish821/projects/blackout/test_bundle.py
++++ canonical/projects/blackout/test_bundle.py
+@@ -249,56 +249,40 @@
+             self.assertFalse(missing_parent.exists())
+ 
+     def test_atomic_no_clobber_competing_writer(self):
+-        # Keeper draft review 814 witnessed a check-then-rename race: a competing
+-        # writer creating the output after our last lexists check replaced bytes.
+-        # The fixed builder publishes via hard link, which fails atomically if
+-        # the name already exists. Simulate by creating a competing file after
+-        # build starts but before publication would clobber.
+-        # We exercise the real builder with a concurrent writer that wins the race.
++        # Inject a real competing entry immediately before the publication syscall.
++        # This deterministically exercises Keeper's witnessed last-check race;
++        # the original check-then-rename implementation fails this regression.
+         import os
+-        import threading
+-        import time
+-
+-        with tempfile.TemporaryDirectory() as tmp:
+-            tmp_path = Path(tmp).resolve()
+-            out = tmp_path / "kit.zip"
+-
+-            # Pre-create a competing writer is not possible for real race; instead
+-            # test the primitive: concurrent creates of the same output must have
+-            # exactly one winner and the loser must report output already exists
+-            # without clobbering the winner.
+-            results: list[tuple[int, str, str]] = []
+-
+-            def try_build(k: int):
+-                time.sleep(0.01 * (k % 3))  # stagger slightly
+-                res = run_bundle("build", "-o", str(out))
+-                results.append((res.returncode, res.stdout, res.stderr))
+-
+-            threads = [threading.Thread(target=try_build, args=(i,)) for i in range(5)]
+-            for th in threads:
+-                th.start()
+-            for th in threads:
+-                th.join(timeout=20)
+-
+-            self.assertEqual(len(results), 5)
+-            successes = [r for r in results if r[0] == 0]
+-            failures = [r for r in results if r[0] == 2]
+-            self.assertEqual(len(successes), 1, msg=f"exactly one winner expected, got {results!r}")
+-            self.assertEqual(len(failures), 4, msg=f"losers must report already exists, got {results!r}")
+-            # The winner's bytes survive unchanged; losers did not clobber
+-            self.assertTrue(out.is_file())
+-            winner_bytes = out.read_bytes()
+-            for _, _, err in failures:
+-                # Each loser reports JSON error without traceback
+-                self.assertIn("output already exists", err)
+-            # No extra temp files left in the directory (only kit.zip and no .bundle-*)
+-            leftovers = [p.name for p in tmp_path.iterdir() if p.name.startswith(".bundle-")]
+-            self.assertEqual(leftovers, [], msg=f"temp leftovers {leftovers!r}")
+-
+-            # Deterministic sequential check: second build after success must also fail
+-            res2 = run_bundle("build", "-o", str(out))
+-            self.assertEqual(res2.returncode, 2)
+-            self.assertEqual(out.read_bytes(), winner_bytes, msg="existing output must be preserved")
++        import runpy
++        from unittest.mock import patch
++
++        builder = runpy.run_path(str(BUNDLE))
++        actual_link = os.link
++        for kind in ("file", "symlink", "dangling-symlink"):
++            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as tmp:
++                root = Path(tmp).resolve()
++                out = root / "kit.zip"
++                victim = root / "other-writers-file"
++                victim.write_bytes(b"Preserve the other writer's bytes.\n")
++
++                def compete(source, destination):
++                    if kind == "file":
++                        out.write_bytes(b"A competing output, not this ZIP.\n")
++                    else:
++                        out.symlink_to(victim if kind == "symlink" else root / "absent")
++                    return actual_link(source, destination)
++
++                with patch.object(os, "link", side_effect=compete):
++                    with self.assertRaisesRegex(builder["BundleError"], "output already exists"):
++                        builder["build_archive"](ROOT, out)
++                self.assertEqual(victim.read_bytes(), b"Preserve the other writer's bytes.\n")
++                if kind == "file":
++                    self.assertEqual(out.read_bytes(), b"A competing output, not this ZIP.\n")
++                else:
++                    self.assertTrue(out.is_symlink())
++                    self.assertEqual(out.readlink(), victim if kind == "symlink" else root / "absent")
++                self.assertFalse((root / "absent").exists())
++                self.assertEqual(list(root.glob(".bundle-*")), [])
+ 
+ 
+ if __name__ == "__main__":

@@ -4,6 +4,13 @@ An offline inventory for the day you need to know whether your backup still has
 the bytes you saved. Python 3.10+ and a POSIX system (macOS or Linux); no packages,
 network, account, or house runtime required.
 
+For a portable copy with an invented recovery rehearsal, start with the
+[offline kit quickstart](QUICKSTART.md). From a source checkout, build it with
+`python3 projects/blackout/bundle.py build -o /path/to/blackout-kit.zip`.
+The output path must be new. The ZIP includes this checker, its guide and the
+complete rehearsal; it needs no Git checkout after extraction. The builder and
+tests stay in the source checkout.
+
 ```sh
 python3 projects/blackout/blackout.py create /path/to/source /path/to/source.manifest.json
 python3 projects/blackout/blackout.py verify /path/to/backup /path/to/source.manifest.json

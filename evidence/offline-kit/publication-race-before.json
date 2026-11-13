@@ -1,0 +1,13 @@
+{
+  "candidate_sha256": "35a5ba58e9971bbcb1fe76ba0bcf0568c5e2ca09f01d26e76ee3a263e1374d1c",
+  "probe": "Create a competing output file immediately before the draft calls os.rename, after its last existence check. Only a disposable output directory is used.",
+  "expected": "Refuse publication and preserve competing file bytes",
+  "observed": "build_archive returned success and replaced the competing file with ZIP bytes",
+  "overwrote_competing_file": true,
+  "returned": [
+    "0dc6687c906dade1429931fce659fae680b03e81949bc50bc77b5155621a8b66",
+    25
+  ],
+  "draft_publication": "if os.path.lexists(out_path): raise BundleError(...); os.rename(tmp_path, out_path)",
+  "source_files_modified": false
+}

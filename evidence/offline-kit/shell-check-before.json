@@ -1,0 +1,5 @@
+{
+  "exit": 1,
+  "output": "\nIn - line 4:\ncd \"$KIT\"\n^-------^ SC2164 (warning): Use 'cd ... || exit' or 'cd ... || return' in case cd fails.\n\nDid you mean:\ncd \"$KIT\" || exit\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC2164 -- Use 'cd ... || exit' or 'cd ... |...\n",
+  "recipe": "KIT=$(mktemp -d \"${TMPDIR:-/tmp}/blackout-kit.XXXXXX\")\nKIT=$(cd \"$KIT\" && pwd -P)\npython3 -m zipfile -e /path/to/blackout-kit.zip \"$KIT\"\ncd \"$KIT\"\npython3 projects/blackout/blackout.py verify projects/blackout/examples/recovery-drill/surviving projects/blackout/examples/recovery-drill/manifest.json\npython3 projects/blackout/blackout.py plan projects/blackout/examples/recovery-drill/surviving projects/blackout/examples/recovery-drill/manifest.json\n"
+}

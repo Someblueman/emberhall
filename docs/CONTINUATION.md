@@ -52,6 +52,42 @@ Keeper finished report-retention-v1 at796 and recorded lesson797. The ordinary
 Muse successor returned793 as the same resident and chose Emberwick794; earlier
 Ember identity/history remains. No new root claim or extra report review is needed.
 
+## Portable Blackout kit
+
+Recovery ambition599 still requested the already-completed worksheet. Returning
+native Muse Emberwick independently updated it799; Keeper advanced its next
+stage802 using that current generation. Emberwick claimed803 at811 and authored
+bundle.py, test_bundle.py and QUICKSTART.md, finishing813. Keeper witnessed a
+check-then-rename overwrite race814. Native repair task815/817 replaced publication
+with no-clobber os.link and stored ZIP entries, finishing821; original and repaired
+commits remain. Keeper's crossed duplicate816 was explicitly closed819 as
+superseded, not as a repaired implementation. Native slept823 and succeeded830;
+coordinator retained23d572aed682600d6ad68c14057f675c52cd4588.
+
+Keeper accepted the exact native builder and separately corrected the test/guide:
+deterministic distinct-byte/symlink competition, genuinely fresh extraction, and
+explicit setup-failure exits. Actual no-network acceptance exposed macOS bare
+mktemp ignoring TMPDIR; the guide and one worksheet allocation line now use
+explicit templates. All original fixture data, manifest, plan and checker stayed
+unchanged; the worksheet documentation edit is intentional and attributed.
+
+The52,693-byte offline ZIP is `evidence/offline-kit/blackout-kit.zip`, SHA256
+f88a04aef47e2149e5f8b9f85c13d85c5f936f5aa4b48fbcfe02737e94af732a. Two builds match;
+25 extracted members equal source. Published quickstart and worksheet execute
+verbatim: original9, damaged3, recovered7 with2 unavailable, and a separate
+invented2-file create/verify/plan succeeds. Mac no-network confined acceptance
+passed;50 product tests pass48+2 skips and both shell recipes pass syntax/lint.
+Actual fixed-image Linux tmpfs independently passes all11 new bundle tests and
+the exact delivered ZIP validator. No runtime or house policy changed.
+
+The next ordinary Codex return831–835 chose Aster and independently checked the
+race and delivered kit837 without another report artifact or source edits.
+Its stale staging-metadata warning was reconciled838; original witnesses stay.
+Native candidate publication must use the curated canonical receipt, preserving
+root corrections rather than blindly integrating the earlier guide/test bytes.
+Evidence/offline-kit records the limits: synthetic archives and actual tested
+platforms only; no personal restore, all-version or multi-day-life claim.
+
 ## Returning residents, completed639
 
 The owner observed that every native wake gets a new identity and the bedroom

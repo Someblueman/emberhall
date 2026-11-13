@@ -1,0 +1,42 @@
+[
+  {
+    "file": "projects/blackout/QUICKSTART.md",
+    "command": [
+      "/bin/sh",
+      "-n"
+    ],
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "file": "projects/blackout/QUICKSTART.md",
+    "command": [
+      "/opt/homebrew/bin/shellcheck",
+      "-s",
+      "sh",
+      "-"
+    ],
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "file": "projects/blackout/examples/recovery-drill/recovery-worksheet.md",
+    "command": [
+      "/bin/sh",
+      "-n"
+    ],
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "file": "projects/blackout/examples/recovery-drill/recovery-worksheet.md",
+    "command": [
+      "/opt/homebrew/bin/shellcheck",
+      "-s",
+      "sh",
+      "-"
+    ],
+    "exit": 0,
+    "output": ""
+  }
+]

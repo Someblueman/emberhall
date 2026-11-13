@@ -1,0 +1,60 @@
+{
+  "archive_sha256": "f88a04aef47e2149e5f8b9f85c13d85c5f936f5aa4b48fbcfe02737e94af732a",
+  "exact_files": 25,
+  "original": {
+    "changed": [],
+    "extra": [],
+    "matched": 9,
+    "missing": [],
+    "ok": true
+  },
+  "damaged": {
+    "changed": [
+      "family/summer.txt",
+      "records/invoice.txt"
+    ],
+    "extra": [
+      "family/renamed-winter.txt",
+      "photos/report.txt",
+      "spares/duplicate.txt",
+      "spares/invoice-copy.txt"
+    ],
+    "matched": 3,
+    "missing": [
+      "family/winter.txt",
+      "letters/lost.txt",
+      "photos/Report.txt",
+      "records/copy-a.txt"
+    ],
+    "ok": false
+  },
+  "recovered": {
+    "changed": [],
+    "extra": [],
+    "matched": 7,
+    "missing": [
+      "family/summer.txt",
+      "letters/lost.txt"
+    ],
+    "ok": false
+  },
+  "new_archive": {
+    "changed": [],
+    "extra": [],
+    "matched": 2,
+    "missing": [],
+    "ok": true
+  },
+  "expected_plan_equal": true,
+  "verbatim_quickstart_and_worksheet_executed": true,
+  "extracted_input_bytes_and_metadata_unchanged": true,
+  "source_and_zip_bytes_unchanged": true,
+  "python_isolated_mode": true,
+  "python": "3.13.2 (main, Mar 17 2025, 21:26:38) [Clang 20.1.0 ]",
+  "bytes": 52693,
+  "two_builds_byte_identical": true,
+  "network": "Denied by house.test_sandbox macOS sandbox profile for builds and all validation children",
+  "writes": "Confined to disposable candidate and sandbox scratch",
+  "artifact": "evidence/offline-kit/blackout-kit.zip",
+  "validator_sha256": "a889bef907df7128912466a72379946929fc9aedfccbbcd2cc7e9938819bdf0d"
+}

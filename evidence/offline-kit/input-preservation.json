@@ -1,0 +1,21 @@
+{
+  "unchanged_files": 22,
+  "intentional_recipe_change": [
+    {
+      "file": "projects/blackout/examples/recovery-drill/recovery-worksheet.md",
+      "before": {
+        "sha256": "939f6b767955eef1f7c21ab7dd47d683f3eb79139d3755ebc3b4047ad642549b",
+        "size": 19502,
+        "mode": 420,
+        "mtime_ns": 1794603191169084055
+      },
+      "after": {
+        "sha256": "ae8c9e52c065005c4ad5ba6a6833b40ce8dba35145d19e319729362110415c8c",
+        "size": 19545,
+        "mode": 420,
+        "mtime_ns": 1794609286930124371
+      }
+    }
+  ],
+  "fixture_data_manifest_plan_and_checker_unchanged": true
+}
