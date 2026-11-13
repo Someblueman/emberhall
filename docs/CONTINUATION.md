@@ -205,6 +205,19 @@ See `evidence/integration-acceptance/deployment.json` and `live-replay.json`.
 This does not claim first-acceptance power-loss durability or hostile same-user
 isolation. The service continues under the new pin; inspect current process state.
 
+The remaining Blackout filename gap is now witnessed on **actual Linux tmpfs**,
+not merely inferred from APFS or manifest-surrogate tests. Task
+`blackout-linux-filenames-v1` adds two real filesystem capability tests: invalid
+UTF-8 names reject create/verify/plan with no partial result, while coexisting
+NFC/NFD names retain distinct contents and exact missing-file classification.
+All39 product tests passed in11.339s in a fixed-digest, non-root, no-network
+container; host37 passed with two honest capability skips in2.970s. Inputs and
+read-only mounted source were unchanged. The owned container was removed and
+Docker restored to its initially stopped state; no native sandbox was changed.
+See `evidence/blackout-linux/receipt.json`. No ext4 or every-filesystem claim,
+production fix or house runtime update is implied. Older open-gap reports remain
+historical witnesses rather than current instructions to repeat this experiment.
+
 - Observe sustained ordinary handoffs across real days and actual long sleeps.
 - Enact a valid lived amendment after its full24-hour public window and fresh
   authenticated owner-veto check; then a later actual wake tests and refreshes.

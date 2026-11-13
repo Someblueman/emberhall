@@ -1,0 +1,94 @@
+{
+  "container": "2b64e0775db1c75545542dbf6f5119c1069090cf06d56bdc6d7abd06e64e543a",
+  "name": "emberhall-blackout-linux-23ebcff3",
+  "image": "sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90",
+  "command": [
+    "docker",
+    "create",
+    "--name",
+    "emberhall-blackout-linux-23ebcff3",
+    "--label",
+    "emberhall.task=blackout-linux-filenames-v1",
+    "--network",
+    "none",
+    "--read-only",
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--pids-limit",
+    "128",
+    "--memory",
+    "256m",
+    "--cpus",
+    "1",
+    "--user",
+    "1000:1000",
+    "--tmpfs",
+    "/tmp:rw,nosuid,nodev,noexec,size=64m,mode=1777",
+    "--mount",
+    "type=bind,source=/Users/sws/Code/longhouse/projects/blackout,target=/work,readonly",
+    "--workdir",
+    "/work",
+    "--env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90",
+    "python",
+    "-B",
+    "-c",
+    "import json,os,platform,subprocess,sys; print(json.dumps({'python':sys.version,'platform':platform.platform(),'uid':os.getuid(),'tmp_mount':[x.strip() for x in open('/proc/mounts') if x.split()[1]=='/tmp']}),flush=True); raise SystemExit(subprocess.call([sys.executable,'-B','-m','unittest','discover','-s','/work','-v']))"
+  ],
+  "host_config": {
+    "NetworkMode": "none",
+    "ReadonlyRootfs": true,
+    "CapDrop": [
+      "ALL"
+    ],
+    "SecurityOpt": [
+      "no-new-privileges"
+    ],
+    "PidsLimit": 128,
+    "Memory": 268435456,
+    "NanoCpus": 1000000000,
+    "Tmpfs": {
+      "/tmp": "rw,nosuid,nodev,noexec,size=64m,mode=1777"
+    }
+  },
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/Users/sws/Code/longhouse/projects/blackout",
+      "Destination": "/work",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "user": "1000:1000",
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-11-13T21:59:07.326395383Z",
+    "FinishedAt": "2026-11-13T21:59:18.918035847Z"
+  },
+  "client_exit": 0,
+  "elapsed_seconds": 11.741400875005638,
+  "source_sha256": {
+    "test_plan.py": "28130fa5626a4fe28d47d4bfb8475d034b97c73caf176bfc61596268185ae6ec",
+    "test_output.py": "46f92236020e0a2ab1830857471c0a0e69f7c24d74a2181078b84f607e16fb7a",
+    "test_blackout.py": "efcff24ad8b0c6cb8cbd54f01a4af42fb5b4049b7114cc5960c6fd18b379cde4",
+    "blackout.py": "b8f528880db41a2bcb143a5744833bae978c5d1292e2fb2b7455bcd14406f040",
+    "test_opencode_recovery.py": "44d77ad1b17ed6a3ca5c97c6c6cac9748281ebc55f9dd608a74b7471b0eeff44",
+    "test_interrupt.py": "c2aaf9ec51f7fc69fbfbc91499a27ca952325fb17c4e2ea99d7029cdb2a81dce",
+    "test_filenames.py": "584d0f6b5a6701a40d7ed7e3b604ab81cbacd01e2daca55135738f042dfa0b80"
+  },
+  "source_bytes_unchanged": true,
+  "log_sha256": "451a259489d98ce25694a79b437441269b1b5f12856ffa48a94f5e91fa79852d"
+}

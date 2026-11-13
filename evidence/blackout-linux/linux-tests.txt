@@ -1,0 +1,45 @@
+{"python": "3.13.18 (main, Nov  5 2026, 08:08:09) [GCC 14.2.0]", "platform": "Linux-7.0.12-linuxkit-aarch64-with-glibc2.41", "uid": 1000, "tmp_mount": ["tmpfs /tmp tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0"]}
+test_dotdot_cannot_hide_invalid_directory_components (test_blackout.BlackoutTests.test_dotdot_cannot_hide_invalid_directory_components) ... ok
+test_empty_directory (test_blackout.BlackoutTests.test_empty_directory) ... ok
+test_fifo_is_rejected_without_hanging (test_blackout.BlackoutTests.test_fifo_is_rejected_without_hanging) ... ok
+test_invalid_json_and_duplicate_keys (test_blackout.BlackoutTests.test_invalid_json_and_duplicate_keys) ... ok
+test_malformed_manifest_schema (test_blackout.BlackoutTests.test_malformed_manifest_schema) ... ok
+test_manifest_must_be_regular_without_symlink_components (test_blackout.BlackoutTests.test_manifest_must_be_regular_without_symlink_components) ... ok
+test_manifest_paths_are_untrusted (test_blackout.BlackoutTests.test_manifest_paths_are_untrusted) ... ok
+test_missing_source_and_manifest (test_blackout.BlackoutTests.test_missing_source_and_manifest) ... ok
+test_nonportable_source_names (test_blackout.BlackoutTests.test_nonportable_source_names) ... ok
+test_output_is_exclusive_and_outside_source (test_blackout.BlackoutTests.test_output_is_exclusive_and_outside_source) ... ok
+test_rejects_file_and_directory_symlinks (test_blackout.BlackoutTests.test_rejects_file_and_directory_symlinks) ... ok
+test_rejects_symlink_root_and_parent (test_blackout.BlackoutTests.test_rejects_symlink_root_and_parent) ... ok
+test_reports_all_differences_without_writing (test_blackout.BlackoutTests.test_reports_all_differences_without_writing) ... ok
+test_round_trip_and_relocation (test_blackout.BlackoutTests.test_round_trip_and_relocation) ... ok
+test_same_size_corruption (test_blackout.BlackoutTests.test_same_size_corruption) ... ok
+test_verify_rejects_symlink_replacement (test_blackout.BlackoutTests.test_verify_rejects_symlink_replacement) ... ok
+test_invalid_utf8_filename_rejects_all_commands_without_partial_output (test_filenames.FilenameTests.test_invalid_utf8_filename_rejects_all_commands_without_partial_output) ... ok
+test_nfc_and_nfd_names_remain_distinct_when_filesystem_supports_both (test_filenames.FilenameTests.test_nfc_and_nfd_names_remain_distinct_when_filesystem_supports_both) ... ok
+test_cancel_after_publish_preserves_complete_exclusive_manifest (test_interrupt.InterruptTests.test_cancel_after_publish_preserves_complete_exclusive_manifest) ... ok
+test_cancel_before_publish_removes_only_staging_file (test_interrupt.InterruptTests.test_cancel_before_publish_removes_only_staging_file) ... ok
+test_closed_error_pipe_does_not_mask_cancellation (test_interrupt.InterruptTests.test_closed_error_pipe_does_not_mask_cancellation) ... ok
+test_scan_interrupts_all_commands_without_touching_input (test_interrupt.InterruptTests.test_scan_interrupts_all_commands_without_touching_input) ... ok
+test_fifo_after_valid_candidate_rejects_entire_plan_and_allows_retry (test_opencode_recovery.RecoveryBoundaryTests.test_fifo_after_valid_candidate_rejects_entire_plan_and_allows_retry) ... ok
+test_create_closed_stdout_preserves_published_manifest (test_output.OutputTests.test_create_closed_stdout_preserves_published_manifest) ... ok
+test_missing_manifest_with_closed_stderr (test_output.OutputTests.test_missing_manifest_with_closed_stderr) ... ok
+test_verify_closed_stdout_for_matching_and_changed_backup (test_output.OutputTests.test_verify_closed_stdout_for_matching_and_changed_backup) ... ok
+test_changed_corruption_restorable_from_extra (test_plan.PlanTests.test_changed_corruption_restorable_from_extra) ... ok
+test_clean_archive_is_ok (test_plan.PlanTests.test_clean_archive_is_ok) ... ok
+test_duplicate_extra_bytes_are_ambiguous (test_plan.PlanTests.test_duplicate_extra_bytes_are_ambiguous) ... ok
+test_extra_only_has_no_restores_but_mismatch (test_plan.PlanTests.test_extra_only_has_no_restores_but_mismatch) ... ok
+test_matched_duplicate_source_is_candidate (test_plan.PlanTests.test_matched_duplicate_source_is_candidate) ... ok
+test_missing_nested_is_unrecoverable (test_plan.PlanTests.test_missing_nested_is_unrecoverable) ... ok
+test_output_is_deterministic (test_plan.PlanTests.test_output_is_deterministic) ... ok
+test_plan_closed_stdout_without_mutation (test_plan.PlanTests.test_plan_closed_stdout_without_mutation) ... ok
+test_plan_rejects_dotdot_components (test_plan.PlanTests.test_plan_rejects_dotdot_components) ... ok
+test_plan_rejects_malformed_manifest (test_plan.PlanTests.test_plan_rejects_malformed_manifest) ... ok
+test_plan_rejects_unsafe_root_and_manifest (test_plan.PlanTests.test_plan_rejects_unsafe_root_and_manifest) ... ok
+test_renamed_file_suggests_extra_candidate (test_plan.PlanTests.test_renamed_file_suggests_extra_candidate) ... ok
+test_shared_candidate_can_serve_two_targets (test_plan.PlanTests.test_shared_candidate_can_serve_two_targets) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 11.339s
+
+OK

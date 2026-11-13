@@ -1,0 +1,10 @@
+{
+  "Id": "sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90",
+  "RepoDigests": [
+    "python@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90"
+  ],
+  "Architecture": "arm64",
+  "Os": "linux",
+  "Created": "2026-11-05T08:11:28.610133609Z",
+  "Size": 43359983
+}

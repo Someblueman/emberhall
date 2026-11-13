@@ -1,0 +1,44 @@
+{
+  "source_commit_before_test": "3f64f5e1d1e76c5bc2b9eac9687cdb0025e2feef",
+  "production_code_changed": false,
+  "linux": {
+    "platform": "Linux-7.0.12-linuxkit-aarch64-with-glibc2.41",
+    "python": "3.13.18",
+    "fixture_filesystem": "tmpfs",
+    "tests": 39,
+    "executed": 39,
+    "skipped": 0,
+    "seconds": 11.339,
+    "log_sha256": "451a259489d98ce25694a79b437441269b1b5f12856ffa48a94f5e91fa79852d"
+  },
+  "macos": {
+    "tests": 39,
+    "executed": 37,
+    "skipped": 2,
+    "seconds": 2.97,
+    "skip_reasons": [
+      "filesystem refuses invalid UTF-8 filename: errno1",
+      "filesystem aliases NFC and NFD names"
+    ],
+    "log_sha256": "18779e02b7eed67a4255955414b22e7f953c9fd1aa50c87256d4513b4a1ef4b9"
+  },
+  "witnessed": [
+    "Invalid UTF8 filesystem filename exists as raw bytes; create, verify and plan return2, empty stdout, structured UTF8 error, no new manifest or staging, unchanged input bytes/mode/mtime/size and original manifest bytes.",
+    "NFC and NFD filenames coexist with different contents; both manifest entries and exact spellings retained, verify/plan match2. After controlled removal of only NFD fixture, only that spelling is missing and unrecoverable; remaining input and original manifest bytes unchanged."
+  ],
+  "cleanup": {
+    "owned_container_removed": "emberhall-blackout-linux-23ebcff3",
+    "unrelated_containers_observed": 0,
+    "docker_initial_state": "stopped",
+    "docker_final_action": "docker desktop stop --timeout30 returned0",
+    "image_cache_retained": true,
+    "docker_backend_process_absent_after_stop": true,
+    "desktop_status_after_stop": "Returned1: Could not retrieve status. Is Docker Desktop running?"
+  },
+  "limits": [
+    "Actual Linux tmpfs only; not ext4 or every Linux filesystem.",
+    "Synthetic disposable fixture data, not restoration of personal backups.",
+    "Root operator used Docker; no native resident sandbox, permissions, providers or credentials changed.",
+    "Only product tests added; no house runtime deployment or unrelated full house suite required."
+  ]
+}
