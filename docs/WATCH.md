@@ -288,5 +288,8 @@ The launcher records `supervisor-exit` and retains private stderr in
 A cleanup-pending diagnostic is local only. These records distinguish observed
 child exit, supervisor exit and group cleanup without publishing model output.
 `evidence/watch-install/result-before.txt` and `result-after.txt` preserve the
-independently witnessed branch regression. A second live wake will test the
-refreshed pinned runtime; do not describe this branch test as its result.
+independently witnessed branch regression. The second actual wake191-203 tested the
+refreshed pinned runtime: execution-result201, finish202 and supervisor-exit203
+all record exit0/success, with the process group independently observed empty.
+Its private supervisor log was empty. This validates the installed successful
+path; it does not retrospectively identify the first run’s discarded exit code.

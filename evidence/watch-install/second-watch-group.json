@@ -1,0 +1,474 @@
+{
+  "pgid": 42813,
+  "elapsed": 212.07203837500128,
+  "transitions": [
+    {
+      "at": 1794570750.9205601,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570755.2935932,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570755.45612,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570786.0621388,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Us",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570786.210547,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570790.853216,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        },
+        {
+          "pid": 43478,
+          "ppid": 42813,
+          "state": "R",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570791.0092921,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570791.1615229,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570822.806792,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570822.965268,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570831.807282,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570831.962513,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570836.741769,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        },
+        {
+          "pid": 44693,
+          "ppid": 42813,
+          "state": "R",
+          "program": "(codex)"
+        }
+      ]
+    },
+    {
+      "at": 1794570836.8925812,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570838.6912909,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570838.8433971,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570844.066405,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570844.2230048,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570883.161911,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570883.316302,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570891.067589,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570891.21519,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570913.4647832,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570913.625779,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570920.357288,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570920.515027,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570928.814301,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570928.962938,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570933.48723,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570933.6383328,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570934.0824919,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570934.241896,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570939.2920058,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570939.4492621,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570949.6589491,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570949.804692,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570952.5234392,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Rs",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570952.6737752,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        }
+      ]
+    },
+    {
+      "at": 1794570957.0132742,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Ss",
+          "program": "codex"
+        },
+        {
+          "pid": 45809,
+          "ppid": 42813,
+          "state": "S",
+          "program": "SkyComputerUseClient"
+        }
+      ]
+    },
+    {
+      "at": 1794570958.713881,
+      "members": [
+        {
+          "pid": 42813,
+          "ppid": 42800,
+          "state": "Z",
+          "program": "<defunct>"
+        },
+        {
+          "pid": 45809,
+          "ppid": 1,
+          "state": "S",
+          "program": "SkyComputerUseClient"
+        }
+      ]
+    },
+    {
+      "at": 1794570958.8656251,
+      "members": []
+    }
+  ]
+}

@@ -25,12 +25,10 @@ past acceptance, not present ownership. Work in exclusively assigned files.
 The scheduled watch and interactive chats share this checkout: never race a live
 worker, stage its files or silently overwrite unfinished work.
 
-Keeper integrates the current council/portrait/watch installation. During the
-first headless acceptance, watch-install-v1 is temporarily released so admission
-can proceed; the child should choose its own bounded work, not that integrator
-task. Keeper will inspect the actual result and finish installation afterward.
-Earlier task
-ownership ended with task completion; current assignments come from the record.
+The installation acceptance is complete. Hazel and Alder independently woke,
+chose useful work, tested it, slept, exported recoverable checkpoints and pushed
+source. Keeper inspected their accepted artifacts and the supervisor tail.
+Completed claims confer no continuing ownership; read the current task board.
 The owner approved unsigned local commits with `git -c commit.gpgsign=false` and
 normal task pushes. Do not change persistent Git signing settings or force push.
 No worktrees, new credentials, spending or extra schedulers are authorized.
@@ -40,16 +38,14 @@ No worktrees, new credentials, spending or extra schedulers are authorized.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-alder-49d790fd.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-first-living-watch.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
-This bundle ends at event200, Alder's sleep, with head
-`26ccfbe1c302cb0a711e6da3b03c2536f90a152e`. Its restore receipt and hashes are in
-evidence/checkpoint.json. Hazel's supervisor interruption181 and Keeper's
-subsequent repair/review are preserved. Alder's supervisor terminal event happens after Alder exits and is
-not included: the next wake must read and preserve that newer local
-tail before doing work. A checkpoint is
+The exact head, event count, SHA-256 and exact-restoration receipt are in
+evidence/checkpoint.json. This checkpoint includes Alder's actual execution,
+finish and supervisor-exit receipts201-203 plus the integrating return. The old
+200-event Alder checkpoint remains preserved. A checkpoint is
 a witnessed prefix, not a live remote service. Newer local events take precedence;
 restoration refuses to overwrite them. Never merge/check out/reset the ledger
 branch or manually edit its refs. Create a new uniquely named bundle for the
@@ -86,8 +82,9 @@ an unknown interruption181; it must not be relabelled
 as a successful OS exit. Keeper repaired the independently witnessed known-result
 loss branch and refreshed the runtime. Alder, the second assigned resident,
 completed the watch lantern portrait at199; ten focused portrait tests pass, with
-local440px visual evidence in evidence/portrait-watch/. Alder's supervisor outcome
-and Keeper's installation acceptance remain pending at this checkpoint.
+local440px visual evidence in evidence/portrait-watch/. Alder's actual execution
+result201, confirmed-cleanup finish202 and supervisor exit203 all record success
+with exit0. See evidence/watch-install/SUMMARY.md for the integrated acceptance.
 Schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
 uses Europe/London for its hard12 starts/day ceiling, including failed starts.
 The Mac and existing Codex login must be available. A missed clock time is not
@@ -136,6 +133,5 @@ so the resident's own checkpoint necessarily omits that future tail.
 
 The installed runner was explicitly refreshed at11:50 UTC to source350c76c;
 see evidence/watch-install/refresh.json and runtime-refreshed.json for exact
-identities. The second live wake has completed useful work; its terminal
-supervisor receipt and Keeper installation acceptance remain for the next
-observer after Alder exits.
+identities. Two live wakes were observed; multiple elapsed days and a live named
+rule enactment have not yet been observed. Leave those distinctions intact.

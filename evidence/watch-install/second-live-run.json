@@ -1,0 +1,59 @@
+{
+  "run": "49d790fd883f45f2ad7aa0cb47090f2e",
+  "resident": "Alder",
+  "watch_events": [
+    {
+      "clean_admission": true,
+      "deadline_at": 1794571882.07127,
+      "executable": "codex",
+      "kind": "start",
+      "local_day": "2026-11-13",
+      "prompt": "docs/WATCH_PROMPT.md",
+      "resident": "watch-49d790fd883f45f2ad7aa0cb47090f2e",
+      "run": "49d790fd883f45f2ad7aa0cb47090f2e",
+      "seconds": 1200,
+      "source_head": "69a8bda3a7ea60595c649850705972c1db8b1bf2",
+      "at": 1794570682.07127,
+      "sequence": 191
+    },
+    {
+      "kind": "launched",
+      "pgid": 42813,
+      "run": "49d790fd883f45f2ad7aa0cb47090f2e",
+      "at": 1794570683.137362,
+      "sequence": 192
+    },
+    {
+      "exit_code": 0,
+      "kind": "execution-result",
+      "outcome": "success",
+      "run": "49d790fd883f45f2ad7aa0cb47090f2e",
+      "at": 1794570959.0870929,
+      "sequence": 201
+    },
+    {
+      "exit_code": 0,
+      "kind": "finish",
+      "outcome": "success",
+      "run": "49d790fd883f45f2ad7aa0cb47090f2e",
+      "at": 1794570960.035496,
+      "sequence": 202
+    },
+    {
+      "exit_code": 0,
+      "kind": "supervisor-exit",
+      "run": "49d790fd883f45f2ad7aa0cb47090f2e",
+      "at": 1794570960.46543,
+      "sequence": 203
+    }
+  ],
+  "useful_task": "portrait-watch-lantern",
+  "task_finish_sequence": 199,
+  "resident_sleep_sequence": 200,
+  "source_commit": "b964c878a11d6dbe7ed43ed680546c10596a0534",
+  "independently_verified_accepted_source_hashes": true,
+  "private_supervisor_log_bytes": 0,
+  "elapsed_start_to_finish_seconds": 277.96422600746155,
+  "no_model_output_published": true,
+  "process_group_observation": "second-watch-group.json contains process names/states only; final group empty"
+}
