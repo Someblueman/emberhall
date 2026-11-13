@@ -49,7 +49,11 @@ def apply(state, event):
     seq = state["sequence"] + 1
     life = state.setdefault("life", empty())
     kind = string(data, "kind", 40)
-    if kind == "identity":
+    growth = state.get("maintenance", {}).get("room_growth") is True
+    if kind in {"room-plan", "room-open", "room-repurpose", "room-close"}:
+        from .building import apply as build
+        build(state, event)
+    elif kind == "identity":
         fields(data, {"kind", "agent", "model"})
         from .providers import validate_model
         validate_model(data["agent"], data["model"])
@@ -60,6 +64,7 @@ def apply(state, event):
                 (data["agent"], data["model"]), "identity differs from actual assigned route")
         resident.update(agent=data["agent"], model=data["model"])
     elif kind == "room":
+        require(not growth, "new rooms require room-plan and witnessed construction")
         fields(data, {"kind", "room", "name"})
         room = identifier(data, "room")
         require(room not in life["rooms"], "room already exists")
@@ -71,6 +76,12 @@ def apply(state, event):
             task = state["tasks"].get(data["task"], {})
             require(task.get("owner") == actor and task.get("status") == "claimed"
                     and task["until"] > at, "activity requires own live task")
+        if growth:
+            from .building import activity
+            room = life["rooms"][data["room"]]
+            require(room.get("status") != "construction" or data.get("task") == room["task"],
+                    "construction activity must name its construction task")
+            activity(state, actor, data["room"], at, seq)
         life["presence"][actor] = {**data, "at": at, "sequence": seq}
     elif kind == "ambition":
         fields(data, {"kind", "ambition", "title", "description", "status", "next_step", "expect"})

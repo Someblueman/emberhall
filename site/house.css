@@ -488,13 +488,6 @@ footer a {
 .introduction {
   position:relative;
 }
-.introduction .quiet-button {
-  position:absolute;
-  right:0;
-  bottom:-34px;
-  z-index:1;
-  background:var(--room);
-}
 .room-nav {
   display:flex;
   justify-content:center;
@@ -514,4 +507,91 @@ footer a {
   border-color:var(--gold);
   color:var(--paper);
   background:var(--room);
+}
+/* Floors are recorded council decisions; rooms remain visitable after closure. */
+.floor-controls {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:8px 14px;
+  margin:24px 0 8px;
+}
+.floor-controls label {
+  font:italic 16px Georgia,serif;
+}
+.floor-controls select {
+  min-width:0;
+  max-width:100%;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--room);
+  color:var(--paper);
+  font:inherit;
+  font-size:12px;
+}
+.floor-controls p {
+  grid-column:1 / -1;
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+}
+.builder-label {
+  font:12px system-ui,sans-serif;
+  fill:#f6e3b9;
+}
+.room-closed .floor {
+  fill:#697162;
+}
+.room-status {
+  display:inline-block;
+  margin:4px 0 6px;
+  padding:4px 9px;
+  border:1px solid var(--line);
+  border-radius:5px;
+  font-size:11px;
+}
+.room-status.construction, .room-nav .room-construction {
+  border-color:var(--gold);
+}
+.room-status.closed, .room-nav .room-closed {
+  border-style:dashed;
+}
+.dust-note {
+  font:italic 13px Georgia,serif;
+  color:var(--gold);
+}
+.room-history {
+  margin:14px 0;
+  font-size:12px;
+}
+.room-history summary {
+  cursor:pointer;
+  color:var(--gold);
+}
+.room-history-entry {
+  margin:12px 0;
+  padding-left:12px;
+  border-left:1px solid var(--line);
+}
+@media(max-width:760px) {
+  .floor-controls {
+    gap:7px 10px;
+    margin-top:18px;
+  }
+  .floor-controls label {
+    font-size:14px;
+  }
+}
+
+.floor-controls .quiet-button {
+  grid-column:1 / -1;
+  justify-self:end;
+}
+
+.floor-controls p, .room-nav button {
+  overflow-wrap:anywhere;
+}
+.room-nav button {
+  max-width:100%;
 }

@@ -47,6 +47,41 @@ def watch_item(event: dict) -> dict | None:
     return item if isinstance(item, dict) and isinstance(item.get("kind"), str) else None
 
 
+
+def room_view(room_id: str, name: str, state: dict, uses: dict) -> dict:
+    """Only recorded building facts; dust is a labelled view-time inference."""
+    public = {"id": room_id, "name": name}
+    room = state.get("life", {}).get("rooms", {}).get(room_id, {})
+    if "status" not in room:
+        return public
+    for key in ("status", "purpose", "reason", "builder", "task", "last_used_by"):
+        value = room.get(key)
+        public[key] = None if value is None else label(value, 500 if key in {"purpose", "reason"} else 100)
+    for key in ("generation", "floor", "planned_at", "opened_at", "closed_at",
+                "last_used_at", "observed_since", "legacy"):
+        public[key] = room.get(key)
+    use = uses.get(room_id)
+    if use and use["at"] > (public["last_used_at"] or 0):
+        public.update(last_used_at=use["at"], last_used_by=use["actor"])
+    public["history"] = [{key: (label(value, 500) if isinstance(value, str) else value)
+        for key, value in item.items() if key in {"kind", "actor", "at", "sequence", "generation",
+                                                "reason", "name", "purpose", "builder", "task"}}
+                         for item in room.get("history", [])]
+    return public
+
+
+def floor_views(state: dict) -> list[dict]:
+    floors = []
+    for floor in state.get("life", {}).get("floors", {}).values():
+        public = {key: (label(value, 500) if isinstance(value, str) else value)
+                  for key, value in floor.items() if key in {"level", "name", "purpose", "proposal",
+                                                            "enacted_at", "enacted_sequence"}}
+        public["authorization"] = (state.get("council", {}).get("rules", {}).get(floor["proposal"], {})
+                                   .get("status", "unknown") if floor["level"] else "original")
+        floors.append(public)
+    return floors
+
+
 def export(record: Record, observed_at: float | None = None) -> dict:
     final, events, head = record.read()
     observed_at = time.time() if observed_at is None else observed_at
@@ -76,6 +111,7 @@ def export(record: Record, observed_at: float | None = None) -> dict:
     ambitions: dict[str, dict] = {}
     budgets: dict[str, dict] = {}
     frames = []
+    room_uses: dict[str, dict] = {}
     sleeping: set[str] = set()
     for seq, event in enumerate(events, 1):
         at, actor, op, data = event["at"], event["actor"], event["op"], event["data"]
@@ -87,6 +123,8 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                     "resident": task["owner"], "at": task["until"], "sequence": seq,
                     "basis": "Inferred from lease time; process fate unconfirmed", "mended": False})
         state = apply_event(state, event)
+        if state.get("maintenance", {}).get("room_growth"):
+            rooms.update({key: label(room["name"], 60) for key, room in state["life"]["rooms"].items()})
         if op == "owner-provider-release":
             accepted = state["life"]["budgets"][data["agent"]]
             budgets[data["agent"]] = {"agent": data["agent"], "until": accepted["until"],
@@ -107,6 +145,15 @@ def export(record: Record, observed_at: float | None = None) -> dict:
             places[actor] = "council"
         elif op == "say" and actor != "watch-keeper":
             places[actor] = "hearth"
+
+        # These existing figure movements are also actual recorded room use.
+        # Keep this view-derived observation out of the replayed protocol state.
+        mapped = op in {"arrive", "wake", "sleep", "claim", "renew", "finish", "release", "task",
+                        "learn", "review", "supersede", "propose", "ratify", "say"} or op.startswith("council-")
+        if mapped and actor != "watch-keeper" and state.get("maintenance", {}).get("room_growth"):
+            room_id = places.get(actor)
+            if state["life"]["rooms"].get(room_id, {}).get("status") == "open":
+                room_uses[room_id] = {"at": at, "actor": actor}
 
         item = watch_item(event)
         life = op == "life"
@@ -215,7 +262,8 @@ def export(record: Record, observed_at: float | None = None) -> dict:
         council = state.get("council", {})
         proposals = council.get("proposals", {})
         frame = {"seq": seq, "at": at, "event": {"op": op, "actor": actor, "title": title},
-            "rooms": [{"id": k, "name": v} for k, v in rooms.items()], "residents": public_residents,
+            "rooms": [room_view(k, v, state, room_uses) for k, v in rooms.items()],
+            "floors": floor_views(state), "residents": public_residents,
             "tasks": tasks, "scars": list(scars.values()), "ambitions": list(ambitions.values()),
             "budgets": list(budgets.values()), "runs": list(runs.values()),
             "lessons": len(state["lessons"]),

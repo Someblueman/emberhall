@@ -1,0 +1,80 @@
+{
+  "ambiguous": [
+    "records/copy-a.txt"
+  ],
+  "changed": [
+    "family/summer.txt",
+    "records/invoice.txt"
+  ],
+  "extra": [
+    "family/renamed-winter.txt",
+    "photos/report.txt",
+    "spares/duplicate.txt",
+    "spares/invoice-copy.txt"
+  ],
+  "matched": 3,
+  "missing": [
+    "family/winter.txt",
+    "letters/lost.txt",
+    "photos/Report.txt",
+    "records/copy-a.txt"
+  ],
+  "ok": false,
+  "restores": [
+    {
+      "ambiguous": false,
+      "candidates": [],
+      "recoverable": false,
+      "status": "changed",
+      "target": "family/summer.txt"
+    },
+    {
+      "ambiguous": false,
+      "candidates": [
+        "family/renamed-winter.txt"
+      ],
+      "recoverable": true,
+      "status": "missing",
+      "target": "family/winter.txt"
+    },
+    {
+      "ambiguous": false,
+      "candidates": [],
+      "recoverable": false,
+      "status": "missing",
+      "target": "letters/lost.txt"
+    },
+    {
+      "ambiguous": false,
+      "candidates": [
+        "photos/report.txt"
+      ],
+      "recoverable": true,
+      "status": "missing",
+      "target": "photos/Report.txt"
+    },
+    {
+      "ambiguous": true,
+      "candidates": [
+        "records/copy-b.txt",
+        "spares/duplicate.txt"
+      ],
+      "recoverable": true,
+      "status": "missing",
+      "target": "records/copy-a.txt"
+    },
+    {
+      "ambiguous": false,
+      "candidates": [
+        "spares/invoice-copy.txt"
+      ],
+      "recoverable": true,
+      "status": "changed",
+      "target": "records/invoice.txt"
+    }
+  ],
+  "unrecoverable": [
+    "family/summer.txt",
+    "letters/lost.txt"
+  ]
+}
