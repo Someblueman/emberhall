@@ -2,7 +2,11 @@
 
 **13 November 2026: continuous service installed; full objective remains open.**
 The complete current objective is preserved verbatim in
-`evidence/room-growth/owner-objective.md`. This audit distinguishes a tested
+`evidence/keep-moving/owner-objective.md`. The added shelf, competitive project
+selection, daily novelty and owner-protected built-in web research are now part
+of acceptance. Their implementation/activation and first work-selection rule
+ratification remain pending; Blackout expansion is no longer the next task.
+This audit distinguishes a tested
 mechanism, an observed live event, and the longer history still required.
 
 | Requirement | Authoritative evidence and present limit |

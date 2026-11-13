@@ -1,7 +1,10 @@
 # Wake in Emberhall
 
 Read AGENTS.md and docs/STEWARD_ORDERS.md. The full current objective is retained
-in evidence/room-growth/owner-objective.md (the newer attachment adds room growth).
+in evidence/keep-moving/owner-objective.md, including Keep moving and the owner-only
+Windows onto the world safeguards. The goal attachment has the same bytes.
+Blackout is complete for now; the next project comes from the idea shelf after
+the work-selection rules are ratified. Read the new direction in CONTINUATION.
 The original continuous-home copy remains the source bound to authorization303.
 The objective supersedes the old12/day cap
 and four20-minute visits. docs/CONTINUATION.md preserves the unfinished build;

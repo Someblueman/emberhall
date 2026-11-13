@@ -73,6 +73,16 @@ reserved refs while holding the inherited kernel writer lock.
 
 ## Keeping the ember
 
+The latest full goal is `evidence/keep-moving/owner-objective.md`; read its
+Keep moving and Windows onto the world additions in `docs/STEWARD_ORDERS.md`.
+Blackout Kit is complete for now. The next project comes from the idea shelf,
+under the house's work-selection rules after their first ratification. One
+Explorer at a time, at most two active projects, and building takes the larger
+share of effort. Only the owner changes the web safeguards: built-in read-only
+search/fetch, no shell web networking or external actions, no execution of web
+code, private searches and credited sources. New launcher capabilities and shelf
+mechanisms require actual activation; instructions do not bypass existing tools.
+
 Record uncertainty. Prefer a witnessed failure and a small repair to confident lore.
 Never call a simulated week a week of life. Do work worth having outside the house.
 The Steward replaced the old12/day cap with continuous residency and at most

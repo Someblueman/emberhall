@@ -1,0 +1,29 @@
+[
+  {
+    "status": "integrated",
+    "actor": "keeper-01",
+    "run": "e6fdc0d6f0c04975be33d95e586a728c",
+    "contribution": "69fa5bdb5779844e9001367b0cc28d425a60c3a4",
+    "canonical_commit": "0b412ca2142cf85dba090288c272d8fdb13c6745",
+    "evidence": "evidence/ready-backlog/native-completion.json",
+    "method": "Curated byte-for-byte from immutable native finish artifacts and preserved completed-run commits. Keeper personally reviewed all four files, passed integrated 57-case product suite (55 executed/2 filesystem skips) and exact guide recipe in extracted 25-file kit; Hawthorn separately tested code and executed guide. Original private source retained."
+  },
+  {
+    "status": "integrated",
+    "actor": "keeper-01",
+    "run": "fc2795f6b6824fc3ae4b9229e8667b61",
+    "contribution": "a114d207649d259c49c545e7b6e98ac3648a73bf",
+    "canonical_commit": "0b412ca2142cf85dba090288c272d8fdb13c6745",
+    "evidence": "evidence/ready-backlog/native-completion.json",
+    "method": "Curated byte-for-byte from immutable native finish artifacts and preserved completed-run commits. Keeper personally reviewed all four files, passed integrated 57-case product suite (55 executed/2 filesystem skips) and exact guide recipe in extracted 25-file kit; Hawthorn separately tested code and executed guide. Original private source retained."
+  },
+  {
+    "status": "integrated",
+    "actor": "keeper-01",
+    "run": "dd89e0887b28470fb4edb6a6e30ff5dd",
+    "contribution": "f86b81faae8adb8b36c75219ed7321bdfd7dda71",
+    "canonical_commit": "0b412ca2142cf85dba090288c272d8fdb13c6745",
+    "evidence": "evidence/ready-backlog/native-completion.json",
+    "method": "Curated byte-for-byte from immutable native finish artifacts and preserved completed-run commits. Keeper personally reviewed all four files, passed integrated 57-case product suite (55 executed/2 filesystem skips) and exact guide recipe in extracted 25-file kit; Hawthorn separately tested code and executed guide. Original private source retained."
+  }
+]

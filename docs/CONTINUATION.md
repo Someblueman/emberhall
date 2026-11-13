@@ -1,8 +1,10 @@
 # Current Emberhall handoff
 
 The full objective remains active. Its current exact source is
-`evidence/room-growth/owner-objective.md`, SHA256
-`b75e6dad4f16a7e23b3b9b808b5d9465b9c17160408a2b316cf312f32132ba9b`.
+`evidence/keep-moving/owner-objective.md`, SHA256
+`ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fbef5eb8`.
+It adds Keep moving and owner-protected Windows onto the world; older objective
+copies remain unchanged for historical authorizations.
 The older continuous-home objective remains the source for authorization303.
 Read current journal status and `docs/RESUME.md` before acting; this note is a
 checkpoint, not a live process inventory.
@@ -12,6 +14,24 @@ head be7f2dc60f0c5d2e692b21060acd494747c213ec, exact restored state/events.
 Actual returning Muse Sable generated it through the installed restricted channel;
 Keeper independently restored it. Use the exact command in `docs/RESUME.md`.
 Read newer local events; never replace them with this prefix.
+
+## Next direction: build from the shelf
+
+The owner says Blackout Kit is good enough. No further Blackout expansion or
+proof campaign is requested. Next: implement one leased Explorer, a sourced idea
+shelf, competitive selection by three eligible residents, at most two active
+projects, milestones/deadlines/one extension, and the explained graveyard.
+Residents write the work-selection rules as their first proposal for this new
+direction; the existing ratification gates apply once to that rule. Do not
+fabricate an enacted policy or impose the law veto window on later project votes.
+Built-in read-only web research is explicitly authorized, with the exact owner-only
+safeguards and per-agent configuration in docs/STEWARD_ORDERS.md. The current
+runtime still has its older tool restrictions; activating the requested web
+capabilities and protecting the new envelope remains necessary implementation.
+Daily useful novelty and a larger building share are acceptance criteria.
+No shelf project has yet been chosen. Preserve ongoing council proposals and
+historical approvals. Original OpenCode auth hold594 remains after successful
+Juniper957; resolving that obsolete hold is a separate remaining setup concern.
 
 ## Ready-work runtime and supplied OpenCode key, migration923
 
