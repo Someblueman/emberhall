@@ -93,16 +93,18 @@ Natural-language council text remains subordinate to Steward instructions; the
 controller must also enforce its fixed provider/sandbox boundary. A paragraph
 claiming permission to bypass a sandbox cannot change those executable settings.
 
-The initial protected code manifest pins `house/providers.py`, `council.py`,
-`wake_policy.py`, `steward.py`, `model.py`, `record.py`, `governance.py`,
-`resident_client.py`, `home.py`, `home_work.py` and `watch_recovery.py`. The last
-ten names are also under `house/`. Green tests cannot approve changed enforcement
-code: both testing and refresh reject any changed/missing protected hash. Changing
-these conservative pins requires another explicit Steward-approved migration,
-which is not exposed by this version. This limits foundation self-rewriting;
-council prompt text, visual/application code and other unprotected modules can
-evolve through the tested path. The initial baseline cannot be enrolled until
-every named enforcement file exists in the reviewed commit.
+The initial protected code manifest is the explicit `PROTECTED_FILES` set in
+`house/wake_policy.py`. It covers the provider, journal, governance, coordinator,
+mailbox/action jobs, source integration, sandbox and runtime code, including their
+privileged imports. An unprotected imported module could otherwise change the
+protected behavior. Green tests cannot approve changed enforcement code: both
+testing and refresh reject any changed/missing protected hash. Changing these
+conservative pins requires another explicit Steward-approved migration, which is
+not exposed by this version. This limits foundation self-rewriting. Council wake
+text, the browser's HTML/CSS/JavaScript, projects and unprivileged additions can
+evolve; the Python public projection currently remains in the trusted import
+closure. The initial baseline cannot be enrolled until every named file exists
+in the reviewed commit.
 
 ## A later wake earns runtime refresh
 
@@ -118,7 +120,11 @@ checkout clean. Then run:
 python3 -m house.steward --as ID test-runtime --run RUN --task TASK --token TOKEN --source-repo /absolute/candidate
 ```
 
-This runs the committed candidate's unittest discovery in a real subprocess. It
+This clones the committed candidate and runs unittest discovery in a macOS sandbox
+with writes limited to that disposable room and scratch space, and network denied.
+The coordinator never imports candidate Python. Host-only process-recovery and nested sandbox fixtures
+are explicitly skipped there because macOS blocks setuid ps and sandbox nesting; host acceptance runs
+those fixtures separately. The receipt retains the actual test output. It
 records the actual exit, observed test count, timestamps, output hash, source
 commit and hashes of runtime/test files. It rechecks the source, finishes the
 claimed task with immutable `runtime-test.json` and `runtime-test-output.txt`, and

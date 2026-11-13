@@ -19,6 +19,7 @@ import time
 from .council import fields, require, text
 from .governance import canonical, digest
 from .record import Record
+from . import test_sandbox
 
 APPROVED_SOURCE_SHA256 = "50f6c535ed42c4e640a5a09a77a3eb3a45568c710b40ab49da44d1da00b96f30"
 OWNER_LIMITS = {
@@ -56,7 +57,8 @@ REPORT_NAME = "runtime-test.json"
 TEST_ARGS = ["-m", "unittest", "discover", "-s", "tests", "-v"]
 PROTECTED_FILES = frozenset("house/" + name + ".py" for name in (
     "providers", "council", "wake_policy", "steward", "model", "record", "governance",
-    "resident_client", "home", "home_work", "watch_recovery", "runtime", "__main__", "watch", "files", "__init__"))
+    "resident_client", "mailbox", "mailbox_jobs", "resident_actions", "opencode_tool", "test_sandbox",
+    "life", "inbox", "publish", "body", "integrate", "home", "home_work", "watch_recovery", "runtime", "__main__", "watch", "files", "__init__"))
 
 
 def approval(source: str, snapshot: dict) -> dict:
@@ -227,16 +229,23 @@ def test_runtime(record: Record, actor: str, run_id: str, task_id: str, token: s
     protected_source(state, before)
     command = [str(Path(sys.executable).resolve()), *TEST_ARGS]
     started = time.time()
-    with tempfile.TemporaryFile() as output:
-        result = subprocess.run(command, cwd=source_repo, stdout=output,
-                                stderr=subprocess.STDOUT, timeout=300)
+    # Tests may modify their room, never the canonical source or authority store.
+    with tempfile.TemporaryDirectory(prefix="emberhall-runtime-test-") as temporary, tempfile.TemporaryFile() as output:
+        candidate = Path(temporary) / "source"
+        subprocess.run(["git", "clone", "--quiet", "--no-local", "--single-branch", "--no-tags",
+                        str(source_repo), str(candidate)], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(candidate), "checkout", "--quiet", "--detach", before["source_head"]],
+                       check=True, capture_output=True)
+        result = test_sandbox.run(command, cwd=candidate, stdout=output, timeout=300)
+        require(source_snapshot(candidate) == before, "test candidate changed during runtime tests")
         output.seek(0)
         raw = output.read(800001)
     finished = time.time()
     require(len(raw) <= 800000, "runtime test output exceeds artifact budget")
     require(source_snapshot(source_repo) == before, "source changed during runtime tests")
     matches = re.findall(rb"\nRan ([0-9]+) tests? in ", raw)
-    count = int(matches[-1]) if matches else 0
+    skipped = re.findall(rb"\nOK \(skipped=([0-9]+)\)", raw)
+    count = max(0, (int(matches[-1]) if matches else 0) - (int(skipped[-1]) if skipped else 0))
     report = {"format": "emberhall-runtime-test-v1", "house": state["house_id"],
               "resident": actor, "run": run_id, "proposal": policy["proposal"],
               "policy_revision": policy["revision"], "envelope_sha256": ENVELOPE_SHA256,
@@ -248,7 +257,7 @@ def test_runtime(record: Record, actor: str, run_id: str, task_id: str, token: s
         artifacts[name] = {"sha256": hashlib.sha256(body).hexdigest(),
                            "base64": base64.b64encode(body).decode()}
     completion = record.append("finish", actor, {"task": task_id, "token": token,
-        "result": f"Runtime tests exited {result.returncode}; {count} tests observed. "
+        "result": f"Runtime tests exited {result.returncode}; {count} non-skipped tests observed. "
                   "This receipt is not runtime activation.", "artifacts": artifacts},
         f"runtime-test-finish-{task_id}")
     if result.returncode != 0 or count == 0:

@@ -15,7 +15,7 @@ class ProviderTests(unittest.TestCase):
             (root / "prompt.txt").write_text("Bounded work")
             for kind, model in DEFAULTS.items():
                 with self.subTest(kind=kind), patch("house.providers.shutil.which", return_value="/bin/agent"):
-                    argv, env = command(kind, model, root, root, root / "house")
+                    argv, env = command(kind, model, root, root, root / "house", runtime=root / "runtime.pyz", resident="fixture")
                     for forbidden in ("--yolo", "--disable-sandbox", "--disable-approval", "--auto",
                                       "--dangerously-skip-permissions", "--dangerously-bypass-approvals-and-sandbox"):
                         self.assertNotIn(forbidden, argv)
@@ -29,8 +29,15 @@ class ProviderTests(unittest.TestCase):
                         config = json.loads(env["OPENCODE_CONFIG_CONTENT"])
                         self.assertEqual(config["enabled_providers"], ["opencode-go"])
                         permissions = config["agent"]["emberhall"]["permission"]
-                        self.assertEqual(permissions["bash"]["*"], "deny")
+                        self.assertEqual(permissions["bash"], "deny")
                         self.assertEqual(permissions["external_directory"], "deny")
+                        self.assertEqual(permissions["house_journal"], "allow")
+                        self.assertFalse(config["lsp"])
+                        self.assertFalse(config["formatter"])
+                        self.assertEqual(env["OPENCODE_DISABLE_PROJECT_CONFIG"], "1")
+                        tool = (root / "opencode-config/tools/house_journal.js").read_text()
+                        self.assertIn("shell: false", tool)
+                        self.assertNotIn("exec(", tool)
 
     def test_billing_route_cannot_be_selected(self):
         for kind, model in (("openrouter", "gpt-6.1-sol"), ("codex", "gpt-5"),
@@ -80,3 +87,8 @@ class ProviderTests(unittest.TestCase):
         parsed = result("muse", "\n".join(map(json.dumps, records)), "", 0)
         self.assertEqual(parsed["usage"], {"input_tokens": 1884667, "cached_input_tokens": 1767160, "output_tokens": 23288})
         self.assertEqual(parsed["outcome"], "success")
+
+    def test_invalid_native_counters_cannot_strand_a_run_at_finish(self):
+        output = '\n'.join([json.dumps({"type": "turn.completed", "usage": {
+            "input_tokens": value, "output_tokens": 1}}) for value in (float("inf"), 1e308, 1e308)])
+        self.assertEqual(result("codex", output, "", 0)["usage"], {"output_tokens": 3})

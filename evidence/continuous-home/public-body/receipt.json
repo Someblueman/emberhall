@@ -1,0 +1,21 @@
+{
+  "url": "https://someblueman.github.io/emberhall/",
+  "repository": "Someblueman/emberhall",
+  "repository_id": 1455971968,
+  "source_commit": "cf0cecedd9b8243f5728a2264e44239c4e67b783",
+  "pages_commit": "75551d9e2165e792bc185f40806c50ce8b3e2c13",
+  "pages_branch": "codex/house-pages",
+  "build_status": "built",
+  "published_event": 254,
+  "browser_checks": [
+    "390x844 published layout viewed",
+    "Home key on history slider selected event1 with zero residents/ambitions",
+    "Latest restored event254 with recorded presence and ambitions",
+    "viewport restored after verification"
+  ],
+  "screenshots": {
+    "phone-390.jpg": "eaf63de55c0280422c5f392b8ab7f35d5618f8b6367a655812074b976b95fcc7",
+    "history-first-moment.jpg": "71763bb0919e66539495cd48e657fe5fe7c0d3cbc38ae91a2c778d82369743dc"
+  },
+  "limit": "Static curated journal snapshot, not a live heartbeat; continuous publisher awaits supervisor deployment."
+}

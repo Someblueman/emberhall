@@ -16,7 +16,7 @@ import sys
 import time
 import uuid
 
-from . import home_work, inbox, providers
+from . import home_work, inbox, mailbox, mailbox_jobs, providers
 from .life import CONTROLLER
 from .record import Record
 from .wake_policy import active_policy, active_prompt
@@ -103,6 +103,7 @@ class Coordinator:
                  poll_seconds: float = 60, publish: bool = False):
         self.record = record
         self.runtime = runtime.resolve()
+        record._mailbox_runtime = self.runtime
         if not self.runtime.is_file():
             raise ValueError("a pinned runtime file is required")
         if min(inactivity_seconds, poll_seconds) <= 0:
@@ -136,7 +137,8 @@ class Coordinator:
             {"run": run, **result}, sort_keys=True)}, f"home-{run}-observed")
 
     def finish(self, run: str, result: dict) -> dict:
-        state = self.record.read()[0]
+        mailbox_jobs.stop(self.record, run)
+        state, events, _ = self.record.read()
         item = state["life"]["runs"][run]
         workspace = self.private / item["workspace"]
         saved = None
@@ -152,18 +154,26 @@ class Coordinator:
                               {"error": type(error).__name__, "workspace_retained": True})
         if result["outcome"] in {"quota", "failed"}:
             self.cooldown(item["agent"], run, result["outcome"])
-        if result["outcome"] == "success" and item.get("help_request"):
+        handed_off = (item["resident"] in state["residents"] and
+            not state["residents"][item["resident"]]["awake"] and
+            not any(task.get("owner") == item["resident"] and task["status"] == "claimed"
+                    for task in state["tasks"].values()) and any(
+            event["actor"] == item["resident"] and event["op"] == "sleep"
+            for event in events[item["started_sequence"]:]))
+        if result["outcome"] == "success" and handed_off and item.get("help_request"):
             request = state["life"]["requests"][item["help_request"]]
             if request["status"] == "assigned":
                 self.record.append("life", CONTROLLER, {"kind": "help-resolved",
-                    "request": item["help_request"], "reason": "Assigned resident completed its stretch; see its handoff."},
+                    "request": item["help_request"], "reason": "Assigned resident completed its native stretch and recorded a sleep handoff."},
                     f"home-{run}-help-resolved")
         # Complete retryable side effects first: a crash cannot lose a cooldown
         # behind a terminal run that recovery would otherwise skip.
         receipt = self.life("run-finish", run, **result)
+        mailbox.release(self.record, run)
         return receipt
 
     def recover(self) -> list[str]:
+        mailbox_jobs.recover(self.record)
         state, events, _ = self.record.read()
         observations = {}
         for event in events:
@@ -175,6 +185,7 @@ class Coordinator:
         for run, item in state.get("life", {}).get("runs", {}).items():
             if item["status"] != "active":
                 continue
+            mailbox.service(self.record, self.private, run)
             if item.get("pgid"):
                 members = group_members(item["pgid"])
                 if members and not any(run in command for command in members):
@@ -193,6 +204,7 @@ class Coordinator:
         if (self.private / "active-runtime.json").exists():
             from .runtime import selected
             self.runtime = Path(selected(self.record)["entry"])
+            self.record._mailbox_runtime = self.runtime
 
     def prompt(self, state: dict, run: str, resident: str, workspace: Path, client: Path,
                help_request: dict | None) -> str:
@@ -240,13 +252,17 @@ class Coordinator:
             prompt = self.prompt(state, run, resident, workspace, client, request)
             (path / "prompt.txt").write_text(prompt)
             (path / "prompt.txt").chmod(0o600)
-            argv, env = providers.command(kind, providers.DEFAULTS[kind], workspace, path, client)
+            if kind == "opencode":
+                prompt += "\nUse house_journal({argv: [...]}) for the fixed resident commands; shell execution is unavailable.\n"
+                (path / "prompt.txt").write_text(prompt)
+            argv, env = providers.command(kind, providers.DEFAULTS[kind], workspace, path, client,
+                                          runtime=self.runtime, resident=resident)
             write_private(path / "launch.json", {"argv": argv, "workspace": str(workspace)})
             gate_read, gate_write = os.pipe()
             with (path / "prompt.txt").open("rb") as source, (path / "stdout.jsonl").open("xb") as output, \
                     (path / "stderr.log").open("xb") as errors:
                 os.chmod(output.name, 0o600); os.chmod(errors.name, 0o600)
-                child = subprocess.Popen([sys.executable, str(self.runtime), "home", "--repo", str(self.record.root),
+                child = subprocess.Popen([sys.executable, "-I", str(self.runtime), "home", "--repo", str(self.record.root),
                     "--runtime", str(self.runtime), "_exec", "--gate", str(gate_read), "--run", run],
                     cwd=workspace, stdin=source, stdout=output, stderr=errors,
                     start_new_session=True, pass_fds=(gate_read,), env=env)
@@ -272,6 +288,9 @@ class Coordinator:
     def reap(self) -> list[str]:
         ended = []
         for run, running in list(self.running.items()):
+            # Deliver final finish/sleep before stopping and preserving the room.
+            mailbox.service(self.record, self.private, run)
+            mailbox_jobs.tick(self.record)
             path = self.private / run
             sizes = tuple((path / name).stat().st_size for name in ("stdout.jsonl", "stderr.log"))
             if sizes != running.sizes:

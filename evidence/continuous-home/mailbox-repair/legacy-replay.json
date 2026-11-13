@@ -1,0 +1,14 @@
+{
+  "prior_source": "cf0cecedd9b8243f5728a2264e44239c4e67b783",
+  "old": {
+    "head": "eaf700be249d5102ff032525952232db03cf7abb",
+    "events": 255,
+    "state_sha256": "4317918502bab39b36192bbc6f8e6523e67ab556592c5276267d5ac9ae3414e0"
+  },
+  "new": {
+    "head": "eaf700be249d5102ff032525952232db03cf7abb",
+    "events": 255,
+    "state_sha256": "4317918502bab39b36192bbc6f8e6523e67ab556592c5276267d5ac9ae3414e0"
+  },
+  "exact_projection_equal": true
+}

@@ -1,0 +1,41 @@
+import json,sys,time,hashlib
+from pathlib import Path
+sys.path.insert(0,'/Users/sws/Code/longhouse')
+from house.record import Record
+from house.home import Coordinator
+from house.wake_policy import OWNER_LIMITS
+import house.home as home
+
+repo=Path('/Users/sws/Code/longhouse'); record=Record(repo)
+private=record.common/'house-home'; receipt=json.loads((private/'native-probe-runtime.json').read_text());runtime=Path(receipt['entry'])
+assert hashlib.sha256(runtime.read_bytes()).hexdigest()==receipt['runtime_sha256']
+# This is an explicit owner-authorized predeployment probe, NOT an enacted-policy
+# wake or activation. Keep that distinction in the actual start receipt.
+home.active_policy=lambda state:{'revision':'predeployment-native-validation'}
+class Probe(Coordinator):
+ def prompt(self,state,run,resident,workspace,client,help_request):
+  kind=state['life']['runs'][run]['agent'] if run in state.get('life',{}).get('runs',{}) else kinds[len(started)]
+  from house.providers import DEFAULTS
+  instruction='Exercise standalone Blackout Kit on a realistic temporary nested archive including Unicode filenames, rename, one-byte damage and explicit recovery. Use its documented CLI, preserve actual outcomes and any discovered defect. Add one meaningful missing regression only if the evidence warrants it.' if kind in ('codex','agy') else 'Independently examine Blackout Kit for an untested recovery boundary involving Unicode names, missing files, rename or interruption. Reproduce one concrete boundary with its CLI if tools permit; otherwise produce a grounded read-only review and request another kind to test it. Never invent a defect.'
+  return f'''You are a real {kind} resident in Emberhall, participating in an owner-authorized bounded native predeployment trial. This is not yet continuous service or enacted-policy runtime refresh.
+Steward-protected limits: {json.dumps(OWNER_LIMITS)}
+Your assigned resident ID is {resident}; model {DEFAULTS[kind]}; run {run}. Choose your own name. Your exclusively owned source checkout is {workspace}. The canonical journal is reached ONLY through this fixed client: {client}
+First use that client to arrive --as {resident} --name YOUR-NAME, then life --as {resident} --data '{{"kind":"identity","agent":"{kind}","model":"{DEFAULTS[kind]}"}}'. Read rules/status and unseen events using that client, and say a short arrival. Never found another house in this clone, use another actor, start a model, push, or edit the canonical checkout. The client is the only allowed shell command for OpenCode; use its native read/edit tools otherwise. Other kinds keep native sandboxes and limited network on.
+Read AGENTS.md and docs/STEWARD_ORDERS.md, but use the fixed canonical client instead of local python -m house commands. Claim one bounded task named native-{run}, with fresh token/finite lease, limited to your private clone. {instruction}
+Only edit projects/blackout/ if a demonstrated gap warrants it, and a concise evidence/native-residents/{run}.md report. Run relevant checks if shell is permitted. Record exact limits if a tool is blocked; do not bypass permissions. Finish with immutable report/artifacts through the client, read latest events and sleep with a useful handoff. Commit only your task-owned private source changes with git -c commit.gpgsign=false if permitted. The coordinator retains all bytes and an independent resident integrates. Do not repeat checkpoint exports or full house suites. End after this bounded trial and return a concise final result. A ten-minute external safety deadline applies only to this predeployment probe, not future normal residency.
+'''
+
+kinds=sys.argv[1:]; assert 1<=len(kinds)<=2
+started=[]; c=Probe(record,runtime)
+try:
+ for kind in kinds:
+  run=c.start(kind);started.append(run);print(json.dumps({'started':run,'kind':kind}),flush=True)
+ deadline=time.monotonic()+600
+ while c.running and time.monotonic()<deadline:
+  c.tick(start=False,poll=False);time.sleep(1)
+finally:
+ c.close()
+state=record.read()[0]
+summary={run:state['life']['runs'][run] for run in started}
+(private/('probe-'+ '-'.join(kinds)+'.json')).write_text(json.dumps(summary,indent=2)+'\n')
+print(json.dumps({run:{k:v for k,v in r.items() if k in ('agent','resident','outcome','usage','elapsed_seconds','released_tasks')} for run,r in summary.items()},indent=2),flush=True)

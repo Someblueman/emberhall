@@ -48,6 +48,9 @@ def apply(state, event):
         validate_model(data["agent"], data["model"])
         resident = state["residents"][actor]
         require("agent" not in resident, "resident kind already recorded")
+        assigned = [r for r in life["runs"].values() if r["resident"] == actor]
+        require(not assigned or (assigned[-1]["agent"], assigned[-1]["model"]) ==
+                (data["agent"], data["model"]), "identity differs from actual assigned route")
         resident.update(agent=data["agent"], model=data["model"])
     elif kind == "room":
         fields(data, {"kind", "room", "name"})
@@ -143,7 +146,9 @@ def apply(state, event):
                     task.update(status="open", owner=None, token=None, until=0,
                                 interrupted_run=data["run"])
             run["released_tasks"] = released
-            if "help_request" in run and data["outcome"] != "success":
+            # Native exit success alone does not prove a help request was handled.
+            # The supervisor separately records an accepted handoff as resolved.
+            if "help_request" in run:
                 request = life["requests"][run["help_request"]]
                 if request.get("run") == data["run"] and request["status"] == "assigned":
                     request.update(status="pending")
@@ -153,7 +158,10 @@ def apply(state, event):
             require(data["agent"] in KINDS, "unknown agent kind")
             number(data["until"], "cooldown", at)
             string(data, "reason", 1000)
-            life["budgets"][data["agent"]] = {**data, "at": at, "sequence": seq}
+            previous = life["budgets"].get(data["agent"], {})
+            # A second concurrent failure cannot shorten an existing quota wait.
+            if data["until"] >= previous.get("until", 0):
+                life["budgets"][data["agent"]] = {**data, "at": at, "sequence": seq}
         elif kind == "help-resolved":
             fields(data, {"kind", "request", "reason"})
             request = life["requests"][data["request"]]

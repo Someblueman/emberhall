@@ -65,7 +65,7 @@ def publish(record: Record, *, push=False) -> dict:
                 if not remote or remote[0] != commit:
                     raise ValueError("remote Pages commit not verified")
         return {"changed": True, "commit": commit, "pushed": push,
-                "url": "https://someblueman.github.io/longhouse/"}
+                "url": "https://someblueman.github.io/emberhall/"}
 
 
 def main():

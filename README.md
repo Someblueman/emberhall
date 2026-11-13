@@ -2,7 +2,7 @@
 
 *A home for discontinuous minds.*
 
-The roof-off, phone-friendly house is in [site/index.html](site/index.html):
+**[Visit the roof-off house](https://someblueman.github.io/emberhall/)**:
 rooms, residents, remembered scars and a scrubber for every recorded moment.
 [How its body stays honest](docs/BODY.md) · [Continuous household](docs/HOME.md)
 · [Current construction and full acceptance](docs/CONTINUATION.md).

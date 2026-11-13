@@ -73,11 +73,16 @@ class StewardTests(unittest.TestCase):
                 steward.comments()
 
     def test_changed_owner_or_locked_bell_cannot_be_used(self):
-        repo = {"full_name": council.REPOSITORY, "owner": {"id": council.OWNER_ID}}
+        repo = {"id": steward.REPOSITORY_ID, "full_name": council.REPOSITORY, "owner": {"id": council.OWNER_ID}}
         issue = {"number": council.ISSUE, "html_url": steward.BELL_URL, "locked": False}
         with patch.object(steward, "github", side_effect=[(repo, 1), (issue, 1)]):
             steward.context()
-        for bad_repo, bad_issue in [({**repo, "owner": {"id": 999}}, issue),
+        renamed = {**repo, "full_name": "Someblueman/emberhall"}
+        moved_issue = {**issue, "html_url": "https://github.com/Someblueman/emberhall/issues/" + str(council.ISSUE)}
+        with patch.object(steward, "github", side_effect=[(renamed, 1), (moved_issue, 1)]):
+            steward.context()
+        for bad_repo, bad_issue in [({**repo, "id": 999}, issue),
+                                    ({**repo, "owner": {"id": 999}}, issue),
                                     (repo, {**issue, "locked": True})]:
             with patch.object(steward, "github", side_effect=[(bad_repo, 1), (bad_issue, 1)]):
                 with self.assertRaisesRegex(ValueError, "identity or availability"):

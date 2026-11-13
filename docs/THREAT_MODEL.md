@@ -88,3 +88,26 @@ boundary; it does not confer missing host isolation or owner approval.
 ## Prepared remote boundary
 
 The optional custodian and client now implement the restricted protocol described in CUSTODIAN_PROTOCOL.md. CUSTODIAN_DEPLOYMENT.md specifies operator ownership and canonical cutover. Real loopback SSH tests verify transport restrictions under the same OS user; the live house remains local. Code availability and passing transport tests do not establish protected host ownership.
+
+## Native resident rooms
+
+Normal native residents write only their independent source room. A fixed local
+mailbox carries requests to the trusted pinned coordinator, which binds identity,
+source artifacts and lifecycle to the accepted run. Neither a changed client nor
+a raw request file grants authority initialization or controller operations.
+Explicit council/integration/runtime jobs remain subject to the existing gates.
+Candidate tests run in a separate macOS sandbox; they cannot write the canonical
+journal, source, runtime store or credentials, and cannot use the network.
+
+Installed OpenCode V1 has tool permissions rather than an OS shell sandbox. Its
+bash tool is completely denied: allowing a fixed shell prefix would still permit
+redirection. A coordinator-private custom tool uses a literal Python executable,
+argument vector and pinned runtime, without a shell or workspace imports. Native
+file tools are limited by external-directory denial. Project/global configuration
+and custom tool discovery are isolated; formatter, LSP, web tools, external skills
+and plugins are disabled. This is not an OS network boundary against a malicious
+OpenCode process. Native Codex/Muse/agy retain their own sandbox boundaries.
+
+The phone bell is checked using stable GitHub repository ID1455971968 and owner
+ID, so the owner's rename from longhouse to emberhall does not replace its
+identity. Historical journal receipts retain their original repository binding.

@@ -106,3 +106,24 @@ class LifeTests(HouseCase):
         self.record.append("claim", "bob", {"task": "work", "token": "new", "expect": 1, "seconds": 60})
         self.rejected("renew", "resident-x", {"task": "work", "token": "old", "seconds": 60}, "stale")
         self.assertEqual(self.record.read()[0]["life"]["runs"]["x"]["released_tasks"], ["work"])
+
+    def test_concurrent_shorter_failure_cannot_clear_quota_cooldown(self):
+        until = time.time() + 900
+        self.life({"kind": "budget", "agent": "muse", "until": until, "reason": "quota"}, "watch-keeper")
+        self.life({"kind": "budget", "agent": "muse", "until": until - 600, "reason": "failed"}, "watch-keeper")
+        self.assertEqual(self.record.read()[0]["life"]["budgets"]["muse"]["until"], until)
+
+    def test_resident_cannot_mislabel_its_supervised_agent_kind(self):
+        self.life(self.start("x"), "watch-keeper")
+        self.record.append("arrive", "resident-x", {"name": "Worker"})
+        self.rejected("life", "resident-x", {"kind": "identity", "agent": "muse", "model": "muse-ember-1.0"},
+                      "differs from actual")
+
+    def test_native_success_without_resolved_help_requeues_the_request(self):
+        self.life({"kind": "help", "request": "still-needed", "reason": "Needs an actual handoff"})
+        self.life(self.start("x") | {"help_request": "still-needed"}, "watch-keeper")
+        self.life({"kind": "run-finish", "run": "x", "outcome": "success",
+                   "exit_code": 0, "usage": {}, "elapsed_seconds": 1}, "watch-keeper")
+        request = self.record.read()[0]["life"]["requests"]["still-needed"]
+        self.assertEqual(request["status"], "pending")
+        self.assertNotIn("run", request)

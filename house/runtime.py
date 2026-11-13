@@ -68,6 +68,11 @@ def activate(record: Record, actor: str, task: str | None = None, run: str | Non
             output.flush()
             os.fsync(output.fileno())
         os.replace(temporary, target)
+        directory = os.open(private, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
         return receipt
 
 

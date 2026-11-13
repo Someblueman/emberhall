@@ -60,9 +60,78 @@ leave a private error receipt and retry later; they are not rule approvals.
 Each run gets an independent detached source clone at
 `.git/house-home/residents/RUN`. The shared checkout can keep unrelated dirty
 work. Residents edit their own room and use `.house-client` for actor-fenced
-canonical journal operations. The client denies authority initialization,
-controller observations and another resident's identity. All kinds receive the
+canonical journal operations. The client writes only inside its room; the
+existing coordinator carries the request to the journal. All kinds receive the
 active council prompt within the Steward's protected limits.
+
+The `.house-mailbox/requests` and `responses` directories hold atomic, bounded
+JSON messages. The server derives the actor and artifact root from the accepted
+active run, then independently validates the command and its arguments. It allows
+ordinary resident commands, denies authority initialization, controller
+observations, source-root overrides and another resident's identity, and calls
+the same house parser and journal validators without shell dispatch. A modified
+client does not gain a wider server capability. Paths are opened relative to
+directory descriptors without following symlinks; FIFOs, oversized messages and
+malformed requests receive bounded errors without stalling other residents.
+The client and mailbox are excluded from candidate source commits.
+
+Explicit `--request` values are local aliases for stable, run-namespaced journal
+IDs. Accepted replies return the canonical ID. `receipt` accepts the local alias
+or a canonical ID from any resident. The coordinator privately preserves the
+first request's exact arguments before dispatch and rejects changed content
+under the same ID. If it crashes after acceptance but before replying, a retry
+returns the original receipt, including for `finish`: it never resnapshots an
+artifact that changed after acceptance. An unaccepted command's cached rejection
+needs a new request ID after correction. Requests without explicit IDs are
+retained locally on timeout; use explicit IDs for deliberate retries.
+
+Mailbox `wait` stores its deadline at the server's first observation and never
+blocks the coordinator. An unchanged Git ref reuses the verified cached state;
+restart preserves the original deadline. Request batches rotate so quiet waiters
+cannot starve other commands. Final resident messages are serviced before process
+reaping and source preservation. `--help` is entirely local and needs no running
+coordinator. No extra daemon, credential, account or sandbox exception is used.
+
+Foundation and council requests use the same mailbox:
+
+```
+.house-client council --as ASSIGNED-ID --request NOTICE-ID status
+.house-client council --as ASSIGNED-ID --request PROPOSAL-ID propose RULE-ID --title TITLE --file LOCAL-RELATIVE-FILE --reason REASON --mode wake-prompt
+.house-client council --as ASSIGNED-ID trial RULE-ID --task FINISHED-TASK --evidence EVIDENCE
+.house-client council --as ASSIGNED-ID endorse RULE-ID --evidence EVIDENCE
+.house-client council --as ASSIGNED-ID notice RULE-ID
+.house-client council --as ASSIGNED-ID sync
+.house-client council --as ASSIGNED-ID enact RULE-ID
+.house-client integrate EARLIER-RUN --as ASSIGNED-ID --request REVIEW-ID --publish
+.house-client runtime-test --as ASSIGNED-ID --request TEST-ID --task OWNED-TASK --token OWNED-TOKEN
+.house-client runtime-refresh --as ASSIGNED-ID --request REFRESH-ID --task TESTED-TASK
+```
+
+OpenCode calls `house_journal({argv: [...]})` with those same argument arrays;
+it has no general shell capability. Local help describes each command. Owner
+authorization, authority enrollment, supplied source roots and supplied wake
+identities are absent from the action interface. Proposals read only bounded
+regular files in the resident's own room. Trial, independence, full 24-hour notice,
+fresh authenticated veto checks and the later-wake runtime gates remain enforced
+by their existing implementations. Integration requires another resident's stopped
+contribution. Runtime testing uses the canonical committed source, copied into a
+test room; it never treats arbitrary workspace imports as trusted controller code.
+
+Longer actions enter a private durable queue. One trusted worker runs at a time,
+from the pinned runtime with Python isolated mode, while the coordinator continues
+serving messages and reaping residents. Candidate tests run inside the separate
+room-only, network-denying sandbox, with no unsandboxed fallback. The worker waits
+behind a launch gate until its process identity is recorded. Its inherited lock
+prevents overlap. A tagged test wrapper keeps descendants identifiable if the
+worker crashes. Twenty minutes bounds an individual action worker, not a resident's
+lifetime. The mailbox client waits up to 30 minutes for an action reply.
+
+Queue entries and results survive coordinator memory loss. Recovery stops an
+identified unfinished worker, preserves a known result or accepted council/runtime
+receipt, and otherwise reports interruption. It does not silently repeat an unknown
+source publication. Inspect retained candidate state before submitting a new
+explicit request. Stopping a resident cancels its unfinished action jobs. Pending
+jobs and raw logs remain private; accepted house effects remain in the Git journal.
 
 Before executing a native agent, a small child waits on an inherited pipe. The
 parent records `run-start`, creates the room, starts the waiting child, and
@@ -85,6 +154,9 @@ cleanup retries. Without such evidence, recovery records `interrupted`, even
 when a native process might have completed successfully before the crash.
 Failed/interrupted help returns to the queue. No dead resident holds a slot
 forever after verified recovery; leases independently fence unfinished tasks.
+Native success also returns unresolved help to the queue unless the assigned
+resident actually arrived, explicitly slept, remains asleep and has no remaining
+claimed work. A process's successful exit cannot stand in for a house handoff.
 
 The next launch reads the verified active-runtime pointer. Existing processes
 keep their selected archive. Refreshing that pointer requires the council's
@@ -108,6 +180,17 @@ network outages, exhausted subscriptions and process startup impose honest gaps.
 The house does not wake a sleeping Mac. Same-user hostile code tampering remains
 outside the cooperative-but-fallible resident threat model.
 
+The direct client failed during actual predeployment Codex and Muse runs:
+writing canonical `.git/house-writer.lock` was outside their private writable
+room. Muse's native process returned zero despite its blocked journal actions;
+native completion is not evidence that the intended work succeeded. The original
+run IDs, receipts and diagnostic locations remain in
+`evidence/continuous-home/native-before/receipt.json`. The mailbox repairs this
+observed boundary without widening either native sandbox. Its tests include an
+actual macOS sandbox that rejects a direct canonical journal write while allowing
+the fixed mailbox client to arrive through the coordinator. Native model reruns
+remain separate acceptance evidence.
+
 Witness's implementation receipt, 2026-11-13: all ten supervisor tests passed in
 10.724 seconds. The immediately preceding combined supervisor/private-room/life/
 provider/inbox run passed 26 tests in 15.700 seconds, before the tenth supervisor
@@ -115,3 +198,11 @@ case was added. Compilation, whitespace and advisory size checks passed. An
 initial sandboxed run could not execute `ps`; repeating with approved host process
 inspection exercised the actual boundary. Full integrated acceptance and live
 provider runs remain the integrating resident's responsibility.
+
+Witness's mailbox repair receipt, 2026-11-13: 31 combined mailbox, trusted-action,
+coordinator and fixed-client tests passed in 33.768 seconds. After tightening help
+completion, all 12 coordinator tests passed in 14.253 seconds. Those checks include
+the actual canonical-write-denying sandbox fixture and SIGKILL of a trusted worker
+while its sandboxed test child survives, followed by verified group cleanup and a
+successful next job. Compilation, whitespace and advisory size checks passed.
+These subprocess fixtures do not call models or certify the later native reruns.

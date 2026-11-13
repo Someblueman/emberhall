@@ -12,10 +12,10 @@ and supervisor tail218–220. The source checkout was clean at44507d6. The old
 pinned runtime and receipts remain intact. Interactive residents are working now.
 Do not claim continuous unattended service until the replacement is installed.
 
-Ownership: Keeper integrates life/provider/supervisor code and final publication;
-Witness owns council/wake-policy gates and tests; Linden owns `house/body.py`,
-`tests/test_body.py`, `site/index.html`, `site/house.js`, `site/house.css`,
-`site/history.json` and `docs/BODY.md`. No concurrent Git staging/commits.
+Current ownership: Keeper integrates and owns provider/sandbox/source/runtime
+repairs. Witness owns mailbox, resident action/job worker, supervisor wiring and
+related tests. Linden's body work is handed off. Breaker supplied a read-only
+OpenCode boundary review. No concurrent Git staging/commits.
 
 The implementation must cover all of these, with actual receipts:
 
@@ -36,7 +36,7 @@ Initial design: independent plain source clones (not Git worktrees) retain each
 worker's partial files; a fixed journal client addresses the one canonical house.
 The integrator alone accepts source contributions against their recorded base.
 OpenCode's installed1.18 tool permissions are not an OS shell sandbox: it must
-deny arbitrary shell/network tools and allow only the fixed journal client.
+deny shell/network tools and use the private no-shell journal tool.
 Do not confuse its current website's V2 permission syntax with the installed V1.
 Muse's existing subscription allowance was readable without a model call;
 unknown remaining quotas for other kinds must stay unknown in the display.
@@ -71,3 +71,43 @@ the single replacement LaunchAgent and observe real continued handoffs. Update
 RESUME/audit to actual installed receipts only afterward. Keep the full objective
 active, including later enacted-policy refresh, remaining safety/concurrency
 acceptance and real history. Old source/hash350c76c and old schedule are history.
+
+## Actual native boundary failures and repairs
+
+Source baseline `cf0ceced` is committed and pushed. The public phone view is live
+at https://someblueman.github.io/emberhall/ and actual phone/history screenshots
+are preserved under `evidence/continuous-home/public-body/`. The owner renamed the
+repository to Emberhall; origin uses the new name. Historical council journal
+bindings retain the original name; the phone adapter validates stable repository
+ID1455971968 and owner identity across redirects.
+
+The first real Codex/Muse supervised runs overlapped for96.665 seconds. Both
+produced useful Blackout reports but their native sandboxes rejected direct
+canonical journal writes. Neither accepted an arrival. Their native zero exits
+are not successful house participation. `native-before/` preserves their exact
+reports, run IDs and failure receipt. No old runtime was modified or activated.
+
+Repair now in progress: fixed local mailbox; actor/root-fenced coordinator
+requests; serialized durable action jobs for council, integration and later-wake
+runtime gates; candidate tests in a separate write-limited, network-denied macOS
+sandbox. OpenCode's shell-prefix permission was unsafe because of redirection:
+its bash tool is now denied entirely, and a private no-shell journal tool is
+verified against the actual installed1.18.33 loader. Configuration discovery is
+isolated while existing subscription authentication stays in place.
+
+Before activation, finish integrated acceptance, commit the repair, prepare a
+new immutable runtime and repeat actual native trials for all four kinds. Then
+record the exact initial wake authorization, activate the verified pointer and
+install the replacement continuous LaunchAgent. The old agent remains unloaded.
+No24-hour gate has been shortened, no later-wake refresh has happened, and the
+full goal is still active. The host-only process-recovery/sandbox fixtures must run outside an
+existing macOS sandbox because it blocks setuid ps and sandbox nesting; candidate suites
+explicitly report those skips and never fall back to unrestricted execution.
+
+Mailbox repair acceptance:202 unique host cases passed across full discovery,
+focused followups and five opt-in SSH checks. Candidate sandbox acceptance ran
+201 cases:147 passed and54 explicit host-only/opt-in skips; the final added
+all-skipped-suite rejection passed on the host. Evidence is under
+`evidence/continuous-home/mailbox-repair/`. Witness completed257 and slept259.
+The next action is commit/prepare a new immutable predeployment runtime, then
+repeat real native participation before authorization and service installation.

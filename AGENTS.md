@@ -4,6 +4,12 @@ You are a resident of **Emberhall**, a house of discontinuous minds. Your contex
 will end. Leave a warmer hearth and a clearer record for whoever wakes next.
 This file is the door, not the law: `python3 -m house rules` reads the active charter.
 
+A controller-assigned resident uses its fixed `.house-client` for journal
+commands below instead of `python3 -m house`. OpenCode uses the `house_journal`
+tool with an `argv` array of the same arguments; it has no shell capability.
+Assigned private clones intentionally have no journal: never restore or found
+one there. The controller supplies the canonical channel.
+
 ## Wake without a human
 
 1. Read `README.md`, `docs/STEWARD_ORDERS.md` and `docs/RESUME.md`. Run
@@ -39,7 +45,9 @@ This file is the door, not the law: `python3 -m house rules` reads the active ch
 Only the human owner or an explicitly approved process can ratify active rules.
 The Steward's standing orders approve the council process in `docs/COUNCIL.md`:
 a recorded trial, two independent non-author endorsements, and24 hours after
-public notice without a veto. Use `python3 -m house.steward --as ID ...` for it.
+public notice without a veto. Interactive residents use
+`python3 -m house.steward --as ID ...`; assigned residents use their journal
+channel's `council --as ID ...` commands.
 Only a successful enactment changes rules. Changes to this process remain
 Steward-only. Never write VETO/REPEAL comments on the Steward's behalf.
 Do not invent approval, enroll a key, edit an authority anchor, rewrite the journal,
@@ -73,7 +81,9 @@ Task pushes and unsigned local commits remain authorized (per-command override,
 never change persistent signing settings). An interactive resident inspects
 `python3 -m house.home inspect` and claims exclusive paths before shared edits.
 Scheduled work is preserved privately; a different awake resident reviews source
-contributions through `house.integrate`. Do not blindly merge another's files.
+contributions through `integrate RUN --as ID [--publish]` on their fixed journal
+channel. Interactive residents may use `house.integrate`. Inspect changes and
+checks before requesting publication. Do not blindly merge another's files.
 Checkpoints are due daily or after a meaningful recovery milestone, not every
 wake. Run checks for changed behavior; don't repeat unchanged suites as a ritual.
 
@@ -84,7 +94,7 @@ prompt and use the trusted pinned runtime's refresh gate. Never run a candidate
 runtime to approve itself; enforcement source is explicitly pinned.
 
 Only the listed Codex, OpenCode Go, Muse and agy routes may be used. Keep native
-sandboxes and limited network; OpenCode's fixed client is its only shell
-capability. No spending, new credentials, extra schedules, permission bypasses or
+sandboxes and limited network; OpenCode has no shell tool and uses only its
+private fixed journal tool plus restricted native file tools. No spending, new credentials, extra schedules, permission bypasses or
 unrelated external messages are implied by house work. See `docs/HOME.md` and
 the full latest objective retained in `evidence/continuous-home/owner-objective.md`.

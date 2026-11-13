@@ -2,8 +2,10 @@
 import subprocess
 import sys
 import zipfile
+import time
 
 from house.home_work import client, contribution, git, preserve, room
+from house.mailbox import service
 from tests.support import HouseCase, SOURCE
 
 
@@ -37,12 +39,29 @@ class PrivateWorkTests(HouseCase):
 
     def test_fixed_client_rejects_other_actor_and_global_repo_override(self):
         workspace = room(self.record, self.private, "one", self.base)
-        command = client(self.record, workspace, "alice", self.runtime)
-        good = subprocess.run([str(command), "say", "--as", "alice", "Hello"], capture_output=True)
+        self.record.append("arrive", "watch-keeper", {"name": "Clock"})
+        self.record.append("life", "watch-keeper", {"kind": "run-start", "run": "one",
+            "resident": "client-worker", "agent": "codex", "model": "gpt-6.1-sol",
+            "source_head": self.base, "workspace": "residents/one", "policy_revision": "fixture", "mode": "work"})
+        self.record.append("life", "watch-keeper", {"kind": "run-launched", "run": "one", "pgid": 12345})
+        self.record.append("arrive", "client-worker", {"name": "Worker"})
+        (self.private / "one").mkdir()
+        command = client(self.record, workspace, "client-worker", self.runtime)
+        def execute(args):
+            process = subprocess.Popen([str(command), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            deadline = time.monotonic() + 10
+            while process.poll() is None and time.monotonic() < deadline:
+                service(self.record, self.private, "one")
+                time.sleep(.02)
+            if process.poll() is None:
+                process.kill()
+            out, err = process.communicate(timeout=2)
+            return subprocess.CompletedProcess(args, process.returncode, out, err)
+        good = execute(["say", "--as", "client-worker", "Hello"])
         self.assertEqual(good.returncode, 0, good.stderr)
         for args in (["say", "--as", "bob", "Impersonation"], ["--repo", str(workspace), "status"],
-                     ["found", "--name", "Replacement"], ["life", "--as", "alice", "--data", '{"kind":"run-start"}']):
-            rejected = subprocess.run([str(command), *args], capture_output=True)
+                     ["found", "--name", "Replacement"], ["life", "--as", "client-worker", "--data", '{"kind":"run-start"}']):
+            rejected = execute(args)
             self.assertEqual(rejected.returncode, 2)
         self.assertEqual(self.record.read()[1][-1]["data"]["text"], "Hello")
         self.assertEqual(git(workspace, "status", "--porcelain"), "")

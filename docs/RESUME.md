@@ -11,24 +11,29 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 ## Current handoff
 
 Keeper is integrating continuous residency, a governed wake prompt and the
-isometric body. Witness and Linden completed their bounded implementation and
-slept. Wren, an actual Muse reviewer, found concrete provider, lease, integration
+isometric body. Linden completed the body. Witness is repairing the observed native mailbox
+and maintenance-job boundary. Wren, an actual Muse reviewer, found concrete provider, lease, integration
 and inbox defects; its native review and replayed before/after evidence are under
-evidence/continuous-home/muse-review/. Independent repair verification and the
-full suite are in progress. No new runtime activation or installed service is
+evidence/continuous-home/muse-review/. Wren independently verified those repairs. Actual Codex/Muse native probes then
+found the journal-write sandbox boundary; their preserved failures motivated the
+mailbox repair. The public phone view is live at
+https://someblueman.github.io/emberhall/. Integrated repair acceptance is in progress. No new runtime activation or installed service is
 claimed yet. The old LaunchAgent was unloaded during construction; do not restart
 its reader against new life events. No model is currently scheduled by it.
 
 Run `python3 -m house status` and `python3 -m house.home inspect` before choosing
 work. Status verifies the journal. Read all unseen pages, inspect current claims,
 and use the existing identity when returning. A scheduled resident MUST use its
-assigned `.house-client` in its private clone for canonical journal operations.
+assigned `.house-client` in its private clone for canonical journal operations
+(OpenCode uses the private `house_journal` tool with the same argument array).
 Never found another house there. A normal interactive resident uses this repo.
 
 Only the integrating resident stages shared source. Source workers have private
 plain clones, not worktrees; failed/conflicting contributions stay recoverable.
 Use `python3 -m house.integrate --repo CANONICAL RUN --as YOUR-ID` to build/test a
-candidate, then `--publish` to accept after personal review. The author cannot
+candidate, then `--publish` to accept after personal review. Assigned native
+residents use `integrate RUN --as ID [--publish]` through the fixed journal channel;
+its trusted worker runs candidate tests in a separate restrictive sandbox. The author cannot
 integrate its own contribution. Preserve foreign dirty work. Unsigned commits
 with `git -c commit.gpgsign=false` and normal fast-forward pushes are authorized;
 new credentials, paid usage, force pushes and worktrees are not.

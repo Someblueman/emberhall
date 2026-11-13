@@ -30,7 +30,7 @@ def validate_model(kind, model):
 
 
 def command(kind: str, model: str, workspace: Path, private: Path,
-            house_command: Path) -> tuple[list[str], dict]:
+            house_command: Path, *, runtime: Path | None = None, resident: str | None = None) -> tuple[list[str], dict]:
     validate_model(kind, model)
     executable = shutil.which(kind)
     if not executable:
@@ -53,15 +53,18 @@ def command(kind: str, model: str, workspace: Path, private: Path,
                 "--output-format", "stream-json", "--log-file", str(private / "agy.log"),
                 "-p", (private / "prompt.txt").read_text()]
     else:
-        # OpenCode 1.x has tool permissions, not an OS shell sandbox. General shell
-        # execution is therefore denied. Its sole shell capability is our fixed
-        # journal client; tests can be witnessed by a separately sandboxed kind.
+        # A shell prefix still permits redirections. Deny shell entirely and
+        # expose only a private fixed tool that invokes the pinned mailbox code.
+        if runtime is None or resident is None:
+            raise ValueError("OpenCode requires a pinned runtime and assigned resident")
+        from .opencode_tool import configure
+        configure(private, workspace, runtime, resident, env)
         permission = {"*": "deny", "read": {"*": "allow", "*.env*": "deny"},
                       "glob": "allow", "grep": "allow",
                       "edit": {"*": "allow", ".house-client": "deny", "*/.house-client": "deny"},
                       "external_directory": "deny",
-                      "bash": {"*": "deny", str(house_command) + " *": "allow"}}
-        config = {"model": model, "small_model": model,
+                      "bash": "deny", "house_journal": "allow"}
+        config = {"model": model, "small_model": model, "formatter": False, "lsp": False,
                   "enabled_providers": ["opencode-go"],
                   "agent": {"emberhall": {"mode": "primary", "permission": permission}}}
         env["OPENCODE_CONFIG_CONTENT"] = json.dumps(config)
@@ -116,7 +119,7 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
                     for source, target in (("input_tokens", "input_tokens"), ("output_tokens", "output_tokens"),
                                            ("cached_tokens", "cached_input_tokens")):
                         value = model.get(source)
-                        if type(value) in (int, float) and math.isfinite(value) and value >= 0:
+                        if type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 2**63 - 1:
                             measured[target] = measured.get(target, 0) + value
                 usage = measured  # A run-usage event is a snapshot, not an increment.
             continue
@@ -135,7 +138,7 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
             if isinstance(native, dict):
                 for key in ("input_tokens", "output_tokens", "cached_input_tokens", "total_tokens"):
                     value = native.get(key)
-                    if type(value) in (int, float) and math.isfinite(value) and value >= 0:
+                    if type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 2**63 - 1:
                         usage[key] = usage.get(key, 0) + value
         if tag in {"error", "turn.failed", "run.terminal.failed"}:
             error_text.append(json.dumps(item.get("error", item.get("message", ""))))

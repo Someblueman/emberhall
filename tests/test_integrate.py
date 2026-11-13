@@ -1,9 +1,13 @@
 """Independent review and conflicting real source contributions preserve work."""
+import os
+import unittest
 from house.home_work import contribution, git, room
 from house.integrate import integrate
 from tests.support import HouseCase
 
 
+@unittest.skipIf(os.environ.get("EMBERHALL_CANDIDATE_SANDBOX") == "1",
+                     "host-only sandbox boundary fixture cannot nest macOS sandboxes")
 class IntegrationTests(HouseCase):
     def setUp(self):
         super().setUp()

@@ -16,6 +16,7 @@ from . import council
 from .record import ANCHOR, Record
 
 FOUNDATION = "74339de5dda84c799fe43650ba273a84de31ba8a"
+REPOSITORY_ID = 1455971968  # Stable GitHub identity survives the owner's repository rename.
 ISSUE_PATH = f"repos/{council.REPOSITORY}/issues/{council.ISSUE}"
 BELL_URL = f"https://github.com/{council.REPOSITORY}/issues/{council.ISSUE}"
 
@@ -44,10 +45,11 @@ def github(path: str, payload: dict | None = None) -> tuple[object, float]:
 def context() -> None:
     repo, _ = github(f"repos/{council.REPOSITORY}")
     issue, _ = github(ISSUE_PATH)
-    if (repo.get("full_name") != council.REPOSITORY
+    canonical = repo.get("full_name", "")
+    if (repo.get("id") != REPOSITORY_ID
             or repo.get("owner", {}).get("id") != council.OWNER_ID
             or issue.get("number") != council.ISSUE
-            or issue.get("html_url") != BELL_URL
+            or issue.get("html_url") != f"https://github.com/{canonical}/issues/{council.ISSUE}"
             or issue.get("locked") is not False):
         raise ValueError("Steward bell identity or availability changed")
 

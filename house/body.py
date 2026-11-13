@@ -125,9 +125,10 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                     for k in ("title", "description", "status", "next_step")}, "sequence": seq}
             elif kind == "budget" and life:
                 agent = str(item["agent"])
-                budgets[agent] = {"agent": agent, "until": item.get("until", 0),
-                    "reason": label(item.get("reason", "")), "usage": usage(item.get("usage")),
-                    "sequence": seq}
+                accepted = state["life"]["budgets"][agent]
+                budgets[agent] = {"agent": agent, "until": accepted["until"],
+                    "reason": label(accepted["reason"]), "usage": {},
+                    "sequence": accepted["sequence"]}
             elif kind in {"start", "run-start"}:
                 resident = str(item.get("resident", ""))
                 agent = item.get("agent", "codex" if item.get("executable") == "codex" else "unrecorded")

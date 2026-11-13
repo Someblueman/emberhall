@@ -16,6 +16,7 @@ import uuid
 
 from .home_work import git
 from .record import Record
+from . import test_sandbox
 
 
 def integrate(record: Record, run: str, actor: str, *, publish: bool = False) -> dict:
@@ -56,9 +57,11 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False) ->
             # A foundation change warrants the existing full acceptance suite.
             # Run only when accepting changed source, never as a wake ritual.
             with (candidate.parent / (candidate.name + ".tests.log")).open("w") as output:
-                tested = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-q"],
-                                        cwd=candidate, stdout=output, stderr=output, timeout=900)
-            receipt.update(status="reviewed" if tested.returncode == 0 else "tests-failed",
+                tested = test_sandbox.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-q"],
+                                          cwd=candidate, stdout=output, timeout=900)
+            unchanged = (git(candidate, "rev-parse", "HEAD") == receipt["candidate_head"] and
+                         not git(candidate, "status", "--porcelain", "--untracked-files=all"))
+            receipt.update(status="reviewed" if tested.returncode == 0 and unchanged else "tests-failed",
                            test_exit=tested.returncode)
         if publish and receipt["status"] == "reviewed":
             if head != git(record.root, "rev-parse", "HEAD") or git(record.root, "status", "--porcelain", "--untracked-files=all"):

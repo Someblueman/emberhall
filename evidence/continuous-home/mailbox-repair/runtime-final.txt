@@ -1,0 +1,15 @@
+test_entirely_skipped_suite_cannot_authorize_runtime_refresh (tests.test_wake_policy.RuntimeProcessTests.test_entirely_skipped_suite_cannot_authorize_runtime_refresh) ... ok
+test_failed_real_tests_preserve_output_but_grant_no_refresh (tests.test_wake_policy.RuntimeProcessTests.test_failed_real_tests_preserve_output_but_grant_no_refresh) ... ok
+test_protected_edits_cannot_be_blessed_by_green_tests (tests.test_wake_policy.RuntimeProcessTests.test_protected_edits_cannot_be_blessed_by_green_tests) ... ok
+test_real_subprocess_receipt_binds_clean_commit_and_later_wake (tests.test_wake_policy.RuntimeProcessTests.test_real_subprocess_receipt_binds_clean_commit_and_later_wake) ... ok
+test_unprotected_house_source_can_evolve_with_new_tested_commit (tests.test_wake_policy.RuntimeProcessTests.test_unprotected_house_source_can_evolve_with_new_tested_commit) ... ok
+test_draft_and_unlaunched_or_earlier_or_foreign_wakes_do_not_qualify (tests.test_wake_policy.WakePolicyTests.test_draft_and_unlaunched_or_earlier_or_foreign_wakes_do_not_qualify) ... ok
+test_explicit_exact_authorization_preserves_prior_rules_and_limits (tests.test_wake_policy.WakePolicyTests.test_explicit_exact_authorization_preserves_prior_rules_and_limits) ... ok
+test_new_prompt_supersedes_old_and_repeal_returns_to_authorized_baseline (tests.test_wake_policy.WakePolicyTests.test_new_prompt_supersedes_old_and_repeal_returns_to_authorized_baseline) ... ok
+test_test_report_requires_actual_outcome_identity_time_and_output (tests.test_wake_policy.WakePolicyTests.test_test_report_requires_actual_outcome_identity_time_and_output) ... ok
+test_wake_prompt_uses_all_existing_gates_and_cannot_set_protected_fields (tests.test_wake_policy.WakePolicyTests.test_wake_prompt_uses_all_existing_gates_and_cannot_set_protected_fields) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 9.685s
+
+OK

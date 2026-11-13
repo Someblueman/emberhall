@@ -1,0 +1,9 @@
+home       /private/tmp/emberhall-opencode-config-probe/opencode-settings
+data       /Users/sws/.local/share/opencode
+bin        /Users/sws/.cache/opencode/bin
+log        /Users/sws/.local/share/opencode/log
+repos      /Users/sws/.local/share/opencode/repos
+cache      /Users/sws/.cache/opencode
+config     /private/tmp/emberhall-opencode-config-probe/opencode-settings/opencode
+state      /Users/sws/.local/state/opencode
+tmp        /var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/opencode

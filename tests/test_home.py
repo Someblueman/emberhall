@@ -1,11 +1,13 @@
 """Real inert processes exercise supervision; these are not live model wakes."""
 import json
 import os
+import unittest
 from pathlib import Path
 import subprocess
 import sys
 import time
 from unittest.mock import patch
+import zipfile
 
 from house import home
 from house.home_work import git
@@ -13,6 +15,8 @@ from house.life import CONTROLLER
 from tests.support import HouseCase, SOURCE
 
 
+@unittest.skipIf(os.environ.get("EMBERHALL_CANDIDATE_SANDBOX") == "1",
+                     "host process-recovery fixture requires macOS setuid ps")
 class HomeTests(HouseCase):
     def setUp(self):
         super().setUp()
@@ -21,9 +25,11 @@ class HomeTests(HouseCase):
         git(self.repo, "-c", "commit.gpgsign=false", "-c", "user.name=Test",
             "-c", "user.email=test@local", "commit", "-m", "Initial source")
         self.record.append("arrive", CONTROLLER, {"name": "Watch keeper"})
-        self.runtime = self.root / "runtime.py"
-        self.runtime.write_text(f"import sys\nsys.path.insert(0, {str(SOURCE)!r})\n"
-                                "from house.home import main\nraise SystemExit(main(sys.argv[2:]))\n")
+        self.runtime = self.root / "runtime.pyz"
+        with zipfile.ZipFile(self.runtime, "w") as archive:
+            for file in (SOURCE / "house").glob("*.py"):
+                archive.write(file, "house/" + file.name)
+            archive.writestr("__main__.py", "import sys\nfrom house.home import main\nraise SystemExit(main(sys.argv[2:]))\n")
         self.native = self.root / "native.py"
         self.native.write_text("import json,sys,time\nfrom pathlib import Path\n"
             "Path('source.txt').write_text('resident contribution\\n')\n"
@@ -39,7 +45,7 @@ class HomeTests(HouseCase):
         self.coordinator = home.Coordinator(self.record, self.runtime)
         self.addCleanup(self.coordinator.close)
 
-    def command(self, kind, model, workspace, private, client):
+    def command(self, kind, model, workspace, private, client, **kwargs):
         return [sys.executable, str(self.native), str(private / "native-started"), str(self.delay)], dict(os.environ)
 
     def drain(self, coordinator=None):
@@ -76,6 +82,7 @@ class HomeTests(HouseCase):
             self.assertTrue((path / "preservation.json").exists())
         self.assertEqual(len(home.pending_contributions(self.coordinator.private)), 3)
         self.assertEqual(state["life"]["requests"]["help-3"]["status"], "pending")
+        self.assertEqual(state["life"]["requests"]["help-0"]["status"], "pending")
 
     def test_native_cannot_start_before_accepted_launch_receipt(self):
         original = self.coordinator.life
@@ -146,7 +153,7 @@ class HomeTests(HouseCase):
             "from pathlib import Path\nfrom house import home\nfrom house.record import Record\n"
             "home.active_policy=lambda _: {'revision':'synthetic-fixture-policy'}\n"
             "home.active_prompt=lambda _: 'Inert crash fixture'\n"
-            f"home.providers.command=lambda k,m,w,p,c: ([sys.executable,{str(self.native)!r},str(p/'native-started'),'30'],dict(os.environ))\n"
+            f"home.providers.command=lambda k,m,w,p,c,**kwargs: ([sys.executable,{str(self.native)!r},str(p/'native-started'),'30'],dict(os.environ))\n"
             f"c=home.Coordinator(Record({str(self.repo)!r}),Path({str(self.runtime)!r}))\n"
             "run=c.start('codex')\nprint(run,flush=True)\nos._exit(17)\n")
         process = subprocess.run([sys.executable, str(script)], capture_output=True, text=True, timeout=15)
@@ -184,8 +191,8 @@ class HomeTests(HouseCase):
         self.assertEqual(home.choose_provider(state, 101), "codex")
 
     def test_pointer_is_selected_only_for_new_launch(self):
-        replacement = self.root / "new-runtime.py"
-        replacement.write_text(self.runtime.read_text())
+        replacement = self.root / "new-runtime.pyz"
+        replacement.write_bytes(self.runtime.read_bytes())
         run = self.coordinator.start("codex")
         running = self.coordinator.running[run]
         (self.coordinator.private / "active-runtime.json").write_text("{}")
@@ -194,3 +201,42 @@ class HomeTests(HouseCase):
         self.assertEqual(self.coordinator.runtime, replacement)
         self.assertIs(self.coordinator.running[run], running)
         self.drain()
+
+    def test_native_final_sleep_is_delivered_before_reap(self):
+        self.native.write_text("import json,subprocess,sys\nfrom pathlib import Path\n"
+            "client=str(Path.cwd()/'.house-client')\nactor=sys.argv[3]\n"
+            "def call(*args):\n return json.loads(subprocess.check_output([client,*args],text=True))\n"
+            "call('arrive','--as',actor,'--name','Fixture')\n"
+            "call('say','--as',actor,'A real local mailbox client reached the journal')\n"
+            "seen=call('read','--as',actor,'--limit','200')\n"
+            "call('sleep','--as',actor,'--through',str(seen['through']),'--note','Finished through mailbox')\n"
+            "print(json.dumps({'type':'turn.completed','usage':{}}),flush=True)\n")
+        def command(kind, model, workspace, private, client, **kwargs):
+            actor = self.record.read()[0]["life"]["runs"][private.name]["resident"]
+            return [sys.executable, str(self.native), str(private / "native-started"), "0", actor], dict(os.environ)
+        self.record.append("life", "alice", {"kind": "help", "request": "sleep-help", "reason": "Complete a handoff"})
+        with patch("house.home.providers.command", command):
+            run = self.coordinator.start("codex", "sleep-help")
+        self.drain()
+        state, events, _ = self.record.read()
+        item = state["life"]["runs"][run]
+        self.assertEqual(item["outcome"], "success")
+        self.assertFalse(state["residents"][item["resident"]]["awake"])
+        self.assertTrue(any(e["op"] == "sleep" and e["actor"] == item["resident"] for e in events))
+        self.assertEqual(state["life"]["requests"]["sleep-help"]["status"], "resolved")
+        self.assertEqual(json.loads((self.coordinator.private / run / "contribution.json").read_text())["paths"], [])
+
+    def test_old_sleep_or_unfinished_claim_does_not_resolve_help(self):
+        for reason in ("woken", "unfinished"):
+            self.record.append("life", "alice", {"kind": "help", "request": reason, "reason": "Still needs work"})
+            run = self.coordinator.start("codex", reason)
+            actor = self.record.read()[0]["life"]["runs"][run]["resident"]
+            self.record.append("arrive", actor, {"name": "Fixture"})
+            if reason == "unfinished":
+                self.record.append("task", actor, {"task": reason, "title": "Unfinished", "description": "Fixture"})
+                self.record.append("claim", actor, {"task": reason, "token": "claim-token", "expect": 0, "seconds": 60})
+            self.record.append("sleep", actor, {"through": self.record.read()[0]["sequence"], "note": "Earlier handoff"})
+            if reason == "woken":
+                self.record.append("wake", actor, {})
+            self.drain()
+            self.assertEqual(self.record.read()[0]["life"]["requests"][reason]["status"], "pending")

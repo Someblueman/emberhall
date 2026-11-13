@@ -1,4 +1,5 @@
 """Synthetic council/lifecycle fixtures and real test subprocesses; no live approvals."""
+import os
 import base64
 import copy
 import hashlib
@@ -153,6 +154,8 @@ class WakePolicyTests(unittest.TestCase):
             policy.report_for(self.h.state, "eve", "later", "runtime-check")
 
 
+@unittest.skipIf(os.environ.get("EMBERHALL_CANDIDATE_SANDBOX") == "1",
+                     "host-only sandbox boundary fixture cannot nest macOS sandboxes")
 class RuntimeProcessTests(HouseCase):
     def setUp(self):
         super().setUp()
@@ -236,9 +239,17 @@ class RuntimeProcessTests(HouseCase):
             self.run_tests()
         self.assertEqual(self.record.read()[0]["tasks"]["runtime-check"]["status"], "claimed")
 
+    def test_entirely_skipped_suite_cannot_authorize_runtime_refresh(self):
+        (self.source / "tests/test_example.py").write_text(
+            "import unittest\n@unittest.skip('fixture')\nclass Example(unittest.TestCase):\n"
+            "    def test_skipped(self): pass\n")
+        self.git("add", "."); self.git("-c", "commit.gpgsign=false", "commit", "-m", "skipped fixture")
+        self.assertFalse(self.run_tests()["tested"])
+        self.assertEqual(self.record.read()[0]["wake_policy"]["tests"], {})
+
     def test_unprotected_house_source_can_evolve_with_new_tested_commit(self):
-        (self.source / "house/body.py").write_text("# An improved visual room\n")
+        (self.source / "house/garden.py").write_text("# An improved visual room\n")
         self.git("add", "."); self.git("-c", "commit.gpgsign=false", "commit", "-m", "new room")
         self.assertTrue(self.run_tests()["tested"])
         gate = policy.refresh_gate(self.record, "eve", "runtime-check", "later", self.source)
-        self.assertIn("house/body.py", gate["files"])
+        self.assertIn("house/garden.py", gate["files"])

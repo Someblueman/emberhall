@@ -1,0 +1,100 @@
+{
+  "at": "2026-11-13T17:05:30.628835+00:00",
+  "host_unique_passed": 202,
+  "runs": {
+    "full": {
+      "ran": 198,
+      "seconds": 123.139,
+      "sha256": "e4d566d6addee932573e9ac45f0d1c80fa83effa2d392dc9bbdad9e74397f578"
+    },
+    "ssh": {
+      "ran": 5,
+      "seconds": 1.955,
+      "sha256": "be406bd0216951d2e1e5c248b07ae1f4a7a735af47c8578ec417d1a26e6fc3f5"
+    },
+    "final-focused": {
+      "ran": 32,
+      "seconds": 35.419,
+      "sha256": "47852ff7a5f0bced8d387ebf6291a5b78e84d9ac07a24d9b499ea0e6d386a219"
+    },
+    "runtime-final": {
+      "ran": 10,
+      "seconds": 9.685,
+      "sha256": "f82af609f7b558897696ae81a7f0b5a2117fab9f8b3a3bcc1a2f3b7da422e855"
+    },
+    "candidate-sandbox-before": {
+      "ran": 201,
+      "seconds": 100.388,
+      "sha256": "f2227fec8d9494cdb107850594df6d83003b132d2a8465ee382d7a60df548905"
+    },
+    "candidate-sandbox-after": {
+      "ran": 201,
+      "seconds": 62.915,
+      "sha256": "756e7f657540ee6d09ce34a7dffd19566c9fc14386583fc3087bec14c81299b4"
+    }
+  },
+  "candidate_passed": 147,
+  "candidate_skipped": 54,
+  "limits": "Candidate suite ran201 cases before the final all-skipped gate regression was added;147 executed and54 host-only/opt-in cases were explicitly skipped. The final gate regression passed on the host; no disabled or broadened sandbox. All202 unique host cases passed across discovery plus affected followups and opt-in SSH. Native all-kind participation remains next.",
+  "source_files_sha256": {
+    "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+    "house/__main__.py": "fce2f9e5911fdcbf7635f4baa32c118674b05b4f50f3b28b695e401541764992",
+    "house/body.py": "298bbad1dd4d8a6df9f3501e1556607aa369b3ab7cb629e57a499df692542d82",
+    "house/council.py": "2fca05947d0d1fa5d73b073bcd2808fddc5ccb55044ca701252a0fcbfc652a09",
+    "house/custodian.py": "54736d8b0d89ef91cac921109644589d10375df5f3606964afd73fbe3246a50c",
+    "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+    "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+    "house/home.py": "dbb9ec2a9fcd315f0ed9c8366ec6f2819513c67e1ac52d31a465ab864b1e164f",
+    "house/home_work.py": "832681c1f25274ba282d5111c410aab19fc6c1cd4016de2bbd2980a069a4cb3c",
+    "house/illustration.py": "9e2ac524ed844c4c4c1a5c69a54cd28522cba05385adfff0ab80f432581705e6",
+    "house/inbox.py": "000a7c14d1c0c1d87a8f20df2a5e0f107b86fa9c2217a5b003224c1c8a43f1b8",
+    "house/integrate.py": "568cf3d63880c23c63ea6038bf9cdaf27010482d233fe5db59839abdefc5519e",
+    "house/life.py": "17febdbb7a90ea245e7bfc86745e4899fdd518c89e77724123435115502c6f49",
+    "house/mailbox.py": "b7e63c1cf6f8e93534a85f90fac15dc38d0085e5955782d900c7a7cf03d2a906",
+    "house/mailbox_jobs.py": "4ba9155907e9b6bd62c67057979cbc6b4cea723a729389f9b7391146636a2641",
+    "house/model.py": "0e72f83296ed2099bb82ddaa6e2d49fe67a0e6e9d08e9555714590fee387e0ec",
+    "house/opencode_tool.py": "eca1953d36b92a5d4ffe5b1e580912f02c4facec70dd236fc4745e6f0fab3968",
+    "house/providers.py": "f49f66c34f3dbe5005000e04e6a77fc364560f823910ec8de060fccb93dd639f",
+    "house/publish.py": "f3beb5ce1b6b1e97ff30a87019adce7b51bb0b17c38187ecbdfce08c167b6972",
+    "house/record.py": "31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985",
+    "house/remote.py": "20b9235e90906d710de3584a67cdb3d928e4d87ecc383b58ef6bf90aecd02a73",
+    "house/resident_actions.py": "b0d3ae0ed72add76fcfd44c441f9e6cdef2b3bf478f0cd01469b585f63617983",
+    "house/resident_client.py": "6f8964f4acf65f130fb1671edc66f892cfeb4478a66c4d63f177497a95faaad1",
+    "house/runtime.py": "bb5e1db13cd6381da2ce760498ffaafad1cb022217196733450f3145f2596c0d",
+    "house/steward.py": "3c9204bdf693dc16075a1e520661ae97ffe810470a806464c89a14719ad60665",
+    "house/test_sandbox.py": "63a9828ce8ed092c231bd9359a05f4f5ce42482e8c85b99bb467493809d31aa8",
+    "house/wake_policy.py": "6b1976bf07ca88a623c1381598ef831a4e23647cae8866561aa8967172f71367",
+    "house/watch.py": "330c2f2e0a8287ad0d97db091d9360b69614340700a9237603509cf646455237",
+    "house/watch_recovery.py": "181350222f2b3903883349a698cfeb2c30379762026407501acd2a9bf115f306",
+    "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/support.py": "2b4b388599e261f1e7dfd69786e317ea3a26f017a6c6f518d9915304bca4c3e8",
+    "tests/test_artifacts_and_seed.py": "4b36a0b43abe55907ea8b02a262562e1b5472af2584b76c3f8a4daacbb56c7a0",
+    "tests/test_body.py": "0d53dc743752bba936a98efc61642f94913c87f7b0af13aabc1d9c3e6a4823f0",
+    "tests/test_concurrency.py": "0bf57a773c9cde0bc0f9799a6055b463d15d7decfc3a2284f755793381c48d23",
+    "tests/test_council.py": "881bfd01320665961d71471a11973f86a387e4c59c7ada82fe2c2bcbec4f2a25",
+    "tests/test_custodian.py": "ec0d46c426ce1ab2869a6ee8dd39d095f8cf0cb00aaa10f45b1f2b3186bd5d99",
+    "tests/test_custodian_ssh.py": "0d3a017d68d63526e470f69731bb674fa3e4e96415ffcab923e7c84f635b21b0",
+    "tests/test_governance.py": "29456f6e78d2e56ade442ba89ceea1e014462e69f4e2ffe8c4eb531e2cc7d2b4",
+    "tests/test_home.py": "4f96c856ae11166d6d74d274e001ec0b4374686ecb50edab86cddd491c415be9",
+    "tests/test_home_work.py": "f6997c0a06265e656e63f1d28d1d9e0f9492d2e294e90c61c801c5ea151fc70c",
+    "tests/test_illustration.py": "49f00070a5fdc8bbd6f8a8126020599b061b8cd3443c8d1b17844d6108975ca8",
+    "tests/test_illustration_watch.py": "8b5c644aeb17054e5b0b8b7055865a440b3bcb5e18016a84a7ca6b4d48265cc1",
+    "tests/test_inbox.py": "a8091574239e1586e53dfc358e3bce83f2b77d1c063e38d277ef61d4a5f0cd0d",
+    "tests/test_integrate.py": "3d1a20837e44e8c41c9b7cabc4eb87a8bf21511a81e396edc1ebc526f498cd4a",
+    "tests/test_life.py": "73022f8ee3359a374f57ddaa1aff298660f6912667e120aa6b1f153c28e54bf2",
+    "tests/test_lifecycle.py": "676d951e7d03fc4ace801934b6daf8a34a5f62b949bf0d6c6c8983d270ff922b",
+    "tests/test_mailbox.py": "d0cf844f241319b1f4e302d201c7d45aaf79e602c11e6ba9fbb1fd12ed71ea1e",
+    "tests/test_mailbox_jobs.py": "276a1a5ea9217cc4b4c33e777645d95a1673fca7ed4c510449bfb2039a15b13d",
+    "tests/test_opencode_tool.py": "c34fdb3449a8b7ea2dc44aca26fd72d74b1eae9e98b5198cef219f304766d787",
+    "tests/test_projection.py": "a10776d4c6eb5ecf26de0a28226d7818d085ffc9d351ebde88cb7f05e5f86da7",
+    "tests/test_providers.py": "4428486f54269f755b57083193637b3e83c14fc0a0dadf89d6685602e19dd958",
+    "tests/test_publish.py": "39d171df8b47a6b284a7f447ac672934e8653cce3cadaca3ad99128d2ccf6e65",
+    "tests/test_recovery.py": "5767f31a3545044e73f598f77393d782fcdf377c0373d3e43a3622e9c51f71e2",
+    "tests/test_remote.py": "db5c330f3d57282fb345b408398d920a65d7abd7b94483a4f6629a9fadeaa40b",
+    "tests/test_runtime.py": "01fd0ecb6544ed1008b8d4fbe06213cfff2d3a4977692bfad6bb504bd766abc0",
+    "tests/test_steward.py": "622d0b8f9a35912243ede8a3dd75307de75f45d14173acd3b7c125cd3337a447",
+    "tests/test_test_sandbox.py": "7608b415093051cabc74d8a2786a1346ada4ddd5bc0a71ff493d9f634e51f6e3",
+    "tests/test_wake_policy.py": "cbf6b62f17f8ea5147d2de331aa4e3b864d6e16099db340ce73597183d2efc7d",
+    "tests/test_watch.py": "056a8880db7880bef2b8ae3e8aabedeabcef83f47f97f2624be6a7956198ebee"
+  }
+}

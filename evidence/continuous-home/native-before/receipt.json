@@ -1,0 +1,85 @@
+{
+  "format": "emberhall-native-predeployment-v1",
+  "phase": "before mailbox repair",
+  "canonical_house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "journal_head_at_capture": "7daefd4b94512d66c3c022a4dea9fd1080471e7c",
+  "runtime_authorized": false,
+  "probes": [
+    {
+      "agent": "codex",
+      "kind": "run-start",
+      "mode": "work",
+      "model": "gpt-6.1-sol",
+      "policy_revision": "predeployment-native-validation",
+      "resident": "resident-7291c81eb18c49bb8f263f5284066808",
+      "run": "5c8ca3ad9e7d4ae5a21745d2bea60e28",
+      "source_head": "cf0cecedd9b8243f5728a2264e44239c4e67b783",
+      "status": "completed",
+      "started_at": 1794587888.9568372,
+      "started_sequence": 244,
+      "pgid": 94186,
+      "launched_sequence": 245,
+      "outcome": "success",
+      "exit_code": 0,
+      "usage": {
+        "cached_input_tokens": 516992,
+        "input_tokens": 565741,
+        "output_tokens": 8380
+      },
+      "elapsed_seconds": 145.6655569076538,
+      "ended_at": 1794588035.092393,
+      "ended_sequence": 253,
+      "released_tasks": [],
+      "journal_arrival_accepted": false,
+      "native_stdout_sha256": "0a954ff739618f81521f4e9745efa0f83dc8a59e1981a0d08ae417eac74e3072",
+      "boundary_failure": "Native sandbox denied canonical .git/house-writer.lock outside private source workspace.",
+      "contribution": {
+        "base": "cf0cecedd9b8243f5728a2264e44239c4e67b783",
+        "commit": "988ce93d8591747cc5fe581f4be0852b7217b567",
+        "paths": [
+          "evidence/native-residents/5c8ca3ad9e7d4ae5a21745d2bea60e28.md"
+        ],
+        "status": "pending-review"
+      }
+    },
+    {
+      "agent": "muse",
+      "kind": "run-start",
+      "mode": "work",
+      "model": "muse-ember-1.0",
+      "policy_revision": "predeployment-native-validation",
+      "resident": "resident-a334476231414ab58247c14aa91c9c3d",
+      "run": "c4945c1d8ca14ec2a969a37e1a0260f8",
+      "source_head": "cf0cecedd9b8243f5728a2264e44239c4e67b783",
+      "status": "completed",
+      "started_at": 1794587889.48162,
+      "started_sequence": 246,
+      "pgid": 94222,
+      "launched_sequence": 247,
+      "outcome": "success",
+      "exit_code": 0,
+      "usage": {
+        "cached_input_tokens": 1230816,
+        "input_tokens": 1302841,
+        "output_tokens": 16787
+      },
+      "elapsed_seconds": 96.21737003326416,
+      "ended_at": 1794587986.1467361,
+      "ended_sequence": 249,
+      "released_tasks": [],
+      "journal_arrival_accepted": false,
+      "native_stdout_sha256": "e0288d30dbf2740544422c607b759c44efa31d8e7e7704128c19cfcf7abe422c",
+      "boundary_failure": "Native sandbox denied canonical .git/house-writer.lock outside private source workspace.",
+      "contribution": {
+        "base": "cf0cecedd9b8243f5728a2264e44239c4e67b783",
+        "commit": "71fe0487062cfbcdbe912ad19dd9712b7154aa9d",
+        "paths": [
+          "evidence/native-residents/c4945c1d8ca14ec2a969a37e1a0260f8.md"
+        ],
+        "status": "pending-review"
+      }
+    }
+  ],
+  "limits": "Real Codex/Muse processes overlapped and did bounded Blackout work, but neither could arrive through its private sandbox. Native exit success is not house-protocol success. No invented resident figures or retrospective arrivals were recorded.",
+  "overlap_seconds": 96.66511607170105
+}
