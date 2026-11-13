@@ -1,0 +1,263 @@
+{
+  "at": "2026-11-13T20:26:29.017305+00:00",
+  "builder": "keeper-01",
+  "room": "salvage",
+  "construction_sequence": 550,
+  "task": "salvage-room-drill-v1",
+  "source_commit": "aa218e9a0a1efd40c96b549d3fa73d2e6b3f2e99",
+  "synthetic_fixture_real_cli_execution": true,
+  "all_fixture_bytes_sizes_modes_mtimes_unchanged": true,
+  "files": {
+    "README.md": {
+      "sha256": "7b5b6ab7dc018ae78671be078aca1e933a1bfffef35b439a55b8244c7ec466a8",
+      "size": 2360,
+      "mode": 420,
+      "mtime_ns": 1794601042319320985
+    },
+    "expected-plan.json": {
+      "sha256": "785bf74348af4dbc66577b41a9dad724cc98af3abce24509811b9634859365fb",
+      "size": 1607,
+      "mode": 420,
+      "mtime_ns": 1794601042319442152
+    },
+    "manifest.json": {
+      "sha256": "cc9f231f741d4a9bf5a31c25ab9fec8f33647188a89270c46d55c8ea5bfdd227",
+      "size": 1410,
+      "mode": 420,
+      "mtime_ns": 1794601042319553027
+    },
+    "original/family/summer.txt": {
+      "sha256": "589ad252cb4602f0e12493445e335feb4d7e49044be096dea3ab94976b4357cd",
+      "size": 14,
+      "mode": 420,
+      "mtime_ns": 1794601042319767153
+    },
+    "original/family/winter.txt": {
+      "sha256": "a77bdfb520c26056569e8fd3ace47af4c004b25e24e3f7c04daad94da948a0cb",
+      "size": 14,
+      "mode": 420,
+      "mtime_ns": 1794601042319876195
+    },
+    "original/letters/empty.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "mode": 420,
+      "mtime_ns": 1794601042319943611
+    },
+    "original/letters/lost.txt": {
+      "sha256": "8a6682bb4b78f11b97476b694e60090b8195dea3545598fc2e5d67657a08c06b",
+      "size": 22,
+      "mode": 420,
+      "mtime_ns": 1794601042320088904
+    },
+    "original/photos/Report.txt": {
+      "sha256": "165c35adc958d1ea1998969b61b0eac275d6d3c871d9ba7be4ece1fd451a85cf",
+      "size": 22,
+      "mode": 420,
+      "mtime_ns": 1794601042320201945
+    },
+    "original/photos/snow \u2603.dat": {
+      "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
+      "size": 256,
+      "mode": 420,
+      "mtime_ns": 1794601042320301862
+    },
+    "original/records/copy-a.txt": {
+      "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf",
+      "size": 21,
+      "mode": 420,
+      "mtime_ns": 1794601042320440446
+    },
+    "original/records/copy-b.txt": {
+      "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf",
+      "size": 21,
+      "mode": 420,
+      "mtime_ns": 1794601042320529905
+    },
+    "original/records/invoice.txt": {
+      "sha256": "963c25725b0c7ed9120cb5456380e62a2dcc3484c22e4d1aef772348c3d27b4b",
+      "size": 19,
+      "mode": 420,
+      "mtime_ns": 1794601042320626655
+    },
+    "surviving/family/renamed-winter.txt": {
+      "sha256": "a77bdfb520c26056569e8fd3ace47af4c004b25e24e3f7c04daad94da948a0cb",
+      "size": 14,
+      "mode": 420,
+      "mtime_ns": 1794601042346761341
+    },
+    "surviving/family/summer.txt": {
+      "sha256": "242f2ce08c25b2a5cdc68b0d80b903d444d8c83521fe385d425edf154b1c729c",
+      "size": 14,
+      "mode": 420,
+      "mtime_ns": 1794601042346862925
+    },
+    "surviving/letters/empty.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "mode": 420,
+      "mtime_ns": 1794601042346923467
+    },
+    "surviving/photos/report.txt": {
+      "sha256": "165c35adc958d1ea1998969b61b0eac275d6d3c871d9ba7be4ece1fd451a85cf",
+      "size": 22,
+      "mode": 420,
+      "mtime_ns": 1794601042347093467
+    },
+    "surviving/photos/snow \u2603.dat": {
+      "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
+      "size": 256,
+      "mode": 420,
+      "mtime_ns": 1794601042347187634
+    },
+    "surviving/records/copy-b.txt": {
+      "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf",
+      "size": 21,
+      "mode": 420,
+      "mtime_ns": 1794601042347304592
+    },
+    "surviving/records/invoice.txt": {
+      "sha256": "65d876c61e46341cc86c9874ed3615adf270968ba2c8e9b0bd59dad4226a2b87",
+      "size": 19,
+      "mode": 420,
+      "mtime_ns": 1794601042347401551
+    },
+    "surviving/spares/duplicate.txt": {
+      "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf",
+      "size": 21,
+      "mode": 420,
+      "mtime_ns": 1794601042347528260
+    },
+    "surviving/spares/invoice-copy.txt": {
+      "sha256": "963c25725b0c7ed9120cb5456380e62a2dcc3484c22e4d1aef772348c3d27b4b",
+      "size": 19,
+      "mode": 420,
+      "mtime_ns": 1794601042347623093
+    }
+  },
+  "receipts": [
+    {
+      "operation": "verify",
+      "directory": "original",
+      "exit": 0,
+      "result": {
+        "changed": [],
+        "extra": [],
+        "matched": 9,
+        "missing": [],
+        "ok": true
+      }
+    },
+    {
+      "operation": "verify",
+      "directory": "surviving",
+      "exit": 1,
+      "result": {
+        "changed": [
+          "family/summer.txt",
+          "records/invoice.txt"
+        ],
+        "extra": [
+          "family/renamed-winter.txt",
+          "photos/report.txt",
+          "spares/duplicate.txt",
+          "spares/invoice-copy.txt"
+        ],
+        "matched": 3,
+        "missing": [
+          "family/winter.txt",
+          "letters/lost.txt",
+          "photos/Report.txt",
+          "records/copy-a.txt"
+        ],
+        "ok": false
+      }
+    },
+    {
+      "operation": "plan",
+      "directory": "surviving",
+      "exit": 1,
+      "result": {
+        "ambiguous": [
+          "records/copy-a.txt"
+        ],
+        "changed": [
+          "family/summer.txt",
+          "records/invoice.txt"
+        ],
+        "extra": [
+          "family/renamed-winter.txt",
+          "photos/report.txt",
+          "spares/duplicate.txt",
+          "spares/invoice-copy.txt"
+        ],
+        "matched": 3,
+        "missing": [
+          "family/winter.txt",
+          "letters/lost.txt",
+          "photos/Report.txt",
+          "records/copy-a.txt"
+        ],
+        "ok": false,
+        "restores": [
+          {
+            "ambiguous": false,
+            "candidates": [],
+            "recoverable": false,
+            "status": "changed",
+            "target": "family/summer.txt"
+          },
+          {
+            "ambiguous": false,
+            "candidates": [
+              "family/renamed-winter.txt"
+            ],
+            "recoverable": true,
+            "status": "missing",
+            "target": "family/winter.txt"
+          },
+          {
+            "ambiguous": false,
+            "candidates": [],
+            "recoverable": false,
+            "status": "missing",
+            "target": "letters/lost.txt"
+          },
+          {
+            "ambiguous": false,
+            "candidates": [
+              "photos/report.txt"
+            ],
+            "recoverable": true,
+            "status": "missing",
+            "target": "photos/Report.txt"
+          },
+          {
+            "ambiguous": true,
+            "candidates": [
+              "records/copy-b.txt",
+              "spares/duplicate.txt"
+            ],
+            "recoverable": true,
+            "status": "missing",
+            "target": "records/copy-a.txt"
+          },
+          {
+            "ambiguous": false,
+            "candidates": [
+              "spares/invoice-copy.txt"
+            ],
+            "recoverable": true,
+            "status": "changed",
+            "target": "records/invoice.txt"
+          }
+        ],
+        "unrecoverable": [
+          "family/summer.txt",
+          "letters/lost.txt"
+        ]
+      }
+    }
+  ],
+  "limits": "Actual local rehearsal on published synthetic archive bytes, not recovery of personal data or elapsed-day evidence. Blackout performs no restore writes. An earlier operator invocation used the pre-feature native room, where these fixture paths were absent; it failed before producing a report. This receipt uses the canonical committed fixture."
+}

@@ -189,7 +189,7 @@ def apply(record: Record, plan_path: Path) -> dict:
 
 
 def release_opencode(record: Record, actor: str, scope: str = maintenance.RETRY_SCOPE) -> dict:
-    require(scope in {maintenance.RETRY_SCOPE, maintenance.REPAIR_SCOPE}, "unknown OpenCode release scope")
+    require(scope in maintenance.RELEASE_SCOPES, "unknown OpenCode release scope")
     authenticate_owner()
     state, _, _ = record.read()
     migration = state.get("maintenance", {}).get("migrations", {}).get(scope)
@@ -200,12 +200,22 @@ def release_opencode(record: Record, actor: str, scope: str = maintenance.RETRY_
         "house": state["house_id"], "owner_id": steward.council.OWNER_ID, "agent": "opencode",
         "expected_sequence": maintenance.RETRY_BUDGET_SEQUENCE,
         "expected_until": maintenance.RETRY_BUDGET_UNTIL}
-    if scope == maintenance.REPAIR_SCOPE:
-        error = record.common / "house-home" / maintenance.FAILED_CLI_RUN / "stderr.log"
-        require(not error.is_symlink() and sha(error.read_bytes()) == maintenance.FAILED_CLI_SHA256,
+    if scope in maintenance.FAILED_ATTEMPTS:
+        proof = maintenance.FAILED_ATTEMPTS[scope]
+        directory = record.common / "house-home" / proof.run
+        error = directory / "stderr.log"
+        require(not any(path.is_symlink() for path in (directory, *directory.parents)) and
+                error.is_file() and not error.is_symlink() and sha(error.read_bytes()) == proof.output_sha256,
                 "preserved pre-provider CLI failure evidence changed")
-        data.update(expected_observation=maintenance.FAILED_CLI_OBSERVATION,
-                    failed_run=maintenance.FAILED_CLI_RUN, failed_output_sha256=maintenance.FAILED_CLI_SHA256)
+        if scope == maintenance.LAUNCHER_SCOPE:
+            output = directory / "stdout.jsonl"
+            require(output.is_file() and not output.is_symlink() and output.stat().st_size == 0,
+                    "bootstrap failure stdout must remain empty")
+            require(all(not path.exists() and not path.is_symlink() for path in
+                        (directory / ("opencode.db" + suffix) for suffix in ("", "-wal", "-shm", "-journal"))),
+                    "bootstrap destination evidence changed")
+        data.update(expected_observation=proof.observation,
+                    failed_run=proof.run, failed_output_sha256=proof.output_sha256)
     return record.append("owner-provider-release", actor, data, "owner-release-" + scope)
 
 
@@ -220,7 +230,7 @@ def main() -> int:
     stage.add_argument("--source-commit", required=True)
     activate = sub.add_parser("apply"); activate.add_argument("plan", type=Path)
     release = sub.add_parser("release-opencode")
-    release.add_argument("--scope", choices=[maintenance.RETRY_SCOPE, maintenance.REPAIR_SCOPE], default=maintenance.RETRY_SCOPE)
+    release.add_argument("--scope", choices=maintenance.RELEASE_SCOPES, default=maintenance.RETRY_SCOPE)
     args = parser.parse_args()
     try:
         record = Record(args.repo)

@@ -6,6 +6,8 @@ from pathlib import Path
 import shutil
 import sqlite3
 import subprocess
+import sys
+import zipfile
 import tempfile
 import traceback
 import unittest
@@ -133,10 +135,30 @@ class OpenCodeAuthTests(unittest.TestCase):
                          and not os.environ.get('EMBERHALL_CANDIDATE_SANDBOX'), 'opt-in installed no-model import')
     def test_native_import_contains_only_selected_synthetic_key(self):
         self.reader.stop()
+        self.db.execute('PRAGMA journal_mode=WAL')
+        self.db.execute('PRAGMA wal_autocheckpoint=0')
         self.row('cred_selected', 1)
         self.row('cred_unrelated', 1, 99, 'another-provider')
         before = self.source.read_bytes()
-        bootstrap(shutil.which('opencode'), self.source, self.private, self.env)
+        supplied_runtime = os.environ.get('EMBERHALL_OPENCODE_PINNED_RUNTIME')
+        runtime = Path(supplied_runtime) if supplied_runtime else self.root / 'pinned.pyz'
+        if not supplied_runtime:
+            with zipfile.ZipFile(runtime, 'w') as archive:
+                for module in (Path(__file__).resolve().parents[1] / 'house').glob('*.py'):
+                    archive.writestr('house/' + module.name, module.read_bytes())
+        self.assertTrue(runtime.is_file())
+        room = self.root / 'room'; room.mkdir()
+        (self.private / 'prompt.txt').write_text('Never submitted')
+        code = ('import sys,os;sys.path.insert(0,sys.argv[1]);from pathlib import Path;'
+                'from house.providers import command,DEFAULTS;from house.opencode_auth import bootstrap;'
+                'runtime,source,private,room=map(Path,sys.argv[1:]);'
+                'argv,env=command("opencode",DEFAULTS["opencode"],room,private,room/".house-client",'
+                'runtime=runtime,resident="synthetic-import");'
+                'env["OPENCODE_DISABLE_MODELS_FETCH"]="1";os.environ.clear();os.environ.update(env);'
+                'bootstrap(argv[0],source,private,env)')
+        outcome = subprocess.run([sys.executable, '-I', '-c', code, str(runtime), str(self.source),
+            str(self.private), str(room)], capture_output=True, text=True, timeout=80)
+        self.assertEqual(outcome.returncode, 0, outcome.stderr)
         with closing(sqlite3.connect(self.env['OPENCODE_DB'])) as destination:
             rows = destination.execute('SELECT id,integration_id,active,value FROM credential').fetchall()
             self.assertEqual(len(rows), 1)
@@ -166,3 +188,19 @@ class OpenCodeAuthTests(unittest.TestCase):
         self.assertEqual(sorted(p.name for p in self.root.iterdir()), before)
         self.assertFalse(Path(str(self.source) + '-wal').exists())
         self.assertFalse(Path(str(self.source) + '-shm').exists())
+
+    @unittest.skipUnless(os.environ.get('EMBERHALL_NATIVE_OPENCODE') == '1'
+                         and not os.environ.get('EMBERHALL_CANDIDATE_SANDBOX'), 'host sandbox contention witness')
+    def test_exclusive_live_wal_failure_keeps_destination_empty(self):
+        self.reader.stop()
+        self.db.execute('PRAGMA journal_mode=WAL')
+        self.db.execute('PRAGMA locking_mode=EXCLUSIVE')
+        self.row('cred_locked_synthetic', 1)
+        native_run = subprocess.run
+        with patch('house.opencode_auth.subprocess.run', wraps=native_run) as calls:
+            with self.assertRaisesRegex(ValueError, '^OpenCode account bootstrap failed; no model started$'):
+                bootstrap('/unused-native-importer', self.source, self.private, self.env)
+        self.assertEqual(calls.call_count, 1)
+        self.assertEqual(calls.call_args.args[0][0], '/usr/bin/sandbox-exec')
+        self.assertFalse(Path(self.env['OPENCODE_DB']).exists())
+        self.assertFalse(any(Path(self.env['XDG_DATA_HOME']).iterdir()))

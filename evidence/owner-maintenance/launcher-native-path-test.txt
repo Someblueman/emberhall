@@ -1,0 +1,6 @@
+test_native_import_contains_only_selected_synthetic_key (tests.test_opencode_auth.OpenCodeAuthTests.test_native_import_contains_only_selected_synthetic_key) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.259s
+
+OK

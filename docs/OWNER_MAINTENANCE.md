@@ -17,7 +17,7 @@ Initial authorization303 and its protected-file manifest stay intact. An append-
 owner-migrate receipt records a replacement manifest limited to this feature,
 source/test/archive hashes and the owner instruction hash. Ordinary resident
 refresh still needs an enacted council prompt and a later tested wake. The floor
-and room-growth scope from the newer owner objective is a separate, unused grant;
+and room-growth scope from the newer owner objective is a separate grant;
 its required building module must exist and pass its own preparation before use.
 
 ## Cold upgrade and recovery
@@ -95,3 +95,47 @@ selection. OAuth/external credentials are unsupported and fail closed. Tests use
 synthetic credentials, never the real account. Remote validity still requires an
 actual coordinator run, and a successful native exit is not an arrival or useful
 contribution by itself.
+
+## Pinned native launcher correction
+
+The repair credit was consumed by `2c9fc6bd10574c84bf0e45aba78a054c`, which
+completed failed with exit2, no usage and no resident arrival (start527,
+finish531). Its retained output showed a bootstrap failure before model work.
+Synthetic production-environment probes subsequently distinguished the service's
+mise shim from the installed native executable: the shim stalled with isolated
+XDG paths while the direct native binary imported a synthetic credential. That
+is a witnessed launcher defect; it does not prove the historical failure's exact
+cause or successful remote account access.
+
+The separate `opencode-launcher-20261113` scope binds the same full owner objective
+SHA256 `b75e6dad4f16a7e23b3b9b808b5d9465b9c17160408a2b316cf312f32132ba9b`.
+It permits changes only to `house/maintenance.py` and `house/owner_upgrade.py`
+in the protected manifest. Every existing entry, including building and private
+authentication enforcement, must remain present and unchanged. The existing
+native executable is pinned by the operator's launcher configuration; this scope
+does not change provider models, tool permissions, authentication code, resident
+runtime gates or global XDG settings.
+
+Prepare/apply use the same cold operator procedure with this new scope and the
+full objective file. Release is explicit:
+
+```text
+python3 -m house.owner_upgrade --as keeper-01 release-opencode --scope opencode-launcher-20261113
+```
+
+Release requires the exact previous repair credit to have been consumed by that
+run, the completed failed exit2/empty-usage/no-arrival record at527–531, latest
+budget observation530, and unchanged original hold300/deadline. The operator
+also verifies retained stderr SHA256
+`034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406`, an empty regular
+`stdout.jsonl` file, and absent `opencode.db`, `opencode.db-wal`,
+`opencode.db-shm` and `opencode.db-journal`.
+Symlinked evidence paths are rejected; no failed evidence is removed or repaired.
+
+This is one additional admission for the corrected launcher, not a refund or
+reuse of either spent credit. A newer failure or late arrival invalidates it,
+even after release. Its first accepted run-start consumes it atomically; launch
+failure does not restore it. It is not a general retry allowance for401, quota,
+model work, unknown attempts or further bootstrap failures. Acceptance of this
+scope and any native run require separate recorded operator action; tests use
+synthetic exact-sequence history and create no live grant.

@@ -1,0 +1,58 @@
+{
+  "integration": "Keeper personally reviewed exact immutable files and combined source",
+  "artifacts": [
+    {
+      "sequence": 538,
+      "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
+      "path": "evidence/native-residents/opencode-recovery-boundary.md",
+      "sha256": "10c86268240bd033ff959ae983e3e7eb1efd55101b76cfd0b399e687e18c1218"
+    },
+    {
+      "sequence": 538,
+      "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
+      "path": "projects/blackout/test_opencode_recovery.py",
+      "sha256": "44d77ad1b17ed6a3ca5c97c6c6cac9748281ebc55f9dd608a74b7471b0eeff44"
+    },
+    {
+      "sequence": 560,
+      "actor": "resident-894ea9075546434eb1a261f2de7617d3",
+      "path": "evidence/room-growth/native-review.md",
+      "sha256": "f0e7b7b91f4fb8170ff1e28614f36886f58c279d9b2f1b63160a94841219dd1c"
+    },
+    {
+      "sequence": 576,
+      "actor": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+      "path": "evidence/native-residents/9b53506ee49f4c5588cff8aadbb01e41-review.md",
+      "sha256": "21f29427c1f7f80d929033e9fd04a159135a13e65868a856d7ee72cc5af68793"
+    }
+  ],
+  "source_candidates": [
+    "6ec986d0a1f689bf1ebe3cf9e411d38afcc2f1fe",
+    "29745d1"
+  ],
+  "journal_observed": "239608348bf02e5171a7c4910df006a2436039d6",
+  "tests": "evidence/owner-maintenance/launcher-full-tests.txt",
+  "native_path_plan": {
+    "status": "tested proposed service PATH; not yet installed",
+    "before": {
+      "codex": "/Users/sws/.local/bin/codex",
+      "opencode": "/Users/sws/.local/share/mise/shims/opencode",
+      "muse": "/Users/sws/.local/bin/muse",
+      "agy": "/Users/sws/.local/bin/agy"
+    },
+    "after": {
+      "codex": "/Users/sws/.local/bin/codex",
+      "opencode": "/Users/sws/.local/share/mise/installs/node/22.22.0/bin/opencode",
+      "muse": "/Users/sws/.local/bin/muse",
+      "agy": "/Users/sws/.local/bin/agy"
+    },
+    "native_resolved": "/Users/sws/.local/share/mise/installs/node/22.22.0/lib/node_modules/@opencode/cli/bin/opencode.exe",
+    "native_sha256": "9f3147cae4ca323827d3ca39451b0d3431b2906e79a08e9b09d1eb34bb703f52",
+    "version": "opencode v2.3.0",
+    "old_path": "/Users/sws/.local/bin:/Users/sws/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "new_path": "/Users/sws/.local/bin:/Users/sws/.local/share/mise/installs/node/22.22.0/bin:/Users/sws/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "other_provider_paths_unchanged": true,
+    "no_model_called": true
+  },
+  "deployment": "not yet applied"
+}
