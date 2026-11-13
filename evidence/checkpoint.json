@@ -1,18 +1,18 @@
 {
   "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
   "name": "Emberhall",
-  "head": "d3908aa1bb48dab4ac283b77976d5742d3fa6037",
+  "head": "216b9e4505f718b5a4c3dd0b0f29e497427ed039",
   "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-  "events": 393,
-  "bundle": "evidence/house-live-recovery.bundle",
-  "bundle_sha256": "0405c6ab218d47aab66822c4a091e664da25506fd15b1763261f0ea6d45dc9dd",
+  "events": 475,
+  "bundle": "evidence/house-owner-retry.bundle",
+  "bundle_sha256": "c7aa6b02d496689a2a847ad643951f03154165e9484442afdd9bdd75d8ed56d4",
   "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
-  "last_event_utc": "2026-11-13T18:53:14.423710+00:00",
+  "last_event_utc": "2026-11-13T19:45:45.017096+00:00",
   "restored_exact_state_and_events": true,
   "restore_receipt": {
-    "head": "d3908aa1bb48dab4ac283b77976d5742d3fa6037",
-    "events": 393,
+    "head": "216b9e4505f718b5a4c3dd0b0f29e497427ed039",
+    "events": 475,
     "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
   },
-  "note": "Meaningful recovery milestone: live coordinator crash, retained work, independent witness, successor completion, ordinary next wake, two wake-prompt endorsements and accepted public notice. Exact prefix restored in an empty repository; concurrent later events are outside it. Not evidence of elapsed days."
+  "note": "Meaningful owner-upgrade milestone: original authority and council retained, cold migration459, one-use release460, real OpenCode CLI incompatibility failure and ordinary fallback. Earlier bundles retained. Concurrent later events are outside this prefix; this is not proof of successful OpenCode residency or elapsed days."
 }

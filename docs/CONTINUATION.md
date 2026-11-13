@@ -191,3 +191,59 @@ all-skipped-suite rejection passed on the host. Evidence is under
 `evidence/continuous-home/mailbox-repair/`. Witness completed257 and slept259.
 The next action is commit/prepare a new immutable predeployment runtime, then
 repeat real native participation before authorization and service installation.
+
+
+## Owner override and room-growth continuation, 13 November evening
+
+The owner explicitly permitted the early OpenCode attempt. Tested source9701b548
+is now the immutable live runtime, SHA61d4d75b28831b63d0a3406c783d98f6d6691e62d6a6ae617e6a110bda8056d1.
+Owner migration459 and release460 preserve initial authority and pending council
+state. Independent reviewer Flint found and witnessed repair of multiple-admission
+and newer-shorter-failure bugs before deployment. The resulting credit is consumed
+atomically at admission and does not shorten the original maximum cooldown.
+
+Actual attempt6eec53281c2641f28677a9a7bcc41e8d (462–466) failed parsing obsolete
+--dir under newly installed OpenCode2.3.0; no arrival or model work was established.
+No second credit is implied by that failure. The original goal and owner's existing
+account/override authorization cover repairing the adapter, but the protected-file
+migration and explicit recorded launch authorization must remain reviewable. Do
+not silently edit the active archive, restore a spent permit or remove sandbox
+restrictions to make a new CLI work. The live coordinator is PID31681 at the last
+check; verify it rather than treating this number as permanently current.
+
+Compatibility investigation is read-only so far: v2 needs --standalone to avoid
+reusing another background server, and its run handler uses inherited PWD, so set
+PWD to the assigned private clone as well as cwd. The former V1 tools/ registry
+is not loaded by V2; inspect native plugin/config and credential storage before
+launch. Old isolation env flags are not all supported. Do not print auth contents
+or create credentials. Constitution worker has been inspecting exact2.3.0 source.
+
+Room-growth code is separately assembled, uncommitted, in the ordinary private
+clone /private/tmp/emberhall-growth-candidate (base9f749890). It contains building,
+life/council/native capability wiring, public room/floor history, site changes,
+tests and the portable projects/blackout/examples/recovery-drill. Root personally
+reviewed returned modules, corrected stale closure dates/asleep construction, and
+verified desktop/phone synthetic rendering. Full suite241 tests passed149.731s
+with5 optional SSH skips; a subsequent small floor-authority visibility correction
+needs focused recheck. Independent Flint review found no protocol blocker; its
+visibility observation is being fixed. Nothing has activated room growth yet.
+
+Original worker clones are retained: /private/tmp/emberhall-building-module and
+/private/tmp/emberhall-room-view. Curated source/tests/fixture screenshots are in
+the growth candidate; /private/tmp/emberhall-room-view-fixture is a clearly labelled
+synthetic preview, not live evidence. Local preview server port8772 may still be
+running (stop only that task server after review). No worktrees were created.
+
+Keeper holds owner-retry-and-room-growth-v1 generation1/token keeper-growth-f237a4
+and salvage-room-drill-v1 generation1/token salvage-8bc640, each with finite leases.
+Check actual expiry before continuing. The proposed ground-floor Salvage Room earns
+its place through a standalone recovery rehearsal. Plan it only after the owner
+migration, record actual activity, finish later useful artifacts, then open. Floors
+still need the full council process. Do not turn fixture clocks into elapsed life.
+
+Next: finish exact installed-v2 adapter/isolation review and test its non-model
+configuration; preserve the failed attempt; integrate/activate only tested explicitly
+authorized source with a cold coordinator transition. Complete and deploy room
+growth, exercise actual construction/opening, then retain a milestone checkpoint.
+Wake002's24-hour window and a later actual enacted-prompt runtime refresh remain
+outstanding; the fixed deadlines and shared rule revision warning above still apply.

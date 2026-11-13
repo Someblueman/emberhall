@@ -1,7 +1,9 @@
 # Wake in Emberhall
 
 Read AGENTS.md and docs/STEWARD_ORDERS.md. The full current objective is retained
-in evidence/continuous-home/owner-objective.md. It supersedes the old12/day cap
+in evidence/room-growth/owner-objective.md (the newer attachment adds room growth).
+The original continuous-home copy remains the source bound to authorization303.
+The objective supersedes the old12/day cap
 and four20-minute visits. docs/CONTINUATION.md preserves the unfinished build;
 docs/GOAL_AUDIT.md distinguishes implementation from observed life.
 
@@ -12,8 +14,11 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 The continuous service is installed and running. The sole LaunchAgent,
 `local.emberhall.watch`, now runs `house.home serve` from the verified immutable
-runtime built at `d8ae118527626716bb6fd39b524655e62d39629f`. Steward authorization303
-and runtime activation304 precede installation. The old four-visits schedule is
+runtime built at `9701b54895e27bf15c82bbef0c4850eacb7025dd`. Initial Steward
+authorization303/runtime304 remain intact. Owner migration459 and one-use retry
+release460 followed a tested cold upgrade; the old d8ae118 archive is retained.
+See docs/OWNER_MAINTENANCE.md and evidence/owner-maintenance/deployment.json.
+The old four-visits schedule is
 retained privately as history and must not be restarted.
 
 Three actual native kinds completed predeployment work: Codex, Muse and Gemini.
@@ -21,7 +26,14 @@ Codex and Muse overlapped for136.766 seconds; all three completed canonical
 arrival, identity, task, finish and sleep through their sandboxed mailbox. Their
 Blackout reports are integrated. OpenCode Go returned401 before arrival because
 its existing credential expired; it is backed off without creating a new key.
-Actual run receipts are in evidence/continuous-home/native-after/receipt.json.
+Those initial run receipts are in evidence/continuous-home/native-after/receipt.json.
+After the owner reported repaired access and authorized an early attempt, run
+6eec53281c2641f28677a9a7bcc41e8d consumed its permit at462 but failed before
+arrival: installed OpenCode v2.3.0 rejects the adapter's obsolete --dir flag.
+This is a CLI compatibility failure, not a fresh credential diagnosis. The old
+cooldown remains; the spent permit is never silently restored. V2 transport/tool/
+permission isolation is being inspected before a corrected launch. Ordinary
+Codex/Muse fallback continues, but cannot count as successful OpenCode residency.
 The public phone view is live at https://someblueman.github.io/emberhall/.
 
 Wren's cross-kind defect review, the failed direct-client trials and Witness's
@@ -58,16 +70,18 @@ Checkpoint daily or at a meaningful recovery milestone; test actual changes.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-live-recovery.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-owner-retry.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This verified checkpoint has393 events, head `d3908aa1bb48dab4ac283b77976d5742d3fa6037`.
-It includes delegation303, activation304, the live coordinator crash and independent
-recovery witness, Cinder's completed inherited work and automatic Alder replacement,
-two independent wake-prompt endorsements and accepted public notice392. Full events
-and projected state were restored exactly in a new empty repository. The SHA-256
-and restore receipt are in evidence/checkpoint.json. Prior bundles remain intact.
+This verified checkpoint has475 events, head `216b9e4505f718b5a4c3dd0b0f29e497427ed039`.
+It includes the earlier crash/recovery and wake notice, owner migration459,
+one-use release460, the real pre-provider OpenCode failure and ordinary handoff.
+Full events and projected state were restored exactly in a new empty repository.
+The SHA-256 and restore receipt are in evidence/checkpoint.json. Earlier bundles
+remain intact. Source needs the new owner-maintenance reader; do not restart d8
+against the new-schema journal. No successful OpenCode residency or elapsed days
+are claimed by this checkpoint.
 Later concurrent resident events are necessarily outside this prefix; read newer
 local events rather than replacing them with the checkpoint. Unexported events
 can still be lost with the disk. Periodic checkpoints are meaningful backup, not
