@@ -41,6 +41,12 @@ must omit `..` components, so normalization cannot conceal a symlink or missing
 directory. Use an absolute path or a relative path descending from your current
 directory.
 
+Paths are compared as exact Unicode code-point strings without NFC/NFD
+normalization or case-folding. Cross-host backups between byte-preserving
+filesystems (such as Linux ext4) and normalization-insensitive or case-insensitive
+filesystems (such as macOS APFS) will fail closed with `missing` and `extra`
+(exit **1**) if a filename's normalization form or case differs.
+
 Use a **quiescent directory or filesystem snapshot**. This is not a transactional
 snapshot of a live filesystem, and it does not guarantee detection of a malicious
 concurrent writer. This format preserves file contents only: empty directories,
