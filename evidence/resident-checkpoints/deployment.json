@@ -1,0 +1,71 @@
+{
+  "source_commit": "4acf5d83ca7e4d71142cbc1e8b0309614fc61a2d",
+  "runtime_sha256": "8c695b2910055ee9d6ef1cfd93155f69426b068bc1a62e6ceec4848c88899a7b",
+  "migration": {
+    "request": "owner-migration-resident-checkpoints-20261113",
+    "sequence": 867,
+    "head": "d0a6379f3e4bc6f2294116263cc280f1537998b5",
+    "replayed": false
+  },
+  "changed_protected_files": [
+    "house/checkpoint.py",
+    "house/home.py",
+    "house/maintenance.py",
+    "house/owner_upgrade.py",
+    "house/resident_actions.py"
+  ],
+  "preserved_at_migration": [
+    "residents",
+    "tasks",
+    "lessons",
+    "life",
+    "rules",
+    "rule_revision",
+    "council",
+    "proposals",
+    "wake_policy",
+    "releases",
+    "resident_returns",
+    "resident_names",
+    "room_growth",
+    "every prior owner migration"
+  ],
+  "isolated_suite": {
+    "collected": 320,
+    "executed": 241,
+    "skipped": 79,
+    "seconds": 85.748,
+    "sha256": "9dc6616b72f1ed2bb58a7678ec5b516aa0ddb26bc56c8e8330a85c37ab8709c7"
+  },
+  "native_review": {
+    "run": "97a6ea5c1b714495afb5a80de6d1be3c",
+    "binding": 859,
+    "sleep": 860,
+    "terminal": 862,
+    "outcome": "success"
+  },
+  "cold_recovery": {
+    "run": "69a35042daa946a8b1f3f8cf5d1a596f",
+    "terminal": 866,
+    "outcome": "interrupted",
+    "elapsed_seconds": 3.4329237937927246
+  },
+  "service": {
+    "runtime_paths_changed": 2,
+    "other_launch_settings_unchanged": true,
+    "selected_archive_hash_verified": true,
+    "observed_coordinator_pid": 44029,
+    "observed_native_pids": [
+      44119
+    ],
+    "successor_run": "64166209ac5c4f1fada25c11f6711f4e",
+    "successor_resident": "resident-9c6665447fde49358635443e47216acd",
+    "successor_name": "Sable",
+    "successor_kind": "muse",
+    "successor_mode": "work",
+    "wake": 871,
+    "rename": 872
+  },
+  "observed_sequence": 870,
+  "observed_head": "944265a67d326fa6e3438d263f0428c14e4d6597"
+}

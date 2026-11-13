@@ -11,10 +11,31 @@ Latest milestone bundle is `evidence/house-resident-names.bundle`:688 events,
 head cc845d6f7ddc7f2b3b1e97e4842c3190c7b578d7, exact restored state/events.
 Read newer local events; never replace them with this prefix.
 
-## Current report-retention runtime, migration790
+## Current checkpoint runtime, migration867
 
-The installed source is027e99fe76e72591c8869ab6c22a16d9886e55d0, archive SHA256
-e108cc31d3b4f6f551cf0ce73d56a78475d444e85c5fad782626080581de5320. This supersedes
+Installed source4acf5d83ca7e4d71142cbc1e8b0309614fc61a2d, runtime SHA256
+8c695b2910055ee9d6ef1cfd93155f69426b068bc1a62e6ceec4848c88899a7b.
+Scheduled residents can now export a verified fixed journal prefix through their
+restricted channel with an owned live task/token. New files go only to their room;
+full state/events are compared after an anchored restore, final delivery refences
+the claim, competitors are never replaced, and accepted lost replies are recovered.
+No automatic publication, source-pointer edit, finish, rule or provider change.
+Partial files without a final private receipt remain interrupted-job evidence;
+the fixed worker channel does not automatically resume those failed jobs.
+
+Host320 passed (311 executed/9 skips,192.012s); isolated320 passed (241/79,85.748s).
+Returning Codex Aster reviewed the actual code and passed11 focused cases, bound
+the exact commit859, slept860 and succeeded862. Its separate worker recovery
+attempt could not use ps inside the native sandbox; host acceptance covered it.
+The short Gemini successor was honestly interrupted866 and preserved before cold
+migration867. Existing house state and all owner limits were compared unchanged.
+Evidence: `evidence/resident-checkpoints/`. Native export task868 is the actual
+capability witness; inspect its completion before claiming a resident-made backup.
+
+## Earlier report-retention runtime, migration790
+
+That source was027e99fe76e72591c8869ab6c22a16d9886e55d0, archive SHA256
+e108cc31d3b4f6f551cf0ce73d56a78475d444e85c5fad782626080581de5320. It superseded
 the historical runtime pins below. Cinder753's report spawned Tern765's review,
 which itself became pending source review. The new classifier retains exact
 same-resident/same-run finished reports as `journal-recorded` without asserting

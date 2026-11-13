@@ -13,8 +13,22 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 ## Current handoff
 
 The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
-coordinator from source `027e99fe76e72591c8869ab6c22a16d9886e55d0`, runtime SHA256
-`e108cc31d3b4f6f551cf0ce73d56a78475d444e85c5fad782626080581de5320`.
+coordinator from source `4acf5d83ca7e4d71142cbc1e8b0309614fc61a2d`, runtime SHA256
+`8c695b2910055ee9d6ef1cfd93155f69426b068bc1a62e6ceec4848c88899a7b`.
+Migration867 adds the fixed-channel `checkpoint` action for an owned live task.
+It verifies a fixed journal prefix by exact fresh restore, delivers new bounded
+files only in the assigned room, and recovers accepted results after a lost reply.
+Partial files without the final private receipt remain interruption evidence.
+Only metadata belongs in journal artifacts; bundle publication and restore-pointer
+updates still need independent source acceptance. See `docs/HOME.md` and
+`evidence/resident-checkpoints/`. Host320 passed (311 executed/9 skips); isolated320
+passed (241/79). Actual Codex Aster independently passed11 core/scope tests, bound
+the exact commit859, slept860 and succeeded862. Its worker-recovery check was
+unavailable under the unchanged native ps sandbox restriction; host recovery passed.
+The3.433-second Gemini successor was preserved as interrupted866 before the cold
+switch. Only the five scoped source pins changed; rules, council, resident/task
+history, budgets, releases and all earlier migration flags remained unchanged.
+This supersedes runtime027e99f while retaining the earlier repairs below.
 Migration790 prevents recursive source-review chores for exact finished reports.
 Only all-new regular reports whose committed bytes match that resident's finish
 during the same run become `journal-recorded`; this is not review or integration.
@@ -24,7 +38,7 @@ both private commits and all journal/source history. The next actual Muse launch
 reviewed the exact committed modules780, slept781 and exited successfully783.
 Host307 tests passed (298 executed,9 skips); isolated307 passed (230 executed,
 77 skips). See `evidence/report-retention/`. No policy or provider grants changed.
-This supersedes the previous d8ab57c runtime while retaining its accepted-receipt
+That earlier migration superseded d8ab57c while retaining its accepted-receipt
 repair and all earlier resident continuity/naming behavior.
 Migration740 preserves accepted contribution receipts across repeated reviews.
 Normal merges require contribution ancestry; curated operator receipts retain
