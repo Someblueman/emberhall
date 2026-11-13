@@ -44,7 +44,13 @@ the old pinned recovery completed safely and preserved interrupted Gemini work.
 Muse was assigned the worksheet through normal fallback597/598 and completed
 first artifacts609. Keeper found a partial-destination and overwrite-risk error610;
 repair task `salvage-worksheet-review-fix-v1` at611 preserves that flawed witness.
-Inspect the repair completion and actual native outcome before integration.
+Muse corrected the two artifacts at614 and slept615. Keeper removed repeated
+destination-creation snippets, fixed actual macOS temporary-path alias rejection,
+and executed the complete shell example:7 matched,2 missing, no changed/extra,
+all22 drill files unchanged in hashes/size/mode/mtime. The curated worksheet and
+verbatim native report are accepted with `evidence/room-growth/worksheet-validation.json`
+recording exact native hashes, editorial changes and report limits. These later
+events are outside checkpoint608; use the newer local journal when available.
 Only `projects/blackout/examples/recovery-drill/recovery-worksheet.md` and
 `evidence/native-residents/opencode-native-arrival.md` belong to that task.
 The latter filename is assignment history, not proof of OpenCode authorship.

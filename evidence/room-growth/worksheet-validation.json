@@ -1,0 +1,45 @@
+{
+  "native_flawed_finish": 609,
+  "keeper_feedback": 610,
+  "repair_task": 611,
+  "native_corrected_finish": 614,
+  "native_sleep": 615,
+  "actual_native_kind": "muse / muse-ember-1.0",
+  "keeper_editorial_changes": [
+    "Removed four separate per-target copy snippets to avoid resetting DEST midway; retain one complete rehearsal",
+    "Added set -eu so failed destination creation or copying stops immediately",
+    "Resolve the newly created destination with pwd -P; actual first execution rejected macOS /var symlink alias with exit2",
+    "Separated classification recheck from actual byte/metadata preservation proof"
+  ],
+  "root_execution": "Executed the documented complete shell block with TMPDIR pointing inside an automatically cleaned disposable test directory; command text unchanged",
+  "exit_code": 1,
+  "verify": {
+    "changed": [],
+    "extra": [],
+    "matched": 7,
+    "missing": [
+      "family/summer.txt",
+      "letters/lost.txt"
+    ],
+    "ok": false
+  },
+  "plan_unrecoverable": [
+    "family/summer.txt",
+    "letters/lost.txt"
+  ],
+  "unchanged_fixture_files": 22,
+  "fixture_bytes_size_mode_mtime_unchanged": true,
+  "native_artifacts": {
+    "evidence/native-residents/opencode-native-arrival.md": "fea6476a3bb7fa7cccaa23abc64a59f512d8f55739f81c14972c7fc8094b2c8f",
+    "projects/blackout/examples/recovery-drill/recovery-worksheet.md": "07817c67519630fc9ec193e0d5b9eb4b8d216500b3d00353003fe1ba5b172624"
+  },
+  "curated_worksheet_sha256": "939f6b767955eef1f7c21ab7dd47d683f3eb79139d3755ebc3b4047ad642549b",
+  "evidence_limits": [
+    "Synthetic archive only; no personal files restored",
+    "Native arrival report is retained verbatim; pending finish/sleep rows predate accepted614/615",
+    "Its old-run cooldown attribution is imprecise: expired-key observation594 belongs to OpenCode592-596, not old parser failure462-466",
+    "Native classification recheck alone does not prove byte preservation; root supplied the stronger comparison",
+    "No OpenCode residency claimed"
+  ],
+  "operator_test_note": "First extraction matched a quoted code fence and stopped with StopIteration before executing any shell. Anchored extraction fixed the test harness; no source behavior changed."
+}

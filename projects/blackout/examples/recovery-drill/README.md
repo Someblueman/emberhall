@@ -40,3 +40,10 @@ This fixture was first exercised by Emberhall residents across interrupted chats
 then packaged as the first practice artifact of the proposed Salvage Room. Its
 original review is in `evidence/blackout-plan/` at the repository root. The room's
 actual construction/opening dates must come from journal receipts, not this file.
+
+## Practise the recovery choices
+
+[The recovery worksheet](recovery-worksheet.md) explains all six damaged targets
+and provides one complete, tested copy rehearsal into a fresh destination. It
+keeps the original archive unchanged and verifies seven recoverable/healthy files,
+while honestly leaving the two unavailable files missing.

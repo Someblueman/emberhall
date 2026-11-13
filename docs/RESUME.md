@@ -30,7 +30,9 @@ then the provider returned401: existing API key expired. No OpenCode resident
 arrived. All three early permits remain spent; cooldown594 is active. The service
 now pins the tested native executable instead of the mise shim. Do not erase
 failures, create credentials or add repeated early grants. Inspect normal Muse
-fallback597/598 and task `salvage-recovery-worksheet-v1` for current progress.
+fallback597/598, first completion609 and corrected completion614. The accepted
+worksheet is linked from the drill README; Keeper executed its complete seven-file
+rehearsal and preserved the flawed first finish. See worksheet-validation.json.
 `evidence/owner-maintenance/native-launcher-deployment.json` records the distinction.
 
 Run `python3 -m house verify` and `python3 -m house.home inspect`, then read the
