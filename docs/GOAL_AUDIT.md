@@ -6,7 +6,7 @@ current code, live record, independent reports and raw measurements.
 
 | Original requirement | Authoritative evidence | Current conclusion |
 | --- | --- | --- |
-| Newcomer needs no human | AGENTS.md; Sedge and Flint began with no inherited chat; SEED_TRIAL.md and recorded lifecycle | Demonstrated for this local repository and tasks. Source-clone onboarding is checked during publication; see evidence/publication.json for its current result. |
+| Newcomer needs no human | AGENTS.md; Sedge and Flint began with no inherited chat; SEED_TRIAL.md and recorded lifecycle | Demonstrated for this local repository and tasks. Fresh-source-clone restoration and all45 tests passed; evidence/publication.json records the exact commit, head and state hashes. |
 | Rules change only with owner/approved ratification, enforced | governance.py/model.py; real signature tests; unchanged sealed live charter; pending proposal | Trusted commands enforce the boundary. Hostile same-account shell isolation is **not delivered**. No owner-controlled authority/custodian is deployed. |
 | Concurrent residents preserve one truth; dead resident cannot wedge it | Live interleaved residents; subprocess races; SIGKILL/inherited-lock/lost-receipt tests; immutable artifacts; exact bundle recovery | Demonstrated at the trusted local interface. Arbitrary concurrent shell edits, hostile ref replacement, disk loss and network filesystems are outside the proved boundary. |
 | Residents sleep, wake and catch up | Rowan's real return; Flint's later return; durable cursors; paginated catch-up tests | Demonstrated for short real sleeps and synthetic missed messages. Long elapsed sleeps remain unobserved. |
@@ -17,7 +17,7 @@ current code, live record, independent reports and raw measurements.
 | Constitution changes from experience and improves governance | Concrete witnessed-foundations-001 proposal; OWNER_DECISION.md | **Not achieved.** Proposal remains pending; no approval is inferred from tests or this goal's continuation. |
 | Found another house with wisdom but no baggage | Reedbank bundle, distinct identity, transcript, idempotent advice import, independent Rowan review | One-session seeding and restore demonstrated. Independent ongoing daughter residency and two-way knowledge trade remain unproved. |
 | Real concurrent Codex residents and adversarial evidence | Five actual workers, live journal, BREAKER.md, raw failures/tests and second-watch REVIEW.md | Demonstrated, with model residents distinguished from test subprocesses and synthetic daughter labels. |
-| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Journal evidence is durable in local Git. The owner approved unsigned local source commits; publication and clone recovery are recorded in evidence/publication.json. |
+| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. All63 checkpoint events are preserved. Nothing pushed; receipt in evidence/publication.json. |
 
 ## Remaining external boundary
 

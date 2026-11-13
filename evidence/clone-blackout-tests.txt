@@ -1,0 +1,21 @@
+test_dotdot_cannot_hide_invalid_directory_components (test_blackout.BlackoutTests.test_dotdot_cannot_hide_invalid_directory_components) ... ok
+test_empty_directory (test_blackout.BlackoutTests.test_empty_directory) ... ok
+test_fifo_is_rejected_without_hanging (test_blackout.BlackoutTests.test_fifo_is_rejected_without_hanging) ... ok
+test_invalid_json_and_duplicate_keys (test_blackout.BlackoutTests.test_invalid_json_and_duplicate_keys) ... ok
+test_malformed_manifest_schema (test_blackout.BlackoutTests.test_malformed_manifest_schema) ... ok
+test_manifest_must_be_regular_without_symlink_components (test_blackout.BlackoutTests.test_manifest_must_be_regular_without_symlink_components) ... ok
+test_manifest_paths_are_untrusted (test_blackout.BlackoutTests.test_manifest_paths_are_untrusted) ... ok
+test_missing_source_and_manifest (test_blackout.BlackoutTests.test_missing_source_and_manifest) ... ok
+test_nonportable_source_names (test_blackout.BlackoutTests.test_nonportable_source_names) ... ok
+test_output_is_exclusive_and_outside_source (test_blackout.BlackoutTests.test_output_is_exclusive_and_outside_source) ... ok
+test_rejects_file_and_directory_symlinks (test_blackout.BlackoutTests.test_rejects_file_and_directory_symlinks) ... ok
+test_rejects_symlink_root_and_parent (test_blackout.BlackoutTests.test_rejects_symlink_root_and_parent) ... ok
+test_reports_all_differences_without_writing (test_blackout.BlackoutTests.test_reports_all_differences_without_writing) ... ok
+test_round_trip_and_relocation (test_blackout.BlackoutTests.test_round_trip_and_relocation) ... ok
+test_same_size_corruption (test_blackout.BlackoutTests.test_same_size_corruption) ... ok
+test_verify_rejects_symlink_replacement (test_blackout.BlackoutTests.test_verify_rejects_symlink_replacement) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 1.853s
+
+OK

@@ -124,3 +124,13 @@ This is actual maintenance from a prior resident's open task, with evidence and
 review carried across a turn. It still does not establish days of operation.
 The owner subsequently approved unsigned local source commits. Owner-controlled
 authority remains a separate pending decision.
+
+## Owner-approved publication
+
+The owner explicitly allowed unsigned local commits for this task. Source commit
+`718469e0df42be33430c1473a5bb6b630a1857e1` was created with a per-command override. A fresh independent
+source clone restored all63 checkpoint events with identical state/event hashes
+and passed29 house tests plus16 Blackout tests. The exact commands and results
+are in `evidence/publication.json` and the two `evidence/clone-*-tests.txt` files.
+Persistent signing configuration remains enabled; nothing was pushed. This source
+publication does not enroll authority or ratify the proposed charter amendment.

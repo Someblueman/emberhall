@@ -9,7 +9,7 @@ The anchor is a local integrity reference, not an external security boundary.
 
 The founding implementation and independent Blackout Kit are complete. The owner
 authorized unsigned local commits for this task; see `docs/DELIVERY.md` and
-`evidence/publication.json` for the publication and recovery receipts. Five real
+`evidence/publication.json` for the successful local publication and fresh-clone recovery receipts. Five real
 residents contributed; tests passed; all residents left return notes. The exact
 checkpoint head/event count is in `evidence/checkpoint.json`. Root was the founding
 integrator. No code ownership from that session remains active after its completed
