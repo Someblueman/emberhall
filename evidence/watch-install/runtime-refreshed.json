@@ -1,0 +1,29 @@
+{
+  "source_head": "350c76cec338620c85de930ad8c7fdca9bbaaf29",
+  "runtime_sha256": "4d319843dedfe3ad0ceef622ae374351d42a0dcf032fbfb0ebf8e20bce582381",
+  "files": {
+    "__main__.py": "4a5eb65bdafdd905fba96694452e8d29df9b9deede17369cfe77837d5c714c8a",
+    "docs/WATCH_PROMPT.md": "2dd9e46a61bfd7144643c5d126c49f80d58bc767f77965a221dc26485952e845",
+    "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+    "house/__main__.py": "6f8563d118fb8a532d37f4561ac2aadafedf75e8ad5639be44754f8cddc14e0c",
+    "house/council.py": "c3fad9f12c6e9fe657af1cbba092888c94520837ca4a3206ac6940c39caf323d",
+    "house/custodian.py": "54736d8b0d89ef91cac921109644589d10375df5f3606964afd73fbe3246a50c",
+    "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+    "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+    "house/illustration.py": "983507702fdafc741039002928b04c23961bce71aa900d067f6489ad8beeca04",
+    "house/model.py": "dfb446d9423037614d8aef0be32748238e37e64f86b41a16478b1e954ca3e517",
+    "house/record.py": "31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985",
+    "house/remote.py": "20b9235e90906d710de3584a67cdb3d928e4d87ecc383b58ef6bf90aecd02a73",
+    "house/steward.py": "071069ccfb98186c59a0c42c78c346c99c6f087e5be8d15e607b17b4208803dc",
+    "house/watch.py": "330c2f2e0a8287ad0d97db091d9360b69614340700a9237603509cf646455237",
+    "house/watch_recovery.py": "9436c52311244d36d4698472a6bbe3a42a6f4aa01b4d1638eda70ec190924c7c"
+  },
+  "entry": "/Users/sws/Code/longhouse/.git/house-watch/runtime-350c76cec338620c85de930ad8c7fdca9bbaaf29.pyz",
+  "command": [
+    "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+    "/Users/sws/Code/longhouse/.git/house-watch/runtime-350c76cec338620c85de930ad8c7fdca9bbaaf29.pyz",
+    "--repo",
+    "/Users/sws/Code/longhouse",
+    "run"
+  ]
+}

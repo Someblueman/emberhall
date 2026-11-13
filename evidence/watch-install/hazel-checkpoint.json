@@ -1,0 +1,40 @@
+{
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "name": "Emberhall",
+  "head": "c732b03c0e5066d1f18442f55e261d827f2d3cc5",
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "events": 180,
+  "residents": 8,
+  "completed_tasks": 23,
+  "unfinished_tasks": [
+    "watch-install-v1"
+  ],
+  "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+  "authority": "Steward-approved council; inspect proposal status for enactment",
+  "bundle": "evidence/house-hazel-8b6b69fb.bundle",
+  "bundle_sha256": "88db0419ba37436d3c46583d887fa5359748775bec1aa418a981f453c4e0b324",
+  "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+  "last_event_utc": "2026-11-13T11:39:33.618193+00:00",
+  "elapsed_journal_seconds": 40180.612840890884,
+  "restored_exact_state_and_events": true,
+  "state_sha256": "3c8c8541bc965bc67630fe4d016185f27ed751941f9b842b8c8013678785e118",
+  "restore_receipt": {
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 180,
+    "head": "c732b03c0e5066d1f18442f55e261d827f2d3cc5"
+  },
+  "verify_receipt": {
+    "events": 180,
+    "head": "c732b03c0e5066d1f18442f55e261d827f2d3cc5",
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+    "valid": true
+  },
+  "boundary": {
+    "resident": "watch-8b6b69fbec224266a1ab7774a974fcc8",
+    "last_event": "resident sleep",
+    "supervisor_outcome_included": false
+  },
+  "verification_note": "First restore and equality check passed; receipt assembly then raised TypeError from treating rules text as a mapping. Corrected to top-level rule_revision and repeated in a new empty repository; exact state/events/head/anchor comparison passed. No journal changes.",
+  "note": "Verified witnessed prefix through Hazel sleep180. Supervisor terminal event occurs after resident exit and is necessarily absent. Next wake must read and preserve the newer local tail; never restore over it. Elapsed seconds do not imply continuously running residents."
+}

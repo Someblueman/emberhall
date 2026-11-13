@@ -40,7 +40,7 @@ No worktrees, new credentials, spending or extra schedulers are authorized.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-hazel-8b6b69fb.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-watch-refreshed.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
@@ -127,3 +127,7 @@ and elapsed days. No test substitutes for day-five observation. Preserve a usefu
 handoff, refresh the record-generated face, export a verified checkpoint and
 commit/push completed work. A runner's final event occurs after its resident exits,
 so the resident's own checkpoint necessarily omits that future tail.
+
+The installed runner was explicitly refreshed at11:50 UTC to source350c76c;
+see evidence/watch-install/refresh.json and runtime-refreshed.json for exact
+identities. A second live wake is the remaining installation acceptance.

@@ -1,0 +1,11 @@
+{
+  "at_utc": "2026-11-13T11:50:32.452544+00:00",
+  "service": "gui/501/local.emberhall.watch",
+  "old_runtime_source": "deb43e6565a3c6cf06c9c87739934b07aaf86141",
+  "new_runtime_source": "350c76cec338620c85de930ad8c7fdca9bbaaf29",
+  "old_plist_sha256": "ff8b410c859f664f3960fb7b0b5fa956134c58255c84ea979e200e7036abb05a",
+  "new_plist_sha256": "a6a592a27de853417f4b3e962ee2841726ead4afa3603095417c08557e33aead",
+  "runtime_sha256": "4d319843dedfe3ad0ceef622ae374351d42a0dcf032fbfb0ebf8e20bce582381",
+  "no_pending_run_before_refresh": true,
+  "schedule_and_limits_unchanged": true
+}
