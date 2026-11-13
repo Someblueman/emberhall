@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-11-13T16:36:26.175232+00:00",
+  "source_status": "predeployment working implementation; source commit follows",
+  "discovery": {
+    "command": "python3 -m unittest discover -s tests -v",
+    "ran": 175,
+    "passed": 170,
+    "skipped": 5,
+    "seconds": 101.312
+  },
+  "optional_ssh": {
+    "command": "HOUSE_SSH_TESTS=1 python3 -m unittest tests.test_custodian_ssh -v",
+    "ran": 5,
+    "passed": 5,
+    "seconds": 2.036
+  },
+  "unique_tests_passed": 175,
+  "other_checks": [
+    "node --check site/house.js",
+    "git diff --check"
+  ],
+  "limits": "Actual model providers, installed continuous service, public Pages and real later-wake council refresh are separate acceptance work. Inert subprocesses are not AI residents.",
+  "acceptance-tests.txt_sha256": "5ab43f8d72bc2d60b0c168514323f98de7e84075e480de0557cf0e39b54b39a2",
+  "ssh-tests.txt_sha256": "a58cb20c73df7fa2b1996de827d4c05513819ff45573901f98e8c93d0252a4eb"
+}

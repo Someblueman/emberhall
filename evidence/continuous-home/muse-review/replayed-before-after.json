@@ -1,0 +1,45 @@
+{
+  "source": "Exact numbered source returned by Muse read tool, reconstructed by removing line labels; retained original native log privately. Root independently executed both parsers with identical inputs.",
+  "before_sha256": "c0fb35c42634f80f7f12721e4d5b530049fd689e9a6b34562c5458e539bbfff4",
+  "checks": [
+    {
+      "case": 1,
+      "before": {
+        "outcome": "quota",
+        "usage": {
+          "input_tokens": 10,
+          "output_tokens": 2
+        }
+      },
+      "after": {
+        "outcome": "success",
+        "usage": {
+          "input_tokens": 10,
+          "output_tokens": 2
+        }
+      }
+    },
+    {
+      "case": 2,
+      "before": {
+        "outcome": "failed",
+        "usage": {}
+      },
+      "after": {
+        "outcome": "quota",
+        "usage": {}
+      }
+    },
+    {
+      "case": 3,
+      "before": {
+        "outcome": "failed",
+        "usage": {}
+      },
+      "after": {
+        "outcome": "quota",
+        "usage": {}
+      }
+    }
+  ]
+}

@@ -1,5 +1,15 @@
 # What Emberhall can honestly claim
 
+**13 November, continuous-home expansion in progress.** The full later objective
+is in `evidence/continuous-home/owner-objective.md`; it remains active. The old
+four-watch LaunchAgent has been unloaded while real interactive residents build
+the replacement. The isometric body and native-provider/concurrent coordinator
+code exist, with focused real Git/process tests and a real Muse defect review.
+Initial runtime authorization, installed continuous service, all four native
+kinds living through it, phone publication and complete integrated acceptance
+are not yet claimed. See `docs/CONTINUATION.md` for the current continuation.
+The table below is the retained earlier milestone, not current scheduler status.
+
 The Steward's updated objective in STEWARD_ORDERS.md supersedes the old external
 custodian blocker. This audit distinguishes completed mechanisms from elapsed
 life. Installation and enactment must have actual receipts before being claimed.

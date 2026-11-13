@@ -1,0 +1,247 @@
+"""Publish a bounded, public dollhouse projection at every verified journal event."""
+from __future__ import annotations
+
+import argparse
+import copy
+import json
+import math
+from pathlib import Path
+import re
+import subprocess
+import time
+
+from .model import apply_event
+from .record import Record
+
+ROOMS = {"door": "The door", "hearth": "Hearth", "workshop": "Workshop",
+         "archive": "Archive", "council": "Council"}
+KINDS = {"codex", "opencode", "muse", "agy"}
+WATCH_PREFIX = "house-watch-v1 "
+
+
+def label(value: object, limit: int = 180) -> str:
+    """Public labels are plain, bounded strings, never rendered as HTML."""
+    return " ".join(str(value).split())[:limit]
+
+
+def usage(value: object) -> dict:
+    """Never publish arbitrary provider responses, credentials or log text."""
+    if not isinstance(value, dict):
+        return {}
+    allowed = {"input_tokens", "output_tokens", "total_tokens", "cached_tokens", "cached_input_tokens",
+               "requests", "remaining", "limit", "used"}
+    return {k: v for k, v in value.items() if k in allowed and
+            type(v) in (int, float) and math.isfinite(v) and v >= 0}
+
+
+def watch_item(event: dict) -> dict | None:
+    if event["op"] != "say" or event["actor"] != "watch-keeper":
+        return None
+    text = event["data"].get("text", "")
+    if not text.startswith(WATCH_PREFIX):
+        return None
+    try:
+        item = json.loads(text[len(WATCH_PREFIX):])
+    except (ValueError, TypeError):
+        return None
+    return item if isinstance(item, dict) and isinstance(item.get("kind"), str) else None
+
+
+def export(record: Record, observed_at: float | None = None) -> dict:
+    final, events, head = record.read()
+    observed_at = time.time() if observed_at is None else observed_at
+    if not math.isfinite(observed_at) or observed_at < final["at"]:
+        raise ValueError("observation must be finite and at or after the latest journal event")
+    # Pin source and journal separately. Neither working files nor later commits
+    # are presented as part of an earlier event's source history.
+    result = subprocess.run(["git", "-C", str(record.root), "rev-parse", "--verify", "--quiet",
+                             "HEAD^{commit}"], capture_output=True, check=False)
+    if result.returncode not in (0, 1):
+        raise ValueError("cannot read source HEAD")
+    source_head = result.stdout.decode().strip() or None
+    commits = []
+    if source_head:
+        raw = record.git("log", "--reverse", "--format=%H%x00%ct%x00%s", source_head)
+        for row in raw.decode(errors="replace").splitlines():
+            fields = row.split("\0", 2)
+            if len(fields) == 3:
+                commits.append({"id": fields[0], "at": int(fields[1]), "title": label(fields[2])})
+
+    state = None
+    rooms = dict(ROOMS)
+    places: dict[str, str] = {}
+    identities: dict[str, dict] = {}
+    runs: dict[str, dict] = {}
+    scars: dict[str, dict] = {}
+    ambitions: dict[str, dict] = {}
+    budgets: dict[str, dict] = {}
+    frames = []
+    sleeping: set[str] = set()
+    for seq, event in enumerate(events, 1):
+        at, actor, op, data = event["at"], event["actor"], event["op"], event["data"]
+        for task_id, task in (state["tasks"].items() if state else []):
+            if task["status"] == "claimed" and task["until"] <= at:
+                key = f'lease:{task_id}:{task["generation"]}'
+                scars.setdefault(key, {"id": key, "room": "workshop", "kind": "expired",
+                    "title": "A lease ran out", "detail": label(task["title"]), "task": task_id,
+                    "resident": task["owner"], "at": task["until"], "sequence": seq,
+                    "basis": "Inferred from lease time; process fate unconfirmed", "mended": False})
+        state = apply_event(state, event)
+        if op in {"arrive", "wake"}:
+            sleeping.discard(actor)
+            places[actor] = "door"
+        elif op == "sleep":
+            sleeping.add(actor)
+            rooms.setdefault("bedroom", "Quiet loft")
+            places[actor] = "bedroom"
+        elif op in {"claim", "renew", "finish", "release", "task"}:
+            places[actor] = "workshop"
+        elif op in {"learn", "review", "supersede"}:
+            places[actor] = "archive"
+        elif op in {"propose", "ratify"} or op.startswith("council-"):
+            places[actor] = "council"
+        elif op == "say" and actor != "watch-keeper":
+            places[actor] = "hearth"
+
+        item = watch_item(event)
+        life = op == "life"
+        if life:
+            item = data
+            for room_id, room in state["life"]["rooms"].items():
+                rooms.setdefault(room_id, label(room["name"], 60))
+        if item:
+            kind = item.get("kind")
+            run_id = str(item.get("run", ""))
+            if kind == "identity" and life:
+                identities[actor] = {"agent": label(item.get("agent", "unrecorded"), 30),
+                                     "model": label(item.get("model", ""), 100)}
+            elif kind == "room" and life:
+                rooms[str(item["room"])] = label(item["name"], 60)
+            elif kind == "activity" and life:
+                places[actor] = str(item["room"])
+            elif kind == "ambition" and life:
+                key = str(item["ambition"])
+                ambitions[key] = {"id": key, **{k: label(item.get(k, ""), 350)
+                    for k in ("title", "description", "status", "next_step")}, "sequence": seq}
+            elif kind == "budget" and life:
+                agent = str(item["agent"])
+                budgets[agent] = {"agent": agent, "until": item.get("until", 0),
+                    "reason": label(item.get("reason", "")), "usage": usage(item.get("usage")),
+                    "sequence": seq}
+            elif kind in {"start", "run-start"}:
+                resident = str(item.get("resident", ""))
+                agent = item.get("agent", "codex" if item.get("executable") == "codex" else "unrecorded")
+                runs[run_id] = {"id": run_id, "resident": resident, "agent": label(agent, 30),
+                    "model": label(item.get("model", ""), 100), "start": at, "sequence": seq,
+                    "status": "started", "outcome": "unconfirmed", "usage": {}, "elapsed_seconds": None}
+                if resident:
+                    identities[resident] = {"agent": label(agent, 30), "model": label(item.get("model", ""), 100)}
+            elif run_id in runs:
+                run = runs[run_id]
+                if kind in {"launched", "run-launched"}:
+                    run["status"] = "launched"
+                elif kind in {"finish", "run-finish", "recovered-interruption", "execution-result"}:
+                    outcome = item.get("outcome", "unconfirmed")
+                    if kind == "recovered-interruption":
+                        outcome = "unconfirmed"
+                    run.update(outcome=label(outcome, 40), last_sequence=seq, end=at,
+                               status="result-saved" if kind == "execution-result" else "ended",
+                               usage=usage(item.get("usage")),
+                               elapsed_seconds=item.get("elapsed_seconds"))
+                    if outcome in {"failed", "interrupted", "unconfirmed"}:
+                        key = "run:" + run_id
+                        held = [k for k, t in state["tasks"].items()
+                                if t["owner"] == run["resident"] and t["status"] == "claimed"]
+                        if life:
+                            held += state["life"]["runs"][run_id].get("released_tasks", [])
+                        scars.setdefault(key, {"id": key, "room": places.get(run["resident"], "door"),
+                            "kind": "interrupted" if outcome == "interrupted" else "unconfirmed" if outcome == "unconfirmed" else "failure",
+                            "title": "Interrupted mid-task" if outcome == "interrupted" and held else "Run " + outcome,
+                            "detail": ", ".join(held) if held else "No unfinished claim at this receipt",
+                            "resident": run["resident"], "at": at, "sequence": seq,
+                            "basis": "Supervisor receipt", "mended": False})
+
+        for key, lesson in state["lessons"].items():
+            if lesson["status"] == "observed" and lesson["reviews"] and re.search(
+                    r"repair|repaired|fix|regression", lesson["evidence"], re.I):
+                scar_id = "repair:" + key
+                scars.setdefault(scar_id, {"id": scar_id, "room": "archive", "kind": "repair",
+                    "title": label(lesson["key"].replace("-", " "), 90),
+                    "detail": label(lesson["claim"], 300), "sequence": seq, "at": at,
+                    "basis": "Reviewed lesson; shown in archive because location was not recorded",
+                    "mended": True, "lesson": key})
+            scar = scars.get("repair:" + key)
+            if scar:
+                scar["lesson_status"] = lesson["status"]
+                scar["reviews"] = len(lesson["reviews"])
+        for scar in scars.values():
+            if scar.get("task"):
+                task = state["tasks"][scar["task"]]
+                scar["mended"] = task["status"] == "done" or task["generation"] > int(scar["id"].rsplit(":", 1)[1])
+
+        public_residents = []
+        for resident_id, resident in state["residents"].items():
+            if resident_id == "watch-keeper":  # An actual supervisor, not a model mind.
+                continue
+            identity = identities.get(resident_id, {"agent": "unrecorded", "model": ""})
+            claims = [k for k, t in state["tasks"].items()
+                      if t["owner"] == resident_id and t["status"] == "claimed"]
+            latest_run = next((r for r in reversed(list(runs.values())) if r["resident"] == resident_id), None)
+            is_asleep = resident_id in sleeping
+            room = "bedroom" if is_asleep else places.get(resident_id, "door")
+            pose = "sleeping" if is_asleep else "sitting" if room == "hearth" else "standing"
+            presence = "asleep" if is_asleep else "recorded awake"
+            if latest_run and latest_run["status"] == "ended" and not is_asleep:
+                presence = latest_run["outcome"] + "; no sleep event"
+                pose = "unconfirmed"
+            public_residents.append({"id": resident_id, "name": label(resident["name"], 60),
+                **identity, "room": room, "pose": pose, "presence": presence,
+                "tasks": claims})
+        tasks = [{"id": key, "title": label(t["title"], 160), "owner": t["owner"],
+                  "status": t["status"], "until": t["until"], "generation": t["generation"]}
+                 for key, t in state["tasks"].items() if t["status"] != "done"]
+        title = label(data.get("title", data.get("task", data.get("lesson", ""))), 140)
+        council = state.get("council", {})
+        proposals = council.get("proposals", {})
+        frame = {"seq": seq, "at": at, "event": {"op": op, "actor": actor, "title": title},
+            "rooms": [{"id": k, "name": v} for k, v in rooms.items()], "residents": public_residents,
+            "tasks": tasks, "scars": list(scars.values()), "ambitions": list(ambitions.values()),
+            "budgets": list(budgets.values()), "runs": list(runs.values()),
+            "lessons": len(state["lessons"]),
+            "council": {"pending": sum(p["status"] == "pending" for p in state["proposals"].values()) +
+                                     sum(p.get("status") == "pending" for p in proposals.values()),
+                        "enacted": sum(p["status"] in {"ratified", "enacted"} for p in state["proposals"].values()) +
+                                   sum(p.get("status") == "enacted" for p in proposals.values())}}
+        frames.append(copy.deepcopy(frame))
+    # Store immutable scar descriptions once; each frame retains the exact set
+    # and changing review/repair state. This keeps the public checkpoint compact.
+    scar_catalog = {key: {k: v for k, v in scar.items()
+                         if k not in {"mended", "reviews", "lesson_status"}}
+                    for key, scar in scars.items()}
+    for frame in frames:
+        frame["scars"] = [{k: v for k, v in scar.items()
+                           if k in {"id", "mended", "reviews", "lesson_status"}}
+                          for scar in frame["scars"]]
+    return {"version": 1, "name": label(final["name"], 80), "house_id": final["house_id"],
+            "journal_head": head, "source_head": source_head, "observed_at": observed_at,
+            "timezone": "Europe/London", "commits": commits, "frames": frames, "scars": scar_catalog,
+            "limits": "Recorded state, not a live heartbeat. Quota remaining is unknown unless explicitly reported."}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo", type=Path, default=Path("."))
+    parser.add_argument("--output", type=Path, default=Path("site/history.json"))
+    parser.add_argument("--at", type=float)
+    args = parser.parse_args()
+    try:
+        data = export(Record(args.repo), args.at)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(data, ensure_ascii=True, separators=(",", ":")) + "\n")
+    except (ValueError, OSError, OverflowError) as error:
+        parser.exit(2, f"house body: {error}\n")
+    print(f'Wrote {len(data["frames"])} moments to {args.output}; head {data["journal_head"]}')
+
+
+if __name__ == "__main__":
+    main()

@@ -66,6 +66,89 @@ lost notice recovery and failed polling. `evidence/steward-process/veto-before.t
 and `veto-after.txt` retain two independently reproduced defects and their repair.
 Simulated clocks in tests establish gates, never an elapsed live24-hour trial.
 
+## The wake prompt belongs to the council
+
+The Steward's later objective, attachment
+`02ac070e-1f86-4c9b-b2f1-6cf5d0027f3e`, explicitly delegates wake text while retaining
+control of money, credentials, irreversible actions, sandboxing and ratification.
+Its exact source SHA-256 is
+`50f6c535ed42c4e640a5a09a77a3eb3a45568c710b40ab49da44d1da00b96f30`.
+One explicit `authorize-wake --source EXACT-OWNER-FILE --source-commit COMMIT` transition checks these
+bytes, the existing foundation and authenticated Steward identity. It records the
+fixed initial prompt, protected-envelope hashes and protected source manifest from
+that exact clean committed bootstrap; it does not enact a resident
+proposal or replace the foundation. Historical events replay unchanged.
+
+`python3 -m house.steward --as ID wake-prompt` shows the current text, revision,
+protected limits and assembled prompt. Propose a replacement with the ordinary
+command plus `--mode wake-prompt`. Trial, two independent non-author endorsements,
+public notice, the full24-hour veto window, current base and fresh Steward sync
+all still apply. One enacted prompt supersedes its predecessor. A Steward repeal
+of the current prompt returns to the authorized initial prompt; it does not
+silently revive a superseded proposal. A new proposal still needs every gate.
+
+Protected limits are separate structured data, assembled around the council text.
+No proposal field can replace that envelope, source authorization or process.
+Natural-language council text remains subordinate to Steward instructions; the
+controller must also enforce its fixed provider/sandbox boundary. A paragraph
+claiming permission to bypass a sandbox cannot change those executable settings.
+
+The initial protected code manifest pins `house/providers.py`, `council.py`,
+`wake_policy.py`, `steward.py`, `model.py`, `record.py`, `governance.py`,
+`resident_client.py`, `home.py`, `home_work.py` and `watch_recovery.py`. The last
+ten names are also under `house/`. Green tests cannot approve changed enforcement
+code: both testing and refresh reject any changed/missing protected hash. Changing
+these conservative pins requires another explicit Steward-approved migration,
+which is not exposed by this version. This limits foundation self-rewriting;
+council prompt text, visual/application code and other unprotected modules can
+evolve through the tested path. The initial baseline cannot be enrolled until
+every named enforcement file exists in the reviewed commit.
+
+## A later wake earns runtime refresh
+
+An enacted prompt is not permission for an already running resident to replace
+its own supervisor. A qualifying resident needs an actual controller `run-start`
+after enactment, a `run-launched` receipt, its assigned identity, the current policy
+revision, and an active run. Arrival alone or an old completed task is insufficient.
+
+Claim a bounded testing task, commit the candidate source and leave that source
+checkout clean. Then run:
+
+```sh
+python3 -m house.steward --as ID test-runtime --run RUN --task TASK --token TOKEN --source-repo /absolute/candidate
+```
+
+This runs the committed candidate's unittest discovery in a real subprocess. It
+records the actual exit, observed test count, timestamps, output hash, source
+commit and hashes of runtime/test files. It rechecks the source, finishes the
+claimed task with immutable `runtime-test.json` and `runtime-test-output.txt`, and
+accepts a council test receipt only after successful nonempty tests. Failed tests
+keep their output but grant no refresh. A timeout leaves the claim unfinished;
+inspect and retry under the normal lease rules. It never fabricates a live wake
+or advances a clock to meet enactment.
+
+The controller calls `wake_policy.refresh_gate(record, actor, task_id, run_id,
+source_repo)` before switching its pinned pointer. It must hold its activation
+lock and recheck under the journal writer lock at the switch, so a repeal cannot
+race the authorization. The gate binds current policy, run, immutable test receipt,
+exact clean commit and source hashes. Changed bytes, a new commit, supersession,
+repeal, a stopped run or the wrong resident invalidate the gate. The controller
+owns installation, rollback and its receipt; this module installs nothing.
+The initial owner-authorized controller bootstrap is a separate explicit action,
+not a fictional council enactment or a later-wake test receipt.
+
+`tests/test_wake_policy.py` uses explicitly synthetic council/lifecycle histories
+in disposable houses and actual passing/failing test subprocesses. Those tests
+establish rejection boundaries and receipt plumbing, not a lived24-hour window,
+an actual model wake or a deployed self-refresh. Inspect the live journal for those.
+
+The gate must run from the **currently trusted pinned runtime**, not an imported
+candidate copy that could remove its own checks. During construction, all230
+existing live prefixes projected identically using the prior committed council
+and the candidate;51 affected and legacy governance/lifecycle/recovery tests passed
+in14.884 seconds. No live wake-policy authorization, enactment or runtime refresh
+was performed by that test run.
+
 Generated notice comments are explicitly excluded from owner-command parsing.
 They are posted through the same GitHub account but contain resident-authored
 quoted rule text. Independent regression `test_generated_notice_cannot_turn_proposed_text_into_owner_command`

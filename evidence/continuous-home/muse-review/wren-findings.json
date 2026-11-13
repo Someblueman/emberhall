@@ -1,0 +1,64 @@
+{
+  "name": "Wren (wren-review01)",
+  "findings": [
+    {
+      "id": "F1",
+      "title": "providers.result labels a recovered error followed by terminal success as quota",
+      "file": "house/providers.py",
+      "line": "76-80, 102-108",
+      "category": "mislabel provider failure",
+      "trace": "Docstring says stderr-triggered cooldown only after nonzero exit, but code appends every error/turn.failed/run.terminal.failed event to error_text regardless of exit_code or terminal. Quota regex is then applied unconditionally and quota wins over success.",
+      "reproduction": "Executed: result('codex', '{\"type\":\"error\",\"message\":\"rate limit reached but retried\"}\\n{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":10,\"output_tokens\":2}}', '', 0) -> {'outcome':'quota', ...}. The run succeeded with a terminal event, yet is classified as quota and would receive the 15-minute quota cooldown instead of success. Existing test test_tool_quoted_limit_is_not_quota_and_usage_is_not_invented only covers tool text in item.completed, not a prior JSON error event."
+    },
+    {
+      "id": "F2",
+      "title": "providers.result misses real quota reported in non-JSON stdout or dropped by 16KB tail truncation",
+      "file": "house/providers.py",
+      "line": "82-86, 104-107",
+      "category": "mislabel provider failure / quota-exhausted retry",
+      "trace": "Non-JSON stdout lines are skipped (continue), so plain-text quota output never enters error_text. If exit_code is nonzero, only errors[-16000:] is searched; an early quota line followed by more than 16KB of diagnostics is lost.",
+      "reproduction": "Executed: result('codex', 'quota exhausted', '', 1) -> {'outcome':'failed'} and result('codex', '', 'quota exhausted\\n'+'x'*20000, 1) -> {'outcome':'failed'}. A truly quota-exhausted provider is thus recorded as failed, gets the shorter failed cooldown, and may be retried sooner/other providers may be exhausted in turn."
+    },
+    {
+      "id": "F3",
+      "title": "life run-finish does not release the dead resident's live task leases",
+      "file": "house/life.py",
+      "line": "119-140",
+      "category": "strand quota-exhausted residents / lose concurrent work",
+      "trace": "run-finish sets the resident awake=false and requeues help_requests on non-success, but never releases or reopens tasks owned by that run resident. Model claim at house/model.py:91 requires until <= at, so a task claimed for up to 86400s (lease ceiling) by a quota/interrupted/failed run remains blocked for the whole TTL even though another provider kind with quota could do it.",
+      "reproduction": "Logical trace: claim task with seconds=1800; run-finish outcome=quota. life state shows task still status=claimed, owner=dead resident, until in future. Next resident claim(..., expect=generation+1) is rejected as 'task has a live lease'. No supervisor release path exists in life.apply for quota/interrupted/failed. Tests cover help requeue but not task-lease release."
+    },
+    {
+      "id": "F4",
+      "title": "integrate allows self-review and self-publish of the same run",
+      "file": "house/integrate.py",
+      "line": "29-33, 61-68",
+      "category": "bypass cooperative/Steward review boundary through normal tool",
+      "trace": "integrate only requires actor in residents (line 32). It never checks actor != run resident, different kind, or independence from the contribution author. The same actor who authored the workspace can call integrate(..., publish=True) and satisfy the 'reviewed' gate with only the automated test run.",
+      "reproduction": "Logical trace: actor == life.runs[run]['resident'] passes line 32; line 61-68 publishes if tests pass. Owner objective requires a different-kind independent witness; AGENTS.md says the integrating resident reviews, implying non-authorship. Inspection found no tests at all for integrate.py covering independence."
+    },
+    {
+      "id": "F5",
+      "title": "inbox poll aborts the whole poll on one malformed owner issue/comment",
+      "file": "house/inbox.py",
+      "line": "38-41, 63-65, 69-71",
+      "category": "strand owner wake requests / lose concurrent work",
+      "trace": "After the owner filter, requests() raises ValueError if id is not int or body is not str. poll() iterates requests() before appending anything, so a single owner item with body:null (valid GitHub empty body) aborts the entire poll. The cursor is then never advanced, so every later poll refetches the same 60s-overlap window and fails again, blocking all later valid owner wake requests.",
+      "reproduction": "Logical trace: requests([], [{'id':10,'user':{'id':OWNER_ID},'body':None,'html_url':'...'}]) raises 'malformed owner issue'. Poll catches nothing, writes only inbox-error (coordinator side), appends no help and no cursor receipt. tests/test_inbox.py covers owner filter/notice exclusion but has no null-body case."
+    }
+  ],
+  "strengths": [
+    "life.py journal-serialized capacity, budget gating, help single-take, ambition CAS, and run single-launch checks operate atomically under Record.locked (house/life.py:97-112, 141-152; test_capacity_is_journal_enforced, test_concurrent_process_admission_cannot_exceed_three).",
+    "resident_client pins canonical repo, resident actor, and artifacts-from, rejects --repo override and controller-only life kinds (house/resident_client.py:22-33), covered by test_fixed_client_rejects_other_actor_and_global_repo_override.",
+    "providers.validate_model enforces the finite Steward allowlist and command() drops API-key env, sandboxes agy/muse, and denies opencode shell/external_directory except the fixed client (house/providers.py:26-72).",
+    "inbox.requests is owner-only, excludes PRs/control issue/emoji-notice/VETO/REPEAL, and uses idempotent request IDs with body digest edits creating new work but re-polls replaying (house/inbox.py:28-45, tests/test_inbox.py).",
+    "integrate never resets/stashes/overwrites the shared checkout; it merges in a private clone, runs tests, rechecks clean HEAD before ff-only publish, and retains conflict/tests-failed candidates (house/integrate.py:40-73).",
+    "runtime selection verifies directory/name/symlink/hash and bootstraps only from steward-authorized source with protected manifest checks (house/runtime.py:20-28, 43-53), covered by tests/test_runtime.py."
+  ],
+  "uncertainties": [
+    "OpenCode bash pattern 'client *' (house/providers.py:58-62) against shell-operator chaining and argparse last-wins --repo: not exercised against a live opencode binary here; left as uncertainty, not a finding.",
+    "Whether repeated turn.completed/step_finish events are cumulative totals (sum is correct) vs repeated snapshots (sum would double-count): needs live provider fixtures per kind.",
+    "Actual cooldown durations, quiet backoff, coordinator uptime, and lease TTL impact under real quota cadence were not exercised; no live model wakes attempted.",
+    "house/home.py excluded per instructions; lease handoff, cooldown call sites, and coordinator capacity logic there were read only for context and not cited as findings."
+  ]
+}

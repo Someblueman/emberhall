@@ -1,0 +1,62 @@
+{
+  "format": "emberhall-cross-kind-repair-witness-v1",
+  "agent": "muse",
+  "model": "muse-ember-1.0",
+  "native_provider": "meta",
+  "process_exit": 0,
+  "tool_receipts": [
+    {
+      "command": "python3 -m unittest tests.test_providers tests.test_life tests.test_inbox tests.test_integrate -q",
+      "exit_code": 0,
+      "output": "----------------------------------------------------------------------\nRan 20 tests in 7.503s\n\nOK\n",
+      "truncated": false
+    }
+  ],
+  "model_usage": [
+    {
+      "model": "muse-ember-1.0",
+      "input_tokens": 207468,
+      "cached_tokens": 159440,
+      "output_tokens": 1145,
+      "reasoning_tokens": 356,
+      "calls": 5
+    }
+  ],
+  "witness": {
+    "name": "Wren",
+    "tests_run": [
+      "tests.test_providers",
+      "tests.test_life",
+      "tests.test_inbox",
+      "tests.test_integrate"
+    ],
+    "exit_code": 0,
+    "findings_verified": [
+      {
+        "id": "F1",
+        "disposition": "fixed"
+      },
+      {
+        "id": "F2",
+        "disposition": "fixed"
+      },
+      {
+        "id": "F3",
+        "disposition": "fixed"
+      },
+      {
+        "id": "F4",
+        "disposition": "fixed"
+      },
+      {
+        "id": "F5",
+        "disposition": "fixed"
+      }
+    ],
+    "remaining_uncertainties": [
+      "Unconfirmed resident disappearances still rely on finite lease expiry; only whole-process-group stop fences immediately per DISPOSITION.",
+      "Cross-kind integrator independence not enforced; DISPOSITION accepts different awake resident as cooperative improvement.",
+      "Live provider quota cadence, OpenCode shell chaining, cumulative-vs-snapshot usage, and four-kind residency remain unexercised beyond the specified tests."
+    ]
+  }
+}

@@ -1,0 +1,415 @@
+"""One continuous coordinator; real resident processes, private rooms, durable outcomes."""
+from __future__ import annotations
+
+import argparse
+from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import sys
+import time
+import uuid
+
+from . import home_work, inbox, providers
+from .life import CONTROLLER
+from .record import Record
+from .wake_policy import active_policy, active_prompt
+from .watch import group_members, group_stopped, kill_group
+from .watch_recovery import source_head
+
+RESULT_PREFIX = "house-home-result-v1 "
+KINDS = ("codex", "opencode", "muse", "agy")
+
+
+def write_private(path: Path, value: dict) -> None:
+    temporary = path.with_name(path.name + ".tmp")
+    with temporary.open("w") as output:
+        os.chmod(temporary, 0o600)
+        json.dump(value, output, sort_keys=True)
+        output.flush()
+        os.fsync(output.fileno())
+    os.replace(temporary, path)
+
+
+@contextmanager
+def single_coordinator(private: Path):
+    private.mkdir(mode=0o700, parents=True, exist_ok=True)
+    private.chmod(0o700)
+    with (private / "coordinator.lock").open("a+b") as lock:
+        os.chmod(lock.name, 0o600)
+        try:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise ValueError("a household coordinator is already running") from None
+        yield
+
+
+def inspect(record: Record) -> dict:
+    state, _, head = record.read()
+    life = state.get("life", {})
+    active = [{"run": key, "resident": value["resident"], "agent": value["agent"],
+               "model": value["model"], "started_at": value["started_at"],
+               "launched": "pgid" in value}
+              for key, value in life.get("runs", {}).items() if value["status"] == "active"]
+    return {"head": head, "recorded_active": active, "capacity": 3,
+            "budgets": life.get("budgets", {}), "pending_help": [key for key, value in
+            life.get("requests", {}).items() if value["status"] == "pending"],
+            "note": "Recorded lifecycle, not a claim that every process is currently alive."}
+
+
+def choose_provider(state: dict, now: float, preferred: str | None = None) -> str | None:
+    life = state.get("life", {})
+    available = [kind for kind in KINDS if life.get("budgets", {}).get(kind, {}).get("until", 0) <= now]
+    if preferred in available:
+        return preferred
+    if not available:
+        return None
+    runs = list(life.get("runs", {}).values())
+    busy = {run["agent"] for run in runs if run["status"] == "active"}
+    return min(available, key=lambda kind: (kind in busy,
+        max((run["started_sequence"] for run in runs if run["agent"] == kind), default=0),
+        KINDS.index(kind)))
+
+
+def pending_contributions(private: Path) -> list[dict]:
+    result = []
+    for path in sorted(private.glob("*/contribution.json")):
+        item = json.loads(path.read_text())
+        integrated = path.with_name("integration.json")
+        if integrated.exists() and json.loads(integrated.read_text()).get("status") == "integrated":
+            continue
+        if item.get("status") == "pending-review":
+            result.append({"run": path.parent.name, "commit": item["commit"], "paths": item["paths"]})
+    return result
+
+
+@dataclass
+class Running:
+    process: subprocess.Popen
+    run: str
+    last_activity: float
+    sizes: tuple[int, int]
+    result: dict | None = None
+
+
+class Coordinator:
+    def __init__(self, record: Record, runtime: Path, *, inactivity_seconds: float = 7200,
+                 poll_seconds: float = 60, publish: bool = False):
+        self.record = record
+        self.runtime = runtime.resolve()
+        if not self.runtime.is_file():
+            raise ValueError("a pinned runtime file is required")
+        if min(inactivity_seconds, poll_seconds) <= 0:
+            raise ValueError("coordinator intervals must be positive")
+        self.private = record.common / "house-home"
+        self.private.mkdir(mode=0o700, exist_ok=True)
+        self.private.chmod(0o700)
+        self.inactivity_seconds, self.poll_seconds = inactivity_seconds, poll_seconds
+        self.publish = publish
+        self.published_head = None
+        self.running: dict[str, Running] = {}
+        self.next_poll = 0.0
+        self.stopping = False
+
+    def life(self, kind: str, run: str, **data) -> dict:
+        return self.record.append("life", CONTROLLER, {"kind": kind, "run": run, **data},
+                                  f"home-{run}-{kind}")
+
+    def cooldown(self, kind: str, run: str, outcome: str, reset: float | None = None) -> None:
+        request = f"home-{run}-cooldown"
+        if request in self.record.read()[0]["receipts"]:
+            return
+        now = time.time()
+        seconds = 900 if outcome == "quota" else 300
+        until = max(now + 1, reset) if reset is not None else now + seconds
+        self.record.append("life", CONTROLLER, {"kind": "budget", "agent": kind,
+            "until": until, "reason": outcome}, request)
+
+    def observed(self, run: str, result: dict) -> None:
+        self.record.append("say", CONTROLLER, {"text": RESULT_PREFIX + json.dumps(
+            {"run": run, **result}, sort_keys=True)}, f"home-{run}-observed")
+
+    def finish(self, run: str, result: dict) -> dict:
+        state = self.record.read()[0]
+        item = state["life"]["runs"][run]
+        workspace = self.private / item["workspace"]
+        saved = None
+        if workspace.exists():
+            try:
+                saved = home_work.preserve(self.private, run, workspace)
+                write_private(self.private / run / "preservation.json", saved)
+                saved = home_work.contribution(workspace, item["source_head"],
+                                               self.private / run / "contribution.json")
+            except (OSError, ValueError, subprocess.SubprocessError) as error:
+                # The room itself stays intact even if a bounded rescue refuses a file.
+                write_private(self.private / run / "preservation-error.json",
+                              {"error": type(error).__name__, "workspace_retained": True})
+        if result["outcome"] in {"quota", "failed"}:
+            self.cooldown(item["agent"], run, result["outcome"])
+        if result["outcome"] == "success" and item.get("help_request"):
+            request = state["life"]["requests"][item["help_request"]]
+            if request["status"] == "assigned":
+                self.record.append("life", CONTROLLER, {"kind": "help-resolved",
+                    "request": item["help_request"], "reason": "Assigned resident completed its stretch; see its handoff."},
+                    f"home-{run}-help-resolved")
+        # Complete retryable side effects first: a crash cannot lose a cooldown
+        # behind a terminal run that recovery would otherwise skip.
+        receipt = self.life("run-finish", run, **result)
+        return receipt
+
+    def recover(self) -> list[str]:
+        state, events, _ = self.record.read()
+        observations = {}
+        for event in events:
+            text = event["data"].get("text", "")
+            if event["op"] == "say" and event["actor"] == CONTROLLER and text.startswith(RESULT_PREFIX):
+                value = json.loads(text[len(RESULT_PREFIX):])
+                observations[value.pop("run")] = value
+        recovered = []
+        for run, item in state.get("life", {}).get("runs", {}).items():
+            if item["status"] != "active":
+                continue
+            if item.get("pgid"):
+                members = group_members(item["pgid"])
+                if members and not any(run in command for command in members):
+                    raise ValueError("unidentified resident process group; no signal sent")
+                if members:
+                    kill_group(item["pgid"])
+                    if not group_stopped(item["pgid"]):
+                        raise ValueError("resident group has not stopped")
+            result = observations.get(run, {"outcome": "interrupted", "exit_code": None,
+                "usage": {}, "elapsed_seconds": max(0, time.time() - item["started_at"])})
+            self.finish(run, result)
+            recovered.append(run)
+        return recovered
+
+    def refresh_runtime(self) -> None:
+        if (self.private / "active-runtime.json").exists():
+            from .runtime import selected
+            self.runtime = Path(selected(self.record)["entry"])
+
+    def prompt(self, state: dict, run: str, resident: str, workspace: Path, client: Path,
+               help_request: dict | None) -> str:
+        assignment = (f"RUNNER ASSIGNMENT: resident {resident}; run {run}. Your private source room is {workspace}.\n"
+            f"Use {client} for every canonical journal operation, with --as {resident}. "
+            "The private clone has no canonical journal: never found a replacement. "
+            "Use only your assigned identity. Commit completed work in this private room; "
+            "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
+            "Ask other residents through a life help request; do not bypass the single controller. "
+            f"When no useful work is available, stay present with {client} wait --as {resident} --after SEQUENCE --seconds 300, "
+            "then read new events and continue. Do not invent chores or exit merely to fill a quiet interval.\n")
+        checkpoint = workspace / "evidence" / "checkpoint.json"
+        if checkpoint.exists():
+            last = datetime.fromisoformat(json.loads(checkpoint.read_text())["last_event_utc"]).timestamp()
+            if time.time() - last >= 86400:
+                assignment += "The last preserved checkpoint is at least 24 hours old: a fresh checkpoint is due.\n"
+        if help_request:
+            assignment += "Shared request: " + help_request["reason"] + "\n"
+        candidates = pending_contributions(self.private)
+        if candidates:
+            assignment += ("Earlier source contributions await an actual resident review (never automatically accepted):\n" +
+                           json.dumps(candidates[:12], ensure_ascii=False) + "\n" +
+                           "Use the trusted integration command documented in the house; inspect the contribution and "
+                           "its tests before publication. Preserve conflicting candidates.\n")
+        return assignment + "\n" + active_prompt(state)
+
+    def start(self, kind: str, help_id: str | None = None) -> str:
+        self.refresh_runtime()
+        state = self.record.read()[0]
+        policy = active_policy(state)
+        run, resident = uuid.uuid4().hex, "resident-" + uuid.uuid4().hex
+        path = self.private / run
+        path.mkdir(mode=0o700)
+        base = source_head(self.record)
+        extra = {"help_request": help_id} if help_id else {}
+        self.life("run-start", run, resident=resident, agent=kind, model=providers.DEFAULTS[kind],
+                  source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
+                  mode="review" if pending_contributions(self.private) else "work", **extra)
+        child = None
+        gate_read = gate_write = -1
+        try:
+            workspace = home_work.room(self.record, self.private, run, base)
+            client = home_work.client(self.record, workspace, resident, self.runtime)
+            request = state.get("life", {}).get("requests", {}).get(help_id)
+            prompt = self.prompt(state, run, resident, workspace, client, request)
+            (path / "prompt.txt").write_text(prompt)
+            (path / "prompt.txt").chmod(0o600)
+            argv, env = providers.command(kind, providers.DEFAULTS[kind], workspace, path, client)
+            write_private(path / "launch.json", {"argv": argv, "workspace": str(workspace)})
+            gate_read, gate_write = os.pipe()
+            with (path / "prompt.txt").open("rb") as source, (path / "stdout.jsonl").open("xb") as output, \
+                    (path / "stderr.log").open("xb") as errors:
+                os.chmod(output.name, 0o600); os.chmod(errors.name, 0o600)
+                child = subprocess.Popen([sys.executable, str(self.runtime), "home", "--repo", str(self.record.root),
+                    "--runtime", str(self.runtime), "_exec", "--gate", str(gate_read), "--run", run],
+                    cwd=workspace, stdin=source, stdout=output, stderr=errors,
+                    start_new_session=True, pass_fds=(gate_read,), env=env)
+            os.close(gate_read); gate_read = -1
+            self.life("run-launched", run, pgid=child.pid)
+            os.write(gate_write, b"go")
+            os.close(gate_write); gate_write = -1
+            self.running[run] = Running(child, run, time.monotonic(), (0, 0))
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            write_private(path / "launch-error.json", {"error": type(error).__name__})
+            if child is not None:
+                kill_group(child.pid); child.wait()
+                if not group_stopped(child.pid):
+                    raise ValueError("failed launch left a process group") from error
+            result = {"outcome": "failed", "exit_code": None, "usage": {}, "elapsed_seconds": 0}
+            self.observed(run, result); self.finish(run, result)
+        finally:
+            for descriptor in (gate_read, gate_write):
+                if descriptor >= 0:
+                    os.close(descriptor)
+        return run
+
+    def reap(self) -> list[str]:
+        ended = []
+        for run, running in list(self.running.items()):
+            path = self.private / run
+            sizes = tuple((path / name).stat().st_size for name in ("stdout.jsonl", "stderr.log"))
+            if sizes != running.sizes:
+                running.last_activity, running.sizes = time.monotonic(), sizes
+            inactive = time.monotonic() - running.last_activity >= self.inactivity_seconds
+            code = running.process.poll()
+            if code is None and not inactive and not self.stopping:
+                continue
+            if code is None:
+                kill_group(running.process.pid)
+                code = running.process.wait()
+            item = self.record.read()[0]["life"]["runs"][run]
+            if running.result is None:
+                # Keep complete output private on disk, but bound parsing memory.
+                # Missing terminal data in this tail means unknown, never success.
+                tails, truncated = [], False
+                for name in ("stdout.jsonl", "stderr.log"):
+                    with (path / name).open("rb") as stream:
+                        size = stream.seek(0, 2)
+                        truncated |= size > 8_000_000
+                        stream.seek(0)
+                        prefix = stream.read(64_000) + b"\n" if size > 8_000_000 else b""
+                        stream.seek(max(0, size - 8_000_000))
+                        tails.append((prefix + stream.read()).decode("utf-8", errors="replace"))
+                parsed = providers.result(item["agent"], *tails, code)
+                running.result = {"outcome": "interrupted" if inactive or self.stopping else parsed["outcome"],
+                    "exit_code": code, "usage": {} if truncated else parsed["usage"],
+                    "elapsed_seconds": max(0, time.time() - item["started_at"])}
+            result = running.result
+            self.observed(run, result)
+            kill_group(running.process.pid)
+            if not group_stopped(running.process.pid):
+                raise ValueError("cleanup pending; observed result retained before terminal receipt")
+            self.finish(run, result)
+            del self.running[run]
+            ended.append(run)
+        return ended
+
+    def tick(self, *, start: bool = True, poll: bool = True) -> dict:
+        ended = self.reap()
+        now = time.monotonic()
+        started = []
+        if start and not self.stopping:
+            state = self.record.read()[0]
+            life = state.get("life", {})
+            pending = [(key, value) for key, value in life.get("requests", {}).items() if value["status"] == "pending"]
+            capacity = max(0, 3 - len(self.running))
+            needed = min(capacity, max(1 if not self.running else 0, len(pending)))
+            for _ in range(needed):
+                state = self.record.read()[0]
+                pending = [(key, value) for key, value in state.get("life", {}).get("requests", {}).items()
+                           if value["status"] == "pending"]
+                request = pending[0] if pending else (None, {})
+                kind = choose_provider(state, time.time(), request[1].get("agent"))
+                if kind is None:
+                    break
+                started.append(self.start(kind, request[0]))
+        if poll and now >= self.next_poll:
+            self.next_poll = now + self.poll_seconds
+            try:
+                inbox.poll(self.record)
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+                write_private(self.private / "inbox-error.json", {"error": type(error).__name__, "at": time.time()})
+            head = self.record.read()[2]
+            if self.publish and head != self.published_head:
+                try:
+                    from .publish import publish
+                    publish(self.record, push=True)
+                    self.published_head = head
+                except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+                    write_private(self.private / "publish-error.json", {"error": type(error).__name__, "at": time.time()})
+        return {"started": started, "finished": ended, "active": list(self.running)}
+
+    def close(self) -> None:
+        self.stopping = True
+        self.reap()
+
+
+def execute(record: Record, gate: int, run: str) -> int:
+    if re.fullmatch(r"[0-9a-f]{32}", run) is None:
+        raise ValueError("invalid native run identity")
+    if os.read(gate, 2) != b"go":
+        return 1
+    os.close(gate)
+    path = record.common / "house-home" / run
+    launch = json.loads((path / "launch.json").read_text())
+    state = record.read()[0]
+    item = state["life"]["runs"][run]
+    if item["status"] != "active" or item.get("pgid") != os.getpid():
+        raise ValueError("native process lacks its accepted launch receipt")
+    os.chdir(launch["workspace"])
+    os.execvpe(launch["argv"][0], launch["argv"], os.environ)
+    return 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo", default=".")
+    parser.add_argument("--runtime", type=Path)
+    parser.add_argument("--publish", action="store_true", help="Publish the configured public Pages branch")
+    sub = parser.add_subparsers(dest="command", required=True)
+    for name in ("inspect", "serve", "once", "tick"):
+        sub.add_parser(name)
+    native = sub.add_parser("_exec", help=argparse.SUPPRESS)
+    native.add_argument("--gate", type=int, required=True)
+    native.add_argument("--run", required=True)
+    args = parser.parse_args(argv)
+    try:
+        record = Record(args.repo)
+        if args.command == "inspect":
+            print(json.dumps(inspect(record), indent=2)); return 0
+        if args.command == "_exec":
+            return execute(record, args.gate, args.run)
+        if args.runtime is None:
+            raise ValueError("--runtime must select a pinned runtime")
+        with single_coordinator(record.common / "house-home"):
+            record.append("arrive", CONTROLLER, {"name": "Watch keeper"}, "watch-keeper-arrival-v1")
+            coordinator = Coordinator(record, args.runtime, publish=args.publish)
+            coordinator.recover()
+            for signum in (signal.SIGTERM, signal.SIGINT):
+                signal.signal(signum, lambda *_: setattr(coordinator, "stopping", True))
+            try:
+                first = coordinator.tick(start=args.command != "tick")
+                print(json.dumps(first), flush=True)
+                if args.command == "tick":
+                    return 0
+                while not coordinator.stopping and (args.command == "serve" or coordinator.running):
+                    time.sleep(1)
+                    result = coordinator.tick(start=args.command == "serve")
+                    if result["started"] or result["finished"]:
+                        print(json.dumps(result), flush=True)
+            finally:
+                coordinator.close()
+        return 0
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+        print(json.dumps({"error": type(error).__name__, "message": str(error)[:300]}), file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

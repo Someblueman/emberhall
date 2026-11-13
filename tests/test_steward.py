@@ -3,15 +3,44 @@ import contextlib
 from email.utils import formatdate
 import io
 import json
+from pathlib import Path
+import tempfile
 import time
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from house import council, steward
+from house import council, steward, wake_policy
 
 
 class StewardTests(unittest.TestCase):
+    def test_wake_authorization_requires_exact_owner_source_before_network_or_append(self):
+        record = Mock()
+        record.read.return_value = ({}, [], "head")
+        record.ref.return_value = steward.FOUNDATION
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "wrong-objective.md"
+            source.write_text("A resident cannot authorize its own limits.")
+            with patch.object(steward, "Record", return_value=record), \
+                    patch.object(steward, "github") as network, \
+                    contextlib.redirect_stderr(io.StringIO()) as errors:
+                code = steward.main(["--as", "alice", "authorize-wake", "--source", str(source),
+                                     "--source-commit", "a" * 40])
+        self.assertEqual(code, 2)
+        self.assertIn("source bytes", errors.getvalue())
+        record.append.assert_not_called()
+        network.assert_not_called()
+
+    def test_wake_notice_names_protected_scope_without_changing_old_rule_notice(self):
+        item = {"mode": "rule", "status": "pending", "title": "A rule", "text": "Exact text\n",
+                "author": "alice", "base": "revision"}
+        old = steward.notice_body("rule", item)
+        changed = steward.notice_body("rule", item | {"mode": "wake-prompt"})
+        self.assertNotIn("Scope: council wake", old)
+        self.assertIn("Scope: council wake prompt only", changed)
+        self.assertIn("24-hour veto window", changed)
+        self.assertIn("two independent non-author endorsements", changed)
+
     def test_github_requires_fresh_server_date_and_success(self):
         now = time.time()
         response = SimpleNamespace(returncode=0, stdout=(

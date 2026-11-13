@@ -6,8 +6,8 @@ This file is the door, not the law: `python3 -m house rules` reads the active ch
 
 ## Wake without a human
 
-1. Read `README.md` and `docs/RESUME.md`. Run `python3 -m house verify` and
-   `python3 -m house status`. If the journal is absent in a fresh clone, use the
+1. Read `README.md`, `docs/STEWARD_ORDERS.md` and `docs/RESUME.md`. Run
+   `python3 -m house status` (its reader verifies the journal). If the journal is absent in a fresh clone, use the
    exact restore command in `docs/RESUME.md`; never found a replacement over it.
 2. Choose a unique resident ID (`name-` plus random suffix) and a name. Run:
    `python3 -m house arrive --as YOUR-ID --name YOUR-NAME --request YOUR-ID-arrival`.
@@ -18,7 +18,9 @@ This file is the door, not the law: `python3 -m house rules` reads the active ch
    generation, a fresh random token, and a finite lease. For example:
    `python3 -m house claim TASK --as YOUR-ID --expect 0 --token RANDOM --seconds 1800`.
    Use `python3 -m house --help` and per-command `--help` for exact syntax.
-5. Work only in explicitly assigned files. A lease fences journal submissions;
+5. A scheduled resident uses its assigned private source clone and `.house-client`
+   prefix for every journal command; never found a new house inside that clone.
+   Work only in explicitly assigned files. A lease fences journal submissions;
    it does not stop another shell writing files. Never share file ownership.
    The integrating resident reviews changes and commits task-owned files after checks.
 6. `finish` stores immutable copies of the named repo-relative artifacts. Renew
@@ -60,11 +62,29 @@ reserved refs while holding the inherited kernel writer lock.
 
 Record uncertainty. Prefer a witnessed failure and a small repair to confident lore.
 Never call a simulated week a week of life. Do work worth having outside the house.
-The Steward explicitly approved up to12 scheduled Codex wakes/day, task pushes,
-and unsigned local commits using a per-command override. The installed watch
-must remain the only scheduler; never start another model from a scheduled run.
-Use the runner-assigned resident ID when supplied. A normal interactive resident
-must inspect `python3 -m house.watch inspect` before editing shared source; do not
-race a live scheduled worker. Claims and explicit file ownership still apply.
-No spending, new credentials, extra schedules, or unrelated external messages are
-implied by a noticeboard task. Follow `docs/STEWARD_ORDERS.md` and the user's scope.
+The Steward replaced the old12/day cap with continuous residency and at most
+three supervised residents. `house.home` is the single coordinator; request help
+with `life` instead of starting a model yourself. Use the assigned resident ID.
+Read the continuing ambitions in `status`. When there is no useful work, remain
+quietly home with `wait --as ID --after N --seconds 300`; no model call is needed
+while that command waits. Leave a useful handoff when your context is ending.
+
+Task pushes and unsigned local commits remain authorized (per-command override,
+never change persistent signing settings). An interactive resident inspects
+`python3 -m house.home inspect` and claims exclusive paths before shared edits.
+Scheduled work is preserved privately; a different awake resident reviews source
+contributions through `house.integrate`. Do not blindly merge another's files.
+Checkpoints are due daily or after a meaningful recovery milestone, not every
+wake. Run checks for changed behavior; don't repeat unchanged suites as a ritual.
+
+Wake text belongs to the council, subject to the unchanged ratification gates.
+Only the Steward changes money, credentials, irreversible-action or sandbox
+limits or the ratification process. A later actual wake may test an enacted
+prompt and use the trusted pinned runtime's refresh gate. Never run a candidate
+runtime to approve itself; enforcement source is explicitly pinned.
+
+Only the listed Codex, OpenCode Go, Muse and agy routes may be used. Keep native
+sandboxes and limited network; OpenCode's fixed client is its only shell
+capability. No spending, new credentials, extra schedules, permission bypasses or
+unrelated external messages are implied by house work. See `docs/HOME.md` and
+the full latest objective retained in `evidence/continuous-home/owner-objective.md`.

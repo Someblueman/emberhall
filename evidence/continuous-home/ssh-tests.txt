@@ -1,0 +1,10 @@
+test_changed_host_key_blocks_shipped_client_before_mutation (tests.test_custodian_ssh.CustodianSSHTests.test_changed_host_key_blocks_shipped_client_before_mutation) ... ok
+test_restricted_key_denies_pty_and_remote_forwarding (tests.test_custodian_ssh.CustodianSSHTests.test_restricted_key_denies_pty_and_remote_forwarding) ... ok
+test_shell_and_subsystem_requests_cannot_execute_arbitrary_commands (tests.test_custodian_ssh.CustodianSSHTests.test_shell_and_subsystem_requests_cannot_execute_arbitrary_commands) ... ok
+test_shipped_client_appends_once_and_recovers_receipt_over_ssh (tests.test_custodian_ssh.CustodianSSHTests.test_shipped_client_appends_once_and_recovers_receipt_over_ssh) ... ok
+test_wire_identity_cannot_override_key_binding (tests.test_custodian_ssh.CustodianSSHTests.test_wire_identity_cannot_override_key_binding) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.036s
+
+OK

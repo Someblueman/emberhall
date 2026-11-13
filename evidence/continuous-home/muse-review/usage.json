@@ -1,0 +1,16 @@
+{
+  "model_usage": [
+    {
+      "model": "muse-ember-1.0",
+      "input_tokens": 1884667,
+      "cached_tokens": 1767160,
+      "output_tokens": 23288,
+      "reasoning_tokens": 17837,
+      "calls": 23
+    }
+  ],
+  "calls": 23,
+  "children_included": false,
+  "native_provider": "meta",
+  "requested_route": "Muse / muse-ember-1.0"
+}

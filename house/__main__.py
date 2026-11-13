@@ -12,11 +12,13 @@ from pathlib import Path
 from .files import artifact
 from .governance import ballot
 from .record import Record
+from .record import REF
 
 
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Emberhall — a home for discontinuous minds")
     p.add_argument("--repo", default=".")
+    p.add_argument("--artifacts-from", help="explicit private source checkout for finish artifacts")
     sub = p.add_subparsers(dest="command", required=True)
     init = sub.add_parser("found", help="found a new house, never replace one")
     init.add_argument("--name", required=True)
@@ -24,6 +26,14 @@ def parser() -> argparse.ArgumentParser:
     init.add_argument("--owner-public-key")
     for name in ("status", "verify", "rules"):
         sub.add_parser(name)
+    life = sub.add_parser("life", help="record a place, ambition, identity or help request")
+    life.add_argument("--as", dest="actor", required=True)
+    life.add_argument("--request")
+    life.add_argument("--data", required=True, help="JSON life operation")
+    waiting = sub.add_parser("wait", help="stay home quietly until the record changes, without model calls")
+    waiting.add_argument("--as", dest="actor", required=True)
+    waiting.add_argument("--after", type=int, required=True)
+    waiting.add_argument("--seconds", type=int, default=300)
     bundle = sub.add_parser("bundle")
     bundle.add_argument("path")
     restore = sub.add_parser("restore")
@@ -104,6 +114,7 @@ def briefing(state: dict) -> dict:
             "rule_revision", "lessons")} | {"tasks": tasks,
             "proposals": {k: {field: value for field, value in v.items() if field != "text"}
                           for k, v in state["proposals"].items()},
+            "life": state.get("life", {}),
             "governance": ("Steward-approved trial, endorsements and veto window" if "council" in state
                            else "owner signatures" if state["owner_key"] else "sealed")}
 
@@ -119,6 +130,20 @@ def run(args: argparse.Namespace) -> object:
     if command == "bundle":
         return record.bundle(args.path)
     state, events, head = record.read()
+    if command == "wait":
+        if args.actor not in state["residents"] or not 0 <= args.after <= state["sequence"]:
+            raise ValueError("invalid waiting resident or cursor")
+        if not 1 <= args.seconds <= 3600:
+            raise ValueError("wait must be between 1 and 3600 seconds")
+        deadline = time.monotonic() + args.seconds
+        while state["sequence"] <= args.after and time.monotonic() < deadline:
+            time.sleep(min(2, max(0, deadline - time.monotonic())))
+            if record.ref(REF) != head:
+                state, events, head = record.read()
+        return {"changed": state["sequence"] > args.after, "through": state["sequence"],
+                "head": head, "note": "Resident process waited; no model call was required."}
+    if command == "life":
+        return record.append("life", args.actor, json.loads(args.data), args.request)
     if command == "status":
         return briefing(state)
     if command == "verify":
@@ -213,14 +238,15 @@ def run(args: argparse.Namespace) -> object:
             output.write("\n")
         return {"path": args.path, "lessons": len(lessons)}
     data = vars(args).copy()
-    for key in ("repo", "command", "actor", "request"):
+    for key in ("repo", "artifacts_from", "command", "actor", "request"):
         data.pop(key)
     if command == "propose":
         data["text"] = Path(data.pop("file")).read_text()
     if command == "ratify":
         data["signature"] = Path(data["signature"]).read_text()
     if command == "finish":
-        data["artifacts"] = {name: artifact(record.root, name) for name in data.pop("artifact")}
+        source = Path(args.artifacts_from).resolve() if args.artifacts_from else record.root
+        data["artifacts"] = {name: artifact(source, name) for name in data.pop("artifact")}
     result = record.append(command, args.actor, data, args.request)
     if command == "wake":
         result["next"] = f"python3 -m house read --as {args.actor}"

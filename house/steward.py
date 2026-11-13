@@ -85,12 +85,14 @@ def sync(record: Record, actor: str, request: str | None = None) -> dict:
 
 def notice_body(proposal: str, item: dict) -> str:
     sha = hashlib.sha256(item["text"].encode()).hexdigest()
+    scope = ("\nScope: council wake prompt only; Steward money, credentials, irreversible-action, "
+             "sandbox and ratification limits remain protected.\n" if item["mode"] == "wake-prompt" else "")
     return (f"<!-- emberhall-notice {proposal} {sha} -->\n"
             f"## Proposed rule: {item['title']}\n\n"
             f"ID: `{proposal}`\n\nAuthor: `{item['author']}`\n\n"
             f"Base revision: `{item['base']}`\n\nText SHA-256: `{sha}`\n\n"
             "The following is the exact proposed rule text:\n\n"
-            + item["text"] + "\n\n"
+            + item["text"] + "\n\n" + scope +
             "The full 24-hour veto window begins only when this notice is accepted in the journal. "
             "Recorded trial evidence and two independent non-author endorsements are also required. "
             f"To veto from your phone, comment `VETO {proposal}` in this issue. "
@@ -100,7 +102,7 @@ def notice_body(proposal: str, item: dict) -> str:
 def publish_notice(record: Record, actor: str, proposal: str) -> dict:
     state, _, _ = record.read()
     item = state["proposals"][proposal]
-    if item.get("mode") != "rule" or item["status"] != "pending":
+    if item.get("mode") not in council.MODES or item["status"] != "pending":
         raise ValueError("only a pending named rule can be noticed")
     context()
     body = notice_body(proposal, item)
@@ -131,11 +133,21 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("authorize")
     sub.add_parser("sync")
     sub.add_parser("status")
+    wake_approval = sub.add_parser("authorize-wake", help="record the exact new Steward authorization")
+    wake_approval.add_argument("--source", required=True, type=Path)
+    wake_approval.add_argument("--source-commit", required=True)
+    sub.add_parser("wake-prompt", help="show active council text and protected limits")
+    testing = sub.add_parser("test-runtime", help="test committed runtime during a later actual wake")
+    testing.add_argument("--run", required=True)
+    testing.add_argument("--task", required=True)
+    testing.add_argument("--token", required=True)
+    testing.add_argument("--source-repo", type=Path)
     propose = sub.add_parser("propose")
     propose.add_argument("proposal")
     propose.add_argument("--title", required=True)
     propose.add_argument("--file", required=True, type=Path)
     propose.add_argument("--reason", required=True)
+    propose.add_argument("--mode", choices=sorted(council.MODES), default="rule")
     for name in ("trial", "endorse", "notice", "enact"):
         action = sub.add_parser(name)
         action.add_argument("proposal")
@@ -159,11 +171,34 @@ def main(argv: list[str] | None = None) -> int:
                                     "source": "Owner-supplied goal-objective.md, attachment 640ada57-3cda-4207-b39f-a325ced64344; preserved in evidence/steward-process/owner-objective.md",
                                     "repository": council.REPOSITORY, "issue": council.ISSUE,
                                     "owner_id": council.OWNER_ID}, "steward-authorization-2026-11-13")
+        elif args.command == "authorize-wake":
+            from . import wake_policy
+            if record.ref(ANCHOR) != FOUNDATION:
+                raise ValueError("wake approval is pinned to Emberhall's existing foundation")
+            if hashlib.sha256(args.source.read_bytes()).hexdigest() != wake_policy.APPROVED_SOURCE_SHA256:
+                raise ValueError("wrong wake-policy Steward source bytes")
+            snapshot = wake_policy.source_snapshot(record.root)
+            if snapshot["source_head"] != args.source_commit:
+                raise ValueError("owner-reviewed bootstrap source commit changed")
+            context()
+            identity, _ = github("user")
+            if identity.get("id") != council.OWNER_ID:
+                raise ValueError("the authenticated account must be the approved Steward")
+            result = record.append("council-wake-authorize", args.actor, wake_policy.approval(
+                "Owner-supplied Let the house steer itself objective, attachment "
+                "02ac070e-1f86-4c9b-b2f1-6cf5d0027f3e", snapshot), "wake-policy-authorization-v1")
+        elif args.command == "wake-prompt":
+            from .wake_policy import active_policy, active_prompt
+            result = {**active_policy(state), "assembled_prompt": active_prompt(state)}
+        elif args.command == "test-runtime":
+            from .wake_policy import test_runtime
+            result = test_runtime(record, args.actor, args.run, args.task, args.token,
+                                  args.source_repo or record.root)
         elif args.command == "sync":
             result = sync(record, args.actor)
         elif args.command == "status":
             result = {"bell": BELL_URL, "council": state.get("council"),
-                      "proposals": {k: v for k, v in state["proposals"].items() if v.get("mode") == "rule"}}
+                      "proposals": {k: v for k, v in state["proposals"].items() if v.get("mode") in council.MODES}}
         elif args.command == "notice":
             result = publish_notice(record, args.actor, args.proposal)
         elif args.command == "enact":
@@ -174,7 +209,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             data = {"proposal": args.proposal}
             if args.command == "propose":
-                data.update(mode="rule", title=args.title, text=args.file.read_text(),
+                data.update(mode=args.mode, title=args.title, text=args.file.read_text(),
                             reason=args.reason, base=state["rule_revision"])
             else:
                 data["evidence"] = args.evidence

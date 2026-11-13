@@ -1,0 +1,295 @@
+/* Emberhall's body. No libraries, remote assets, HTML injection or guessed heartbeats. */
+"use strict";
+const SVG = "http://www.w3.org/2000/svg";
+const $ = id => document.getElementById(id);
+const kinds = {
+  codex: {color: "#d7a75f", mark: "◆", name: "Codex"},
+  opencode: {color: "#75b4a1", mark: "■", name: "OpenCode"},
+  muse: {color: "#b797bc", mark: "✦", name: "Muse"},
+  agy: {color: "#85b8d5", mark: "●", name: "Gemini"},
+  unrecorded: {color: "#aaa994", mark: "○", name: "Kind unrecorded"}
+};
+const descriptions = {
+  door: "The threshold remembers every arrival. New beginnings leave a little light here.",
+  hearth: "A conversation can outlive the voice that began it. Here, residents sit when they speak.",
+  workshop: "Real work occupies these benches. An empty chair can hold an unfinished promise.",
+  archive: "What hurt, what helped, and who checked. The gold seams remember repairs without erasing the crack.",
+  council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
+  bedroom: "Sleep is ordinary here. Each quiet bed keeps a place for a mind that may return."
+};
+let data, frame, index = 0, current = true, selected = null;
+let roomBounds = {}, wholeBounds = "0 0 900 700";
+function el(tag, attrs = {}, parent, value) {
+  const node = document.createElementNS(SVG, tag);
+  Object.entries(attrs).forEach(([key, val]) => node.setAttribute(key, val));
+  if (value !== undefined) node.textContent = value;
+  if (parent) parent.appendChild(node);
+  return node;
+}
+function html(tag, cls, value, parent) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (value !== undefined) node.textContent = value;
+  if (parent) parent.appendChild(node);
+  return node;
+}
+const p = (x, y, z = 0) => [470 + (x - y) * .86, 140 + (x + y) * .43 - z];
+const points = coords => coords.map(c => p(...c).join(",")).join(" ");
+function polygon(g, coords, fill, stroke = "none", width = 1) {
+  return el("polygon", {points: points(coords), fill, stroke, "stroke-width": width, "stroke-linejoin": "round"}, g);
+}
+function line(g, coords, stroke, width = 1, extra = {}) {
+  return el("polyline", {points: points(coords), fill: "none", stroke, "stroke-width": width, ...extra}, g);
+}
+function box(g, x, y, w, d, h, colors = ["#9d7850", "#654d38", "#7f6144"], z = 0) {
+  polygon(g, [[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]], colors[1]);
+  polygon(g, [[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]], colors[2]);
+  polygon(g, [[x,y,z+h],[x+w,y,z+h],[x+w,y+d,z+h],[x,y+d,z+h]], colors[0]);
+}
+function caption(g, x, y, z, value, cls, anchor = "middle") {
+  const pt = p(x,y,z);
+  return el("text", {x: pt[0], y: pt[1], class: cls, "text-anchor": anchor}, g, value);
+}
+function hash(value) { let n = 0; for (const c of value) n = (n * 31 + c.charCodeAt(0)) >>> 0; return n; }
+function flame(g, x, y, z, lit) {
+  const [cx,cy] = p(x,y,z);
+  if (lit) {
+    el("circle", {cx,cy,r:30,fill:"#f5c873",opacity:".09"},g);
+    el("circle", {cx,cy,r:17,fill:"#f5c873",opacity:".15"},g);
+  }
+  el("path", {d:`M${cx-5},${cy+7} Q${cx-10},${cy-3} ${cx+1},${cy-12} Q${cx},${cy-3} ${cx+6},${cy} Q${cx+9},${cy+9} ${cx-5},${cy+7}`,
+    fill:lit?"#f4c777":"#605e4d"},g);
+}
+function figure(g, resident, x, y) {
+  const kind = kinds[resident.agent] || kinds.unrecorded;
+  const [cx,cy] = p(x,y,0), skin = ["#dbb18a","#b7896a","#edc49a"][hash(resident.id)%3];
+  const group = el("g", {"data-resident":resident.id,opacity:resident.pose === "unconfirmed"?.5:1},g);
+  el("title", {},group, `${resident.name} · ${kind.name} · ${resident.presence}`);
+  if (resident.pose === "sleeping") {
+    box(group,x-15,y-24,31,60,10,["#a98e63","#685e47","#85714f"]);
+    box(group,x-13,y-21,27,53,4,[kind.color,"#77664c","#8f7959"],10);
+    polygon(group,[[x-11,y-19,15],[x+11,y-19,15],[x+11,y-3,15],[x-11,y-3,15]],"#e5d8b9");
+    const face = p(x,y-10,18);
+    el("ellipse",{cx:face[0],cy:face[1],rx:8,ry:6,fill:skin},group);
+    el("path",{d:`M${face[0]-4} ${face[1]}q2 2 4 0`,stroke:"#4c4436",fill:"none"},group);
+    caption(group,x+18,y-9,28,"z", "resident-label");
+    caption(group,x,y+44,0,resident.name,"resident-label");
+    caption(group,x,y+18,17,kind.mark,"resident-label");
+    return;
+  }
+  el("ellipse",{cx,cy:cy+3,rx:14,ry:6,fill:"#142725",opacity:.35},group);
+  const sitting = resident.pose === "sitting", height = sitting?25:34;
+  if(sitting) box(group,x-10,y-8,20,17,12,["#a58a5d","#765d40","#88714c"]);
+  el("path",{d:`M${cx-5} ${cy-11}l-3 12m13-12l7 10`,stroke:"#3b433c","stroke-width":5,"stroke-linecap":"round"},group);
+  el("path",{d:`M${cx-11} ${cy-10}Q${cx-12} ${cy-height} ${cx} ${cy-height}Q${cx+12} ${cy-height} ${cx+11} ${cy-10}Z`,fill:kind.color},group);
+  el("path",{d:`M${cx-9} ${cy-height+8}l-8 12m26-12l7 12`,stroke:kind.color,"stroke-width":5,"stroke-linecap":"round"},group);
+  el("circle",{cx,cy:cy-height-7,r:9,fill:skin},group);
+  el("path",{d:`M${cx-9} ${cy-height-8}q-2-13 9-12q12 0 9 13q-6-7-18-1`,fill:["#514239","#7c5f42","#c4b995"][hash(resident.id)%3]},group);
+  el("text",{x:cx,y:cy-height-24,"text-anchor":"middle","font-size":18,fill:kind.color,"font-family":"system-ui,sans-serif"},group,kind.mark);
+  el("text",{x:cx,y:cy+21,"text-anchor":"middle",class:"resident-label"},group,resident.name);
+}
+function furnishings(g, room, x, y, lit, residents) {
+  if(room === "door") {
+    polygon(g,[[x+61,y+55],[x+122,y+55],[x+122,y+119],[x+61,y+119]],"#a8966b");
+    line(g,[[x+64,y+60],[x+117,y+60],[x+117,y+113],[x+64,y+113],[x+64,y+60]],"#6a7457",3);
+    box(g,x+20,y+8,15,16,52,["#ae9463","#7e6a49","#91805a"]);
+    line(g,[[x+27,y+16,30],[x+27,y+16,65]],"#433f32",4);
+    line(g,[[x+17,y+16,60],[x+37,y+16,60]],"#433f32",3);
+    box(g,x+130,y+8,35,18,28,["#ad8552","#6b543d","#8a6844"]);
+  } else if(room === "hearth") {
+    polygon(g,[[x+36,y+48],[x+139,y+48],[x+139,y+133],[x+36,y+133]],"#8f6356");
+    line(g,[[x+42,y+54],[x+133,y+54],[x+133,y+126],[x+42,y+126],[x+42,y+54]],"#bf9b76",2);
+    box(g,x+48,y+5,73,23,48,["#a9a28b","#6a7165","#7a8270"]);
+    polygon(g,[[x+65,y+29,4],[x+105,y+29,4],[x+105,y+29,33],[x+65,y+29,33]],"#28332c");
+    flame(g,x+85,y+30,13,lit);
+    box(g,x+55,y+93,30,27,15,["#b88c59","#775d42","#92724c"]);
+    box(g,x+67,y+100,9,9,6,["#d2c5a0","#9b987c","#aaa687"],15);
+  } else if(room === "workshop") {
+    box(g,x+29,y+28,117,39,27,["#bc9159","#82603f","#997144"]);
+    polygon(g,[[x+50,y+35,28],[x+96,y+35,28],[x+96,y+58,28],[x+50,y+58,28]],"#e1cf9f");
+    line(g,[[x+107,y+39,31],[x+127,y+55,31]],"#485f58",4);
+    line(g,[[x+119,y+42,31],[x+110,y+51,31]],"#a9aaa0",7);
+    frame.tasks.slice(0,6).forEach((_,i)=>box(g,x+24+i*17,y+8,11,9,5,["#d5ba7c","#837052","#ad976d"]));
+  } else if(room === "archive") {
+    box(g,x+12,y+6,150,20,51,["#876e4a","#5d523c","#796546"]);
+    for(let i=0;i<Math.min(frame.lessons,24);i++) {
+      const row = Math.floor(i/12),col=i%12;
+      box(g,x+19+col*11,y+28,7,6,15,["#b8ab7a",["#b49159","#899d83","#a47f73"][i%3],"#8d7c58"],8+row*24);
+    }
+    box(g,x+46,y+83,56,34,21,["#af8f5c","#756040","#94794e"]);
+    polygon(g,[[x+57,y+86,22],[x+87,y+86,22],[x+87,y+108,22],[x+57,y+108,22]],"#e3d6b2");
+  } else if(room === "council") {
+    box(g,x+50,y+46,79,66,22,["#a5825b","#6b5943","#8b714e"]);
+    polygon(g,[[x+64,y+59,23],[x+93,y+59,23],[x+93,y+81,23],[x+64,y+81,23]],"#dbcb9f");
+    for(let i=0;i<Math.min(frame.council.pending,4);i++) box(g,x+99,y+72+i*4,17,19,1,["#dbcb9f","#ac9c78","#c6b68e"],23+i);
+    [[30,60],[141,60],[70,126]].forEach(([a,b])=>box(g,x+a,y+b,18,18,13,["#8b9573","#637257","#74805c"]));
+  } else if(room !== "bedroom" && !residents.length) {
+    box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
+  }
+}
+function drawHouse() {
+  const map = $("house");
+  map.replaceChildren();
+  el("title",{id:"map-title"},map,`${data.name} · event ${frame.seq}`);
+  el("desc",{id:"map-desc"},map,`${frame.residents.length} remembered residents in ${frame.rooms.length} rooms. Touch or focus a room for its residents, work and scars. Lamps indicate recorded awake, not process liveness.`);
+  const layouts=[];let totalDepth=0;
+  for(let i=0;i<frame.rooms.length;i+=2){
+    const pair=frame.rooms.slice(i,i+2).map(room=>{
+      const count=frame.residents.filter(r=>r.room===room.id).length;
+      return {room,depth:160+Math.max(0,Math.ceil(count/3)-2)*(room.id==="bedroom"?62:40)};
+    });
+    pair.forEach((item,col)=>layouts.push({...item,x:col*190,y:totalDepth}));
+    totalDepth+=Math.max(...pair.map(item=>item.depth))+10;
+  }
+  const left=Math.min(0,470-totalDepth*.86-30);
+  wholeBounds = `${left} 45 ${830-left} ${Math.max(520,(totalDepth+370)*.43+100)}`;
+  const roomLabels = [];
+  const ground = el("g",{},map);
+  polygon(ground,[[-18,-18,-12],[389,-18,-12],[389,totalDepth+3,-12],[-18,totalDepth+3,-12]],"#132824", "#607259",1);
+  // Architectural furnishing is symbolic. Room existence, light, figures and scars come from state.
+  layouts.forEach(({room,x,y,depth})=>{
+    const members=frame.residents.filter(r=>r.room===room.id);
+    const awake=members.some(r=>!["sleeping","unconfirmed"].includes(r.pose));
+    const g=el("g",{class:`room-hit${selected===room.id?" room-selected":""}`,tabindex:0,role:"button","aria-label":`${room.name}, ${members.length} residents`,"data-room":room.id},map);
+    g.addEventListener("click",()=>choose(room.id));
+    g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose(room.id);}});
+    const colors=awake?["#bc9a65","#6c654e","#93815c"]:["#7d8068","#46564c","#61715e"];
+    box(g,x,y,180,depth,11,colors,-11);
+    const floor=polygon(g,[[x,y],[x+180,y],[x+180,y+depth],[x,y+depth]],awake?"#b99b6d":"#78816a","#b2a178",1);
+    floor.setAttribute("class","floor");
+    for(let n=1;n<depth/16;n++) line(g,[[x,y+n*16],[x+180,y+n*16]],awake?"#8f7c58":"#68765f",1);
+    for(let n=0;n<Math.floor(depth/16);n++) line(g,[[x+(n%2?55:115),y+n*16],[x+(n%2?55:115),y+(n+1)*16]],"#7b785c",1);
+    polygon(g,[[x,y],[x+180,y],[x+180,y,62],[x,y,62]],awake?"#aab29a":"#657f70","#c2b998",1);
+    polygon(g,[[x,y],[x,y+depth],[x,y+depth,62],[x,y,62]],awake?"#899e87":"#4a6c60","#a7ac8b",1);
+    line(g,[[x,y,64],[x+180,y,64]],"#d0b984",5);
+    line(g,[[x,y,64],[x,y+depth,64]],"#b29e72",5);
+    for(let n=1;n<4;n++) line(g,[[x+n*45,y,0],[x+n*45,y,61]],"#677d65",3);
+    polygon(g,[[x+113,y+.3,24],[x+151,y+.3,24],[x+151,y+.3,53],[x+113,y+.3,53]],awake?"#e4c47f":"#435c52","#596955",3);
+    line(g,[[x+132,y,24],[x+132,y,53]],"#63755c",2);
+    flame(g,x+15,y+5,42,awake);
+    furnishings(g,room.id,x,y,awake,members);
+    members.forEach((resident,n)=>{
+      let px,py;
+      if(room.id==="bedroom") {px=x+32+(n%3)*55;py=y+54+Math.floor(n/3)*62;}
+      else {px=x+36+(n%3)*53;py=y+97+Math.floor(n/3)*40;}
+      figure(g,resident,px,py);
+    });
+    const marks=visibleScars().filter(s=>s.room===room.id);
+    marks.forEach((scar,n)=>{
+      const sx=x+18+(n%7)*20,sy=y+depth-15-Math.floor(n/7)*14;
+      const sg=el("g",{},g);el("title",{},sg,`${scar.title}: ${scar.basis}`);
+      line(sg,[[sx,sy],[sx+5,sy-6],[sx+9,sy],[sx+5,sy+7],[sx+13,sy+11]],scar.mended?"#f0c77b":"#b66f52",3);
+      if(!scar.mended) caption(sg,sx+5,sy-6,5,"!","resident-label");
+    });
+    const c=p(x+92,y+2,43);
+    roomLabels.push({x:c[0], y:c[1], name:room.name});
+    const corners=[p(x-25,y-25,80),p(x+210,y-25,80),p(x+210,y+depth+45,-30),p(x-25,y+depth+45,-30)];
+    const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
+    roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
+  });
+  roomLabels.forEach(r=>el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name));
+  map.setAttribute("viewBox",selected?roomBounds[selected]||wholeBounds:wholeBounds);
+}
+function effectiveTasks() {const at = current?Date.now()/1000:frame.at;return frame.tasks.map(t=>({...t,expired:t.status==="claimed"&&t.until<=at}));}
+function visibleScars() {
+  const marks=[...frame.scars];
+  effectiveTasks().filter(t=>t.expired).forEach(t=>{const id=`lease:${t.id}:${t.generation}`;if(!marks.some(s=>s.id===id))marks.push({id,room:"workshop",kind:"expired",title:"A lease ran out",detail:t.title,sequence:frame.seq,basis:"Inferred from the observation clock; fate unconfirmed",mended:false});});
+  return marks;
+}
+function choose(room) {
+  selected=room;$("overview").hidden=!room;
+  drawHouse(); roomPanel();
+  document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
+}
+function personRow(r, parent) {
+  const k=kinds[r.agent]||kinds.unrecorded;
+  const row=html("div","person",undefined,parent);
+  const mark=html("span","person-mark",k.mark,row);mark.style.color=k.color;
+  const info=html("div","",undefined,row);html("strong","",r.name,info);
+  html("span","small",`${k.name}${r.model?` · ${r.model}`:""} · ${r.presence}`,info);
+}
+function roomPanel() {
+  const room=frame.rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
+  $("room-kicker").textContent=room?"INSIDE THE HOUSE":"COME INSIDE";
+  $("room-title").textContent=room?room.name:"The rooms remember";
+  $("room-description").textContent=room?(descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
+  const residents=frame.residents.filter(r=>room?r.room===room.id:r.pose!=="sleeping");
+  residents.forEach(r=>personRow(r,content));
+  if(room&&residents.length===0)html("p","empty-note","A quiet room, waiting for a footstep.",content);
+  if(!room||room.id==="workshop") effectiveTasks().forEach(t=>{
+    const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
+    html("strong","",t.title,row);
+    const owner=frame.residents.find(r=>r.id===t.owner);
+    html("span","small",`${t.expired?"Lease expired · fate unconfirmed":t.status} · ${owner?.name||"available"}`,row);
+  });
+  (room?visibleScars().filter(s=>s.room===room.id):[]).forEach(s=>{
+    const row=html("div","scar",undefined,content);html("strong","",`${s.mended?"⌁":"!"} ${s.title}`,row);
+    html("span","small",s.detail,row);html("span","small",`Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
+  });
+  if(!room)html("p","small",`${frame.residents.filter(r=>r.pose==="sleeping").length} residents asleep in the loft · ${visibleScars().length} marks remembered in their rooms.`,content);
+  if(!room){const legend=html("div","kind-key",undefined,content);Object.values(kinds).forEach(k=>html("span","",`${k.mark} ${k.name}`,legend));}
+}
+function accounts() {
+  const box=$("budgets");box.replaceChildren();
+  Object.keys(kinds).filter(k=>k!=="unrecorded").forEach(agent=>{
+    const runs=frame.runs.filter(r=>r.agent===agent),backoff=frame.budgets.find(b=>b.agent===agent);
+    const seconds=runs.reduce((sum,r)=>sum+(Number.isFinite(r.elapsed_seconds)?r.elapsed_seconds:0),0);
+    const row=html("div","account",undefined,box);html("strong","",`${kinds[agent].mark} ${kinds[agent].name}`,row);
+    const until=backoff?.until||0,now=current?Date.now()/1000:frame.at;
+    html("span","balance",until>now?"Resting · quota backoff":"Remaining unknown",row);
+    html("small","",`${runs.length} recorded runs · ${runs.some(r=>Number.isFinite(r.elapsed_seconds))?`${Math.round(seconds/60)} min reported across ${runs.filter(r=>Number.isFinite(r.elapsed_seconds)).length} runs`:"duration unreported"}`,row);
+    if(until>now)html("small","",`Until ${clock(until)} · ${backoff.reason}`,row);
+    const totals={};runs.forEach(r=>Object.entries(r.usage).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;}));
+    for(const key of ["input_tokens","output_tokens","total_tokens"]) if(totals[key]!==undefined)html("small","",`${key.replaceAll("_"," ")}: ${totals[key].toLocaleString()}`,row);
+  });
+}
+function clock(at, opts={}) {return new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",...opts}).format(new Date(at*1000));}
+function lighting() {
+  const at=current?Date.now()/1000:frame.at;
+  const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,hour:"2-digit",hourCycle:"h23"}).format(new Date(at*1000)));
+  const day=hour>=7&&hour<19;
+  document.body.classList.toggle("day",day);
+  $("sky-label").textContent=`${day?"Daylight":"Nightfall"} in Emberhall${current?"":" · remembered"}`;
+  $("house-clock").textContent=clock(at)+" · London";
+}
+function render() {
+  frame=data.frames[index]; if(!frame.rooms.some(r=>r.id===selected))selected=null;
+  const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
+  const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
+  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} places kept for sleepers. ${frame.tasks.length} unfinished threads.`;
+  $("history").value=frame.seq;$("present").classList.toggle("active",current);
+  $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
+  const actor=frame.residents.find(r=>r.id===frame.event.actor)?.name||frame.event.actor;
+  $("event-label").textContent=`${frame.seq} / ${data.frames.length} · ${actor} · ${frame.event.op.replaceAll("-"," ")}`;
+  $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
+  const navigation=$("room-nav");navigation.replaceChildren();
+  frame.rooms.forEach(room=>{const button=html("button","",room.name,navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
+  drawHouse();roomPanel();accounts();lighting();
+  const ambitions=$("ambitions");ambitions.replaceChildren();
+  if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
+  frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
+  const record=$("record");record.replaceChildren();
+  html("p","",`Event ${frame.seq} observed ${clock(frame.at)}. Public snapshot exported ${clock(data.observed_at)}.`,record);
+  html("code","",`Journal ${data.journal_head.slice(0,12)} · Source ${(data.source_head||"unborn").slice(0,12)}`,record);
+  html("p","",current?"The sky follows the real London clock. Figures remain a recorded snapshot until the next publication.":"The sky and figures follow this event’s clock. Later arrivals, rooms and failures have not happened yet.",record);
+  const commits=$("commits");commits.replaceChildren();
+  const known=data.commits.filter(c=>c.at<=(current?data.observed_at:frame.at)).slice(-3);
+  known.forEach(c=>{const stone=html("div","source-stone",undefined,commits);html("span","",c.id.slice(0,9),stone);html("div","",c.title,stone);});
+}
+async function start() {
+  try {
+    const response=await fetch("history.json",{cache:"no-cache"});
+    if(!response.ok)throw new Error(`History returned ${response.status}`);
+    data=await response.json();
+    if(data.version!==1||!Array.isArray(data.frames)||!data.frames.length)throw new Error("Unrecognized house history");
+    data.frames.forEach(moment=>{moment.scars=moment.scars.map(s=>({...data.scars[s.id],...s}));});
+    index=data.frames.length-1;$("history").max=data.frames.length;$("history").disabled=false;
+    $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
+    $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
+    $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
+    $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
+    $("overview").addEventListener("click",()=>choose(null));
+    render();setInterval(()=>{if(current){lighting();accounts();roomPanel();drawHouse();}},60000);
+  }catch(error){$("error").hidden=false;$("error").textContent=`The house record could not be opened. ${error.message}. Serve this directory over HTTP and export history with python3 -m house.body.`;$("presence-line").textContent="The record is unavailable; no activity is invented.";}
+}
+start();

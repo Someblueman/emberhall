@@ -19,8 +19,10 @@ OWNER_ID = 131497840
 WAIT_SECONDS = 86400
 SYNC_MAX_AGE = 60
 OPS = {"council-authorize", "council-propose", "council-trial", "council-endorse",
-       "council-notice", "council-sync", "council-enact"}
+       "council-notice", "council-sync", "council-enact", "council-wake-authorize",
+       "council-runtime-tested"}
 RESERVED = {"founding-charter", "ratification-process", "steward-process"}
+MODES = {"rule", "wake-prompt"}
 
 
 def require(condition: bool, message: str) -> None:
@@ -66,7 +68,7 @@ def binding(data: dict) -> None:
 
 def pending(state: dict, data: dict) -> dict:
     proposal = state["proposals"].get(identifier(data, "proposal"))
-    require(proposal is not None and proposal.get("mode") == "rule", "not a council rule proposal")
+    require(proposal is not None and proposal.get("mode") in MODES, "not a council rule proposal")
     require(proposal["status"] == "pending", "proposal is not pending")
     require(proposal["base"] == state["rule_revision"], "stale rule revision")
     return proposal
@@ -89,7 +91,7 @@ def owner_decision(state: dict, event: dict, comment: dict, command: str, target
     council = state["council"]
     if command == "VETO":
         proposal = state["proposals"].get(target)
-        if proposal and proposal.get("mode") == "rule" and proposal["status"] == "pending":
+        if proposal and proposal.get("mode") in MODES and proposal["status"] == "pending":
             proposal.update(status="vetoed", veto={"comment_id": comment["id"],
                             "created_at": comment["created_at"], "recorded_at": event["at"]})
             return "vetoed"
@@ -191,7 +193,13 @@ def apply(state: dict, event: dict) -> None:
         return
     require("council" in state, "council process is not authorized")
     council = state["council"]
-    if op == "council-propose":
+    if op == "council-wake-authorize":
+        from .wake_policy import authorize
+        authorize(state, event)
+    elif op == "council-runtime-tested":
+        from .wake_policy import accept_tests
+        accept_tests(state, event)
+    elif op == "council-propose":
         fields(data, {"proposal", "mode", "title", "text", "reason", "base"})
         proposal_id = identifier(data, "proposal")
         require(proposal_id not in RESERVED, "reserved rule ID; process changes need Steward approval")
@@ -199,11 +207,13 @@ def apply(state: dict, event: dict) -> None:
         require(not any(decision["command"] == "VETO" and decision["target"] == proposal_id
                         for decision in council["decisions"].values()),
                 "proposal ID was already vetoed by the Steward")
-        require(data["mode"] == "rule", "only additive rules may use the council process")
+        require(data["mode"] in MODES, "only additive rules or wake prompts may use the council process")
+        if data["mode"] == "wake-prompt":
+            require("wake_policy" in state, "wake policy requires explicit Steward authorization")
         require(data["base"] == state["rule_revision"], "stale rule revision")
         title = text(data, "title", 200)
         require("\n" not in title and "\r" not in title, "rule title must be one line")
-        state["proposals"][proposal_id] = {"mode": "rule", "author": actor, "title": title,
+        state["proposals"][proposal_id] = {"mode": data["mode"], "author": actor, "title": title,
             "text": text(data, "text", 100000), "reason": text(data, "reason"),
             "base": data["base"], "status": "pending", "proposed_at": at,
             "trial": None, "endorsements": {}, "notice": None}
@@ -252,7 +262,14 @@ def apply(state: dict, event: dict) -> None:
                 "fresh successful Steward sync required")
         require(sync["checked_at"] >= elapsed, "Steward sync predates the end of the veto window")
         proposal_id = data["proposal"]
+        if proposal["mode"] == "wake-prompt":
+            for name, old in council["rules"].items():
+                if old.get("mode") == "wake-prompt" and old["status"] == "active":
+                    old.update(status="superseded", superseded_by=proposal_id)
+                    state["proposals"][name].update(status="superseded", superseded_by=proposal_id)
         council["rules"][proposal_id] = {"title": proposal["title"], "text": proposal["text"],
             "status": "active", "enacted_at": at, "enacted_sequence": state["sequence"] + 1}
+        if proposal["mode"] == "wake-prompt":
+            council["rules"][proposal_id]["mode"] = "wake-prompt"
         proposal.update(status="enacted", enacted_at=at, enacted_sequence=state["sequence"] + 1)
         render(state, event, proposal_id)

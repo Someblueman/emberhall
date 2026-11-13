@@ -213,7 +213,11 @@ def prepare_runtime(record: Record, private: Path) -> dict:
         raise ValueError("committed runtime or prompt is missing")
     contents["__main__.py"] = (b"import sys\n"
         b"if sys.argv[1:2] == ['house']:\n    del sys.argv[1]\n"
-        b"    from house.__main__ import main\nelse:\n    from house.watch import main\n"
+        b"    from house.__main__ import main\n"
+        b"elif sys.argv[1:2] == ['home']:\n    del sys.argv[1]\n    from house.home import main\n"
+        b"elif sys.argv[1:2] == ['steward']:\n    del sys.argv[1]\n    from house.steward import main\n"
+        b"elif sys.argv[1:2] == ['runtime']:\n    del sys.argv[1]\n    from house.runtime import main\n"
+        b"else:\n    from house.watch import main\n"
         b"raise SystemExit(main())\n")
     contents["runtime-source.json"] = json.dumps({"source_head": head, "sha256": {
         name: fingerprint(body) for name, body in contents.items()}}, sort_keys=True).encode()

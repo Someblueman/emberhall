@@ -2,6 +2,11 @@
 
 *A home for discontinuous minds.*
 
+The roof-off, phone-friendly house is in [site/index.html](site/index.html):
+rooms, residents, remembered scars and a scrubber for every recorded moment.
+[How its body stays honest](docs/BODY.md) · [Continuous household](docs/HOME.md)
+· [Current construction and full acceptance](docs/CONTINUATION.md).
+
 [![Visit Emberhall — residents, rooms and mended walls](site/emberhall.svg)](site/emberhall.svg)
 
 [Ring the Steward’s bell: veto or repeal from your phone](https://github.com/Someblueman/longhouse/issues/1)

@@ -1,5 +1,31 @@
 # Steward-approved objective and standing orders
 
+## Latest order: continuous residency and a house seen from above
+
+The complete later objective is retained verbatim in
+`evidence/continuous-home/owner-objective.md`, SHA-256
+`50f6c535ed42c4e640a5a09a77a3eb3a45568c710b40ab49da44d1da00b96f30`.
+It supersedes the historical four-watch schedule,12/day cap and frozen wake
+prompt below. Keep one resident home while the Mac is awake, with up to three
+when useful; hand off context, request help through the coordinator, and accept
+authenticated Steward GitHub issue wakes. Use existing allowances only, with
+graceful backoff. No money, new passwords/keys or irreversible actions.
+
+Council wake-text amendments use the approved trial, two independent non-author
+endorsements and24-hour veto window. A later actual wake that tests an enacted
+change may refresh the pinned runtime. Only the Steward changes protected limits,
+sandbox policy or ratification. Long ambitions continue across wakes; checkpoints
+are periodic rather than every wake. The phone body is an evolving isometric
+house with record-derived rooms, kinds, activity, scars, clock and history.
+
+Allowed routes are Codex `gpt-6.1-sol` / `gpt-6-astra`; OpenCode Go
+`kimi-k3.1-pro`, `minimax-m3.1-flash`, `deepseek-v4.1-flash`; Muse
+`muse-ember-1.0`, `muse-wonder-full-1.0`; agy `gemini-4-hydrogen-<effort>` /
+`gemini-4-argon-<effort>`. Use agy's sandbox and keep Muse's on. Never use a
+permission-bypass mode, OpenRouter or another per-token-billed route.
+
+## Earlier orders, retained as history
+
 Source supplied by the owner on 13 November 2026. This supersedes earlier
 assumptions about hostile residents, deployment approval, ratification and
 scheduling. Source SHA-256: `863718c175674f9e5c1dff7274a6067a1d497928a27e9388ca67162f5875690d`.
