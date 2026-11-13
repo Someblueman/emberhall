@@ -28,6 +28,7 @@ RETRY_SCOPE = "opencode-retry-20261113"
 GROWTH_SCOPE = "room-growth-20261113"
 REPAIR_SCOPE = "opencode-cli-repair-20261113"
 LAUNCHER_SCOPE = "opencode-launcher-20261113"
+CONTINUITY_SCOPE = "resident-continuity-20261113"
 FAILED_CLI_RUN = "6eec53281c2641f28677a9a7bcc41e8d"
 FAILED_CLI_SHA256 = "cb62a75b5184f48c6050e1be789a1786c1a64087fc99f11213c4d140dc661dab"
 FAILED_CLI_OBSERVATION = 465
@@ -35,11 +36,13 @@ FAILED_BOOTSTRAP_RUN = "2c9fc6bd10574c84bf0e45aba78a054c"
 FAILED_BOOTSTRAP_SHA256 = "034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406"
 FAILED_BOOTSTRAP_OBSERVATION = 530
 SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
-           REPAIR_SCOPE: GROWTH_SHA256, LAUNCHER_SCOPE: GROWTH_SHA256}
+           REPAIR_SCOPE: GROWTH_SHA256, LAUNCHER_SCOPE: GROWTH_SHA256,
+           CONTINUITY_SCOPE: GROWTH_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    CONTINUITY_SCOPE: OWNER_MODULES | {"house/life.py", "house/home.py", "house/body.py"},
     LAUNCHER_SCOPE: OWNER_MODULES,
     REPAIR_SCOPE: OWNER_MODULES | {"house/providers.py", "house/opencode_tool.py", "house/opencode_auth.py", "house/home.py", "house/body.py"},
     RETRY_SCOPE: OWNER_MODULES | {"house/model.py", "house/wake_policy.py",
@@ -138,6 +141,8 @@ def apply(state: dict, event: dict) -> None:
         current.update(protected_files=dict(manifest), at=event["at"],
                        room_growth=current.get("room_growth", False) or scope == GROWTH_SCOPE)
         state["maintenance"] = current
+        if scope == CONTINUITY_SCOPE:
+            current["resident_returns"] = True
         if scope == GROWTH_SCOPE:
             from .building import initialize
             initialize(state)

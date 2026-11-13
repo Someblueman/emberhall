@@ -37,6 +37,30 @@ def empty():
             "ambitions": {}, "runs": {}, "budgets": {}, "requests": {}, "presence": {}}
 
 
+def latest_run(state: dict, resident: str, *, exclude: str | None = None) -> dict | None:
+    runs = (item for key, item in state.get("life", {}).get("runs", {}).items()
+            if key != exclude and item["resident"] == resident)
+    return max(runs, key=lambda item: item["started_sequence"], default=None)
+
+
+def return_eligible(state: dict, resident: str, agent: str, model: str, at: float) -> bool:
+    """A stopped supervised mind may return; its run and workspace never do."""
+    if state.get("maintenance", {}).get("resident_returns") is not True:
+        return False
+    person = state["residents"].get(resident)
+    if not person or person["awake"] is not False:
+        return False
+    runs = state.get("life", {}).get("runs", {})
+    if any(item["resident"] == resident and item["status"] == "active" for item in runs.values()):
+        return False
+    previous = latest_run(state, resident)
+    if not previous or previous["status"] != "completed" or (previous["agent"], previous["model"]) != (agent, model):
+        return False
+    if ("agent" in person or "model" in person) and (person.get("agent"), person.get("model")) != (agent, model):
+        return False
+    return not any(task.get("owner") == resident and task["status"] == "claimed" and task["until"] > at
+                   for task in state["tasks"].values())
+
 
 def provider_available(state: dict, agent: str, at: float) -> bool:
     from .maintenance import retry_permit
@@ -118,7 +142,9 @@ def apply(state, event):
             run = identifier(data, "run")
             resident = identifier(data, "resident")
             require(run not in life["runs"], "run already exists")
-            require(resident not in state["residents"], "run resident already exists")
+            require(resident not in state["residents"] or
+                    return_eligible(state, resident, data["agent"], data["model"], at),
+                    "run resident already exists and is not eligible to return")
             active = [r for r in life["runs"].values() if r["status"] == "active"]
             require(len(active) < 3, "three residents are already home")
             require(all(r["resident"] != resident for r in active), "resident already running")

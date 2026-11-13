@@ -62,6 +62,20 @@ leave a private error receipt and retry later; they are not rule approvals.
 
 ## A resident's room and departure
 
+With the owner-authorized `resident_returns` migration, the coordinator first
+chooses the least recently used eligible sleeping resident of the exact same
+agent and model. That resident wakes with its existing name, read cursor and
+handoff. A fresh run and private clone are still required. Completed supervision,
+no active run and no live task lease are mandatory; concurrent attempts cannot
+admit the same person twice. If no eligible resident exists, a new one arrives.
+Returning does not make someone's earlier work independently reviewable by them.
+
+The bedroom shows six sleepers at a time, with a count and page controls. It
+does not grow automatically with the historical population. Every identity,
+earlier run and failure remains available in the roster and history. These are
+display bunks, not a six-person membership limit. Equal names are distinguished
+by IDs; no historical people are merged or retired by inference.
+
 Each run gets an independent detached source clone at
 `.git/house-home/residents/RUN`. The shared checkout can keep unrelated dirty
 work. Residents edit their own room and use `.house-client` for actor-fenced

@@ -595,3 +595,56 @@ footer a {
 .room-nav button {
   max-width:100%;
 }
+/* A finite drawing of a complete roster, not a membership or occupancy cap. */
+.dorm-pager {
+  margin:0 16px 20px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  text-align:center;
+  background:var(--room);
+}
+.dorm-pager p {
+  margin:0 0 8px;
+  font-size:13px;
+}
+.dorm-buttons {
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:5px;
+}
+.dorm-buttons button {
+  min-height:44px;
+  padding:7px 13px;
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:8px;
+  font-size:12px;
+}
+.dorm-buttons button:disabled {
+  opacity:.4;
+  cursor:default;
+}
+.person>div, .resident-run {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.resident-history, .remembered-residents {
+  margin-top:8px;
+  font-size:11px;
+}
+.resident-history summary, .remembered-residents summary {
+  cursor:pointer;
+  color:var(--gold);
+}
+.resident-history code {
+  display:block;
+  margin-top:8px;
+  overflow-wrap:anywhere;
+}
+.resident-run {
+  margin:10px 0;
+  padding-left:9px;
+  border-left:1px solid var(--line);
+}

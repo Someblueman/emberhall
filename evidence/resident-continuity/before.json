@@ -1,0 +1,13 @@
+{
+  "sequence": 618,
+  "head": "93473b49db69666cc2d91bd556e16f97c6996b61",
+  "supervised_runs": 28,
+  "distinct_supervised_resident_ids": 28,
+  "journal_residents": 31,
+  "public_figures": 30,
+  "explicit_sleepers": 23,
+  "old_bedroom_depth": 532,
+  "native_worksheet_run_still_active": true,
+  "source_commit": "a0e69c68a02cf531edfa3b753d17b356674c616e",
+  "limits": "Recorded lifecycle and renderer formula; not proof every recorded process is currently alive."
+}

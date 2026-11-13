@@ -1,0 +1,48 @@
+{
+  "format": "emberhall-resident-continuity-acceptance-v1",
+  "workers": {
+    "core": "577faf62cd1eed763cd64dea10cc20da0c665fa3",
+    "display": "63cf94e89dcf2b97db6c6da609574efb77023782"
+  },
+  "host_suite": {
+    "collected": 280,
+    "skipped": 9,
+    "executed": 271,
+    "seconds": 164.032,
+    "exit": 0,
+    "log_sha256": "70f572fcdf4bc37b62bddade4a9e825730bb9f18296c0703c9830b043225e2aa"
+  },
+  "independent_review": {
+    "core_tests": 7,
+    "owner_tests": 3,
+    "additional_witness": "Prior sleep does not complete a new help assignment; same identity cannot review or endorse its own earlier work.",
+    "log_sha256": "081f40a08e766e167f2160aabde3b132bf3eb705f37c3c11b3cdc68f135560bc"
+  },
+  "browser": {
+    "fixture": "Explicitly synthetic 100-sleeper review at localhost:8773",
+    "viewport": [
+      390,
+      844
+    ],
+    "document_width": 375,
+    "visible_bunks": 6,
+    "pages": 17,
+    "last_page_count": 4,
+    "historical_frame_sleepers": 1,
+    "historical_pages": 1,
+    "bedroom_viewbox_unchanged": true,
+    "all_identity_list_count": 100,
+    "same_identity_run_receipts": 2,
+    "duplicate_names_distinguishable": true,
+    "screenshot": "synthetic-phone.png"
+  },
+  "boundaries": [
+    "Inert subprocess tests are not live native return evidence.",
+    "No old identity or run is deleted or merged.",
+    "No provider retry, authority delegation or sandbox change."
+  ],
+  "syntax_checks": [
+    "node --check site/house.js",
+    "git diff --check"
+  ]
+}

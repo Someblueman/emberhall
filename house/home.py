@@ -17,7 +17,7 @@ import time
 import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, providers
-from .life import CONTROLLER, provider_available
+from .life import CONTROLLER, latest_run, provider_available, return_eligible
 from .record import Record
 from .wake_policy import active_policy, active_prompt
 from .watch import group_members, group_stopped, kill_group
@@ -214,7 +214,7 @@ class Coordinator:
         waiting = ("house_journal argv " + json.dumps(["wait", "--as", resident, "--after", "SEQUENCE", "--seconds", "300"])
                    if assigned["agent"] == "opencode" else f"{client} wait --as {resident} --after SEQUENCE --seconds 300")
         assignment = (f"RUNNER ASSIGNMENT: resident {resident}; run {run}. Your private source room is {workspace}.\n"
-            f"Your actual route is {assigned['agent']} / {assigned['model']}; record that exact kind/model after arrival.\n"
+            f"Your actual route is {assigned['agent']} / {assigned['model']}.\n"
             f"Use {channel} for every canonical journal operation, with --as {resident}. "
             "The private clone has no canonical journal: never found a replacement. "
             "Use only your assigned identity. Commit completed work in this private room; "
@@ -222,6 +222,28 @@ class Coordinator:
             "Ask other residents through a life help request; do not bypass the single controller. "
             f"When no useful work is available, stay present with {waiting}, "
             "then read new events and continue. Do not invent chores or exit merely to fill a quiet interval.\n")
+        person = state["residents"].get(resident)
+        if person:
+            prior = latest_run(state, resident, exclude=run)
+            assignment += ("You are returning as the same resident, not arriving as a new person. "
+                "Preserve your name and identity; do not call arrive. "
+                f"Call wake --as {resident} --request {run}-wake, then read --as {resident}. "
+                "Paginate using each returned through cursor until caught up; never acknowledge unseen events.\n"
+                "Your retained memory: " + json.dumps({"name": person["name"], "cursor": person["cursor"],
+                    "handoff": person["note"], "previous_run": prior["run"], "outcome": prior["outcome"],
+                    "released_tasks": prior.get("released_tasks", [])}, ensure_ascii=False) + "\n"
+                "A stopped or interrupted run is not evidence of an explicit sleep. Recover unfinished work "
+                "from preserved contributions; reclaim tasks using current generations and fresh tokens.\n")
+        else:
+            assignment += (f"You are a new resident: arrive --as {resident} --name YOUR-NAME "
+                           f"--request {run}-arrive, then read --as {resident}.\n")
+        if not person or "agent" not in person:
+            assignment += ("After waking or arriving, record your identity once with life kind identity and "
+                           "the exact assigned agent/model above.\n")
+        else:
+            assignment += "Your identity is already recorded; do not submit life identity again.\n"
+        assignment += (f"Prefix new mutation request IDs with {run}-. Old room-local request aliases do not "
+                       "transfer; use the full canonical receipt ID from the earlier handoff to inspect old work.\n")
         checkpoint = workspace / "evidence" / "checkpoint.json"
         if checkpoint.exists():
             last = datetime.fromisoformat(json.loads(checkpoint.read_text())["last_event_utc"]).timestamp()
@@ -235,6 +257,12 @@ class Coordinator:
                            json.dumps(candidates[:12], ensure_ascii=False) + "\n" +
                            "Use the trusted integration command documented in the house; inspect the contribution and "
                            "its tests before publication. Preserve conflicting candidates.\n")
+            own = {key for key, item in state.get("life", {}).get("runs", {}).items()
+                   if item["resident"] == resident}
+            if any(candidate["run"] in own for candidate in candidates):
+                assignment += ("Some pending contributions are yours from an earlier run. You cannot independently "
+                    "review your own work by returning or renaming yourself. Ask another resident to review "
+                    "through a life help request; keep your durable identity.\n")
         return assignment + "\n" + active_prompt(state)
 
     def start(self, kind: str, help_id: str | None = None) -> str:
@@ -244,7 +272,12 @@ class Coordinator:
         model = request.get("model", providers.DEFAULTS[kind]) if request.get("agent") == kind else providers.DEFAULTS[kind]
         providers.validate_model(kind, model)
         policy = active_policy(state)
-        run, resident = uuid.uuid4().hex, "resident-" + uuid.uuid4().hex
+        at = max(time.time(), state["at"])
+        eligible = [resident for resident in state["residents"]
+                    if return_eligible(state, resident, kind, model, at)]
+        resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
+            "resident-" + uuid.uuid4().hex)
+        run = uuid.uuid4().hex
         path = self.private / run
         path.mkdir(mode=0o700)
         base = source_head(self.record)

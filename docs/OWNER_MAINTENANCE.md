@@ -1,5 +1,19 @@
 # Explicit owner maintenance
 
+## Resident continuity correction
+
+The owner observed that native visits continually minted identities and expanded
+the bedroom. Scope `resident-continuity-20261113` binds the full approved objective
+in `evidence/room-growth/owner-objective.md`; the specific steering is retained in
+`evidence/resident-continuity/owner-steering.txt`. It permits only the maintenance
+modules and `house/life.py`, `house/home.py`, `house/body.py` to change in the
+protected manifest. It enables `resident_returns` through an append-only cold
+migration. No entry is removed and no provider retry is granted. Prepare and
+apply use the procedure below with this scope and the full objective file;
+do not call `release-opencode` for this correction.
+
+## Earlier OpenCode retry
+
 The owner reported that existing OpenCode account access was repaired and then
 said "you can override it" after the one-day cooldown was explained. The exact
 short approval record is `evidence/owner-maintenance/opencode-approval.txt`.

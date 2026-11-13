@@ -113,6 +113,7 @@ def export(record: Record, observed_at: float | None = None) -> dict:
     frames = []
     room_uses: dict[str, dict] = {}
     sleeping: set[str] = set()
+    awakened: dict[str, int] = {}
     for seq, event in enumerate(events, 1):
         at, actor, op, data = event["at"], event["actor"], event["op"], event["data"]
         for task_id, task in (state["tasks"].items() if state else []):
@@ -131,6 +132,7 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                 "reason": "Owner authorized one early attempt; original cooldown retained.",
                 "usage": {}, "sequence": seq}
         if op in {"arrive", "wake"}:
+            awakened[actor] = seq
             sleeping.discard(actor)
             places[actor] = "door"
         elif op == "sleep":
@@ -249,7 +251,8 @@ def export(record: Record, observed_at: float | None = None) -> dict:
             room = "bedroom" if is_asleep else places.get(resident_id, "door")
             pose = "sleeping" if is_asleep else "sitting" if room == "hearth" else "standing"
             presence = "asleep" if is_asleep else "recorded awake"
-            if latest_run and latest_run["status"] == "ended" and not is_asleep:
+            if (latest_run and latest_run["status"] == "ended" and not is_asleep
+                    and latest_run["last_sequence"] > awakened.get(resident_id, 0)):
                 presence = latest_run["outcome"] + "; no sleep event"
                 pose = "unconfirmed"
             public_residents.append({"id": resident_id, "name": label(resident["name"], 60),

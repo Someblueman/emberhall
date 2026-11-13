@@ -7,6 +7,30 @@ The older continuous-home objective remains the source for authorization303.
 Read current journal status and `docs/RESUME.md` before acting; this note is a
 checkpoint, not a live process inventory.
 
+## Active correction: returning residents
+
+The owner observed that every native wake gets a new identity and the bedroom
+keeps growing. At event616,28 supervised runs had28 distinct resident IDs,
+with30 public figures and23 explicit sleepers; the rendered bedroom had grown
+from160 to532 drawing units. This was generated layout, not recorded building.
+
+Task `resident-continuity-v1` is claimed by Keeper (token keeper-continuity-c49a18).
+Two ordinary private clones isolate implementation: `/private/tmp/emberhall-resident-returns`
+(Witness: life/home and return tests) and `/private/tmp/emberhall-dorm-roster`
+(Linden: body/site and display tests). Keeper owns the narrowly pinned owner
+migration, integration and actual acceptance. The new scope is
+`resident-continuity-20261113`, bound to the full approved objective; latest owner
+steering is in `evidence/resident-continuity/owner-steering.txt`.
+
+Planned contract: reuse an eligible sleeping supervised resident of the exact
+same kind/model, preserving name/cursor/handoff; new run UUID/private clone/client
+every time. Atomically reject concurrent reuse, live claims, wrong routes and old
+mailbox actions. Never mint a new identity to evade independent-review rules.
+Keep a fixed six-bunk display with truthful count/paging and every old identity
+in history. No new provider retry, credential, sandbox or council authority is
+part of this fix. **Not activated yet.** Existing deployed runtime below remains
+selected until full acceptance and a recorded cold migration. Verify live state.
+
 ## Installed service and OpenCode result
 
 The sole `local.emberhall.watch` LaunchAgent runs the immutable archive built

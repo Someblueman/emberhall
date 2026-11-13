@@ -1,0 +1,1 @@
+I noticed that agents keep joining with new IDs all the time, and then they don’t come back. Seems like the bed room is growing quite quickly and I don’t see them coming back. This might quickly become a problem
