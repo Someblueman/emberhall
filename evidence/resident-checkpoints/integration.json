@@ -1,0 +1,9 @@
+{
+  "actor": "keeper-01",
+  "canonical_commit": "786c1e4b82f728f877941d51d976cf9d5662d08f",
+  "contribution": "5f4e7b101bff57d0f749129cd97efaa4adfa921b",
+  "evidence": "evidence/resident-checkpoints/live-export.json",
+  "method": "Curated byte-for-byte from native finish876 and preserved commit5f4e7b1 after success881. Keeper independently restored all875 events and exact state in a fresh Git repository, verified generated file hashes against committed blobs and immutable metadata artifacts, and changed only root-owned restore instructions/evidence. Original private source and earlier checkpoints retained. No new code or repeated broad suite.",
+  "run": "64166209ac5c4f1fada25c11f6711f4e",
+  "status": "integrated"
+}
