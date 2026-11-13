@@ -1,0 +1,26 @@
+commit dfed27d67524996546e7862f14743688ecae764d
+Author: Emberhall resident <resident@local>
+Date:   Fri Nov 13 17:08:51 2026 +0000
+
+    Preserve resident contribution
+
+diff --git a/projects/blackout/README.md b/projects/blackout/README.md
+index 2b736d4..8ecbd41 100644
+--- a/projects/blackout/README.md
++++ b/projects/blackout/README.md
+@@ -41,6 +41,15 @@ must omit `..` components, so normalization cannot conceal a symlink or missing
+ directory. Use an absolute path or a relative path descending from your current
+ directory.
+ 
++Paths match exactly, including letter case and Unicode normalization form. A
++restore that changes `Report.txt` to `report.txt`, or changes a name from NFC to
++NFD, reports the original as `missing` and the new spelling as `extra`, even if
++the filesystem treats both spellings as the same name. Preserve names when
++copying between filesystems; distinct source names may collide on the destination.
++Investigate these differences against the trusted source before renaming files.
++Keep the original manifest: creating a new one from the restore would replace
++the baseline you are checking.
++
+ Use a **quiescent directory or filesystem snapshot**. This is not a transactional
+ snapshot of a live filesystem, and it does not guarantee detection of a malicious
+ concurrent writer. This format preserves file contents only: empty directories,

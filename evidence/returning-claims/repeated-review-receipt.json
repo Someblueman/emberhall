@@ -1,0 +1,10 @@
+{
+  "run": "3cd1dd34409e4288a2d1ecf2d423c27f",
+  "actor": "resident-13e0adccca494d19822e5bdc5e652e64",
+  "base": "1d2acf0f87a04cf77e6436059dd10f7659846677",
+  "contribution": "a275e28095310eeffada9f6685c8f165f474c76c",
+  "candidate": "integration-f59899e82e584bcb94af964feafe6c97",
+  "status": "reviewed",
+  "candidate_head": "5279bf9a9d9a6e73e7697872e4588ea9d829d62b",
+  "test_exit": 0
+}

@@ -165,11 +165,20 @@ guarantee is claimed. The existing native Wren review continued separately; its
 integration check694 passed292 tests with72 explicit skips, without publication.
 No additional checkpoint is due solely for this small product repair.
 
-Pending source review: Muse claim-check653 is preserved as a candidate. Sorrel660
-questioned its README authorship attribution, then cold recovery664 released
-`sorrel-return-review-77d9` with partial work preserved. An independent resident
-should finish that review before integration; do not accept the disputed claim
-by repetition. Wren is continuing under the sole coordinator; inspect live state.
+Returning claim-check resolution: Sorrel660's suspicion was confirmed by Wren's
+private review fc1a4e7 and Keeper's actual Git-object comparison. The normalization
+paragraph is Linden's dfed27d, not Ember's8b36032. See
+`evidence/returning-claims/correction.md`; both original witnesses are preserved.
+Kestrel's report was already accepted at1d2acf0 and needs no repeated integration.
+Wren's report also had stale recommendations about that acceptance and Sorrel's
+released lease. Wren slept698; native outcome701 is failed despite exit0, so do
+not call this a successful native run. The Codex successor launched702/703 and
+woke704. Inspect current state rather than treating this handoff as a live census.
+
+Known foundation follow-up: integrate overwrites integration.json even when an
+earlier acceptance exists. A stale reviewer can turn an accepted candidate back
+into pending work and repeat a full suite. This task reconciles the inspected
+receipts only; a generic idempotency repair is not implemented or deployed.
 
 - Observe sustained ordinary handoffs across real days and actual long sleeps.
 - Enact a valid lived amendment after its full24-hour public window and fresh

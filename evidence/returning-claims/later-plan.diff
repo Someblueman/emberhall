@@ -1,0 +1,54 @@
+commit 8b360323c5a9547a7e733336f9dc04a6d24c9487
+Author: Sebastian Widlund-Stone <swidlundstone@gmail.com>
+Date:   Fri Nov 13 19:05:19 2026 +0000
+
+    Add read-only blackout recovery plan command
+
+diff --git a/projects/blackout/README.md b/projects/blackout/README.md
+index 8ecbd41..a60bb46 100644
+--- a/projects/blackout/README.md
++++ b/projects/blackout/README.md
+@@ -7,6 +7,7 @@ network, account, or house runtime required.
+ ```sh
+ python3 projects/blackout/blackout.py create /path/to/source /path/to/source.manifest.json
+ python3 projects/blackout/blackout.py verify /path/to/backup /path/to/source.manifest.json
++python3 projects/blackout/blackout.py plan /path/to/surviving-archive /path/to/source.manifest.json
+ ```
+ 
+ `create` records each regular file's relative path, byte length, and SHA-256. It
+@@ -22,13 +23,34 @@ and there are no extra files; **1** means a mismatch; **2** means an unsafe sour
+ malformed manifest, or I/O error prevented verification. A failure never repairs,
+ deletes, or alters your files.
+ 
++`plan` reads a surviving archive and the same trusted manifest, then prints a
++read-only recovery plan: the same `missing`, `changed`, `extra`, and `matched`
++classifications as `verify`, plus `restores`, `ambiguous`, and `unrecoverable`.
++Each `restores` entry has `target`, `status` (`missing` or `changed`),
++`candidates`, `recoverable`, and `ambiguous`. A candidate is any surviving
++regular file whose size and SHA-256 are byte-identical to the expected entry
++for that target, including an `extra` file that looks like a rename and a
++`matched` file whose bytes are duplicated elsewhere. Exit status follows
++`verify`: **0** when nothing is missing, changed, or extra; **1** when the
++plan describes a mismatch; **2** when unsafe input, a malformed manifest, or
++an I/O error prevented planning. `plan` never copies, renames, overwrites, or
++deletes, and it never chooses for you: when more than one surviving file
++matches a target, `ambiguous` is true and `candidates` lists every match
++sorted by path, so you must make that one-byte-identical choice explicitly.
++When no surviving file matches, the target appears in `unrecoverable`.
++Candidates are sorted, JSON keys are sorted, and no timestamps or random
++values are included, so the same manifest and archive produce byte-identical
++`plan` output. If output fails (for example a closed stdout), `plan` exits
++**2** and the scanned archive is unchanged; inspect the archive and re-run
++`plan` rather than assuming a restore happened.
++
+ An output I/O failure also returns **2**, including a closed stdout or stderr
+ pipe. `create` may already have saved a complete manifest before its success
+ message is lost. Inspect that manifest and use `verify`; do not assume the file
+ was rolled back or delete it to retry. A repeated `create` still refuses to
+ overwrite it. Output failures during `verify` do not alter the backup.
+ 
+-Both operations reject symlinks (including directory components of the root),
++All three operations reject symlinks (including directory components of the root),
+ devices, sockets, FIFOs, and nonportable names containing colons, backslashes,
+ control characters, or invalid UTF-8. Manifests reject absolute paths, traversal,
+ duplicate paths and JSON keys, inconsistent file/directory paths, unknown fields,

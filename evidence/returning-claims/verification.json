@@ -1,0 +1,31 @@
+{
+  "observed_head": "bbfceffa2b0fda6065271a52683159d0fa89820e",
+  "journal_sequence": 709,
+  "journal_head": "e49aaed20c24fda6c73a7fa3573c433a677f206d",
+  "original_sha256": "23f78e5e0d2123697a2a177c8094ed598ded6ff74f9aa133bae7d9ba9a8e302f",
+  "wren_sha256": "c5a0830f6a215a20c75fe52399f74e745c9846279f90a6e66aebd6750e08ab4b",
+  "kestrel_sha256": "4ef00883e4d5b9d3d6a69a00722165690ad92018e5b5fb999b83b858e2845da7",
+  "kestrel_already_canonical_at": "1d2acf0f87a04cf77e6436059dd10f7659846677",
+  "normalization_introduced_at": "dfed27d67524996546e7862f14743688ecae764d",
+  "later_plan_commit": "8b360323c5a9547a7e733336f9dc04a6d24c9487",
+  "integration_033e1cd_changed_paths": [
+    "evidence/native-residents/1d22c5f73483489eaead584d7b7b4d80.md",
+    "evidence/native-residents/6f4acf2f87f94cad9923c7f09de8da84.md"
+  ],
+  "sorrel_released_sequence": 664,
+  "wren_explicit_sleep": 698,
+  "wren_run_finish": {
+    "elapsed_seconds": 746.5419430732727,
+    "exit_code": 0,
+    "kind": "run-finish",
+    "outcome": "failed",
+    "run": "bb84f07d08e44b52aacc87ba531f5d65",
+    "usage": {}
+  },
+  "limits": [
+    "Original and Wren reports retained verbatim as historical witnesses, with correction.md authoritative for this adjudication.",
+    "No fresh repeat of unchanged filesystem probes; current37-test cancellation results are separate evidence/blackout-cancel.",
+    "Wren exit0 and sleep do not override native outcome failed; no successful native completion claimed.",
+    "No generic integration idempotency fix or runtime deployment in this task."
+  ]
+}
