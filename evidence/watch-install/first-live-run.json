@@ -1,0 +1,44 @@
+{
+  "run": "8b6b69fbec224266a1ab7774a974fcc8",
+  "resident": "Hazel",
+  "watch_events": [
+    {
+      "clean_admission": true,
+      "deadline_at": 1794570975.9833548,
+      "executable": "codex",
+      "kind": "start",
+      "local_day": "2026-11-13",
+      "prompt": "docs/WATCH_PROMPT.md",
+      "resident": "watch-8b6b69fbec224266a1ab7774a974fcc8",
+      "run": "8b6b69fbec224266a1ab7774a974fcc8",
+      "seconds": 1200,
+      "source_head": "902732bc4cd359b5526b113376bc70d786cf7c2b",
+      "at": 1794569775.9833548,
+      "sequence": 171
+    },
+    {
+      "kind": "launched",
+      "pgid": 25641,
+      "run": "8b6b69fbec224266a1ab7774a974fcc8",
+      "at": 1794569776.997511,
+      "sequence": 172
+    },
+    {
+      "kind": "recovered-interruption",
+      "reason": "supervisor-ended-without-finish",
+      "run": "8b6b69fbec224266a1ab7774a974fcc8",
+      "at": 1794570066.4064739,
+      "sequence": 181
+    }
+  ],
+  "model_final_output_mtime": 1794570064.0112429,
+  "terminal_delay_seconds": 2.395231008529663,
+  "model_final_event_type": "turn.completed",
+  "source_commit": "bf23574",
+  "house_task": "blackout-output-repair",
+  "task_finish_sequence": 179,
+  "resident_sleep_sequence": 180,
+  "model_private_output_not_published": true,
+  "supervisor_result": "recovered-interruption; normal finish absent; diagnosis ongoing",
+  "independent_review": "Keeper inspected Blackout diff/test suite and reproduced old exit120 then repaired exit2; both preserve a valid manifest."
+}

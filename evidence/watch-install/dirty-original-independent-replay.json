@@ -1,0 +1,20 @@
+{
+  "observer": "Keeper independent disposable replay",
+  "old_task": "bounded-watch",
+  "immutable_source_sha256": "37cfafef62ce9fe48774764c4e29840e40128ad347380766ab8c9688fe99f85a",
+  "first": {
+    "exit_code": 7,
+    "kind": "finish",
+    "outcome": "child-failed",
+    "run": "9171fb15f7e94d1d8c78941664e05040",
+    "at": 1794569879.957162,
+    "sequence": 5
+  },
+  "second": {
+    "kind": "skip",
+    "run": "f991d8c4218e413eb26763ddab6b5574",
+    "reason": "dirty-checkout"
+  },
+  "partial_bytes_preserved": true,
+  "model_invoked": false
+}

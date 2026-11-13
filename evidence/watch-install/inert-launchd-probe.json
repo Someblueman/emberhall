@@ -1,0 +1,214 @@
+[
+  {
+    "number": 0,
+    "result": {
+      "exit_code": 0,
+      "kind": "finish",
+      "outcome": "success",
+      "run": "9770ed411edf47e3a31db70f79daa3a5",
+      "at": 1794570277.258518,
+      "sequence": 5
+    },
+    "topology": {
+      "pid": 27210,
+      "pgid": 27210,
+      "sid": 27210,
+      "ppid": 27202,
+      "children": [
+        27219,
+        27220,
+        27221
+      ]
+    },
+    "worker": [
+      {
+        "kind": "worker-enter",
+        "time": 1794570276.146548,
+        "pid": 27202,
+        "pgid": 27202,
+        "sid": 27202
+      },
+      {
+        "kind": "worker-return",
+        "time": 1794570277.294993,
+        "pid": 27202,
+        "pgid": 27202,
+        "sid": 27202,
+        "code": 0
+      },
+      {
+        "kind": "supervisor-exit",
+        "time": 1794570277.4319959,
+        "pid": 27176,
+        "pgid": 27176,
+        "sid": 1,
+        "child": 27202,
+        "code": 0
+      }
+    ],
+    "self_group_kills": [],
+    "checks": 1,
+    "cleanup_elapsed": 0.0,
+    "nonempty_checks": [],
+    "stderr_bytes": 0
+  },
+  {
+    "number": 1,
+    "result": {
+      "exit_code": 0,
+      "kind": "finish",
+      "outcome": "success",
+      "run": "d6d73cf474444576ba6af966b3ec2a18",
+      "at": 1794570278.887437,
+      "sequence": 5
+    },
+    "topology": {
+      "pid": 27297,
+      "pgid": 27297,
+      "sid": 27297,
+      "ppid": 27289,
+      "children": [
+        27306,
+        27307,
+        27308
+      ]
+    },
+    "worker": [
+      {
+        "kind": "worker-enter",
+        "time": 1794570278.0107179,
+        "pid": 27289,
+        "pgid": 27289,
+        "sid": 27289
+      },
+      {
+        "kind": "worker-return",
+        "time": 1794570278.926433,
+        "pid": 27289,
+        "pgid": 27289,
+        "sid": 27289,
+        "code": 0
+      },
+      {
+        "kind": "supervisor-exit",
+        "time": 1794570279.0095701,
+        "pid": 27263,
+        "pgid": 27263,
+        "sid": 1,
+        "child": 27289,
+        "code": 0
+      }
+    ],
+    "self_group_kills": [],
+    "checks": 1,
+    "cleanup_elapsed": 0.0,
+    "nonempty_checks": [],
+    "stderr_bytes": 0
+  },
+  {
+    "number": 2,
+    "result": {
+      "exit_code": 0,
+      "kind": "finish",
+      "outcome": "success",
+      "run": "4d25920e67304a64ad7a1531be11eb61",
+      "at": 1794570280.54009,
+      "sequence": 5
+    },
+    "topology": {
+      "pid": 27384,
+      "pgid": 27384,
+      "sid": 27384,
+      "ppid": 27376,
+      "children": [
+        27393,
+        27394,
+        27395
+      ]
+    },
+    "worker": [
+      {
+        "kind": "worker-enter",
+        "time": 1794570279.591712,
+        "pid": 27376,
+        "pgid": 27376,
+        "sid": 27376
+      },
+      {
+        "kind": "worker-return",
+        "time": 1794570280.576443,
+        "pid": 27376,
+        "pgid": 27376,
+        "sid": 27376,
+        "code": 0
+      },
+      {
+        "kind": "supervisor-exit",
+        "time": 1794570280.633945,
+        "pid": 27350,
+        "pgid": 27350,
+        "sid": 1,
+        "child": 27376,
+        "code": 0
+      }
+    ],
+    "self_group_kills": [],
+    "checks": 1,
+    "cleanup_elapsed": 0.0,
+    "nonempty_checks": [],
+    "stderr_bytes": 0
+  },
+  {
+    "number": 3,
+    "result": {
+      "exit_code": 0,
+      "kind": "finish",
+      "outcome": "success",
+      "run": "033978e23c4f4acb8ddf05e203a36363",
+      "at": 1794570282.12708,
+      "sequence": 5
+    },
+    "topology": {
+      "pid": 27471,
+      "pgid": 27471,
+      "sid": 27471,
+      "ppid": 27463,
+      "children": [
+        27480,
+        27481,
+        27482
+      ]
+    },
+    "worker": [
+      {
+        "kind": "worker-enter",
+        "time": 1794570281.2403998,
+        "pid": 27463,
+        "pgid": 27463,
+        "sid": 27463
+      },
+      {
+        "kind": "worker-return",
+        "time": 1794570282.1633081,
+        "pid": 27463,
+        "pgid": 27463,
+        "sid": 27463,
+        "code": 0
+      },
+      {
+        "kind": "supervisor-exit",
+        "time": 1794570282.186031,
+        "pid": 27437,
+        "pgid": 27437,
+        "sid": 1,
+        "child": 27463,
+        "code": 0
+      }
+    ],
+    "self_group_kills": [],
+    "checks": 1,
+    "cleanup_elapsed": 0.0,
+    "nonempty_checks": [],
+    "stderr_bytes": 0
+  }
+]

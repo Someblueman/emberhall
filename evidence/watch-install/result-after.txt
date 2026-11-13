@@ -1,0 +1,7 @@
+test_delayed_cleanup_preserves_known_child_result_for_recovery (tests.test_watch.WatchTests.test_delayed_cleanup_preserves_known_child_result_for_recovery) ... {"stage": "cleanup-pending", "run": "delayed-cleanup", "pgid": 27862}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.720s
+
+OK

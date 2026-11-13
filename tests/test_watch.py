@@ -90,6 +90,8 @@ sys.exit(7 if mode == 'fail' else 0)
         self.assertEqual(result['outcome'], 'success')
         path = self.record.common / 'house-watch' / result['run']
         self.assertEqual(path.stat().st_mode & 0o777, 0o700)
+        supervisor_log = path.parent / (result['run'] + '-supervisor.log')
+        self.assertEqual(supervisor_log.stat().st_mode & 0o777, 0o600)
         for file in path.iterdir():
             self.assertEqual(file.stat().st_mode & 0o777, 0o600)
         self.assertIn('PRIVATE-FIXTURE', (path / 'events.jsonl').read_text())
@@ -247,6 +249,33 @@ sys.exit(7 if mode == 'fail' else 0)
         self.assertEqual(result, 1)
         self.assertFalse((self.repo / '.git/child-pid').exists())
         self.assertEqual(self.history()[-1]['outcome'], 'timeout')
+
+    def test_delayed_cleanup_preserves_known_child_result_for_recovery(self):
+        import fcntl
+        from unittest.mock import patch
+        from house.watch import admit, private_root, recover, worker
+        self.record.append('arrive', ACTOR, {'name': 'Watch keeper'}, 'watch-keeper-arrival-v1')
+        run = 'delayed-cleanup'
+        prompt = (self.repo / 'docs/WATCH_PROMPT.md').resolve()
+        with (private_root(self.record) / 'runner.lock').open('a+b') as lock:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            admit(self.record, run, 10, prompt, str(self.fixture))
+            # Model the cleanup-deadline branch, not a fabricated model result:
+            # the actual inert child must run and return zero first.
+            with patch('house.watch.group_stopped', return_value=False):
+                code = worker(self.record, run, lock.fileno(), str(self.fixture),
+                              prompt, time.monotonic() + 10)
+            self.assertEqual(code, 1)
+            self.assertFalse(any(x['kind'] == 'finish' for x in self.history()))
+            observed = [x for x in self.history() if x['kind'] == 'execution-result']
+            self.assertEqual(len(observed), 1, 'known child outcome was discarded')
+            self.assertEqual(observed[0]['exit_code'], 0)
+            self.assertIsNone(recover(self.record))
+        final = self.history()[-1]
+        self.assertEqual(final['kind'], 'finish')
+        self.assertEqual(final['outcome'], 'success')
+        self.assertTrue(final['recovered'])
+        self.assertEqual(sum(x['kind'] == 'start' for x in self.history()), 1)
 
     def test_scheduled_dirty_failure_can_resume_without_reset(self):
         failed = self.collect(self.watch_process(mode='dirty-fail'))

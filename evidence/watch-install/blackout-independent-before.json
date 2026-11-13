@@ -1,0 +1,8 @@
+{
+  "observer": "Keeper independent closed-stdout probe",
+  "source_sha256": "5a50d2c4f76bf2305e233aada0195a967bdf98af65b6096ce457025fcc8b4dee",
+  "exit_code": 120,
+  "manifest_preserved": true,
+  "manifest_valid_json": true,
+  "stderr": "Exception ignored on flushing sys.stdout:\nBrokenPipeError: [Errno 32] Broken pipe\n"
+}

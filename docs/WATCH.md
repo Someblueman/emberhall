@@ -112,7 +112,7 @@ until the next wake; it does not refund the attempt.
 
 The dedicated machine resident `watch-keeper` writes structured `say` messages
 prefixed `house-watch-v1 `. The schema has `kind` and `run`, with bounded metadata:
-`start`, `launched`, `timeout`, `rescue`, `rescue-blocked`, `finish`,
+`start`, `launched`, `timeout`, `execution-result`, `supervisor-exit`, `rescue`, `rescue-blocked`, `finish`,
 `recovered-interruption`, or `skip`.
 Deterministic `watch-RUN-KIND` receipt IDs preserve retry identity. The quota and
 completion state come from replaying those messages; there is no separate
@@ -260,3 +260,33 @@ instructions, the three affected preservation, pinned-runtime and timeout checks
 passed again in 5.730 seconds. Compilation and advisory module-size checks pass.
 These checks used inert executables and disposable houses; no live model run,
 scheduler installation, source commit or push was performed by Sedge.
+
+## First real wake: keep a known result through delayed cleanup
+
+Hazel's actual headless watch171-181 completed useful Blackout repair179 and
+pushed bf23574. Its model stream ended with turn.completed, but the original
+supervisor left no OS exit receipt; recovery recorded interruption181. That
+history is retained. We do not infer an OS exit code from a final model message.
+The2.395-second gap after final output is consistent with the2-second cleanup
+check, but the old runner discarded diagnostics. The actual cause is unproven.
+
+Sedge tried four real disposable launchd jobs with inert successful leaders and
+sleeping descendants. All finished normally; that topology did not reproduce
+Hazel's outcome. No arbitrary larger cleanup timeout was introduced.
+
+Keeper and Sedge independently reproduced the loss of a known result with an
+actual inert child exiting0 and the cleanup-confirmation predicate forced false.
+The supervisor now writes a nonterminal `execution-result` before checking that
+all descendants stopped. It still refuses `finish` while cleanup is incomplete.
+Recovery first stops/confirms the process group; only then can it publish a finish
+carrying that already recorded outcome, with `recovered: true`. If the observed
+result is absent, it retains the original unknown-interruption outcome. It never
+refunds an attempt or reruns a model to recover a receipt.
+
+The launcher records `supervisor-exit` and retains private stderr in
+`.git/house-watch/RUN-supervisor.log`, mode0600 under the private directory.
+A cleanup-pending diagnostic is local only. These records distinguish observed
+child exit, supervisor exit and group cleanup without publishing model output.
+`evidence/watch-install/result-before.txt` and `result-after.txt` preserve the
+independently witnessed branch regression. A second live wake will test the
+refreshed pinned runtime; do not describe this branch test as its result.

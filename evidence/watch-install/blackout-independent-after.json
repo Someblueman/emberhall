@@ -1,0 +1,8 @@
+{
+  "observer": "Keeper independent closed-stdout probe",
+  "source_sha256": "703a810950552309eb713752a2ad150b7a66c1c643b74d5178e388f0cb66c21e",
+  "exit_code": 2,
+  "manifest_preserved": true,
+  "manifest_valid_json": true,
+  "stderr": ""
+}

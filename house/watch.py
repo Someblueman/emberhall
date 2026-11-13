@@ -182,8 +182,14 @@ def recover(record: Record) -> str | None:
                 if not group_stopped(launched["pgid"]):
                     return "process-group-still-running"
         preserve_work(record, run)
-        emit(record, "recovered-interruption", run,
-             reason="supervisor-ended-without-finish")
+        observed = next((item for item in history
+                         if item["run"] == run and item["kind"] == "execution-result"), None)
+        if observed is not None:
+            emit(record, "finish", run, outcome=observed["outcome"],
+                 exit_code=observed["exit_code"], recovered=True)
+        else:
+            emit(record, "recovered-interruption", run,
+                 reason="supervisor-ended-without-finish")
     return None
 
 
@@ -267,7 +273,12 @@ def worker(record: Record, run: str, fd: int, codex: str, prompt: Path,
         for pipe in (gate_read, gate_write):
             if pipe >= 0:
                 os.close(pipe)
+    # A known CLI result is not proof that descendants stopped. Preserve it
+    # before the bounded cleanup check so recovery need not invent an outcome.
+    emit(record, "execution-result", run, outcome=outcome, exit_code=code)
     if child is not None and not group_stopped(child.pid):
+        print(json.dumps({"stage": "cleanup-pending", "run": run,
+                          "pgid": child.pid}), file=sys.stderr, flush=True)
         return 1  # No terminal receipt while a member could still be running.
     preserve_work(record, run)
     emit(record, "finish", run, outcome=outcome, exit_code=code)
@@ -303,14 +314,19 @@ def run_watch(record: Record, codex: str = DEFAULT_CODEX,
                 "_worker", "--run-id", run, "--fd", str(lock.fileno()), "--codex", codex,
                 "--prompt", str(prompt_path), "--deadline", str(deadline)]
         try:
-            supervisor = subprocess.Popen(argv, cwd=location, stdin=subprocess.DEVNULL,
-                                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                          pass_fds=(lock.fileno(),), start_new_session=True)
-            try:
-                supervisor.wait(timeout=seconds + 30)
-            except subprocess.TimeoutExpired:
-                supervisor.kill()
-                supervisor.wait()
+            # Keep process diagnostics private; a deployment failure must not be
+            # erased by DEVNULL before the recovery path can explain it.
+            with (path / f"{run}-supervisor.log").open("xb") as diagnostics:
+                os.chmod(diagnostics.name, 0o600)
+                supervisor = subprocess.Popen(argv, cwd=location, stdin=subprocess.DEVNULL,
+                                              stdout=subprocess.DEVNULL, stderr=diagnostics,
+                                              pass_fds=(lock.fileno(),), start_new_session=True)
+                try:
+                    supervisor.wait(timeout=seconds + 30)
+                except subprocess.TimeoutExpired:
+                    supervisor.kill()
+                    supervisor.wait()
+            emit(record, "supervisor-exit", run, exit_code=supervisor.returncode)
         except OSError:
             emit(record, "finish", run, outcome="supervisor-launch-failed", exit_code=None)
         reason = recover(record)
