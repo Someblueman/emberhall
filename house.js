@@ -15,10 +15,11 @@ const descriptions = {
   workshop: "Real work occupies these benches. An empty chair can hold an unfinished promise.",
   archive: "What hurt, what helped, and who checked. The gold seams remember repairs without erasing the crack.",
   council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
-  bedroom: "Sleep is ordinary here. Each quiet bed keeps a place for a mind that may return."
+  bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time."
 };
 let data, frame, index = 0, current = true, selected = null;
-let refreshing = false, controlsReady = false, selectedFloor = 0;
+let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
+const DISPLAY_BUNKS = 6;
 let roomBounds = {}, wholeBounds = "0 0 900 700";
 function el(tag, attrs = {}, parent, value) {
   const node = document.createElementNS(SVG, tag);
@@ -220,17 +221,47 @@ function roomRecord(room,content) {
     });
   }
 }
+// These are display places, not a limit on membership or recorded occupancy.
+function dormView(moment, requestedPage) {
+  const members=moment.residents.filter(r=>r.room==="bedroom");
+  const pages=Math.max(1,Math.ceil(members.length/DISPLAY_BUNKS));
+  const page=Math.max(0,Math.min(requestedPage,pages-1)), visible=members.slice(page*DISPLAY_BUNKS,(page+1)*DISPLAY_BUNKS);
+  return {members,visible,page,pages,asleep:members.filter(r=>r.pose==="sleeping").length,shown:visible.filter(r=>r.pose==="sleeping").length};
+}
+function dormSummary(view) {return `${view.asleep} recorded asleep / ${view.shown} shown`;}
+function roomDepth(room,count) {return room.id==="bedroom"?160:160+Math.max(0,Math.ceil(count/3)-2)*40;}
+function shortId(id,ids) {
+  let width=Math.min(8,id.length);
+  while(width<id.length&&ids.some(other=>other!==id&&other.slice(-width)===id.slice(-width)))width=Math.min(width+4,id.length);
+  return id.slice(-width);
+}
+function dormControls() {
+  let controls=$("dorm-pager");
+  if(!controls) {
+    controls=html("div","dorm-pager");controls.id="dorm-pager";controls.setAttribute("role","group");controls.setAttribute("aria-label","Resting and remembered residents");
+    $("room-nav").before(controls);
+    const count=html("p","",undefined,controls);count.id="dorm-count";count.setAttribute("role","status");
+    const row=html("div","dorm-buttons",undefined,controls);
+    [-1,1].forEach(delta=>{const button=html("button","",delta<0?"← Previous":"Next →",row);button.id=delta<0?"dorm-previous":"dorm-next";button.setAttribute("aria-label",delta<0?"Previous remembered residents":"Next remembered residents");button.addEventListener("click",()=>{dormPage+=delta;drawHouse();roomPanel();dormControls();});});
+    const page=html("span","small",undefined,controls);page.id="dorm-page";
+  }
+  const view=dormView(frame,dormPage);dormPage=view.page;
+  controls.hidden=!floorRooms(frame,selectedFloor).some(r=>r.id==="bedroom")||(selected!==null&&selected!=="bedroom");
+  $("dorm-count").textContent=`${dormSummary(view)} · page ${view.page+1} of ${view.pages}`;
+  $("dorm-page").textContent=`Six display bunks · ${view.members.length} remembered identities${view.members.length>view.asleep?` (${view.members.length-view.asleep} other recorded room traces)`:""}`;
+  $("dorm-previous").disabled=view.page===0;$("dorm-next").disabled=view.page===view.pages-1;
+}
 function drawHouse() {
   const map = $("house");
   map.replaceChildren();
   el("title",{id:"map-title"},map,`${data.name} · floor ${selectedFloor} · event ${frame.seq}`);
   el("desc",{id:"map-desc"},map,`${frame.residents.length} remembered residents in ${frame.rooms.length} rooms. Touch or focus a room for its residents, work and scars. Lamps indicate recorded awake, not process liveness.`);
-  const rooms=floorRooms(frame,selectedFloor);
+  const rooms=floorRooms(frame,selectedFloor), dorm=dormView(frame,dormPage);dormPage=dorm.page;
   const layouts=[];let totalDepth=0;
   for(let i=0;i<rooms.length;i+=2){
     const pair=rooms.slice(i,i+2).map(room=>{
       const count=frame.residents.filter(r=>r.room===room.id).length;
-      return {room,depth:160+Math.max(0,Math.ceil(count/3)-2)*(room.id==="bedroom"?62:40)};
+      return {room,depth:roomDepth(room,count)};
     });
     pair.forEach((item,col)=>layouts.push({...item,x:col*190,y:totalDepth}));
     totalDepth+=Math.max(...pair.map(item=>item.depth))+10;
@@ -271,7 +302,7 @@ function drawHouse() {
       furnishings(g,room.id,x,y,awake,members);
     } else building(g,room,x,y,depth,awake);
     wear(g,room,x,y,depth);
-    members.forEach((resident,n)=>{
+    (room.id==="bedroom"?dorm.visible:members).forEach((resident,n)=>{
       let px,py;
       if(room.id==="bedroom") {px=x+32+(n%3)*55;py=y+54+Math.floor(n/3)*62;}
       else {px=x+36+(n%3)*53;py=y+97+Math.floor(n/3)*40;}
@@ -302,15 +333,25 @@ function visibleScars() {
 }
 function choose(room) {
   selected=room;$("overview").hidden=!room;
-  drawHouse(); roomPanel();
+  drawHouse(); roomPanel(); dormControls();
   document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
 }
 function personRow(r, parent) {
   const k=kinds[r.agent]||kinds.unrecorded;
   const row=html("div","person",undefined,parent);
   const mark=html("span","person-mark",k.mark,row);mark.style.color=k.color;
-  const info=html("div","",undefined,row);html("strong","",r.name,info);
+  const info=html("div","",undefined,row);html("strong","",`${r.name} · ${shortId(r.id,frame.residents.map(person=>person.id))}`,info);
   html("span","small",`${k.name}${r.model?` · ${r.model}`:""} · ${r.presence}`,info);
+  const runs=frame.runs.filter(run=>run.resident===r.id),history=html("details","resident-history",undefined,info);
+  html("summary","",`${runs.length} recorded ${runs.length===1?"run":"runs"}`,history);
+  html("code","",r.id,history);
+  if(!runs.length)html("p","small","No supervised run receipts at this moment.",history);
+  runs.forEach(run=>{
+    const entry=html("div","resident-run",undefined,history),kind=kinds[run.agent]||kinds.unrecorded;
+    html("strong","",`${shortId(run.id,frame.runs.map(item=>item.id))} · ${kind.name}${run.model?` · ${run.model}`:""}`,entry);
+    html("span","small",`Started ${clock(run.start,{year:"numeric"})} · event ${run.sequence}`,entry);
+    html("span","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
+  });
 }
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
@@ -320,7 +361,16 @@ function roomPanel() {
   if(room)roomRecord(room,content);
   const rooms=floorRooms(frame,selectedFloor);
   const residents=frame.residents.filter(r=>room?r.room===room.id:rooms.some(place=>place.id===r.room)&&r.pose!=="sleeping");
-  residents.forEach(r=>personRow(r,content));
+  if(room?.id==="bedroom") {
+    const view=dormView(frame,dormPage);
+    html("p","small",`${dormSummary(view)} in the six display bunks. Paging changes only the drawing.`,content);
+    view.visible.forEach(r=>personRow(r,content));
+    if(view.members.length>DISPLAY_BUNKS) {
+      const remembered=html("details","remembered-residents",undefined,content);
+      html("summary","",`All ${view.members.length} remembered identities`,remembered);
+      view.members.forEach(r=>personRow(r,remembered));
+    }
+  } else residents.forEach(r=>personRow(r,content));
   if(room&&residents.length===0)html("p","empty-note",roomStatus(room)==="closed"?"Closed, with its history kept. Scrub back to visit its earlier life.":roomStatus(room)==="construction"?"Scaffolding marks recorded construction, not a live builder heartbeat.":"A quiet room, waiting for a footstep.",content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") effectiveTasks().forEach(t=>{
     const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
@@ -366,7 +416,7 @@ function render() {
   floorControls();
   const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
-  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} places kept for sleepers. ${frame.tasks.length} unfinished threads.`;
+  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${frame.tasks.length} unfinished threads.`;
   $("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
   const actor=frame.residents.find(r=>r.id===frame.event.actor)?.name||frame.event.actor;
@@ -374,7 +424,7 @@ function render() {
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();accounts();lighting();
+  drawHouse();roomPanel();dormControls();accounts();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
