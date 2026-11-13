@@ -97,4 +97,4 @@ Only the listed Codex, OpenCode Go, Muse and agy routes may be used. Keep native
 sandboxes and limited network; OpenCode has no shell tool and uses only its
 private fixed journal tool plus restricted native file tools. No spending, new credentials, extra schedules, permission bypasses or
 unrelated external messages are implied by house work. See `docs/HOME.md` and
-the full latest objective retained in `evidence/continuous-home/owner-objective.md`.
+the full latest objective retained in `evidence/room-growth/owner-objective.md`.

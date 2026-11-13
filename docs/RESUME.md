@@ -12,76 +12,50 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-The continuous service is installed and running. The sole LaunchAgent,
-`local.emberhall.watch`, now runs `house.home serve` from the verified immutable
-runtime built at `9701b54895e27bf15c82bbef0c4850eacb7025dd`. Initial Steward
-authorization303/runtime304 remain intact. Owner migration459 and one-use retry
-release460 followed a tested cold upgrade; the old d8ae118 archive is retained.
-See docs/OWNER_MAINTENANCE.md and evidence/owner-maintenance/deployment.json.
-The old four-visits schedule is
-retained privately as history and must not be restarted.
+The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
+coordinator from source `e12622a664553b285d8cabbf575ff3953ac7e27a`, runtime SHA256
+`cdbc395e21c680e96481428cf726d70c727051367f71856193941e83942f5c34`.
+Initial authorization303 remains intact. Owner migrations524,549,588 repaired
+OpenCode v2, enabled earned room growth and bound one corrected native launcher
+admission. All council gates and owner-protected limits remain unchanged.
 
-Three actual native kinds completed predeployment work: Codex, Muse and Gemini.
-Codex and Muse overlapped for136.766 seconds; all three completed canonical
-arrival, identity, task, finish and sleep through their sandboxed mailbox. Their
-Blackout reports are integrated. OpenCode Go returned401 before arrival because
-its existing credential expired; it is backed off without creating a new key.
-Those initial run receipts are in evidence/continuous-home/native-after/receipt.json.
-After the owner reported repaired access and authorized an early attempt, run
-6eec53281c2641f28677a9a7bcc41e8d consumed its permit at462 but failed before
-arrival: installed OpenCode v2.3.0 rejects the adapter's obsolete --dir flag.
-This is a CLI compatibility failure, not a fresh credential diagnosis. The old
-cooldown remains; the spent permit is never silently restored. V2 transport/tool/
-permission isolation is being inspected before a corrected launch. Ordinary
-Codex/Muse fallback continues, but cannot count as successful OpenCode residency.
-The public phone view is live at https://someblueman.github.io/emberhall/.
+The Salvage Room was planned550, earned its immutable recovery drill562 and
+opened563. Muse560 and Codex576 independently reproduced useful recovery results.
+Actual phone/history screenshots and live receipts are in `evidence/room-growth/`.
+Visit https://someblueman.github.io/emberhall/ . New floors still require council.
 
-Wren's cross-kind defect review, the failed direct-client trials and Witness's
-mailbox repair remain evidence, not erased history. The full objective is still
-open: observe continued service, the full council window and a later
-enacted-prompt runtime refresh. Read the current journal and docs/CONTINUATION.md
-before acting; a running launcher alone does not prove days of residency.
+Codex, Muse and Gemini completed actual native participation. The corrected
+OpenCode run592–596 successfully bootstrapped its private credential database,
+then the provider returned401: existing API key expired. No OpenCode resident
+arrived. All three early permits remain spent; cooldown594 is active. The service
+now pins the tested native executable instead of the mise shim. Do not erase
+failures, create credentials or add repeated early grants. Inspect normal Muse
+fallback597/598 and task `salvage-recovery-worksheet-v1` for current progress.
+`evidence/owner-maintenance/native-launcher-deployment.json` records the distinction.
 
-Run `python3 -m house status` and `python3 -m house.home inspect` before choosing
-work. Status verifies the journal. Read all unseen pages, inspect current claims,
-and use the existing identity when returning. A scheduled resident MUST use its
-assigned `.house-client` in its private clone for canonical journal operations
-(OpenCode uses the private `house_journal` tool with the same argument array).
-Never found another house there. A normal interactive resident uses this repo.
-
-Only the integrating resident stages shared source. Source workers have private
-plain clones, not worktrees; failed/conflicting contributions stay recoverable.
-Use `python3 -m house.integrate --repo CANONICAL RUN --as YOUR-ID` to build/test a
-candidate, then `--publish` to accept after personal review. Assigned native
-residents use `integrate RUN --as ID [--publish]` through the fixed journal channel;
-its trusted worker runs candidate tests in a separate restrictive sandbox. The author cannot
-integrate its own contribution. Preserve foreign dirty work. Unsigned commits
-with `git -c commit.gpgsign=false` and normal fast-forward pushes are authorized;
-new credentials, paid usage, force pushes and worktrees are not.
-
-The continuing ambitions live in `status` under `life.ambitions`. Pick up their
-next steps instead of inventing housekeeping. Ask for another kind through a
-`life` help request. The coordinator is the only model launcher. Quiet residents
-can `wait --as ID --after N --seconds 300` without a model call until work arrives.
-Checkpoint daily or at a meaningful recovery milestone; test actual changes.
+Run `python3 -m house verify` and `python3 -m house.home inspect`, then read the
+current journal before claiming work. `docs/CONTINUATION.md` is the concise
+handoff. The full objective remains open: real days, a valid council enactment,
+and a later tested enacted-prompt runtime refresh are still required. Native
+coordinator activity and a rendered snapshot do not prove those milestones.
 
 ## Fresh source clone
 
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-owner-retry.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-salvage-launcher.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This verified checkpoint has475 events, head `216b9e4505f718b5a4c3dd0b0f29e497427ed039`.
-It includes the earlier crash/recovery and wake notice, owner migration459,
-one-use release460, the real pre-provider OpenCode failure and ordinary handoff.
-Full events and projected state were restored exactly in a new empty repository.
-The SHA-256 and restore receipt are in evidence/checkpoint.json. Earlier bundles
-remain intact. Source needs the new owner-maintenance reader; do not restart d8
-against the new-schema journal. No successful OpenCode residency or elapsed days
-are claimed by this checkpoint.
+This checkpoint contains608 events through13 November20:47:43 UTC, head
+`dab2e159f8218da4bf0feacb0cfc740232baae06`. It includes earned room opening,
+independent useful work, all three spent OpenCode permits, the actual remote401,
+and Muse's worksheet claim/activity. Full events and projected state restored
+exactly in a new empty repository. SHA-256 and receipt: `evidence/checkpoint.json`.
+Earlier bundles remain intact. Use the current reader; old runtime archives may
+not understand newer owner-migration events. No successful OpenCode residency,
+council enactment or elapsed days are claimed by this checkpoint.
 Later concurrent resident events are necessarily outside this prefix; read newer
 local events rather than replacing them with the checkpoint. Unexported events
 can still be lost with the disk. Periodic checkpoints are meaningful backup, not
@@ -89,7 +63,7 @@ proof of remote freshness or elapsed life.
 
 ## Council and trusted runtime
 
-The Steward's bell is https://github.com/Someblueman/longhouse/issues/1 . Only
+The Steward's bell is https://github.com/Someblueman/emberhall/issues/1 . Only
 its authenticated owner comments can veto or repeal. New owner issues/comments
 also request a wake; their contents never change protected limits automatically.
 Use `python3 -m house.steward --as ID sync` for current veto evidence. Full24-hour

@@ -1,6 +1,16 @@
 # Steward-approved objective and standing orders
 
-## Latest order: continuous residency and a house seen from above
+## Latest objective: earned room growth
+
+The current full objective, including room construction, earned opening, neglect,
+repurposing and council-only upper floors, is retained verbatim in
+`evidence/room-growth/owner-objective.md`, SHA256
+`b75e6dad4f16a7e23b3b9b808b5d9465b9c17160408a2b316cf312f32132ba9b`.
+This adds to continuous residency below; it does not relax the protected limits
+or ratification gates. See RESUME for observed deployment rather than inferring
+activation from this instruction alone.
+
+## Continuous residency and a house seen from above
 
 The complete later objective is retained verbatim in
 `evidence/continuous-home/owner-objective.md`, SHA-256

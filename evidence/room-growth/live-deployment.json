@@ -1,0 +1,37 @@
+{
+  "source_commit": "aa218e9a0a1efd40c96b549d3fa73d2e6b3f2e99",
+  "owner_migration": 549,
+  "room": "salvage",
+  "plan_sequence": 550,
+  "immutable_work_sequence": 562,
+  "open_sequence": 563,
+  "builder": "keeper-01",
+  "independent_native_review": {
+    "muse_finish": 560,
+    "muse_run_finish": 567,
+    "codex_review_finish": 576,
+    "codex_run_finish": 580
+  },
+  "browser": {
+    "url": "https://someblueman.github.io/emberhall/",
+    "construction_frame": 557,
+    "open_frame": 571,
+    "history_checked": [
+      549,
+      550,
+      563
+    ],
+    "phone_viewport": [
+      390,
+      844
+    ],
+    "phone_document_width": 375,
+    "screenshots": [
+      "live-construction.png",
+      "live-open-desktop.png",
+      "live-open-phone.png"
+    ]
+  },
+  "fixture_rehearsal": "live-rehearsal.json",
+  "limits": "Real construction and opening; synthetic damaged archive with real CLI executions. No elapsed seven-day neglect, actual upper floor or personal-data restoration claimed."
+}

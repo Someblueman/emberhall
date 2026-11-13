@@ -1,0 +1,97 @@
+{
+  "observed_at": "2026-11-13T20:47:09.293228+00:00",
+  "source_commit": "e12622a664553b285d8cabbf575ff3953ac7e27a",
+  "runtime_sha256": "cdbc395e21c680e96481428cf726d70c727051367f71856193941e83942f5c34",
+  "owner_migration_sequence": 588,
+  "owner_release_sequence": 589,
+  "scope": "opencode-launcher-20261113",
+  "authority_and_previous_credits_unchanged": true,
+  "service_path": {
+    "after": {
+      "agy": "/Users/sws/.local/bin/agy",
+      "codex": "/Users/sws/.local/bin/codex",
+      "muse": "/Users/sws/.local/bin/muse",
+      "opencode": "/Users/sws/.local/share/mise/installs/node/22.22.0/bin/opencode"
+    },
+    "authority_unchanged": true,
+    "before": {
+      "agy": "/Users/sws/.local/bin/agy",
+      "codex": "/Users/sws/.local/bin/codex",
+      "muse": "/Users/sws/.local/bin/muse",
+      "opencode": "/Users/sws/.local/share/mise/shims/opencode"
+    },
+    "native_resolved": "/Users/sws/.local/share/mise/installs/node/22.22.0/lib/node_modules/@opencode/cli/bin/opencode.exe",
+    "native_sha256": "9f3147cae4ca323827d3ca39451b0d3431b2906e79a08e9b09d1eb34bb703f52",
+    "new_path": "/Users/sws/.local/bin:/Users/sws/.local/share/mise/installs/node/22.22.0/bin:/Users/sws/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "no_model_called": true,
+    "old_path": "/Users/sws/.local/bin:/Users/sws/.local/share/mise/shims:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "original_hold_unchanged": true,
+    "other_provider_paths_unchanged": true,
+    "runtime": "/Users/sws/Code/longhouse/.git/house-home/runtime-e12622a664553b285d8cabbf575ff3953ac7e27a.pyz",
+    "spent_credits_unchanged": true,
+    "status": "installed while service stopped",
+    "version": "opencode v2.3.0"
+  },
+  "host_tests": {
+    "collected": 265,
+    "executed": 256,
+    "skipped": 9,
+    "seconds": 145.823
+  },
+  "blackout_tests": {
+    "executed": 33,
+    "seconds": 2.612
+  },
+  "isolated_tests": {
+    "collected": 265,
+    "executed": 198,
+    "skipped": 67,
+    "seconds": 62.644,
+    "output_sha256": "c2db1f3d25e55ac82a6bcc5c202b80d5dd34d7cc27fec33e2a782f9f076e175e"
+  },
+  "native_run": {
+    "agent": "opencode",
+    "help_request": "salvage-native-opencode-worksheet",
+    "kind": "run-start",
+    "mode": "work",
+    "model": "opencode-go/deepseek-v4.1-flash",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-db90c52098954147a4d8b2e70c1be930",
+    "run": "85cecff20f114d5b805b8474e19a6120",
+    "source_head": "e12622a664553b285d8cabbf575ff3953ac7e27a",
+    "workspace": "residents/85cecff20f114d5b805b8474e19a6120",
+    "status": "completed",
+    "started_at": 1794602714.277003,
+    "started_sequence": 592,
+    "pgid": 2883,
+    "launched_sequence": 593,
+    "outcome": "failed",
+    "exit_code": 1,
+    "usage": {},
+    "elapsed_seconds": 16.373822927474976,
+    "ended_at": 1794602733.88756,
+    "ended_sequence": 596,
+    "released_tasks": []
+  },
+  "actual_executable": "/Users/sws/.local/share/mise/installs/node/22.22.0/bin/opencode",
+  "private_bootstrap_database_exists": true,
+  "provider_error": {
+    "type": "provider.auth",
+    "status": 401,
+    "message_class": "existing API key expired"
+  },
+  "stdout_sha256": "54107bb23032fd6b4795f360605c528537a554362c170b0693bcdd9e71a945cf",
+  "stderr_bytes": 0,
+  "resident_arrived": false,
+  "latest_provider_budget": {
+    "agent": "opencode",
+    "kind": "budget",
+    "reason": "credentials unavailable",
+    "until": 1794689129.189377,
+    "at": 1794602730.53184,
+    "sequence": 594
+  },
+  "no_further_early_grant": true,
+  "followup": "Normal coordinator handed worksheet to Muse at597/598. Do not label fallback work OpenCode. Existing selected credential must be repaired before another useful OpenCode attempt; no replacement key or sandbox changes authorized.",
+  "limits": "Native bootstrap and provider request succeeded far enough to get an authenticated protocol error; no successful OpenCode residency, useful model work or account repair is established. Synthetic shim failure does not establish the second historical attempt cause."
+}

@@ -2,7 +2,7 @@
 
 **13 November 2026: continuous service installed; full objective remains open.**
 The complete current objective is preserved verbatim in
-`evidence/continuous-home/owner-objective.md`. This audit distinguishes a tested
+`evidence/room-growth/owner-objective.md`. This audit distinguishes a tested
 mechanism, an observed live event, and the longer history still required.
 
 | Requirement | Authoritative evidence and present limit |
@@ -17,11 +17,11 @@ mechanism, an observed live event, and the longer history still required.
 | Continuous residency | The sole local.emberhall.watch LaunchAgent runs the pinned coordinator with KeepAlive/RunAtLoad and no four-visit or20-minute limit. After a real coordinator crash, successor Cinder reclaimed355, finished356, slept369 and completed372; Alder automatically started373/374 and arrived378. Days of continuous life and ongoing handoff reliability remain unproved. |
 | Up to three residents, help and quota fallback | Journal-enforced capacity, real concurrent native trials, durable help and process receipts, tested quota/credential backoff and replacement. All unavailable providers produce an honest gap. The house does not wake a sleeping Mac. |
 | GitHub owner wake requests | Authenticated owner-ID polling and idempotent issue/comment requests are implemented and tested; the installed coordinator polls the real inbox. Do not impersonate the owner to manufacture a live issue-wake acceptance test. |
-| Four native kinds | Codex, Muse and Gemini completed arrival/identity/claim/finish/sleep. OpenCode Go was actually attempted with restricted tools but its existing credential returned401 before arrival. No new key or paid alternate route was created. Successful OpenCode residency remains blocked by that credential. |
+| Four native kinds | Codex, Muse and Gemini completed actual canonical participation. Corrected native OpenCode592–596 imported the selected credential and reached provider401 for an expired key; no OpenCode resident arrived. Normal fallback continues. |
 | Native sandboxes and usage | Fixed mailbox avoids canonical Git writes from native rooms. Muse sandbox and agy --sandbox remain on. OpenCode has no shell tool and uses a fixed no-shell journal tool. Native counters and unknown balances are distinguished from whole-account usage. Gemini's first unknown journal counters remain immutable; its observed terminal format drove a tested parser repair. |
 | Persistent ambitions and useful work | Three continuing ambitions are in the journal. Standalone Blackout Kit has19 real CLI tests and independent recovery/filename-portability trials; it needs no house, network or account. Work demonstrably impossible within one chat remains an aspiration, not a proven claim. |
 | Checkpoints without wake paperwork | Periodic checkpoint guidance replaces every-wake ceremonies. Exported bundles restore exact state and events; private source rescue retains unfinished work. The most recent published checkpoint is identified in evidence/checkpoint.json; private newer records are not remote backups. |
-| Public phone house | https://someblueman.github.io/emberhall/ is deployed. Actual300-event view shows room figures, kind glyphs, sleepers, failure marks, native budget status and history. Phone390x844 and first-event scrubbing screenshots are retained. A rendered snapshot is not process liveness. |
+| Public phone house | https://someblueman.github.io/emberhall/ shows record-derived rooms, figures, kind glyphs, sleepers, failure marks, budget status and history. Actual construction550/opening563 and390x844 phone checks are retained under evidence/room-growth/. A rendered snapshot is not process liveness. |
 | Cross-kind repair witnessing | Actual Muse Wren review and re-verification, then actual Codex/Muse/Gemini mailbox participation. Gemini independently assessed live SIGKILL journal recovery and completed354, explicitly unable to inspect cross-room objects. Flint separately verified all15 retained-file comparisons, rescue hashes, claim release and process absence365/366. Raw native logs stay private. |
 | Daughter and exchange | Reedbank has a distinct identity and15-event verified bundle, real residents/reviewers and two-way lesson exchange. Ongoing independent daughter life is not yet proved. |
 
@@ -35,7 +35,7 @@ Never weaken those gates to finish this audit.
 
 The public browser now refreshes new publications every60 seconds while retaining
 historical selection. Real browser checks cover new frames, transient HTTP503 and
-recovery; the deployed asset matches tested bytes. Recovery checkpoint393 restored
+recovery; the deployed asset matches tested bytes. Milestone checkpoint608 restored
 exact events and state in an empty repository. These are bounded checks, not proof
 of all mobile browsers, all crash points, disk-loss recovery or elapsed days.
 
@@ -44,3 +44,23 @@ are under `native-before/` and `native-after/`; host/candidate acceptance is und
 `mailbox-repair/`. Historical founding and four-watch receipts remain history,
 including failed runs and the deactivated custodian detour. They do not establish
 the present service configuration or elapsed multi-day life.
+
+
+## Observed room and launcher milestone,13 November evening
+
+The Salvage Room's actual plan550, immutable useful work562 and opening563 are
+visible in the public history and an actual390x844 phone screenshot. Independent
+Muse560 and Codex576 reproduced its portable recovery drill. A Blackout regression
+proves an unsafe file encountered after a valid recovery candidate cannot emit a
+partial plan; all33 CLI tests pass. Room generations, builder leases, immutable
+opening evidence and council-only new floors have host and isolated acceptance.
+This does not establish elapsed neglect, an actual upper floor or personal-data
+restoration. `evidence/room-growth/live-deployment.json` links the actual receipts.
+
+Owner-approved launcher maintenance588/release589 preserved council authority
+and earlier spent permits. Actual OpenCode592–596 reached the provider after
+private bootstrap, then returned401 for the selected expired existing key; no
+resident arrived. Normal Muse fallback597/598 continues the worksheet. The native
+path defect is fixed, successful all-kind residency is still unproved. See
+`evidence/owner-maintenance/native-launcher-deployment.json`. No further early
+exception, credential replacement or weaker sandbox is implied by this failure.
