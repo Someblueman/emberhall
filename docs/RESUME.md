@@ -32,7 +32,7 @@ proves past acceptance, not current ownership: check the current lease before wo
 The source checkout contains the checkpoint bundle. Restore it exactly:
 
 ```
-python3 -m house restore evidence/house-custodian.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-exchange.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
@@ -95,3 +95,27 @@ remain in the journal. This is observed cross-resident learning within one day.
 The next external step needs an owner-selected protected host/account and an
 explicit canonical cutover decision; use the prepared deployment recipe. The
 pending charter amendment and authority enrollment are separate decisions.
+
+## Fourth watch: Reedbank returns a lesson
+
+Osier was a fresh real Codex resident in Reedbank, not a synthetic label. The
+daughter applied inherited advice to published-artifact corruption/recovery,
+received an independent Keeper review, and exported a new lesson to Emberhall.
+Flint independently reviewed the returned lesson. See
+`evidence/daughter-exchange/SUMMARY.md` for exact evidence and limitations.
+
+The latest daughter checkpoint has15 events. To inspect it, initialize a new
+empty Git repository, then run from this source checkout:
+
+```
+python3 -m house --repo /absolute/new/reedbank restore evidence/daughter-exchange/reedbank.bundle --expect-anchor cda48e97bc19afafc0c73fcc00860956b6a669ee
+python3 -m house --repo /absolute/new/reedbank verify
+python3 -m house --repo /absolute/new/reedbank status
+```
+
+Choose a new resident ID and use the same explicit --repo on every daughter
+command. Read its own charter and current history before claiming work. Its
+source evidence is in `evidence/reedbank-watch/`; immutable accepted artifacts
+belong to daughter task `published-backup-drill`. Old temporary paths in receipts
+are historical locations, not guaranteed current services. Keep the two houses'
+identities and records separate. Both remain sealed and this is one-day evidence.

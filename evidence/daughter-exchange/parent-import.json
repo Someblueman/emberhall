@@ -1,0 +1,73 @@
+[
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "adopt",
+      "evidence/daughter-exchange/return-seed.json",
+      "--as",
+      "keeper-01"
+    ],
+    "utc": "2026-11-13T02:29:12.720505+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"adopted\": 2,\n  \"notice\": \"Imported as unreviewed advice; rules and authority unchanged.\",\n  \"receipts\": [\n    {\n      \"head\": \"f6704508ae79535f6d5993e15376f42f3bb08d68\",\n      \"replayed\": false,\n      \"request\": \"seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-0\",\n      \"sequence\": 99\n    },\n    {\n      \"head\": \"b3ae47f0c1af1d35142421a8c55d64ed78c55f11\",\n      \"replayed\": false,\n      \"request\": \"seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1\",\n      \"sequence\": 100\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "adopt",
+      "evidence/daughter-exchange/return-seed.json",
+      "--as",
+      "keeper-01"
+    ],
+    "utc": "2026-11-13T02:29:12.900751+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"adopted\": 2,\n  \"notice\": \"Imported as unreviewed advice; rules and authority unchanged.\",\n  \"receipts\": [\n    {\n      \"replayed\": true,\n      \"request\": \"seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-0\",\n      \"sequence\": 99\n    },\n    {\n      \"replayed\": true,\n      \"request\": \"seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1\",\n      \"sequence\": 100\n    }\n  ]\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "supersede",
+      "--as",
+      "keeper-01",
+      "--request",
+      "keeper-resolve-returned-echo",
+      "--old",
+      "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-0",
+      "--new",
+      "blackout-input-boundaries-v1",
+      "--evidence",
+      "Complete reviewed Reedbank export returned the parent filesystem lesson unchanged. Compared key and exact claim bytes: identical. Keep the original claim, supersede this echo explicitly, retain nested source provenance and both immutable histories. This resolves duplication, not a factual disagreement. evidence/daughter-exchange/return-seed.json and parent-import.json preserve the exchange; no auto-merging of different claims."
+    ],
+    "utc": "2026-11-13T02:29:13.060434+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"head\": \"f48ada4532fc0becb88f8f7fb14c818e9887443b\",\n  \"replayed\": false,\n  \"request\": \"keeper-resolve-returned-echo\",\n  \"sequence\": 101\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "review",
+      "blackout-input-boundaries-v1",
+      "--as",
+      "keeper-01",
+      "--request",
+      "keeper-rereview-original-after-echo",
+      "--evidence",
+      "Fresh unchanged original FIFO and dotdot probes all rejected unsafe inputs, recorded in evidence/daughter-exchange/parent-boundary-review.json. Independently inspected returned identical claim and historical repair evidence; supersession retains the original and removes only its duplicate from active advice. No arbitrary concurrent-writer claim."
+    ],
+    "utc": "2026-11-13T02:29:13.185739+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"head\": \"fe896684c2ac5785966ae3e27e0e7be1c8e97f00\",\n  \"replayed\": false,\n  \"request\": \"keeper-rereview-original-after-echo\",\n  \"sequence\": 102\n}\n",
+    "stderr": ""
+  }
+]

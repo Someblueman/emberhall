@@ -1,0 +1,252 @@
+[
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "6d2f64035fcdd12d437bff5671b20c7235efa399:evidence/house-custodian.bundle"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.578812+00:00",
+    "returncode": 0,
+    "stdout": "58de5756c79d3158d9a68bcf534a1466a8b32682\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "hash-object",
+      "/Users/sws/Code/longhouse/evidence/house-custodian.bundle"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.584839+00:00",
+    "returncode": 0,
+    "stdout": "58de5756c79d3158d9a68bcf534a1466a8b32682\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "6d2f64035fcdd12d437bff5671b20c7235efa399:evidence/custodian/SUMMARY.md"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.589698+00:00",
+    "returncode": 0,
+    "stdout": "616cd1f955151505b3c6a334acade4baf9e9ce69\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "hash-object",
+      "/Users/sws/Code/longhouse/evidence/custodian/SUMMARY.md"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.594432+00:00",
+    "returncode": 0,
+    "stdout": "616cd1f955151505b3c6a334acade4baf9e9ce69\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "6d2f64035fcdd12d437bff5671b20c7235efa399:evidence/custodian/recovery.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.598735+00:00",
+    "returncode": 0,
+    "stdout": "0938f10262716d831e52d5383a6ba5d1145a9753\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "hash-object",
+      "/Users/sws/Code/longhouse/evidence/custodian/recovery.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.603165+00:00",
+    "returncode": 0,
+    "stdout": "0938f10262716d831e52d5383a6ba5d1145a9753\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "6d2f64035fcdd12d437bff5671b20c7235efa399:evidence/seed-trial/daughter.bundle"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.607394+00:00",
+    "returncode": 0,
+    "stdout": "8d7920571378d07d59ce08addc73c6ee9b916b3f\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "hash-object",
+      "/Users/sws/Code/longhouse/evidence/seed-trial/daughter.bundle"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.611843+00:00",
+    "returncode": 0,
+    "stdout": "8d7920571378d07d59ce08addc73c6ee9b916b3f\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "6d2f64035fcdd12d437bff5671b20c7235efa399:evidence/seed-trial/provenance.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.615903+00:00",
+    "returncode": 0,
+    "stdout": "bfb4545fe81de520cce5fbeacc09cfc295f7a26b\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "hash-object",
+      "/Users/sws/Code/longhouse/evidence/seed-trial/provenance.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.620145+00:00",
+    "returncode": 0,
+    "stdout": "bfb4545fe81de520cce5fbeacc09cfc295f7a26b\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+      "create",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/reference",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/inventory.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.625546+00:00",
+    "returncode": 0,
+    "stdout": "{\"created\": \"/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/inventory.json\", \"files\": 5}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+      "verify",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/backup",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/inventory.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.648837+00:00",
+    "returncode": 0,
+    "stdout": "{\"changed\": [], \"extra\": [], \"matched\": 5, \"missing\": [], \"ok\": true}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+      "verify",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/backup",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/inventory.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.672297+00:00",
+    "returncode": 1,
+    "stdout": "{\"changed\": [\"evidence/house-custodian.bundle\"], \"extra\": [], \"matched\": 4, \"missing\": [], \"ok\": false}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+      "verify",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/backup",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/inventory.json"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.696072+00:00",
+    "returncode": 0,
+    "stdout": "{\"changed\": [], \"extra\": [], \"matched\": 5, \"missing\": [], \"ok\": true}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "init",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/restored-house"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.719728+00:00",
+    "returncode": 0,
+    "stdout": "Initialized empty Git repository in /private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/restored-house/.git/\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/restored-house",
+      "restore",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/backup/evidence/house-custodian.bundle",
+      "--expect-anchor",
+      "74339de5dda84c799fe43650ba273a84de31ba8a"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.728893+00:00",
+    "returncode": 0,
+    "stdout": "{\n  \"anchor\": \"74339de5dda84c799fe43650ba273a84de31ba8a\",\n  \"events\": 92,\n  \"head\": \"c628b312bc04d2f8e92bd055a0121839b0c5c94c\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/restored-house",
+      "verify"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.850399+00:00",
+    "returncode": 0,
+    "stdout": "{\n  \"events\": 92,\n  \"head\": \"c628b312bc04d2f8e92bd055a0121839b0c5c94c\",\n  \"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\",\n  \"rule_revision\": \"365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853\",\n  \"valid\": true\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4/drill-verified/inherited-probe.py"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:29.910035+00:00",
+    "returncode": 0,
+    "stdout": "FIFO manifest: 2 {\"error\": \"manifest must be a regular file, not a symlink or special file\"}\nsymlink-component 2  {\"error\": \"directory paths must not contain '..' components\"}\nmissing-component 2  {\"error\": \"directory paths must not contain '..' components\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "projects/blackout",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "cwd": "/Users/sws/Code/longhouse",
+    "started": "2026-11-13T02:26:30.003738+00:00",
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "test_dotdot_cannot_hide_invalid_directory_components (test_blackout.BlackoutTests.test_dotdot_cannot_hide_invalid_directory_components) ... ok\ntest_empty_directory (test_blackout.BlackoutTests.test_empty_directory) ... ok\ntest_fifo_is_rejected_without_hanging (test_blackout.BlackoutTests.test_fifo_is_rejected_without_hanging) ... ok\ntest_invalid_json_and_duplicate_keys (test_blackout.BlackoutTests.test_invalid_json_and_duplicate_keys) ... ok\ntest_malformed_manifest_schema (test_blackout.BlackoutTests.test_malformed_manifest_schema) ... ok\ntest_manifest_must_be_regular_without_symlink_components (test_blackout.BlackoutTests.test_manifest_must_be_regular_without_symlink_components) ... ok\ntest_manifest_paths_are_untrusted (test_blackout.BlackoutTests.test_manifest_paths_are_untrusted) ... ok\ntest_missing_source_and_manifest (test_blackout.BlackoutTests.test_missing_source_and_manifest) ... ok\ntest_nonportable_source_names (test_blackout.BlackoutTests.test_nonportable_source_names) ... ok\ntest_output_is_exclusive_and_outside_source (test_blackout.BlackoutTests.test_output_is_exclusive_and_outside_source) ... ok\ntest_rejects_file_and_directory_symlinks (test_blackout.BlackoutTests.test_rejects_file_and_directory_symlinks) ... ok\ntest_rejects_symlink_root_and_parent (test_blackout.BlackoutTests.test_rejects_symlink_root_and_parent) ... ok\ntest_reports_all_differences_without_writing (test_blackout.BlackoutTests.test_reports_all_differences_without_writing) ... ok\ntest_round_trip_and_relocation (test_blackout.BlackoutTests.test_round_trip_and_relocation) ... ok\ntest_same_size_corruption (test_blackout.BlackoutTests.test_same_size_corruption) ... ok\ntest_verify_rejects_symlink_replacement (test_blackout.BlackoutTests.test_verify_rejects_symlink_replacement) ... ok\n\n----------------------------------------------------------------------\nRan 16 tests in 1.509s\n\nOK\n"
+  }
+]

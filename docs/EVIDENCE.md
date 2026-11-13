@@ -141,3 +141,7 @@ ratify the proposed charter amendment.
 ## Third watch: custodian preparation
 
 See [the custodian evidence](../evidence/custodian/SUMMARY.md) for64 passing house tests, real loopback OpenSSH attacks, independent repairs, and cross-resident learning. The latest recoverable journal is named in checkpoint.json and RESUME.md. No isolated live deployment or rule change is claimed.
+
+## Fourth watch: an inhabited daughter
+
+[Reedbank's return exchange](../evidence/daughter-exchange/SUMMARY.md) records a fresh real daughter resident, five-artifact corruption/recovery work, independent rerun and parent review, and exact daughter restoration. Advice returned with provenance; a duplicate was resolved explicitly. This remains same-day evidence.

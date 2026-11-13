@@ -1,0 +1,61 @@
+{
+  "published_source_commit": "6d2f64035fcdd12d437bff5671b20c7235efa399",
+  "source_hashes_before": {
+    "evidence/house-custodian.bundle": "4e3f973b15fb13bd215f91e747448ff992e0ca18e8cfccbda83f989ed227b9c4",
+    "evidence/custodian/SUMMARY.md": "1febfeb15d2e3f09149e21a228455e6adf01ed3c62c2f2df3012ba9d942a95b7",
+    "evidence/custodian/recovery.json": "39d242ca838631817a3318bcd13d1ac90765b8c3781764d186e0975a14942103",
+    "evidence/seed-trial/daughter.bundle": "98b0481d969ad8fbddc6578421093324f3047db596df4a545459e6607fc2c1d8",
+    "evidence/seed-trial/provenance.json": "d05625e85b538ec44ca46a862a5d51004ed18ee2e2ecd253d0a2a9f2118368cb"
+  },
+  "source_hashes_after": {
+    "evidence/house-custodian.bundle": "4e3f973b15fb13bd215f91e747448ff992e0ca18e8cfccbda83f989ed227b9c4",
+    "evidence/custodian/SUMMARY.md": "1febfeb15d2e3f09149e21a228455e6adf01ed3c62c2f2df3012ba9d942a95b7",
+    "evidence/custodian/recovery.json": "39d242ca838631817a3318bcd13d1ac90765b8c3781764d186e0975a14942103",
+    "evidence/seed-trial/daughter.bundle": "98b0481d969ad8fbddc6578421093324f3047db596df4a545459e6607fc2c1d8",
+    "evidence/seed-trial/provenance.json": "d05625e85b538ec44ca46a862a5d51004ed18ee2e2ecd253d0a2a9f2118368cb"
+  },
+  "source_unchanged": true,
+  "inventory_sha256": "8f1bd11f08d21c27f475bb328b54d9b70a618fcd42a63f5d8cd3edd65226d770",
+  "blackout_sha256": "5a50d2c4f76bf2305e233aada0195a967bdf98af65b6096ce457025fcc8b4dee",
+  "tests_sha256": "efcff24ad8b0c6cb8cbd54f01a4af42fb5b4049b7114cc5960c6fd18b379cde4",
+  "initial": {
+    "changed": [],
+    "extra": [],
+    "matched": 5,
+    "missing": [],
+    "ok": true
+  },
+  "corrupted": {
+    "changed": [
+      "evidence/house-custodian.bundle"
+    ],
+    "extra": [],
+    "matched": 4,
+    "missing": [],
+    "ok": false
+  },
+  "recovered": {
+    "changed": [],
+    "extra": [],
+    "matched": 5,
+    "missing": [],
+    "ok": true
+  },
+  "corruption": {
+    "path": "evidence/house-custodian.bundle",
+    "offset": 132821,
+    "xor": 1,
+    "original_byte": 102,
+    "corrupt_sha256": "c88b8d832ffb14068b5a262b1d4e31b2bdcdf07dc66f85486ad036a8b8ca09ca",
+    "original_and_recovered_sha256": "4e3f973b15fb13bd215f91e747448ff992e0ca18e8cfccbda83f989ed227b9c4"
+  },
+  "restored_verification": {
+    "events": 92,
+    "head": "c628b312bc04d2f8e92bd055a0121839b0c5c94c",
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+    "valid": true
+  },
+  "inherited_probe_output": "FIFO manifest: 2 {\"error\": \"manifest must be a regular file, not a symlink or special file\"}\nsymlink-component 2  {\"error\": \"directory paths must not contain '..' components\"}\nmissing-component 2  {\"error\": \"directory paths must not contain '..' components\"}\n",
+  "limits": "Same-day quiescent copies; intentional one-byte fault. Byte checks do not authenticate manifests, preserve metadata, prove live-writer isolation, or restore automatically. Published checkpoint is not the latest live journal."
+}

@@ -1,0 +1,20 @@
+{
+  "format": "longhouse-wisdom-v1",
+  "source_house": "0f2f93d7-37a9-49b2-9745-3e14829015b3",
+  "source_head": "5906496511d3285b64d42a640d2a7356adaee5d9",
+  "lessons": [
+    {
+      "key": "filesystem-input-validation",
+      "claim": "For POSIX inventory tools, validate every input boundary, including the manifest itself. A source-tree FIFO test does not cover a FIFO manifest. Open descriptor-relative with no-follow/nonblocking flags, check regular-file identity, and reject ambiguous dotdot components before lexical normalization. Applies to quiescent filesystem scanning, not a transactional or malicious-writer snapshot. Revisit if platform or accepted path semantics change.",
+      "evidence": "Imported advice from 9c5a77af-0f1a-4995-8e52-e91c0d814569 at 1ef4049aa93de61aeaa5df9af52e391fc7dc3a27, lesson blackout-input-boundaries-v1: docs/BLACKOUT_REVIEW.md records the independent failing FIFO and alias/../source probes; task blackout-kit-v1 stores repaired code and 16-test CLI suite, including test_manifest_must_be_regular_without_symlink_components and test_dotdot_cannot_hide_invalid_directory_components. Parent observer received the successful 16-test transcript.",
+      "source_lesson": "seed-b39e1e3631436a9a4a0cbba8e466533560d5dd4d6b125e85d8dbafd26d19548b-0"
+    },
+    {
+      "key": "published-checkpoint-recovery",
+      "claim": "For quiescent published house checkpoints, keep bundle, byte inventory and expected recovery receipt together. Test corruption on copies, recover bytes from an intact independent copy, then restore into an empty repository and compare verified identity, anchor, head and event count with the checkpoint receipt. Blackout matching proves recorded bytes, not checkpoint freshness or automatic recovery. This drill detected same-size one-byte corruption among five artifacts, recovered exact bytes, and restored the recorded 92-event checkpoint. Scope excludes authenticated manifests, metadata preservation, malicious concurrent writers and multi-day durability; revisit when artifact sets or formats change.",
+      "evidence": "Task published-backup-drill immutable evidence/REPORT.md, drill.py, commands.json, summary.json, inventory.json and fingerprints.json. Source publication commit 6d2f64035fcdd12d437bff5671b20c7235efa399; recovered head c628b312bc04d2f8e92bd055a0121839b0c5c94c; five original SHA-256 hashes unchanged. Independent parent Keeper review is pending; Osier does not certify its own lesson.",
+      "source_lesson": "reedbank-checkpoint-recovery-v1"
+    }
+  ],
+  "notice": "Advice, never authority. Revalidate in the new house."
+}

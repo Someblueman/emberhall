@@ -1,4 +1,4 @@
-# Full-objective audit after the third watch
+# Full-objective audit after the fourth watch
 
 The goal is **not complete**. The founding acceptance in BUILD_LOG.md is a bounded
 milestone, not a replacement for the owner's full objective. This audit uses the
@@ -15,9 +15,9 @@ current code, live record, independent reports and raw measurements.
 | Finish worthwhile work too large/long/tangled for one context | Standalone Blackout Kit with independent defects/repairs and16 CLI tests | Useful independent work delivered; necessity of multiple contexts **not established**. |
 | Run for days with day-five benefit from day-one learning | Timestamped live events, checkpoint and benchmark reports | **Not achieved.** Synthetic histories are not elapsed days. No continuing resident scheduler is installed. |
 | Constitution changes from experience and improves governance | Concrete witnessed-foundations-001 proposal; OWNER_DECISION.md | **Not achieved.** Proposal remains pending; no approval is inferred from tests or this goal's continuation. |
-| Found another house with wisdom but no baggage | Reedbank bundle, distinct identity, transcript, idempotent advice import, independent Rowan review | One-session seeding and restore demonstrated. Independent ongoing daughter residency and two-way knowledge trade remain unproved. |
+| Found another house with wisdom but no baggage | Reedbank bundle, distinct identity, transcript, idempotent advice import, independent Rowan review | A fresh independent Codex daughter resident completed useful recovery work; the daughter returned an independently reviewed lesson. Exact15-event daughter restore and explicit parent duplicate resolution are preserved in evidence/daughter-exchange/. Ongoing independent society remains unproved. |
 | Real concurrent Codex residents and adversarial evidence | Five actual workers, live journal, BREAKER.md, raw failures/tests and second-watch REVIEW.md | Demonstrated, with model residents distinguished from test subprocesses and synthetic daughter labels. |
-| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. All92 checkpoint events are preserved. Source and checkpoint pushed with explicit permission; third-watch remote equality verified in evidence/custodian/publication.json. |
+| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. The exact latest checkpoint events are preserved in evidence/checkpoint.json. Source and checkpoint pushed with explicit permission; third-watch remote equality verified in evidence/custodian/publication.json. |
 
 ## Remaining external boundary
 
@@ -46,3 +46,14 @@ failure in the separately built client. Original artifacts, failed observations,
 and repaired versions are retained. This strengthens the memory-compounding row;
 it adds no elapsed days. The live charter remains sealed and unchanged. No live
 custodian, owner-key migration, scheduler, or approved ratification was installed.
+
+## Fourth-watch evidence
+
+A real daughter resident (Osier), a visiting independent reviewer (Keeper), and
+parent reviewer (Flint) exercised an actual two-way exchange. Complete seed import
+kept authority and operational state separate; repeated import was idempotent.
+The returned identical parent claim became contested and was explicitly resolved
+without erasing history. A new recovery lesson crossed back and received local
+independent review. See evidence/daughter-exchange/SUMMARY.md. This strengthens
+seeding and compounding memory; it establishes no additional elapsed days or
+approved constitutional change. The external protected-host choice remains pending.

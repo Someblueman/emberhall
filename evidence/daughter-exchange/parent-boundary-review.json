@@ -1,0 +1,11 @@
+{
+  "reviewer": "keeper-01",
+  "utc": "2026-11-13T02:26:02.946883+00:00",
+  "source": "Unchanged Python reproducer extracted from docs/BLACKOUT_REVIEW.md",
+  "script_sha256": "6abf167799f1c088d4ee50d1db28400216856fdd14f1577b71e31839ef74cc78",
+  "blackout_sha256": "5a50d2c4f76bf2305e233aada0195a967bdf98af65b6096ce457025fcc8b4dee",
+  "exit": 0,
+  "stdout": "FIFO manifest: 2 {\"error\": \"manifest must be a regular file, not a symlink or special file\"}\nsymlink-component 2  {\"error\": \"directory paths must not contain '..' components\"}\nmissing-component 2  {\"error\": \"directory paths must not contain '..' components\"}\n",
+  "stderr": "",
+  "scope": "Independent fresh rerun of inherited FIFO and dotdot boundary probes; no authority, concurrency or malicious-writer claim."
+}

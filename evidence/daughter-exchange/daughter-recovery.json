@@ -1,0 +1,17 @@
+{
+  "house": "0f2f93d7-37a9-49b2-9745-3e14829015b3",
+  "bundle": "evidence/daughter-exchange/reedbank.bundle",
+  "bundle_sha256": "d2593f27d638695a1c7347afd3f70a02742565c842d7dc7c7bf1ef33a7bd3dd8",
+  "restored": {
+    "head": "5906496511d3285b64d42a640d2a7356adaee5d9",
+    "events": 15,
+    "anchor": "cda48e97bc19afafc0c73fcc00860956b6a669ee"
+  },
+  "full_state_equal": true,
+  "full_events_equal": true,
+  "state_sha256": "f312d054e73b09df12a6aeddc44b82f07534755a24e5906a5490bc97bf512e97",
+  "events_sha256": "04690ec66656369fd6a527c272410fd80d063f5318b44364e335e29abee40aad",
+  "sealed": true,
+  "rules_equal_original": true,
+  "all_residents_asleep": true
+}

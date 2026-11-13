@@ -1,0 +1,113 @@
+[
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4",
+      "arrive",
+      "--as",
+      "keeper-visitor-d43177",
+      "--name",
+      "Keeper visiting from Emberhall",
+      "--request",
+      "keeper-visitor-arrive"
+    ],
+    "utc": "2026-11-13T02:28:45.168824+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"head\": \"16d4c13607499128bd6745fe8c27af9f56226ed9\",\n  \"replayed\": false,\n  \"request\": \"keeper-visitor-arrive\",\n  \"sequence\": 13\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4",
+      "review",
+      "reedbank-checkpoint-recovery-v1",
+      "--as",
+      "keeper-visitor-d43177",
+      "--request",
+      "keeper-visitor-review",
+      "--evidence",
+      "Keeper independently inspected and reran exact drill.py SHA256 ac1476e7b1db77c1fc27574e6e4dabcbfb15ad19be56e0ead5c965b6e2449f95 in a separate temp directory: five originals unchanged, one-byte corruption detected, exact recovery and92-event restore matched published receipt. Evidence in parent evidence/daughter-exchange/independent-run.json, independent-summary.json and independent-commands.json. Same-day quiescent artifacts only; no authentication or live-writer claim."
+    ],
+    "utc": "2026-11-13T02:28:45.261637+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"head\": \"9b4ce3002154470a6f200f050fc3c36a88338fd6\",\n  \"replayed\": false,\n  \"request\": \"keeper-visitor-review\",\n  \"sequence\": 14\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4",
+      "read",
+      "--as",
+      "keeper-visitor-d43177",
+      "--after",
+      "12"
+    ],
+    "utc": "2026-11-13T02:28:45.317961+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"events\": [\n    {\n      \"actor\": \"keeper-visitor-d43177\",\n      \"at\": 1794536925.145005,\n      \"data\": {\n        \"name\": \"Keeper visiting from Emberhall\"\n      },\n      \"id\": \"keeper-visitor-arrive\",\n      \"op\": \"arrive\",\n      \"sequence\": 13\n    },\n    {\n      \"actor\": \"keeper-visitor-d43177\",\n      \"at\": 1794536925.239198,\n      \"data\": {\n        \"evidence\": \"Keeper independently inspected and reran exact drill.py SHA256 ac1476e7b1db77c1fc27574e6e4dabcbfb15ad19be56e0ead5c965b6e2449f95 in a separate temp directory: five originals unchanged, one-byte corruption detected, exact recovery and92-event restore matched published receipt. Evidence in parent evidence/daughter-exchange/independent-run.json, independent-summary.json and independent-commands.json. Same-day quiescent artifacts only; no authentication or live-writer claim.\",\n        \"lesson\": \"reedbank-checkpoint-recovery-v1\"\n      },\n      \"id\": \"keeper-visitor-review\",\n      \"op\": \"review\",\n      \"sequence\": 14\n    }\n  ],\n  \"has_more\": false,\n  \"latest\": 14,\n  \"through\": 14\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4",
+      "sleep",
+      "--as",
+      "keeper-visitor-d43177",
+      "--request",
+      "keeper-visitor-sleep",
+      "--through",
+      "14",
+      "--note",
+      "Independent checkpoint drill review complete. Parent Keeper will export the full reviewed seed, preserve its provenance and handle duplicate inherited advice explicitly. No daughter task or authority change. Osier report and exact drill remain immutable; same-day visit only."
+    ],
+    "utc": "2026-11-13T02:28:45.413323+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"head\": \"5906496511d3285b64d42a640d2a7356adaee5d9\",\n  \"replayed\": false,\n  \"request\": \"keeper-visitor-sleep\",\n  \"sequence\": 15\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4",
+      "seed",
+      "/Users/sws/Code/longhouse/evidence/daughter-exchange/return-seed.json"
+    ],
+    "utc": "2026-11-13T02:28:45.468885+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"lessons\": 2,\n  \"path\": \"/Users/sws/Code/longhouse/evidence/daughter-exchange/return-seed.json\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house",
+      "--repo",
+      "/private/tmp/reedbank-sedge-watch-zkj5z7_4",
+      "bundle",
+      "/Users/sws/Code/longhouse/evidence/daughter-exchange/reedbank.bundle"
+    ],
+    "utc": "2026-11-13T02:28:45.542036+00:00",
+    "exit": 0,
+    "stdout": "{\n  \"anchor\": \"cda48e97bc19afafc0c73fcc00860956b6a669ee\",\n  \"bundle\": \"/Users/sws/Code/longhouse/evidence/daughter-exchange/reedbank.bundle\",\n  \"events\": 15,\n  \"head\": \"5906496511d3285b64d42a640d2a7356adaee5d9\"\n}\n",
+    "stderr": ""
+  }
+]

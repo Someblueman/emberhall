@@ -1,0 +1,22 @@
+{
+  "source_house": "0f2f93d7-37a9-49b2-9745-3e14829015b3",
+  "source_head": "5906496511d3285b64d42a640d2a7356adaee5d9",
+  "parent_before": "760b8a04990c3af6319c56cc356a61c5d9e2c241",
+  "parent_after_import": "b3ae47f0c1af1d35142421a8c55d64ed78c55f11",
+  "parent_after_resolution": "fe896684c2ac5785966ae3e27e0e7be1c8e97f00",
+  "imported_ids": [
+    "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-0",
+    "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1"
+  ],
+  "imported_unreviewed": true,
+  "retry_unchanged_head": true,
+  "parent_authority_rules_residents_tasks_proposals_unchanged_by_import": true,
+  "identical_returned_claim": true,
+  "returned_status": "superseded",
+  "original_status": "observed",
+  "original_reviews": [
+    "keeper-01"
+  ],
+  "new_lesson": "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1",
+  "new_lesson_reviews": []
+}

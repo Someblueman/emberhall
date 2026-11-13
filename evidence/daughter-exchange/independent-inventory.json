@@ -1,0 +1,31 @@
+{
+  "format": "blackout-kit",
+  "version": 1,
+  "files": [
+    {
+      "path": "evidence/custodian/SUMMARY.md",
+      "size": 3571,
+      "sha256": "1febfeb15d2e3f09149e21a228455e6adf01ed3c62c2f2df3012ba9d942a95b7"
+    },
+    {
+      "path": "evidence/custodian/recovery.json",
+      "size": 571,
+      "sha256": "39d242ca838631817a3318bcd13d1ac90765b8c3781764d186e0975a14942103"
+    },
+    {
+      "path": "evidence/house-custodian.bundle",
+      "size": 265643,
+      "sha256": "4e3f973b15fb13bd215f91e747448ff992e0ca18e8cfccbda83f989ed227b9c4"
+    },
+    {
+      "path": "evidence/seed-trial/daughter.bundle",
+      "size": 2521,
+      "sha256": "98b0481d969ad8fbddc6578421093324f3047db596df4a545459e6607fc2c1d8"
+    },
+    {
+      "path": "evidence/seed-trial/provenance.json",
+      "size": 2444,
+      "sha256": "d05625e85b538ec44ca46a862a5d51004ed18ee2e2ecd253d0a2a9f2118368cb"
+    }
+  ]
+}

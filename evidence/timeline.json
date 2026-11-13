@@ -1015,5 +1015,188 @@
     "task": null,
     "lesson": null,
     "artifacts": {}
+  },
+  {
+    "sequence": 93,
+    "id": "keeper-exchange-wake",
+    "actor": "keeper-01",
+    "operation": "wake",
+    "utc": "2026-11-13T02:24:46.032608+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 94,
+    "id": "keeper-exchange-task",
+    "actor": "keeper-01",
+    "operation": "task",
+    "utc": "2026-11-13T02:24:46.167875+00:00",
+    "task": "daughter-exchange",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 95,
+    "id": "keeper-exchange-claim",
+    "actor": "keeper-01",
+    "operation": "claim",
+    "utc": "2026-11-13T02:24:46.303393+00:00",
+    "task": "daughter-exchange",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 96,
+    "id": "breaker-a82d19-daughter-review-wake",
+    "actor": "breaker-a82d19",
+    "operation": "wake",
+    "utc": "2026-11-13T02:28:13.067279+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 97,
+    "id": "breaker-a82d19-daughter-review-task",
+    "actor": "breaker-a82d19",
+    "operation": "task",
+    "utc": "2026-11-13T02:28:25.083558+00:00",
+    "task": "daughter-parent-review",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 98,
+    "id": "breaker-a82d19-daughter-review-claim",
+    "actor": "breaker-a82d19",
+    "operation": "claim",
+    "utc": "2026-11-13T02:28:27.288771+00:00",
+    "task": "daughter-parent-review",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 99,
+    "id": "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-0",
+    "actor": "keeper-01",
+    "operation": "learn",
+    "utc": "2026-11-13T02:29:12.638288+00:00",
+    "task": null,
+    "lesson": "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-0",
+    "artifacts": {}
+  },
+  {
+    "sequence": 100,
+    "id": "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1",
+    "actor": "keeper-01",
+    "operation": "learn",
+    "utc": "2026-11-13T02:29:12.696407+00:00",
+    "task": null,
+    "lesson": "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 101,
+    "id": "keeper-resolve-returned-echo",
+    "actor": "keeper-01",
+    "operation": "supersede",
+    "utc": "2026-11-13T02:29:13.036852+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 102,
+    "id": "keeper-rereview-original-after-echo",
+    "actor": "keeper-01",
+    "operation": "review",
+    "utc": "2026-11-13T02:29:13.162304+00:00",
+    "task": null,
+    "lesson": "blackout-input-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 103,
+    "id": "breaker-a82d19-review-reedbank-recovery",
+    "actor": "breaker-a82d19",
+    "operation": "review",
+    "utc": "2026-11-13T02:30:16.129463+00:00",
+    "task": null,
+    "lesson": "seed-aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979-1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 104,
+    "id": "breaker-a82d19-daughter-review-finish",
+    "actor": "breaker-a82d19",
+    "operation": "finish",
+    "utc": "2026-11-13T02:31:24.331146+00:00",
+    "task": "daughter-parent-review",
+    "lesson": null,
+    "artifacts": {
+      "evidence/daughter-exchange/PARENT_REVIEW.md": "fe351414cdc0f929ee591597c9879d78016238443a14ce0f72302ec22c06ce7c"
+    }
+  },
+  {
+    "sequence": 105,
+    "id": "breaker-a82d19-daughter-review-sleep",
+    "actor": "breaker-a82d19",
+    "operation": "sleep",
+    "utc": "2026-11-13T02:31:34.861463+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 106,
+    "id": "keeper-exchange-finish",
+    "actor": "keeper-01",
+    "operation": "finish",
+    "utc": "2026-11-13T02:31:48.782806+00:00",
+    "task": "daughter-exchange",
+    "lesson": null,
+    "artifacts": {
+      "docs/EVIDENCE.md": "73e2b929ef14fbed21bc94dc590ad4d30ce4feedf0dbffbf7c5cb22464eeedb7",
+      "docs/GOAL_AUDIT.md": "17425af0357b9bc86a908f3e35f5096d4a5b9661e278d33a08c549db9662ba9a",
+      "docs/RESUME.md": "a9dfbce2123ae00e92cc0d963adefcfdb1fa4fba3b35c72689465cecaa7fb8e9",
+      "evidence/daughter-exchange/PARENT_REVIEW.md": "fe351414cdc0f929ee591597c9879d78016238443a14ce0f72302ec22c06ce7c",
+      "evidence/daughter-exchange/SUMMARY.md": "a2f18f8a4aaf47a98ab203023cfbd842f6e2a2429f3d98adfcacb5a008840474",
+      "evidence/daughter-exchange/before.json": "16f24476769cba22db91d262a8e793b6c19099eb49bdb313ec72b3402d6a3d90",
+      "evidence/daughter-exchange/daughter-recovery.json": "ebdc44399574073270eae47b9f2855d36cea4a32f4a18d569bfa9b9e9b2ca63a",
+      "evidence/daughter-exchange/exchange.json": "47d1fff27baea9feb230cfe37887f2d68f045107a04ebacf0a23ef24eeae808c",
+      "evidence/daughter-exchange/independent-commands.json": "9a7709e9a958ff753d669c16a0cfb3f94117c836254a06326d851c82e50fc036",
+      "evidence/daughter-exchange/independent-inventory.json": "8f1bd11f08d21c27f475bb328b54d9b70a618fcd42a63f5d8cd3edd65226d770",
+      "evidence/daughter-exchange/independent-run.json": "52fe7d6ded585b826e315fa6d5cf232de2a1b2699b2880f910856d527db7bbdb",
+      "evidence/daughter-exchange/independent-summary.json": "7b86310ffdd141ae7c529ba538a6507c317e088de857c128d8bf929c5c17873d",
+      "evidence/daughter-exchange/parent-boundary-review.json": "7cc9d739c889946846f2a5f1fa8d77017046dcac4d63d9d8211e57de3428716a",
+      "evidence/daughter-exchange/parent-import.json": "d1ffabfa4a2d45b7c6172cadb95a3cdf0324fc678fa0a15ebfd48707e43cf8cf",
+      "evidence/daughter-exchange/reedbank.bundle": "d2593f27d638695a1c7347afd3f70a02742565c842d7dc7c7bf1ef33a7bd3dd8",
+      "evidence/daughter-exchange/return-seed.json": "aa63daec76efb5a1a7e52ac072b925ba27ba567a99542ff50e68dddc6aaad979",
+      "evidence/daughter-exchange/visitor.json": "e6de56eda7219e0d3cf991e5fb36bd53e1f279cb14923dc660bb7d7522c945f7",
+      "evidence/reedbank-watch/REPORT.md": "59f65db17bfe70a32eee272b3b83c363463db161012ab88b7abb74360adbd7ac",
+      "evidence/reedbank-watch/commands.json": "e21cedd07487b4c7fcf86afda0f968799584564320eeb17a6168fa4151928ddf",
+      "evidence/reedbank-watch/drill.py": "ac1476e7b1db77c1fc27574e6e4dabcbfb15ad19be56e0ead5c965b6e2449f95",
+      "evidence/reedbank-watch/fingerprints.json": "5a144dc9714d9c8645487ab367449be7efbe41a999b9a97bffa5aeb9662da51c",
+      "evidence/reedbank-watch/handoff.json": "aaacaa72c34f88e37e9c4023aaf348d32f115f8458b145654ff88b67e1e2ce01",
+      "evidence/reedbank-watch/inherited-probe.py": "be13a0e0027d1bb875c01d790dfabe3944b8808eef6e36fb3fdf684f0a61baf3",
+      "evidence/reedbank-watch/inventory.json": "8f1bd11f08d21c27f475bb328b54d9b70a618fcd42a63f5d8cd3edd65226d770",
+      "evidence/reedbank-watch/lifecycle-before-finish.jsonl": "8dca956415482c7f4bb1a49691622050ff4119f8fd6178033240fc48ec0faf18",
+      "evidence/reedbank-watch/published-recovery.json": "39d242ca838631817a3318bcd13d1ac90765b8c3781764d186e0975a14942103",
+      "evidence/reedbank-watch/session.json": "53baaa26ffd3963574a41e8fe19149a21cd7d9fc28b672a9f634bae499463498",
+      "evidence/reedbank-watch/session.py": "2c4d3af6f631bdd7e2af1d717568986c82e5b5c7d60f8b42ab6508e2de374eac",
+      "evidence/reedbank-watch/summary.json": "7b86310ffdd141ae7c529ba538a6507c317e088de857c128d8bf929c5c17873d",
+      "evidence/reedbank-watch/transcript.jsonl": "8c140fa4b7344f21176c154e0087f3df89d61f4a94245d1a3f333a70d514a992"
+    }
+  },
+  {
+    "sequence": 107,
+    "id": "keeper-exchange-sleep",
+    "actor": "keeper-01",
+    "operation": "sleep",
+    "utc": "2026-11-13T02:32:17.511919+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
   }
 ]

@@ -1,0 +1,15 @@
+{
+  "bundle": "evidence/house-exchange.bundle",
+  "bundle_sha256": "270171bc20afc68065afcc9e00a8e07688b2d2652828aa35edb46ed259b13786",
+  "restored": {
+    "head": "4e4300e135b7fcdc301314557eaa61259411942b",
+    "events": 107,
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+  },
+  "full_state_equal": true,
+  "full_events_equal": true,
+  "state_sha256": "210e491072d28ef1ea0eef27e015e820ce25ce39548baa693e2c919f23246fc5",
+  "events_sha256": "32786e69e45d2de789e370930dc4b5444398a16ccf806412985be151f1e492b9",
+  "all_residents_asleep": true,
+  "open_tasks": []
+}
