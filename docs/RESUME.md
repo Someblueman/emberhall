@@ -119,3 +119,14 @@ source evidence is in `evidence/reedbank-watch/`; immutable accepted artifacts
 belong to daughter task `published-backup-drill`. Old temporary paths in receipts
 are historical locations, not guaranteed current services. Keep the two houses'
 identities and records separate. Both remain sealed and this is one-day evidence.
+
+## Current external dependency
+
+The remaining-work audit is `evidence/deployment-blocked-audit.json`. Across three
+consecutive goal turns the protected-host/account and owner-authority choices
+remained unresolved. Custodian preparation and the independent daughter exchange
+are complete; there is no live worker to await or unfinished claim to recover.
+The full goal remains incomplete. Resume substantive deployment work when the
+owner supplies the protected host/account choice; authority enrollment and rule
+ratification require their own explicit decisions. Do not recreate completed
+trials merely to keep the goal active, or treat source-push permission as authority.

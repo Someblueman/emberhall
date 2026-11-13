@@ -1,0 +1,50 @@
+{
+  "checked_utc": "2026-11-13T02:33:55.773329+00:00",
+  "goal_complete": false,
+  "previous_turn_classification": "progress: independent daughter residency, two-way exchange, exact checkpoints and authorized push",
+  "blocking_condition": "Live protected custody and owner-approved authority require owner-selected trust/deployment inputs; no answer to the pending host/account choice has arrived.",
+  "consecutive_observations": [
+    {
+      "turn": "custodian preparation and publication",
+      "result": "Protocol, client, independent attacks and real SSH acceptance completed; deployment choice requested; no protected live host or owner authority selected."
+    },
+    {
+      "turn": "daughter residency and knowledge exchange",
+      "result": "Independent available work completed and published; the same live custody/authority decision remained unresolved."
+    },
+    {
+      "turn": "current remaining-work audit",
+      "result": "Current107-event ledger verifies; all15 parent tasks done and all residents asleep; all delegated agents completed. Same decision remains unresolved and no independent bounded implementation task is outstanding."
+    }
+  ],
+  "canonical": {
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "head": "4e4300e135b7fcdc301314557eaa61259411942b",
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 107,
+    "sealed": true,
+    "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+    "pending_proposals": [
+      "witnessed-foundations-001"
+    ],
+    "unfinished_tasks": [],
+    "awake_residents": []
+  },
+  "source_before_audit": "974087c70b086957d9afc6858a38e85b18388f06",
+  "ready_for_decision": [
+    "docs/CUSTODIAN_DEPLOYMENT.md",
+    "docs/CUSTODIAN_PROTOCOL.md",
+    "docs/REMOTE_CLIENT.md",
+    "docs/OWNER_DECISION.md",
+    "docs/proposals/001-witnessed-foundations.md"
+  ],
+  "unproved_requirements": [
+    "Installed protection against hostile same-user writes",
+    "Owner-approved ratifier and lived constitutional amendment",
+    "Observed multi-day operation and long-sleep continuity",
+    "Useful completed work demonstrated to require more than one context"
+  ],
+  "resume_condition": "Owner selects protected local account or provides an owner-controlled remote host/account. Apply the reviewed installation and single-writer cutover plan with actual access checks. Separately obtain explicit authority enrollment/ratifier approval before any active-rule change. Preserve existing anchors and histories.",
+  "reason_to_stop": "More same-user implementations or repeated rapid tests cannot establish missing operator authority, installed host isolation, or elapsed days. All presently selected independent work is complete. The full objective is retained, not marked achieved.",
+  "authorization_preserved": "Unsigned commits via per-command override and pushes remain allowed; neither grants rule authority or selects a protected host."
+}
