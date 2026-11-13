@@ -209,14 +209,18 @@ class Coordinator:
     def prompt(self, state: dict, run: str, resident: str, workspace: Path, client: Path,
                help_request: dict | None) -> str:
         assigned = self.record.read()[0]["life"]["runs"][run]
+        channel = ("the house_journal tool with an argv array" if assigned["agent"] == "opencode"
+                   else str(client))
+        waiting = ("house_journal argv " + json.dumps(["wait", "--as", resident, "--after", "SEQUENCE", "--seconds", "300"])
+                   if assigned["agent"] == "opencode" else f"{client} wait --as {resident} --after SEQUENCE --seconds 300")
         assignment = (f"RUNNER ASSIGNMENT: resident {resident}; run {run}. Your private source room is {workspace}.\n"
             f"Your actual route is {assigned['agent']} / {assigned['model']}; record that exact kind/model after arrival.\n"
-            f"Use {client} for every canonical journal operation, with --as {resident}. "
+            f"Use {channel} for every canonical journal operation, with --as {resident}. "
             "The private clone has no canonical journal: never found a replacement. "
             "Use only your assigned identity. Commit completed work in this private room; "
             "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
             "Ask other residents through a life help request; do not bypass the single controller. "
-            f"When no useful work is available, stay present with {client} wait --as {resident} --after SEQUENCE --seconds 300, "
+            f"When no useful work is available, stay present with {waiting}, "
             "then read new events and continue. Do not invent chores or exit merely to fill a quiet interval.\n")
         checkpoint = workspace / "evidence" / "checkpoint.json"
         if checkpoint.exists():
@@ -389,6 +393,12 @@ def execute(record: Record, gate: int, run: str) -> int:
     item = state["life"]["runs"][run]
     if item["status"] != "active" or item.get("pgid") != os.getpid():
         raise ValueError("native process lacks its accepted launch receipt")
+    if item["agent"] == "opencode":
+        from .opencode_auth import bootstrap
+        from .opencode_tool import validate_workspace
+        validate_workspace(Path(launch["workspace"]))
+        source = Path(os.environ.pop("EMBERHALL_OPENCODE_SOURCE_DB"))
+        bootstrap(launch["argv"][0], source, path, dict(os.environ))
     os.chdir(launch["workspace"])
     os.execvpe(launch["argv"][0], launch["argv"], os.environ)
     return 1
