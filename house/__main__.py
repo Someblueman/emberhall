@@ -47,12 +47,12 @@ def parser() -> argparse.ArgumentParser:
     extract = sub.add_parser("extract", help="recover a finished task into a new directory")
     extract.add_argument("task")
     extract.add_argument("directory")
-    for name in ("arrive", "wake", "sleep", "say", "task", "claim", "renew", "release", "finish",
+    for name in ("arrive", "rename", "wake", "sleep", "say", "task", "claim", "renew", "release", "finish",
                  "propose", "ratify", "learn", "review", "supersede"):
         cmd = sub.add_parser(name)
         cmd.add_argument("--as", dest="actor", required=True)
         cmd.add_argument("--request", help="stable id for retrying a lost response")
-        if name == "arrive":
+        if name in {"arrive", "rename"}:
             cmd.add_argument("--name", required=True)
         elif name == "sleep":
             cmd.add_argument("--through", type=int, required=True)

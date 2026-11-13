@@ -17,7 +17,7 @@ from .__main__ import parser, run as dispatch
 from .record import REF, Record
 from .resident_actions import ACTIONS
 
-ALLOWED = frozenset({"status", "rules", "verify", "read", "wait", "receipt", "arrive", "wake",
+ALLOWED = frozenset({"status", "rules", "verify", "read", "wait", "receipt", "arrive", "rename", "wake",
                     "sleep", "say", "task", "claim", "renew", "release", "finish", "learn",
                     "review", "supersede", "life"}) | ACTIONS
 MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "wait", "receipt"}

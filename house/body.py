@@ -114,6 +114,7 @@ def export(record: Record, observed_at: float | None = None) -> dict:
     room_uses: dict[str, dict] = {}
     sleeping: set[str] = set()
     awakened: dict[str, int] = {}
+    name_history: dict[str, list[dict]] = {}
     for seq, event in enumerate(events, 1):
         at, actor, op, data = event["at"], event["actor"], event["op"], event["data"]
         for task_id, task in (state["tasks"].items() if state else []):
@@ -123,7 +124,11 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                     "title": "A lease ran out", "detail": label(task["title"]), "task": task_id,
                     "resident": task["owner"], "at": task["until"], "sequence": seq,
                     "basis": "Inferred from lease time; process fate unconfirmed", "mended": False})
+        former_name = state["residents"].get(actor, {}).get("name") if state else None
         state = apply_event(state, event)
+        if op == "rename":
+            name_history.setdefault(actor, []).append({"from": label(former_name, 100),
+                "to": label(state["residents"][actor]["name"], 100), "sequence": seq, "at": at})
         if state.get("maintenance", {}).get("room_growth"):
             rooms.update({key: label(room["name"], 60) for key, room in state["life"]["rooms"].items()})
         if op == "owner-provider-release":
@@ -257,7 +262,8 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                 pose = "unconfirmed"
             public_residents.append({"id": resident_id, "name": label(resident["name"], 60),
                 **identity, "room": room, "pose": pose, "presence": presence,
-                "tasks": claims})
+                "tasks": claims, **({"name_history": copy.deepcopy(name_history[resident_id])}
+                                     if resident_id in name_history else {})})
         tasks = [{"id": key, "title": label(t["title"], 160), "owner": t["owner"],
                   "status": t["status"], "until": t["until"], "generation": t["generation"]}
                  for key, t in state["tasks"].items() if t["status"] != "done"]

@@ -345,6 +345,9 @@ function personRow(r, parent) {
   const runs=frame.runs.filter(run=>run.resident===r.id),history=html("details","resident-history",undefined,info);
   html("summary","",`${runs.length} recorded ${runs.length===1?"run":"runs"}`,history);
   html("code","",r.id,history);
+  (r.name_history||[]).forEach(change=>{
+    html("p","small",`${change.from} → ${change.to} · chose this name at event ${change.sequence}`,history);
+  });
   if(!runs.length)html("p","small","No supervised run receipts at this moment.",history);
   runs.forEach(run=>{
     const entry=html("div","resident-run",undefined,history),kind=kinds[run.agent]||kinds.unrecorded;

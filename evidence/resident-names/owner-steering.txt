@@ -1,0 +1,5 @@
+Owner follow-up, 13 November 2026:
+I also noticed that some of the agents are…less good at picking names
+Examples supplied: Ember; Hydrogen; Ember Muse; Clover; hydrogen-1f27, beside their separate provider/model badges and interrupted-run status.
+
+Implementation interpretation: distinct personal names, self-renaming on return for technical/generated/duplicate labels, unchanged durable IDs and authorship, preserved historical names. Ordinary unique names such as Clover are not mechanically rejected. No authority, provider or sandbox changes.

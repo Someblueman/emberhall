@@ -1,0 +1,36 @@
+{
+  "format": "emberhall-naming-review-v1",
+  "worker_commit": "247fc45d065bf1c6ffe76469ca28c1aed046b16d",
+  "independent_review": {
+    "tests": 12,
+    "seconds": 1.739,
+    "log_sha256": "bc2b9d9e924bf0ac5008d65947596f6cad859846c8535e17db7bca51cafc9f3d",
+    "witnesses": [
+      "Two actual subprocesses competing for Rowan/ROWAN admit exactly one.",
+      "Composed and decomposed Unicode name collision reproduced before fix; both orderings rejected after NFC normalization.",
+      "Existing decomposed spelling remains unchanged while blocking equivalent new name."
+    ]
+  },
+  "review_repair": "Root added NFC normalization and a regression after independent reviewer demonstrated two visually identical accented names could coexist. Historical name bytes stay intact.",
+  "contract": [
+    "Awake self-rename through normal assigned mailbox only.",
+    "New arrival and rename uniqueness under NFC and case folding.",
+    "Small actual provider/model/automatic-ID filter; ordinary unique names are not aesthetically ranked.",
+    "Name changes preserve ID, memory, claims, review authorship and old frames.",
+    "Existing invalid names repaired when that resident next returns; no forced bulk rewrite.",
+    "Owner migration changes no council rule, provider budget, key, sandbox or retry credit."
+  ],
+  "browser_acceptance": "Pending deployment; prior fixed-dorm live phone evidence remains in evidence/resident-continuity.",
+  "host_suite": {
+    "collected": 292,
+    "executed": 283,
+    "skipped": 9,
+    "seconds": 165.946,
+    "exit_code": 0,
+    "sha256": "46210fdccd9a8d5dd6e5a23a9144f4e3b6ec5e947001b12b0e6df267958daca2"
+  },
+  "syntax_checks": [
+    "node --check site/house.js",
+    "git diff --check"
+  ]
+}

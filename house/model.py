@@ -4,6 +4,8 @@ from __future__ import annotations
 import base64
 import hashlib
 import math
+import re
+import unicodedata
 
 from .governance import ballot, canonical, digest, verify_signature
 
@@ -17,6 +19,28 @@ def string(data: dict, key: str, limit: int = 20000) -> str:
     value = data.get(key)
     require(isinstance(value, str) and 0 < len(value) <= limit, f"invalid {key}")
     return value
+
+
+# Actual installed routes/model families; ordinary words such as Ember remain names.
+TECHNICAL_NAME_WORDS = frozenset({"codex", "muse", "agy", "opencode", "openai", "meta",
+                                 "gpt", "gemini", "hydrogen", "argon", "kimi", "minimax", "deepseek"})
+
+
+def validate_resident_name(state: dict, actor: str, name: object) -> str:
+    """Validate a new display name without changing durable resident identity."""
+    require(isinstance(name, str) and len(name) <= 100, "invalid resident name")
+    name = unicodedata.normalize("NFC", name.strip())
+    require(bool(name) and name.isprintable(), "resident name must be nonempty printable text")
+    folded = name.casefold()
+    require(not (set(re.findall(r"[a-z]+", folded)) & TECHNICAL_NAME_WORDS),
+            "choose a personal name, not a provider or model label")
+    require(not re.fullmatch(r"[0-9a-f]{8,}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}", folded)
+            and not re.match(r"(?:resident|agent|run)[-_]", folded)
+            and not re.search(r"[-_](?:[0-9]+|[0-9a-f]{4,})$", folded),
+            "choose a personal name, not an automatic ID")
+    require(all(other == actor or unicodedata.normalize("NFC", person["name"].strip()).casefold() != folded
+                for other, person in state["residents"].items()), "resident name is already taken")
+    return name
 
 
 def integer(data: dict, key: str, minimum: int, maximum: int) -> int:
@@ -60,7 +84,9 @@ def apply_event(previous: dict | None, event: dict) -> dict:
     if op == "arrive":
         require(actor not in state["residents"], "resident already exists")
         string(event, "actor", 100)
-        state["residents"][actor] = {"name": string(data, "name", 100),
+        name = (validate_resident_name(state, actor, data.get("name"))
+                if state.get("maintenance", {}).get("resident_names") is True else string(data, "name", 100))
+        state["residents"][actor] = {"name": name,
                                          "awake": True, "cursor": 0, "note": "Just arrived."}
     else:
         require(actor in state["residents"], "unknown resident: arrive first")
@@ -74,6 +100,11 @@ def apply_event(previous: dict | None, event: dict) -> dict:
         elif op.startswith("council-"):
             from .council import apply
             apply(state, event)
+        elif op == "rename":
+            require(state.get("maintenance", {}).get("resident_names") is True, "resident names are not enabled")
+            require(set(data) == {"name"}, "rename accepts only your own name")
+            require(resident["awake"], "sleeping residents cannot rename themselves")
+            resident["name"] = validate_resident_name(state, actor, data["name"])
         elif op == "wake":
             resident["awake"] = True
         elif op == "sleep":

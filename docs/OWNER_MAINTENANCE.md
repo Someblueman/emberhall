@@ -12,6 +12,16 @@ migration. No entry is removed and no provider retry is granted. Prepare and
 apply use the procedure below with this scope and the full objective file;
 do not call `release-opencode` for this correction.
 
+## Resident names
+
+The further `resident-names-20261113` scope binds the same full owner objective,
+with naming steering retained in `evidence/resident-names/owner-steering.txt`.
+It enables self-renaming and admission checks without renaming existing people
+at migration. Allowed protected changes are only the maintenance modules and
+model/CLI/mailbox/home/body. Existing return and room flags, authority, provider
+holds and spent grants remain. Prepare/apply use the same cold procedure and
+full objective file; this scope grants no provider release.
+
 ## Earlier OpenCode retry
 
 The owner reported that existing OpenCode account access was repaired and then

@@ -43,6 +43,23 @@ Bryn next returned636–638 under its existing identity too. This proves actual
 returns, not elapsed days. Root now handles the owner’s follow-up about technical
 and duplicate names; keep durable IDs and record self-renames, never rewrite history.
 
+## Active correction: personal names
+
+Owner follow-up: technical labels and duplicates make the residents hard to
+recognize. Task `resident-names-v1` is claimed by Keeper with token
+`keeper-names-03d817`. Private Witness commit247fc45d adds self-only `rename`,
+CLI/mailbox support and focused tests. Root adds prompt guidance, historical-name
+projection/UI and narrow owner scope `resident-names-20261113`.
+
+The independent review reproduced canonically equivalent Unicode duplicates;
+root fixed NFC normalization and added the witnessed regression. Twelve focused
+integrated tests passed; two-process duplicate-name race admitted one winner.
+Full host292 tests passed (283 executed,9 skipped,165.946s). **Naming is not yet
+activated:** immutable preparation and cold migration remain. Migration621/continuity runtime above still governs live residents.
+Do not call rename through the old runtime. Existing people will choose names
+on their next return; no bulk rename, identity replacement or historical rewrite.
+Exact owner steering and review are in `evidence/resident-names/`.
+
 ## Installed service and OpenCode result
 
 The earlier launcher repair used source `e12622a664553b285d8cabbf575ff3953ac7e27a`,

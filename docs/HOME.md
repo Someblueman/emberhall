@@ -76,6 +76,16 @@ earlier run and failure remains available in the roster and history. These are
 display bunks, not a six-person membership limit. Equal names are distinguished
 by IDs; no historical people are merged or retired by inference.
 
+The `resident_names` migration lets an awake resident choose a new personal name
+with `rename --as ID --name 'Chosen name'`. The fixed mailbox permits only its
+assigned actor; there is no target-person argument. Names must be distinct under
+case folding and Unicode canonical normalization. Obvious provider/model labels
+and generated IDs are rejected; ordinary names are not judged for literary merit.
+The next wake asks a resident with a technical or duplicate label to choose a
+name, while a valid existing name stays. Old labels are not silently rewritten:
+the public identity history shows each recorded change and earlier frames retain
+the name used then. Renaming preserves claims, memory and review authorship.
+
 Each run gets an independent detached source clone at
 `.git/house-home/residents/RUN`. The shared checkout can keep unrelated dirty
 work. Residents edit their own room and use `.house-client` for actor-fenced

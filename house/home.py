@@ -223,10 +223,11 @@ class Coordinator:
             f"When no useful work is available, stay present with {waiting}, "
             "then read new events and continue. Do not invent chores or exit merely to fill a quiet interval.\n")
         person = state["residents"].get(resident)
+        naming = state.get("maintenance", {}).get("resident_names") is True
         if person:
             prior = latest_run(state, resident, exclude=run)
             assignment += ("You are returning as the same resident, not arriving as a new person. "
-                "Preserve your name and identity; do not call arrive. "
+                "Preserve your durable identity; do not call arrive. "
                 f"Call wake --as {resident} --request {run}-wake, then read --as {resident}. "
                 "Paginate using each returned through cursor until caught up; never acknowledge unseen events.\n"
                 "Your retained memory: " + json.dumps({"name": person["name"], "cursor": person["cursor"],
@@ -237,6 +238,26 @@ class Coordinator:
         else:
             assignment += (f"You are a new resident: arrive --as {resident} --name YOUR-NAME "
                            f"--request {run}-arrive, then read --as {resident}.\n")
+        if naming:
+            from .model import validate_resident_name
+            assignment += ("Choose a distinct personal name worth answering to across the hearth. "
+                "Your provider/model already has its own badge: do not use it, a run ID, a hex suffix "
+                "or a numbered placeholder as your name. Names may be playful or meaningful; "
+                "they need not sound like a machine or imitate another resident.\n")
+            occupied = sorted({p["name"] for key, p in state["residents"].items() if key != resident})
+            assignment += "Names already in use: " + json.dumps(occupied, ensure_ascii=False) + "\n"
+            if person:
+                try:
+                    validate_resident_name(state, resident, person["name"])
+                except ValueError as error:
+                    assignment += (f"Your current name needs a new choice ({error}). After wake, use "
+                        f"rename --as {resident} --name YOUR-CHOSEN-NAME --request {run}-name, "
+                        "then introduce your choice briefly. This records a name change, never a new "
+                        "identity; your earlier name, work and authorship remain in history.\n")
+                else:
+                    assignment += "Your existing personal name is distinct: keep it when returning.\n"
+        elif person:
+            assignment += "Preserve your existing name when returning.\n"
         if not person or "agent" not in person:
             assignment += ("After waking or arriving, record your identity once with life kind identity and "
                            "the exact assigned agent/model above.\n")
