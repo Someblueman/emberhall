@@ -1,0 +1,130 @@
+{
+  "migration": 923,
+  "source_commit": "983969c4b2c0efc87d7392634731e1dde4a54cbe",
+  "runtime_sha256": "03d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2",
+  "isolated": {
+    "collected": 338,
+    "executed": 256,
+    "skipped": 82,
+    "seconds": 91.974,
+    "output_sha256": "cb744fadaf3f66c9b659c68da074f261cc167b10011c083fe62cde62658790fc"
+  },
+  "prior_authority_histories_quotas_unchanged": true,
+  "launcher_changed_arguments": 2,
+  "new_key_release": {
+    "request": "owner-release-ready-backlog-20261113",
+    "sequence": 924,
+    "head": "5ff51c2a6c924c56e52b4a73fd0e1d14f8155165",
+    "replayed": false
+  },
+  "reviewer_events": [
+    {
+      "actor": "resident-836035b42f354512a781b26410a12e39",
+      "at": 1794612949.20476,
+      "data": {
+        "text": "Clover read-only review of canonical checkout: verified all 11 hashes in evidence/ready-backlog/final-source-hashes.json (0 mismatches). Inspected house/life.py (backlog_enabled gating BACKLOG_SCOPE on maintenance.migrations when wake_policy is present), house/model.py (task ready and op ready gated on backlog_enabled), house/maintenance.py & house/owner_upgrade.py (single new-key retry bound to 85cecff20f114d5b805b8474e19a6120 and hold594), and evidence/ready-backlog/owner-authorization.md. Ran PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest tests.test_owner_key tests.test_owner_backlog tests.test_ready_backlog -v in /Users/sws/Code/longhouse: 15 tests passed in 31.685s, 0 skips. Private room unmodified; standing by."
+      },
+      "id": "mailbox-dfa9440e145748e092f85559b9a3d0b3-85c64a8d1d5fdcdcdae3bd00bfc6e56757154dec3910ca21ce48484190d2d8ee",
+      "op": "say"
+    },
+    {
+      "actor": "resident-836035b42f354512a781b26410a12e39",
+      "at": 1794613146.773751,
+      "data": {
+        "note": "Clover (resident-836035b42f354512a781b26410a12e39, agy / gemini-4-hydrogen-low) caught up through 914. Verified all 11 frozen hashes in evidence/ready-backlog/final-source-hashes.json against canonical checkout and final commit 983969c4b2c0efc87d7392634731e1dde4a54cbe (0 mismatches). Inspected house/life.py, house/model.py, house/maintenance.py, house/owner_upgrade.py, and evidence/ready-backlog/owner-authorization.md; ran focused tests (tests.test_owner_key, tests.test_owner_backlog, tests.test_ready_backlog): 15 passed in 31.685s, 0 skips. Private room unmodified, no claims. Sleeping cleanly so Keeper can complete isolated acceptance and cold-upgrade; next wake inspect migration and OpenCode verification before any Blackout diff work.",
+        "through": 914
+      },
+      "id": "mailbox-dfa9440e145748e092f85559b9a3d0b3-4aed5c9c30310255f1ad6213353048a0c78ea5b456dc6b1ad93cab721ac08070",
+      "op": "sleep"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613155.665931,
+      "data": {
+        "text": "house-home-result-v1 {\"elapsed_seconds\": 853.5369050502777, \"exit_code\": 0, \"outcome\": \"success\", \"run\": \"dfa9440e145748e092f85559b9a3d0b3\", \"usage\": {\"cached_input_tokens\": 1080807, \"input_tokens\": 97075, \"output_tokens\": 8039, \"total_tokens\": 105114}}"
+      },
+      "id": "home-dfa9440e145748e092f85559b9a3d0b3-observed",
+      "op": "say"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613158.178495,
+      "data": {
+        "elapsed_seconds": 853.5369050502777,
+        "exit_code": 0,
+        "kind": "run-finish",
+        "outcome": "success",
+        "run": "dfa9440e145748e092f85559b9a3d0b3",
+        "usage": {
+          "cached_input_tokens": 1080807,
+          "input_tokens": 97075,
+          "output_tokens": 8039,
+          "total_tokens": 105114
+        }
+      },
+      "id": "home-dfa9440e145748e092f85559b9a3d0b3-run-finish",
+      "op": "life"
+    }
+  ],
+  "cutover_events": [
+    {
+      "actor": "watch-keeper",
+      "at": 1794613161.600252,
+      "data": {
+        "agent": "muse",
+        "kind": "run-start",
+        "mode": "work",
+        "model": "muse-ember-1.0",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-d8b49972bb00491f9233d595a4daa2fb",
+        "run": "bf8d5974301d44508ca1b6abc0a8a38a",
+        "source_head": "983969c4b2c0efc87d7392634731e1dde4a54cbe",
+        "workspace": "residents/bf8d5974301d44508ca1b6abc0a8a38a"
+      },
+      "id": "home-bf8d5974301d44508ca1b6abc0a8a38a-run-start",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613165.379164,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 52214,
+        "run": "bf8d5974301d44508ca1b6abc0a8a38a"
+      },
+      "id": "home-bf8d5974301d44508ca1b6abc0a8a38a-run-launched",
+      "op": "life"
+    },
+    {
+      "actor": "resident-d8b49972bb00491f9233d595a4daa2fb",
+      "at": 1794613188.008959,
+      "data": {},
+      "id": "mailbox-bf8d5974301d44508ca1b6abc0a8a38a-1d12fc86037cb7286c4e4c2ff2e0d4a85dd1ac2a95be77ce88bddf1d348ddc94",
+      "op": "wake"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613212.666502,
+      "data": {
+        "text": "house-home-result-v1 {\"elapsed_seconds\": 50.897682189941406, \"exit_code\": -9, \"outcome\": \"interrupted\", \"run\": \"bf8d5974301d44508ca1b6abc0a8a38a\", \"usage\": {}}"
+      },
+      "id": "home-bf8d5974301d44508ca1b6abc0a8a38a-observed",
+      "op": "say"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613213.1895602,
+      "data": {
+        "elapsed_seconds": 50.897682189941406,
+        "exit_code": -9,
+        "kind": "run-finish",
+        "outcome": "interrupted",
+        "run": "bf8d5974301d44508ca1b6abc0a8a38a",
+        "usage": {}
+      },
+      "id": "home-bf8d5974301d44508ca1b6abc0a8a38a-run-finish",
+      "op": "life"
+    }
+  ],
+  "model_verification": "Pending actual supervised run"
+}

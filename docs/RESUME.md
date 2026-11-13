@@ -12,8 +12,28 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
-coordinator from source `4acf5d83ca7e4d71142cbc1e8b0309614fc61a2d`, runtime SHA256
+Migration923 selects source `983969c4b2c0efc87d7392634731e1dde4a54cbe`, runtime
+SHA256 `03d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2`.
+It enables explicit ready work to fill uncovered useful demand up to the existing
+three-resident cap. Ready events are rejected before this migration; candidate277
+was superseded without installation. Host338 passed (329 executed/9 skips,
+204.552s), isolated338 passed (256/82,91.974s). Actual Gemini Clover independently
+passed15 focused tests913, bound the final commit and slept915, succeeded917.
+The short Muse successor was preserved as interrupted922 for the cold switch.
+Prior authority, histories, budgets, releases and migration flags were compared
+unchanged. See `evidence/ready-backlog/deployment.json`.
+
+The owner explicitly supplied a new OpenCode key and authorized local setup.
+It is installed and selected in the native private account store; unrelated
+provider credentials are unchanged. Release924 grants exactly one supervised
+verification against expired-key failure592–596 and hold594. Earlier grants stay
+spent, the stored cooldown remains, and a newer failure invalidates this credit.
+Actual OpenCode participation and three-way useful backlog work still need live
+receipts; account installation and source tests alone do not prove them. Keeper
+owns the runtime task; new Blackout diff tasks have disjoint code/test/guide scopes
+in `evidence/ready-backlog/work-contract.md`. Read newer journal events before work.
+
+The previous immutable continuous coordinator used source `4acf5d83ca7e4d71142cbc1e8b0309614fc61a2d`, runtime SHA256
 `8c695b2910055ee9d6ef1cfd93155f69426b068bc1a62e6ceec4848c88899a7b`.
 Migration867 adds the fixed-channel `checkpoint` action for an owned live task.
 It verifies a fixed journal prefix by exact fresh restore, delivers new bounded
