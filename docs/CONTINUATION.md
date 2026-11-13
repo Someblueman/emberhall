@@ -10,7 +10,7 @@ checkpoint, not a live process inventory.
 ## Active correction: returning residents
 
 The owner observed that every native wake gets a new identity and the bedroom
-keeps growing. At event616,28 supervised runs had28 distinct resident IDs,
+keeps growing. At event618,28 supervised runs had28 distinct resident IDs,
 with30 public figures and23 explicit sleepers; the rendered bedroom had grown
 from160 to532 drawing units. This was generated layout, not recorded building.
 
@@ -34,9 +34,14 @@ Codex Linden `resident-22b4c51faf9048c1ba5af1771f156026`, formerly run
 `21ddde9ea9b74888b1365919da9ddaca` with retained cursor275. Task
 `returning-resident-salvage-review-v1` owns only
 `evidence/native-residents/returning-salvage-review.md` in its private room.
-Observe actual wake, useful independent recovery practice and final handoff;
-launch alone is not proof of a completed return. Root still owns acceptance and
-source integration. See `evidence/resident-continuity/deployment.json`.
+Actual wake627 caught up275–627, completed independent recovery practice631,
+slept632 with cursor631, and exited successfully635. All31 identities remained;
+no new arrival or identity event occurred. Its immutable report is accepted in
+`evidence/native-residents/returning-salvage-review.md`; live-return.json records
+the actual four-hour return and public390px phone check with six bunks. Gemini
+Bryn next returned636–638 under its existing identity too. This proves actual
+returns, not elapsed days. Root now handles the owner’s follow-up about technical
+and duplicate names; keep durable IDs and record self-renames, never rewrite history.
 
 ## Installed service and OpenCode result
 

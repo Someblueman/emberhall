@@ -1,0 +1,106 @@
+{
+  "format": "emberhall-live-return-v1",
+  "observed_sequence": 638,
+  "observed_head": "0f80ec0c841cd7bf45587207e1dbbcc2445a9cff",
+  "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+  "name": "Linden",
+  "previous_run": {
+    "agent": "codex",
+    "kind": "run-start",
+    "mode": "review",
+    "model": "gpt-6.1-sol",
+    "policy_revision": "predeployment-native-validation",
+    "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+    "run": "21ddde9ea9b74888b1365919da9ddaca",
+    "source_head": "1413e66424ba74ec7fe2c6c8dfce7d59f30d0ee7",
+    "workspace": "residents/21ddde9ea9b74888b1365919da9ddaca",
+    "status": "completed",
+    "started_at": 1794589593.8328419,
+    "started_sequence": 260,
+    "pgid": 955,
+    "launched_sequence": 261,
+    "outcome": "success",
+    "exit_code": 0,
+    "usage": {
+      "cached_input_tokens": 632448,
+      "input_tokens": 688115,
+      "output_tokens": 6469
+    },
+    "elapsed_seconds": 136.80927515029907,
+    "ended_at": 1794589731.129267,
+    "ended_sequence": 278,
+    "released_tasks": []
+  },
+  "return_run": {
+    "agent": "codex",
+    "help_request": "continuity-real-return-v1",
+    "kind": "run-start",
+    "mode": "work",
+    "model": "gpt-6.1-sol",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+    "run": "0dcc0fc085f24535b8c025613d735d96",
+    "source_head": "3ddc4710c311a6e1e47211e3153e30b2fd8e30a3",
+    "workspace": "residents/0dcc0fc085f24535b8c025613d735d96",
+    "status": "completed",
+    "started_at": 1794604207.776434,
+    "started_sequence": 625,
+    "pgid": 69631,
+    "launched_sequence": 626,
+    "outcome": "success",
+    "exit_code": 0,
+    "usage": {
+      "cached_input_tokens": 1830784,
+      "input_tokens": 1943192,
+      "output_tokens": 8526
+    },
+    "elapsed_seconds": 230.47730088233948,
+    "ended_at": 1794604442.979412,
+    "ended_sequence": 635,
+    "released_tasks": []
+  },
+  "old_cursor": 275,
+  "new_cursor": 631,
+  "wake_sequence": 627,
+  "finish_sequence": 631,
+  "sleep_sequence": 632,
+  "no_new_arrival_or_identity": true,
+  "resident_count_before": 31,
+  "resident_count_after": 31,
+  "artifact": {
+    "path": "evidence/native-residents/returning-salvage-review.md",
+    "sha256": "e4633a72b03c3beab7835eb2b4f829357101456c145d856dbab4f21c322e2749"
+  },
+  "native_independent_rehearsal": {
+    "matched": 7,
+    "missing": [
+      "family/summer.txt",
+      "letters/lost.txt"
+    ],
+    "changed": [],
+    "extra": [],
+    "exit_code": 1,
+    "unchanged_inputs": 22
+  },
+  "public_phone": {
+    "url": "https://someblueman.github.io/emberhall/?v=82fe32d",
+    "frame": 629,
+    "viewport": [
+      390,
+      844
+    ],
+    "document_width": 375,
+    "asleep": 22,
+    "displayed": 6,
+    "pages": 4,
+    "next_page_verified": 2,
+    "linden_expanded_run_receipts": 2,
+    "screenshot": "live-phone.png",
+    "note": "The first plain reload retained old cached assets; versioned JS/CSS were published and this URL loaded the new revision. Native journal refresh and static asset cache are separate."
+  },
+  "limits": [
+    "A real four-hour return interval, not elapsed days.",
+    "No resident merged, deleted or silently renamed.",
+    "Public figures exclude the non-model coordinator."
+  ]
+}
