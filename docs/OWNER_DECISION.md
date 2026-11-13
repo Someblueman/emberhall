@@ -1,3 +1,7 @@
+> Historical pre-standing-orders decision note. The Steward supplied the missing
+> process approval and cooperative threat model on13 November2026; see
+> STEWARD_ORDERS.md and COUNCIL.md. The old protected-host blocker is superseded.
+
 # A proposal at the council, not a new law
 
 The live house remains sealed. The founding charter has not changed.

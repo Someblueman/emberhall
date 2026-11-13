@@ -1,0 +1,12 @@
+{
+  "utc": "2026-11-13T10:53:20.191600+00:00",
+  "reason": "Updated Steward orders explicitly reject further custodian work for cooperative residents; disable this task-created service and preserve evidence.",
+  "bootout_exit": 0,
+  "service_absent_exit": 113,
+  "service_absent_stderr": "Bad request.\nCould not find service \"local.emberhall.custodian\" in domain for user gui: 501\n",
+  "removed_launch_agent": "/Users/sws/Library/LaunchAgents/local.emberhall.custodian.plist",
+  "preserved_plist": "/Users/sws/.local/state/emberhall-custodian/local.emberhall.custodian.plist",
+  "preserved_plist_sha256": "e0ae8f166e166303c965030f0e4921a21caba39c9972cb5ce7069c96f7e3f4a0",
+  "runtime_and_transport_keys_preserved": true,
+  "journal_unchanged": true
+}

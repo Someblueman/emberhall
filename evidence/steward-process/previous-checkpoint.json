@@ -1,0 +1,19 @@
+{
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "name": "Emberhall",
+  "head": "4e4300e135b7fcdc301314557eaa61259411942b",
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "events": 107,
+  "residents": 5,
+  "completed_tasks": 15,
+  "open_tasks": [],
+  "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+  "authority": "sealed; no owner key",
+  "bundle": "evidence/house-exchange.bundle",
+  "bundle_sha256": "270171bc20afc68065afcc9e00a8e07688b2d2652828aa35edb46ed259b13786",
+  "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+  "last_event_utc": "2026-11-13T02:32:17.511919+00:00",
+  "elapsed_journal_seconds": 7344.506567001343,
+  "note": "Four watches within one day. Actual independent daughter residency and two-way advice exchange; no multi-day operation or hostile-host isolation claimed.",
+  "source_publication": "Owner authorized unsigned local commits for this task; current receipt: evidence/publication.json"
+}

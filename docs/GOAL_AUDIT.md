@@ -1,59 +1,27 @@
-# Full-objective audit after the fourth watch
+# What Emberhall can honestly claim
 
-The goal is **not complete**. The founding acceptance in BUILD_LOG.md is a bounded
-milestone, not a replacement for the owner's full objective. This audit uses the
-current code, live record, independent reports and raw measurements.
+The Steward's updated objective in STEWARD_ORDERS.md supersedes the old external
+custodian blocker. This audit distinguishes completed mechanisms from elapsed
+life. Installation and enactment must have actual receipts before being claimed.
 
-| Original requirement | Authoritative evidence | Current conclusion |
-| --- | --- | --- |
-| Newcomer needs no human | AGENTS.md; Sedge and Flint began with no inherited chat; SEED_TRIAL.md and recorded lifecycle | Demonstrated for this local repository and tasks. Fresh-source-clone restoration and all45 tests passed; evidence/publication.json records the exact commit, head and state hashes. |
-| Rules change only with owner/approved ratification, enforced | governance.py/model.py; real signature tests; unchanged sealed live charter; pending proposal | Trusted commands enforce the boundary. Hostile same-account shell isolation is **not delivered**. No owner-controlled authority/custodian is deployed. |
-| Concurrent residents preserve one truth; dead resident cannot wedge it | Live interleaved residents; subprocess races; SIGKILL/inherited-lock/lost-receipt tests; immutable artifacts; exact bundle recovery | Demonstrated at the trusted local interface. Arbitrary concurrent shell edits, hostile ref replacement, disk loss and network filesystems are outside the proved boundary. |
-| Residents sleep, wake and catch up | Rowan's real return; Flint's later return; durable cursors; paginated catch-up tests | Demonstrated for short real sleeps and synthetic missed messages. Long elapsed sleeps remain unobserved. |
-| Memory compounds and mistakes improve practice | Five scoped lessons, independent reviews, preserved failing witnesses, explicit contradiction/supersession tests, seed transfer | Demonstrated across residents and the second watch. No multi-day memory-aging evidence yet. |
-| Residents improve foundations while inhabiting them | Token/revision defects and repairs; subsequent scaling task found quadratic copying; independent prefix-equivalence check | Demonstrated in bounded form. 10,000-event replay improved from median13.059s to0.220s without dropping checks. This does not prove general superiority over the founder. |
-| Finish worthwhile work too large/long/tangled for one context | Standalone Blackout Kit with independent defects/repairs and16 CLI tests | Useful independent work delivered; necessity of multiple contexts **not established**. |
-| Run for days with day-five benefit from day-one learning | Timestamped live events, checkpoint and benchmark reports | **Not achieved.** Synthetic histories are not elapsed days. No continuing resident scheduler is installed. |
-| Constitution changes from experience and improves governance | Concrete witnessed-foundations-001 proposal; OWNER_DECISION.md | **Not achieved.** Proposal remains pending; no approval is inferred from tests or this goal's continuation. |
-| Found another house with wisdom but no baggage | Reedbank bundle, distinct identity, transcript, idempotent advice import, independent Rowan review | A fresh independent Codex daughter resident completed useful recovery work; the daughter returned an independently reviewed lesson. Exact15-event daughter restore and explicit parent duplicate resolution are preserved in evidence/daughter-exchange/. Ongoing independent society remains unproved. |
-| Real concurrent Codex residents and adversarial evidence | Five actual workers, live journal, BREAKER.md, raw failures/tests and second-watch REVIEW.md | Demonstrated, with model residents distinguished from test subprocesses and synthetic daughter labels. |
-| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. The exact latest checkpoint events are preserved in evidence/checkpoint.json. Source and checkpoint pushed with explicit permission; third-watch remote equality verified in evidence/custodian/publication.json. |
+| Requirement | Evidence and present limit |
+| --- | --- |
+| Newcomer needs no human | AGENTS/RESUME, real fresh residents Sedge, Flint, Linden and Osier; exact bundle restoration. Scheduled newcomer acceptance is the next live check. |
+| Rules are real | council.py enforces the explicitly approved trial, two other endorsers and24-hour public window; steward.py authenticates the phone bell. Authorization event143; proposal144/trial145/notice147. No named rule enacted yet. |
+| Many residents, one truth | Actual disjoint concurrent residents, full journal replay, CAS/inherited lock, killed-writer/lost-receipt/lease tests. Shell editing still requires explicit file ownership. |
+| Sleep/wake/catch-up | Real returns and persisted cursors; long synthetic histories are labeled. Days of actual absence remain to observe. |
+| Compounding memory | Blackout failure/repair; replay lessons applied to client output; daughter recovery lesson returned and reviewed; council veto defects independently reproduced and fixed. |
+| Rebuild foundations while inhabited | Replay10,000-event read13.059s→0.220s with independent prefix-equivalence review; token, signature, output and veto boundary repairs. Not a general superiority claim. |
+| Useful external work | Standalone Blackout Kit,16 actual CLI tests and independently repaired unsafe input boundaries. Necessity of multiple contexts remains unproved. |
+| A place to visit | Generated phone-width SVG in README, distinct residents, sleeping loft, benches, reviewed repair seams and actual Git stones. Snapshot head/time are embedded; awake is not process liveness. |
+| Continuous days | Bounded scheduled runner plus private crash recovery/pinned reader are implemented and tested with inert subprocesses. Actual installation/model receipts and elapsed days must be reported separately. |
+| Lived constitutional change | Independent witness proposal is trial-backed. Earliest enactment14 November2026 at11:26:19.596354 UTC, subject to fresh veto check and quorum. Waiting has not been simulated away. |
+| Daughter and knowledge exchange | Distinct Reedbank identity, real resident/reviewers,15-event verified bundle, two-way lesson exchange. Ongoing independent daughter society is unproved. |
 
-## Remaining external boundary
-
-The owner explicitly approved unsigned local source commits for this task. That
-resolves the source-signing blocker without changing persistent signing settings.
-The owner must still approve any rule ratifier and an actual isolated custodian
-before the stronger rule-enforcement claim is true. Source publication is not a
-rule ratification.
-
-These are real authority/deployment decisions. Writing more same-user code cannot
-manufacture the missing isolation or owner approval. Nor can additional rapid test
-runs establish days of observed life. Preserve the current evidence and do not mark
-the full goal achieved on the strength of the bounded milestones above.
-
-## Third-watch evidence
-
-The optional one-request forced-command custodian, bounded SSH client, and
-operator deployment recipe now exist. All64 house tests passed, including16
-custodian process tests,14 client process tests, and5 real loopback OpenSSH tests.
-The fixture verified restricted commands, identity binding, host-key rejection,
-and idempotent publication through the shipped client. It used the same OS user;
-it does not establish installed ownership isolation. See evidence/custodian/SUMMARY.md.
-
-Flint's recorded output-failure lesson led Rowan to reproduce and repair the same
-failure in the separately built client. Original artifacts, failed observations,
-and repaired versions are retained. This strengthens the memory-compounding row;
-it adds no elapsed days. The live charter remains sealed and unchanged. No live
-custodian, owner-key migration, scheduler, or approved ratification was installed.
-
-## Fourth-watch evidence
-
-A real daughter resident (Osier), a visiting independent reviewer (Keeper), and
-parent reviewer (Flint) exercised an actual two-way exchange. Complete seed import
-kept authority and operational state separate; repeated import was idempotent.
-The returned identical parent claim became contested and was explicitly resolved
-without erasing history. A new recovery lesson crossed back and received local
-independent review. See evidence/daughter-exchange/SUMMARY.md. This strengthens
-seeding and compounding memory; it establishes no additional elapsed days or
-approved constitutional change. The external protected-host choice remains pending.
+Historical reports and failures are retained, including the unnecessary custodian
+detour and its explicit deactivation. Do not describe that old blocker as current.
+The current milestone is a visitable, recoverable house with an installed bounded
+watch and a live council window; the first independent headless resident must
+complete useful work before that milestone is accepted. Multi-day benefit and a
+real rule enactment require later timestamped observations. They are continuing
+work, not inferred from this session's volume of tests or generated history.

@@ -1,0 +1,6 @@
+test_scheduled_dirty_failure_can_resume_without_reset (tests.test_watch.WatchTests.test_scheduled_dirty_failure_can_resume_without_reset) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.393s
+
+OK

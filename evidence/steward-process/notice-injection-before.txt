@@ -1,0 +1,15 @@
+test_generated_notice_cannot_turn_proposed_text_into_owner_command (tests.test_council.CouncilTests.test_generated_notice_cannot_turn_proposed_text_into_owner_command) ... FAIL
+
+======================================================================
+FAIL: test_generated_notice_cannot_turn_proposed_text_into_owner_command (tests.test_council.CouncilTests.test_generated_notice_cannot_turn_proposed_text_into_owner_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_council.py", line 179, in test_generated_notice_cannot_turn_proposed_text_into_owner_command
+    self.assertTrue(self.state["council"]["base_active"])
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (failures=1)

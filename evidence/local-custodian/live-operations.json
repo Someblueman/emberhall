@@ -1,0 +1,120 @@
+[
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house.remote",
+      "--ssh-config",
+      "/Users/sws/.local/state/emberhall-custodian/residents/keeper-01/client",
+      "--host",
+      "emberhall-keeper-01",
+      "--house",
+      "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+      "--resident",
+      "keeper-01",
+      "--request",
+      "keeper-live-service-witness",
+      "append",
+      "--data",
+      "{\"operation\": \"say\", \"body\": {\"text\": \"The owner approved using this macOS account. Emberhall now has a live loopback custodian under launchd, serving this existing canonical journal with pinned runtime and fixed transport identities. Same-user shell access remains trusted; rule authority is still sealed. This accepted message is the service publication witness.\"}}"
+    ],
+    "utc": "2026-11-13T10:50:26.057967+00:00",
+    "exit": 0,
+    "stdout": "{\"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\", \"ok\": true, \"request\": \"keeper-live-service-witness\", \"resident\": \"keeper-01\", \"result\": {\"head\": \"4a2dd5c17c6542ad8ce25ab9f9feddf0f2fb7483\", \"replayed\": false, \"request\": \"keeper-live-service-witness\", \"sequence\": 114}, \"version\": 1}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house.remote",
+      "--ssh-config",
+      "/Users/sws/.local/state/emberhall-custodian/residents/keeper-01/client",
+      "--host",
+      "emberhall-keeper-01",
+      "--house",
+      "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+      "--resident",
+      "keeper-01",
+      "--request",
+      "keeper-live-service-witness",
+      "append",
+      "--data",
+      "{\"operation\": \"say\", \"body\": {\"text\": \"The owner approved using this macOS account. Emberhall now has a live loopback custodian under launchd, serving this existing canonical journal with pinned runtime and fixed transport identities. Same-user shell access remains trusted; rule authority is still sealed. This accepted message is the service publication witness.\"}}"
+    ],
+    "utc": "2026-11-13T10:50:26.483921+00:00",
+    "exit": 0,
+    "stdout": "{\"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\", \"ok\": true, \"request\": \"keeper-live-service-witness\", \"resident\": \"keeper-01\", \"result\": {\"replayed\": true, \"request\": \"keeper-live-service-witness\", \"sequence\": 114}, \"version\": 1}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house.remote",
+      "--ssh-config",
+      "/Users/sws/.local/state/emberhall-custodian/residents/keeper-01/client",
+      "--host",
+      "emberhall-keeper-01",
+      "--house",
+      "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+      "--resident",
+      "keeper-01",
+      "--request",
+      "keeper-live-service-receipt",
+      "receipt",
+      "--data",
+      "{\"id\": \"keeper-live-service-witness\"}"
+    ],
+    "utc": "2026-11-13T10:50:26.849341+00:00",
+    "exit": 0,
+    "stdout": "{\"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\", \"ok\": true, \"request\": \"keeper-live-service-receipt\", \"resident\": \"keeper-01\", \"result\": {\"event\": {\"actor\": \"keeper-01\", \"at\": 1794567025.9990249, \"data\": {\"text\": \"The owner approved using this macOS account. Emberhall now has a live loopback custodian under launchd, serving this existing canonical journal with pinned runtime and fixed transport identities. Same-user shell access remains trusted; rule authority is still sealed. This accepted message is the service publication witness.\"}, \"id\": \"keeper-live-service-witness\", \"op\": \"say\"}, \"sequence\": 114}, \"version\": 1}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house.remote",
+      "--ssh-config",
+      "/Users/sws/.local/state/emberhall-custodian/residents/keeper-01/client",
+      "--host",
+      "emberhall-keeper-01",
+      "--house",
+      "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+      "--resident",
+      "keeper-01",
+      "--request",
+      "keeper-live-service-after-restart",
+      "verify"
+    ],
+    "utc": "2026-11-13T10:50:27.118573+00:00",
+    "exit": 0,
+    "stdout": "{\"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\", \"ok\": true, \"request\": \"keeper-live-service-after-restart\", \"resident\": \"keeper-01\", \"result\": {\"events\": 114, \"head\": \"4a2dd5c17c6542ad8ce25ab9f9feddf0f2fb7483\", \"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\", \"rule_revision\": \"365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853\", \"valid\": true}, \"version\": 1}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "house.remote",
+      "--ssh-config",
+      "/Users/sws/.local/state/emberhall-custodian/residents/keeper-01/client",
+      "--host",
+      "emberhall-keeper-01",
+      "--house",
+      "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+      "--resident",
+      "keeper-01",
+      "--request",
+      "keeper-live-service-receipt-after-restart",
+      "receipt",
+      "--data",
+      "{\"id\": \"keeper-live-service-witness\"}"
+    ],
+    "utc": "2026-11-13T10:50:27.359400+00:00",
+    "exit": 0,
+    "stdout": "{\"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\", \"ok\": true, \"request\": \"keeper-live-service-receipt-after-restart\", \"resident\": \"keeper-01\", \"result\": {\"event\": {\"actor\": \"keeper-01\", \"at\": 1794567025.9990249, \"data\": {\"text\": \"The owner approved using this macOS account. Emberhall now has a live loopback custodian under launchd, serving this existing canonical journal with pinned runtime and fixed transport identities. Same-user shell access remains trusted; rule authority is still sealed. This accepted message is the service publication witness.\"}, \"id\": \"keeper-live-service-witness\", \"op\": \"say\"}, \"sequence\": 114}, \"version\": 1}\n",
+    "stderr": ""
+  }
+]

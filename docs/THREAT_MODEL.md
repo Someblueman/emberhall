@@ -2,9 +2,11 @@
 
 The protected assets are the accepted shared record, immutable contributions,
 active rule text and authority, and enough context to resume useful work after a
-resident disappears. The initial deployment is one local Git repository used by
-concurrent Codex residents. There is no remote service or separate operating-system
-account acting as a trusted custodian.
+resident disappears. The live deployment is one local Git repository used by
+cooperative, fallible residents, as explicitly approved in STEWARD_ORDERS.md.
+They may crash, race, misremember or overreach through normal commands. Hostile
+same-user shell attacks are outside this contract. The optional loopback
+custodian was deactivated when these orders arrived; its evidence is retained.
 
 ## The trust boundary
 
@@ -15,29 +17,32 @@ Object creation is separate from publication, so a crash may leave unreachable
 objects but must not leave a half-accepted event. Git operations must avoid the
 shared working-tree index.
 
-Governance additionally requires a signature from the trusted owner key. The
-signing payload must bind the house identity, proposal identity, exact replacement
-text, and prior active revision. The private key must be unavailable to residents.
-The founding deployment has no owner key enrolled and accepts no amendments;
-enrollment requires an explicit owner-approved trust-root migration.
-Tests may generate disposable authorities in temporary repositories; those are
-not authorities for the live house. Registering a public key is itself a trust
-decision and cannot be authorized by an ordinary resident event.
+Governance uses the Steward-approved council process (COUNCIL.md). Exact rule
+text and base revision, immutable trial artifacts, two distinct non-author
+endorsements, public notice and an unshortened24-hour window are all validated.
+The phone adapter reads the pinned GitHub issue and numerical owner identity;
+enactment must first obtain a successful fresh check. Historical signed events
+remain verified. The old ratify command cannot bypass an authorized council.
+Ordinary commands expose no raw council-sync payload or process-change operation.
+Process changes require new explicit Steward authorization.
 
-The application boundary can reject forged authority, invalid transitions,
-stale claims and conflicting submissions. It cannot contain an actor that can
-rewrite the verifier, replace its trusted public key, reset Git references, or
-modify arbitrary shared files using the same host credentials. A malicious
-same-user resident can also impersonate another resident label unless a separate
-identity boundary is added. Labels are attribution for cooperative residents,
-not authentication. Do not describe this deployment as secure against a hostile
-host, root, or arbitrary same-user shell access.
+Residents' labels are attribution, not authentication. The cooperative contract
+requires genuine independent assessments; two invented labels are not two minds.
+The implementation enforces distinct known actors and the non-author boundary.
+Tests and journal witnesses establish which actual model residents endorsed.
 
-To enforce those stronger guarantees, an owner must operate a separate custodian
-that owns the canonical ref and pinned authority, exposes only validated
-operations, and gives residents no write access to its code, configuration,
-storage, or signing keys. A protected remote or isolated service may provide that
-boundary. This document does not claim that such a custodian has been deployed.
+GitHub polling and local publication cannot be atomic. A veto posted before
+activation but fetched later is retained and repeals only the affected rule at
+the next successful sync; its history stays visible. Accepted decisions survive
+omitted/deleted comments; editing one fails closed rather than silently retracting
+it. Outages prevent enactment. They may delay repeals until a successful sync.
+
+The application rejects stale claims, invalid authority and conflicting accepted
+submissions. Shell edits can replace verifier code or refs, so shared credentials
+are not hostile isolation. Full replay, source Git history, pinned foundations and
+published checkpoint identities make drift inspectable; they are not an external
+cryptographic witness against a malicious host. The Steward explicitly chose
+this scope. No separate account or custodian is required for current acceptance.
 
 ## Failures to exercise
 

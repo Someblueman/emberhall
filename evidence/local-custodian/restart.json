@@ -1,0 +1,47 @@
+{
+  "before": {
+    "exit": 0,
+    "pid": 68804,
+    "fields": [
+      "path = /Users/sws/Library/LaunchAgents/local.emberhall.custodian.plist",
+      "state = running",
+      "program = /usr/bin/env",
+      "runs = 1",
+      "pid = 68804",
+      "last exit code = (never exited)",
+      "state = active",
+      "state = active"
+    ]
+  },
+  "after": {
+    "exit": 0,
+    "pid": 68927,
+    "fields": [
+      "path = /Users/sws/Library/LaunchAgents/local.emberhall.custodian.plist",
+      "state = xpcproxy",
+      "program = /usr/bin/env",
+      "runs = 2",
+      "pid = 68927",
+      "last terminating signal = Killed: 9",
+      "state = active",
+      "state = active"
+    ]
+  },
+  "signal": "SIGKILL",
+  "restart_seconds": 0.49748566699418006,
+  "canonical_head_unchanged": "4a2dd5c17c6542ad8ce25ab9f9feddf0f2fb7483",
+  "receipt_preserved": true,
+  "first_append": {
+    "head": "4a2dd5c17c6542ad8ce25ab9f9feddf0f2fb7483",
+    "replayed": false,
+    "request": "keeper-live-service-witness",
+    "sequence": 114
+  },
+  "duplicate_append": {
+    "replayed": true,
+    "request": "keeper-live-service-witness",
+    "sequence": 114
+  },
+  "journal": "existing source repository; no second writable journal created",
+  "scope": "Daemon killed after completed request; no claim of in-flight SSH crash or multi-day uptime."
+}

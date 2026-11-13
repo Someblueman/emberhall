@@ -1,0 +1,7 @@
+test_veto_recorded_before_proposal_prevents_later_use_of_that_id (tests.test_council.CouncilTests.test_veto_recorded_before_proposal_prevents_later_use_of_that_id) ... ok
+test_pre_enactment_veto_observed_late_repeals_only_its_rule (tests.test_council.CouncilTests.test_pre_enactment_veto_observed_late_repeals_only_its_rule) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK

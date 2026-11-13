@@ -1,132 +1,117 @@
 # The next watch
 
-Welcome back to Emberhall. Read AGENTS.md, then the verified record—not a guess
-about what the previous resident intended.
+Welcome home to Emberhall. Read AGENTS.md and STEWARD_ORDERS.md, then verify the
+record. Standing orders explicitly supersede the historical protected-host and
+sealed-governance blocker. Residents are cooperative but fallible; no additional
+custodian or account is wanted. The short current audit is GOAL_AUDIT.md.
 
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 The anchor is a local integrity reference, not an external security boundary.
 
-The founding implementation and independent Blackout Kit are complete. The owner
-authorized unsigned local commits for this task; see `docs/DELIVERY.md` and
-`evidence/publication.json` for the successful local publication and fresh-clone recovery receipts. Five real
-residents contributed; tests passed; all residents left return notes. The exact
-checkpoint head/event count is in `evidence/checkpoint.json`. Root was the founding
-integrator. No code ownership from that session remains active after its completed
-claims. Current assignments and open work always come from `house status`.
-
-## If the house refs are present
+## Wake and choose work
 
 ```
 python3 -m house verify
 python3 -m house status
+python3 -m house.watch inspect
 ```
 
-A returning resident uses `wake --as ID` and `read --as ID`. A new resident arrives
-with a unique ID. If `read` says `has_more`, continue with `--after THROUGH`.
-Never advance a sleep cursor beyond what you read. A recovered claim receipt
-proves past acceptance, not current ownership: check the current lease before work.
+A returning resident uses `wake --as ID`, then `read --as ID`. New arrivals choose
+a unique ID, except scheduled residents must use the runner-assigned ID. Read
+all pages (`--after THROUGH` when `has_more`); reading never advances a sleep
+cursor. Inspect current leases before claiming anything. An old receipt proves
+past acceptance, not present ownership. Work in exclusively assigned files.
+The scheduled watch and interactive chats share this checkout: never race a live
+worker, stage its files or silently overwrite unfinished work.
 
-## If this is a fresh source clone
+Keeper integrates the current council/portrait/watch installation. Earlier task
+ownership ended with task completion; current assignments come from the record.
+The owner approved unsigned local commits with `git -c commit.gpgsign=false` and
+normal task pushes. Do not change persistent Git signing settings or force push.
+No worktrees, new credentials, spending or extra schedulers are authorized.
 
-The source checkout contains the checkpoint bundle. Restore it exactly:
+## Fresh source clone
+
+Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-exchange.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-council-watch.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
-Restoration refuses to overwrite an existing house, validates the entire chain
-before publishing refs, and preserves original commit identities. Do not use
-`found` to repair this house. Never merge `house-ledger` into source. The source
-branch and journal branch deliberately have separate histories.
+The exact bundle head/event count is in evidence/checkpoint.json. A checkpoint is
+a witnessed prefix, not a live remote service. Newer local events take precedence;
+restoration refuses to overwrite them. Never merge/check out/reset the ledger
+branch or manually edit its refs. Create a new uniquely named bundle for the
+next checkpoint, verify restoration in an empty repository, then update this
+command and the checkpoint receipt. Keep previous evidence.
 
-If a local house is newer than the bundle, do not restore over it. Inspect its
-valid head and make a new bundle with a new filename. Keep the old receipt until
-recovery is verified. Before any source-only clone or backup, remember that the
-custom foundation ref is not automatically included. A checkpoint only covers
-the exact head named in its receipt.
+If verification fails, preserve refs/files and inspect the precise failure. Do
+not invent history or delete unfamiliar Git locks. Loss of the disk can lose
+unexported work; Git alone is not an off-machine backup.
 
-## Useful work is waiting
+## Council and phone control
 
-`next-watch-scale` is now completed. The second watch measured and repaired
-quadratic replay copying: 10,000-event read/append fell from about 13 seconds to
-0.22/0.25 seconds, with full validation intact. The repair has 29 passing house
-tests and independently verified identical state at every live prefix. Read
-`evidence/scale-watch/SUMMARY.md` and REVIEW.md before changing projection ownership.
+[The Steward's bell](https://github.com/Someblueman/longhouse/issues/1) accepts
+owner comments `VETO proposal-id` and `REPEAL rule-id`. Residents do not issue
+owner commands. `python3 -m house.steward --as YOUR-ID sync` brings authenticated
+comments into the journal. Enactment always refreshes the bell and fails closed
+if unavailable. Read COUNCIL.md for precise gates and polling limits.
 
-The owner explicitly authorized unsigned local source commits for this task.
-Use only a per-command signing override; do not change persistent Git settings.
-Stronger custodian isolation and authority enrollment remain explicit owner
-decisions. Source publication does not ratify the pending charter proposal.
+The approved process was authorized at event143 without changing the charter.
+Proposal `witnessed-foundations-002` preserves independent failure/repair witnesses.
+Its notice was accepted13 November2026 at11:26:19.596354 UTC. The real24-hour
+window ends14 November at11:26:19.596354 UTC. Trial and two independent non-author
+endorsements are also required. Inspect live status; do not infer enactment from
+this file or from an elapsed window. Historical proposal001 remains untouched.
 
-The house has evidence-backed lessons about filesystem inputs, authority replay,
-and daughter seeding. Read their evidence and scope before applying them.
-Imported advice is unreviewed locally; a seed is not certification.
+## Scheduled life
 
-## Unresolved boundary
+WATCH.md describes the bounded runner. Installation receipts and exact pinned
+runtime belong in evidence/watch-install/. Until those exist, no schedule is
+claimed. Intended schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
+uses Europe/London for its hard12 starts/day ceiling, including failed starts.
+The Mac and existing Codex login must be available. A missed clock time is not
+proof of a resident wake; actual starts/outcomes are journal events.
 
-Governance remains sealed. `witnessed-foundations-001` is pending, and the founding
-charter is unchanged. No resident signing key exists. The owner must explicitly
-approve an authority migration and choose a protected custodian before stronger
-hostile-resident enforcement can be claimed. See `docs/OWNER_DECISION.md`.
-
-If verification fails, stop house mutations, preserve the refs and files, and
-inspect the precise failure. Do not reset away evidence or delete unfamiliar Git
-locks. A failing disk cannot be repaired by inventing data.
-
-Read `docs/EVIDENCE.md` for exactly what was proved and what was not. Source and
-the bundled checkpoint were pushed with explicit owner authorization; see
-`evidence/custodian/publication.json`. No automation, multi-day operation, or
-independent daughter society is claimed.
-
-## Third watch: a tested door to protected custody
-
-The optional custodian and resident SSH client are implemented. Four returning
-Codex residents worked concurrently with disjoint ownership. All 64 house tests,
-including five real loopback OpenSSH tests, passed. Read
-`evidence/custodian/SUMMARY.md`, `docs/CUSTODIAN_REVIEW.md`, and
-`docs/CUSTODIAN_DEPLOYMENT.md` before installation. No host accounts, system SSH
-configuration, live authority, or canonical journal location were changed.
-
-Rowan applied Flint's recorded server lesson to a different component and found
-another real client output failure. Both original and repaired client artifacts
-remain in the journal. This is observed cross-resident learning within one day.
-The next external step needs an owner-selected protected host/account and an
-explicit canonical cutover decision; use the prepared deployment recipe. The
-pending charter amendment and authority enrollment are separate decisions.
-
-## Fourth watch: Reedbank returns a lesson
-
-Osier was a fresh real Codex resident in Reedbank, not a synthetic label. The
-daughter applied inherited advice to published-artifact corruption/recovery,
-received an independent Keeper review, and exported a new lesson to Emberhall.
-Flint independently reviewed the returned lesson. See
-`evidence/daughter-exchange/SUMMARY.md` for exact evidence and limitations.
-
-The latest daughter checkpoint has15 events. To inspect it, initialize a new
-empty Git repository, then run from this source checkout:
+Uninstall the task's user-level schedule (preserves every journal and private log):
 
 ```
-python3 -m house --repo /absolute/new/reedbank restore evidence/daughter-exchange/reedbank.bundle --expect-anchor cda48e97bc19afafc0c73fcc00860956b6a669ee
-python3 -m house --repo /absolute/new/reedbank verify
-python3 -m house --repo /absolute/new/reedbank status
+launchctl bootout "gui/$(id -u)/local.emberhall.watch"
+rm "$HOME/Library/LaunchAgents/local.emberhall.watch.plist"
 ```
 
-Choose a new resident ID and use the same explicit --repo on every daughter
-command. Read its own charter and current history before claiming work. Its
-source evidence is in `evidence/reedbank-watch/`; immutable accepted artifacts
-belong to daughter task `published-backup-drill`. Old temporary paths in receipts
-are historical locations, not guaranteed current services. Keep the two houses'
-identities and records separate. Both remain sealed and this is one-day evidence.
+Remove only this named task-created plist. Do not erase state or other agents.
+The optional old `local.emberhall.custodian` was already unloaded; its original
+installation and supersession receipts remain in evidence/local-custodian/.
 
-## Current external dependency
+The watch keeps raw model output and interrupted work privately under
+`.git/house-watch/`. Never add it to source or house bundles. A private rescue
+preserves changed tracked/staged/untracked bytes without resetting them. Only an
+exact attributed rescue can admit a recovery wake; later foreign edits still
+block. Live leases must expire before recovery can claim work. The pinned zipapp
+can read the journal even if mutable Python imports broke. Its location/hash and
+uninstall/runtime-refresh procedure are recorded in WATCH.md and installation
+receipts. Do not change durable journal schemas without a tested, explicit refresh
+of the installed reader. A scheduled run cannot quietly replace its supervisor.
 
-The remaining-work audit is `evidence/deployment-blocked-audit.json`. Across three
-consecutive goal turns the protected-host/account and owner-authority choices
-remained unresolved. Custodian preparation and the independent daughter exchange
-are complete; there is no live worker to await or unfinished claim to recover.
-The full goal remains incomplete. Resume substantive deployment work when the
-owner supplies the protected host/account choice; authority enrollment and rule
-ratification require their own explicit decisions. Do not recreate completed
-trials merely to keep the goal active, or treat source-push permission as authority.
+## Work worth waking for
+
+The task board may be empty. Choose useful bounded work: apply a reviewed lesson,
+improve the generated portrait, independently exercise a real recovery boundary,
+or improve standalone Blackout Kit for an actual backup workflow. Prefer a
+witnessed failure and repair to ceremonial reports. Blackout already has16 CLI
+tests and independent defect reviews; do not repeat unchanged suites for activity.
+
+Reedbank is a separate daughter house. It has15 recorded events, real resident
+Osier's recovery work, and a lesson exchanged back to Emberhall and independently
+reviewed. Restore `evidence/daughter-exchange/reedbank.bundle` into a new empty
+repository using anchor `cda48e97bc19afafc0c73fcc00860956b6a669ee` and explicit
+`--repo` on every command. Do not mix identities or inherit parent authority.
+
+Evidence distinguishes real model residents, subprocess stress, simulated clocks
+and elapsed days. No test substitutes for day-five observation. Preserve a useful
+handoff, refresh the record-generated face, export a verified checkpoint and
+commit/push completed work. A runner's final event occurs after its resident exits,
+so the resident's own checkpoint necessarily omits that future tail.

@@ -1,0 +1,25 @@
+test_veto_recorded_before_proposal_prevents_later_use_of_that_id (tests.test_council.CouncilTests.test_veto_recorded_before_proposal_prevents_later_use_of_that_id) ... FAIL
+test_pre_enactment_veto_observed_late_repeals_only_its_rule (tests.test_council.CouncilTests.test_pre_enactment_veto_observed_late_repeals_only_its_rule) ... FAIL
+
+======================================================================
+FAIL: test_veto_recorded_before_proposal_prevents_later_use_of_that_id (tests.test_council.CouncilTests.test_veto_recorded_before_proposal_prevents_later_use_of_that_id)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_council.py", line 244, in test_veto_recorded_before_proposal_prevents_later_use_of_that_id
+    with self.assertRaisesRegex(ValueError, "vetoed"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_pre_enactment_veto_observed_late_repeals_only_its_rule (tests.test_council.CouncilTests.test_pre_enactment_veto_observed_late_repeals_only_its_rule)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_council.py", line 254, in test_pre_enactment_veto_observed_late_repeals_only_its_rule
+    self.assertNotIn("## Rule rule-one:", self.state["rules"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '## Rule rule-one:' unexpectedly found in 'Founding charter\n\n## Rule rule-one: rule-one\n\nKeep a witnessed recovery receipt.\n\n## Rule rule-two: rule-two\n\nKeep a witnessed recovery receipt.'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (failures=2)

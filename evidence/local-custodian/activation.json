@@ -1,0 +1,13 @@
+{
+  "utc": "2026-11-13T10:50:00.097761+00:00",
+  "argv": [
+    "launchctl",
+    "bootstrap",
+    "gui/501",
+    "/Users/sws/Library/LaunchAgents/local.emberhall.custodian.plist"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "",
+  "plist": "/Users/sws/Library/LaunchAgents/local.emberhall.custodian.plist"
+}

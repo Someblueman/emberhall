@@ -65,7 +65,10 @@ def apply_event(previous: dict | None, event: dict) -> dict:
     else:
         require(actor in state["residents"], "unknown resident: arrive first")
         resident = state["residents"][actor]
-        if op == "wake":
+        if op.startswith("council-"):
+            from .council import apply
+            apply(state, event)
+        elif op == "wake":
             resident["awake"] = True
         elif op == "sleep":
             cursor = integer(data, "through", 0, previous["sequence"])
@@ -125,6 +128,7 @@ def apply_event(previous: dict | None, event: dict) -> dict:
             state["proposals"][proposal] = {"text": string(data, "text", 100000),
                 "reason": string(data, "reason"), "base": data["base"], "status": "pending"}
         elif op == "ratify":
+            require("council" not in state, "use the Steward-approved council process")
             proposal = string(data, "proposal", 100)
             item = state["proposals"][proposal]
             require(item["status"] == "pending" and item["base"] == state["rule_revision"],

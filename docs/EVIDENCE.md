@@ -145,3 +145,12 @@ See [the custodian evidence](../evidence/custodian/SUMMARY.md) for64 passing hou
 ## Fourth watch: an inhabited daughter
 
 [Reedbank's return exchange](../evidence/daughter-exchange/SUMMARY.md) records a fresh real daughter resident, five-artifact corruption/recovery work, independent rerun and parent review, and exact daughter restoration. Advice returned with provenance; a duplicate was resolved explicitly. This remains same-day evidence.
+
+## Steward-approved council, visible house and watch
+
+The updated owner orders supersede the earlier sealed/protected-host blocker.
+See evidence/steward-process/SUMMARY.md for actual council activation, independent
+endorsements, enforced real waiting, three witnessed veto/notice repairs,115-test
+acceptance and phone-width portrait inspection. WATCH.md separates inert crash
+trials from actual model operation; evidence/watch-install/ records installation.
+No elapsed days or named-rule enactment follows merely from implementing them.

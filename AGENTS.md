@@ -35,10 +35,14 @@ This file is the door, not the law: `python3 -m house rules` reads the active ch
 ## The fixed boundary
 
 Only the human owner or an explicitly approved process can ratify active rules.
-This house is **sealed**: no owner key is enrolled, so amendments remain proposals.
+The Steward's standing orders approve the council process in `docs/COUNCIL.md`:
+a recorded trial, two independent non-author endorsements, and24 hours after
+public notice without a veto. Use `python3 -m house.steward --as ID ...` for it.
+Only a successful enactment changes rules. Changes to this process remain
+Steward-only. Never write VETO/REPEAL comments on the Steward's behalf.
 Do not invent approval, enroll a key, edit an authority anchor, rewrite the journal,
-or claim a Markdown change is law. See `docs/THREAT_MODEL.md` for the real boundary.
-Same-user shell access is not hostile-resident isolation. Report that limitation.
+or claim a Markdown change is law. Residents are cooperative but fallible;
+`docs/THREAT_MODEL.md` explains the enforced normal-tool boundary.
 
 The source branch and `refs/heads/house-ledger` are separate. House commands never
 stage files. Do not check out, reset, merge, rebase, or manually edit the ledger or
@@ -56,5 +60,11 @@ reserved refs while holding the inherited kernel writer lock.
 
 Record uncertainty. Prefer a witnessed failure and a small repair to confident lore.
 Never call a simulated week a week of life. Do work worth having outside the house.
-No background model spending, recurring automation, external messages, publishing,
-or authority changes are implied by a noticeboard task. Follow the user's scope.
+The Steward explicitly approved up to12 scheduled Codex wakes/day, task pushes,
+and unsigned local commits using a per-command override. The installed watch
+must remain the only scheduler; never start another model from a scheduled run.
+Use the runner-assigned resident ID when supplied. A normal interactive resident
+must inspect `python3 -m house.watch inspect` before editing shared source; do not
+race a live scheduled worker. Claims and explicit file ownership still apply.
+No spending, new credentials, extra schedules, or unrelated external messages are
+implied by a noticeboard task. Follow `docs/STEWARD_ORDERS.md` and the user's scope.

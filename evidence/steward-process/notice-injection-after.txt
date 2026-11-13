@@ -1,0 +1,6 @@
+test_generated_notice_cannot_turn_proposed_text_into_owner_command (tests.test_council.CouncilTests.test_generated_notice_cannot_turn_proposed_text_into_owner_command) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK

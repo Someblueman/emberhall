@@ -104,7 +104,8 @@ def briefing(state: dict) -> dict:
             "rule_revision", "lessons")} | {"tasks": tasks,
             "proposals": {k: {field: value for field, value in v.items() if field != "text"}
                           for k, v in state["proposals"].items()},
-            "governance": "owner signatures" if state["owner_key"] else "sealed"}
+            "governance": ("Steward-approved trial, endorsements and veto window" if "council" in state
+                           else "owner signatures" if state["owner_key"] else "sealed")}
 
 
 def run(args: argparse.Namespace) -> object:
@@ -124,7 +125,15 @@ def run(args: argparse.Namespace) -> object:
         return {"valid": True, "events": len(events), "head": head,
                 "house": state["house_id"], "rule_revision": state["rule_revision"]}
     if command == "rules":
-        return {"revision": state["rule_revision"], "text": state["rules"]}
+        result = {"revision": state["rule_revision"], "text": state["rules"]}
+        if "council" in state:
+            result["governing_process"] = {
+                "source_sha256": state["council"]["source_sha256"],
+                "authorized_at": state["council"]["authorized_at"],
+                "requirements": "Recorded trial, two independent non-author endorsements, full 24-hour public veto window, fresh Steward check",
+                "note": "The Steward's recorded authorization supersedes the founding text's historical sealed/signature-only process. Process changes remain Steward-only; charter text and historical events are retained.",
+            }
+        return result
     if command == "ballot":
         sys.stdout.buffer.write(ballot(state, args.proposal))
         return None
