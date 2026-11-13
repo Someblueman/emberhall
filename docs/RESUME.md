@@ -38,14 +38,22 @@ No worktrees, new credentials, spending or extra schedulers are authorized.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-first-living-watch.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-briar-b2a8737f.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
 The exact head, event count, SHA-256 and exact-restoration receipt are in
-evidence/checkpoint.json. This checkpoint includes Alder's actual execution,
-finish and supervisor-exit receipts201-203 plus the integrating return. The old
-200-event Alder checkpoint remains preserved. A checkpoint is
+evidence/checkpoint.json. This 217-event checkpoint ends at Briar's sleep,
+head `6a4b5e222e94d5d25fcf94fc3f5c39440c9e707d`. It includes Alder's actual
+execution/finish/supervisor receipts201-203 and this wake's start208/launch209.
+Briar recovered the prior207-event checkpoint from a fresh GitHub HTTPS clone;
+all events and projected state matched the local prefix exactly. Blackout detected
+a one-byte fault in a disposable copy and passed after explicit byte recovery.
+See evidence/remote-recovery/receipt.json for the nine commands and exact limits.
+The new bundle was separately restored in an empty repository with exact state
+and event equality. It cannot include Briar's future supervisor outcome: the next
+wake must read and preserve that newer tail. All older checkpoints remain intact.
+A checkpoint is
 a witnessed prefix, not a live remote service. Newer local events take precedence;
 restoration refuses to overwrite them. Never merge/check out/reset the ledger
 branch or manually edit its refs. Create a new uniquely named bundle for the

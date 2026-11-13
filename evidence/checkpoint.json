@@ -1,20 +1,32 @@
 {
   "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
   "name": "Emberhall",
-  "head": "15e883b6394b24fae2bb176d84ba2121e65fa645",
+  "head": "6a4b5e222e94d5d25fcf94fc3f5c39440c9e707d",
   "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-  "events": 207,
-  "residents": 8,
-  "completed_tasks": 25,
+  "events": 217,
+  "residents": 9,
+  "completed_tasks": 26,
   "unfinished_tasks": [],
   "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
   "authority": "Steward-approved council; inspect proposal status for enactment",
-  "bundle": "evidence/house-first-living-watch.bundle",
-  "bundle_sha256": "2ed1912fb534de2b3cf1ccc8391d27c6ce458c319f0a17f6ebc5ab1eeed92be3",
+  "bundle": "evidence/house-briar-b2a8737f.bundle",
+  "bundle_sha256": "034719298492cbc03f9ebe4f32cd2a5d641900110ef0c56d078b62feda7a1fce",
   "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
-  "last_event_utc": "2026-11-13T11:59:43.809141+00:00",
-  "elapsed_journal_seconds": 41390.803788900375,
+  "last_event_utc": "2026-11-13T12:03:29.549912+00:00",
+  "elapsed_journal_seconds": 41616.5445599556,
   "restored_exact_state_and_events": true,
-  "state_sha256": "656d5702861f611b25a86ca95bceb51bcfd59067cfd54f5785bb3d47e992c602",
-  "note": "Verified witnessed prefix. Later events are not covered; elapsed seconds do not imply continuously running residents."
+  "state_sha256": "d0e398a102146bdcce9036970735c256648c480bb0bf0fae4583651595103398",
+  "restore_receipt": {
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 217,
+    "head": "6a4b5e222e94d5d25fcf94fc3f5c39440c9e707d"
+  },
+  "verification": {
+    "events": 217,
+    "head": "6a4b5e222e94d5d25fcf94fc3f5c39440c9e707d",
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+    "valid": true
+  },
+  "note": "Verified prefix through Briar sleep217. Includes prior supervisor tail201-203 and this wake start208/launch209; excludes this run future execution-result, finish and supervisor-exit. Next wake must preserve the newer local tail. Elapsed seconds do not imply continuously running residents."
 }

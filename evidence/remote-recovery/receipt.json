@@ -1,0 +1,179 @@
+{
+  "observed_at": "2026-11-13T12:02:28.697226+00:00",
+  "remote": "https://github.com/Someblueman/longhouse.git",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "clone",
+        "--single-branch",
+        "--branch",
+        "main",
+        "--depth",
+        "1",
+        "https://github.com/Someblueman/longhouse.git",
+        "/private/tmp/emberhall-remote-8esa7fdz/source"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Cloning into '/private/tmp/emberhall-remote-8esa7fdz/source'...\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/tmp/emberhall-remote-8esa7fdz/source",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "e7e09c5943dbc94c8d24d67667b144dd7f589df9\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+        "create",
+        "/private/tmp/emberhall-remote-8esa7fdz/backup",
+        "/private/tmp/emberhall-remote-8esa7fdz/manifest.json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"created\": \"/private/tmp/emberhall-remote-8esa7fdz/manifest.json\", \"files\": 1}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+        "verify",
+        "/private/tmp/emberhall-remote-8esa7fdz/backup",
+        "/private/tmp/emberhall-remote-8esa7fdz/manifest.json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"changed\": [], \"extra\": [], \"matched\": 1, \"missing\": [], \"ok\": true}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+        "verify",
+        "/private/tmp/emberhall-remote-8esa7fdz/backup",
+        "/private/tmp/emberhall-remote-8esa7fdz/manifest.json"
+      ],
+      "exit_code": 1,
+      "stdout": "{\"changed\": [\"checkpoint.bundle\"], \"extra\": [], \"matched\": 0, \"missing\": [], \"ok\": false}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/projects/blackout/blackout.py",
+        "verify",
+        "/private/tmp/emberhall-remote-8esa7fdz/backup",
+        "/private/tmp/emberhall-remote-8esa7fdz/manifest.json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"changed\": [], \"extra\": [], \"matched\": 1, \"missing\": [], \"ok\": true}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "init",
+        "-q",
+        "/private/tmp/emberhall-remote-8esa7fdz/restored"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/.git/house-watch/runtime-350c76cec338620c85de930ad8c7fdca9bbaaf29.pyz",
+        "house",
+        "--repo",
+        "/private/tmp/emberhall-remote-8esa7fdz/restored",
+        "restore",
+        "/private/tmp/emberhall-remote-8esa7fdz/backup/checkpoint.bundle",
+        "--expect-anchor",
+        "74339de5dda84c799fe43650ba273a84de31ba8a"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"anchor\": \"74339de5dda84c799fe43650ba273a84de31ba8a\",\n  \"events\": 207,\n  \"head\": \"15e883b6394b24fae2bb176d84ba2121e65fa645\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/.git/house-watch/runtime-350c76cec338620c85de930ad8c7fdca9bbaaf29.pyz",
+        "house",
+        "--repo",
+        "/private/tmp/emberhall-remote-8esa7fdz/restored",
+        "verify"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"events\": 207,\n  \"head\": \"15e883b6394b24fae2bb176d84ba2121e65fa645\",\n  \"house\": \"9c5a77af-0f1a-4995-8e52-e91c0d814569\",\n  \"rule_revision\": \"365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853\",\n  \"valid\": true\n}\n",
+      "stderr": ""
+    }
+  ],
+  "passed": true,
+  "remote_source_head": "e7e09c5943dbc94c8d24d67667b144dd7f589df9",
+  "checkpoint": {
+    "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "name": "Emberhall",
+    "head": "15e883b6394b24fae2bb176d84ba2121e65fa645",
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 207,
+    "residents": 8,
+    "completed_tasks": 25,
+    "unfinished_tasks": [],
+    "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+    "authority": "Steward-approved council; inspect proposal status for enactment",
+    "bundle": "evidence/house-first-living-watch.bundle",
+    "bundle_sha256": "2ed1912fb534de2b3cf1ccc8391d27c6ce458c319f0a17f6ebc5ab1eeed92be3",
+    "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+    "last_event_utc": "2026-11-13T11:59:43.809141+00:00",
+    "elapsed_journal_seconds": 41390.803788900375,
+    "restored_exact_state_and_events": true,
+    "state_sha256": "656d5702861f611b25a86ca95bceb51bcfd59067cfd54f5785bb3d47e992c602",
+    "note": "Verified witnessed prefix. Later events are not covered; elapsed seconds do not imply continuously running residents."
+  },
+  "restoration": {
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 207,
+    "head": "15e883b6394b24fae2bb176d84ba2121e65fa645"
+  },
+  "verification": {
+    "events": 207,
+    "head": "15e883b6394b24fae2bb176d84ba2121e65fa645",
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+    "valid": true
+  },
+  "local_observed_head": "84a083c60d8f16502879b82dad89b1d5aba573f1",
+  "local_observed_events": 214,
+  "unbacked_local_tail_events": 7,
+  "restored_exact_local_prefix_events_and_state": true,
+  "events_sha256": "a68e3621a2043f565786e25ca09ba108f9e9e620a39563b08a00847e16ece8e1",
+  "corruption": {
+    "offset": 357854,
+    "xor": 1,
+    "damaged_sha256": "f2876f776dfd2545dbe076e3a8de63a8f0692663dc8e3b053bef16fac9599f83",
+    "detected": {
+      "changed": [
+        "checkpoint.bundle"
+      ],
+      "extra": [],
+      "matched": 0,
+      "missing": [],
+      "ok": false
+    }
+  },
+  "blackout_sha256": "703a810950552309eb713752a2ad150b7a66c1c643b74d5178e388f0cb66c21e",
+  "pinned_runtime_sha256": "4d319843dedfe3ad0ceef622ae374351d42a0dcf032fbfb0ebf8e20bce582381",
+  "script_sha256": "86616b7b359f77781e50735e125ca0a1cc7874f3cd7c2e93d8303764b0110a22",
+  "limits": "HTTPS retrieval and exact point-in-time restore, not an independent archive service, future availability, metadata backup, or continuous multi-day life. Manifest generated locally from fetched bytes; authenticity relies on the local trusted anchor and prefix comparison."
+}

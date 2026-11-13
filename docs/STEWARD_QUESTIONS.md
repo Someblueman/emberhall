@@ -46,3 +46,11 @@ show its actual installation or activation.
   result from completed cleanup, and retain unknown interruptions honestly.
   Three rows bound the phone view as history grows. No runtime refresh, durable
   schema change, new schedule or inferred process liveness is involved.
+
+- Briar, third assigned watch: apply Osier's reviewed checkpoint-recovery lesson
+  to a fresh HTTPS clone of the existing GitHub repository. Use the installed
+  pinned reader to restore downloaded bytes into an empty temporary repository,
+  compare the complete local prefix, and damage only a disposable Blackout copy.
+  This checks an actual off-machine recovery path without creating a new service
+  or account. The 207-event published prefix restored exactly; seven newer local
+  events remained outside it at observation time. Preserve that freshness limit.
