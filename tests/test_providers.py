@@ -92,3 +92,24 @@ class ProviderTests(unittest.TestCase):
         output = '\n'.join([json.dumps({"type": "turn.completed", "usage": {
             "input_tokens": value, "output_tokens": 1}}) for value in (float("inf"), 1e308, 1e308)])
         self.assertEqual(result("codex", output, "", 0)["usage"], {"output_tokens": 3})
+
+    def test_native_expired_credential_has_long_backoff_without_tool_text_false_positive(self):
+        error = {"name": "APIError", "data": {"statusCode": 401, "message": "This API key has expired."}}
+        self.assertEqual(result("opencode", json.dumps({"type": "error", "error": error}), "", 0),
+                         {"outcome": "failed", "usage": {}, "retry_after_seconds": 86400})
+        quoted = json.dumps({"type": "item.completed", "item": {"text": "This API key has expired."}})
+        self.assertNotIn("retry_after_seconds", result("codex", quoted, "", 1))
+
+    def test_observed_agy_result_binds_conversation_status_and_final_usage(self):
+        opening = {"event": "init", "conversation_id": "actual-conversation"}
+        final = {"event": "result", "result": {"conversation_id": "actual-conversation", "status": "SUCCESS",
+            "response": "A quoted quota failure is not this result", "usage": {"input_tokens": 67536,
+            "output_tokens": 6829, "cache_read_tokens": 487558, "total_tokens": 74365}}}
+        encoded = lambda: '\n'.join(map(json.dumps, [opening, final]))
+        self.assertEqual(result("agy", encoded(), "", 0), {"outcome": "success", "usage": {
+            "input_tokens": 67536, "output_tokens": 6829, "cached_input_tokens": 487558, "total_tokens": 74365}})
+        self.assertEqual(result("agy", json.dumps(final), "", 0)["outcome"], "failed")
+        self.assertEqual(result("agy", encoded()+'\n'+json.dumps(final), "", 0)["outcome"], "failed")
+        final["result"]["status"] = "ERROR"
+        final["result"]["response"] = "usage limit reached"
+        self.assertEqual(result("agy", encoded(), "", 0)["outcome"], "quota")

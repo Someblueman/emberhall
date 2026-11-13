@@ -99,6 +99,17 @@ class HomeTests(HouseCase):
         self.drain()
         self.assertEqual(self.record.read()[0]["life"]["runs"][second]["model"], "muse-ember-1.0")
 
+    def test_expired_native_credential_keeps_long_backoff_after_failed_finish(self):
+        self.native.write_text("import json\nprint(json.dumps({'type':'error','error':"
+            "{'data':{'statusCode':401,'message':'This API key has expired.'}}}))\n")
+        run = self.coordinator.start("opencode")
+        self.drain()
+        state = self.record.read()[0]
+        self.assertEqual(state["life"]["runs"][run]["outcome"], "failed")
+        budget = state["life"]["budgets"]["opencode"]
+        self.assertGreater(budget["until"], time.time() + 23 * 3600)
+        self.assertIn("credentials", budget["reason"])
+
     def test_native_cannot_start_before_accepted_launch_receipt(self):
         original = self.coordinator.life
         def refuse(kind, run, **data):

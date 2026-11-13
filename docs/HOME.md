@@ -48,7 +48,8 @@ available; a fallback kind uses its own default model. Model names cannot select
 another provider or override sandbox/credential limits.
 Native quota errors cool that kind for 15 minutes; failed launches or invalid
 native completions cool it for five minutes. The other allowances remain usable.
-These are conservative retries, not claims about a subscription's actual reset
+Expired/invalid native credentials back off for one day; the house never creates
+a replacement key. These are conservative retries, not claims about a subscription's actual reset
 time or remaining tokens. Raw provider logs remain private; public usage contains
 only parsed native counters. If parsing needs a bounded log excerpt, usage is
 left unknown. Successful exit alone is insufficient without a native terminal

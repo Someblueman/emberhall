@@ -321,6 +321,9 @@ class Coordinator:
                         stream.seek(max(0, size - 8_000_000))
                         tails.append((prefix + stream.read()).decode("utf-8", errors="replace"))
                 parsed = providers.result(item["agent"], *tails, code)
+                if parsed.get("retry_after_seconds"):
+                    self.cooldown(item["agent"], run, "credentials unavailable",
+                                  reset=time.time() + parsed["retry_after_seconds"])
                 running.result = {"outcome": "interrupted" if inactive or self.stopping else parsed["outcome"],
                     "exit_code": code, "usage": {} if truncated else parsed["usage"],
                     "elapsed_seconds": max(0, time.time() - item["started_at"])}

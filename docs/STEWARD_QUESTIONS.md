@@ -54,3 +54,17 @@ show its actual installation or activation.
   This checks an actual off-machine recovery path without creating a new service
   or account. The 207-event published prefix restored exactly; seven newer local
   events remained outside it at observation time. Preserve that freshness limit.
+
+- Continuous-home native acceptance,13 November: existing Codex, Muse and Gemini
+  credentials admitted real sandboxed residents through the repaired mailbox.
+  OpenCode Go returned HTTP401 with an explicitly expired API key before arrival.
+  Safe reversible choice: retain the failed receipt, show credential unavailability,
+  back off that kind for one day and continue with the other approved kinds.
+  No new key, password, account, paid route or permission bypass was created.
+  Another valid existing credential or explicit changed credential authorization
+  is needed before successful OpenCode residency can be demonstrated.
+
+- Candidate acceptance keeps room-only writes and network denial. Host-only
+  process-recovery and nested sandbox fixtures run separately on the host because
+  macOS blocks setuid ps and sandbox nesting. No sandbox was widened to turn
+  those fixtures green. Entirely skipped suites cannot authorize runtime refresh.

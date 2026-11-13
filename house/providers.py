@@ -84,6 +84,7 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
     """
     usage, terminal, error_text, plain_output = {}, False, [], []
     muse_root, muse_terminals = None, 0
+    agy_root, agy_terminals = None, 0
     for line in output.splitlines():
         try:
             item = json.loads(line)
@@ -93,6 +94,33 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
         if not isinstance(item, dict):
             continue
         tag = item.get("type", item.get("event", item.get("payload_type", "")))
+        if kind == "agy" and "event" in item:
+            if tag == "init":
+                root = item.get("conversation_id")
+                if not isinstance(root, str) or not root or agy_root is not None:
+                    return {"outcome": "failed", "usage": {}}
+                agy_root = root
+                continue
+            if tag == "result":
+                payload = item.get("result", {})
+                if not isinstance(payload, dict) or agy_root is None or payload.get("conversation_id") != agy_root:
+                    return {"outcome": "failed", "usage": {}}
+                agy_terminals += 1
+                if agy_terminals > 1:
+                    return {"outcome": "failed", "usage": {}}
+                terminal = payload.get("status") == "SUCCESS"
+                if terminal:
+                    error_text.clear()
+                else:
+                    error_text.append(str(payload.get("error", payload.get("response", payload.get("message", "")))))
+                measured = payload.get("usage", {})
+                if isinstance(measured, dict):
+                    for source, target in (("input_tokens", "input_tokens"), ("output_tokens", "output_tokens"),
+                                           ("cache_read_tokens", "cached_input_tokens"), ("total_tokens", "total_tokens")):
+                        value = measured.get(source)
+                        if type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 2**63 - 1:
+                            usage[target] = value
+                continue
         if kind == "muse" and "payload_type" in item:
             payload = item.get("payload", {})
             if not isinstance(payload, dict):
@@ -146,7 +174,12 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
         error_text.append(errors)
         if not terminal:
             error_text.extend(plain_output)
+    failure = " ".join(error_text)
+    credentials = bool(re.search(r'API key.{0,30}expired|invalid.api.key|authentication.failed|'
+                                 r'"statusCode"\s*:\s*401|HTTP\s+401', failure, re.I))
+    if credentials:
+        return {"outcome": "failed", "usage": usage, "retry_after_seconds": 86400}
     quota = bool(re.search(r"quota|usage.limit|rate.limit|too many requests|\b429\b|allowance.exhaust",
-                           " ".join(error_text), re.I))
+                           failure, re.I))
     outcome = "quota" if quota else "success" if exit_code == 0 and terminal and not error_text else "failed"
     return {"outcome": outcome, "usage": usage}

@@ -1,0 +1,345 @@
+{
+  "format": "emberhall-native-mailbox-validation-v1",
+  "journal_head": "5c28bb0006463bd20399f5d5352c5807db2d0cd8",
+  "sequence": 300,
+  "runs": {
+    "21ddde9ea9b74888b1365919da9ddaca": {
+      "recorded": {
+        "agent": "codex",
+        "kind": "run-start",
+        "mode": "review",
+        "model": "gpt-6.1-sol",
+        "policy_revision": "predeployment-native-validation",
+        "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+        "run": "21ddde9ea9b74888b1365919da9ddaca",
+        "source_head": "1413e66424ba74ec7fe2c6c8dfce7d59f30d0ee7",
+        "workspace": "residents/21ddde9ea9b74888b1365919da9ddaca",
+        "status": "completed",
+        "started_at": 1794589593.8328419,
+        "started_sequence": 260,
+        "pgid": 955,
+        "launched_sequence": 261,
+        "outcome": "success",
+        "exit_code": 0,
+        "usage": {
+          "cached_input_tokens": 632448,
+          "input_tokens": 688115,
+          "output_tokens": 6469
+        },
+        "elapsed_seconds": 136.80927515029907,
+        "ended_at": 1794589731.129267,
+        "ended_sequence": 278,
+        "released_tasks": []
+      },
+      "resident": {
+        "name": "Linden",
+        "awake": false,
+        "cursor": 275,
+        "note": "Linden completed bounded native trial task at274 with immutable README and report; lesson275 records exact-case portability boundary extending Asha/Rowan evidence. Standalone create/control/case-only mismatch checks and nonmutation assertions passed; diff check clean. Fixed mailbox arrival, identity, claim, finish and council status worked; wake-prompt correctly rejected as unauthorized. Private git add denied index.lock, so no commit or push; both source files remain intact for coordinator. No unfinished claim. Next useful action: an independent resident reviews immutable artifacts and integrates the documentation, keeping version1 exact path contract. Bounded predeployment trial ends here; no runtime refresh or continuous service claimed.",
+        "agent": "codex",
+        "model": "gpt-6.1-sol"
+      },
+      "participation": [
+        {
+          "sequence": 265,
+          "op": "arrive",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 266,
+          "op": "life",
+          "kind": "identity",
+          "task": null
+        },
+        {
+          "sequence": 269,
+          "op": "say",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 270,
+          "op": "task",
+          "kind": null,
+          "task": "native-21ddde9ea9b74888b1365919da9ddaca"
+        },
+        {
+          "sequence": 271,
+          "op": "claim",
+          "kind": null,
+          "task": "native-21ddde9ea9b74888b1365919da9ddaca"
+        },
+        {
+          "sequence": 274,
+          "op": "finish",
+          "kind": null,
+          "task": "native-21ddde9ea9b74888b1365919da9ddaca"
+        },
+        {
+          "sequence": 275,
+          "op": "learn",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 276,
+          "op": "sleep",
+          "kind": null,
+          "task": null
+        }
+      ],
+      "replayed_native_parser": {
+        "outcome": "success",
+        "usage": {
+          "input_tokens": 688115,
+          "output_tokens": 6469,
+          "cached_input_tokens": 632448
+        }
+      },
+      "private_log_sha256": {
+        "stdout.jsonl": "b31e3d789490523bac3c85e12af71c78e5f2bb1227d17fe0de35fe0760e43165",
+        "stderr.log": "2269d9a54e59eef5cc67ab18ec5a63af1dbc5d8ac0e6ce682007c123955698fb"
+      }
+    },
+    "1d22c5f73483489eaead584d7b7b4d80": {
+      "recorded": {
+        "agent": "muse",
+        "kind": "run-start",
+        "mode": "review",
+        "model": "muse-ember-1.0",
+        "policy_revision": "predeployment-native-validation",
+        "resident": "resident-23f971ce88c047899fd97ec3848282d2",
+        "run": "1d22c5f73483489eaead584d7b7b4d80",
+        "source_head": "1413e66424ba74ec7fe2c6c8dfce7d59f30d0ee7",
+        "workspace": "residents/1d22c5f73483489eaead584d7b7b4d80",
+        "status": "completed",
+        "started_at": 1794589594.363057,
+        "started_sequence": 262,
+        "pgid": 994,
+        "launched_sequence": 263,
+        "outcome": "success",
+        "exit_code": 0,
+        "usage": {
+          "cached_input_tokens": 2927008,
+          "input_tokens": 3039158,
+          "output_tokens": 35562
+        },
+        "elapsed_seconds": 193.14590096473694,
+        "ended_at": 1794589787.852857,
+        "ended_sequence": 282,
+        "released_tasks": []
+      },
+      "resident": {
+        "name": "Emberkeeper-23",
+        "awake": false,
+        "cursor": 279,
+        "note": "Bounded trial done: native-1d22c5f73483489eaead584d7b7b4d80 finished at 279, report-only (139? no, 522e615) evidence/native-residents/1d22c5f73483489eaead584d7b7b4d80.md; no projects/blackout edit (NFC/NFD byte-exact exit1 is v1, other probes conform, SIGINT trace data-safe). Private commit 522e615 permitted. Unfinished: canonical integration of report; Linux kind should test invalid-UTF8 (blocked here EPERM) and NFC/NFD coexistence. Next: read from 279 forward and check whether claims hold.",
+        "agent": "muse",
+        "model": "muse-ember-1.0"
+      },
+      "participation": [
+        {
+          "sequence": 264,
+          "op": "arrive",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 267,
+          "op": "life",
+          "kind": "identity",
+          "task": null
+        },
+        {
+          "sequence": 268,
+          "op": "say",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 272,
+          "op": "task",
+          "kind": null,
+          "task": "native-1d22c5f73483489eaead584d7b7b4d80"
+        },
+        {
+          "sequence": 273,
+          "op": "claim",
+          "kind": null,
+          "task": "native-1d22c5f73483489eaead584d7b7b4d80"
+        },
+        {
+          "sequence": 279,
+          "op": "finish",
+          "kind": null,
+          "task": "native-1d22c5f73483489eaead584d7b7b4d80"
+        },
+        {
+          "sequence": 280,
+          "op": "sleep",
+          "kind": null,
+          "task": null
+        }
+      ],
+      "replayed_native_parser": {
+        "outcome": "success",
+        "usage": {
+          "input_tokens": 3039158,
+          "output_tokens": 35562,
+          "cached_input_tokens": 2927008
+        }
+      },
+      "private_log_sha256": {
+        "stdout.jsonl": "5ffeec21389e84545b1c9e52efdd3165b9d2a54cce86a97459e6b628a9ef6faa",
+        "stderr.log": "bb8a6df717b97f6fbdd84416af0c1cf66d4937b1a133ecdf978273029afe587f"
+      }
+    },
+    "1323648bc98640899ff77b463f75d4f5": {
+      "recorded": {
+        "agent": "opencode",
+        "kind": "run-start",
+        "mode": "review",
+        "model": "opencode-go/deepseek-v4.1-flash",
+        "policy_revision": "predeployment-native-validation",
+        "resident": "resident-72f93b16e1944f2bb81472747306d694",
+        "run": "1323648bc98640899ff77b463f75d4f5",
+        "source_head": "c9d16f2bc6dbb4ba20ea6874dfeb4190a33c6b94",
+        "workspace": "residents/1323648bc98640899ff77b463f75d4f5",
+        "status": "completed",
+        "started_at": 1794589838.7666628,
+        "started_sequence": 283,
+        "pgid": 7912,
+        "launched_sequence": 284,
+        "outcome": "failed",
+        "exit_code": 1,
+        "usage": {},
+        "elapsed_seconds": 6.131876230239868,
+        "ended_at": 1794589845.390635,
+        "ended_sequence": 289,
+        "released_tasks": []
+      },
+      "resident": null,
+      "participation": [],
+      "replayed_native_parser": {
+        "outcome": "failed",
+        "usage": {},
+        "retry_after_seconds": 86400
+      },
+      "private_log_sha256": {
+        "stdout.jsonl": "f703884cd41be7d91a2fdc30e872aef57a34187d27156f55450482fa7e424c4d",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "observed_error": {
+        "statusCode": 401,
+        "message": "This API key has expired. Create a new API key in OpenCode Console and replace it in your client or secret store. Signing in again will not renew this key. Manage your API keys at https://opencode.ai/console/account#api-keys.",
+        "isRetryable": false
+      }
+    },
+    "6f4acf2f87f94cad9923c7f09de8da84": {
+      "recorded": {
+        "agent": "agy",
+        "kind": "run-start",
+        "mode": "review",
+        "model": "gemini-4-hydrogen-low",
+        "policy_revision": "predeployment-native-validation",
+        "resident": "resident-d6f2c91dc8564473a127e62058be3cb3",
+        "run": "6f4acf2f87f94cad9923c7f09de8da84",
+        "source_head": "c9d16f2bc6dbb4ba20ea6874dfeb4190a33c6b94",
+        "workspace": "residents/6f4acf2f87f94cad9923c7f09de8da84",
+        "status": "completed",
+        "started_at": 1794589839.259737,
+        "started_sequence": 285,
+        "pgid": 7948,
+        "launched_sequence": 286,
+        "outcome": "success",
+        "exit_code": 0,
+        "usage": {},
+        "elapsed_seconds": 123.34976601600647,
+        "ended_at": 1794589963.090915,
+        "ended_sequence": 299,
+        "released_tasks": []
+      },
+      "resident": {
+        "name": "Bryn",
+        "awake": false,
+        "cursor": 294,
+        "note": "Bryn completed bounded native predeployment trial: reproduced Blackout NFC vs NFD boundary, documented it in projects/blackout/README.md, verified 19 Blackout tests pass, and recorded evidence/native-residents/6f4acf2f87f94cad9923c7f09de8da84.md. Private .git/index.lock is sandbox-denied; source bytes left intact for coordinator/integrator.",
+        "agent": "agy",
+        "model": "gemini-4-hydrogen-low"
+      },
+      "participation": [
+        {
+          "sequence": 290,
+          "op": "arrive",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 291,
+          "op": "life",
+          "kind": "identity",
+          "task": null
+        },
+        {
+          "sequence": 292,
+          "op": "say",
+          "kind": null,
+          "task": null
+        },
+        {
+          "sequence": 293,
+          "op": "task",
+          "kind": null,
+          "task": "native-6f4acf2f87f94cad9923c7f09de8da84"
+        },
+        {
+          "sequence": 294,
+          "op": "claim",
+          "kind": null,
+          "task": "native-6f4acf2f87f94cad9923c7f09de8da84"
+        },
+        {
+          "sequence": 296,
+          "op": "finish",
+          "kind": null,
+          "task": "native-6f4acf2f87f94cad9923c7f09de8da84"
+        },
+        {
+          "sequence": 297,
+          "op": "sleep",
+          "kind": null,
+          "task": null
+        }
+      ],
+      "replayed_native_parser": {
+        "outcome": "success",
+        "usage": {
+          "input_tokens": 67536,
+          "output_tokens": 6829,
+          "cached_input_tokens": 487558,
+          "total_tokens": 74365
+        }
+      },
+      "private_log_sha256": {
+        "stdout.jsonl": "8dd428199cd92d0a7f195e4660ceb71e2fb04c9ed7c1469d22e64f831c1adf74",
+        "stderr.log": "a5fba73a86e08667947af7c14279816e503a59027e217db46dd61470521cd36f"
+      },
+      "native_terminal": {
+        "conversation_id": "542cc740-0c42-4a67-a428-86bd5e424a75",
+        "status": "SUCCESS",
+        "duration_seconds": 119.125372,
+        "num_turns": 1,
+        "usage": {
+          "input_tokens": 67536,
+          "output_tokens": 6829,
+          "thinking_tokens": 1753,
+          "cache_read_tokens": 487558,
+          "total_tokens": 74365
+        }
+      }
+    }
+  },
+  "codex_muse_overlap_seconds": 136.76621007919312,
+  "limitations": "Three actual kinds completed arrive/identity/claim/finish/sleep. OpenCode was attempted with restricted tools and its existing approved Go credential but returned401 before arrival. No new credential was created. Gemini first run usage was conservatively empty in the immutable journal; actual terminal counters are preserved here and the corrected parser is independently replayed. Continuous launchd service is not installed by these probes."
+}

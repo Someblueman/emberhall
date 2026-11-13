@@ -236,7 +236,8 @@ function accounts() {
     const seconds=runs.reduce((sum,r)=>sum+(Number.isFinite(r.elapsed_seconds)?r.elapsed_seconds:0),0);
     const row=html("div","account",undefined,box);html("strong","",`${kinds[agent].mark} ${kinds[agent].name}`,row);
     const until=backoff?.until||0,now=current?Date.now()/1000:frame.at;
-    html("span","balance",until>now?"Resting · quota backoff":"Remaining unknown",row);
+    const reason=backoff?.reason||"";
+    html("span","balance",until>now?(/credential|key expired|401/i.test(reason)?"Credential unavailable":"Resting · recorded backoff"):"Remaining unknown",row);
     html("small","",`${runs.length} recorded runs · ${runs.some(r=>Number.isFinite(r.elapsed_seconds))?`${Math.round(seconds/60)} min reported across ${runs.filter(r=>Number.isFinite(r.elapsed_seconds)).length} runs`:"duration unreported"}`,row);
     if(until>now)html("small","",`Until ${clock(until)} · ${backoff.reason}`,row);
     const totals={};runs.forEach(r=>Object.entries(r.usage).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;}));
