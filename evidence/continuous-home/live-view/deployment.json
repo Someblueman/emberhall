@@ -1,0 +1,12 @@
+{
+  "url": "https://someblueman.github.io/emberhall/house.js",
+  "checked_at_utc": "2026-11-13T18:54:05.728508+00:00",
+  "sha256": "587ce00ab76602759243a8df0eb907d640b6021b06ffe2d2a871374d8921065f",
+  "byte_equal_to_tested_source": true,
+  "pages_build": {
+    "commit": "2248818017da3be7d876973981cff4bc4138c7a0",
+    "status": "built",
+    "updated_at": "2026-11-13T18:50:59Z"
+  },
+  "scope": "HTTP-fetched public asset equals local browser-tested site/house.js. Browser behavior checks are in checks.json."
+}

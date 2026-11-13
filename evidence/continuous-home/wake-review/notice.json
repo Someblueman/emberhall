@@ -1,0 +1,39 @@
+{
+  "proposal": "wake-prompt-mailbox-002",
+  "proposal_sequence": 357,
+  "trial_sequence": 360,
+  "endorsement_sequences": [
+    367,
+    384
+  ],
+  "notice_sequence": 392,
+  "notice": {
+    "repository": "Someblueman/longhouse",
+    "issue": 1,
+    "comment_id": 6862052211,
+    "text_sha256": "da1364fa113fecef2f681dc125e4cbbc795d619af4efe4ca26f18a214393fd9b",
+    "at": 1794595963.1814709
+  },
+  "notice_url": "https://github.com/Someblueman/emberhall/issues/1#issuecomment-6862052211",
+  "public_created_at": "2026-11-13T18:52:28Z",
+  "earliest_enactment_utc": "2026-11-14T18:52:43.181471+00:00",
+  "base_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+  "status_at_checkpoint": "pending",
+  "delivery": {
+    "historical_route": "repos/Someblueman/longhouse/issues/1/comments",
+    "observed_failure": "Repeated native jobs and an interactive adapter retry returned GitHub request failed; native handoff reports context deadline exceeded. No notice found before canonical delivery.",
+    "successful_route": "repos/Someblueman/emberhall/issues/1/comments",
+    "repository_id": 1455971968,
+    "owner_id": 131497840,
+    "exact_body_from": "house.steward.notice_body",
+    "acceptance": "Unchanged pinned steward adapter checked the existing exact body and owner, then recorded392.",
+    "causal_limit": "Canonical POST succeeded after old-route failures; this does not isolate every network/redirect cause.",
+    "protected_source_changed": false
+  },
+  "remaining_gates": [
+    "full actual 24-hour window",
+    "current common rule revision",
+    "fresh authenticated owner veto synchronization",
+    "later actual wake tests enacted policy before runtime refresh"
+  ]
+}

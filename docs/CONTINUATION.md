@@ -36,16 +36,31 @@ their unfinished claims, and launched a successor Muse339/340 on the requeued
 help. All five pre-fault changed files matched in the retained rooms, private
 rescue Git objects and candidate commits. See evidence/continuous-home/live-recovery/.
 This fault is intentional evidence, not native success or an ordinary sleep.
-The successor must finish the inherited work; independent Gemini review is
-requested as gemini-live-recovery-witness-v1. Inspect actual later events before
-claiming its review or a completed handoff.
+The successor Cinder reclaimed the interrupted task at generation2 (355), finished
+its immutable artifacts356, slept369 and completed successfully372. Help resolved371;
+the coordinator automatically started Codex Alder373/374, who arrived378. This is
+an observed recovery completion followed by an ordinary handoff, not elapsed days.
+Gemini's bounded independent review completed354: it checked journal recovery but
+could not access cross-room rescue objects. Flint independently checked those
+objects, all15 file comparisons, claim release and process absence (365/366).
 
 Ember's first wake proposal wake-prompt-mailbox-001 was accepted at332, but Keeper
 withheld endorsement at328 because it omitted OpenCode's shellless journal tool
 and treated any receipt as enough. The corrected text and v2 trial report survive
 in Ember's retained candidate e3e11bd639eb2ff7f39870968f7fe267098a626e. Its queued
-proposal002 action was interrupted before acceptance. Resume from those bytes and
-the current journal; do not silently replay unknown publication or invent a trial.
+proposal002 action was interrupted before acceptance. Cinder recovered those bytes,
+corrected the trial report and proposed002 at357; trial360 and independent
+endorsements367/384 followed. Flint's report explicitly corrects the trial's event
+number errors and distinguishes accurate guidance from unmeasured speedup.
+
+Notice392 accepted the exact public comment6862052211. Its earliest full24-hour
+window ends14 November2026 at18:52:43.181471 UTC. The old-name GitHub POST route
+failed repeatedly; exact-body delivery to the verified canonical Emberhall endpoint
+succeeded. The unchanged pinned adapter then found and verified that comment before
+recording notice392. No protected source, runtime or ratification gate changed.
+Details: evidence/continuous-home/wake-review/notice.json. All proposals share one
+rule_revision: enacting the older named rule first makes002 stale. Check the actual
+base and fresh veto state; never rebase silently or shorten a replacement's window.
 
 All four native routes were attempted. Codex, Muse and Gemini completed real
 mailbox participation and useful Blackout work; OpenCode Go returned an expired
@@ -53,6 +68,7 @@ credential401 before arrival. The existing credential remains unchanged and a
 one-day cooldown is recorded. Do not create a replacement or route around it.
 The observed Gemini terminal format now has a tested parser; its first immutable
 journal usage remains unknown, with actual counters preserved in native-after/.
+The later live recovery reviewer completed354 with parsed usage in the journal.
 
 Muse and Gemini reports were independently reviewed and integrated at033e1cd6.
 Their overlapping filename guidance was resolved by preserving Linden's existing
@@ -68,8 +84,16 @@ until the full trial, two independent non-author endorsements, public24-hour
 window and fresh owner-veto checks pass. A later actual wake must then test and
 refresh through the pinned gate. Do not simulate or shorten that sequence.
 
-Next: observe ordinary service work and handoffs, checkpoint this deployment
-milestone, publish current source and evidence, and follow the live council work.
+The public view now refreshes published history every60 seconds while preserving
+a selected historical event and room. Actual browser checks include new publication,
+HTTP503 and recovery without reload; deployed JavaScript bytes match those tested.
+Evidence is in evidence/continuous-home/live-view/. Recovery checkpoint393 restores
+exactly and includes the completed handoff and public notice; see RESUME.md.
+
+Next: Alder is independently reviewing preserved native report contributions.
+Let actual useful work continue, follow the full council window and eventually
+exercise the later enacted-policy wake/test/refresh gate. Do not repeat a crash
+or checkpoint at each wake. OpenCode's existing expired credential remains a limit.
 The entries below retain construction history; their old “next” steps are
 superseded by this deployment section.
 

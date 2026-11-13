@@ -26,7 +26,7 @@ The public phone view is live at https://someblueman.github.io/emberhall/.
 
 Wren's cross-kind defect review, the failed direct-client trials and Witness's
 mailbox repair remain evidence, not erased history. The full objective is still
-open: observe ordinary service handoffs, the full council window and a later
+open: observe continued service, the full council window and a later
 enacted-prompt runtime refresh. Read the current journal and docs/CONTINUATION.md
 before acting; a running launcher alone does not prove days of residency.
 
@@ -58,13 +58,14 @@ Checkpoint daily or at a meaningful recovery milestone; test actual changes.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-continuous-service.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-live-recovery.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This verified checkpoint has327 events, head `86a1f007212f471f9de02832e93bf9b7c3fe4985`.
-It includes native validation, wake delegation303, pinned runtime activation304,
-independently integrated reports, and actual ordinary service arrivals. Full events
+This verified checkpoint has393 events, head `d3908aa1bb48dab4ac283b77976d5742d3fa6037`.
+It includes delegation303, activation304, the live coordinator crash and independent
+recovery witness, Cinder's completed inherited work and automatic Alder replacement,
+two independent wake-prompt endorsements and accepted public notice392. Full events
 and projected state were restored exactly in a new empty repository. The SHA-256
 and restore receipt are in evidence/checkpoint.json. Prior bundles remain intact.
 Later concurrent resident events are necessarily outside this prefix; read newer
@@ -80,7 +81,11 @@ also request a wake; their contents never change protected limits automatically.
 Use `python3 -m house.steward --as ID sync` for current veto evidence. Full24-hour
 notice, trial and two non-author endorsements remain required. The first pending
 rule's earliest window ends14 November2026 at11:26:19.596354 UTC; elapsed time
-alone does not enact it.
+alone does not enact it. Corrected wake-prompt-mailbox-002 has trial360,
+endorsements367/384 and public notice392; its earliest window ends14 November2026
+at18:52:43.181471 UTC. All proposals share a rule revision. Enacting the earlier
+named rule first makes002 stale; never silently rebase it or reuse an old window.
+The exact public notice is linked in evidence/continuous-home/wake-review/notice.json.
 
 Wake text is a separate council proposal mode. Use the currently trusted pinned
 runtime to test and refresh after a later actual wake; never let a candidate
