@@ -18,7 +18,7 @@ const descriptions = {
   bedroom: "Sleep is ordinary here. Each quiet bed keeps a place for a mind that may return."
 };
 let data, frame, index = 0, current = true, selected = null;
-let refreshing = false, controlsReady = false;
+let refreshing = false, controlsReady = false, selectedFloor = 0;
 let roomBounds = {}, wholeBounds = "0 0 900 700";
 function el(tag, attrs = {}, parent, value) {
   const node = document.createElementNS(SVG, tag);
@@ -128,30 +128,129 @@ function furnishings(g, room, x, y, lit, residents) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
 }
+// Missing growth fields describe an existing historical ground room, not a build.
+function floorsAt(moment) {
+  const levels = new Map([[0,{level:0,name:"Ground floor",purpose:"The original rooms"}]]);
+  (moment.floors||[]).forEach(f=>{if(Number.isInteger(f.level))levels.set(f.level,f);});
+  return [...levels.values()].sort((a,b)=>a.level-b.level);
+}
+function floorRooms(moment, level) {return moment.rooms.filter(r=>(r.floor??0)===level);}
+function roomAge(room, at) {
+  const valid=value=>Number.isFinite(value)&&value>0&&value<=at;
+  const used=valid(room.last_used_at), baseline=used?room.last_used_at:room.observed_since;
+  if(!valid(baseline))return {days:null,dust:false,label:"Use age unknown · no observation baseline"};
+  const days=Math.floor((at-baseline)/86400);
+  return {days,dust:days>=7,label:used?`${days} days since recorded use`:`${days} days observed without recorded use`};
+}
+function observationTime() {return current?Date.now()/1000:frame.at;}
+function roomStatus(room) {return room.status??"open";}
+function residentName(id) {return frame.residents.find(r=>r.id===id)?.name||id;}
+function building(g,room,x,y,depth,lit) {
+  const scaffold=el("g",{"data-construction":room.id},g);
+  el("title",{},scaffold,`Under construction · assigned builder: ${room.builder?residentName(room.builder):"not recorded"}`);
+  [[0,0],[180,0],[0,depth],[180,depth]].forEach(([dx,dy])=>line(scaffold,[[x+dx,y+dy,0],[x+dx,y+dy,78]],"#c6a06c",5));
+  [29,62].forEach(z=>{
+    line(scaffold,[[x,y,z],[x+180,y,z]],"#d9b680",4);
+    line(scaffold,[[x,y,z],[x,y+depth,z]],"#d9b680",4);
+  });
+  line(scaffold,[[x,y,7],[x+90,y,62],[x+180,y,7]],"#b58c5e",3);
+  line(scaffold,[[x,y,62],[x,y+depth,7]],"#b58c5e",3);
+  box(scaffold,x+35,y+20,110,16,5,["#d3b17a","#8c6a49","#af8c60"]);
+  box(scaffold,x+45,y+25,110,12,4,["#c8a16d","#8c6a49","#af8c60"],5);
+  polygon(scaffold,[[x+60,y+72],[x+109,y+72],[x+109,y+109],[x+60,y+109]],"#d6c99c");
+  line(scaffold,[[x+69,y+81],[x+99,y+81],[x+99,y+99],[x+69,y+99],[x+69,y+81]],"#71867a",2);
+  flame(scaffold,x+15,y+5,42,lit);
+  const [px,py]=p(x+88,y+depth-6,18);
+  el("rect",{x:px-68,y:py-15,width:136,height:31,rx:3,fill:"#5b4936",stroke:"#d9b680"},scaffold);
+  el("text",{x:px,y:py+5,"text-anchor":"middle",class:"builder-label"},scaffold,
+    room.builder?`Builder: ${residentName(room.builder).slice(0,20)}`:"Builder unrecorded");
+}
+function wear(g,room,x,y,depth) {
+  if(roomStatus(room)==="closed") {
+    line(g,[[x+113,y+1,24],[x+151,y+1,53]],"#aa8c65",6);
+    line(g,[[x+113,y+1,53],[x+151,y+1,24]],"#aa8c65",6);
+    polygon(g,[[x+24,y+depth-27],[x+156,y+depth-27],[x+156,y+depth-13],[x+24,y+depth-13]],"#695e4f");
+    caption(g,x+90,y+depth-14,2,"CLOSED · remembered","resident-label");
+  }
+  const age=roomAge(room,observationTime());
+  if(age.dust) {
+    const dust=el("g",{"data-dust":room.id},g);
+    el("title",{},dust,`${age.label}; dust is a visual inference, not a physical observation.`);
+    for(let n=0;n<26;n++) {
+      const seed=hash(`${room.id}:${n}`), [cx,cy]=p(x+15+seed%150,y+15+(seed>>>8)%(depth-30),1);
+      el("ellipse",{cx,cy,rx:2+seed%3,ry:1,fill:"#ddd3b4",opacity:.45},dust);
+    }
+    line(dust,[[x+2,y+2,45],[x+30,y+2,18],[x+2,y+30,18],[x+2,y+2,45]],"#d8d1b4",1);
+  }
+}
+function floorControls() {
+  const floor=floorsAt(frame).find(f=>f.level===selectedFloor),picker=$("floor-picker");
+  picker.replaceChildren();
+  floorsAt(frame).forEach(f=>{const option=html("option","",`${f.level===0?"Ground":`Floor ${f.level}`} · ${f.name}`,picker);option.value=f.level;});
+  picker.value=selectedFloor;
+  $("overview").textContent=floorsAt(frame).length>1?"Whole floor ↗":"Whole house ↗";
+  $("floor-note").textContent=floor.authorization==="repealed"?`Council approval withdrawn · existing floor and history kept · new construction blocked`:
+    floor.enacted_at?`Council approved ${clock(floor.enacted_at,{year:"numeric"})} · ${floor.purpose||floor.name}`:
+    selectedFloor===0?"Original ground floor · earlier construction dates unrecorded":floor.purpose||"Recorded floor";
+}
+function roomRecord(room,content) {
+  const status=roomStatus(room),age=roomAge(room,observationTime());
+  html("span",`room-status ${status}`,status==="construction"?"Under construction":status==="closed"?"Closed · history kept":"Open",content);
+  if(room.reason)html("p","small",`Why this room: ${room.reason}`,content);
+  if(room.builder)html("p","small",`Assigned builder: ${residentName(room.builder)}`,content);
+  if(room.task)html("p","small",`Building task: ${frame.tasks.find(t=>t.id===room.task)?.title||room.task}`,content);
+  [["planned_at","Planned"],["opened_at","Opened"],["closed_at","Closed"]].forEach(([key,name])=>{
+    if(Number.isFinite(room[key])&&room[key]>0)html("p","small",`${name} ${clock(room[key],{year:"numeric"})}`,content);
+  });
+  if(!room.opened_at&&status!=="construction")html("p","small","Earlier opening date unrecorded.",content);
+  html("p",age.dust?"dust-note":"small",`${age.label}${age.dust?" · dust is inferred from the record":""}.`,content);
+  if(room.last_used_by)html("p","small",`Last recorded user: ${residentName(room.last_used_by)}`,content);
+  if(room.history?.length) {
+    const history=html("details","room-history",undefined,content);
+    html("summary","",`${room.history.length} remembered changes`,history);
+    room.history.forEach(event=>{
+      const row=html("div","room-history-entry",undefined,history);
+      html("strong","",`${event.kind} · ${clock(event.at,{year:"numeric"})}`,row);
+      html("span","small",`Event ${event.sequence} · ${residentName(event.actor)} · generation ${event.generation}`,row);
+      if(event.name)html("span","small",event.name,row);
+      if(event.purpose)html("span","small",event.purpose,row);
+      if(event.reason)html("span","small",event.reason,row);
+      if(event.builder)html("span","small",`Builder: ${residentName(event.builder)}`,row);
+      if(event.task)html("span","small",`Task: ${event.task}`,row);
+    });
+  }
+}
 function drawHouse() {
   const map = $("house");
   map.replaceChildren();
-  el("title",{id:"map-title"},map,`${data.name} · event ${frame.seq}`);
+  el("title",{id:"map-title"},map,`${data.name} · floor ${selectedFloor} · event ${frame.seq}`);
   el("desc",{id:"map-desc"},map,`${frame.residents.length} remembered residents in ${frame.rooms.length} rooms. Touch or focus a room for its residents, work and scars. Lamps indicate recorded awake, not process liveness.`);
+  const rooms=floorRooms(frame,selectedFloor);
   const layouts=[];let totalDepth=0;
-  for(let i=0;i<frame.rooms.length;i+=2){
-    const pair=frame.rooms.slice(i,i+2).map(room=>{
+  for(let i=0;i<rooms.length;i+=2){
+    const pair=rooms.slice(i,i+2).map(room=>{
       const count=frame.residents.filter(r=>r.room===room.id).length;
       return {room,depth:160+Math.max(0,Math.ceil(count/3)-2)*(room.id==="bedroom"?62:40)};
     });
     pair.forEach((item,col)=>layouts.push({...item,x:col*190,y:totalDepth}));
     totalDepth+=Math.max(...pair.map(item=>item.depth))+10;
   }
+  totalDepth=Math.max(170,totalDepth);
   const left=Math.min(0,470-totalDepth*.86-30);
   wholeBounds = `${left} 45 ${830-left} ${Math.max(520,(totalDepth+370)*.43+100)}`;
   const roomLabels = [];
   const ground = el("g",{},map);
   polygon(ground,[[-18,-18,-12],[389,-18,-12],[389,totalDepth+3,-12],[-18,totalDepth+3,-12]],"#132824", "#607259",1);
+  if(!rooms.length) {
+    polygon(ground,[[12,12],[358,12],[358,145],[12,145]],"none","#c5ac79",2);
+    caption(ground,185,80,0,selectedFloor===0?"No rooms recorded on this floor.":"A floor approved. Rooms still to come.","room-label");
+  }
   // Architectural furnishing is symbolic. Room existence, light, figures and scars come from state.
   layouts.forEach(({room,x,y,depth})=>{
     const members=frame.residents.filter(r=>r.room===room.id);
-    const awake=members.some(r=>!["sleeping","unconfirmed"].includes(r.pose));
-    const g=el("g",{class:`room-hit${selected===room.id?" room-selected":""}`,tabindex:0,role:"button","aria-label":`${room.name}, ${members.length} residents`,"data-room":room.id},map);
+    const status=roomStatus(room);
+    const awake=status!=="closed"&&members.some(r=>!["sleeping","unconfirmed"].includes(r.pose));
+    const g=el("g",{class:`room-hit room-${status}${selected===room.id?" room-selected":""}`,tabindex:0,role:"button","aria-label":`${room.name}, ${status}, ${members.length} residents`,"data-room":room.id},map);
     g.addEventListener("click",()=>choose(room.id));
     g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose(room.id);}});
     const colors=awake?["#bc9a65","#6c654e","#93815c"]:["#7d8068","#46564c","#61715e"];
@@ -160,15 +259,18 @@ function drawHouse() {
     floor.setAttribute("class","floor");
     for(let n=1;n<depth/16;n++) line(g,[[x,y+n*16],[x+180,y+n*16]],awake?"#8f7c58":"#68765f",1);
     for(let n=0;n<Math.floor(depth/16);n++) line(g,[[x+(n%2?55:115),y+n*16],[x+(n%2?55:115),y+(n+1)*16]],"#7b785c",1);
-    polygon(g,[[x,y],[x+180,y],[x+180,y,62],[x,y,62]],awake?"#aab29a":"#657f70","#c2b998",1);
-    polygon(g,[[x,y],[x,y+depth],[x,y+depth,62],[x,y,62]],awake?"#899e87":"#4a6c60","#a7ac8b",1);
-    line(g,[[x,y,64],[x+180,y,64]],"#d0b984",5);
-    line(g,[[x,y,64],[x,y+depth,64]],"#b29e72",5);
-    for(let n=1;n<4;n++) line(g,[[x+n*45,y,0],[x+n*45,y,61]],"#677d65",3);
-    polygon(g,[[x+113,y+.3,24],[x+151,y+.3,24],[x+151,y+.3,53],[x+113,y+.3,53]],awake?"#e4c47f":"#435c52","#596955",3);
-    line(g,[[x+132,y,24],[x+132,y,53]],"#63755c",2);
-    flame(g,x+15,y+5,42,awake);
-    furnishings(g,room.id,x,y,awake,members);
+    if(status!=="construction") {
+      polygon(g,[[x,y],[x+180,y],[x+180,y,62],[x,y,62]],awake?"#aab29a":"#657f70","#c2b998",1);
+      polygon(g,[[x,y],[x,y+depth],[x,y+depth,62],[x,y,62]],awake?"#899e87":"#4a6c60","#a7ac8b",1);
+      line(g,[[x,y,64],[x+180,y,64]],"#d0b984",5);
+      line(g,[[x,y,64],[x,y+depth,64]],"#b29e72",5);
+      for(let n=1;n<4;n++) line(g,[[x+n*45,y,0],[x+n*45,y,61]],"#677d65",3);
+      polygon(g,[[x+113,y+.3,24],[x+151,y+.3,24],[x+151,y+.3,53],[x+113,y+.3,53]],awake?"#e4c47f":"#435c52","#596955",3);
+      line(g,[[x+132,y,24],[x+132,y,53]],"#63755c",2);
+      flame(g,x+15,y+5,42,awake);
+      furnishings(g,room.id,x,y,awake,members);
+    } else building(g,room,x,y,depth,awake);
+    wear(g,room,x,y,depth);
     members.forEach((resident,n)=>{
       let px,py;
       if(room.id==="bedroom") {px=x+32+(n%3)*55;py=y+54+Math.floor(n/3)*62;}
@@ -183,7 +285,8 @@ function drawHouse() {
       if(!scar.mended) caption(sg,sx+5,sy-6,5,"!","resident-label");
     });
     const c=p(x+92,y+2,43);
-    roomLabels.push({x:c[0], y:c[1], name:room.name});
+    const roomName=room.name.length>22?room.name.slice(0,21)+"…":room.name;
+    roomLabels.push({x:c[0], y:c[1], name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
     const corners=[p(x-25,y-25,80),p(x+210,y-25,80),p(x+210,y+depth+45,-30),p(x-25,y+depth+45,-30)];
     const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
@@ -212,12 +315,14 @@ function personRow(r, parent) {
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
   $("room-kicker").textContent=room?"INSIDE THE HOUSE":"COME INSIDE";
-  $("room-title").textContent=room?room.name:"The rooms remember";
-  $("room-description").textContent=room?(descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
-  const residents=frame.residents.filter(r=>room?r.room===room.id:r.pose!=="sleeping");
+  $("room-title").textContent=room?room.name:floorsAt(frame).find(f=>f.level===selectedFloor).name;
+  $("room-description").textContent=room?(room.purpose||descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
+  if(room)roomRecord(room,content);
+  const rooms=floorRooms(frame,selectedFloor);
+  const residents=frame.residents.filter(r=>room?r.room===room.id:rooms.some(place=>place.id===r.room)&&r.pose!=="sleeping");
   residents.forEach(r=>personRow(r,content));
-  if(room&&residents.length===0)html("p","empty-note","A quiet room, waiting for a footstep.",content);
-  if(!room||room.id==="workshop") effectiveTasks().forEach(t=>{
+  if(room&&residents.length===0)html("p","empty-note",roomStatus(room)==="closed"?"Closed, with its history kept. Scrub back to visit its earlier life.":roomStatus(room)==="construction"?"Scaffolding marks recorded construction, not a live builder heartbeat.":"A quiet room, waiting for a footstep.",content);
+  if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") effectiveTasks().forEach(t=>{
     const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
     html("strong","",t.title,row);
     const owner=frame.residents.find(r=>r.id===t.owner);
@@ -227,7 +332,7 @@ function roomPanel() {
     const row=html("div","scar",undefined,content);html("strong","",`${s.mended?"⌁":"!"} ${s.title}`,row);
     html("span","small",s.detail,row);html("span","small",`Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
   });
-  if(!room)html("p","small",`${frame.residents.filter(r=>r.pose==="sleeping").length} residents asleep in the loft · ${visibleScars().length} marks remembered in their rooms.`,content);
+  if(!room)html("p","small",`Across the house: ${frame.residents.filter(r=>r.pose==="sleeping").length} residents asleep in the loft · ${visibleScars().length} marks remembered in their rooms.`,content);
   if(!room){const legend=html("div","kind-key",undefined,content);Object.values(kinds).forEach(k=>html("span","",`${k.mark} ${k.name}`,legend));}
 }
 function accounts() {
@@ -255,7 +360,10 @@ function lighting() {
   $("house-clock").textContent=clock(at)+" · London";
 }
 function render() {
-  frame=data.frames[index]; if(!frame.rooms.some(r=>r.id===selected))selected=null;
+  frame=data.frames[index];
+  if(!floorsAt(frame).some(f=>f.level===selectedFloor))selectedFloor=0;
+  if(!floorRooms(frame,selectedFloor).some(r=>r.id===selected))selected=null;
+  floorControls();
   const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
   $("presence-line").textContent=`${awake} recorded awake. ${sleepers} places kept for sleepers. ${frame.tasks.length} unfinished threads.`;
@@ -265,7 +373,7 @@ function render() {
   $("event-label").textContent=`${frame.seq} / ${data.frames.length} · ${actor} · ${frame.event.op.replaceAll("-"," ")}`;
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
-  frame.rooms.forEach(room=>{const button=html("button","",room.name,navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
+  floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
   drawHouse();roomPanel();accounts();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
@@ -279,6 +387,7 @@ function render() {
   known.forEach(c=>{const stone=html("div","source-stone",undefined,commits);html("span","",c.id.slice(0,9),stone);html("div","",c.title,stone);});
 }
 function bindControls() {
+  $("floor-picker").addEventListener("change",e=>{selectedFloor=Number(e.target.value);selected=null;render();});
   $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
   $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
   $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});

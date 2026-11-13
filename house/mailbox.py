@@ -117,7 +117,9 @@ def parse(argv: list[str], repo: Path, workspace: Path, resident: str):
         raise ValueError("this mailbox belongs to another resident")
     if args.command == "life":
         data = json.loads(args.data)
-        if not isinstance(data, dict) or data.get("kind") not in {"identity", "activity", "room", "ambition", "help"}:
+        if not isinstance(data, dict) or data.get("kind") not in {
+                "identity", "activity", "room", "ambition", "help",
+                "room-plan", "room-open", "room-repurpose", "room-close"}:
             raise ValueError("not a resident life command")
     if args.command == "wait" and not 1 <= args.seconds <= 3600:
         raise ValueError("wait must be between 1 and 3600 seconds")

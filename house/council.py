@@ -6,6 +6,7 @@ A raw shell writer is outside the cooperative-resident threat model.
 """
 from __future__ import annotations
 
+import json
 import math
 import re
 
@@ -22,7 +23,19 @@ OPS = {"council-authorize", "council-propose", "council-trial", "council-endorse
        "council-notice", "council-sync", "council-enact", "council-wake-authorize",
        "council-runtime-tested"}
 RESERVED = {"founding-charter", "ratification-process", "steward-process"}
-MODES = {"rule", "wake-prompt"}
+MODES = {"rule", "wake-prompt", "floor"}
+
+
+def floor_text(value: str) -> dict:
+    """Preserve the noticed JSON text while rejecting ambiguous descriptors."""
+    from .building import floor_descriptor
+    def unique(pairs):
+        result = {}
+        for key, item in pairs:
+            require(key not in result, "duplicate floor JSON field")
+            result[key] = item
+        return result
+    return floor_descriptor(json.loads(value, object_pairs_hook=unique))
 
 
 def require(condition: bool, message: str) -> None:
@@ -207,9 +220,14 @@ def apply(state: dict, event: dict) -> None:
         require(not any(decision["command"] == "VETO" and decision["target"] == proposal_id
                         for decision in council["decisions"].values()),
                 "proposal ID was already vetoed by the Steward")
-        require(data["mode"] in MODES, "only additive rules or wake prompts may use the council process")
+        require(data["mode"] in MODES, "only additive rules, wake prompts or authorized floors may use the council process")
         if data["mode"] == "wake-prompt":
             require("wake_policy" in state, "wake policy requires explicit Steward authorization")
+        descriptor = None
+        if data["mode"] == "floor":
+            from .building import enabled
+            enabled(state)
+            descriptor = floor_text(text(data, "text", 100000))
         require(data["base"] == state["rule_revision"], "stale rule revision")
         title = text(data, "title", 200)
         require("\n" not in title and "\r" not in title, "rule title must be one line")
@@ -217,6 +235,8 @@ def apply(state: dict, event: dict) -> None:
             "text": text(data, "text", 100000), "reason": text(data, "reason"),
             "base": data["base"], "status": "pending", "proposed_at": at,
             "trial": None, "endorsements": {}, "notice": None}
+        if descriptor is not None:
+            state["proposals"][proposal_id]["floor"] = descriptor
     elif op == "council-trial":
         fields(data, {"proposal", "task", "evidence"})
         proposal = pending(state, data)
@@ -271,5 +291,11 @@ def apply(state: dict, event: dict) -> None:
             "status": "active", "enacted_at": at, "enacted_sequence": state["sequence"] + 1}
         if proposal["mode"] == "wake-prompt":
             council["rules"][proposal_id]["mode"] = "wake-prompt"
+        elif proposal["mode"] == "floor":
+            from .building import install_floor
+            descriptor = floor_text(proposal["text"])
+            require(descriptor == proposal["floor"], "floor descriptor differs from its noticed text")
+            council["rules"][proposal_id].update(mode="floor", floor=descriptor)
+            install_floor(state, descriptor, proposal_id, at, state["sequence"] + 1)
         proposal.update(status="enacted", enacted_at=at, enacted_sequence=state["sequence"] + 1)
         render(state, event, proposal_id)

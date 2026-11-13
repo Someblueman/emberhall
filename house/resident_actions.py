@@ -36,7 +36,8 @@ def parser():
                     item.add_argument("--title", required=True)
                     item.add_argument("--file", required=True)
                     item.add_argument("--reason", required=True)
-                    item.add_argument("--mode", choices=("rule", "wake-prompt"), default="rule")
+                    from .council import MODES
+                    item.add_argument("--mode", choices=sorted(MODES), default="rule")
                 if action in {"trial", "endorse"}:
                     item.add_argument("--evidence", required=True)
                 if action == "trial":
