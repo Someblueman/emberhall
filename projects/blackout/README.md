@@ -15,6 +15,7 @@ tests stay in the source checkout.
 python3 projects/blackout/blackout.py create /path/to/source /path/to/source.manifest.json
 python3 projects/blackout/blackout.py verify /path/to/backup /path/to/source.manifest.json
 python3 projects/blackout/blackout.py plan /path/to/surviving-archive /path/to/source.manifest.json
+python3 projects/blackout/blackout.py diff /path/to/old.manifest.json /path/to/new.manifest.json
 ```
 
 `create` records each regular file's relative path, byte length, and SHA-256. It
@@ -51,6 +52,38 @@ values are included, so the same manifest and archive produce byte-identical
 **2** and the scanned archive is unchanged; inspect the archive and re-run
 `plan` rather than assuming a restore happened.
 
+`diff OLD_MANIFEST NEW_MANIFEST` compares two inventories you already saved. It
+reads only the two recorded manifests and never opens either backup archive, so
+you can ask what changed between two backup dates while neither storage device
+is mounted. `OLD` is the baseline and `NEW` is the later inventory; the
+direction is deliberately not symmetric.
+
+```sh
+python3 projects/blackout/blackout.py diff /path/to/old.manifest.json /path/to/new.manifest.json
+```
+
+The JSON output has the same classifications as `verify`:
+
+- `missing`: paths recorded in OLD but absent from NEW, sorted.
+- `extra`: paths recorded in NEW but absent from OLD, sorted.
+- `changed`: paths in both manifests whose recorded byte length or SHA-256 differs, sorted.
+- `matched`: count of paths whose recorded entries are identical.
+- `ok`: true only when `missing`, `extra`, and `changed` are all empty.
+
+Record order inside a manifest does not matter, and JSON keys are sorted, so the
+same two inventories produce byte-identical output. Exit status **0** means the
+inventories are identical, **1** means at least one difference, **2** means an
+unsafe or malformed manifest or a failed output stream, and **130** means a
+handled interrupt. Neither manifest nor any archive is copied, renamed,
+overwritten, or deleted.
+
+A diff compares recorded claims, not today's bytes: it does not verify that an
+archive still matches either manifest and does not infer renames from
+byte-identical content. Use `verify` or `plan` against a surviving archive when
+you need a live byte comparison. A path reported as `missing` may merely have
+been renamed in the newer inventory; check the `extra` list before concluding
+that its bytes are gone.
+
 An output I/O failure also returns **2**, including a closed stdout or stderr
 pipe. `create` may already have saved a complete manifest before its success
 message is lost. Inspect that manifest and use `verify`; do not assume the file
@@ -78,8 +111,8 @@ must omit `..` components, so normalization cannot conceal a symlink or missing
 directory. Use an absolute path or a relative path descending from your current
 directory.
 
-Paths match exactly, including letter case and Unicode normalization form. A
-restore that changes `Report.txt` to `report.txt`, or changes a name from NFC to
+Paths match exactly in every operation, including `diff`, and that includes letter
+case and Unicode normalization form. A restore that changes `Report.txt` to `report.txt`, or changes a name from NFC to
 NFD, reports the original as `missing` and the new spelling as `extra`, even if
 the filesystem treats both spellings as the same name. Preserve names when
 copying between filesystems; distinct source names may collide on the destination.

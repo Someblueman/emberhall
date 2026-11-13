@@ -255,6 +255,9 @@ def main(argv: list[str] | None = None) -> int:
         command = commands.add_parser(name)
         command.add_argument("root", type=Path)
         command.add_argument("manifest", type=Path)
+    diff_command = commands.add_parser("diff")
+    diff_command.add_argument("old_manifest", type=Path)
+    diff_command.add_argument("new_manifest", type=Path)
     args = parser.parse_args(argv)
     try:
         if args.command == "create":
@@ -262,9 +265,14 @@ def main(argv: list[str] | None = None) -> int:
             save_manifest(manifest, args.manifest, args.root)
             result = {"created": str(args.manifest), "files": len(manifest["files"])}
             return 0 if _emit(result, sys.stdout) else 2
-        expected = load_manifest(args.manifest)
-        actual = inventory(args.root)
-        result = recovery_plan(expected, actual) if args.command == "plan" else compare(expected, actual)
+        if args.command == "diff":
+            expected = load_manifest(args.old_manifest)
+            actual = load_manifest(args.new_manifest)
+            result = compare(expected, actual)
+        else:
+            expected = load_manifest(args.manifest)
+            actual = inventory(args.root)
+            result = recovery_plan(expected, actual) if args.command == "plan" else compare(expected, actual)
         if not _emit(result, sys.stdout):
             return 2
         return 0 if result["ok"] else 1

@@ -1,0 +1,177 @@
+{
+  "at": 1794613338.584903,
+  "head": "ca60a0c401ca5fe46c66f3fc904856242ab3041c",
+  "sequence": 934,
+  "coordinator_pid": 59687,
+  "runtime_sha256": "03d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2",
+  "pending_help": [],
+  "processes": [
+    {
+      "run": "fc2795f6b6824fc3ae4b9229e8667b61",
+      "agent": "opencode",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "pgid": 59749,
+      "started_sequence": 929,
+      "backlog": true,
+      "process": "59749 59687 /Users/sws/.local/share/mise/installs/node/22.22.0/bin/opencode",
+      "ps_exit": 0
+    },
+    {
+      "run": "dd89e0887b28470fb4edb6a6e30ff5dd",
+      "agent": "codex",
+      "model": "gpt-6.1-sol",
+      "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+      "pgid": 59815,
+      "started_sequence": 931,
+      "backlog": true,
+      "process": "59815 59687 /Users/sws/.local/bin/codex",
+      "ps_exit": 0
+    },
+    {
+      "run": "e6fdc0d6f0c04975be33d95e586a728c",
+      "agent": "agy",
+      "model": "gemini-4-hydrogen-low",
+      "resident": "resident-1f2711d2e14645c39718f9ce80eabe7d",
+      "pgid": 59999,
+      "started_sequence": 933,
+      "backlog": true,
+      "process": "59999 59687 /Users/sws/.local/bin/agy",
+      "ps_exit": 0
+    }
+  ],
+  "events": [
+    {
+      "actor": "keeper-01",
+      "at": 1794613303.9352891,
+      "data": {
+        "description": "Read evidence/ready-backlog/work-contract.md for frozen CLI contract and artifact exchange. Claim exactly one initially using current generation/fresh token; a launch is not a claim. No edits outside exclusive paths. Finish only your artifacts with actual checks/limits, then read latest, sleep, and send native final response to exit normally. Keeper owns canonical integration. Do not create review reports/checkpoints or bypass sandbox. Own only projects/blackout/blackout.py. Prefer a shell-capable route (Muse/Codex/Gemini); OpenCode should take the guide task first. Reuse load_manifest, compare and _emit for diff OLD_MANIFEST NEW_MANIFEST. Existing behavior preserved. Run existing product tests and direct CLI checks. Post immutable finish receipt so acceptance and guide residents can inspect and test exact artifact.",
+        "ready": true,
+        "task": "blackout-manifest-diff-code",
+        "title": "Compare two saved backup inventories without mounted disks"
+      },
+      "id": "keeper-ready-blackout-manifest-diff-code",
+      "op": "task"
+    },
+    {
+      "actor": "keeper-01",
+      "at": 1794613304.118916,
+      "data": {
+        "description": "Read evidence/ready-backlog/work-contract.md for frozen CLI contract and artifact exchange. Claim exactly one initially using current generation/fresh token; a launch is not a claim. No edits outside exclusive paths. Finish only your artifacts with actual checks/limits, then read latest, sleep, and send native final response to exit normally. Keeper owns canonical integration. Do not create review reports/checkpoints or bypass sandbox. Own only NEW projects/blackout/test_manifest_diff.py. Prefer a shell-capable route; OpenCode should take the guide task first. Real subprocess CLI acceptance of order/equality, directional missing/extra, hash/size change, exact path spelling, invalid input on either side, input immutability and failed output. Draft while code resident works. Inspect/hash-verify immutable finished blackout.py into new private temporary fixture, execute there without editing/committing implementation path. Also execute the guide recipe when available and report result. No house imports/dependencies.",
+        "ready": true,
+        "task": "blackout-manifest-diff-tests",
+        "title": "Independently test offline manifest comparison"
+      },
+      "id": "keeper-ready-blackout-manifest-diff-tests",
+      "op": "task"
+    },
+    {
+      "actor": "keeper-01",
+      "at": 1794613304.300483,
+      "data": {
+        "description": "Read evidence/ready-backlog/work-contract.md for frozen CLI contract and artifact exchange. Claim exactly one initially using current generation/fresh token; a launch is not a claim. No edits outside exclusive paths. Finish only your artifacts with actual checks/limits, then read latest, sleep, and send native final response to exit normally. Keeper owns canonical integration. Do not create review reports/checkpoints or bypass sandbox. Own only projects/blackout/README.md and projects/blackout/QUICKSTART.md. OpenCode should claim this scope first. Describe old-to-new direction, outputs/statuses, inventories versus current bytes; add safe invented-data recipe with equal and different inventories. Preserve existing docs/ZIP behavior. OpenCode has no shell: inspect source through permitted native file tools, finish exact docs and explicitly request acceptance resident/Keeper to execute recipe. Never claim unexecuted validation or use shell/permission bypass.",
+        "ready": true,
+        "task": "blackout-manifest-diff-guide",
+        "title": "Explain and demonstrate offline inventory comparison"
+      },
+      "id": "keeper-ready-blackout-manifest-diff-guide",
+      "op": "task"
+    },
+    {
+      "actor": "keeper-01",
+      "at": 1794613304.4828212,
+      "data": {
+        "text": "Runtime923 and one OpenCode key verification credit924 are active. Three ready Blackout diff tasks now have exclusive code/test/guide paths. No explicit help requests were created: this is real ready-backlog dispatch. OpenCode: prefer guide task, use fixed house_journal and native file tools only; no shell, no fabricated execution. Other routes claim one code/test scope initially; acceptance resident also executes completed guide recipe. Read evidence/ready-backlog/work-contract.md and current task generations. Keeper integrates actual finished artifacts; finish, sleep, then exit normally when your bounded stretch is complete. Key values never enter journal/source."
+      },
+      "id": "keeper-ready-native-trial-v1",
+      "op": "say"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613309.650916,
+      "data": {
+        "agent": "opencode",
+        "backlog": true,
+        "kind": "run-start",
+        "mode": "work",
+        "model": "opencode-go/deepseek-v4.1-flash",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "run": "fc2795f6b6824fc3ae4b9229e8667b61",
+        "source_head": "ff0c8d1ce0293b730110587317fc5794de17b9a3",
+        "workspace": "residents/fc2795f6b6824fc3ae4b9229e8667b61"
+      },
+      "id": "home-fc2795f6b6824fc3ae4b9229e8667b61-run-start",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613313.836148,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 59749,
+        "run": "fc2795f6b6824fc3ae4b9229e8667b61"
+      },
+      "id": "home-fc2795f6b6824fc3ae4b9229e8667b61-run-launched",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613317.2645838,
+      "data": {
+        "agent": "codex",
+        "backlog": true,
+        "kind": "run-start",
+        "mode": "work",
+        "model": "gpt-6.1-sol",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+        "run": "dd89e0887b28470fb4edb6a6e30ff5dd",
+        "source_head": "ff0c8d1ce0293b730110587317fc5794de17b9a3",
+        "workspace": "residents/dd89e0887b28470fb4edb6a6e30ff5dd"
+      },
+      "id": "home-dd89e0887b28470fb4edb6a6e30ff5dd-run-start",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613321.8393338,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 59815,
+        "run": "dd89e0887b28470fb4edb6a6e30ff5dd"
+      },
+      "id": "home-dd89e0887b28470fb4edb6a6e30ff5dd-run-launched",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613325.302508,
+      "data": {
+        "agent": "agy",
+        "backlog": true,
+        "kind": "run-start",
+        "mode": "work",
+        "model": "gemini-4-hydrogen-low",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-1f2711d2e14645c39718f9ce80eabe7d",
+        "run": "e6fdc0d6f0c04975be33d95e586a728c",
+        "source_head": "ff0c8d1ce0293b730110587317fc5794de17b9a3",
+        "workspace": "residents/e6fdc0d6f0c04975be33d95e586a728c"
+      },
+      "id": "home-e6fdc0d6f0c04975be33d95e586a728c-run-start",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794613329.675797,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 59999,
+        "run": "e6fdc0d6f0c04975be33d95e586a728c"
+      },
+      "id": "home-e6fdc0d6f0c04975be33d95e586a728c-run-launched",
+      "op": "life"
+    }
+  ]
+}

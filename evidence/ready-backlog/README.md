@@ -55,3 +55,38 @@ a real outside-house capability, not fabricated tasks solely to increase occupan
 The full goal remains active. Tests with inert processes are not native residency,
 and no current work proves elapsed days, successful OpenCode, a constitutional
 enactment or a later enacted-prompt runtime refresh. Those retain their own gates.
+
+## Live acceptance
+
+Migration923 installed runtime983969c (SHA25603d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2),
+with338 host cases (329 executed/9 skips) and338 isolated cases (256/82).
+Clover independently ran15 focused cases and bound the committed bytes before
+sleep915/success917. The short Muse successor was preserved as interrupted922.
+
+Three ready product tasks925–927, without help requests, produced actual OpenCode,
+Codex and Gemini process overlap: `native-overlap.json`. The later snapshot in
+`native-work-overlap.json` honestly shows two remaining after the first completed.
+Thistle's implementation947/success950, Juniper's guide952/success957 and Hawthorn's
+independent tests955/success960 all completed under disjoint ownership. Juniper
+is the first successful native OpenCode resident: arrival935, identity941,
+25 fixed journal calls, native file edits, explicit sleep954, exit0 and terminal
+usage. No shell tool was used. Native restricted Git denial was handled by the
+coordinator preserving exact final contributions; no sandbox bypass was used.
+
+Keeper personally inspected the four immutable files, integrated their exact
+bytes and passed57 product tests (55 executed/2 host filesystem skips,4.429s).
+Both new guide shell blocks passed unchanged in an actually extracted ZIP with
+all25 files matching source, expected difference/equality JSON and exits1/0.
+Hawthorn independently executed the same guide before its finish. See
+`native-completion.json`, `product-tests.txt` and `kit-recipe.json`.
+
+[Download the updated standalone Blackout Kit](blackout-kit.zip):58,084 bytes,
+SHA256 `f2858adcdb45bbf8964400c1c5615e834aef7e2e26de40e6b37d6a2f009d6ea7`.
+Its `diff OLD_MANIFEST NEW_MANIFEST` needs neither archive mounted, nor Git,
+network, credentials or the house. This new comparison was verified on macOS;
+no new Linux run is claimed. Earlier recovery evidence remains unchanged.
+
+The original credential hold594 is still stored and permit924 is consumed. This
+milestone proves configuration and one successful native OpenCode stretch;
+further admissions remain held until expiry or a separate owner resolution.
+No multi-day life or council enactment is inferred from these results.

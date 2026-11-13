@@ -1,0 +1,13 @@
+{
+  "zip_sha256": "f2858adcdb45bbf8964400c1c5615e834aef7e2e26de40e6b37d6a2f009d6ea7",
+  "zip_bytes": 58084,
+  "files": 25,
+  "all_extracted_files_match_reviewed_source": true,
+  "recipe_blocks_executed_unchanged": 2,
+  "syntax_exit": 0,
+  "recipe_exit": 0,
+  "stdout": "{\"changed\": [\"photos/cat.jpg\"], \"extra\": [\"photos/dog.jpg\"], \"matched\": 2, \"missing\": [\"records/invoice.txt\"], \"ok\": false}\nexit: 1\n{\"changed\": [], \"extra\": [], \"matched\": 4, \"missing\": [], \"ok\": true}\nexit: 0\n",
+  "stderr": "",
+  "platform": "macOS",
+  "scope": "Actual extracted kit; no network used. No new Linux execution claimed."
+}

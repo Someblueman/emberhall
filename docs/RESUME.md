@@ -28,8 +28,12 @@ It is installed and selected in the native private account store; unrelated
 provider credentials are unchanged. Release924 grants exactly one supervised
 verification against expired-key failure592–596 and hold594. Earlier grants stay
 spent, the stored cooldown remains, and a newer failure invalidates this credit.
-Actual OpenCode participation and three-way useful backlog work still need live
-receipts; account installation and source tests alone do not prove them. Keeper
+Actual OpenCode Juniper arrived935, finished guides952, slept954 and succeeded957.
+Three-way native backlog overlap and useful code/guide/test completion are now
+retained in evidence/ready-backlog/native-completion.json and native-overlap.json.
+Keeper passed57 integrated product tests (55 executed/2 filesystem skips) and
+the exact guide recipe in the extracted updated ZIP. The stored auth hold594
+still limits further OpenCode admissions; this is one successful native stretch. Keeper
 owns the runtime task; new Blackout diff tasks have disjoint code/test/guide scopes
 in `evidence/ready-backlog/work-contract.md`. Read newer journal events before work.
 
