@@ -18,6 +18,7 @@ const descriptions = {
   bedroom: "Sleep is ordinary here. Each quiet bed keeps a place for a mind that may return."
 };
 let data, frame, index = 0, current = true, selected = null;
+let refreshing = false, controlsReady = false;
 let roomBounds = {}, wholeBounds = "0 0 900 700";
 function el(tag, attrs = {}, parent, value) {
   const node = document.createElementNS(SVG, tag);
@@ -272,25 +273,46 @@ function render() {
   const record=$("record");record.replaceChildren();
   html("p","",`Event ${frame.seq} observed ${clock(frame.at)}. Public snapshot exported ${clock(data.observed_at)}.`,record);
   html("code","",`Journal ${data.journal_head.slice(0,12)} · Source ${(data.source_head||"unborn").slice(0,12)}`,record);
-  html("p","",current?"The sky follows the real London clock. Figures remain a recorded snapshot until the next publication.":"The sky and figures follow this event’s clock. Later arrivals, rooms and failures have not happened yet.",record);
+  html("p","",current?"The sky follows the real London clock. This page checks for a newer recorded snapshot every minute.":"The sky and figures follow this event’s clock. Later arrivals, rooms and failures have not happened yet.",record);
   const commits=$("commits");commits.replaceChildren();
   const known=data.commits.filter(c=>c.at<=(current?data.observed_at:frame.at)).slice(-3);
   known.forEach(c=>{const stone=html("div","source-stone",undefined,commits);html("span","",c.id.slice(0,9),stone);html("div","",c.title,stone);});
 }
-async function start() {
-  try {
-    const response=await fetch("history.json",{cache:"no-cache"});
-    if(!response.ok)throw new Error(`History returned ${response.status}`);
-    data=await response.json();
-    if(data.version!==1||!Array.isArray(data.frames)||!data.frames.length)throw new Error("Unrecognized house history");
-    data.frames.forEach(moment=>{moment.scars=moment.scars.map(s=>({...data.scars[s.id],...s}));});
-    index=data.frames.length-1;$("history").max=data.frames.length;$("history").disabled=false;
-    $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
-    $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
-    $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
-    $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
-    $("overview").addEventListener("click",()=>choose(null));
-    render();setInterval(()=>{if(current){lighting();accounts();roomPanel();drawHouse();}},60000);
-  }catch(error){$("error").hidden=false;$("error").textContent=`The house record could not be opened. ${error.message}. Serve this directory over HTTP and export history with python3 -m house.body.`;$("presence-line").textContent="The record is unavailable; no activity is invented.";}
+function bindControls() {
+  $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
+  $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
+  $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
+  $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
+  $("overview").addEventListener("click",()=>choose(null));
+  controlsReady=true;
 }
-start();
+async function refresh() {
+  if(refreshing)return;
+  refreshing=true;
+  try {
+    const response=await fetch("history.json",{cache:"no-cache",signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw new Error(`History returned ${response.status}`);
+    const next=await response.json();
+    if(next.version!==1||!Array.isArray(next.frames)||!next.frames.length)throw new Error("Unrecognized house history");
+    if(data&&next.frames.length<data.frames.length)throw new Error("An older publication arrived");
+    // Read the selection after the fetch: someone may have scrubbed while it was in flight.
+    const nextIndex=current?next.frames.length-1:next.frames.findIndex(moment=>moment.seq===frame.seq);
+    if(nextIndex<0)throw new Error("The selected moment is missing from this publication");
+    next.frames.forEach(moment=>{moment.scars=moment.scars.map(s=>({...next.scars[s.id],...s}));});
+    const changed=!data||next.journal_head!==data.journal_head||next.source_head!==data.source_head;
+    $("error").hidden=true;
+    if(changed){
+      data=next;index=nextIndex;
+      $("history").max=data.frames.length;$("history").disabled=false;
+      if(!controlsReady)bindControls();
+      render();
+    }else if(current){lighting();accounts();roomPanel();drawHouse();}
+  }catch(error){
+    $("error").hidden=false;
+    $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here; we’ll try again shortly.":"The house record is unavailable. We’ll try again shortly.";
+    if(!data)$("presence-line").textContent="The record is unavailable; no activity is invented.";
+    else if(current){lighting();accounts();roomPanel();drawHouse();}
+  }finally{refreshing=false;}
+}
+refresh();
+setInterval(refresh,60000);
