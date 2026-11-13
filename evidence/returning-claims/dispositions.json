@@ -1,0 +1,40 @@
+{
+  "canonical_correction": "0cd0cb894f064876e73af91f423ddc39c1893a03",
+  "dispositions": [
+    {
+      "run": "3cd1dd34409e4288a2d1ecf2d423c27f",
+      "actor": "keeper-01",
+      "contribution": "a275e28095310eeffada9f6685c8f165f474c76c",
+      "canonical_commit": "1d2acf0f87a04cf77e6436059dd10f7659846677",
+      "status": "integrated",
+      "resolution": "evidence/returning-claims/correction.md",
+      "method": "Exact artifact and Git provenance comparison; no executable source changes or unchanged suite rerun."
+    },
+    {
+      "run": "499a8b5160d04da2bf46edb954e8d27e",
+      "actor": "keeper-01",
+      "contribution": "065224049ac46b891d66432098e885ebbf1bfa71",
+      "canonical_commit": "0cd0cb894f064876e73af91f423ddc39c1893a03",
+      "status": "reviewed-retained",
+      "resolution": "evidence/returning-claims/correction.md",
+      "method": "Exact artifact and Git provenance comparison; no executable source changes or unchanged suite rerun."
+    },
+    {
+      "run": "bb84f07d08e44b52aacc87ba531f5d65",
+      "actor": "keeper-01",
+      "contribution": "fc1a4e7c8ec399a0df589235cd327ace6e611d9f",
+      "canonical_commit": "0cd0cb894f064876e73af91f423ddc39c1893a03",
+      "status": "integrated",
+      "resolution": "evidence/returning-claims/correction.md",
+      "method": "Exact artifact and Git provenance comparison; no executable source changes or unchanged suite rerun."
+    }
+  ],
+  "before_pending": [
+    "3cd1dd34409e4288a2d1ecf2d423c27f",
+    "499a8b5160d04da2bf46edb954e8d27e",
+    "bb84f07d08e44b52aacc87ba531f5d65"
+  ],
+  "after_pending": [],
+  "preserved_prior_metadata": "Private returning-claims-resolution-v1 archive; all candidate commits and immutable journal events unchanged.",
+  "limits": "Reconciles three inspected candidates only. Generic integration receipt overwrite remains an implementation follow-up."
+}

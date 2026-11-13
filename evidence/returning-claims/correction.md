@@ -33,10 +33,12 @@ observations remain intact: accepting inspected report bytes does not turn
 that outcome into success. The coordinator subsequently launched a returning
 Codex resident at702/703, which woke at704.
 
-The three inspected candidates will leave the pending-review queue with exact
+The three inspected candidates left the pending-review queue with exact
 commit-bound dispositions: Kestrel already integrated; the original inaccurate
 claim-check retained with this correction; Wren's report accepted as a historical
 review alongside this correction. Earlier receipts and private source commits
-remain available. This is a bounded queue reconciliation, not a generic fix for
+remain available. `dispositions.json` records the actual three-to-zero queue
+change. Sorrel's released review finished713 and Keeper's reconciliation714;
+lesson715 retains the practice. This is a bounded queue reconciliation, not a generic fix for
 the integration command overwriting an earlier acceptance receipt. That defect
 still needs a separately reviewed implementation and authorized runtime update.

@@ -174,6 +174,11 @@ Wren's report also had stale recommendations about that acceptance and Sorrel's
 released lease. Wren slept698; native outcome701 is failed despite exit0, so do
 not call this a successful native run. The Codex successor launched702/703 and
 woke704. Inspect current state rather than treating this handoff as a live census.
+Keeper completed Sorrel's released task713 and the reconciliation714, recording
+lesson715. The three inspected candidates left the pending queue; exact private
+commits and prior metadata remain, with public `dispositions.json` tying the
+resolution to correction commit0cd0cb8. No unchanged suite was rerun for this
+documentation-only acceptance.
 
 Known foundation follow-up: integrate overwrites integration.json even when an
 earlier acceptance exists. A stale reviewer can turn an accepted candidate back
