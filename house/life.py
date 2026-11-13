@@ -37,6 +37,13 @@ def empty():
             "ambitions": {}, "runs": {}, "budgets": {}, "requests": {}, "presence": {}}
 
 
+
+def provider_available(state: dict, agent: str, at: float) -> bool:
+    from .maintenance import retry_permit
+    return (state.get("life", {}).get("budgets", {}).get(agent, {}).get("until", 0) <= at
+            or retry_permit(state, agent, at) is not None)
+
+
 def apply(state, event):
     data, actor, at = event["data"], event["actor"], event["at"]
     seq = state["sequence"] + 1
@@ -104,7 +111,7 @@ def apply(state, event):
             active = [r for r in life["runs"].values() if r["status"] == "active"]
             require(len(active) < 3, "three residents are already home")
             require(all(r["resident"] != resident for r in active), "resident already running")
-            require(life["budgets"].get(data["agent"], {}).get("until", 0) <= at,
+            require(provider_available(state, data["agent"], at),
                     "provider is cooling down")
             require(data["mode"] in {"work", "review"}, "invalid work mode")
             require(re.fullmatch("[0-9a-f]{40}", data["source_head"]) is not None,
@@ -115,6 +122,10 @@ def apply(state, event):
                 request = life["requests"].get(data["help_request"], {})
                 require(request.get("status") == "pending", "help already taken")
                 request.update(status="assigned", run=run)
+            from .maintenance import retry_permit
+            permit = retry_permit(state, data["agent"], at)
+            if permit is not None:
+                permit.update(consumed_run=run, consumed_sequence=seq, consumed_at=at)
             life["runs"][run] = {**data, "status": "active", "started_at": at,
                                  "started_sequence": seq}
         elif kind == "run-launched":
@@ -162,6 +173,7 @@ def apply(state, event):
             require(data["agent"] in KINDS, "unknown agent kind")
             number(data["until"], "cooldown", at)
             string(data, "reason", 1000)
+            life.setdefault("budget_observations", {})[data["agent"]] = seq
             previous = life["budgets"].get(data["agent"], {})
             # A second concurrent failure cannot shorten an existing quota wait.
             if data["until"] >= previous.get("until", 0):

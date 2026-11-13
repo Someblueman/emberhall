@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-v"
+  ],
+  "exit_code": 0,
+  "tests": 221,
+  "skipped": 5,
+  "executed": 216,
+  "seconds": 150.504,
+  "output_sha256": "7e3a81aaf3711ab88a1874a14c83e62d06dc4919ebf37b10ffde86ce972fae00",
+  "note": "Precommit full suite in private checkout. Actual immutable committed-source proof follows during preparation."
+}

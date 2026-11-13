@@ -217,6 +217,7 @@ def prepare_runtime(record: Record, private: Path) -> dict:
         b"elif sys.argv[1:2] == ['home']:\n    del sys.argv[1]\n    from house.home import main\n"
         b"elif sys.argv[1:2] == ['steward']:\n    del sys.argv[1]\n    from house.steward import main\n"
         b"elif sys.argv[1:2] == ['runtime']:\n    del sys.argv[1]\n    from house.runtime import main\n"
+        b"elif sys.argv[1:2] == ['owner-upgrade']:\n    del sys.argv[1]\n    from house.owner_upgrade import main\n"
         b"else:\n    from house.watch import main\n"
         b"raise SystemExit(main())\n")
     contents["runtime-source.json"] = json.dumps({"source_head": head, "sha256": {
