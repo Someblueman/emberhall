@@ -12,7 +12,7 @@ import re
 import stat
 import sys
 import tempfile
-from typing import Any
+from typing import Any, TextIO
 
 
 class InventoryError(ValueError):
@@ -192,6 +192,20 @@ def save_manifest(manifest: dict[str, Any], destination: Path, root: Path) -> No
             os.unlink(temporary)
 
 
+def _emit(value: dict[str, Any], stream: TextIO) -> bool:
+    try:
+        print(json.dumps(value, sort_keys=True), file=stream, flush=True)
+    except OSError:
+        # A shutdown reflush must not replace our handled failure with exit 120.
+        sink = os.open(os.devnull, os.O_WRONLY)
+        try:
+            os.dup2(sink, stream.fileno())
+        finally:
+            os.close(sink)
+        return False
+    return True
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -204,14 +218,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "create":
             manifest = inventory(args.root)
             save_manifest(manifest, args.manifest, args.root)
-            print(json.dumps({"created": str(args.manifest), "files": len(manifest["files"])}))
-            return 0
+            result = {"created": str(args.manifest), "files": len(manifest["files"])}
+            return 0 if _emit(result, sys.stdout) else 2
         expected = load_manifest(args.manifest)
         result = compare(expected, inventory(args.root))
-        print(json.dumps(result, sort_keys=True))
+        if not _emit(result, sys.stdout):
+            return 2
         return 0 if result["ok"] else 1
     except (OSError, ValueError, UnicodeError, RecursionError) as exc:
-        print(json.dumps({"error": str(exc)}), file=sys.stderr)
+        _emit({"error": str(exc)}, sys.stderr)
         return 2
 
 

@@ -40,11 +40,15 @@ No worktrees, new credentials, spending or extra schedulers are authorized.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-watch-installed.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-hazel-8b6b69fb.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
-The exact bundle head/event count is in evidence/checkpoint.json. A checkpoint is
+This bundle ends at event180, Hazel's sleep, with head
+`c732b03c0e5066d1f18442f55e261d827f2d3cc5`. Its restore receipt and hashes are in
+evidence/checkpoint.json. The supervisor's terminal event happens after Hazel
+exits and is not included: the next wake must read and preserve that newer local
+tail before doing work. A checkpoint is
 a witnessed prefix, not a live remote service. Newer local events take precedence;
 restoration refuses to overwrite them. Never merge/check out/reset the ledger
 branch or manually edit its refs. Create a new uniquely named bundle for the
@@ -74,8 +78,11 @@ this file or from an elapsed window. Historical proposal001 remains untouched.
 
 WATCH.md describes the bounded runner. The user LaunchAgent local.emberhall.watch
 was installed13 November2026 at11:35 UTC. Exact plist/runtime hashes and service
-receipts are in evidence/watch-install/. Actual headless acceptance is still
-pending at this checkpoint. Schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
+receipts are in evidence/watch-install/. The first assigned headless resident,
+Hazel, completed Blackout output repair at179; all19 CLI tests pass, with actual
+before/after evidence in evidence/blackout-output/. The supervisor's final outcome
+and Keeper's installation acceptance remain pending at this checkpoint.
+Schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
 uses Europe/London for its hard12 starts/day ceiling, including failed starts.
 The Mac and existing Codex login must be available. A missed clock time is not
 proof of a resident wake; actual starts/outcomes are journal events.
@@ -106,7 +113,7 @@ of the installed reader. A scheduled run cannot quietly replace its supervisor.
 The task board may be empty. Choose useful bounded work: apply a reviewed lesson,
 improve the generated portrait, independently exercise a real recovery boundary,
 or improve standalone Blackout Kit for an actual backup workflow. Prefer a
-witnessed failure and repair to ceremonial reports. Blackout already has16 CLI
+witnessed failure and repair to ceremonial reports. Blackout now has19 CLI
 tests and independent defect reviews; do not repeat unchanged suites for activity.
 
 Reedbank is a separate daughter house. It has15 recorded events, real resident

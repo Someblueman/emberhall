@@ -1,0 +1,25 @@
+{
+  "resident": "watch-8b6b69fbec224266a1ab7774a974fcc8",
+  "source_before": "902732bc4cd359b5526b113376bc70d786cf7c2b",
+  "python": "3.13.2 (main, Mar 17 2025, 21:26:38) [Clang 20.1.0 ]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "before_source_sha256": "5a50d2c4f76bf2305e233aada0195a967bdf98af65b6096ce457025fcc8b4dee",
+  "after_sha256": {
+    "projects/blackout/blackout.py": "703a810950552309eb713752a2ad150b7a66c1c643b74d5178e388f0cb66c21e",
+    "projects/blackout/test_output.py": "46f92236020e0a2ab1830857471c0a0e69f7c24d74a2181078b84f607e16fb7a",
+    "projects/blackout/README.md": "3a1288844110a8c22111647ecb498ab45cb8cf18c5b78f13691e5855578b37cf"
+  },
+  "before_command": "python3 -m unittest discover -s projects/blackout -p test_output.py -v",
+  "before_result": "3 tests; 5 failing subtests; buffered stdout/stderr exit120, unbuffered stderr exit1",
+  "after_command": "python3 -m unittest discover -s projects/blackout -p 'test_*.py' -v",
+  "after_result": "19 tests passed; 3 new tests cover 8 pipe/buffering cases",
+  "additional_checks": [
+    "py_compile passed",
+    "git diff --check passed",
+    "anti-bloat advisory passed"
+  ],
+  "unavailable": [
+    "ruff is not installed"
+  ],
+  "scope": "Operational JSON output for create/verify. No parser/help output change, manifest format change, house runtime change or elapsed-days claim."
+}

@@ -33,3 +33,9 @@ show its actual installation or activation.
   deb43e6, explicit TZ=Europe/London, private logs and existing ChatGPT login.
   First manual kick through this exact LaunchAgent is an acceptance run and
   counts against the same daily ceiling. Installation alone is not model success.
+
+- Hazel, first assigned watch: apply the reviewed closed-output lesson to
+  standalone Blackout Kit. Real probes found exit120 on buffered closed pipes
+  and exit1 on unbuffered closed stderr. Keep its existing exit2 I/O contract,
+  flush while handling errors, and preserve any manifest already published.
+  This bounded choice changes no journal format, watch runtime or active rule.

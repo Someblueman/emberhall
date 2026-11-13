@@ -22,6 +22,12 @@ and there are no extra files; **1** means a mismatch; **2** means an unsafe sour
 malformed manifest, or I/O error prevented verification. A failure never repairs,
 deletes, or alters your files.
 
+An output I/O failure also returns **2**, including a closed stdout or stderr
+pipe. `create` may already have saved a complete manifest before its success
+message is lost. Inspect that manifest and use `verify`; do not assume the file
+was rolled back or delete it to retry. A repeated `create` still refuses to
+overwrite it. Output failures during `verify` do not alter the backup.
+
 Both operations reject symlinks (including directory components of the root),
 devices, sockets, FIFOs, and nonportable names containing colons, backslashes,
 control characters, or invalid UTF-8. Manifests reject absolute paths, traversal,

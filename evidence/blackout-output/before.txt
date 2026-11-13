@@ -1,0 +1,64 @@
+test_create_closed_stdout_preserves_published_manifest (test_output.OutputTests.test_create_closed_stdout_preserves_published_manifest) ... 
+  test_create_closed_stdout_preserves_published_manifest (test_output.OutputTests.test_create_closed_stdout_preserves_published_manifest) (unbuffered=False) ... FAIL
+test_missing_manifest_with_closed_stderr (test_output.OutputTests.test_missing_manifest_with_closed_stderr) ... 
+  test_missing_manifest_with_closed_stderr (test_output.OutputTests.test_missing_manifest_with_closed_stderr) (unbuffered=False) ... FAIL
+  test_missing_manifest_with_closed_stderr (test_output.OutputTests.test_missing_manifest_with_closed_stderr) (unbuffered=True) ... FAIL
+test_verify_closed_stdout_for_matching_and_changed_backup (test_output.OutputTests.test_verify_closed_stdout_for_matching_and_changed_backup) ... 
+  test_verify_closed_stdout_for_matching_and_changed_backup (test_output.OutputTests.test_verify_closed_stdout_for_matching_and_changed_backup) (content=b'keep me\n', unbuffered=False) ... FAIL
+  test_verify_closed_stdout_for_matching_and_changed_backup (test_output.OutputTests.test_verify_closed_stdout_for_matching_and_changed_backup) (content=b'changed\n', unbuffered=False) ... FAIL
+
+======================================================================
+FAIL: test_create_closed_stdout_preserves_published_manifest (test_output.OutputTests.test_create_closed_stdout_preserves_published_manifest) (unbuffered=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_output.py", line 53, in test_create_closed_stdout_preserves_published_manifest
+    self.assertEqual(result.returncode, 2, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 != 2 : Exception ignored on flushing sys.stdout:
+BrokenPipeError: [Errno 32] Broken pipe
+
+
+======================================================================
+FAIL: test_missing_manifest_with_closed_stderr (test_output.OutputTests.test_missing_manifest_with_closed_stderr) (unbuffered=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_output.py", line 73, in test_missing_manifest_with_closed_stderr
+    self.assertEqual(result.returncode, 2)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 != 2
+
+======================================================================
+FAIL: test_missing_manifest_with_closed_stderr (test_output.OutputTests.test_missing_manifest_with_closed_stderr) (unbuffered=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_output.py", line 73, in test_missing_manifest_with_closed_stderr
+    self.assertEqual(result.returncode, 2)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 2
+
+======================================================================
+FAIL: test_verify_closed_stdout_for_matching_and_changed_backup (test_output.OutputTests.test_verify_closed_stdout_for_matching_and_changed_backup) (content=b'keep me\n', unbuffered=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_output.py", line 64, in test_verify_closed_stdout_for_matching_and_changed_backup
+    self.assertEqual(result.returncode, 2, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 != 2 : Exception ignored on flushing sys.stdout:
+BrokenPipeError: [Errno 32] Broken pipe
+
+
+======================================================================
+FAIL: test_verify_closed_stdout_for_matching_and_changed_backup (test_output.OutputTests.test_verify_closed_stdout_for_matching_and_changed_backup) (content=b'changed\n', unbuffered=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/projects/blackout/test_output.py", line 64, in test_verify_closed_stdout_for_matching_and_changed_backup
+    self.assertEqual(result.returncode, 2, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 120 != 2 : Exception ignored on flushing sys.stdout:
+BrokenPipeError: [Errno 32] Broken pipe
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.567s
+
+FAILED (failures=5)
