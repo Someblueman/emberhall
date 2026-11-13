@@ -1,0 +1,6 @@
+test_returning_to_old_rule_text_does_not_revive_old_approval (tests.test_governance.GovernanceTests.test_returning_to_old_rule_text_does_not_revive_old_approval) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.775s
+
+OK

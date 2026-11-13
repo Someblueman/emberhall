@@ -1,0 +1,101 @@
+{
+  "format": "house-scale-probe-v1",
+  "started_utc": "2026-11-13T00:54:11Z",
+  "python": "3.13.2",
+  "os": "Darwin",
+  "machine": "arm64",
+  "cpu_count": 10,
+  "git": "git version 2.50.1",
+  "load_average_start": [
+    2.02734375,
+    2.3984375,
+    2.53857421875
+  ],
+  "source_sha256": {
+    "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+    "house/__main__.py": "eb4eef1499f9b713fa63b3067309bc331f134c3d76c0535ba5a36ddcf45ceedd",
+    "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+    "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+    "house/model.py": "ae44f7385ab4da78847adfd064c0f1b9909239b6d731fe15c0fb777f4f0cdd26",
+    "house/record.py": "33627d0338e6207bde9b9d7d621617d8d6ceacf361fbd2723929a457f5be0c95"
+  },
+  "fixture": "20 residents; per 100 events one task/claim/finish/lesson/review/sleep/wake; otherwise messages",
+  "boundary": "Record.read full validation; CLI last-page read including startup; append including full validation/lock/Git commit",
+  "limits": "Synthetic packed Git history; warm OS caches; small artifacts; no live SSH ratifications; no elapsed-day or tail-latency claim",
+  "target": "At 10000 events, median full read and append each <= 2 seconds on this host",
+  "runs": [
+    {
+      "fixture": {
+        "events": 1000,
+        "events_sha256": "69868c8dc87aa493f46ba1144ca83e3f01a0f913f7e6b026d7c4a70b10132874",
+        "anchor": "1c1ec5dab2683efa25e23e6b5f18feb0f2ec01fa"
+      },
+      "samples": [
+        {
+          "starting_events": 1000,
+          "read_seconds": 0.18378387500069948,
+          "state_sha256": "10f1f05a1acec3206e98c01440c657478850d12ffffec37c66bc5ecaf4797d0c",
+          "head": "8c5612b228ad3be7e324fb0ea5ca6927e19c336d",
+          "cli_page_seconds": 0.21882658300000912,
+          "append_seconds": 0.20442787499996484
+        },
+        {
+          "starting_events": 1001,
+          "read_seconds": 0.1823432090004644,
+          "state_sha256": "2cc521bd1e00cb1c9c09ab3b734318c2e6cf7a1fe7e38e049df3a39781d86b16",
+          "head": "d3a154f68a9f311a7a5c523e39c06b4ab847057d",
+          "cli_page_seconds": 0.21713333299976512,
+          "append_seconds": 0.21045179100019595
+        },
+        {
+          "starting_events": 1002,
+          "read_seconds": 0.18282633299986628,
+          "state_sha256": "05b07a14161c9845cd9512f7a6488bf943e8ff6291215283d30816b4b90945b0",
+          "head": "664dfe60b93ba863889f4250ff82f3cd807d17ee",
+          "cli_page_seconds": 0.21687554199979786,
+          "append_seconds": 0.20851666599992313
+        }
+      ],
+      "profile": "         7579203 function calls (6099300 primitive calls) in 0.832 seconds\n\n   Ordered by: cumulative time\n   List reduced from 165 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n        1    0.008    0.008    0.832    0.832 /Users/sws/Code/longhouse/house/record.py:80(read)\n     1003    0.003    0.000    0.781    0.001 /Users/sws/Code/longhouse/house/model.py:29(apply)\n1438017/1002    0.413    0.000    0.775    0.001 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/copy.py:119(deepcopy)\n43890/1002    0.118    0.000    0.774    0.001 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/copy.py:218(_deepcopy_dict)\n  2880407    0.135    0.000    0.135    0.000 {method 'get' of 'dict' objects}\n  1544859    0.052    0.000    0.052    0.000 {built-in method builtins.id}\n  1385097    0.039    0.000    0.039    0.000 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/copy.py:173(_deepcopy_atomic)\n        4    0.000    0.000    0.032    0.008 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/subprocess.py:514(run)\n        4    0.000    0.000    0.027    0.007 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/subprocess.py:1177(communicate)\n        4    0.002    0.001    0.027    0.007 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/subprocess.py:2077(_communicate)\n        2    0.000    0.000    0.023    0.012 /Users/sws/Code/longhouse/house/record.py:31(git)\n     2138    0.001    0.000    0.023    0.000 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/selectors.py:385(select)\n     2138    0.021    0.000    0.021    0.000 {method 'poll' of 'select.poll' objects}\n    52920    0.009    0.000    0.014    0.000 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/copy.py:232(_keep_alive)\n        2    0.000    0.000    0.010    0.005 /Users/sws/Code/longhouse/house/record.py:41(ref)\n     9030    0.003    0.000    0.008    0.000 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/copy.py:192(_deepcopy_list)\n        4    0.000    0.000    0.005    0.001 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/subprocess.py:816(__init__)\n        4    0.000    0.000    0.005    0.001 /Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/subprocess.py:1810(_execute_child)\n\n\n"
+    },
+    {
+      "fixture": {
+        "events": 10000,
+        "events_sha256": "535ced2edfa37ddcef5a54957421e233d4ff45f0835e2f6a3986dd87e9889409",
+        "anchor": "1c1ec5dab2683efa25e23e6b5f18feb0f2ec01fa"
+      },
+      "samples": [
+        {
+          "starting_events": 10000,
+          "read_seconds": 12.591089958999873,
+          "state_sha256": "423bb90a36bde66992ed0ca2bbd4c5b2be416aa78d1e29b00a0755cf2a327406",
+          "head": "54c6fb2f377231cd338affac8ceee985211adcbe",
+          "cli_page_seconds": 12.768903208000665,
+          "append_seconds": 12.91352016699966
+        },
+        {
+          "starting_events": 10001,
+          "read_seconds": 13.059327209000003,
+          "state_sha256": "bffd9c826dcdc70cb8c82d4605633fcfe19d2bffbe01cef76b892aeee4df6392",
+          "head": "7b36108a6a7e524e4c8831dd9d2ed1024e102a9b",
+          "cli_page_seconds": 12.991462375000083,
+          "append_seconds": 13.149875207999685
+        },
+        {
+          "starting_events": 10002,
+          "read_seconds": 13.175119457999244,
+          "state_sha256": "65c152e822d544e11d344ccb6599a73d8bb4b6fc21047c5da29434fa90fb9ecf",
+          "head": "81dbb4cf24f2c406bf35cc6660f733c0b610241c",
+          "cli_page_seconds": 13.384541915999762,
+          "append_seconds": 13.165918165999756
+        }
+      ]
+    }
+  ],
+  "load_average_end": [
+    3.02587890625,
+    2.61572265625,
+    2.60107421875
+  ],
+  "complete": true
+}

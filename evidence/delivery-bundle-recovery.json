@@ -1,0 +1,8 @@
+{
+  "head": "4b13dbad1c33c02d9234c793166066c080dbd43f",
+  "events": 49,
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "passed": true,
+  "source_publication": "staged; blocked by locked configured SSH signing key",
+  "note": "Exact state and every event equal the live house; source clone remains pending."
+}

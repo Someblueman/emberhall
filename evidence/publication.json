@@ -1,0 +1,8 @@
+{
+  "status": "authorized; source commit and clone verification pending",
+  "authorization": "Allow unsigned local commits for this task",
+  "scope": "Local source commits only; no push or rule ratification",
+  "mechanism": "git -c commit.gpgsign=false commit; persistent signing configuration unchanged",
+  "house_head": "f8652b679f9fe4ccce91473b8bfd55047c733ddc",
+  "house_events": 63
+}

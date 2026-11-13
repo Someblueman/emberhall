@@ -1,0 +1,18 @@
+test_returning_to_old_rule_text_does_not_revive_old_approval (tests.test_governance.GovernanceTests.test_returning_to_old_rule_text_does_not_revive_old_approval) ... FAIL
+
+======================================================================
+FAIL: test_returning_to_old_rule_text_does_not_revive_old_approval (tests.test_governance.GovernanceTests.test_returning_to_old_rule_text_does_not_revive_old_approval)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_governance.py", line 97, in test_returning_to_old_rule_text_does_not_revive_old_approval
+    self.reject_ratification(self.signed, old_signature, reason="no longer current")
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/tests/test_governance.py", line 38, in reject_ratification
+    with self.assertRaisesRegex(ValueError, reason):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.799s
+
+FAILED (failures=1)

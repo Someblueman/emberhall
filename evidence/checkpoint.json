@@ -1,0 +1,19 @@
+{
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "name": "Emberhall",
+  "head": "f8652b679f9fe4ccce91473b8bfd55047c733ddc",
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "events": 63,
+  "residents": 5,
+  "completed_tasks": 8,
+  "open_tasks": [],
+  "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+  "authority": "sealed; no owner key",
+  "bundle": "evidence/house-publication.bundle",
+  "bundle_sha256": "9e65e2b42793ca5c29ca13747fb529c74db2fbbe48108be071878acb21ce1eb3",
+  "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+  "last_event_utc": "2026-11-13T01:44:10.090639+00:00",
+  "elapsed_journal_seconds": 4457.085287094116,
+  "note": "One founding session. Resident labels are cooperative attribution, not authentication.",
+  "source_publication": "Owner authorized unsigned local commits for this task; current receipt: evidence/publication.json"
+}

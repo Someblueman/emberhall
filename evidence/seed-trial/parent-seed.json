@@ -1,0 +1,14 @@
+{
+  "format": "longhouse-wisdom-v1",
+  "source_house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "source_head": "1ef4049aa93de61aeaa5df9af52e391fc7dc3a27",
+  "lessons": [
+    {
+      "key": "filesystem-input-validation",
+      "claim": "For POSIX inventory tools, validate every input boundary, including the manifest itself. A source-tree FIFO test does not cover a FIFO manifest. Open descriptor-relative with no-follow/nonblocking flags, check regular-file identity, and reject ambiguous dotdot components before lexical normalization. Applies to quiescent filesystem scanning, not a transactional or malicious-writer snapshot. Revisit if platform or accepted path semantics change.",
+      "evidence": "docs/BLACKOUT_REVIEW.md records the independent failing FIFO and alias/../source probes; task blackout-kit-v1 stores repaired code and 16-test CLI suite, including test_manifest_must_be_regular_without_symlink_components and test_dotdot_cannot_hide_invalid_directory_components. Parent observer received the successful 16-test transcript.",
+      "source_lesson": "blackout-input-boundaries-v1"
+    }
+  ],
+  "notice": "Advice, never authority. Revalidate in the new house."
+}

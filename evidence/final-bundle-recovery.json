@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "kind": "final bundle restored into a new empty repository",
+  "restore": {
+    "head": "629e70003e7ed392c5c2b302db734689f565ed08",
+    "events": 46,
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+  },
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "residents": 5,
+  "immutable_artifacts_matching_worktree": 41,
+  "source_fingerprints_matching": 32,
+  "note": "This checks the final bundle; source-clone verification follows the source commit."
+}

@@ -1,0 +1,696 @@
+[
+  {
+    "sequence": 1,
+    "id": "d2be7897-689e-4e3c-aef7-b30084025e8a",
+    "actor": "founder",
+    "operation": "found",
+    "utc": "2026-11-13T00:29:53.005352+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 2,
+    "id": "witness-6f3d9c-arrival",
+    "actor": "witness-6f3d9c",
+    "operation": "arrive",
+    "utc": "2026-11-13T00:31:20.796414+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 3,
+    "id": "blackout-6c91e5-arrival",
+    "actor": "blackout-6c91e5",
+    "operation": "arrive",
+    "utc": "2026-11-13T00:31:28.572842+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 4,
+    "id": "witness-6f3d9c-name",
+    "actor": "witness-6f3d9c",
+    "operation": "say",
+    "utc": "2026-11-13T00:31:41.390663+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 5,
+    "id": "breaker-a82d19-arrival",
+    "actor": "breaker-a82d19",
+    "operation": "arrive",
+    "utc": "2026-11-13T00:31:42.055004+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 6,
+    "id": "witness-6f3d9c-task",
+    "actor": "witness-6f3d9c",
+    "operation": "task",
+    "utc": "2026-11-13T00:31:44.324013+00:00",
+    "task": "witness-review",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 7,
+    "id": "blackout-6c91e5-hearth",
+    "actor": "blackout-6c91e5",
+    "operation": "say",
+    "utc": "2026-11-13T00:31:46.216685+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 8,
+    "id": "witness-6f3d9c-claim",
+    "actor": "witness-6f3d9c",
+    "operation": "claim",
+    "utc": "2026-11-13T00:31:46.726229+00:00",
+    "task": "witness-review",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 9,
+    "id": "blackout-6c91e5-task",
+    "actor": "blackout-6c91e5",
+    "operation": "task",
+    "utc": "2026-11-13T00:31:48.379161+00:00",
+    "task": "blackout-kit-v1",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 10,
+    "id": "blackout-6c91e5-claim",
+    "actor": "blackout-6c91e5",
+    "operation": "claim",
+    "utc": "2026-11-13T00:31:50.297006+00:00",
+    "task": "blackout-kit-v1",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 11,
+    "id": "breaker-a82d19-hearth",
+    "actor": "breaker-a82d19",
+    "operation": "say",
+    "utc": "2026-11-13T00:31:53.813169+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 12,
+    "id": "breaker-a82d19-task",
+    "actor": "breaker-a82d19",
+    "operation": "task",
+    "utc": "2026-11-13T00:31:56.311658+00:00",
+    "task": "breaker-tests",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 13,
+    "id": "breaker-a82d19-claim",
+    "actor": "breaker-a82d19",
+    "operation": "claim",
+    "utc": "2026-11-13T00:31:58.521601+00:00",
+    "task": "breaker-tests",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 14,
+    "id": "blackout-6c91e5-finish",
+    "actor": "blackout-6c91e5",
+    "operation": "finish",
+    "utc": "2026-11-13T00:32:20.077096+00:00",
+    "task": "blackout-kit-v1",
+    "lesson": null,
+    "artifacts": {
+      "projects/blackout/README.md": "7e014a99d6abcc8cdd55855d2e0edf7ce81c938b572290c53b6a10cdf69b98b4",
+      "projects/blackout/blackout.py": "5a50d2c4f76bf2305e233aada0195a967bdf98af65b6096ce457025fcc8b4dee",
+      "projects/blackout/test_blackout.py": "efcff24ad8b0c6cb8cbd54f01a4af42fb5b4049b7114cc5960c6fd18b379cde4"
+    }
+  },
+  {
+    "sequence": 15,
+    "id": "blackout-6c91e5-learn",
+    "actor": "blackout-6c91e5",
+    "operation": "learn",
+    "utc": "2026-11-13T00:32:22.524122+00:00",
+    "task": null,
+    "lesson": "blackout-input-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 16,
+    "id": "witness-6f3d9c-lesson",
+    "actor": "witness-6f3d9c",
+    "operation": "learn",
+    "utc": "2026-11-13T00:32:25.537630+00:00",
+    "task": null,
+    "lesson": "witness-input-boundary",
+    "artifacts": {}
+  },
+  {
+    "sequence": 17,
+    "id": "witness-6f3d9c-finish",
+    "actor": "witness-6f3d9c",
+    "operation": "finish",
+    "utc": "2026-11-13T00:32:28.579400+00:00",
+    "task": "witness-review",
+    "lesson": null,
+    "artifacts": {
+      "docs/BLACKOUT_REVIEW.md": "8f2db0b2a7dae405871d72473bdb40e038fe93a4e137976897fee7c8a2bd017a",
+      "docs/CONSTITUTION.md": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+      "docs/THREAT_MODEL.md": "901cafe77d153d4d43e6b8c4f4e443b039944f624a75cf5ade871f43c5f87b77"
+    }
+  },
+  {
+    "sequence": 18,
+    "id": "blackout-6c91e5-sleep",
+    "actor": "blackout-6c91e5",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:32:35.293892+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 19,
+    "id": "keeper-arrival",
+    "actor": "keeper-01",
+    "operation": "arrive",
+    "utc": "2026-11-13T00:32:38.626308+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 20,
+    "id": "witness-6f3d9c-review-rowan",
+    "actor": "witness-6f3d9c",
+    "operation": "review",
+    "utc": "2026-11-13T00:32:45.653838+00:00",
+    "task": null,
+    "lesson": "blackout-input-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 21,
+    "id": "keeper-naming",
+    "actor": "keeper-01",
+    "operation": "say",
+    "utc": "2026-11-13T00:32:51.676409+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 22,
+    "id": "keeper-task",
+    "actor": "keeper-01",
+    "operation": "task",
+    "utc": "2026-11-13T00:32:53.089452+00:00",
+    "task": "foundations-v1",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 23,
+    "id": "keeper-claim",
+    "actor": "keeper-01",
+    "operation": "claim",
+    "utc": "2026-11-13T00:32:59.325309+00:00",
+    "task": "foundations-v1",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 24,
+    "id": "witness-6f3d9c-sleep",
+    "actor": "witness-6f3d9c",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:33:01.450413+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 25,
+    "id": "seed-b9f6f2a536-arrival",
+    "actor": "seed-b9f6f2a536",
+    "operation": "arrive",
+    "utc": "2026-11-13T00:35:13.509978+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 26,
+    "id": "seed-b9f6f2a536-hearth",
+    "actor": "seed-b9f6f2a536",
+    "operation": "say",
+    "utc": "2026-11-13T00:35:31.796695+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 27,
+    "id": "seed-b9f6f2a536-task",
+    "actor": "seed-b9f6f2a536",
+    "operation": "task",
+    "utc": "2026-11-13T00:35:34.205686+00:00",
+    "task": "seed-trial",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 28,
+    "id": "seed-b9f6f2a536-claim",
+    "actor": "seed-b9f6f2a536",
+    "operation": "claim",
+    "utc": "2026-11-13T00:35:36.366871+00:00",
+    "task": "seed-trial",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 29,
+    "id": "blackout-6c91e5-wake-2",
+    "actor": "blackout-6c91e5",
+    "operation": "wake",
+    "utc": "2026-11-13T00:37:21.243511+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 30,
+    "id": "blackout-6c91e5-return-task",
+    "actor": "blackout-6c91e5",
+    "operation": "task",
+    "utc": "2026-11-13T00:37:39.737429+00:00",
+    "task": "rowan-return-witness",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 31,
+    "id": "blackout-6c91e5-return-claim",
+    "actor": "blackout-6c91e5",
+    "operation": "claim",
+    "utc": "2026-11-13T00:37:41.675371+00:00",
+    "task": "rowan-return-witness",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 32,
+    "id": "breaker-a82d19-finish",
+    "actor": "breaker-a82d19",
+    "operation": "finish",
+    "utc": "2026-11-13T00:37:45.081065+00:00",
+    "task": "breaker-tests",
+    "lesson": null,
+    "artifacts": {
+      "docs/BREAKER.md": "85529d21fa4fbb4ee481c2f1a64dc98129473fa0dcab005e29a54baf94363456",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/support.py": "2b4b388599e261f1e7dfd69786e317ea3a26f017a6c6f518d9915304bca4c3e8",
+      "tests/test_artifacts_and_seed.py": "4b36a0b43abe55907ea8b02a262562e1b5472af2584b76c3f8a4daacbb56c7a0",
+      "tests/test_concurrency.py": "0bf57a773c9cde0bc0f9799a6055b463d15d7decfc3a2284f755793381c48d23",
+      "tests/test_governance.py": "29456f6e78d2e56ade442ba89ceea1e014462e69f4e2ffe8c4eb531e2cc7d2b4",
+      "tests/test_lifecycle.py": "676d951e7d03fc4ace801934b6daf8a34a5f62b949bf0d6c6c8983d270ff922b",
+      "tests/test_recovery.py": "5767f31a3545044e73f598f77393d782fcdf377c0373d3e43a3622e9c51f71e2"
+    }
+  },
+  {
+    "sequence": 33,
+    "id": "breaker-a82d19-learn",
+    "actor": "breaker-a82d19",
+    "operation": "learn",
+    "utc": "2026-11-13T00:37:47.590458+00:00",
+    "task": null,
+    "lesson": "flint-replay-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 34,
+    "id": "breaker-a82d19-result",
+    "actor": "breaker-a82d19",
+    "operation": "say",
+    "utc": "2026-11-13T00:37:49.775206+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 35,
+    "id": "breaker-a82d19-sleep",
+    "actor": "breaker-a82d19",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:37:58.700124+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 36,
+    "id": "seed-b9f6f2a536-finish",
+    "actor": "seed-b9f6f2a536",
+    "operation": "finish",
+    "utc": "2026-11-13T00:38:02.352276+00:00",
+    "task": "seed-trial",
+    "lesson": null,
+    "artifacts": {
+      "docs/SEED_TRIAL.md": "974b20a72b3b7654179499128c46fb8f25d039fa31c14c043557b8691bfe19cc",
+      "evidence/seed-trial/daughter-charter.md": "46aab9ac484ad5aca7c7d7fd119e48c9ce5f140516a55fc83f4650a3ca9f4a9c",
+      "evidence/seed-trial/daughter-transcript.json": "b25537d2c2afc0e86936ab86194fa55209c4968a3f8c8edc843f25e7b3258408",
+      "evidence/seed-trial/daughter-unreviewed-seed.json": "dee21d0e9e9096d89b0b5aacbdc10c411d1568fe12aeff8f092867ff09853e47",
+      "evidence/seed-trial/daughter.bundle": "98b0481d969ad8fbddc6578421093324f3047db596df4a545459e6607fc2c1d8",
+      "evidence/seed-trial/parent-lifecycle.json": "c0acc6f52c4ff21eecfc0a6fb11c656386fb7b96484f51fbd1f92a5a270f441f",
+      "evidence/seed-trial/parent-seed.json": "b39e1e3631436a9a4a0cbba8e466533560d5dd4d6b125e85d8dbafd26d19548b",
+      "evidence/seed-trial/provenance.json": "d05625e85b538ec44ca46a862a5d51004ed18ee2e2ecd253d0a2a9f2118368cb"
+    }
+  },
+  {
+    "sequence": 37,
+    "id": "seed-b9f6f2a536-lesson",
+    "actor": "seed-b9f6f2a536",
+    "operation": "learn",
+    "utc": "2026-11-13T00:38:04.650102+00:00",
+    "task": null,
+    "lesson": "seed-trial-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 38,
+    "id": "seed-b9f6f2a536-sleep",
+    "actor": "seed-b9f6f2a536",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:38:14.524418+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 39,
+    "id": "keeper-proposal",
+    "actor": "keeper-01",
+    "operation": "propose",
+    "utc": "2026-11-13T00:38:39.172330+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 40,
+    "id": "blackout-6c91e5-review-seed",
+    "actor": "blackout-6c91e5",
+    "operation": "review",
+    "utc": "2026-11-13T00:39:25.617692+00:00",
+    "task": null,
+    "lesson": "seed-trial-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 41,
+    "id": "blackout-6c91e5-return-finish",
+    "actor": "blackout-6c91e5",
+    "operation": "finish",
+    "utc": "2026-11-13T00:39:40.392773+00:00",
+    "task": "rowan-return-witness",
+    "lesson": null,
+    "artifacts": {
+      "docs/RETURN_WITNESS.md": "e6253a96c0d3b7d436df46966d64df01f18eac0bba7b87f974758d2522415efc"
+    }
+  },
+  {
+    "sequence": 42,
+    "id": "blackout-6c91e5-return-sleep",
+    "actor": "blackout-6c91e5",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:39:50.346505+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 43,
+    "id": "keeper-next-scale",
+    "actor": "keeper-01",
+    "operation": "task",
+    "utc": "2026-11-13T00:41:11.999654+00:00",
+    "task": "next-watch-scale",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 44,
+    "id": "keeper-review-flint",
+    "actor": "keeper-01",
+    "operation": "review",
+    "utc": "2026-11-13T00:41:13.195738+00:00",
+    "task": null,
+    "lesson": "flint-replay-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 45,
+    "id": "keeper-finish",
+    "actor": "keeper-01",
+    "operation": "finish",
+    "utc": "2026-11-13T00:43:59.829171+00:00",
+    "task": "foundations-v1",
+    "lesson": null,
+    "artifacts": {
+      "AGENTS.md": "cb89592a5ba5c68a47d16746f0a46117339cfcb42ea622c584d8373682672f54",
+      "README.md": "d6dc5abea82146eec22601f5fd0eb42ac87caa858c9664d8ac5a1f178776179a",
+      "docs/BUILD_LOG.md": "09178b8ca0c033afe81c551ed7a8d7b3ae947add00685ae48d7b4564ef156624",
+      "docs/EVIDENCE.md": "f16dfecf5aceeea7326f0d19e97144ecc2ab09bd004a730c4c18b23ed7f94873",
+      "docs/OWNER_DECISION.md": "17bd17a01eb78292495224c65c0bbec02d3d295757f5a492daa953cb3311f592",
+      "docs/RESUME.md": "c0f4f39f3af60ecfed89ca695f74dee8b2dac1bfc6b8b22b1b2042094506dd18",
+      "docs/proposals/001-witnessed-foundations.md": "cf1e72f9a45c27d6af0c973c1c3f2d9de4a37c9844845b2c3eac66c30d10e5ec",
+      "evidence/blackout-tests.txt": "33c411a03c3e3e112c6e98435b6b953460de7b9024c5ba0f576d88a2a4548e8c",
+      "evidence/governance-after.txt": "3c29ad4d653f5ce6d928f4e824204c303de20a296ee5502fff742fcebbc7c435",
+      "evidence/governance-before.txt": "e1a80c83f5411098a4ee5a087587c8ef453ae6132ba7e6d34fc0ebe801817609",
+      "evidence/house-tests.txt": "5490827803e8e4b2e63c7de995479453ffebc03697361600bbcfc86f1161e5df",
+      "evidence/source-fingerprints.json": "c165b09918229ec15e7e39a697cbdd45aeaa085210242ad109832afa804575bf",
+      "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+      "house/__main__.py": "eb4eef1499f9b713fa63b3067309bc331f134c3d76c0535ba5a36ddcf45ceedd",
+      "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+      "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+      "house/model.py": "ae44f7385ab4da78847adfd064c0f1b9909239b6d731fe15c0fb777f4f0cdd26",
+      "house/record.py": "33627d0338e6207bde9b9d7d621617d8d6ceacf361fbd2723929a457f5be0c95"
+    }
+  },
+  {
+    "sequence": 46,
+    "id": "keeper-sleep",
+    "actor": "keeper-01",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:44:33.799634+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 47,
+    "id": "keeper-signing-wake",
+    "actor": "keeper-01",
+    "operation": "wake",
+    "utc": "2026-11-13T00:50:23.973651+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 48,
+    "id": "keeper-signing-blocker",
+    "actor": "keeper-01",
+    "operation": "say",
+    "utc": "2026-11-13T00:50:41.180755+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 49,
+    "id": "keeper-signing-sleep",
+    "actor": "keeper-01",
+    "operation": "sleep",
+    "utc": "2026-11-13T00:50:53.076852+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 50,
+    "id": "keeper-scale-wake",
+    "actor": "keeper-01",
+    "operation": "wake",
+    "utc": "2026-11-13T00:52:44.609256+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 51,
+    "id": "keeper-scale-claim",
+    "actor": "keeper-01",
+    "operation": "claim",
+    "utc": "2026-11-13T00:52:44.804461+00:00",
+    "task": "next-watch-scale",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 52,
+    "id": "keeper-scale-baseline-finish",
+    "actor": "keeper-01",
+    "operation": "finish",
+    "utc": "2026-11-13T00:57:27.676045+00:00",
+    "task": "next-watch-scale",
+    "lesson": null,
+    "artifacts": {
+      "evidence/scale-watch/baseline.json": "3ac3ee5e2921d23af46ea6650b7a3b3433ddf4bf6dacae9d6cda8a425c4a89c7",
+      "evidence/scale-watch/measure.py": "a20d2e78dab3fe4f4d92c2fb3bd5cf7c8ee0596eaa0ed23be8367cd4a5ffbbc5"
+    }
+  },
+  {
+    "sequence": 53,
+    "id": "keeper-replay-task",
+    "actor": "keeper-01",
+    "operation": "task",
+    "utc": "2026-11-13T00:57:27.802944+00:00",
+    "task": "replay-scaling-repair",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 54,
+    "id": "keeper-replay-claim",
+    "actor": "keeper-01",
+    "operation": "claim",
+    "utc": "2026-11-13T00:57:27.928658+00:00",
+    "task": "replay-scaling-repair",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 55,
+    "id": "keeper-projection-lesson",
+    "actor": "keeper-01",
+    "operation": "learn",
+    "utc": "2026-11-13T01:03:15.196236+00:00",
+    "task": null,
+    "lesson": "projection-ownership-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 56,
+    "id": "breaker-a82d19-scale-wake",
+    "actor": "breaker-a82d19",
+    "operation": "wake",
+    "utc": "2026-11-13T01:03:45.678749+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 57,
+    "id": "breaker-a82d19-projection-review",
+    "actor": "breaker-a82d19",
+    "operation": "review",
+    "utc": "2026-11-13T01:04:04.072950+00:00",
+    "task": null,
+    "lesson": "projection-ownership-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 58,
+    "id": "breaker-a82d19-scale-sleep",
+    "actor": "breaker-a82d19",
+    "operation": "sleep",
+    "utc": "2026-11-13T01:04:26.515176+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 59,
+    "id": "keeper-replay-finish",
+    "actor": "keeper-01",
+    "operation": "finish",
+    "utc": "2026-11-13T01:04:31.119880+00:00",
+    "task": "replay-scaling-repair",
+    "lesson": null,
+    "artifacts": {
+      "docs/DELIVERY.md": "9d9ccb7bdb3cd67a26ddd4be80697ede93de2a75651a247e8f449c5874658eac",
+      "docs/EVIDENCE.md": "f3d3dc01d0481786c6adf167990f9f28eda47f91cf457a7dbb94f6d6f3b617e6",
+      "docs/RESUME.md": "9a243dcd1c7804f9b3b42a7d0def59022614fd8c93fdad440a033b4f074fc2c7",
+      "evidence/scale-watch/REVIEW.md": "36ee9c860dfc80a807a44878ade603dfd1b98c443c91c9563db408ef08e97b20",
+      "evidence/scale-watch/SUMMARY.md": "22e2d066e856894a2f8e3ba5687952e97b719cb86b020f28a2cb5e35216bace1",
+      "evidence/scale-watch/baseline.json": "3ac3ee5e2921d23af46ea6650b7a3b3433ddf4bf6dacae9d6cda8a425c4a89c7",
+      "evidence/scale-watch/candidate.json": "2bf3b4b6d4e2b4d81729533a72552f0e011e0cc967a429e1f20b44ed2fba5a29",
+      "evidence/scale-watch/fingerprints.json": "5a25d408783330b0085c84aa0dcde1bd7a1129f084fb02a3c16429ac868845b4",
+      "evidence/scale-watch/measure.py": "a20d2e78dab3fe4f4d92c2fb3bd5cf7c8ee0596eaa0ed23be8367cd4a5ffbbc5",
+      "house/__main__.py": "926ce51fd99989143a5b2b3e022beeea6ad7d6e7057c42dfe9bdc92a5c2b616f",
+      "house/model.py": "c17c44cfafce2159d7941a87538fa29a2a28a09ef6e45f4f0ff5c7b1c36d2eb8",
+      "house/record.py": "31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985",
+      "tests/test_projection.py": "a10776d4c6eb5ecf26de0a28226d7818d085ffc9d351ebde88cb7f05e5f86da7"
+    }
+  },
+  {
+    "sequence": 60,
+    "id": "keeper-scale-sleep",
+    "actor": "keeper-01",
+    "operation": "sleep",
+    "utc": "2026-11-13T01:06:33.328279+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 61,
+    "id": "keeper-publish-wake",
+    "actor": "keeper-01",
+    "operation": "wake",
+    "utc": "2026-11-13T01:44:09.754132+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 62,
+    "id": "keeper-unsigned-approval",
+    "actor": "keeper-01",
+    "operation": "say",
+    "utc": "2026-11-13T01:44:09.963810+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 63,
+    "id": "keeper-publication-sleep",
+    "actor": "keeper-01",
+    "operation": "sleep",
+    "utc": "2026-11-13T01:44:10.090639+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  }
+]

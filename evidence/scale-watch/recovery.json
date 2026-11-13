@@ -1,0 +1,9 @@
+{
+  "head": "8db180ade0b66b93fc8024010b36be8160f9b107",
+  "events": 60,
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "passed": true,
+  "latest_artifacts_matching_worktree": 49,
+  "source_publication": "staged; blocked by locked configured SSH signing key",
+  "note": "Exact recovered state/event equality; later task versions supersede earlier artifact snapshots without erasing them."
+}

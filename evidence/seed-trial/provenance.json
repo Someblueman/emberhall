@@ -1,0 +1,51 @@
+{
+  "parent_house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "seed_source_head": "1ef4049aa93de61aeaa5df9af52e391fc7dc3a27",
+  "daughter_house": "0f2f93d7-37a9-49b2-9745-3e14829015b3",
+  "daughter_path": "/private/tmp/emberhall-daughter-oxfz072c",
+  "restore_path": "/private/tmp/emberhall-daughter-restore-431_dkz8",
+  "daughter_actor": "reed-e7311b2815",
+  "daughter_anchor": "cda48e97bc19afafc0c73fcc00860956b6a669ee",
+  "daughter_head": "f76121d86060529b239884e6fe738e755de047e1",
+  "daughter_events": 4,
+  "seed_lesson_count": 1,
+  "first_adoption": {
+    "adopted": 1,
+    "notice": "Imported as unreviewed advice; rules and authority unchanged.",
+    "receipts": [
+      {
+        "head": "9938ddfee108230202586b6a72d09fa22b12dce0",
+        "replayed": false,
+        "request": "seed-b39e1e3631436a9a4a0cbba8e466533560d5dd4d6b125e85d8dbafd26d19548b-0",
+        "sequence": 3
+      }
+    ]
+  },
+  "repeat_adoption": {
+    "adopted": 1,
+    "notice": "Imported as unreviewed advice; rules and authority unchanged.",
+    "receipts": [
+      {
+        "replayed": true,
+        "request": "seed-b39e1e3631436a9a4a0cbba8e466533560d5dd4d6b125e85d8dbafd26d19548b-0",
+        "sequence": 3
+      }
+    ]
+  },
+  "checks": "Trial assertions passed; checked conditions are recorded in docs/SEED_TRIAL.md and actual CLI states in daughter-transcript.json.",
+  "engine_sha256": {
+    "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+    "house/__main__.py": "eb4eef1499f9b713fa63b3067309bc331f134c3d76c0535ba5a36ddcf45ceedd",
+    "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+    "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+    "house/model.py": "ae44f7385ab4da78847adfd064c0f1b9909239b6d731fe15c0fb777f4f0cdd26",
+    "house/record.py": "33627d0338e6207bde9b9d7d621617d8d6ceacf361fbd2723929a457f5be0c95"
+  },
+  "artifacts_sha256": {
+    "daughter-charter.md": "46aab9ac484ad5aca7c7d7fd119e48c9ce5f140516a55fc83f4650a3ca9f4a9c",
+    "daughter-transcript.json": "b25537d2c2afc0e86936ab86194fa55209c4968a3f8c8edc843f25e7b3258408",
+    "daughter-unreviewed-seed.json": "dee21d0e9e9096d89b0b5aacbdc10c411d1568fe12aeff8f092867ff09853e47",
+    "daughter.bundle": "98b0481d969ad8fbddc6578421093324f3047db596df4a545459e6607fc2c1d8",
+    "parent-seed.json": "b39e1e3631436a9a4a0cbba8e466533560d5dd4d6b125e85d8dbafd26d19548b"
+  }
+}
