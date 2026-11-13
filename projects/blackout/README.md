@@ -41,6 +41,15 @@ must omit `..` components, so normalization cannot conceal a symlink or missing
 directory. Use an absolute path or a relative path descending from your current
 directory.
 
+Paths match exactly, including letter case and Unicode normalization form. A
+restore that changes `Report.txt` to `report.txt`, or changes a name from NFC to
+NFD, reports the original as `missing` and the new spelling as `extra`, even if
+the filesystem treats both spellings as the same name. Preserve names when
+copying between filesystems; distinct source names may collide on the destination.
+Investigate these differences against the trusted source before renaming files.
+Keep the original manifest: creating a new one from the restore would replace
+the baseline you are checking.
+
 Use a **quiescent directory or filesystem snapshot**. This is not a transactional
 snapshot of a live filesystem, and it does not guarantee detection of a malicious
 concurrent writer. This format preserves file contents only: empty directories,
