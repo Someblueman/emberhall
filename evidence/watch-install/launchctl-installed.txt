@@ -1,0 +1,105 @@
+gui/501/local.emberhall.watch = {
+	active count = 0
+	path = /Users/sws/Library/LaunchAgents/local.emberhall.watch.plist
+	type = LaunchAgent
+	state = not running
+
+	program = /Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3
+	arguments = {
+		/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3
+		/Users/sws/Code/longhouse/.git/house-watch/runtime-deb43e6565a3c6cf06c9c87739934b07aaf86141.pyz
+		--repo
+		/Users/sws/Code/longhouse
+		run
+	}
+
+	working directory = /Users/sws/Code/longhouse
+
+	stdout path = /Users/sws/Code/longhouse/.git/house-watch/launchd-out.log
+	stderr path = /Users/sws/Code/longhouse/.git/house-watch/launchd-error.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.Mj3y6XiXr8/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		TZ => Europe/London
+		PATH => /Users/sws/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+		XPC_SERVICE_NAME => local.emberhall.watch
+	}
+
+	domain = gui/501 [100004]
+	asid = 100004
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 0
+	last exit code = (never exited)
+
+	event triggers = {
+		local.emberhall.watch.268435473 => {
+			keepalive = 0
+			service = local.emberhall.watch
+			stream = com.apple.launchd.calendarinterval
+			monitor = com.apple.UserEventAgent-Aqua
+			descriptor = {
+				"Minute" => 0
+				"Hour" => 6
+			}
+		}
+		local.emberhall.watch.268435472 => {
+			keepalive = 0
+			service = local.emberhall.watch
+			stream = com.apple.launchd.calendarinterval
+			monitor = com.apple.UserEventAgent-Aqua
+			descriptor = {
+				"Minute" => 0
+				"Hour" => 0
+			}
+		}
+		local.emberhall.watch.268435475 => {
+			keepalive = 0
+			service = local.emberhall.watch
+			stream = com.apple.launchd.calendarinterval
+			monitor = com.apple.UserEventAgent-Aqua
+			descriptor = {
+				"Minute" => 0
+				"Hour" => 18
+			}
+		}
+		local.emberhall.watch.268435474 => {
+			keepalive = 0
+			service = local.emberhall.watch
+			stream = com.apple.launchd.calendarinterval
+			monitor = com.apple.UserEventAgent-Aqua
+			descriptor = {
+				"Minute" => 0
+				"Hour" => 12
+			}
+		}
+	}
+
+	event channels = {
+		"com.apple.launchd.calendarinterval" = {
+			port = 0x0
+			active = 0
+			managed = 1
+			reset = 0
+			hide = 0
+			watching = 1
+		}
+	}
+
+	spawn type = background (5)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = inferred program
+}

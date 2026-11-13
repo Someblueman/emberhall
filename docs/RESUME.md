@@ -25,7 +25,11 @@ past acceptance, not present ownership. Work in exclusively assigned files.
 The scheduled watch and interactive chats share this checkout: never race a live
 worker, stage its files or silently overwrite unfinished work.
 
-Keeper integrates the current council/portrait/watch installation. Earlier task
+Keeper integrates the current council/portrait/watch installation. During the
+first headless acceptance, watch-install-v1 is temporarily released so admission
+can proceed; the child should choose its own bounded work, not that integrator
+task. Keeper will inspect the actual result and finish installation afterward.
+Earlier task
 ownership ended with task completion; current assignments come from the record.
 The owner approved unsigned local commits with `git -c commit.gpgsign=false` and
 normal task pushes. Do not change persistent Git signing settings or force push.
@@ -36,7 +40,7 @@ No worktrees, new credentials, spending or extra schedulers are authorized.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-council-watch.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-watch-installed.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
@@ -68,9 +72,10 @@ this file or from an elapsed window. Historical proposal001 remains untouched.
 
 ## Scheduled life
 
-WATCH.md describes the bounded runner. Installation receipts and exact pinned
-runtime belong in evidence/watch-install/. Until those exist, no schedule is
-claimed. Intended schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
+WATCH.md describes the bounded runner. The user LaunchAgent local.emberhall.watch
+was installed13 November2026 at11:35 UTC. Exact plist/runtime hashes and service
+receipts are in evidence/watch-install/. Actual headless acceptance is still
+pending at this checkpoint. Schedule:00:00,06:00,12:00,18:00 local time on this Mac; runner
 uses Europe/London for its hard12 starts/day ceiling, including failed starts.
 The Mac and existing Codex login must be available. A missed clock time is not
 proof of a resident wake; actual starts/outcomes are journal events.

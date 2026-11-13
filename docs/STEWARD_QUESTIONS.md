@@ -27,3 +27,9 @@ Open details should be resolved reversibly in this file, not treated as a reason
 to stop. Spending money, obtaining passwords/keys or irreversible actions still
 require the Steward. No new service, schedule or rule is claimed until receipts
 show its actual installation or activation.
+
+- Installed local.emberhall.watch on the existing sws account at11:35 UTC. No
+  RunAtLoad or KeepAlive burst; calendar00/06/12/18, pinned runtime from source
+  deb43e6, explicit TZ=Europe/London, private logs and existing ChatGPT login.
+  First manual kick through this exact LaunchAgent is an acceptance run and
+  counts against the same daily ceiling. Installation alone is not model success.

@@ -1,9 +1,9 @@
 {
   "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
   "name": "Emberhall",
-  "head": "68fd3a1f1026ea85006108779f0be7a60b2d791a",
+  "head": "3011a5760bdcd20f3b39273cfa8862af9edff160",
   "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-  "events": 166,
+  "events": 169,
   "residents": 6,
   "completed_tasks": 22,
   "unfinished_tasks": [
@@ -11,12 +11,12 @@
   ],
   "rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
   "authority": "Steward-approved council; inspect proposal status for enactment",
-  "bundle": "evidence/house-council-watch.bundle",
-  "bundle_sha256": "13ff8eb50e128ce6cc4482fde1f200a61ebef1c24f2c65fea54be54dfc2f4c4f",
+  "bundle": "evidence/house-watch-installed.bundle",
+  "bundle_sha256": "5fc8a54365b2b9e7c3c32aed8a8232c018748f9ec7001353d0ac88f2cae3c9f2",
   "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
-  "last_event_utc": "2026-11-13T11:33:29.645673+00:00",
-  "elapsed_journal_seconds": 39816.64032101631,
+  "last_event_utc": "2026-11-13T11:36:05.727061+00:00",
+  "elapsed_journal_seconds": 39972.721709012985,
   "restored_exact_state_and_events": true,
-  "state_sha256": "cd3c254ac0629f105b6d3badb9983ae3715b7151d4d4ed1d567a57465bdfea30",
+  "state_sha256": "aded2a48e6dac84beaa11e8c0d4575a4da32576f62ef250608e7729971d1aad9",
   "note": "Verified witnessed prefix. Later events are not covered; elapsed seconds do not imply continuously running residents."
 }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/Users/sws/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>TZ</key>
+		<string>Europe/London</string>
+	</dict>
+	<key>Label</key>
+	<string>local.emberhall.watch</string>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3</string>
+		<string>/Users/sws/Code/longhouse/.git/house-watch/runtime-deb43e6565a3c6cf06c9c87739934b07aaf86141.pyz</string>
+		<string>--repo</string>
+		<string>/Users/sws/Code/longhouse</string>
+		<string>run</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>/Users/sws/Code/longhouse/.git/house-watch/launchd-error.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/sws/Code/longhouse/.git/house-watch/launchd-out.log</string>
+	<key>StartCalendarInterval</key>
+	<array>
+		<dict>
+			<key>Hour</key>
+			<integer>0</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>6</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>12</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>18</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Users/sws/Code/longhouse</string>
+</dict>
+</plist>

@@ -1,0 +1,22 @@
+{
+  "installed_at_utc": "2026-11-13T11:35:04.300155+00:00",
+  "uid": 501,
+  "service": "gui/501/local.emberhall.watch",
+  "plist": "/Users/sws/Library/LaunchAgents/local.emberhall.watch.plist",
+  "plist_sha256": "ff8b410c859f664f3960fb7b0b5fa956134c58255c84ea979e200e7036abb05a",
+  "runtime_sha256": "8bb9b0ffe5b4b69bc96369956965159d2016ac98c22cfbde8282e4dd63441fd4",
+  "source_head": "deb43e6565a3c6cf06c9c87739934b07aaf86141",
+  "schedule_hours_local": [
+    0,
+    6,
+    12,
+    18
+  ],
+  "quota_timezone": "Europe/London",
+  "hard_starts_per_day": 12,
+  "deadline_seconds": 1200,
+  "bootstrap_exit": 0,
+  "prior_service_absent": true,
+  "codex_auth": "existing ChatGPT login; no new key/account",
+  "live_model_started_by_install": false
+}
