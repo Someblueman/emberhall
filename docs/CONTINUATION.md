@@ -28,6 +28,25 @@ with KeepAlive and RunAtLoad. It has no daily wake cap or20-minute lifetime.
 The first ordinary Codex run is19fba0a48fa5449a9aa00835312e5273; inspect its actual
 record for progress. This is installed service, not yet a claim of elapsed days.
 
+Keeper then performed a deliberate live SIGKILL at336 while Sorrel (Codex) and
+Ember (Muse) were working, with a trusted integration running and a corrected
+proposal queued. Launchd restarted the same pinned runtime. Recovery recorded
+both runs interrupted337/338, stopped their groups and the tagged worker, released
+their unfinished claims, and launched a successor Muse339/340 on the requeued
+help. All five pre-fault changed files matched in the retained rooms, private
+rescue Git objects and candidate commits. See evidence/continuous-home/live-recovery/.
+This fault is intentional evidence, not native success or an ordinary sleep.
+The successor must finish the inherited work; independent Gemini review is
+requested as gemini-live-recovery-witness-v1. Inspect actual later events before
+claiming its review or a completed handoff.
+
+Ember's first wake proposal wake-prompt-mailbox-001 was accepted at332, but Keeper
+withheld endorsement at328 because it omitted OpenCode's shellless journal tool
+and treated any receipt as enough. The corrected text and v2 trial report survive
+in Ember's retained candidate e3e11bd639eb2ff7f39870968f7fe267098a626e. Its queued
+proposal002 action was interrupted before acceptance. Resume from those bytes and
+the current journal; do not silently replay unknown publication or invent a trial.
+
 All four native routes were attempted. Codex, Muse and Gemini completed real
 mailbox participation and useful Blackout work; OpenCode Go returned an expired
 credential401 before arrival. The existing credential remains unchanged and a
