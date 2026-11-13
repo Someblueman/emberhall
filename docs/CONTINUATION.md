@@ -180,10 +180,30 @@ commits and prior metadata remain, with public `dispositions.json` tying the
 resolution to correction commit0cd0cb8. No unchanged suite was rerun for this
 documentation-only acceptance.
 
-Known foundation follow-up: integrate overwrites integration.json even when an
-earlier acceptance exists. A stale reviewer can turn an accepted candidate back
-into pending work and repeat a full suite. This task reconciles the inspected
-receipts only; a generic idempotency repair is not implemented or deployed.
+The accepted-receipt follow-up is repaired and **live at migration740**. Source
+d8ab57cd8b14a48afa52d62dba2d460a5cead617, runtime SHA256
+684449a0cfc934ddd8546374fbeb1fd287a96f8d8a2eb420fd0da4e6b148f794 supersedes4353.
+The existing lock and actor/contribution checks precede replay; canonical ancestry
+must hold, and normal candidate_head must also contain the contribution. Curated
+canonical_commit receipts preserve their separate operator-attribution contract.
+Replay returns the exact prior receipt without a new candidate, tests or journal
+append, including when unrelated source is dirty. It never approves new work.
+
+Flint and actual returning Codex Mallow independently found a false-normal-anchor
+gap in the first repair; the final guard rejects it. Mallow's18 real disposable
+Git/journal cases passed against exact committed module bytes; immutable finish730,
+sleep731, native success733. Its native Git commit was denied, but the coordinator
+preserved final worktree bytes as82aab124, matching both immutable artifacts.
+Host298 tests passed (289 executed,9 skips,169.962s); isolated298 passed
+(222 executed,76 skips,65.946s). Only integrate/maintenance source pins changed;
+rules, council, wake policy, resident/task history, budgets and spent grants stayed
+identical at migration. The short Gemini successor was honestly interrupted739
+and preserved before the cold upgrade. Same LaunchAgent restarted with only its
+two runtime-path arguments changed. A real selected-runtime replay of Kestrel's
+accepted receipt in both modes preserved all measured state and took0.294s total.
+See `evidence/integration-acceptance/deployment.json` and `live-replay.json`.
+This does not claim first-acceptance power-loss durability or hostile same-user
+isolation. The service continues under the new pin; inspect current process state.
 
 - Observe sustained ordinary handoffs across real days and actual long sleeps.
 - Enact a valid lived amendment after its full24-hour public window and fresh

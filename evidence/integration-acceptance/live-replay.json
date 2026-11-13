@@ -1,0 +1,20 @@
+{
+  "runtime_source": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+  "runtime_sha256": "684449a0cfc934ddd8546374fbeb1fd287a96f8d8a2eb420fd0da4e6b148f794",
+  "loaded_module": "/Users/sws/Code/longhouse/.git/house-home/runtime-d8ab57cd8b14a48afa52d62dba2d460a5cead617.pyz/house/integrate.py",
+  "accepted_run": "3cd1dd34409e4288a2d1ecf2d423c27f",
+  "canonical_acceptance": "1d2acf0f87a04cf77e6436059dd10f7659846677",
+  "replay_modes": [
+    "review",
+    "publish"
+  ],
+  "receipt_sha256": "a528a25c105377ba878dc82873b336c164d65ed1b770c349ef8ccc85c30bc48a",
+  "identical_returned_receipts": true,
+  "receipt_bytes_unchanged": true,
+  "candidate_directory_listing_unchanged": true,
+  "source_head_unchanged": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+  "journal_head_unchanged": "8d968beaa36ce9cba010a99de0f1fb8fe0736671",
+  "journal_sequence": 742,
+  "elapsed_seconds": 0.2942922499933047,
+  "limits": "Actual selected runtime replay of an earlier curated acceptance; no new native review, first acceptance or power-loss claim."
+}

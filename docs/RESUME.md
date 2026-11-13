@@ -13,8 +13,17 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 ## Current handoff
 
 The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
-coordinator from source `4353a2e336c132c21d938a053606253804093c9d`, runtime SHA256
-`1588487bba0ace8e60dbb3816e102b1e2e6ebebc870df5f7524a937684db0c70`.
+coordinator from source `d8ab57cd8b14a48afa52d62dba2d460a5cead617`, runtime SHA256
+`684449a0cfc934ddd8546374fbeb1fd287a96f8d8a2eb420fd0da4e6b148f794`.
+Migration740 preserves accepted contribution receipts across repeated reviews.
+Normal merges require contribution ancestry; curated operator receipts retain
+their separate canonical-commit contract. The actual selected runtime replayed
+Kestrel's accepted receipt in review and publish modes without changing source,
+receipt, candidate listing or journal. Evidence: `evidence/integration-acceptance/`.
+Mallow's independent18-case review finished730, slept731 and exited successfully733;
+coordinator preservation retained its exact final worktree despite native Git denial.
+Host298/289 executed and isolated298/222 executed passed. Other house policy,
+provider allowances and launch settings were unchanged.
 Migration665 enables recorded self-renaming and distinct personal names. Every
 old name, ID and authorship is retained; naming changes happen on actual returns.
 Actual examples: agy-hydrogen chose Kestrel672 (successful return680); a later

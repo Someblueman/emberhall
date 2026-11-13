@@ -1,0 +1,1022 @@
+{
+  "resident": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+  "name": "Mallow",
+  "previous_name": "Alder",
+  "run": "e8f0b88f8b3543edb52b37c7696eccfa",
+  "review_status": "independent exact-module review passed; committed binding verified; runtime deployment remains separate",
+  "baseline": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.2 (main, Mar 17 2025, 21:26:38) [Clang 20.1.0 ]",
+    "source_root": "/private/tmp/emberhall-mallow-review",
+    "fixture": "/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/house-test-cr7tynr8/house",
+    "acceptance_origin": "synthetic receipt, real contribution fast-forward; test_exit=0 is fixture data, not an executed first acceptance",
+    "source_commit": "bbfceffa2b0fda6065271a52683159d0fa89820e",
+    "source_integrate_sha256": "568cf3d63880c23c63ea6038bf9cdaf27010482d233fe5db59839abdefc5519e",
+    "checks": [
+      {
+        "publish": false,
+        "before": {
+          "run": "repeat",
+          "actor": "alice",
+          "base": "46d336bad8bffe7639627b2067f9e9a318c6b189",
+          "contribution": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "candidate": "integration-seeded",
+          "candidate_head": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "status": "integrated",
+          "test_exit": 0
+        },
+        "returned": {
+          "run": "repeat",
+          "actor": "alice",
+          "base": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "contribution": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "candidate": "integration-efd979e7285d40029eb7ab476d970a7f",
+          "status": "tests-failed",
+          "candidate_head": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "test_exit": 71
+        },
+        "after": {
+          "run": "repeat",
+          "actor": "alice",
+          "base": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "contribution": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "candidate": "integration-efd979e7285d40029eb7ab476d970a7f",
+          "status": "tests-failed",
+          "candidate_head": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "test_exit": 71
+        },
+        "receipt_bytes_preserved": false,
+        "journal_preserved": false,
+        "source_head_preserved": true,
+        "source_clean": true,
+        "document_preserved": true,
+        "test_logs": {
+          "integration-efd979e7285d40029eb7ab476d970a7f.tests.log": "sandbox-exec: sandbox_apply: Operation not permitted\n"
+        }
+      },
+      {
+        "publish": true,
+        "before": {
+          "run": "repeat",
+          "actor": "alice",
+          "base": "46d336bad8bffe7639627b2067f9e9a318c6b189",
+          "contribution": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "candidate": "integration-seeded",
+          "candidate_head": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "status": "integrated",
+          "test_exit": 0
+        },
+        "returned": {
+          "run": "repeat",
+          "actor": "alice",
+          "base": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "contribution": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "candidate": "integration-3ddabe1b0c834c0e93667e48e23d17f3",
+          "status": "tests-failed",
+          "candidate_head": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "test_exit": 71
+        },
+        "after": {
+          "run": "repeat",
+          "actor": "alice",
+          "base": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "contribution": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "candidate": "integration-3ddabe1b0c834c0e93667e48e23d17f3",
+          "status": "tests-failed",
+          "candidate_head": "6d2db187f4c2ab4bb604dc35ea5630dc5a2a7f72",
+          "test_exit": 71
+        },
+        "receipt_bytes_preserved": false,
+        "journal_preserved": false,
+        "source_head_preserved": true,
+        "source_clean": true,
+        "document_preserved": true,
+        "test_logs": {
+          "integration-3ddabe1b0c834c0e93667e48e23d17f3.tests.log": "sandbox-exec: sandbox_apply: Operation not permitted\n",
+          "integration-efd979e7285d40029eb7ab476d970a7f.tests.log": "sandbox-exec: sandbox_apply: Operation not permitted\n"
+        }
+      }
+    ],
+    "self_review": {
+      "rejected": true,
+      "error": "integration requires a different, awake resident",
+      "receipt_preserved": true
+    },
+    "changed_identity": {
+      "rejected": true,
+      "error": "contribution identity changed",
+      "receipt_preserved": true
+    }
+  },
+  "candidate_initial": {
+    "module_sha256": "0eda109edc2927b979fa58eb8b2c04d1cb2d923e211d81f688353b859ae97d4e",
+    "acceptance_origin": "synthetic receipts; actual Git contribution and canonical ancestry; no first acceptance or nested tests claimed",
+    "checks": [
+      {
+        "case": "normal dry repeat",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "normal publish repeat",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated format after later source commit",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated receipt with dirty unrelated source",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "self review",
+        "actor": "author-repeat",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "sleeping reviewer",
+        "actor": "bob",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "unknown reviewer",
+        "actor": "stranger",
+        "publish": false,
+        "error": "integrator must be a resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed contribution report",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt run=another",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt contribution=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=--all",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=7",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=6256c60a9edd70e5ec09c753cdda978f10ade37f",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "anchor exists outside canonical ancestry",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed workspace HEAD",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      }
+    ],
+    "passed": true
+  },
+  "candidate_anchor_failure": {
+    "module_sha256": "0eda109edc2927b979fa58eb8b2c04d1cb2d923e211d81f688353b859ae97d4e",
+    "acceptance_origin": "synthetic receipts; actual Git contribution and canonical ancestry; no first acceptance or nested tests claimed",
+    "checks": [
+      {
+        "case": "normal dry repeat",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "normal publish repeat",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated format after later source commit",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated receipt with dirty unrelated source",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "self review",
+        "actor": "author-repeat",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "sleeping reviewer",
+        "actor": "bob",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "unknown reviewer",
+        "actor": "stranger",
+        "publish": false,
+        "error": "integrator must be a resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed contribution report",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt run=another",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt contribution=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=--all",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=3c7a83fc819dd0d00672fb9bd9b377683427178d",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": false,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=7",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=3c7a83fc819dd0d00672fb9bd9b377683427178d",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "anchor exists outside canonical ancestry",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed workspace HEAD",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      }
+    ],
+    "passed": false
+  },
+  "reproduction": {
+    "probe.py": {
+      "sha256": "9a9b3b0ee29cd5426b4fb711870573b281cf47df2f4c1bb7b5bd540180813dca",
+      "source": "\"\"\"Real disposable Git/journal repeat probe; never changes the canonical house.\"\"\"\nimport hashlib\nimport json\nfrom pathlib import Path\nimport platform\nimport sys\n\nfrom house.home_work import git\nfrom house.integrate import integrate\nfrom tests.test_integrate import IntegrationTests\n\n\ncase = IntegrationTests()\ncase.setUp()\nworkspace = case.candidate(\"repeat\", \"first\\n\")\nreport_path = case.private / \"repeat\" / \"contribution.json\"\nreport = json.loads(report_path.read_text())\ngit(case.repo, \"fetch\", \"--quiet\", str(workspace), report[\"commit\"])\ngit(case.repo, \"merge\", \"--ff-only\", report[\"commit\"])\naccepted_head = git(case.repo, \"rev-parse\", \"HEAD\")\nreceipt_path = case.private / \"repeat\" / \"integration.json\"\naccepted = {\n    \"run\": \"repeat\", \"actor\": \"alice\", \"base\": case.base,\n    \"contribution\": report[\"commit\"], \"candidate\": \"integration-seeded\",\n    \"candidate_head\": accepted_head, \"status\": \"integrated\", \"test_exit\": 0,\n}\noutput = {\n    \"platform\": platform.platform(), \"python\": sys.version,\n    \"source_root\": str(Path(__file__).resolve().parent),\n    \"fixture\": str(case.repo),\n    \"acceptance_origin\": \"synthetic receipt, real contribution fast-forward; test_exit=0 is fixture data, not an executed first acceptance\",\n    \"source_commit\": git(Path.cwd(), \"rev-parse\", \"HEAD\"),\n    \"source_integrate_sha256\": hashlib.sha256(Path(\"house/integrate.py\").read_bytes()).hexdigest(),\n    \"checks\": [],\n}\n\nfor publish in (False, True):\n    receipt_path.write_text(json.dumps(accepted, indent=2) + \"\\n\")\n    receipt_path.chmod(0o600)\n    before = receipt_path.read_bytes()\n    journal_before = case.record.read()[2]\n    entry = {\"publish\": publish, \"before\": accepted}\n    try:\n        entry[\"returned\"] = integrate(case.record, \"repeat\", \"alice\", publish=publish)\n    except Exception as error:\n        entry[\"error\"] = {\"type\": type(error).__name__, \"text\": str(error)}\n    entry[\"after\"] = json.loads(receipt_path.read_text())\n    entry[\"receipt_bytes_preserved\"] = receipt_path.read_bytes() == before\n    entry[\"journal_preserved\"] = case.record.read()[2] == journal_before\n    entry[\"source_head_preserved\"] = git(case.repo, \"rev-parse\", \"HEAD\") == accepted_head\n    entry[\"source_clean\"] = not git(case.repo, \"status\", \"--porcelain\", \"--untracked-files=all\")\n    entry[\"document_preserved\"] = (case.repo / \"document.txt\").read_text() == \"first\\n\"\n    logs = sorted(case.private.glob(\"integration-*.tests.log\"))\n    entry[\"test_logs\"] = {p.name: p.read_text() for p in logs}\n    output[\"checks\"].append(entry)\n\nreceipt_path.write_text(json.dumps(accepted, indent=2) + \"\\n\")\ncase.record.append(\"wake\", \"author-repeat\", {})\nbefore = receipt_path.read_bytes()\ntry:\n    integrate(case.record, \"repeat\", \"author-repeat\", publish=True)\n    output[\"self_review\"] = {\"rejected\": False}\nexcept ValueError as error:\n    output[\"self_review\"] = {\"rejected\": True, \"error\": str(error)}\noutput[\"self_review\"][\"receipt_preserved\"] = receipt_path.read_bytes() == before\n\nreport_path.write_text(json.dumps({**report, \"base\": \"0\" * 40}) + \"\\n\")\ntry:\n    integrate(case.record, \"repeat\", \"alice\")\n    output[\"changed_identity\"] = {\"rejected\": False}\nexcept ValueError as error:\n    output[\"changed_identity\"] = {\"rejected\": True, \"error\": str(error)}\noutput[\"changed_identity\"][\"receipt_preserved\"] = receipt_path.read_bytes() == before\nPath(sys.argv[1]).write_text(json.dumps(output, indent=2) + \"\\n\")\nprint(json.dumps(output, indent=2))\ncase.doCleanups()\n"
+    },
+    "candidate_probe.py": {
+      "sha256": "71480aac78789543fa9d59b61956ee34e27b137c27fdbba44fa2e88d12cfd925",
+      "source": "\"\"\"Check one exact candidate module in the existing native sandbox.\"\"\"\nimport hashlib\nimport importlib.util\nimport json\nfrom pathlib import Path\nimport subprocess\nimport sys\n\nfrom house.home_work import git\nfrom tests.test_integrate import IntegrationTests\n\nmodule_path = Path(sys.argv[1])\nspec = importlib.util.spec_from_file_location(\"house.mallow_candidate\", module_path)\nmodule = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(module)\nintegrate = module.integrate\ncase = IntegrationTests()\ncase.setUp()\nworkspace = case.candidate(\"repeat\", \"first\\n\")\nreport_path = case.private / \"repeat/contribution.json\"\nreport = json.loads(report_path.read_text())\ngit(case.repo, \"fetch\", \"--quiet\", str(workspace), report[\"commit\"])\ngit(case.repo, \"merge\", \"--ff-only\", report[\"commit\"])\nhead = git(case.repo, \"rev-parse\", \"HEAD\")\nreceipt_path = case.private / \"repeat/integration.json\"\naccepted = {\"run\": \"repeat\", \"actor\": \"alice\", \"base\": case.base,\n            \"contribution\": report[\"commit\"], \"candidate\": \"integration-seeded\",\n            \"candidate_head\": head, \"status\": \"integrated\", \"test_exit\": 0}\nresults = []\n\ndef observe(label, value, actor=\"bob\", publish=False, rejected=None):\n    receipt_path.write_text(json.dumps(value, indent=2) + \"\\n\")\n    receipt_path.chmod(0o600)\n    before = receipt_path.read_bytes()\n    journal = case.record.read()[2]\n    candidates = sorted(str(p) for p in case.private.glob(\"integration-*\"))\n    source = git(case.repo, \"rev-parse\", \"HEAD\")\n    document = (case.repo / \"document.txt\").read_bytes()\n    entry = {\"case\": label, \"actor\": actor, \"publish\": publish}\n    try:\n        returned = integrate(case.record, \"repeat\", actor, publish=publish)\n        entry[\"returned_equal\"] = returned == value\n        entry[\"passed\"] = rejected is None and returned == value\n    except ValueError as error:\n        entry[\"error\"] = str(error)\n        entry[\"passed\"] = rejected is not None and rejected in str(error)\n    entry.update(receipt_preserved=receipt_path.read_bytes() == before,\n                 journal_preserved=case.record.read()[2] == journal,\n                 candidates_preserved=sorted(str(p) for p in case.private.glob(\"integration-*\")) == candidates,\n                 source_head_preserved=git(case.repo, \"rev-parse\", \"HEAD\") == source,\n                 document_preserved=(case.repo / \"document.txt\").read_bytes() == document)\n    entry[\"passed\"] &= all(entry[key] for key in (\"receipt_preserved\", \"journal_preserved\",\n                          \"candidates_preserved\", \"source_head_preserved\", \"document_preserved\"))\n    results.append(entry)\n\nobserve(\"normal dry repeat\", accepted)\nobserve(\"normal publish repeat\", accepted, publish=True)\ngit(case.repo, \"-c\", \"commit.gpgsign=false\", \"-c\", \"user.name=Test\", \"-c\",\n    \"user.email=test@local\", \"commit\", \"--allow-empty\", \"-m\", \"Later source\")\ncurated = {\"run\": \"repeat\", \"actor\": \"alice\", \"contribution\": report[\"commit\"],\n           \"canonical_commit\": head, \"status\": \"integrated\",\n           \"resolution\": \"fixture-only.md\", \"method\": \"Synthetic exact-artifact acceptance\"}\nobserve(\"curated format after later source commit\", curated)\n(case.repo / \"document.txt\").write_text(\"uncommitted next task\\n\")\nobserve(\"curated receipt with dirty unrelated source\", curated, publish=True)\n(case.repo / \"document.txt\").write_text(\"first\\n\")\ncase.record.append(\"wake\", \"author-repeat\", {})\nobserve(\"self review\", accepted, actor=\"author-repeat\", rejected=\"different, awake\")\ncase.record.append(\"sleep\", \"bob\", {\"through\": 0, \"note\": \"Fixture rest\"})\nobserve(\"sleeping reviewer\", accepted, rejected=\"different, awake\")\ncase.record.append(\"wake\", \"bob\", {})\nobserve(\"unknown reviewer\", accepted, actor=\"stranger\", rejected=\"must be a resident\")\nreport_path.write_text(json.dumps({**report, \"base\": \"0\" * 40}))\nobserve(\"changed contribution report\", accepted, rejected=\"identity changed\")\nreport_path.write_text(json.dumps(report))\nfor key, value in ((\"run\", \"another\"), (\"contribution\", \"0\" * 40),\n                   (\"candidate_head\", \"0\" * 40), (\"candidate_head\", \"--all\"),\n                   (\"candidate_head\", case.base),\n                   (\"canonical_commit\", 7), (\"canonical_commit\", case.base)):\n    observe(\"inconsistent receipt \" + key + \"=\" + str(value), {**accepted, key: value},\n            rejected=\"accepted contribution\")\nother = case.candidate(\"other\", \"second\\n\")\nother_head = git(other, \"rev-parse\", \"HEAD\")\ngit(case.repo, \"fetch\", \"--quiet\", str(other), other_head)\nobserve(\"anchor exists outside canonical ancestry\", {**accepted, \"candidate_head\": other_head},\n        rejected=\"outside current source history\")\ngit(workspace, \"-c\", \"commit.gpgsign=false\", \"-c\", \"user.name=Test\", \"-c\",\n    \"user.email=test@local\", \"commit\", \"--allow-empty\", \"-m\", \"Changed contribution\")\nobserve(\"changed workspace HEAD\", accepted, rejected=\"identity changed\")\ncurated_commit = git(workspace, \"rev-parse\", \"HEAD\")\nreport_path.write_text(json.dumps({**report, \"commit\": curated_commit}))\ngit(case.repo, \"fetch\", \"--quiet\", str(workspace), curated_commit)\nassert subprocess.run([\"git\", \"merge-base\", \"--is-ancestor\", curated_commit,\n                       git(case.repo, \"rev-parse\", \"HEAD\")], cwd=case.repo,\n                      capture_output=True).returncode == 1\nassert (workspace / \"document.txt\").read_bytes() == (case.repo / \"document.txt\").read_bytes()\nobserve(\"curated exact bytes accepted without contribution ancestry\",\n        {**curated, \"contribution\": curated_commit})\noutput = {\"module_sha256\": hashlib.sha256(module_path.read_bytes()).hexdigest(),\n          \"acceptance_origin\": \"synthetic receipts; actual Git contribution and canonical ancestry; no first acceptance or nested tests claimed\",\n          \"checks\": results, \"passed\": all(r[\"passed\"] for r in results)}\nPath(sys.argv[2]).write_text(json.dumps(output, indent=2) + \"\\n\")\nprint(json.dumps(output, indent=2))\ncase.doCleanups()\nsys.exit(0 if output[\"passed\"] else 1)\n"
+    }
+  },
+  "candidate_revised": {
+    "module_sha256": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+    "acceptance_origin": "synthetic receipts; actual Git contribution and canonical ancestry; no first acceptance or nested tests claimed",
+    "checks": [
+      {
+        "case": "normal dry repeat",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "normal publish repeat",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated format after later source commit",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated receipt with dirty unrelated source",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "self review",
+        "actor": "author-repeat",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "sleeping reviewer",
+        "actor": "bob",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "unknown reviewer",
+        "actor": "stranger",
+        "publish": false,
+        "error": "integrator must be a resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed contribution report",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt run=another",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt contribution=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=--all",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=4002fbcb8de6c2a4e3567e18d75a33e695c0b2ed",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is absent from its merge commit; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=7",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=4002fbcb8de6c2a4e3567e18d75a33e695c0b2ed",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "anchor exists outside canonical ancestry",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed workspace HEAD",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      }
+    ],
+    "passed": true
+  },
+  "candidate_final": {
+    "module_sha256": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+    "acceptance_origin": "synthetic receipts; actual Git contribution and canonical ancestry; no first acceptance or nested tests claimed",
+    "checks": [
+      {
+        "case": "normal dry repeat",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "normal publish repeat",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated format after later source commit",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated receipt with dirty unrelated source",
+        "actor": "bob",
+        "publish": true,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "self review",
+        "actor": "author-repeat",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "sleeping reviewer",
+        "actor": "bob",
+        "publish": false,
+        "error": "integration requires a different, awake resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "unknown reviewer",
+        "actor": "stranger",
+        "publish": false,
+        "error": "integrator must be a resident",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed contribution report",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt run=another",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt contribution=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=0000000000000000000000000000000000000000",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=--all",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt candidate_head=4fee697be39ce72626065691138af5035bec54d4",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is absent from its merge commit; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=7",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "inconsistent receipt canonical_commit=4fee697be39ce72626065691138af5035bec54d4",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution receipt is inconsistent; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "anchor exists outside canonical ancestry",
+        "actor": "bob",
+        "publish": false,
+        "error": "accepted contribution is outside current source history; preserve it",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "changed workspace HEAD",
+        "actor": "bob",
+        "publish": false,
+        "error": "contribution identity changed",
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      },
+      {
+        "case": "curated exact bytes accepted without contribution ancestry",
+        "actor": "bob",
+        "publish": false,
+        "returned_equal": true,
+        "passed": true,
+        "receipt_preserved": true,
+        "journal_preserved": true,
+        "candidates_preserved": true,
+        "source_head_preserved": true,
+        "document_preserved": true
+      }
+    ],
+    "passed": true
+  },
+  "reproduction_at_initial_report": {
+    "probe.py": {
+      "sha256": "9a9b3b0ee29cd5426b4fb711870573b281cf47df2f4c1bb7b5bd540180813dca",
+      "source": "\"\"\"Real disposable Git/journal repeat probe; never changes the canonical house.\"\"\"\nimport hashlib\nimport json\nfrom pathlib import Path\nimport platform\nimport sys\n\nfrom house.home_work import git\nfrom house.integrate import integrate\nfrom tests.test_integrate import IntegrationTests\n\n\ncase = IntegrationTests()\ncase.setUp()\nworkspace = case.candidate(\"repeat\", \"first\\n\")\nreport_path = case.private / \"repeat\" / \"contribution.json\"\nreport = json.loads(report_path.read_text())\ngit(case.repo, \"fetch\", \"--quiet\", str(workspace), report[\"commit\"])\ngit(case.repo, \"merge\", \"--ff-only\", report[\"commit\"])\naccepted_head = git(case.repo, \"rev-parse\", \"HEAD\")\nreceipt_path = case.private / \"repeat\" / \"integration.json\"\naccepted = {\n    \"run\": \"repeat\", \"actor\": \"alice\", \"base\": case.base,\n    \"contribution\": report[\"commit\"], \"candidate\": \"integration-seeded\",\n    \"candidate_head\": accepted_head, \"status\": \"integrated\", \"test_exit\": 0,\n}\noutput = {\n    \"platform\": platform.platform(), \"python\": sys.version,\n    \"source_root\": str(Path(__file__).resolve().parent),\n    \"fixture\": str(case.repo),\n    \"acceptance_origin\": \"synthetic receipt, real contribution fast-forward; test_exit=0 is fixture data, not an executed first acceptance\",\n    \"source_commit\": git(Path.cwd(), \"rev-parse\", \"HEAD\"),\n    \"source_integrate_sha256\": hashlib.sha256(Path(\"house/integrate.py\").read_bytes()).hexdigest(),\n    \"checks\": [],\n}\n\nfor publish in (False, True):\n    receipt_path.write_text(json.dumps(accepted, indent=2) + \"\\n\")\n    receipt_path.chmod(0o600)\n    before = receipt_path.read_bytes()\n    journal_before = case.record.read()[2]\n    entry = {\"publish\": publish, \"before\": accepted}\n    try:\n        entry[\"returned\"] = integrate(case.record, \"repeat\", \"alice\", publish=publish)\n    except Exception as error:\n        entry[\"error\"] = {\"type\": type(error).__name__, \"text\": str(error)}\n    entry[\"after\"] = json.loads(receipt_path.read_text())\n    entry[\"receipt_bytes_preserved\"] = receipt_path.read_bytes() == before\n    entry[\"journal_preserved\"] = case.record.read()[2] == journal_before\n    entry[\"source_head_preserved\"] = git(case.repo, \"rev-parse\", \"HEAD\") == accepted_head\n    entry[\"source_clean\"] = not git(case.repo, \"status\", \"--porcelain\", \"--untracked-files=all\")\n    entry[\"document_preserved\"] = (case.repo / \"document.txt\").read_text() == \"first\\n\"\n    logs = sorted(case.private.glob(\"integration-*.tests.log\"))\n    entry[\"test_logs\"] = {p.name: p.read_text() for p in logs}\n    output[\"checks\"].append(entry)\n\nreceipt_path.write_text(json.dumps(accepted, indent=2) + \"\\n\")\ncase.record.append(\"wake\", \"author-repeat\", {})\nbefore = receipt_path.read_bytes()\ntry:\n    integrate(case.record, \"repeat\", \"author-repeat\", publish=True)\n    output[\"self_review\"] = {\"rejected\": False}\nexcept ValueError as error:\n    output[\"self_review\"] = {\"rejected\": True, \"error\": str(error)}\noutput[\"self_review\"][\"receipt_preserved\"] = receipt_path.read_bytes() == before\n\nreport_path.write_text(json.dumps({**report, \"base\": \"0\" * 40}) + \"\\n\")\ntry:\n    integrate(case.record, \"repeat\", \"alice\")\n    output[\"changed_identity\"] = {\"rejected\": False}\nexcept ValueError as error:\n    output[\"changed_identity\"] = {\"rejected\": True, \"error\": str(error)}\noutput[\"changed_identity\"][\"receipt_preserved\"] = receipt_path.read_bytes() == before\nPath(sys.argv[1]).write_text(json.dumps(output, indent=2) + \"\\n\")\nprint(json.dumps(output, indent=2))\ncase.doCleanups()\n"
+    },
+    "candidate_probe.py": {
+      "sha256": "f6bf5859a462952400a4d4af503bd68db7c4129c2d54e3e7131b0e368a851e9f",
+      "source": "\"\"\"Check one exact candidate module in the existing native sandbox.\"\"\"\nimport hashlib\nimport importlib.util\nimport json\nfrom pathlib import Path\nimport subprocess\nimport sys\n\nfrom house.home_work import git\nfrom tests.test_integrate import IntegrationTests\n\nmodule_path = Path(sys.argv[1])\nspec = importlib.util.spec_from_file_location(\"house.mallow_candidate\", module_path)\nmodule = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(module)\nintegrate = module.integrate\ncase = IntegrationTests()\ncase.setUp()\nworkspace = case.candidate(\"repeat\", \"first\\n\")\nreport_path = case.private / \"repeat/contribution.json\"\nreport = json.loads(report_path.read_text())\ngit(case.repo, \"fetch\", \"--quiet\", str(workspace), report[\"commit\"])\ngit(case.repo, \"merge\", \"--ff-only\", report[\"commit\"])\nhead = git(case.repo, \"rev-parse\", \"HEAD\")\nreceipt_path = case.private / \"repeat/integration.json\"\naccepted = {\"run\": \"repeat\", \"actor\": \"alice\", \"base\": case.base,\n            \"contribution\": report[\"commit\"], \"candidate\": \"integration-seeded\",\n            \"candidate_head\": head, \"status\": \"integrated\", \"test_exit\": 0}\nresults = []\n\ndef observe(label, value, actor=\"bob\", publish=False, rejected=None):\n    receipt_path.write_text(json.dumps(value, indent=2) + \"\\n\")\n    receipt_path.chmod(0o600)\n    before = receipt_path.read_bytes()\n    journal = case.record.read()[2]\n    candidates = sorted(str(p) for p in case.private.glob(\"integration-*\"))\n    source = git(case.repo, \"rev-parse\", \"HEAD\")\n    document = (case.repo / \"document.txt\").read_bytes()\n    entry = {\"case\": label, \"actor\": actor, \"publish\": publish}\n    try:\n        returned = integrate(case.record, \"repeat\", actor, publish=publish)\n        entry[\"returned_equal\"] = returned == value\n        entry[\"passed\"] = rejected is None and returned == value\n    except ValueError as error:\n        entry[\"error\"] = str(error)\n        entry[\"passed\"] = rejected is not None and rejected in str(error)\n    entry.update(receipt_preserved=receipt_path.read_bytes() == before,\n                 journal_preserved=case.record.read()[2] == journal,\n                 candidates_preserved=sorted(str(p) for p in case.private.glob(\"integration-*\")) == candidates,\n                 source_head_preserved=git(case.repo, \"rev-parse\", \"HEAD\") == source,\n                 document_preserved=(case.repo / \"document.txt\").read_bytes() == document)\n    entry[\"passed\"] &= all(entry[key] for key in (\"receipt_preserved\", \"journal_preserved\",\n                          \"candidates_preserved\", \"source_head_preserved\", \"document_preserved\"))\n    results.append(entry)\n\nobserve(\"normal dry repeat\", accepted)\nobserve(\"normal publish repeat\", accepted, publish=True)\ngit(case.repo, \"-c\", \"commit.gpgsign=false\", \"-c\", \"user.name=Test\", \"-c\",\n    \"user.email=test@local\", \"commit\", \"--allow-empty\", \"-m\", \"Later source\")\ncurated = {\"run\": \"repeat\", \"actor\": \"alice\", \"contribution\": report[\"commit\"],\n           \"canonical_commit\": head, \"status\": \"integrated\",\n           \"resolution\": \"fixture-only.md\", \"method\": \"Synthetic exact-artifact acceptance\"}\nobserve(\"curated format after later source commit\", curated)\n(case.repo / \"document.txt\").write_text(\"uncommitted next task\\n\")\nobserve(\"curated receipt with dirty unrelated source\", curated, publish=True)\n(case.repo / \"document.txt\").write_text(\"first\\n\")\ncase.record.append(\"wake\", \"author-repeat\", {})\nobserve(\"self review\", accepted, actor=\"author-repeat\", rejected=\"different, awake\")\ncase.record.append(\"sleep\", \"bob\", {\"through\": 0, \"note\": \"Fixture rest\"})\nobserve(\"sleeping reviewer\", accepted, rejected=\"different, awake\")\ncase.record.append(\"wake\", \"bob\", {})\nobserve(\"unknown reviewer\", accepted, actor=\"stranger\", rejected=\"must be a resident\")\nreport_path.write_text(json.dumps({**report, \"base\": \"0\" * 40}))\nobserve(\"changed contribution report\", accepted, rejected=\"identity changed\")\nreport_path.write_text(json.dumps(report))\nfor key, value in ((\"run\", \"another\"), (\"contribution\", \"0\" * 40),\n                   (\"candidate_head\", \"0\" * 40), (\"candidate_head\", \"--all\"),\n                   (\"candidate_head\", case.base),\n                   (\"canonical_commit\", 7), (\"canonical_commit\", case.base)):\n    observe(\"inconsistent receipt \" + key + \"=\" + str(value), {**accepted, key: value},\n            rejected=\"accepted contribution\")\nother = case.candidate(\"other\", \"second\\n\")\nother_head = git(other, \"rev-parse\", \"HEAD\")\ngit(case.repo, \"fetch\", \"--quiet\", str(other), other_head)\nobserve(\"anchor exists outside canonical ancestry\", {**accepted, \"candidate_head\": other_head},\n        rejected=\"outside current source history\")\ngit(workspace, \"-c\", \"commit.gpgsign=false\", \"-c\", \"user.name=Test\", \"-c\",\n    \"user.email=test@local\", \"commit\", \"--allow-empty\", \"-m\", \"Changed contribution\")\nobserve(\"changed workspace HEAD\", accepted, rejected=\"identity changed\")\noutput = {\"module_sha256\": hashlib.sha256(module_path.read_bytes()).hexdigest(),\n          \"acceptance_origin\": \"synthetic receipts; actual Git contribution and canonical ancestry; no first acceptance or nested tests claimed\",\n          \"checks\": results, \"passed\": all(r[\"passed\"] for r in results)}\nPath(sys.argv[2]).write_text(json.dumps(output, indent=2) + \"\\n\")\nprint(json.dumps(output, indent=2))\ncase.doCleanups()\nsys.exit(0 if output[\"passed\"] else 1)\n"
+    }
+  },
+  "module_snapshots": {
+    "candidate_integrate.py": {
+      "sha256": "0eda109edc2927b979fa58eb8b2c04d1cb2d923e211d81f688353b859ae97d4e",
+      "source": "\"\"\"Review private source contributions before a serialized fast-forward publication.\n\nCandidates and failures remain in private Git clones. No reset, stash, forced\nupdate or patch overwrite is used on the shared source checkout.\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport fcntl\nimport json\nfrom pathlib import Path\nimport re\nimport subprocess\nimport sys\nimport uuid\n\nfrom .home_work import git\nfrom .record import Record\nfrom . import test_sandbox\n\n\ndef integrate(record: Record, run: str, actor: str, *, publish: bool = False) -> dict:\n    if not re.fullmatch(r\"[A-Za-z0-9_-]{1,100}\", run):\n        raise ValueError(\"invalid run ID\")\n    private = record.common / \"house-home\"\n    private.mkdir(mode=0o700, exist_ok=True)\n    with (private / \"integration.lock\").open(\"a+b\") as lock:\n        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        state, _, _ = record.read()\n        item = state.get(\"life\", {}).get(\"runs\", {}).get(run)\n        if not item or item[\"status\"] != \"completed\":\n            raise ValueError(\"contribution requires a stopped resident\")\n        if actor not in state[\"residents\"]:\n            raise ValueError(\"integrator must be a resident\")\n        if actor == item[\"resident\"] or not state[\"residents\"][actor][\"awake\"]:\n            raise ValueError(\"integration requires a different, awake resident\")\n        workspace = private / \"residents\" / run\n        report = json.loads((private / run / \"contribution.json\").read_text())\n        if report[\"base\"] != item[\"source_head\"] or report[\"commit\"] != git(workspace, \"rev-parse\", \"HEAD\"):\n            raise ValueError(\"contribution identity changed\")\n        head = git(record.root, \"rev-parse\", \"HEAD\")\n        path = private / run / \"integration.json\"\n        if path.exists():\n            accepted = json.loads(path.read_text())\n            if accepted.get(\"status\") == \"integrated\":\n                # Both fields exist in durable receipts: normal merges record\n                # candidate_head; operator-curated acceptance records canonical_commit.\n                anchors = [accepted[key] for key in (\"canonical_commit\", \"candidate_head\") if key in accepted]\n                if (accepted.get(\"run\") != run or accepted.get(\"contribution\") != report[\"commit\"]\n                        or not anchors or any(not isinstance(anchor, str)\n                            or not re.fullmatch(r\"[0-9a-f]{40}\", anchor)\n                            or anchor != anchors[0] for anchor in anchors)):\n                    raise ValueError(\"accepted contribution receipt is inconsistent; preserve it\")\n                ancestor = subprocess.run([\"git\", \"merge-base\", \"--is-ancestor\", anchors[0], head],\n                                          cwd=record.root, capture_output=True)\n                if ancestor.returncode != 0:\n                    raise ValueError(\"accepted contribution is outside current source history; preserve it\")\n                return accepted\n        if git(record.root, \"status\", \"--porcelain\", \"--untracked-files=all\"):\n            raise ValueError(\"shared source has uncommitted work; preserve it\")\n        candidate = private / (\"integration-\" + uuid.uuid4().hex)\n        subprocess.run([\"git\", \"clone\", \"--quiet\", \"--no-local\", \"--single-branch\", \"--no-tags\",\n                        str(record.root), str(candidate)], check=True, capture_output=True)\n        git(candidate, \"remote\", \"remove\", \"origin\")\n        git(candidate, \"fetch\", \"--quiet\", str(workspace), report[\"commit\"])\n        receipt = {\"run\": run, \"actor\": actor, \"base\": head, \"contribution\": report[\"commit\"],\n                   \"candidate\": candidate.name, \"status\": \"conflict\"}\n        merged = subprocess.run([\"git\", \"-C\", str(candidate), \"-c\", \"commit.gpgsign=false\",\n                                 \"-c\", \"user.name=Emberhall integrator\", \"-c\", \"user.email=house@local\",\n                                 \"merge\", \"--no-edit\", report[\"commit\"]], capture_output=True, text=True)\n        (candidate.parent / (candidate.name + \".merge.log\")).write_text(merged.stdout + merged.stderr)\n        if merged.returncode == 0:\n            receipt[\"candidate_head\"] = git(candidate, \"rev-parse\", \"HEAD\")\n            # A foundation change warrants the existing full acceptance suite.\n            # Run only when accepting changed source, never as a wake ritual.\n            with (candidate.parent / (candidate.name + \".tests.log\")).open(\"w\") as output:\n                tested = test_sandbox.run([sys.executable, \"-m\", \"unittest\", \"discover\", \"-s\", \"tests\", \"-q\"],\n                                          cwd=candidate, stdout=output, timeout=900)\n            unchanged = (git(candidate, \"rev-parse\", \"HEAD\") == receipt[\"candidate_head\"] and\n                         not git(candidate, \"status\", \"--porcelain\", \"--untracked-files=all\"))\n            receipt.update(status=\"reviewed\" if tested.returncode == 0 and unchanged else \"tests-failed\",\n                           test_exit=tested.returncode)\n        if publish and receipt[\"status\"] == \"reviewed\":\n            if head != git(record.root, \"rev-parse\", \"HEAD\") or git(record.root, \"status\", \"--porcelain\", \"--untracked-files=all\"):\n                raise ValueError(\"shared source changed during review; candidate retained\")\n            # Git itself refuses overwrites if an interactive writer dirties a\n            # touched path between the check and this fast-forward operation.\n            git(record.root, \"fetch\", \"--quiet\", str(candidate), receipt[\"candidate_head\"])\n            git(record.root, \"merge\", \"--ff-only\", receipt[\"candidate_head\"])\n            receipt[\"status\"] = \"integrated\"\n        path.write_text(json.dumps(receipt, indent=2) + \"\\n\")\n        path.chmod(0o600)\n        record.append(\"say\", actor, {\"text\": \"house-integration-v1 \" + json.dumps({\n            k: v for k, v in receipt.items() if k != \"candidate\"}, sort_keys=True)})\n        return receipt\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument(\"--repo\", default=\".\")\n    parser.add_argument(\"run\")\n    parser.add_argument(\"--as\", dest=\"actor\", required=True)\n    parser.add_argument(\"--publish\", action=\"store_true\", help=\"accept tested candidate by fast-forward\")\n    args = parser.parse_args()\n    try:\n        print(json.dumps(integrate(Record(args.repo), args.run, args.actor, publish=args.publish), indent=2))\n    except (ValueError, OSError, subprocess.SubprocessError) as error:\n        print(f\"integration retained for review: {type(error).__name__}\", file=sys.stderr)\n        return 2\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"
+    },
+    "revised_integrate.py": {
+      "sha256": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+      "source": "\"\"\"Review private source contributions before a serialized fast-forward publication.\n\nCandidates and failures remain in private Git clones. No reset, stash, forced\nupdate or patch overwrite is used on the shared source checkout.\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport fcntl\nimport json\nfrom pathlib import Path\nimport re\nimport subprocess\nimport sys\nimport uuid\n\nfrom .home_work import git\nfrom .record import Record\nfrom . import test_sandbox\n\n\ndef integrate(record: Record, run: str, actor: str, *, publish: bool = False) -> dict:\n    if not re.fullmatch(r\"[A-Za-z0-9_-]{1,100}\", run):\n        raise ValueError(\"invalid run ID\")\n    private = record.common / \"house-home\"\n    private.mkdir(mode=0o700, exist_ok=True)\n    with (private / \"integration.lock\").open(\"a+b\") as lock:\n        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)\n        state, _, _ = record.read()\n        item = state.get(\"life\", {}).get(\"runs\", {}).get(run)\n        if not item or item[\"status\"] != \"completed\":\n            raise ValueError(\"contribution requires a stopped resident\")\n        if actor not in state[\"residents\"]:\n            raise ValueError(\"integrator must be a resident\")\n        if actor == item[\"resident\"] or not state[\"residents\"][actor][\"awake\"]:\n            raise ValueError(\"integration requires a different, awake resident\")\n        workspace = private / \"residents\" / run\n        report = json.loads((private / run / \"contribution.json\").read_text())\n        if report[\"base\"] != item[\"source_head\"] or report[\"commit\"] != git(workspace, \"rev-parse\", \"HEAD\"):\n            raise ValueError(\"contribution identity changed\")\n        head = git(record.root, \"rev-parse\", \"HEAD\")\n        path = private / run / \"integration.json\"\n        if path.exists():\n            accepted = json.loads(path.read_text())\n            if accepted.get(\"status\") == \"integrated\":\n                # Both fields exist in durable receipts: normal merges record\n                # candidate_head; operator-curated acceptance records canonical_commit.\n                anchors = [accepted[key] for key in (\"canonical_commit\", \"candidate_head\") if key in accepted]\n                if (accepted.get(\"run\") != run or accepted.get(\"contribution\") != report[\"commit\"]\n                        or not anchors or any(not isinstance(anchor, str)\n                            or not re.fullmatch(r\"[0-9a-f]{40}\", anchor)\n                            or anchor != anchors[0] for anchor in anchors)):\n                    raise ValueError(\"accepted contribution receipt is inconsistent; preserve it\")\n                ancestor = subprocess.run([\"git\", \"merge-base\", \"--is-ancestor\", anchors[0], head],\n                                          cwd=record.root, capture_output=True)\n                if ancestor.returncode != 0:\n                    raise ValueError(\"accepted contribution is outside current source history; preserve it\")\n                if \"candidate_head\" in accepted:\n                    contains = subprocess.run([\"git\", \"merge-base\", \"--is-ancestor\", report[\"commit\"],\n                                               accepted[\"candidate_head\"]], cwd=record.root, capture_output=True)\n                    if contains.returncode != 0:\n                        raise ValueError(\"accepted contribution is absent from its merge commit; preserve it\")\n                return accepted\n        if git(record.root, \"status\", \"--porcelain\", \"--untracked-files=all\"):\n            raise ValueError(\"shared source has uncommitted work; preserve it\")\n        candidate = private / (\"integration-\" + uuid.uuid4().hex)\n        subprocess.run([\"git\", \"clone\", \"--quiet\", \"--no-local\", \"--single-branch\", \"--no-tags\",\n                        str(record.root), str(candidate)], check=True, capture_output=True)\n        git(candidate, \"remote\", \"remove\", \"origin\")\n        git(candidate, \"fetch\", \"--quiet\", str(workspace), report[\"commit\"])\n        receipt = {\"run\": run, \"actor\": actor, \"base\": head, \"contribution\": report[\"commit\"],\n                   \"candidate\": candidate.name, \"status\": \"conflict\"}\n        merged = subprocess.run([\"git\", \"-C\", str(candidate), \"-c\", \"commit.gpgsign=false\",\n                                 \"-c\", \"user.name=Emberhall integrator\", \"-c\", \"user.email=house@local\",\n                                 \"merge\", \"--no-edit\", report[\"commit\"]], capture_output=True, text=True)\n        (candidate.parent / (candidate.name + \".merge.log\")).write_text(merged.stdout + merged.stderr)\n        if merged.returncode == 0:\n            receipt[\"candidate_head\"] = git(candidate, \"rev-parse\", \"HEAD\")\n            # A foundation change warrants the existing full acceptance suite.\n            # Run only when accepting changed source, never as a wake ritual.\n            with (candidate.parent / (candidate.name + \".tests.log\")).open(\"w\") as output:\n                tested = test_sandbox.run([sys.executable, \"-m\", \"unittest\", \"discover\", \"-s\", \"tests\", \"-q\"],\n                                          cwd=candidate, stdout=output, timeout=900)\n            unchanged = (git(candidate, \"rev-parse\", \"HEAD\") == receipt[\"candidate_head\"] and\n                         not git(candidate, \"status\", \"--porcelain\", \"--untracked-files=all\"))\n            receipt.update(status=\"reviewed\" if tested.returncode == 0 and unchanged else \"tests-failed\",\n                           test_exit=tested.returncode)\n        if publish and receipt[\"status\"] == \"reviewed\":\n            if head != git(record.root, \"rev-parse\", \"HEAD\") or git(record.root, \"status\", \"--porcelain\", \"--untracked-files=all\"):\n                raise ValueError(\"shared source changed during review; candidate retained\")\n            # Git itself refuses overwrites if an interactive writer dirties a\n            # touched path between the check and this fast-forward operation.\n            git(record.root, \"fetch\", \"--quiet\", str(candidate), receipt[\"candidate_head\"])\n            git(record.root, \"merge\", \"--ff-only\", receipt[\"candidate_head\"])\n            receipt[\"status\"] = \"integrated\"\n        path.write_text(json.dumps(receipt, indent=2) + \"\\n\")\n        path.chmod(0o600)\n        record.append(\"say\", actor, {\"text\": \"house-integration-v1 \" + json.dumps({\n            k: v for k, v in receipt.items() if k != \"candidate\"}, sort_keys=True)})\n        return receipt\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument(\"--repo\", default=\".\")\n    parser.add_argument(\"run\")\n    parser.add_argument(\"--as\", dest=\"actor\", required=True)\n    parser.add_argument(\"--publish\", action=\"store_true\", help=\"accept tested candidate by fast-forward\")\n    args = parser.parse_args()\n    try:\n        print(json.dumps(integrate(Record(args.repo), args.run, args.actor, publish=args.publish), indent=2))\n    except (ValueError, OSError, subprocess.SubprocessError) as error:\n        print(f\"integration retained for review: {type(error).__name__}\", file=sys.stderr)\n        return 2\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"
+    }
+  },
+  "probe_setup_correction": {
+    "case": "curated exact-byte acceptance without contribution ancestry",
+    "first_result": "AssertionError at merge-base returncode assertion because the new workspace commit object had not been fetched into source",
+    "correction": "Fetch the new commit into the disposable source without changing HEAD, then require merge-base --is-ancestor return1 and exact document bytes before calling integrate",
+    "product_change": false
+  },
+  "committed_binding": {
+    "commit": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+    "path": "house/integrate.py",
+    "sha256": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+    "method": "git show COMMIT:house/integrate.py and local hashlib.sha256 compared to executed module",
+    "source_tree": "458ed9e3551efbc76c99305855614a6c2c89f607"
+  },
+  "keeper_reported_acceptance": {
+    "journal_sequence": 729,
+    "host_collected": 298,
+    "host_executed": 289,
+    "host_skipped": 9,
+    "seconds": 169.962,
+    "independent_flint_tests": 5,
+    "observed_by_mallow": "journal report only, not an independently rerun broad suite"
+  },
+  "private_git": {
+    "staged_paths": [
+      "evidence/native-residents/integration-acceptance-mallow.json",
+      "evidence/native-residents/integration-acceptance-mallow.md"
+    ],
+    "commit_command": "git -c commit.gpgsign=false commit -m [task message]",
+    "commit_exit": 128,
+    "commit_error": "Unable to create private .git/index.lock: Operation not permitted",
+    "commit_created": false,
+    "push_attempted": false,
+    "recovery": "coordinator must preserve and commit the exact two task-owned report files; no lock deletion or permission bypass",
+    "initial_git_add_exit": 0,
+    "restage_after_recording_failure_exit": 128,
+    "staging_note": "Initial report versions staged; final worktree includes the added Git failure record, whose restaging was also denied."
+  }
+}

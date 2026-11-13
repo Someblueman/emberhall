@@ -1,0 +1,65 @@
+{
+  "source_commit": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+  "runtime_sha256": "684449a0cfc934ddd8546374fbeb1fd287a96f8d8a2eb420fd0da4e6b148f794",
+  "migration": {
+    "request": "owner-migration-integration-acceptance-20261113",
+    "sequence": 740,
+    "head": "d9e4973da595ade6d844e8fc9ace738b9c8ea567",
+    "replayed": false
+  },
+  "isolated_executed": 222,
+  "changed_protected_files": [
+    "house/integrate.py",
+    "house/maintenance.py"
+  ],
+  "preserved_at_migration": [
+    "residents",
+    "tasks",
+    "lessons",
+    "life",
+    "rules",
+    "rule_revision",
+    "council",
+    "proposals",
+    "wake_policy",
+    "provider releases",
+    "resident_returns",
+    "resident_names",
+    "room_growth",
+    "every prior owner migration"
+  ],
+  "migrated_at_sequence": 740,
+  "isolated_suite": {
+    "collected": 298,
+    "executed": 222,
+    "skipped": 76,
+    "seconds": 65.946,
+    "sha256": "ca78dba81963c627cc5e695c94ef60594c8a76821179a9c5fb77dcaba24d8d9d"
+  },
+  "native_review": {
+    "run": "e8f0b88f8b3543edb52b37c7696eccfa",
+    "resident": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+    "finish": 730,
+    "sleep": 731,
+    "terminal": 733,
+    "outcome": "success",
+    "contribution": "82aab1249cf1ef66bc7992faeabc7208ae063f1e",
+    "final_worktree_equals_immutable_finish": true
+  },
+  "service": {
+    "label": "local.emberhall.watch",
+    "observed_coordinator_pid": 8675,
+    "observed_native_pid": 8723,
+    "runtime_paths_changed": 2,
+    "other_launch_settings_unchanged": true,
+    "successor_run": "cbe3b8c1388f4f78bbb1b9daeaff131e"
+  },
+  "cold_recovery": {
+    "interrupted_run": "0bd49150f6964641b851ead134b337e2",
+    "terminal": 739,
+    "released_tasks": [],
+    "note": "Short successor preserved by previous trusted runtime before migration; no successful finish or sleep invented."
+  },
+  "observed_sequence": 743,
+  "observed_head": "97da3dbce76d952d3606c98440ac7a82f6fce64a"
+}
