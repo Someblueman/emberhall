@@ -41,3 +41,5 @@ request is needed. This does not authorize worktrees or governance changes.
 ## Third-watch publication
 
 The optional custodian and client add35 tests to the existing29; all64 passed, including five disposable real-SSH tests. The previous Blackout16-test evidence remains applicable because its source is unchanged. The latest bundle is evidence/house-custodian.bundle; checkpoint.json names its exact head and recovery.json records its restore comparison. The same per-command unsigned commit and owner-authorized push policy applies. No live deployment or authority change accompanies source publication.
+
+Implementation/checkpoint commit `6d2f64035fcdd12d437bff5671b20c7235efa399` was pushed and origin/main matched it exactly. The worktree was clean and persistent signing remained true. `evidence/custodian/publication.json` records this observation; its subsequent receipt-only commit changes no tested code.

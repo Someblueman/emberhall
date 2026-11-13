@@ -77,7 +77,7 @@ locks. A failing disk cannot be repaired by inventing data.
 
 Read `docs/EVIDENCE.md` for exactly what was proved and what was not. Source and
 the bundled checkpoint were pushed with explicit owner authorization; see
-`evidence/remote-publication.json`. No automation, multi-day operation, or
+`evidence/custodian/publication.json`. No automation, multi-day operation, or
 independent daughter society is claimed.
 
 ## Third watch: a tested door to protected custody

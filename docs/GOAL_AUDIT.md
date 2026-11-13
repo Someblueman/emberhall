@@ -17,7 +17,7 @@ current code, live record, independent reports and raw measurements.
 | Constitution changes from experience and improves governance | Concrete witnessed-foundations-001 proposal; OWNER_DECISION.md | **Not achieved.** Proposal remains pending; no approval is inferred from tests or this goal's continuation. |
 | Found another house with wisdom but no baggage | Reedbank bundle, distinct identity, transcript, idempotent advice import, independent Rowan review | One-session seeding and restore demonstrated. Independent ongoing daughter residency and two-way knowledge trade remain unproved. |
 | Real concurrent Codex residents and adversarial evidence | Five actual workers, live journal, BREAKER.md, raw failures/tests and second-watch REVIEW.md | Demonstrated, with model residents distinguished from test subprocesses and synthetic daughter labels. |
-| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. All92 checkpoint events are preserved. Source and checkpoint pushed with explicit permission; remote equality verified in evidence/remote-publication.json. |
+| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. All92 checkpoint events are preserved. Source and checkpoint pushed with explicit permission; third-watch remote equality verified in evidence/custodian/publication.json. |
 
 ## Remaining external boundary
 

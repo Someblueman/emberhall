@@ -1,0 +1,13 @@
+{
+  "source_commit": "6d2f64035fcdd12d437bff5671b20c7235efa399",
+  "remote": "https://github.com/Someblueman/longhouse.git",
+  "remote_ref": "refs/heads/main",
+  "observed_remote_head": "6d2f64035fcdd12d437bff5671b20c7235efa399",
+  "verified_equal": true,
+  "verified_utc": "2026-11-13T02:23:26.085283+00:00",
+  "worktree_clean_after_push": true,
+  "persistent_commit_gpgsign": "true",
+  "tests": "evidence/custodian/house-tests.txt",
+  "recovery": "evidence/custodian/recovery.json",
+  "note": "This receipt is committed afterward; it records the implementation/checkpoint push and does not claim a self-referential receipt commit hash."
+}
