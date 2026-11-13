@@ -37,3 +37,7 @@ the portable 63-event checkpoint are included in main. The live journal refs are
 local; a fresh clone uses RESUME.md to restore the bundled history. Pushes remain
 authorized for this task after relevant checks; no further routine permission
 request is needed. This does not authorize worktrees or governance changes.
+
+## Third-watch publication
+
+The optional custodian and client add35 tests to the existing29; all64 passed, including five disposable real-SSH tests. The previous Blackout16-test evidence remains applicable because its source is unchanged. The latest bundle is evidence/house-custodian.bundle; checkpoint.json names its exact head and recovery.json records its restore comparison. The same per-command unsigned commit and owner-authorized push policy applies. No live deployment or authority change accompanies source publication.

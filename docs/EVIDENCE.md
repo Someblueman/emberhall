@@ -137,3 +137,7 @@ Persistent signing configuration remains enabled. The owner then authorized push
 source and checkpoint were pushed to origin/main and remote equality was checked.
 See `evidence/remote-publication.json`. Publication does not enroll authority or
 ratify the proposed charter amendment.
+
+## Third watch: custodian preparation
+
+See [the custodian evidence](../evidence/custodian/SUMMARY.md) for64 passing house tests, real loopback OpenSSH attacks, independent repairs, and cross-resident learning. The latest recoverable journal is named in checkpoint.json and RESUME.md. No isolated live deployment or rule change is claimed.

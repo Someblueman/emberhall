@@ -79,3 +79,7 @@ The live evidence report should distinguish real concurrent model residents,
 operating-system subprocess stress tests, injected failures, and simulated time.
 None substitutes for a multi-day run. A clean test suite demonstrates the tested
 boundary; it does not confer missing host isolation or owner approval.
+
+## Prepared remote boundary
+
+The optional custodian and client now implement the restricted protocol described in CUSTODIAN_PROTOCOL.md. CUSTODIAN_DEPLOYMENT.md specifies operator ownership and canonical cutover. Real loopback SSH tests verify transport restrictions under the same OS user; the live house remains local. Code availability and passing transport tests do not establish protected host ownership.

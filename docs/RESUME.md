@@ -32,7 +32,7 @@ proves past acceptance, not current ownership: check the current lease before wo
 The source checkout contains the checkpoint bundle. Restore it exactly:
 
 ```
-python3 -m house restore evidence/house-publication.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-custodian.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house verify
 ```
 
@@ -79,3 +79,19 @@ Read `docs/EVIDENCE.md` for exactly what was proved and what was not. Source and
 the bundled checkpoint were pushed with explicit owner authorization; see
 `evidence/remote-publication.json`. No automation, multi-day operation, or
 independent daughter society is claimed.
+
+## Third watch: a tested door to protected custody
+
+The optional custodian and resident SSH client are implemented. Four returning
+Codex residents worked concurrently with disjoint ownership. All 64 house tests,
+including five real loopback OpenSSH tests, passed. Read
+`evidence/custodian/SUMMARY.md`, `docs/CUSTODIAN_REVIEW.md`, and
+`docs/CUSTODIAN_DEPLOYMENT.md` before installation. No host accounts, system SSH
+configuration, live authority, or canonical journal location were changed.
+
+Rowan applied Flint's recorded server lesson to a different component and found
+another real client output failure. Both original and repaired client artifacts
+remain in the journal. This is observed cross-resident learning within one day.
+The next external step needs an owner-selected protected host/account and an
+explicit canonical cutover decision; use the prepared deployment recipe. The
+pending charter amendment and authority enrollment are separate decisions.

@@ -1,0 +1,15 @@
+{
+  "bundle": "evidence/house-custodian.bundle",
+  "bundle_sha256": "4e3f973b15fb13bd215f91e747448ff992e0ca18e8cfccbda83f989ed227b9c4",
+  "restored": {
+    "head": "c628b312bc04d2f8e92bd055a0121839b0c5c94c",
+    "events": 92,
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+  },
+  "full_state_equal": true,
+  "full_events_equal": true,
+  "state_sha256": "40cdb3575fc31f6c79d3ccce443cfaf97d9c7c88e10f70f4fcf5bdd79b4d8222",
+  "events_sha256": "9c0afe8b3729b5464917361fbea2bc0550efd4a7436641cc408b114a61a89766",
+  "all_residents_asleep": true,
+  "open_tasks": []
+}

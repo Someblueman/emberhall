@@ -1,0 +1,8 @@
+{
+  "encoding": "utf-16",
+  "request_sha256": "323510c1c7e57a7285472057802e7068e861d39e37cf9b2458d03a7fc211fec1",
+  "expected_exit": 2,
+  "actual_exit": 0,
+  "stdout": "{\"house\":\"2026c4d1-36f6-49a4-b98a-134e287a6e0f\",\"ok\":true,\"request\":\"utf16-probe\",\"resident\":\"alice\",\"result\":{\"events\":1,\"head\":\"2cf2b4184d47de7b6b83488232305f7e21ad2bcd\",\"house\":\"2026c4d1-36f6-49a4-b98a-134e287a6e0f\",\"rule_revision\":\"4228aeb07c410ffc9d15b458bf7c2bf8d9dfa7af632f2c339e69f8cb54654da3\",\"valid\":true},\"version\":1}\n",
+  "stderr": ""
+}

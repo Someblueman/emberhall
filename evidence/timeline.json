@@ -692,5 +692,328 @@
     "task": null,
     "lesson": null,
     "artifacts": {}
+  },
+  {
+    "sequence": 64,
+    "id": "keeper-custodian-wake",
+    "actor": "keeper-01",
+    "operation": "wake",
+    "utc": "2026-11-13T02:01:43.936484+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 65,
+    "id": "keeper-custodian-task",
+    "actor": "keeper-01",
+    "operation": "task",
+    "utc": "2026-11-13T02:01:44.061506+00:00",
+    "task": "custodian-boundary",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 66,
+    "id": "keeper-custodian-claim",
+    "actor": "keeper-01",
+    "operation": "claim",
+    "utc": "2026-11-13T02:01:44.186645+00:00",
+    "task": "custodian-boundary",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 67,
+    "id": "blackout-6c91e5-wake-remote",
+    "actor": "blackout-6c91e5",
+    "operation": "wake",
+    "utc": "2026-11-13T02:02:25.805339+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 68,
+    "id": "breaker-a82d19-custodian-wake",
+    "actor": "breaker-a82d19",
+    "operation": "wake",
+    "utc": "2026-11-13T02:02:35.783845+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 69,
+    "id": "breaker-a82d19-custodian-task",
+    "actor": "breaker-a82d19",
+    "operation": "task",
+    "utc": "2026-11-13T02:02:49.798549+00:00",
+    "task": "custodian-review",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 70,
+    "id": "breaker-a82d19-custodian-claim",
+    "actor": "breaker-a82d19",
+    "operation": "claim",
+    "utc": "2026-11-13T02:02:53.732471+00:00",
+    "task": "custodian-review",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 71,
+    "id": "blackout-6c91e5-remote-task",
+    "actor": "blackout-6c91e5",
+    "operation": "task",
+    "utc": "2026-11-13T02:03:13.773193+00:00",
+    "task": "remote-client-v1",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 72,
+    "id": "blackout-6c91e5-remote-claim",
+    "actor": "blackout-6c91e5",
+    "operation": "claim",
+    "utc": "2026-11-13T02:03:15.862940+00:00",
+    "task": "remote-client-v1",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 73,
+    "id": "witness-6f3d9c-wake-custodian",
+    "actor": "witness-6f3d9c",
+    "operation": "wake",
+    "utc": "2026-11-13T02:03:26.972325+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 74,
+    "id": "witness-6f3d9c-custodian-task",
+    "actor": "witness-6f3d9c",
+    "operation": "task",
+    "utc": "2026-11-13T02:03:29.827912+00:00",
+    "task": "custodian-deployment-recipe",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 75,
+    "id": "witness-6f3d9c-custodian-claim",
+    "actor": "witness-6f3d9c",
+    "operation": "claim",
+    "utc": "2026-11-13T02:03:32.377184+00:00",
+    "task": "custodian-deployment-recipe",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 76,
+    "id": "witness-6f3d9c-custodian-finish",
+    "actor": "witness-6f3d9c",
+    "operation": "finish",
+    "utc": "2026-11-13T02:10:28.566625+00:00",
+    "task": "custodian-deployment-recipe",
+    "lesson": null,
+    "artifacts": {
+      "docs/CUSTODIAN_DEPLOYMENT.md": "b03ca06582aff9c36a12676dabc200c9e64afd9edc88acde4fe2f00567d0783e"
+    }
+  },
+  {
+    "sequence": 77,
+    "id": "witness-6f3d9c-custodian-sleep",
+    "actor": "witness-6f3d9c",
+    "operation": "sleep",
+    "utc": "2026-11-13T02:10:40.805030+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 78,
+    "id": "breaker-a82d19-custodian-finish",
+    "actor": "breaker-a82d19",
+    "operation": "finish",
+    "utc": "2026-11-13T02:12:19.110338+00:00",
+    "task": "custodian-review",
+    "lesson": null,
+    "artifacts": {
+      "docs/CUSTODIAN_REVIEW.md": "0d053f544f9fb8cc3050d8f9f02e7d16670a6cece5bd4382e61b86d67bd34739",
+      "tests/test_custodian.py": "ec0d46c426ce1ab2869a6ee8dd39d095f8cf0cb00aaa10f45b1f2b3186bd5d99"
+    }
+  },
+  {
+    "sequence": 79,
+    "id": "breaker-a82d19-custodian-learn",
+    "actor": "breaker-a82d19",
+    "operation": "learn",
+    "utc": "2026-11-13T02:12:39.199207+00:00",
+    "task": null,
+    "lesson": "custodian-process-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 80,
+    "id": "breaker-a82d19-custodian-sleep",
+    "actor": "breaker-a82d19",
+    "operation": "sleep",
+    "utc": "2026-11-13T02:12:50.275372+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 81,
+    "id": "blackout-6c91e5-remote-finish",
+    "actor": "blackout-6c91e5",
+    "operation": "finish",
+    "utc": "2026-11-13T02:12:55.002605+00:00",
+    "task": "remote-client-v1",
+    "lesson": null,
+    "artifacts": {
+      "docs/REMOTE_CLIENT.md": "b38dc42aa79de34bdfd3005eb158a4216236128de66a643afd3771a4e3a7639e",
+      "house/remote.py": "d28f8ca4e7c51afcb1a9b8dae93f03220e27475392909296d73dd2fe45f34d40",
+      "tests/test_remote.py": "b758bb0b52c69385476ab40db24b5a40bd98fcb85380488ad5df42c3d20ea2dc"
+    }
+  },
+  {
+    "sequence": 82,
+    "id": "blackout-6c91e5-remote-lesson",
+    "actor": "blackout-6c91e5",
+    "operation": "learn",
+    "utc": "2026-11-13T02:12:57.098758+00:00",
+    "task": null,
+    "lesson": "remote-lost-receipts-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 83,
+    "id": "blackout-6c91e5-output-task",
+    "actor": "blackout-6c91e5",
+    "operation": "task",
+    "utc": "2026-11-13T02:14:00.479615+00:00",
+    "task": "remote-client-output-repair",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 84,
+    "id": "blackout-6c91e5-output-claim",
+    "actor": "blackout-6c91e5",
+    "operation": "claim",
+    "utc": "2026-11-13T02:14:02.854934+00:00",
+    "task": "remote-client-output-repair",
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 85,
+    "id": "blackout-6c91e5-output-finish",
+    "actor": "blackout-6c91e5",
+    "operation": "finish",
+    "utc": "2026-11-13T02:15:26.072086+00:00",
+    "task": "remote-client-output-repair",
+    "lesson": null,
+    "artifacts": {
+      "docs/REMOTE_CLIENT.md": "7902e2913a0f1295f2432212b2d69c08fdbffec5a228fc187435ca97bf0e7276",
+      "house/remote.py": "20b9235e90906d710de3584a67cdb3d928e4d87ecc383b58ef6bf90aecd02a73",
+      "tests/test_remote.py": "db5c330f3d57282fb345b408398d920a65d7abd7b94483a4f6629a9fadeaa40b"
+    }
+  },
+  {
+    "sequence": 86,
+    "id": "blackout-6c91e5-output-lesson",
+    "actor": "blackout-6c91e5",
+    "operation": "learn",
+    "utc": "2026-11-13T02:15:27.995254+00:00",
+    "task": null,
+    "lesson": "client-output-reflush-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 87,
+    "id": "blackout-6c91e5-remote-sleep",
+    "actor": "blackout-6c91e5",
+    "operation": "sleep",
+    "utc": "2026-11-13T02:15:41.610145+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
+  },
+  {
+    "sequence": 88,
+    "id": "keeper-review-custodian",
+    "actor": "keeper-01",
+    "operation": "review",
+    "utc": "2026-11-13T02:21:27.634616+00:00",
+    "task": null,
+    "lesson": "custodian-process-boundaries-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 89,
+    "id": "keeper-review-remote",
+    "actor": "keeper-01",
+    "operation": "review",
+    "utc": "2026-11-13T02:21:27.765993+00:00",
+    "task": null,
+    "lesson": "remote-lost-receipts-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 90,
+    "id": "keeper-review-client-output",
+    "actor": "keeper-01",
+    "operation": "review",
+    "utc": "2026-11-13T02:21:27.895299+00:00",
+    "task": null,
+    "lesson": "client-output-reflush-v1",
+    "artifacts": {}
+  },
+  {
+    "sequence": 91,
+    "id": "keeper-custodian-finish",
+    "actor": "keeper-01",
+    "operation": "finish",
+    "utc": "2026-11-13T02:21:57.993726+00:00",
+    "task": "custodian-boundary",
+    "lesson": null,
+    "artifacts": {
+      "custodian_entry.py": "66cb28278eb44beecaf5455ec863b34edbc55c298accfd55f90c6bba89af2267",
+      "docs/CUSTODIAN_DEPLOYMENT.md": "b03ca06582aff9c36a12676dabc200c9e64afd9edc88acde4fe2f00567d0783e",
+      "docs/CUSTODIAN_PROTOCOL.md": "7f20e76c1dc3d3418dbb345b53173a25a1d1198c5db07a5c4feabc5a63ed188e",
+      "docs/CUSTODIAN_REVIEW.md": "0d053f544f9fb8cc3050d8f9f02e7d16670a6cece5bd4382e61b86d67bd34739",
+      "docs/GOAL_AUDIT.md": "26b2df56cfd99694800af6f9670e3d313df9b77840cfe1a3d5488a4d95f02875",
+      "docs/REMOTE_CLIENT.md": "7902e2913a0f1295f2432212b2d69c08fdbffec5a228fc187435ca97bf0e7276",
+      "docs/RESUME.md": "09100c1e5604b8ad2f541936a7ac2ff181832c9e5f5c53d688b2d6052fba6e40",
+      "evidence/custodian/SUMMARY.md": "1febfeb15d2e3f09149e21a228455e6adf01ed3c62c2f2df3012ba9d942a95b7",
+      "evidence/custodian/closed-pipe-before.json": "feed5699770e67119aaf5d93a28af6e6845fce995e560a4de51d998b93689b49",
+      "evidence/custodian/fingerprints.json": "4ef342f9497e9ce1578a4a3a6ebe9ea3505db2a5c2109f6bc4c76c29f7bdd4e3",
+      "evidence/custodian/house-tests.txt": "456f6bd087ec8f60d0b67e41b3ef05facb9ad8c71554fc96e29f81c3b7ec1f6d",
+      "evidence/custodian/ssh-probe.json": "a4c2509c9ffca4e1ce518026436612f4637d64e7b6be69ea56ea243fbc8baa12",
+      "evidence/custodian/ssh-tests.txt": "8d1569819818b2ac66e660345e9c8c38ac5726c9caed4cc1182ff50c40a48ca2",
+      "evidence/custodian/utf16-before.json": "39fb9e6778a548b3fe09397b8f12547794129881179557ceed634abf7d4f5759",
+      "house/custodian.py": "54736d8b0d89ef91cac921109644589d10375df5f3606964afd73fbe3246a50c",
+      "house/remote.py": "20b9235e90906d710de3584a67cdb3d928e4d87ecc383b58ef6bf90aecd02a73",
+      "tests/test_custodian.py": "ec0d46c426ce1ab2869a6ee8dd39d095f8cf0cb00aaa10f45b1f2b3186bd5d99",
+      "tests/test_custodian_ssh.py": "0d3a017d68d63526e470f69731bb674fa3e4e96415ffcab923e7c84f635b21b0",
+      "tests/test_remote.py": "db5c330f3d57282fb345b408398d920a65d7abd7b94483a4f6629a9fadeaa40b"
+    }
+  },
+  {
+    "sequence": 92,
+    "id": "keeper-custodian-sleep",
+    "actor": "keeper-01",
+    "operation": "sleep",
+    "utc": "2026-11-13T02:21:58.165873+00:00",
+    "task": null,
+    "lesson": null,
+    "artifacts": {}
   }
 ]

@@ -1,0 +1,5 @@
+{
+  "expected_exit": 2,
+  "actual_exit": 120,
+  "stderr": "Exception ignored on flushing sys.stdout:\nBrokenPipeError: [Errno 32] Broken pipe\n"
+}

@@ -1,4 +1,4 @@
-# Full-objective audit after the second watch
+# Full-objective audit after the third watch
 
 The goal is **not complete**. The founding acceptance in BUILD_LOG.md is a bounded
 milestone, not a replacement for the owner's full objective. This audit uses the
@@ -17,7 +17,7 @@ current code, live record, independent reports and raw measurements.
 | Constitution changes from experience and improves governance | Concrete witnessed-foundations-001 proposal; OWNER_DECISION.md | **Not achieved.** Proposal remains pending; no approval is inferred from tests or this goal's continuation. |
 | Found another house with wisdom but no baggage | Reedbank bundle, distinct identity, transcript, idempotent advice import, independent Rowan review | One-session seeding and restore demonstrated. Independent ongoing daughter residency and two-way knowledge trade remain unproved. |
 | Real concurrent Codex residents and adversarial evidence | Five actual workers, live journal, BREAKER.md, raw failures/tests and second-watch REVIEW.md | Demonstrated, with model residents distinguished from test subprocesses and synthetic daughter labels. |
-| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. All63 checkpoint events are preserved. Source and checkpoint pushed with explicit permission; remote equality verified in evidence/remote-publication.json. |
+| Resumability, evidence in Git, residents choose name | Live journal/bundles, return notes, RESUME.md, naming messages | Source committed locally with explicit owner-approved unsigned mode; fresh-clone recovery verified. All92 checkpoint events are preserved. Source and checkpoint pushed with explicit permission; remote equality verified in evidence/remote-publication.json. |
 
 ## Remaining external boundary
 
@@ -31,3 +31,18 @@ These are real authority/deployment decisions. Writing more same-user code canno
 manufacture the missing isolation or owner approval. Nor can additional rapid test
 runs establish days of observed life. Preserve the current evidence and do not mark
 the full goal achieved on the strength of the bounded milestones above.
+
+## Third-watch evidence
+
+The optional one-request forced-command custodian, bounded SSH client, and
+operator deployment recipe now exist. All64 house tests passed, including16
+custodian process tests,14 client process tests, and5 real loopback OpenSSH tests.
+The fixture verified restricted commands, identity binding, host-key rejection,
+and idempotent publication through the shipped client. It used the same OS user;
+it does not establish installed ownership isolation. See evidence/custodian/SUMMARY.md.
+
+Flint's recorded output-failure lesson led Rowan to reproduce and repair the same
+failure in the separately built client. Original artifacts, failed observations,
+and repaired versions are retained. This strengthens the memory-compounding row;
+it adds no elapsed days. The live charter remains sealed and unchanged. No live
+custodian, owner-key migration, scheduler, or approved ratification was installed.

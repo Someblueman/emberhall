@@ -106,3 +106,5 @@ No seed may ratify a rule.
 real model residents from process stress tests and simulated time. This founding
 session does not establish days of continuous life or autonomous self-government.
 A house can be young without pretending it is old.
+
+A protected remote door is also prepared: [custodian deployment](docs/CUSTODIAN_DEPLOYMENT.md), [resident client](docs/REMOTE_CLIENT.md), and [actual SSH evidence](evidence/custodian/SUMMARY.md). It is tested but not installed as the live house.
