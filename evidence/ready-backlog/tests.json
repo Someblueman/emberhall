@@ -1,0 +1,19 @@
+{
+  "host": {
+    "collected": 333,
+    "executed": 324,
+    "skipped": 9,
+    "seconds": 202.467,
+    "exit_code": 0,
+    "output_sha256": "a7c6e932bbe90bf66e0c61cf745a7fef083a14a4a8a8c9c772be1b04a680d497"
+  },
+  "native_review": {
+    "sequence": 900,
+    "cases": 10,
+    "passed": 10,
+    "skipped": 0,
+    "seconds": 22.306,
+    "process_tests": "Reviewed source only; host suite executes these boundaries."
+  },
+  "scope": "Synthetic inert process concurrency plus actual native code review. Live ready backlog still requires installed-runtime evidence."
+}

@@ -47,7 +47,7 @@ def parser() -> argparse.ArgumentParser:
     extract = sub.add_parser("extract", help="recover a finished task into a new directory")
     extract.add_argument("task")
     extract.add_argument("directory")
-    for name in ("arrive", "rename", "wake", "sleep", "say", "task", "claim", "renew", "release", "finish",
+    for name in ("arrive", "rename", "wake", "sleep", "say", "task", "ready", "claim", "renew", "release", "finish",
                  "propose", "ratify", "learn", "review", "supersede"):
         cmd = sub.add_parser(name)
         cmd.add_argument("--as", dest="actor", required=True)
@@ -63,6 +63,13 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("task")
             cmd.add_argument("--title", required=True)
             cmd.add_argument("--description", required=True)
+            cmd.add_argument("--ready", action="store_true", default=argparse.SUPPRESS,
+                             help="bounded independent work ready for a supervised resident")
+        elif name == "ready":
+            cmd.add_argument("task")
+            cmd.add_argument("--expect", type=int, required=True)
+            cmd.add_argument("--blocked", dest="ready", action="store_false",
+                             help="withdraw unclaimed work from automatic waking")
         elif name in ("claim", "renew", "release", "finish"):
             cmd.add_argument("task")
             cmd.add_argument("--token", required=True, help="fresh random claim token; reuse on renewal/completion")

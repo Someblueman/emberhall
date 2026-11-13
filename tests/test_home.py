@@ -92,6 +92,58 @@ class HomeTests(HouseCase):
         self.assertIn("independent source review", prompt)
         self.drain()
 
+    def test_ready_backlog_fills_only_uncovered_capacity_without_help(self):
+        self.delay = 30
+        self.coordinator.start("codex")
+        for name in ("one", "two", "three"):
+            self.record.append("task", "alice", {"task": name, "title": name,
+                "description": "Independent fixture work", "ready": True})
+        result = self.coordinator.tick(poll=False)
+        self.assertEqual(len(result["started"]), 2)
+        self.assertEqual(len(result["active"]), 3)
+        self.assertEqual(self.coordinator.tick(poll=False)["started"], [])
+        state = self.record.read()[0]
+        self.assertEqual(state["life"]["requests"], {})
+        self.assertTrue(all(state["life"]["runs"][run]["backlog"] for run in result["started"]))
+        self.assertIn("task with --ready", (self.coordinator.private / result["started"][0] / "prompt.txt").read_text())
+        for item in self.coordinator.running.values():
+            item.process.terminate()
+        self.drain()
+
+    def test_backlog_claim_during_provider_choice_does_not_launch_stale_work(self):
+        self.delay = 30
+        self.coordinator.start("codex")
+        for name in ("one", "two"):
+            self.record.append("task", "alice", {"task": name, "title": name,
+                "description": "Independent fixture work", "ready": True})
+        old_choose = home.choose_provider
+        def choose(state, at, preferred=None):
+            self.record.append("claim", "alice", {"task": "two", "expect": 0,
+                "token": "won-before-admission", "seconds": 60})
+            return old_choose(state, at, preferred)
+        with patch("house.home.choose_provider", side_effect=choose):
+            result = self.coordinator.tick(poll=False)
+        self.assertEqual(result["started"], [])
+        self.assertEqual(len(self.record.read()[0]["life"]["runs"]), 1)
+        self.assertEqual(len(list(self.coordinator.private.glob("*/prompt.txt"))), 1)
+        for item in self.coordinator.running.values():
+            item.process.terminate()
+        self.drain()
+
+    def test_ready_work_respects_cooldowns_and_failed_start_does_not_spin(self):
+        self.record.append("task", "alice", {"task": "one", "title": "One", "ready": True,
+                                             "description": "Independent fixture work"})
+        with patch("house.home.providers.command", side_effect=ValueError("inert startup failure")):
+            result = self.coordinator.tick(poll=False)
+        self.assertEqual(len(result["started"]), 1)
+        self.assertEqual(result["active"], [])
+        for kind in home.KINDS:
+            self.record.append("life", CONTROLLER, {"kind": "budget", "agent": kind,
+                "until": time.time() + 3600, "reason": "Synthetic unavailable allowance"})
+        before = self.record.read()
+        self.assertEqual(self.coordinator.tick(poll=False)["started"], [])
+        self.assertEqual(self.record.read(), before)
+
     def test_three_real_rooms_preserve_work_and_fourth_waits(self):
         self.delay = 1
         for number in range(4):

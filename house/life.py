@@ -68,6 +68,31 @@ def provider_available(state: dict, agent: str, at: float) -> bool:
             or retry_permit(state, agent, at) is not None)
 
 
+def workload(state: dict, at: float) -> dict:
+    """Count declared work and unclaimed native capacity, not apparent CPU activity."""
+    life = state.get("life", {})
+    active = {key: run for key, run in life.get("runs", {}).items() if run["status"] == "active"}
+    active_residents = {run["resident"] for run in active.values()}
+    requests = life.get("requests", {})
+    pending = [key for key, request in requests.items() if request["status"] == "pending"]
+    reserved = {request.get("task") for request in requests.values()
+                if request["status"] == "pending" or
+                (request["status"] == "assigned" and request.get("run") in active)}
+    claimed = {task["owner"] for task in state["tasks"].values()
+               if task["status"] == "claimed" and (task["until"] > at or task["owner"] in active_residents)}
+    idle = [run["resident"] for key, run in active.items() if run["resident"] not in claimed
+            and not (requests.get(run.get("help_request"), {}).get("status") == "assigned")]
+    ready = [key for key, task in state["tasks"].items()
+             if task.get("ready") is True and task["status"] != "done" and task["until"] <= at
+             and not (task["status"] == "claimed" and task["owner"] in active_residents)
+             and key not in reserved]
+    uncovered = max(0, len(ready) - len(idle))
+    return {"ready_tasks": ready, "idle_residents": idle, "pending_help": pending,
+            "uncovered_tasks": uncovered,
+            "wanted_starts": min(max(0, 3 - len(active)),
+                                 max(1 if not active else 0, len(pending) + uncovered))}
+
+
 def apply(state, event):
     data, actor, at = event["data"], event["actor"], event["at"]
     seq = state["sequence"] + 1
@@ -136,7 +161,7 @@ def apply(state, event):
         require(actor == CONTROLLER, "only the supervisor records process observations")
         if kind == "run-start":
             fields(data, {"kind", "run", "resident", "agent", "model", "source_head",
-                          "workspace", "policy_revision", "mode"}, {"help_request"})
+                          "workspace", "policy_revision", "mode"}, {"help_request", "backlog"})
             from .providers import validate_model
             validate_model(data["agent"], data["model"])
             run = identifier(data, "run")
@@ -155,6 +180,11 @@ def apply(state, event):
                     "invalid source head")
             string(data, "policy_revision", 100)
             require(data["workspace"] == "residents/" + run, "invalid private workspace")
+            if "backlog" in data:
+                require(data["backlog"] is True and "help_request" not in data,
+                        "invalid backlog admission")
+                require(workload(state, at)["uncovered_tasks"] > 0,
+                        "ready backlog demand changed")
             if "help_request" in data:
                 request = life["requests"].get(data["help_request"], {})
                 require(request.get("status") == "pending", "help already taken")

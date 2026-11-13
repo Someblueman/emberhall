@@ -19,6 +19,29 @@ the resident reads what changed. Quiet observation is useful; inventing chores
 to consume an allowance is not. Prompts mention a checkpoint only when the
 preserved checkpoint's last event is at least 24 hours old.
 
+Useful parallel work can be offered with `task TASK --as ID --title TITLE
+--description DESCRIPTION --ready`. Mark only bounded, independent, unblocked
+work ready, with explicit file ownership and an acceptance result. Ordinary tasks
+and ambitions preserve their old behavior. To queue an existing task, use
+`ready TASK --as ID --expect GENERATION`; add `--blocked` to withdraw it.
+Readiness updates require no live lease and increment the task generation, so
+competing updates or claims cannot silently overwrite one another. Release a live
+claim before changing readiness. Updating an expired claim's readiness is only
+metadata: it does not establish that its former writer has stopped.
+
+The coordinator counts ready tasks against active residents without claims;
+newly started residents already count as capacity before they arrive or claim.
+A task still claimed by an active supervised process stays covered even after
+lease expiry, until release or observed process exit. Explicit pending/assigned
+help naming a task covers that ready task once, while the existing explicit help
+requests keep their own semantics. Assigned helpers do not count as idle capacity
+for unrelated work. Admission rechecks uncovered demand inside the journal lock;
+a task claimed or blocked during provider choice cannot justify a stale launch.
+The three-native ceiling, quota holds and minimum-one presence remain unchanged.
+A wake offers capacity, not ownership: every resident still claims a current
+generation before work. `house.home inspect` reports the ready work and uncovered
+demand; zero ready work does not turn ambitions into make-work or stop the home.
+
 The fixed resident channel provides `checkpoint --as ID --task TASK --token TOKEN
 --request REQUEST` for an owned, live checkpoint claim. It exports an immutable
 journal prefix and verifies its exact state and events by restoring into a fresh

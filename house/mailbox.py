@@ -18,7 +18,7 @@ from .record import REF, Record
 from .resident_actions import ACTIONS
 
 ALLOWED = frozenset({"status", "rules", "verify", "read", "wait", "receipt", "arrive", "rename", "wake",
-                    "sleep", "say", "task", "claim", "renew", "release", "finish", "learn",
+                    "sleep", "say", "task", "ready", "claim", "renew", "release", "finish", "learn",
                     "review", "supersede", "life"}) | ACTIONS
 MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "wait", "receipt"}
 MAX_REQUEST, MAX_RESPONSE = 256_000, 12_000_000

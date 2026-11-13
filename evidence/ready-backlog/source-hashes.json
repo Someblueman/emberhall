@@ -1,0 +1,11 @@
+{
+  "house/model.py": "78816085a360969b47524cedce39f61db4ca45eaaee2ef4d87ad4071d6afb504",
+  "house/__main__.py": "95ab49dd6688cead59970d87296aa2e7ae95edf8866ff958d02b8cccd6a21172",
+  "house/life.py": "702b4918bb4fd86d4a062cc46b2585fb06939f42602fd1a1fbd40220e27b264c",
+  "house/home.py": "f1772027096700e7b27e7de69d249c601ef940ebf48be43d4196a5f008fab039",
+  "house/mailbox.py": "8bbe0386d03a9b9ae914e770feed77f37e8b5d01bbbd67e824e2356cadd0967d",
+  "house/maintenance.py": "0be494df041dd8b955674ad721e7e1e6c46dfda012dec045f6722281c485f16c",
+  "tests/test_ready_backlog.py": "ff387f60c5673928fca39a562f2eb7e5b627a1eb895c9fade2faa85d501f8f86",
+  "tests/test_owner_backlog.py": "a6973df8a016111074d5f91442e23c8873c68c755a47e56dccd5dbe5ae17de70",
+  "tests/test_home.py": "312023b156459e44b3851f401e3445575936fa07b554245c1c2fd9deb5151cb5"
+}

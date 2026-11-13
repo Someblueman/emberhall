@@ -1,0 +1,11 @@
+{
+  "head": "7651e404d799f25800f002c731840db0f1af1423",
+  "sequence": 898,
+  "source_commit": "5a16a48920bf7f70babb7f15a79f203c7171e8fe",
+  "existing_state_events_sha256": "90ab3db175d497ced1604049e5f67d69e4bb875d0dca9c42450c0b9d92a9832b",
+  "installed_reader_matches_candidate_exactly": true,
+  "no_existing_ready_events_or_task_fields": true,
+  "installed_dispatch": "minimum one; additional runs only explicit pending help",
+  "owner_observation": 889,
+  "review": 896
+}

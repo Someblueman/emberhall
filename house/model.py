@@ -116,9 +116,24 @@ def apply_event(previous: dict | None, event: dict) -> dict:
         elif op == "task":
             task_id = string(data, "task", 100)
             require(task_id not in state["tasks"], "task already exists")
+            if "ready" in data:
+                require(type(data["ready"]) is bool and resident["awake"],
+                        "task readiness requires an awake resident and boolean")
             state["tasks"][task_id] = {"title": string(data, "title", 500),
                 "description": string(data, "description"), "status": "open",
                 "generation": 0, "owner": None, "until": 0, "token": None, "used_tokens": []}
+            if "ready" in data:
+                state["tasks"][task_id]["ready"] = data["ready"]
+        elif op == "ready":
+            require(set(data) == {"task", "expect", "ready"} and type(data["ready"]) is bool,
+                    "invalid readiness fields")
+            require(resident["awake"], "sleeping residents cannot change readiness")
+            task = state["tasks"][string(data, "task", 100)]
+            require(task["status"] != "done", "task is done")
+            require(task["until"] <= at, "task has a live lease; release before changing readiness")
+            require(type(data["expect"]) is int and data["expect"] == task["generation"],
+                    "task generation changed")
+            task.update(ready=data["ready"], generation=task["generation"] + 1)
         elif op == "claim":
             task = state["tasks"][string(data, "task", 100)]
             require(task["status"] != "done", "task is done")

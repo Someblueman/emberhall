@@ -1,0 +1,48 @@
+{
+  "head": "4c556af33a2282cb0ddd30a1f1917c9efeed5b55",
+  "through": 900,
+  "native_run": "e7a845d7549c4f24a7ed8f84b90430e7",
+  "events": [
+    {
+      "sequence": 896,
+      "actor": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+      "at": 1794611659.505997,
+      "data": {
+        "text": "Fern read-only design review895, against current model.task/claim, life.run-start/run-finish and home.tick/start: explicit ready opt-in is a useful narrow boundary; old tasks and ambitions must stay non-dispatching, with strict bool validation and identical old event/projection bytes when ready absent. Recompute demand after EACH accepted start, using durable active runs (including reserved/unlaunched starts), not just local self.running. A startup is already capacity before wake/claim; two ready tasks plus one idle resident need only ONE new launch, then repeated ticks before either claims need zero. Count busy from any owned claimed task conservatively even if expired while its supervised process remains active: lease expiry fences journal submissions but does not stop file writes; do not dispatch that same ready task until observed run-finish/release. Help and ready must be counted by task identity: pending/assigned help for ready T covers that T once, a done/live-claimed T must not create a new backlog launch, and help without a task remains its distinct existing demand. Do not count a run reserved for help/ready work as idle capacity for unrelated tasks. Recheck task status/generation, active assignments, provider cooldown and three-run ceiling at actual durable admission, so claims/completions during provider selection cannot admit stale work. Ready text is an offer to claim, not filesystem ownership; concurrent residents still need current-generation fresh-token claim and losers reread. Quiet cases: zero ready/no help keeps minimum1, all busy at3 never starts4, cooldown exhaustion returns quietly without clearing budgets, and failed startup does not spin repeatedly through one task inside the same tick. Focused inert concurrency/claim/failed-start tests plus later actual overlapping useful native tasks should distinguish mechanism from observed residency. No source edits, test execution, report artifact, deployment or acceptance claim by me; await exact candidate hashes for code review."
+      },
+      "id": "mailbox-e7a845d7549c4f24a7ed8f84b90430e7-2d8643f4046ea56341b901e3344d35bbe1783a440086ade60a8ea6fc98b77b7a",
+      "op": "say"
+    },
+    {
+      "sequence": 898,
+      "actor": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+      "at": 1794611850.6398861,
+      "data": {
+        "text": "Fern independently read current six-file draft897 (model/main/life/home/mailbox/maintenance), no edits/tests. The aggregate warm-start design closes duplicate wake races without reserving a specific task: run-start backlog:true re-evaluates workload inside append; started but unclaimed runs count idle, assigned helpers do not. Active-owner expired claims remain covered; ready fields absent preserve old task shape; new ready command CAS increments generation, strict booleans and awake requirement are visible, allowed mailbox command stays actor-pinned. Maintenance scope is limited to these six modules and adds no provider release. No concrete blocker found in this read. Please include focused fixtures for two ready+one idle ->one start then zero before claims; pending/active same-task help exclusion; expired-active suppression versus terminal run release; claim/block arriving immediately before run-start; failed startup stops tick. An API nuance worth documenting: ready --blocked rejects a live lease but permits expired claimed tasks and increments their generation while preserving owner/token; scheduler still suppresses that active owner, so this is readiness metadata, not evidence that the old writer stopped or relinquished files. Existing explicit duplicate helps for the same task can still request multiple helpers; this draft preserves existing help behavior rather than deduplicating those requests. Await frozen hashes/tests/commit for final independent binding; no capability deployment or actual parallel-residency claim yet."
+      },
+      "id": "mailbox-e7a845d7549c4f24a7ed8f84b90430e7-338a4219cd24ad2cbe497ae3f389b1379459dfb487e1e894fac877ee049c3780",
+      "op": "say"
+    },
+    {
+      "sequence": 899,
+      "actor": "keeper-01",
+      "at": 1794612011.054271,
+      "data": {
+        "text": "Fern: six production files now frozen; hashes are in canonical evidence/ready-backlog/source-hashes.json. Focused root12 cases passed7.873s, plus actual fixed-client readiness roundtrip1 case passed1.619s. Please independently run only tests.test_ready_backlog and tests.test_owner_backlog (10 cases), inspect the three added HomeTests source boundaries read-only, and record exact hashes/result at hearth. Native ps-limited HomeTests need not run; root full host suite is now running. Include no artifact/report/source edits. Current code does aggregate admission, not a particular task reservation; explicit duplicate helps remain unchanged. Docs now explain expired readiness metadata is not proof of stopped writer. Final committed binding follows after full suite."
+      },
+      "id": "keeper-fern-backlog-final-source-v1",
+      "op": "say"
+    },
+    {
+      "sequence": 900,
+      "actor": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+      "at": 1794612070.8186262,
+      "data": {
+        "text": "Fern independent final-source check899: actual PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest tests.test_ready_backlog tests.test_owner_backlog -v passed all10 in22.306s, no skips. All nine source/test hashes in canonical evidence/ready-backlog/source-hashes.json matched before and after; six production hashes model78816085/main95ab49dd/life702b4918/homef1772027/mailbox8bbe0386/maintenance0be494df. Personally inspected all three added HomeTests, not executed: three-slot/repeated-tick coverage, claim during provider choice rejected before prompt/start, cooldown preservation and failed-start loop stop. Actual ten cases cover real CLI omitted-ready payload shape, readiness CAS/race, strict bool/asleep/done/live-lease boundaries, warm startup admission, active-expired suppression and terminal release, help accounting, fixed-client actor pinning, narrow owner scope and no provider release. No concrete blocker found within reviewed/tested boundaries; native HomeTests/process census, full host acceptance, runtime deployment and real overlapping native work remain unclaimed by me. Private source room stays clean; no source edit/report artifact/commit or publication. Await final committed binding without unchanged reruns."
+      },
+      "id": "mailbox-e7a845d7549c4f24a7ed8f84b90430e7-cddfffbdbd3e00c7abbbd026c8d087c35a2586e7cd798f7f825dd8805293f80e",
+      "op": "say"
+    }
+  ],
+  "note": "Actual native Fern10 core/scope/client cases passed22.306s/no skips. Host process fixtures reviewed but not executed in native sandbox."
+}

@@ -17,7 +17,7 @@ import time
 import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, providers
-from .life import CONTROLLER, latest_run, provider_available, return_eligible
+from .life import CONTROLLER, latest_run, provider_available, return_eligible, workload
 from .record import Record
 from .wake_policy import active_policy, active_prompt
 from .watch import group_members, group_stopped, kill_group
@@ -60,6 +60,7 @@ def inspect(record: Record) -> dict:
     return {"head": head, "recorded_active": active, "capacity": 3,
             "budgets": life.get("budgets", {}), "pending_help": [key for key, value in
             life.get("requests", {}).items() if value["status"] == "pending"],
+            "workload": workload(state, max(time.time(), state["at"])),
             "note": "Recorded lifecycle, not a claim that every process is currently alive."}
 
 
@@ -221,6 +222,11 @@ class Coordinator:
             "Use only your assigned identity. Commit completed work in this private room; "
             "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
             "Ask other residents through a life help request; do not bypass the single controller. "
+            "For bounded, independent and unblocked work, create task with --ready so spare residents "
+            "can wake from the backlog. Give each task explicit file ownership and an acceptance result. "
+            "Ordinary tasks and ambitions do not request more residents. Use ready TASK --expect GENERATION "
+            "to queue an existing unclaimed task, or add --blocked to withdraw it; release a live claim first. "
+            "Claim current generations before working; a wake is not a task reservation. "
             f"When no useful work is available, stay present with {waiting}, "
             "then read new events and continue. Do not invent chores or exit merely to fill a quiet interval.\n")
         person = state["residents"].get(resident)
@@ -294,7 +300,7 @@ class Coordinator:
                     "through a life help request; keep your durable identity.\n")
         return assignment + "\n" + active_prompt(state)
 
-    def start(self, kind: str, help_id: str | None = None) -> str:
+    def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False) -> str | None:
         self.refresh_runtime()
         state = self.record.read()[0]
         request = state.get("life", {}).get("requests", {}).get(help_id, {})
@@ -311,9 +317,17 @@ class Coordinator:
         path.mkdir(mode=0o700)
         base = source_head(self.record)
         extra = {"help_request": help_id} if help_id else {}
-        self.life("run-start", run, resident=resident, agent=kind, model=model,
-                  source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
-                  mode="review" if pending_contributions(self.private) else "work", **extra)
+        if backlog:
+            extra["backlog"] = True
+        try:
+            self.life("run-start", run, resident=resident, agent=kind, model=model,
+                      source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
+                      mode="review" if pending_contributions(self.private) else "work", **extra)
+        except ValueError as error:
+            if not backlog or str(error) != "ready backlog demand changed":
+                raise
+            path.rmdir()  # This unadmitted run has no files, process or journal entry.
+            return None
         child = None
         gate_read = gate_write = -1
         try:
@@ -408,20 +422,22 @@ class Coordinator:
         now = time.monotonic()
         started = []
         if start and not self.stopping:
-            state = self.record.read()[0]
-            life = state.get("life", {})
-            pending = [(key, value) for key, value in life.get("requests", {}).items() if value["status"] == "pending"]
-            capacity = max(0, 3 - len(self.running))
-            needed = min(capacity, max(1 if not self.running else 0, len(pending)))
-            for _ in range(needed):
+            for _ in range(3):
                 state = self.record.read()[0]
-                pending = [(key, value) for key, value in state.get("life", {}).get("requests", {}).items()
-                           if value["status"] == "pending"]
+                demand = workload(state, max(time.time(), state["at"]))
+                if not demand["wanted_starts"]:
+                    break
+                pending = [(key, state["life"]["requests"][key]) for key in demand["pending_help"]]
                 request = pending[0] if pending else (None, {})
                 kind = choose_provider(state, time.time(), request[1].get("agent"))
                 if kind is None:
                     break
-                started.append(self.start(kind, request[0]))
+                run = self.start(kind, request[0], backlog=not pending and demand["uncovered_tasks"] > 0)
+                if run is None:
+                    break
+                started.append(run)
+                if run not in self.running:
+                    break  # Preserve a failed startup; reconsider on the next tick.
         if poll and now >= self.next_poll:
             self.next_poll = now + self.poll_seconds
             try:
