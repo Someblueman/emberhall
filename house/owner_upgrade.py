@@ -198,14 +198,14 @@ def release_opencode(record: Record, actor: str, scope: str = maintenance.RETRY_
     require(migration is not None, "owner retry migration not accepted")
     require(runtime.selected(record)["runtime_sha256"] == migration["runtime_sha256"],
             "owner retry runtime is not selected")
+    sequence, until = maintenance.approved_hold(scope)
     data = {"scope": scope, "approval_sha256": maintenance.SOURCES[scope],
         "house": state["house_id"], "owner_id": steward.council.OWNER_ID, "agent": "opencode",
-        "expected_sequence": maintenance.RETRY_BUDGET_SEQUENCE,
-        "expected_until": maintenance.RETRY_BUDGET_UNTIL}
+        "expected_sequence": sequence, "expected_until": until}
     if scope in maintenance.FAILED_ATTEMPTS:
         proof = maintenance.FAILED_ATTEMPTS[scope]
         directory = record.common / "house-home" / proof.run
-        error = directory / "stderr.log"
+        error = directory / proof.output_file
         require(not any(path.is_symlink() for path in (directory, *directory.parents)) and
                 error.is_file() and not error.is_symlink() and sha(error.read_bytes()) == proof.output_sha256,
                 "preserved pre-provider CLI failure evidence changed")

@@ -1,0 +1,13 @@
+{
+  "house/model.py": "f78bba4fcff82fc0f1f15ebcc600923dad6129ea1669c8de4783f2c3de6731c3",
+  "house/__main__.py": "95ab49dd6688cead59970d87296aa2e7ae95edf8866ff958d02b8cccd6a21172",
+  "house/life.py": "4fa65e87be71e3643a9a9e34cd6402a80f1a001a21997dd1a4d7c4baa4718be2",
+  "house/home.py": "f1772027096700e7b27e7de69d249c601ef940ebf48be43d4196a5f008fab039",
+  "house/mailbox.py": "8bbe0386d03a9b9ae914e770feed77f37e8b5d01bbbd67e824e2356cadd0967d",
+  "house/maintenance.py": "0e0f4ce78ec5ceae7e899b5e545a425b0587b5629225ab114d7af5ae95865694",
+  "tests/test_ready_backlog.py": "ff387f60c5673928fca39a562f2eb7e5b627a1eb895c9fade2faa85d501f8f86",
+  "tests/test_owner_backlog.py": "277f46373f503fdc447a3d87805facf072cb6c8790bdfbf292c0d4543ccba38f",
+  "tests/test_home.py": "312023b156459e44b3851f401e3445575936fa07b554245c1c2fd9deb5151cb5",
+  "house/owner_upgrade.py": "e9c7486fc92d1de565abe6000211be23804c54828ffc1609369537298039435b",
+  "tests/test_owner_key.py": "e89341c8ba6ba6523ab09f9102dbc9513c8dd4dd36c4dfef5f68e6eb4b064dc4"
+}

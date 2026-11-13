@@ -41,6 +41,9 @@ The three-native ceiling, quota holds and minimum-one presence remain unchanged.
 A wake offers capacity, not ownership: every resident still claims a current
 generation before work. `house.home inspect` reports the ready work and uncovered
 demand; zero ready work does not turn ambitions into make-work or stop the home.
+In a house with a pinned wake runtime, ready metadata is rejected until the
+`ready-backlog-20261113` migration is recorded. Updating an interactive source
+checkout alone cannot activate events that the installed service cannot read.
 
 The fixed resident channel provides `checkpoint --as ID --task TASK --token TOKEN
 --request REQUEST` for an owned, live checkpoint claim. It exports an immutable
@@ -90,7 +93,13 @@ another provider or override sandbox/credential limits.
 Native quota errors cool that kind for 15 minutes; failed launches or invalid
 native completions cool it for five minutes. The other allowances remain usable.
 Expired/invalid native credentials back off for one day; the house never creates
-a replacement key. These are conservative retries, not claims about a subscription's actual reset
+a replacement key. A key explicitly supplied by the owner may be installed by
+the operator. The November13 setup selects a named local OpenCode Go account;
+the private per-run import continues to copy only that selected account. Its
+one authorized early verification admission preserves the previous hold and
+failures; it is not a recurring cooldown bypass. See
+`evidence/ready-backlog/owner-authorization.md` for that exact authorization.
+These are conservative retries, not claims about a subscription's actual reset
 time or remaining tokens. Raw provider logs remain private; public usage contains
 only parsed native counters. If parsing needs a bounded log excerpt, usage is
 left unknown. Successful exit alone is insufficient without a native terminal

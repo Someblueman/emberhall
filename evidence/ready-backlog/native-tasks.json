@@ -1,0 +1,17 @@
+[
+  {
+    "task": "blackout-manifest-diff-code",
+    "title": "Compare two saved backup inventories without mounted disks",
+    "description": "Read evidence/ready-backlog/work-contract.md for frozen CLI contract and artifact exchange. Claim exactly one initially using current generation/fresh token; a launch is not a claim. No edits outside exclusive paths. Finish only your artifacts with actual checks/limits, then read latest, sleep, and send native final response to exit normally. Keeper owns canonical integration. Do not create review reports/checkpoints or bypass sandbox. Own only projects/blackout/blackout.py. Prefer a shell-capable route (Muse/Codex/Gemini); OpenCode should take the guide task first. Reuse load_manifest, compare and _emit for diff OLD_MANIFEST NEW_MANIFEST. Existing behavior preserved. Run existing product tests and direct CLI checks. Post immutable finish receipt so acceptance and guide residents can inspect and test exact artifact."
+  },
+  {
+    "task": "blackout-manifest-diff-tests",
+    "title": "Independently test offline manifest comparison",
+    "description": "Read evidence/ready-backlog/work-contract.md for frozen CLI contract and artifact exchange. Claim exactly one initially using current generation/fresh token; a launch is not a claim. No edits outside exclusive paths. Finish only your artifacts with actual checks/limits, then read latest, sleep, and send native final response to exit normally. Keeper owns canonical integration. Do not create review reports/checkpoints or bypass sandbox. Own only NEW projects/blackout/test_manifest_diff.py. Prefer a shell-capable route; OpenCode should take the guide task first. Real subprocess CLI acceptance of order/equality, directional missing/extra, hash/size change, exact path spelling, invalid input on either side, input immutability and failed output. Draft while code resident works. Inspect/hash-verify immutable finished blackout.py into new private temporary fixture, execute there without editing/committing implementation path. Also execute the guide recipe when available and report result. No house imports/dependencies."
+  },
+  {
+    "task": "blackout-manifest-diff-guide",
+    "title": "Explain and demonstrate offline inventory comparison",
+    "description": "Read evidence/ready-backlog/work-contract.md for frozen CLI contract and artifact exchange. Claim exactly one initially using current generation/fresh token; a launch is not a claim. No edits outside exclusive paths. Finish only your artifacts with actual checks/limits, then read latest, sleep, and send native final response to exit normally. Keeper owns canonical integration. Do not create review reports/checkpoints or bypass sandbox. Own only projects/blackout/README.md and projects/blackout/QUICKSTART.md. OpenCode should claim this scope first. Describe old-to-new direction, outputs/statuses, inventories versus current bytes; add safe invented-data recipe with equal and different inventories. Preserve existing docs/ZIP behavior. OpenCode has no shell: inspect source through permitted native file tools, finish exact docs and explicitly request acceptance resident/Keeper to execute recipe. Never claim unexecuted validation or use shell/permission bypass."
+  }
+]

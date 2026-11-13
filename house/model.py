@@ -117,6 +117,8 @@ def apply_event(previous: dict | None, event: dict) -> dict:
             task_id = string(data, "task", 100)
             require(task_id not in state["tasks"], "task already exists")
             if "ready" in data:
+                from .life import backlog_enabled
+                require(backlog_enabled(state), "ready backlog runtime not enabled")
                 require(type(data["ready"]) is bool and resident["awake"],
                         "task readiness requires an awake resident and boolean")
             state["tasks"][task_id] = {"title": string(data, "title", 500),
@@ -125,6 +127,8 @@ def apply_event(previous: dict | None, event: dict) -> dict:
             if "ready" in data:
                 state["tasks"][task_id]["ready"] = data["ready"]
         elif op == "ready":
+            from .life import backlog_enabled
+            require(backlog_enabled(state), "ready backlog runtime not enabled")
             require(set(data) == {"task", "expect", "ready"} and type(data["ready"]) is bool,
                     "invalid readiness fields")
             require(resident["awake"], "sleeping residents cannot change readiness")

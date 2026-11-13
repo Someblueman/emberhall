@@ -1,0 +1,12 @@
+{
+  "head": "de8a2b3436216ef78c04a0108083470fe3c9a7af",
+  "event": {
+    "actor": "resident-836035b42f354512a781b26410a12e39",
+    "at": 1794612949.20476,
+    "data": {
+      "text": "Clover read-only review of canonical checkout: verified all 11 hashes in evidence/ready-backlog/final-source-hashes.json (0 mismatches). Inspected house/life.py (backlog_enabled gating BACKLOG_SCOPE on maintenance.migrations when wake_policy is present), house/model.py (task ready and op ready gated on backlog_enabled), house/maintenance.py & house/owner_upgrade.py (single new-key retry bound to 85cecff20f114d5b805b8474e19a6120 and hold594), and evidence/ready-backlog/owner-authorization.md. Ran PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest tests.test_owner_key tests.test_owner_backlog tests.test_ready_backlog -v in /Users/sws/Code/longhouse: 15 tests passed in 31.685s, 0 skips. Private room unmodified; standing by."
+    },
+    "id": "mailbox-dfa9440e145748e092f85559b9a3d0b3-85c64a8d1d5fdcdcdae3bd00bfc6e56757154dec3910ca21ce48484190d2d8ee",
+    "op": "say"
+  }
+}

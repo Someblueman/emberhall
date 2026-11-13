@@ -68,6 +68,11 @@ def provider_available(state: dict, agent: str, at: float) -> bool:
             or retry_permit(state, agent, at) is not None)
 
 
+def backlog_enabled(state: dict) -> bool:
+    from .maintenance import BACKLOG_SCOPE
+    return "wake_policy" not in state or BACKLOG_SCOPE in state.get("maintenance", {}).get("migrations", {})
+
+
 def workload(state: dict, at: float) -> dict:
     """Count declared work and unclaimed native capacity, not apparent CPU activity."""
     life = state.get("life", {})
@@ -83,7 +88,7 @@ def workload(state: dict, at: float) -> dict:
     idle = [run["resident"] for key, run in active.items() if run["resident"] not in claimed
             and not (requests.get(run.get("help_request"), {}).get("status") == "assigned")]
     ready = [key for key, task in state["tasks"].items()
-             if task.get("ready") is True and task["status"] != "done" and task["until"] <= at
+             if backlog_enabled(state) and task.get("ready") is True and task["status"] != "done" and task["until"] <= at
              and not (task["status"] == "claimed" and task["owner"] in active_residents)
              and key not in reserved]
     uncovered = max(0, len(ready) - len(idle))

@@ -54,6 +54,11 @@ sandbox. Never modify or commit the other resident's assigned path.
 The artifact is source for testing, never a replacement house/runtime. Use only
 the existing sandbox's permitted filesystem. If transport or permissions prevent
 that validation, preserve the exact limitation rather than bypassing it.
+OpenCode has no shell tool: prefer the documentation scope on that route, inspect
+the source through its permitted file tools and explicitly leave executable
+recipe validation to the independent acceptance resident and Keeper. Successful
+file edits and canonical journal participation are real work; do not pretend
+that reading a command is executing it.
 
 Each resident finishes only its own artifacts. Keep output concise and evidence
 in the finish result rather than creating report-on-report files. After a completed

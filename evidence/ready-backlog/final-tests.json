@@ -1,0 +1,29 @@
+{
+  "host": {
+    "collected": 338,
+    "executed": 329,
+    "skipped": 9,
+    "seconds": 204.552,
+    "exit_code": 0,
+    "output_sha256": "aa892980607b0c18225fc4e8eea45c5b62e853d574ad193b25933cf3cf5fb024"
+  },
+  "native_review": {
+    "resident": "Clover",
+    "agent": "agy",
+    "run": "dfa9440e145748e092f85559b9a3d0b3",
+    "sequence": 913,
+    "passed": 15,
+    "skipped": 0,
+    "seconds": 31.685,
+    "hashes_verified": 11
+  },
+  "superseded_candidate": {
+    "commit": "2777343593058dc18b836d938ea4bc33051178a5",
+    "isolated_collected": 333,
+    "isolated_executed": 251,
+    "isolated_skipped": 82,
+    "seconds": 92.082,
+    "deployed": false
+  },
+  "scope": "Source acceptance, not successful OpenCode or live ready-backlog concurrency."
+}

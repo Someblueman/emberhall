@@ -34,6 +34,9 @@ INTEGRATION_SCOPE = "integration-acceptance-20261113"
 REPORT_SCOPE = "report-retention-20261113"
 CHECKPOINT_SCOPE = "resident-checkpoints-20261113"
 BACKLOG_SCOPE = "ready-backlog-20261113"
+BACKLOG_SHA256 = "df1df5907e1f8e2999eebdf374b162fb1db59413ae716db7d978298d45dff2d3"
+KEY_BUDGET_SEQUENCE = 594
+KEY_BUDGET_UNTIL = 1794689129.189377
 FAILED_CLI_RUN = "6eec53281c2641f28677a9a7bcc41e8d"
 FAILED_CLI_SHA256 = "cb62a75b5184f48c6050e1be789a1786c1a64087fc99f11213c4d140dc661dab"
 FAILED_CLI_OBSERVATION = 465
@@ -44,12 +47,12 @@ SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            REPAIR_SCOPE: GROWTH_SHA256, LAUNCHER_SCOPE: GROWTH_SHA256,
            CONTINUITY_SCOPE: GROWTH_SHA256, NAMING_SCOPE: GROWTH_SHA256,
            INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256,
-           CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: GROWTH_SHA256}
+           CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: BACKLOG_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
-    BACKLOG_SCOPE: {"house/maintenance.py", "house/home.py", "house/life.py",
+    BACKLOG_SCOPE: OWNER_MODULES | {"house/home.py", "house/life.py",
                     "house/model.py", "house/__main__.py", "house/mailbox.py"},
     CHECKPOINT_SCOPE: OWNER_MODULES | {"house/checkpoint.py", "house/resident_actions.py", "house/home.py"},
     REPORT_SCOPE: {"house/maintenance.py", "house/home.py", "house/home_work.py"},
@@ -100,6 +103,7 @@ class FailedAttempt:
     start: int
     end: int
     exit_code: int
+    output_file: str = "stderr.log"
 
 
 # Fixed historical incidents, not operator-supplied exception policies.
@@ -108,8 +112,17 @@ FAILED_ATTEMPTS = MappingProxyType({
                                FAILED_CLI_OBSERVATION, 462, 466, 1),
     LAUNCHER_SCOPE: FailedAttempt(REPAIR_SCOPE, FAILED_BOOTSTRAP_RUN, FAILED_BOOTSTRAP_SHA256,
                                  FAILED_BOOTSTRAP_OBSERVATION, 527, 531, 2),
+    BACKLOG_SCOPE: FailedAttempt(LAUNCHER_SCOPE, "85cecff20f114d5b805b8474e19a6120",
+        "54107bb23032fd6b4795f360605c528537a554362c170b0693bcdd9e71a945cf",
+        594, 592, 596, 1, "stdout.jsonl"),
 })
-RELEASE_SCOPES = (RETRY_SCOPE, REPAIR_SCOPE, LAUNCHER_SCOPE)
+RELEASE_SCOPES = (RETRY_SCOPE, REPAIR_SCOPE, LAUNCHER_SCOPE, BACKLOG_SCOPE)
+
+
+def approved_hold(scope: str) -> tuple[int, float]:
+    if scope == BACKLOG_SCOPE:
+        return KEY_BUDGET_SEQUENCE, KEY_BUDGET_UNTIL
+    return RETRY_BUDGET_SEQUENCE, RETRY_BUDGET_UNTIL
 
 
 def failure_proven(state: dict, scope: str) -> bool:
@@ -172,10 +185,11 @@ def apply(state: dict, event: dict) -> None:
         current = state.get("maintenance", {})
         require(scope in current.get("migrations", {}), "owner retry runtime is not authorized")
         require(scope not in current.get("releases", {}), "owner release already used")
-        require(type(data["expected_sequence"]) is int and data["expected_sequence"] == RETRY_BUDGET_SEQUENCE and
+        sequence, until = approved_hold(scope)
+        require(type(data["expected_sequence"]) is int and data["expected_sequence"] == sequence and
                 type(data["expected_until"]) in (int, float) and
-                data["expected_until"] == RETRY_BUDGET_UNTIL, "wrong approved hold")
-        observation = RETRY_BUDGET_SEQUENCE
+                data["expected_until"] == until, "wrong approved hold")
+        observation = sequence
         if scope in FAILED_ATTEMPTS:
             proof = FAILED_ATTEMPTS[scope]
             original = current.get("releases", {}).get(proof.previous_scope, {})
