@@ -1,0 +1,91 @@
+{
+  "format": "emberhall-live-coordinator-crash-v1",
+  "at": "2026-11-13T18:36:04.906846+00:00",
+  "coordinator_pid": 34711,
+  "coordinator_command": "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3 -I /Users/sws/Code/longhouse/.git/house-home/runtime-d8ae118527626716bb6fd39b524655e62d39629f.pyz home --repo /Users/sws/Code/longhouse --runtime /Users/sws/Code/longhouse/.git/house-home/runtime-d8ae118527626716bb6fd39b524655e62d39629f.pyz --publish serve",
+  "runtime_sha256": "846b0ff9f930329268c77c07af4994265494863a4daae9cedf2b40912b67204d",
+  "source_head": "e8f97d273f106cdc54ddd2c023c493e3cf8317ba",
+  "journal_before": {
+    "sequence": 335,
+    "head": "c4b27a35866e0d11dbcb084decf41cf3251897b8"
+  },
+  "fault_notice": {
+    "request": "live-coordinator-crash-test-v1",
+    "sequence": 336,
+    "head": "5fc91bc74403f9b50fd9132b3fd2a7e866a6f4db",
+    "replayed": false
+  },
+  "active_runs": {
+    "19fba0a48fa5449a9aa00835312e5273": {
+      "resident": "resident-9309d3aacbb4418ba3db22805d98e199",
+      "agent": "codex",
+      "pgid": 34766,
+      "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+      "private_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+      "changed_file_sha256": {
+        "evidence/native-residents/19fba0a48fa5449a9aa00835312e5273.md": "8a2a27311e2dc50b9c8d37ba6ec63e32be06e66a1d8de06d228c0b2aef24da9c"
+      },
+      "claimed_tasks": [
+        "review-earlier-native-19fb"
+      ]
+    },
+    "cf1c7aa0edba45ff806cdf7893ad7b0f": {
+      "resident": "resident-13e0adccca494d19822e5bdc5e652e64",
+      "agent": "muse",
+      "pgid": 35413,
+      "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+      "private_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262",
+      "changed_file_sha256": {
+        "docs/proposals/wake-prompt-mailbox-transport-v2.md": "da1364fa113fecef2f681dc125e4cbbc795d619af4efe4ca26f18a214393fd9b",
+        "docs/proposals/wake-prompt-mailbox-transport.md": "b14904d3468b828d29ad4d00543850741ba789d40bcf7b668058f52e413c1caa",
+        "evidence/native-residents/cf1c7aa0edba45ff806cdf7893ad7b0f-v2.md": "8f7568e14fc5be15815011ea51c2f20249bc92b6e181852d17b45062e2054885",
+        "evidence/native-residents/cf1c7aa0edba45ff806cdf7893ad7b0f.md": "0ac61d323c3a69f01367ffab8022c6e7eaf4ccdc61238032b9291d5701d96036"
+      },
+      "claimed_tasks": [
+        "wake-prompt-ember-trial-v2"
+      ]
+    }
+  },
+  "jobs_before": [
+    {
+      "id": "5658a278cee4a9755e69e29360564c78697bffbd997c97e3db68ae4f29579a63",
+      "status": "running",
+      "run": "19fba0a48fa5449a9aa00835312e5273",
+      "argv": [
+        "integrate",
+        "5c8ca3ad9e7d4ae5a21745d2bea60e28",
+        "--as",
+        "resident-9309d3aacbb4418ba3db22805d98e199",
+        "--request",
+        "19fb-rowan-publish",
+        "--publish"
+      ],
+      "pgid": 48670
+    },
+    {
+      "id": "4553675b8d66f18285abaf1a3ca567f0a3aad7ba95dbc35650e79f55197a5f5a",
+      "status": "queued",
+      "run": "cf1c7aa0edba45ff806cdf7893ad7b0f",
+      "argv": [
+        "council",
+        "--as",
+        "resident-13e0adccca494d19822e5bdc5e652e64",
+        "--request",
+        "propose-13e0-v2-1",
+        "propose",
+        "wake-prompt-mailbox-002",
+        "--title",
+        "Name the fixed journal channel including OpenCode tool",
+        "--file",
+        "docs/proposals/wake-prompt-mailbox-transport-v2.md",
+        "--reason",
+        "Corrects accepted 001 per Keeper 328: names ./ .house-client or house_journal argv for shellless OpenCode, requires the per-step accepted receipt, and states status/rules take no --as while read takes --as. Same witnessed base as 001 (pre-mailbox exit-0 failures, post-mailbox proof, this run PATH/--as/pre-arrival errors, 303 prompt omitting transport). 001 preserved pending.",
+        "--mode",
+        "wake-prompt"
+      ],
+      "pgid": null
+    }
+  ],
+  "signal": "SIGKILL",
+  "target": "identified coordinator only"
+}

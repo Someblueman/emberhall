@@ -1,0 +1,122 @@
+{
+  "format": "emberhall-live-coordinator-recovery-v1",
+  "observed_at": "2026-11-13T18:37:37.421426+00:00",
+  "coordinator_pid": 52735,
+  "coordinator_restarted": true,
+  "journal_sequence": 340,
+  "journal_head": "72c6ccb70d49d769b0ca8549fd79b9ef53c8aac0",
+  "pre_fault_journal_is_ancestor": true,
+  "source_head": "e8f97d273f106cdc54ddd2c023c493e3cf8317ba",
+  "runs": {
+    "19fba0a48fa5449a9aa00835312e5273": {
+      "finished_sequence": 337,
+      "outcome": "interrupted",
+      "old_group_stopped": true,
+      "released_tasks": [
+        "review-earlier-native-19fb"
+      ],
+      "rescue": {
+        "commit": "866b00a83f0b46226ac3d9ab85559299eea4b3b1",
+        "fingerprint": "52615a3b42d187e75977501698cff9a0fb32a557761b0a71598872906c7c148f",
+        "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262"
+      },
+      "candidate_commit": "f2881897d6ec4504d816b8b3824ab7b1f58f449b",
+      "files": {
+        "evidence/native-residents/19fba0a48fa5449a9aa00835312e5273.md": {
+          "sha256": "8a2a27311e2dc50b9c8d37ba6ec63e32be06e66a1d8de06d228c0b2aef24da9c",
+          "workspace_matches": true,
+          "rescue_matches": true,
+          "candidate_commit_matches": true
+        }
+      }
+    },
+    "cf1c7aa0edba45ff806cdf7893ad7b0f": {
+      "finished_sequence": 338,
+      "outcome": "interrupted",
+      "old_group_stopped": true,
+      "released_tasks": [
+        "wake-prompt-ember-trial-v2"
+      ],
+      "rescue": {
+        "commit": "6e309d0993408eea01c2ebf5edd4391f48b158ac",
+        "fingerprint": "bb6ce6245210260283b6c2b5fad0b0e3f84d45be8866a77d943c2176651dd3a2",
+        "source_head": "033e1cd6fd9641e910c9d2b799e85d189fcd4262"
+      },
+      "candidate_commit": "e3e11bd639eb2ff7f39870968f7fe267098a626e",
+      "files": {
+        "docs/proposals/wake-prompt-mailbox-transport-v2.md": {
+          "sha256": "da1364fa113fecef2f681dc125e4cbbc795d619af4efe4ca26f18a214393fd9b",
+          "workspace_matches": true,
+          "rescue_matches": true,
+          "candidate_commit_matches": true
+        },
+        "docs/proposals/wake-prompt-mailbox-transport.md": {
+          "sha256": "b14904d3468b828d29ad4d00543850741ba789d40bcf7b668058f52e413c1caa",
+          "workspace_matches": true,
+          "rescue_matches": true,
+          "candidate_commit_matches": true
+        },
+        "evidence/native-residents/cf1c7aa0edba45ff806cdf7893ad7b0f-v2.md": {
+          "sha256": "8f7568e14fc5be15815011ea51c2f20249bc92b6e181852d17b45062e2054885",
+          "workspace_matches": true,
+          "rescue_matches": true,
+          "candidate_commit_matches": true
+        },
+        "evidence/native-residents/cf1c7aa0edba45ff806cdf7893ad7b0f.md": {
+          "sha256": "0ac61d323c3a69f01367ffab8022c6e7eaf4ccdc61238032b9291d5701d96036",
+          "workspace_matches": true,
+          "rescue_matches": true,
+          "candidate_commit_matches": true
+        }
+      }
+    }
+  },
+  "jobs": {
+    "5658a278cee4a9755e69e29360564c78697bffbd997c97e3db68ae4f29579a63": {
+      "status": "done",
+      "group_stopped": true,
+      "result": {
+        "error": "action interrupted without a durable result; inspect preserved state before a new request",
+        "ok": false
+      }
+    },
+    "4553675b8d66f18285abaf1a3ca567f0a3aad7ba95dbc35650e79f55197a5f5a": {
+      "status": "done",
+      "group_stopped": true,
+      "result": {
+        "error": "action interrupted without a durable result; inspect preserved state before a new request",
+        "ok": false
+      }
+    }
+  },
+  "successors": {
+    "ffffe72f2f8e47cfa658799d6075dc17": {
+      "agent": "muse",
+      "help_request": "wake-prompt-lived-trial-v1",
+      "kind": "run-start",
+      "mode": "review",
+      "model": "muse-ember-1.0",
+      "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+      "resident": "resident-8ce5efdfe3004ff78be973499d85d26c",
+      "run": "ffffe72f2f8e47cfa658799d6075dc17",
+      "source_head": "e8f97d273f106cdc54ddd2c023c493e3cf8317ba",
+      "workspace": "residents/ffffe72f2f8e47cfa658799d6075dc17",
+      "status": "active",
+      "started_at": 1794594977.8288288,
+      "started_sequence": 339,
+      "pgid": 52939,
+      "launched_sequence": 340
+    }
+  },
+  "help_request": {
+    "agent": "muse",
+    "kind": "help",
+    "reason": "Own a bounded council task in your private room: assess the lived native-client failures and current wake prompt, then propose one small evidence-backed wake-prompt improvement that helps later residents spend less time on setup and more on useful ambitions. Use your own name/identity and fixed mailbox. Inspect actual receipts; do not invent a trial or endorsements. You may test the proposed guidance yourself on a real useful task, finish immutable artifacts, record a trial and publish the council notice through approved commands if justified. Full24-hour window and two independent non-author endorsements remain mandatory; no early enactment or runtime refresh. Do not change protected source or owner limits. Keeper owns canonical docs/evidence integration right now. Ordinary read-only status/rules take no --as. Leave a precise handoff and sleep when this bounded request is complete.",
+    "request": "wake-prompt-lived-trial-v1",
+    "resident": "keeper-01",
+    "status": "assigned",
+    "at": 1794594257.460613,
+    "run": "ffffe72f2f8e47cfa658799d6075dc17"
+  },
+  "limits": "One deliberate SIGKILL trial on this host. Not a proof against disk loss, hostile same-user tampering or all crash points. Successor launch is observed; its eventual completed task/handoff remains separate evidence."
+}
