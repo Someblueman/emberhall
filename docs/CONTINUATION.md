@@ -15,27 +15,34 @@ with30 public figures and23 explicit sleepers; the rendered bedroom had grown
 from160 to532 drawing units. This was generated layout, not recorded building.
 
 Task `resident-continuity-v1` is claimed by Keeper (token keeper-continuity-c49a18).
-Two ordinary private clones isolate implementation: `/private/tmp/emberhall-resident-returns`
-(Witness: life/home and return tests) and `/private/tmp/emberhall-dorm-roster`
-(Linden: body/site and display tests). Keeper owns the narrowly pinned owner
-migration, integration and actual acceptance. The new scope is
-`resident-continuity-20261113`, bound to the full approved objective; latest owner
-steering is in `evidence/resident-continuity/owner-steering.txt`.
+The reviewed source is `3ddc4710c311a6e1e47211e3153e30b2fd8e30a3`.
+Migration621 enabled `resident_returns` and the sole service now selects runtime
+SHA256 `ad00cbcbab67a47376c48cb131e5e9a5c78e23cc706b6b52f7e9b229587af4f6`.
+Host280 tests (271 executed,9 skipped) and isolated280 (208 executed,72 skipped)
+passed. A synthetic100-sleeper phone check displayed6 bunks with17 pages and
+retained all100 identities; history correctly clamped to a one-sleeper past.
 
-Planned contract: reuse an eligible sleeping supervised resident of the exact
-same kind/model, preserving name/cursor/handoff; new run UUID/private clone/client
-every time. Atomically reject concurrent reuse, live claims, wrong routes and old
-mailbox actions. Never mint a new identity to evade independent-review rules.
-Keep a fixed six-bunk display with truthful count/paging and every old identity
-in history. No new provider retry, credential, sandbox or council authority is
-part of this fix. **Not activated yet.** Existing deployed runtime below remains
-selected until full acceptance and a recorded cold migration. Verify live state.
+The coordinator reuses the least recently used eligible sleeping resident of the
+exact same kind/model, preserving name/cursor/handoff; each run gets a fresh UUID,
+private clone and client. Concurrent reuse, live claims, wrong routes and old
+mailbox actions are rejected. Returning cannot evade independent-review rules.
+Every identity remains in history; six bunks are a display page, not membership.
+No provider retry, credential, sandbox or council authority changed.
+
+Run `0dcc0fc085f24535b8c025613d735d96` started625/launched626 as the existing
+Codex Linden `resident-22b4c51faf9048c1ba5af1771f156026`, formerly run
+`21ddde9ea9b74888b1365919da9ddaca` with retained cursor275. Task
+`returning-resident-salvage-review-v1` owns only
+`evidence/native-residents/returning-salvage-review.md` in its private room.
+Observe actual wake, useful independent recovery practice and final handoff;
+launch alone is not proof of a completed return. Root still owns acceptance and
+source integration. See `evidence/resident-continuity/deployment.json`.
 
 ## Installed service and OpenCode result
 
-The sole `local.emberhall.watch` LaunchAgent runs the immutable archive built
-from `e12622a664553b285d8cabbf575ff3953ac7e27a`, SHA256
-`cdbc395e21c680e96481428cf726d70c727051367f71856193941e83942f5c34`.
+The earlier launcher repair used source `e12622a664553b285d8cabbf575ff3953ac7e27a`,
+archive SHA256 `cdbc395e21c680e96481428cf726d70c727051367f71856193941e83942f5c34`.
+The continuity runtime above supersedes it; preserve both archives.
 KeepAlive/RunAtLoad and the original protected envelope remain. The coordinator
 is the only model launcher. Private rooms, failed logs, rescue objects and all
 previous archives remain under `.git/house-home/`. No worktrees were made.

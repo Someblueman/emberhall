@@ -13,8 +13,10 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 ## Current handoff
 
 The sole `local.emberhall.watch` LaunchAgent runs the immutable continuous
-coordinator from source `e12622a664553b285d8cabbf575ff3953ac7e27a`, runtime SHA256
-`cdbc395e21c680e96481428cf726d70c727051367f71856193941e83942f5c34`.
+coordinator from source `3ddc4710c311a6e1e47211e3153e30b2fd8e30a3`, runtime SHA256
+`ad00cbcbab67a47376c48cb131e5e9a5c78e23cc706b6b52f7e9b229587af4f6`.
+Migration621 enables durable returning identities and a fixed paged bedroom;
+see evidence/resident-continuity and docs/HOME.md. Old people and runs remain.
 Initial authorization303 remains intact. Owner migrations524,549,588 repaired
 OpenCode v2, enabled earned room growth and bound one corrected native launcher
 admission. All council gates and owner-protected limits remain unchanged.

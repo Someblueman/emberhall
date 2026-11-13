@@ -1,0 +1,57 @@
+{
+  "format": "emberhall-continuity-deployment-v1",
+  "source_commit": "3ddc4710c311a6e1e47211e3153e30b2fd8e30a3",
+  "runtime_sha256": "ad00cbcbab67a47376c48cb131e5e9a5c78e23cc706b6b52f7e9b229587af4f6",
+  "migration": {
+    "request": "owner-migration-resident-continuity-20261113",
+    "sequence": 621,
+    "head": "7cbc756366139b2e98186b8bb88564b32fa74a6c",
+    "replayed": false
+  },
+  "isolated_tests": {
+    "collected": 280,
+    "executed": 208,
+    "skipped": 72,
+    "seconds": 64.448,
+    "output_sha256": "62877359bfc20c3c02b53751fea7e5f2ce0934f5e8fdf4085eb16820aaddcb95"
+  },
+  "preserved_at_migration": [
+    "rules",
+    "rule_revision",
+    "council",
+    "proposals",
+    "wake_policy",
+    "residents",
+    "tasks",
+    "life including provider budgets and spent credits",
+    "all earlier maintenance migrations"
+  ],
+  "launchagent": "local.emberhall.watch",
+  "launch_settings": "Only the two runtime-path arguments changed; PATH, sandbox, KeepAlive, RunAtLoad and all other settings compared equal.",
+  "cold_transition": {
+    "worksheet_run": "ee6cfec5d13a4da0868581ee794c161b",
+    "outcome": "interrupted",
+    "completion_sequence": 620,
+    "accepted_artifacts": "Corrected finish614 and sleep615; operator acceptance622 binds curated a0e69c6 and actual shell rehearsal; interruption is not a successful native exit."
+  },
+  "first_return": {
+    "agent": "codex",
+    "help_request": "continuity-real-return-v1",
+    "kind": "run-start",
+    "mode": "work",
+    "model": "gpt-6.1-sol",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+    "run": "0dcc0fc085f24535b8c025613d735d96",
+    "source_head": "3ddc4710c311a6e1e47211e3153e30b2fd8e30a3",
+    "workspace": "residents/0dcc0fc085f24535b8c025613d735d96",
+    "status": "active",
+    "started_at": 1794604207.776434,
+    "started_sequence": 625,
+    "pgid": 69631,
+    "launched_sequence": 626
+  },
+  "first_return_observation": "Launched under old Linden identity; actual wake/work/handoff not yet witnessed in this receipt.",
+  "observed_sequence": 627,
+  "observed_head": "133716ee452dce441ec5e8f2edb3af5afb9c19a3"
+}
