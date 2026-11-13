@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-13T18:27:05.695640+00:00",
+  "command": "pinned-runtime home --repo CANONICAL --runtime PINNED once",
+  "exit_code": 2,
+  "response": {
+    "error": "ValueError",
+    "message": "a household coordinator is already running"
+  },
+  "outcome": "Second real coordinator refused before launching any resident; existing service continues."
+}

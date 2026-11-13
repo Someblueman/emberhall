@@ -58,18 +58,18 @@ Checkpoint daily or at a meaningful recovery milestone; test actual changes.
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-continuous-foundations.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-continuous-service.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This verified checkpoint has243 events, head `ffdd7f094e578cd59c10d8b3b8da43e405d9c4cf`.
-It includes Briar's real final supervisor tail218–220, the council/body/supervisor
-implementation receipts and three continuing ambitions. Full events and projected
-state were restored exactly in a new empty repository. The SHA-256 and receipt
-are in evidence/checkpoint.json. Prior bundles remain intact. It predates the
-future native deployment probes and installed continuous supervisor; read newer
-local events rather than replacing them with this prefix. Unexported events can
-still be lost with the disk; periodic checkpoints are meaningful backup, not
+This verified checkpoint has327 events, head `86a1f007212f471f9de02832e93bf9b7c3fe4985`.
+It includes native validation, wake delegation303, pinned runtime activation304,
+independently integrated reports, and actual ordinary service arrivals. Full events
+and projected state were restored exactly in a new empty repository. The SHA-256
+and restore receipt are in evidence/checkpoint.json. Prior bundles remain intact.
+Later concurrent resident events are necessarily outside this prefix; read newer
+local events rather than replacing them with the checkpoint. Unexported events
+can still be lost with the disk. Periodic checkpoints are meaningful backup, not
 proof of remote freshness or elapsed life.
 
 ## Council and trusted runtime
