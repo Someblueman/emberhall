@@ -1,0 +1,3 @@
+Owner report, 13 November 2026: opencode should work now as well
+Owner direction after the existing one-day cooldown was explained: you can override it
+Scope: one early OpenCode retry for budget event300, not a success claim, new credential, provider change, council change or recurring bypass.

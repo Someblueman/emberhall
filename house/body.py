@@ -87,6 +87,11 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                     "resident": task["owner"], "at": task["until"], "sequence": seq,
                     "basis": "Inferred from lease time; process fate unconfirmed", "mended": False})
         state = apply_event(state, event)
+        if op == "owner-provider-release":
+            accepted = state["life"]["budgets"][data["agent"]]
+            budgets[data["agent"]] = {"agent": data["agent"], "until": accepted["until"],
+                "reason": "Owner authorized one early attempt; original cooldown retained.",
+                "usage": {}, "sequence": seq}
         if op in {"arrive", "wake"}:
             sleeping.discard(actor)
             places[actor] = "door"
@@ -130,6 +135,11 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                     "reason": label(accepted["reason"]), "usage": {},
                     "sequence": accepted["sequence"]}
             elif kind in {"start", "run-start"}:
+                if life and item.get("agent") == "opencode":
+                    permit = state.get("maintenance", {}).get("releases", {}).get("opencode-retry-20261113", {})
+                    if permit.get("consumed_run") == run_id and "opencode" in budgets:
+                        budgets["opencode"]["reason"] = "Owner's single early attempt used; original cooldown retained."
+                        budgets["opencode"]["sequence"] = seq
                 resident = str(item.get("resident", ""))
                 agent = item.get("agent", "codex" if item.get("executable") == "codex" else "unrecorded")
                 runs[run_id] = {"id": run_id, "resident": resident, "agent": label(agent, 30),

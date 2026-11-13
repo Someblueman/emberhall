@@ -87,9 +87,10 @@ def authorize(state: dict, event: dict) -> None:
 
 
 def protected_source(state: dict, snapshot: dict) -> None:
-    require(PROTECTED_FILES <= snapshot["files"].keys() and
-            {name: snapshot["files"][name] for name in PROTECTED_FILES} ==
-            state["wake_policy"]["protected_files"],
+    manifest = state.get("maintenance", {}).get("protected_files",
+                                               state["wake_policy"]["protected_files"])
+    require(manifest.keys() <= snapshot["files"].keys() and
+            {name: snapshot["files"][name] for name in manifest} == manifest,
             "protected enforcement source changed; new Steward authorization required")
 
 

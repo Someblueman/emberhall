@@ -65,7 +65,10 @@ def apply_event(previous: dict | None, event: dict) -> dict:
     else:
         require(actor in state["residents"], "unknown resident: arrive first")
         resident = state["residents"][actor]
-        if op == "life":
+        if op in {"owner-migrate", "owner-provider-release"}:
+            from .maintenance import apply
+            apply(state, event)
+        elif op == "life":
             from .life import apply
             apply(state, event)
         elif op.startswith("council-"):

@@ -17,7 +17,7 @@ import time
 import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, providers
-from .life import CONTROLLER
+from .life import CONTROLLER, provider_available
 from .record import Record
 from .wake_policy import active_policy, active_prompt
 from .watch import group_members, group_stopped, kill_group
@@ -65,7 +65,7 @@ def inspect(record: Record) -> dict:
 
 def choose_provider(state: dict, now: float, preferred: str | None = None) -> str | None:
     life = state.get("life", {})
-    available = [kind for kind in KINDS if life.get("budgets", {}).get(kind, {}).get("until", 0) <= now]
+    available = [kind for kind in KINDS if provider_available(state, kind, now)]
     if preferred in available:
         return preferred
     if not available:
