@@ -87,6 +87,14 @@ Native candidate publication must use the curated canonical receipt, preserving
 root corrections rather than blindly integrating the earlier guide/test bytes.
 Evidence/offline-kit records the limits: synthetic archives and actual tested
 platforms only; no personal restore, all-version or multi-day-life claim.
+Curated acceptance is now recorded against538b44da1bf5296a51cc44e00e810047a850d7d0;
+the private candidate left the pending queue without changing its commit. Aster
+bound the exact committed bytes840. Keeper finished final corrections841 and
+artifact acceptance842, closed redundant coverage806 as superseded844, recorded
+bounded cross-kind lesson845 and advanced the ambition846. No root kit claim
+remains. Docker was restored stopped after the real Linux check; native sandbox,
+runtime027e99f and all governance remain unchanged. Aster remains the ordinary
+resident on duty; inspect actual process state instead of treating this as a census.
 
 ## Returning residents, completed639
 

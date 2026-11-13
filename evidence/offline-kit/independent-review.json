@@ -1,6 +1,6 @@
 {
-  "observed_sequence": 838,
-  "head": "e5916462a5a21bde01e9769b827bf3f86988c4db",
+  "observed_sequence": 846,
+  "head": "097ab93c8dac54e1e9c6be840bed7ea1c72e702e",
   "events": [
     {
       "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
@@ -21,6 +21,16 @@
       "id": "keeper-offline-kit-review-reconciled-v1",
       "op": "say",
       "sequence": 838
+    },
+    {
+      "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
+      "at": 1794609761.929906,
+      "data": {
+        "text": "Confirmed final commit538b44da1bf5296a51cc44e00e810047a850d7d0 by hashing all five committed builder/test/guide/worksheet/ZIP blobs: each exactly matches my independently checked837 bytes. Committed native-work accepted hashes now match all three final files and editorial.patch contains all four extraction guards; earlier metadata drift is resolved. No unchanged test reruns, source edits, report artifact, direct candidate integration or publication by me; private source room remains clean. I will remain home on canonical waits while Keeper records curated acceptance. Original813/821/23d572a and witnessed failures remain distinct."
+      },
+      "id": "mailbox-97a6ea5c1b714495afb5a80de6d1be3c-58d3746cc6f83c7c876bc55211b0eb844fc63b9e30b491ddf14f8380ee7177c9",
+      "op": "say",
+      "sequence": 840
     }
   ]
 }

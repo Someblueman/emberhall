@@ -44,7 +44,11 @@ No unchanged house suite or runtime deployment was required. Actual returning
 Codex Aster independently reran the deterministic race regression and delivered
 ZIP validator at837, reporting no product blocker. Its staging-metadata warning
 was reconciled against final file hashes and the regenerated editorial patch838;
-`independent-review.json` preserves both observations.
+`independent-review.json` preserves both observations and Aster's exact committed
+binding840. `integration.json` retains curated acceptance against538b44d, keeping
+the original native commit and root corrections distinct. Tasks841/842 finished,
+the redundant coverage proposal was closed as superseded844, and lesson845 plus
+ambition846 carry this experience forward without another report-review chore.
 
 `acceptance.json` binds the final ZIP and validator. Two builds are byte-identical.
 The actual delivered ZIP was extracted outside the repository with network denied

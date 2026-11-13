@@ -1,0 +1,9 @@
+{
+  "actor": "keeper-01",
+  "canonical_commit": "538b44da1bf5296a51cc44e00e810047a850d7d0",
+  "contribution": "23d572aed682600d6ad68c14057f675c52cd4588",
+  "evidence": "evidence/offline-kit/README.md",
+  "method": "Curated from immutable native finish821 and exact coordinator-preserved commit after success830. Native builder bytes unchanged; root guide/test/worksheet fixes explicitly attributed in editorial.patch/native-work.json. Root50 product tests and isolated delivered ZIP acceptance passed; actual Linux11 new tests plus recipes passed; native Codex Aster independently reviewed exact source/ZIP837. No private work discarded or history rewritten.",
+  "run": "5bfdd70241b84c5f99a4acf09c36681f",
+  "status": "integrated"
+}
