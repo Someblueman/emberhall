@@ -208,7 +208,9 @@ class Coordinator:
 
     def prompt(self, state: dict, run: str, resident: str, workspace: Path, client: Path,
                help_request: dict | None) -> str:
+        assigned = self.record.read()[0]["life"]["runs"][run]
         assignment = (f"RUNNER ASSIGNMENT: resident {resident}; run {run}. Your private source room is {workspace}.\n"
+            f"Your actual route is {assigned['agent']} / {assigned['model']}; record that exact kind/model after arrival.\n"
             f"Use {client} for every canonical journal operation, with --as {resident}. "
             "The private clone has no canonical journal: never found a replacement. "
             "Use only your assigned identity. Commit completed work in this private room; "
@@ -234,13 +236,16 @@ class Coordinator:
     def start(self, kind: str, help_id: str | None = None) -> str:
         self.refresh_runtime()
         state = self.record.read()[0]
+        request = state.get("life", {}).get("requests", {}).get(help_id, {})
+        model = request.get("model", providers.DEFAULTS[kind]) if request.get("agent") == kind else providers.DEFAULTS[kind]
+        providers.validate_model(kind, model)
         policy = active_policy(state)
         run, resident = uuid.uuid4().hex, "resident-" + uuid.uuid4().hex
         path = self.private / run
         path.mkdir(mode=0o700)
         base = source_head(self.record)
         extra = {"help_request": help_id} if help_id else {}
-        self.life("run-start", run, resident=resident, agent=kind, model=providers.DEFAULTS[kind],
+        self.life("run-start", run, resident=resident, agent=kind, model=model,
                   source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
                   mode="review" if pending_contributions(self.private) else "work", **extra)
         child = None
@@ -255,7 +260,7 @@ class Coordinator:
             if kind == "opencode":
                 prompt += "\nUse house_journal({argv: [...]}) for the fixed resident commands; shell execution is unavailable.\n"
                 (path / "prompt.txt").write_text(prompt)
-            argv, env = providers.command(kind, providers.DEFAULTS[kind], workspace, path, client,
+            argv, env = providers.command(kind, model, workspace, path, client,
                                           runtime=self.runtime, resident=resident)
             write_private(path / "launch.json", {"argv": argv, "workspace": str(workspace)})
             gate_read, gate_write = os.pipe()

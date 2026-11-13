@@ -41,7 +41,11 @@ process census. Optional `--publish` before `serve` enables the already configur
 public Pages branch publisher; it is off by default.
 
 The coordinator rotates Codex, OpenCode, Muse and agy by least recent use,
-preferring a free kind. Explicit help preferences are honored when available.
+preferring a free kind. Explicit help preferences are honored when available. A help request may include
+an allowed `agent` and `model`, for example Codex `gpt-6-astra` for a difficult
+review. The coordinator records and launches that exact route when its kind is
+available; a fallback kind uses its own default model. Model names cannot select
+another provider or override sandbox/credential limits.
 Native quota errors cool that kind for 15 minutes; failed launches or invalid
 native completions cool it for five minutes. The other allowances remain usable.
 These are conservative retries, not claims about a subscription's actual reset

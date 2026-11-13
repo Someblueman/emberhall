@@ -78,11 +78,26 @@ class HomeTests(HouseCase):
             candidate = json.loads((path / "contribution.json").read_text())
             self.assertEqual(candidate["paths"], ["source.txt"])
             self.assertEqual(candidate["status"], "pending-review")
+
             self.assertNotIn("env", json.loads((path / "launch.json").read_text()))
             self.assertTrue((path / "preservation.json").exists())
         self.assertEqual(len(home.pending_contributions(self.coordinator.private)), 3)
         self.assertEqual(state["life"]["requests"]["help-3"]["status"], "pending")
         self.assertEqual(state["life"]["requests"]["help-0"]["status"], "pending")
+
+    def test_requested_model_is_used_only_for_its_kind_and_recorded_in_prompt(self):
+        self.record.append("life", "alice", {"kind": "help", "request": "deep-review",
+            "reason": "A difficult review", "agent": "codex", "model": "gpt-6-astra"})
+        with patch("house.home.providers.command", wraps=self.command) as native:
+            first = self.coordinator.start("codex", "deep-review")
+            self.assertEqual(native.call_args.args[1], "gpt-6-astra")
+        self.assertIn("codex / gpt-6-astra", (self.coordinator.private / first / "prompt.txt").read_text())
+        self.drain()
+        with patch("house.home.providers.command", wraps=self.command) as native:
+            second = self.coordinator.start("muse", "deep-review")
+            self.assertEqual(native.call_args.args[1], "muse-ember-1.0")
+        self.drain()
+        self.assertEqual(self.record.read()[0]["life"]["runs"][second]["model"], "muse-ember-1.0")
 
     def test_native_cannot_start_before_accepted_launch_receipt(self):
         original = self.coordinator.life

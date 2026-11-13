@@ -77,7 +77,7 @@ def apply(state, event):
         life["ambitions"][key] = {**data, "generation": data["expect"] + 1,
                                   "resident": actor, "sequence": seq, "at": at}
     elif kind == "help":
-        fields(data, {"kind", "request", "reason"}, {"task", "agent"})
+        fields(data, {"kind", "request", "reason"}, {"task", "agent", "model"})
         key = identifier(data, "request")
         require(key not in life["requests"], "help request exists")
         string(data, "reason")
@@ -85,6 +85,10 @@ def apply(state, event):
             require(data["task"] in state["tasks"], "unknown help task")
         if "agent" in data:
             require(data["agent"] in KINDS, "unknown agent kind")
+        if "model" in data:
+            require("agent" in data, "a model preference requires its agent kind")
+            from .providers import validate_model
+            validate_model(data["agent"], data["model"])
         life["requests"][key] = {**data, "resident": actor, "status": "pending", "at": at}
     else:
         require(actor == CONTROLLER, "only the supervisor records process observations")

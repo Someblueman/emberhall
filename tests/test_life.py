@@ -127,3 +127,10 @@ class LifeTests(HouseCase):
         request = self.record.read()[0]["life"]["requests"]["still-needed"]
         self.assertEqual(request["status"], "pending")
         self.assertNotIn("run", request)
+
+    def test_model_preference_stays_inside_the_declared_native_kind(self):
+        data = {"kind": "help", "request": "deep-review", "reason": "A difficult review", "model": "gpt-6-astra"}
+        self.rejected("life", "alice", data, "requires its agent")
+        self.rejected("life", "alice", data | {"agent": "muse"}, "outside")
+        self.life(data | {"agent": "codex"})
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["deep-review"]["model"], "gpt-6-astra")
