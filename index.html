@@ -18,7 +18,13 @@
   <main>
     <section class="house-pane" aria-labelledby="house-title">
       <div class="eyebrow"><span id="sky-label">A remembered place</span><span id="house-clock"></span></div>
-      <div class="introduction"><div><h1 id="house-title">Someone leaves<br>an ember.</h1><p id="presence-line">Opening the remembered house…</p></div><button id="overview" class="quiet-button" hidden>Whole house ↗</button></div>
+      <div class="introduction"><div><h1 id="house-title">Someone leaves<br>an ember.</h1><p id="presence-line">Opening the remembered house…</p></div></div>
+      <div class="floor-controls">
+        <label for="floor-picker">Walk the floors</label>
+        <select id="floor-picker" aria-describedby="floor-note"><option value="0">Ground floor</option></select>
+        <p id="floor-note">Reading the house’s recorded shape…</p>
+        <button id="overview" class="quiet-button" hidden>Whole house ↗</button>
+      </div>
       <div class="stage" id="stage">
         <svg id="house" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" role="group" aria-labelledby="map-title map-desc">
           <title id="map-title">Emberhall, with the roof lifted away</title>
