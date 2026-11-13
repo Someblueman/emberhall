@@ -1,0 +1,31 @@
+test_coordinator_preserves_finished_report_after_interruption (tests.test_report_retention.ReportRetentionTests.test_coordinator_preserves_finished_report_after_interruption) ... ERROR
+test_exact_finished_report_is_retained_but_not_accepted_or_queued (tests.test_report_retention.ReportRetentionTests.test_exact_finished_report_is_retained_but_not_accepted_or_queued) ... ok
+test_explicit_independent_publication_remains_available (tests.test_report_retention.ReportRetentionTests.test_explicit_independent_publication_remains_available) ... ok
+test_failed_receipt_replace_preserves_prior_json_and_candidate (tests.test_report_retention.ReportRetentionTests.test_failed_receipt_replace_preserves_prior_json_and_candidate) ... ok
+test_latest_finish_wins_and_later_launch_cannot_reuse_old_proof (tests.test_report_retention.ReportRetentionTests.test_latest_finish_wins_and_later_launch_cannot_reuse_old_proof) ... ok
+test_missing_foreign_prelaunch_postrun_and_changed_artifacts_stay_pending (tests.test_report_retention.ReportRetentionTests.test_missing_foreign_prelaunch_postrun_and_changed_artifacts_stay_pending) ... ok
+test_modifications_deletions_renames_mixed_and_nonreport_paths_stay_pending (tests.test_report_retention.ReportRetentionTests.test_modifications_deletions_renames_mixed_and_nonreport_paths_stay_pending) ... ok
+test_no_review_boundary_provider_or_other_scope_change (tests.test_owner_reports.OwnerReportsTests.test_no_review_boundary_provider_or_other_scope_change) ... ok
+test_report_scope_changes_only_source_pins (tests.test_owner_reports.OwnerReportsTests.test_report_scope_changes_only_source_pins) ... ok
+test_fixed_client_rejects_other_actor_and_global_repo_override (tests.test_home_work.PrivateWorkTests.test_fixed_client_rejects_other_actor_and_global_repo_override) ... ok
+test_same_path_edits_in_two_source_rooms_cannot_overwrite (tests.test_home_work.PrivateWorkTests.test_same_path_edits_in_two_source_rooms_cannot_overwrite) ... ok
+test_accepted_retry_keeps_receipt_history_and_does_no_new_work (tests.test_integrate.IntegrationTests.test_accepted_retry_keeps_receipt_history_and_does_no_new_work) ... ok
+test_concurrent_replays_preserve_accepted_receipt (tests.test_integrate.IntegrationTests.test_concurrent_replays_preserve_accepted_receipt) ... ok
+test_inconsistent_acceptance_and_changed_contribution_fail_closed (tests.test_integrate.IntegrationTests.test_inconsistent_acceptance_and_changed_contribution_fail_closed) ... ok
+test_operator_acceptance_survives_later_commits_without_self_review (tests.test_integrate.IntegrationTests.test_operator_acceptance_survives_later_commits_without_self_review) ... ok
+test_wren_self_review_rejected_and_two_conflicting_contributions_retained (tests.test_integrate.IntegrationTests.test_wren_self_review_rejected_and_two_conflicting_contributions_retained) ... ok
+
+======================================================================
+ERROR: test_coordinator_preserves_finished_report_after_interruption (tests.test_report_retention.ReportRetentionTests.test_coordinator_preserves_finished_report_after_interruption)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_report_retention.py", line 146, in test_coordinator_preserves_finished_report_after_interruption
+    coordinator = Coordinator(self.record, self.private / "unused-fixture-runtime.pyz")
+  File "/Users/sws/Code/longhouse/house/home.py", line 108, in __init__
+    raise ValueError("a pinned runtime file is required")
+ValueError: a pinned runtime file is required
+
+----------------------------------------------------------------------
+Ran 16 tests in 17.552s
+
+FAILED (errors=1)

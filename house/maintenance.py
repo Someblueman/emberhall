@@ -31,6 +31,7 @@ LAUNCHER_SCOPE = "opencode-launcher-20261113"
 CONTINUITY_SCOPE = "resident-continuity-20261113"
 NAMING_SCOPE = "resident-names-20261113"
 INTEGRATION_SCOPE = "integration-acceptance-20261113"
+REPORT_SCOPE = "report-retention-20261113"
 FAILED_CLI_RUN = "6eec53281c2641f28677a9a7bcc41e8d"
 FAILED_CLI_SHA256 = "cb62a75b5184f48c6050e1be789a1786c1a64087fc99f11213c4d140dc661dab"
 FAILED_CLI_OBSERVATION = 465
@@ -40,11 +41,12 @@ FAILED_BOOTSTRAP_OBSERVATION = 530
 SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            REPAIR_SCOPE: GROWTH_SHA256, LAUNCHER_SCOPE: GROWTH_SHA256,
            CONTINUITY_SCOPE: GROWTH_SHA256, NAMING_SCOPE: GROWTH_SHA256,
-           INTEGRATION_SCOPE: GROWTH_SHA256}
+           INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    REPORT_SCOPE: {"house/maintenance.py", "house/home.py", "house/home_work.py"},
     INTEGRATION_SCOPE: {"house/maintenance.py", "house/integrate.py"},
     NAMING_SCOPE: OWNER_MODULES | {"house/model.py", "house/__main__.py", "house/mailbox.py",
                                   "house/home.py", "house/body.py"},

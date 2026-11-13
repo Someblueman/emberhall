@@ -147,7 +147,8 @@ class Coordinator:
                 saved = home_work.preserve(self.private, run, workspace)
                 write_private(self.private / run / "preservation.json", saved)
                 saved = home_work.contribution(workspace, item["source_head"],
-                                               self.private / run / "contribution.json")
+                                               self.private / run / "contribution.json",
+                                               journal_artifacts=home_work.finished_reports(events, item))
             except (OSError, ValueError, subprocess.SubprocessError) as error:
                 # The room itself stays intact even if a bounded rescue refuses a file.
                 write_private(self.private / run / "preservation-error.json",

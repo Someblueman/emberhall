@@ -34,7 +34,7 @@ class IntegrationTests(HouseCase):
         workspace = room(self.record, self.private, run, self.base)
         (workspace / "document.txt").write_text(text)
         (self.private / run).mkdir()
-        contribution(workspace, self.base, self.private / run / "contribution.json")
+        contribution(workspace, self.base, self.private / run / "contribution.json", journal_artifacts={})
         self.record.append("life", "watch-keeper", {"kind": "run-finish", "run": run,
             "outcome": "success", "exit_code": 0, "usage": {}, "elapsed_seconds": 1})
         return workspace

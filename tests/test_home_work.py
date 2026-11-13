@@ -31,7 +31,7 @@ class PrivateWorkTests(HouseCase):
         (second / "source.txt").write_text("second\n")
         preserved = preserve(self.private, "one", first)
         self.assertIsNotNone(preserved["rescue"])
-        report = contribution(first, self.base, self.private / "candidate.json")
+        report = contribution(first, self.base, self.private / "candidate.json", journal_artifacts={})
         self.assertEqual(report["paths"], ["source.txt"])
         self.assertEqual((self.repo / "source.txt").read_text(), "base\n")
         self.assertEqual((second / "source.txt").read_text(), "second\n")

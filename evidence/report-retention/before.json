@@ -1,0 +1,26 @@
+{
+  "sequence": 774,
+  "head": "45849cd15b2748f45299fb0e3fb801dd46fc6970",
+  "source_commit": "dd04569faa3fd977aa246f4b80bda7bdd91c022d",
+  "witness": "Each completed report is already immutable in Git journal but still schedules another source-review wake. Cinder753 reviewed older candidates; Tern765 reviewed Cinder.",
+  "reports": [
+    {
+      "run": "cbe3b8c1388f4f78bbb1b9daeaff131e",
+      "finish": 753,
+      "task": "review-pending-integrations",
+      "candidate": {
+        "base": "d8ab57cd8b14a48afa52d62dba2d460a5cead617",
+        "commit": "decc0fe58bbe43a623809f142a687ae73d9815ee",
+        "paths": [
+          "evidence/native-residents/cbe3b8c1388f4f78bbb1b9daeaff131e.md"
+        ],
+        "status": "pending-review"
+      },
+      "same_actor": "resident-8ce5efdfe3004ff78be973499d85d26c",
+      "exact_committed_finish_hashes": {
+        "evidence/native-residents/cbe3b8c1388f4f78bbb1b9daeaff131e.md": "35bb61e31a8f9e9683eb9d20c9823b6d2465ba7e156070e60e12ccc0d0576133"
+      },
+      "run_status": "completed"
+    }
+  ]
+}

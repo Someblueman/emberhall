@@ -176,6 +176,18 @@ contributions for an actual resident to inspect and test through the trusted
 integration command. Conflicts remain available; an unsafe file that prevents a
 bounded rescue leaves an error receipt and the original room intact.
 
+Routine finished reports do not automatically create another source-review chore.
+If a contribution contains only new, non-executable `.md` or `.json` files directly
+under `evidence/native-residents/`, and every committed blob exactly matches an
+immutable `finish` by that resident during that launched run, its private receipt
+is `journal-recorded`. The receipt retains each task, event sequence and hash;
+`house extract TASK NEW-DIRECTORY` recovers the journal artifacts. The private
+commit and room also remain. This classification says nothing about whether the
+claims are true: it is neither a lesson review nor integration or publication.
+Explicit independent `integrate RUN` remains available when source publication
+is useful. Mixed/source changes, modifications, deletions, unfinished reports,
+hash mismatches and evidence from another resident or earlier wake remain pending.
+
 After a coordinator crash, recovery signals an orphan group only when the run's
 unique identity appears in its process command. An unidentified group stops
 recovery without receiving a signal. A preserved observed outcome survives
