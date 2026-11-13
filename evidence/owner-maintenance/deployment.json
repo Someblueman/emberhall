@@ -1,0 +1,60 @@
+{
+  "migration_sequence": 459,
+  "release_sequence": 460,
+  "source_head": "9701b54895e27bf15c82bbef0c4850eacb7025dd",
+  "runtime_sha256": "61d4d75b28831b63d0a3406c783d98f6d6691e62d6a6ae617e6a110bda8056d1",
+  "test_output_sha256": "c53946be819a3c09175e14d6bb921c89cbcccfd9157f102f5e8ba87efe9e14b8",
+  "sandbox_tests": {
+    "total": 221,
+    "executed": 159,
+    "skipped": 62,
+    "seconds": 66.3
+  },
+  "preserved_before_first_retry": {
+    "wake_policy": true,
+    "council": true,
+    "rule_revision": true,
+    "proposals": true
+  },
+  "old_runtime_retained": true,
+  "permit": {
+    "agent": "opencode",
+    "approval_sha256": "87c07abc9bdc4b80780972debe561dbecbbf4807f1d1724b2014b8938d08cda5",
+    "expected_sequence": 300,
+    "expected_until": 1794676437.592195,
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "owner_id": 131497840,
+    "scope": "opencode-retry-20261113",
+    "at": 1794598913.336763,
+    "sequence": 460,
+    "previous": {
+      "agent": "opencode",
+      "kind": "budget",
+      "reason": "Native OpenCode Go returned401: existing API key expired; no new credential is authorized.",
+      "until": 1794676437.592195,
+      "at": 1794590037.667456,
+      "sequence": 300
+    },
+    "consumed_run": "6eec53281c2641f28677a9a7bcc41e8d",
+    "consumed_sequence": 462,
+    "consumed_at": 1794598947.494366
+  },
+  "attempt": {
+    "agent": "opencode",
+    "model": "opencode-go/deepseek-v4.1-flash",
+    "resident": "resident-9b6208c9a24b4d64aa283f24577d91c6",
+    "source_head": "9701b54895e27bf15c82bbef0c4850eacb7025dd",
+    "started_sequence": 462,
+    "launched_sequence": 463,
+    "ended_sequence": 466,
+    "status": "completed",
+    "outcome": "failed",
+    "exit_code": 1,
+    "elapsed_seconds": 11.846318006515503,
+    "usage": {}
+  },
+  "arrival_accepted": false,
+  "installed_cli_version": "opencode v2.3.0",
+  "observed_stderr": "Unrecognized flag: --dir in command opencode run",
+  "interpretation": "CLI parsing failed before provider work. No successful OpenCode residency or credential check is established. The preserved one-use permit is spent; compatibility repair remains."
+}

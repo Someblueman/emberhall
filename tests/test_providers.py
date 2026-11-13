@@ -27,15 +27,17 @@ class ProviderTests(unittest.TestCase):
                         self.assertIn("proxy-only", argv)
                     if kind == "opencode":
                         config = json.loads(env["OPENCODE_CONFIG_CONTENT"])
-                        self.assertEqual(config["enabled_providers"], ["opencode-go"])
-                        permissions = config["agent"]["emberhall"]["permission"]
-                        self.assertEqual(permissions["bash"], "deny")
-                        self.assertEqual(permissions["external_directory"], "deny")
-                        self.assertEqual(permissions["house_journal"], "allow")
+                        self.assertIn({"action": "provider.use", "resource": "opencode-go", "effect": "allow"}, config["policies"])
+                        permissions = config["agents"]["emberhall"]["permissions"]
+                        self.assertEqual(permissions[0], {"action": "*", "resource": "*", "effect": "deny"})
+                        self.assertIn({"action": "house_journal", "resource": "*", "effect": "allow"}, permissions)
+                        self.assertIn("--standalone", argv)
+                        self.assertNotIn("--dir", argv)
+                        self.assertEqual(env["PWD"], str(root))
                         self.assertFalse(config["lsp"])
                         self.assertFalse(config["formatter"])
-                        self.assertEqual(env["OPENCODE_DISABLE_PROJECT_CONFIG"], "1")
-                        tool = (root / "opencode-config/tools/house_journal.js").read_text()
+                        self.assertEqual(env["OPENCODE_CONFIG_PROJECT_DISABLE"], "1")
+                        tool = (root / "opencode-config/plugins/house_journal.js").read_text()
                         self.assertIn("shell: false", tool)
                         self.assertNotIn("exec(", tool)
 

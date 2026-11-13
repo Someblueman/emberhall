@@ -1,7 +1,8 @@
 """The Steward's finite provider allowlist and native headless boundaries.
 
-No credentials are created or copied. Raw provider output stays private. Usage
-here is measured tokens, never an invented currency bill or remaining allowance.
+No credentials are created. OpenCode reuses only the existing selected Go login
+in its private database. Raw output stays private. Usage is measured tokens,
+never an invented currency bill or remaining allowance.
 """
 from __future__ import annotations
 
@@ -57,21 +58,20 @@ def command(kind: str, model: str, workspace: Path, private: Path,
         # expose only a private fixed tool that invokes the pinned mailbox code.
         if runtime is None or resident is None:
             raise ValueError("OpenCode requires a pinned runtime and assigned resident")
+        from .opencode_auth import source_database
         from .opencode_tool import configure
-        configure(private, workspace, runtime, resident, env)
-        permission = {"*": "deny", "read": {"*": "allow", "*.env*": "deny"},
-                      "glob": "allow", "grep": "allow",
-                      "edit": {"*": "allow", ".house-client": "deny", "*/.house-client": "deny"},
-                      "external_directory": "deny",
-                      "bash": "deny", "house_journal": "allow"}
-        config = {"model": model, "small_model": model, "formatter": False, "lsp": False,
-                  "enabled_providers": ["opencode-go"],
-                  "agent": {"emberhall": {"mode": "primary", "permission": permission}}}
+        source = source_database(env)
+        config = configure(private, workspace, runtime, resident, env)
+        config.update(model=model, default_agent="emberhall", formatter=False, lsp=False,
+                      warming=False, share="disabled", update="disable")
+        config["agents"]["title"] = {"model": model}
         env["OPENCODE_CONFIG_CONTENT"] = json.dumps(config)
         env["OPENCODE_DB"] = str(private / "opencode.db")
-        env["OPENCODE_GOAL_STATE_PATH"] = str(private / "opencode-goal.json")
-        argv = [executable, "run", "-m", model, "--agent", "emberhall", "--format", "json",
-                "--dir", str(workspace), "--title", "Emberhall " + private.name,
+        env["EMBERHALL_OPENCODE_SOURCE_DB"] = str(source)
+        # V2 run prefers PWD over process.cwd(); the coordinator also sets cwd.
+        env["PWD"] = str(workspace)
+        argv = [executable, "run", "--standalone", "-m", model, "--agent", "emberhall",
+                "--format", "json", "--title", "Emberhall " + private.name,
                 (private / "prompt.txt").read_text()]
     return argv, env
 

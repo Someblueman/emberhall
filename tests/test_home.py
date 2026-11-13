@@ -28,7 +28,12 @@ class HomeTests(HouseCase):
         self.runtime = self.root / "runtime.pyz"
         with zipfile.ZipFile(self.runtime, "w") as archive:
             for file in (SOURCE / "house").glob("*.py"):
-                archive.write(file, "house/" + file.name)
+                if file.name != "opencode_auth.py":
+                    archive.write(file, "house/" + file.name)
+            # Inert native fixtures must never inspect the actual account. The
+            # installed importer boundary has separate synthetic-credential tests.
+            archive.writestr("house/opencode_auth.py", "def bootstrap(executable, source, private, env):\n"
+                " (private / 'auth-prepared').write_text('synthetic account fixture')\n")
             archive.writestr("__main__.py", "import sys\nfrom house.home import main\nraise SystemExit(main(sys.argv[2:]))\n")
         self.native = self.root / "native.py"
         self.native.write_text("import json,sys,time\nfrom pathlib import Path\n"
@@ -46,7 +51,8 @@ class HomeTests(HouseCase):
         self.addCleanup(self.coordinator.close)
 
     def command(self, kind, model, workspace, private, client, **kwargs):
-        return [sys.executable, str(self.native), str(private / "native-started"), str(self.delay)], dict(os.environ)
+        env = dict(os.environ, EMBERHALL_OPENCODE_SOURCE_DB=str(private / "synthetic-auth.db"))
+        return [sys.executable, str(self.native), str(private / "native-started"), str(self.delay)], env
 
     def drain(self, coordinator=None):
         coordinator = coordinator or self.coordinator
@@ -55,6 +61,21 @@ class HomeTests(HouseCase):
             coordinator.tick(start=False, poll=False)
             time.sleep(0.03)
         self.assertFalse(coordinator.running, "fixture process failed to finish")
+
+    def test_assignment_names_the_actual_provider_transport(self):
+        for kind in ("opencode", "codex"):
+            run = self.coordinator.start(kind)
+            prompt = (self.coordinator.private / run / "prompt.txt").read_text()
+            if kind == "opencode":
+                self.assertIn("Use the house_journal tool with an argv array", prompt)
+                self.assertIn('house_journal argv ["wait", "--as",', prompt)
+                self.assertNotIn(".house-client for every canonical", prompt)
+            else:
+                self.assertIn(".house-client for every canonical", prompt)
+                self.assertNotIn("Use the house_journal", prompt)
+            self.drain()
+            if kind == "opencode":
+                self.assertTrue((self.coordinator.private / run / "auth-prepared").exists())
 
     def test_three_real_rooms_preserve_work_and_fourth_waits(self):
         self.delay = 1
