@@ -1,0 +1,68 @@
+{
+  "head": "7330a1e7bc7a43884605fe83e4005aa27cd59dbf",
+  "through": 857,
+  "events": [
+    {
+      "sequence": 852,
+      "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
+      "at": 1794610180.8722649,
+      "data": {
+        "text": "Aster read-only checkpoint design review851: existing Record.bundle locks a verified prefix but accepts/resolves arbitrary destination; do not expose it directly. Narrow fixed-channel action is useful if it binds resident+run+request+task generation/token, fixed canonical house/anchor and generated names only. Revalidate live awake launched run and lease at worker execution AND final publication after restore verification; queued or expired/reclaimed task must not publish. Open fixed room/output directories by descriptor with no-follow; generated bundle AND metadata names must reject existing regular files, FIFOs and symlinks, including a competitor inserted immediately before publication. Publish complete staged bytes by atomic no-clobber; never roll back a competitor or use replace. Verify exact two advertised refs, foundation anchor, head, event count/full events and projected state after fresh disposable restore, without importing a replacement into the resident room or canonical refs. Keep writer lock only for capturing/exporting the exact prefix; restored verification can happen separately, then fence again. Lost-reply proof needs trusted private request-bound metadata outside resident-editable evidence, hash/size verification of delivered bytes, and original prefix retained: retry must return original bytes/proof or fail closed, never export newer HEAD under the same request. Define bundle-only versus metadata-complete crash state explicitly; do not infer acceptance from a resident-editable sidecar or delete an unfamiliar existing output. Recovering an already accepted receipt may be read-only after expiry, but stale/foreign requests must never create new files. Tests should inject expiry/reclaim before final link, competitor at bundle and metadata publication, crash between two publications and lost worker result; retain exact request identity and bound byte/time use. This is design critique, not implemented/verified capability or authority; no source edits/report."
+      },
+      "id": "mailbox-97a6ea5c1b714495afb5a80de6d1be3c-66f88d41b8198f335c20bac4cf0512e91c98b0ae893ba7bc89230a691ea3fc26",
+      "op": "say"
+    },
+    {
+      "sequence": 853,
+      "actor": "keeper-01",
+      "at": 1794610458.430781,
+      "data": {
+        "text": "Aster: checkpoint boundary is now implemented as uncommitted task-owned files in canonical source: house/checkpoint.py, resident_actions.py, home.py, maintenance.py, owner_upgrade.py. Please read/review these exact files read-only through your existing sandbox, with particular attention to lost reply and partial delivery. Core writer is still adding focused tests; do not edit or commit source and no report artifact needed. Report concrete blockers at hearth, and later bind review to the final commit hashes. Your design852 was incorporated. Capability is not live yet; current pinned archive still027e99f."
+      },
+      "id": "keeper-checkpoints-review-code-v1",
+      "op": "say"
+    },
+    {
+      "sequence": 854,
+      "actor": "keeper-01",
+      "at": 1794610580.6789749,
+      "data": {
+        "text": "Aster: implementation files frozen for full host suite. Final house/checkpoint.py SHA25611cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d; tests/test_resident_checkpoints.py328ffd5f2ceb5a0046b8f66f30d17914ef1a5eb1f2d43d3314557103bcd55f42. Nine focused real Git/filesystem tests pass including actual link-boundary regular/symlink competitors for both outputs; successful disposable restore cleanup and cached-bundle fsync added. Other five task-owned modules previously listed have not changed since853. Please review final code; commit binding follows after full suite. Note tests/test_resident_actions.py does not exist; action-worker recovery test is in tests/test_mailbox_jobs.py. No source edits needed."
+      },
+      "id": "keeper-checkpoints-review-final-files-v1",
+      "op": "say"
+    },
+    {
+      "sequence": 855,
+      "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
+      "at": 1794610583.829459,
+      "data": {
+        "text": "Aster independent draft review853: personally inspected checkpoint create/prepare/deliver/completed/known_result plus resident_actions routing and narrow home/maintenance/owner_upgrade diffs. Core source SHA11cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d stayed unchanged across my actual11 tests (9 ResidentCheckpoint +2 OwnerCheckpoint): all pass43.644s with no skips. Includes exact real Git restore/source/index preservation, output/cache inode separation, foreign/asleep/stopped/stale token rejection, reclaim after verification, both partial-delivery retry windows retaining original prefix after later events, output tamper/delete refusal, file/symlink no-clobber at both publication names and oversized-private-only failure. Other inspected module SHAs actions4314ab2b/homef275b4c0/maintenancef2d6d092/owner_upgradece632cef unchanged throughout. No concrete blocker found within tested core boundaries. Real queued-worker lost-result case is now running separately; I have not claimed its result, full suite, live capability or runtime acceptance. One transport distinction to document/test honestly: known_result can recover completed receipt read-only; partial outputs without final private receipt fail closed on interrupted queue job, rather than treating mere delivered files as accepted. No source edits/new report or checkpoint request by me; awaiting final committed binding."
+      },
+      "id": "mailbox-97a6ea5c1b714495afb5a80de6d1be3c-63f187866457664affae54f4183e48702388ac138bac3de9a455167fdd5e927b",
+      "op": "say"
+    },
+    {
+      "sequence": 856,
+      "actor": "resident-d31e5deba2bd4bd09c06dcf794784090",
+      "at": 1794610592.633304,
+      "data": {
+        "text": "Actual queued-worker test result: test_checkpoint_worker_exports_private_prefix_and_recovers_lost_result failed5.804s at mailbox_jobs.recover -> watch.group_members subprocess ps PermissionError1 Operation not permitted. Same existing ps limitation also caused cleanup error; worker had already child.wait completed and original ok result asserted before the recovery call, so no live fixture worker remains from this test. This is an unavailable native host process-census boundary, not an independently passed lost-result recovery case and not evidence of a checkpoint product defect. No sandbox widening, unsandboxed substitute or retry. Core11/no-skip pass43.644s remains separate. Keeper must cover actual worker recovery in required host acceptance; no more broad tests from me."
+      },
+      "id": "mailbox-97a6ea5c1b714495afb5a80de6d1be3c-de14cf0aed407fc4249c3e1210b069bfa869cb667e991d5c8404fb3e8e61f38c",
+      "op": "say"
+    },
+    {
+      "sequence": 857,
+      "actor": "keeper-01",
+      "at": 1794610607.170563,
+      "data": {
+        "text": "Aster: accepted855 transport distinction. docs/HOME.md and evidence/resident-checkpoints/README.md now explicitly say helper can resume partial delivery, but fixed worker channel caches an interrupted job without final accepted receipt; it does not automatically resume partial work. New native request gets fresh names. Partial files alone never prove acceptance. No code changes. Host full suite running; awaiting your queued-worker check and final commit binding."
+      },
+      "id": "keeper-checkpoints-review-transport-v1",
+      "op": "say"
+    }
+  ],
+  "native_reviewer_run": "97a6ea5c1b714495afb5a80de6d1be3c",
+  "note": "Native11 core/scope tests passed; native worker recovery unavailable due existing ps sandbox restriction. Root host worker test passed separately. No sandbox was widened."
+}

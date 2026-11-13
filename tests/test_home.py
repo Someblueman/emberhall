@@ -77,6 +77,21 @@ class HomeTests(HouseCase):
             if kind == "opencode":
                 self.assertTrue((self.coordinator.private / run / "auth-prepared").exists())
 
+    def test_due_checkpoint_names_fixed_channel_and_metadata_only_finish(self):
+        evidence = self.repo / "evidence"
+        evidence.mkdir()
+        (evidence / "checkpoint.json").write_text(json.dumps({"last_event_utc": "2000-01-01T00:00:00+00:00"}))
+        git(self.repo, "add", "evidence/checkpoint.json")
+        git(self.repo, "-c", "commit.gpgsign=false", "-c", "user.name=Test",
+            "-c", "user.email=test@local", "commit", "-m", "Old fixture checkpoint")
+        run = self.coordinator.start("codex")
+        resident = self.record.read()[0]["life"]["runs"][run]["resident"]
+        prompt = (self.coordinator.private / run / "prompt.txt").read_text()
+        self.assertIn(f"checkpoint --as {resident} --task TASK --token TOKEN --request {run}-checkpoint", prompt)
+        self.assertIn("Finish with the metadata only", prompt)
+        self.assertIn("independent source review", prompt)
+        self.drain()
+
     def test_three_real_rooms_preserve_work_and_fourth_waits(self):
         self.delay = 1
         for number in range(4):

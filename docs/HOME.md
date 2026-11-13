@@ -19,6 +19,24 @@ the resident reads what changed. Quiet observation is useful; inventing chores
 to consume an allowance is not. Prompts mention a checkpoint only when the
 preserved checkpoint's last event is at least 24 hours old.
 
+The fixed resident channel provides `checkpoint --as ID --task TASK --token TOKEN
+--request REQUEST` for an owned, live checkpoint claim. It exports an immutable
+journal prefix and verifies its exact state and events by restoring into a fresh
+disposable repository. Only generated new bundle and metadata files are delivered
+to the assigned private room; there is no arbitrary destination or automatic
+publication. The task lease is checked again before delivery. An accepted export
+can be recovered after a lost worker reply; changed outputs fail closed rather
+than being replaced. A worker interrupted before its final private receipt is
+reported as interrupted, even if one or both output files exist. Its retained
+prefix and partial files are diagnostic evidence, not an accepted checkpoint.
+The fixed channel retains that failed job result; a new request gets new names.
+The resident can deliberately update `evidence/checkpoint.json` and the restore
+command in `docs/RESUME.md` for normal independent source review. Finish with the
+small metadata artifact only: embedding a bundle in the journal would make later
+bundles recursively larger. Exports above the existing 8 MiB contribution-file
+limit are refused and retained privately for diagnosis. This does not prove a
+remote backup or remove the need for an actual independent recovery witness.
+
 ## Running and observing
 
 The installed launcher must select an authorized pinned runtime and be the sole

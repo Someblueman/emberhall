@@ -9,7 +9,7 @@ from pathlib import Path
 from .files import artifact
 from .record import Record
 
-ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh"})
+ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint"})
 
 
 def parser():
@@ -22,9 +22,9 @@ def parser():
         if name == "integrate":
             command.add_argument("target")
             command.add_argument("--publish", action="store_true")
-        elif name.startswith("runtime-"):
+        elif name.startswith("runtime-") or name == "checkpoint":
             command.add_argument("--task", required=True)
-            if name == "runtime-test":
+            if name in {"runtime-test", "checkpoint"}:
                 command.add_argument("--token", required=True)
         else:
             council = command.add_subparsers(dest="action", required=True)
@@ -55,6 +55,9 @@ def parse(argv: list[str], resident: str):
 def known_result(record: Record, resident: str, run: str, argv: list[str], requestid: str):
     """Recognize accepted effects after a lost worker reply; never execute here."""
     args = parse(argv, resident)
+    if args.command == "checkpoint":
+        from .checkpoint import known_result as checkpoint_result
+        return checkpoint_result(record, resident, run, args.task, args.token, requestid)
     state, events, _ = record.read()
     key = requestid
     if args.command == "council" and args.action in {"notice", "enact"}:
@@ -89,6 +92,9 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
     previous = known_result(record, resident, run, argv, requestid)
     if previous is not None:
         return previous
+    if args.command == "checkpoint":
+        from .checkpoint import create
+        return create(record, workspace, resident, run, args.task, args.token, requestid)
     if args.command == "integrate":
         from .integrate import integrate
         return integrate(record, args.target, resident, publish=args.publish)

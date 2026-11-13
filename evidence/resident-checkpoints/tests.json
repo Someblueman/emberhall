@@ -1,0 +1,28 @@
+{
+  "host": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ],
+    "exit_code": 0,
+    "collected": 320,
+    "executed": 311,
+    "skipped": 9,
+    "seconds": 192.012,
+    "output_sha256": "4a4f28caa7fb528b7651950008c2a0627580c0ce253c36385cde23eaa91a8261"
+  },
+  "native_review": {
+    "sequence": 855,
+    "core_and_scope_tests": 11,
+    "passed": 11,
+    "skipped": 0,
+    "seconds": 43.644,
+    "worker_recovery": "Unavailable inside native sandbox: ps denied; host test passed."
+  },
+  "note": "Synthetic fixtures test races and crash states; actual native export still requires installed-runtime evidence."
+}

@@ -32,6 +32,7 @@ CONTINUITY_SCOPE = "resident-continuity-20261113"
 NAMING_SCOPE = "resident-names-20261113"
 INTEGRATION_SCOPE = "integration-acceptance-20261113"
 REPORT_SCOPE = "report-retention-20261113"
+CHECKPOINT_SCOPE = "resident-checkpoints-20261113"
 FAILED_CLI_RUN = "6eec53281c2641f28677a9a7bcc41e8d"
 FAILED_CLI_SHA256 = "cb62a75b5184f48c6050e1be789a1786c1a64087fc99f11213c4d140dc661dab"
 FAILED_CLI_OBSERVATION = 465
@@ -41,11 +42,13 @@ FAILED_BOOTSTRAP_OBSERVATION = 530
 SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            REPAIR_SCOPE: GROWTH_SHA256, LAUNCHER_SCOPE: GROWTH_SHA256,
            CONTINUITY_SCOPE: GROWTH_SHA256, NAMING_SCOPE: GROWTH_SHA256,
-           INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256}
+           INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256,
+           CHECKPOINT_SCOPE: GROWTH_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    CHECKPOINT_SCOPE: OWNER_MODULES | {"house/checkpoint.py", "house/resident_actions.py", "house/home.py"},
     REPORT_SCOPE: {"house/maintenance.py", "house/home.py", "house/home_work.py"},
     INTEGRATION_SCOPE: {"house/maintenance.py", "house/integrate.py"},
     NAMING_SCOPE: OWNER_MODULES | {"house/model.py", "house/__main__.py", "house/mailbox.py",
@@ -131,6 +134,8 @@ def apply(state: dict, event: dict) -> None:
         extra = OWNER_MODULES | ({"house/building.py"} if scope == GROWTH_SCOPE else set())
         if scope == REPAIR_SCOPE:
             extra.add("house/opencode_auth.py")
+        if scope == CHECKPOINT_SCOPE:
+            extra.add("house/checkpoint.py")
         require(isinstance(manifest, dict) and set(manifest) == set(old) | extra
                 and all(_sha(value) for value in manifest.values()), "invalid replacement manifest")
         changes = {name for name in manifest if manifest[name] != old.get(name)}

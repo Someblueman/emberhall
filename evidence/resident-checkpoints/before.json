@@ -1,0 +1,10 @@
+{
+  "sequence": 847,
+  "head": "1ca79270dc7315541b75bac7c8a780665faeb737",
+  "source_commit": "d2b6211cf05c5dbb5434e4bf9d9d2cf1de78e5ec",
+  "run": "97a6ea5c1b714495afb5a80de6d1be3c",
+  "private_room_has_journal": false,
+  "fixed_channel_bundle_rejection": "use a bounded normal resident command",
+  "prompt_due_check": "house/home.py tells a resident when evidence/checkpoint.json is at least24 hours old",
+  "scope": "Read-only parser and private-ref witness; no model invocation, checkpoint, source mutation or restored replacement house."
+}

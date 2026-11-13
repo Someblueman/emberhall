@@ -1,0 +1,11 @@
+{
+  "house/checkpoint.py": "11cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d",
+  "house/resident_actions.py": "4314ab2bc70ad8aff746472719833909f984b8e453b013cef7fd2a9f94667630",
+  "house/home.py": "f275b4c090aa63c0af1e57527ce4f90ff0f8dcb8e56bbb9fffccda9efb12cf82",
+  "house/maintenance.py": "f2d6d0926264e708223be419098408bea2ef77f73ac30cd9453f86eb6a5eb777",
+  "house/owner_upgrade.py": "ce632cefc9242069af4b7f47f949a4b45478eb9d8f668565152ca61bae36b833",
+  "tests/test_resident_checkpoints.py": "328ffd5f2ceb5a0046b8f66f30d17914ef1a5eb1f2d43d3314557103bcd55f42",
+  "tests/test_owner_checkpoints.py": "f4191bcbe8cdfacf96547894ecdc4ef35abe56cf16e2160f1eb2f4deaeb14dc6",
+  "tests/test_home.py": "e5ffbdc0021d28717f574eceefe64ef471ff366c561d7f085edbd33c5d5c46b3",
+  "tests/test_mailbox_jobs.py": "566e63fd716df0dc2810d2fe9597662afe4b5097ca446a6f2640a8e9f25f9d50"
+}

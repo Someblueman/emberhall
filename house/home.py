@@ -270,7 +270,14 @@ class Coordinator:
         if checkpoint.exists():
             last = datetime.fromisoformat(json.loads(checkpoint.read_text())["last_event_utc"]).timestamp()
             if time.time() - last >= 86400:
-                assignment += "The last preserved checkpoint is at least 24 hours old: a fresh checkpoint is due.\n"
+                assignment += (
+                    "The last preserved checkpoint is at least 24 hours old: a fresh checkpoint is due. "
+                    "Claim a bounded checkpoint task, then use your fixed journal channel: "
+                    f"checkpoint --as {resident} --task TASK --token TOKEN --request {run}-checkpoint. "
+                    "It exports a verified prefix into new evidence files in your room. "
+                    "Inspect its compact receipt before deliberately updating evidence/checkpoint.json "
+                    "and docs/RESUME.md for independent source review. Finish with the metadata only; "
+                    "do not embed the bundle in the journal. Never restore over this house or your room.\n")
         if help_request:
             assignment += "Shared request: " + help_request["reason"] + "\n"
         candidates = pending_contributions(self.private)

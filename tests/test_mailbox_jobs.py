@@ -59,8 +59,39 @@ class JobTests(MailboxCase):
         self.assertIsNone(self.call("council", "--as", self.resident, "--request", "status-one", "status")["council"])
         self.assertEqual(len(mailbox_jobs.jobs(self.record)), 2)
 
+    def test_checkpoint_worker_exports_private_prefix_and_recovers_lost_result(self):
+        self.call("task", "checkpoint-work", "--as", self.resident,
+                  "--title", "Checkpoint", "--description", "Synthetic export fixture")
+        self.call("claim", "checkpoint-work", "--as", self.resident,
+                  "--expect", "0", "--token", "checkpoint-token")
+        before = self.record.read()
+        argv = ["checkpoint", "--as", self.resident, "--task", "checkpoint-work",
+                "--token", "checkpoint-token"]
+        job = mailbox_jobs.enqueue(self.record, self.run, argv, "checkpoint-worker-proof")
+        mailbox_jobs.tick(self.record)
+        child = self.record._mailbox_processes[job]
+        child.wait(timeout=15)
+        result_path = self.private / "jobs" / job / "result.json"
+        original = json.loads(result_path.read_text())
+        self.assertTrue(original["ok"], original)
+        result_path.unlink()  # Accepted export, lost worker result.
+        fresh = Record(self.repo)
+        mailbox_jobs.recover(fresh)
+        recovered = mailbox_jobs.result(fresh, job)
+        self.assertEqual(recovered, original)
+        receipt = recovered["result"]
+        self.assertEqual(receipt["head"], before[2])
+        restored = Record(self.new_repo("export-restored"))
+        restored.restore(str(self.workspace / receipt["bundle"]), receipt["anchor"])
+        self.assertEqual(restored.read(), before)
+        self.assertEqual(self.record.read(), before)
+        self.record._mailbox_processes.clear()
+
     def test_action_parser_denies_owner_initializers_roots_and_other_identity(self):
         for argv in (["council", "--as", self.resident, "authorize"],
+                     ["checkpoint", "--as", self.resident, "--task", "x", "--token", "x", "--destination", "/tmp"],
+                     ["checkpoint", "--as", "alice", "--task", "x", "--token", "x"],
+                     ["checkpoint", "--as", self.resident, "--task", "x"],
                      ["council", "--as", self.resident, "authorize-wake", "--source", "x"],
                      ["runtime-test", "--as", self.resident, "--task", "x", "--token", "x", "--source-repo", "/tmp"],
                      ["runtime-refresh", "--as", "alice", "--task", "x"],
