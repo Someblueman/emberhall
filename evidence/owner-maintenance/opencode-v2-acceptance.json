@@ -1,0 +1,40 @@
+{
+  "scope": "opencode-cli-repair-20261113",
+  "status": "tested before deployment",
+  "full_suite": {
+    "command": "python3 -m unittest discover -s tests -v",
+    "collected": 238,
+    "executed": 230,
+    "skipped": 8,
+    "seconds": 147.961,
+    "log": "opencode-v2-full-tests.txt"
+  },
+  "native_independent": {
+    "command": "EMBERHALL_NATIVE_OPENCODE=1 python3 -B -m unittest tests.test_opencode_v2 tests.test_opencode_auth tests.test_opencode_tool tests.test_owner_cli_repair",
+    "executed": 17,
+    "seconds": 1.376,
+    "review": "opencode-v2-boundary-review.md"
+  },
+  "root_auth_and_permit": {
+    "executed": 24,
+    "seconds": 0.598,
+    "log": "opencode-v2-auth-permit-tests.txt"
+  },
+  "existing_account_preflight": {
+    "selected_go_key_readable_under_os_write_denial": true,
+    "credential_value_logged": false,
+    "imported": false,
+    "model_called": false
+  },
+  "scope_limits": [
+    "Original failed attempt and spent permit remain immutable",
+    "No council gate changed",
+    "Only selected existing Go key reused; no new credential, unrelated account or session history",
+    "Link-free rooms and reviewed effective tools; not hostile same-user shell isolation",
+    "Actual native model wake and remote account validity not yet established"
+  ],
+  "logs_sha256": {
+    "opencode-v2-full-tests.txt": "36e97d799b33c2b284b77d2c94d1c1bea877d4684af8efc4c9d7a5571a7ecbe4",
+    "opencode-v2-auth-permit-tests.txt": "3191b3f5bc1ff1a223d77f8338019c45ed0839f81996b9f03e9b3febdb677959"
+  }
+}

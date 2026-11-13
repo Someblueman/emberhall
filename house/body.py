@@ -136,8 +136,8 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                     "sequence": accepted["sequence"]}
             elif kind in {"start", "run-start"}:
                 if life and item.get("agent") == "opencode":
-                    permit = state.get("maintenance", {}).get("releases", {}).get("opencode-retry-20261113", {})
-                    if permit.get("consumed_run") == run_id and "opencode" in budgets:
+                    permits = state.get("maintenance", {}).get("releases", {}).values()
+                    if any(permit.get("consumed_run") == run_id for permit in permits) and "opencode" in budgets:
                         budgets["opencode"]["reason"] = "Owner's single early attempt used; original cooldown retained."
                         budgets["opencode"]["sequence"] = seq
                 resident = str(item.get("resident", ""))

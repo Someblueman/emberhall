@@ -68,6 +68,8 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
     names = set(old) | maintenance.OWNER_MODULES
     if scope == maintenance.GROWTH_SCOPE:
         names.add("house/building.py")
+    if scope == maintenance.REPAIR_SCOPE:
+        names.add("house/opencode_auth.py")
     require(names <= snapshot["files"].keys(), "required owner upgrade module is missing")
     previous = runtime.selected(record)
     private = record.common / "house-home"
@@ -186,18 +188,25 @@ def apply(record: Record, plan_path: Path) -> dict:
         return {"receipt": receipt, "runtime": target}
 
 
-def release_opencode(record: Record, actor: str) -> dict:
+def release_opencode(record: Record, actor: str, scope: str = maintenance.RETRY_SCOPE) -> dict:
+    require(scope in {maintenance.RETRY_SCOPE, maintenance.REPAIR_SCOPE}, "unknown OpenCode release scope")
     authenticate_owner()
     state, _, _ = record.read()
-    migration = state.get("maintenance", {}).get("migrations", {}).get(maintenance.RETRY_SCOPE)
+    migration = state.get("maintenance", {}).get("migrations", {}).get(scope)
     require(migration is not None, "owner retry migration not accepted")
     require(runtime.selected(record)["runtime_sha256"] == migration["runtime_sha256"],
             "owner retry runtime is not selected")
-    return record.append("owner-provider-release", actor, {
-        "scope": maintenance.RETRY_SCOPE, "approval_sha256": maintenance.OPENCODE_SHA256,
+    data = {"scope": scope, "approval_sha256": maintenance.SOURCES[scope],
         "house": state["house_id"], "owner_id": steward.council.OWNER_ID, "agent": "opencode",
         "expected_sequence": maintenance.RETRY_BUDGET_SEQUENCE,
-        "expected_until": maintenance.RETRY_BUDGET_UNTIL}, "owner-release-" + maintenance.RETRY_SCOPE)
+        "expected_until": maintenance.RETRY_BUDGET_UNTIL}
+    if scope == maintenance.REPAIR_SCOPE:
+        error = record.common / "house-home" / maintenance.FAILED_CLI_RUN / "stderr.log"
+        require(not error.is_symlink() and sha(error.read_bytes()) == maintenance.FAILED_CLI_SHA256,
+                "preserved pre-provider CLI failure evidence changed")
+        data.update(expected_observation=maintenance.FAILED_CLI_OBSERVATION,
+                    failed_run=maintenance.FAILED_CLI_RUN, failed_output_sha256=maintenance.FAILED_CLI_SHA256)
+    return record.append("owner-provider-release", actor, data, "owner-release-" + scope)
 
 
 def main() -> int:
@@ -210,7 +219,8 @@ def main() -> int:
     stage.add_argument("--approval-file", type=Path, required=True)
     stage.add_argument("--source-commit", required=True)
     activate = sub.add_parser("apply"); activate.add_argument("plan", type=Path)
-    sub.add_parser("release-opencode")
+    release = sub.add_parser("release-opencode")
+    release.add_argument("--scope", choices=[maintenance.RETRY_SCOPE, maintenance.REPAIR_SCOPE], default=maintenance.RETRY_SCOPE)
     args = parser.parse_args()
     try:
         record = Record(args.repo)
@@ -219,7 +229,7 @@ def main() -> int:
         elif args.command == "apply":
             result = apply(record, args.plan)
         else:
-            result = release_opencode(record, args.actor)
+            result = release_opencode(record, args.actor, args.scope)
         print(json.dumps(result, indent=2)); return 0
     except (ValueError, KeyError, OSError, subprocess.SubprocessError) as error:
         print(f"owner upgrade: {error}", file=sys.stderr); return 2

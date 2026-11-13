@@ -66,3 +66,32 @@ An actor string and approval digest are attribution, not cryptographic isolation
 from another shell using the owner's account. Native fixed mailbox actions expose
 neither owner operation. No council notice, endorsement, trial, veto or ratification
 boundary is relaxed.
+
+## Installed OpenCode v2 parser repair
+
+The first owner retry was consumed by run6eec53281c2641f28677a9a7bcc41e8d,
+which failed locally on obsolete `--dir` before model work or arrival. The spent
+credit is never refunded. The continuing owner goal requires the installed native
+OpenCode route and explicitly permits use of this existing account. A separately
+recorded `opencode-cli-repair-20261113` scope uses the exact full owner objective
+in `evidence/room-growth/owner-objective.md`. It covers the v2 adapter, private
+one-credential bootstrap and conditional transport guidance, plus one corrected
+admission bound to the retained parser failure. It does not authorize repeated
+retries after a new failure. The historical approval, deadline and council state
+remain unchanged.
+
+Prepare/apply follow the same cold procedure above, with the repair scope and
+full objective file. Then use `release-opencode --scope opencode-cli-repair-20261113`.
+The command checks the failed native stderr hash and exact selected runtime.
+The record also requires the completed exit1/empty-usage/no-arrival run462–466,
+the spent first credit, original hold300, and latest failure observation465.
+A late arrival or newer failure invalidates an unspent repair credit.
+
+Only an existing selected OpenCode Go key is reused. A source query in an OS sandbox that denies all writes and network access
+feeds the supported importer through stdin inside the resident's supervised
+process group; no secret is put in command arguments, public evidence or logs.
+A fresh private database and empty private data directory prevent legacy-login
+selection. OAuth/external credentials are unsupported and fail closed. Tests use
+synthetic credentials, never the real account. Remote validity still requires an
+actual coordinator run, and a successful native exit is not an arrival or useful
+contribution by itself.

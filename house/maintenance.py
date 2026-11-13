@@ -24,11 +24,16 @@ OPENCODE_SHA256 = hashlib.sha256(OPENCODE_APPROVAL.encode()).hexdigest()
 GROWTH_SHA256 = "b75e6dad4f16a7e23b3b9b808b5d9465b9c17160408a2b316cf312f32132ba9b"
 RETRY_SCOPE = "opencode-retry-20261113"
 GROWTH_SCOPE = "room-growth-20261113"
-SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256}
+REPAIR_SCOPE = "opencode-cli-repair-20261113"
+FAILED_CLI_RUN = "6eec53281c2641f28677a9a7bcc41e8d"
+FAILED_CLI_SHA256 = "cb62a75b5184f48c6050e1be789a1786c1a64087fc99f11213c4d140dc661dab"
+FAILED_CLI_OBSERVATION = 465
+SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256, REPAIR_SCOPE: GROWTH_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    REPAIR_SCOPE: OWNER_MODULES | {"house/providers.py", "house/opencode_tool.py", "house/opencode_auth.py", "house/home.py", "house/body.py"},
     RETRY_SCOPE: OWNER_MODULES | {"house/model.py", "house/wake_policy.py",
         "house/body.py", "house/watch_recovery.py", "house/life.py", "house/home.py"},
     GROWTH_SCOPE: OWNER_MODULES | {"house/building.py", "house/life.py", "house/council.py",
@@ -61,6 +66,15 @@ def _sha(value: object) -> bool:
     return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
 
 
+
+def cli_failure_proven(state: dict) -> bool:
+    failed = state.get("life", {}).get("runs", {}).get(FAILED_CLI_RUN, {})
+    return (failed.get("status") == "completed" and failed.get("outcome") == "failed" and
+            failed.get("exit_code") == 1 and failed.get("usage") == {} and
+            failed.get("started_sequence") == 462 and failed.get("ended_sequence") == 466 and
+            failed.get("agent") == "opencode" and failed.get("resident") not in state["residents"])
+
+
 def apply(state: dict, event: dict) -> None:
     _owner(state, event)
     data, scope = event["data"], event["data"]["scope"]
@@ -75,6 +89,8 @@ def apply(state: dict, event: dict) -> None:
         require(data["previous_manifest_sha256"] == fingerprint(old), "stale protected manifest")
         manifest = data["protected_files"]
         extra = OWNER_MODULES | ({"house/building.py"} if scope == GROWTH_SCOPE else set())
+        if scope == REPAIR_SCOPE:
+            extra.add("house/opencode_auth.py")
         require(isinstance(manifest, dict) and set(manifest) == set(old) | extra
                 and all(_sha(value) for value in manifest.values()), "invalid replacement manifest")
         changes = {name for name in manifest if manifest[name] != old.get(name)}
@@ -97,19 +113,30 @@ def apply(state: dict, event: dict) -> None:
             from .building import initialize
             initialize(state)
     elif event["op"] == "owner-provider-release":
+        extra = {"expected_observation", "failed_run", "failed_output_sha256"} if scope == REPAIR_SCOPE else set()
         council.fields(data, {"scope", "approval_sha256", "house", "owner_id",
-                              "agent", "expected_sequence", "expected_until"})
-        require(scope == RETRY_SCOPE and data["agent"] == "opencode", "only approved OpenCode hold may release")
+                              "agent", "expected_sequence", "expected_until"} | extra)
+        require(scope in {RETRY_SCOPE, REPAIR_SCOPE} and data["agent"] == "opencode", "only approved OpenCode hold may release")
         current = state.get("maintenance", {})
         require(scope in current.get("migrations", {}), "owner retry runtime is not authorized")
         require(scope not in current.get("releases", {}), "owner release already used")
         require(type(data["expected_sequence"]) is int and data["expected_sequence"] == RETRY_BUDGET_SEQUENCE and
                 type(data["expected_until"]) in (int, float) and
                 data["expected_until"] == RETRY_BUDGET_UNTIL, "wrong approved hold")
+        observation = RETRY_BUDGET_SEQUENCE
+        if scope == REPAIR_SCOPE:
+            original = current.get("releases", {}).get(RETRY_SCOPE, {})
+            require(original.get("consumed_run") == FAILED_CLI_RUN and
+                    data["failed_run"] == FAILED_CLI_RUN and data["failed_output_sha256"] == FAILED_CLI_SHA256 and
+                    type(data["expected_observation"]) is int and data["expected_observation"] == FAILED_CLI_OBSERVATION,
+                    "repair credit requires the exact spent pre-provider attempt")
+            require(cli_failure_proven(state),
+                    "repair credit does not cover a model attempt or an uncertain failure")
+            observation = FAILED_CLI_OBSERVATION
         budget = state["life"]["budgets"].get("opencode", {})
         require(budget.get("sequence") == data["expected_sequence"] and
                 budget.get("until") == data["expected_until"] and
-                state["life"].get("budget_observations", {}).get("opencode") == data["expected_sequence"],
+                state["life"].get("budget_observations", {}).get("opencode") == observation,
                 "provider hold changed; do not erase new failure")
         require(event["at"] < budget["until"], "provider hold already elapsed")
         current.setdefault("releases", {})[scope] = copy.deepcopy(data) | {
@@ -122,13 +149,17 @@ def retry_permit(state: dict, agent: str, at: float) -> dict | None:
     """Return the still-valid one-use credit, without shortening any cooldown."""
     if agent != "opencode":
         return None
-    release = state.get("maintenance", {}).get("releases", {}).get(RETRY_SCOPE)
-    if not release or "consumed_run" in release or at >= release["expected_until"]:
-        return None
     life = state.get("life", {})
     budget = life.get("budgets", {}).get(agent, {})
-    if (life.get("budget_observations", {}).get(agent) != release["expected_sequence"] or
-            budget.get("sequence") != release["expected_sequence"] or
-            budget.get("until") != release["expected_until"]):
-        return None
-    return release
+    for scope in (REPAIR_SCOPE, RETRY_SCOPE):
+        release = state.get("maintenance", {}).get("releases", {}).get(scope)
+        if not release or "consumed_run" in release or at >= release["expected_until"]:
+            continue
+        if scope == REPAIR_SCOPE and not cli_failure_proven(state):
+            continue
+        observation = release.get("expected_observation", release["expected_sequence"])
+        if (life.get("budget_observations", {}).get(agent) == observation and
+                budget.get("sequence") == release["expected_sequence"] and
+                budget.get("until") == release["expected_until"]):
+            return release
+    return None
