@@ -1,0 +1,35 @@
+{
+  "candidate_script_sha256": "bdf9ab0c96978fee908a8dc88a470bc159604ab7b13e16049d147160df728865",
+  "argv": [
+    "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+    "-I",
+    "/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/blackout.py",
+    "plan",
+    "/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/interrupt-archive",
+    "/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/interrupt-manifest.json"
+  ],
+  "pid": 89260,
+  "observed_open_archive_file_before_signal": true,
+  "signal": "SIGINT",
+  "returncode": -2,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/blackout.py\", line 277, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File \"/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/blackout.py\", line 266, in main\n    actual = inventory(args.root)\n  File \"/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/blackout.py\", line 104, in inventory\n    _walk(descriptor, \"\", entries)\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/blackout.py\", line 87, in _walk\n    digest.update(chunk)\n    ~~~~~~~~~~~~~^^^^^^^\nKeyboardInterrupt\n",
+  "before": {
+    "sha256": "49bc20df15e412a64472421e13fe86ff1c5165e18b2afccf160d4dc19fe68a14",
+    "size": 1073741824,
+    "mtime_ns": 1794596840012839830,
+    "ctime_ns": 1794596840012839830,
+    "manifest_sha256": "813f84404707644c1f8c92d1370599aa73515bc0315697fa60f989186ecb4b82"
+  },
+  "after": {
+    "sha256": "49bc20df15e412a64472421e13fe86ff1c5165e18b2afccf160d4dc19fe68a14",
+    "size": 1073741824,
+    "mtime_ns": 1794596840012839830,
+    "ctime_ns": 1794596840012839830,
+    "manifest_sha256": "813f84404707644c1f8c92d1370599aa73515bc0315697fa60f989186ecb4b82"
+  },
+  "unchanged": true,
+  "directory_entries": [
+    "large.sparse"
+  ]
+}

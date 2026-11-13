@@ -1,0 +1,163 @@
+{
+  "candidate_script_sha256": "bdf9ab0c96978fee908a8dc88a470bc159604ab7b13e16049d147160df728865",
+  "command": [
+    "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+    "/Users/sws/Code/longhouse/.git/house-home/residents/78e2bbd6e9844ff4a4e664df6c80bdd1/projects/blackout/blackout.py",
+    "plan",
+    "/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/surviving",
+    "/private/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-plan-acceptance-cz7c4x4z/original.json"
+  ],
+  "exit": 1,
+  "result": {
+    "ambiguous": [
+      "records/copy-a.txt"
+    ],
+    "changed": [
+      "family/summer.txt",
+      "records/invoice.txt"
+    ],
+    "extra": [
+      "family/renamed-winter.txt",
+      "photos/report.txt",
+      "spares/duplicate.txt",
+      "spares/invoice-copy.txt"
+    ],
+    "matched": 3,
+    "missing": [
+      "family/winter.txt",
+      "letters/lost.txt",
+      "photos/Report.txt",
+      "records/copy-a.txt"
+    ],
+    "ok": false,
+    "restores": [
+      {
+        "ambiguous": false,
+        "candidates": [],
+        "recoverable": false,
+        "status": "changed",
+        "target": "family/summer.txt"
+      },
+      {
+        "ambiguous": false,
+        "candidates": [
+          "family/renamed-winter.txt"
+        ],
+        "recoverable": true,
+        "status": "missing",
+        "target": "family/winter.txt"
+      },
+      {
+        "ambiguous": false,
+        "candidates": [],
+        "recoverable": false,
+        "status": "missing",
+        "target": "letters/lost.txt"
+      },
+      {
+        "ambiguous": false,
+        "candidates": [
+          "photos/report.txt"
+        ],
+        "recoverable": true,
+        "status": "missing",
+        "target": "photos/Report.txt"
+      },
+      {
+        "ambiguous": true,
+        "candidates": [
+          "records/copy-b.txt",
+          "spares/duplicate.txt"
+        ],
+        "recoverable": true,
+        "status": "missing",
+        "target": "records/copy-a.txt"
+      },
+      {
+        "ambiguous": false,
+        "candidates": [
+          "spares/invoice-copy.txt"
+        ],
+        "recoverable": true,
+        "status": "changed",
+        "target": "records/invoice.txt"
+      }
+    ],
+    "unrecoverable": [
+      "family/summer.txt",
+      "letters/lost.txt"
+    ]
+  },
+  "repeat_stdout_identical": true,
+  "archive_content_and_metadata_unchanged": true,
+  "manifest_unchanged": true,
+  "verify_classification_equal": true,
+  "fixture_manifest": {
+    "format": "blackout-kit",
+    "version": 1,
+    "files": [
+      {
+        "path": "family/summer.txt",
+        "size": 14,
+        "sha256": "589ad252cb4602f0e12493445e335feb4d7e49044be096dea3ab94976b4357cd"
+      },
+      {
+        "path": "family/winter.txt",
+        "size": 14,
+        "sha256": "a77bdfb520c26056569e8fd3ace47af4c004b25e24e3f7c04daad94da948a0cb"
+      },
+      {
+        "path": "letters/empty.txt",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "letters/lost.txt",
+        "size": 22,
+        "sha256": "8a6682bb4b78f11b97476b694e60090b8195dea3545598fc2e5d67657a08c06b"
+      },
+      {
+        "path": "photos/Report.txt",
+        "size": 22,
+        "sha256": "165c35adc958d1ea1998969b61b0eac275d6d3c871d9ba7be4ece1fd451a85cf"
+      },
+      {
+        "path": "photos/snow \u2603.dat",
+        "size": 256,
+        "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880"
+      },
+      {
+        "path": "records/copy-a.txt",
+        "size": 21,
+        "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf"
+      },
+      {
+        "path": "records/copy-b.txt",
+        "size": 21,
+        "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf"
+      },
+      {
+        "path": "records/invoice.txt",
+        "size": 19,
+        "sha256": "963c25725b0c7ed9120cb5456380e62a2dcc3484c22e4d1aef772348c3d27b4b"
+      }
+    ]
+  },
+  "expected_candidates": {
+    "family/winter.txt": [
+      "family/renamed-winter.txt"
+    ],
+    "family/summer.txt": [],
+    "records/invoice.txt": [
+      "spares/invoice-copy.txt"
+    ],
+    "records/copy-a.txt": [
+      "records/copy-b.txt",
+      "spares/duplicate.txt"
+    ],
+    "letters/lost.txt": [],
+    "photos/Report.txt": [
+      "photos/report.txt"
+    ]
+  }
+}

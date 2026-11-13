@@ -1,0 +1,77 @@
+{
+  "expected_candidates": {
+    "family/winter.txt": [
+      "family/renamed-winter.txt"
+    ],
+    "family/summer.txt": [],
+    "records/invoice.txt": [
+      "spares/invoice-copy.txt"
+    ],
+    "records/copy-a.txt": [
+      "records/copy-b.txt",
+      "spares/duplicate.txt"
+    ],
+    "letters/lost.txt": [],
+    "photos/Report.txt": [
+      "photos/report.txt"
+    ]
+  },
+  "surviving_before": {
+    "family/renamed-winter.txt": {
+      "sha256": "a77bdfb520c26056569e8fd3ace47af4c004b25e24e3f7c04daad94da948a0cb",
+      "size": 14,
+      "mtime_ns": 1794596475054328496,
+      "mode": 33188
+    },
+    "family/summer.txt": {
+      "sha256": "242f2ce08c25b2a5cdc68b0d80b903d444d8c83521fe385d425edf154b1c729c",
+      "size": 14,
+      "mtime_ns": 1794596475082942566,
+      "mode": 33188
+    },
+    "letters/empty.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "mtime_ns": 1794596475054735424,
+      "mode": 33188
+    },
+    "photos/report.txt": {
+      "sha256": "165c35adc958d1ea1998969b61b0eac275d6d3c871d9ba7be4ece1fd451a85cf",
+      "size": 22,
+      "mtime_ns": 1794596475054919785,
+      "mode": 33188
+    },
+    "photos/snow \u2603.dat": {
+      "sha256": "40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880",
+      "size": 256,
+      "mtime_ns": 1794596475054991072,
+      "mode": 33188
+    },
+    "records/copy-b.txt": {
+      "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf",
+      "size": 21,
+      "mtime_ns": 1794596475054669013,
+      "mode": 33188
+    },
+    "records/invoice.txt": {
+      "sha256": "65d876c61e46341cc86c9874ed3615adf270968ba2c8e9b0bd59dad4226a2b87",
+      "size": 19,
+      "mtime_ns": 1794596475083247501,
+      "mode": 33188
+    },
+    "spares/duplicate.txt": {
+      "sha256": "fc7f99045789bbc3055686b5a460ab962153ed70812e9902bad136ab83095ddf",
+      "size": 21,
+      "mtime_ns": 1794596475083442028,
+      "mode": 33188
+    },
+    "spares/invoice-copy.txt": {
+      "sha256": "963c25725b0c7ed9120cb5456380e62a2dcc3484c22e4d1aef772348c3d27b4b",
+      "size": 19,
+      "mtime_ns": 1794596475083168299,
+      "mode": 33188
+    }
+  },
+  "manifest_sha256": "cc9f231f741d4a9bf5a31c25ab9fec8f33647188a89270c46d55c8ea5bfdd227",
+  "scope": "Independent actual CLI fixture for future read-only plan; no feature results yet."
+}

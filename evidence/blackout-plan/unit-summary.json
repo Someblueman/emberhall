@@ -1,0 +1,9 @@
+{
+  "command": "python3 -I -m unittest discover -s .git/house-home/residents/78e2bbd6e9844ff4a4e664df6c80bdd1/projects/blackout -p test_*.py -v",
+  "candidate_commit": "8b360323c5a9547a7e733336f9dc04a6d24c9487",
+  "tests": 32,
+  "seconds": 2.687,
+  "exit_code": 0,
+  "result": "OK",
+  "scope": "16 existing inventory tests,3 output tests,13 new plan tests, run independently by Keeper. No skipped cases in this project suite."
+}
