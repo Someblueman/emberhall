@@ -1,0 +1,31 @@
+{
+  "baseline_source": "802229b7d6a032d6a60020c650894b4f0af7a709",
+  "witness": "Repeat review downgraded integrated to reviewed and created another candidate/test execution. Preserved before.txt.",
+  "repair": "Under the existing integration lock, validate stopped contribution, current independent awake actor, exact contribution identity and accepted canonical ancestry, then return the original receipt without source, journal, candidate or receipt writes. Normal merged acceptance also requires contribution ancestry into candidate_head.",
+  "final_source_sha256": {
+    "house/integrate.py": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+    "house/maintenance.py": "c12c9cd308e110c6b1696f7767d3ebcad29913c98849a331a8a3fb56c330d203",
+    "tests/test_integrate.py": "495e2db7825424763824725d71d17209f6087b3dd4ab96246a9f4746bc746ddb",
+    "tests/test_owner_integration.py": "e1107d16fc7ec0f599fb3f56f247cf88537a784ac9731f5ec3f4a1aad106e2c4"
+  },
+  "full_suite": {
+    "collected": 298,
+    "executed": 289,
+    "skipped": 9,
+    "seconds": 169.962,
+    "sha256": "c019379b7b1e9e9fc009f71df8266ac5860e103202edcc4397f4fb2f879c5b37"
+  },
+  "independent_focused": {
+    "tests": 5,
+    "seconds": 4.684,
+    "sha256": "c8da924f24d3a0a2197ed617be049471aeb5fbbe222d332a0f0a9ee99d6ac24d"
+  },
+  "native_witness": "Mallow independently found same false-normal-anchor gap724; repaired exact module passed17 real disposable Git/journal cases728, with explicitly synthetic accepted receipts and unchanged native sandbox. Immutable report follows committed binding.",
+  "owner_scope_review": "Witness independently inspected the two-module scope and unchanged owner authentication, tests/archive/drain/runtime-lock gates. Both owner-scope tests passed; no blocker.",
+  "limits": [
+    "Curated acceptance remains trusted operator attribution, not proof every original contribution byte was merged.",
+    "No new first-acceptance crash-durability claim; this repairs replay of an existing accepted receipt.",
+    "Same-user out-of-protocol edits remain outside cooperative lock isolation.",
+    "Deployment requires the separately prepared exact runtime; this source receipt is not evidence it is installed."
+  ]
+}

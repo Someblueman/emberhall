@@ -1,0 +1,31 @@
+test_accepted_retry_keeps_receipt_history_and_does_no_new_work (tests.test_integrate.IntegrationTests.test_accepted_retry_keeps_receipt_history_and_does_no_new_work) ... FAIL
+
+======================================================================
+FAIL: test_accepted_retry_keeps_receipt_history_and_does_no_new_work (tests.test_integrate.IntegrationTests.test_accepted_retry_keeps_receipt_history_and_does_no_new_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_integrate.py", line 66, in test_accepted_retry_keeps_receipt_history_and_does_no_new_work
+    self.assertEqual(integrate(self.record, "one", "bob", publish=publish), accepted)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'run[15 chars]r': 'bob', 'base': '4b1da3a10661875a4ac6b1d7fa[232 chars]': 0} != {'run[15 chars]r': 'alice', 'base': '50bed581e9b1594a56aa00a6[236 chars]': 0}
+- {'actor': 'bob',
+?            ^^^
+
++ {'actor': 'alice',
+?            ^^^^^
+
+-  'base': '4b1da3a10661875a4ac6b1d7fa99a1460fe85171',
+-  'candidate': 'integration-9fedb70a5b9b41d0bf5a7d96d5d943f4',
++  'base': '50bed581e9b1594a56aa00a6424eae9dffe03672',
++  'candidate': 'integration-5b2f00657ba044d590fa617215a6e60a',
+   'candidate_head': '4b1da3a10661875a4ac6b1d7fa99a1460fe85171',
+   'contribution': '4b1da3a10661875a4ac6b1d7fa99a1460fe85171',
+   'run': 'one',
+-  'status': 'reviewed',
++  'status': 'integrated',
+   'test_exit': 0}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.920s
+
+FAILED (failures=1)

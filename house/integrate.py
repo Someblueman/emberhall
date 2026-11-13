@@ -34,13 +34,35 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False) ->
             raise ValueError("integrator must be a resident")
         if actor == item["resident"] or not state["residents"][actor]["awake"]:
             raise ValueError("integration requires a different, awake resident")
-        if git(record.root, "status", "--porcelain", "--untracked-files=all"):
-            raise ValueError("shared source has uncommitted work; preserve it")
         workspace = private / "residents" / run
         report = json.loads((private / run / "contribution.json").read_text())
         if report["base"] != item["source_head"] or report["commit"] != git(workspace, "rev-parse", "HEAD"):
             raise ValueError("contribution identity changed")
         head = git(record.root, "rev-parse", "HEAD")
+        path = private / run / "integration.json"
+        if path.exists():
+            accepted = json.loads(path.read_text())
+            if accepted.get("status") == "integrated":
+                # Both fields exist in durable receipts: normal merges record
+                # candidate_head; operator-curated acceptance records canonical_commit.
+                anchors = [accepted[key] for key in ("canonical_commit", "candidate_head") if key in accepted]
+                if (accepted.get("run") != run or accepted.get("contribution") != report["commit"]
+                        or not anchors or any(not isinstance(anchor, str)
+                            or not re.fullmatch(r"[0-9a-f]{40}", anchor)
+                            or anchor != anchors[0] for anchor in anchors)):
+                    raise ValueError("accepted contribution receipt is inconsistent; preserve it")
+                ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", anchors[0], head],
+                                          cwd=record.root, capture_output=True)
+                if ancestor.returncode != 0:
+                    raise ValueError("accepted contribution is outside current source history; preserve it")
+                if "candidate_head" in accepted:
+                    contains = subprocess.run(["git", "merge-base", "--is-ancestor", report["commit"],
+                                               accepted["candidate_head"]], cwd=record.root, capture_output=True)
+                    if contains.returncode != 0:
+                        raise ValueError("accepted contribution is absent from its merge commit; preserve it")
+                return accepted
+        if git(record.root, "status", "--porcelain", "--untracked-files=all"):
+            raise ValueError("shared source has uncommitted work; preserve it")
         candidate = private / ("integration-" + uuid.uuid4().hex)
         subprocess.run(["git", "clone", "--quiet", "--no-local", "--single-branch", "--no-tags",
                         str(record.root), str(candidate)], check=True, capture_output=True)
@@ -71,7 +93,6 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False) ->
             git(record.root, "fetch", "--quiet", str(candidate), receipt["candidate_head"])
             git(record.root, "merge", "--ff-only", receipt["candidate_head"])
             receipt["status"] = "integrated"
-        path = private / run / "integration.json"
         path.write_text(json.dumps(receipt, indent=2) + "\n")
         path.chmod(0o600)
         record.append("say", actor, {"text": "house-integration-v1 " + json.dumps({
