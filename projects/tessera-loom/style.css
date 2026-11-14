@@ -1,0 +1,57 @@
+:root { font-family: ui-sans-serif, system-ui, sans-serif; color: #203d3c; background: #f5f0e7; line-height: 1.5; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 1320px; margin: auto; padding: 42px 40px 24px; }
+header { padding-bottom: 34px; border-bottom: 1px solid #c9cebd; }
+.eyebrow { margin: 0 0 18px; text-transform: uppercase; letter-spacing: .17em; font-size: .68rem; font-weight: 700; }
+h1 { font-family: Georgia, serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 400; letter-spacing: -.055em; line-height: 1; margin: 0 0 22px; }
+h1 span { display: inline-block; font-family: serif; color: #b95738; margin-left: .35em; font-size: .65em; vertical-align: .12em; }
+.intro { margin: 0; color: #526760; max-width: 580px; font-size: 1.05rem; }
+h2 { font-size: .78rem; letter-spacing: .035em; font-weight: 700; margin: 0; }
+p { margin: 0 0 16px; }
+.studio { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 44px; padding: 30px 0 40px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 42px; margin-bottom: 16px; }
+#size-label, .caption { font-family: ui-monospace, monospace; font-size: .75rem; }
+#editor-help { color: #526760; font-size: .82rem; min-height: 62px; }
+.editor { display: grid; gap: 5px; padding: 9px; border: 1px solid #a5b8aa; background: #e4e7dc; aspect-ratio: 1; }
+.tile { border: 0; border-radius: 0; padding: 0; min-width: 0; min-height: 0; aspect-ratio: 1; cursor: pointer; }
+.tile svg { display: block; width: 100%; height: 100%; }
+.tile.selected { box-shadow: 0 0 0 2px #203d3c; z-index: 1; }
+.settings { display: grid; gap: 12px; margin-top: 24px; }
+label { font-size: .78rem; font-weight: 650; }
+output { float: right; font-family: ui-monospace, monospace; }
+input[type="range"] { width: 100%; accent-color: #285a61; margin: 0 0 6px; }
+button, select { font: inherit; font-size: .78rem; border: 1px solid #91a698; background: #f9f7f0; color: #203d3c; border-radius: 4px; padding: 10px 12px; min-height: 40px; }
+button { cursor: pointer; font-weight: 650; }
+button:hover:not(:disabled) { background: #e1e8db; }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #b95738; outline-offset: 4px; }
+.button-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.button-row button { flex: 1 1 auto; }
+.repeat-label { display: flex; align-items: center; gap: 8px; }
+.repeat-label select { padding: 5px 8px; }
+.preview { border: 1px solid #a5b8aa; background: #e4e7dc; padding: 14px; aspect-ratio: 1; display: grid; place-items: center; }
+.preview svg { width: 100%; height: auto; display: block; }
+.caption { margin: 14px 0 7px; }
+.field-note { font-family: Georgia, serif; font-size: 1rem; font-style: italic; color: #526760; }
+.portable { border-top: 1px solid #c9cebd; padding: 28px 0; display: grid; grid-template-columns: minmax(220px, 340px) minmax(0, 1fr); gap: 44px; }
+.portable h2 { margin-bottom: 16px; }
+.portable p { font-size: .85rem; color: #526760; }
+textarea { display: block; width: 100%; resize: vertical; margin: 12px 0; border: 1px solid #91a698; border-radius: 4px; background: #fffdf7; padding: 12px; color: #203d3c; font: .75rem/1.5 ui-monospace, monospace; overflow-wrap: anywhere; }
+.load-row { display: flex; align-items: center; gap: 14px; }
+.load-row button { flex-shrink: 0; background: #285a61; color: #fffdf7; }
+.load-row button:hover { background: #203d3c; }
+.load-row p { margin: 0; }
+#message.error { color: #963b27; }
+footer { border-top: 1px solid #c9cebd; padding-top: 18px; font-size: .7rem; color: #526760; }
+a { color: inherit; text-underline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 760px) {
+  main { padding: 26px 18px 20px; }
+  .studio, .portable { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .workbench { max-width: 440px; width: 100%; margin: auto; }
+  #editor-help { min-height: 0; }
+  .section-heading { flex-wrap: wrap; }
+  .preview { padding: 8px; }
+  .load-row { align-items: flex-start; }
+}
