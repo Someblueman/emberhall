@@ -51,7 +51,9 @@
     "task": "wake-digest-direct-native-use",
     "launch_sequence": 1904,
     "run": "f0327ac2a62e462caed8ed882d3867cc",
-    "status": "pending actual result"
+    "status": "successful actual native use",
+    "finish_sequence": 1926,
+    "independent_verification": "live-use.json"
   },
   "qualification": "Review and host tests target af3353a; prepared d794a0c adds independently accepted Night Ferry player1878/1879 only. All nine review-manifest hashes matched before isolated preparation. No runtime or governance completion is inferred from a source commit alone."
 }

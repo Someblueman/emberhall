@@ -1,0 +1,12 @@
+{
+  "candidate": "056d4bd2dfbcafc4f686c212a5ee26f3a2ba1de7",
+  "source_run": "113dd2a861af409aa94186d3027fec8f",
+  "fixture": "site/history.json (243 actual published frames, historical snapshot)",
+  "observation": {
+    "frames": 243,
+    "actualFinishEvents": 29,
+    "displayedCompletedTasks": 0,
+    "taskListContainsDone": false
+  },
+  "cause": "house/body.py public tasks exclude status done. Candidate looks for done entries; synthetic tests manufacture them. Read finish events and preceding task metadata instead."
+}

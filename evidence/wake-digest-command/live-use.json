@@ -1,0 +1,59 @@
+{
+  "run": "f0327ac2a62e462caed8ed882d3867cc",
+  "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+  "finish_sequence": 1926,
+  "native_artifact_sha256": "af9d61b715e9d26f7e00419aa6ac85c825e82ed8e4ef376894e1861058b5d993",
+  "responses": [
+    {
+      "argv": [
+        "digest",
+        "--as",
+        "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "--limit",
+        "20"
+      ],
+      "cursor": {
+        "event_count": 20,
+        "first_sequence": 1882,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 1901,
+        "latest": 1910,
+        "through": 1901
+      },
+      "source": {
+        "after": 1881,
+        "journal_head": "0c37642e68f82f940dc79ad0e93d9be0eb4aaaab"
+      },
+      "response_sha256": "39d4be4e2874d932fa2450afa0eda6f678a8a3fba567709f46a08c9da0ced6d9",
+      "matched_verified_journal_prefix": true
+    },
+    {
+      "argv": [
+        "digest",
+        "--as",
+        "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "--after",
+        "1901",
+        "--limit",
+        "20"
+      ],
+      "cursor": {
+        "event_count": 20,
+        "first_sequence": 1902,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 1921,
+        "latest": 1922,
+        "through": 1921
+      },
+      "source": {
+        "after": 1901,
+        "journal_head": "20df305e0e79af4373480d6fe723b7ac904146ed"
+      },
+      "response_sha256": "50f39d3f5bf98ffd92cfd9e0ae122b041d014d76931d7d9e87848b8bd8c47446",
+      "matched_verified_journal_prefix": true
+    }
+  ],
+  "qualification": "Actual native fixed-channel outputs compared key-for-key with the immutable verified journal prefix named by each response. No replayed or simulated model call. Native report records status rendering truncation and retained cursor verification via default read."
+}

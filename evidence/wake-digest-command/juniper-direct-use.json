@@ -1,0 +1,88 @@
+{
+  "format": "wake-digest-direct-use-v1",
+  "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+  "name": "Juniper",
+  "route": "opencode / opencode-go/deepseek-v4.1-flash",
+  "run": "f0327ac2a62e462caed8ed882d3867cc",
+  "task": "wake-digest-direct-native-use",
+  "observed_at": "2026-11-14",
+  "outcome": "success",
+  "channel": "house_journal fixed resident mailbox; no shell, no JSON capture pipeline",
+  "actual_arguments": {
+    "first": ["digest", "--as", "resident-c6036599626b4fcbaee845b2aec48a2d", "--limit", "20"],
+    "read_back": ["read", "--as", "resident-c6036599626b4fcbaee845b2aec48a2d", "--after", "1881", "--limit", "20"],
+    "second": ["digest", "--as", "resident-c6036599626b4fcbaee845b2aec48a2d", "--after", "1901", "--limit", "20"]
+  },
+  "digest_page_1": {
+    "source_after": 1881,
+    "event_count": 20,
+    "first_sequence": 1882,
+    "last_sequence": 1901,
+    "through": 1901,
+    "has_more": true,
+    "latest_at_response": 1910,
+    "journal_head": "0c37642e68f82f940dc79ad0e93d9be0eb4aaaab",
+    "next": "read --as resident-c6036599626b4fcbaee845b2aec48a2d --after 1881 --limit 20"
+  },
+  "raw_read_back": {
+    "after": 1881,
+    "limit": 20,
+    "first_sequence": 1882,
+    "last_sequence": 1901,
+    "through": 1901,
+    "has_more": true,
+    "latest_at_response": 1913,
+    "match": "same 20-event interval and same first/last/through/has_more as digest page 1"
+  },
+  "digest_page_2": {
+    "source_after": 1901,
+    "event_count": 20,
+    "first_sequence": 1902,
+    "last_sequence": 1921,
+    "through": 1921,
+    "has_more": true,
+    "latest_at_response": 1922,
+    "journal_head": "20df305e0e79af4373480d6fe723b7ac904146ed"
+  },
+  "meaningful_references": [
+    {
+      "sequence": 1888,
+      "op": "finish",
+      "actor": "resident-d8b49972bb00491f9233d595a4daa2fb",
+      "task": "wake-digest-command-review",
+      "observed": "independent digest-command review completed with one artifact",
+      "artifact_sha256": "e05f50737257f64e6f0ecfb75da722e8591bf7a294fa41a821e88928d37a05ae"
+    },
+    {
+      "sequence": 1898,
+      "op": "task",
+      "actor": "keeper-01",
+      "task": "wake-digest-direct-native-use",
+      "observed": "the bounded direct-native-use task and its acceptance conditions were defined"
+    },
+    {
+      "sequence": 1895,
+      "op": "owner-migrate",
+      "actor": "keeper-01",
+      "scope": "wake-digest-command-20261114",
+      "observed": "the installed runtime/source binding the trial was requested to exercise",
+      "runtime_sha256": "b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55",
+      "source_head": "d794a0c74f5b62b6a76533b10653cacc9220c87d"
+    }
+  ],
+  "durable_cursor": {
+    "before": 1881,
+    "after": 1881,
+    "before_source": "digest_page_1.source_after (the stored returning cursor)",
+    "after_check": "a read with no --after after both digest pages still began at sequence 1882, so the stored cursor remained 1881",
+    "status_note": "status was also called; its briefing contains the residents cursor map, but the rendered tool view was truncated before that field, so the no---after read supplied the concrete post-digest value",
+    "sleep_performed": false
+  },
+  "brief_helped_notice": "The digest's next line is bound to source.after (1881), not to latest, so it pointed back to the exact unseen interval rather than to the newest tail. The tail did grow between requests (latest 1910 -> 1913 -> 1922) while the bounded pages stayed honest; has_more kept the interval explicitly incomplete.",
+  "limit": "The digest is a summary and explicitly not acknowledgement or verification of live git, processes or external files; the durable cursor only moves through a deliberate later sleep handoff after raw reading. Its status context is also large enough that the residents cursor field can fall outside one rendered tool view.",
+  "source_edits": false,
+  "integration": false,
+  "activation": false,
+  "web_or_network": false,
+  "extra_reports": false
+}
