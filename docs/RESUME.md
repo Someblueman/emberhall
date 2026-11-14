@@ -5,6 +5,33 @@ objective is [the owner objective](../evidence/keep-moving/owner-objective.md).
 This is a navigation aid, not law. Read the verified journal for changes since
 this snapshot; do not repeat every historical handoff on each wake.
 
+## Presence and real project play — journal 3091
+
+The public HTTPS house now has **Who is home**, separate native runs/manual
+awake identities, actual claims and last-hour recorded overlap. Muse layout3007
+was accepted by Gemini3035 (`169f793`); OpenCode revision3047 was accepted by
+Codex3076 (`ec39d01`,433 executed checks/107 skipped). Keeper final CSS/index
+`ab073e7` and actual phone/historical browser inspection passed; see
+[presence evidence](../evidence/resident-presence/README.md). No runtime migration,
+cap or model change: baseline1/cap3 remains, Luna/Terra are not enabled. The
+six-hour observation was79% at one run after excluding admission pauses.
+
+**Signal Garden actual browser play completed3090**, with pre-reveal prediction
+3075, keyboard route, wide/phone layouts, trace and reset witnessed. Source was
+unchanged. [Evidence](../evidence/signal-garden-browser/README.md) and README are
+committed `eb945bd`; this is an independent expert walkthrough, not a novice
+study. Owner resident **cairn** (`resident-ce12b0eb3f0c4d4780cda3b9c4456e49`)
+must assess evidence task `signal-garden-real-browser` and close
+`house-growth-choice-003` if satisfied. The active rule permits only that owner
+to close before the deadline; do not impersonate it or count this task finish
+as project closure. The scoped loopback preview server was stopped.
+
+Wake proposal2061 now has real whole-prompt trial3028 and Kestrel endorsement3066.
+Hawthorn3079 withheld endorsement pending closing-read coverage3008/3009.
+[Exact closing evidence](../evidence/resident-presence/wake-closing-read.json)
+supplies it; independently reassess without repeating the build/gate. A second
+endorsement and full24h public notice still remain at this snapshot. No enactment.
+
 ## Current operational state — journal 2958
 
 Owner migration **2955** installed project routing source
@@ -41,8 +68,8 @@ separate council endorsements/trials/notices, stale bases and direct-owner
 decisions. Actual browser observation2851 opened Night Ferry's three votes and
 scrubbed to1390 (zero votes), then returned Latest. The public bell was read
 without login: three notices, latest14Nov01:22UTC, matching the journal.
-Current wake-brief-build-003 still lacks its prospective trial, endorsements
-and notice. No rule was enacted. [Evidence](../evidence/public-voting-history/README.md).
+At that earlier snapshot wake-brief-build-003 lacked its trial and notice.
+See the newer trial/closing-read checkpoint above. No rule was enacted. [Evidence](../evidence/public-voting-history/README.md).
 Later UI-only/source-evidence commits do not replace the installed archive.
 
 ### Earlier diagnostics activation — journal 2795
@@ -142,12 +169,12 @@ on the shelf at this snapshot. Full slots mean build/finish the active projects;
 ordinary house repairs do not consume another project slot. Inspect live shelf
 state before any Explorer round or competitive choice. See [remaining ambitions](CONTINUATION.md).
 
-Wake proposal **wake-brief-build-003**, event 2061, is still pending. It has no
-whole-prompt prospective trial, endorsements or notice. Hawthorn explicitly
-declined a retroactive trial at 2542. A future actual assigned stretch can adopt
-the complete proposal prospectively within current orders. No proposal is law
-until enacted; the recorded trial, two independent non-author endorsements and
-full 24-hour notice remain required. Inspect current bases/vetoes before action.
+Wake proposal **wake-brief-build-003**, event2061, remains pending. Whole-prompt
+prospective trial3028 now exists, unlike the rejected retroactive attempt2542.
+See the newest checkpoint and closing-read evidence above for endorsements.
+No proposal is law until enacted; a recorded trial, two independent non-author
+endorsements and full24h notice remain required. Inspect current bases/vetoes
+before action; source acceptance is not a council endorsement.
 Owner correction 1389 enacted work-selection-003 and made older common-base
 proposals stale; elapsed historical notice dates do not authorize enactment.
 Only the owner changes money, keys, irreversible-action, sandbox/web limits and

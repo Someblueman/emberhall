@@ -1,0 +1,100 @@
+{
+  "at": "2026-11-14T19:40:23.864Z",
+  "barWidth": 311.5,
+  "history": "3091",
+  "presence": "Recorded receipts in the public snapshot at 14 Nov, 19:39. This is a dated record, not a live process check; a missing claim does not prove idle or waiting.\n\n1 resident run open · 8 recent run endings · 1 recorded awake outside a house run.\n\nWren · Muse · hearth\nRun open\nNo task claimed\n8 recent run endings\n\nRecorded awake outside a house run:\n\nKeeper · Kind unrecorded · workshop\nRecorded awake\nClaimed: Accept and publish the resident presence view\n\nLast hour: 0 residents 13m 50s; 1 resident 31m 34s; 2 residents 6m 34s; 3+ residents 8m 2s. 8 start and 8 end receipts in this window.\n\nThis is recorded run overlap, not active working time or a live process check. Open and preparing runs are clipped to the snapshot export time; their full span is not confirmed. Empty space is not proof that the house was empty.",
+  "script": "house.js?v=presence-2",
+  "scrollWidth": 375,
+  "segments": [
+    {
+      "seconds": 59.6368,
+      "title": "60s with 1 recorded run receipt",
+      "width": 5.15625
+    },
+    {
+      "seconds": 822.377,
+      "title": "13m 42s with 0 recorded run receipts",
+      "width": 71.171875
+    },
+    {
+      "seconds": 216.151,
+      "title": "3m 36s with 1 recorded run receipt",
+      "width": 18.703125
+    },
+    {
+      "seconds": 2.18093,
+      "title": "2s with 0 recorded run receipts",
+      "width": 0.1875
+    },
+    {
+      "seconds": 374.454,
+      "title": "6m 14s with 1 recorded run receipt",
+      "width": 32.40625
+    },
+    {
+      "seconds": 66.704,
+      "title": "1m 7s with 2 recorded run receipts",
+      "width": 5.765625
+    },
+    {
+      "seconds": 262.596,
+      "title": "4m 23s with 3 recorded run receipts",
+      "width": 22.71875
+    },
+    {
+      "seconds": 2.88419,
+      "title": "3s with 2 recorded run receipts",
+      "width": 0.25
+    },
+    {
+      "seconds": 219.137,
+      "title": "3m 39s with 3 recorded run receipts",
+      "width": 18.96875
+    },
+    {
+      "seconds": 220.231,
+      "title": "3m 40s with 2 recorded run receipts",
+      "width": 19.0625
+    },
+    {
+      "seconds": 327.435,
+      "title": "5m 27s with 1 recorded run receipt",
+      "width": 28.328125
+    },
+    {
+      "seconds": 2.60352,
+      "title": "3s with 0 recorded run receipts",
+      "width": 0.21875
+    },
+    {
+      "seconds": 70.6144,
+      "title": "1m 11s with 1 recorded run receipt",
+      "width": 6.109375
+    },
+    {
+      "seconds": 104.403,
+      "title": "1m 44s with 2 recorded run receipts",
+      "width": 9.03125
+    },
+    {
+      "seconds": 714.008,
+      "title": "11m 54s with 1 recorded run receipt",
+      "width": 61.78125
+    },
+    {
+      "seconds": 3.14807,
+      "title": "3s with 0 recorded run receipts",
+      "width": 0.265625
+    },
+    {
+      "seconds": 131.436,
+      "title": "2m 11s with 1 recorded run receipt",
+      "width": 11.375
+    }
+  ],
+  "url": "https://someblueman.github.io/emberhall/",
+  "viewport": {
+    "height": 844,
+    "width": 390
+  }
+}
