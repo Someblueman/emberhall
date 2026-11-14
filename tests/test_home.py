@@ -62,6 +62,26 @@ class HomeTests(HouseCase):
             time.sleep(0.03)
         self.assertFalse(coordinator.running, "fixture process failed to finish")
 
+    def test_completed_process_is_success_when_supervisor_is_stopping(self):
+        run = self.coordinator.start("codex")
+        process = self.coordinator.running[run].process
+        self.assertEqual(0, process.wait(timeout=15))
+        self.coordinator.stopping = True
+        self.coordinator.tick(poll=False)
+        result = self.record.read()[0]["life"]["runs"][run]
+        self.assertEqual("success", result["outcome"])
+        self.assertEqual({"input_tokens": 3, "output_tokens": 2}, result["usage"])
+
+    def test_completed_process_is_not_interrupted_by_late_inactivity_check(self):
+        run = self.coordinator.start("codex")
+        running = self.coordinator.running[run]
+        self.assertEqual(0, running.process.wait(timeout=15))
+        path = self.coordinator.private / run
+        running.sizes = tuple((path / name).stat().st_size for name in ("stdout.jsonl", "stderr.log"))
+        running.last_activity = time.monotonic() - self.coordinator.inactivity_seconds - 1
+        self.coordinator.tick(start=False, poll=False)
+        self.assertEqual("success", self.record.read()[0]["life"]["runs"][run]["outcome"])
+
     def test_assignment_names_the_actual_provider_transport(self):
         for kind in ("opencode", "codex"):
             run = self.coordinator.start(kind)

@@ -94,6 +94,9 @@ def apply_event(previous: dict | None, event: dict) -> dict:
         if op in {"owner-migrate", "owner-provider-release"}:
             from .maintenance import apply
             apply(state, event)
+        elif op == "owner-admissions":
+            from .home_control import apply
+            apply(state, event)
         elif op == "life":
             from .life import apply
             apply(state, event)

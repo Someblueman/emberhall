@@ -42,6 +42,15 @@ class OpenCodeV2Tests(unittest.TestCase):
                          and not os.environ.get('EMBERHALL_CANDIDATE_SANDBOX'),
                          'explicit installed-CLI acceptance only; never launches a model')
     def test_installed_native_registry_permissions_and_project_isolation(self):
+        self.native_permissions(web=False)
+
+    @unittest.skipUnless(os.environ.get('EMBERHALL_NATIVE_OPENCODE') == '1'
+                         and not os.environ.get('EMBERHALL_CANDIDATE_SANDBOX'),
+                         'explicit installed-CLI acceptance only; never launches a model')
+    def test_installed_web_tools_without_shell_or_project_plugins(self):
+        self.native_permissions(web=True)
+
+    def native_permissions(self, *, web):
         executable = shutil.which('opencode')
         self.assertIsNotNone(executable)
         with tempfile.TemporaryDirectory(prefix='emberhall-v2-native-') as temp:
@@ -56,7 +65,7 @@ class OpenCodeV2Tests(unittest.TestCase):
                     'import json\ndef client_main(workspace,resident,argv):\n'
                     ' print(json.dumps({"resident":resident,"argv":argv}));return 0\n')
             _, env = command('opencode', DEFAULTS['opencode'], room, private, room / '.house-client',
-                             runtime=runtime, resident='native-fixture')
+                             runtime=runtime, resident='native-fixture', web=web)
             # No real auth or global server/settings are visible to this fixture.
             for key in ('XDG_DATA_HOME', 'XDG_CACHE_HOME', 'XDG_STATE_HOME'):
                 env[key] = str(root / key.lower())
@@ -92,7 +101,7 @@ class OpenCodeV2Tests(unittest.TestCase):
                 'const effective=[];for(const tool of tools){const action=tool.options?.permission??tool.name;\n'
                 'try{await ctx.permission.assert({sessionID:session.id,agent:"emberhall",action,resources:["*"],save:["*"]});effective.push(tool.name);}\n'
                 'catch(error){checks["registered:"+tool.id]=String(error);}}\n'
-                'const probes=[...["shell","subagent","external_directory","execute","webfetch"].map(a=>[a,"*"]),'
+                'const probes=[...["shell","subagent","external_directory","execute","webfetch","websearch"].map(a=>[a,"*"]),'
                 '...[".house-client","nested/.house-client",".git",".git/config",".GIT/hooks/pre-commit","nested/.gIt/config"].map(p=>["edit",p])];\n'
                 'for(const [action,resource] of probes){const key=action+":"+resource;\n'
                 'try{await ctx.permission.assert({sessionID:session.id,agent:"emberhall",action,resources:[resource],save:[resource]});checks[key]="allowed";}\n'
@@ -134,10 +143,14 @@ class OpenCodeV2Tests(unittest.TestCase):
                 self.assertIn('house_journal', data['tools'])
                 # Some built-ins register after the private plugin transform;
                 # they must remain denied, not be described as absent.
-                self.assertEqual(set(data['effective']), {'read', 'glob', 'grep', 'edit', 'write', 'patch', 'house_journal'})
+                self.assertEqual(set(data['effective']), {'read', 'glob', 'grep', 'edit', 'write', 'patch', 'house_journal'}
+                                 | ({'webfetch', 'websearch'} if web else set()))
                 self.assertNotIn('worktree_remove', data['tools'])
                 self.assertNotIn('shell', data['tools'])
                 for action, result in data['checks'].items():
+                    if web and action in {'webfetch:*', 'websearch:*'}:
+                        self.assertEqual(result, 'allowed', action)
+                        continue
                     self.assertNotEqual(result, 'allowed', action)
                     self.assertRegex(result.lower(), 'block|denied|denial', action)
                 self.assertEqual(json.loads(data['result']['content']),

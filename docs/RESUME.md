@@ -15,6 +15,10 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+A source-only Keep moving runtime candidate is in progress; read the current
+implementation checkpoint in CONTINUATION.md before acting. Do not send
+`owner-admissions` to runtime1004 or infer web capabilities from source files.
+
 Migration1004 selects source `a2246d50d80dc5c8cc346469150607b23e422fbc`, runtime
 SHA256 `ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64`.
 It retires only the unchanged expired-key hold594 after exact native Juniper

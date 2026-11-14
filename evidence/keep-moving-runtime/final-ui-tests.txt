@@ -1,0 +1,12 @@
+test_real_states_safe_links_reasons_and_historical_reset (tests.test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
+test_graveyard_keeps_counted_reasons_and_project_lessons (tests.test_shelf_body.ShelfBodyTests.test_graveyard_keeps_counted_reasons_and_project_lessons) ... ok
+test_historical_frames_and_real_shelf_are_separate (tests.test_shelf_body.ShelfBodyTests.test_historical_frames_and_real_shelf_are_separate) ... ok
+test_equal_names_remain_separate_and_sleep_does_not_remove_people (tests.test_body_returns.BodyReturnTests.test_equal_names_remain_separate_and_sleep_does_not_remove_people) ... ok
+test_explicit_wake_after_ended_run_wins_by_sequence_and_keeps_scar (tests.test_body_returns.BodyReturnTests.test_explicit_wake_after_ended_run_wins_by_sequence_and_keeps_scar) ... ok
+test_two_recorded_runs_share_one_identity_and_keep_distinct_receipts (tests.test_body_returns.BodyReturnTests.test_two_recorded_runs_share_one_identity_and_keep_distinct_receipts) ... ok
+test_one_hundred_sleepers_are_paged_without_growth_or_lost_identities (tests.test_body_returns.DormViewTests.test_one_hundred_sleepers_are_paged_without_growth_or_lost_identities) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 1.803s
+
+OK

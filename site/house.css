@@ -370,6 +370,38 @@ footer a {
   color:var(--muted);
   margin-top:16px;
 }
+.shelf-policy,.shelf-explorer {
+  margin: 0 0 0.55rem;
+}
+.shelf-group {
+  margin-top: 0.7rem;
+}
+.shelf-item {
+  padding: 0.55rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 0.2rem;
+}
+.shelf-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+}
+.shelf-source-link {
+  font-size: 0.78rem;
+  color: inherit;
+  opacity: 0.86;
+  word-break: break-all;
+}
+.shelf-graveyard {
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+}
+.shelf-graveyard summary {
+  cursor: pointer;
+  opacity: 0.85;
+}
 .empty-note {
   font:italic 15px/1.5 Georgia,serif;
   color:var(--muted);
@@ -440,7 +472,7 @@ footer a {
   .record-details {
     grid-column:1 / -1;
   }
-  .ambition-card,.budget-card {
+  .ambition-card,.shelf-card,.budget-card {
     min-width:0;
   }
   .account {

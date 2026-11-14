@@ -381,7 +381,9 @@ function roomPanel() {
     const owner=frame.residents.find(r=>r.id===t.owner);
     html("span","small",`${t.expired?"Lease expired · fate unconfirmed":t.status} · ${owner?.name||"available"}`,row);
   });
-  (room?visibleScars().filter(s=>s.room===room.id):[]).forEach(s=>{
+  const roomScars=room?visibleScars().filter(s=>s.room===room.id):[];
+  if(roomScars.length)html("p","small","These marks are historical receipts, not alerts that a run is still failing.",content);
+  roomScars.forEach(s=>{
     const row=html("div","scar",undefined,content);html("strong","",`${s.mended?"⌁":"!"} ${s.title}`,row);
     html("span","small",s.detail,row);html("span","small",`Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
   });
@@ -397,13 +399,108 @@ function accounts() {
     const until=backoff?.until||0,now=current?Date.now()/1000:frame.at;
     const reason=backoff?.reason||"";
     html("span","balance",until>now?(/credential|key expired|401/i.test(reason)?"Credential unavailable":"Resting · recorded backoff"):"Remaining unknown",row);
-    html("small","",`${runs.length} recorded runs · ${runs.some(r=>Number.isFinite(r.elapsed_seconds))?`${Math.round(seconds/60)} min reported across ${runs.filter(r=>Number.isFinite(r.elapsed_seconds)).length} runs`:"duration unreported"}`,row);
+    html("small","",`${runs.length} recorded runs · ${runs.some(r=>Number.isFinite(r.elapsed_seconds))?`${Math.round(seconds/60)} session min across ${runs.filter(r=>Number.isFinite(r.elapsed_seconds)).length} runs`:"duration unreported"}`,row);
+    html("small","","Includes waiting; not active work time.",row);
     if(until>now)html("small","",`Until ${clock(until)} · ${backoff.reason}`,row);
     const totals={};runs.forEach(r=>Object.entries(r.usage).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;}));
     for(const key of ["input_tokens","output_tokens","total_tokens"]) if(totals[key]!==undefined)html("small","",`${key.replaceAll("_"," ")}: ${totals[key].toLocaleString()}`,row);
   });
 }
 function clock(at, opts={}) {return new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",...opts}).format(new Date(at*1000));}
+function safeHttpUrl(raw) {
+  try {
+    const parsed = new URL(String(raw || ""));
+    return ["http:", "https:"].includes(parsed.protocol) && !parsed.username && !parsed.password ? parsed.href : null;
+  } catch {
+    return null;
+  }
+}
+function shelf() {
+  const box = $("shelf");
+  if (!box) return;
+  box.replaceChildren();
+  const dataShelf = frame && frame.shelf;
+  if (!dataShelf || !dataShelf.enabled) {
+    html("p", "empty-note", "The idea shelf is not activated at this moment.", box);
+    return;
+  }
+  html("p", "shelf-policy", dataShelf.policy ? `Selection rule: ${dataShelf.policy}` : "Research is open. Project selection awaits ratification.", box);
+  if (dataShelf.explorer && (dataShelf.explorer.resident || dataShelf.explorer.agent)) {
+    const exp = dataShelf.explorer;
+    const parts = [exp.resident, exp.agent].filter(Boolean).join(" · ");
+    const until = exp.until ? ` · until ${typeof exp.until === "number" ? clock(exp.until) : exp.until}` : "";
+    html("p", "shelf-explorer small", `Explorer: ${parts}${until}`, box);
+  }
+  const rawIdeas = Array.isArray(dataShelf.ideas) ? dataShelf.ideas : [];
+  const rawProjects = Array.isArray(dataShelf.projects) ? dataShelf.projects : [];
+  const ideas = rawIdeas.filter(i => i.status === "shelved");
+  const activeProjects = rawProjects.filter(p => p.status === "active");
+  const completedProjects = rawProjects.filter(p => p.status === "done");
+  const graveyard = [
+    ...rawProjects.filter(p => p.status === "dropped").map(p => ({
+      title: p.title || p.id || "Untitled project",
+      status: p.status || "retired",
+      reason: p.lesson || ""
+    })),
+    ...rawIdeas.filter(i => i.status === "graveyard" && !rawProjects.some(p => p.idea === i.id && p.status === "dropped")).map(i => ({
+      title: i.title || i.id || "Untitled idea",
+      status: i.status || "retired",
+      reason: [`Lost ${i.losses} council choices.`, ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
+    }))
+  ];
+  if (!ideas.length && !activeProjects.length && !completedProjects.length && !graveyard.length) {
+    html("p", "empty-note", "No ideas or projects have been shelved at this moment.", box);
+    return;
+  }
+  for (const [title, projects] of [["Active projects", activeProjects], ["Finished projects", completedProjects]]) {
+    if (!projects.length) continue;
+    const group = html("div", "shelf-group", undefined, box);
+    html("div", "eyebrow-small", title, group);
+    projects.forEach(proj => {
+      const item = html("div", "shelf-item", undefined, group);
+      html("strong", "", proj.title || proj.id || "Untitled project", item);
+      const meta = [proj.status, proj.owner].filter(Boolean).join(" · ");
+      if (meta) html("span", "small", meta, item);
+      if (proj.milestone) html("p", "", `Milestone: ${proj.milestone}`, item);
+      if (proj.deadline) {
+        const dl = typeof proj.deadline === "number" ? clock(proj.deadline) : String(proj.deadline);
+        html("span", "small", `Deadline: ${dl}${proj.extended ? " (extended)" : ""}`, item);
+      }
+    });
+  }
+  if (ideas.length) {
+    const group = html("div", "shelf-group", undefined, box);
+    html("div", "eyebrow-small", "Ideas", group);
+    ideas.forEach(idea => {
+      const item = html("div", "shelf-item", undefined, group);
+      html("strong", "", idea.title || idea.id || "Untitled idea", item);
+      const meta = [idea.status, idea.author].filter(Boolean).join(" · ");
+      if (meta) html("span", "small", meta, item);
+      if (idea.what) html("p", "", idea.what, item);
+      if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
+      if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
+      const links = (Array.isArray(idea.sources) ? idea.sources : []).map(safeHttpUrl).filter(Boolean);
+      if (links.length) {
+        const row = html("div", "shelf-sources", undefined, item);
+        links.forEach(href => {
+          const a = html("a", "shelf-source-link", href, row);
+          a.href = href;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+        });
+      }
+    });
+  }
+  if (graveyard.length) {
+    const details = html("details", "shelf-graveyard", undefined, box);
+    html("summary", "", `Graveyard (${graveyard.length})`, details);
+    graveyard.forEach(entry => {
+      const item = html("div", "shelf-item shelf-dead", undefined, details);
+      html("strong", "", entry.title, item);
+      html("span", "small", entry.reason ? `${entry.status} · ${entry.reason}` : entry.status, item);
+    });
+  }
+}
 function lighting() {
   const at=current?Date.now()/1000:frame.at;
   const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,hour:"2-digit",hourCycle:"h23"}).format(new Date(at*1000)));
@@ -427,7 +524,7 @@ function render() {
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();dormControls();accounts();lighting();
+  drawHouse();roomPanel();dormControls();accounts();shelf();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});

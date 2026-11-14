@@ -58,6 +58,7 @@ def inspect(record: Record) -> dict:
                "launched": "pgid" in value}
               for key, value in life.get("runs", {}).items() if value["status"] == "active"]
     return {"head": head, "recorded_active": active, "capacity": 3,
+            "admissions": state.get("maintenance", {}).get("admissions"),
             "budgets": life.get("budgets", {}), "pending_help": [key for key, value in
             life.get("requests", {}).items() if value["status"] == "pending"],
             "workload": workload(state, max(time.time(), state["at"])),
@@ -324,7 +325,8 @@ class Coordinator:
                       source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
                       mode="review" if pending_contributions(self.private) else "work", **extra)
         except ValueError as error:
-            if not backlog or str(error) != "ready backlog demand changed":
+            if str(error) != "owner paused admissions" and not (
+                    backlog and str(error) == "ready backlog demand changed"):
                 raise
             path.rmdir()  # This unadmitted run has no files, process or journal entry.
             return None
@@ -340,8 +342,9 @@ class Coordinator:
             if kind == "opencode":
                 prompt += "\nUse house_journal({argv: [...]}) for the fixed resident commands; shell execution is unavailable.\n"
                 (path / "prompt.txt").write_text(prompt)
+            from .windows import enabled as web_enabled
             argv, env = providers.command(kind, model, workspace, path, client,
-                                          runtime=self.runtime, resident=resident)
+                                          runtime=self.runtime, resident=resident, web=web_enabled(state))
             write_private(path / "launch.json", {"argv": argv, "workspace": str(workspace)})
             gate_read, gate_write = os.pipe()
             with (path / "prompt.txt").open("rb") as source, (path / "stdout.jsonl").open("xb") as output, \
@@ -384,7 +387,8 @@ class Coordinator:
             code = running.process.poll()
             if code is None and not inactive and not self.stopping:
                 continue
-            if code is None:
+            interrupted = code is None
+            if interrupted:
                 kill_group(running.process.pid)
                 code = running.process.wait()
             item = self.record.read()[0]["life"]["runs"][run]
@@ -404,7 +408,7 @@ class Coordinator:
                 if parsed.get("retry_after_seconds"):
                     self.cooldown(item["agent"], run, "credentials unavailable",
                                   reset=time.time() + parsed["retry_after_seconds"])
-                running.result = {"outcome": "interrupted" if inactive or self.stopping else parsed["outcome"],
+                running.result = {"outcome": "interrupted" if interrupted else parsed["outcome"],
                     "exit_code": code, "usage": {} if truncated else parsed["usage"],
                     "elapsed_seconds": max(0, time.time() - item["started_at"])}
             result = running.result

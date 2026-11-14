@@ -75,6 +75,7 @@ def backlog_enabled(state: dict) -> bool:
 
 def workload(state: dict, at: float) -> dict:
     """Count declared work and unclaimed native capacity, not apparent CPU activity."""
+    from .home_control import paused
     life = state.get("life", {})
     active = {key: run for key, run in life.get("runs", {}).items() if run["status"] == "active"}
     active_residents = {run["resident"] for run in active.values()}
@@ -94,7 +95,7 @@ def workload(state: dict, at: float) -> dict:
     uncovered = max(0, len(ready) - len(idle))
     return {"ready_tasks": ready, "idle_residents": idle, "pending_help": pending,
             "uncovered_tasks": uncovered,
-            "wanted_starts": min(max(0, 3 - len(active)),
+            "wanted_starts": 0 if paused(state, at) else min(max(0, 3 - len(active)),
                                  max(1 if not active else 0, len(pending) + uncovered))}
 
 
@@ -165,6 +166,8 @@ def apply(state, event):
     else:
         require(actor == CONTROLLER, "only the supervisor records process observations")
         if kind == "run-start":
+            from .home_control import paused
+            require(not paused(state, at), "owner paused admissions")
             fields(data, {"kind", "run", "resident", "agent", "model", "source_head",
                           "workspace", "policy_revision", "mode"}, {"help_request", "backlog"})
             from .providers import validate_model

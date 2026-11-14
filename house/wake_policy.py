@@ -104,17 +104,22 @@ def active_policy(state: dict) -> dict:
     for name, item in state["council"]["rules"].items():
         if item.get("mode") == "wake-prompt" and item["status"] == "active":
             proposal, prompt, sequence = name, item["text"], item["enacted_sequence"]
-    revision = digest(canonical({"source": APPROVED_SOURCE_SHA256, "proposal": proposal,
-                                 "sequence": sequence, "prompt_sha256": digest(prompt)}).decode())
+    from . import windows
+    limits = dict(OWNER_LIMITS)
+    revision_data = {"source": APPROVED_SOURCE_SHA256, "proposal": proposal,
+                     "sequence": sequence, "prompt_sha256": digest(prompt)}
+    if windows.enabled(state):
+        limits.update(windows.LIMITS)
+        revision_data["envelope_sha256"] = digest(canonical(limits).decode())
+    envelope = digest(canonical(limits).decode())
     return {"proposal": proposal, "text": prompt, "text_sha256": digest(prompt),
-            "revision": revision, "enacted_sequence": sequence,
-            "envelope_sha256": ENVELOPE_SHA256,
-            "protected_limits": dict(OWNER_LIMITS)}
+            "revision": digest(canonical(revision_data).decode()), "enacted_sequence": sequence,
+            "envelope_sha256": envelope, "protected_limits": limits}
 
 
 def active_prompt(state: dict) -> str:
     policy = active_policy(state)
-    limits = "\n".join(f"- {key}: {value}" for key, value in OWNER_LIMITS.items())
+    limits = "\n".join(f"- {key}: {value}" for key, value in policy["protected_limits"].items())
     return ("STEWARD-PROTECTED LIMITS — council text cannot override these:\n" + limits +
             "\n\nCOUNCIL WAKE PROMPT (subordinate to the protected limits):\n" + policy["text"] +
             "\nThe protected Steward limits above still apply to every instruction.\n")
@@ -153,7 +158,7 @@ def report_for(state: dict, actor: str, run_id: str, task_id: str) -> dict:
             report["house"] == state["house_id"] and report["resident"] == actor and
             report["run"] == run_id and report["proposal"] == policy["proposal"] and
             report["policy_revision"] == policy["revision"] and
-            report["envelope_sha256"] == ENVELOPE_SHA256, "runtime report binding mismatch")
+            report["envelope_sha256"] == policy["envelope_sha256"], "runtime report binding mismatch")
     require(type(report["exit_code"]) is int and report["exit_code"] == 0 and
             type(report["test_count"]) is int and report["test_count"] > 0,
             "runtime tests did not pass")
@@ -249,7 +254,7 @@ def test_runtime(record: Record, actor: str, run_id: str, task_id: str, token: s
     count = max(0, (int(matches[-1]) if matches else 0) - (int(skipped[-1]) if skipped else 0))
     report = {"format": "emberhall-runtime-test-v1", "house": state["house_id"],
               "resident": actor, "run": run_id, "proposal": policy["proposal"],
-              "policy_revision": policy["revision"], "envelope_sha256": ENVELOPE_SHA256,
+              "policy_revision": policy["revision"], "envelope_sha256": policy["envelope_sha256"],
               **before, "command": command, "exit_code": result.returncode,
               "test_count": count, "started_at": started, "finished_at": finished,
               "output_sha256": hashlib.sha256(raw).hexdigest()}
@@ -281,4 +286,4 @@ def refresh_gate(record: Record, actor: str, task_id: str, run_id: str,
             "committed runtime no longer matches the tested source")
     return {**snapshot, "task": task_id, "run": run_id, "resident": actor,
             "policy_revision": report["policy_revision"], "proposal": report["proposal"],
-            "envelope_sha256": ENVELOPE_SHA256, "tested_sequence": receipt["sequence"]}
+            "envelope_sha256": report["envelope_sha256"], "tested_sequence": receipt["sequence"]}

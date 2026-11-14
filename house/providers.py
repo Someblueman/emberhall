@@ -31,7 +31,8 @@ def validate_model(kind, model):
 
 
 def command(kind: str, model: str, workspace: Path, private: Path,
-            house_command: Path, *, runtime: Path | None = None, resident: str | None = None) -> tuple[list[str], dict]:
+            house_command: Path, *, runtime: Path | None = None, resident: str | None = None,
+            web: bool = False) -> tuple[list[str], dict]:
     validate_model(kind, model)
     executable = shutil.which(kind)
     if not executable:
@@ -44,11 +45,15 @@ def command(kind: str, model: str, workspace: Path, private: Path,
         argv = [executable, "exec", "-m", model, "--approve-for-me", "--json",
                 "-c", 'model_provider="openai"', "-c", 'forced_login_method="chatgpt"',
                 "-C", str(workspace), "-o", str(private / "final.txt"), "-"]
+        if web:
+            argv.insert(1, "--search")
     elif kind == "muse":
         argv = [executable, "exec", "--provider", "meta", "--model", model,
                 "--json", "--workspace", str(workspace), "--worktree", "off",
                 "--sandbox-network", "proxy-only", "--disable-web-tools",
                 "--disable-reminders", "--no-session-log", "--prompt-file", str(private / "prompt.txt")]
+        if web:
+            argv.remove("--disable-web-tools")
     elif kind == "agy":
         argv = [executable, "--model", model, "--sandbox", "--mode", "auto",
                 "--output-format", "stream-json", "--log-file", str(private / "agy.log"),
@@ -61,7 +66,7 @@ def command(kind: str, model: str, workspace: Path, private: Path,
         from .opencode_auth import source_database
         from .opencode_tool import configure
         source = source_database(env)
-        config = configure(private, workspace, runtime, resident, env)
+        config = configure(private, workspace, runtime, resident, env, web=web)
         config.update(model=model, default_agent="emberhall", formatter=False, lsp=False,
                       warming=False, share="disabled", update="disable")
         config["agents"]["title"] = {"model": model}

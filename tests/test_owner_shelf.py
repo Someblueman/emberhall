@@ -1,4 +1,4 @@
-"""Owner activation adds two source pins, not a council enactment or web access."""
+"""Owner activation adds shelf, protected web access and finite admission control."""
 import copy
 import unittest
 
@@ -14,8 +14,8 @@ class OwnerShelfTests(unittest.TestCase):
 
     def migration(self):
         old = owner.protected_manifest(self.h.state)
-        return self.prior.migration() | {'scope': owner.SHELF_SCOPE, 'approval_sha256': owner.SHELF_SHA256,
-            'protected_files': old | {name: '6' * 64 for name in owner.ALLOWED_CHANGES[owner.SHELF_SCOPE]},
+        return self.prior.migration() | {'scope': owner.KEEP_MOVING_SCOPE, 'approval_sha256': owner.KEEP_MOVING_SHA256,
+            'protected_files': old | {name: '6' * 64 for name in owner.ALLOWED_CHANGES[owner.KEEP_MOVING_SCOPE]},
             'previous_manifest_sha256': owner.fingerprint(old)}
 
     def test_scope_and_activation_preserve_authority_history_and_budgets(self):
@@ -30,19 +30,19 @@ class OwnerShelfTests(unittest.TestCase):
             if key not in {'migrations', 'protected_files', 'at'}:
                 self.assertEqual(value, self.h.state['maintenance'][key], key)
         self.assertEqual(set(owner.protected_manifest(self.h.state)) - set(owner.protected_manifest(before)),
-                         {'house/shelf.py', 'house/shelf_gate.py'})
+                         {'house/shelf.py', 'house/shelf_gate.py', 'house/windows.py', 'house/home_control.py'})
         self.assertNotIn('shelf', self.h.state)
         self.h.reject('shelf', {'kind': 'choice-open'}, 'require the enacted')
 
     def test_other_sources_provider_releases_and_missing_pins_reject(self):
         good = self.migration()
-        for path in ('house/council.py', 'house/providers.py', 'house/wake_policy.py', 'house/home.py'):
+        for path in ('house/council.py', 'house/record.py', 'house/test_sandbox.py', 'house/integrate.py'):
             bad = copy.deepcopy(good); bad['protected_files'][path] = '0' * 64
             self.h.reject('owner-migrate', bad, 'outside.*scope')
         bad = copy.deepcopy(good); del bad['protected_files']['house/shelf_gate.py']
         self.h.reject('owner-migrate', bad, 'replacement manifest')
         self.h.event('owner-migrate', good)
         self.h.reject('owner-migrate', good, 'already used')
-        self.h.reject('owner-provider-release', {'scope': owner.SHELF_SCOPE, 'approval_sha256': owner.SHELF_SHA256,
+        self.h.reject('owner-provider-release', {'scope': owner.KEEP_MOVING_SCOPE, 'approval_sha256': owner.KEEP_MOVING_SHA256,
             'house': self.h.state['house_id'], 'owner_id': owner.council.OWNER_ID, 'agent': 'opencode',
             'expected_sequence': 594, 'expected_until': owner.KEY_BUDGET_UNTIL}, 'only approved OpenCode')

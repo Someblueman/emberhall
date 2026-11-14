@@ -1,0 +1,9 @@
+{
+  "started_at": 1794617228.667553,
+  "finished_at": 1794617467.76115,
+  "exit_code": 0,
+  "source_unchanged": true,
+  "native_opencode_metadata_tests": true,
+  "model_calls": false,
+  "output_sha256": "dcbc1b359cc9d9f206cea2040839b3faee3861e7941f3334755913e70cbe2474"
+}

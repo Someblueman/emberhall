@@ -28,7 +28,8 @@ def validate_workspace(workspace: Path) -> None:
                 raise ValueError("OpenCode room cannot contain hard-linked files")
 
 
-def configure(private: Path, workspace: Path, runtime: Path, resident: str, env: dict) -> dict:
+def configure(private: Path, workspace: Path, runtime: Path, resident: str, env: dict, *,
+              web: bool = False) -> dict:
     config = private / 'opencode-config'
     tool = config / 'plugins' / 'house_journal.js'
     tool.parent.mkdir(parents=True, exist_ok=True)
@@ -74,6 +75,8 @@ export default {id: "emberhall.journal", async setup(ctx) {
 '''
     source = source.replace('PYTHON', json.dumps(str(Path(sys.executable).resolve())))
     source = source.replace('CODE', json.dumps(python)).replace('ROOM', json.dumps(str(workspace)))
+    if web:
+        source = source.replace('"write", "patch"', '"write", "patch", "websearch", "webfetch"')
     tool.write_text(source)
     tool.chmod(0o600)
     # Empty private data prevents V2 from importing the stale legacy auth.json.
@@ -95,6 +98,9 @@ export default {id: "emberhall.journal", async setup(ctx) {
     rules = [{"action": "*", "resource": "*", "effect": "deny"}]
     for action in ('read', 'glob', 'grep', 'edit', 'house_journal'):
         rules.append({"action": action, "resource": "*", "effect": "allow"})
+    if web:
+        rules.extend({"action": action, "resource": "*", "effect": "allow"}
+                     for action in ("websearch", "webfetch"))
     for action in ('shell', 'subagent', 'external_directory', 'execute'):
         rules.append({"action": action, "resource": "*", "effect": "deny"})
     for action, resource in [('read', '*.env*'), ('edit', '.house-client'),
@@ -113,7 +119,7 @@ export default {id: "emberhall.journal", async setup(ctx) {
                 {"action": "plugin.use", "resource": str(tool), "effect": "allow"},
                 {"action": "mcp.use", "resource": "*", "effect": "deny"},
                 {"action": "skill.use", "resource": "*", "effect": "deny"},
-                {"action": "websearch.use", "resource": "*", "effect": "deny"}]
+                {"action": "websearch.use", "resource": "*", "effect": "allow" if web else "deny"}]
     policies.extend({"action": "tool.use", "resource": rule["action"] + ':' + rule["resource"],
                      "effect": rule["effect"]} for rule in rules)
     return {"permissions": rules, "policies": policies,

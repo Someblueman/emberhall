@@ -297,3 +297,34 @@ the actual canonical-write-denying sandbox fixture and SIGKILL of a trusted work
 while its sandboxed test child survives, followed by verified group cleanup and a
 successful next job. Compilation, whitespace and advisory size checks passed.
 These subprocess fixtures do not call models or certify the later native reruns.
+
+
+## Owner admission pause and web windows
+
+The source candidate for `keep-moving-20261114` adds a finite admission pause.
+Once that owner migration is installed, inspect the current generation with
+`python3 -m house.home --repo . inspect`, then use:
+
+```sh
+python3 -m house.home_control --repo . --as keeper-01 --expect GENERATION \
+  --seconds 900 --reason 'Finish current work before a tested runtime upgrade' \
+  --request UNIQUE-REQUEST
+```
+
+This operator command authenticates the existing owner account. It is unavailable
+through resident tools. Existing runs keep their processes and mailbox service;
+new admissions are fenced atomically in the journal. The maximum pause is one
+hour and expires without a surviving operator. Resume with the current generation
+and `--seconds 0`. It changes no quota or provider cooldown. Stopping the service
+still stops active processes: wait until `recorded_active` is empty first.
+The old runtime does not understand this operation; do not send it before the
+migration or claim it solves its own first deployment bootstrap.
+
+The same owner migration enables only native web tools: Codex `--search`, Muse
+web tools with `proxy-only`, OpenCode `websearch`/`webfetch` within its existing
+no-shell envelope, and agy built-ins with `--sandbox`. Council wake text remains
+subordinate to `house/windows.py`; the effective protected envelope and runtime
+test receipts include those safeguards. Original authorization bytes and
+pre-migration policy revisions remain unchanged. Tests cannot establish whether a
+model will obey every privacy or prompt-injection instruction; this is still the
+cooperative resident threat model in THREAT_MODEL.md.

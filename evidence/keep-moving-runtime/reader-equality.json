@@ -1,0 +1,9 @@
+{
+  "equal": true,
+  "installed_source": "a2246d50d80dc5c8cc346469150607b23e422fbc",
+  "head": "7be0fdfc861e56e5e97108ba8f55b3a0b27e3e11",
+  "sequence": 1077,
+  "state_events_sha256": "4910cf167b6463e87767ea3ac13de7820aa06640282d3f1944cb253f4c71011a",
+  "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+  "envelope_sha256": "1abbfe9dbc7d006f764416f79f3077981209695e536a2888917df3d48728c116"
+}

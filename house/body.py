@@ -34,6 +34,35 @@ def usage(value: object) -> dict:
             type(v) in (int, float) and math.isfinite(v) and v >= 0}
 
 
+def shelf_view(state: dict) -> dict:
+    """Public real work only; never publish Explorer tokens or isolated trials."""
+    from . import shelf_gate
+    shelf = state.get("shelf", {})
+    ideas = []
+    for key, idea in shelf.get("ideas", {}).items():
+        history = []
+        for entry in idea["history"]:
+            public = {k: label(v, 2000) if isinstance(v, str) else v
+                      for k, v in entry.items()}
+            if "choice" in entry:
+                choice = shelf["choices"][entry["choice"]]
+                public["reasons"] = [label(v["reason"], 2000) for v in choice["votes"].values()
+                                     if v["counted"]]
+            history.append(public)
+        ideas.append({"id": key, **{k: label(idea[k], 2000) for k in
+            ("title", "what", "why", "first_step", "author", "status")},
+            "sources": list(idea["sources"]), "losses": idea["losses"], "history": history})
+    projects = [{"id": key, "title": label(shelf["ideas"][p["idea"]]["title"], 2000),
+                 **{k: label(p[k], 2000) if isinstance(p[k], str) else p[k]
+                    for k in ("idea", "owner", "status", "milestone", "deadline", "extended", "lesson")
+                    if k in p}} for key, p in shelf.get("projects", {}).items()]
+    expedition = shelf.get("rounds", {}).get(shelf.get("explorer"))
+    return {"enabled": shelf_gate.enabled(state), "policy": shelf_gate.policy(state),
+            "ideas": ideas, "projects": projects, "explorer": {
+                "resident": expedition["owner"], "agent": expedition["agent"],
+                "until": expedition["until"]} if expedition else None}
+
+
 def watch_item(event: dict) -> dict | None:
     if event["op"] != "say" or event["actor"] != "watch-keeper":
         return None
@@ -284,6 +313,11 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                                      sum(p.get("status") == "pending" for p in proposals.values()),
                         "enacted": sum(p["status"] in {"ratified", "enacted"} for p in state["proposals"].values()) +
                                    sum(p.get("status") == "enacted" for p in proposals.values())}}
+        # Preserve historical frames exactly before this owner activation (or
+        # before the first real shelf event in an unpinned disposable house).
+        from .windows import enabled as windows_enabled
+        if windows_enabled(state) or "shelf" in state:
+            frame["shelf"] = shelf_view(state)
         frames.append(copy.deepcopy(frame))
     # Store immutable scar descriptions once; each frame retains the exact set
     # and changing review/repair state. This keeps the public checkpoint compact.

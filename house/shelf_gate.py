@@ -14,8 +14,8 @@ ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return",
 
 
 def enabled(state: dict) -> bool:
-    from .maintenance import SHELF_SCOPE
-    return "wake_policy" not in state or SHELF_SCOPE in state.get("maintenance", {}).get("migrations", {})
+    from .maintenance import KEEP_MOVING_SCOPE
+    return "wake_policy" not in state or KEEP_MOVING_SCOPE in state.get("maintenance", {}).get("migrations", {})
 
 
 def policy(state: dict) -> str | None:

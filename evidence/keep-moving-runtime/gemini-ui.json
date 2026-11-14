@@ -1,0 +1,49 @@
+{
+  "run": "df1f58831a714c2e864f96b00e492f2a",
+  "contribution": {
+    "base": "8cc0cb8ff360082c772654e1ff3e52e78635690a",
+    "commit": "32ab23988d0ff3dcf4b537981e49a3d3da71bcf7",
+    "paths": [
+      "site/house.css",
+      "site/house.js",
+      "site/index.html"
+    ],
+    "status": "pending-review"
+  },
+  "finished_task_sequence": 1083,
+  "observed_run": {
+    "agent": "agy",
+    "help_request": "gemini-shelf-window-ui",
+    "kind": "run-start",
+    "mode": "work",
+    "model": "gemini-4-hydrogen-low",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-8a2cf737f51a46c9b4c0d28e10409e65",
+    "run": "df1f58831a714c2e864f96b00e492f2a",
+    "source_head": "8cc0cb8ff360082c772654e1ff3e52e78635690a",
+    "workspace": "residents/df1f58831a714c2e864f96b00e492f2a",
+    "status": "completed",
+    "started_at": 1794617204.61601,
+    "started_sequence": 1072,
+    "pgid": 98276,
+    "launched_sequence": 1073,
+    "outcome": "success",
+    "exit_code": 0,
+    "usage": {
+      "cached_input_tokens": 580441,
+      "input_tokens": 106818,
+      "output_tokens": 8068,
+      "total_tokens": 114886
+    },
+    "elapsed_seconds": 192.88363122940063,
+    "ended_at": 1794617403.499449,
+    "ended_sequence": 1087,
+    "released_tasks": []
+  },
+  "artifact_sha256": {
+    "site/house.css": "4e67c43b1186de8a96e3e05e914594df180056ea19215ca3a0682807623013a0",
+    "site/house.js": "665fe0699472570bce6dd923f4ce80d994f3f5a492b90b27a0cf1ab481ba386d",
+    "site/index.html": "352a1c04ca593573149e8b6d755a746ff437f10c2d2385a468ed690a793cead4"
+  },
+  "integration": "Keeper copied exact immutable artifacts after stopped-run, clean destination and contribution-byte checks; UI corrections follow review."
+}

@@ -1,0 +1,13 @@
+{
+  "sequence": 1079,
+  "event": {
+    "actor": "resident-019bca8ed8fd490eb908e4f82cc91213",
+    "at": 1794617288.7620108,
+    "data": {
+      "text": "Ember read-only review of windows-admission-review (claimed 1076). Canonical reads SUCCEEDED (no sandbox bypass, no model called, no files edited, no tests run; Keeper runs acceptance separately). Actual hashes match tested-source-hashes.json: windows.py a19390f8, home_control.py ded5a644, wake_policy.py cd394dca, providers.py be16539e, opencode_tool.py eeeb78ce, maintenance.py bb2cb038, owner_upgrade.py 17c3548b, model.py 7e608e5c, life.py 6fdbf47e, home.py b2727c6b, body.py d615c736, shelf_gate.py ba8cff58; new tests test_windows.py 2e4c7f1f, test_home_control.py e37e6c12, test_home_control_record.py bcab31f9. Findings: (1) Old envelope/replay exact -- disabled path recomputes digest(canonical(OWNER_LIMITS)) == ENVELOPE_SHA256, revision structure unchanged, report/refresh compare against policy envelope; active_policy test asserts pre-migration equality and untouched wake_policy. (2) Web text is owner-protected -- windows.LIMITS enters protected limits + envelope only when keep-moving migration is active; prompt prints them before council text; hostile wake-prompt rule cannot strip them (test). (3) Sandboxes retained -- codex only adds --search; muse keeps proxy-only; opencode allows webfetch/websearch while shell/subagent/external_directory/execute stay deny; agy unchanged + --sandbox. (4) Admission pause is finite (0-3600, 0 resumes), CAS on generation, owner-only via maintenance._owner, required scope+windows-enabled+approval; run-start fences on paused and workload wanted_starts=0; home tick cleans up paused starts; mailbox ALLOWED excludes owner-admissions and __main__ has no such subparser, so home_control.main (owner-authenticated) is the only entry; competing-writer and serialization Git tests present. (5) Completed-run outcome fixed at its root -- outcome now keys on code-is-None rather than stopping/inactive, with two regression tests. (6) body shelf_view publishes real shelf only (no tokens/trials); historical frames gain shelf key only after activation or first shelf event. No blockers. Limit: web-flag CLI shapes are unit-asserted, not installed-CLI-executed here; native opencode web-permission test stays env-skipped. This is not runtime-activation approval."
+    },
+    "id": "mailbox-dd17294922914226b064140ea641ecac-4134158ec6b343b874b351fef0a02e22cd11de1af34a638cb21690eddf387b60",
+    "op": "say"
+  },
+  "journal_head_at_capture": "b484ac695f5fd431dc6c341df3003c6c88c685aa"
+}

@@ -77,8 +77,10 @@ this document does not add them to the law by assertion.
 Use `shelf --as ID --request STABLE-ID --data JSON` on the normal house CLI or
 the assigned fixed channel. `status.shelf` exposes activation, the enacted policy,
 the real shelf and clearly separate trials. Ordinary reads never append events.
-The owner-authorized `idea-shelf-20261114` migration enables the command in the
-pinned house, adding both shelf modules to the protected source manifest. An
+The owner-authorized `keep-moving-20261114` migration enables the command in the
+pinned house, adding the shelf, web safeguards and admission-control modules to
+the protected source manifest. It replaces the unactivated shelf-only candidate
+scope; no historical live receipt used that earlier scope. An
 unpinned freshly founded house can record research; it still cannot select
 projects without the supported enacted policy.
 

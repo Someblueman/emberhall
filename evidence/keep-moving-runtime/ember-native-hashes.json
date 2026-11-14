@@ -1,0 +1,34 @@
+{
+  "run": "dd17294922914226b064140ea641ecac",
+  "captured_prefix_bytes": 2445297,
+  "captured_prefix_sha256": "e4045568bc006b23c609316bb595fe262ad3d4f356c70b1953a9ad4c7124b747",
+  "actual_tool_result": {
+    "schema_version": 1,
+    "id": "018f0000-0000-7000-8000-00000000cfb0",
+    "stream": {
+      "kind": "session",
+      "id": "01a1d769-7c62-7e12-b6b4-fb075bc2d7ab"
+    },
+    "sequence": 1588,
+    "recorded_at": 1780531400003168,
+    "record_type": "event",
+    "durability": "durable",
+    "causation_id": "01a1d769-f845-79a1-ac08-5ee96b391149",
+    "payload_type": "tool.result",
+    "payload_schema_version": 1,
+    "payload": {
+      "kind": "tool_result",
+      "command_id": "01a1d769-f845-79a1-ac08-5ee96b391149",
+      "run_stream": {
+        "kind": "run",
+        "id": "01a1d769-f845-79a1-ac08-5ee96b391149"
+      },
+      "call_id": "call_01a1d7867d6074f39b73229f5d4f96a0",
+      "text": "{\n  \"chunk_id\": \"exec-68-1\",\n  \"command\": \"cat /Users/sws/Code/longhouse/evidence/keep-moving-runtime/tested-source-hashes.json 2>/dev/null | head -30; echo ===; python3 - <<'PY'\\nimport hashlib\\nfrom pathlib import Path\\nroot=Path(\\\"/Users/sws/Code/longhouse\\\")\\nfor rel in [\\\"house/windows.py\\\",\\\"house/home_control.py\\\",\\\"house/wake_policy.py\\\",\\\"house/providers.py\\\",\\\"house/opencode_tool.py\\\",\\\"house/maintenance.py\\\",\\\"house/owner_upgrade.py\\\",\\\"house/model.py\\\",\\\"house/life.py\\\",\\\"house/home.py\\\",\\\"house/body.py\\\",\\\"house/shelf_gate.py\\\",\\\"tests/test_windows.py\\\",\\\"tests/test_home_control.py\\\",\\\"tests/test_home_control_record.py\\\"]:\\n    print(rel, hashlib.sha256((root/rel).read_bytes()).hexdigest()[:12])\\nPY\",\n  \"description\": \"Report actual source hashes\",\n  \"exit_code\": 0,\n  \"terminal_status\": \"completed\",\n  \"output\": \"{\\n  \\\"house/__init__.py\\\": \\\"cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf\\\",\\n  \\\"house/__main__.py\\\": \\\"06a17f17a5142f4bdc785a69a15d5f4ca7683077e5c93169304bcbe98a6cf92f\\\",\\n  \\\"house/body.py\\\": \\\"d615c7369fdc068e6229d3441c74ff69d262aa62d2f8a213ac390751986c0e73\\\",\\n  \\\"house/building.py\\\": \\\"572a6c2d527c41e7cb08d45e56d61885a41036c1188b112c1d4e2ff39e681b3e\\\",\\n  \\\"house/checkpoint.py\\\": \\\"11cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d\\\",\\n  \\\"house/council.py\\\": \\\"85fcd011da8e037bd290e4e0400e5fe50b93a200d449e1f9e22d574a19d9eeba\\\",\\n  \\\"house/custodian.py\\\": \\\"54736d8b0d89ef91cac921109644589d10375df5f3606964afd73fbe3246a50c\\\",\\n  \\\"house/files.py\\\": \\\"68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a\\\",\\n  \\\"house/governance.py\\\": \\\"d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a\\\",\\n  \\\"house/home.py\\\": \\\"b2727c6b727637a6b85821484dc4efd2e6d81bfdd4c875c6b7f1cf375af02162\\\",\\n  \\\"house/home_control.py\\\": \\\"ded5a6446bc9fbd393805fa19e4e53c70862faa6eb4ad118be110ad51eb0805e\\\",\\n  \\\"house/home_work.py\\\": \\\"a209da38cb5ceb42665b8371f5824d3c16ab0f49c641904b223059c4b052d7ae\\\",\\n  \\\"house/illustration.py\\\": \\\"9e2ac524ed844c4c4c1a5c69a54cd28522cba05385adfff0ab80f432581705e6\\\",\\n  \\\"house/inbox.py\\\": \\\"000a7c14d1c0c1d87a8f20df2a5e0f107b86fa9c2217a5b003224c1c8a43f1b8\\\",\\n  \\\"house/integrate.py\\\": \\\"bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84\\\",\\n  \\\"house/life.py\\\": \\\"6fdbf47e88346bc80c9f27556c35bf6c95a72fadc6fe32eb84038eabf41d96c3\\\",\\n  \\\"house/mailbox.py\\\": \\\"1953ab21a8117a6dce08f95f0168d3fc2f8430083598c6d5b533c4b61f3d4ff1\\\",\\n  \\\"house/mailbox_jobs.py\\\": \\\"4ba9155907e9b6bd62c67057979cbc6b4cea723a729389f9b7391146636a2641\\\",\\n  \\\"house/maintenance.py\\\": \\\"bb2cb03897e389f94a5d1747cfae755b0768a2d7abc43fabf1d2f0d8b45ce9f4\\\",\\n  \\\"house/model.py\\\": \\\"7e608e5c51e50577f8a32ef0c9095274e41580d8895c5eb92f3b0f0bedf858ff\\\",\\n  \\\"house/opencode_auth.py\\\": \\\"453dc0a6042309c618cadf18ecdc0840453f9dd6de97dd03d90efe9cc71fe5bc\\\",\\n  \\\"house/opencode_tool.py\\\": \\\"eeeb78ceb4ec91559f6135e8e686f6b1bcd329d8f424b4b12645e680d5263f83\\\",\\n  \\\"house/owner_upgrade.py\\\": \\\"17c3548bba74fb8ac8a4f3d1a6af7f801454c827f7cc4916561369220b2a00d1\\\",\\n  \\\"house/providers.py\\\": \\\"be16539e0441db88d644615e46d0616eb60e21bb6a5700110a1ddfb50a6aa8cb\\\",\\n  \\\"house/publish.py\\\": \\\"f3beb5ce1b6b1e97ff30a87019adce7b51bb0b17c38187ecbdfce08c167b6972\\\",\\n  \\\"house/record.py\\\": \\\"31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985\\\",\\n  \\\"house/remote.py\\\": \\\"20b9235e90906d710de3584a67cdb3d928e4d87ecc383b58ef6bf90aecd02a73\\\",\\n  \\\"house/resident_actions.py\\\": \\\"4314ab2bc70ad8aff746472719833909f984b8e453b013cef7fd2a9f94667630\\\",\\n  \\\"house/resident_client.py\\\": \\\"6f8964f4acf65f130fb1671edc66f892cfeb4478a66c4d63f177497a95faaad1\\\",\\n===\\nhouse/windows.py a19390f80e3e\\nhouse/home_control.py ded5a6446bc9\\nhouse/wake_policy.py cd394dca02e2\\nhouse/providers.py be16539e0441\\nhouse/opencode_tool.py eeeb78ceb4ec\\nhouse/maintenance.py bb2cb03897e3\\nhouse/owner_upgrade.py 17c3548bba74\\nhouse/model.py 7e608e5c51e5\\nhouse/life.py 6fdbf47e8834\\nhouse/home.py b2727c6b7276\\nhouse/body.py d615c7369fdc\\nhouse/shelf_gate.py ba8cff580bd3\\ntests/test_windows.py 2e4c7f1f3f03\\ntests/test_home_control.py e37e6c12872d\\ntests/test_home_control_record.py bcab31f95370\\n\",\n  \"original_output_bytes\": 3171,\n  \"original_output_tokens\": 793,\n  \"truncated\": false\n}",
+      "correlation_facts": {
+        "tool_name": "bash",
+        "outcome": "success"
+      }
+    }
+  }
+}

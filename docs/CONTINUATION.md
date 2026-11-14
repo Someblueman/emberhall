@@ -15,6 +15,31 @@ Actual returning Muse Sable generated it through the installed restricted channe
 Keeper independently restored it. Use the exact command in `docs/RESUME.md`.
 Read newer local events; never replace them with this prefix.
 
+## Current implementation checkpoint: web windows and admission drain
+
+Keeper owns `keep-moving-runtime-v1`, claimed1064. Source work adds owner-protected
+web tools, a finite admission pause and a correction for already-completed
+processes falsely marked interrupted during supervisor shutdown. Public shelf
+export includes real work only and preserves pre-activation historical frames.
+The unactivated `idea-shelf-20261114` candidate scope is replaced in place by
+`keep-moving-20261114`, bound to the same exact owner objective. Runtime1004 is
+still installed: no new migration, web-enabled model wake or project selection
+has happened merely because this code exists.
+
+Real UI task `shelf-window-ui`1065 has exclusive site/index.html, site/house.js,
+site/house.css ownership (corrected1068). Muse Ember's editing tool returned
+`tool denied: approval aborted` twice; it made no edits and released1070.
+Gemini was requested1071 through the sole coordinator, started1072/launched1073,
+and woke1075 as returning resident-8a2cf737f51a46c9b4c0d28e10409e65. Gemini finished1083, slept1084 and completed successfully1086 (192.884 seconds).
+Keeper matched the three stopped-contribution blobs to immutable artifacts and
+integrated them, correcting done-project classification, graveyard explanations,
+credential URL filtering and the owner's duration/history labels. Ember reviewed
+backend hashes1079 and released1081, with no blocker and no test claim. Review
+readiness was withdrawn1082. Evidence: evidence/keep-moving-runtime. Host379
+passed (374 executed,5 skipped); final7 UI/projection checks passed. No live
+activation yet. Next: commit, isolated owner-upgrade acceptance, and a bounded
+handoff that lets current residents finish before the single cohesive migration.
+
 ## Next direction: build from the shelf
 
 The shelf journal integration is now implemented in source (see
