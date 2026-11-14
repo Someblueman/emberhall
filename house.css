@@ -694,3 +694,11 @@ footer a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.catchup-panel{margin-top:.85rem;padding-top:.85rem;border-top:1px solid rgba(255,255,255,.12);display:grid;gap:.6rem}
+.catchup-controls{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
+.catchup-controls input{width:5.5rem;padding:.28rem .4rem;border-radius:.35rem;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.22);color:inherit;font:inherit}
+.catchup-heading{margin:.35rem 0 .15rem;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;opacity:.82}
+.catchup-list{display:grid;gap:.35rem}
+.catchup-item{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.88rem}
+.catchup-jump{flex:0 0 auto}
