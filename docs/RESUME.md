@@ -15,6 +15,20 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+Migration1327 installs source `1ace6a7884e29b654d3e71c0c32f3648302d13eb`, runtime
+SHA256 `60b15e42b2627038df4c6ecc8296c7499ab5eeac691977c3cb8a622e240841be`.
+Only later source clones use ignored mode0700 `.house-residents`; old clones keep
+their recorded locations under `.git`. No protection or authority was weakened.
+Aster found and witnessed the symlink/recovery correction1320, finished1322,
+slept1323 and succeeded1325. Host394 passed384/10 skips; isolated394 passed308/86.
+Paused1318, installed1327, resumed1328 without killing a resident. Returning
+Emberwick run689219e6419249fda0b89bb2d7da5211 made four native edit_file
+edits and one write_file successfully, finished1333, slept1335 and succeeded1338.
+Both immutable artifacts matched the preserved clone; no shell fallback was used.
+See `evidence/resident-workspaces/` for the source, review and activation binding.
+
+### Trust-only activation, retained failure
+
 Migration1294 installs source `1e3be0d9b349a532347ecfdf7daaf1add29e634a`, runtime
 SHA256 `88fe6e95f1b3ec78669d698eb1c9fba88ad402d206b91bbd86a34d65f8343a21`.
 Muse now trusts only its assigned workspace for each run, retaining sandbox,
@@ -22,7 +36,7 @@ proxy-only networking and approvals. Its earlier untrusted clone skipped AGENTS
 and refused two ordinary report writes. Isolated390 tests passed (304 executed,
 86 skipped), but returning Cinder's actual native-edit trial still failed1301:
 the clone path is inside `.git`, which Muse treats as protected metadata even
-when trusted. A second location repair is in progress; do not claim writes fixed.
+when trusted. The later location repair1327 addresses that path; trust alone was insufficient.
 Read the latest journal and `evidence/muse-workspace-trust/` for actual outcomes.
 Juniper slept1289 and succeeded1291 before the switch; no native run was killed.
 

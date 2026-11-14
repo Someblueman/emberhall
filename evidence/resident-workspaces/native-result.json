@@ -1,0 +1,86 @@
+{
+  "run": "689219e6419249fda0b89bb2d7da5211",
+  "source_head": "1ace6a7884e29b654d3e71c0c32f3648302d13eb",
+  "claim": 1332,
+  "finish": 1333,
+  "sleep": 1335,
+  "success": 1338,
+  "native_log_sha256": "f29a7ebfe13704295b8f4ae146ae42f59364781b5665f18884855c99bbc920c5",
+  "tools": [
+    {
+      "line": 528,
+      "edit_facts": {
+        "tool_name": "edit_file",
+        "path": "docs/GOAL_AUDIT.md",
+        "added": 6,
+        "removed": 4
+      },
+      "correlation_facts": {
+        "tool_name": "edit_file",
+        "outcome": "success"
+      }
+    },
+    {
+      "line": 546,
+      "edit_facts": {
+        "tool_name": "edit_file",
+        "path": "docs/GOAL_AUDIT.md",
+        "added": 1,
+        "removed": 1
+      },
+      "correlation_facts": {
+        "tool_name": "edit_file",
+        "outcome": "success"
+      }
+    },
+    {
+      "line": 564,
+      "edit_facts": {
+        "tool_name": "edit_file",
+        "path": "docs/GOAL_AUDIT.md",
+        "added": 1,
+        "removed": 1
+      },
+      "correlation_facts": {
+        "tool_name": "edit_file",
+        "outcome": "success"
+      }
+    },
+    {
+      "line": 582,
+      "edit_facts": {
+        "tool_name": "edit_file",
+        "path": "docs/GOAL_AUDIT.md",
+        "added": 1,
+        "removed": 1
+      },
+      "correlation_facts": {
+        "tool_name": "edit_file",
+        "outcome": "success"
+      }
+    },
+    {
+      "line": 600,
+      "edit_facts": {
+        "tool_name": "write_file",
+        "path": "evidence/muse-workspace-trust/native-check.md",
+        "added": 11
+      },
+      "correlation_facts": {
+        "tool_name": "write_file",
+        "outcome": "success"
+      }
+    }
+  ],
+  "artifacts": {
+    "docs/GOAL_AUDIT.md": {
+      "original_sha256": "8b40c3aa2a32d9cee99fa15f440ad1827a9975fcb45045ce7141eef9f5acd605",
+      "accepted_sha256": "0847e34abad9d08280a6d5b4a5354cc468293ad0394cd11263a2fc4e43e26eb2"
+    },
+    "evidence/muse-workspace-trust/native-check.md": {
+      "original_sha256": "9082a02b40633f0f165cc54ddfdb2dffea2d80ab17607ccff79ba31ae02f5729",
+      "accepted_sha256": "5f29b2552061ac03591d2040248049d0600c64c064a7f24cf30d4d28af4aa229"
+    }
+  },
+  "curation": "Clarify trial receipt versus competition close and historical Door presence; remove local absolute prefix from published note. Originals remain immutable at1333 and in preserved private clone."
+}

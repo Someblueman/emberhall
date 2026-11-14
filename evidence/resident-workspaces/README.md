@@ -26,10 +26,20 @@ completes, rather than blocking admission. Concurrent same-user path replacement
 after validation remains outside the existing threat model.
 Aster completed the independent review1320/1322, slept1323 and succeeded1325.
 The exact immutable report is ../native-residents/workspace-location-review.md;
-all eleven recorded hashes matched the final candidate. Final host acceptance
-and actual native editing must be recorded before calling the repair complete. Same-user shells are not hostile
+all eleven recorded hashes matched the final candidate. Final host acceptance and the actual later Muse result are now retained below. Same-user shells are not hostile
 resident isolation; the existing threat model still applies.
 
 Final host acceptance: 394 collected, 384 executed, 10 skipped, 250.646s, passed.
 See host-tests.txt. First candidate393 passed383/10 before Aster corrections;
 initial-host-tests.txt is retained separately. Final focused4 passed in7.857s; see focused.txt.
+
+Migration1327 installed the immutable runtime; resumed1328 after Aster normal
+sleep1323/success1325. Isolated394 passed308 executed/86 skips in127.161s.
+Only maintenance/sequence/at/receipts changed across activation. See activation.json.
+
+Returning Emberwick used the new ordinary source room and per-run trust. All four
+native edit_file calls and the native write_file call returned success; finish1333
+preserved both exact artifacts, sleep1335 and terminal success1338 completed the
+stretch normally. native-result.json binds tool facts and original/accepted hashes.
+The original failed Cinder trial is still retained; no shell fallback, global trust,
+sandbox weakening, approval bypass or authority change was needed.

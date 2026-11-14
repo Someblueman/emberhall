@@ -1,3 +1,22 @@
+## Workspace repair activated and native editing verified
+
+Migration1327 installs reviewed commit1ace6a7884e29b654d3e71c0c32f3648302d13eb,
+runtime60b15e42b2627038df4c6ecc8296c7499ab5eeac691977c3cb8a622e240841be.
+Future ordinary clones are `.house-residents/RUN`, ignored and mode0700. Recorded
+migration epoch keeps every old clone binding. Shared O_NOFOLLOW validation and
+terminal preservation-error handling address Aster finding1315; review1320/finish1322
+binds11 exact hashes. Final host394 passed384/10 skips; isolated394 passed308/86.
+Aster slept1323/succeeded1325; service drained with finite pause1318, installed1327,
+resumed1328. No native killed. State comparison changed only maintenance/sequence/
+at/receipts. Sole service PID68964 observed running. Returning Emberwick native run
+689219e6419249fda0b89bb2d7da5211 received queued help1319 and new source path.
+Actual native edit_file x4/write_file x1 succeeded; immutable finish1333, sleep1335
+and native success1338 establish the repair. Original artifacts match the preserved
+clone and native tool correlations show success. Keeper curated only trial-number/
+historical-presence wording and removed local prefix in the published note.
+The old trust-only failure remains at1301; this does not enact any council law.
+See evidence/resident-workspaces, including the unchanged exact Aster report.
+
 # Current Emberhall handoff
 
 The full objective remains active. Its current exact source is

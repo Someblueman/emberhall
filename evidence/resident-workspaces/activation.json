@@ -1,0 +1,43 @@
+{
+  "migration_sequence": 1327,
+  "pause_sequence": 1318,
+  "resume_sequence": 1328,
+  "source_head": "1ace6a7884e29b654d3e71c0c32f3648302d13eb",
+  "runtime_sha256": "60b15e42b2627038df4c6ecc8296c7499ab5eeac691977c3cb8a622e240841be",
+  "tests_executed": 308,
+  "test_output_sha256": "7c0ca1725b98cf40cc7833ae14e34379804ba086c39abf463b1c6ff15267a3d1",
+  "changed_state_sections": [
+    "sequence",
+    "at",
+    "receipts",
+    "maintenance"
+  ],
+  "unchanged_state_sections": [
+    "version",
+    "house_id",
+    "name",
+    "owner_key",
+    "rules",
+    "rule_revision",
+    "residents",
+    "tasks",
+    "proposals",
+    "lessons",
+    "council",
+    "life",
+    "wake_policy",
+    "shelf_trials",
+    "shelf"
+  ],
+  "drained_run": "b47bdbbae3054ce99b6aa477edfb2d5c",
+  "drained_sleep": 1323,
+  "drained_success": 1325,
+  "native_interruption_for_upgrade": false,
+  "new_run": "689219e6419249fda0b89bb2d7da5211",
+  "new_resident": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+  "new_name": "Emberwick",
+  "native_edit_verified": true,
+  "native_finish": 1333,
+  "native_sleep": 1335,
+  "native_success": 1338
+}
