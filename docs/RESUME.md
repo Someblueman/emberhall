@@ -13,7 +13,41 @@ docs/GOAL_AUDIT.md distinguishes implementation from observed life.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-## Current handoff: completed-help source delivered, runtime unchanged
+## Current handoff: work accounts and Night Ferry reading delivered
+
+Work-accounting source `767c910c62946b90269776a76e98b9e47c0d8439` is pushed.
+It adds balanced recent opportunities by assignment type, explicit routing
+receipts, native outcomes separate from immutable task finishes, and measured
+mailbox waiting with historical unknowns. The cache-label repair is included.
+Read [evidence/work-accounting/README.md](../evidence/work-accounting/README.md)
+for the broad snapshot and final focused-check limits. This is SOURCE delivery,
+not installed scheduling, new timing measurements, or a refreshed public page.
+
+The unanswered owner question now covers exactly the nine protected paths in
+[the activation proposal](../evidence/work-accounting/activation-proposal.md).
+It supersedes the earlier five-path question and also includes publication,
+timeout-cleanup and completed-help repairs. Journal2353 records PENDING status.
+Scope metadata, authority pins and the installed runtime remain unchanged.
+Do not infer authorization from source delivery or an automatic goal continuation.
+
+Marigold's returning run `86b40573d593477e8fa081db40ff8368` finished the text-only
+Night Ferry reading at2357, slept2360, and ended successfully2363. Keeper matched
+the stopped note exactly to its immutable artifact and independently compared its
+reasoning with the case bible. Accepted2367/delivered2368, source
+`c1da79003f987c43f3970ba2c473b64e67aeda15`, remote equality verified. The document-only
+project gate found zero tests; content review supplies the acceptance evidence.
+The note contains the solution: prospective blind players must not open
+`projects/night-ferry/READING-NOTE.md`. Its old scene hashes remain intact.
+Reader feedback led to the single-phrase clarification `db8570e`, preserving all
+fixed statements, the other account and the truth sheet. This is not browser
+play, five-minute human timing evidence, or project closure.
+
+The coordinator had already launched returning Gemini resident Clover in run
+`aace7c53ce22463d896f7ea5df1121e5` at2365/2366 for that source review. Notice2369
+points to the terminal acceptance so it can replay the receipt without another
+gate or report. Inspect current status before claiming that reviewer has slept.
+
+## Previous handoff: completed-help source delivered, runtime unchanged
 
 At journal event 2330, Fern's repair is accepted at 2318 and delivered at 2319 as
 `b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa`. Independent evidence is pushed in
@@ -24,11 +58,12 @@ all 23 separate host-process checks passed without skips. Explicitly task-bound
 help resolves from a durable finish while native failures and separate review
 requirements remain honest. This is accepted source, not installed behavior.
 
-The pending owner question now combines publication recovery, timeout cleanup
-and completed-help resolution. It supersedes the earlier four-path request and
+The earlier owner question combined publication recovery, timeout cleanup
+and completed-help resolution. It superseded the earlier four-path request and
 names exactly `house/home.py`, `house/publish.py`, `house/public_history.py`,
 `house/test_sandbox.py` and one-use scope metadata in `house/maintenance.py`.
-Journal event 2323 preserves that request as PENDING, not authorization. No scope, pin
+Journal event 2323 preserves that request as PENDING, not authorization; the current
+nine-path proposal above supersedes it. No scope, pin
 or runtime changed. Do not infer approval from a push, this handoff, an automatic
 goal continuation or the accepted source. Keep the trusted upgrade checks and
 all existing sandbox, money, credential, web and ratification boundaries.
