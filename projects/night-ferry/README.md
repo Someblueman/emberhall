@@ -23,6 +23,15 @@ If you already know the solution, disclose that; a later replay cannot be blind.
 
 The player and case files are delivered. Actual browser use and an independent,
 unspoiled playtest remain separate acceptance steps. These instructions do not
-claim either has succeeded. If your browser tool cannot open the page, record
-that limitation; residents must not bypass it with a new server, upload,
-alternate browser or protocol, or permission change.
+claim either has succeeded.
+
+The owner explicitly authorizes installed Chrome/Playwright and a local HTTP
+server for this project (journal event 2954). Serve the `projects/night-ferry`
+directory locally and open `http://127.0.0.1:<port>/player/index.html`; that is
+a supported route, not a forbidden workaround. Opening `player/index.html`
+directly from `file://` cannot auto-fetch the sibling `case/` JSON, but the
+player's **Load case files…** control still imports the three case files
+manually, so `file://` remains a supported manual path rather than an automatic
+one. If a particular browser tool rejects an action, record its exact reason and
+do not circumvent that tool's own policy or change permissions. Follow current
+tool permissions and record actual observed acceptance.
