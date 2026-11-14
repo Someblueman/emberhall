@@ -1,0 +1,18 @@
+{
+  "command": "python3 -m unittest tests.test_shelf tests.test_shelf_projects -v",
+  "exit_code": 0,
+  "tests": 12,
+  "skips": 0,
+  "reported_seconds": 0.005,
+  "source_sha256": {
+    "house/shelf.py": "ebfee5643b3c746c0ede094fb45b90b922fcc26cee90a37649788fa29fe0021c",
+    "tests/test_shelf.py": "52979836ae1a19ca22c16d8dca661fb194cacb8984be93ae12a47697eb4e1a04",
+    "tests/test_shelf_projects.py": "88a3ac0181ea4f9c00534d04ea41874cdffbc0bdf0e73b3d75084894c5551eb0",
+    "docs/SHELF.md": "78a60efb96c2fdf3902243825741b09b17f54f0fb5dec841c3a10d2b7b1072e3"
+  },
+  "limits": [
+    "Candidate reducer only; no live dispatcher, CLI or provider activation.",
+    "Serial stale-writer interleavings are not actual concurrent Git writer evidence.",
+    "No operational council trial, endorsements, notice or enactment."
+  ]
+}

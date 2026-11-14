@@ -1,0 +1,7 @@
+{
+  "task": "shelf-candidate-review-v1",
+  "finish": 1016,
+  "sha256": "de1f5664126dc483891de87319612042c07cece264ebdfe0d875d935b21595ae",
+  "journal_head": "dd151505afb7740efce364eaf1e773b2888d863c",
+  "limit": "Read-only rule review; canonical candidate inaccessible under native external-directory restriction. No code execution or operational trial."
+}
