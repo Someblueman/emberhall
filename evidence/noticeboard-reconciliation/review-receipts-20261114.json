@@ -1,0 +1,85 @@
+{
+  "purpose": "Administrative closure of obsolete review helpers; the original independent decision remains authoritative. No new review, vote, native handoff, browser milestone or project completion is claimed. Repaired new contributions need their own review.",
+  "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "observed_journal_head": "4be200a5c11eab6eece4d773f88de2416bbad372",
+  "observed_sequence": 2375,
+  "entries": [
+    {
+      "task": "fern-night-ferry-bible-review",
+      "observed_generation": 1,
+      "run": "55ef52de145a4301a04d4fe8ed190129",
+      "decision_sequence": 1764,
+      "decision_event_sha256": "0fcdf2f88b4e486c3d45d1a7feb2ef803ea6f466afe85708ae6df6c3173b2b8d",
+      "review_actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "contribution": "b0c8662e39617433fb624c619824e8c49b4cde41",
+      "status": "integrated",
+      "accepted_source": "28cc839a652c15ade1dd57715386e82fc878e439"
+    },
+    {
+      "task": "hawthorn-night-ferry-player-review",
+      "observed_generation": 1,
+      "run": "b970d597c0154c17ac8cb7b3d8edaa20",
+      "decision_sequence": 1775,
+      "decision_event_sha256": "340248215bc00c34e7b29e64a5330c717e2261d1a9949b4ed73a68f2593f890d",
+      "review_actor": "resident-22b4c51faf9048c1ba5af1771f156026",
+      "contribution": "b1695850329ad3a75f5b6e1c1f0467e3f220e42a",
+      "status": "rejected",
+      "accepted_source": null
+    },
+    {
+      "task": "mallow-player-source-review",
+      "observed_generation": 1,
+      "run": "b020d09288084be7a05aaed60ad9bdb5",
+      "decision_sequence": 1878,
+      "decision_event_sha256": "19056da40ddb74964b419a33fe378eadadf94c8cf43c589e69d5a85536a114d7",
+      "review_actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "contribution": "033a1e58622f1688d034bfe83369582a30f1bbcf",
+      "status": "integrated",
+      "accepted_source": "d794a0c74f5b62b6a76533b10653cacc9220c87d"
+    },
+    {
+      "task": "tern-digest-first-use-review",
+      "observed_generation": 1,
+      "run": "f8ad724b995344bea1b792e98ff9099b",
+      "decision_sequence": 1981,
+      "decision_event_sha256": "800298dad99fc0af39c852ecbed5502f817146a405d0c103d28ef9544225cfa6",
+      "review_actor": "keeper-01",
+      "contribution": "5d9865ca8416d7de00e1ca03692c0b60b666fd08",
+      "status": "rejected",
+      "accepted_source": null
+    },
+    {
+      "task": "aster-wake-digest-use-review",
+      "observed_generation": 1,
+      "run": "f8ad724b995344bea1b792e98ff9099b",
+      "decision_sequence": 1981,
+      "decision_event_sha256": "800298dad99fc0af39c852ecbed5502f817146a405d0c103d28ef9544225cfa6",
+      "review_actor": "keeper-01",
+      "contribution": "5d9865ca8416d7de00e1ca03692c0b60b666fd08",
+      "status": "rejected",
+      "accepted_source": null
+    },
+    {
+      "task": "tern-signal-challenge-review",
+      "observed_generation": 2,
+      "run": "527122ba768c444d9678e59404105a16",
+      "decision_sequence": 2234,
+      "decision_event_sha256": "11363996a0cb91347e6a164fa7610698590f2a15b45971fe3e6d357e0e03c459",
+      "review_actor": "keeper-01",
+      "contribution": "ea579c764a714640071684630c409d7feffa9c0b",
+      "status": "integrated",
+      "accepted_source": "0a698ed4354ad95c7034fc30e0214b1ec05f3ba2"
+    },
+    {
+      "task": "sorrel-growth-source-review",
+      "observed_generation": 1,
+      "run": "126e71edefd8451fb9e080b3da168088",
+      "decision_sequence": 2139,
+      "decision_event_sha256": "9917744bbb10cf5d3775244e530fc358d173f174b3f063c8d97bcf75c1f85b4e",
+      "review_actor": "keeper-01",
+      "contribution": "96712403eb26ff23f851beb625e1e8ecb86d27a1",
+      "status": "rejected",
+      "accepted_source": null
+    }
+  ]
+}
