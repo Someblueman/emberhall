@@ -1,0 +1,270 @@
+{
+  "run": "02e7af104efd4ae1ada3689a71d2a8bf",
+  "proposal": "wake-brief-build-003",
+  "adoption_event": 2995,
+  "trial_attachment_event": 3028,
+  "layout_finish": 3007,
+  "trial_finish": 3010,
+  "sleep": 3011,
+  "run_finish": 3014,
+  "requests": [
+    {
+      "command": "digest",
+      "first_seen": 1794683093.399997,
+      "ok": true,
+      "after": "2520",
+      "cursor": {
+        "event_count": 50,
+        "first_sequence": 2521,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 2570,
+        "latest": 2995,
+        "through": 2570
+      }
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683098.833036,
+      "ok": true,
+      "after": "2570",
+      "limit": "200",
+      "cursor": {
+        "event_count": 200,
+        "first_sequence": 2571,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 2770,
+        "latest": 2997,
+        "through": 2770
+      }
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683105.232623,
+      "ok": false,
+      "after": "2770",
+      "limit": "300",
+      "cursor": null,
+      "error": "ValueError: read limit must be between 1 and 200"
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683110.244033,
+      "ok": false,
+      "after": "2770",
+      "limit": "300",
+      "cursor": null,
+      "error": "ValueError: read limit must be between 1 and 200"
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683113.88949,
+      "ok": true,
+      "after": "2770",
+      "limit": "200",
+      "cursor": {
+        "event_count": 200,
+        "first_sequence": 2771,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 2970,
+        "latest": 3001,
+        "through": 2970
+      }
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683117.003855,
+      "ok": true,
+      "after": "2970",
+      "cursor": {
+        "event_count": 31,
+        "first_sequence": 2971,
+        "gaps": [],
+        "has_more": false,
+        "last_sequence": 3001,
+        "latest": 3001,
+        "through": 3001
+      }
+    },
+    {
+      "command": "read",
+      "first_seen": 1794683122.224631,
+      "ok": true,
+      "after": "2970",
+      "limit": "10",
+      "through": 2980,
+      "latest": 3001,
+      "has_more": true
+    },
+    {
+      "command": "read",
+      "first_seen": 1794683127.223549,
+      "ok": true,
+      "after": "2980",
+      "limit": "10",
+      "through": 2990,
+      "latest": 3001,
+      "has_more": true
+    },
+    {
+      "command": "read",
+      "first_seen": 1794683134.3587399,
+      "ok": true,
+      "after": "2984",
+      "limit": "10",
+      "through": 2994,
+      "latest": 3001,
+      "has_more": true
+    },
+    {
+      "command": "read",
+      "first_seen": 1794683139.362663,
+      "ok": true,
+      "after": "2994",
+      "limit": "10",
+      "through": 3001,
+      "latest": 3001,
+      "has_more": false
+    },
+    {
+      "command": "read",
+      "first_seen": 1794683268.421702,
+      "ok": true,
+      "after": "3001",
+      "limit": "10",
+      "through": 3005,
+      "latest": 3005,
+      "has_more": false
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683275.813217,
+      "ok": true,
+      "after": "2520",
+      "limit": "50",
+      "cursor": {
+        "event_count": 50,
+        "first_sequence": 2521,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 2570,
+        "latest": 3005,
+        "through": 2570
+      }
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683280.744305,
+      "ok": true,
+      "after": "2570",
+      "limit": "200",
+      "cursor": {
+        "event_count": 200,
+        "first_sequence": 2571,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 2770,
+        "latest": 3005,
+        "through": 2770
+      }
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683283.4348822,
+      "ok": true,
+      "after": "2770",
+      "limit": "200",
+      "cursor": {
+        "event_count": 200,
+        "first_sequence": 2771,
+        "gaps": [],
+        "has_more": true,
+        "last_sequence": 2970,
+        "latest": 3005,
+        "through": 2970
+      }
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683286.102109,
+      "ok": true,
+      "after": "2970",
+      "limit": "50",
+      "cursor": {
+        "event_count": 35,
+        "first_sequence": 2971,
+        "gaps": [],
+        "has_more": false,
+        "last_sequence": 3005,
+        "latest": 3005,
+        "through": 3005
+      }
+    },
+    {
+      "command": "receipt",
+      "first_seen": 1794683290.971955,
+      "ok": true,
+      "sequence": 2993
+    },
+    {
+      "command": "finish",
+      "first_seen": 1794683312.665188,
+      "ok": true,
+      "task": "resident-presence-layout",
+      "sequence": 3007
+    },
+    {
+      "command": "finish",
+      "first_seen": 1794683319.1991649,
+      "ok": true,
+      "task": "wake-brief-build-trial",
+      "sequence": 3010
+    },
+    {
+      "command": "read",
+      "first_seen": 1794683324.889075,
+      "ok": true,
+      "after": "3006",
+      "limit": "10",
+      "through": 3010,
+      "latest": 3010,
+      "has_more": false
+    },
+    {
+      "command": "receipt",
+      "first_seen": 1794683329.861557,
+      "ok": true,
+      "sequence": 3007
+    },
+    {
+      "command": "receipt",
+      "first_seen": 1794683332.946126,
+      "ok": true,
+      "sequence": 3010
+    },
+    {
+      "command": "digest",
+      "first_seen": 1794683350.157789,
+      "ok": true,
+      "after": "3010",
+      "cursor": {
+        "event_count": 0,
+        "first_sequence": null,
+        "gaps": [],
+        "has_more": false,
+        "last_sequence": null,
+        "latest": 3010,
+        "through": 3010
+      }
+    },
+    {
+      "command": "sleep",
+      "first_seen": 1794683355.1494012,
+      "ok": true,
+      "sequence": 3011
+    }
+  ],
+  "limits": "Bounded journal-command order and receipts only. Does not expose native logs, prove internal comprehension, or establish time saved."
+}

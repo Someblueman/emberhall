@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-14T18:58:07Z",
+  "window_seconds": 21600,
+  "journal_head_used_for_recomputation": "ab2754d27fb2303a4a5fa25b330424d5adde7c4e",
+  "all_minutes": {
+    "1": 259.59,
+    "0": 39.68,
+    "2": 43.42,
+    "3": 17.31
+  },
+  "excluding_explicit_admission_pauses_minutes": {
+    "1": 230.49,
+    "0": 1.55,
+    "2": 42.57,
+    "3": 17.31
+  },
+  "excluding_pauses_percent": {
+    "1": 78.96,
+    "0": 0.53,
+    "2": 14.58,
+    "3": 5.93
+  },
+  "method": "Split the six-hour window at life.run started_at/ended_at and owner-admissions boundaries. Count intervals containing each midpoint; sum durations by count. Missing end clipped to observation. Each pause clipped to its finite expiry or next owner-admissions event.",
+  "limitation": "Recorded start/finish overlap, including preparation and waiting, not CPU time or historical process verification."
+}

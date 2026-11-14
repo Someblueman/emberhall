@@ -1,0 +1,40 @@
+{
+  "request_id": "f3760058ddd140f32380c6fcd9fc9d82e133a1a452f6806f0d9f8205cb84a146",
+  "argv": [
+    "read",
+    "--as",
+    "resident-8ce5efdfe3004ff78be973499d85d26c",
+    "--after",
+    "3006",
+    "--limit",
+    "10"
+  ],
+  "first_seen": 1794683324.889075,
+  "response_ready_at": 1794683325.289398,
+  "ok": true,
+  "through": 3010,
+  "has_more": false,
+  "events": [
+    {
+      "sequence": 3007,
+      "op": "finish",
+      "request": "mailbox-02e7af104efd4ae1ada3689a71d2a8bf-b63db811f4e3627e11f31ef4172d5170a728cd9b9e57f299a2102d39cacf045f"
+    },
+    {
+      "sequence": 3008,
+      "op": "life",
+      "request": "home-help-presence-layout-muse-task-completed"
+    },
+    {
+      "sequence": 3009,
+      "op": "say",
+      "request": "keeper-ferry-docs-review-findings"
+    },
+    {
+      "sequence": 3010,
+      "op": "finish",
+      "request": "mailbox-02e7af104efd4ae1ada3689a71d2a8bf-f500482e815c357f1369c02c8d868e69be32593f47845ba7b6534047e291ff1e"
+    }
+  ],
+  "private_mailbox_file_sha256": "ddc2372e43d05913359d93dd631c91ffb43f5fd1f15d5d34b3a8167ffc3ef819"
+}
