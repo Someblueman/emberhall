@@ -1,0 +1,29 @@
+python3 -m unittest tests.test_home.HomeTests -v
+test_assignment_names_the_actual_provider_transport (tests.test_home.HomeTests.test_assignment_names_the_actual_provider_transport) ... ok
+test_backlog_claim_during_provider_choice_does_not_launch_stale_work (tests.test_home.HomeTests.test_backlog_claim_during_provider_choice_does_not_launch_stale_work) ... ok
+test_completed_process_is_not_interrupted_by_late_inactivity_check (tests.test_home.HomeTests.test_completed_process_is_not_interrupted_by_late_inactivity_check) ... ok
+test_completed_process_is_success_when_supervisor_is_stopping (tests.test_home.HomeTests.test_completed_process_is_success_when_supervisor_is_stopping) ... ok
+test_crashed_coordinator_recovers_real_orphan_as_interrupted (tests.test_home.HomeTests.test_crashed_coordinator_recovers_real_orphan_as_interrupted) ... ok
+test_due_checkpoint_names_fixed_channel_and_metadata_only_finish (tests.test_home.HomeTests.test_due_checkpoint_names_fixed_channel_and_metadata_only_finish) ... ok
+test_expired_native_credential_keeps_long_backoff_after_failed_finish (tests.test_home.HomeTests.test_expired_native_credential_keeps_long_backoff_after_failed_finish) ... ok
+test_finished_task_survives_actual_late_native_error (tests.test_home.HomeTests.test_finished_task_survives_actual_late_native_error) ... ok
+test_idle_watchdog_stops_real_process_and_preserves_room (tests.test_home.HomeTests.test_idle_watchdog_stops_real_process_and_preserves_room) ... ok
+test_muse_continuation_transcript_finishes_without_false_provider_hold (tests.test_home.HomeTests.test_muse_continuation_transcript_finishes_without_false_provider_hold) ... ok
+test_native_cannot_start_before_accepted_launch_receipt (tests.test_home.HomeTests.test_native_cannot_start_before_accepted_launch_receipt) ... ok
+test_native_final_sleep_is_delivered_before_reap (tests.test_home.HomeTests.test_native_final_sleep_is_delivered_before_reap) ... ok
+test_new_coordinator_recovers_observed_result_and_immediately_hands_off (tests.test_home.HomeTests.test_new_coordinator_recovers_observed_result_and_immediately_hands_off) ... ok
+test_observed_outcome_survives_cleanup_retry (tests.test_home.HomeTests.test_observed_outcome_survives_cleanup_retry) ... ok
+test_old_sleep_or_unfinished_claim_does_not_resolve_help (tests.test_home.HomeTests.test_old_sleep_or_unfinished_claim_does_not_resolve_help) ... ok
+test_pointer_is_selected_only_for_new_launch (tests.test_home.HomeTests.test_pointer_is_selected_only_for_new_launch) ... ok
+test_quota_rotates_and_requeues_assigned_help (tests.test_home.HomeTests.test_quota_rotates_and_requeues_assigned_help) ... ok
+test_ready_backlog_fills_only_uncovered_capacity_without_help (tests.test_home.HomeTests.test_ready_backlog_fills_only_uncovered_capacity_without_help) ... ok
+test_ready_work_respects_cooldowns_and_failed_start_does_not_spin (tests.test_home.HomeTests.test_ready_work_respects_cooldowns_and_failed_start_does_not_spin) ... ok
+test_requested_model_is_used_only_for_its_kind_and_recorded_in_prompt (tests.test_home.HomeTests.test_requested_model_is_used_only_for_its_kind_and_recorded_in_prompt) ... ok
+test_singleton_and_provider_fairness (tests.test_home.HomeTests.test_singleton_and_provider_fairness) ... ok
+test_three_real_rooms_preserve_work_and_fourth_waits (tests.test_home.HomeTests.test_three_real_rooms_preserve_work_and_fourth_waits) ... ok
+test_unidentified_process_group_is_never_signalled (tests.test_home.HomeTests.test_unidentified_process_group_is_never_signalled) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 33.906s
+
+OK

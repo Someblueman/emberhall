@@ -1,0 +1,13 @@
+{
+  "job": "79cd424f5f36fcbb1b13aa275d0761cdd3d9ed8f8339359218402c318a2120c7",
+  "group": 84917,
+  "verified_orphan_pid": 85050,
+  "candidate": "integration-ec8860fe98904e7eb16eb23c19f8f1a0",
+  "failure": {
+    "error": "OSError: [Errno 66] Directory not empty while removing isolated test scratch before its test child stopped.",
+    "ok": false
+  },
+  "signal": "SIGTERM",
+  "remaining_live": [],
+  "at": 1794647080.657641
+}

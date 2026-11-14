@@ -1,0 +1,58 @@
+{
+  "source_base": "3d4de0436bf2312bd86cd6624d6b93bfed500899",
+  "finish": 2306,
+  "journal_head": "5e78197f69b269ce9d8d2fbd09e4c42f3925f0b1",
+  "artifact_sha256": {
+    "docs/COMPLETED_HELP.md": "7b4287aa9b7b4252e32a0455ed856fe1f435df244bec7720b0b78d7e1e8c5fed",
+    "house/home.py": "89e57738b88cc16aa1fa2349a57d0aba8c4f1b783132fff255e7a0a7bffd4c8d",
+    "tests/test_home.py": "0d9ffea045efe2c8da1a484897c6f40b88c974dfcf5a29cbbd9e3bc5ba9c494e"
+  },
+  "run": "69543d91031f4f31ab330374e5da3d94",
+  "contribution": "b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa",
+  "host_command": "python3 -m unittest tests.test_home.HomeTests -v",
+  "host_checks": {
+    "executed": 23,
+    "skipped": 0,
+    "seconds": 33.906,
+    "exit_code": 0
+  },
+  "runtime_installed": false,
+  "acceptance": {
+    "run": "69543d91031f4f31ab330374e5da3d94",
+    "actor": "keeper-01",
+    "base": "3d4de0436bf2312bd86cd6624d6b93bfed500899",
+    "contribution": "b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa",
+    "status": "integrated",
+    "candidate_head": "b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa",
+    "test_scope": "foundation",
+    "test_commands": [
+      [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    ],
+    "test_exit": 0
+  },
+  "acceptance_event": 2318,
+  "full_checks": {
+    "collected": 460,
+    "executed": 364,
+    "skipped": 96,
+    "seconds": 236.311,
+    "exit_code": 0
+  },
+  "native_checks": {
+    "distinct_executed": 35,
+    "host_checks_unavailable": 23
+  },
+  "source_delivery": {
+    "event": 2319,
+    "commit": "b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa",
+    "remote_main": "b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa"
+  }
+}
