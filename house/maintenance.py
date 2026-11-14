@@ -39,6 +39,7 @@ RESTORED_SCOPE = "opencode-restored-20261113"
 KEEP_MOVING_SCOPE = "keep-moving-20261114"
 KEEP_MOVING_SHA256 = "ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fbef5eb8"
 WEB_REPAIR_SCOPE = "native-web-repair-20261114"
+MUSE_TRUST_SCOPE = "muse-workspace-trust-20261114"
 RESTORED_SHA256 = "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde"
 VERIFIED_KEY_RUN = "fc2795f6b6824fc3ae4b9229e8667b61"
 KEY_BUDGET_SEQUENCE = 594
@@ -55,11 +56,12 @@ SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256,
            CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: BACKLOG_SHA256,
            RESTORED_SCOPE: RESTORED_SHA256, KEEP_MOVING_SCOPE: KEEP_MOVING_SHA256,
-           WEB_REPAIR_SCOPE: KEEP_MOVING_SHA256}
+           WEB_REPAIR_SCOPE: KEEP_MOVING_SHA256, MUSE_TRUST_SCOPE: KEEP_MOVING_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    MUSE_TRUST_SCOPE: {"house/maintenance.py", "house/providers.py"},
     WEB_REPAIR_SCOPE: {"house/maintenance.py", "house/opencode_tool.py", "house/steward.py"},
     KEEP_MOVING_SCOPE: OWNER_MODULES | {"house/shelf.py", "house/shelf_gate.py", "house/model.py",
                                  "house/__main__.py", "house/mailbox.py", "house/windows.py",

@@ -1,0 +1,28 @@
+{
+  "run": "44ad53f151b24683b194957efdcb6c27",
+  "resident": "resident-13e0adccca494d19822e5bdc5e652e64",
+  "native_log_sha256": "f98cc4b93c4729d1ef0ec57b5b28b2f03819828ff2a68e81e19a2c46e6ccb5bb",
+  "denials": [
+    {
+      "native_sequence": 694,
+      "message": "tool denied: approval aborted",
+      "edit_facts": {
+        "tool_name": "write_file",
+        "path": "evidence/native-residents/wren-study-review-44ad53f1.md",
+        "added": 66
+      }
+    },
+    {
+      "native_sequence": 761,
+      "message": "tool denied: approval aborted",
+      "edit_facts": {
+        "tool_name": "write_file",
+        "path": "evidence/native-residents/wren-study-review-44ad53f1.md",
+        "added": 41
+      }
+    }
+  ],
+  "stderr_observation": "Workspace untrusted; AGENTS.md skipped; restart with --trust-workspace suggested.",
+  "official_source": "https://dev.meta.ai/docs/cookbook/immutable-guardrails",
+  "hypothesis": "Untrusted assigned workspace causes ordinary native file writes to require an unavailable headless approval; per-run trust preserves sandbox and approval policy. Actual repaired file write remains to verify."
+}

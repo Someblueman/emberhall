@@ -25,6 +25,11 @@ class ProviderTests(unittest.TestCase):
                         self.assertIn("--sandbox", argv)
                     if kind == "muse":
                         self.assertIn("proxy-only", argv)
+                        self.assertIn("--trust-workspace", argv)
+                        self.assertEqual(argv[argv.index("--workspace") + 1], str(root))
+                        self.assertNotIn("--permission-profile", argv)
+                        self.assertNotIn("--approval-mode", argv)
+                        self.assertNotIn("--approval-judge", argv)
                     if kind == "opencode":
                         config = json.loads(env["OPENCODE_CONFIG_CONTENT"])
                         self.assertIn({"action": "provider.use", "resource": "opencode-go", "effect": "allow"}, config["policies"])

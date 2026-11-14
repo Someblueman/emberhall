@@ -1,0 +1,41 @@
+{
+  "initial_fixture_error": [
+    {
+      "trusted": false,
+      "exit_code": 2,
+      "stderr": "--model requires --provider meta or local\nusage: muse exec [OPTIONS] [PROMPT] (run `muse exec --help` for options)\n",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "provider": "echo",
+      "model_call": false,
+      "limits": "Validates native CLI configuration, not file writes or OS sandbox behavior."
+    },
+    {
+      "trusted": true,
+      "exit_code": 2,
+      "stderr": "--model requires --provider meta or local\nusage: muse exec [OPTIONS] [PROMPT] (run `muse exec --help` for options)\n",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "provider": "echo",
+      "model_call": false,
+      "limits": "Validates native CLI configuration, not file writes or OS sandbox behavior."
+    }
+  ],
+  "corrected": [
+    {
+      "trusted": false,
+      "exit_code": 0,
+      "stderr": "muse: local session messaging disabled: session logging is required\nmuse: workspace root: <fixture> (explicit)\nmuse: warning: rules file at <fixture>/AGENTS.md exists, but the workspace is untrusted, so it is skipped for this session; restart with --trust-workspace to load project rules\nmuse: Agent delegation: auto unavailable: workspace is untrusted.\n",
+      "output_sha256": "144816112d5284638509e1358ee58e06a4e974ae669b28675c9db7b9da05250a",
+      "provider": "echo",
+      "model_call": false
+    },
+    {
+      "trusted": true,
+      "exit_code": 0,
+      "stderr": "muse: local session messaging disabled: session logging is required\nmuse: workspace root: <fixture> (explicit)\nmuse: workspace trust: trusted source=run-flag\n",
+      "output_sha256": "1b4a264abfaee2b4bbd8e9b2483b96e6371d88a6230b6a2dc83f194829003799",
+      "provider": "echo",
+      "model_call": false
+    }
+  ],
+  "limits": "Echo replaces meta and omits model for this no-model configuration test. File writes and OS sandbox behavior are not established."
+}

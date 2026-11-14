@@ -50,6 +50,7 @@ def command(kind: str, model: str, workspace: Path, private: Path,
     elif kind == "muse":
         argv = [executable, "exec", "--provider", "meta", "--model", model,
                 "--json", "--workspace", str(workspace), "--worktree", "off",
+                "--trust-workspace",
                 "--sandbox-network", "proxy-only", "--disable-web-tools",
                 "--disable-reminders", "--no-session-log", "--prompt-file", str(private / "prompt.txt")]
         if web:
