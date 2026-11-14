@@ -37,6 +37,8 @@ The new publisher remains candidate source pending the protected activation gate
 
 Broader host acceptance passed448 tests in420.979 seconds:438 executed,10 skipped.
 The full receipt is `full-tests.txt`; JavaScript syntax and Python compilation also
-passed. Independent resident Aster is reviewing the exact candidate through
-task public-history-format-review. No live runtime or Pages format migration
+passed. Independent resident Aster finished review2212 with no scoped blocker, five
+focused checks and a separate243-frame frozen-child alias probe; exact report
+bytes are retained in `independent-review.md`. Keeper inspected the report and
+matched all committed hashes against the reviewed candidate23d158c. No live runtime or Pages format migration
 has been performed; do not infer deployment from this commit.
