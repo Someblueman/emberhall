@@ -1,0 +1,103 @@
+{
+  "observed_at": 1794614801.331337,
+  "head": "c7b42f51545eb45679dd2b29f46cdb5e9ab5ace9",
+  "sequence": 1007,
+  "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+  "name": "Juniper",
+  "previous_successful_run": "fc2795f6b6824fc3ae4b9229e8667b61",
+  "ordinary_return_run": "dc3fa2c830af4d5aa981b021fb9b4557",
+  "same_identity": true,
+  "no_new_retry_credit": true,
+  "obsolete_hold_absent": true,
+  "events": [
+    {
+      "actor": "keeper-01",
+      "at": 1794614669.378935,
+      "data": {
+        "approval_sha256": "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde",
+        "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+        "owner_id": 131497840,
+        "previous_manifest_sha256": "9425b4bd91895a987f96baf95238f9bc9de7efc670ee2c324a4baa16782b8f6b",
+        "previous_runtime_sha256": "03d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2",
+        "protected_files": {
+          "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+          "house/__main__.py": "95ab49dd6688cead59970d87296aa2e7ae95edf8866ff958d02b8cccd6a21172",
+          "house/body.py": "336b55787b32d0aca84e09611961987e911a61f3c3b28f7dc0969dd43837a123",
+          "house/building.py": "572a6c2d527c41e7cb08d45e56d61885a41036c1188b112c1d4e2ff39e681b3e",
+          "house/checkpoint.py": "11cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d",
+          "house/council.py": "85fcd011da8e037bd290e4e0400e5fe50b93a200d449e1f9e22d574a19d9eeba",
+          "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+          "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+          "house/home.py": "f1772027096700e7b27e7de69d249c601ef940ebf48be43d4196a5f008fab039",
+          "house/home_work.py": "a209da38cb5ceb42665b8371f5824d3c16ab0f49c641904b223059c4b052d7ae",
+          "house/inbox.py": "000a7c14d1c0c1d87a8f20df2a5e0f107b86fa9c2217a5b003224c1c8a43f1b8",
+          "house/integrate.py": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+          "house/life.py": "4fa65e87be71e3643a9a9e34cd6402a80f1a001a21997dd1a4d7c4baa4718be2",
+          "house/mailbox.py": "8bbe0386d03a9b9ae914e770feed77f37e8b5d01bbbd67e824e2356cadd0967d",
+          "house/mailbox_jobs.py": "4ba9155907e9b6bd62c67057979cbc6b4cea723a729389f9b7391146636a2641",
+          "house/maintenance.py": "d73f57da6c330221495ae3ef8c06958e14ff931d280a737200029a2f0ffdc51c",
+          "house/model.py": "f78bba4fcff82fc0f1f15ebcc600923dad6129ea1669c8de4783f2c3de6731c3",
+          "house/opencode_auth.py": "453dc0a6042309c618cadf18ecdc0840453f9dd6de97dd03d90efe9cc71fe5bc",
+          "house/opencode_tool.py": "16efc0ba85dd83f4fb70a70396fdd55b112bb6551db804e54038a8038b16e89b",
+          "house/owner_upgrade.py": "e9c7486fc92d1de565abe6000211be23804c54828ffc1609369537298039435b",
+          "house/providers.py": "70b4f61bd1d693f821c29ea4c2f8ec037c7949b73923bd16f1fa93a9ea8e2d45",
+          "house/publish.py": "f3beb5ce1b6b1e97ff30a87019adce7b51bb0b17c38187ecbdfce08c167b6972",
+          "house/record.py": "31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985",
+          "house/resident_actions.py": "4314ab2bc70ad8aff746472719833909f984b8e453b013cef7fd2a9f94667630",
+          "house/resident_client.py": "6f8964f4acf65f130fb1671edc66f892cfeb4478a66c4d63f177497a95faaad1",
+          "house/runtime.py": "bb5e1db13cd6381da2ce760498ffaafad1cb022217196733450f3145f2596c0d",
+          "house/steward.py": "3c9204bdf693dc16075a1e520661ae97ffe810470a806464c89a14719ad60665",
+          "house/test_sandbox.py": "63a9828ce8ed092c231bd9359a05f4f5ce42482e8c85b99bb467493809d31aa8",
+          "house/wake_policy.py": "f3e520bcd62a0afc0ebbcad3ee1b35209378c3aa198a5fbaedb031951f0d84c5",
+          "house/watch.py": "330c2f2e0a8287ad0d97db091d9360b69614340700a9237603509cf646455237",
+          "house/watch_recovery.py": "cd85efe96bd538a7b1951c40f3d0541813bf4cf27d2e2454bd222d96578117f9"
+        },
+        "runtime_sha256": "ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64",
+        "scope": "opencode-restored-20261113",
+        "source_head": "a2246d50d80dc5c8cc346469150607b23e422fbc",
+        "source_sha256": "96e276d8652a7c21dd736a4f0e617bfa2a6fe054cc8c6077cb7f5939d7b7938d",
+        "test_count": 260,
+        "test_output_sha256": "e3c618f8448aff1a8d1e0bf8b2478061b66e473f32d6f239809f6ff938746d30"
+      },
+      "id": "owner-migration-opencode-restored-20261113",
+      "op": "owner-migrate"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614720.293866,
+      "data": {
+        "agent": "opencode",
+        "kind": "run-start",
+        "mode": "work",
+        "model": "opencode-go/deepseek-v4.1-flash",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "run": "dc3fa2c830af4d5aa981b021fb9b4557",
+        "source_head": "f4f762b7f42e7bf750921a48df8c7a2144c546bb",
+        "workspace": "residents/dc3fa2c830af4d5aa981b021fb9b4557"
+      },
+      "id": "home-dc3fa2c830af4d5aa981b021fb9b4557-run-start",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614724.693277,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 19914,
+        "run": "dc3fa2c830af4d5aa981b021fb9b4557"
+      },
+      "id": "home-dc3fa2c830af4d5aa981b021fb9b4557-run-launched",
+      "op": "life"
+    },
+    {
+      "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "at": 1794614744.178899,
+      "data": {},
+      "id": "mailbox-dc3fa2c830af4d5aa981b021fb9b4557-1e3a8bd5e2824453b866570de86b54017198960bcba2483962f5171f8d923753",
+      "op": "wake"
+    }
+  ],
+  "processes": "19849     1 /Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3\n19914 19849 /Users/sws/.local/share/mise/installs/node/22.22.0/bin/opencode\n",
+  "scope": "Actual native wake and process liveness; returning stretch is ongoing, not a claimed completed second run."
+}

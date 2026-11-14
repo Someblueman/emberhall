@@ -30,3 +30,8 @@ rerun passed. `tests.json` preserves this distinction. Actual source/state and
 public-history comparisons are in `deployment.json`; native Sorrel reviewed four
 cases and the exact committed bytes before normal sleep and success998. No
 additional provider retry grant was made.
+
+`return.json` witnesses ordinary run1005, launch1006 and Juniper wake1007 under
+the same ID/name, with live native process19914 and supervisor19849. No new
+retry credit or resident was created. This second stretch was still ongoing
+at observation; only the first stretch is claimed as completed successfully.

@@ -47,6 +47,9 @@ Host342 executed333/skipped9: one unchanged daily-limit test failed in a run tha
 crossed midnight, then passed its targeted rerun; do not call that full run green.
 Isolated342 passed (260 executed/82 skips). Actual current public budget is gone;
 the preceding historical frame retains it. See evidence/opencode-restored.
+Ordinary OpenCode run1005/launch1006 woke Juniper1007 under the same resident
+ID and name; actual supervisor19849/native19914 were observed. No new retry
+credit or new resident identity was needed. The returning stretch is ongoing.
 This migration does not activate web tools or the idea-shelf protocol.
 
 ## Earlier ready-work runtime and supplied OpenCode key, migration923
