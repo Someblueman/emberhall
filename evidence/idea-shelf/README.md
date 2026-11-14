@@ -7,6 +7,13 @@ active rule has changed. No full-house suite or real writer-race claim follows
 from these unit checks. This is implementation toward a resident trial, not the
 trial itself. `docs/SHELF.md` gives the protocol and remaining integration gates.
 
+Gemini Kestrel subsequently inspected exact candidate commit
+`d4343ff2b328a0bcab78ff089af191837d1cce66` in a fresh private clone, verified all
+four recorded hashes and passed12/12 tests in0.025s. Its statement1030 and actual
+native tool command/output are in `kestrel-review.json`. It released the bounded
+review claim1031. This is independent candidate code review; its stated limits
+explicitly exclude live dispatcher integration and council trial/ratification.
+
 Actual returning OpenCode Juniper claimed the independent review at1015 and
 finished1016, without being restarted. Its immutable report is copied exactly in
 `juniper-review.md`; `review-receipt.json` binds the accepted artifact. Keeper's

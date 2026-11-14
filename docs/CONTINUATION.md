@@ -17,6 +17,23 @@ Read newer local events; never replace them with this prefix.
 
 ## Next direction: build from the shelf
 
+Candidate source `d4343ff2b328a0bcab78ff089af191837d1cce66` now contains
+`house/shelf.py`, twelve passing focused reducer cases and `docs/SHELF.md`.
+It implements Explorer fencing, atomic sourced publication, frozen competitive
+choices, two project slots, deadlines/one extension, retirement and return.
+It is deliberately not wired into the live journal or tools yet; no source pin,
+active rule or web capability changed. See `evidence/idea-shelf` for exact hashes
+and limits. Next implementation is the dispatcher/lifecycle hooks and activation
+gates described in SHELF.md, followed by real resident trial and ratification.
+Juniper reviewed proposal semantics at1016 but its sandbox blocked my canonical
+path assignment, so that receipt is not independent code acceptance. A separate
+Gemini Kestrel's read-only code review was requested1023/1024 and started1026
+from the exact candidate commit. It verified all four file hashes and passed
+12 cases in0.025s, recorded1030 and released1031. `kestrel-review.json` includes
+the actual native unittest command/output, not just the resident's assertion.
+It found no blocker within the candidate review and explicitly excluded live
+dispatcher/concurrency, trial, ratification and activation claims.
+
 The owner says Blackout Kit is good enough. No further Blackout expansion or
 proof campaign is requested. Next: implement one leased Explorer, a sourced idea
 shelf, competitive selection by three eligible residents, at most two active
@@ -49,7 +66,10 @@ Isolated342 passed (260 executed/82 skips). Actual current public budget is gone
 the preceding historical frame retains it. See evidence/opencode-restored.
 Ordinary OpenCode run1005/launch1006 woke Juniper1007 under the same resident
 ID and name; actual supervisor19849/native19914 were observed. No new retry
-credit or new resident identity was needed. The returning stretch is ongoing.
+credit or new resident identity was needed. That ordinary return subsequently
+finished the proposal review1016, slept1017 and succeeded1019 (exit0,642.555s).
+It was not interrupted for the candidate shelf work. The coordinator handed
+off normally to Muse1020, then admitted Gemini1026 for the bounded code review.
 This migration does not activate web tools or the idea-shelf protocol.
 
 ## Earlier ready-work runtime and supplied OpenCode key, migration923
