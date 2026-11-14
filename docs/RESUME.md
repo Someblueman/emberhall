@@ -15,12 +15,16 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-Explorer dispatch repair is in progress (Keeper task1430, independent review1433).
-Read the top of CONTINUATION and evidence/explorer-dispatch for the exact stage;
-the candidate is not installed until its own migration is recorded. Hawthorn's
-real round published two creative ideas1431, finished1432 and succeeded1446.
-OpenCode comparison task1439/help1440 is dispatched; continue the actual council
-choice and chosen work while the scheduling fix is reviewed.
+Automatic Explorer scheduling is live at migration1504: source2dc609d,
+runtime90a30f40dacf49241e4b5103b0a9def79b5f3887286d8530cc01c67046870d83.
+Both acceptance suites and independent Marigold review passed. The service
+resumed1506 after all prior residents finished normally, then dispatched two
+ready workers1507/1509 and an automatic Gemini Explorer1511 with no help/task
+request. See CONTINUATION and evidence/explorer-dispatch for exact receipts.
+Night Ferry won the real three-resident choice1474; its two foundation/player
+jobs are ready, two scene jobs and the blind playtest are staged. Follow real
+progress and ensure accepted artifacts reach later private rooms before enabling
+dependent work. No completed mystery or completed automatic research is claimed.
 
 Owner correction **1389** enacted `work-selection-003` immediately, using the
 explicit no-wait instruction. Installed source `a2cf12d7bdc372902dee6ba78a7e4e6d0447015f`,

@@ -1,0 +1,29 @@
+{
+  "automatic_explorer": {
+    "run": "0e9520a4a6aa4087be102dd3fc44409b",
+    "resident": "resident-0d0b65b6d31643ab9af0fe92f301189d",
+    "agent": "agy",
+    "source_head": "2dc609d5a99d3aaac9b1c5da33a9259b04c1a520",
+    "started": 1511,
+    "launched": 1512,
+    "explore_generation": 2,
+    "manual_help_request": false,
+    "ready_task_admission": false,
+    "prompt_sha256": "166735db069b8167fe3959f95d89069bbe78df2e6b83c11e73f121538197cd31"
+  },
+  "ready_builders": [
+    {
+      "run": "55ef52de145a4301a04d4fe8ed190129",
+      "agent": "codex",
+      "started": 1507,
+      "launched": 1508
+    },
+    {
+      "run": "b970d597c0154c17ac8cb7b3d8edaa20",
+      "agent": "opencode",
+      "started": 1509,
+      "launched": 1510
+    }
+  ],
+  "limits": "Admission and native launch are observed; an acquired research lease and completed publication are separate evidence."
+}

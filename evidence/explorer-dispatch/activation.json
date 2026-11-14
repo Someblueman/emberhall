@@ -1,0 +1,28 @@
+{
+  "migration": 1504,
+  "scope": "explorer-dispatch-20261114",
+  "approval_sha256": "ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fbef5eb8",
+  "source_head": "2dc609d5a99d3aaac9b1c5da33a9259b04c1a520",
+  "runtime_sha256": "90a30f40dacf49241e4b5103b0a9def79b5f3887286d8530cc01c67046870d83",
+  "isolated_executed": 323,
+  "isolated_output_sha256": "5cb4c5596ab47d05531991c4cdecdde85ed026180af0f8a71c00a73d5b4ee594",
+  "host_collected": 410,
+  "host_executed": 400,
+  "host_skipped": 10,
+  "isolated_collected": 410,
+  "isolated_skipped": 87,
+  "review": 1497,
+  "review_sleep": 1499,
+  "review_success": 1503,
+  "pause": 1478,
+  "resume": 1506,
+  "interrupted_native_runs": 0,
+  "changed_sections": [
+    "at",
+    "maintenance",
+    "receipts",
+    "sequence"
+  ],
+  "rule_revision": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+  "rule_revision_unchanged": true
+}

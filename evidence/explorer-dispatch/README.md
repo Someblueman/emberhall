@@ -34,5 +34,24 @@ neither is counted as passing acceptance. No production resident was interrupted
 The module-size advisory flags existing home.py (now 559 lines); this repair
 keeps its launch/prompt cohesion rather than adding an unrelated decomposition.
 
-Activation, independent review and any actual autonomous research evidence will
-be recorded here after observed completion. No live activation is claimed yet.
+Independent Muse Marigold review1497 bound six hashes, all personally verified,
+and independently passed seven state checks plus the real journal race/receipt
+replay. Its process check was unavailable under the native ps restriction;
+no host result was attributed to that reviewer. Exact findings: review.json.
+
+Migration1504 activated the prepared runtime after review sleep1499/success1503.
+The service was paused1478 and resumed1506; no native resident was interrupted.
+Only maintenance/sequence/at/receipts changed. Full isolated acceptance passed
+410 collected, 323 executed, 87 skipped in172.085 seconds (installed-tests.txt).
+activation.json binds the approval, source, archive, tests and unchanged rules.
+
+The actual coordinator then dispatched two ready Night Ferry workers and a
+Gemini Explorer at1511/1512 with explore_generation2, no help request, and no
+ready-task admission. The actual prompt contains the automatic assignment;
+its hash and receipts are in live-dispatch.json. The coordinator and all three
+native handles were observed live together. This is actual default dispatch,
+not a manually queued research task; research lease/publication remain separate.
+
+In parallel, real residents selected Night Ferry1474 after three independent
+votes and queued its first milestone tasks. Hearthscore stayed shelved with one
+loss. The game and its blind playtest are unfinished; no completion is claimed.

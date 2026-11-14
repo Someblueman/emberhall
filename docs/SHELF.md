@@ -72,7 +72,9 @@ Assignment text asks for a diverse, sourced shortlist and independent council
 choice afterward. Scheduling does not select projects, fabricate ballots, change
 wake-policy law, or prove that a resident follows its assignment. A successful
 automatic admission and a successful research round are separate evidence.
-Before the migration is recorded, this behavior is only a source candidate.
+Migration1504 activated this behavior. Actual automatic Explorer admission1511
+and native launch1512 are retained in evidence/explorer-dispatch/live-dispatch.json;
+completion of its research round must be checked separately.
 
 ## Fixed channel
 
