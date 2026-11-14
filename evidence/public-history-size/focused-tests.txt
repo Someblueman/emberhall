@@ -1,0 +1,17 @@
+test_browser_decoder_matches_python_and_retains_version_one (tests.test_public_history.PublicHistoryTests.test_browser_decoder_matches_python_and_retains_version_one) ... ok
+test_real_history_roundtrip_reuses_containers_and_is_deterministic (tests.test_public_history.PublicHistoryTests.test_real_history_roundtrip_reuses_containers_and_is_deterministic) ... ok
+test_values_resembling_refs_and_malformed_transport (tests.test_public_history.PublicHistoryTests.test_values_resembling_refs_and_malformed_transport) ... ok
+test_publication_preserves_dirty_source_and_does_not_repeat_unchanged_views (tests.test_publish.PublishTests.test_publication_preserves_dirty_source_and_does_not_repeat_unchanged_views) ... ok
+test_rejected_local_chain_is_preserved_and_remote_history_fast_forwards (tests.test_publish.PublishTests.test_rejected_local_chain_is_preserved_and_remote_history_fast_forwards) ... ok
+test_refresh_keeps_drafts_and_focus_without_changing_navigation (tests.test_parlor_refresh.ParlorRefreshTests.test_refresh_keeps_drafts_and_focus_without_changing_navigation) ... ok
+test_build_catchup_digest_respects_scrubbed_moment_and_start_seq (tests.test_catchup_room.CatchupRoomTests.test_build_catchup_digest_respects_scrubbed_moment_and_start_seq) ... ok
+test_render_catchup_panel_and_jump (tests.test_catchup_room.CatchupRoomTests.test_render_catchup_panel_and_jump) ... ok
+test_tracked_history_finish_events_are_recovered (tests.test_catchup_room.CatchupRoomTests.test_tracked_history_finish_events_are_recovered) ... ok
+test_real_states_safe_links_reasons_and_historical_reset (tests.test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
+test_study_room_renders_only_when_recorded_and_links_to_shelf (tests.test_shelf_ui.ShelfUITests.test_study_room_renders_only_when_recorded_and_links_to_shelf) ... ok
+test_stopped_residents_leave_figures_but_keep_history_and_return (tests.test_presence_ui.PresenceUITests.test_stopped_residents_leave_figures_but_keep_history_and_return) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.907s
+
+OK

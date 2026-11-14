@@ -1,0 +1,17 @@
+{
+  "snapshot_commit": "7ddeb8393425ef585fa57ec105311a709ff6fe85",
+  "input_bytes": 108475647,
+  "wire_bytes": 2335273,
+  "nodes": 9051,
+  "original_sha256": "e9dbba96c1636c32d9582834cbc9dd68da3a28fa5fd65305a10aaf809df4bd94",
+  "wire_sha256": "c5a26ccb6d04e4f502cd994ee9d57ad52694993745d7443026d3e3d680e62481",
+  "python_exact_equality": true,
+  "browser_roundtrip": {
+    "sha256": "d12a706c53bcbb9b540bcb99f9690a8ac6b4304a85eefff1a4032c31af7b59d6",
+    "frames": 2192,
+    "first": 1,
+    "last": 2192
+  },
+  "public_catchup_matches_at_four_moments": true,
+  "runtime_activated": false
+}

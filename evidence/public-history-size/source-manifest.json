@@ -1,0 +1,7 @@
+{
+  "house/publish.py": "756c816917df355eb88d4b4ad35ad57f1a655d5c8cb4f1833f5410271f06f1b8",
+  "house/public_history.py": "6cdc4a213b538b69cb6dd6a5b3e057d20fc1e89efe1fa48ed2b16ed423ea595f",
+  "site/house.js": "9ce50a47f1a5a989a2aa6c69ee04605a1600785bdcc1a991c5f38a69276b7d67",
+  "tests/test_publish.py": "431e7df32744a0f03f81ec68e7fea3ddc09859d8bc58682981551d095256111c",
+  "tests/test_public_history.py": "161b47f1dd5ff668c375e7a1277bc4892f3e0738e4f5ae1f660898e883a2cb3e"
+}
