@@ -1,0 +1,41 @@
+{
+  "migration": 1389,
+  "rule": "work-selection-003",
+  "authority": "direct-owner, one exact correction; no simulated notice or endorsements",
+  "source_head": "a2cf12d7bdc372902dee6ba78a7e4e6d0447015f",
+  "runtime_sha256": "97735794d600d8718c869b07ae3d682c25a30234633eed8acfe4caf72454ca4c",
+  "test_count_executed": 315,
+  "test_output_sha256": "808adb5add6dab95b7e74143b628ae3c5396bd754009eb7dfea9300e0bd78b52",
+  "prior_rule_revision": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+  "rule_revision": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+  "changed_sections": [
+    "rules",
+    "rule_revision",
+    "proposals",
+    "sequence",
+    "at",
+    "receipts",
+    "council",
+    "maintenance"
+  ],
+  "unchanged_sections": [
+    "version",
+    "house_id",
+    "name",
+    "owner_key",
+    "residents",
+    "tasks",
+    "lessons",
+    "life",
+    "wake_policy",
+    "shelf_trials",
+    "shelf"
+  ],
+  "pause": 1375,
+  "drained_sleep": 1383,
+  "drained_success": 1385,
+  "resume": 1392,
+  "interrupted_native_runs": 0,
+  "choice_open": 1390,
+  "integrator_vote": 1391
+}

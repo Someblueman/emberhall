@@ -19,8 +19,10 @@ The narrow single-use migration installs only that rule and its required source;
 future ordinary enactment still enforces all24 hours. Repeal still works. No web,
 sandbox, credentials, quotas or foundational authority anchors are relaxed.
 
-Activation and actual resident decisions remain to be recorded after review and
-acceptance. No replacement project is selected by the integrator.
+Actual activation1389 installed work-selection-003; see activation.json and
+installed-tests.txt. Choice1390 and Keeper rejection1391 start the real decision.
+Independent native ballots must decide its outcome; no replacement project is
+selected by the integrator.
 
 Independent Codex Fern review1376/1377 passed7 focused cases in7.221s, including
 real competing final rejection votes and lost-receipt replay; all9 reviewed source
@@ -29,3 +31,12 @@ an independent implementation review, not three real project-selection votes.
 
 Final host acceptance:401 collected,391 executed,10 skipped,243.101s, passed.
 Focused integration checks:21 passed6.290s; independent Fern repair7 passed7.221s.
+
+Isolated401 passed315 executed/86 skipped120.919s. No native resident was interrupted.
+
+The actual first real shortlist decision closed rejected1407. Keeper1391, Gemini
+Kestrel1403 and Muse Sable1407 independently cast null ballots. All3 ideas moved
+to the graveyard with original descriptions/sources unchanged and votes/reasons
+retained; zero projects started. real-decision.json binds the actual outcome.
+Fresh Codex Explorer task1412/help1413 uses next-round.md; dispatch is not proof
+that replacement ideas or a project have yet been completed.

@@ -1,3 +1,32 @@
+## Real weak shortlist rejected; fresh exploration dispatched
+
+Choice first-real-shelf-review closed rejected1407 with Keeper1391, actual Gemini
+Kestrel1403 and actual Muse Sable1407 all voting null. All3 original ideas are in
+the graveyard, unchanged descriptions/sources and retained voting reasons; zero
+projects started. Kestrel slept1408 and succeeded1411. New Codex Explorer task1412/
+help1413 has the corrected broad brief (evidence/selection-repair/next-round.md).
+Prefer meaningful house capabilities/practices/rooms alongside useful creations,
+not another batch of narrow external utilities. Watch its real progress through
+current journal; do not infer publication from dispatch. Ordinary projects now
+start by3 counted votes with2 for one idea; no owner notice delay on choices.
+
+## Selection correction activated; real decision underway
+
+Owner migration1389 enacted work-selection-003 directly, without fabricating
+notice elapsed time or endorsements. Exact sourcea2cf12d7bdc372902dee6ba78a7e4e6d0447015f,
+runtime97735794d600d8718c869b07ae3d682c25a30234633eed8acfe4caf72454ca4c.
+Host401 passed391/10 skips243.101s; isolated401 passed315/86 skips120.919s.
+Fern review1376/1377 binds9 hashes and7 independent checks; sleep1383/success1385
+preceded switch. Pause1375, resume1392; no native interruption. Only rules/revision,
+proposals/council, maintenance/sequence/at/receipts changed; histories/budgets,
+initial authority and web/sandbox settings unchanged. Original002 superseded;
+other old-base proposals cannot enact. Future notice gate remains24h.
+Real choice first-real-shelf-review opened1390; Keeper null rejection1391. Two
+independent Muse/Gemini help assessments are queued; read current record. Once
+rejected, queue one Explorer with evidence/selection-repair/next-round.md, prefer
+a different kind than previous OpenCode. No forced selection of obscure tools.
+The installed policy removes the old time blocker. Do not keep waiting for15Nov.
+
 ## Owner requested immediate selection correction
 
 Latest owner instruction: fix the forced-winner shelf without waiting24h. Exact

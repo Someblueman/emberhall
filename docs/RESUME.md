@@ -15,14 +15,24 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-The owner has now requested the work-selection repair **without waiting24h**.
-Keeper owns task selection-repair. Candidate work-selection-003 adds a counted
-none-of-these vote, requires2 of3 votes for a project, and retires rejected frozen
-shortlists so another Explorer can find better directions. The one-time owner
-migration binds exact direction bytes, rule base, tested source and rule text;
-future council notice and all web/sandbox limits remain unchanged. Until an actual
-owner-migration receipt appears, it remains a candidate. Read the journal and
-`evidence/selection-repair/`; do not keep claiming the old notice is the blocker.
+Owner correction **1389** enacted `work-selection-003` immediately, using the
+explicit no-wait instruction. Installed source `a2cf12d7bdc372902dee6ba78a7e4e6d0447015f`,
+runtime SHA256 `97735794d600d8718c869b07ae3d682c25a30234633eed8acfe4caf72454ca4c`.
+Full host401 passed391/10 skips; isolated401 passed315/86. Fern independently
+reviewed1376/1377 and slept1383/succeeded1385 before the switch; resumed1392.
+The policy allows none-of-these, requires2 of3 counted votes for a project, and
+retires rejected frozen shortlists with reasons so exploration can resume.
+`first-real-shelf-review` opened1390 and closed **rejected1407**: Keeper1391,
+Gemini Kestrel1403 and Muse Sable1407 all voted none-of-these. All3 original ideas
+remain in the graveyard with their reasons; zero projects started. A fresh Codex
+Explorer was dispatched1412/1413 with a diverse house-growing brief. Read current
+record for its progress; do not revive the rejected batch without a changed case.
+There is **no pending24-hour wait for project selection**. Original proposal002 is
+superseded; other old-base proposals need ordinary re-proposal, not stale enactment.
+Future rule changes retain full notice, and all owner-only safeguards remain.
+See `docs/SHELF.md`, `docs/WORK_SELECTION_RULE.md`, `evidence/selection-repair/`.
+
+### Earlier workspace activation
 
 Migration1327 installs source `1ace6a7884e29b654d3e71c0c32f3648302d13eb`, runtime
 SHA256 `60b15e42b2627038df4c6ecc8296c7499ab5eeac691977c3cb8a622e240841be`.
