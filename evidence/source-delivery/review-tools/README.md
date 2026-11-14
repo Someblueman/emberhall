@@ -1,4 +1,4 @@
-# Source review tools: tested candidate
+# Source review tools: activated repair
 
 The live source-delivery trial failed before acceptance: OpenCode lacked a fixed
 source inspection action and project-only work ran the whole foundation suite,
@@ -16,9 +16,11 @@ in5.117 seconds. The first focused run's one fixture error is retained separatel
 normal candidate capture correctly rejects symlinks; the corrected adversarial
 fixture deliberately commits a legacy symlink to test read refusal.
 
-Independent Muse review and isolated runtime acceptance are pending at this
-commit. The later activation receipt must bind actual tested source and reviewer
-hashes. No new autonomous integration/push is claimed here. Timeout descendant
+Independent Muse Cinder finished1713, binding seven exact hashes; review.json
+qualifies the retained original report. Isolated430 tests passed339/91 skips in
+173.630 seconds. Migration1721 activated exact sourcee0ce6b2 after all residents
+finished normally. Only maintenance/receipts/sequence/at changed. This handoff
+precedes explicit resume; no new autonomous integration/push is claimed here. Timeout descendant
 cleanup is an observed remaining limitation; this scope does not change it.
 
 Wake Digest is the actual selected house project. Gemini built it, Muse repaired

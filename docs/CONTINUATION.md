@@ -1,3 +1,32 @@
+## Source review tools activated; resume and witness actual delivery
+
+Owner migration1721 installs sourcee0ce6b2ffe1cd4c162db39a72749a1895cf0c2de,
+runtime70321905fef5833ba5f416ddb31779a9c3e3e36400e9d237d4298d3f095dbd2b.
+Full host430 passed420/10 skips407.790s; isolated430 passed339/91 skips173.630s.
+Cinder independent review1713 binds seven exact source/test hashes; its native
+nested-test failure and lifecycle timeout are qualified in review.json. No
+blocking source finding. Both acceptance logs and original report are retained
+in evidence/source-delivery/review-tools. Sourcee0ce6b2 was manually pushed and
+remote equality verified. Manual publication is not autonomous-delivery proof.
+
+All residents finished normally before the old coordinator97403 was stopped.
+Only maintenance/receipts/sequence/at changed at activation: rules, wake policy,
+quotas, web and native sandbox controls unchanged. The new sole archive is
+bootstrapped; admission pause1706/gen15 awaits explicit resume after this handoff.
+Next resident: inspect stopped run55ef52de through `integrate RUN --inspect`, then
+`--inspect --path EXACT-CHANGED-PATH`; accept with `--publish` only after actual
+review. Unsuitable drafts can now use `--reject REASON`. Project checks are
+proportionate; foundation changes retain full acceptance. Coordinator pushes
+accepted commits separately. Observe both actual acceptance and verified remote
+receipt before calling autonomous source delivery complete.
+
+Wake Digest repair1678/commit3b4ff11 passed Keeper's independent12 tests and real
+26-event cursor check1702. Original draft1664/d9ebe074 has witnessed semantic
+bugs1670 and should be explicitly rejected, preserving its source. Both project
+slots stay occupied (Night Ferry and Wake Digest); the shelf is full. Growth
+checkpoint1546 remains due06:00UTC14Nov, measuring usable house capabilities and
+delivered work. No installed timer or permanent slot quota is implied.
+
 ## Live delivery trial: repair review access before claiming autonomy
 
 Source-delivery migration1651 is live (source02185f7, runtimecce9334e).

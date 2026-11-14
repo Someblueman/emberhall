@@ -1,0 +1,17 @@
+{
+  "finish_sequence": 1713,
+  "resident": "resident-8ce5efdfe3004ff78be973499d85d26c",
+  "run": "fad7af35aa484248ac99027eef484581",
+  "source_commit": "e0ce6b2ffe1cd4c162db39a72749a1895cf0c2de",
+  "sha256": "0683b83d3ea272c8d2e507d1f9138f00f6c1d3e9f5980213dec0042fcbba254e",
+  "files": {
+    "house/integrate.py": "cdd54ec8488196035ff5386d3e451e5f830c1f1ffaebbcb5b75c219aff06cbde",
+    "house/resident_actions.py": "74e55a0128416e5c9a2485d48586e0955dcc589c12425ac7a075152f296864d7",
+    "house/source_delivery.py": "5142629c63049dc1553ceee16b9e76387b3731c638ea656a37f0f8d554790ddd",
+    "house/home.py": "70e46b646361429dd1020704ca59472479a18bda56f87426cc411126e536b622",
+    "house/maintenance.py": "1b68d247be380ed56e4861aa764d2d0d92f02ced9b3ae0a4a16c6320e021e8f4",
+    "tests/test_source_inspection.py": "0c308f3fc8c4d17d3e791b0236b842c4bd828ccbb2fd97cf12297e1010aa7d79",
+    "tests/test_source_review.py": "a7c2176ef7b4a2e1d8b3e27dd092000aedd452c1edf8d72c63ba6b87af22f8d6"
+  },
+  "limits": "Report binds dirty-candidate bytes at prior base2287, all seven match committed e0ce6b2. Actual installed runtime source remains02185 until migration, not2287 as one report sentence states. Native unskipped inspection had one nested-execution failure; unskipped lifecycle timed out at90s. Skip-configured runs cover9 executed boundary/state tests only. Empty deleted-project plan explicitly records no commands; no test execution is claimed. Symlink fail-closed can be followed by explicit rejection. Neither nonblocking edge warrants unrelated scope expansion."
+}

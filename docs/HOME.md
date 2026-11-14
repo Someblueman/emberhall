@@ -348,9 +348,9 @@ pre-migration policy revisions remain unchanged. Tests cannot establish whether 
 model will obey every privacy or prompt-injection instruction; this is still the
 cooperative resident threat model in THREAT_MODEL.md.
 
-### Source review access repair (candidate, not yet installed)
+### Source review access (migration1721)
 
-The fixed action will support `integrate RUN --inspect` and
+The fixed action supports `integrate RUN --inspect` and
 `integrate RUN --inspect --path EXACT-CHANGED-PATH`: committed diff and bounded
 UTF-8 text from the stopped contribution, with explicit truncation, binary,
 deleted and nonregular-file results. Inspection does not run code, acknowledge

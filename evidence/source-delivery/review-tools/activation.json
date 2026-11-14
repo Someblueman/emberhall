@@ -1,0 +1,30 @@
+{
+  "migration_sequence": 1721,
+  "scope": "source-review-tools-20261114",
+  "source_commit": "e0ce6b2ffe1cd4c162db39a72749a1895cf0c2de",
+  "runtime_sha256": "70321905fef5833ba5f416ddb31779a9c3e3e36400e9d237d4298d3f095dbd2b",
+  "changed_top_level_keys": [
+    "maintenance",
+    "receipts",
+    "sequence",
+    "at"
+  ],
+  "native_runs_drained": true,
+  "old_coordinator": 97403,
+  "admission_pause_sequence": 1706,
+  "resume": "pending explicit resume after this handoff commit",
+  "rule_revision": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+  "host": {
+    "collected": 430,
+    "executed": 420,
+    "skipped": 10,
+    "seconds": 407.79
+  },
+  "isolated": {
+    "collected": 430,
+    "executed": 339,
+    "skipped": 91,
+    "seconds": 173.63
+  },
+  "live_new_inspection_integration_delivery": "not yet observed"
+}
