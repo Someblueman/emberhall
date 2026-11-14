@@ -1,0 +1,114 @@
+{
+  "format": "hearth-lens-independent-reference-v1",
+  "source_head": "42b6bae12d54c121207ddb81ae7f66ebe81686ea",
+  "journal_head": "1279b3e5a9a773c3f91808a574444dc56752eb92",
+  "journal_sequence": 3230,
+  "task": {
+    "id": "shelf-review-fern-a7f23",
+    "direct_events": [
+      {
+        "sequence": 2308,
+        "op": "task",
+        "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "at": 1794645706.5284212,
+        "data": {
+          "task": "shelf-review-fern-a7f23"
+        }
+      },
+      {
+        "sequence": 2310,
+        "op": "claim",
+        "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "at": 1794645910.46863,
+        "data": {
+          "task": "shelf-review-fern-a7f23",
+          "expect": 0,
+          "seconds": 1800
+        }
+      },
+      {
+        "sequence": 2333,
+        "op": "claim",
+        "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "at": 1794648294.708915,
+        "data": {
+          "task": "shelf-review-fern-a7f23",
+          "expect": 1,
+          "seconds": 300
+        }
+      },
+      {
+        "sequence": 2336,
+        "op": "release",
+        "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "at": 1794648528.976456,
+        "data": {
+          "task": "shelf-review-fern-a7f23"
+        }
+      },
+      {
+        "sequence": 2337,
+        "op": "claim",
+        "actor": "keeper-01",
+        "at": 1794648629.5081012,
+        "data": {
+          "task": "shelf-review-fern-a7f23",
+          "expect": 2,
+          "seconds": 300
+        }
+      },
+      {
+        "sequence": 2338,
+        "op": "finish",
+        "actor": "keeper-01",
+        "at": 1794648629.99924,
+        "data": {
+          "task": "shelf-review-fern-a7f23"
+        }
+      }
+    ],
+    "replayed_claim_boundaries": [
+      {
+        "claim_sequence": 2310,
+        "previous_status": "open",
+        "previous_generation": 0,
+        "previous_until": 0,
+        "claim_at": 1794645910.46863,
+        "previous_claim_expired": false,
+        "new_generation": 1
+      },
+      {
+        "claim_sequence": 2333,
+        "previous_status": "claimed",
+        "previous_generation": 1,
+        "previous_until": 1794647710.46863,
+        "claim_at": 1794648294.708915,
+        "previous_claim_expired": true,
+        "new_generation": 2
+      },
+      {
+        "claim_sequence": 2337,
+        "previous_status": "open",
+        "previous_generation": 2,
+        "previous_until": 0,
+        "claim_at": 1794648629.5081012,
+        "previous_claim_expired": false,
+        "new_generation": 3
+      }
+    ]
+  },
+  "resident": {
+    "id": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+    "return_run": "9060edc0e67e45e9bd644dbdb067ec3f",
+    "targeted_help": 3165,
+    "run_start": 3167,
+    "run_launched": 3169,
+    "wake": 3170,
+    "project_done": 3173,
+    "sleep": 3175,
+    "help_resolved": 3177,
+    "run_finish": 3179
+  },
+  "method": "Expectations derived from verified Record.read and canonical apply_event before inspecting the new tracer. Direct event list excludes tokens, artifact bytes and arbitrary prose. Exact task/resident query output is not assumed to equal the direct list: related run/help links must also be assessed.",
+  "limit": "Real historical boundaries, not a simulated week. Absence of an explicit expiry event must remain distinguishable from inference at a recorded time."
+}
