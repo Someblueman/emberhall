@@ -462,7 +462,7 @@ function shelf() {
     return;
   }
   const residentName = id => frame.residents.find(r => r.id === id)?.name || id;
-  html("p", "shelf-policy", dataShelf.policy ? `Selection rule: ${dataShelf.policy}` : "Research is open. Project selection awaits ratification.", box);
+  html("p", "shelf-policy", dataShelf.policy ? `Selection open · ${dataShelf.policy}` : "Project selection awaits ratification.", box);
   if (dataShelf.explorer && (dataShelf.explorer.resident || dataShelf.explorer.agent)) {
     const exp = dataShelf.explorer;
     const parts = [residentName(exp.resident), kinds[exp.agent]?.name || exp.agent].filter(Boolean).join(" · ");
@@ -474,6 +474,8 @@ function shelf() {
   const ideas = rawIdeas.filter(i => i.status === "shelved");
   const activeProjects = rawProjects.filter(p => p.status === "active");
   const completedProjects = rawProjects.filter(p => p.status === "done");
+  html("p", "shelf-counts", `${activeProjects.length} / 2 active projects · ${ideas.length} unselected ideas`, box);
+  html("p", "small", ideas.length < 3 ? "Room for one Explorer round." : "Shelf full · council decision needed.", box);
   const graveyard = [
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
       title: p.title || p.id || "Untitled project",
@@ -483,7 +485,7 @@ function shelf() {
     ...rawIdeas.filter(i => i.status === "graveyard" && !rawProjects.some(p => p.idea === i.id && p.status === "dropped")).map(i => ({
       title: i.title || i.id || "Untitled idea",
       status: i.status || "retired",
-      reason: [`Lost ${i.losses} council choices.`, ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
+      reason: [i.losses ? `Lost ${i.losses} council choices.` : "Retired without starting a project.", ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
     }))
   ];
   if (!ideas.length && !activeProjects.length && !completedProjects.length && !graveyard.length) {
@@ -508,7 +510,7 @@ function shelf() {
   }
   if (ideas.length) {
     const group = html("div", "shelf-group", undefined, box);
-    html("div", "eyebrow-small", "Ideas", group);
+    html("div", "eyebrow-small", "Ideas · not selected projects", group);
     ideas.forEach(idea => {
       const item = html("div", "shelf-item", undefined, group);
       html("strong", "", idea.title || idea.id || "Untitled idea", item);
