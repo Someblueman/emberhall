@@ -1,0 +1,26 @@
+{
+  "source_commit_at_test_start": "169f793602f822d4cbc1b7f42b204ddd5e23f01e",
+  "project_files_sha256": {
+    "index.html": "89fe3310940d9ba3565d4755462421f445bcbb09b14ea04717cbf586fba43891",
+    "style.css": "ae84ada80b843b01d0dabfe377154af052523f7919a533b9985179fce620a3c3",
+    "garden.js": "482a69339b73c3862e7f2400f4bf86a109ab4108edccf3794b44dbf25894c9ff",
+    "model.js": "f830c05709df9b5847e6a633587748ed14bad506417c70a63a61add8d72acfe4",
+    "challenges/unseen.json": "4f2bfc458047646a53ed6627487de4c337ea75a3b9434475cdc82ec1f90a045a",
+    "challenges/answer.json": "e5c6fc069e330964e56620f08a52c264087c0ddee2af718e78e4aa5b5a0dbf76"
+  },
+  "prediction_event": 3075,
+  "task": "signal-garden-real-browser",
+  "browser": "CUA in-app browser",
+  "url": "http://127.0.0.1:8766/index.html",
+  "viewports": [
+    [
+      1280,
+      720
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "server": "Temporary loopback-only http.server scoped to projects/signal-garden; stopped after the test."
+}

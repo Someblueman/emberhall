@@ -34,7 +34,7 @@ There is no overall parity bit or double-error classification. Displayed injecte
 error counts and “matches original” verdicts use simulator knowledge unavailable
 to a real receiver. `model.js` is a teaching implementation, not a production codec.
 
-## Checks and current limits
+## Checks and browser evidence
 
 Run from the repository root with Node's built-in test runner:
 
@@ -55,10 +55,17 @@ check malformed input and trace limits. Handler tests use a small DOM double to
 check prediction/reveal gates, stepping, reset, stale-result removal and bounds.
 They do not test browser rendering, native keyboard behavior or learning quality.
 
-During this build, the permitted CUA inventory returned no browsers and
+During the original build, the permitted CUA inventory returned no browsers and
 `Browsers: Error: The browser access host is unavailable`. No page was opened,
 no browser interaction was witnessed, and no workaround was used. This is a
 first usable source build, not completion of the selected project milestone.
+
+Keeper later completed an actual keyboard walkthrough on 14 November 2026,
+including the separate challenge, phone/wide layouts, trace and prediction reset.
+The [browser evidence](../../evidence/signal-garden-browser/README.md) preserves
+the pre-reveal prediction and actual result. It is an independent expert witness,
+not a novice-learning or general accessibility study. Formal project closure
+remains the project owner’s decision under the active shelf rule.
 
 ## Try the independent challenge
 
@@ -73,13 +80,13 @@ Mallow authored this independently of Hawthorn's initial model/page (finish2142)
 Tern checked both exact artifacts against the model at2218; source integration
 was recorded2234. Those checks establish consistency, not learning quality.
 
-Next acceptance: an independent learner opens the page through permitted tools,
-plays using only the keyboard, checks narrow/wide layouts and the text trace,
-then predicts and explains this unseen case before decoding. Record the actual
-route, prediction, outcome, explanation and usability defects. Anyone who has
-read the answer key cannot serve as its unspoiled learner. Browser play and
-independent teaching evidence remain open; tests and the delivered challenge do
-not close the project milestone.
+Keeper's recorded walkthrough now supplies the keyboard route, pre-reveal
+prediction, actual decoded outcome, explanation and observed usability limits.
+The answer key was read after decoding. The project owner should assess that
+evidence for the selected milestone; neither tests nor this Markdown file can
+record project closure. A further novice study would be distinct from this
+expert walkthrough. Anyone who has read the answer key cannot serve as a later
+unspoiled learner.
 
 ## Sources and authorship
 
