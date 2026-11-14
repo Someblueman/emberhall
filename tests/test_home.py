@@ -384,3 +384,177 @@ class HomeTests(HouseCase):
                 self.record.append("wake", actor, {})
             self.drain()
             self.assertEqual(self.record.read()[0]["life"]["requests"][reason]["status"], "pending")
+
+    def test_finished_task_survives_actual_late_native_error(self):
+        from house.files import artifact, workspace_path
+        self.native.write_text("import json,sys,time\nfrom pathlib import Path\n"
+            "while not Path('proof.txt').exists(): time.sleep(0.01)\n"
+            "print(json.dumps({'type':'error','message':'malformed terminal response'}),flush=True)\n"
+            "sys.exit(1)\n")
+        self.task()
+        self.record.append("life", "alice", {"kind": "help", "request": "build",
+            "task": "work", "reason": "Build a deliverable"})
+        run = self.coordinator.start("codex", "build")
+        actor = self.record.read()[0]["life"]["runs"][run]["resident"]
+        self.record.append("arrive", actor, {"name": "Builder"})
+        self.record.append("claim", actor, {"task": "work", "expect": 0, "token": "build", "seconds": 60})
+        proof = self.root / "proof.txt"; proof.write_text("Durable deliverable\n")
+        self.record.append("finish", actor, {"task": "work", "token": "build", "result": "Built",
+            "artifacts": {"proof.txt": artifact(self.root, "proof.txt")}})
+        (workspace_path(self.record, run) / "proof.txt").write_bytes(proof.read_bytes())
+        self.drain()
+        state = self.record.read()[0]
+        self.assertEqual(state["life"]["runs"][run]["outcome"], "failed")
+        self.assertEqual(state["life"]["requests"]["build"]["status"], "resolved")
+        self.assertTrue((self.coordinator.private / run / "preservation.json").exists())
+
+
+class CompletedHelpTests(HouseCase):
+    """Real journal/recovery boundaries without host ps or model execution."""
+
+    def setUp(self):
+        super().setUp()
+        self.record.append("arrive", CONTROLLER, {"name": "Clock"})
+        self.runtime = self.root / "inert-runtime.pyz"
+        self.runtime.touch()  # These tests never execute a runtime or native route.
+        self.coordinator = home.Coordinator(self.record, self.runtime)
+
+    def offer(self, key="build", **binding):
+        self.record.append("life", "alice", {"kind": "help", "request": key,
+            "reason": "Build work", **binding})
+
+    def start_record(self, run="worker", key="build"):
+        data = {"kind": "run-start", "run": run, "resident": "resident-" + run,
+            "agent": "codex", "model": "gpt-6.1-sol", "source_head": "a" * 40,
+            "workspace": "residents/" + run, "policy_revision": "fixture", "mode": "work"}
+        if key:
+            data["help_request"] = key
+        self.record.append("life", CONTROLLER, data)
+        self.record.append("arrive", data["resident"], {"name": run})
+        return data["resident"]
+
+    def complete(self, task="work", actor="alice"):
+        from house.files import artifact
+        self.record.append("claim", actor, {"task": task, "expect": 0, "token": task, "seconds": 60})
+        (self.repo / "proof.txt").write_text("Durable deliverable\n")
+        self.record.append("finish", actor, {"task": task, "token": task, "result": "Built",
+            "artifacts": {"proof.txt": artifact(self.repo, "proof.txt")}})
+
+    def result(self, outcome):
+        return {"outcome": outcome, "exit_code": 0 if outcome == "success" else 1,
+            "usage": {}, "elapsed_seconds": 1}
+
+    def late_error(self, outcome):
+        self.task(); self.offer(task="work"); actor = self.start_record()
+        self.complete(actor=actor)
+        self.record.append("task", actor, {"task": "left", "title": "Unfinished",
+            "description": "Release on observed stop"})
+        self.record.append("claim", actor, {"task": "left", "expect": 0,
+            "token": "old", "seconds": 60})
+        self.coordinator.finish("worker", self.result(outcome))
+        state = self.record.read()[0]
+        self.assertEqual(state["life"]["requests"]["build"]["status"], "resolved")
+        self.assertEqual(state["life"]["runs"]["worker"]["outcome"], outcome)
+        self.assertEqual(state["life"]["runs"]["worker"]["exit_code"], 1)
+        self.assertGreater(state["life"]["budgets"]["codex"]["until"], time.time())
+        self.assertEqual(state["tasks"]["left"]["status"], "open")
+        self.assertIn("proof.txt", state["tasks"]["work"]["artifacts"])
+
+    def test_done_task_survives_late_failure_with_other_claim_release(self):
+        self.late_error("failed")
+
+    def test_done_task_survives_quota_with_other_claim_release(self):
+        self.late_error("quota")
+
+    def test_crash_after_task_finish_resolves_once_across_recovery(self):
+        self.task(); self.offer(task="work"); self.start_record(); self.complete()
+        self.assertEqual(self.coordinator.recover(), ["worker"])
+        state, events, _ = self.record.read()
+        self.assertEqual(state["life"]["requests"]["build"]["status"], "resolved")
+        self.assertEqual(state["life"]["runs"]["worker"]["outcome"], "interrupted")
+        head = self.record.read()[2]
+        self.assertEqual(home.Coordinator(self.record, self.runtime).recover(), [])
+        self.assertEqual(self.record.read()[2], head)
+        self.assertEqual(sum(e["data"].get("kind") == "help-resolved" for e in events), 1)
+
+    def test_recovery_retry_after_resolution_before_terminal_run_does_not_duplicate(self):
+        self.task(); self.offer(task="work"); self.start_record(); self.complete()
+        append = self.record.append
+        def interrupted(op, actor, data, request=None):
+            if data.get("kind") == "run-finish":
+                raise OSError("Crash before terminal receipt")
+            return append(op, actor, data, request)
+        with patch.object(self.record, "append", side_effect=interrupted):
+            with self.assertRaisesRegex(OSError, "Crash before terminal"):
+                self.coordinator.recover()
+        replacement = home.Coordinator(self.record, self.runtime)
+        self.assertEqual(replacement.recover(), ["worker"])
+        self.assertEqual(replacement.recover(), [])
+        events = self.record.read()[1]
+        self.assertEqual(sum(e["data"].get("kind") == "help-resolved" for e in events), 1)
+
+    def test_previously_requeued_done_task_is_resolved_before_another_launch(self):
+        self.task(); self.offer(task="work"); self.start_record(); self.complete()
+        self.record.append("life", CONTROLLER, {"kind": "run-finish", "run": "worker",
+            **self.result("interrupted")})  # The older coordinator requeued it.
+        with patch("house.home.providers.command", side_effect=AssertionError("must not launch")):
+            self.assertIsNone(self.coordinator.start("codex", "build"))
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["build"]["status"], "resolved")
+        self.assertEqual(len(self.record.read()[0]["life"]["runs"]), 1)
+
+    def test_tick_removes_completed_pending_demand_before_admission(self):
+        self.task(); self.offer(task="work"); self.complete()
+        self.start_record(key=None)  # Minimum-one presence is already covered.
+        with patch("house.home.providers.command", side_effect=AssertionError("must not launch")):
+            self.assertEqual(self.coordinator.tick(poll=False)["started"], [])
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["build"]["status"], "resolved")
+
+    def test_task_finished_during_runtime_refresh_is_resolved_before_admission(self):
+        self.task(); self.offer(task="work")
+        with patch.object(self.coordinator, "refresh_runtime", side_effect=self.complete), \
+                patch("house.home.active_policy", side_effect=AssertionError(
+                    "completed help reached admission policy")):
+            self.assertIsNone(self.coordinator.start("codex", "build"))
+        state = self.record.read()[0]
+        self.assertEqual(state["life"]["requests"]["build"]["status"], "resolved")
+        self.assertEqual(state["life"]["runs"], {})
+
+    def test_successful_sleep_cannot_complete_unfinished_bound_task(self):
+        self.task(); self.offer(task="work"); actor = self.start_record()
+        self.record.append("sleep", actor, {"through": 0, "note": "No deliverable yet"})
+        self.coordinator.finish("worker", self.result("success"))
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["build"]["status"], "pending")
+
+    def test_unbound_matching_task_name_and_reason_do_not_imply_completion(self):
+        self.task(); self.complete(); self.offer("work")
+        self.start_record(key="work")
+        self.coordinator.finish("worker", self.result("interrupted"))
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["work"]["status"], "pending")
+        for run, sleep in (("awake", False), ("handoff", True)):
+            actor = self.start_record(run, key="work")
+            if sleep:
+                self.record.append("sleep", actor, {"through": 0, "note": "Current handoff"})
+            self.coordinator.finish(run, self.result("success"))
+            expected = "resolved" if sleep else "pending"
+            self.assertEqual(self.record.read()[0]["life"]["requests"]["work"]["status"], expected)
+
+    def test_done_task_does_not_replace_source_review_receipt(self):
+        from tests.test_explorer_dispatch_home import configure
+        from tests.test_source_review import SourceReviewTests
+        configure(self, SourceReviewTests)
+        self.coordinator = home.Coordinator(self.record, self.runtime)
+        self.start_record("source", key=None)
+        self.record.append("life", CONTROLLER, {"kind": "run-finish", "run": "source",
+            **self.result("success")})
+        self.task(); self.complete(); self.offer(task="work", review_run="source")
+        actor = self.start_record()
+        self.record.append("sleep", actor, {"through": 0, "note": "Review still unavailable"})
+        self.coordinator.finish("worker", self.result("success"))
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["build"]["status"], "pending")
+        saved = self.coordinator.private / "source"; saved.mkdir()
+        (saved / "contribution.json").write_text(json.dumps({"commit": "b" * 40}))
+        (saved / "integration.json").write_text(json.dumps({"run": "source",
+            "contribution": "b" * 40, "status": "rejected"}))
+        self.start_record("reviewer")
+        self.coordinator.finish("reviewer", self.result("failed"))
+        self.assertEqual(self.record.read()[0]["life"]["requests"]["build"]["status"], "resolved")

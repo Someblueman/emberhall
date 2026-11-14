@@ -143,6 +143,19 @@ class Coordinator:
         self.record.append("say", CONTROLLER, {"text": RESULT_PREFIX + json.dumps(
             {"run": run, **result}, sort_keys=True)}, f"home-{run}-observed")
 
+    def resolve_completed_help(self) -> None:
+        """A typed task binding names a durable deliverable, not a native exit."""
+        from .source_delivery import review_result
+        state = self.record.read()[0]
+        for key, request in state.get("life", {}).get("requests", {}).items():
+            if (request["status"] in {"pending", "assigned"} and "task" in request
+                    and state["tasks"][request["task"]]["status"] == "done"
+                    and ("review_run" not in request or review_result(self.private, request["review_run"]))):
+                self.record.append("life", CONTROLLER, {"kind": "help-resolved",
+                    "request": key, "reason": f"Bound task {request['task']} has an immutable finish; "
+                    "the native process outcome remains separately recorded."},
+                    f"home-help-{key}-task-completed")
+
     def finish(self, run: str, result: dict) -> dict:
         mailbox_jobs.stop(self.record, run)
         state, events, _ = self.record.read()
@@ -163,6 +176,7 @@ class Coordinator:
                           {"error": type(error).__name__, "workspace_retained": True})
         if result["outcome"] in {"quota", "failed"}:
             self.cooldown(item["agent"], run, result["outcome"])
+        self.resolve_completed_help()
         handed_off = (item["resident"] in state["residents"] and
             not state["residents"][item["resident"]]["awake"] and
             not any(task.get("owner") == item["resident"] and task["status"] == "claimed"
@@ -173,7 +187,7 @@ class Coordinator:
             request = state["life"]["requests"][item["help_request"]]
             from .source_delivery import review_result
             reviewed = "review_run" not in request or review_result(self.private, request["review_run"])
-            if request["status"] == "assigned" and reviewed:
+            if request["status"] == "assigned" and reviewed and "task" not in request:
                 self.record.append("life", CONTROLLER, {"kind": "help-resolved",
                     "request": item["help_request"], "reason": "Assigned resident completed its native stretch and recorded a sleep handoff."},
                     f"home-{run}-help-resolved")
@@ -209,6 +223,7 @@ class Coordinator:
                 "usage": {}, "elapsed_seconds": max(0, time.time() - item["started_at"])})
             self.finish(run, result)
             recovered.append(run)
+        self.resolve_completed_help()
         return recovered
 
     def refresh_runtime(self) -> None:
@@ -327,8 +342,11 @@ class Coordinator:
     def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False,
               explore_generation: int | None = None) -> str | None:
         self.refresh_runtime()
+        self.resolve_completed_help()
         state = self.record.read()[0]
         request = state.get("life", {}).get("requests", {}).get(help_id, {})
+        if help_id is not None and request.get("status") == "resolved":
+            return None
         model = request.get("model", providers.DEFAULTS[kind]) if request.get("agent") == kind else providers.DEFAULTS[kind]
         providers.validate_model(kind, model)
         policy = active_policy(state)
@@ -450,6 +468,7 @@ class Coordinator:
 
     def tick(self, *, start: bool = True, poll: bool = True) -> dict:
         ended = self.reap()
+        self.resolve_completed_help()
         now = time.monotonic()
         started = []
         if start and not self.stopping:
