@@ -70,11 +70,15 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("--ready", action="store_true", default=argparse.SUPPRESS,
                              help="bounded independent work ready for a supervised resident")
             cmd.add_argument("--project", default=argparse.SUPPRESS, help="active shelf project ID")
+            cmd.add_argument("--helper", choices=("build", "review"), default=argparse.SUPPRESS,
+                             help="explicit eligibility for a bounded helper")
         elif name == "ready":
             cmd.add_argument("task")
             cmd.add_argument("--expect", type=int, required=True)
             cmd.add_argument("--blocked", dest="ready", action="store_false",
                              help="withdraw unclaimed work from automatic waking")
+            cmd.add_argument("--helper", choices=("build", "review", "none"), default=argparse.SUPPRESS,
+                             help="mark or clear bounded helper eligibility")
             project = cmd.add_mutually_exclusive_group()
             project.add_argument("--project", default=argparse.SUPPRESS, help="attach an active shelf project ID")
             project.add_argument("--clear-project", action="store_true", default=argparse.SUPPRESS,

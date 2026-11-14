@@ -52,6 +52,7 @@ PUBLICATION_SCOPE = "publication-worker-refresh-20261114"
 VOTING_SCOPE = "public-voting-history-20261114"
 PROJECT_WORK_SCOPE = "project-work-routing-20261114"
 TARGETED_WAKE_SCOPE = "targeted-resident-wakes-20261114"
+HELPER_SCOPE = "helper-staffing-20261114"
 DIAGNOSTICS_SCOPE = "integration-diagnostics-20261114"
 SELECTION_SHA256 = "e01580a8a78bbbb5b9286635b85df68bd43b8f8a4785cf9df477765767ba1df8"
 RESTORED_SHA256 = "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde"
@@ -64,7 +65,8 @@ FAILED_CLI_OBSERVATION = 465
 FAILED_BOOTSTRAP_RUN = "2c9fc6bd10574c84bf0e45aba78a054c"
 FAILED_BOOTSTRAP_SHA256 = "034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406"
 FAILED_BOOTSTRAP_OBSERVATION = 530
-SOURCES = {TARGETED_WAKE_SCOPE: "50d7a4acc1521e2887f0d2eb81ba8d0a6bdf1a7c1965f0bbcd2107debd4804f6",
+SOURCES = {HELPER_SCOPE: "4b2f63bfbb054b70e77fce85edeced049257971c28e28ae473c9133685aa7a3a",
+           TARGETED_WAKE_SCOPE: "50d7a4acc1521e2887f0d2eb81ba8d0a6bdf1a7c1965f0bbcd2107debd4804f6",
            PROJECT_WORK_SCOPE: "28f99162a0cb1f333f2f6e1572255f3db1f23e95c1a8a24096219fdd7dec31bf",
            VOTING_SCOPE: "27fa743f14d4e09df5345df54e8dc4c743c77fed90fe327d8497e9c1ab45d999",
            RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
@@ -85,6 +87,8 @@ RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    HELPER_SCOPE: OWNER_MODULES | {"house/staffing.py", "house/home.py", "house/life.py",
+        "house/providers.py", "house/model.py", "house/__main__.py", "house/work_metrics.py"},
     TARGETED_WAKE_SCOPE: {"house/maintenance.py", "house/life.py", "house/home.py"},
     PROJECT_WORK_SCOPE: OWNER_MODULES | {"house/project_work.py", "house/model.py",
         "house/life.py", "house/home.py", "house/__main__.py", "house/body.py"},
@@ -265,6 +269,8 @@ def apply(state: dict, event: dict) -> None:
         extra = OWNER_MODULES | ({"house/building.py"} if scope == GROWTH_SCOPE else set())
         if scope == REPAIR_SCOPE:
             extra.add("house/opencode_auth.py")
+        if scope == HELPER_SCOPE:
+            extra.add("house/staffing.py")
         if scope == PROJECT_WORK_SCOPE:
             extra.add("house/project_work.py")
         if scope == PUBLICATION_SCOPE:

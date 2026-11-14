@@ -127,6 +127,10 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 require(backlog_enabled(state), "ready backlog runtime not enabled")
                 require(type(data["ready"]) is bool and resident["awake"],
                         "task readiness requires an awake resident and boolean")
+            if "helper" in data:
+                from .staffing import metadata
+                require(resident["awake"], "sleeping residents cannot mark helper work")
+                metadata(state, data["helper"])
             if "project" in data:
                 from .project_work import association
                 require(resident["awake"], "sleeping residents cannot attach projects")
@@ -138,11 +142,13 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 state["tasks"][task_id]["ready"] = data["ready"]
             if "project" in data:
                 state["tasks"][task_id]["project"] = data["project"]
+            if "helper" in data:
+                state["tasks"][task_id]["helper"] = data["helper"]
         elif op == "ready":
             from .life import backlog_enabled
             require(backlog_enabled(state), "ready backlog runtime not enabled")
             require({"task", "expect", "ready"} <= data.keys() <=
-                    {"task", "expect", "ready", "project", "clear_project"}
+                    {"task", "expect", "ready", "project", "clear_project", "helper"}
                     and not {"project", "clear_project"} <= data.keys() and type(data["ready"]) is bool,
                     "invalid readiness fields")
             require(resident["awake"], "sleeping residents cannot change readiness")
@@ -151,6 +157,13 @@ def apply_event(previous: dict | None, event: dict) -> dict:
             require(task["until"] <= at, "task has a live lease; release before changing readiness")
             require(type(data["expect"]) is int and data["expect"] == task["generation"],
                     "task generation changed")
+            if "helper" in data:
+                from .staffing import metadata
+                metadata(state, data["helper"], clear=True)
+                if data["helper"] == "none":
+                    task.pop("helper", None)
+                else:
+                    task["helper"] = data["helper"]
             if "project" in data:
                 from .project_work import association
                 association(state, data, at)

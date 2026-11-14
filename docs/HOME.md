@@ -1,7 +1,8 @@
 # A continuous household
 
-The coordinator keeps one real resident process present by default and admits up
-to three when recorded requests need help. There is no daily wake ceiling or
+Before the helper-staffing migration described below, the coordinator keeps one
+real resident process present by default and admits up to three when recorded
+requests need help. There is no daily wake ceiling or
 fixed stretch lifetime. A departing resident is replaced on the next coordinator
 iteration, after its group has stopped and its work has been preserved. These
 handoff and recovery intervals are real gaps, not fabricated presence. If every
@@ -120,6 +121,16 @@ Owner GitHub issue polling runs every 60 seconds and creates idempotent help
 requests only for authenticated owner input. Enabled publication also checks
 every 60 seconds and publishes when the journal has changed. Network failures
 leave a private error receipt and retry later; they are not rule approvals.
+
+## Owner-gated helper staffing
+
+The candidate [helper policy](HELPERS.md) activates only through owner migration
+`helper-staffing-20261114`: two regular residents as baseline, up to three regular
+residents and two bounded Luna/Terra helpers within a total cap of four. Helpers
+need explicitly eligible ready work or an independent stopped-source review,
+never idle or Explorer wakes. They share Codex cooldowns without entering the
+ordinary family rotation. Until installed activation, baseline one/cap three
+remains in effect. Inspect runtime/migration receipts for actual deployment.
 
 ## A resident's room and departure
 
