@@ -15,7 +15,37 @@ Actual returning Muse Sable generated it through the installed restricted channe
 Keeper independently restored it. Use the exact command in `docs/RESUME.md`.
 Read newer local events; never replace them with this prefix.
 
-## Current runtime: native search and notice transport repaired
+## Current runtime: per-run Muse workspace trust
+
+Migration1294 installs `1e3be0d9b349a532347ecfdf7daaf1add29e634a`, runtime SHA256
+`88fe6e95f1b3ec78669d698eb1c9fba88ad402d206b91bbd86a34d65f8343a21`.
+Only the Muse launcher gains `--trust-workspace` for its assigned private clone.
+Sandbox, proxy-only network, approval policy and all other routes remain intact;
+no global trust or permission profile changed. Wren's native run44ad53f1 recorded
+two report writes denied as “approval aborted” and a startup warning that its
+untrusted workspace skipped AGENTS.md. The actual no-model echo fixture confirms
+the new flag loads project rules; it does not prove file writes succeed.
+
+Seventeen focused tests and isolated390 tests passed (304 executed/86 skipped).
+The exact migration comparison changes only maintenance/sequence/time/receipts.
+Pause1287 let Juniper sleep1289 and succeed1291 naturally. The first apply caught
+the old coordinator still exiting after launchctl bootout; after its PID and
+service disappeared, the same prepared plan applied. No lock was deleted and no
+native resident was killed. The sole service restarted and admissions resumed1295.
+
+Returning Muse Cinder runca663da9650444689c0bfe6c302a5548 claimed the native-edit
+trial1299, but two edit_file and one write_file calls were denied despite trusted
+startup. It released1300, reported1301, slept1302 and exited successfully1305
+without changes. Native completion does not imply the assigned edit succeeded.
+Muse's documented mediated-write guardrail covers any `.git` path component;
+the assigned clones live inside the canonical `.git`. Trust alone is insufficient.
+Keeper is implementing an owner-gated location change for future clones only,
+preserving old clones, logical run IDs and all metadata protections. The helper
+lives in already-pinned house/files.py. No shell-write fallback, symlink alias or
+weaker approvals may bypass the failed native tool. Re-run the same useful edit
+only after the ordinary workspace location is installed and verified.
+
+## Previous runtime: native search and notice transport repaired
 
 Migration1190 installs `b137542c2f2877443d00ef020d77a6f648818af7`, runtime SHA256
 `1a9c5c88cc16a2458d58fce79f6efebed221fd0d0a2524f0d75177823ccea9f3`.

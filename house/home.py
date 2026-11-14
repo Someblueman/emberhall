@@ -142,19 +142,20 @@ class Coordinator:
         mailbox_jobs.stop(self.record, run)
         state, events, _ = self.record.read()
         item = state["life"]["runs"][run]
-        workspace = self.private / item["workspace"]
+        from .files import workspace_path
         saved = None
-        if workspace.exists():
-            try:
+        try:
+            workspace = workspace_path(self.record, run, state)
+            if workspace.exists():
                 saved = home_work.preserve(self.private, run, workspace)
                 write_private(self.private / run / "preservation.json", saved)
                 saved = home_work.contribution(workspace, item["source_head"],
                                                self.private / run / "contribution.json",
                                                journal_artifacts=home_work.finished_reports(events, item))
-            except (OSError, ValueError, subprocess.SubprocessError) as error:
-                # The room itself stays intact even if a bounded rescue refuses a file.
-                write_private(self.private / run / "preservation-error.json",
-                              {"error": type(error).__name__, "workspace_retained": True})
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            # A refused room is retained; it must not strand a dead resident.
+            write_private(self.private / run / "preservation-error.json",
+                          {"error": type(error).__name__, "workspace_retained": True})
         if result["outcome"] in {"quota", "failed"}:
             self.cooldown(item["agent"], run, result["outcome"])
         handed_off = (item["resident"] in state["residents"] and

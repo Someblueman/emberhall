@@ -12,6 +12,7 @@ import sys
 from .record import Record
 from .resident_client import client
 from .watch_recovery import capture, save_rescue, source_head
+from .files import workspace_location
 
 
 def git(root: Path, *args: str) -> str:
@@ -20,8 +21,15 @@ def git(root: Path, *args: str) -> str:
 
 
 def room(record: Record, private: Path, run: str, base: str) -> Path:
-    target = private / "residents" / run
-    target.parent.mkdir(mode=0o700, exist_ok=True)
+    from .mailbox import directory
+    if private != record.common / "house-home":
+        raise ValueError("invalid private room store")
+    root, parts = workspace_location(record, run)
+    target = root.joinpath(*parts)
+    with directory(root, *parts[:-1], create=True):
+        pass
+    if target.exists() or target.is_symlink():
+        raise ValueError("resident workspace already exists; preserve it")
     # Ordinary independent clone: no shared index/working tree or worktree registry.
     subprocess.run(["git", "clone", "--quiet", "--no-local", "--single-branch", "--no-tags",
                     str(record.root), str(target)], check=True, capture_output=True)

@@ -17,6 +17,7 @@ import uuid
 from .home_work import git
 from .record import Record
 from . import test_sandbox
+from .files import workspace_path
 
 
 def integrate(record: Record, run: str, actor: str, *, publish: bool = False) -> dict:
@@ -34,7 +35,7 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False) ->
             raise ValueError("integrator must be a resident")
         if actor == item["resident"] or not state["residents"][actor]["awake"]:
             raise ValueError("integration requires a different, awake resident")
-        workspace = private / "residents" / run
+        workspace = workspace_path(record, run, state)
         report = json.loads((private / run / "contribution.json").read_text())
         if report["base"] != item["source_head"] or report["commit"] != git(workspace, "rev-parse", "HEAD"):
             raise ValueError("contribution identity changed")

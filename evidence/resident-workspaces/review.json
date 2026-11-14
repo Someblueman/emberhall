@@ -1,0 +1,15 @@
+{
+  "run": "b47bdbbae3054ce99b6aa477edfb2d5c",
+  "review_sequence": 1320,
+  "finish_sequence": 1322,
+  "sleep_sequence": 1323,
+  "success_sequence": 1325,
+  "artifact_sha256": "8b9e478e9ef65b88ad030e80cd3e064e060172b71be7e281654921087e8e0bd4",
+  "finding_sequence": 1315,
+  "corrections": [
+    1316,
+    1317
+  ],
+  "all_11_hashes_match": true,
+  "native_edit_claim": false
+}

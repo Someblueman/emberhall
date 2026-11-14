@@ -16,6 +16,7 @@ import uuid
 from .__main__ import parser, run as dispatch
 from .record import REF, Record
 from .resident_actions import ACTIONS
+from .files import workspace_location
 
 ALLOWED = frozenset({"status", "rules", "verify", "read", "wait", "receipt", "arrive", "rename", "wake",
                     "sleep", "say", "task", "ready", "claim", "renew", "release", "finish", "learn",
@@ -225,11 +226,12 @@ def service(record: Record, private: Path, run: str) -> int:
         return 0
     if item["workspace"] != "residents/" + run:
         raise ValueError("run workspace does not match its mailbox")
-    workspace = private / "residents" / run
+    root, parts = workspace_location(record, run, state)
+    workspace = root.joinpath(*parts)
     served = 0
     try:
-        with directory(private, "residents", run, ".house-mailbox", "requests") as requests, \
-             directory(private, "residents", run, ".house-mailbox", "responses") as responses, \
+        with directory(root, *parts, ".house-mailbox", "requests") as requests, \
+             directory(root, *parts, ".house-mailbox", "responses") as responses, \
              directory(private, run, "mailbox", create=True) as receipts:
             scans = getattr(record, "_mailbox_scans", {})
             identity = (os.fstat(requests).st_dev, os.fstat(requests).st_ino)

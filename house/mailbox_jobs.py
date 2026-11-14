@@ -14,6 +14,7 @@ import time
 from .mailbox import directory, read_json, write_json, MAX_RESPONSE, ERRORS, ID
 from .record import Record
 from .resident_actions import execute, known_result
+from .files import workspace_path
 from .watch import group_members, group_stopped, kill_group
 
 LIMIT = MAX_RESPONSE + 300_000
@@ -182,7 +183,7 @@ def main(argv=None):
         if runtime.is_symlink() or hashlib.sha256(runtime.read_bytes()).hexdigest() != item["runtime_sha256"]:
             raise ValueError("trusted action runtime bytes changed")
         os.environ["EMBERHALL_ACTION_JOB"] = item["id"]
-        value = execute(record, record.common / "house-home" / "residents" / item["run"],
+        value = execute(record, workspace_path(record, item["run"]),
                         item["resident"], item["run"], item["argv"], item["requestid"])
         response = {"ok": True, "result": value}
     except (*ERRORS, subprocess.SubprocessError) as error:

@@ -22,6 +22,7 @@ import uuid
 from .model import require
 from .record import ANCHOR, REF, Record
 from .watch_recovery import FILE_LIMIT
+from .files import workspace_path
 
 META_LIMIT = 256_000
 DIRECTORY = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
@@ -99,7 +100,7 @@ def binding(record, resident, run, task, token, requestid):
     key = sha(requestid.encode())
     return ({"resident": resident, "run": run, "task": task, "token": token, "requestid": requestid},
             record.common / "house-home" / "checkpoints" / key,
-            record.common / "house-home" / "residents" / run)
+            workspace_path(record, run))
 
 
 def load(fd: int, expected: dict) -> dict:

@@ -6,7 +6,7 @@ import base64
 import json
 from pathlib import Path
 
-from .files import artifact
+from .files import artifact, workspace_path
 from .record import Record
 
 ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint"})
@@ -84,7 +84,7 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
     args = parse(argv, resident)
     state = record.read()[0]
     item = state.get("life", {}).get("runs", {}).get(run, {})
-    expected = record.common / "house-home" / "residents" / run
+    expected = workspace_path(record, run, state)
     if (item.get("status") != "active" or item.get("resident") != resident or
             "launched_sequence" not in item or workspace != expected or
             not state["residents"].get(resident, {}).get("awake")):
