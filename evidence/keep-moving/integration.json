@@ -1,0 +1,9 @@
+{
+  "status": "integrated",
+  "actor": "keeper-01",
+  "run": "fea4c9ca1d6341be9ce131beb3986ab1",
+  "contribution": "465aafc9bc6ddc5b66e3ef87fd119c15ecd126b9",
+  "canonical_commit": "a2246d50d80dc5c8cc346469150607b23e422fbc",
+  "evidence": "evidence/keep-moving/proposal-review.json",
+  "method": "Exact final native draft from finish982 and preserved source commit, personally reviewed after corrections977/981. Accepted as pending proposal work only, not trial, endorsement or law. Run987 remains failed despite exit0 and unknown usage; no failure receipt is erased."
+}

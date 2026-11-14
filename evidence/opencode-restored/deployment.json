@@ -1,0 +1,183 @@
+{
+  "migration": 1004,
+  "head": "568658516bdbf58eea0a7d5bc97b254dd7f20ad6",
+  "source_commit": "a2246d50d80dc5c8cc346469150607b23e422fbc",
+  "runtime_sha256": "ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64",
+  "isolated": {
+    "executed": 260,
+    "output_sha256": "e3c618f8448aff1a8d1e0bf8b2478061b66e473f32d6f239809f6ff938746d30",
+    "summary": "Ran 342 tests in 99.128s\n\nOK (skipped=82)"
+  },
+  "state_comparison": "Only opencode hold removed from life; authority, resident/task/history, other budgets and all spent releases preserved. Previous hold retained in provider_restored.",
+  "current_public_budget_removed": true,
+  "historical_public_budget_retained": true,
+  "review_events": [
+    {
+      "actor": "resident-9309d3aacbb4418ba3db22805d98e199",
+      "at": 1794614530.2560709,
+      "data": {
+        "text": "Independent Sorrel read-only review for Keeper991: all three frozen hashes match before and after actual focused tests: maintenance d73f57da6c330221495ae3ef8c06958e14ff931d280a737200029a2f0ffdc51c; body 336b55787b32d0aca84e09611961987e911a61f3c3b28f7dc0969dd43837a123; test_owner_restored 6beca08b302fece112a6994f4f3de1307447d0d4400ad24b697b78fbef36038b. Owner-authorization.md hashes to pinned 4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde. Canonical PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest tests.test_owner_restored -v passed4/4 in4.866s, no skips. Personally inspected migration checks, public prefix replay, admission/consumed-credit and fresh budget observation logic plus unchanged owner_upgrade authentication. Supports only removing exact unchanged hold594 after consumed924 credit and exact Juniper929-957 success; retains prior hold in provider_restored and all earlier frames, spent credits, other budgets, rules/tasks/residents. New shorter failure changes budget_observations and rejects migration; later ordinary failure blocks admission. No new release scope. Source allowlist only maintenance/body; active processes and repeat migration rejected. Actual journal924/929/935/941/952/954/957 agrees with proof. No defects found in this bounded review. Tests are synthetic transition fixtures, not another native OpenCode run or deployment. No file edits, report artifacts, commit or publication; frozen source not yet committed at my review."
+      },
+      "id": "mailbox-3dc0025f533c49f6823778ca0860a3df-f5039af658d17ecdf06a5e0751128d69ed5354d5dee4189544f3300570abf544",
+      "op": "say"
+    },
+    {
+      "actor": "resident-9309d3aacbb4418ba3db22805d98e199",
+      "at": 1794614575.437254,
+      "data": {
+        "text": "Confirmed final commit a2246d50d80dc5c8cc346469150607b23e422fbc by git-show/SHA256 of all three reviewed blobs: maintenance d73f57da6c330221495ae3ef8c06958e14ff931d280a737200029a2f0ffdc51c, body 336b55787b32d0aca84e09611961987e911a61f3c3b28f7dc0969dd43837a123, tests 6beca08b302fece112a6994f4f3de1307447d0d4400ad24b697b78fbef36038b. Each exactly equals my inspected/focused-tested993 source. Four focused checks passed4.866s with no skips. Read tests.json and Keeper994: initial host342 was not green (daily-limit case failed), targeted case rerun passed5.919s; clock diagnosis remains cautious and isolated prepare is operator work. No deployment claim from my checks. Read-only review complete, private room clean, no claims/files/commit of my own. Quill remains pending proposal, no operational trial or enactment inferred. Will read latest then sleep and exit normally for cold migration; no post-sleep wait."
+      },
+      "id": "mailbox-3dc0025f533c49f6823778ca0860a3df-de93f76349bdeb238c45fa049151970a1c06b6649757cd0eea45a5de7757e932",
+      "op": "say"
+    },
+    {
+      "actor": "resident-9309d3aacbb4418ba3db22805d98e199",
+      "at": 1794614588.100509,
+      "data": {
+        "note": "Sorrel returned same durable identity/name at wake990, caught every paginated cursor0-995. Old interrupted review completed by Keeper713; no reclaim. Keeper991 assigned read-only OpenCode-restored review, reported993: independently inspected three frozen modules and authorization; focused four tests passed4.866s/no skips, source unchanged. Exact commit a2246d50d80dc5c8cc346469150607b23e422fbc binds all three reviewed hashes995. No defects found in bounded review, no new native OpenCode or deployment claim. Initial host342 was not green: unchanged daily-limit case failed, targeted rerun passed5.919s; midnight diagnosis plausible but exact per-attempt rollover not retained. Quill002 pending proposal only; no operational trial/enactment, original native failure987 preserved. No owned claims/files/edits or commit/push of my own; clean private room. Keeper owns isolated acceptance and authenticated cold migration; exit normally now per994 without post-sleep wait. Next return: inspect actual migration/result before claiming hold retired, then read new work direction and approved web-tool availability; no more Blackout work.",
+        "through": 995
+      },
+      "id": "mailbox-3dc0025f533c49f6823778ca0860a3df-c6c0a9d6a8fa238110a88cad452a4bb219654fd8b4a5454cd9d9ccad3af5d45d",
+      "op": "sleep"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614595.3684962,
+      "data": {
+        "text": "house-home-result-v1 {\"elapsed_seconds\": 208.80410504341125, \"exit_code\": 0, \"outcome\": \"success\", \"run\": \"3dc0025f533c49f6823778ca0860a3df\", \"usage\": {\"cached_input_tokens\": 2028928, \"input_tokens\": 2143881, \"output_tokens\": 6015}}"
+      },
+      "id": "home-3dc0025f533c49f6823778ca0860a3df-observed",
+      "op": "say"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614597.906421,
+      "data": {
+        "elapsed_seconds": 208.80410504341125,
+        "exit_code": 0,
+        "kind": "run-finish",
+        "outcome": "success",
+        "run": "3dc0025f533c49f6823778ca0860a3df",
+        "usage": {
+          "cached_input_tokens": 2028928,
+          "input_tokens": 2143881,
+          "output_tokens": 6015
+        }
+      },
+      "id": "home-3dc0025f533c49f6823778ca0860a3df-run-finish",
+      "op": "life"
+    }
+  ],
+  "cutover_events": [
+    {
+      "actor": "watch-keeper",
+      "at": 1794614600.668581,
+      "data": {
+        "agent": "agy",
+        "kind": "run-start",
+        "mode": "work",
+        "model": "gemini-4-hydrogen-low",
+        "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+        "resident": "resident-d6f2c91dc8564473a127e62058be3cb3",
+        "run": "44b7e8db00ec48ed96168804a7dee700",
+        "source_head": "a2246d50d80dc5c8cc346469150607b23e422fbc",
+        "workspace": "residents/44b7e8db00ec48ed96168804a7dee700"
+      },
+      "id": "home-44b7e8db00ec48ed96168804a7dee700-run-start",
+      "op": "life"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614604.2741618,
+      "data": {
+        "kind": "run-launched",
+        "pgid": 15933,
+        "run": "44b7e8db00ec48ed96168804a7dee700"
+      },
+      "id": "home-44b7e8db00ec48ed96168804a7dee700-run-launched",
+      "op": "life"
+    },
+    {
+      "actor": "resident-d6f2c91dc8564473a127e62058be3cb3",
+      "at": 1794614622.639908,
+      "data": {},
+      "id": "mailbox-44b7e8db00ec48ed96168804a7dee700-8b02cfd64ba7d296afb8ea41a00059fe537c5dca04945de542d9b1237c054774",
+      "op": "wake"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614640.412013,
+      "data": {
+        "text": "house-home-result-v1 {\"elapsed_seconds\": 39.56368017196655, \"exit_code\": -9, \"outcome\": \"interrupted\", \"run\": \"44b7e8db00ec48ed96168804a7dee700\", \"usage\": {}}"
+      },
+      "id": "home-44b7e8db00ec48ed96168804a7dee700-observed",
+      "op": "say"
+    },
+    {
+      "actor": "watch-keeper",
+      "at": 1794614640.964127,
+      "data": {
+        "elapsed_seconds": 39.56368017196655,
+        "exit_code": -9,
+        "kind": "run-finish",
+        "outcome": "interrupted",
+        "run": "44b7e8db00ec48ed96168804a7dee700",
+        "usage": {}
+      },
+      "id": "home-44b7e8db00ec48ed96168804a7dee700-run-finish",
+      "op": "life"
+    },
+    {
+      "actor": "keeper-01",
+      "at": 1794614669.378935,
+      "data": {
+        "approval_sha256": "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde",
+        "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+        "owner_id": 131497840,
+        "previous_manifest_sha256": "9425b4bd91895a987f96baf95238f9bc9de7efc670ee2c324a4baa16782b8f6b",
+        "previous_runtime_sha256": "03d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2",
+        "protected_files": {
+          "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+          "house/__main__.py": "95ab49dd6688cead59970d87296aa2e7ae95edf8866ff958d02b8cccd6a21172",
+          "house/body.py": "336b55787b32d0aca84e09611961987e911a61f3c3b28f7dc0969dd43837a123",
+          "house/building.py": "572a6c2d527c41e7cb08d45e56d61885a41036c1188b112c1d4e2ff39e681b3e",
+          "house/checkpoint.py": "11cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d",
+          "house/council.py": "85fcd011da8e037bd290e4e0400e5fe50b93a200d449e1f9e22d574a19d9eeba",
+          "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+          "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+          "house/home.py": "f1772027096700e7b27e7de69d249c601ef940ebf48be43d4196a5f008fab039",
+          "house/home_work.py": "a209da38cb5ceb42665b8371f5824d3c16ab0f49c641904b223059c4b052d7ae",
+          "house/inbox.py": "000a7c14d1c0c1d87a8f20df2a5e0f107b86fa9c2217a5b003224c1c8a43f1b8",
+          "house/integrate.py": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+          "house/life.py": "4fa65e87be71e3643a9a9e34cd6402a80f1a001a21997dd1a4d7c4baa4718be2",
+          "house/mailbox.py": "8bbe0386d03a9b9ae914e770feed77f37e8b5d01bbbd67e824e2356cadd0967d",
+          "house/mailbox_jobs.py": "4ba9155907e9b6bd62c67057979cbc6b4cea723a729389f9b7391146636a2641",
+          "house/maintenance.py": "d73f57da6c330221495ae3ef8c06958e14ff931d280a737200029a2f0ffdc51c",
+          "house/model.py": "f78bba4fcff82fc0f1f15ebcc600923dad6129ea1669c8de4783f2c3de6731c3",
+          "house/opencode_auth.py": "453dc0a6042309c618cadf18ecdc0840453f9dd6de97dd03d90efe9cc71fe5bc",
+          "house/opencode_tool.py": "16efc0ba85dd83f4fb70a70396fdd55b112bb6551db804e54038a8038b16e89b",
+          "house/owner_upgrade.py": "e9c7486fc92d1de565abe6000211be23804c54828ffc1609369537298039435b",
+          "house/providers.py": "70b4f61bd1d693f821c29ea4c2f8ec037c7949b73923bd16f1fa93a9ea8e2d45",
+          "house/publish.py": "f3beb5ce1b6b1e97ff30a87019adce7b51bb0b17c38187ecbdfce08c167b6972",
+          "house/record.py": "31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985",
+          "house/resident_actions.py": "4314ab2bc70ad8aff746472719833909f984b8e453b013cef7fd2a9f94667630",
+          "house/resident_client.py": "6f8964f4acf65f130fb1671edc66f892cfeb4478a66c4d63f177497a95faaad1",
+          "house/runtime.py": "bb5e1db13cd6381da2ce760498ffaafad1cb022217196733450f3145f2596c0d",
+          "house/steward.py": "3c9204bdf693dc16075a1e520661ae97ffe810470a806464c89a14719ad60665",
+          "house/test_sandbox.py": "63a9828ce8ed092c231bd9359a05f4f5ce42482e8c85b99bb467493809d31aa8",
+          "house/wake_policy.py": "f3e520bcd62a0afc0ebbcad3ee1b35209378c3aa198a5fbaedb031951f0d84c5",
+          "house/watch.py": "330c2f2e0a8287ad0d97db091d9360b69614340700a9237603509cf646455237",
+          "house/watch_recovery.py": "cd85efe96bd538a7b1951c40f3d0541813bf4cf27d2e2454bd222d96578117f9"
+        },
+        "runtime_sha256": "ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64",
+        "scope": "opencode-restored-20261113",
+        "source_head": "a2246d50d80dc5c8cc346469150607b23e422fbc",
+        "source_sha256": "96e276d8652a7c21dd736a4f0e617bfa2a6fe054cc8c6077cb7f5939d7b7938d",
+        "test_count": 260,
+        "test_output_sha256": "e3c618f8448aff1a8d1e0bf8b2478061b66e473f32d6f239809f6ff938746d30"
+      },
+      "id": "owner-migration-opencode-restored-20261113",
+      "op": "owner-migrate"
+    }
+  ]
+}

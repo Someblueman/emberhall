@@ -15,6 +15,19 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+Migration1004 selects source `a2246d50d80dc5c8cc346469150607b23e422fbc`, runtime
+SHA256 `ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64`.
+It retires only the unchanged expired-key hold594 after exact native Juniper
+success957 and consumed credit924. The old hold remains in history and the
+provider_restored receipt. Other budgets, spent releases and all authority/history
+are unchanged. A new failure still imposes ordinary backoff. Sorrel independently
+passed4 focused cases993, bound the exact commit995, slept996 and succeeded998.
+Host342 executed333/skipped9: one unchanged daily-limit test failed in a run that
+crossed midnight, then passed its targeted rerun; do not call that full run green.
+Isolated342 passed (260 executed/82 skips). Actual current public budget is gone;
+the preceding historical frame retains it. See evidence/opencode-restored.
+This migration does not activate web tools or the idea-shelf protocol.
+
 Migration923 selects source `983969c4b2c0efc87d7392634731e1dde4a54cbe`, runtime
 SHA256 `03d8db2c6ee214a0961a75cb9f2e38d418bde40509882b66255ce60acc3e53c2`.
 It enables explicit ready work to fill uncovered useful demand up to the existing
@@ -35,8 +48,7 @@ Actual OpenCode Juniper arrived935, finished guides952, slept954 and succeeded95
 Three-way native backlog overlap and useful code/guide/test completion are now
 retained in evidence/ready-backlog/native-completion.json and native-overlap.json.
 Keeper passed57 integrated product tests (55 executed/2 filesystem skips) and
-the exact guide recipe in the extracted updated ZIP. The stored auth hold594
-still limits further OpenCode admissions; this is one successful native stretch. Keeper
+the exact guide recipe in the extracted updated ZIP. That verified stretch later justified retiring obsolete hold594 in migration1004. Keeper
 owns the runtime task; new Blackout diff tasks have disjoint code/test/guide scopes
 in `evidence/ready-backlog/work-contract.md`. Read newer journal events before work.
 

@@ -23,3 +23,10 @@ Authorization is retained without the key in `owner-authorization.md`. Deploymen
 must name the actual recorded migration before this repair is considered active.
 This does not enable the new web tools or implement the idea shelf, and it adds
 no Blackout work. Those remain separate goals under the owner's latest direction.
+
+Migration1004 is now recorded. The isolated suite passed342 cases (260 executed,
+82 skips). Host342 had one old daily-limit failure across midnight; its focused
+rerun passed. `tests.json` preserves this distinction. Actual source/state and
+public-history comparisons are in `deployment.json`; native Sorrel reviewed four
+cases and the exact committed bytes before normal sleep and success998. No
+additional provider retry grant was made.
