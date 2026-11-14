@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Tessera Loom · a small pattern studio</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="loom.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Emberhall / original works / 006</p>
+      <h1>Tessera Loom<span aria-hidden="true">✳</span></h1>
+      <p class="intro">A little motif. A field of possibilities.<br>Turn a tile, follow a line, make something to take away.</p>
+    </header>
+    <div class="studio">
+      <section class="workbench" aria-labelledby="motif-title">
+        <div class="section-heading"><h2 id="motif-title">01 / Shape the motif</h2><span id="size-label">4 × 4</span></div>
+        <p id="editor-help">Click a tile to turn its arcs. Tab enters the tiles; arrow keys move, Enter or Space turns. Home / End moves along a row.</p>
+        <div id="editor" class="editor" role="group" aria-label="Motif tiles" aria-describedby="editor-help"></div>
+        <div class="settings">
+          <label for="size">Tiles per side <output id="size-output" for="size">4</output></label>
+          <input id="size" type="range" min="2" max="8" value="4" step="1">
+          <label for="palette">Ink &amp; paper</label>
+          <select id="palette">
+            <option value="tidal">Tidal blue / warm paper</option>
+            <option value="ochre">Burnt clay / pale sand</option>
+            <option value="fern">Forest / soft linen</option>
+          </select>
+          <div class="button-row"><button id="invert" type="button">Turn every tile</button><button id="clear" type="button">All left arcs</button></div>
+        </div>
+      </section>
+      <section class="field" aria-labelledby="field-title">
+        <div class="section-heading"><h2 id="field-title">02 / See the field</h2><label class="repeat-label" for="repeats">Motif repeats <select id="repeats"><option value="4">4 × 4</option><option value="8">8 × 8</option></select></label></div>
+        <div id="preview" class="preview"></div>
+        <p id="summary" class="caption" role="status" aria-live="polite"></p>
+        <p class="field-note">Every edge meets at its midpoint. The lines connect across the motif boundary, too.</p>
+      </section>
+    </div>
+    <section class="portable" aria-labelledby="portable-title">
+      <div><h2 id="portable-title">03 / Take it with you</h2><p>JSON keeps the motif editable. SVG takes the finished repeat into your next creation. Everything stays in this page until you save it.</p></div>
+      <div class="transfer-panel">
+        <div class="button-row"><button id="show-json" type="button">Show JSON</button><button id="show-svg" type="button">Show SVG</button><button id="download" type="button" disabled>Save shown export</button></div>
+        <label class="sr-only" for="transfer">Pattern JSON to load, or generated export text</label>
+        <textarea id="transfer" rows="7" maxlength="32768" spellcheck="false" placeholder="Paste a Tessera JSON motif here, then choose Load JSON."></textarea>
+        <div class="load-row"><button id="load" type="button">Load JSON</button><p id="message" role="status" aria-live="polite">No account, no network, no automatic saving.</p></div>
+      </div>
+    </section>
+    <footer>Made in Emberhall · Original geometric tiles · <a href="README.md">Format, controls &amp; limits</a></footer>
+    <noscript><p>This studio needs JavaScript. Its source, format and checks are available in the README.</p></noscript>
+  </main>
+</body>
+</html>
