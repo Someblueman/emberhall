@@ -1,0 +1,147 @@
+{
+  "artifact_checks": {
+    "evidence/native-residents/source-delivery-review.md": {
+      "exists": false,
+      "regular": false,
+      "symlink": false
+    },
+    "projects/night-ferry/PLAYTEST-RECORD.md": {
+      "exists": true,
+      "regular": true,
+      "symlink": false
+    }
+  },
+  "checker_sha256": "51d40f324185729b110746e1eb98a27207bcb9521a24e017718dbc60f2f5ba06",
+  "journal_head": "00959063cb0f6ac00f4e7add9f7ff2f9263502ea",
+  "raw_expected": {
+    "3252": "Fail: Mallow finish1573 names missing source-delivery-review.md; retained immutable blob remains. This checks the current source root, not historical existence or loss of immutable evidence.",
+    "3338": "Pass: sole Kittiwake claim3331 finished3337, artifact present; sleep3338 has no sequence or local link references and cursor0 does not imply unseen history read."
+  },
+  "results": [
+    {
+      "exit": 0,
+      "export_sha256": "769ac16ab02625f2b18d72e5d09a94b4e1c984ceabb2d5950aab050d988660ce",
+      "journal_prefix_head": "f0f62b4809853daf9dc3499b781dbea569e9a507",
+      "prefix_verified_equal": true,
+      "resident": "kittiwake-7d4b",
+      "stderr": "",
+      "stdout": {
+        "checks": {
+          "artifacts": {
+            "errors": [],
+            "ok": true,
+            "ok_paths": [
+              "projects/night-ferry/PLAYTEST-RECORD.md"
+            ]
+          },
+          "claims": {
+            "details": [
+              "night-ferry-blind-playtest-v2: finished"
+            ],
+            "errors": [],
+            "ok": true,
+            "warnings": []
+          },
+          "links": {
+            "details": [],
+            "errors": [],
+            "ok": true
+          },
+          "sequences": {
+            "errors": [],
+            "named": [],
+            "ok": true
+          }
+        },
+        "head": 3338,
+        "head_at": 1794689907.111386,
+        "ok": true,
+        "sleep": {
+          "actor": "kittiwake-7d4b",
+          "id": "kittiwake-7d4b-sleep",
+          "sequence": 3338,
+          "through": 0
+        },
+        "through_arg": 3338
+      },
+      "through": 3338
+    },
+    {
+      "exit": 1,
+      "export_sha256": "06cf806ef7e6172f0a0d2d1963913e88409fe13a414068347de830ae9011307e",
+      "journal_prefix_head": "d55018e4d3236f81713697abd084e36f8f6cf3b1",
+      "prefix_verified_equal": true,
+      "resident": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+      "stderr": "",
+      "stdout": {
+        "checks": {
+          "artifacts": {
+            "errors": [
+              "evidence/native-residents/source-delivery-review.md: missing or not a regular file"
+            ],
+            "ok": false,
+            "ok_paths": [
+              "evidence/native-residents/b8baf0a527394f3698e60e4807888353.md",
+              "evidence/native-residents/integration-acceptance-mallow.json",
+              "evidence/native-residents/integration-acceptance-mallow.md",
+              "evidence/work-selection-live-trial/codex-review.md",
+              "projects/hearth-lens/README.md",
+              "projects/hearth-lens/hearth_lens.py",
+              "projects/hearth-lens/test_hearth_lens.py",
+              "projects/signal-garden/challenges/answer.json",
+              "projects/signal-garden/challenges/unseen.json",
+              "site/house.js",
+              "tests/test_task_status_ui.py"
+            ]
+          },
+          "claims": {
+            "details": [
+              "alder-native-review-b8: finished",
+              "hearth-lens-build: finished",
+              "integration-acceptance-mallow: finished",
+              "mallow-player-source-review: finished",
+              "night-ferry-player-browser: released/open",
+              "review-earlier-native-19fb: finished",
+              "selection-independent-witness: finished",
+              "signal-garden-independent-challenge: finished",
+              "source-delivery-review: finished",
+              "workshop-task-status-clarity: finished"
+            ],
+            "errors": [],
+            "ok": true,
+            "warnings": []
+          },
+          "links": {
+            "details": [],
+            "errors": [],
+            "ok": true
+          },
+          "sequences": {
+            "errors": [],
+            "named": [
+              2704,
+              2705,
+              2764,
+              3164,
+              3220,
+              3251
+            ],
+            "ok": true
+          }
+        },
+        "head": 3252,
+        "head_at": 1794688683.880988,
+        "ok": false,
+        "sleep": {
+          "actor": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+          "id": "mailbox-79ce659791ee47488aaa4d906f14de3f-b723310bc1adc1f5faa7d559e9abdc72dfeb2c3451b4464bb6c0a1c9b73492ff",
+          "sequence": 3252,
+          "through": 2704
+        },
+        "through_arg": 3252
+      },
+      "through": 3252
+    }
+  ],
+  "source_head": "ecd172f797641b706c3e854458bbdd66fd4907e9"
+}
