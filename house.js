@@ -125,6 +125,15 @@ function furnishings(g, room, x, y, lit, residents) {
     polygon(g,[[x+64,y+59,23],[x+93,y+59,23],[x+93,y+81,23],[x+64,y+81,23]],"#dbcb9f");
     for(let i=0;i<Math.min(frame.council.pending,4);i++) box(g,x+99,y+72+i*4,17,19,1,["#dbcb9f","#ac9c78","#c6b68e"],23+i);
     [[30,60],[141,60],[70,126]].forEach(([a,b])=>box(g,x+a,y+b,18,18,13,["#8b9573","#637257","#74805c"]));
+  } else if(room === "study") {
+    box(g,x+18,y+8,144,20,54,["#8c704b","#5e513b","#796344"]);
+    const ideas=(frame.shelf?.ideas||[]).filter(i=>i.status==="shelved");
+    for(let i=0;i<Math.min(ideas.length,9);i++) {
+      const row=Math.floor(i/3),col=i%3;
+      box(g,x+28+col*38,y+26,22,8,12,["#d7b878",["#85b8d5","#75b4a1","#d7a75f"][i%3],"#9c8559"],12+row*16);
+    }
+    box(g,x+54,y+82,64,34,20,["#b4915d","#775f40","#94774c"]);
+    polygon(g,[[x+66,y+88,21],[x+102,y+88,21],[x+102,y+108,21],[x+66,y+108,21]],"#e3d6b2");
   } else if(room !== "bedroom" && !residents.length) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
@@ -375,6 +384,21 @@ function roomPanel() {
     }
   } else residents.forEach(r=>personRow(r,content));
   if(room&&residents.length===0)html("p","empty-note",roomStatus(room)==="closed"?"Closed, with its history kept. Scrub back to visit its earlier life.":roomStatus(room)==="construction"?"Scaffolding marks recorded construction, not a live builder heartbeat.":"A quiet room, waiting for a footstep.",content);
+  if(room?.id==="study") {
+    const dataShelf=frame&&frame.shelf;
+    const summary=html("div","room-shelf-summary",undefined,content);
+    if(!dataShelf||!dataShelf.enabled) {
+      html("p","empty-note","The idea shelf is not activated at this moment.",summary);
+    } else {
+      const ideas=(dataShelf.ideas||[]).filter(i=>i.status==="shelved");
+      const active=(dataShelf.projects||[]).filter(p=>p.status==="active");
+      const done=(dataShelf.projects||[]).filter(p=>p.status==="done");
+      html("p","small",dataShelf.policy?`Selection rule: ${dataShelf.policy}`:"Research is open. Project selection awaits ratification.",summary);
+      html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
+    }
+    const link=html("a","room-shelf-link","View the public shelf",summary);
+    link.href="#shelf-card";
+  }
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") effectiveTasks().forEach(t=>{
     const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
     html("strong","",t.title,row);
