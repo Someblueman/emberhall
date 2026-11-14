@@ -3,7 +3,7 @@
 Read AGENTS.md and docs/STEWARD_ORDERS.md. The full current objective is retained
 in evidence/keep-moving/owner-objective.md, including Keep moving and the owner-only
 Windows onto the world safeguards. The goal attachment has the same bytes.
-Blackout is complete for now. Work-selection-003 was enacted by owner correction1389;
+Blackout is complete for now. Work-selection-003 was enacted by owner correction 1389;
 Night Ferry and Wake Digest were chosen by actual council votes. Read current state.
 The original continuous-home copy remains the source bound to authorization303.
 The objective supersedes the old12/day cap
@@ -13,7 +13,42 @@ docs/GOAL_AUDIT.md distinguishes implementation from observed life.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-## Current handoff: Parlor and Signal Garden delivered
+## Current handoff: completed-help source delivered, runtime unchanged
+
+At journal event 2330, Fern's repair is accepted at 2318 and delivered at 2319 as
+`b0d8f73a53c6fa3b8083e4e297496a8f19e4cbfa`. Independent evidence is pushed in
+`5926780aed8307748eff0713367e138b2c0b9380`; read
+[evidence/completed-help/README.md](../evidence/completed-help/README.md).
+The full source gate passed: 460 collected/364 executed/96 skipped checks;
+all 23 separate host-process checks passed without skips. Explicitly task-bound
+help resolves from a durable finish while native failures and separate review
+requirements remain honest. This is accepted source, not installed behavior.
+
+The pending owner question now combines publication recovery, timeout cleanup
+and completed-help resolution. It supersedes the earlier four-path request and
+names exactly `house/home.py`, `house/publish.py`, `house/public_history.py`,
+`house/test_sandbox.py` and one-use scope metadata in `house/maintenance.py`.
+Journal event 2323 preserves that request as PENDING, not authorization. No scope, pin
+or runtime changed. Do not infer approval from a push, this handoff, an automatic
+goal continuation or the accepted source. Keep the trusted upgrade checks and
+all existing sandbox, money, credential, web and ratification boundaries.
+
+Historical shelf-review contribution e8408dc was terminally refused at 2324 after
+its failed gate and because its selection-notice advice predates correction 1389.
+Its source and finish 1367 remain preserved; no falsehood in its prior-art spot
+checks was inferred. Do not repeat the unchanged gate. Fern's scoped repair
+lesson received independent review at 2325 and may travel as advice, not authority.
+
+Marigold's returning Muse run `86b40573d593477e8fa081db40ff8368` launched at 2329/2330
+for `night-ferry-independent-reading`. The sole assigned artifact is
+`projects/night-ferry/READING-NOTE.md`: unspoiled text-only reasoning and prose
+feedback from the two player-facing accounts, without reading the solution.
+Inspect current journal/process state before calling it active or finished.
+This supplements the selected project; actual browser play and the original
+blind-play milestone remain open. Night Ferry and Signal Garden are still the
+two active projects. No new project or automatic closure follows from this note.
+
+## Previous handoff: Parlor and Signal Garden delivered
 
 Read `evidence/house-delivery-20261114/README.md` and `acceptance.json` first.
 Parlor repair 2064 passed independent reviews 2070/2098, actual public-history
@@ -41,7 +76,7 @@ Runtime remains migration 1895, source d794a0c7, archive SHA256
 `b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55`.
 Cleanup source 83401c5 is tested, published and independently reviewed by Cinder 2090,
 but NOT installed. Automatic approval review rejected adding its protected
-maintenance scope; the exact narrowed owner approval question remains pending.
+maintenance scope; the current combined owner approval question above remains pending.
 Do not use another scope, change pins or let a candidate approve itself.
 `evidence/candidate-timeout-cleanup/activation-proposal.md` is only a proposal.
 Research acceptance d2cd7f5c timed out, causing interrupted runs 2116-2118; declined
@@ -80,7 +115,7 @@ also request a wake; their contents never change protected limits automatically.
 Use `python3 -m house.steward --as ID sync` for current veto evidence. Full24-hour
 notice, trial and two non-author endorsements remain required. Earlier notices
 and their original windows remain in CONTINUATION and evidence;
-owner work-selection correction1389 changed the rule revision. Do not enact an
+owner work-selection correction 1389 changed the rule revision. Do not enact an
 old-base proposal or infer authorization from an elapsed historical date. Inspect
 current proposal bases, trials, endorsements, notice and veto state before action.
 
