@@ -1,0 +1,10 @@
+test_real_inert_helpers_get_two_separate_rooms_and_native_outcomes (tests.test_helper_home.HelperHomeTests.test_real_inert_helpers_get_two_separate_rooms_and_native_outcomes) ... ok
+test_exact_target_over_older_preserves_cursor_and_fresh_room (tests.test_targeted_wakes.TargetedCoordinatorTests.test_exact_target_over_older_preserves_cursor_and_fresh_room) ... ok
+test_unavailable_target_does_not_allocate_or_block_unrelated_tick (tests.test_targeted_wakes.TargetedCoordinatorTests.test_unavailable_target_does_not_allocate_or_block_unrelated_tick) ... ok
+test_wake_between_selection_and_admission_leaves_no_empty_room (tests.test_targeted_wakes.TargetedCoordinatorTests.test_wake_between_selection_and_admission_leaves_no_empty_room) ... ok
+test_wrong_provider_and_duplicate_do_not_allocate (tests.test_targeted_wakes.TargetedCoordinatorTests.test_wrong_provider_and_duplicate_do_not_allocate) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 20.046s
+
+OK

@@ -1,0 +1,62 @@
+{
+  "artifact_sha256": {
+    "desktop.jpg": "801d391ca00758fb2fea48ac28655272094b36211ae0f57b8fd3bd1d3c0a23c3",
+    "export.jpg": "d00173cbe2f54d610e3a8a58203639567d368f7fc668eed4e2fee13a75892f70",
+    "field.svg": "bff9c42c3aae78906138d3a8c7bb41ed6fb92d015f6e0c9f799cabaa5309c1da",
+    "motif.json": "1b9797d2af4c1b1e650428a8229c900a53b3f326d67a414659b37f9707a1fa1e"
+  },
+  "browser": "ChatGPT in-app browser",
+  "expected_motif": {
+    "palette": "fern",
+    "size": 2,
+    "tiles": [
+      1,
+      1,
+      0,
+      1
+    ],
+    "version": 1
+  },
+  "keyboard": [
+    "slider Home selects2",
+    "clear motif",
+    "Enter at row1 column1",
+    "Right then Enter",
+    "Down then Space",
+    "Right wraps row2",
+    "Up then Tab exits grid to size slider"
+  ],
+  "limits": [
+    "SVG text export captured; SVG download/reopen not tested",
+    "phone layout and general accessibility not tested",
+    "one model operator, not a human usability study",
+    "full-page screenshot omitted some offscreen controls; viewport export screenshot shows them",
+    "download wait reported3829.938s despite15s requested timeout; cause unknown"
+  ],
+  "observed": {
+    "downloaded_json_bytes_match_export": true,
+    "downloaded_json_restores_cleared_motif": true,
+    "eight_repeat_preview": "2x2 motif;8x8 repeats;16x16 tiles",
+    "four_repeat_preview": "2x2 motif;4x4 repeats;8x8 tiles",
+    "invalid_import_preserves_motif": true,
+    "json_browser_download_observed": true,
+    "json_matches_expected": true,
+    "json_repeated_export_identical": true,
+    "svg_paths": 512,
+    "svg_repeated_export_identical": true,
+    "svg_viewbox": "0 0 1600 1600",
+    "tab_leaves_grid": true
+  },
+  "observer": "keeper-01",
+  "source": {
+    "finish": 3591,
+    "hashes": {
+      "projects/tessera-loom/README.md": "17aa9da168d49b748955c3223a581fe5daef259552266e3d118012401602499c",
+      "projects/tessera-loom/index.html": "1b8082643d40d24e68db3c9371d1bd7cda9c2c700f7a0e8545f32a77f9da07ea",
+      "projects/tessera-loom/loom.js": "adb5905fc49008416a49dd0995b194fa61d6dc155d578cf3e862cbd931afd655",
+      "projects/tessera-loom/style.css": "853bba30b80d40ccde8580caa5a264ec5039bf31c9834307c5e15d3d252a111b",
+      "projects/tessera-loom/test_loom.js": "6b5a38a9db7c6ab7c411ded8cf22dd9c5e7fa5864a11872a25e0f419b150175c"
+    }
+  },
+  "source_matches_integrated": "5b8c4f28ea56f88a0aa83fa85bddd1a4b6928599"
+}

@@ -1,0 +1,76 @@
+{
+  "activation": null,
+  "artifacts": {
+    "docs/HELPERS.md": "a7678d9e208e48b5fbbc1535ffb642eaa981bfd35fb44646cc40cf7a84e03713",
+    "docs/HOME.md": "63faa10a975f26ef790762154fbb8fa9de520ec6c6f32e0c02abbcaa0c2108e7",
+    "house/__main__.py": "b89b506351b2f595ac975a3ad696272fcafb8bcad45c9d46b85c8a6609d85ecd",
+    "house/home.py": "cbbfcb8ae83d036ae261b12160238c81879795e6ae91228d26892a673af0693b",
+    "house/life.py": "4dd37b26dc23699104808b440b3a21b27bde0fd9f1ed05f38a3b714c00e0a534",
+    "house/maintenance.py": "6f8b8eff5f1d46b7fe6e965dfa770d35c9b8281882f6ae784a429d974769a524",
+    "house/model.py": "7630b379e436cce6274976fecebffb1c2adbf1ae10fcc78e0b9a32b3a6981dc4",
+    "house/owner_upgrade.py": "341d92f725061e932e8eff762affcd79b4203aba5e4559fa2106f63f3f700f91",
+    "house/providers.py": "1c468578a8f5ddeb11645a80b9e25f2b5674bbeb6a52b475c0c3635122de2f3d",
+    "house/staffing.py": "f7b10190162a37d50f04d2e67b6e5114f1f36f53416154b9d009867ac07da2e4",
+    "house/work_metrics.py": "5c53d314d73285d8c16ca91cf98abaee5a953097089a037aad4ae18e1a555b02",
+    "tests/test_helper_home.py": "e0777b469cb36c6ce48952bf857b16d9cc21f4921ce335fd56250f0f638e75b4",
+    "tests/test_helper_staffing.py": "ed1e81f02fdf19535fceb94730194dbe68db658c83fdf4c510ef3d76ce1701a3"
+  },
+  "builder_run": "c2f58fcf9b7440d9ae2983513c19cfe9",
+  "candidate": "c37c23a608e41b323924bcb6b5d084cc2358ce6c",
+  "finish_sequence": 3489,
+  "host_checks": [
+    {
+      "executed": 5,
+      "file": "host-process-tests.txt",
+      "seconds": 20.046,
+      "sha256": "95b118a5701cfc2fc1d3e842565f23232ae13816e36938b3d1a7ceea2b852ba0",
+      "skipped": 0
+    },
+    {
+      "executed": 5,
+      "file": "host-owner-tests.txt",
+      "seconds": 14.529,
+      "sha256": "1da2433c6b07046afbf94f12eb3a4813bada80be2918574c9479a799ff60e244",
+      "skipped": 0
+    }
+  ],
+  "independent_native_review_sequence": 3569,
+  "initial_preparation": {
+    "runtime_sha256": "0717d1ea480e66ae225ab0d71ba514d03d79e6bef6012c8e21165b110e72a66c",
+    "source_head": "fff578e85027c2359d17baf08fa38e6830f3d2e1",
+    "source_sha256": "e962eca9d1d6174303f6ad66402f3a0d948b504093cc74aad934ddb29174455a",
+    "status": "stale source after actual long browser-tool stall; not activated",
+    "test_count": 465,
+    "test_output_sha256": "af58a751beac642644341ea4703f445e156fd398b00b463055ccafc1e8f59570"
+  },
+  "integration": {
+    "actor": "keeper-01",
+    "base": "ee36ceca0c6f0e6822284c3c541632debfcbf710",
+    "candidate": "integration-170fa05cc32245fe944193a06288f669",
+    "candidate_head": "ceb1160415779226c9e6fe140227426d8e7d63b5",
+    "collected": 577,
+    "contribution": "c37c23a608e41b323924bcb6b5d084cc2358ce6c",
+    "executed": 465,
+    "run": "c2f58fcf9b7440d9ae2983513c19cfe9",
+    "seconds": 325.691,
+    "skipped": 112,
+    "status": "integrated",
+    "test_commands": [
+      [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    ],
+    "test_exit": 0,
+    "test_scope": "foundation"
+  },
+  "native_helper_observations": [],
+  "review_sequence": 3517,
+  "reviewer": "keeper-01",
+  "scope_sha256": "4b2f63bfbb054b70e77fce85edeced049257971c28e28ae473c9133685aa7a3a"
+}
