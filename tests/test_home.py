@@ -147,10 +147,10 @@ class HomeTests(HouseCase):
             self.record.append("task", "alice", {"task": name, "title": name,
                 "description": "Independent fixture work", "ready": True})
         old_choose = home.choose_provider
-        def choose(state, at, preferred=None):
+        def choose(state, at, preferred=None, **kwargs):
             self.record.append("claim", "alice", {"task": "two", "expect": 0,
                 "token": "won-before-admission", "seconds": 60})
-            return old_choose(state, at, preferred)
+            return old_choose(state, at, preferred, **kwargs)
         with patch("house.home.choose_provider", side_effect=choose):
             result = self.coordinator.tick(poll=False)
         self.assertEqual(result["started"], [])

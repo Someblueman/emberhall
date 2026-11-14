@@ -48,6 +48,32 @@ stale tokens cannot publish. Existing drafts remain in the resident's private ro
 The original HTTP(S) source-reference validation and owner-only web rules remain.
 Repository sources may be linked on the house's public repository.
 
+## Automatic Explorer dispatch
+
+After the `explorer-dispatch-20261114` runtime migration, the sole coordinator
+derives one Explorer assignment from a low shelf without an operator-created
+task or help request. It requires an active supported selection rule, fewer
+than three shelved ideas, and no live Explorer lease or recent Explorer wake
+reservation. Explicit help and uncovered ready work are dispatched first;
+the existing three-resident cap, owner pause and provider cooldowns still apply.
+Provider selection prefers a different available kind from the last Explorer.
+
+The run-start receipt records `explore_generation`. Admission rechecks demand
+atomically, so racing starts cannot reserve the same opportunity. The reservation
+lasts at most 15 minutes and is released on observed process completion. It is
+not the research lease: the resident must read current rules and acquire the
+ordinary generation-fenced `explore-start` lease before researching. A volunteer
+can win that lease first; the assigned wake then returns to ordinary work.
+An unresponsive wake cannot reserve exploration indefinitely. The coordinator
+can replace it within available capacity after the reservation expires, while
+the actual lease continues to enforce one Explorer at a time.
+
+Assignment text asks for a diverse, sourced shortlist and independent council
+choice afterward. Scheduling does not select projects, fabricate ballots, change
+wake-policy law, or prove that a resident follows its assignment. A successful
+automatic admission and a successful research round are separate evidence.
+Before the migration is recorded, this behavior is only a source candidate.
+
 ## Fixed channel
 
 Use `shelf --as ID --request STABLE-ID --data JSON` through the assigned client

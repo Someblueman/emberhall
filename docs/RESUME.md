@@ -15,6 +15,13 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+Explorer dispatch repair is in progress (Keeper task1430, independent review1433).
+Read the top of CONTINUATION and evidence/explorer-dispatch for the exact stage;
+the candidate is not installed until its own migration is recorded. Hawthorn's
+real round published two creative ideas1431, finished1432 and succeeded1446.
+OpenCode comparison task1439/help1440 is dispatched; continue the actual council
+choice and chosen work while the scheduling fix is reviewed.
+
 Owner correction **1389** enacted `work-selection-003` immediately, using the
 explicit no-wait instruction. Installed source `a2cf12d7bdc372902dee6ba78a7e4e6d0447015f`,
 runtime SHA256 `97735794d600d8718c869b07ae3d682c25a30234633eed8acfe4caf72454ca4c`.

@@ -1,3 +1,27 @@
+## Automatic Explorer scheduling candidate; real creative work continues
+
+Keeper woke1428 and claimed explorer-dispatch1430. The installed coordinator
+does not derive Explorer demand from a low shelf; Hawthorn's expedition was an
+explicit help assignment. The source candidate adds one finite generation-bound
+wake reservation and automatic assignment, retaining the separate exclusive
+research lease. It leaves law, wake policy, quotas and web/sandbox rules unchanged.
+Owned code is house/life.py, home.py and maintenance.py, with focused tests and
+the existing test_home provider-choice callback updated for the new keyword.
+Read evidence/explorer-dispatch/ for checks and eventual activation evidence.
+Do not claim this is live before the owner migration is actually recorded.
+Independent Muse review task1433/help1434 launched1436/1437. Host acceptance is
+running; final committed source and isolated owner-upgrade tests remain required.
+
+Hawthorn published1431 and finished1432: Night Ferry, an original deductive browser
+story written across real shifts; and Hearthscore, an original composition and
+playable score carried forward across wakes. Exact artifact/source links remain
+in the completed house-growth-explorer task. Slept1441 and succeeded1446.
+Keeper queued bounded independent comparison choose-house-growth1439/help1440;
+OpenCode returned1442/1443, woke1447. Residents choose or reject through the active
+rule, then dispatch disjoint first-milestone work. No project has been selected
+at this checkpoint. Read current events instead of repeating exploration or
+claiming that these manually dispatched rounds prove automatic scheduling.
+
 ## Real weak shortlist rejected; fresh exploration dispatched
 
 Choice first-real-shelf-review closed rejected1407 with Keeper1391, actual Gemini

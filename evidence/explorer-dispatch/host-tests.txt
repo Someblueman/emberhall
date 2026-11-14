@@ -1,0 +1,5 @@
+{"stage": "cleanup-pending", "run": "delayed-cleanup", "pgid": 26618}
+----------------------------------------------------------------------
+Ran 410 tests in 356.227s
+
+OK (skipped=10)

@@ -73,6 +73,40 @@ def backlog_enabled(state: dict) -> bool:
     return "wake_policy" not in state or BACKLOG_SCOPE in state.get("maintenance", {}).get("migrations", {})
 
 
+EXPLORER_ADMISSION_SECONDS = 900
+
+
+def explorer_reserved(run: dict, at: float) -> bool:
+    """A wake gets a finite chance to claim the real, separately fenced role."""
+    return (run["status"] == "active" and "explore_generation" in run
+            and at < run["started_at"] + EXPLORER_ADMISSION_SECONDS)
+
+
+def explorer_owner(state: dict, at: float) -> str | None:
+    record = state.get("shelf", {})
+    expedition = record.get("rounds", {}).get(record.get("explorer"))
+    if (expedition and expedition["until"] > at
+            and state["residents"][expedition["owner"]]["awake"]):
+        return expedition["owner"]
+    return None
+
+
+def explorer_demand(state: dict, at: float) -> int | None:
+    from . import shelf, shelf_gate
+    from .maintenance import EXPLORER_SCOPE
+    if (EXPLORER_SCOPE not in state.get("maintenance", {}).get("migrations", {})
+            or not shelf_gate.enabled(state) or shelf_gate.policy(state) is None):
+        return None
+    record = state.get("shelf", shelf.empty())
+    if len(shelf.shelf_ids(record)) >= 3:
+        return None
+    if explorer_owner(state, at) is not None:
+        return None
+    if any(explorer_reserved(run, at) for run in state.get("life", {}).get("runs", {}).values()):
+        return None
+    return record["generation"]
+
+
 def workload(state: dict, at: float) -> dict:
     """Count declared work and unclaimed native capacity, not apparent CPU activity."""
     from .home_control import paused
@@ -86,17 +120,21 @@ def workload(state: dict, at: float) -> dict:
                 (request["status"] == "assigned" and request.get("run") in active)}
     claimed = {task["owner"] for task in state["tasks"].values()
                if task["status"] == "claimed" and (task["until"] > at or task["owner"] in active_residents)}
+    exploring = explorer_owner(state, at)
     idle = [run["resident"] for key, run in active.items() if run["resident"] not in claimed
+            and run["resident"] != exploring
+            and not explorer_reserved(run, at)
             and not (requests.get(run.get("help_request"), {}).get("status") == "assigned")]
     ready = [key for key, task in state["tasks"].items()
              if backlog_enabled(state) and task.get("ready") is True and task["status"] != "done" and task["until"] <= at
              and not (task["status"] == "claimed" and task["owner"] in active_residents)
              and key not in reserved]
     uncovered = max(0, len(ready) - len(idle))
+    explore = explorer_demand(state, at)
     return {"ready_tasks": ready, "idle_residents": idle, "pending_help": pending,
-            "uncovered_tasks": uncovered,
+            "uncovered_tasks": uncovered, "explore_generation": explore,
             "wanted_starts": 0 if paused(state, at) else min(max(0, 3 - len(active)),
-                                 max(1 if not active else 0, len(pending) + uncovered))}
+                                 max(1 if not active else 0, len(pending) + uncovered + (explore is not None)))}
 
 
 def apply(state, event):
@@ -169,7 +207,7 @@ def apply(state, event):
             from .home_control import paused
             require(not paused(state, at), "owner paused admissions")
             fields(data, {"kind", "run", "resident", "agent", "model", "source_head",
-                          "workspace", "policy_revision", "mode"}, {"help_request", "backlog"})
+                          "workspace", "policy_revision", "mode"}, {"help_request", "backlog", "explore_generation"})
             from .providers import validate_model
             validate_model(data["agent"], data["model"])
             run = identifier(data, "run")
@@ -188,6 +226,11 @@ def apply(state, event):
                     "invalid source head")
             string(data, "policy_revision", 100)
             require(data["workspace"] == "residents/" + run, "invalid private workspace")
+            if "explore_generation" in data:
+                require(type(data["explore_generation"]) is int and
+                        not {"help_request", "backlog"} & data.keys(), "invalid Explorer admission")
+                require(explorer_demand(state, at) == data["explore_generation"],
+                        "Explorer demand changed")
             if "backlog" in data:
                 require(data["backlog"] is True and "help_request" not in data,
                         "invalid backlog admission")

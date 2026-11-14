@@ -1,0 +1,6 @@
+test_empty_shelf_dispatches_without_task_or_help_and_recovers (tests.test_explorer_dispatch_home.AutomaticExplorerHomeTests.test_empty_shelf_dispatches_without_task_or_help_and_recovers) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 50.591s
+
+OK

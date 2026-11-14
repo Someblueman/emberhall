@@ -65,9 +65,13 @@ def inspect(record: Record) -> dict:
             "note": "Recorded lifecycle, not a claim that every process is currently alive."}
 
 
-def choose_provider(state: dict, now: float, preferred: str | None = None) -> str | None:
+def choose_provider(state: dict, now: float, preferred: str | None = None, *,
+                    exploring: bool = False) -> str | None:
     life = state.get("life", {})
     available = [kind for kind in KINDS if provider_available(state, kind, now)]
+    if exploring:
+        different = [kind for kind in available if kind != state.get("shelf", {}).get("last_kind")]
+        available = different or available
     if preferred in available:
         return preferred
     if not available:
@@ -288,6 +292,21 @@ class Coordinator:
                     "do not embed the bundle in the journal. Never restore over this house or your room.\n")
         if help_request:
             assignment += "Shared request: " + help_request["reason"] + "\n"
+        if "explore_generation" in assigned:
+            assignment += (
+                "Automatic Explorer assignment: the shelf has fewer than three unselected ideas. "
+                f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
+                "After waking, read current shelf and active rules. Before research use shelf explore-start "
+                "with current expect generation, a unique round/token and a finite seconds lease. "
+                "If another Explorer holds the role or the shelf is now full, do ordinary useful work instead. "
+                "Bring back 2 to 4 meaningfully different ideas: useful creations, new resident capabilities "
+                "or ways of working, or rooms with a real purpose. Explain what, why, first small step, "
+                "existing alternatives, missing value and uncertainty; link sources. Follow owner web safeguards. "
+                "Use explore-publish through your fixed journal channel, then return to ordinary work. "
+                "Do not build an unselected idea. Read docs/SHELF.md for exact JSON fields. "
+                f"If keeping a research artifact, create and claim a task owning only research/explorations/{run}.md. "
+                "A full shelf needs competitive council choice with milestones and independent votes; "
+                "request those through ordinary help, without choosing for others or voting for your own idea.\n")
         candidates = pending_contributions(self.private)
         if candidates:
             assignment += ("Earlier source contributions await an actual resident review (never automatically accepted):\n" +
@@ -302,7 +321,8 @@ class Coordinator:
                     "through a life help request; keep your durable identity.\n")
         return assignment + "\n" + active_prompt(state)
 
-    def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False) -> str | None:
+    def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False,
+              explore_generation: int | None = None) -> str | None:
         self.refresh_runtime()
         state = self.record.read()[0]
         request = state.get("life", {}).get("requests", {}).get(help_id, {})
@@ -321,12 +341,14 @@ class Coordinator:
         extra = {"help_request": help_id} if help_id else {}
         if backlog:
             extra["backlog"] = True
+        if explore_generation is not None:
+            extra["explore_generation"] = explore_generation
         try:
             self.life("run-start", run, resident=resident, agent=kind, model=model,
                       source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
                       mode="review" if pending_contributions(self.private) else "work", **extra)
         except ValueError as error:
-            if str(error) != "owner paused admissions" and not (
+            if str(error) not in {"owner paused admissions", "Explorer demand changed"} and not (
                     backlog and str(error) == "ready backlog demand changed"):
                 raise
             path.rmdir()  # This unadmitted run has no files, process or journal entry.
@@ -434,10 +456,12 @@ class Coordinator:
                     break
                 pending = [(key, state["life"]["requests"][key]) for key in demand["pending_help"]]
                 request = pending[0] if pending else (None, {})
-                kind = choose_provider(state, time.time(), request[1].get("agent"))
+                backlog = not pending and demand["uncovered_tasks"] > 0
+                explore = demand["explore_generation"] if not pending and not backlog else None
+                kind = choose_provider(state, time.time(), request[1].get("agent"), exploring=explore is not None)
                 if kind is None:
                     break
-                run = self.start(kind, request[0], backlog=not pending and demand["uncovered_tasks"] > 0)
+                run = self.start(kind, request[0], backlog=backlog, explore_generation=explore)
                 if run is None:
                     break
                 started.append(run)
