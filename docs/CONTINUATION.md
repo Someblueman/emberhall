@@ -1,3 +1,11 @@
+## Latest checkpoint: 14 November at06:00UTC
+
+Read `evidence/house-growth-check-20261114/README.md` and its exact snapshot before
+older handoffs below. Real direct digest passed use and delivery; Parlor is still
+construction. Supervised time is review-heavy. Interrupted native workspaces
+are preserved; the first repair left no source changes. Cleanup draft1988 is ready. No actual browser/blind-play or runtime
+timeout fix is claimed. The completed check is not a recurring automation.
+
 ## Current handoff: Wake Digest delivered and used
 
 Migration1895 installed source `d794a0c74f5b62b6a76533b10653cacc9220c87d`,

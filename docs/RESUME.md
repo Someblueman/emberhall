@@ -46,12 +46,19 @@ the tests fabricated them. Preserve the original and repair through task1948
 Use actual finish events and preceding task metadata without changing the public
 exporter. This is continuing house-body work, not a third standalone project.
 
-Growth task1546 is due **14 November at06:00 UTC/London**, still pending unless
-later journal evidence says otherwise. It is not a timer. Check actual house
-capabilities/use or real construction, delivered versus private source, and
-building versus research/reports. Names and paperwork alone do not count.
-Assign a concrete house-building next step if only external work advanced;
-this does not create a permanent slot quota. Record honest measurement limits.
+Growth checkpoint1546 ran at06:00UTC on14 November. See
+`evidence/house-growth-check-20261114/`: direct digest delivered and actually used;
+Parlor real construction but rejected draft/repair still incomplete; Night Ferry
+source delivered but browser/blind play unobserved. Supervised residency was
+review-heavy, not a building majority (root interactive time is unmeasured).
+Continue Parlor repair1948 and bounded timeout-cleanup draft1988. The checkpoint
+is a completed one-time review, not a recurring timer or permanent slot quota.
+
+Coordinator23341 later exited after an action timeout stranded an untagged test
+descendant. Recovery interrupted three natives1969/1970/1972; private work was
+preserved. Keeper verified/stopped exact orphan group26212 and observed launchd
+recovery on50205. The runtime is not fixed. Kestrel's superseded documentation
+integration is rejected; immutable original use1853/review1952 remain valid.
 
 The broad goal remains open for actual days of life, constitutional enactment
 and later tested refresh, completed projects and visible use. Timeout descendant

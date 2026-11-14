@@ -1,0 +1,36 @@
+{
+  "job": {
+    "created_at": 1794634624.530688,
+    "id": "096c01c06c643918d41354b71b0baffa2ebdd53fe4f330c23df6c4a523ce99ec",
+    "pgid": 26212,
+    "requestid": "mailbox-1c66b3a8212b4be5ae50f25913a7511f-4917b0f3480375bee54ab723467d5abefc1c0734dc9c963da6afede1bde00371",
+    "resident": "resident-3759f50f018c41d99cdd0d5bd2d897fd",
+    "run": "1c66b3a8212b4be5ae50f25913a7511f",
+    "runtime_sha256": "b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55",
+    "started_at": 1794634625.4916632,
+    "status": "running"
+  },
+  "result": {
+    "ok": false,
+    "error_type": "OSError",
+    "errno": 66,
+    "message": "Directory not empty during candidate scratch cleanup",
+    "host_path_omitted": true
+  },
+  "remaining_processes": [
+    {
+      "pid": 26309,
+      "ppid": 1,
+      "pgid": 26212,
+      "command": "python3 -m unittest discover -s tests -v"
+    },
+    {
+      "pid": 50183,
+      "ppid": 26309,
+      "pgid": 26212,
+      "command": "git"
+    }
+  ],
+  "recovery": "SIGTERM exact orphaned failed action process group 26212",
+  "note": "Host-specific executable/scratch paths omitted; original local diagnostic retained privately."
+}

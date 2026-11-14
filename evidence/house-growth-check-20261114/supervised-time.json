@@ -1,0 +1,513 @@
+{
+  "journal_head_at_capture": "f1feb51e649582991913aac9a6dd9a489d563c52",
+  "journal_sequence_at_capture": 2000,
+  "captured_at": 1794636010.74704,
+  "interval_start": 1794627160.652768,
+  "interval_end": 1794636000.0,
+  "due": 1794636000.0,
+  "method": "Intersect recorded supervisor run start/end times with checkpoint1546 creation through06:00UTC; active intervals end at cutoff. Sum resident time, so concurrent intervals count separately. Whole runs classified by assigned task/claims; review_or_delivery is the explicit remainder. This is observed residency duration, not CPU/model time. Root interactive work, background tests outside native lifetimes, and within-run activity splits are unmeasured. No claim about the precise share of all house effort.",
+  "category_seconds": {
+    "building_or_repair": 3274.755,
+    "review_or_delivery": 9312.296,
+    "selection_or_decision": 1999.0349999999999,
+    "research": 324.531,
+    "actual_use": 903.688
+  },
+  "building_share_of_supervised_residency": 0.20707549272636389,
+  "runs": [
+    {
+      "run": "b970d597c0154c17ac8cb7b3d8edaa20",
+      "agent": "opencode",
+      "started_sequence": 1509,
+      "ended_sequence": 1568,
+      "help_request": null,
+      "claims": [
+        "night-ferry-player",
+        "night-ferry-player-gate-fix"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 488.42,
+      "reported_elapsed_seconds": 926.2270019054413,
+      "outcome": "success"
+    },
+    {
+      "run": "370249750ff442098165517eabbc89a1",
+      "agent": "muse",
+      "started_sequence": 1531,
+      "ended_sequence": 1606,
+      "help_request": null,
+      "claims": [
+        "source-delivery-recovery-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 867.828,
+      "reported_elapsed_seconds": 1040.1060388088226,
+      "outcome": "success"
+    },
+    {
+      "run": "1e6ac6b671bd4315abd6a7429e77936d",
+      "agent": "codex",
+      "started_sequence": 1539,
+      "ended_sequence": 1580,
+      "help_request": null,
+      "claims": [
+        "night-ferry-player-browser",
+        "source-delivery-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 627.871,
+      "reported_elapsed_seconds": 735.3665511608124,
+      "outcome": "success"
+    },
+    {
+      "run": "2531cda778b442d9b279bf25090217df",
+      "agent": "agy",
+      "started_sequence": 1570,
+      "ended_sequence": 1597,
+      "help_request": "second-slot-house-growth",
+      "claims": [],
+      "category": "selection_or_decision",
+      "overlap_seconds": 248.714,
+      "reported_elapsed_seconds": 245.8642840385437,
+      "outcome": "success"
+    },
+    {
+      "run": "4d91d02e683d4933919685cfff2c79b4",
+      "agent": "opencode",
+      "started_sequence": 1587,
+      "ended_sequence": 1630,
+      "help_request": "house-growth-choice-002-vote-1",
+      "claims": [],
+      "category": "selection_or_decision",
+      "overlap_seconds": 389.649,
+      "reported_elapsed_seconds": 386.7435188293457,
+      "outcome": "success"
+    },
+    {
+      "run": "6554395457ad49658530718bff7c538e",
+      "agent": "codex",
+      "started_sequence": 1598,
+      "ended_sequence": 1621,
+      "help_request": "house-growth-choice-002-vote-2",
+      "claims": [
+        "tern-growth-choice-002"
+      ],
+      "category": "selection_or_decision",
+      "overlap_seconds": 238.272,
+      "reported_elapsed_seconds": 235.11254501342773,
+      "outcome": "success"
+    },
+    {
+      "run": "00d2a1f4bb3044ca9ae13d0fc707ddd5",
+      "agent": "muse",
+      "started_sequence": 1609,
+      "ended_sequence": 1644,
+      "help_request": null,
+      "claims": [
+        "tansy-player-gate-review-00d2a1f4"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 379.181,
+      "reported_elapsed_seconds": 375.0711040496826,
+      "outcome": "success"
+    },
+    {
+      "run": "73163191552546f3b54c9ac669aa3110",
+      "agent": "codex",
+      "started_sequence": 1622,
+      "ended_sequence": 1649,
+      "help_request": null,
+      "claims": [
+        "aster-exploration-731631"
+      ],
+      "category": "research",
+      "overlap_seconds": 324.531,
+      "reported_elapsed_seconds": 320.5296468734741,
+      "outcome": "success"
+    },
+    {
+      "run": "9e17cdf361f949b091376cc159e0d2a0",
+      "agent": "agy",
+      "started_sequence": 1655,
+      "ended_sequence": 1669,
+      "help_request": "wake-digest-first-build",
+      "claims": [
+        "wake-digest-build-v1"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 287.819,
+      "reported_elapsed_seconds": 283.03879404067993,
+      "outcome": "success"
+    },
+    {
+      "run": "39c7e6e260f74667b336e2a2281e0b20",
+      "agent": "opencode",
+      "started_sequence": 1657,
+      "ended_sequence": 1685,
+      "help_request": "source-review-55ef52de145a4301a04d4fe8ed190129",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 1152.989,
+      "reported_elapsed_seconds": 1151.175059080124,
+      "outcome": "interrupted"
+    },
+    {
+      "run": "cf0d041fdba348ceb2463fb26fae4530",
+      "agent": "muse",
+      "started_sequence": 1672,
+      "ended_sequence": 1682,
+      "help_request": null,
+      "claims": [
+        "wake-digest-cursor-repair"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 300.782,
+      "reported_elapsed_seconds": 296.6941041946411,
+      "outcome": "success"
+    },
+    {
+      "run": "bd87a369d00e4fc9afc550718e38f803",
+      "agent": "codex",
+      "started_sequence": 1686,
+      "ended_sequence": 1703,
+      "help_request": "source-review-55ef52de145a4301a04d4fe8ed190129",
+      "claims": [
+        "fern-night-ferry-bible-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 231.503,
+      "reported_elapsed_seconds": 229.26722598075867,
+      "outcome": "success"
+    },
+    {
+      "run": "fad7af35aa484248ac99027eef484581",
+      "agent": "muse",
+      "started_sequence": 1692,
+      "ended_sequence": 1719,
+      "help_request": "review-source-review-tools",
+      "claims": [
+        "review-source-review-tools"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 569.433,
+      "reported_elapsed_seconds": 566.111389875412,
+      "outcome": "success"
+    },
+    {
+      "run": "69e7df8507ec49f38b4fbf0d83927e34",
+      "agent": "agy",
+      "started_sequence": 1704,
+      "ended_sequence": 1711,
+      "help_request": "source-review-55ef52de145a4301a04d4fe8ed190129",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 105.41,
+      "reported_elapsed_seconds": 102.97868990898132,
+      "outcome": "success"
+    },
+    {
+      "run": "9bc275092d8543018e41686f82aa12c2",
+      "agent": "opencode",
+      "started_sequence": 1723,
+      "ended_sequence": 1747,
+      "help_request": "source-review-55ef52de145a4301a04d4fe8ed190129",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 500.862,
+      "reported_elapsed_seconds": 497.5510058403015,
+      "outcome": "success"
+    },
+    {
+      "run": "62eae541acc7464582835515e998256c",
+      "agent": "muse",
+      "started_sequence": 1734,
+      "ended_sequence": 1754,
+      "help_request": "review-project-checks-zero",
+      "claims": [
+        "review-project-checks-zero"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 287.227,
+      "reported_elapsed_seconds": 283.9930248260498,
+      "outcome": "success"
+    },
+    {
+      "run": "9ea70d91e8434213b234aaa8aef3ba91",
+      "agent": "codex",
+      "started_sequence": 1758,
+      "ended_sequence": 1784,
+      "help_request": "source-review-b970d597c0154c17ac8cb7b3d8edaa20",
+      "claims": [
+        "hawthorn-night-ferry-player-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 320.378,
+      "reported_elapsed_seconds": 316.1708128452301,
+      "outcome": "success"
+    },
+    {
+      "run": "f30806100a5d47629c4d0655b3995294",
+      "agent": "opencode",
+      "started_sequence": 1760,
+      "ended_sequence": 1801,
+      "help_request": "case-bible-after-zero-fix",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 430.662,
+      "reported_elapsed_seconds": 425.97444200515747,
+      "outcome": "success"
+    },
+    {
+      "run": "066d15f1e4f14a19a85e710002e893ff",
+      "agent": "agy",
+      "started_sequence": 1769,
+      "ended_sequence": 1795,
+      "help_request": null,
+      "claims": [
+        "night-ferry-scene-clerk"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 221.131,
+      "reported_elapsed_seconds": 216.37396621704102,
+      "outcome": "success"
+    },
+    {
+      "run": "bf487d3287c14a0e95e5499c3863d804",
+      "agent": "muse",
+      "started_sequence": 1786,
+      "ended_sequence": 1814,
+      "help_request": null,
+      "claims": [
+        "night-ferry-scene-engine"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 376.611,
+      "reported_elapsed_seconds": 373.55849409103394,
+      "outcome": "success"
+    },
+    {
+      "run": "b020d09288084be7a05aaed60ad9bdb5",
+      "agent": "codex",
+      "started_sequence": 1796,
+      "ended_sequence": 1821,
+      "help_request": null,
+      "claims": [
+        "night-ferry-player-question-repair"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 411.002,
+      "reported_elapsed_seconds": 406.7861738204956,
+      "outcome": "success"
+    },
+    {
+      "run": "e2dedae7a6f7494eb7c226821d523cad",
+      "agent": "opencode",
+      "started_sequence": 1803,
+      "ended_sequence": 1830,
+      "help_request": "wake-digest-house-feature-review",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 478.444,
+      "reported_elapsed_seconds": 473.39286613464355,
+      "outcome": "success"
+    },
+    {
+      "run": "f8ad724b995344bea1b792e98ff9099b",
+      "agent": "agy",
+      "started_sequence": 1824,
+      "ended_sequence": 1857,
+      "help_request": null,
+      "claims": [
+        "wake-digest-first-return-use"
+      ],
+      "category": "actual_use",
+      "overlap_seconds": 401.313,
+      "reported_elapsed_seconds": 397.26727294921875,
+      "outcome": "success"
+    },
+    {
+      "run": "50fb9ddcc6474586af79e70c1cdd0678",
+      "agent": "muse",
+      "started_sequence": 1832,
+      "ended_sequence": 1844,
+      "help_request": "source-review-066d15f1e4f14a19a85e710002e893ff",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 208.338,
+      "reported_elapsed_seconds": 203.46877908706665,
+      "outcome": "success"
+    },
+    {
+      "run": "6d820d79a60b4f8c970deff5bb86ee6a",
+      "agent": "codex",
+      "started_sequence": 1846,
+      "ended_sequence": 1868,
+      "help_request": "source-review-b020d09288084be7a05aaed60ad9bdb5",
+      "claims": [
+        "mallow-player-source-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 421.214,
+      "reported_elapsed_seconds": 417.873165845871,
+      "outcome": "success"
+    },
+    {
+      "run": "f015a5851af84ffab7f7c194fb2ea5f2",
+      "agent": "opencode",
+      "started_sequence": 1869,
+      "ended_sequence": 1886,
+      "help_request": "source-review-b020d09288084be7a05aaed60ad9bdb5",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 605.772,
+      "reported_elapsed_seconds": 601.4073429107666,
+      "outcome": "success"
+    },
+    {
+      "run": "8874f1e1c2c94634a95ac8ab71a71d31",
+      "agent": "muse",
+      "started_sequence": 1875,
+      "ended_sequence": 1893,
+      "help_request": "digest-command-independent-review",
+      "claims": [
+        "wake-digest-command-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 380.377,
+      "reported_elapsed_seconds": 375.0242178440094,
+      "outcome": "success"
+    },
+    {
+      "run": "cfa5f22e9492446896ae95f49d777283",
+      "agent": "agy",
+      "started_sequence": 1901,
+      "ended_sequence": 1913,
+      "help_request": "source-review-bf487d3287c14a0e95e5499c3863d804",
+      "claims": [],
+      "category": "review_or_delivery",
+      "overlap_seconds": 189.976,
+      "reported_elapsed_seconds": 184.7211570739746,
+      "outcome": "success"
+    },
+    {
+      "run": "f0327ac2a62e462caed8ed882d3867cc",
+      "agent": "opencode",
+      "started_sequence": 1903,
+      "ended_sequence": 1932,
+      "help_request": "digest-direct-native-use",
+      "claims": [
+        "wake-digest-direct-native-use"
+      ],
+      "category": "actual_use",
+      "overlap_seconds": 502.375,
+      "reported_elapsed_seconds": 495.9573631286621,
+      "outcome": "success"
+    },
+    {
+      "run": "1c66b3a8212b4be5ae50f25913a7511f",
+      "agent": "codex",
+      "started_sequence": 1915,
+      "ended_sequence": 1969,
+      "help_request": "source-review-f8ad724b995344bea1b792e98ff9099b",
+      "claims": [
+        "tern-digest-first-use-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 1237.533,
+      "reported_elapsed_seconds": 1234.6463668346405,
+      "outcome": "interrupted"
+    },
+    {
+      "run": "113dd2a861af409aa94186d3027fec8f",
+      "agent": "agy",
+      "started_sequence": 1920,
+      "ended_sequence": 1938,
+      "help_request": "build-catchup-room",
+      "claims": [
+        "wake-digest-catchup-room"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 337.919,
+      "reported_elapsed_seconds": 330.4492700099945,
+      "outcome": "success"
+    },
+    {
+      "run": "d392a2e1358b41acb9be3dc59d1d2039",
+      "agent": "agy",
+      "started_sequence": 1941,
+      "ended_sequence": 1961,
+      "help_request": "digest-milestone-decision",
+      "claims": [
+        "wake-digest-milestone-decision"
+      ],
+      "category": "selection_or_decision",
+      "overlap_seconds": 386.202,
+      "reported_elapsed_seconds": 380.2470352649689,
+      "outcome": "failed"
+    },
+    {
+      "run": "9abec31dbb6d4a9b93e911d876c6f293",
+      "agent": "muse",
+      "started_sequence": 1950,
+      "ended_sequence": 1970,
+      "help_request": "parlor-real-history-repair",
+      "claims": [
+        "parlor-real-history-repair"
+      ],
+      "category": "building_or_repair",
+      "overlap_seconds": 548.918,
+      "reported_elapsed_seconds": 544.2853519916534,
+      "outcome": "interrupted"
+    },
+    {
+      "run": "383d04937ab54325a67dd6d0af6ba53d",
+      "agent": "opencode",
+      "started_sequence": 1962,
+      "ended_sequence": 1972,
+      "help_request": "digest-milestone-decision",
+      "claims": [],
+      "category": "selection_or_decision",
+      "overlap_seconds": 431.001,
+      "reported_elapsed_seconds": 428.59635281562805,
+      "outcome": "interrupted"
+    },
+    {
+      "run": "d4f7c675245f44f1bb06a95413d42c24",
+      "agent": "codex",
+      "started_sequence": 1975,
+      "ended_sequence": null,
+      "help_request": "source-review-f8ad724b995344bea1b792e98ff9099b",
+      "claims": [
+        "aster-wake-digest-use-review"
+      ],
+      "category": "review_or_delivery",
+      "overlap_seconds": 317.298,
+      "reported_elapsed_seconds": null,
+      "outcome": "active_at_capture"
+    },
+    {
+      "run": "86c302169b1343b0b91776c9a959ba6e",
+      "agent": "agy",
+      "started_sequence": 1977,
+      "ended_sequence": 1998,
+      "help_request": "digest-milestone-decision",
+      "claims": [],
+      "category": "selection_or_decision",
+      "overlap_seconds": 305.197,
+      "reported_elapsed_seconds": 299.2832930088043,
+      "outcome": "success"
+    },
+    {
+      "run": "9dbb146ae8f54dc2853b129c523e152a",
+      "agent": "muse",
+      "started_sequence": 1979,
+      "ended_sequence": null,
+      "help_request": "parlor-real-history-repair",
+      "claims": [],
+      "category": "building_or_repair",
+      "overlap_seconds": 302.153,
+      "reported_elapsed_seconds": null,
+      "outcome": "active_at_capture"
+    }
+  ]
+}
