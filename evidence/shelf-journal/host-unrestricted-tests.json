@@ -1,0 +1,11 @@
+{
+  "command": "python3 -m unittest discover -s tests -v",
+  "environment": "Host with process inspection and nested sandbox test permissions",
+  "exit_code": 0,
+  "elapsed_seconds": 225.80372524261475,
+  "source_hashes": "source-hashes.json",
+  "collected": 365,
+  "executed": 356,
+  "skipped": 9,
+  "note": "Started before the mode-confusion fix. Final fix and all shelf boundaries passed the subsequent 24-case focused suite bound to final-source-hashes.json."
+}

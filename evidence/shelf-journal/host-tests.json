@@ -1,0 +1,6 @@
+{
+  "command": "python3 -m unittest discover -s tests -v",
+  "exit_code": 1,
+  "elapsed_seconds": 191.8020179271698,
+  "environment": "Default tool sandbox; host-only process inspection and nested-sandbox fixtures unavailable"
+}

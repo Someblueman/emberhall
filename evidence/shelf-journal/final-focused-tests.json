@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "tests.test_shelf",
+    "tests.test_shelf_projects",
+    "tests.test_shelf_gate",
+    "tests.test_shelf_record",
+    "tests.test_owner_shelf",
+    "-v"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 4.557469844818115,
+  "source_hashes": "final-source-hashes.json"
+}

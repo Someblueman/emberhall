@@ -1,6 +1,6 @@
-"""Candidate work-selection reducer; not connected to the live journal yet.
+"""Deterministic work-selection reducer behind shelf_gate's authority checks.
 
-The integration must gate decisions on ratified policy and call ``advance`` on
+The dispatcher gates decisions on ratified policy and calls ``advance`` on
 every event (including sleep/run-finish). See docs/SHELF.md. Like model.apply_event,
 this mutates a disposable projection; discard it after any rejected transition.
 """

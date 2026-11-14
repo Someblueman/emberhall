@@ -36,6 +36,8 @@ CHECKPOINT_SCOPE = "resident-checkpoints-20261113"
 BACKLOG_SCOPE = "ready-backlog-20261113"
 BACKLOG_SHA256 = "df1df5907e1f8e2999eebdf374b162fb1db59413ae716db7d978298d45dff2d3"
 RESTORED_SCOPE = "opencode-restored-20261113"
+SHELF_SCOPE = "idea-shelf-20261114"
+SHELF_SHA256 = "ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fbef5eb8"
 RESTORED_SHA256 = "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde"
 VERIFIED_KEY_RUN = "fc2795f6b6824fc3ae4b9229e8667b61"
 KEY_BUDGET_SEQUENCE = 594
@@ -51,11 +53,13 @@ SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            CONTINUITY_SCOPE: GROWTH_SHA256, NAMING_SCOPE: GROWTH_SHA256,
            INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256,
            CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: BACKLOG_SHA256,
-           RESTORED_SCOPE: RESTORED_SHA256}
+           RESTORED_SCOPE: RESTORED_SHA256, SHELF_SCOPE: SHELF_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    SHELF_SCOPE: OWNER_MODULES | {"house/shelf.py", "house/shelf_gate.py", "house/model.py",
+                                 "house/__main__.py", "house/mailbox.py"},
     RESTORED_SCOPE: {"house/maintenance.py", "house/body.py"},
     BACKLOG_SCOPE: OWNER_MODULES | {"house/home.py", "house/life.py",
                     "house/model.py", "house/__main__.py", "house/mailbox.py"},
@@ -182,6 +186,8 @@ def apply(state: dict, event: dict) -> None:
             extra.add("house/opencode_auth.py")
         if scope == CHECKPOINT_SCOPE:
             extra.add("house/checkpoint.py")
+        if scope == SHELF_SCOPE:
+            extra.update({"house/shelf.py", "house/shelf_gate.py"})
         require(isinstance(manifest, dict) and set(manifest) == set(old) | extra
                 and all(_sha(value) for value in manifest.values()), "invalid replacement manifest")
         changes = {name for name in manifest if manifest[name] != old.get(name)}

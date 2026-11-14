@@ -72,6 +72,8 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
         names.add("house/building.py")
     if scope == maintenance.REPAIR_SCOPE:
         names.add("house/opencode_auth.py")
+    if scope == maintenance.SHELF_SCOPE:
+        names.update({"house/shelf.py", "house/shelf_gate.py"})
     require(names <= snapshot["files"].keys(), "required owner upgrade module is missing")
     previous = runtime.selected(record)
     private = record.common / "house-home"

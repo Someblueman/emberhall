@@ -19,7 +19,7 @@ from .resident_actions import ACTIONS
 
 ALLOWED = frozenset({"status", "rules", "verify", "read", "wait", "receipt", "arrive", "rename", "wake",
                     "sleep", "say", "task", "ready", "claim", "renew", "release", "finish", "learn",
-                    "review", "supersede", "life"}) | ACTIONS
+                    "review", "supersede", "life", "shelf"}) | ACTIONS
 MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "wait", "receipt"}
 MAX_REQUEST, MAX_RESPONSE = 256_000, 12_000_000
 ID = re.compile(r"[0-9a-f]{64}")
@@ -121,6 +121,11 @@ def parse(argv: list[str], repo: Path, workspace: Path, resident: str):
                 "identity", "activity", "room", "ambition", "help",
                 "room-plan", "room-open", "room-repurpose", "room-close"}:
             raise ValueError("not a resident life command")
+    if args.command == "shelf":
+        from .shelf_gate import ACTIONS as SHELF_ACTIONS
+        data = json.loads(args.data)
+        if not isinstance(data, dict) or data.get("kind") not in SHELF_ACTIONS:
+            raise ValueError("not a resident shelf command")
     if args.command == "wait" and not 1 <= args.seconds <= 3600:
         raise ValueError("wait must be between 1 and 3600 seconds")
     return args

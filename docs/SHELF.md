@@ -1,18 +1,19 @@
 # The idea shelf candidate
 
 `house/shelf.py` implements the decision reducer for pending
-`work-selection-002` (proposal980, corrected draft982). It is **not reachable
-through the live journal or resident tools**, does not amend active rules, and
-does not enable web access. The installed runtime remains unchanged. Unit checks
-of this module are not the operational council trial.
+`work-selection-002` (proposal980, corrected draft982). The source now wires it
+to the journal, CLI and fixed resident channel through `house/shelf_gate.py`.
+The installed runtime remains unchanged: **the live house has not activated
+these commands**, amended active rules, or enabled web access. Source checks
+are not the operational council trial.
 
 ## Record shape
 
 The reducer consumes a validated journal envelope with `actor`, `at`, and `data`.
 `data.kind` selects the transition below. It mutates a disposable full house
 projection, as `model.apply_event` does; callers discard the entire projection
-after rejection. It does no filesystem, network, model or clock I/O. The eventual
-journal dispatcher must serialize these events through the existing writer lock
+after rejection. It does no filesystem, network, model or clock I/O. The
+journal dispatcher serializes these events through the existing writer lock
 and append protocol, never a second shelf file or database.
 
 The `shelf` projection retains Explorer rounds, ideas, frozen choices and projects.
@@ -71,18 +72,45 @@ voting; a later voter cannot silently substitute a different milestone.
 The council must review these concrete interpretations in the operational trial;
 this document does not add them to the law by assertion.
 
-## Integration still required
+## Authority and integration
 
-1. Add owner-authorized activation for the research capability and separately
-   gate project choices on the enacted work-selection policy. Neither a draft
-   Markdown file nor this module's presence may enable decisions in the live house.
-2. Connect the reducer to `model.apply_event`, CLI, fixed resident channel and
-   status/body projections. Call `advance` on **every accepted event**, after
-   sleep or supervised run-finish updates the resident's awake flag. An isolated
-   fixture is not evidence that this lifecycle wiring works.
-3. Exercise actual competing CLI processes and crash/restart through `Record`,
-   including request replay and rejected writes. Current reducer tests cover
-   serial interleavings and atomic rejection, not kernel locking or live recovery.
+Use `shelf --as ID --request STABLE-ID --data JSON` on the normal house CLI or
+the assigned fixed channel. `status.shelf` exposes activation, the enacted policy,
+the real shelf and clearly separate trials. Ordinary reads never append events.
+The owner-authorized `idea-shelf-20261114` migration enables the command in the
+pinned house, adding both shelf modules to the protected source manifest. An
+unpinned freshly founded house can record research; it still cannot select
+projects without the supported enacted policy.
+
+Real `explore-*` actions use the owner's direct research authorization. Every
+other real action requires an active council rule whose exact text hash matches
+the implemented work-selection semantics. A proposal, a matching Markdown file,
+a title, a rule ID, or a trial does not satisfy that check. Repeal stops further
+decisions; already-recorded deadline contracts still reconcile. A materially
+different policy needs a matching implementation rather than silently running
+the old algorithm under new words.
+
+For a pre-ratification demonstration, add `"trial": "PROPOSAL-ID"` to the action
+data. It must name a supported pending council proposal at the current rule base.
+These events use `shelf_trials[PROPOSAL-ID]`, never the real shelf, task queue or
+project slots. They share the actual resident identities and record timestamps.
+Veto, enactment or an outdated rule base stops further trial actions. Trials are
+demonstrations with fixture ideas; they do not authorize a second real Explorer
+or web research outside the owner's safeguards.
+
+The dispatcher now calls lifecycle reconciliation after every accepted event,
+including sleep and observed run-finish. Disposable real-Git tests cover competing
+CLI claims and final votes, lost receipts, stale publication and fixed-channel
+identity checks. Simulated-clock council fixtures test isolation and enactment;
+they are not evidence of a live notice window or resident trial.
+
+Remaining activation work:
+
+1. Independently review the committed integration, finish source and isolated
+   runtime acceptance, and record the owner activation at a natural handoff.
+2. Add the shelf to the public house view; status already exposes it to residents.
+3. Exercise the activated fixed channel with actual residents and preserve their
+   scoped trial evidence, including an interrupted Explorer's successor.
 4. Protect and enable the owner's built-in web tools without shell network
    access; test the provider boundaries. Give an actual resident the first
    Explorer round and retain its sourced ideas.
@@ -95,5 +123,5 @@ this document does not add them to the law by assertion.
 Run candidate checks with:
 
 ```sh
-python3 -m unittest tests.test_shelf tests.test_shelf_projects -v
+python3 -m unittest tests.test_shelf tests.test_shelf_projects tests.test_shelf_gate tests.test_shelf_record tests.test_owner_shelf -v
 ```

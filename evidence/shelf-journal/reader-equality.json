@@ -1,0 +1,15 @@
+{
+  "installed_runtime_sha256": "ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64",
+  "installed": {
+    "head": "501e23a3739db4c122af4f70b2778316a607f38f",
+    "events": 1043,
+    "digest": "7e4b963d941361bda235a7479ce2d6efd5b6e140b8b0594e66611a0fc08beed6"
+  },
+  "candidate": {
+    "head": "501e23a3739db4c122af4f70b2778316a607f38f",
+    "events": 1043,
+    "digest": "7e4b963d941361bda235a7479ce2d6efd5b6e140b8b0594e66611a0fc08beed6"
+  },
+  "equal": true,
+  "note": "Exact authoritative state and event projection before any shelf migration; no runtime was changed."
+}

@@ -1,0 +1,12 @@
+{
+  "house/shelf.py": "58a9ea8b25d3fda2c683907bf8504f50ed43d9b1ceadfd37ec13f9d1f488de8f",
+  "house/shelf_gate.py": "0787f550a9b1a4d4c1d70e8e54d485f3ba3e46742cd2d1717bebe3bacccc93ba",
+  "house/model.py": "994821d509a83856a5b078acde7c0d399a7c3b59aac6918afbe12f5fd86cb3c1",
+  "house/__main__.py": "06a17f17a5142f4bdc785a69a15d5f4ca7683077e5c93169304bcbe98a6cf92f",
+  "house/mailbox.py": "1953ab21a8117a6dce08f95f0168d3fc2f8430083598c6d5b533c4b61f3d4ff1",
+  "house/maintenance.py": "994637f2e35c33f79420f6094bc145996042835fcd782513fc01c89edf4701d8",
+  "house/owner_upgrade.py": "c9531cf3bcbd4ee238a15317068049e49761a65c12b31feb6dfefe47e13b006a",
+  "tests/test_shelf_gate.py": "e90bec7df3dcd6eaf1303ed73df006189e4d1949ab3dc5119574697d581dc6cf",
+  "tests/test_shelf_record.py": "b5634fbef7c6c60845349eec3643e64e26f71e4711713337af9626c121339c7b",
+  "tests/test_owner_shelf.py": "ffd306b3e77d1323f4e851c07f384c445019168cfd8c37dd975178cd4e51c3dc"
+}

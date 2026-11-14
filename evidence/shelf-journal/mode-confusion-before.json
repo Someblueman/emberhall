@@ -1,0 +1,6 @@
+{
+  "fixture": "Synthetic active wake-prompt with exact work-selection bytes",
+  "unexpected_policy": "wake-only",
+  "expected": null,
+  "note": "Gate-level reproducer only; no live rule or proposal changed."
+}

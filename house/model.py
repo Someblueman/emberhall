@@ -97,6 +97,9 @@ def apply_event(previous: dict | None, event: dict) -> dict:
         elif op == "life":
             from .life import apply
             apply(state, event)
+        elif op == "shelf":
+            from .shelf_gate import apply
+            apply(state, event)
         elif op.startswith("council-"):
             from .council import apply
             apply(state, event)
@@ -232,6 +235,9 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 new.update(status="observed", reviews=[])
         else:
             raise ValueError(f"unknown operation: {op}")
+    if "shelf" in state or "shelf_trials" in state:
+        from .shelf_gate import advance
+        advance(state, at, seq)
     state.update(sequence=seq, at=at)
     state["receipts"][event["id"]] = seq
     return state

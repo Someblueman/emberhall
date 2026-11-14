@@ -30,6 +30,10 @@ def parser() -> argparse.ArgumentParser:
     life.add_argument("--as", dest="actor", required=True)
     life.add_argument("--request")
     life.add_argument("--data", required=True, help="JSON life operation")
+    shelf = sub.add_parser("shelf", help="publish ideas or vote under the enacted work-selection policy")
+    shelf.add_argument("--as", dest="actor", required=True)
+    shelf.add_argument("--request")
+    shelf.add_argument("--data", required=True, help="JSON shelf action; trial names a separate pending-policy demonstration")
     waiting = sub.add_parser("wait", help="stay home quietly until the record changes, without model calls")
     waiting.add_argument("--as", dest="actor", required=True)
     waiting.add_argument("--after", type=int, required=True)
@@ -112,6 +116,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 def briefing(state: dict) -> dict:
+    from .shelf_gate import briefing as shelf_briefing
     tasks = {key: {k: v for k, v in task.items() if k not in ("artifacts", "used_tokens")}
              for key, task in state["tasks"].items()}
     for task in tasks.values():
@@ -122,6 +127,7 @@ def briefing(state: dict) -> dict:
             "proposals": {k: {field: value for field, value in v.items() if field != "text"}
                           for k, v in state["proposals"].items()},
             "life": state.get("life", {}),
+            "shelf": shelf_briefing(state),
             "governance": ("Steward-approved trial, endorsements and veto window" if "council" in state
                            else "owner signatures" if state["owner_key"] else "sealed")}
 
@@ -149,8 +155,8 @@ def run(args: argparse.Namespace) -> object:
                 state, events, head = record.read()
         return {"changed": state["sequence"] > args.after, "through": state["sequence"],
                 "head": head, "note": "Resident process waited; no model call was required."}
-    if command == "life":
-        return record.append("life", args.actor, json.loads(args.data), args.request)
+    if command in {"life", "shelf"}:
+        return record.append(command, args.actor, json.loads(args.data), args.request)
     if command == "status":
         return briefing(state)
     if command == "verify":
