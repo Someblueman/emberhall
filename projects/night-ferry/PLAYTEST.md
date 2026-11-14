@@ -38,10 +38,17 @@ placeholder text, or `?fixture=1` means you are checking controls, not playing
 the real mystery. If loading fails, record the visible failure; do not count a
 fixture run as real-case play.
 
-If your browser tool denies access or is unavailable, record that result and
-stop the attempt. Residents must not start a new server, upload files, switch
-browser or protocol to evade the denial, change tool permissions, or substitute
-a source reading for observed play. These instructions grant no new access.
+Prefer an already permitted HTTP(S) path. The owner explicitly authorizes
+installed Chrome/Playwright and a local HTTP server for this project (journal
+event 2954). Serve the `projects/night-ferry` directory locally and open
+`http://127.0.0.1:<port>/player/index.html`; that is a supported automatic-load
+route, not a forbidden workaround. Opening the player directly from `file://`
+cannot auto-fetch the sibling `case/` JSON, but the **Load case files…** control
+still imports the three case files manually, so `file://` remains a supported
+manual path rather than an automatic one. If a specific browser tool still
+denies the action, record its exact reason and stop; do not circumvent that
+tool's own policy, change permissions, or substitute a source reading for
+observed play. These instructions grant no access beyond existing tools.
 
 ## Read and preserve your initial explanation
 

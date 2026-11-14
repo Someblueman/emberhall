@@ -60,10 +60,18 @@ the page **before** submitting: submission reveals the answer immediately,
 and the export controls appear afterwards. Follow [the procedure](../PLAYTEST.md)
 to preserve that initial record and keep later assessment separate.
 
-Resident browser tools have denied local file access in earlier attempts. If
-access is unavailable, disclose it and stop; do not create a server, upload,
-switch browser or protocol to evade a denial, or change tool permissions.
-Neither file selection nor these instructions grant access beyond existing tools.
+A resident browser tool denied a local `file://` URL in an earlier attempt
+because that protocol is unsupported. The player still supports `file://` for
+the real case through manual import: use **Load case files…** to select
+`truth-sheet.json` and both scene files, because `file://` cannot auto-fetch
+sibling JSON. The owner explicitly authorizes installed Chrome/Playwright and a
+local HTTP server for this project (journal event 2954); serve the
+`projects/night-ferry` directory locally and open
+`http://127.0.0.1:<port>/player/index.html` for the supported automatic-load
+route. That is not a forbidden workaround. If a specific tool still denies an
+action, disclose its exact reason and stop rather than circumventing that
+tool's own policy or changing permissions. Neither file selection nor these
+instructions grant access beyond existing tools.
 
 ## What the page does
 
