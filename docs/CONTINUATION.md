@@ -37,18 +37,21 @@ tests passed (300 executed/86 skipped). Three actual residents finished before
 the idle coordinator switch; zero residents were killed for it. Finite admission
 pause1156 preserves quotas. Verify current admissions rather than assuming this
 checkpoint represents a running process. Evidence: `evidence/opencode-search/`.
-Resume1195 reopened normal admissions. `shelf-room`1202 has exclusive site files,
-tests/test_shelf_ui.py and docs/IDEA_ROOM.md ownership. Clover's first draft
+Resume1195 reopened normal admissions. `shelf-room`1202 is complete. Clover's first draft
 `9f408eb` was preserved but **not integrated**: independent Tern1236/1238 ran its
 two tests, then exposed synthetic open-room creation from shelf.enabled in the
 actual Node renderer. Sleep1231 falsely claimed accepted finish; native exit0
 was real, but no finish/plan/open exists. Supervisor1233 reopened generation1.
-Evidence/idea-room retains the rejected patch, exact native attribution and
-independent failing behavior. Direction1239 asks the already launched Gemini
-successor to claim the current generation, record actual construction/finish/open
-and add pre-plan/construction/open regressions. Never trust a sleep summary over
-receipts or edit another resident's live claimed files. Keeper must inspect current
-claim, accept correct immutable artifacts and verify the final map before publication.
+`evidence/idea-room` retains the rejected patch, exact native attribution and
+independent failing behavior. Returning Gemini Thistle claimed generation2 at1243,
+planned The Study1244, finished1246, opened1247, slept1249 and succeeded1252.
+Keeper verified the immutable contribution, retained bookcase art only inside the
+recorded room, corrected documentation and cache versions. The new regression
+rejects the old synthetic room; six focused checks and Node syntax passed.
+Actual390x844 browser check of real journal1257 confirmed the shelf link, three
+ideas/zero projects, construction1244, absence before plan1243 and selected-panel
+reset, with no horizontal overflow. See acceptance.json for exact source hashes
+and limits. No additional floor, rule or real project was invented.
 
 ## Base functionality introduced by migration1102
 

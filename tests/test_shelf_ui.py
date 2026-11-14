@@ -51,3 +51,47 @@ assert.match(text(root),/not activated/);
         result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
                                 capture_output=True, text=True, timeout=15)
         self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_study_room_renders_only_when_recorded_and_links_to_shelf(self):
+        source = Path(__file__).parents[1] / 'site/house.js'
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+  appendChild(node){this.children.push(node);}
+  replaceChildren(){this.children=[];}
+}
+const nodes={};
+const get=id=>(nodes[id]||(nodes[id]=new Element('div')));
+const document={getElementById:get,createElement:tag=>new Element(tag)};
+const text=node=>[node.textContent,...node.children.map(text)].join(' ');
+const all=node=>[node,...node.children.flatMap(all)];
+const context=vm.createContext({assert,document,URL,nodes,text,all});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
+vm.runInContext(`
+data={timezone:'Europe/London'};
+const door={id:'door',name:'Door',floor:0,status:'open'};
+frame={rooms:[door],residents:[],scars:[],tasks:[],floors:[{level:0,name:'Ground floor'}],shelf:{enabled:true,policy:null,ideas:[{id:'i1',status:'shelved'}],projects:[]}};
+assert.deepEqual(floorRooms(frame,0).map(r=>r.id),['door']);
+const studyBuild={id:'study',name:'The Study',floor:0,status:'construction',purpose:'Shelf room'};
+frame.rooms.push(studyBuild);
+assert.deepEqual(floorRooms(frame,0).map(r=>r.id),['door','study']);
+assert.equal(roomStatus(studyBuild),'construction');
+studyBuild.status='open';
+assert.equal(roomStatus(studyBuild),'open');
+selected='study';
+roomPanel();
+const panel=nodes['room-content'];
+assert.match(text(panel),/1 shelved idea/);
+const links=all(panel).filter(n=>n.tag==='a');
+assert.equal(links.length,1);
+assert.equal(links[0].href,'#shelf-card');
+frame={rooms:[door],residents:[],scars:[],tasks:[],floors:[{level:0,name:'Ground floor'}]};
+if(!floorRooms(frame,0).some(r=>r.id===selected))selected=null;
+assert.equal(selected,null);
+`,context);
+'''
+        result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(0, result.returncode, result.stderr)

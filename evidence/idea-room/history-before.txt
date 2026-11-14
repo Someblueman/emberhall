@@ -1,0 +1,47 @@
+test_real_states_safe_links_reasons_and_historical_reset (test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
+test_study_room_renders_only_when_recorded_and_links_to_shelf (test_shelf_ui.ShelfUITests.test_study_room_renders_only_when_recorded_and_links_to_shelf) ... FAIL
+
+======================================================================
+FAIL: test_study_room_renders_only_when_recorded_and_links_to_shelf (test_shelf_ui.ShelfUITests.test_study_room_renders_only_when_recorded_and_links_to_shelf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/folders/sp/gftbmpy17y1_q_6cp75p8gm40000gn/T/emberhall-study-before-98yyejyc/tests/test_shelf_ui.py", line 97, in test_study_room_renders_only_when_recorded_and_links_to_shelf
+    self.assertEqual(0, result.returncode, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : node:assert:150
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'door',
++   'shelf'
+  ]
+
+    at evalmachine.<anonymous>:5:8
+    at Script.runInContext (node:vm:149:12)
+    at Object.runInContext (node:vm:301:6)
+    at [eval]:16:4
+    at runScriptInThisContext (node:internal/vm:209:10)
+    at node:internal/process/execution:446:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:444:60)
+    at evalFunction (node:internal/process/execution:279:30)
+    at evalTypeScript (node:internal/process/execution:291:3) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [ 'door', 'shelf' ],
+  expected: [ 'door' ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.22.0
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.049s
+
+FAILED (failures=1)

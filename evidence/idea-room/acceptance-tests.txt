@@ -1,0 +1,11 @@
+test_real_states_safe_links_reasons_and_historical_reset (tests.test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
+test_study_room_renders_only_when_recorded_and_links_to_shelf (tests.test_shelf_ui.ShelfUITests.test_study_room_renders_only_when_recorded_and_links_to_shelf) ... ok
+test_history_retains_construction_opening_closure_without_future_leak (tests.test_body_growth.BodyGrowthTests.test_history_retains_construction_opening_closure_without_future_leak) ... ok
+test_normal_recorded_actions_count_as_use_without_rewriting_state (tests.test_body_growth.BodyGrowthTests.test_normal_recorded_actions_count_as_use_without_rewriting_state) ... ok
+test_graveyard_keeps_counted_reasons_and_project_lessons (tests.test_shelf_body.ShelfBodyTests.test_graveyard_keeps_counted_reasons_and_project_lessons) ... ok
+test_historical_frames_and_real_shelf_are_separate (tests.test_shelf_body.ShelfBodyTests.test_historical_frames_and_real_shelf_are_separate) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.079s
+
+OK

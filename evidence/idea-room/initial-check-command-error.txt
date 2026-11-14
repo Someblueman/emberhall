@@ -1,0 +1,20 @@
+test_real_states_safe_links_reasons_and_historical_reset (tests.test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
+test_study_room_renders_only_when_recorded_and_links_to_shelf (tests.test_shelf_ui.ShelfUITests.test_study_room_renders_only_when_recorded_and_links_to_shelf) ... ok
+test_building_body (unittest.loader._FailedTest.test_building_body) ... ERROR
+test_graveyard_keeps_counted_reasons_and_project_lessons (tests.test_shelf_body.ShelfBodyTests.test_graveyard_keeps_counted_reasons_and_project_lessons) ... ok
+test_historical_frames_and_real_shelf_are_separate (tests.test_shelf_body.ShelfBodyTests.test_historical_frames_and_real_shelf_are_separate) ... ok
+
+======================================================================
+ERROR: test_building_body (unittest.loader._FailedTest.test_building_body)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_building_body
+Traceback (most recent call last):
+  File "/Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+ModuleNotFoundError: No module named 'tests.test_building_body'
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.563s
+
+FAILED (errors=1)

@@ -1,0 +1,86 @@
+{
+  "builder": "Thistle",
+  "resident": "resident-1f2711d2e14645c39718f9ce80eabe7d",
+  "agent": "agy",
+  "model": "gemini-4-hydrogen-low",
+  "run": "f121ad9ebab147e6953c771b207d7dda",
+  "contribution": {
+    "base": "21fcc9081267886e6fdd192b3e1b78d0e0a8e77e",
+    "commit": "a559bc53dda36eae29535386ca5b2eb3cec3b1a8",
+    "paths": [
+      "docs/IDEA_ROOM.md",
+      "site/house.css",
+      "site/house.js",
+      "site/index.html",
+      "tests/test_shelf_ui.py"
+    ],
+    "status": "pending-review"
+  },
+  "claim_sequence": 1243,
+  "task_generation": 2,
+  "plan_sequence": 1244,
+  "finish_sequence": 1246,
+  "open_sequence": 1247,
+  "sleep_sequence": 1249,
+  "native_success_sequence": 1252,
+  "artifact_sha256": {
+    "docs/IDEA_ROOM.md": "bda3e17c02006643a8423a007b082a779fe4be87cd235bf7aaa39976bd847ad1",
+    "site/house.css": "4f800ca8c131619498dd8242cb34c2964ac60cabb2e06e219cd8d3c2fc52dd49",
+    "site/house.js": "3fa23250ca22b608d86fd9d0935368436bdb3f92b1f3f965bc9028d7d4f9e3bf",
+    "site/index.html": "fb684a34d33aec92fef2aa67c6c8af61d00ed357833a159b9a0dee8b9cd29205",
+    "tests/test_shelf_ui.py": "6ff04c95530ccc278281c988e826591c25887f85351e8e37eb95bfc4958fa4b3"
+  },
+  "curated_sha256": {
+    "docs/IDEA_ROOM.md": "11e16a858c26a9cfe8df7ce8015f50d7dd1f408a79efa3e6d839a80fc5c4c08f",
+    "site/house.css": "4f800ca8c131619498dd8242cb34c2964ac60cabb2e06e219cd8d3c2fc52dd49",
+    "site/house.js": "cc7f8e10d6880e9936cf8645b51608f06c2f4beeabf3c92d1cc09a16d3859c22",
+    "site/index.html": "af8efe1d556f8786c47611ef5fb95f4bbf93f9ddd9b7109465d0199151e4b011",
+    "tests/test_shelf_ui.py": "6ff04c95530ccc278281c988e826591c25887f85351e8e37eb95bfc4958fa4b3"
+  },
+  "curation": [
+    "Retained original rejected draft bookcase/table art only for the journal-recorded study ID",
+    "Corrected task generation1 to2 and named exact lifecycle receipts in documentation",
+    "Bumped both stylesheet and script cache versions"
+  ],
+  "tests": {
+    "focused": "6 passed in2.079s",
+    "javascript_syntax": "node --check site/house.js passed",
+    "old_draft_with_new_regression": "fails expected deep-equality: synthesized room before planning"
+  },
+  "browser": {
+    "target": "loopback candidate preview with actual1257-event journal export, not a fabricated clock or published-site claim",
+    "viewport_request": {
+      "width": 390,
+      "height": 844
+    },
+    "document_client_width": 375,
+    "document_scroll_width": 375,
+    "open_frame": {
+      "sequence": 1257,
+      "room": "study",
+      "status": "open",
+      "shelved_ideas": 3,
+      "active_projects": 0,
+      "finished_projects": 0
+    },
+    "shelf_link": "click navigated to #shelf-card",
+    "construction_frame": {
+      "sequence": 1244,
+      "status": "construction",
+      "builder": "Thistle"
+    },
+    "before_plan": {
+      "sequence": 1243,
+      "study_absent": true,
+      "room_count": 7,
+      "selected_panel": "Ground floor"
+    },
+    "restored_latest_frame": 1257,
+    "viewport_override_reset": true
+  },
+  "limits": [
+    "Not proof of all device sizes, future page changes or actual multi-day aging",
+    "Native original artifact unchanged in journal; canonical files include explicit curation",
+    "Initial check command misspelled test_body_growth; failed invocation retained separately"
+  ]
+}

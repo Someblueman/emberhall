@@ -680,3 +680,17 @@ footer a {
   padding-left:9px;
   border-left:1px solid var(--line);
 }
+
+.room-shelf-summary {
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+.room-shelf-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--gold);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
