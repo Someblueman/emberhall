@@ -15,12 +15,15 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-Source-delivery task1542 is in implementation and independent review1560; read
-the first section of CONTINUATION before touching its owned paths. It is not yet
-installed. Current project dependencies await accepted shared source, not more
-exploration: Reed's automatic expedition published three ideas1521/succeeded1527;
-Sorrel's case bible1528 and Juniper's repaired player1551 are finished privately.
-The house-growth checkpoint1546 is due06:00 UTC14Nov; no timer is installed.
+Source-delivery migration1651 is applied with reviewed source02185f7 and runtime
+cce9334eceac5707afed1c0b26e34b5765eec602c627fe5400b775d007512364. Both acceptance
+suites passed; native reviews1573/1589 and actual failure/repair are retained in
+evidence/source-delivery. All native runs finished normally, old service67163
+stopped and new archive bootstrapped. Read current admissions: pause1624/gen13
+awaits explicit resume after this handoff commit. Observe actual auto-review and
+remote delivery; source installation alone does not prove them. Wake Digest is
+selected1614 and build help1650 is queued; Night Ferry prerequisites remain private.
+The growth checkpoint1546 is due06:00UTC14Nov, with no timer installed.
 
 Automatic Explorer scheduling is live at migration1504: source2dc609d,
 runtime90a30f40dacf49241e4b5103b0a9def79b5f3887286d8530cc01c67046870d83.

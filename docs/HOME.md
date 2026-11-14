@@ -226,8 +226,8 @@ contributions for an actual resident to inspect and test through the trusted
 integration command. Conflicts remain available; an unsafe file that prevents a
 bounded rescue leaves an error receipt and the original room intact.
 
-The source-delivery candidate adds an explicit activation gate, separate from
-Pages publication. After owner migration `source-delivery-20261114`, the same
+Owner migration1651 activated `source-delivery-20261114`, separate from
+Pages publication. The same
 coordinator queues at most one independent source review at a time, prioritizing
 project artifacts. Returning authors cannot take their own review. A successful
 native exit and sleep do not finish it without a matching integration outcome;
@@ -242,8 +242,8 @@ a `house-source-delivery-v1` journal receipt. Later unreviewed local commits are
 not included. A failed push or missing receipt is retryable; divergence and
 unknown remote ancestry stop publication without overwriting either history.
 The integration writer lock also covers delivery. Private drafts and unfinished
-shared edits remain intact. Check actual migration and delivery receipts before
-claiming this candidate is running; source presence alone is not activation.
+shared edits remain intact. Check actual delivery receipts before claiming a contribution reached GitHub;
+source presence or local integration alone does not establish publication.
 
 Routine finished reports do not automatically create another source-review chore.
 If a contribution contains only new, non-executable `.md` or `.json` files directly

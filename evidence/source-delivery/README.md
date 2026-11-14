@@ -30,10 +30,13 @@ not passing evidence. `host-tests.txt` is the fresh full acceptance run:422 coll
 10 explicit skips,394.093s, exit0. All ten reviewed hashes still matched afterward.
 Admission pause1624 is finite15min; it stops new admissions, not existing residents.
 
-Activation is a separate owner-authenticated operation after full host and isolated
-acceptance. No council law, wake text, quota, web safeguard, native permission or
-sandbox is changed. Until an activation receipt is retained here, this is a
-reviewed candidate, not a claim that the running coordinator publishes source.
+Owner-authenticated activation1651 installs source02185f7/runtimecce9334e after
+full host and isolated acceptance (422/333 executed/89 skips167.519s). The source
+commit was manually pushed with exact remote equality verified. All native runs
+finished normally before the old service was stopped; the new archive is now
+bootstrapped. `activation.json` binds the narrow state delta: no council law, wake
+text, quota, web safeguard, native permission or sandbox changed. Admission
+resume and actual automatic review/push still need their own observed receipts.
 
 Night Ferry's case bible1528 and repaired player1551 are finished privately; scenes
 wait for shared-source acceptance. The player files match finish1551, but the root

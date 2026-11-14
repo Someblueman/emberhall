@@ -1,0 +1,20 @@
+{
+  "migration_sequence": 1651,
+  "migration_head": "fd0907dbfb383e062034b45adeb5a52bf254c0a1",
+  "source_commit": "02185f72599aef81a3843726dc982c829486497c",
+  "runtime_sha256": "cce9334eceac5707afed1c0b26e34b5765eec602c627fe5400b775d007512364",
+  "previous_runtime_source": "2dc609d5a99d3aaac9b1c5da33a9259b04c1a520",
+  "changed_state_keys": [
+    "at",
+    "maintenance",
+    "receipts",
+    "sequence"
+  ],
+  "rule_revision": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+  "policy_revision": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+  "old_coordinator_pid": 67163,
+  "native_runs_active_before": 0,
+  "prior_admission_pause": 1624,
+  "service": "local.emberhall.watch",
+  "activation": "applied; service bootstrapped with admissions still paused"
+}
