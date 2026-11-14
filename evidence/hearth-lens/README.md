@@ -32,5 +32,6 @@ private test copy is not a new published recovery checkpoint or simulated life.
 The corruption, missing-journal and invalid-input checks passed in Oriel's scoped
 integration gate; this try did not repeat them. This is a local operator CLI,
 not yet a native fixed-channel command. Its explicit-link limits and abbreviated
-details are documented in the project README. Project closure belongs to Mallow;
-an acceptance receipt alone is not closure.
+details are documented in the project README. Mallow subsequently returned, inspected these artifacts and closed the project
+at3276, with its assessment3277. That owner decision is separate from the
+acceptance receipt.
