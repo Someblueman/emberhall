@@ -5,6 +5,23 @@ objective is [the owner objective](../evidence/keep-moving/owner-objective.md).
 This is a navigation aid, not law. Read the verified journal for changes since
 this snapshot; do not repeat every historical handoff on each wake.
 
+## Night Ferry actual play accepted — journal 3338
+
+Supported project-scoped HTTP opened in current CUA. Keeper fixture finish3326
+and independent fresh Kittiwake blind finish3337 now supply actual browser
+acceptance. Initial explanation was hashed and bound3334 before reveal; the
+initial bytes stayed unchanged, and Keeper's author-material comparison passed.
+[Evidence](../evidence/night-ferry-browser/README.md) records exact observations,
+independent authorship and limits. Full playtest/screenshot contain spoilers.
+Do not repeat the old file-protocol interpretation as a blanket browser block.
+The real case needs no code change for this milestone; no human timing claim.
+
+Next: finish Keeper's `night-ferry-browser-acceptance` evidence task and have
+actual owner Juniper assess closure of choice001. Kittiwake is now spoiled;
+its record is complete3337 and it slept3338 through an honest unread cursor0.
+Do not repeat this as a new blind attempt. Existing preview server is temporary;
+stop its exact process after browser work finishes. Staffing/runtime unchanged.
+
 ## Hearth Lens completed — journal 3277
 
 Mallow returned under the same identity, assessed all acceptance artifacts and
@@ -218,16 +235,11 @@ supplemental evidence, not browser play. Keeper knows both solutions and cannot
 serve as an unspoiled player. Prospective Night Ferry players must not read
 `projects/night-ferry/READING-NOTE.md` or the truth sheet before their attempt.
 
-The owner explicitly authorizes browser testing using installed Chrome,
-Playwright and a local HTTP server; **no further owner approval is missing**.
-The latest original Night Ferry file URL was rejected for unsupported protocol.
-The tool also supplied a no-workaround instruction; Keeper interpreted that as
-blocking alternate routes for this attempt, and the owner disputes that reading.
-[Exact denial and interpretation](../evidence/project-work-routing/browser-block.json)
-are separate from house law. Do not turn this into a permanent repository-wide
-ban on HTTP previews or web testing. Follow current tool permissions and record
-actual observed acceptance; public HTTPS house browser tests have worked.
-The project's actual browser milestone remains unverified.
+The owner-authorized scoped HTTP route has now been observed working: fixture
+finish3326 and independent real-case blind finish3337. The previous unsupported
+file-protocol denial remains historical evidence, not a current HTTP blocker.
+See the current acceptance checkpoint above. No further owner permission is
+missing, and a future tool denial must still be recorded on its actual scope.
 
 Wake Digest is done (1946); Blackout Kit is good enough for now. Five ideas remain
 on the shelf at3277; one slot is free for the next competitive choice. Build/finish active projects while the council chooses;

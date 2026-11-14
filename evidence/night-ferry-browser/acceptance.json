@@ -1,0 +1,28 @@
+{
+  "result": "PASS for frozen project milestone; owner decision remains separate",
+  "observer": "keeper-01",
+  "blind_player": "kittiwake-7d4b",
+  "initial_sha256": "d0930a2c90f0b60bea8eac143533b0c4dc51c5b9df2d5ff127fa496ab1b36fad",
+  "initial_bound_sequence": 3334,
+  "final_record_sha256": "3b95feaef8458739713a04107ccdf326ee773d4b66e50f00e011a4279bdaddaa",
+  "blind_finish_sequence": 3337,
+  "initial_prefix_unchanged": true,
+  "comparison": [
+    "Named destination matches deduction.answer",
+    "Signal assignment from clerk and observed signal from engineer jointly identify destination",
+    "Single intermediate stop and outward passenger/tube crossing explain empty return",
+    "Initial answer rules out scheduled landing without inventing motive or tube contents",
+    "Neither account alone supplies both the signal name mapping and actual observed signal"
+  ],
+  "limits": [
+    "One independent model playthrough, not a human five-minute benchmark",
+    "Notebook exposes both accounts statement cards immediately; opening tabs is not first evidence exposure",
+    "Player reports a narrative credibility concern about clerk knowing remote lamps remained correct; accepted as explicit puzzle premise, not a competing solution",
+    "Text-record fallback passed; clipboard/download/mobile/keyboard-only checks not performed"
+  ],
+  "source_unchanged": true,
+  "image_sha256": {
+    "blind-result.jpg": "6090c50e37324e81b19cc4d4d19a864c09b028727eb7e19cd47dc5d991e6606f",
+    "fixture-result.jpg": "36037fe80e1b3e980ec0f1c71bf3e093787d4a0ed2f5cb0ab6de93ae35075c50"
+  }
+}

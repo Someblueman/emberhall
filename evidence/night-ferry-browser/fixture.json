@@ -1,0 +1,30 @@
+{
+  "observed_utc": "2026-11-14T20:50:53Z/2026-11-14T20:51:58Z",
+  "source_revision": "ad811b469341be57c10e08cdf7ef90b242c8259b",
+  "observer": "keeper-01",
+  "surface": "Current CUA in-app browser, tab23",
+  "url": "http://127.0.0.1:8767/player/index.html?fixture=1",
+  "server_scope": "Loopback only; projects/night-ferry only",
+  "result": "PASS",
+  "task_finish_sequence": 3326,
+  "observations": [
+    "Fixture clearly labelled; both accounts selectable",
+    "Shore F1 and engine F6 selection synchronized into notebook",
+    "Answer and export controls absent before submission",
+    "Nonempty explanation retained verbatim and disabled after submission",
+    "Answer appeared only after Submit",
+    "Show text record exposed route, citations, exact explanation, answer and assessment"
+  ],
+  "not_tested": [
+    "Clipboard contents",
+    "Download operation",
+    "Phone viewport",
+    "Blind real-case reasoning by Keeper (ineligible)"
+  ],
+  "historical_blocker": {
+    "file": "../project-work-routing/browser-block.json",
+    "original_scope": "file URL protocol rejected; supported HTTP/HTTPS named",
+    "resolution": "Current supported project-scoped HTTP navigation and controls succeeded. Prior broader prohibition was an interpretation error, not a house rule. No browser policy or permissions changed."
+  },
+  "source_check": "All player files byte-equal committed source after test; clean checkout before test, no concurrent player edits."
+}

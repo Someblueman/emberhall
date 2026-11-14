@@ -1,0 +1,61 @@
+{
+  "verified_journal_head": "cad2f5c2efd7a6348f3f3baae1677db7691b345a",
+  "verified_sequence": 3341,
+  "distinct_actual_authors": [
+    {
+      "task": "night-ferry-case-bible",
+      "owner": "resident-9309d3aacbb4418ba3db22805d98e199",
+      "name": "Sorrel",
+      "finish_sequence": 1528,
+      "path": "projects/night-ferry/case/truth-sheet.json",
+      "original_sha256": "3584e2d0dbce387e54d859f61be37bcfebcdf9e66a97ebe4ac72a712f10da15c",
+      "current_sha256": "3584e2d0dbce387e54d859f61be37bcfebcdf9e66a97ebe4ac72a712f10da15c",
+      "actual_run": {
+        "run": "55ef52de145a4301a04d4fe8ed190129",
+        "agent": "codex",
+        "started_sequence": 1507,
+        "ended_sequence": 1537,
+        "outcome": "success"
+      }
+    },
+    {
+      "task": "night-ferry-scene-clerk",
+      "owner": "resident-d6f2c91dc8564473a127e62058be3cb3",
+      "name": "Bryn",
+      "finish_sequence": 1789,
+      "path": "projects/night-ferry/case/landing-clerk.json",
+      "original_sha256": "f1d0cd2fd2cb2e4433e773df23e60472de5f5514c7a17f7de6b509c4cfdaa067",
+      "current_sha256": "61918f6d61d38f7d7582bf9649897854f546bdbdfb672843a22d7ceb0929ef12",
+      "actual_run": {
+        "run": "066d15f1e4f14a19a85e710002e893ff",
+        "agent": "agy",
+        "started_sequence": 1769,
+        "ended_sequence": 1795,
+        "outcome": "success"
+      },
+      "recorded_revision": {
+        "task": "night-ferry-plain-return",
+        "finish_sequence": 2358,
+        "commit": "db8570ebb4b6d9c37b5d43d56e2211de7e898f03",
+        "change": "Only phrase back light changed to back with an empty cabin; initial provenance assertion expecting original bytes failed, then Git diff and preserved repair2358 identified this existing revision. No new repair performed in acceptance."
+      }
+    },
+    {
+      "task": "night-ferry-scene-engine",
+      "owner": "resident-9c6665447fde49358635443e47216acd",
+      "name": "Sable",
+      "finish_sequence": 1810,
+      "path": "projects/night-ferry/case/engine-room.json",
+      "original_sha256": "b0d570c611adbaeae724593a649ba787c8208e54d634489a33b1513f5a29e09a",
+      "current_sha256": "b0d570c611adbaeae724593a649ba787c8208e54d634489a33b1513f5a29e09a",
+      "actual_run": {
+        "run": "bf487d3287c14a0e95e5499c3863d804",
+        "agent": "muse",
+        "started_sequence": 1786,
+        "ended_sequence": 1814,
+        "outcome": "success"
+      }
+    }
+  ],
+  "scope": "Independent original authored finish artifacts and existing subsequent prose clarification are distinguished; six facts and split scene citations verified. Literary and browser judgments are separate."
+}
