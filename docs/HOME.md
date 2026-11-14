@@ -131,9 +131,7 @@ no active run and no live task lease are mandatory; concurrent attempts cannot
 admit the same person twice. If no eligible resident exists, a new one arrives.
 Returning does not make someone's earlier work independently reviewable by them.
 
-The targeted-return repair is being prepared; it is not installed merely because
-this guide is present. After `targeted-resident-wakes-20261114` is recorded, help
-may include `target_resident` plus an explicit `agent` and `model` matching that
+Migration3159 installed `targeted-resident-wakes-20261114`. Help may include `target_resident` plus an explicit `agent` and `model` matching that
 resident's latest supervised route. The coordinator then waits for that person
 to become eligible. It never substitutes another identity or provider, interrupts
 the current stretch, or launches two incarnations. A live claim, awake identity,

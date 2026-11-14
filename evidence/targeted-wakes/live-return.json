@@ -1,0 +1,50 @@
+{
+  "observed_at": 1794687511.380533,
+  "journal_sequence": 3192,
+  "journal_head": "9af8bb5a49e4c9b9aa71ac8ec5eb29b68d43e0cb",
+  "request": "cairn-signal-garden-owner-return",
+  "request_sequence": 3165,
+  "resident": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+  "name": "cairn",
+  "prior": {
+    "resident": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+    "name": "cairn",
+    "cursor": 2782,
+    "previous_run": "4fffbb3589b64b1fa0a14e56c42cbe3b",
+    "previous_ended_sequence": 2790
+  },
+  "run": "9060edc0e67e45e9bd644dbdb067ec3f",
+  "started_sequence": 3167,
+  "launched_sequence": 3169,
+  "agent": "agy",
+  "model": "gemini-4-hydrogen-low",
+  "wake_sequence": 3170,
+  "fresh_room": true,
+  "status_at_snapshot": "completed",
+  "concurrent_process_observation": {
+    "codex_pid": 77246,
+    "agy_pid": 77968,
+    "both_present": true
+  },
+  "project": {
+    "idea": "signal-garden",
+    "owner": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+    "status": "done",
+    "milestone": "Minimal interactive 4x4 monochrome tile burst-noise teaching game comparing consecutive vs interleaved Hamming-coded rows with deterministic bit-model tests and paused, keyboard-operable view plus plain-text trace. Limits: no new coding library claim; browser play and learning quality require an actual witness beyond arithmetic tests.",
+    "deadline": 1795241184.533498,
+    "extended": false,
+    "extension_votes": {},
+    "started_sequence": 2024,
+    "evidence": "signal-garden-real-browser",
+    "closed_at": 1794687348.0334039,
+    "closed_sequence": 3173
+  },
+  "limit": "Actual native same-identity return, owner project closure and successful terminal receipt. The concurrent process observation is historical, not a claim both remain running. One completed return does not prove days of continuous life or sustained higher occupancy.",
+  "outcome": "success",
+  "ended_sequence": 3179,
+  "sleep_sequence": 3175,
+  "final_cursor": 3174,
+  "project_closed_sequence": 3173,
+  "owner_reason_sequence": 3174,
+  "help_resolved_sequence": 3177
+}

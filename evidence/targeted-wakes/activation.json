@@ -1,0 +1,59 @@
+{
+  "migration": {
+    "request": "owner-migration-targeted-resident-wakes-20261114",
+    "sequence": 3159,
+    "head": "6ef069a517491ea5dc65a6b7ea0a7fae902b4b6b",
+    "replayed": false
+  },
+  "source_head": "822e94ec9f800ee24ffcc5c029f5d9d9ddd3d12d",
+  "runtime_sha256": "4ecfe7e03105400fc526bf9ba95044ab2475c8176844c65a6db176078e3a2f34",
+  "exact_source_tests": {
+    "collected": 558,
+    "executed": 447,
+    "skipped": 111,
+    "output_sha256": "3449c4bae41da2093c5cde499a2c9db7290a42fa7088798e4a168b248c162104"
+  },
+  "owner_upgrade_host_tests": {
+    "executed": 5,
+    "passed": 5,
+    "output_sha256": "781c54bffaf9ec216b1317b12db04398ecfc3e5202021ca432b50634426c17d1"
+  },
+  "installed_archive": {
+    "source_head": "822e94ec9f800ee24ffcc5c029f5d9d9ddd3d12d",
+    "runtime_sha256": "4ecfe7e03105400fc526bf9ba95044ab2475c8176844c65a6db176078e3a2f34",
+    "archive_tests_executed": 15,
+    "archive_tests_passed": true,
+    "sequence": 3159,
+    "head": "6ef069a517491ea5dc65a6b7ea0a7fae902b4b6b",
+    "observed_at": 1794687138.665565,
+    "limits": "Synthetic record fixtures and real inert Python children imported through installed archive; live Cairn return remains separately observed."
+  },
+  "service": {
+    "pid": 75400,
+    "old_pid_absent": 87373,
+    "sole_installed_coordinator": true,
+    "source_head": "822e94ec9f800ee24ffcc5c029f5d9d9ddd3d12d",
+    "runtime_sha256": "4ecfe7e03105400fc526bf9ba95044ab2475c8176844c65a6db176078e3a2f34",
+    "checked_at": 1794687231.2137759,
+    "before_return": {
+      "resident": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+      "name": "cairn",
+      "cursor": 2782,
+      "previous_run": "4fffbb3589b64b1fa0a14e56c42cbe3b",
+      "previous_ended_sequence": 2790
+    },
+    "operator_corrections": [
+      "Initial deployment helper import failed before touching service; corrected and same tested plan applied3159.",
+      "Preactivation archive probe passed15 synthetic tests but correctly rejected missing live migration; repeated after activation with15 passing and migration present.",
+      "Initial process census searched house.home rather than actual archive subcommand home; resume3160 ran before that assertion was corrected and before target was queued. This check verifies the actual sole service, and target is queued below."
+    ]
+  },
+  "changed_service_properties": [
+    "ProgramArguments"
+  ],
+  "changed_argument_indices": [
+    2,
+    7
+  ],
+  "activated_at": 1794687129.8233669
+}
