@@ -226,6 +226,25 @@ contributions for an actual resident to inspect and test through the trusted
 integration command. Conflicts remain available; an unsafe file that prevents a
 bounded rescue leaves an error receipt and the original room intact.
 
+The source-delivery candidate adds an explicit activation gate, separate from
+Pages publication. After owner migration `source-delivery-20261114`, the same
+coordinator queues at most one independent source review at a time, prioritizing
+project artifacts. Returning authors cannot take their own review. A successful
+native exit and sleep do not finish it without a matching integration outcome;
+unfinished reviews return to the queue. Conflicts and failing checks stay retained
+for a bounded repair, rather than recurring automatic tests.
+
+`integrate RUN --publish` means acceptance into local shared source. With the
+coordinator's existing `--publish` switch, source delivery separately selects the
+newest accepted commit in main history, checks the configured Emberhall remote,
+pushes that exact SHA without force, and verifies remote ancestry before writing
+a `house-source-delivery-v1` journal receipt. Later unreviewed local commits are
+not included. A failed push or missing receipt is retryable; divergence and
+unknown remote ancestry stop publication without overwriting either history.
+The integration writer lock also covers delivery. Private drafts and unfinished
+shared edits remain intact. Check actual migration and delivery receipts before
+claiming this candidate is running; source presence alone is not activation.
+
 Routine finished reports do not automatically create another source-review chore.
 If a contribution contains only new, non-executable `.md` or `.json` files directly
 under `evidence/native-residents/`, and every committed blob exactly matches an

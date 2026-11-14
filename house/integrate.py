@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -42,7 +43,15 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False) ->
         head = git(record.root, "rev-parse", "HEAD")
         path = private / run / "integration.json"
         if path.exists():
-            accepted = json.loads(path.read_text())
+            try:
+                accepted = json.loads(path.read_text())
+            except json.JSONDecodeError:
+                # A stopped writer may have left an old non-atomic receipt.
+                # Preserve its bytes; it cannot authorize acceptance. Re-review.
+                path.replace(path.with_name("integration-incomplete-" + uuid.uuid4().hex + ".json"))
+                accepted = {}
+            if not isinstance(accepted, dict):
+                raise ValueError("invalid integration receipt; preserve it")
             if accepted.get("status") == "integrated":
                 # Both fields exist in durable receipts: normal merges record
                 # candidate_head; operator-curated acceptance records canonical_commit.
@@ -94,8 +103,17 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False) ->
             git(record.root, "fetch", "--quiet", str(candidate), receipt["candidate_head"])
             git(record.root, "merge", "--ff-only", receipt["candidate_head"])
             receipt["status"] = "integrated"
-        path.write_text(json.dumps(receipt, indent=2) + "\n")
-        path.chmod(0o600)
+        temporary = path.with_suffix(".tmp")
+        with temporary.open("w") as output:
+            temporary.chmod(0o600)
+            output.write(json.dumps(receipt, indent=2) + "\n")
+            output.flush(); os.fsync(output.fileno())
+        os.replace(temporary, path)
+        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
         record.append("say", actor, {"text": "house-integration-v1 " + json.dumps({
             k: v for k, v in receipt.items() if k != "candidate"}, sort_keys=True)})
         return receipt

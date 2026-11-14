@@ -188,10 +188,15 @@ def apply(state, event):
         life["ambitions"][key] = {**data, "generation": data["expect"] + 1,
                                   "resident": actor, "sequence": seq, "at": at}
     elif kind == "help":
-        fields(data, {"kind", "request", "reason"}, {"task", "agent", "model"})
+        fields(data, {"kind", "request", "reason"}, {"task", "agent", "model", "review_run"})
         key = identifier(data, "request")
         require(key not in life["requests"], "help request exists")
         string(data, "reason")
+        if "review_run" in data:
+            from .source_delivery import enabled
+            require(enabled(state), "source delivery is not enabled")
+            source = life["runs"].get(identifier(data, "review_run"), {})
+            require(source.get("status") == "completed", "source review requires a stopped contribution")
         if "task" in data:
             require(data["task"] in state["tasks"], "unknown help task")
         if "agent" in data:
@@ -239,6 +244,9 @@ def apply(state, event):
             if "help_request" in data:
                 request = life["requests"].get(data["help_request"], {})
                 require(request.get("status") == "pending", "help already taken")
+                if "review_run" in request:
+                    require(resident != life["runs"][request["review_run"]]["resident"],
+                            "source reviewer must be independent")
                 request.update(status="assigned", run=run)
             from .maintenance import retry_permit
             permit = retry_permit(state, data["agent"], at)

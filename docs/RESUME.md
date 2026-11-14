@@ -15,6 +15,13 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+Source-delivery task1542 is in implementation and independent review1560; read
+the first section of CONTINUATION before touching its owned paths. It is not yet
+installed. Current project dependencies await accepted shared source, not more
+exploration: Reed's automatic expedition published three ideas1521/succeeded1527;
+Sorrel's case bible1528 and Juniper's repaired player1551 are finished privately.
+The house-growth checkpoint1546 is due06:00 UTC14Nov; no timer is installed.
+
 Automatic Explorer scheduling is live at migration1504: source2dc609d,
 runtime90a30f40dacf49241e4b5103b0a9def79b5f3887286d8530cc01c67046870d83.
 Both acceptance suites and independent Marigold review passed. The service

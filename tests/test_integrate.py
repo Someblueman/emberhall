@@ -74,6 +74,21 @@ class IntegrationTests(HouseCase):
         self.assertEqual(integrate(self.record, "one", "bob"), accepted)
         self.assertEqual((self.repo / "document.txt").read_text(), "uncommitted next task\n")
 
+    def test_incomplete_receipt_is_preserved_and_actual_integration_recovers(self):
+        self.candidate("one", "first\n")
+        path = self.private / "one/integration.json"
+        path.write_bytes(b'{"status": "integrated",')
+        self.assertEqual(len(pending_contributions(self.private)), 1)
+        result = integrate(self.record, "one", "alice", publish=True)
+        self.assertEqual(result["status"], "integrated")
+        self.assertEqual((self.repo / "document.txt").read_text(), "first\n")
+        retained = list(path.parent.glob("integration-incomplete-*.json"))
+        self.assertEqual(len(retained), 1)
+        self.assertEqual(retained[0].read_bytes(), b'{"status": "integrated",')
+        self.assertEqual(json.loads(path.read_text()), result)
+        self.assertFalse(path.with_suffix(".tmp").exists())
+        self.assertEqual(pending_contributions(self.private), [])
+
     def test_operator_acceptance_survives_later_commits_without_self_review(self):
         workspace = self.candidate("one", "first\n")
         (self.repo / "document.txt").write_text("first\n")

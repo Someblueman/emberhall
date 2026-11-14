@@ -84,11 +84,12 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
 
 
 def pending_contributions(private: Path) -> list[dict]:
+    from .source_delivery import review_result
     result = []
     for path in sorted(private.glob("*/contribution.json")):
         item = json.loads(path.read_text())
-        integrated = path.with_name("integration.json")
-        if integrated.exists() and json.loads(integrated.read_text()).get("status") == "integrated":
+        reviewed = review_result(private, path.parent.name)
+        if reviewed and reviewed["status"] == "integrated":
             continue
         if item.get("status") == "pending-review":
             result.append({"run": path.parent.name, "commit": item["commit"], "paths": item["paths"]})
@@ -170,7 +171,9 @@ class Coordinator:
             for event in events[item["started_sequence"]:]))
         if result["outcome"] == "success" and handed_off and item.get("help_request"):
             request = state["life"]["requests"][item["help_request"]]
-            if request["status"] == "assigned":
+            from .source_delivery import review_result
+            reviewed = "review_run" not in request or review_result(self.private, request["review_run"])
+            if request["status"] == "assigned" and reviewed:
                 self.record.append("life", CONTROLLER, {"kind": "help-resolved",
                     "request": item["help_request"], "reason": "Assigned resident completed its native stretch and recorded a sleep handoff."},
                     f"home-{run}-help-resolved")
@@ -330,8 +333,9 @@ class Coordinator:
         providers.validate_model(kind, model)
         policy = active_policy(state)
         at = max(time.time(), state["at"])
+        author = state["life"]["runs"][request["review_run"]]["resident"] if "review_run" in request else None
         eligible = [resident for resident in state["residents"]
-                    if return_eligible(state, resident, kind, model, at)]
+                    if resident != author and return_eligible(state, resident, kind, model, at)]
         resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
             "resident-" + uuid.uuid4().hex)
         run = uuid.uuid4().hex
@@ -449,6 +453,13 @@ class Coordinator:
         now = time.monotonic()
         started = []
         if start and not self.stopping:
+            from .source_delivery import queue_review
+            try:
+                queue_review(self.record, self.private)
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+                write_private(self.private / "source-review-error.json",
+                              {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
+        if start and not self.stopping:
             for _ in range(3):
                 state = self.record.read()[0]
                 demand = workload(state, max(time.time(), state["at"]))
@@ -469,6 +480,13 @@ class Coordinator:
                     break  # Preserve a failed startup; reconsider on the next tick.
         if poll and now >= self.next_poll:
             self.next_poll = now + self.poll_seconds
+            if self.publish:
+                from .source_delivery import deliver
+                try:
+                    deliver(self.record, self.private)
+                except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+                    write_private(self.private / "source-delivery-error.json",
+                                  {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
             try:
                 inbox.poll(self.record)
             except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
@@ -515,7 +533,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=".")
     parser.add_argument("--runtime", type=Path)
-    parser.add_argument("--publish", action="store_true", help="Publish the configured public Pages branch")
+    parser.add_argument("--publish", action="store_true", help="Publish Pages and, when activated, independently accepted source")
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("inspect", "serve", "once", "tick"):
         sub.add_parser(name)

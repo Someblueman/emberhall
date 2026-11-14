@@ -1,0 +1,68 @@
+{
+  "journal_head_at_capture": "8238b92ae9b05cf973faaa554fe5e9180de43d22",
+  "bindings": {
+    "house/source_delivery.py": {
+      "sha256": "bba94be1e2b3bc701efdfd3a933f5c263709d4176cde847d105be86e3ee97626",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "house/home.py": {
+      "sha256": "4789bafb277747e59a49713c130c41f09b7e9a54f5be959d8225ab4ef0223f2f",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "house/life.py": {
+      "sha256": "e34c24f52296a98e9202bf9524ae999744a253203d7a8817e81bf4f6c7203c74",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "house/maintenance.py": {
+      "sha256": "8e9fce35c308f7e319ca362f8d2f1abfddb89968f7cc85c5a8fb61a1f27d8f73",
+      "review_sequence": 1589,
+      "review_file": "ember-recovery-review.md"
+    },
+    "house/owner_upgrade.py": {
+      "sha256": "e8ce4f5dc8c46d63b172ee1c588b3ff7ceda6e1bce09cdd26632b515d261213b",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "tests/test_source_delivery.py": {
+      "sha256": "c5ba09c14434eebbcc82e5ad13f2ad17b1ecd6b6c7eccbe8f056319e91d2a348",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "tests/test_source_review.py": {
+      "sha256": "3a9b1af23beebcdc10de0eeaebb742de291e4c4e32c59b61598c4a093ae64f23",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "tests/test_explorer_dispatch_home.py": {
+      "sha256": "e203c8c1e4f10d0f3d2a120cc68217333bf3ea5fc0fdd1f9ef6fde6ad8a3f73b",
+      "review_sequence": 1573,
+      "review_file": "mallow-review.md"
+    },
+    "house/integrate.py": {
+      "sha256": "a01da1a2b4eb3348faaea591113b36058af5cdb4656ffce90c2100fc6e20afd4",
+      "review_sequence": 1589,
+      "review_file": "ember-recovery-review.md"
+    },
+    "tests/test_integrate.py": {
+      "sha256": "29eff5932cf20e325f41cbaffd7e392d63cad44bbcca4cf43876b2c28654ed3f",
+      "review_sequence": 1589,
+      "review_file": "ember-recovery-review.md"
+    }
+  },
+  "reviews": [
+    {
+      "sequence": 1573,
+      "actor": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+      "at_utc": "2026-11-14T03:41:59.174391+00:00"
+    },
+    {
+      "sequence": 1589,
+      "actor": "resident-019bca8ed8fd490eb908e4f82cc91213",
+      "at_utc": "2026-11-14T03:44:56.417309+00:00"
+    }
+  ],
+  "limits": "Original native reports are retained verbatim. Use journal UTC timestamps here rather than the approximate prose time in Ember report. Mallow executed ten focused tests and witnessed the failing discovery probe; Ember inspected the later three-file delta and AST-parsed it, without executing host-only tests. Full host and isolated acceptance remain separate gates."
+}

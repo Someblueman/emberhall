@@ -1,0 +1,21 @@
+test_accepted_retry_keeps_receipt_history_and_does_no_new_work (tests.test_integrate.IntegrationTests.test_accepted_retry_keeps_receipt_history_and_does_no_new_work) ... ok
+test_concurrent_replays_preserve_accepted_receipt (tests.test_integrate.IntegrationTests.test_concurrent_replays_preserve_accepted_receipt) ... ok
+test_incomplete_receipt_is_preserved_and_actual_integration_recovers (tests.test_integrate.IntegrationTests.test_incomplete_receipt_is_preserved_and_actual_integration_recovers) ... ok
+test_inconsistent_acceptance_and_changed_contribution_fail_closed (tests.test_integrate.IntegrationTests.test_inconsistent_acceptance_and_changed_contribution_fail_closed) ... ok
+test_operator_acceptance_survives_later_commits_without_self_review (tests.test_integrate.IntegrationTests.test_operator_acceptance_survives_later_commits_without_self_review) ... ok
+test_wren_self_review_rejected_and_two_conflicting_contributions_retained (tests.test_integrate.IntegrationTests.test_wren_self_review_rejected_and_two_conflicting_contributions_retained) ... ok
+test_only_single_approved_fetch_and_push_url (tests.test_source_delivery.RemoteValidationTests.test_only_single_approved_fetch_and_push_url) ... ok
+test_bad_acceptance_and_concurrent_integration_cannot_publish (tests.test_source_delivery.SourceDeliveryTests.test_bad_acceptance_and_concurrent_integration_cannot_publish) ... ok
+test_failed_push_does_not_record_delivery_and_later_retry_succeeds (tests.test_source_delivery.SourceDeliveryTests.test_failed_push_does_not_record_delivery_and_later_retry_succeeds) ... ok
+test_newer_acceptance_is_not_blocked_by_old_receipt_format (tests.test_source_delivery.SourceDeliveryTests.test_newer_acceptance_is_not_blocked_by_old_receipt_format) ... ok
+test_only_accepted_commit_pushed_dirty_work_preserved_and_retry_is_local (tests.test_source_delivery.SourceDeliveryTests.test_only_accepted_commit_pushed_dirty_work_preserved_and_retry_is_local) ... ok
+test_push_succeeded_but_receipt_lost_retries_without_duplicate_event (tests.test_source_delivery.SourceDeliveryTests.test_push_succeeded_but_receipt_lost_retries_without_duplicate_event) ... ok
+test_remote_divergence_preserves_both_histories (tests.test_source_delivery.SourceDeliveryTests.test_remote_divergence_preserves_both_histories) ... ok
+test_activation_preserves_all_policy_and_requires_owner_and_exact_pins (tests.test_source_review.SourceReviewTests.test_activation_preserves_all_policy_and_requires_owner_and_exact_pins) ... ok
+test_queue_prioritizes_product_one_at_a_time_and_preserves_failed_reviews (tests.test_source_review.SourceReviewTests.test_queue_prioritizes_product_one_at_a_time_and_preserves_failed_reviews) ... ok
+test_review_requires_stopped_source_and_rejects_returning_author_atomically (tests.test_source_review.SourceReviewTests.test_review_requires_stopped_source_and_rejects_returning_author_atomically) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 9.589s
+
+OK

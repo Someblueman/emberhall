@@ -13,7 +13,7 @@ from tests import test_council, test_explorer_dispatch, test_home
 from tests.support import HouseCase
 
 
-def configure(case):
+def configure(case, fixture_type=test_explorer_dispatch.ExplorerDispatchTests):
     events = []
     original = test_council.CouncilTests.event
 
@@ -22,7 +22,7 @@ def configure(case):
         events.append((h.now, op, copy.deepcopy(data), actor))
 
     with patch.object(test_council.CouncilTests, "event", capture):
-        fixture = test_explorer_dispatch.ExplorerDispatchTests()
+        fixture = fixture_type()
         fixture.setUp(); fixture.enable()
     case.repo = case.new_repo("automatic-explorer")
     case.record = Record(case.repo)
