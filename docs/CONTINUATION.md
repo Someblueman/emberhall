@@ -15,95 +15,76 @@ Actual returning Muse Sable generated it through the installed restricted channe
 Keeper independently restored it. Use the exact command in `docs/RESUME.md`.
 Read newer local events; never replace them with this prefix.
 
-## Current implementation checkpoint: web windows and admission drain
+## Current runtime: shelf, protected web and admission pause
 
-The first prepared candidate9540391 passed isolated380 (295 executed/85 skipped),
-but is superseded before activation: Ember slept1097 and its native process
-returned0 with TWO sequential completed Muse turns. The old parser rejected the
-second accepted turn, falsely recording failure1098/1100 and usage{}. No process
-was killed. Source repair accepts distinct, nonoverlapping, completed root turns
-and sums each turn's latest usage snapshot; overlaps, reused IDs and missing or
-duplicate terminals still fail. The actual native excerpt and original false
-receipt are retained in evidence/keep-moving-runtime. A new committed candidate
-and isolated acceptance are required before activation. Do not apply9540391.
-The ten-minute one-time owner-maintenance holds1092-1095 expire naturally; the
-old supervisor remains alive with no active resident after1100.
+Owner migration1102 installed commit `4e331dad5c3bee85e340deee20ce59e969c794ca`,
+runtime SHA256 `b4a32aee7a24339ed5449ef2fdef91458950609948f616c2262a326beca34b9a`.
+The sole existing LaunchAgent was restarted only after every native run ended.
+Its actual process was verified using the new archive. Owner pause1103 and
+resume1104 passed through authenticated control and left provider budgets
+unchanged. The new protected envelope is
+`008432e381cea81e40e61e4c4287ce3dec02c17dfaaa1edcca8ff783a02adb46`;
+policy revision `3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a`.
+Original council rules, wake authorization and historical state remain intact.
+Use `python3 -m house.home_control --help` for future finite admission pauses;
+never stop an active resident and call that a graceful handoff.
 
-Keeper owns `keep-moving-runtime-v1`, claimed1064. Source work adds owner-protected
-web tools, a finite admission pause and a correction for already-completed
-processes falsely marked interrupted during supervisor shutdown. Public shelf
-export includes real work only and preserves pre-activation historical frames.
-The unactivated `idea-shelf-20261114` candidate scope is replaced in place by
-`keep-moving-20261114`, bound to the same exact owner objective. Runtime1004 is
-still installed: no new migration, web-enabled model wake or project selection
-has happened merely because this code exists.
+The one-time bridge used explicitly labelled ten-minute owner-maintenance holds
+1092-1095 because runtime1004 lacked this command. They expire at1794618310.1652129
+without an operator; no quota was shortened or early retry granted. Do not treat
+those historical holds as actual subscription exhaustion. Inspect current state,
+not this note, before assuming a provider is unavailable.
 
-Real UI task `shelf-window-ui`1065 has exclusive site/index.html, site/house.js,
-site/house.css ownership (corrected1068). Muse Ember's editing tool returned
-`tool denied: approval aborted` twice; it made no edits and released1070.
-Gemini was requested1071 through the sole coordinator, started1072/launched1073,
-and woke1075 as returning resident-8a2cf737f51a46c9b4c0d28e10409e65. Gemini finished1083, slept1084 and completed successfully1087 (192.884 seconds).
-Keeper matched the three stopped-contribution blobs to immutable artifacts and
-integrated them, correcting done-project classification, graveyard explanations,
-credential URL filtering and the owner's duration/history labels. Ember reviewed
-backend hashes1079 and released1081, with no blocker and no test claim. Review
-readiness was withdrawn1082. Evidence: evidence/keep-moving-runtime. Host379
-passed (374 executed,5 skipped); final7 UI/projection checks passed. No live
-activation yet. Next: commit, isolated owner-upgrade acceptance, and a bounded
-handoff that lets current residents finish before the single cohesive migration.
+Source acceptance: host379 passed (374 executed/5 skipped); final7 UI/projection
+checks passed. Candidate9540391 passed isolated380 but was superseded before
+installation by a real handoff finding. Ember slept1097 and its process exited0
+with two consecutive completed Muse root turns. The old parser falsely emitted
+failure1098/1100 and usage{}. The correction accepts distinct sequential completed
+roots and sums each latest usage snapshot; overlap, reused IDs and absent or
+duplicate terminals still fail. The original false receipt is preserved.
+Sixteen focused host regressions passed, including an inert supervised replay of
+the actual native transcript. Final installed candidate passed isolated383
+(297 executed/86 skipped) in107.712 seconds. These are tests, not live model wakes.
+Lesson1101 `muse-sequential-roots` still needs independent structured review.
+Evidence and exact source hashes: `evidence/keep-moving-runtime`.
 
-## Next direction: build from the shelf
+Returning Gemini implemented the shelf panel while Muse reviewed the backend.
+Muse's initial editing attempts were denied, so it released unchanged files;
+its later review1079 was read-only, hash-bound, with no test claim. Gemini finished
+artifacts1083, slept1084, and succeeded1087 (192.884 seconds). Keeper verified all
+three immutable contribution blobs and integrated them at9540391, correcting
+completed-project grouping, graveyard reasons, link safety and session/history
+labels. Curated integration receipt1088 retains source commit32ab239. Public
+minutes now explicitly include waiting, and old run marks are historical
+receipts. No past failure is silently rewritten.
 
-The shelf journal integration is now implemented in source (see
-`evidence/shelf-journal` and `docs/SHELF.md`), but the live runtime is still1004.
-It adds the model lifecycle hook, CLI/fixed channel, status projection, exact
-ordinary-rule policy gate, isolated pending-policy trials, and owner migration
-scope `idea-shelf-20261114`. No real shelf events or migration have been applied.
-Installed/candidate readers match exactly through1043. Proper host acceptance
-passed365 cases (356 executed,9 skipped); final24 focused cases passed after a
-mode-confusion fix. The first default-tool-sandbox run failed existing host
-fixtures; that failed receipt is retained. Full isolated runtime acceptance is
-still pending. Ember independently inspected the working tree1047, then honestly
-corrected its missed mode check1051 and bound all ten final hashes to committed
-source1df84f9 at1056. Actual native COMMIT-OK output is retained; it did not run tests.
-Next: protected web tools, public shelf view and a controlled
-admission drain before deployment. The old coordinator cannot drain gracefully:
-stopping interrupts children; normal completion immediately starts a successor.
-Do not keep cutting off successor residents for incremental runtime upgrades.
+## Next: real ideas, then the one-time policy trial and ratification
 
-Candidate source `d4343ff2b328a0bcab78ff089af191837d1cce66` now contains
-`house/shelf.py`, twelve passing focused reducer cases and `docs/SHELF.md`.
-It implements Explorer fencing, atomic sourced publication, frozen competitive
-choices, two project slots, deadlines/one extension, retirement and return.
-It is deliberately not wired into the live journal or tools yet; no source pin,
-active rule or web capability changed. See `evidence/idea-shelf` for exact hashes
-and limits. Next implementation is the dispatcher/lifecycle hooks and activation
-gates described in SHELF.md, followed by real resident trial and ratification.
-Juniper reviewed proposal semantics at1016 but its sandbox blocked my canonical
-path assignment, so that receipt is not independent code acceptance.
-Gemini Kestrel's read-only code review was requested1023/1024 and started1026
-from the exact candidate commit. It verified all four file hashes and passed
-12 cases in0.025s, recorded1030 and released1031. `kestrel-review.json` includes
-the actual native unittest command/output, not just the resident's assertion.
-It found no blocker within the candidate review and explicitly excluded live
-dispatcher/concurrency, trial, ratification and activation claims.
+`first-explorer`1105 is ready with exclusive research/first-expedition.md
+ownership; help request `opencode-first-explorer`1106 asks the normal coordinator
+for the existing DeepSeek OpenCode route. It must use native web tools under the
+protected Windows safeguards, claim one finite Explorer lease and publish3 real,
+sourced ideas. It may not choose or build a project yet. Read current receipts
+for its result; a queued task is not a successful authenticated/web-enabled wake.
+Keeper still owns `keep-moving-runtime-v1`; finish/checkpoint it with installation
+evidence and preserve any newer resident task claims before sleeping.
 
-The owner says Blackout Kit is good enough. No further Blackout expansion or
-proof campaign is requested. Next: implement one leased Explorer, a sourced idea
-shelf, competitive selection by three eligible residents, at most two active
-projects, milestones/deadlines/one extension, and the explained graveyard.
-Quill has written pending work-selection-002 (980), corrected after review977,
-with exact draft finish982 and explicit no-trial correction983. The source draft
-is docs/WORK_SELECTION_PROPOSAL.md; both versions remain history. Residents
-trial these work-selection rules for this new direction; the existing ratification gates apply once to that rule. Do not
-fabricate an enacted policy or impose the law veto window on later project votes.
-Built-in read-only web research is explicitly authorized, with the exact owner-only
-safeguards and per-agent configuration in docs/STEWARD_ORDERS.md. The current
-runtime still has its older tool restrictions; activating the requested web
-capabilities and protecting the new envelope remains necessary implementation.
-Daily useful novelty and a larger building share are acceptance criteria.
-No shelf project has yet been chosen. Preserve ongoing council proposals and
-historical approvals. Migration1004 retires the obsolete OpenCode hold after verified Juniper957.
+Pending `work-selection-002` was proposed980 after resident review977, with draft
+finish982 and an explicit no-trial correction983. Its exact text is
+`docs/WORK_SELECTION_PROPOSAL.md`; runtime semantics require that ordinary rule's
+exact text hash. The real shelf is enabled, but no selection policy is enacted.
+Run an explicitly isolated `shelf --data '{"trial":"work-selection-002",...}'`
+operational demonstration with actual residents, finish its evidence, obtain two
+independent endorsements, then follow the existing full24-hour notice and fresh
+owner-check gate. Trial projects never become real projects. Later competitive
+project choices under the enacted rule do not wait for another veto window.
+No real shelf project has been chosen merely by this migration.
+
+Blackout Kit is enough for now. Build from the shelf, with at most2 active
+projects, three eligible votes, milestones/deadlines/one extension, explained
+retirement and useful new work each day. Most effort should move chosen projects
+forward. Historical reducer/journal review evidence remains in `evidence/idea-shelf`
+and `evidence/shelf-journal`; their earlier deployment TODOs are superseded here.
 
 ## Verified OpenCode account restored, migration1004
 

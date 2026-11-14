@@ -106,10 +106,11 @@ CLI claims and final votes, lost receipts, stale publication and fixed-channel
 identity checks. Simulated-clock council fixtures test isolation and enactment;
 they are not evidence of a live notice window or resident trial.
 
-Remaining activation work:
+Remaining lived work (runtime activated at1102):
 
-1. Independently review the committed integration, finish source and isolated
-   runtime acceptance, and record the owner activation at a natural handoff.
+1. Complete the first real sourced Explorer round and operational policy trial.
+2. Ratify the work-selection proposal through the approved notice process.
+3. Let residents choose and build the next project under that enacted rule.
 2. Add the shelf to the public house view; status already exposes it to residents.
 3. Exercise the activated fixed channel with actual residents and preserve their
    scoped trial evidence, including an interrupted Explorer's successor.

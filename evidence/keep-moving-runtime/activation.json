@@ -1,0 +1,208 @@
+{
+  "activation": {
+    "receipt": {
+      "request": "owner-migration-keep-moving-20261114",
+      "sequence": 1102,
+      "head": "937057935a9974c82c9d31ef428c178858375eeb",
+      "replayed": false
+    },
+    "runtime": {
+      "command": [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "/Users/sws/Code/longhouse/.git/house-home/runtime-4e331dad5c3bee85e340deee20ce59e969c794ca.pyz",
+        "--repo",
+        "/Users/sws/Code/longhouse",
+        "run"
+      ],
+      "entry": "/Users/sws/Code/longhouse/.git/house-home/runtime-4e331dad5c3bee85e340deee20ce59e969c794ca.pyz",
+      "files": {
+        "__main__.py": "11a0fa19b0e67fc0e8d47c9c147cb885b9fb07a55bc406ab09498e5abf62a07f",
+        "docs/WATCH_PROMPT.md": "2dd9e46a61bfd7144643c5d126c49f80d58bc767f77965a221dc26485952e845",
+        "house/__init__.py": "cc618c6c92ad3a52c2c3002d3b63a8b1ea87ada554ec26b1eec259cc901eb3cf",
+        "house/__main__.py": "06a17f17a5142f4bdc785a69a15d5f4ca7683077e5c93169304bcbe98a6cf92f",
+        "house/body.py": "d615c7369fdc068e6229d3441c74ff69d262aa62d2f8a213ac390751986c0e73",
+        "house/building.py": "572a6c2d527c41e7cb08d45e56d61885a41036c1188b112c1d4e2ff39e681b3e",
+        "house/checkpoint.py": "11cc3eca3e9d50ec88bbd83c3b70d596d672ae64993762650091dec547228b0d",
+        "house/council.py": "85fcd011da8e037bd290e4e0400e5fe50b93a200d449e1f9e22d574a19d9eeba",
+        "house/custodian.py": "54736d8b0d89ef91cac921109644589d10375df5f3606964afd73fbe3246a50c",
+        "house/files.py": "68e60185d1ef1775ec7f578b008562b210597c2a441a2348b06d013494f00a9a",
+        "house/governance.py": "d35940b6b63f26082aa3666a835808539761a8aa47b61bafff314a4d0978c29a",
+        "house/home.py": "b2727c6b727637a6b85821484dc4efd2e6d81bfdd4c875c6b7f1cf375af02162",
+        "house/home_control.py": "ded5a6446bc9fbd393805fa19e4e53c70862faa6eb4ad118be110ad51eb0805e",
+        "house/home_work.py": "a209da38cb5ceb42665b8371f5824d3c16ab0f49c641904b223059c4b052d7ae",
+        "house/illustration.py": "9e2ac524ed844c4c4c1a5c69a54cd28522cba05385adfff0ab80f432581705e6",
+        "house/inbox.py": "000a7c14d1c0c1d87a8f20df2a5e0f107b86fa9c2217a5b003224c1c8a43f1b8",
+        "house/integrate.py": "bc6cece65aa6767b8b81a44434f7e97927cb27a0e66f85f447d3c2b1abfb6a84",
+        "house/life.py": "6fdbf47e88346bc80c9f27556c35bf6c95a72fadc6fe32eb84038eabf41d96c3",
+        "house/mailbox.py": "1953ab21a8117a6dce08f95f0168d3fc2f8430083598c6d5b533c4b61f3d4ff1",
+        "house/mailbox_jobs.py": "4ba9155907e9b6bd62c67057979cbc6b4cea723a729389f9b7391146636a2641",
+        "house/maintenance.py": "bb2cb03897e389f94a5d1747cfae755b0768a2d7abc43fabf1d2f0d8b45ce9f4",
+        "house/model.py": "7e608e5c51e50577f8a32ef0c9095274e41580d8895c5eb92f3b0f0bedf858ff",
+        "house/opencode_auth.py": "453dc0a6042309c618cadf18ecdc0840453f9dd6de97dd03d90efe9cc71fe5bc",
+        "house/opencode_tool.py": "eeeb78ceb4ec91559f6135e8e686f6b1bcd329d8f424b4b12645e680d5263f83",
+        "house/owner_upgrade.py": "17c3548bba74fb8ac8a4f3d1a6af7f801454c827f7cc4916561369220b2a00d1",
+        "house/providers.py": "b4a3f49d5addc1a318537c889bb990ec62d60707eebcc5e4130c2f6ba9442d81",
+        "house/publish.py": "f3beb5ce1b6b1e97ff30a87019adce7b51bb0b17c38187ecbdfce08c167b6972",
+        "house/record.py": "31f2a76b74c88a88344d258a84aae8897b8434899f1a1dc4e3d345b2acbc4985",
+        "house/remote.py": "20b9235e90906d710de3584a67cdb3d928e4d87ecc383b58ef6bf90aecd02a73",
+        "house/resident_actions.py": "4314ab2bc70ad8aff746472719833909f984b8e453b013cef7fd2a9f94667630",
+        "house/resident_client.py": "6f8964f4acf65f130fb1671edc66f892cfeb4478a66c4d63f177497a95faaad1",
+        "house/runtime.py": "bb5e1db13cd6381da2ce760498ffaafad1cb022217196733450f3145f2596c0d",
+        "house/shelf.py": "58a9ea8b25d3fda2c683907bf8504f50ed43d9b1ceadfd37ec13f9d1f488de8f",
+        "house/shelf_gate.py": "ba8cff580bd35d2ce6669208c89f2701ac505bb43736ad7908a1f7daccfc79cb",
+        "house/steward.py": "3c9204bdf693dc16075a1e520661ae97ffe810470a806464c89a14719ad60665",
+        "house/test_sandbox.py": "63a9828ce8ed092c231bd9359a05f4f5ce42482e8c85b99bb467493809d31aa8",
+        "house/wake_policy.py": "cd394dca02e2a8b2d83e3cf6e10d1c7863cff910f172bbb81e6f13b8ce6eff84",
+        "house/watch.py": "330c2f2e0a8287ad0d97db091d9360b69614340700a9237603509cf646455237",
+        "house/watch_recovery.py": "cd85efe96bd538a7b1951c40f3d0541813bf4cf27d2e2454bd222d96578117f9",
+        "house/windows.py": "a19390f80e3ed23e60ed80abd479f1ee20158276f7aa4791d1b12f8740185140"
+      },
+      "runtime_sha256": "b4a32aee7a24339ed5449ef2fdef91458950609948f616c2262a326beca34b9a",
+      "source_head": "4e331dad5c3bee85e340deee20ce59e969c794ca",
+      "attestation": {
+        "owner_migration": "keep-moving-20261114",
+        "source_head": "4e331dad5c3bee85e340deee20ce59e969c794ca",
+        "approval_sha256": "ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fbef5eb8",
+        "policy_revision": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a"
+      }
+    }
+  },
+  "bridge": {
+    "before": {
+      "head": "ca1bb23390c721e820b7fc58c42189af24c492bf",
+      "sequence": 1090,
+      "budgets": {
+        "muse": {
+          "agent": "muse",
+          "kind": "budget",
+          "reason": "failed",
+          "until": 1794614681.1632152,
+          "at": 1794614382.0563571,
+          "sequence": 986
+        }
+      },
+      "active": {
+        "dd17294922914226b064140ea641ecac": {
+          "agent": "muse",
+          "kind": "run-start",
+          "mode": "work",
+          "model": "muse-ember-1.0",
+          "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+          "resident": "resident-019bca8ed8fd490eb908e4f82cc91213",
+          "run": "dd17294922914226b064140ea641ecac",
+          "source_head": "60dc27b5df5b60c1e73e5ec456168551995328d0",
+          "workspace": "residents/dd17294922914226b064140ea641ecac",
+          "status": "active",
+          "started_at": 1794615371.253568,
+          "started_sequence": 1020,
+          "pgid": 24058,
+          "launched_sequence": 1021
+        }
+      }
+    },
+    "until": 1794618310.1652129,
+    "receipts": [
+      {
+        "request": "keeper-keep-moving-bridge-agy-20261114",
+        "sequence": 1092,
+        "head": "de1110b17082f166d7797f31628fd590d80c539a",
+        "replayed": false
+      },
+      {
+        "request": "keeper-keep-moving-bridge-codex-20261114",
+        "sequence": 1093,
+        "head": "e8038bc0f67a11c77081a91a461b2464d86dd23d",
+        "replayed": false
+      },
+      {
+        "request": "keeper-keep-moving-bridge-muse-20261114",
+        "sequence": 1094,
+        "head": "2131a2ac2bfea85a5a05df0e32c8866b9c5ea9b9",
+        "replayed": false
+      },
+      {
+        "request": "keeper-keep-moving-bridge-opencode-20261114",
+        "sequence": 1095,
+        "head": "932bd3b4b5b7841d8b82861ce198227ad45ae253",
+        "replayed": false
+      }
+    ],
+    "prepared_source": "9540391c45f41de9c7074e72f9437343875882c1",
+    "test_count": 295
+  },
+  "admissions": {
+    "generation": 2,
+    "until": 1794618049.415201,
+    "reason": "Installed pause verified; resume admissions subject to unchanged finite provider holds",
+    "actor": "keeper-01",
+    "sequence": 1104
+  },
+  "owner_control_sequences": [
+    1103,
+    1104
+  ],
+  "provider_budgets_unchanged_by_pause_resume": true,
+  "policy": {
+    "proposal": null,
+    "text_sha256": "3d9a2cb32e60fbe4dd7eb1052603ab2097edfeb34195a0e09fde594ec96297ab",
+    "revision": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+    "enacted_sequence": 303,
+    "envelope_sha256": "008432e381cea81e40e61e4c4287ce3dec02c17dfaaa1edcca8ff783a02adb46"
+  },
+  "read_sequence": 1106,
+  "read_head": "6f87e778d1f4845f508933d6fe9079a34d4344e8",
+  "stopped_native_run_outcomes": {
+    "dd17294922914226b064140ea641ecac": {
+      "agent": "muse",
+      "kind": "run-start",
+      "mode": "work",
+      "model": "muse-ember-1.0",
+      "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+      "resident": "resident-019bca8ed8fd490eb908e4f82cc91213",
+      "run": "dd17294922914226b064140ea641ecac",
+      "source_head": "60dc27b5df5b60c1e73e5ec456168551995328d0",
+      "workspace": "residents/dd17294922914226b064140ea641ecac",
+      "status": "completed",
+      "started_at": 1794615371.253568,
+      "started_sequence": 1020,
+      "pgid": 24058,
+      "launched_sequence": 1021,
+      "outcome": "failed",
+      "exit_code": 0,
+      "usage": {},
+      "elapsed_seconds": 2378.496798992157,
+      "ended_at": 1794617756.295069,
+      "ended_sequence": 1100,
+      "released_tasks": []
+    },
+    "df1f58831a714c2e864f96b00e492f2a": {
+      "agent": "agy",
+      "help_request": "gemini-shelf-window-ui",
+      "kind": "run-start",
+      "mode": "work",
+      "model": "gemini-4-hydrogen-low",
+      "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+      "resident": "resident-8a2cf737f51a46c9b4c0d28e10409e65",
+      "run": "df1f58831a714c2e864f96b00e492f2a",
+      "source_head": "8cc0cb8ff360082c772654e1ff3e52e78635690a",
+      "workspace": "residents/df1f58831a714c2e864f96b00e492f2a",
+      "status": "completed",
+      "started_at": 1794617204.61601,
+      "started_sequence": 1072,
+      "pgid": 98276,
+      "launched_sequence": 1073,
+      "outcome": "success",
+      "exit_code": 0,
+      "usage": {
+        "cached_input_tokens": 580441,
+        "input_tokens": 106818,
+        "output_tokens": 8068,
+        "total_tokens": 114886
+      },
+      "elapsed_seconds": 192.88363122940063,
+      "ended_at": 1794617403.499449,
+      "ended_sequence": 1087,
+      "released_tasks": []
+    }
+  }
+}

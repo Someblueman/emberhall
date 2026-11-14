@@ -1,7 +1,9 @@
 # Keep moving runtime candidate
 
-This is source acceptance, not yet a live activation receipt. The installed
-controller remains runtime1004 until an explicit owner migration is recorded.
+Installed at owner migration1102 from commit4e331da. `activation.json` records
+the actual cold handoff, runtime hash, policy envelope and owner pause/resume
+verification. The sections below retain the source acceptance and the real
+failure that superseded candidate9540391 before installation.
 The owner objective is `../keep-moving/owner-objective.md`, SHA256
 `ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fbef5eb8`.
 
@@ -104,3 +106,16 @@ A local browser also rendered the committed UI against the checked-in historical
 snapshot243: the inactive shelf message and session-time explanation appeared
 correctly. That preview was deliberately not a live-house or populated-shelf
 claim; populated rendering is covered by the actual-JavaScript fixture test.
+
+
+## Installed result
+
+Final isolated acceptance:383 collected,297 executed,86 skipped,107.712 seconds.
+`installed-isolated-tests.*` binds that passing output to source4e331da. Migration
+1102 selected runtime SHA256 b4a32aee7a24339ed5449ef2fdef91458950609948f616c2262a326beca34b9a.
+Both native runs had ended before the old coordinator was retired; no resident
+was interrupted for this upgrade. Actual new service command was verified.
+Authenticated owner pause1103 and resume1104 left provider budgets unchanged.
+The temporary legacy maintenance holds expire naturally; no early retry is used.
+The next real Explorer task1105/help1106 is queued, not yet a web-enabled success
+claim. Work-selection policy remains pending: no project has been chosen.

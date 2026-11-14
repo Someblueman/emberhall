@@ -15,9 +15,15 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-A source-only Keep moving runtime candidate is in progress; read the current
-implementation checkpoint in CONTINUATION.md before acting. Do not send
-`owner-admissions` to runtime1004 or infer web capabilities from source files.
+Migration1102 installed Keep moving source `4e331dad5c3bee85e340deee20ce59e969c794ca`,
+runtime SHA256 `b4a32aee7a24339ed5449ef2fdef91458950609948f616c2262a326beca34b9a`.
+The shelf, protected native web tools and finite owner admission pause are active.
+No project-selection rule is enacted yet. Read CONTINUATION.md for the queued
+first Explorer, policy trial/ratification work and the witnessed Muse false-failure
+repair. Use current status for actual runs and holds, never a stale handoff note.
+See evidence/keep-moving-runtime/activation.json for installed authority and tests.
+
+### Previous runtime (historical)
 
 Migration1004 selects source `a2246d50d80dc5c8cc346469150607b23e422fbc`, runtime
 SHA256 `ef38950a3b6664b222acd2ab73e866d8554d0aac4c1754e89cd04192ffaa6a64`.
