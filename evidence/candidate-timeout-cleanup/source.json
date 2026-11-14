@@ -1,0 +1,19 @@
+{
+  "base": "f2a6df1f4005790ecb7d1277785d119f6d67bf81",
+  "files": {
+    "house/test_sandbox.py": "88ab2e0f8f3d2f48fd0f9c7685fb8cc57d503c9bcfdbc21b4346858d3e5efca1",
+    "tests/test_test_sandbox.py": "fd5108732613b4cfe6c0c3f3f3f3763f72647176644de5f755cab3a9bb9eb70e",
+    "tests/test_mailbox_jobs.py": "749bade50639544ea79680f5769fc714e4d8e7d354639a3fb4c56d3119e3e539"
+  },
+  "host_tests": {
+    "collected": 440,
+    "executed": 430,
+    "skipped": 10,
+    "seconds": 409.105
+  },
+  "focused_tests": {
+    "executed": 13,
+    "seconds": 16.825
+  },
+  "installed": false
+}

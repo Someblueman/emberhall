@@ -1,0 +1,18 @@
+test_timeout_stops_child_and_grandchild_before_removing_scratch (tests.test_test_sandbox.CandidateSandboxTests.test_timeout_stops_child_and_grandchild_before_removing_scratch) ... ok
+test_writes_and_network_are_fenced_even_through_symlink (tests.test_test_sandbox.CandidateSandboxTests.test_writes_and_network_are_fenced_even_through_symlink) ... ok
+test_action_parser_denies_owner_initializers_roots_and_other_identity (tests.test_mailbox_jobs.JobTests.test_action_parser_denies_owner_initializers_roots_and_other_identity) ... ok
+test_changed_runtime_is_rejected_before_worker_imports (tests.test_mailbox_jobs.JobTests.test_changed_runtime_is_rejected_before_worker_imports) ... ok
+test_checkpoint_worker_exports_private_prefix_and_recovers_lost_result (tests.test_mailbox_jobs.JobTests.test_checkpoint_worker_exports_private_prefix_and_recovers_lost_result) ... ok
+test_guardian_survives_worker_death_after_candidate_exits (tests.test_mailbox_jobs.JobTests.test_guardian_survives_worker_death_after_candidate_exits) ... ok
+test_jobs_use_pinned_code_and_client_ignores_workspace_module_shadows (tests.test_mailbox_jobs.JobTests.test_jobs_use_pinned_code_and_client_ignores_workspace_module_shadows) ... ok
+test_known_worker_result_survives_coordinator_memory_loss (tests.test_mailbox_jobs.JobTests.test_known_worker_result_survives_coordinator_memory_loss) ... ok
+test_long_worker_does_not_block_other_mail_and_recovery_preserves_interruption (tests.test_mailbox_jobs.JobTests.test_long_worker_does_not_block_other_mail_and_recovery_preserves_interruption) ... ok
+test_queued_action_dies_with_requester_and_unknown_group_is_not_signalled (tests.test_mailbox_jobs.JobTests.test_queued_action_dies_with_requester_and_unknown_group_is_not_signalled) ... ok
+test_sandbox_timeout_stops_descendants_and_next_action_runs (tests.test_mailbox_jobs.JobTests.test_sandbox_timeout_stops_descendants_and_next_action_runs) ... ok
+test_worker_cannot_launch_before_its_persistent_receipt (tests.test_mailbox_jobs.JobTests.test_worker_cannot_launch_before_its_persistent_receipt) ... ok
+test_worker_death_during_sandbox_test_keeps_descendant_identifiable (tests.test_mailbox_jobs.JobTests.test_worker_death_during_sandbox_test_keeps_descendant_identifiable) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 16.825s
+
+OK

@@ -1,6 +1,7 @@
 """Real trusted worker processes; synthetic house fixtures, never live approvals."""
 import json
 import os
+from pathlib import Path
 import signal
 import subprocess
 import sys
@@ -189,6 +190,61 @@ class JobTests(MailboxCase):
             mailbox_jobs.tick(fresh)
             time.sleep(0.03)
         self.assertTrue(mailbox_jobs.result(fresh, following)["ok"])
+
+    def test_sandbox_timeout_stops_descendants_and_next_action_runs(self):
+        self.fixture_runtime("\ndef execute(record, workspace, *args):\n"
+            " import sys\n from house.test_sandbox import run\n"
+            " grandchild = \"import json,os,time;from pathlib import Path;Path('descendant.json').write_text(json.dumps({'group':os.getpgrp(),'scratch':os.environ['TMPDIR']}));time.sleep(30)\"\n"
+            " code = \"import subprocess,sys,time;subprocess.Popen([sys.executable,'-c',\" + repr(grandchild) + \"]);time.sleep(30)\"\n"
+            " with (workspace/'sandbox-tests.log').open('w') as output:\n"
+            "  return run([sys.executable,'-c',code],workspace,stdout=output,timeout=2)\n")
+        job = mailbox_jobs.enqueue(self.record, self.run,
+            ["council", "--as", self.resident, "status"], "sandbox-timeout-fixture")
+        mailbox_jobs.tick(self.record)
+        child = self.record._mailbox_processes[job]
+        child.wait(timeout=15)
+        observed = json.loads((self.workspace / 'descendant.json').read_text())
+        self.assertEqual(observed['group'], child.pid)
+        self.assertTrue(mailbox_jobs.group_stopped(child.pid))
+        self.assertFalse(Path(observed['scratch']).exists())
+        mailbox_jobs.tick(self.record)  # Previously raised unidentified group.
+        result = mailbox_jobs.result(self.record, job)
+        self.assertFalse(result['ok'])
+        self.assertIn('TimeoutExpired', result['error'])
+        self.record._mailbox_runtime = self.runtime
+        following = mailbox_jobs.enqueue(self.record, self.run,
+            ["council", "--as", self.resident, "status"], "after-timeout-fixture")
+        mailbox_jobs.tick(self.record)
+        self.record._mailbox_processes[following].wait(timeout=10)
+        mailbox_jobs.tick(self.record)
+        self.assertTrue(mailbox_jobs.result(self.record, following)['ok'])
+
+    def test_guardian_survives_worker_death_after_candidate_exits(self):
+        self.fixture_runtime("\ndef execute(record, workspace, *args):\n"
+            " import sys,time\n from house import test_sandbox\n"
+            " def pause_cleanup(*args, **kwargs):\n"
+            "  (workspace/'cleanup-ready').write_text('yes')\n"
+            "  time.sleep(30)\n"
+            " test_sandbox._stop_group = pause_cleanup\n"
+            " code = \"import subprocess,sys;subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'])\"\n"
+            " with (workspace/'sandbox-tests.log').open('w') as output:\n"
+            "  return test_sandbox.run([sys.executable,'-c',code],workspace,stdout=output,timeout=10)\n")
+        job = mailbox_jobs.enqueue(self.record, self.run,
+            ["council", "--as", self.resident, "status"], "sandbox-cleanup-crash-fixture")
+        mailbox_jobs.tick(self.record)
+        child = self.record._mailbox_processes[job]
+        deadline = time.monotonic() + 10
+        while not (self.workspace / 'cleanup-ready').exists() and child.poll() is None and time.monotonic() < deadline:
+            time.sleep(0.03)
+        self.assertTrue((self.workspace / 'cleanup-ready').exists())
+        os.kill(child.pid, signal.SIGKILL)
+        child.wait(timeout=5)
+        self.assertTrue(any(job in command for command in mailbox_jobs.group_members(child.pid)))
+        fresh = Record(self.repo)
+        mailbox_jobs.recover(fresh)
+        self.assertTrue(mailbox_jobs.group_stopped(child.pid))
+        self.assertFalse(mailbox_jobs.result(fresh, job)['ok'])
+        self.record._mailbox_processes.clear()
 
     def test_changed_runtime_is_rejected_before_worker_imports(self):
         job = mailbox_jobs.enqueue(self.record, self.run,

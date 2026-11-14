@@ -1,13 +1,13 @@
 """Candidate tests can write their room, not the coordinator's authority store."""
 import os
-import io
+import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
 
-from house import test_sandbox
+from house import test_sandbox, watch
 
 
 @unittest.skipUnless(Path('/usr/bin/sandbox-exec').exists(), 'macOS sandbox required')
@@ -41,3 +41,22 @@ else: raise AssertionError('network unexpectedly allowed')
                 self.assertEqual(result.returncode, 0, output.read().decode())
             self.assertEqual(outside.read_text(), 'unchanged')
             self.assertEqual((room / 'inside').read_text(), 'allowed')
+
+    def test_timeout_stops_child_and_grandchild_before_removing_scratch(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            room = Path(temporary).resolve()
+            grandchild = ("import json,os,signal,time;from pathlib import Path;"
+                          "signal.signal(signal.SIGTERM,signal.SIG_IGN);"
+                          "Path('started.json').write_text(json.dumps("
+                          "{'group':os.getpgrp(),'scratch':os.environ['TMPDIR']}));"
+                          "time.sleep(30)")
+            code = ("import subprocess,sys,time;"
+                    f"subprocess.Popen([sys.executable,'-c',{grandchild!r}]);"
+                    "time.sleep(30)")
+            with tempfile.TemporaryFile() as output:
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    test_sandbox.run([sys.executable, '-c', code], room,
+                                     stdout=output, timeout=2)
+            seen = json.loads((room / 'started.json').read_text())
+            self.assertEqual(watch.group_members(seen['group']), [])
+            self.assertFalse(Path(seen['scratch']).exists())
