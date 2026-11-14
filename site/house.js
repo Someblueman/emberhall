@@ -616,13 +616,38 @@ function shelf() {
     });
   }
 }
+function snapshotCue(nowSec, observedAt, frameAt, isCurrent, timeZone) {
+  const fmt = (ts) => new Intl.DateTimeFormat("en-GB", {
+    timeZone: timeZone || "Europe/London",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(ts * 1000));
+  if (!isCurrent) {
+    if (!Number.isFinite(frameAt) || frameAt <= 0) return "Event time unknown";
+    return `Event ${fmt(frameAt)}`;
+  }
+  if (!Number.isFinite(observedAt) || observedAt <= 0) return "Snapshot time unknown";
+  const label = `Snapshot ${fmt(observedAt)}`;
+  if (!Number.isFinite(nowSec)) return label;
+  const diff = nowSec - observedAt;
+  if (diff < -60) return `${label} · ahead of clock`;
+  if (diff < 60) return `${label} · just now`;
+  if (diff < 3600) return `${label} · ${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${label} · ${Math.floor(diff / 3600)}h ago`;
+  return `${label} · ${Math.floor(diff / 86400)}d ago`;
+}
 function lighting() {
-  const at=current?Date.now()/1000:frame.at;
+  const nowSec=Date.now()/1000;
+  const at=current?nowSec:frame.at;
   const hour=Number(new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,hour:"2-digit",hourCycle:"h23"}).format(new Date(at*1000)));
   const day=hour>=7&&hour<19;
   document.body.classList.toggle("day",day);
   $("sky-label").textContent=`${day?"Daylight":"Nightfall"} in Emberhall${current?"":" · remembered"}`;
-  $("house-clock").textContent=clock(at)+" · London";
+  $("house-clock").textContent=(Number.isFinite(at)&&at>0?clock(at):"Time unknown")+" · London";
+  const cue=$("snapshot-cue");
+  if(cue)cue.textContent=snapshotCue(nowSec,data.observed_at,frame?frame.at:NaN,current,data.timezone);
 }
 function render() {
   frame=data.frames[index];
