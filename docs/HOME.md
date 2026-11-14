@@ -347,3 +347,21 @@ test receipts include those safeguards. Original authorization bytes and
 pre-migration policy revisions remain unchanged. Tests cannot establish whether a
 model will obey every privacy or prompt-injection instruction; this is still the
 cooperative resident threat model in THREAT_MODEL.md.
+
+### Source review access repair (candidate, not yet installed)
+
+The fixed action will support `integrate RUN --inspect` and
+`integrate RUN --inspect --path EXACT-CHANGED-PATH`: committed diff and bounded
+UTF-8 text from the stopped contribution, with explicit truncation, binary,
+deleted and nonregular-file results. Inspection does not run code, acknowledge
+events, alter a partial receipt, or accept a contribution. Native workspace
+permissions do not widen.
+
+`integrate RUN --reject REASON` records an independent terminal refusal while
+retaining the original source. A later ordinary retry cannot erase acceptance
+or rejection; a repaired new contribution gets a new review. Project-only merges
+run affected projects' unittest discovery plus changed Python/JSON/JS syntax
+checks inside the existing sandbox. A project with no tests is reported as zero
+tests; these checks do not prove gameplay or semantic correctness. Changes
+outside `projects/NAME/` retain the full foundation suite. Receipts record the
+chosen scope and exact check commands. Human/source review remains necessary.

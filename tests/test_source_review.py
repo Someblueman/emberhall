@@ -40,6 +40,20 @@ class SourceReviewTests(unittest.TestCase):
         for key in before.keys() - {"maintenance", "sequence", "at", "receipts"}:
             self.assertEqual(before[key], self.h.state[key], key)
 
+    def test_review_tool_migration_preserves_policy_and_cannot_widen_permissions(self):
+        self.enable()
+        before = copy.deepcopy(self.h.state)
+        old = maintenance.protected_manifest(before)
+        data = self.migration() | {"scope": maintenance.REVIEW_TOOLS_SCOPE,
+            "protected_files": old | {name: "b" * 64 for name in
+                                      maintenance.ALLOWED_CHANGES[maintenance.REVIEW_TOOLS_SCOPE]}}
+        for path in ("house/providers.py", "house/windows.py", "house/test_sandbox.py", "house/council.py"):
+            bad = copy.deepcopy(data); bad["protected_files"][path] = "c" * 64
+            self.h.reject("owner-migrate", bad, "outside.*scope")
+        self.h.event("owner-migrate", data)
+        for key in before.keys() - {"maintenance", "sequence", "at", "receipts"}:
+            self.assertEqual(before[key], self.h.state[key], key)
+
     def test_review_requires_stopped_source_and_rejects_returning_author_atomically(self):
         request = {"kind": "help", "request": "review", "review_run": "source", "reason": "Review"}
         self.h.reject("life", request, "not enabled")

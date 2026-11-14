@@ -89,7 +89,7 @@ def pending_contributions(private: Path) -> list[dict]:
     for path in sorted(private.glob("*/contribution.json")):
         item = json.loads(path.read_text())
         reviewed = review_result(private, path.parent.name)
-        if reviewed and reviewed["status"] == "integrated":
+        if reviewed and reviewed["status"] in {"integrated", "rejected"}:
             continue
         if item.get("status") == "pending-review":
             result.append({"run": path.parent.name, "commit": item["commit"], "paths": item["paths"]})

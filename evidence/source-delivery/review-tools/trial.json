@@ -1,0 +1,9 @@
+{
+  "automatic_review": 1652,
+  "opencode_run": "39c7e6e260f74667b336e2a2281e0b20",
+  "preflight_job": "a18c333c2fa6db9dd3edf97e17ca1745a9152242196023ce8d7ff13b829b933c",
+  "outcome": "900s timeout; no acceptance",
+  "post_timeout_group_observed_empty": true,
+  "failed_test_log_sha256": "377ab2ca972d25df628a2d5dcc6f334657597cc8f1285f56712b11d0549e5047",
+  "limits": "Full suite ran for a project-only case bible; timeout removed scratch before descendant exited, causing cascading errors. Do not treat this as valid product testing. Timeout process cleanup is not repaired by this source-review scope."
+}

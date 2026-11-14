@@ -30,7 +30,7 @@ def review_result(private: Path, run: str) -> dict | None:
     if not isinstance(result, dict) or not isinstance(candidate, dict):
         return None
     if (result.get("run") == run and result.get("contribution") == candidate.get("commit")
-            and result.get("status") in {"integrated", "conflict", "tests-failed"}):
+            and result.get("status") in {"integrated", "rejected", "conflict", "tests-failed"}):
         return result
     return None
 
@@ -56,12 +56,16 @@ def queue_review(record, private: Path) -> None:
         reason = (
             f"Independently review stopped contribution {run}, commit {candidate['commit']}, "
             f"paths {json.dumps(candidate['paths'])}. You are not its author. "
-            "Inspect the actual private contribution and its finished task artifacts before acceptance. "
+            f"First use integrate {run} --inspect via your fixed journal channel; "
+            "use --inspect --path EXACT-CHANGED-PATH for bounded committed text. "
+            "Read the finished task artifacts and actual changed source before acceptance. "
             "Own no implementation paths for this review. Check correctness, task ownership, privacy, "
             "and relevant acceptance evidence. If acceptable, use your fixed journal channel "
             f"integrate {run} --publish; this tests and merges into shared source. "
             "The coordinator separately pushes accepted commits and records verified remote delivery. "
-            "Do not claim publication from local integration. Preserve conflicts and failed checks; "
+            "Do not claim publication from local integration. If unsuitable, use "
+            f"integrate {run} --reject REASON to record a terminal refusal while preserving source. "
+            "Preserve conflicts and failed checks; "
             "report concrete blockers and request bounded repairs with exclusive file ownership. "
             "If another reviewer already accepted it, replay the receipt rather than repeat tests. "
             "Leave a brief journal handoff and sleep after this bounded review; no redundant report file.")

@@ -1,0 +1,16 @@
+test_actual_git_paths_select_checks_even_if_report_lies (tests.test_source_inspection.SourceInspectionTests.test_actual_git_paths_select_checks_even_if_report_lies) ... ok
+test_inspection_reads_exact_committed_diff_without_receipt_or_lock_mutation (tests.test_source_inspection.SourceInspectionTests.test_inspection_reads_exact_committed_diff_without_receipt_or_lock_mutation) ... ok
+test_large_binary_symlink_and_deleted_content_are_explicit (tests.test_source_inspection.SourceInspectionTests.test_large_binary_symlink_and_deleted_content_are_explicit) ... ok
+test_native_fixed_parser_keeps_modes_exclusive (tests.test_source_inspection.SourceInspectionTests.test_native_fixed_parser_keeps_modes_exclusive) ... ok
+test_project_failure_does_not_publish (tests.test_source_inspection.SourceInspectionTests.test_project_failure_does_not_publish) ... ok
+test_project_tests_gate_real_merge_and_rejection_cannot_erase_acceptance (tests.test_source_inspection.SourceInspectionTests.test_project_tests_gate_real_merge_and_rejection_cannot_erase_acceptance) ... ok
+test_rejection_is_terminal_preserves_source_and_skips_queue (tests.test_source_inspection.SourceInspectionTests.test_rejection_is_terminal_preserves_source_and_skips_queue) ... ok
+test_activation_preserves_all_policy_and_requires_owner_and_exact_pins (tests.test_source_review.SourceReviewTests.test_activation_preserves_all_policy_and_requires_owner_and_exact_pins) ... ok
+test_queue_prioritizes_product_one_at_a_time_and_preserves_failed_reviews (tests.test_source_review.SourceReviewTests.test_queue_prioritizes_product_one_at_a_time_and_preserves_failed_reviews) ... ok
+test_review_requires_stopped_source_and_rejects_returning_author_atomically (tests.test_source_review.SourceReviewTests.test_review_requires_stopped_source_and_rejects_returning_author_atomically) ... ok
+test_review_tool_migration_preserves_policy_and_cannot_widen_permissions (tests.test_source_review.SourceReviewTests.test_review_tool_migration_preserves_policy_and_cannot_widen_permissions) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 5.117s
+
+OK

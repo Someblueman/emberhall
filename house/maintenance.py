@@ -44,6 +44,7 @@ WORKSPACE_SCOPE = "resident-workspaces-20261114"
 SELECTION_SCOPE = "work-selection-repair-20261114"
 EXPLORER_SCOPE = "explorer-dispatch-20261114"
 DELIVERY_SCOPE = "source-delivery-20261114"
+REVIEW_TOOLS_SCOPE = "source-review-tools-20261114"
 SELECTION_SHA256 = "e01580a8a78bbbb5b9286635b85df68bd43b8f8a4785cf9df477765767ba1df8"
 RESTORED_SHA256 = "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde"
 VERIFIED_KEY_RUN = "fc2795f6b6824fc3ae4b9229e8667b61"
@@ -63,11 +64,14 @@ SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            RESTORED_SCOPE: RESTORED_SHA256, KEEP_MOVING_SCOPE: KEEP_MOVING_SHA256,
            WEB_REPAIR_SCOPE: KEEP_MOVING_SHA256, MUSE_TRUST_SCOPE: KEEP_MOVING_SHA256,
            WORKSPACE_SCOPE: KEEP_MOVING_SHA256, SELECTION_SCOPE: SELECTION_SHA256,
-           EXPLORER_SCOPE: KEEP_MOVING_SHA256, DELIVERY_SCOPE: KEEP_MOVING_SHA256}
+           EXPLORER_SCOPE: KEEP_MOVING_SHA256, DELIVERY_SCOPE: KEEP_MOVING_SHA256,
+           REVIEW_TOOLS_SCOPE: KEEP_MOVING_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    REVIEW_TOOLS_SCOPE: OWNER_MODULES | {"house/integrate.py", "house/resident_actions.py",
+        "house/source_delivery.py", "house/home.py"},
     DELIVERY_SCOPE: OWNER_MODULES | {"house/source_delivery.py", "house/home.py", "house/life.py", "house/integrate.py"},
     EXPLORER_SCOPE: {"house/maintenance.py", "house/home.py", "house/life.py"},
     SELECTION_SCOPE: OWNER_MODULES | {"house/shelf.py", "house/shelf_gate.py"},

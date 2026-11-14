@@ -15,15 +15,18 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
-Source-delivery migration1651 is applied with reviewed source02185f7 and runtime
-cce9334eceac5707afed1c0b26e34b5765eec602c627fe5400b775d007512364. Both acceptance
-suites passed; native reviews1573/1589 and actual failure/repair are retained in
-evidence/source-delivery. All native runs finished normally, old service67163
-stopped and new archive bootstrapped. Read current admissions: pause1624/gen13
-awaits explicit resume after this handoff commit. Observe actual auto-review and
-remote delivery; source installation alone does not prove them. Wake Digest is
-selected1614 and build help1650 is queued; Night Ferry prerequisites remain private.
-The growth checkpoint1546 is due06:00UTC14Nov, with no timer installed.
+Source-delivery migration1651 is live and resumed1654/gen14; prior text saying
+it awaits resume is historical. Sole coordinator97403 uses source02185f7 and
+runtimecce9334eceac5707afed1c0b26e34b5765eec602c627fe5400b775d007512364.
+Automatic OpenCode review1657 exposed missing fixed-channel source inspection
+and timed out its full-suite preflight. No new native integration/push is proved.
+Keeper task1683 repairs inspection/refusal and proportionate project tests;
+independent Muse review1690 is underway. Read CONTINUATION and the actual journal
+before further work. Do not activate unreviewed candidate source.
+Wake Digest is selected1614, built by Gemini1664 and repaired by Muse1678;
+Keeper's independent12 tests and real interval pass, but source remains private.
+Night Ferry scenes await accepted prerequisites. Growth checkpoint1546 is due
+06:00UTC14Nov; it is a task, not a timer. Keep the two-project limit.
 
 Automatic Explorer scheduling is live at migration1504: source2dc609d,
 runtime90a30f40dacf49241e4b5103b0a9def79b5f3887286d8530cc01c67046870d83.

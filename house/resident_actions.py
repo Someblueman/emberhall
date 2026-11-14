@@ -21,7 +21,11 @@ def parser():
         command.add_argument("--request")
         if name == "integrate":
             command.add_argument("target")
-            command.add_argument("--publish", action="store_true")
+            mode = command.add_mutually_exclusive_group()
+            mode.add_argument("--publish", action="store_true")
+            mode.add_argument("--inspect", action="store_true")
+            mode.add_argument("--reject")
+            command.add_argument("--path")
         elif name.startswith("runtime-") or name == "checkpoint":
             command.add_argument("--task", required=True)
             if name in {"runtime-test", "checkpoint"}:
@@ -96,8 +100,12 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
         from .checkpoint import create
         return create(record, workspace, resident, run, args.task, args.token, requestid)
     if args.command == "integrate":
-        from .integrate import integrate
-        return integrate(record, args.target, resident, publish=args.publish)
+        from .integrate import integrate, inspect_contribution
+        if args.path is not None and not args.inspect:
+            raise ValueError("--path requires --inspect")
+        if args.inspect:
+            return inspect_contribution(record, args.target, resident, args.path)
+        return integrate(record, args.target, resident, publish=args.publish, reject=args.reject)
     if args.command == "runtime-test":
         from .wake_policy import test_runtime
         return test_runtime(record, resident, run, args.task, args.token, record.root)
