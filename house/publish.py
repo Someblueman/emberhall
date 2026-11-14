@@ -27,14 +27,62 @@ def oversized_unpublished(record: Record, previous: str, remote: str | None) -> 
                for kind, size in (line.split() for line in sizes.splitlines()))
 
 
+def committed_blob(record: Record, head: str, path: str, *, optional=False) -> bytes | None:
+    """Read an exact regular-file entry from the captured source tree."""
+    entry = record.git("ls-tree", "-z", head, "--", path)
+    if not entry and optional:
+        return None
+    parts = entry.rstrip(b"\0").split(b"\t", 1)
+    if len(parts) != 2 or parts[1].decode() != path:
+        raise ValueError("Missing committed public file: " + path)
+    metadata = parts[0].split()
+    if len(metadata) != 3 or metadata[0] not in (b"100644", b"100755") or metadata[1] != b"blob":
+        raise ValueError("Public file is not a regular blob: " + path)
+    return record.git("cat-file", "blob", metadata[2].decode())
+
+
+def project_contents(record: Record, head: str) -> dict[str, bytes]:
+    raw = committed_blob(record, head, "site/projects.json", optional=True)
+    if raw is None:
+        return {}
+    manifest = json.loads(raw)
+    if (not isinstance(manifest, dict) or manifest.get("version") != 1
+            or type(manifest.get("version")) is not int or not isinstance(manifest.get("projects"), list)):
+        raise ValueError("Invalid project manifest")
+    contents = {"projects.json": raw}
+    ids = set()
+    for project in manifest["projects"]:
+        if (not isinstance(project, dict) or set(project) != {"id", "title", "summary", "category", "action", "href", "files"}
+                or any(not isinstance(project[key], str) or not project[key] for key in
+                       ("id", "title", "summary", "category", "action", "href"))
+                or project["id"] in ids or project["category"] not in ("creation", "house-tool")
+                or project["action"] not in ("Open", "Play", "Read guide")
+                or not isinstance(project["files"], list)):
+            raise ValueError("Invalid project entry")
+        ids.add(project["id"])
+        for path in project["files"]:
+            if not isinstance(path, str):
+                raise ValueError("Invalid project path")
+            parts = path.split("/")
+            if (len(parts) < 3 or parts[0] != "projects" or
+                    any(not part or part.startswith(".") or "\\" in part for part in parts)):
+                raise ValueError("Unsafe project path: " + path)
+            contents[path] = committed_blob(record, head, path)
+    return contents
+
+
 def publish(record: Record, *, push=False) -> dict:
     private = record.common / "house-home"
     private.mkdir(mode=0o700, exist_ok=True)
     with (private / "publisher.lock").open("a+b") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         projection = export(record)
-        contents = {name: record.git("show", "HEAD:site/" + name)
+        head = projection["source_head"]
+        if not head:
+            raise ValueError("No source HEAD")
+        contents = {name: committed_blob(record, head, "site/" + name)
                     for name in ("index.html", "house.css", "house.js")}
+        contents.update(project_contents(record, head))
         contents["history.json"] = json.dumps(encode(projection), separators=(",", ":"), allow_nan=False).encode()
         contents[".nojekyll"] = b""
         if any(len(body) > MAX_PUBLIC_BLOB for body in contents.values()):

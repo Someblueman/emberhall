@@ -28,7 +28,7 @@ assert.match(text(root),/not activated/);
 frame={residents:[{id:'resident-fixture',name:'Juniper'}],shelf:{enabled:true,policy:null,ideas:[],projects:[]}};shelf();
 assert.match(text(root),/awaits ratification/);assert.match(text(root),/No ideas/);
 assert.doesNotMatch(text(root),/Room for one Explorer round|council can choose/);
-assert(text(root).includes("0 / 2 active projects · 0 unselected ideas"));
+assert(text(root).includes("Building now: 0 of 2 project slots · 0 ideas waiting"));
 frame.shelf.policy='work-selection';
 frame.shelf.explorer={resident:'resident-fixture',agent:'opencode',until:100};
 frame.shelf.ideas=[

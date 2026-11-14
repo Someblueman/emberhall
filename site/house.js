@@ -18,6 +18,7 @@ const descriptions = {
   bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time."
 };
 let data, frame, index = 0, current = true, selected = null;
+let catalog = null, catalogSource = null;
 let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
 const DISPLAY_BUNKS = 6;
 let roomBounds = {}, wholeBounds = "0 0 900 700";
@@ -34,6 +35,14 @@ function html(tag, cls, value, parent) {
   if (value !== undefined) node.textContent = value;
   if (parent) parent.appendChild(node);
   return node;
+}
+function recordId(parent,id,label="Record ID") {
+  if(typeof id!=="string"||!id)return;
+  const details=html("details","record-details",undefined,parent);
+  html("summary","",label,details);html("code","",id,details);
+}
+function titleFor(record,type) {
+  return typeof record.title==="string"&&record.title.trim()&&record.title!==record.id?record.title:`Untitled ${type}`;
 }
 const p = (x, y, z = 0) => [470 + (x - y) * .86, 140 + (x + y) * .43 - z];
 const points = coords => coords.map(c => p(...c).join(",")).join(" ");
@@ -384,11 +393,28 @@ function choose(room) {
   drawHouse(); roomPanel(); dormControls();
   document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
 }
+function showViewForHash(hash, focusTarget=false) {
+  const targetId=String(hash||"").replace(/^#/,"");
+  const routes={"house-view":"house-view","projects-view":"projects-view","shelf-card":"projects-view",
+    "council-view":"council-view","voting-card":"council-view","accounts-view":"accounts-view"};
+  const viewId=routes[targetId]||"house-view",view=$(viewId);
+  if(!view)return;
+  document.querySelectorAll(".page-view").forEach(section=>{section.hidden=section.id!==viewId;});
+  document.querySelectorAll(".view-nav a").forEach(link=>{
+    if(link.hash===`#${viewId}`)link.setAttribute("aria-current","page");
+    else link.removeAttribute("aria-current");
+  });
+  if(focusTarget) {
+    const target=$(targetId)||view;
+    target.focus?.({preventScroll:true});
+    target.scrollIntoView?.({block:"start"});
+  }
+}
 function personRow(r, parent) {
   const k=kinds[r.agent]||kinds.unrecorded;
   const row=html("div","person",undefined,parent);
   const mark=html("span","person-mark",k.mark,row);mark.style.color=k.color;
-  const info=html("div","",undefined,row);html("strong","",`${r.name} · ${shortId(r.id,frame.residents.map(person=>person.id))}`,info);
+  const info=html("div","",undefined,row);html("strong","",r.name,info);
   html("span","small",`${k.name}${r.model?` · ${r.model}`:""} · ${r.presence}`,info);
   if(r.room==="door"&&r.pose!=="unconfirmed"&&r.pose!=="sleeping")
     html("span","small","Arrived · no later room activity recorded. Reading and waiting do not move a figure.",info);
@@ -483,7 +509,12 @@ function renderCatchupPanel(content) {
   if(!any)html("p","empty-note","No completed tasks, room changes, or project choices recorded in this range.",panel);
 }
 function roomPanel() {
-  const room=frame.rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
+  const room=frame.rooms.find(r=>r.id===selected);
+  let content=$("room-content");content.replaceChildren();
+  if(!room) {
+    const overview=html("details","overview-record",undefined,content);
+    html("summary","","Residents and unfinished work",overview);content=overview;
+  }
   $("room-kicker").textContent=room?"INSIDE THE HOUSE":"COME INSIDE";
   $("room-title").textContent=room?room.name:floorsAt(frame).find(f=>f.level===selectedFloor).name;
   $("room-description").textContent=room?(room.purpose||descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
@@ -518,7 +549,8 @@ function roomPanel() {
       const ideas=(dataShelf.ideas||[]).filter(i=>i.status==="shelved");
       const active=(dataShelf.projects||[]).filter(p=>p.status==="active");
       const done=(dataShelf.projects||[]).filter(p=>p.status==="done");
-      html("p","small",dataShelf.policy?`Selection rule: ${dataShelf.policy}`:"Research is open. Project selection awaits ratification.",summary);
+      html("p","small",dataShelf.policy?"Selection rules recorded":"Research is open. Project selection awaits ratification.",summary);
+      if(dataShelf.policy)recordId(summary,dataShelf.policy,"Selection rule ID");
       html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
     }
     const link=html("a","room-shelf-link","View the public shelf",summary);
@@ -527,6 +559,10 @@ function roomPanel() {
   if(room?.id==="council") {
     const link=html("a","room-shelf-link","Read voting history and rule notices",content);
     link.href="#voting-card";
+  }
+  if(room?.id==="gallery") {
+    const link=html("a","room-shelf-link","Explore the creations made here →",content);
+    link.href="#projects-view";
   }
   if(room?.id==="parlor") renderCatchupPanel(content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") renderWorkshopTasks(content);
@@ -602,6 +638,63 @@ function safeHttpUrl(raw) {
     return null;
   }
 }
+function collectionUrl(entry) {
+  const href=entry.href;
+  if(typeof href!=="string")return null;
+  if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*$/.test(href))return href;
+  if(entry.category==="house-tool" && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
+  return null;
+}
+async function loadCatalog(sourceHead) {
+  if(!document.querySelector?.("#creations-card")||catalogSource===sourceHead)return;
+  try {
+    const response=await fetch("projects.json",{cache:"no-cache",signal:AbortSignal.timeout(5000)});
+    if(!response.ok)throw new Error("Collection unavailable");
+    const next=await response.json();
+    if(next?.version!==1||!Array.isArray(next.projects))throw new Error("Invalid collection");
+    catalog=next.projects.filter(entry=>entry&&typeof entry.id==="string"&&typeof entry.title==="string"&&typeof entry.summary==="string"&&collectionUrl(entry));
+    catalogSource=sourceHead;
+  } catch {
+    catalog=null;catalogSource=null;
+  }
+}
+function renderCollection() {
+  const box=$("creations");if(!box)return;
+  box.replaceChildren();
+  if(!catalog) {
+    html("p","empty-note","Collection links are unavailable in this publication. The recorded project history is still below.",box);
+    return;
+  }
+  const completed=new Set((frame.shelf?.projects||[]).filter(project=>project.status==="done").map(project=>project.idea));
+  const known=catalog.filter(entry=>completed.has(entry.id));
+  const creations=known.filter(entry=>entry.category==="creation");
+  html("p","small",current?"Finished creations you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
+  if(!creations.length)html("p","empty-note","No published creations were completed by this moment.",box);
+  const cards=html("div","creation-grid",undefined,box);
+  function card(entry,parent) {
+    const article=html("article","creation-card",undefined,parent);
+    html("h3","",entry.title,article);
+    html("p","",entry.summary,article);
+    html("span","small","Completed",article);
+    const action=entry.category==="house-tool"?"Read guide":entry.action==="Play"?"Play":"Open";
+    const link=html("a","creation-action",`${action} ${entry.title} →`,article);
+    link.href=collectionUrl(entry);
+  }
+  creations.forEach(entry=>card(entry,cards));
+  const tools=known.filter(entry=>entry.category==="house-tool");
+  if(tools.length) {
+    const details=html("details","house-tools",undefined,box);
+    html("summary","",`Tools for the house (${tools.length})`,details);
+    tools.forEach(entry=>card(entry,details));
+  }
+}
+function renderViewContext() {
+  const context=$("view-context");
+  if(context)context.textContent=current
+    ? `Latest snapshot · ${snapshotCue(Date.now()/1000,data.observed_at,frame.at,true,data.timezone)}`
+    : `Historical view · event ${frame.seq} · ${snapshotCue(Date.now()/1000,data.observed_at,frame.at,false,data.timezone)}`;
+  const latest=$("view-latest");if(latest)latest.hidden=current;
+}
 function shelf() {
   const box = $("shelf");
   if (!box) return;
@@ -611,8 +704,9 @@ function shelf() {
     html("p", "empty-note", "The idea shelf is not activated at this moment.", box);
     return;
   }
-  const residentName = id => frame.residents.find(r => r.id === id)?.name || id;
-  html("p", "shelf-policy", dataShelf.policy ? `Work selection · ${dataShelf.policy}` : "Project selection awaits ratification.", box);
+  const residentName = id => frame.residents.find(r => r.id === id)?.name || "Owner unrecorded";
+  html("p", "shelf-policy", dataShelf.policy ? "Work selection rules recorded" : "Project selection awaits ratification.", box);
+  if(dataShelf.policy)recordId(box,dataShelf.policy,"Selection rule ID");
   if (dataShelf.explorer && (dataShelf.explorer.resident || dataShelf.explorer.agent)) {
     const exp = dataShelf.explorer;
     const parts = [residentName(exp.resident), kinds[exp.agent]?.name || exp.agent].filter(Boolean).join(" · ");
@@ -624,7 +718,7 @@ function shelf() {
   const ideas = rawIdeas.filter(i => i.status === "shelved");
   const activeProjects = rawProjects.filter(p => p.status === "active");
   const completedProjects = rawProjects.filter(p => p.status === "done");
-  html("p", "shelf-counts", `${activeProjects.length} / 2 active projects · ${ideas.length} unselected ideas`, box);
+  html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
   if (dataShelf.policy) {
     if (activeProjects.length >= 2) {
       html("p", "small", "Both project slots occupied · build the active projects.", box);
@@ -637,12 +731,12 @@ function shelf() {
   }
   const graveyard = [
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
-      title: p.title || p.id || "Untitled project",
+      title: titleFor(p,"project"), id:p.id,
       status: p.status || "retired",
       reason: p.lesson || ""
     })),
     ...rawIdeas.filter(i => i.status === "graveyard" && !rawProjects.some(p => p.idea === i.id && p.status === "dropped")).map(i => ({
-      title: i.title || i.id || "Untitled idea",
+      title: titleFor(i,"idea"), id:i.id,
       status: i.status || "retired",
       reason: [i.losses ? `Lost ${i.losses} council choices.` : "Retired without starting a project.", ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
     }))
@@ -651,33 +745,49 @@ function shelf() {
     html("p", "empty-note", "No ideas or projects have been shelved at this moment.", box);
     return;
   }
-  for (const [title, projects] of [["Active projects", activeProjects], ["Finished projects", completedProjects]]) {
-    if (!projects.length) continue;
-    const group = html("div", "shelf-group", undefined, box);
-    html("div", "eyebrow-small", title, group);
-    projects.forEach(proj => {
-      const item = html("div", "shelf-item", undefined, group);
-      html("strong", "", proj.title || proj.id || "Untitled project", item);
-      const meta = [proj.status, residentName(proj.owner)].filter(Boolean).join(" · ");
-      if (meta) html("span", "small", meta, item);
-      if (proj.milestone) html("p", "", `Milestone: ${proj.milestone}`, item);
-      if (proj.deadline) {
-        const dl = typeof proj.deadline === "number" ? clock(proj.deadline) : String(proj.deadline);
-        html("span", "small", `Deadline: ${dl}${proj.extended ? " (extended)" : ""}`, item);
+  if(activeProjects.length) {
+    const group=html("div","shelf-group",undefined,box);
+    html("h2","","Active projects",group);
+    activeProjects.forEach(project=>{
+      const item=html("article","shelf-item",undefined,group);
+      html("strong","",titleFor(project,"project"),item);
+      html("span","small",`Active · ${residentName(project.owner)}`,item);
+      const details=html("details","project-details",undefined,item);
+      html("summary","","Milestone and details",details);
+      if(project.milestone)html("p","",`Milestone: ${project.milestone}`,details);
+      if(project.deadline) {
+        const deadline=typeof project.deadline==="number"?clock(project.deadline):String(project.deadline);
+        html("p","small",`Deadline: ${deadline}${project.extended?" (extended)":""}`,details);
       }
+      recordId(details,project.id);
+    });
+  }
+  if(completedProjects.length) {
+    const completed=html("details","shelf-completed",undefined,box);
+    html("summary","",`Finished projects (${completedProjects.length})`,completed);
+    completedProjects.forEach(project=>{
+      const item=html("article","shelf-item",undefined,completed);
+      html("strong","",titleFor(project,"project"),item);
+      html("span","small",`Finished · ${residentName(project.owner)}`,item);
+      const details=html("details","project-details",undefined,item);
+      html("summary","","Milestone and details",details);
+      if(project.milestone)html("p","",`Milestone: ${project.milestone}`,details);
+      if(project.deadline)html("p","small",`Deadline: ${typeof project.deadline==="number"?clock(project.deadline):project.deadline}`,details);
+      recordId(details,project.id);
     });
   }
   if (ideas.length) {
     const group = html("div", "shelf-group", undefined, box);
     html("div", "eyebrow-small", "Ideas · not selected projects", group);
     ideas.forEach(idea => {
-      const item = html("div", "shelf-item", undefined, group);
-      html("strong", "", idea.title || idea.id || "Untitled idea", item);
+      const item = html("details", "shelf-item shelf-idea", undefined, group);
+      html("summary", "", titleFor(idea,"idea"), item);
       const meta = [idea.status, residentName(idea.author)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
       if (idea.what) html("p", "", idea.what, item);
       if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
       if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
+      recordId(item,idea.id);
       const links = (Array.isArray(idea.sources) ? idea.sources : []).map(safeHttpUrl).filter(Boolean);
       if (links.length) {
         const row = html("div", "shelf-sources", undefined, item);
@@ -697,6 +807,7 @@ function shelf() {
       const item = html("div", "shelf-item shelf-dead", undefined, details);
       html("strong", "", entry.title, item);
       html("span", "small", entry.reason ? `${entry.status} · ${entry.reason}` : entry.status, item);
+      recordId(item,entry.id);
     });
   }
 }
@@ -725,20 +836,29 @@ function voting() {
   html("h3", "", `Project choices (${choices.length})`, box);
   if (!choices.length) html("p", "empty-note", "No project ballots recorded at this moment.", box);
   for (const choice of [...choices].reverse()) {
-    const title = id => id === null ? "None of these" : choice.candidates.find(c => c.id === id)?.title || id;
+    const title = id => {
+      if(id===null)return "None of these";
+      const candidate=choice.candidates.find(c=>c.id===id);
+      if(!candidate)return "Unknown candidate";
+      if(typeof candidate.title==="string"&&candidate.title.trim())return candidate.title;
+      return `Untitled candidate ${choice.candidates.indexOf(candidate)+1}`;
+    };
     const counted = choice.votes.filter(v => v.counted).length;
     const outcome = choice.status === "open" ? `Open · ${counted}/3 counted votes` : choice.status === "rejected" ? "Shortlist rejected" : `Selected: ${title(choice.winner)}`;
     const item = html("details", "vote-round", undefined, box);
     item.id = `vote-choice-${choice.id}`;
-    html("summary", "", `${outcome} · ${choice.id}`, item);
+    html("summary", "", `Project choice · ${outcome}`, item);
+    recordId(item,choice.id);
     html("p", "small", `Opened by ${person(choice.owner)} at event ${choice.opened_sequence}${choice.closed_sequence ? ` · closed at event ${choice.closed_sequence}` : ""}.`, item);
     html("p", "small", choice.selection_version === 2 ? "Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available." : "Historical selection rule: three counted votes, plurality with the recorded tie-break. Authors’ votes for their own ideas do not count.", item);
     const alternatives = html("details", "vote-alternatives", undefined, item);
     alternatives.id = `vote-candidates-${choice.id}`;
     html("summary", "", `Frozen alternatives (${choice.candidates.length})`, alternatives);
     choice.candidates.forEach(c => {
-      html("strong", "", `${c.title} · by ${person(c.author)}`, alternatives);
-      html("p", "small", `${c.milestone} · ${c.seconds / 86400} day milestone`, alternatives);
+      const candidate=html("div","vote-candidate",undefined,alternatives);
+      html("strong", "", `${title(c.id)} · by ${person(c.author)}`, candidate);
+      html("p", "small", `${c.milestone||"Milestone unrecorded"}${Number.isFinite(c.seconds)?` · ${c.seconds / 86400} day milestone`:""}`, candidate);
+      recordId(candidate,c.id,"Candidate record ID");
     });
     for (const vote of choice.votes) {
       const row = html("div", "vote-ballot", undefined, item);
@@ -753,8 +873,9 @@ function voting() {
     const item = html("details", "vote-round", undefined, box);
     item.id = `vote-rule-${proposal.id}`;
     const status = proposal.stale ? "Stale base · needs a new proposal" : proposal.rule_status || proposal.status;
-    html("summary", "", `${proposal.title} · ${status}`, item);
-    html("p", "small", `${proposal.id} · ${proposal.mode} · proposed by ${person(proposal.author)} · ${stamp(proposal.proposed_at)}`, item);
+    html("summary", "", `${titleFor(proposal,"proposal")} · ${status}`, item);
+    html("p", "small", `${proposal.mode} · proposed by ${person(proposal.author)} · ${stamp(proposal.proposed_at)}`, item);
+    recordId(item,proposal.id);
     html("p", "", proposal.reason, item);
     if (proposal.ratification === "direct-owner") html("p", "small", "Direct owner decision; no council vote or notice is claimed.", item);
     html("p", "small", proposal.trial ? `Trial: ${proposal.trial.task} · ${proposal.trial.evidence}` : "No trial recorded.", item);
@@ -775,7 +896,7 @@ function voting() {
     html("summary", "", "Proposed wording", text);
     html("p", "vote-reason", proposal.text, text);
   }
-  box.querySelectorAll("details").forEach(node => { node.open = opened.has(node.id); });
+  box.querySelectorAll("details").forEach(node => { node.open = Boolean(node.id)&&opened.has(node.id); });
 }
 function snapshotCue(nowSec, observedAt, frameAt, isCurrent, timeZone) {
   const validTime = ts => Number.isFinite(ts) && ts > 0 && Number.isFinite(new Date(ts * 1000).getTime());
@@ -859,7 +980,8 @@ function renderResidentPulse() {
     `${awakeWithout.length} recorded awake outside a house run.`;
   const runLabel=(run,person,kind)=>{
     const base=person?`${person.name} · ${kind.name}`:`Unarrived or unknown resident · ${kind.name}`;
-    return person&&person.room?`${base} · ${person.room}`:base;
+    const model=typeof run.model==="string"&&run.model.trim()?run.model:"Model unrecorded";
+    return `${base} · ${model}${person&&person.room?` · ${person.room}`:""}`;
   };
   if(active.length) {
     const list=html("div","",undefined,host);
@@ -960,6 +1082,7 @@ function render() {
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
   const stopped=frame.residents.filter(r=>r.pose==="unconfirmed").length;
   $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${frame.tasks.length} unfinished threads.`;
+  renderViewContext();
   $("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
   const actor=frame.residents.find(r=>r.id===frame.event.actor)?.name||frame.event.actor;
@@ -967,7 +1090,7 @@ function render() {
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderResidentPulse();lighting();
+  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
@@ -980,9 +1103,12 @@ function render() {
   known.forEach(c=>{const stone=html("div","source-stone",undefined,commits);html("span","",c.id.slice(0,9),stone);html("div","",c.title,stone);});
 }
 function bindControls() {
+  window.addEventListener("hashchange",()=>showViewForHash(window.location.hash,true));
+  showViewForHash(window.location.hash,Boolean(window.location.hash));
   $("floor-picker").addEventListener("change",e=>{selectedFloor=Number(e.target.value);selected=null;render();});
   $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
   $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
+  $("view-latest")?.addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
   $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
   $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
   $("overview").addEventListener("click",()=>choose(null));
@@ -1016,7 +1142,7 @@ function refreshView(changed=false) {
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const focusId=input&&document.activeElement?.id?.startsWith("catchup-")?document.activeElement.id:null;
   if(changed)render();
-  else {lighting();accounts();roomPanel();drawHouse();}
+  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();}
   const replacement=$("catchup-seq");
   if(replacement&&draft!==null)replacement.value=draft;
   if(replacement&&focusId)$(focusId)?.focus({preventScroll:true});
@@ -1030,6 +1156,7 @@ async function refresh() {
     const next=decodePublicHistory(await response.json());
     if(next.version!==1||!Array.isArray(next.frames)||!next.frames.length)throw new Error("Unrecognized house history");
     if(data&&next.frames.length<data.frames.length)throw new Error("An older publication arrived");
+    await loadCatalog(next.source_head);
     // Read the selection after the fetch: someone may have scrubbed while it was in flight.
     const nextIndex=current?next.frames.length-1:next.frames.findIndex(moment=>moment.seq===frame.seq);
     if(nextIndex<0)throw new Error("The selected moment is missing from this publication");

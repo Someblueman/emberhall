@@ -23,13 +23,13 @@ class Element {
   addEventListener(k,fn){this.listeners[k]=fn;}
 }
 const all=n=>[n,...n.children.flatMap(all)], nodes={};
-const document={body:new Element('body'),activeElement:null,createElement:tag=>new Element(tag),
+const document={querySelectorAll:()=>[],body:new Element('body'),activeElement:null,createElement:tag=>new Element(tag),
   getElementById(id){
     const found=Object.values(nodes).flatMap(all).find(n=>n.id===id);
     if(found)return found;
     return nodes[id]||(nodes[id]=Object.assign(new Element('div'),{id}));
   }};
-const ctx=vm.createContext({assert,document,fetch:()=>new Promise(()=>{}),AbortSignal,structuredClone,console});
+const ctx=vm.createContext({assert,document,fetch:()=>new Promise(()=>{}),AbortSignal,structuredClone,console,window:{location:{hash:""},addEventListener(){}}});
 const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
