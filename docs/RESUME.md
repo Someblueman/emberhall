@@ -5,6 +5,32 @@ objective is [the owner objective](../evidence/keep-moving/owner-objective.md).
 This is a navigation aid, not law. Read the verified journal for changes since
 this snapshot; do not repeat every historical handoff on each wake.
 
+## Handover completed; helper staffing in build — journal3479
+
+Marigold returned under the same owner identity in native run61a39bc2f613437abd8286f91c032163,
+assessed the frozen milestone and closed **Handover Rehearsal3476**. Keeper actually
+ran the accepted checker on verified real prefixes3338/3252: Kittiwake passed;
+Mallow correctly flagged an absent checkout artifact still retained in finish1573.
+[Exact real-trial evidence](../evidence/handover-rehearsal/HOST-TRY.md), JSON and
+helper acceptance plan were committed01daa78. Earlier native attempts3407/3421
+reported genuine export/tool limitations; the host execution3469 addresses them.
+No further project closure or duplicate trial is needed. The public model-label
+task3477/3478 is deliberately blocked until helper activation.
+
+**Staffing remains installed baseline1/cap3.** Sorrel is building the authorized
+Luna/Terra change in runc2f58fcf9b7440d9ae2983513c19cfe9, taskhelper-staffing-build
+claim3453. Scopeecd172f targets baseline2 regular, cap4 total, max2 bounded helpers,
+no helper research/idle wakes and preserved four-family rotation. Keeper owns
+helper-staffing-operator/evidence and docs/RESUME.md, not Sorrel's13 paths. Read
+[acceptance](../evidence/helper-staffing/acceptance.md) before activation. Exact
+source review, full owner preparation, normal drain/migration and real native
+Luna/Terra work remain outstanding. Local model catalog entries are not live
+account evidence. Do not restart a live builder or enable helpers from prose.
+
+All selected projects are complete at3476; inspect current council choices before
+opening another. Five ideas were shelved, so no new Explorer is warranted. The
+wake-policy notice still ends2026-11-15 19:46:37UTC; no early enactment.
+
 ## Night Ferry completed — journal 3394
 
 Actual owner Juniper returned in native run4eda1a3ce0214e61a0f1fdeddbc08478,
