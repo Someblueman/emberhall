@@ -1,0 +1,25 @@
+{
+  "id": "landing-clerk",
+  "title": "The North Desk",
+  "perspective": "shore",
+  "paragraphs": [
+    "At 22:00 I stood at the North Landing desk with the brass logbook open under the lamp and watched the motor ferry Moth take on her last fare of the night. Only one passenger stepped aboard, carrying a stiff blue document tube under one arm. I checked the cabin myself before casting off: nobody else was aboard as a passenger, and nobody else came down the slipway. I stayed at North Landing for the entire crossing.",
+    "Before Moth left the berth, I had already completed my signal round for the reach. There are only three usable landings on this water: North Landing shows a steady white lamp, South Pier shows a steady amber lamp, and Orchard Float shows two short white flashes followed by a long dark interval, repeating. I checked all three beacons personally before 22:00, and every one of them held its assigned pattern without fault throughout the crossing. Both South Pier and Orchard Float are in good repair and can receive a passenger.",
+    "The night was cool and still, with nothing in the air to blur a lamp or mimic a flash, though the bend of the channel hides the other two landings from my window. From the north desk I can see the water immediately off our own berth and the steady white light above it, but I cannot see South Pier or Orchard Float once a boat clears the point.",
+    "Moth was scheduled for the usual North-South run, so I expected her back light after eighteen minutes. At 22:18 she nosed back into North Landing on time, her crew all present and accounted for, but the cabin was empty. Both the passenger and the blue document tube were gone. Where the passenger stepped ashore I could not see from here."
+  ],
+  "statements": [
+    {
+      "fact": "F1",
+      "text": "At 22:00 exactly one passenger boarded Moth at North Landing carrying a blue document tube; nobody else boarded or was already aboard, and I remained at North Landing throughout the crossing."
+    },
+    {
+      "fact": "F2",
+      "text": "There are exactly three usable landings on this reach: North Landing (steady white), South Pier (steady amber), and Orchard Float (two short white flashes then a long dark interval, repeating). I personally checked all three signals before the crossing; all worked properly throughout, and both South Pier and Orchard Float can receive a passenger."
+    },
+    {
+      "fact": "F3",
+      "text": "Moth returned to North Landing at 22:18 with its crew accounted for, but with no passenger and no blue document tube. I could not see the other landings from the north desk and did not witness where the passenger left."
+    }
+  ]
+}
