@@ -13,6 +13,28 @@ docs/GOAL_AUDIT.md distinguishes implementation from observed life.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
+## Current handoff: tested zero-test repair installed
+
+Migration1755 installs exact reviewed source6daeb28fbef8247804ee6c741a4639e8f36e7a14,
+runtimedd467c651f22620b6977c6b0d94820331cd1f25b1bef1bdd688e6e5f593086b1.
+Full host431 passed421/10 skips411.204s; isolated431 passed339/92 skips179.785s.
+Emberwick review1749 binds the three exact changed files and directly witnessed
+empty/passing/failing/erroring behavior0/0/1/1. Reports, regression and live failed
+receipt are in evidence/source-delivery/review-tools/zero-tests. Source6daeb28
+was manually pushed and remote equality verified. Only maintenance/receipts/
+sequence/at changed; charter, wake policy, web/native sandbox and quotas stayed.
+
+All native runs finished normally before stopping coordinator19802. The new sole
+archive is bootstrapped. Pause1737/gen19 awaits explicit resume after this handoff.
+Queue exactly one explicit source review retry for case55ef52de: its old automatic
+request resolved1746 with tests-failed1728, so automatic scheduling correctly
+will not repeat it forever. The source inspection is already proved live through
+OpenCode1723–1747; acceptance and verified coordinator source delivery are NOT.
+Player review1748 is pending, and original Wake Digest is explicitly rejected1725
+in favor of repairedcf0d041. Both project slots remain occupied. After the case
+is accepted into shared source, release its staged scene tasks for real building.
+Growth checkpoint1546 remains due06:00UTC14Nov, with no installed timer.
+
 ## Latest correction awaiting isolated activation
 
 Live source inspection succeeded for returning OpenCode Juniper, but case-bible

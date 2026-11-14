@@ -14,7 +14,9 @@ refuses malformed JSON. Focused8 passed5.509s; full host431 passed421/10 skips i
 411.204s. Emberwick independently reviewed exact3-file hashes1749 and directly
 witnessed empty/passing/failing/erroring exit codes0/0/1/1, plus JSON refusal.
 
-Isolated owner preparation and activation remain pending at this commit. The
+Isolated431 tests passed339/92 skips179.785s; migration1755 activated exact
+reviewed source6daeb28 after all native residents finished normally. This
+handoff precedes explicit resume and the actual native retry. The
 new narrow project-checks-20261114 scope changes only owner modules/integrate;
 no sandbox, governance, native permissions or project files change. After it is
 installed, one explicit native case retry is required: the earlier automatic

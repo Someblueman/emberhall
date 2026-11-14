@@ -1,0 +1,33 @@
+{
+  "migration_sequence": 1755,
+  "scope": "project-checks-20261114",
+  "source_commit": "6daeb28fbef8247804ee6c741a4639e8f36e7a14",
+  "runtime_sha256": "dd467c651f22620b6977c6b0d94820331cd1f25b1bef1bdd688e6e5f593086b1",
+  "host": {
+    "collected": 431,
+    "executed": 421,
+    "skipped": 10,
+    "seconds": 411.204
+  },
+  "isolated": {
+    "collected": 431,
+    "executed": 339,
+    "skipped": 92,
+    "seconds": 179.785
+  },
+  "review_sequence": 1749,
+  "changed_top_level_keys": [
+    "maintenance",
+    "receipts",
+    "sequence",
+    "at"
+  ],
+  "old_coordinator": 19802,
+  "all_native_runs_drained": true,
+  "admission_pause": {
+    "sequence": 1737,
+    "generation": 19
+  },
+  "resume": "pending explicit resume after handoff",
+  "live_retry": "not yet observed"
+}
