@@ -134,6 +134,11 @@ function furnishings(g, room, x, y, lit, residents) {
     }
     box(g,x+54,y+82,64,34,20,["#b4915d","#775f40","#94774c"]);
     polygon(g,[[x+66,y+88,21],[x+102,y+88,21],[x+102,y+108,21],[x+66,y+108,21]],"#e3d6b2");
+  } else if(room === "parlor") {
+    box(g,x+44,y+52,86,52,22,["#b4915d","#775f40","#94774c"]);
+    polygon(g,[[x+56,y+60,23],[x+116,y+60,23],[x+116,y+94,23],[x+56,y+94,23]],"#e3d6b2");
+    box(g,x+64,y+66,20,16,4,["#d7b878","#8c704b","#b4915d"],23);
+    box(g,x+18,y+16,32,20,38,["#8c704b","#5e513b","#796344"]);
   } else if(room !== "bedroom" && !residents.length) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
@@ -370,6 +375,74 @@ function personRow(r, parent) {
     html("span","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
   });
 }
+function jumpToSequence(seq) {
+  const target=data.frames.findIndex(f=>f.seq===seq);
+  if(target<0)return;
+  index=target;current=target===data.frames.length-1;render();
+}
+function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
+  const visible=frames.slice(0,endIndex+1);
+  if(!visible.length)return{startSeq:0,endSeq:0,count:0,isDefault:true,tasks:[],rooms:[],projects:[]};
+  const endSeq=visible[visible.length-1].seq;
+  const isDefault=!(Number.isInteger(requestedStartSeq)&&requestedStartSeq>0&&requestedStartSeq<=endSeq);
+  const defaultIdx=Math.max(0,visible.length-50);
+  let startIdx=isDefault?defaultIdx:visible.findIndex(f=>f.seq>=requestedStartSeq);
+  if(startIdx<0)startIdx=0;
+  const startSeq=visible[startIdx].seq;
+  const baseline=startIdx>0?visible[startIdx-1]:null;
+  const seenRooms=new Map((baseline?.rooms||[]).map(r=>[r.id,`${r.status||"open"}:${r.name||""}`]));
+  const seenProjects=new Map((baseline?.shelf?.projects||[]).map(p=>[p.id||p.title,p.status]));
+  const tasks=[],rooms=[],projects=[];
+  const reported=new Set();
+  for(let i=startIdx;i<visible.length;i++){
+    const f=visible[i];
+    if(f.event?.op==="finish"){
+      const taskId=f.event.title;
+      const prev=frames[i-1];
+      const meta=prev?.tasks?.find(t=>t.id===taskId);
+      const title=meta?.title||taskId;
+      if(taskId&&!reported.has(taskId)){
+        reported.add(taskId);
+        tasks.push({title,seq:f.seq});
+      }
+    }
+    (f.rooms||[]).forEach(r=>{const sig=`${r.status||"open"}:${r.name||""}`;if(seenRooms.get(r.id)!==sig){seenRooms.set(r.id,sig);rooms.push({name:r.name||r.id,status:r.status||"open",seq:f.seq});}});
+    (f.shelf?.projects||[]).forEach(p=>{const k=p.id||p.title;if(seenProjects.get(k)!==p.status&&(p.status==="active"||p.status==="done")){seenProjects.set(k,p.status);projects.push({title:p.title||k,status:p.status,seq:f.seq});}});
+  }
+  return{startSeq,endSeq,count:visible.length-startIdx,isDefault,tasks,rooms,projects};
+}
+let catchupStartSeq=null;
+function renderCatchupPanel(content) {
+  const panel=html("div","catchup-panel",undefined,content);
+  const digest=buildCatchupDigest(data.frames,index,catchupStartSeq);
+  html("p","small catchup-note",digest.isDefault?`Showing latest ${digest.count} events (${digest.startSeq}–${digest.endSeq}) through this moment. Not a remembered visitor cursor.`:`Showing ${digest.count} events (${digest.startSeq}–${digest.endSeq}) through this moment. Not a remembered visitor cursor.`,panel);
+  const controls=html("div","catchup-controls",undefined,panel);
+  const label=html("label","small","Start from event ",controls);
+  label.htmlFor="catchup-seq";
+  const input=html("input","",undefined,controls);
+  input.id="catchup-seq";input.type="number";input.min=String(data.frames[0]?.seq||1);input.max=String(digest.endSeq);input.value=String(digest.startSeq);
+  const apply=html("button","","Update",controls);
+  apply.id="catchup-apply";
+  apply.addEventListener("click",()=>{const v=Number.parseInt(input.value,10);catchupStartSeq=Number.isFinite(v)?v:null;roomPanel();});
+  const reset=html("button","","Latest 50",controls);
+  reset.id="catchup-reset";
+  reset.addEventListener("click",()=>{catchupStartSeq=null;roomPanel();});
+  const sections=[["Completed tasks",digest.tasks,t=>t.title],["Room changes",digest.rooms,r=>`${r.name} (${r.status})`],["Project choices",digest.projects,p=>`${p.title} (${p.status})`] ];
+  let any=false;
+  sections.forEach(([heading,items,fmt])=>{
+    if(!items.length)return;
+    any=true;
+    html("h3","catchup-heading",`${heading} (${items.length})`,panel);
+    const list=html("div","catchup-list",undefined,panel);
+    items.slice(0,8).forEach(item=>{
+      const row=html("div","catchup-item",undefined,list);
+      html("span","",`${fmt(item)} · event ${item.seq}`,row);
+      const btn=html("button","catchup-jump","Jump",row);
+      btn.addEventListener("click",()=>jumpToSequence(item.seq));
+    });
+  });
+  if(!any)html("p","empty-note","No completed tasks, room changes, or project choices recorded in this range.",panel);
+}
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
   $("room-kicker").textContent=room?"INSIDE THE HOUSE":"COME INSIDE";
@@ -412,6 +485,7 @@ function roomPanel() {
     const link=html("a","room-shelf-link","View the public shelf",summary);
     link.href="#shelf-card";
   }
+  if(room?.id==="parlor") renderCatchupPanel(content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") effectiveTasks().forEach(t=>{
     const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
     html("strong","",t.title,row);
