@@ -811,6 +811,146 @@ function lighting() {
   const cue=$("snapshot-cue");
   if(cue)cue.textContent=snapshotCue(nowSec,data.observed_at,frame?frame.at:NaN,current,data.timezone);
 }
+function renderResidentPulse() {
+  const host=$("resident-pulse");
+  if(!host)return;
+  host.replaceChildren();
+  const residents=Array.isArray(frame.residents)?frame.residents:[];
+  const tasks=Array.isArray(frame.tasks)?frame.tasks:[];
+  const runs=(Array.isArray(frame.runs)?frame.runs:[]).filter(run=>run&&typeof run==="object"&&
+    (!Number.isInteger(run.sequence)||run.sequence<=frame.seq));
+  const validTime=value=>Number.isFinite(value)&&value>0;
+  const ref=current?(validTime(data.observed_at)?data.observed_at:frame.at):frame.at;
+  const caveat=html("p","presence-note",undefined,host);
+  caveat.textContent=!validTime(ref)
+    ? "Snapshot time unknown; recorded presence cannot be placed in time."
+    : current
+      ? `Recorded receipts in the public snapshot at ${clock(ref)}. This is a dated record, not a live process check; a missing claim does not prove idle or waiting.`
+      : `Recorded receipts at this remembered moment, ${clock(ref)}. Later arrivals and endings are not shown; a missing claim does not prove idle or waiting.`;
+  const earliest=Array.isArray(data.frames)&&data.frames.length&&validTime(data.frames[0].at)?data.frames[0].at:ref;
+  const windowEnd=validTime(ref)?ref:null;
+  const windowStart=windowEnd===null?null:Math.max(validTime(earliest)?earliest:windowEnd,windowEnd-3600);
+  const residentOf=id=>residents.find(person=>person.id===id);
+  const claimFor=id=>{
+    const claimed=tasks.filter(item=>item&&item.owner===id&&item.status==="claimed");
+    if(!claimed.length)return null;
+    const active=claimed.find(item=>{
+      const until=validTime(item.until)?item.until:null;
+      return until===null||windowEnd===null||until>windowEnd;
+    });
+    return {title:(active||claimed[0]).title,expired:!active};
+  };
+  const workLabel=id=>{
+    const claim=claimFor(id);
+    if(!claim)return "No task claimed";
+    if(claim.expired)return "Last claim expired; fate unconfirmed";
+    return `Claimed: ${claim.title||"untitled task"}`;
+  };
+  const kindOf=agent=>kinds[agent]||kinds.unrecorded;
+  const openAt=run=>!(validTime(run.end)&&windowEnd!==null&&run.end<=windowEnd);
+  const active=runs.filter(run=>openAt(run)&&(!validTime(run.start)||run.start<=windowEnd))
+    .sort((a,b)=>(b.start||0)-(a.start||0));
+  const ended=runs.filter(run=>!openAt(run)&&run.end>=windowStart).sort((a,b)=>b.end-a.end);
+  const awakeWithout=residents.filter(person=>person&&person.pose!=="sleeping"&&person.pose!=="unconfirmed"&&
+    !active.some(run=>run.resident===person.id));
+  const summary=html("p","presence-summary",undefined,host);
+  summary.textContent=`${active.length} resident run${active.length===1?"":"s"} open · `+
+    `${ended.length} recent run ending${ended.length===1?"":"s"} · `+
+    `${awakeWithout.length} recorded awake outside a house run.`;
+  const runLabel=(run,person,kind)=>{
+    const base=person?`${person.name} · ${kind.name}`:`Unarrived or unknown resident · ${kind.name}`;
+    return person&&person.room?`${base} · ${person.room}`:base;
+  };
+  if(active.length) {
+    const list=html("div","",undefined,host);
+    active.forEach(run=>{
+      const entry=html("div","presence-run",undefined,list);
+      const person=residentOf(run.resident), kind=kindOf(run.agent);
+      const laterEnd=validTime(run.end)&&windowEnd!==null&&run.end>windowEnd;
+      html("strong","presence-name",runLabel(run,person,kind),entry);
+      const state=html("span","presence-state",undefined,entry);
+      if(laterEnd)state.textContent="Run open at this moment";
+      else if(run.status==="started")state.textContent="Preparing";
+      else if(run.status==="ended"||run.status==="result-saved")state.textContent="Run ended; end time unrecorded";
+      else if(person&&person.pose==="sleeping")
+        state.textContent="Last posture: asleep; launch timing uncertain";
+      else state.textContent="Run open";
+      html("span","presence-work",workLabel(run.resident),entry);
+    });
+  }
+  if(ended.length) {
+    const details=html("details","",undefined,host);
+    html("summary","",`${ended.length} recent run ending${ended.length===1?"":"s"}`,details);
+    ended.forEach(run=>{
+      const entry=html("div","presence-run",undefined,details);
+      const person=residentOf(run.resident), kind=kindOf(run.agent);
+      html("strong","presence-name",runLabel(run,person,kind),entry);
+      html("span","presence-state",`Run ended ${clock(run.end)} · ${run.outcome||"outcome unrecorded"}.`,entry);
+      html("span","presence-work",workLabel(run.resident),entry);
+    });
+  }
+  if(awakeWithout.length) {
+    html("p","presence-note","Recorded awake outside a house run:",host);
+    const list=html("div","",undefined,host);
+    awakeWithout.forEach(person=>{
+      const entry=html("div","presence-run",undefined,list);
+      const label=`${person.name} · ${kindOf(person.agent).name}`;
+      html("strong","presence-name",person.room?`${label} · ${person.room}`:label,entry);
+      html("span","presence-state","Recorded awake",entry);
+      html("span","presence-work",workLabel(person.id),entry);
+    });
+  }
+  const occupancy=html("div","",undefined,host);
+  if(windowStart===null||windowEnd===null) {
+    html("p","presence-empty","Recorded occupancy is unavailable because this snapshot has no valid observation time.",occupancy);
+    return;
+  }
+  const intervals=[];
+  runs.forEach(run=>{
+    if(!validTime(run.start))return;
+    const open=openAt(run),end=open?windowEnd:run.end;
+    if(end<=run.start)return;
+    const from=Math.max(run.start,windowStart),to=Math.min(end,windowEnd);
+    if(to>from)intervals.push({start:from,end:to,open});
+  });
+  const bounds=[windowStart,windowEnd];
+  intervals.forEach(item=>{bounds.push(item.start,item.end);});
+  const edges=[...new Set(bounds)].filter(value=>value>=windowStart&&value<=windowEnd).sort((a,b)=>a-b);
+  const segments=[];
+  for(let i=0;i<edges.length-1;i++){
+    const start=edges[i],end=edges[i+1];
+    if(end<=start)continue;
+    const count=intervals.filter(item=>item.start<end&&item.end>start).length;
+    segments.push({start,end,count});
+  }
+  const duration=value=>{
+    if(value<60)return `${Math.round(value)}s`;
+    const minutes=Math.floor(value/60),seconds=Math.round(value%60);
+    return seconds?`${minutes}m ${seconds}s`:`${minutes}m`;
+  };
+  const buckets={0:0,1:0,2:0,3:0};
+  segments.forEach(item=>{buckets[Math.min(item.count,3)]+=item.end-item.start;});
+  const starts=runs.filter(run=>validTime(run.start)&&run.start>=windowStart&&run.start<=windowEnd).length;
+  const ends=runs.filter(run=>validTime(run.end)&&run.end>=windowStart&&run.end<=windowEnd).length;
+  const bars=html("div","occupancy-bars",undefined,occupancy);
+  segments.forEach(item=>{
+    const segment=html("span","occupancy-segment",undefined,bars);
+    const seconds=item.end-item.start;
+    segment.style.flexGrow=String(seconds);
+    segment.style.flexBasis="0";
+    segment.style.opacity=item.count?String(Math.min(1,0.35+0.25*item.count)):"0";
+    segment.title=`${duration(seconds)} with ${item.count} recorded run receipt${item.count===1?"":"s"}`;
+  });
+  html("p","occupancy-legend",
+    `Last hour: 0 residents ${duration(buckets[0])}; 1 resident ${duration(buckets[1])}; `+
+    `2 residents ${duration(buckets[2])}; 3+ residents ${duration(buckets[3])}. `+
+    `${starts} start and ${ends} end receipt${ends===1?"":"s"} in this window.`,
+    occupancy);
+  html("p","presence-note",
+    `This is recorded run overlap, not active working time or a live process check. Open and preparing runs are clipped to ${current?"the snapshot export time":"this frame"}${windowStart>windowEnd-3600?" and the earliest recorded frame":""}; their full span is not confirmed. Empty space is not proof that the house was empty.`,
+    occupancy);
+  if(!intervals.length)html("p","presence-empty","No recorded run interval overlaps this hour. The gap is not proof that the house was empty.",occupancy);
+}
 function render() {
   frame=data.frames[index];
   if(!floorsAt(frame).some(f=>f.level===selectedFloor))selectedFloor=0;
@@ -827,7 +967,7 @@ function render() {
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();dormControls();accounts();shelf();voting();lighting();
+  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderResidentPulse();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
