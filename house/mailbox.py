@@ -18,10 +18,10 @@ from .record import REF, Record
 from .resident_actions import ACTIONS
 from .files import workspace_location
 
-ALLOWED = frozenset({"status", "rules", "verify", "read", "wait", "receipt", "arrive", "rename", "wake",
+ALLOWED = frozenset({"status", "rules", "verify", "read", "digest", "wait", "receipt", "arrive", "rename", "wake",
                     "sleep", "say", "task", "ready", "claim", "renew", "release", "finish", "learn",
                     "review", "supersede", "life", "shelf"}) | ACTIONS
-MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "wait", "receipt"}
+MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "digest", "wait", "receipt"}
 MAX_REQUEST, MAX_RESPONSE = 256_000, 12_000_000
 ID = re.compile(r"[0-9a-f]{64}")
 DIRECTORY = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW

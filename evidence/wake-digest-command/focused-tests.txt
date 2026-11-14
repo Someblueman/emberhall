@@ -1,0 +1,11 @@
+test_upgrade_pins_formatter_without_changing_policy_or_other_sources (tests.test_digest_command.DigestAuthorityTests.test_upgrade_pins_formatter_without_changing_policy_or_other_sources) ... ok
+test_bounded_pages_equal_raw_read_and_leave_record_unchanged (tests.test_digest_command.DigestCommandTests.test_bounded_pages_equal_raw_read_and_leave_record_unchanged) ... ok
+test_default_is_actual_sleep_cursor_not_latest_and_empty_is_honest (tests.test_digest_command.DigestCommandTests.test_default_is_actual_sleep_cursor_not_latest_and_empty_is_honest) ... ok
+test_invalid_bounds_and_missing_default_identity_fail_read_only (tests.test_digest_command.DigestCommandTests.test_invalid_bounds_and_missing_default_identity_fail_read_only) ... ok
+test_fixed_native_channel_uses_verified_record_and_does_not_acknowledge (tests.test_digest_command.DigestMailboxTests.test_fixed_native_channel_uses_verified_record_and_does_not_acknowledge) ... ok
+test_native_channel_cannot_impersonate_or_override_the_journal_root (tests.test_digest_command.DigestMailboxTests.test_native_channel_cannot_impersonate_or_override_the_journal_root) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 3.704s
+
+OK

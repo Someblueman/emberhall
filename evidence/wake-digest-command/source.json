@@ -1,0 +1,33 @@
+{
+  "files": {
+    "house/digest.py": "0953e129532183c42960034d899c984ad042b0fea532127f1f84dbf94ead9deb",
+    "house/__main__.py": "b6c8e904bdad7434f8a870f07eb018a71181de2dbda6d03db97c5505c32e9cc4",
+    "house/mailbox.py": "72059f166ca279fc29a5d582416ee0ca3124abaddc4a8475ad886758343846fb",
+    "house/maintenance.py": "c4ad1bc4defe722d055b17ee29df794da8476d2f004e73eb865e7bf91361e10b",
+    "house/owner_upgrade.py": "27b93a5c7a62dea0d87900ade5a9ac633e7f918b2d6482107c1fb44b83fd95cf",
+    "projects/wake-digest/digest.py": "737ba1a0f9a5184c0587231fdeef86d2a6318d02e1d90172592d01d67ac7544b",
+    "projects/wake-digest/test_digest.py": "d64c77ebb6f666ab97d2c939741a61e8a69c5b3a45b01ea7686e89c55d3e385b",
+    "tests/test_digest_command.py": "d181513c861873f8637913be272d6b991a7b00dada7d408953a43d1d98f35359",
+    "docs/WAKE_DIGEST.md": "86fac726e4c63f464fa30e3617ef04020961b01ee4173443e34933fedd3440c7"
+  },
+  "formatter": "Byte-for-byte move of accepted projects/wake-digest/digest.py from source c158395. Published offline script remains an entrypoint within the checkout.",
+  "host": {
+    "collected": 437,
+    "executed": 427,
+    "skipped": 10,
+    "seconds": 409.55
+  },
+  "focused": 6,
+  "offline": 12,
+  "activation": "pending; installed runtime is still6daeb28",
+  "native_use_before_command": {
+    "finish": 1853,
+    "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+    "events": 430,
+    "first_sequence": 1405,
+    "last_sequence": 1834,
+    "pages": 9,
+    "qualification": "Recorded native result; private report source review remains separate."
+  },
+  "failed_attempt": "Initial host suite launched without host process observation, showed process fixture errors and was deliberately interrupted with SIGINT to its identified PID23302. Full partial log preserved; not acceptance. Authorized host run passed all executed cases."
+}

@@ -5,8 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from digest import build_digest, format_markdown, load_inputs
+from house.digest import build_digest, format_markdown, load_inputs
 
 
 class TestWakeDigest(unittest.TestCase):

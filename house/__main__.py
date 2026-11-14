@@ -104,10 +104,11 @@ def parser() -> argparse.ArgumentParser:
         elif name == "supersede":
             for key in ("old", "new", "evidence"):
                 cmd.add_argument("--" + key, required=True)
-    read = sub.add_parser("read", help="read without moving your durable cursor")
-    read.add_argument("--as", dest="actor", required=True)
-    read.add_argument("--after", type=int)
-    read.add_argument("--limit", type=int, default=50)
+    for name in ("read", "digest"):
+        read = sub.add_parser(name, help="read or summarize without moving your durable cursor")
+        read.add_argument("--as", dest="actor", required=True)
+        read.add_argument("--after", type=int)
+        read.add_argument("--limit", type=int, default=50)
     receipt = sub.add_parser("receipt")
     receipt.add_argument("request")
     signing = sub.add_parser("ballot")
@@ -178,7 +179,7 @@ def run(args: argparse.Namespace) -> object:
     if command == "receipt":
         seq = state["receipts"][args.request]
         return {"sequence": seq, "event": events[seq - 1]}
-    if command == "read":
+    if command in {"read", "digest"}:
         cursor = state["residents"][args.actor]["cursor"] if args.after is None else args.after
         if not 0 <= cursor <= len(events):
             raise ValueError("invalid read cursor")
@@ -192,8 +193,14 @@ def run(args: argparse.Namespace) -> object:
             if "artifacts" in data:
                 data["artifacts"] = {k: {"sha256": v["sha256"]} for k, v in data["artifacts"].items()}
             summaries.append({**event, "data": data, "sequence": seq})
-        return {"through": through, "latest": len(events), "has_more": through < len(events),
+        page = {"through": through, "latest": len(events), "has_more": through < len(events),
                 "events": summaries}
+        if command == "digest":
+            from .digest import build_digest
+            return build_digest([page]) | {"source": {"journal_head": head, "after": cursor},
+                "next": f"read --as {args.actor} --after {cursor} --limit {args.limit}",
+                "note": "A summary is not acknowledgement. Read cited raw events before advancing your sleep cursor."}
+        return page
     if command == "extract":
         task = state["tasks"][args.task]
         if task["status"] != "done":
