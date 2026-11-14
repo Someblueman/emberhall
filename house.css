@@ -702,18 +702,20 @@ footer a {
 }
 .occupancy-bars {
   display:flex;
-  gap:2px;
+  gap:0;
   height:14px;
   margin:9px 0 5px;
   min-width:0;
+  overflow:hidden;
+  border-radius:3px;
+  background:var(--line);
 }
 .occupancy-segment {
   flex:1 1 0;
-  min-width:2px;
+  min-width:0;
   height:100%;
-  border:1px solid var(--line);
-  border-radius:2px;
-  background:transparent;
+  border:0;
+  background:var(--gold);
 }
 .occupancy-legend {
   display:flex;
