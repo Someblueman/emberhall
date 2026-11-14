@@ -1,0 +1,27 @@
+test_refresh_keeps_drafts_and_focus_without_changing_navigation (tests.test_parlor_refresh.ParlorRefreshTests.test_refresh_keeps_drafts_and_focus_without_changing_navigation) ... FAIL
+
+======================================================================
+FAIL: test_refresh_keeps_drafts_and_focus_without_changing_navigation (tests.test_parlor_refresh.ParlorRefreshTests.test_refresh_keeps_drafts_and_focus_without_changing_navigation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_parlor_refresh.py", line 94, in test_refresh_keeps_drafts_and_focus_without_changing_navigation
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'1' !== '2'
+
+    at [eval]:41:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '1',
+  expected: '2',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.032s
+
+FAILED (failures=1)

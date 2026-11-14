@@ -420,7 +420,7 @@ function renderCatchupPanel(content) {
   const label=html("label","small","Start from event ",controls);
   label.htmlFor="catchup-seq";
   const input=html("input","",undefined,controls);
-  input.id="catchup-seq";input.type="number";input.min=String(data.frames[0]?.seq||1);input.max=String(digest.endSeq);input.value=String(digest.startSeq);
+  input.id="catchup-seq";input.type="number";input.min=String(data.frames[0]?.seq||1);input.max=String(digest.endSeq);input.value=String(digest.startSeq);input.defaultValue=input.value;
   const apply=html("button","","Update",controls);
   apply.id="catchup-apply";
   apply.addEventListener("click",()=>{const v=Number.parseInt(input.value,10);catchupStartSeq=Number.isFinite(v)?v:null;roomPanel();});
@@ -429,7 +429,7 @@ function renderCatchupPanel(content) {
   reset.addEventListener("click",()=>{catchupStartSeq=null;roomPanel();});
   const sections=[["Completed tasks",digest.tasks,t=>t.title],["Room changes",digest.rooms,r=>`${r.name} (${r.status})`],["Project choices",digest.projects,p=>`${p.title} (${p.status})`] ];
   let any=false;
-  sections.forEach(([heading,items,fmt])=>{
+  sections.forEach(([heading,items,fmt],section)=>{
     if(!items.length)return;
     any=true;
     html("h3","catchup-heading",`${heading} (${items.length})`,panel);
@@ -438,6 +438,7 @@ function renderCatchupPanel(content) {
       const row=html("div","catchup-item",undefined,list);
       html("span","",`${fmt(item)} · event ${item.seq}`,row);
       const btn=html("button","catchup-jump","Jump",row);
+      btn.id=`catchup-jump-${section}-${item.seq}`;
       btn.addEventListener("click",()=>jumpToSequence(item.seq));
     });
   });
@@ -660,6 +661,17 @@ function bindControls() {
   $("overview").addEventListener("click",()=>choose(null));
   controlsReady=true;
 }
+function refreshView(changed=false) {
+  // Capture immediately before the redraw, after the fetch and any visitor edits.
+  const input=$("catchup-seq");
+  const draft=input&&input.value!==input.defaultValue?input.value:null;
+  const focusId=input&&document.activeElement?.id?.startsWith("catchup-")?document.activeElement.id:null;
+  if(changed)render();
+  else {lighting();accounts();roomPanel();drawHouse();}
+  const replacement=$("catchup-seq");
+  if(replacement&&draft!==null)replacement.value=draft;
+  if(replacement&&focusId)$(focusId)?.focus({preventScroll:true});
+}
 async function refresh() {
   if(refreshing)return;
   refreshing=true;
@@ -679,13 +691,13 @@ async function refresh() {
       data=next;index=nextIndex;
       $("history").max=data.frames.length;$("history").disabled=false;
       if(!controlsReady)bindControls();
-      render();
-    }else if(current){lighting();accounts();roomPanel();drawHouse();}
+      refreshView(true);
+    }else if(current)refreshView();
   }catch(error){
     $("error").hidden=false;
     $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here; we’ll try again shortly.":"The house record is unavailable. We’ll try again shortly.";
     if(!data)$("presence-line").textContent="The record is unavailable; no activity is invented.";
-    else if(current){lighting();accounts();roomPanel();drawHouse();}
+    else if(current)refreshView();
   }finally{refreshing=false;}
 }
 refresh();

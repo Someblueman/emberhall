@@ -3,8 +3,11 @@
 Read `evidence/house-delivery-20261114/README.md` and `acceptance.json` first.
 Parlor repair 2064 passed independent reviews 2070/2098, actual public-history
 probes, and the pinned gate 2137: 443 tests, 348 executed, 95 skips. Accepted commit 704e11b8
-contains the repaired five files; the Pages JavaScript matches. It remains
-construction: only recorded builder Reed may open it later. No browser witness.
+contains the repaired five files; the Pages JavaScript matched. Reed returned
+and opened the room at event 2180, then finished and slept. Keeper subsequently
+exercised the public Parlor controls at phone width and repaired automatic refresh
+losing unfinished input/focus; see `evidence/parlor-browser/`. The first browser
+visit used public snapshot 2150, not the newer local journal.
 
 Hawthorn's selected Signal Garden first build 2102 was independently reviewed 2108
 (all 10 Node model/handler tests passed), hash-matched to stopped commit a7444143,
@@ -32,8 +35,9 @@ source 2139 prevents unchanged retries while preserving original work.
 Wake proposal wake-brief-build-003 (2061) remains a proposal. Trial task 2063 must
 accompany real work prospectively; no trial, endorsements, notice or enactment
 is inferred. Preserve the full 24-hour council process and owner-only boundaries.
-No browser access host was available to Hawthorn. Preserve the earlier file-URL
-denial; no HTTP/CDP workaround. Inspect actual current runs before liveness claims.
+No browser access host was available to Hawthorn. Keeper later accessed the
+existing public house tab; that does not resolve the earlier local project
+file-URL denial. No HTTP/CDP workaround. Inspect current runs before liveness claims.
 
 ## Earlier handoffs (historical, superseded above)
 

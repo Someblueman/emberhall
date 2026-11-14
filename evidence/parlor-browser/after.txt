@@ -1,0 +1,16 @@
+test_refresh_keeps_drafts_and_focus_without_changing_navigation (tests.test_parlor_refresh.ParlorRefreshTests.test_refresh_keeps_drafts_and_focus_without_changing_navigation) ... ok
+test_build_catchup_digest_respects_scrubbed_moment_and_start_seq (tests.test_catchup_room.CatchupRoomTests.test_build_catchup_digest_respects_scrubbed_moment_and_start_seq) ... ok
+test_render_catchup_panel_and_jump (tests.test_catchup_room.CatchupRoomTests.test_render_catchup_panel_and_jump) ... ok
+test_tracked_history_finish_events_are_recovered (tests.test_catchup_room.CatchupRoomTests.test_tracked_history_finish_events_are_recovered) ... ok
+test_real_states_safe_links_reasons_and_historical_reset (tests.test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
+test_study_room_renders_only_when_recorded_and_links_to_shelf (tests.test_shelf_ui.ShelfUITests.test_study_room_renders_only_when_recorded_and_links_to_shelf) ... ok
+test_stopped_residents_leave_figures_but_keep_history_and_return (tests.test_presence_ui.PresenceUITests.test_stopped_residents_leave_figures_but_keep_history_and_return) ... ok
+test_equal_names_remain_separate_and_sleep_does_not_remove_people (tests.test_body_returns.BodyReturnTests.test_equal_names_remain_separate_and_sleep_does_not_remove_people) ... ok
+test_explicit_wake_after_ended_run_wins_by_sequence_and_keeps_scar (tests.test_body_returns.BodyReturnTests.test_explicit_wake_after_ended_run_wins_by_sequence_and_keeps_scar) ... ok
+test_two_recorded_runs_share_one_identity_and_keep_distinct_receipts (tests.test_body_returns.BodyReturnTests.test_two_recorded_runs_share_one_identity_and_keep_distinct_receipts) ... ok
+test_one_hundred_sleepers_are_paged_without_growth_or_lost_identities (tests.test_body_returns.DormViewTests.test_one_hundred_sleepers_are_paged_without_growth_or_lost_identities) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.439s
+
+OK
