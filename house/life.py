@@ -9,6 +9,7 @@ import math
 import re
 
 from .model import require, string
+from . import staffing
 
 CONTROLLER = "watch-keeper"
 KINDS = {"codex", "opencode", "muse", "agy"}
@@ -146,6 +147,7 @@ def workload(state: dict, at: float) -> dict:
     project_routing = project_work.enabled(state)
     pending = [key for key, request in requests.items() if request["status"] == "pending"
                and project_work.help_available(state, request, at, help_id=key)
+               and (not staffing.helper(request) or staffing.help_eligible(state, request, at, help_id=key))
                and targeted_pending_eligible(state, request, at)]
     reserved = {request.get("task") for request in requests.values()
                 if request["status"] == "pending" or
@@ -160,6 +162,7 @@ def workload(state: dict, at: float) -> dict:
             and run["resident"] != exploring
             and not explorer_reserved(run, at)
             and not (project_routing and "task" in run)
+            and not staffing.helper(run)
             and not (requests.get(run.get("help_request"), {}).get("status") == "assigned")]
     ready = [key for key, task in state["tasks"].items()
              if backlog_enabled(state) and task.get("ready") is True and task["status"] != "done" and task["until"] <= at
@@ -169,10 +172,12 @@ def workload(state: dict, at: float) -> dict:
                   or project_work.active_project(state, task["project"], at) is not None)]
     uncovered = max(0, len(ready) - len(idle))
     explore = explorer_demand(state, at)
+    capacity = staffing.capacity(state)
     return {"ready_tasks": ready, "idle_residents": idle, "pending_help": pending,
             "uncovered_tasks": uncovered, "explore_generation": explore,
-            "wanted_starts": 0 if paused(state, at) else min(max(0, 3 - len(active)),
-                                 max(1 if not active else 0, len(pending) + uncovered + (explore is not None)))}
+            "wanted_starts": 0 if paused(state, at) else min(max(0, capacity["total_limit"] - len(active)),
+                                 max(capacity["baseline"] - capacity["regular"],
+                                     len(pending) + uncovered + (explore is not None)))}
 
 
 def apply(state, event):
@@ -188,6 +193,8 @@ def apply(state, event):
         fields(data, {"kind", "agent", "model"})
         from .providers import validate_model
         validate_model(data["agent"], data["model"])
+        require(not staffing.helper(data) or staffing.enabled(state),
+                "helper staffing requires activation migration")
         resident = state["residents"][actor]
         require("agent" not in resident, "resident kind already recorded")
         assigned = [r for r in life["runs"].values() if r["resident"] == actor]
@@ -243,6 +250,7 @@ def apply(state, event):
             require("agent" in data, "a model preference requires its agent kind")
             from .providers import validate_model
             validate_model(data["agent"], data["model"])
+        staffing.validate_help(state, data)
         if "target_resident" in data:
             require(state.get("maintenance", {}).get("resident_returns") is True,
                     "targeted help requires resident returns enabled")
@@ -284,7 +292,7 @@ def apply(state, event):
                     return_eligible(state, resident, data["agent"], data["model"], at),
                     "run resident already exists and is not eligible to return")
             active = [r for r in life["runs"].values() if r["status"] == "active"]
-            require(len(active) < 3, "three residents are already home")
+            staffing.validate_admission(state, data, at)
             require(all(r["resident"] != resident for r in active), "resident already running")
             require(provider_available(state, data["agent"], at),
                     "provider is cooling down")
@@ -298,7 +306,7 @@ def apply(state, event):
                         not {"help_request", "backlog"} & data.keys(), "invalid Explorer admission")
                 require(explorer_demand(state, at) == data["explore_generation"],
                         "Explorer demand changed")
-            if {"task", "task_generation"} & data.keys():
+            if not staffing.helper(data) and {"task", "task_generation"} & data.keys():
                 from .project_work import validate_admission
                 validate_admission(state, data, at)
             if "backlog" in data:

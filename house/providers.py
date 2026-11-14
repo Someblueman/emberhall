@@ -14,7 +14,7 @@ import re
 import shutil
 
 MODELS = {
-    "codex": ("gpt-6.1-sol", "gpt-6-astra"),
+    "codex": ("gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-6.1-terra"),
     "opencode": ("opencode-go/kimi-k3.1-pro", "opencode-go/minimax-m3.1-flash",
                  "opencode-go/deepseek-v4.1-flash"),
     "muse": ("muse-ember-1.0", "muse-wonder-full-1.0"),

@@ -16,7 +16,7 @@ import sys
 import time
 import uuid
 
-from . import home_work, inbox, mailbox, mailbox_jobs, project_work, providers, work_metrics
+from . import home_work, inbox, mailbox, mailbox_jobs, project_work, providers, staffing, work_metrics
 from .life import CONTROLLER, latest_run, provider_available, return_eligible, workload
 from .record import Record
 from .wake_policy import active_policy, active_prompt
@@ -55,9 +55,10 @@ def inspect(record: Record) -> dict:
     life = state.get("life", {})
     active = [{"run": key, "resident": value["resident"], "agent": value["agent"],
                "model": value["model"], "started_at": value["started_at"],
-               "launched": "pgid" in value}
+               "launched": "pgid" in value, "helper": staffing.helper(value)}
               for key, value in life.get("runs", {}).items() if value["status"] == "active"]
-    return {"head": head, "recorded_active": active, "capacity": 3,
+    limits = staffing.capacity(state)
+    return {"head": head, "recorded_active": active, "capacity": limits["total_limit"], "staffing": limits,
             "admissions": state.get("maintenance", {}).get("admissions"),
             "budgets": life.get("budgets", {}), "pending_help": [key for key, value in
             life.get("requests", {}).items() if value["status"] == "pending"],
@@ -76,7 +77,7 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
         return preferred
     if not available:
         return None
-    runs = list(life.get("runs", {}).values())
+    runs = [r for r in life.get("runs", {}).values() if not staffing.helper(r)]
     busy = {run["agent"] for run in runs if run["status"] == "active"}
     counts = work_metrics.counts(state, "explore" if exploring else "review" if reviewing else "work", KINDS)
     return min(available, key=lambda kind: (kind in busy,
@@ -314,16 +315,26 @@ class Coordinator:
                     "do not embed the bundle in the journal. Never restore over this house or your room.\n")
         if "task" in assigned:
             task = state["tasks"][assigned["task"]]
-            project = state["shelf"]["projects"][task["project"]]
+            project = state.get("shelf", {}).get("projects", {}).get(task.get("project"))
             assignment += (
-                f"Suggested project task: {assigned['task']}; generation {assigned['task_generation']}; "
-                f"project {task['project']}; milestone deadline {project['deadline']}.\n"
+                f"Suggested {'project ' if project else ''}task: {assigned['task']}; generation {assigned['task_generation']}; "
+                + (f"project {task['project']}; milestone deadline {project['deadline']}.\n" if project else "\n") +
                 f"Title: {task['title']}\nFull task: {task['description']}\n"
                 "This finite admission hint is not ownership. Read current state and claim the current generation "
                 "with a fresh token before editing; if blocked, claimed or changed, do not overwrite another resident. "
                 "Build this assigned project work before unrelated contribution reviews.\n")
         if help_request:
             assignment += "Shared request: " + help_request["reason"] + "\n"
+            if staffing.enabled(state) and "task" in help_request and "task" not in assigned:
+                task = state["tasks"][help_request["task"]]
+                assignment += (f"Bound task: {help_request['task']}; current generation {task['generation']}.\n"
+                               f"Title: {task['title']}\nFull task: {task['description']}\n")
+        if staffing.helper(assigned):
+            assignment += (
+                "Bounded helper assignment: perform only the supplied eligible task or independent source review. "
+                "Claim its current generation before edits. Finish or release every claim, leave a brief handoff "
+                "and explicitly sleep when this assignment ends. Do not research, explore, invent extra work "
+                "or remain in a post-completion wait. Queued contributions do not replace this assignment.\n")
         if "explore_generation" in assigned:
             assignment += (
                 "Automatic Explorer assignment: the shelf has fewer than three unselected ideas. "
@@ -359,7 +370,8 @@ class Coordinator:
 
     def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False,
               explore_generation: int | None = None, scheduled: bool = False,
-              task_id: str | None = None, task_generation: int | None = None) -> str | None:
+              task_id: str | None = None, task_generation: int | None = None,
+              helper_model: str | None = None) -> str | None:
         self.refresh_runtime()
         self.resolve_completed_help()
         state = self.record.read()[0]
@@ -367,7 +379,17 @@ class Coordinator:
         if help_id is not None and request.get("status") == "resolved":
             return None
         model = request.get("model", providers.DEFAULTS[kind]) if request.get("agent") == kind else providers.DEFAULTS[kind]
+        if helper_model is not None:
+            if kind != "codex" or helper_model not in staffing.HELPER_MODELS:
+                raise ValueError("invalid helper route")
+            model = helper_model
         providers.validate_model(kind, model)
+        if model in staffing.HELPER_MODELS:
+            if not staffing.enabled(state):
+                raise ValueError("helper staffing requires activation migration")
+            if "task" in request and "review_run" not in request and task_id is None:
+                task_id = request["task"]
+                task_generation = state["tasks"][task_id]["generation"]
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         author = state["life"]["runs"][request["review_run"]]["resident"] if "review_run" in request else None
@@ -401,15 +423,23 @@ class Coordinator:
             extra.update(task=task_id, task_generation=task_generation)
         mode = ("review" if "review_run" in request else "work") if project_work.enabled(state) else (
             "review" if pending_contributions(self.private) else "work")
+        if model in staffing.HELPER_MODELS and task_id is not None:
+            mode = "review" if state["tasks"][task_id].get("helper") == "review" else "work"
         try:
             self.life("run-start", run, resident=resident, agent=kind, model=model,
                       source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
                       mode=mode, **extra)
         except ValueError as error:
             message = str(error)
-            clean = message in {"owner paused admissions", "Explorer demand changed",
+            clean = message in {"owner paused admissions", "Explorer demand changed", "resident capacity reached",
+                                "three residents are already home", "provider is cooling down", "help already taken",
                                 "project task demand changed", "project task generation changed",
                                 "project help demand changed"} or (backlog and message == "ready backlog demand changed")
+            if model in staffing.HELPER_MODELS and message in {
+                    "helper capacity changed", "helper task generation changed", "helper task demand changed",
+                    "helper task coverage changed", "helper help demand changed", "helper task role changed",
+                    "helper requested model changed", "source reviewer must be independent"}:
+                clean = True
             # A lost targeted admission race (concurrent assignment, now-active/awake/claimed
             # or cooling-down target, or forged payload) is a clean non-start with no room leak.
             if "target_resident" in request and message in {"help already taken",
@@ -419,18 +449,21 @@ class Coordinator:
                     "resident already running", "provider is cooling down",
                     "three residents are already home"}:
                 clean = True
+            path.rmdir()  # This unadmitted run has no files, process or journal entry.
             if not clean:
                 raise
-            path.rmdir()  # This unadmitted run has no files, process or journal entry.
             return None
         child = None
         gate_read = gate_write = -1
         try:
             selected_lane = "explore" if explore_generation is not None else "review" if "review_run" in request else "work"
+            if staffing.helper({"agent": kind, "model": model}):
+                selected_lane = mode
             reason = ("direct" if not scheduled else "requested-provider" if request.get("agent") == kind else
                       "preferred-unavailable" if request.get("agent") else "balanced")
             self.record.append("say", CONTROLLER, {"text": work_metrics.ASSIGNMENT_PREFIX + json.dumps({
                 "run": run, "lane": selected_lane, "reason": reason,
+                "helper": staffing.helper({"agent": kind, "model": model}),
                 "requested_agent": request.get("agent"), "help_request": help_id,
                 "window": work_metrics.WINDOW, "prior_starts": work_metrics.counts(state, selected_lane, KINDS)
             }, sort_keys=True)}, f"home-{run}-assignment")
@@ -535,15 +568,37 @@ class Coordinator:
                 write_private(self.private / "source-review-error.json",
                               {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
         if start and not self.stopping:
-            for _ in range(3):
+            for _ in range(staffing.capacity(self.record.read()[0])["total_limit"]):
                 state = self.record.read()[0]
                 demand = workload(state, max(time.time(), state["at"]))
                 if not demand["wanted_starts"]:
                     break
-                pending = [(key, state["life"]["requests"][key]) for key in demand["pending_help"]]
+                at = max(time.time(), state["at"])
+                helper_plan = staffing.select(state, at, demand)
+                if helper_plan:
+                    help_id = helper_plan.get("help_request")
+                    run = self.start("codex", help_id, backlog=help_id is None, scheduled=True,
+                        helper_model=helper_plan["helper_model"], task_id=helper_plan.get("task"),
+                        task_generation=helper_plan.get("task_generation"))
+                    if run is None:
+                        break
+                    started.append(run)
+                    if run not in self.running:
+                        break
+                    continue
+                limits = staffing.capacity(state)
+                if limits["regular"] >= limits["regular_limit"]:
+                    break
+                pending = [(key, state["life"]["requests"][key]) for key in demand["pending_help"]
+                           if not staffing.helper(state["life"]["requests"][key]) or
+                           (not provider_available(state, "codex", at) and
+                            "target_resident" not in state["life"]["requests"][key])]
+                if (limits["regular"] >= limits["baseline"] and not pending
+                        and not demand["uncovered_tasks"] and demand["explore_generation"] is None):
+                    break
                 selected = project_work.first(state, max(time.time(), state["at"]),
                                               demand["ready_tasks"] if demand["uncovered_tasks"] else [],
-                                              demand["pending_help"])
+                                              [key for key, _ in pending])
                 task_args = {}
                 if selected and "task" in selected:
                     request = (None, {})

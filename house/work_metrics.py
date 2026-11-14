@@ -8,6 +8,7 @@ import re
 
 from . import mailbox
 from .life import CONTROLLER
+from .staffing import helper
 
 WINDOW = 32
 ASSIGNMENT_PREFIX = "house-assignment-v1 "
@@ -19,6 +20,8 @@ REASONS = {"balanced", "requested-provider", "preferred-unavailable", "direct"}
 def lane(run: dict, requests: dict) -> str:
     if "explore_generation" in run:
         return "explore"
+    if helper(run):
+        return run["mode"]
     request = requests.get(run.get("help_request"), {})
     return "review" if "review_run" in request else "work"
 
@@ -26,7 +29,7 @@ def lane(run: dict, requests: dict) -> str:
 def counts(state: dict, selected_lane: str, kinds: tuple) -> dict:
     life = state.get("life", {})
     recent = sorted((r for r in life.get("runs", {}).values()
-                     if lane(r, life.get("requests", {})) == selected_lane),
+                     if not helper(r) and lane(r, life.get("requests", {})) == selected_lane),
                     key=lambda r: r["started_sequence"])[-WINDOW:]
     return {kind: sum(r["agent"] == kind for r in recent) for kind in kinds}
 
