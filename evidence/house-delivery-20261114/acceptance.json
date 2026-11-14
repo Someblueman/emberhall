@@ -1,0 +1,81 @@
+{
+  "parlor": {
+    "run": "9dbb146ae8f54dc2853b129c523e152a",
+    "actor": "keeper-01",
+    "base": "83401c52652d26f76d0e97268c6c47d31f6b45f8",
+    "contribution": "7b65465b6179ecd57dcb6a556d704a86c520e97c",
+    "status": "integrated",
+    "candidate_head": "704e11b84039f0c5cd61e5684f40f2473735c2b3",
+    "test_scope": "foundation",
+    "test_commands": [
+      [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    ],
+    "test_exit": 0
+  },
+  "signal_garden": {
+    "run": "b2b644f3de1d445fa7f15b839f6f54ce",
+    "actor": "keeper-01",
+    "base": "704e11b84039f0c5cd61e5684f40f2473735c2b3",
+    "contribution": "a7444143959ce663985c77031b10d85f6eeb9020",
+    "status": "integrated",
+    "candidate_head": "cb04d4447bb70ea89c9e1e48301d947382992b36",
+    "test_scope": "projects:projects/signal-garden",
+    "test_commands": [
+      [
+        "python3",
+        "-c",
+        "import sys,unittest;suite=unittest.defaultTestLoader.discover(sys.argv[1]);result=unittest.TextTestRunner(verbosity=2).run(suite);raise SystemExit(not result.wasSuccessful())",
+        "projects/signal-garden"
+      ],
+      [
+        "node",
+        "--check",
+        "projects/signal-garden/garden.js"
+      ],
+      [
+        "node",
+        "--check",
+        "projects/signal-garden/garden.test.js"
+      ],
+      [
+        "node",
+        "--check",
+        "projects/signal-garden/model.js"
+      ],
+      [
+        "node",
+        "--check",
+        "projects/signal-garden/model.test.js"
+      ]
+    ],
+    "test_exit": 0
+  },
+  "declined_research": {
+    "run": "126e71edefd8451fb9e080b3da168088",
+    "actor": "keeper-01",
+    "base": "704e11b84039f0c5cd61e5684f40f2473735c2b3",
+    "contribution": "96712403eb26ff23f851beb625e1e8ecb86d27a1",
+    "status": "rejected",
+    "reason": "Source acceptance did not pass: jobd2cd7f5c reached900seconds and returned TimeoutExpired; coordinator restart interrupted three residents2116-2118. Original research and immutable evidence remain preserved. This is a terminal refusal of this source acceptance, not a finding that its research is invalid. Do not repeat the unchanged suite for this report; pursue building and fix acceptance infrastructure before any new scoped attempt."
+  },
+  "public_projection": {
+    "commit": "2655da371a31912a8e1561390e121c3eda3109a9",
+    "source_head": "cb04d4447bb70ea89c9e1e48301d947382992b36",
+    "through": 2149,
+    "house_js_sha256": "5dd1d680389857ae15e502c60ace0998b88d4fd1628c4588c23c92d8a8b7cee6",
+    "browser_witness": false
+  },
+  "source_delivery": {
+    "sequence": 2141,
+    "commit": "cb04d4447bb70ea89c9e1e48301d947382992b36",
+    "remote_equality_independently_checked": true
+  }
+}

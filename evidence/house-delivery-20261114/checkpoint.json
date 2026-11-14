@@ -1,0 +1,10 @@
+{
+  "head": "46f2c601cf304e22685b000ba1d1026c8be83819",
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "events": 2149,
+  "path": "evidence/house-delivery-20261114/house.bundle",
+  "sha256": "62e7fbb0d23fc20c07cb1a8999f3197de38b511dafd5ab9c33aaabdb6569f0b5",
+  "bytes": 3057629,
+  "restore_exact_state": true,
+  "restore_exact_events": true
+}

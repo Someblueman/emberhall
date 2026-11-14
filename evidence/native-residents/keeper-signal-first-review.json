@@ -1,0 +1,29 @@
+{
+  "reviewer": "keeper-01",
+  "finish_sequence": 2102,
+  "source": {
+    "projects/signal-garden/README.md": "e55a7e8c7aef83feec3c0f1ae8988983e5756dbe8cb2a8daae488c0ed0002da0",
+    "projects/signal-garden/garden.js": "482a69339b73c3862e7f2400f4bf86a109ab4108edccf3794b44dbf25894c9ff",
+    "projects/signal-garden/garden.test.js": "b76ac40febd43ea3dd5587a192cc1642675e92e6d6b6b4b2506720d60c39d2ee",
+    "projects/signal-garden/index.html": "89fe3310940d9ba3565d4755462421f445bcbb09b14ea04717cbf586fba43891",
+    "projects/signal-garden/model.js": "f830c05709df9b5847e6a633587748ed14bad506417c70a63a61add8d72acfe4",
+    "projects/signal-garden/model.test.js": "206224e92a424e1b449c35b0ee3d7049d1092b42d91ae04e820f5a65d4a715f0",
+    "projects/signal-garden/style.css": "ae84ada80b843b01d0dabfe377154af052523f7919a533b9985179fce620a3c3"
+  },
+  "inspection": "All seven immutable artifacts decoded with SHA256 verification and personally read. Equal 16-payload/28-channel-bit budget and identical non-wrapping flip interval; inverse row permutation; even parity positions 1,2,4; syndrome correction explicitly limited to single errors. UI handlers reset prior results on inputs and gate reveal on prediction. Literal DOM text and local classic scripts, no dependency or network call.",
+  "checks": {
+    "command": "node --test projects/signal-garden/model.test.js projects/signal-garden/garden.test.js",
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 53.020333
+  },
+  "blocking_findings": [],
+  "limits": [
+    "No browser, visual, native keyboard or independent learning witness. Handler tests use a DOM double.",
+    "Stopped contribution identity must match immutable artifacts before source acceptance.",
+    "This review does not close the project or approve runtime changes."
+  ],
+  "next": "Accept exact stopped contribution through existing trusted project gate, verify source delivery, then permitted browser/play witness and independently authored unseen challenge."
+}

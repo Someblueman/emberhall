@@ -1,0 +1,71 @@
+{
+  "reviewer": "keeper-01",
+  "source_finish": 2064,
+  "source_run": "9dbb146ae8f54dc2853b129c523e152a",
+  "artifact_hashes_verified": true,
+  "inspected_files": [
+    "site/house.js",
+    "site/house.css",
+    "site/index.html",
+    "tests/test_catchup_room.py",
+    "docs/CATCHUP_ROOM.md"
+  ],
+  "finding": "No blocking defect in the repaired finished artifact. Real finish-event extraction fixes the witnessed failure; preceding metadata includes the start-boundary finish and no future tasks. Literal text rendering retained. Candidate commit comparison and normal integration gate still pending.",
+  "checks": {
+    "node_syntax": "passed",
+    "focused_tests": 5,
+    "focused_seconds": 0.11,
+    "focused_output_sha256": "22355439840474f84c3b833cf3483916a037703e5de57666e350fddb02a5e1b0",
+    "published_history": {
+      "public_history_sha256": "ea78af95c2625e29c8795c38d3158b678e06bc1b2a05d2641e4d2814781be393",
+      "frames": 2067,
+      "latest_sequence": 2067,
+      "script_sha256": "5dd1d680389857ae15e502c60ace0998b88d4fd1628c4588c23c92d8a8b7cee6",
+      "probes": [
+        {
+          "end": 200,
+          "start": 1,
+          "count": 200,
+          "finishes": 24
+        },
+        {
+          "end": 200,
+          "start": 151,
+          "count": 50,
+          "finishes": 4
+        },
+        {
+          "end": 200,
+          "start": 200,
+          "count": 1,
+          "finishes": 0
+        },
+        {
+          "end": 2067,
+          "start": 1,
+          "count": 2067,
+          "finishes": 139
+        },
+        {
+          "end": 2067,
+          "start": 2018,
+          "count": 50,
+          "finishes": 2
+        },
+        {
+          "end": 2067,
+          "start": 2067,
+          "count": 1,
+          "finishes": 0
+        }
+      ],
+      "limitation": "Reducer checks only; no browser or visual acceptance."
+    }
+  },
+  "limits": [
+    "No browser/visual acceptance; room remains construction.",
+    "Panel shows at most8 items per category without a remaining-item note; users can narrow the start window.",
+    "Regression pins the currently tracked243-frame historical fixture; a deliberate fixture refresh will need expected-count updates.",
+    "Review used immutable finish bytes; the native CLI has terminal output but waits for queued read-only inspections, so no preserved stopped commit is claimed yet."
+  ]
+}

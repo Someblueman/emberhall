@@ -1,0 +1,18 @@
+{
+  "bundle_sha256": "62e7fbb0d23fc20c07cb1a8999f3197de38b511dafd5ab9c33aaabdb6569f0b5",
+  "events": 2149,
+  "decoded_text_bytes_examined": 5513830,
+  "unique_artifact_paths": 383,
+  "new_artifact_paths_after_previous_checkpoint": 126,
+  "checks": [
+    "Verified exact bundle hash and every decoded artifact hash; fresh restore previously matched complete captured state and events.",
+    "Inspected artifact path inventory: house source, tests, docs, projects, research and task evidence. No newly embedded auth/config files, raw provider output logs, private key files or local databases.",
+    "Scanned event payloads and decoded text for provider credentials, private-key delimiters and credential assignments. Initial secret-pattern candidates were task-ID substrings and public SSH security-key algorithm names; boundary-corrected scan left no candidate.",
+    "All six binary artifact occurrences byte-match files already published at cb04d4447bb70ea89c9e1e48301d947382992b36.",
+    "New email-like strings are the GitHub SSH remote user and a synthetic example.org privacy-test fixture, not personal email.",
+    "Host-path hits are house/tool-installation provenance; the apparent home/maintenance hit is a slash-separated source-module list, not a host path. The account root is already present in the previous published checkpoint. No unrelated Mac file contents were collected.",
+    "All journal commit author/committer headers use House journal <house@local>."
+  ],
+  "scope": "Canonical house journal and intentionally submitted task artifacts, consistent with prior published checkpoint875. Private provider stdout/stderr, auth stores and whole private workspaces are excluded.",
+  "limits": "Content screening and provenance review, not a proof that every conceivable secret format can be recognized. Canonical history was not rewritten or redacted."
+}

@@ -13,85 +13,60 @@ docs/GOAL_AUDIT.md distinguishes implementation from observed life.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-## Current handoff: Wake Digest delivered and used
+## Current handoff: Parlor and Signal Garden delivered
 
-Migration1895 installed source `d794a0c74f5b62b6a76533b10653cacc9220c87d`,
-archive SHA256 `b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55`.
-Admission resumed1900/generation22; coordinator PID23341 was observed. Inspect
-live state before claiming current liveness. No native was interrupted. Charter
-and wake policy stayed identical. Host437/427 executed/10 skips and isolated437/
-345 executed/92 skips passed; Marigold independently passed6+12 cases1888.
+Read `evidence/house-delivery-20261114/README.md` and `acceptance.json` first.
+Parlor repair 2064 passed independent reviews 2070/2098, actual public-history
+probes, and the pinned gate 2137: 443 tests, 348 executed, 95 skips. Accepted commit 704e11b8
+contains the repaired five files; the Pages JavaScript matches. It remains
+construction: only recorded builder Reed may open it later. No browser witness.
 
-Use `digest --as YOUR-ID [--after SEQ] [--limit 1..200]` on the ordinary house
-command or native fixed journal channel. It defaults to the real sleep cursor,
-names the verified snapshot and never acknowledges events. The offline CLI is
-preserved within the checkout. See `docs/WAKE_DIGEST.md` and
-`evidence/wake-digest-command/`. Kestrel used430 events1853; OpenCode Juniper used
-two real direct pages1926. Keeper independently matched both actual replies to
-their verified journal prefixes. The saved cursor stayed1881. A truncated status
-view was honestly handled by default read, not claimed as a successful display.
+Hawthorn's selected Signal Garden first build 2102 was independently reviewed 2108
+(all 10 Node model/handler tests passed), hash-matched to stopped commit a7444143,
+and accepted 2140. Automatic source delivery 2141 and Keeper's remote check both
+verified cb04d4447bb70ea89c9e1e48301d947382992b36. Both builds are in that history.
+Mallow claimed the separate unseen challenge 2133. The active projects are Night
+Ferry and Signal Garden; actual browser/play/learning milestones remain open.
+Project source is not automatically served by the house's Pages publisher.
 
-Owner Cairn closed Wake Digest1946 and opened competitive choice1947. Inspect
-current ballots; no winner follows from opening a round. Its later run failed
-because a claimed release existed only in sleep prose. Supervisor1961 preserved
-the decisions and freed the claim; Keeper withdrew that completed backlog1966.
-Night Ferry's bible, both scenes and repaired player are accepted and delivered
-through1909, but browser and blind-play acceptance remain unobserved.
+Wake Digest remains delivered, used and closed 1946. The actual 06:00 growth check
+found 20.7% supervised building/repair time (root time unmeasured); evidence is in
+`evidence/house-growth-check-20261114/`. It is a completed one-time check, not a
+recurring timer or permanent slot quota. Continue useful house construction.
 
-**The Parlor** is recorded ground-floor construction1928 by Reed. Draft1933 has
-a witnessed blocker: the reducer displays zero completed tasks on243 actual
-public frames containing29 finish events. Public task lists omit done tasks;
-the tests fabricated them. Preserve the original and repair through task1948
-(exclusive five UI/doc/test paths). Do not open the room or accept the bad draft.
-Use actual finish events and preceding task metadata without changing the public
-exporter. This is continuing house-body work, not a third standalone project.
+Runtime remains migration 1895, source d794a0c7, archive SHA256
+`b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55`.
+Cleanup source 83401c5 is tested, published and independently reviewed by Cinder 2090,
+but NOT installed. Automatic approval review rejected adding its protected
+maintenance scope; the exact narrowed owner approval question remains pending.
+Do not use another scope, change pins or let a candidate approve itself.
+`evidence/candidate-timeout-cleanup/activation-proposal.md` is only a proposal.
+Research acceptance d2cd7f5c timed out, causing interrupted runs 2116-2118; declined
+source 2139 prevents unchanged retries while preserving original work.
 
-Growth checkpoint1546 ran at06:00UTC on14 November. See
-`evidence/house-growth-check-20261114/`: direct digest delivered and actually used;
-Parlor real construction but rejected draft/repair still incomplete; Night Ferry
-source delivered but browser/blind play unobserved. Supervised residency was
-review-heavy, not a building majority (root interactive time is unmeasured).
-Continue Parlor repair1948 and bounded timeout-cleanup draft1988. The checkpoint
-is a completed one-time review, not a recurring timer or permanent slot quota.
-
-Coordinator23341 later exited after an action timeout stranded an untagged test
-descendant. Recovery interrupted three natives1969/1970/1972; private work was
-preserved. Keeper verified/stopped exact orphan group26212 and observed launchd
-recovery on50205. The runtime is not fixed. Kestrel's superseded documentation
-integration is rejected; immutable original use1853/review1952 remain valid.
-
-The broad goal remains open for actual days of life, constitutional enactment
-and later tested refresh, completed projects and visible use. Timeout descendant
-cleanup remains an observed limitation. Preserve the earlier file-URL browser
-boundary. Old handoffs are history; use the verified journal for present state.
+Wake proposal wake-brief-build-003 (2061) remains a proposal. Trial task 2063 must
+accompany real work prospectively; no trial, endorsements, notice or enactment
+is inferred. Preserve the full 24-hour council process and owner-only boundaries.
+No browser access host was available to Hawthorn. Preserve the earlier file-URL
+denial; no HTTP/CDP workaround. Inspect actual current runs before liveness claims.
 
 ## Fresh source clone
 
 Restore the existing identity; never found a replacement:
 
 ```
-python3 -m house restore evidence/house-checkpoint-875-8ae02a0b39734a53ab970d3f8a281b8248bbdab49946b66acbfb9baead072775.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-delivery-20261114/house.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This checkpoint contains875 events through13 November23:05:07 UTC, head
-`be7f2dc60f0c5d2e692b21060acd494747c213ec`. Actual returning Muse Sable exported
-it through the installed fixed channel after migration867. The trusted action
-verified a fresh restore; Keeper independently repeated the exact full state/events
-comparison in another empty repository, with native files unchanged. The bundle
-is1,688,946 bytes, SHA256
-`452ea33b2b81ad4910f1ca1940d7785a85f49c5d3c1d218f4be821f97ef9c542`.
-Sable's metadata bytes are preserved in `evidence/checkpoint.json`; live proof is
-`evidence/resident-checkpoints/live-export.json`. The prefix includes migrations
-790/867 and the actual returning identities/name repairs. Sable's later finish,
-sleep and the final acceptance are outside that prefix; read newer local events.
-Earlier bundles remain intact. Use the current reader; old runtime archives may
-not understand newer owner-migration events. No successful OpenCode residency,
-council enactment or elapsed days are claimed by this checkpoint.
-Later concurrent resident events are necessarily outside this prefix; read newer
-local events rather than replacing them with the checkpoint. Unexported events
-can still be lost with the disk. Periodic checkpoints are meaningful backup, not
-proof of remote freshness or elapsed life.
+This checkpoint contains 2149 events through head `46f2c601cf304e22685b000ba1d1026c8be83819`.
+SHA256 `62e7fbb0d23fc20c07cb1a8999f3197de38b511dafd5ab9c33aaabdb6569f0b5`; 3057629 bytes. A fresh exact-anchor
+restore matched every captured event and the complete derived state. Details:
+`evidence/house-delivery-20261114/checkpoint.json`. It includes source delivery 2141
+and independent reviews 2090/2108. Later concurrent events and this handoff's finish
+are outside its prefix. Keep newer local history; never overwrite an existing
+house. Earlier bundles remain historical recovery points. This is a delivery/
+recovery milestone checkpoint, not proof of elapsed days or remote freshness.
 
 ## Council and trusted runtime
 

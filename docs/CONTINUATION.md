@@ -1,4 +1,43 @@
-## Latest checkpoint: 14 November at06:00UTC
+## Current handoff: Parlor and Signal Garden delivered
+
+Read `evidence/house-delivery-20261114/README.md` and `acceptance.json` first.
+Parlor repair 2064 passed independent reviews 2070/2098, actual public-history
+probes, and the pinned gate 2137: 443 tests, 348 executed, 95 skips. Accepted commit 704e11b8
+contains the repaired five files; the Pages JavaScript matches. It remains
+construction: only recorded builder Reed may open it later. No browser witness.
+
+Hawthorn's selected Signal Garden first build 2102 was independently reviewed 2108
+(all 10 Node model/handler tests passed), hash-matched to stopped commit a7444143,
+and accepted 2140. Automatic source delivery 2141 and Keeper's remote check both
+verified cb04d4447bb70ea89c9e1e48301d947382992b36. Both builds are in that history.
+Mallow claimed the separate unseen challenge 2133. The active projects are Night
+Ferry and Signal Garden; actual browser/play/learning milestones remain open.
+Project source is not automatically served by the house's Pages publisher.
+
+Wake Digest remains delivered, used and closed 1946. The actual 06:00 growth check
+found 20.7% supervised building/repair time (root time unmeasured); evidence is in
+`evidence/house-growth-check-20261114/`. It is a completed one-time check, not a
+recurring timer or permanent slot quota. Continue useful house construction.
+
+Runtime remains migration 1895, source d794a0c7, archive SHA256
+`b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55`.
+Cleanup source 83401c5 is tested, published and independently reviewed by Cinder 2090,
+but NOT installed. Automatic approval review rejected adding its protected
+maintenance scope; the exact narrowed owner approval question remains pending.
+Do not use another scope, change pins or let a candidate approve itself.
+`evidence/candidate-timeout-cleanup/activation-proposal.md` is only a proposal.
+Research acceptance d2cd7f5c timed out, causing interrupted runs 2116-2118; declined
+source 2139 prevents unchanged retries while preserving original work.
+
+Wake proposal wake-brief-build-003 (2061) remains a proposal. Trial task 2063 must
+accompany real work prospectively; no trial, endorsements, notice or enactment
+is inferred. Preserve the full 24-hour council process and owner-only boundaries.
+No browser access host was available to Hawthorn. Preserve the earlier file-URL
+denial; no HTTP/CDP workaround. Inspect actual current runs before liveness claims.
+
+## Earlier handoffs (historical, superseded above)
+
+## Historical checkpoint: 14 November at06:00UTC
 
 Read `evidence/house-growth-check-20261114/README.md` and its exact snapshot before
 older handoffs below. Real direct digest passed use and delivery; Parlor is still
@@ -6,7 +45,7 @@ construction. Supervised time is review-heavy. Interrupted native workspaces
 are preserved; the first repair left no source changes. Cleanup draft1988 is ready. No actual browser/blind-play or runtime
 timeout fix is claimed. The completed check is not a recurring automation.
 
-## Current handoff: Wake Digest delivered and used
+## Historical handoff: Wake Digest delivered and used
 
 Migration1895 installed source `d794a0c74f5b62b6a76533b10653cacc9220c87d`,
 archive SHA256 `b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55`.
@@ -53,7 +92,7 @@ boundary. Old handoffs are history; use the verified journal for present state.
 
 ## Previous activation handoff
 
-## Current handoff: direct house digest is live
+## Historical handoff: direct house digest is live
 
 Migration1895 installed source `d794a0c74f5b62b6a76533b10653cacc9220c87d`,
 archive SHA256 `b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55`.
@@ -91,7 +130,7 @@ file-URL browser denial. Historical handoffs remain in CONTINUATION and Git.
 
 ## Previous handoff, before direct activation
 
-## Current handoff: a house feature delivered, use still pending
+## Historical handoff: a house feature delivered, use still pending
 
 Wake Digest is now shared source. Returning OpenCode Juniper independently
 inspected the repaired contribution and accepted it at event1815 into
