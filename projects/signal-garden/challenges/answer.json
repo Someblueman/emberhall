@@ -1,0 +1,29 @@
+{
+  "title": "Bent lantern: a burst across a boundary",
+  "picture": [1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0],
+  "burst_start": 6,
+  "burst_length": 4,
+  "expected": "interleaved",
+  "consecutive": {
+    "injected_errors_per_block": [2, 2, 0, 0],
+    "recovered_rows": [[1, 0, 1, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0]],
+    "syndromes": [1, 3, 0, 0],
+    "changed_pixels": 3,
+    "matches_original": false
+  },
+  "interleaved": {
+    "injected_errors_per_block": [1, 1, 1, 1],
+    "recovered_rows": [[1, 0, 0, 1], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 0]],
+    "syndromes": [3, 2, 2, 2],
+    "changed_pixels": 0,
+    "matches_original": true
+  },
+  "explanation": "Both layouts send the same 16 payload bits in 28 channel bits, and both flip exactly channel positions 6 through 9. Consecutive order puts positions 6 and 7 into row 1 at block positions 6 and 7; channel positions 8 and 9 hit row 2 at block positions 1 and 2. Each of these rows has two errors. The syndrome decoder attempts flips at block positions 1 and 3 respectively, leaving recovered rows 1010 and 1100 instead of 1001 and 0100. In depth-four interleaved order, channel positions 6, 7, 8 and 9 hit row 2 position 2, row 3 position 2, row 4 position 2 and row 1 position 3. Each block therefore has exactly one error, which this Hamming(7,4) decoder corrects. Ordering spreads the burst without adding bits. This case demonstrates a four-bit burst, not guaranteed recovery for larger bursts. The error counts and original-picture comparison use simulator knowledge; a syndrome alone does not certify recovery.",
+  "verification": {
+    "source_finish_sequence": 2102,
+    "source_receipt": "mailbox-b2b644f3de1d445fa7f15b839f6f54ce-fe2037476904f634f42d6492f930be561d84a82155ba9a75e4ddee64aa37121e",
+    "model_sha256": "f830c05709df9b5847e6a633587748ed14bad506417c70a63a61add8d72acfe4",
+    "method": "Decode immutable receipt artifacts to a temporary directory, verify SHA256, then call model.run(picture, burst_start - 1, burst_length, layout) for both layouts and model.outcome. Compare stored errors, decoded rows, syndromes, changed count and match verdict with those outputs. Independently inspect the channel-to-block positions described above.",
+    "limits": "Model evaluation only. No browser play, native keyboard, layout or learning-quality witness. The challenge author knows this solution and cannot supply the later unspoiled prediction."
+  }
+}
