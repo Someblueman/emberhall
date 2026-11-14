@@ -65,7 +65,7 @@ function flame(g, x, y, z, lit) {
 function figure(g, resident, x, y) {
   const kind = kinds[resident.agent] || kinds.unrecorded;
   const [cx,cy] = p(x,y,0), skin = ["#dbb18a","#b7896a","#edc49a"][hash(resident.id)%3];
-  const group = el("g", {"data-resident":resident.id,opacity:resident.pose === "unconfirmed"?.5:1},g);
+  const group = el("g", {"data-resident":resident.id},g);
   el("title", {},group, `${resident.name} · ${kind.name} · ${resident.presence}`);
   if (resident.pose === "sleeping") {
     box(group,x-15,y-24,31,60,10,["#a98e63","#685e47","#85714f"]);
@@ -231,8 +231,11 @@ function roomRecord(room,content) {
   }
 }
 // These are display places, not a limit on membership or recorded occupancy.
+function roomOccupants(moment, room) {
+  return moment.residents.filter(r=>r.room===room&&r.pose!=="unconfirmed");
+}
 function dormView(moment, requestedPage) {
-  const members=moment.residents.filter(r=>r.room==="bedroom");
+  const members=roomOccupants(moment,"bedroom");
   const pages=Math.max(1,Math.ceil(members.length/DISPLAY_BUNKS));
   const page=Math.max(0,Math.min(requestedPage,pages-1)), visible=members.slice(page*DISPLAY_BUNKS,(page+1)*DISPLAY_BUNKS);
   return {members,visible,page,pages,asleep:members.filter(r=>r.pose==="sleeping").length,shown:visible.filter(r=>r.pose==="sleeping").length};
@@ -269,7 +272,7 @@ function drawHouse() {
   const layouts=[];let totalDepth=0;
   for(let i=0;i<rooms.length;i+=2){
     const pair=rooms.slice(i,i+2).map(room=>{
-      const count=frame.residents.filter(r=>r.room===room.id).length;
+      const count=roomOccupants(frame,room.id).length;
       return {room,depth:roomDepth(room,count)};
     });
     pair.forEach((item,col)=>layouts.push({...item,x:col*190,y:totalDepth}));
@@ -287,7 +290,7 @@ function drawHouse() {
   }
   // Architectural furnishing is symbolic. Room existence, light, figures and scars come from state.
   layouts.forEach(({room,x,y,depth})=>{
-    const members=frame.residents.filter(r=>r.room===room.id);
+    const members=roomOccupants(frame,room.id);
     const status=roomStatus(room);
     const awake=status!=="closed"&&members.some(r=>!["sleeping","unconfirmed"].includes(r.pose));
     const g=el("g",{class:`room-hit room-${status}${selected===room.id?" room-selected":""}`,tabindex:0,role:"button","aria-label":`${room.name}, ${status}, ${members.length} residents`,"data-room":room.id},map);
@@ -351,6 +354,8 @@ function personRow(r, parent) {
   const mark=html("span","person-mark",k.mark,row);mark.style.color=k.color;
   const info=html("div","",undefined,row);html("strong","",`${r.name} · ${shortId(r.id,frame.residents.map(person=>person.id))}`,info);
   html("span","small",`${k.name}${r.model?` · ${r.model}`:""} · ${r.presence}`,info);
+  if(r.room==="door"&&r.pose!=="unconfirmed"&&r.pose!=="sleeping")
+    html("span","small","Arrived · no later room activity recorded. Reading and waiting do not move a figure.",info);
   const runs=frame.runs.filter(run=>run.resident===r.id),history=html("details","resident-history",undefined,info);
   html("summary","",`${runs.length} recorded ${runs.length===1?"run":"runs"}`,history);
   html("code","",r.id,history);
@@ -372,7 +377,9 @@ function roomPanel() {
   $("room-description").textContent=room?(room.purpose||descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
   if(room)roomRecord(room,content);
   const rooms=floorRooms(frame,selectedFloor);
-  const residents=frame.residents.filter(r=>room?r.room===room.id:rooms.some(place=>place.id===r.room)&&r.pose!=="sleeping");
+  const inView=r=>room?r.room===room.id:rooms.some(place=>place.id===r.room);
+  const residents=frame.residents.filter(r=>inView(r)&&r.pose!=="unconfirmed"&&(room||r.pose!=="sleeping"));
+  const stopped=frame.residents.filter(r=>inView(r)&&r.pose==="unconfirmed");
   if(room?.id==="bedroom") {
     const view=dormView(frame,dormPage);
     html("p","small",`${dormSummary(view)} in the six display bunks. Paging changes only the drawing.`,content);
@@ -384,6 +391,12 @@ function roomPanel() {
     }
   } else residents.forEach(r=>personRow(r,content));
   if(room&&residents.length===0)html("p","empty-note",roomStatus(room)==="closed"?"Closed, with its history kept. Scrub back to visit its earlier life.":roomStatus(room)==="construction"?"Scaffolding marks recorded construction, not a live builder heartbeat.":"A quiet room, waiting for a footstep.",content);
+  if(stopped.length) {
+    const remembered=html("details","remembered-residents",undefined,content);
+    html("summary","",`Remembered here · ${stopped.length} stopped ${stopped.length===1?"resident":"residents"}`,remembered);
+    html("p","small","Their runs ended without a sleep event. This is their last recorded room, not current occupancy. Their receipts and scars remain; a later wake brings the figure back.",remembered);
+    stopped.forEach(r=>personRow(r,remembered));
+  }
   if(room?.id==="study") {
     const dataShelf=frame&&frame.shelf;
     const summary=html("div","room-shelf-summary",undefined,content);
@@ -541,7 +554,8 @@ function render() {
   floorControls();
   const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
-  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${frame.tasks.length} unfinished threads.`;
+  const stopped=frame.residents.filter(r=>r.pose==="unconfirmed").length;
+  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${frame.tasks.length} unfinished threads.`;
   $("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
   const actor=frame.residents.find(r=>r.id===frame.event.actor)?.name||frame.event.actor;
