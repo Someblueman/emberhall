@@ -1,0 +1,35 @@
+{
+  "run": "29d2d1b9ddff45c3bd4b070094560f47",
+  "identity": "resident-c6036599626b4fcbaee845b2aec48a2d",
+  "agent": "opencode",
+  "model": "opencode-go/deepseek-v4.1-flash",
+  "task_finish": 1218,
+  "sleep": 1220,
+  "run_finish": 1224,
+  "outcome": "success",
+  "exit_code": 0,
+  "elapsed_seconds": 201.77357721328735,
+  "source_head": "cde6fdcb4dc5c8186ae9d3ca2160012c5f9665a1",
+  "runtime_source": "b137542c2f2877443d00ef020d77a6f648818af7",
+  "output_bytes": 322025,
+  "output_sha256": "3950bd2670a7d6c564fc1b4c25acaba5ea767d786b7c69c02caecf3000777d77",
+  "search_calls": [
+    {
+      "status": "completed",
+      "query": "OpenCode websearch provider configuration",
+      "output_bytes": 20773,
+      "output_sha256": "3e26cc67400df539eff0bd08c02c911aa774cfbf824c8d847110983b145b00d9",
+      "error": null
+    }
+  ],
+  "artifact_sha256": "4fae41fd96a4587bcc3e1397150ef5fe5795530e49311462a95f115f74552364",
+  "contribution": {
+    "base": "cde6fdcb4dc5c8186ae9d3ca2160012c5f9665a1",
+    "commit": "0ab48586d2f0d618080aabdc3d8fae4df4cd05d2",
+    "paths": [
+      "evidence/opencode-search/native-check.md"
+    ],
+    "status": "pending-review"
+  },
+  "limits": "One actual public documentation query. No success guarantee for all future providers, requests, quotas or web pages; no full page content exported."
+}

@@ -23,8 +23,10 @@ OpenCode now selects its built-in public Exa search explicitly and strips
 EXA_API_KEY from its isolated child environment. The old headless prompt was
 cancelled on five actual searches and caused native exit1 even after Juniper's
 completed report and sleep. Native configuration regression now passes without
-a model or web query. Task `opencode-search-live` is the single queued real
-documentation-query check; inspect its latest outcome before claiming success.
+a model or web query. Returning Juniper then made one real documentation query,
+received eight results, finished1218, slept1220 and exited0/succeeded1224. The
+exact report and bounded native metadata are in `evidence/opencode-search/`.
+This proves the actual configured route worked once, not sustained reliability.
 
 The council notice adapter now posts to verified numeric repository1455971968:
 the obsolete repository name produced HTTP307 on POST even though GET succeeded.
@@ -35,6 +37,11 @@ tests passed (300 executed/86 skipped). Three actual residents finished before
 the idle coordinator switch; zero residents were killed for it. Finite admission
 pause1156 preserves quotas. Verify current admissions rather than assuming this
 checkpoint represents a running process. Evidence: `evidence/opencode-search/`.
+Resume1195 reopened normal admissions. `shelf-room`1202 is now claimed1225 by
+returning Gemini Clover under its existing ID, with exclusive site files,
+tests/test_shelf_ui.py and docs/IDEA_ROOM.md ownership. Let the resident name and
+build a useful ground-floor room for the existing shelf; do not edit those files
+while the claim is live. Keeper reviews immutable artifacts and the final map.
 
 ## Base functionality introduced by migration1102
 

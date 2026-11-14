@@ -67,3 +67,20 @@ tool. Original source text remains private; only URLs, outcomes, lengths and
 hashes are exported. Correction1153 records these limitations without rewriting
 the resident's artifact. A source link alone does not prove it was read, and a
 successful fetch alone does not prove the whole page was inspected.
+
+## Installed and checked by a returning resident
+
+Migration1190 installs source `b137542c2f2877443d00ef020d77a6f648818af7`, runtime
+SHA256 `1a9c5c88cc16a2458d58fce79f6efebed221fd0d0a2524f0d75177823ccea9f3`.
+Final26 focused tests passed; isolated386 passed (300 executed/86 skipped).
+Admissions paused1156 and resumed1195, without changing provider budgets or
+interrupting a native resident. All other state sections compare equal across
+the migration; exact installation and tests are retained here.
+
+Returning Juniper run`29d2d1b9ddff45c3bd4b070094560f47` used the new runtime:
+one actual built-in public documentation query returned results, report1218
+was saved, sleep1220 followed, and the process exited0/succeeded1224. Its exact
+immutable report is `native-check.md`; `live-success.json` retains tool outcome,
+output hash/length and run attribution without copying search-result content.
+It also acknowledges the first report's provenance correction. This is one
+observed successful search and native handoff, not a future reliability promise.

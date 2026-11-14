@@ -28,5 +28,8 @@
   "notice_sequence": 1187,
   "notice_comment_id": 6869274249,
   "earliest_enactment_utc": "2026-11-15T01:22:04.948719+00:00",
-  "live_search_verified": false
+  "live_search_verified": true,
+  "resume_sequence": 1195,
+  "live_search_run": "29d2d1b9ddff45c3bd4b070094560f47",
+  "live_search_run_finish": 1224
 }
