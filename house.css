@@ -76,9 +76,55 @@ main {
   max-width:1500px;
   margin:auto;
   padding:38px 5% 32px;
+}
+.page-view[hidden] {
+  display:none !important;
+}
+.house-layout {
   display:grid;
   grid-template-columns:minmax(0,1.6fr) minmax(270px,.8fr);
   gap:5%;
+}
+.view-nav {
+  display:flex;
+  gap:8px;
+  max-width:1500px;
+  margin:18px auto 0;
+  padding:0 5%;
+}
+.view-nav a {
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:7px 14px;
+  color:var(--muted);
+  font-size:12px;
+}
+.view-nav a[aria-current="page"] {
+  color:var(--night);
+  border-color:var(--gold);
+  background:var(--gold);
+}
+.view-context {
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:12px;
+}
+.page-view:focus {
+  outline:none;
+}
+.content-view {
+  max-width:980px;
+  min-height:55vh;
+}
+.content-view > section {
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--room);
+}
+.content-view > h1 {
+  font:normal clamp(34px,4vw,52px)/1.05 Georgia,serif;
+  margin:4px 0 25px;
 }
 .eyebrow,.eyebrow-small {
   color:var(--gold);
@@ -211,6 +257,11 @@ input[type=range] {
   margin-bottom:25px;
   border-bottom:1px solid var(--line);
 }
+.journal-pane > details {
+  padding-bottom:20px;
+  margin-bottom:20px;
+  border-bottom:1px solid var(--line);
+}
 h2 {
   font:normal 28px/1.2 Georgia,serif;
   letter-spacing:-.5px;
@@ -301,6 +352,16 @@ h2 {
 }
 .record-details code {
   font-size:10px;
+}
+.ambition-card summary,.accounting-notes summary,.shelf-completed > summary,.shelf-idea > summary,.project-details summary {
+  cursor:pointer;
+}
+.shelf-item > summary {
+  font-weight:600;
+  overflow-wrap:anywhere;
+}
+.shelf-item .record-details {
+  margin-top:0.35rem;
 }
 .source-stone {
   border-left:2px solid var(--line);
@@ -428,6 +489,24 @@ footer a {
   }
 }
 @media(max-width:760px) {
+  .house-layout {
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+  .journal-pane {
+    border-left:0;
+    border-top:1px solid var(--line);
+    padding:24px 0 0;
+  }
+  .view-nav {
+    gap:5px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .view-nav a {
+    padding:7px 11px;
+    white-space:nowrap;
+  }
   .masthead {
     padding:18px 0;
     gap:10px;
@@ -818,3 +897,21 @@ footer a {
 .vote-alternatives { margin:.6rem 0; }
 .vote-alternatives strong { display:block; margin-top:.6rem; }
 .vote-bell { margin:1rem 0; }
+
+/* The collection is a place to use completed work, with its record kept below. */
+.gallery-invitation { display:inline-block; margin:18px 0 4px; color:var(--gold); border-bottom:1px solid var(--gold); }
+.view-status { display:flex; align-items:baseline; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+.view-status .view-context { margin:0; }
+.content-view > section + section { margin-top:22px; }
+.creation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:16px; }
+.creation-card { padding:18px; border:1px solid var(--line); border-radius:12px; display:flex; flex-direction:column; gap:10px; min-width:0; }
+.creation-card h3,.creation-card p { margin:0; }
+.creation-card h3 { font:normal 25px/1.2 Georgia,serif; }
+.creation-card p { color:var(--muted); font-size:14px; }
+.creation-action { color:var(--gold); border-top:1px solid var(--line); padding-top:12px; margin-top:auto; }
+.house-tools { margin-top:22px; }
+.house-tools .creation-card { margin-top:12px; }
+
+.view-nav { position:sticky; top:0; z-index:20; padding-top:10px; padding-bottom:10px; background:var(--night); border-bottom:1px solid var(--line); }
+.view-status { position:sticky; top:57px; z-index:19; padding:8px 0; background:var(--night); }
+.page-view,#shelf-card,#voting-card { scroll-margin-top:115px; }
