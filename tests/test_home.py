@@ -82,6 +82,16 @@ class HomeTests(HouseCase):
         self.coordinator.tick(start=False, poll=False)
         self.assertEqual("success", self.record.read()[0]["life"]["runs"][run]["outcome"])
 
+    def test_muse_continuation_transcript_finishes_without_false_provider_hold(self):
+        transcript = (SOURCE / "evidence/keep-moving-runtime/muse-sequential-turns.jsonl").read_text()
+        self.native.write_text("import sys\nsys.stdout.write(" + repr(transcript) + ")\n")
+        run = self.coordinator.start("muse")
+        self.drain()
+        state = self.record.read()[0]
+        self.assertEqual("success", state["life"]["runs"][run]["outcome"])
+        self.assertEqual(14055014, state["life"]["runs"][run]["usage"]["input_tokens"])
+        self.assertNotIn("muse", state["life"]["budgets"])
+
     def test_assignment_names_the_actual_provider_transport(self):
         for kind in ("opencode", "codex"):
             run = self.coordinator.start(kind)

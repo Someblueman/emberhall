@@ -1,0 +1,18 @@
+test_actual_muse_sequential_completed_turns_sum_distinct_snapshots (tests.test_providers.ProviderTests.test_actual_muse_sequential_completed_turns_sum_distinct_snapshots) ... ok
+test_billing_route_cannot_be_selected (tests.test_providers.ProviderTests.test_billing_route_cannot_be_selected) ... ok
+test_invalid_native_counters_cannot_strand_a_run_at_finish (tests.test_providers.ProviderTests.test_invalid_native_counters_cannot_strand_a_run_at_finish) ... ok
+test_muse_continuation_rejects_overlap_missing_terminal_and_reused_identity (tests.test_providers.ProviderTests.test_muse_continuation_rejects_overlap_missing_terminal_and_reused_identity) ... ok
+test_muse_native_envelope_requires_root_terminal (tests.test_providers.ProviderTests.test_muse_native_envelope_requires_root_terminal) ... ok
+test_native_commands_do_not_disable_sandbox_or_buy_api_usage (tests.test_providers.ProviderTests.test_native_commands_do_not_disable_sandbox_or_buy_api_usage) ... ok
+test_native_expired_credential_has_long_backoff_without_tool_text_false_positive (tests.test_providers.ProviderTests.test_native_expired_credential_has_long_backoff_without_tool_text_false_positive) ... ok
+test_observed_agy_result_binds_conversation_status_and_final_usage (tests.test_providers.ProviderTests.test_observed_agy_result_binds_conversation_status_and_final_usage) ... ok
+test_observed_muse_usage_is_latest_root_snapshot (tests.test_providers.ProviderTests.test_observed_muse_usage_is_latest_root_snapshot) ... ok
+test_tool_quoted_limit_is_not_quota_and_usage_is_not_invented (tests.test_providers.ProviderTests.test_tool_quoted_limit_is_not_quota_and_usage_is_not_invented) ... ok
+test_wren_recovered_retry_and_plain_startup_quota_witnesses (tests.test_providers.ProviderTests.test_wren_recovered_retry_and_plain_startup_quota_witnesses) ... ok
+test_activation_preserves_old_authority_and_binds_new_envelope (tests.test_windows.WindowsTests.test_activation_preserves_old_authority_and_binds_new_envelope) ... ok
+test_only_native_web_tools_are_added (tests.test_windows.WindowsTests.test_only_native_web_tools_are_added) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.050s
+
+OK

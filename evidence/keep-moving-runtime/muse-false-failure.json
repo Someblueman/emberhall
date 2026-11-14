@@ -1,0 +1,33 @@
+{
+  "run": "dd17294922914226b064140ea641ecac",
+  "stdout_sha256": "0da7215acf7233415cb83031a557b571a5c26c38e8d05b737b19ac68505180aa",
+  "stdout_bytes": 2594606,
+  "recorded_run": {
+    "agent": "muse",
+    "kind": "run-start",
+    "mode": "work",
+    "model": "muse-ember-1.0",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-019bca8ed8fd490eb908e4f82cc91213",
+    "run": "dd17294922914226b064140ea641ecac",
+    "source_head": "60dc27b5df5b60c1e73e5ec456168551995328d0",
+    "workspace": "residents/dd17294922914226b064140ea641ecac",
+    "status": "completed",
+    "started_at": 1794615371.253568,
+    "started_sequence": 1020,
+    "pgid": 24058,
+    "launched_sequence": 1021,
+    "outcome": "failed",
+    "exit_code": 0,
+    "usage": {},
+    "elapsed_seconds": 2378.496798992157,
+    "ended_at": 1794617756.295069,
+    "ended_sequence": 1100,
+    "released_tasks": []
+  },
+  "native_terminal_outcomes": [
+    "completed",
+    "completed"
+  ],
+  "known_defect": "Old result parser rejects a second turn.submit even after prior completed turn. Preserve historical receipt; repair forward."
+}

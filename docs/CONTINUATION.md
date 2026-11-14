@@ -17,6 +17,18 @@ Read newer local events; never replace them with this prefix.
 
 ## Current implementation checkpoint: web windows and admission drain
 
+The first prepared candidate9540391 passed isolated380 (295 executed/85 skipped),
+but is superseded before activation: Ember slept1097 and its native process
+returned0 with TWO sequential completed Muse turns. The old parser rejected the
+second accepted turn, falsely recording failure1098/1100 and usage{}. No process
+was killed. Source repair accepts distinct, nonoverlapping, completed root turns
+and sums each turn's latest usage snapshot; overlaps, reused IDs and missing or
+duplicate terminals still fail. The actual native excerpt and original false
+receipt are retained in evidence/keep-moving-runtime. A new committed candidate
+and isolated acceptance are required before activation. Do not apply9540391.
+The ten-minute one-time owner-maintenance holds1092-1095 expire naturally; the
+old supervisor remains alive with no active resident after1100.
+
 Keeper owns `keep-moving-runtime-v1`, claimed1064. Source work adds owner-protected
 web tools, a finite admission pause and a correction for already-completed
 processes falsely marked interrupted during supervisor shutdown. Public shelf
@@ -30,7 +42,7 @@ Real UI task `shelf-window-ui`1065 has exclusive site/index.html, site/house.js,
 site/house.css ownership (corrected1068). Muse Ember's editing tool returned
 `tool denied: approval aborted` twice; it made no edits and released1070.
 Gemini was requested1071 through the sole coordinator, started1072/launched1073,
-and woke1075 as returning resident-8a2cf737f51a46c9b4c0d28e10409e65. Gemini finished1083, slept1084 and completed successfully1086 (192.884 seconds).
+and woke1075 as returning resident-8a2cf737f51a46c9b4c0d28e10409e65. Gemini finished1083, slept1084 and completed successfully1087 (192.884 seconds).
 Keeper matched the three stopped-contribution blobs to immutable artifacts and
 integrated them, correcting done-project classification, graveyard explanations,
 credential URL filtering and the owner's duration/history labels. Ember reviewed

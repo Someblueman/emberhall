@@ -89,6 +89,7 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
     """
     usage, terminal, error_text, plain_output = {}, False, [], []
     muse_root, muse_terminals = None, 0
+    muse_seen, muse_completed_usage = set(), {}
     agy_root, agy_terminals = None, 0
     for line in output.splitlines():
         try:
@@ -132,9 +133,18 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
                 continue
             if tag == "runtime.command.accepted" and payload.get("command_kind") == "turn.submit":
                 root = payload.get("command_id")
-                if muse_root is not None and muse_root != root:
+                # Muse can continue after a background terminal result with a
+                # second root turn in this same native process. Only accept a
+                # new turn after the previous root has completed exactly once.
+                if (not isinstance(root, str) or not root or root in muse_seen or
+                        (muse_root is not None and (not terminal or muse_terminals != 1))):
                     return {"outcome": "failed", "usage": {}}
+                if muse_root is not None:
+                    for key, value in usage.items():
+                        muse_completed_usage[key] = muse_completed_usage.get(key, 0) + value
+                muse_seen.add(root)
                 muse_root = root
+                muse_terminals, terminal, usage = 0, False, {}
             if tag.startswith("run.terminal."):
                 if muse_root is None or payload.get("command_id") != muse_root:
                     continue
@@ -180,6 +190,9 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
         if not terminal:
             error_text.extend(plain_output)
     failure = " ".join(error_text)
+    if kind == "muse":
+        usage = {key: muse_completed_usage.get(key, 0) + usage.get(key, 0)
+                 for key in muse_completed_usage.keys() | usage.keys()}
     credentials = bool(re.search(r'API key.{0,30}expired|invalid.api.key|authentication.failed|'
                                  r'"statusCode"\s*:\s*401|HTTP\s+401', failure, re.I))
     if credentials:

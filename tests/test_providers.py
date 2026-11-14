@@ -70,6 +70,20 @@ class ProviderTests(unittest.TestCase):
         records.append(records[-1])
         self.assertEqual(result("muse", encoded(), "", 0)["outcome"], "failed")
 
+    def test_actual_muse_sequential_completed_turns_sum_distinct_snapshots(self):
+        output = (Path(__file__).parents[1] / 'evidence/keep-moving-runtime/muse-sequential-turns.jsonl').read_text()
+        self.assertEqual(result('muse', output, '', 0), {'outcome': 'success', 'usage': {
+            'input_tokens': 14055014, 'output_tokens': 39617, 'cached_input_tokens': 13797004}})
+        records = [json.loads(line) for line in output.splitlines()]
+        records.insert(2, records[1])  # Repeated usage is a snapshot, never another bill.
+        self.assertEqual(result('muse', '\n'.join(map(json.dumps, records)), '', 0)['usage']['input_tokens'], 14055014)
+
+    def test_muse_continuation_rejects_overlap_missing_terminal_and_reused_identity(self):
+        records = [json.loads(line) for line in
+            (Path(__file__).parents[1] / 'evidence/keep-moving-runtime/muse-sequential-turns.jsonl').read_text().splitlines()]
+        for bad in (records[:2] + records[3:], records[:-1], records + records[:1]):
+            self.assertEqual('failed', result('muse', '\n'.join(map(json.dumps, bad)), '', 0)['outcome'])
+
     def test_wren_recovered_retry_and_plain_startup_quota_witnesses(self):
         output = '\n'.join(json.dumps(item) for item in [
             {"type": "error", "message": "rate limit reached but retried"},

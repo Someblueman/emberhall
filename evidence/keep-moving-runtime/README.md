@@ -79,3 +79,28 @@ whitespace checks. The renderer test uses actual house.js with a minimal DOM,
 not a visual browser screenshot. The newly added test_shelf_ui.py is therefore
 additional to the host suite's original manifest. Isolated full acceptance and
 live installation remain separate subsequent steps.
+
+
+## Lived handoff found a second accounting defect
+
+Candidate9540391 passed isolated380 (295 executed,85 skipped) in108.758 seconds,
+but was superseded BEFORE installation. Owner-maintenance holds1092-1095 let
+Ember sleep1097 and exit0. Its actual native session contained two distinct,
+sequential `turn.submit` commands, each with its own completed terminal and usage
+snapshot. The installed parser rejected the second command outright and emitted
+false failure1098/1100 with empty usage. No resident process was killed.
+
+`muse-sequential-turns.jsonl` retains the relevant native events (account allowance
+metadata omitted); `muse-false-failure.json` binds the full private output hash
+and original recorded outcome. The corrected parser accepts only consecutive,
+individually completed root turns, sums their latest snapshots, and still rejects
+overlap, reused identity, missing terminal and duplicate terminal. Tests replay
+this exact transcript and supervise an inert process emitting it, asserting a
+successful receipt with measured usage and no false provider hold. This is a
+regression replay, not a second live model success. The old receipt is preserved;
+the correction is explicit evidence, never a journal rewrite.
+
+A local browser also rendered the committed UI against the checked-in historical
+snapshot243: the inactive shelf message and session-time explanation appeared
+correctly. That preview was deliberately not a live-house or populated-shelf
+claim; populated rendering is covered by the actual-JavaScript fixture test.
