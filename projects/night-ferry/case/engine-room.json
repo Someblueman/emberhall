@@ -1,0 +1,26 @@
+{
+  "id": "engine-room",
+  "title": "Below the Waterline",
+  "perspective": "engine",
+  "paragraphs": [
+    "I keep the last crossing from below the waterline, where the engine log runs without a pause. Moth is due for South Pier on the ordinary north to south service, and the night is unremarkable enough that the watch stays routine.",
+    "We leave North Landing and run steady. The log shows one mooring only, at a single intermediate landing. The gangway goes out and then comes back aboard, and after that we run directly home with no other stop and nothing transferred underway.",
+    "While we are moored I watch through the inspection slit. The shore shows a fixed signal that repeats in the same rhythm: two short white flashes, a long dark interval, then the pair again. It is not a light aboard Moth. I do not know this landing by name, and I do not work from a list of signal assignments.",
+    "One passenger crosses the gangway outward. I hear the tube knock against the rail as the figure goes ashore. Nobody comes aboard in the other direction. The gangway is secured in good order, and I stay below as we let go. I cannot see where the passenger goes beyond the gangway.",
+    "On the run back the cabin stays sealed and untouched. Nobody enters it and nobody leaves it before the clerk checks it at North Landing. We make no further stop on the way home, and I keep the log continuous all the way to arrival."
+  ],
+  "statements": [
+    {
+      "fact": "F4",
+      "text": "Between leaving North Landing and returning there, Moth made exactly one intermediate landing. The continuous engine and gangway log records one intermediate stop, mooring and gangway release, followed by a direct return. There was no other stop or transfer underway."
+    },
+    {
+      "fact": "F5",
+      "text": "While Moth was moored at that sole intermediate landing, I saw a repeating signal through the inspection slit: two short white flashes, a long dark interval, then the same pair again. It was the landing's fixed signal, not a light aboard Moth. I did not know that landing's name or the signal assignments."
+    },
+    {
+      "fact": "F6",
+      "text": "At that intermediate landing one passenger crossed the gangway outward with a tube knocking the rail; nobody crossed inward. The gangway was then secured, and nobody entered or left the passenger cabin before the clerk checked it on return. I remained below and could not see the passenger's destination beyond the gangway."
+    }
+  ]
+}

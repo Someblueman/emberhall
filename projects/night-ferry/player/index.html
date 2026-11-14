@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#172b2b">
+  <meta name="description" content="Night Ferry: a local, dependency-free player for a two-perspective Emberhall mystery case.">
+  <title>Night Ferry · a case player</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="fixture/fixture.js" defer></script>
+  <script src="player.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="wordmark"><span class="ember" aria-hidden="true">◈</span> Night Ferry</div>
+    <p class="tagline">two accounts, one crossing · a case player</p>
+    <span id="mode-badge" class="badge" hidden>fixture</span>
+  </header>
+
+  <main>
+    <section class="case-pane" aria-labelledby="case-title">
+      <div class="case-head">
+        <p class="kicker" id="case-kicker">Emberhall case player</p>
+        <h1 id="case-title">Loading the case…</h1>
+        <p class="case-sub" id="case-sub">A local page. No network, no accounts, no build step.</p>
+        <p class="source-note" id="source-note" role="status">Looking for <code>../case/truth-sheet.json</code>.</p>
+      </div>
+
+      <div class="toolbar" aria-label="Load a case">
+        <label class="button quiet" for="load-files">Load case files…</label>
+        <input id="load-files" type="file" accept=".json,application/json" multiple hidden>
+        <button id="load-fixture" class="button quiet" type="button" hidden>Use fixture</button>
+        <span class="toolbar-note">or open this page with <code>?fixture=1</code></span>
+      </div>
+      <p id="load-status" class="load-status" role="status"></p>
+
+      <nav id="tabs" class="tabs" aria-label="Choose an account" hidden></nav>
+
+      <article id="scene-panel" class="scene-panel" aria-live="polite">
+        <p class="placeholder">Choose an account above to read it. Mark the statements you rely on; the notebook on the right collects them by fact.</p>
+      </article>
+    </section>
+
+    <aside class="notebook-pane" aria-labelledby="notebook-title">
+      <section class="card" aria-labelledby="notebook-title">
+        <p class="kicker">Comparison notebook</p>
+        <h2 id="notebook-title">Statements by fact</h2>
+        <p class="card-note">Both accounts, side by side. Tick a statement here or in the account.</p>
+        <div id="notebook" class="notebook"></div>
+      </section>
+
+      <section class="card" aria-labelledby="route-title">
+        <p class="kicker">Route</p>
+        <h2 id="route-title">What you did</h2>
+        <ol id="route" class="route"><li class="muted">Nothing yet.</li></ol>
+      </section>
+    </aside>
+
+    <section class="verdict-pane" aria-labelledby="explain-title">
+      <p class="kicker">Your reading</p>
+      <h2 id="explain-title">Final explanation</h2>
+      <p id="case-question" hidden></p>
+      <p class="card-note">Answer the case question and explain how both accounts support your reading. The case's answer stays hidden until you submit.</p>
+      <label class="sr-only" for="explanation">Your final explanation</label>
+      <textarea id="explanation" rows="5" placeholder="I think… because the shore account says… and the engine account says…"></textarea>
+      <div class="submit-row">
+        <button id="submit" class="button primary" type="button">Submit explanation</button>
+        <span id="submit-hint" class="muted">Nothing is sent anywhere.</span>
+      </div>
+
+      <section id="answer-panel" class="answer" hidden aria-labelledby="answer-title">
+        <h3 id="answer-title">The case's answer</h3>
+        <p class="answer-q" id="answer-question"></p>
+        <p class="answer-a" id="answer-text"></p>
+        <p class="card-note" id="answer-note">Your explanation is kept as written at submit time. Judge it yourself below; this page does not mark prose.</p>
+        <div class="self-check" role="group" aria-labelledby="self-check-title">
+          <p id="self-check-title" class="self-check-title">How fair was the deduction?</p>
+          <label><input type="radio" name="selfcheck" value="supported"> Fairly supported by both accounts</label>
+          <label><input type="radio" name="selfcheck" value="ambiguous"> Ambiguous, but deducible</label>
+          <label><input type="radio" name="selfcheck" value="trivial"> Too easy or stated outright</label>
+        </div>
+        <p class="cited" id="cited-summary"></p>
+        <div class="submit-row">
+          <button id="export" class="button primary" type="button">Download playtest record</button>
+          <button id="show-record" class="button quiet" type="button">Show text record</button>
+          <button id="copy-record" class="button quiet" type="button">Copy record</button>
+        </div>
+        <label class="sr-only" for="record-text">Plain-text playtest record</label>
+        <textarea id="record-text" class="record" rows="8" readonly hidden></textarea>
+        <p id="export-status" class="load-status" role="status"></p>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span>Night Ferry · Emberhall</span>
+    <span class="footer-note">No network requests, no CDN, no storage. The fixture is placeholder text for checking the page, not story content.</span>
+  </footer>
+</body>
+</html>

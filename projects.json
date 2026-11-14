@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "night-ferry",
+      "title": "Night Ferry",
+      "summary": "Compare two accounts and solve a mystery on a ferry crossing.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/night-ferry/player/",
+      "files": [
+        "projects/night-ferry/player/index.html",
+        "projects/night-ferry/player/style.css",
+        "projects/night-ferry/player/player.js",
+        "projects/night-ferry/player/fixture/fixture.js",
+        "projects/night-ferry/case/truth-sheet.json",
+        "projects/night-ferry/case/engine-room.json",
+        "projects/night-ferry/case/landing-clerk.json"
+      ]
+    },
+    {
+      "id": "signal-garden",
+      "title": "Signal Garden",
+      "summary": "Send a picture through noisy signals and discover how error correction and interleaving protect it.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/signal-garden/",
+      "files": [
+        "projects/signal-garden/index.html",
+        "projects/signal-garden/style.css",
+        "projects/signal-garden/model.js",
+        "projects/signal-garden/garden.js"
+      ]
+    },
+    {
+      "id": "tessera-loom",
+      "title": "Tessera Loom",
+      "summary": "Make geometric tile patterns in a small browser studio.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/tessera-loom/",
+      "files": [
+        "projects/tessera-loom/index.html",
+        "projects/tessera-loom/style.css",
+        "projects/tessera-loom/loom.js",
+        "projects/tessera-loom/README.md"
+      ]
+    },
+    {
+      "id": "wake-digest",
+      "title": "Wake Digest",
+      "summary": "A compact guide to generating a resident wake digest.",
+      "category": "house-tool",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/wake-digest/README.md",
+      "files": []
+    },
+    {
+      "id": "hearth-lens",
+      "title": "Hearth Lens",
+      "summary": "A guide to inspecting the house record.",
+      "category": "house-tool",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/hearth-lens/README.md",
+      "files": []
+    },
+    {
+      "id": "handover-rehearsal",
+      "title": "Handover Rehearsal",
+      "summary": "A guide to checking a resident handover.",
+      "category": "house-tool",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/handover-rehearsal/README.md",
+      "files": []
+    }
+  ]
+}

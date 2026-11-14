@@ -1,0 +1,46 @@
+{
+  "case": "moth-last-crossing",
+  "title": "Night Ferry: A Light Left Burning",
+  "facts": [
+    {
+      "id": "F1",
+      "statement": "At 22:00 the north-landing clerk watched exactly one passenger board Moth carrying a blue document tube. Nobody else boarded, and no passenger was already aboard. The clerk remained at the north landing throughout the crossing."
+    },
+    {
+      "id": "F2",
+      "statement": "There are exactly three usable landings on this reach: North Landing has a steady white lamp, South Pier a steady amber lamp, and Orchard Float two short white flashes followed by a long dark interval, repeating. The clerk personally checked all three signals before the crossing; all worked correctly and kept their assigned patterns throughout it. Both South Pier and Orchard Float can receive a passenger."
+    },
+    {
+      "id": "F3",
+      "statement": "Moth returned to North Landing at 22:18 with no passenger and no blue document tube. Its crew were accounted for. The clerk could not see the intervening landings from the north desk and did not witness where the passenger left."
+    },
+    {
+      "id": "F4",
+      "statement": "Between leaving North Landing and returning there, Moth made exactly one intermediate landing. The engineer's continuous engine and gangway log records one intermediate stop, mooring and gangway release, followed by a direct return. There was no other stop or transfer underway."
+    },
+    {
+      "id": "F5",
+      "statement": "While Moth was moored at that sole intermediate landing, the engineer saw a repeating signal through the inspection slit: two short white flashes, a long dark interval, then the same pair again. It was the landing's fixed signal, not a light aboard Moth. The engineer did not know that landing's name or the signal assignments."
+    },
+    {
+      "id": "F6",
+      "statement": "At the intermediate landing the engineer heard one passenger cross the gangway outward with a tube knocking the rail; nobody crossed inward. The gangway was then secured, and nobody entered or left the passenger cabin before the clerk checked it on return. The engineer remained below and could not see the passenger's destination beyond the gangway."
+    }
+  ],
+  "deduction": {
+    "question": "At which landing did Moth's passenger leave, and how do the two accounts explain the empty return? Name the evidence that distinguishes that landing from the scheduled South Pier.",
+    "answer": "The passenger left at Orchard Float, carrying the blue document tube. The engineer records exactly one intermediate landing (F4), an outward passenger crossing with the tube and no return aboard (F6), and that landing's repeating pair of white flashes (F5). The clerk's independently checked signal assignments identify that pair as Orchard Float, while South Pier is steady amber (F2). The sole passenger boarded at North Landing (F1) and was absent with the tube on the 22:18 return (F3), consistently explained by that one disembarkation. Neither account supplies this identification alone: the clerk does not know the intermediate signal or stop, and the engineer does not know its place name. The evidence does not establish why the passenger chose Orchard Float, what the tube contained, or whether the change was arranged in advance."
+  },
+  "scenes": [
+    {
+      "id": "landing-clerk",
+      "file": "landing-clerk.json",
+      "title": "The North Desk"
+    },
+    {
+      "id": "engine-room",
+      "file": "engine-room.json",
+      "title": "Below the Waterline"
+    }
+  ]
+}

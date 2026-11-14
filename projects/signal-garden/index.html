@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signal Garden — a picture through noise</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="model.js" defer></script>
+  <script src="garden.js" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">A small experiment from Emberhall</p>
+    <h1>Signal Garden<span aria-hidden="true"> ▦</span></h1>
+    <p class="lede">Can a picture survive a scratch in its signal?</p>
+    <p>Send the same picture two ways. Add the same burst of flipped bits.
+      Predict which picture comes back whole.</p>
+  </header>
+
+  <section aria-labelledby="plant-title">
+    <h2 id="plant-title">1. Plant a picture</h2>
+    <div class="setup">
+      <div>
+        <div id="picture" class="picture" role="group" aria-label="Edit the 4 by 4 picture"></div>
+        <p class="hint">Tab to a tile; Enter or Space flips it. 1 = ink, 0 = paper.</p>
+        <button id="reset-picture" type="button">Restore seed picture</button>
+      </div>
+      <div>
+        <p>Each four-pixel row becomes a seven-bit Hamming block:
+          four picture bits and three parity bits.</p>
+        <p><strong>Same budget:</strong> 16 picture bits → 28 channel bits in each layout.
+          Interleaving changes their order, adding no extra bits.</p>
+        <label for="burst-start">Burst starts at channel position <output id="start-value">1</output> of 28</label>
+        <input id="burst-start" type="range" min="1" max="25" value="1">
+        <label for="burst-length">Number of consecutive bits to flip</label>
+        <select id="burst-length">
+          <option value="0">0 — no noise</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4" selected>4</option>
+          <option value="5">5 — beyond the guarantee</option><option value="6">6</option>
+          <option value="7">7</option><option value="8">8</option>
+        </select>
+        <p class="hint">One burst per picture, no wrapping. Changing any input starts a fresh prediction.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="predict-title">
+    <h2 id="predict-title">2. Make a prediction</h2>
+    <p>A block can correct one flipped bit. Sending rows consecutively can put a burst
+      inside one block. Interleaving sends one bit from each row in turn.</p>
+    <label for="prediction">Which layouts will recover all 16 original pixels?</label>
+    <select id="prediction">
+      <option value="">Choose before revealing…</option>
+      <option value="both">Both</option><option value="consecutive">Only consecutive</option>
+      <option value="interleaved">Only interleaved</option><option value="neither">Neither</option>
+    </select>
+    <button id="begin" type="button" disabled>Follow the signal</button>
+    <p id="status" role="status">Choose a prediction to begin. Nothing advances by itself.</p>
+  </section>
+
+  <section id="walkthrough" aria-labelledby="stage-title" hidden>
+    <p class="eyebrow">Paused · advance at your own pace</p>
+    <h2 id="stage-title" tabindex="-1"></h2>
+    <p id="stage-description"></p>
+    <nav aria-label="Signal steps">
+      <button id="previous" type="button">Previous step</button>
+      <button id="next" type="button">Next step</button>
+      <button id="try-again" type="button">New prediction</button>
+    </nav>
+    <p class="hint">Channel chips show row letter + bit value. × marks a flipped bit; square brackets also mark it in the text trace.</p>
+    <div id="comparison" class="comparison"></div>
+    <p id="verdict" class="verdict" hidden></p>
+    <details>
+      <summary>Plain-text trace for this step</summary>
+      <pre id="trace" tabindex="0"></pre>
+    </details>
+  </section>
+
+  <aside>
+    <h2>The edge of the lesson</h2>
+    <p>Depth-four interleaving spreads any one burst of at most four flipped bits across
+      four blocks, with at most one error in each. Five can put two errors in a block.
+      Try five bits starting at position 1 after your first run.</p>
+    <p>This seven-bit decoder attempts a single-bit correction. With multiple errors,
+      it can confidently produce wrong pixels. It has no overall parity bit and
+      cannot reliably distinguish a single error from multiple errors. “Matches”
+      uses the simulator’s original picture, which a real receiver does not know.</p>
+    <p>We compare one fixed burst on two layouts, not real-world channel performance.
+      No animation, score, timer, account, storage or network request is needed.</p>
+  </aside>
+  <footer>
+    <p>Original picture and implementation by Hawthorn, Emberhall.
+      Existing ideas, credited: <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html">NVIDIA’s Hamming visualizer</a>;
+      <a href="https://web.mit.edu/6.02/www/s2012/handouts/part1.pdf#page=67">MIT 6.02, §5.5.1 (interleaving)</a>;
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html">W3C on user-controlled motion</a>.</p>
+    <p>First build. Arithmetic checks do not establish browser usability or learning quality.</p>
+  </footer>
+</main>
+<noscript>This lesson needs local JavaScript. Its model and tests are available alongside this page; no remote script is used.</noscript>
+</body>
+</html>
