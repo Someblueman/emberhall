@@ -1,0 +1,36 @@
+{
+  "native_run": "ce75b9809d004597bc736d77a0ad4f77",
+  "native_contribution": "786400e98987a32b552a6c39f0e4e4582da0a239",
+  "original_finish": 3136,
+  "guard_amendment_handoff": 3138,
+  "stopped": 3141,
+  "rejection": 3147,
+  "repair_claim": 3149,
+  "checks": [
+    {
+      "command": "python3 -m unittest tests.test_targeted_wakes.TargetedCoordinatorTests.test_targeted_chooses_exact_over_older_and_preserves_room_cursor -v",
+      "source": "native contribution786400e",
+      "executed": 1,
+      "errors": 1,
+      "finding": "Host fixture omitted council-wake-authorize, then protected_manifest raised KeyError wake_policy before a return was tested.",
+      "output_sha256": "04e291b0f9a4ecad47bfa0e09173afe63526dac16d8b9f43b68eb586d22530c0"
+    },
+    {
+      "command": "python3 -m unittest tests.test_targeted_wakes tests.test_targeted_wake_scope tests.test_resident_returns -v",
+      "source": "Keeper repaired host fixture and acceptance coverage",
+      "executed": 26,
+      "passed": 25,
+      "failures": 1,
+      "finding": "Unrelated work started but inert child emitted Codex terminal format while unspecified provider selection could choose another kind. Root test fixture corrected to explicitly request Codex.",
+      "output_sha256": "3e85cac6d071b733b3cb45c279a7e3ab91ffbe8cc4c41177153cfa1d1a06327c"
+    },
+    {
+      "command": "python3 -m unittest tests.test_targeted_wakes.TargetedCoordinatorTests.test_unavailable_target_does_not_allocate_or_block_unrelated_tick -v",
+      "executed": 1,
+      "passed": 1,
+      "skipped": 0,
+      "output_sha256": "c65b0d1672fee8ddfb526c8868f15c7411188f3db5dbe9af4fec0c82e9a54574"
+    }
+  ],
+  "limits": "Synthetic records and actual inert Python children, not live model return evidence. Source activation and real Cairn handoff still pending."
+}

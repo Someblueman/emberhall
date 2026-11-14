@@ -371,10 +371,23 @@ class Coordinator:
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         author = state["life"]["runs"][request["review_run"]]["resident"] if "review_run" in request else None
-        eligible = [resident for resident in state["residents"]
-                    if resident != author and return_eligible(state, resident, kind, model, at)]
-        resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
-            "resident-" + uuid.uuid4().hex)
+        # Targeted help must use its exact resident/route; never substitute an older eligible or new identity.
+        if "target_resident" in request:
+            target = request["target_resident"]
+            if kind != request.get("agent") or model != request.get("model"):
+                return None
+            if target == author:
+                return None
+            if not return_eligible(state, target, kind, model, at):
+                return None
+            if not provider_available(state, kind, at):
+                return None
+            resident = target
+        else:
+            eligible = [resident for resident in state["residents"]
+                        if resident != author and return_eligible(state, resident, kind, model, at)]
+            resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
+                "resident-" + uuid.uuid4().hex)
         run = uuid.uuid4().hex
         path = self.private / run
         path.mkdir(mode=0o700)
@@ -393,10 +406,20 @@ class Coordinator:
                       source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
                       mode=mode, **extra)
         except ValueError as error:
-            if str(error) not in {"owner paused admissions", "Explorer demand changed",
-                                   "project task demand changed", "project task generation changed",
-                                   "project help demand changed"} and not (
-                    backlog and str(error) == "ready backlog demand changed"):
+            message = str(error)
+            clean = message in {"owner paused admissions", "Explorer demand changed",
+                                "project task demand changed", "project task generation changed",
+                                "project help demand changed"} or (backlog and message == "ready backlog demand changed")
+            # A lost targeted admission race (concurrent assignment, now-active/awake/claimed
+            # or cooling-down target, or forged payload) is a clean non-start with no room leak.
+            if "target_resident" in request and message in {"help already taken",
+                    "targeted admission resident mismatch", "targeted admission route mismatch",
+                    "targeted resident is not eligible",
+                    "run resident already exists and is not eligible to return",
+                    "resident already running", "provider is cooling down",
+                    "three residents are already home"}:
+                clean = True
+            if not clean:
                 raise
             path.rmdir()  # This unadmitted run has no files, process or journal entry.
             return None

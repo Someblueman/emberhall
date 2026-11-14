@@ -107,6 +107,34 @@ def explorer_demand(state: dict, at: float) -> int | None:
     return record["generation"]
 
 
+TARGETED_SCOPE = "targeted-resident-wakes-20261114"
+
+
+def targeted_pending_eligible(state: dict, request: dict, at: float) -> bool:
+    """Targeted pending help is eligible only for its exact resident/route."""
+    target = request.get("target_resident")
+    if target is None:
+        return True
+    # Pinned runtime gate: targeted help is usable only after activation migration
+    # when a pinned wake_policy is present; synthetic no-policy states test directly.
+    if "wake_policy" in state:
+        if TARGETED_SCOPE not in state.get("maintenance", {}).get("migrations", {}):
+            return False
+    agent = request.get("agent")
+    model = request.get("model")
+    if agent is None or model is None:
+        return False
+    if not return_eligible(state, target, agent, model, at):
+        return False
+    if not provider_available(state, agent, at):
+        return False
+    if "review_run" in request:
+        source = state.get("life", {}).get("runs", {}).get(request["review_run"], {})
+        if target == source.get("resident"):
+            return False
+    return True
+
+
 def workload(state: dict, at: float) -> dict:
     """Count declared work and unclaimed native capacity, not apparent CPU activity."""
     from .home_control import paused
@@ -117,7 +145,8 @@ def workload(state: dict, at: float) -> dict:
     from . import project_work
     project_routing = project_work.enabled(state)
     pending = [key for key, request in requests.items() if request["status"] == "pending"
-               and project_work.help_available(state, request, at, help_id=key)]
+               and project_work.help_available(state, request, at, help_id=key)
+               and targeted_pending_eligible(state, request, at)]
     reserved = {request.get("task") for request in requests.values()
                 if request["status"] == "pending" or
                 (request["status"] == "assigned" and request.get("run") in active)}
@@ -197,7 +226,7 @@ def apply(state, event):
         life["ambitions"][key] = {**data, "generation": data["expect"] + 1,
                                   "resident": actor, "sequence": seq, "at": at}
     elif kind == "help":
-        fields(data, {"kind", "request", "reason"}, {"task", "agent", "model", "review_run"})
+        fields(data, {"kind", "request", "reason"}, {"task", "agent", "model", "review_run", "target_resident"})
         key = identifier(data, "request")
         require(key not in life["requests"], "help request exists")
         string(data, "reason")
@@ -214,6 +243,29 @@ def apply(state, event):
             require("agent" in data, "a model preference requires its agent kind")
             from .providers import validate_model
             validate_model(data["agent"], data["model"])
+        if "target_resident" in data:
+            require(state.get("maintenance", {}).get("resident_returns") is True,
+                    "targeted help requires resident returns enabled")
+            # Activation gate: pinned runtime requires migration before targeted help is usable.
+            if "wake_policy" in state:
+                require(TARGETED_SCOPE in state.get("maintenance", {}).get("migrations", {}),
+                        "targeted help requires activation migration")
+            require("agent" in data and "model" in data,
+                    "targeted help requires explicit agent and model")
+            target = identifier(data, "target_resident")
+            person = state["residents"].get(target)
+            require(person is not None, "unknown targeted resident")
+            previous = latest_run(state, target)
+            require(previous is not None, "targeted resident is not supervised")
+            require((previous["agent"], previous["model"]) == (data["agent"], data["model"]),
+                    "targeted route does not match latest run")
+            if ("agent" in person or "model" in person):
+                require((person.get("agent"), person.get("model")) == (data["agent"], data["model"]),
+                        "targeted identity does not match resident route")
+            if "review_run" in data:
+                source = life["runs"].get(identifier(data, "review_run"), {})
+                require(target != source.get("resident"),
+                        "targeted help cannot request source author as reviewer")
         life["requests"][key] = {**data, "resident": actor, "status": "pending", "at": at}
     else:
         require(actor == CONTROLLER, "only the supervisor records process observations")
@@ -260,6 +312,19 @@ def apply(state, event):
                 from .project_work import help_available
                 require(help_available(state, request, at, help_id=data["help_request"]),
                         "project help demand changed")
+                if "target_resident" in request:
+                    target = request["target_resident"]
+                    if "wake_policy" in state:
+                        require(TARGETED_SCOPE in state.get("maintenance", {}).get("migrations", {}),
+                                "targeted help requires activation migration")
+                    require(resident == target,
+                            "targeted admission resident mismatch")
+                    require((data["agent"], data["model"]) == (request.get("agent"), request.get("model")),
+                            "targeted admission route mismatch")
+                    require(return_eligible(state, resident, data["agent"], data["model"], at),
+                            "targeted resident is not eligible")
+                    require(provider_available(state, data["agent"], at),
+                            "provider is cooling down")
                 if "review_run" in request:
                     require(resident != life["runs"][request["review_run"]]["resident"],
                             "source reviewer must be independent")
