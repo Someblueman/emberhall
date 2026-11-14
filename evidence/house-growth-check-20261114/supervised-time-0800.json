@@ -1,0 +1,326 @@
+{
+  "journal_head_at_capture": "64104c24bf2587b5128a83d15bd663b77461220f",
+  "journal_sequence_at_capture": 2273,
+  "interval_start": 1794636000.0,
+  "interval_end": 1794643200.0,
+  "method": "Intersect native recorded started_at/ended_at with06:00-08:00UTC; unfinished runs end at cutoff. Count concurrent resident time separately. Whole assigned build/repair runs include unsuccessful retries; review/delivery is explicit remainder, council choice and room opening are decisions. Task finish before a build assignment is separately flagged. Root interactive implementation and within-run activity splits remain unmeasured. This generous assigned-build share is not a precise total-house effort split.",
+  "category_seconds": {
+    "review_or_delivery": 9462.544815540314,
+    "building_or_repair": 5763.925538063049,
+    "selection_or_decisions": 1434.358332157135
+  },
+  "building_share_of_supervised_residency": 0.3459567136050862,
+  "assigned_after_finish_seconds": 1676.8953220844269,
+  "runs": [
+    {
+      "run": "d4f7c675245f44f1bb06a95413d42c24",
+      "agent": "codex",
+      "help_request": "source-review-f8ad724b995344bea1b792e98ff9099b",
+      "claims": [
+        "aster-wake-digest-use-review"
+      ],
+      "category": "review_or_delivery",
+      "started_at": 1794635682.7015228,
+      "recorded_ended_at": 1794636059.695603,
+      "overlap_seconds": 59.695602893829346,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "9dbb146ae8f54dc2853b129c523e152a",
+      "agent": "muse",
+      "help_request": "parlor-real-history-repair",
+      "claims": [
+        "parlor-real-history-repair"
+      ],
+      "category": "building_or_repair",
+      "started_at": 1794635697.8465579,
+      "recorded_ended_at": 1794637761.836523,
+      "overlap_seconds": 1761.8365230560303,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "80517076f3674d3c9f0d15d16e996a40",
+      "agent": "opencode",
+      "help_request": "house-growth-choice-003-vote-2",
+      "claims": [],
+      "category": "selection_or_decisions",
+      "started_at": 1794636002.399572,
+      "recorded_ended_at": 1794636515.036342,
+      "overlap_seconds": 512.6367700099945,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "6803d5f97e22486fb3ec98577f5687e2",
+      "agent": "codex",
+      "help_request": "house-growth-choice-003-vote-1",
+      "claims": [
+        "fern-choice-003-weigh-in"
+      ],
+      "category": "selection_or_decisions",
+      "started_at": 1794636070.169902,
+      "recorded_ended_at": 1794636458.1695402,
+      "overlap_seconds": 387.9996380805969,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "939b2ea4381d4b49bd94573e02d6cb26",
+      "agent": "agy",
+      "help_request": "source-review-126e71edefd8451fb9e080b3da168088",
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794636461.745652,
+      "recorded_ended_at": 1794636628.1212711,
+      "overlap_seconds": 166.37561917304993,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "20829b671fe54874aff2fc6f45b19041",
+      "agent": "opencode",
+      "help_request": null,
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794636521.340661,
+      "recorded_ended_at": 1794637766.267649,
+      "overlap_seconds": 1244.9269878864288,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "180575527401442081848eaf9ad0e2b7",
+      "agent": "codex",
+      "help_request": "source-review-126e71edefd8451fb9e080b3da168088",
+      "claims": [
+        "sorrel-growth-source-review"
+      ],
+      "category": "review_or_delivery",
+      "started_at": 1794636634.2700422,
+      "recorded_ended_at": 1794637771.709806,
+      "overlap_seconds": 1137.4397637844086,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "607dffc8403941a1aa36a13c7be31b10",
+      "agent": "muse",
+      "help_request": "parlor-real-history-repair",
+      "claims": [],
+      "category": "building_or_repair",
+      "started_at": 1794637776.183061,
+      "recorded_ended_at": 1794638840.544651,
+      "overlap_seconds": 1064.3615901470184,
+      "assigned_after_task_finish": true,
+      "prior_finish_sequence": 2064
+    },
+    {
+      "run": "7c68a9739ba4453cb48fea647b6ac5d5",
+      "agent": "agy",
+      "help_request": "source-review-126e71edefd8451fb9e080b3da168088",
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794637784.107863,
+      "recorded_ended_at": 1794638845.5440981,
+      "overlap_seconds": 1061.4362351894379,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "651aad34bbde41c3b6b4e30e7c5dcf32",
+      "agent": "muse",
+      "help_request": "candidate-timeout-independent-review",
+      "claims": [
+        "candidate-timeout-independent-review"
+      ],
+      "category": "review_or_delivery",
+      "started_at": 1794637792.3479629,
+      "recorded_ended_at": 1794638167.39227,
+      "overlap_seconds": 375.0443072319031,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "b2b644f3de1d445fa7f15b839f6f54ce",
+      "agent": "codex",
+      "help_request": "signal-garden-first-builder",
+      "claims": [
+        "signal-garden-first-build"
+      ],
+      "category": "building_or_repair",
+      "started_at": 1794638172.1225312,
+      "recorded_ended_at": 1794638770.0613818,
+      "overlap_seconds": 597.9388506412506,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "c876a7d26aa34b9aa71ed62e30ed0f38",
+      "agent": "opencode",
+      "help_request": null,
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794638775.03955,
+      "recorded_ended_at": 1794638851.5509608,
+      "overlap_seconds": 76.5114107131958,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "13a56b545f224abcb92980d2bb0b935b",
+      "agent": "muse",
+      "help_request": "parlor-real-history-repair",
+      "claims": [],
+      "category": "building_or_repair",
+      "started_at": 1794638855.756938,
+      "recorded_ended_at": 1794639358.074473,
+      "overlap_seconds": 502.31753492355347,
+      "assigned_after_task_finish": true,
+      "prior_finish_sequence": 2064
+    },
+    {
+      "run": "a820b9f532d340bf92d8513aaa077d49",
+      "agent": "agy",
+      "help_request": "source-review-126e71edefd8451fb9e080b3da168088",
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794638862.223017,
+      "recorded_ended_at": 1794639008.9921842,
+      "overlap_seconds": 146.7691671848297,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "527122ba768c444d9678e59404105a16",
+      "agent": "codex",
+      "help_request": null,
+      "claims": [
+        "signal-garden-independent-challenge"
+      ],
+      "category": "building_or_repair",
+      "started_at": 1794638869.275203,
+      "recorded_ended_at": 1794639172.566368,
+      "overlap_seconds": 303.2911651134491,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "b42f11ab02244160a2469222400fdb1d",
+      "agent": "opencode",
+      "help_request": "source-review-126e71edefd8451fb9e080b3da168088",
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794639018.0135849,
+      "recorded_ended_at": 1794639367.341057,
+      "overlap_seconds": 349.3274722099304,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "bb42530cfa9b4cec8db6e05753fd5183",
+      "agent": "agy",
+      "help_request": null,
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794639179.5312839,
+      "recorded_ended_at": 1794639493.593604,
+      "overlap_seconds": 314.06232023239136,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "66ffd53d1571468cbcfe451df81ad975",
+      "agent": "muse",
+      "help_request": "source-review-527122ba768c444d9678e59404105a16",
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794639378.2049139,
+      "recorded_ended_at": 1794640695.483298,
+      "overlap_seconds": 1317.2783842086792,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "5c3ebaf6c594421fb9e2b924bf891145",
+      "agent": "agy",
+      "help_request": "parlor-return-and-opening",
+      "claims": [
+        "parlor-return-and-opening"
+      ],
+      "category": "selection_or_decisions",
+      "started_at": 1794639623.036937,
+      "recorded_ended_at": 1794640156.758861,
+      "overlap_seconds": 533.7219240665436,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "5521c89e5bde4b74959141a01cafff2c",
+      "agent": "codex",
+      "help_request": "source-review-527122ba768c444d9678e59404105a16",
+      "claims": [
+        "tern-signal-challenge-review"
+      ],
+      "category": "review_or_delivery",
+      "started_at": 1794640700.8287842,
+      "recorded_ended_at": 1794642907.4396539,
+      "overlap_seconds": 2206.6108696460724,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "aad1668c4db943e4bd8d08353671fcbf",
+      "agent": "codex",
+      "help_request": "public-history-format-review",
+      "claims": [
+        "public-history-format-review"
+      ],
+      "category": "review_or_delivery",
+      "started_at": 1794640924.333616,
+      "recorded_ended_at": 1794641649.526678,
+      "overlap_seconds": 725.1930620670319,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "ae28496663734204a684528e2536c0a5",
+      "agent": "agy",
+      "help_request": "snapshot-age-cue",
+      "claims": [
+        "snapshot-age-cue"
+      ],
+      "category": "building_or_repair",
+      "started_at": 1794641654.92008,
+      "recorded_ended_at": 1794643078.883757,
+      "overlap_seconds": 1423.9636771678925,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "22410fa194a549dfa317c90432217cf0",
+      "agent": "opencode",
+      "help_request": "source-review-a7f23a0b88d14f6ca3637c4a21cd0694",
+      "claims": [],
+      "category": "review_or_delivery",
+      "started_at": 1794642918.126387,
+      "recorded_ended_at": null,
+      "overlap_seconds": 281.87361311912537,
+      "assigned_after_task_finish": false,
+      "prior_finish_sequence": null
+    },
+    {
+      "run": "ac854e4a206140c597bf79b6b3591f52",
+      "agent": "muse",
+      "help_request": "snapshot-age-cue",
+      "claims": [],
+      "category": "building_or_repair",
+      "started_at": 1794643089.783803,
+      "recorded_ended_at": null,
+      "overlap_seconds": 110.21619701385498,
+      "assigned_after_task_finish": true,
+      "prior_finish_sequence": 2250
+    }
+  ]
+}
