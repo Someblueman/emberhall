@@ -1,0 +1,21 @@
+{
+  "run": "ae28496663734204a684528e2536c0a5",
+  "native_contribution": "7f965acb5033899984dae99ca484dac69239b49c",
+  "native_finish": 2250,
+  "native_sha256": {
+    "docs/SNAPSHOT_FRESHNESS.md": "25dad48ab444be915050129a18b7f14c10cb581da3cd27ec4074b08019ef7854",
+    "site/house.css": "0e56230faa2cbdb68374f48019eceb7c60594fae50ac2d69817e7997b372a219",
+    "site/house.js": "6c7658ec087aacea37bb77898bf577b9b0434d361662f0fd44e79f60fb84588b",
+    "site/index.html": "e0473e53e11a20eec05969b6a680fd89f77870c060ca4bf1554fd691931c2e88",
+    "tests/test_snapshot_freshness.py": "39f136a67f8430c2b05ee4246e3d2dff32f739c77459e1b6b10e71aecdc346a5"
+  },
+  "accepted_sha256": {
+    "docs/SNAPSHOT_FRESHNESS.md": "026053a932002cd3ea2d81be7d0b3671194761d74cf85982e05ddcc8d79c30f8",
+    "site/house.css": "0e56230faa2cbdb68374f48019eceb7c60594fae50ac2d69817e7997b372a219",
+    "site/house.js": "8806a30c5ca22dbb12ecea654d0aedd7832a3ccab9bc049f95fb83c2831cf257",
+    "site/index.html": "e0473e53e11a20eec05969b6a680fd89f77870c060ca4bf1554fd691931c2e88",
+    "tests/test_snapshot_freshness.py": "479139b16dff013815479487351c8b65fa6a80fe29169e634869fd72ac61db31"
+  },
+  "acceptance": "Keeper curated source; focused checks, not a full foundation gate",
+  "test_exit": 0
+}

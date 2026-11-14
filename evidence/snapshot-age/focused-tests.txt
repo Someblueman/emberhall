@@ -1,0 +1,22 @@
+python3 -m unittest tests.test_snapshot_freshness tests.test_catchup_room tests.test_parlor_refresh tests.test_public_history tests.test_body -v
+test_times_and_current_history_wiring (tests.test_snapshot_freshness.SnapshotFreshnessTests.test_times_and_current_history_wiring) ... ok
+test_build_catchup_digest_respects_scrubbed_moment_and_start_seq (tests.test_catchup_room.CatchupRoomTests.test_build_catchup_digest_respects_scrubbed_moment_and_start_seq) ... ok
+test_render_catchup_panel_and_jump (tests.test_catchup_room.CatchupRoomTests.test_render_catchup_panel_and_jump) ... ok
+test_tracked_history_finish_events_are_recovered (tests.test_catchup_room.CatchupRoomTests.test_tracked_history_finish_events_are_recovered) ... ok
+test_refresh_keeps_drafts_and_focus_without_changing_navigation (tests.test_parlor_refresh.ParlorRefreshTests.test_refresh_keeps_drafts_and_focus_without_changing_navigation) ... ok
+test_browser_decoder_matches_python_and_retains_version_one (tests.test_public_history.PublicHistoryTests.test_browser_decoder_matches_python_and_retains_version_one) ... ok
+test_real_history_roundtrip_reuses_containers_and_is_deterministic (tests.test_public_history.PublicHistoryTests.test_real_history_roundtrip_reuses_containers_and_is_deterministic) ... ok
+test_values_resembling_refs_and_malformed_transport (tests.test_public_history.PublicHistoryTests.test_values_resembling_refs_and_malformed_transport) ... ok
+test_budget_is_reported_backoff_not_a_guessed_remaining_balance (tests.test_body.BodyTests.test_budget_is_reported_backoff_not_a_guessed_remaining_balance) ... ok
+test_cli_source_provenance_and_read_only_export (tests.test_body.BodyTests.test_cli_source_provenance_and_read_only_export) ... ok
+test_every_event_is_scrubbable_without_future_residents_or_rooms (tests.test_body.BodyTests.test_every_event_is_scrubbable_without_future_residents_or_rooms) ... ok
+test_expired_claim_retains_a_mark_after_reclaim_without_declaring_death (tests.test_body.BodyTests.test_expired_claim_retains_a_mark_after_reclaim_without_declaring_death) ... ok
+test_legacy_supervisor_unknown_is_not_relabelled_as_death (tests.test_body.BodyTests.test_legacy_supervisor_unknown_is_not_relabelled_as_death) ... ok
+test_public_data_excludes_artifact_bytes_arbitrary_messages_and_private_run_fields (tests.test_body.BodyTests.test_public_data_excludes_artifact_bytes_arbitrary_messages_and_private_run_fields) ... ok
+test_real_interrupted_run_keeps_mid_task_marker_and_no_false_sleep (tests.test_body.BodyTests.test_real_interrupted_run_keeps_mid_task_marker_and_no_false_sleep) ... ok
+test_reviewed_scar_stays_when_its_lesson_is_later_contested (tests.test_body.BodyTests.test_reviewed_scar_stays_when_its_lesson_is_later_contested) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 3.476s
+
+OK

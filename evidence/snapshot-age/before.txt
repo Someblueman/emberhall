@@ -1,0 +1,32 @@
+test_times_and_current_history_wiring (test_snapshot_freshness.SnapshotFreshnessTests.test_times_and_current_history_wiring) ... FAIL
+
+======================================================================
+FAIL: test_times_and_current_history_wiring (test_snapshot_freshness.SnapshotFreshnessTests.test_times_and_current_history_wiring)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<extracted-finish2250>/tests/test_snapshot_freshness.py", line 59, in test_times_and_current_history_wiring
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : evalmachine.<anonymous>:626
+  }).format(new Date(ts * 1000));
+     ^
+
+RangeError: Invalid time value
+    at fmt (evalmachine.<anonymous>:626:6)
+    at snapshotCue (evalmachine.<anonymous>:632:29)
+    at evalmachine.<anonymous>:8:16
+    at Script.runInContext (node:vm:149:12)
+    at Object.runInContext (node:vm:301:6)
+    at [eval]:14:4
+    at runScriptInThisContext (node:internal/vm:209:10)
+    at node:internal/process/execution:446:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:444:60)
+
+Node.js v22.22.0
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.027s
+
+FAILED (failures=1)
