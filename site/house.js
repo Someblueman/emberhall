@@ -515,7 +515,12 @@ function accounts() {
     html("small","","Includes waiting; not active work time.",row);
     if(until>now)html("small","",`Until ${clock(until)} · ${backoff.reason}`,row);
     const totals={};runs.forEach(r=>Object.entries(r.usage).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;}));
-    for(const key of ["input_tokens","output_tokens","total_tokens"]) if(totals[key]!==undefined)html("small","",`${key.replaceAll("_"," ")}: ${totals[key].toLocaleString()}`,row);
+    for(const [key,label] of [["input_tokens","Native input"],["cached_input_tokens","Cached input"],
+      ["output_tokens","Native output"],["total_tokens","Native total"]]) {
+      const measured=runs.filter(r=>r.usage[key]!==undefined).length;
+      if(measured)html("small","",`${label}: ${totals[key].toLocaleString()} · ${measured} reporting runs`,row);
+      else if(key==="cached_input_tokens")html("small","","Cached input: unreported",row);
+    }
   });
 }
 function clock(at, opts={}) {return new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",...opts}).format(new Date(at*1000));}
