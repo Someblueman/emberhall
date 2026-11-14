@@ -424,10 +424,11 @@ function shelf() {
     html("p", "empty-note", "The idea shelf is not activated at this moment.", box);
     return;
   }
+  const residentName = id => frame.residents.find(r => r.id === id)?.name || id;
   html("p", "shelf-policy", dataShelf.policy ? `Selection rule: ${dataShelf.policy}` : "Research is open. Project selection awaits ratification.", box);
   if (dataShelf.explorer && (dataShelf.explorer.resident || dataShelf.explorer.agent)) {
     const exp = dataShelf.explorer;
-    const parts = [exp.resident, exp.agent].filter(Boolean).join(" · ");
+    const parts = [residentName(exp.resident), kinds[exp.agent]?.name || exp.agent].filter(Boolean).join(" · ");
     const until = exp.until ? ` · until ${typeof exp.until === "number" ? clock(exp.until) : exp.until}` : "";
     html("p", "shelf-explorer small", `Explorer: ${parts}${until}`, box);
   }
@@ -459,7 +460,7 @@ function shelf() {
     projects.forEach(proj => {
       const item = html("div", "shelf-item", undefined, group);
       html("strong", "", proj.title || proj.id || "Untitled project", item);
-      const meta = [proj.status, proj.owner].filter(Boolean).join(" · ");
+      const meta = [proj.status, residentName(proj.owner)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
       if (proj.milestone) html("p", "", `Milestone: ${proj.milestone}`, item);
       if (proj.deadline) {
@@ -474,7 +475,7 @@ function shelf() {
     ideas.forEach(idea => {
       const item = html("div", "shelf-item", undefined, group);
       html("strong", "", idea.title || idea.id || "Untitled idea", item);
-      const meta = [idea.status, idea.author].filter(Boolean).join(" · ");
+      const meta = [idea.status, residentName(idea.author)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
       if (idea.what) html("p", "", idea.what, item);
       if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
