@@ -1,0 +1,140 @@
+{
+  "source_author_run": "55ef52de145a4301a04d4fe8ed190129",
+  "contribution_commit": "b0c8662e39617433fb624c619824e8c49b4cde41",
+  "independent_reviewer_run": "f30806100a5d47629c4d0655b3995294",
+  "integration": {
+    "run": "55ef52de145a4301a04d4fe8ed190129",
+    "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+    "base": "8de6fc51752a91c059866123b0ee0d02a92496d2",
+    "contribution": "b0c8662e39617433fb624c619824e8c49b4cde41",
+    "candidate": "integration-62b387cb0f644372a32b7b4ddd4b51d8",
+    "status": "integrated",
+    "candidate_head": "28cc839a652c15ade1dd57715386e82fc878e439",
+    "test_scope": "projects:projects/night-ferry",
+    "test_commands": [
+      [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "-c",
+        "import sys,unittest;suite=unittest.defaultTestLoader.discover(sys.argv[1]);result=unittest.TextTestRunner(verbosity=2).run(suite);raise SystemExit(not result.wasSuccessful())",
+        "projects/night-ferry"
+      ],
+      [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "-c",
+        "import json,sys;json.load(open(sys.argv[1]))",
+        "projects/night-ferry/case/truth-sheet.json"
+      ]
+    ],
+    "test_exit": 0
+  },
+  "integration_sequence": 1764,
+  "coordinator_delivery_sequence": 1765,
+  "delivery_event": {
+    "actor": "watch-keeper",
+    "at": 1794631808.1534212,
+    "data": {
+      "text": "house-source-delivery-v1 {\"commit\": \"28cc839a652c15ade1dd57715386e82fc878e439\", \"remote_main\": \"28cc839a652c15ade1dd57715386e82fc878e439\", \"repository\": \"Someblueman/emberhall\"}"
+    },
+    "id": "source-delivered-28cc839a652c15ade1dd57715386e82fc878e439",
+    "op": "say"
+  },
+  "independently_observed_remote_main": "28cc839a652c15ade1dd57715386e82fc878e439",
+  "keeper_did_not_merge_or_push_this_contribution": true,
+  "coordinator_pid": 9580,
+  "runtime_source": "6daeb28fbef8247804ee6c741a4639e8f36e7a14",
+  "runtime_sha256": "dd467c651f22620b6977c6b0d94820331cd1f25b1bef1bdd688e6e5f593086b1",
+  "resume_sequence": 1757,
+  "jobs": [
+    {
+      "id": "02a26aba4a460a8bf0901ffd9b314ad50c46af75aecfc20b9a09278d11fe0364",
+      "run": "9bc275092d8543018e41686f82aa12c2",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "argv": [
+        "integrate",
+        "55ef52de145a4301a04d4fe8ed190129",
+        "--as",
+        "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "--inspect",
+        "--request",
+        "9bc275092d8543018e41686f82aa12c2-inspect-bible"
+      ],
+      "status": "done",
+      "created_at": 1794630734.945415,
+      "started_at": 1794630735.754393,
+      "finished_at": 1794630741.377963,
+      "ok": true,
+      "result_status": "inspection",
+      "result_sha256": "67ecfcf6b9790226a3c5cdfbd748079b63158665ec2de27236fecae46d5d5ae6"
+    },
+    {
+      "id": "f1501f3948c2864bb78a35562386cec6fe12baac0b9ac286e96b4247d638b7e9",
+      "run": "f30806100a5d47629c4d0655b3995294",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "argv": [
+        "integrate",
+        "55ef52de145a4301a04d4fe8ed190129",
+        "--inspect",
+        "--as",
+        "resident-c6036599626b4fcbaee845b2aec48a2d"
+      ],
+      "status": "done",
+      "created_at": 1794631726.21745,
+      "started_at": 1794631726.978456,
+      "finished_at": 1794631731.020915,
+      "ok": true,
+      "result_status": "inspection",
+      "result_sha256": "67ecfcf6b9790226a3c5cdfbd748079b63158665ec2de27236fecae46d5d5ae6"
+    },
+    {
+      "id": "0021c012fa876748c21cb856f384ba81602d5c2160c79a364dfeb135c17d2b6b",
+      "run": "9bc275092d8543018e41686f82aa12c2",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "argv": [
+        "integrate",
+        "55ef52de145a4301a04d4fe8ed190129",
+        "--as",
+        "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "--publish",
+        "--request",
+        "9bc275092d8543018e41686f82aa12c2-publish-bible"
+      ],
+      "status": "done",
+      "created_at": 1794630811.5573492,
+      "started_at": 1794630812.2432508,
+      "finished_at": 1794630821.014526,
+      "ok": true,
+      "result_status": "tests-failed",
+      "result_sha256": "254bd0b61d5829ba77459fdd543979428a755d7ab506ce17c194f8714590ef02"
+    },
+    {
+      "id": "daf3aa57d4f9862fee73a1646d9013f290d5aca2752a085ec53afb6b500a3388",
+      "run": "f30806100a5d47629c4d0655b3995294",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "argv": [
+        "integrate",
+        "55ef52de145a4301a04d4fe8ed190129",
+        "--publish",
+        "--as",
+        "resident-c6036599626b4fcbaee845b2aec48a2d"
+      ],
+      "status": "done",
+      "created_at": 1794631772.0593832,
+      "started_at": 1794631780.503179,
+      "finished_at": 1794631790.79711,
+      "ok": true,
+      "result_status": "integrated",
+      "result_sha256": "35a036bba02cb599d51ae84a072cf1c9eada8710b742ca18c9a5fc543f1fcc2d"
+    }
+  ],
+  "scene_ready_sequences": [
+    1766,
+    1767
+  ],
+  "new_builder_start_sequence": 1769,
+  "limitations": [
+    "The first live acceptance required a Keeper runner repair and one explicit retry; it was not a completely unattended recovery.",
+    "The code/data contract is accepted; game fairness, browser play, scenes and completion remain unproved.",
+    "Wake Digest repair is still a private candidate pending independent integration.",
+    "Native source inspection and rejection are live; timeout descendant cleanup remains an observed separate limitation."
+  ]
+}

@@ -28,6 +28,8 @@
     "sequence": 1737,
     "generation": 19
   },
-  "resume": "pending explicit resume after handoff",
-  "live_retry": "not yet observed"
+  "resume_sequence": 1757,
+  "new_coordinator": 9580,
+  "live_retry_integration_sequence": 1764,
+  "live_retry_delivery_sequence": 1765
 }
