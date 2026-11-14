@@ -1,0 +1,7 @@
+{
+  "title": "Bent lantern: a burst across a boundary",
+  "picture": [1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0],
+  "burst_start": 6,
+  "burst_length": 4,
+  "question": "Enter the picture row by row, left to right, then set burst start to 6 and length to 4. Before beginning the walkthrough, record which layout you predict will recover the entire picture: both, consecutive, interleaved, or neither. Explain how channel positions 6 through 9 will land in the four row blocks for each layout. After revealing the result, compare your prediction with the recovered rows and explain any difference. Use only this file until your prediction and reasoning are recorded; answer.json is the separate solution."
+}
