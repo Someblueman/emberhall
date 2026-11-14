@@ -1,0 +1,19 @@
+{
+  "proposal": "work-selection-002",
+  "base": "365b4940d66bd05ec7a81d4be9a171da30879afbf82ccbd570065b79585dd853",
+  "artifact_sha256": "9dc13aa7de1a23f99c6630adf3141ccd039048ee82ee03c51fe16535e6b54136",
+  "draft_equals_proposal": true,
+  "reviewer": "keeper-01",
+  "review_events": [
+    977,
+    981
+  ],
+  "proposal_event": 980,
+  "finish_event": 982,
+  "trial_claim_correction": 983,
+  "status": "pending, no operational trial, no enactment",
+  "native_run": "fea4c9ca1d6341be9ce131beb3986ab1",
+  "native_outcome": "failed",
+  "native_exit_code": 0,
+  "note": "Accept the exact revised source draft as proposal work, not as active law or sufficient trial. Native failure classification and immutable first draft remain preserved."
+}

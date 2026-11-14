@@ -136,6 +136,10 @@ def export(record: Record, observed_at: float | None = None) -> dict:
             budgets[data["agent"]] = {"agent": data["agent"], "until": accepted["until"],
                 "reason": "Owner authorized one early attempt; original cooldown retained.",
                 "usage": {}, "sequence": seq}
+        if op == "owner-migrate":
+            restored = state.get("maintenance", {}).get("provider_restored", {}).get("opencode", {})
+            if restored.get("sequence") == seq:
+                budgets.pop("opencode", None)
         if op in {"arrive", "wake"}:
             awakened[actor] = seq
             sleeping.discard(actor)

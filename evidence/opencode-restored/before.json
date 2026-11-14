@@ -1,0 +1,42 @@
+{
+  "head": "41873e891085d9510ca241f4a7dbd4563dbe6f9b",
+  "sequence": 974,
+  "reader_state_and_events_equal": true,
+  "sha256": "428b433cb2cc7150ae766d88b7fea3a700d43b122a342293ca05ec94e1fea14b",
+  "budget": {
+    "agent": "opencode",
+    "kind": "budget",
+    "reason": "credentials unavailable",
+    "until": 1794689129.189377,
+    "at": 1794602730.53184,
+    "sequence": 594
+  },
+  "successful_run": {
+    "agent": "opencode",
+    "backlog": true,
+    "kind": "run-start",
+    "mode": "work",
+    "model": "opencode-go/deepseek-v4.1-flash",
+    "policy_revision": "8c26a690b6100b3a8a2fe494fa146e5c1aab6585f63b86305be46b84a64dba20",
+    "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+    "run": "fc2795f6b6824fc3ae4b9229e8667b61",
+    "source_head": "ff0c8d1ce0293b730110587317fc5794de17b9a3",
+    "workspace": "residents/fc2795f6b6824fc3ae4b9229e8667b61",
+    "status": "completed",
+    "started_at": 1794613309.650916,
+    "started_sequence": 929,
+    "pgid": 59749,
+    "launched_sequence": 930,
+    "outcome": "success",
+    "exit_code": 0,
+    "usage": {
+      "cached_input_tokens": 2482432,
+      "input_tokens": 84508,
+      "output_tokens": 7133
+    },
+    "elapsed_seconds": 365.17041277885437,
+    "ended_at": 1794613680.486449,
+    "ended_sequence": 957,
+    "released_tasks": []
+  }
+}

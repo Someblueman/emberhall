@@ -35,6 +35,9 @@ REPORT_SCOPE = "report-retention-20261113"
 CHECKPOINT_SCOPE = "resident-checkpoints-20261113"
 BACKLOG_SCOPE = "ready-backlog-20261113"
 BACKLOG_SHA256 = "df1df5907e1f8e2999eebdf374b162fb1db59413ae716db7d978298d45dff2d3"
+RESTORED_SCOPE = "opencode-restored-20261113"
+RESTORED_SHA256 = "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde"
+VERIFIED_KEY_RUN = "fc2795f6b6824fc3ae4b9229e8667b61"
 KEY_BUDGET_SEQUENCE = 594
 KEY_BUDGET_UNTIL = 1794689129.189377
 FAILED_CLI_RUN = "6eec53281c2641f28677a9a7bcc41e8d"
@@ -47,11 +50,13 @@ SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            REPAIR_SCOPE: GROWTH_SHA256, LAUNCHER_SCOPE: GROWTH_SHA256,
            CONTINUITY_SCOPE: GROWTH_SHA256, NAMING_SCOPE: GROWTH_SHA256,
            INTEGRATION_SCOPE: GROWTH_SHA256, REPORT_SCOPE: GROWTH_SHA256,
-           CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: BACKLOG_SHA256}
+           CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: BACKLOG_SHA256,
+           RESTORED_SCOPE: RESTORED_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    RESTORED_SCOPE: {"house/maintenance.py", "house/body.py"},
     BACKLOG_SCOPE: OWNER_MODULES | {"house/home.py", "house/life.py",
                     "house/model.py", "house/__main__.py", "house/mailbox.py"},
     CHECKPOINT_SCOPE: OWNER_MODULES | {"house/checkpoint.py", "house/resident_actions.py", "house/home.py"},
@@ -134,6 +139,31 @@ def failure_proven(state: dict, scope: str) -> bool:
             failed.get("agent") == "opencode" and failed.get("resident") not in state["residents"])
 
 
+def verified_key_resolution(state: dict, event: dict) -> dict:
+    """Retire one obsolete authentication hold after its exact native repair."""
+    life = state.get("life", {})
+    budget = life.get("budgets", {}).get("opencode", {})
+    require(budget.get("sequence") == KEY_BUDGET_SEQUENCE and
+            budget.get("until") == KEY_BUDGET_UNTIL and
+            life.get("budget_observations", {}).get("opencode") == KEY_BUDGET_SEQUENCE,
+            "authentication hold changed; preserve newer failure")
+    require(event["at"] < KEY_BUDGET_UNTIL, "authentication hold already elapsed")
+    permit = state.get("maintenance", {}).get("releases", {}).get(BACKLOG_SCOPE, {})
+    run = life.get("runs", {}).get(VERIFIED_KEY_RUN, {})
+    require(permit.get("consumed_run") == VERIFIED_KEY_RUN and
+            run.get("status") == "completed" and run.get("outcome") == "success" and
+            run.get("exit_code") == 0 and run.get("started_sequence") == 929 and
+            run.get("ended_sequence") == 957 and run.get("agent") == "opencode" and
+            run.get("model") == "opencode-go/deepseek-v4.1-flash" and
+            run.get("usage", {}).get("input_tokens", 0) > 0 and
+            run.get("usage", {}).get("output_tokens", 0) > 0 and
+            state["residents"].get(run.get("resident"), {}).get("agent") == "opencode",
+            "exact successful native key verification required")
+    return {"scope": RESTORED_SCOPE, "verified_run": VERIFIED_KEY_RUN,
+            "previous": copy.deepcopy(budget), "at": event["at"],
+            "sequence": state["sequence"] + 1}
+
+
 def apply(state: dict, event: dict) -> None:
     _owner(state, event)
     data, scope = event["data"], event["data"]["scope"]
@@ -164,12 +194,16 @@ def apply(state: dict, event: dict) -> None:
                 "owner migration requires executed passing tests")
         require(not any(run["status"] == "active" for run in
                 state.get("life", {}).get("runs", {}).values()), "drain native residents before migration")
+        resolution = verified_key_resolution(state, event) if scope == RESTORED_SCOPE else None
         entry = copy.deepcopy(data) | {"at": event["at"], "sequence": seq, "actor": event["actor"]}
         current = copy.deepcopy(maintenance)
         current.setdefault("migrations", {})[scope] = entry
         current.update(protected_files=dict(manifest), at=event["at"],
                        room_growth=current.get("room_growth", False) or scope == GROWTH_SCOPE)
         state["maintenance"] = current
+        if resolution is not None:
+            current.setdefault("provider_restored", {})["opencode"] = resolution
+            del state["life"]["budgets"]["opencode"]
         if scope == CONTINUITY_SCOPE:
             current["resident_returns"] = True
         if scope == NAMING_SCOPE:

@@ -1,0 +1,6 @@
+test_failures_count_and_thirteenth_start_is_denied (tests.test_watch.WatchTests.test_failures_count_and_thirteenth_start_is_denied) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 5.919s
+
+OK

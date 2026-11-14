@@ -1,0 +1,28 @@
+{
+  "host_full": {
+    "collected": 342,
+    "executed": 333,
+    "passed": 332,
+    "errors": 1,
+    "skipped": 9,
+    "seconds": 213.98,
+    "sha256": "61b9e75c390a7bc9fb1e4bcae41256cb25d5699036998790984378866dbe29ee",
+    "created_at": 1794614211.7162008,
+    "last_written_at": 1794614425.7588165
+  },
+  "existing_failure": {
+    "case": "tests.test_watch.WatchTests.test_failures_count_and_thirteenth_start_is_denied",
+    "error": "KeyError: 'reason'",
+    "diagnosis": "Full run crossed Europe/London midnight. This unchanged test counts wall-clock civil-day starts; a day rollover permits the thirteenth run. Consistent with the observed failure; per-attempt temporary history was cleaned by the fixture, so exact rollover inside the case was not retained.",
+    "rerun_passed": true,
+    "rerun_seconds": 5.919,
+    "rerun_sha256": "fe278f60bfd03514bef5f77380a6fac0587d7dccf6475f0cc3e0c4645234c741",
+    "production_or_test_workaround": false
+  },
+  "focused_new_cases": {
+    "passed": 4,
+    "skipped": 0,
+    "seconds": 0.793
+  },
+  "interpretation": "All 333 unique executed host cases pass across full run and the focused rerun; do not call the initial full run green."
+}
