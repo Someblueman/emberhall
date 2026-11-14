@@ -23,7 +23,11 @@ const ctx=vm.createContext({document,assert});
 vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 frame={budgets:[],runs:[
-  {agent:'codex',elapsed_seconds:60,usage:{input_tokens:169087031,cached_input_tokens:165094912,output_tokens:414580}},
+  {agent:'codex',sequence:10,outcome:'failed',elapsed_seconds:60,
+   assignment:{lane:'work',reason:'requested-provider',requested_agent:'codex',help_request:'build-a'},
+   finished_tasks:[{task:'artifact-a',sequence:11}],
+   waiting:{mailbox_seconds:40,voluntary_seconds:30,measured_requests:2,unmeasured_requests:1},
+   usage:{input_tokens:169087031,cached_input_tokens:165094912,output_tokens:414580}},
   {agent:'codex',usage:{}},
   {agent:'codex',elapsed_seconds:30,usage:{input_tokens:100,cached_input_tokens:0}},
   {agent:'opencode',elapsed_seconds:60,usage:{input_tokens:1705670,cached_input_tokens:34465408}},
@@ -43,6 +47,16 @@ assert(rendered[1].includes(text('Cached input',34465408,1))); // may exceed nat
 assert(rendered[2].includes('Cached input: unreported'));
 assert(rendered[3].includes(text('Native total',2583908,1))); // retain provider's total
 assert(rendered.every(row=>row.includes('Remaining unknown')));
+assert(rendered[0].includes('0 successful exits · 1 failed · 0 interrupted · 0 quota'));
+assert(rendered[0].includes('1 finished task receipts · 1 runs with a finish'));
+assert(rendered[0].includes('1 work assignments · 0 review assignments · 0 explore assignments · 2 unrecorded'));
+assert(rendered[0].includes('1 measured mailbox min (1 explicit wait min included) · 1 runs'));
+assert(rendered[0].includes('2 runs without measured waiting · 1 observed requests without timing'));
+const all=n=>[n.textContent,...n.children.flatMap(all)];
+assert(all(box).some(s=>s.includes('Explicit provider request (Codex)')));
+assert(all(box).includes('Request: build-a'));
+assert(all(box).includes('Finished artifact-a · event 11'));
+assert(rendered[2].includes('Mailbox waiting: unreported'));
 vm.runInContext('frame={budgets:[],runs:[]};accounts();',ctx);
 assert.equal(box.children.length,4); // history navigation clears later counters
 assert(rows().every(row=>row.includes('Cached input: unreported')));

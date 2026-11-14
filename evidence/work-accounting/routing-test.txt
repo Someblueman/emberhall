@@ -1,0 +1,6 @@
+test_requested_model_is_used_only_for_its_kind_and_recorded_in_prompt (tests.test_home.HomeTests.test_requested_model_is_used_only_for_its_kind_and_recorded_in_prompt) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.283s
+
+OK

@@ -149,7 +149,7 @@ def release(record: Record, run: str) -> None:
 
 
 def process(record: Record, workspace: Path, resident: str, run: str, key: str,
-            request: dict, receipts: int) -> dict | None:
+            request: dict, receipts: int, *, queued_at: float | None = None) -> dict | None:
     if (not isinstance(request, dict) or set(request) != {"version", "id", "argv"} or
             type(request["version"]) is not int or request["version"] != 1 or request["id"] != key):
         raise ValueError("invalid mailbox request schema")
@@ -162,6 +162,8 @@ def process(record: Record, workspace: Path, resident: str, run: str, key: str,
             raise ValueError("mailbox request id reused with different content")
     except FileNotFoundError:
         saved = {"sha256": signature, "request": request, "first_seen": time.time()}
+        if queued_at is not None:
+            saved["queued_at"] = min(saved["first_seen"], queued_at)
         if args.command == "wait":
             saved["deadline"] = saved["first_seen"] + args.seconds
         write_json(receipts, name, saved, MAX_RESPONSE + MAX_REQUEST)
@@ -211,6 +213,7 @@ def process(record: Record, workspace: Path, resident: str, run: str, key: str,
         response = {"id": key, "sha256": signature, "ok": False,
                     "error": type(error).__name__ + ": " + str(error)[:300]}
     saved["response"] = response
+    saved["response_ready_at"] = time.time()
     write_json(receipts, name, saved, MAX_RESPONSE + MAX_REQUEST)
     return response
 
@@ -253,7 +256,9 @@ def service(record: Record, private: Path, run: str) -> int:
                 key = name[:-5]
                 try:
                     request = read_json(requests, name, MAX_REQUEST)
-                    response = process(record, workspace, item["resident"], run, key, request, receipts)
+                    queued_at = os.stat(name, dir_fd=requests, follow_symlinks=False).st_mtime
+                    response = process(record, workspace, item["resident"], run, key, request, receipts,
+                                       queued_at=queued_at)
                 except ERRORS as error:
                     response = {"id": key, "ok": False, "error": type(error).__name__ + ": " + str(error)[:300]}
                 if response is None:

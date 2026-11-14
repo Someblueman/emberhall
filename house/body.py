@@ -12,6 +12,7 @@ import time
 
 from .model import apply_event
 from .record import Record
+from .work_metrics import public_observation
 
 ROOMS = {"door": "The door", "hearth": "Hearth", "workshop": "Workshop",
          "archive": "Archive", "council": "Council"}
@@ -231,7 +232,8 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                 agent = item.get("agent", "codex" if item.get("executable") == "codex" else "unrecorded")
                 runs[run_id] = {"id": run_id, "resident": resident, "agent": label(agent, 30),
                     "model": label(item.get("model", ""), 100), "start": at, "sequence": seq,
-                    "status": "started", "outcome": "unconfirmed", "usage": {}, "elapsed_seconds": None}
+                    "status": "started", "outcome": "unconfirmed", "usage": {}, "elapsed_seconds": None,
+                    "finished_tasks": []}
                 if resident:
                     identities[resident] = {"agent": label(agent, 30), "model": label(item.get("model", ""), 100)}
             elif run_id in runs:
@@ -258,6 +260,13 @@ def export(record: Record, observed_at: float | None = None) -> dict:
                             "detail": ", ".join(held) if held else "No unfinished claim at this receipt",
                             "resident": run["resident"], "at": at, "sequence": seq,
                             "basis": "Supervisor receipt", "mended": False})
+
+        public_observation(event, runs)
+        if op == "finish":
+            active_run = next((r for r in reversed(list(runs.values()))
+                               if r["resident"] == actor and r["status"] == "launched"), None)
+            if active_run is not None:
+                active_run["finished_tasks"].append({"task": label(data["task"], 100), "sequence": seq})
 
         for key, lesson in state["lessons"].items():
             if lesson["status"] == "observed" and lesson["reviews"] and re.search(

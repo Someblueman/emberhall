@@ -216,6 +216,11 @@ class HomeTests(HouseCase):
             self.assertEqual(native.call_args.args[1], "muse-ember-1.0")
         self.drain()
         self.assertEqual(self.record.read()[0]["life"]["runs"][second]["model"], "muse-ember-1.0")
+        events = self.record.read()[1]
+        receipt = next(e for e in events if e["id"] == f"home-{second}-assignment")
+        observation = json.loads(receipt["data"]["text"][len(home.work_metrics.ASSIGNMENT_PREFIX):])
+        self.assertEqual(observation["reason"], "direct")
+        self.assertEqual(observation["requested_agent"], "codex")
 
     def test_expired_native_credential_keeps_long_backoff_after_failed_finish(self):
         self.native.write_text("import json\nprint(json.dumps({'type':'error','error':"
@@ -333,6 +338,21 @@ class HomeTests(HouseCase):
         state["life"]["budgets"] = {kind: {"until": 101} for kind in home.KINDS}
         self.assertIsNone(home.choose_provider(state, 100))
         self.assertEqual(home.choose_provider(state, 101), "codex")
+
+    def test_scheduled_start_records_reason_and_waiting_without_changing_outcome(self):
+        result = self.coordinator.tick(poll=False)
+        run = result["started"][0]
+        self.drain()
+        state, events, _ = self.record.read()
+        observations = [e["data"]["text"] for e in events if e["op"] == "say" and e["actor"] == CONTROLLER]
+        assignment = next(json.loads(text[len(home.work_metrics.ASSIGNMENT_PREFIX):])
+                          for text in observations if text.startswith(home.work_metrics.ASSIGNMENT_PREFIX))
+        self.assertEqual(assignment["run"], run)
+        self.assertEqual(assignment["reason"], "balanced")
+        self.assertEqual(assignment["lane"], "work")
+        self.assertEqual(assignment["prior_starts"], dict.fromkeys(home.KINDS, 0))
+        self.assertTrue(any(text.startswith(home.work_metrics.WAIT_PREFIX) for text in observations))
+        self.assertEqual(state["life"]["runs"][run]["outcome"], "success")
 
     def test_pointer_is_selected_only_for_new_launch(self):
         replacement = self.root / "new-runtime.pyz"

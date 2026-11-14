@@ -16,7 +16,7 @@ import sys
 import time
 import uuid
 
-from . import home_work, inbox, mailbox, mailbox_jobs, providers
+from . import home_work, inbox, mailbox, mailbox_jobs, providers, work_metrics
 from .life import CONTROLLER, latest_run, provider_available, return_eligible, workload
 from .record import Record
 from .wake_policy import active_policy, active_prompt
@@ -66,7 +66,7 @@ def inspect(record: Record) -> dict:
 
 
 def choose_provider(state: dict, now: float, preferred: str | None = None, *,
-                    exploring: bool = False) -> str | None:
+                    exploring: bool = False, reviewing: bool = False) -> str | None:
     life = state.get("life", {})
     available = [kind for kind in KINDS if provider_available(state, kind, now)]
     if exploring:
@@ -78,7 +78,9 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
         return None
     runs = list(life.get("runs", {}).values())
     busy = {run["agent"] for run in runs if run["status"] == "active"}
+    counts = work_metrics.counts(state, "explore" if exploring else "review" if reviewing else "work", KINDS)
     return min(available, key=lambda kind: (kind in busy,
+        counts[kind],
         max((run["started_sequence"] for run in runs if run["agent"] == kind), default=0),
         KINDS.index(kind)))
 
@@ -193,6 +195,7 @@ class Coordinator:
                     f"home-{run}-help-resolved")
         # Complete retryable side effects first: a crash cannot lose a cooldown
         # behind a terminal run that recovery would otherwise skip.
+        work_metrics.observe_wait(self.record, self.private, run, item, result["elapsed_seconds"])
         receipt = self.life("run-finish", run, **result)
         mailbox.release(self.record, run)
         return receipt
@@ -340,7 +343,7 @@ class Coordinator:
         return assignment + "\n" + active_prompt(state)
 
     def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False,
-              explore_generation: int | None = None) -> str | None:
+              explore_generation: int | None = None, scheduled: bool = False) -> str | None:
         self.refresh_runtime()
         self.resolve_completed_help()
         state = self.record.read()[0]
@@ -378,6 +381,14 @@ class Coordinator:
         child = None
         gate_read = gate_write = -1
         try:
+            selected_lane = "explore" if explore_generation is not None else "review" if "review_run" in request else "work"
+            reason = ("direct" if not scheduled else "requested-provider" if request.get("agent") == kind else
+                      "preferred-unavailable" if request.get("agent") else "balanced")
+            self.record.append("say", CONTROLLER, {"text": work_metrics.ASSIGNMENT_PREFIX + json.dumps({
+                "run": run, "lane": selected_lane, "reason": reason,
+                "requested_agent": request.get("agent"), "help_request": help_id,
+                "window": work_metrics.WINDOW, "prior_starts": work_metrics.counts(state, selected_lane, KINDS)
+            }, sort_keys=True)}, f"home-{run}-assignment")
             workspace = home_work.room(self.record, self.private, run, base)
             client = home_work.client(self.record, workspace, resident, self.runtime)
             request = state.get("life", {}).get("requests", {}).get(help_id)
@@ -488,10 +499,11 @@ class Coordinator:
                 request = pending[0] if pending else (None, {})
                 backlog = not pending and demand["uncovered_tasks"] > 0
                 explore = demand["explore_generation"] if not pending and not backlog else None
-                kind = choose_provider(state, time.time(), request[1].get("agent"), exploring=explore is not None)
+                kind = choose_provider(state, time.time(), request[1].get("agent"), exploring=explore is not None,
+                                       reviewing="review_run" in request[1])
                 if kind is None:
                     break
-                run = self.start(kind, request[0], backlog=backlog, explore_generation=explore)
+                run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True)
                 if run is None:
                     break
                 started.append(run)

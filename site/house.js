@@ -513,12 +513,40 @@ function accounts() {
     html("span","balance",until>now?(/credential|key expired|401/i.test(reason)?"Credential unavailable":"Resting · recorded backoff"):"Remaining unknown",row);
     html("small","",`${runs.length} recorded runs · ${runs.some(r=>Number.isFinite(r.elapsed_seconds))?`${Math.round(seconds/60)} session min across ${runs.filter(r=>Number.isFinite(r.elapsed_seconds)).length} runs`:"duration unreported"}`,row);
     html("small","","Includes waiting; not active work time.",row);
+    const outcomes=["success","failed","interrupted","quota"].map(outcome=>
+      `${runs.filter(r=>r.outcome===outcome).length} ${outcome==="success"?"successful exits":outcome}`);
+    html("small","",outcomes.join(" · "),row);
+    const finished=runs.flatMap(r=>r.finished_tasks||[]);
+    html("small","",`${finished.length} finished task receipts · ${runs.filter(r=>(r.finished_tasks||[]).length).length} runs with a finish`,row);
+    const assignments=runs.filter(r=>r.assignment);
+    html("small","",["work","review","explore"].map(lane=>
+      `${assignments.filter(r=>r.assignment.lane===lane).length} ${lane} assignments`).join(" · ")+` · ${runs.length-assignments.length} unrecorded`,row);
+    const measured=runs.filter(r=>r.waiting?.measured_requests>0);
+    if(measured.length) {
+      const waiting=measured.reduce((n,r)=>n+r.waiting.mailbox_seconds,0);
+      const voluntary=measured.reduce((n,r)=>n+r.waiting.voluntary_seconds,0);
+      html("small","",`${Math.round(waiting/60)} measured mailbox min (${Math.round(voluntary/60)} explicit wait min included) · ${measured.length} runs`,row);
+    } else html("small","","Mailbox waiting: unreported",row);
+    const unknown=runs.reduce((n,r)=>n+(r.waiting?.unmeasured_requests||0),0);
+    html("small","",`${runs.length-measured.length} runs without measured waiting · ${unknown} observed requests without timing`,row);
+    if(assignments.length||finished.length) {
+      const detail=html("details","",undefined,row);
+      html("summary","","Recent work and routing",detail);
+      const reasons={balanced:"Balanced recent opportunities", "requested-provider":"Explicit provider request",
+        "preferred-unavailable":"Requested provider unavailable; balanced fallback",direct:"Direct coordinator assignment"};
+      for(const run of runs.filter(r=>r.assignment||(r.finished_tasks||[]).length).slice(-8).reverse()) {
+        const assignment=run.assignment;
+        html("small","",`Event ${run.sequence} · ${assignment?`${assignment.lane} · ${reasons[assignment.reason]}${assignment.requested_agent?` (${kinds[assignment.requested_agent].name})`:""}`:"Routing unrecorded"}`,detail);
+        if(assignment?.help_request)html("small","",`Request: ${assignment.help_request}`,detail);
+        for(const task of run.finished_tasks||[])html("small","",`Finished ${task.task} · event ${task.sequence}`,detail);
+      }
+    }
     if(until>now)html("small","",`Until ${clock(until)} · ${backoff.reason}`,row);
     const totals={};runs.forEach(r=>Object.entries(r.usage).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;}));
     for(const [key,label] of [["input_tokens","Native input"],["cached_input_tokens","Cached input"],
       ["output_tokens","Native output"],["total_tokens","Native total"]]) {
-      const measured=runs.filter(r=>r.usage[key]!==undefined).length;
-      if(measured)html("small","",`${label}: ${totals[key].toLocaleString()} · ${measured} reporting runs`,row);
+      const reports=runs.filter(r=>r.usage[key]!==undefined).length;
+      if(reports)html("small","",`${label}: ${totals[key].toLocaleString()} · ${reports} reporting runs`,row);
       else if(key==="cached_input_tokens")html("small","","Cached input: unreported",row);
     }
   });

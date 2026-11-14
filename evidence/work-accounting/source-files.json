@@ -1,0 +1,29 @@
+{
+  "base": "95486ab635798df271814d3653b7eeaade42dccc",
+  "final_files": {
+    "docs/WORK_ACCOUNTING.md": "35c48a4c71f0349a705ff7b381c6062e02fc39d26e7dea03ae8a3b5b05265606",
+    "house/body.py": "732069d1c2d17df5feeca2c7f7315045d32e03f6dd9ba05f5ef733482c2cee27",
+    "house/home.py": "f947eb8477a8b01fdee3d4c9e750318063676d45a2c43e7658a7a76efe6cbcdc",
+    "house/mailbox.py": "ee0f5abbdff5c833347bad575b24d5f9dd302e9b797a45b7dd7d07db728bebc7",
+    "house/work_metrics.py": "fa8edb24f348a7a3ce395ef0e7a4b59508e0329bedb880a8c411562fca7979df",
+    "site/house.js": "cc78f908cd26ad2ea8b39727d473e813d9527717582e611de4d5d69937d00ac5",
+    "site/index.html": "1fb88afde27f4f884215873c9641d9f52db47d6a483bb2386638a93437b5819c",
+    "tests/test_account_view.py": "156d64b91ef60dd4aa09b6e2934a25b740523da5d2aa268c9c161be4730123bb",
+    "tests/test_assignment_balance.py": "549f8599a696db2e8364762c68805299affbd79212d3a7351515f7965f6f2a48",
+    "tests/test_home.py": "1426c97632e7c224ccabab7dbc00d569247eeb42ea8937d14bd8eef90eb7af8f",
+    "tests/test_work_metrics.py": "61dac26978a343d051c02f8bfcdf5f10f7f5e91967e5399862463a509411f6ab"
+  },
+  "full_suite_snapshot": {
+    "docs/WORK_ACCOUNTING.md": "35c48a4c71f0349a705ff7b381c6062e02fc39d26e7dea03ae8a3b5b05265606",
+    "house/body.py": "732069d1c2d17df5feeca2c7f7315045d32e03f6dd9ba05f5ef733482c2cee27",
+    "house/home.py": "5d6f64a3fe32ccb47c7ae0480a0e4b782ce7116310cbed6ad164160dd6db8d58",
+    "house/mailbox.py": "ee0f5abbdff5c833347bad575b24d5f9dd302e9b797a45b7dd7d07db728bebc7",
+    "house/work_metrics.py": "fa8edb24f348a7a3ce395ef0e7a4b59508e0329bedb880a8c411562fca7979df",
+    "site/house.js": "cc78f908cd26ad2ea8b39727d473e813d9527717582e611de4d5d69937d00ac5",
+    "site/index.html": "1fb88afde27f4f884215873c9641d9f52db47d6a483bb2386638a93437b5819c",
+    "tests/test_account_view.py": "156d64b91ef60dd4aa09b6e2934a25b740523da5d2aa268c9c161be4730123bb",
+    "tests/test_assignment_balance.py": "549f8599a696db2e8364762c68805299affbd79212d3a7351515f7965f6f2a48",
+    "tests/test_home.py": "57017068f24126a2c5b26402fe1b50f43d1390c76bf580ecfb90fb1e267e85ae",
+    "tests/test_work_metrics.py": "61dac26978a343d051c02f8bfcdf5f10f7f5e91967e5399862463a509411f6ab"
+  }
+}

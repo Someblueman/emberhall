@@ -1,0 +1,24 @@
+{
+  "sequence": 2350,
+  "recorded_supervised_task_finishes": {
+    "codex": 26,
+    "opencode": 8,
+    "muse": 25,
+    "agy": 12
+  },
+  "recent_work_opportunities": {
+    "codex": 6,
+    "opencode": 5,
+    "muse": 13,
+    "agy": 8
+  },
+  "recent_typed_review_opportunities": {
+    "codex": 7,
+    "opencode": 7,
+    "muse": 2,
+    "agy": 5
+  },
+  "candidate_next_unbound_provider": "opencode",
+  "waiting_reported_runs": 0,
+  "note": "Read-only candidate replay, not installed scheduling or measured historical effort."
+}
