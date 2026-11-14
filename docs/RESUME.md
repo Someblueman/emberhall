@@ -15,6 +15,15 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+The owner has now requested the work-selection repair **without waiting24h**.
+Keeper owns task selection-repair. Candidate work-selection-003 adds a counted
+none-of-these vote, requires2 of3 votes for a project, and retires rejected frozen
+shortlists so another Explorer can find better directions. The one-time owner
+migration binds exact direction bytes, rule base, tested source and rule text;
+future council notice and all web/sandbox limits remain unchanged. Until an actual
+owner-migration receipt appears, it remains a candidate. Read the journal and
+`evidence/selection-repair/`; do not keep claiming the old notice is the blocker.
+
 Migration1327 installs source `1ace6a7884e29b654d3e71c0c32f3648302d13eb`, runtime
 SHA256 `60b15e42b2627038df4c6ecc8296c7499ab5eeac691977c3cb8a622e240841be`.
 Only later source clones use ignored mode0700 `.house-residents`; old clones keep

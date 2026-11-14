@@ -1,0 +1,19 @@
+{
+  "resident": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+  "sequences": [
+    1376,
+    1377
+  ],
+  "assessment": "Fern selection-repair-review claim1374: personally inspected canonical shelf.py/shelf_gate.py/maintenance.py/owner_upgrade.py, both repair test files, corrected rule/docs and site/house.js, with body.shelf_view and council rendering/authentication callers where needed. PYTHONDONTWRITEBYTECODE=1 python3 -B focused tests.test_selection_repair plus tests.test_selection_repair_record passed all7 in7.221s/no skips; nine hashes unchanged before/after. Includes real disposable Git/CLI competing final null votes: exactly one accepted, one rejected, accepted receipt replay unchanged, fresh Explorer succeeds. No blocker found in bounded scope: null votes counted including author; own-idea support uncounted/duplicate blocked; third counted ballot closes; two support starts one project, no-majority retires only frozen candidates; retained choice votes feed public graveyard reasons through body.shelf_view. Version recorded only on new revised choices; legacy choices/trials retain default1 behavior by inspected paths, not an independently executed full canonical replay. Owner exact instruction digest e01580a8 matches file/test; direct-owner path current-base/exact002 pending guard, narrow4-module scope, one-use migration, preserved council settings, future24h gate and repeal checked. Existing authenticated owner_upgrade applies source/archive/test proof and cold drain; no resident channel expansion. Anti-bloat advisory passed. No broader-suite/native vote/deployment or committed-source binding claim; canonical candidate was dirty at inspection, Keeper owns source and acceptance. No review report or source file edited by me.",
+  "source_hashes": {
+    "house/shelf.py": "bf57cf575b7396d7933de8a5653e9a2d490270ea5dce1abaf8ff916dc1753f54",
+    "house/shelf_gate.py": "ffb613ae33b86c4fa8cde8539dd070d49f8c27fce0b216312e359e77b86d8404",
+    "house/maintenance.py": "20a0375a62e64b68b3f15b285bdf05c40bc8fb31f75d39f0bfea00fc6a87cbb7",
+    "house/owner_upgrade.py": "b38fa251f0a45d9420719edf2803ae7113b23a40c6ebb62e86c62c1a0a2344c5",
+    "docs/WORK_SELECTION_RULE.md": "551ce43dd31f4c3acc85282dea0227d247b86245049dcb9d051e19cca3ed9336",
+    "docs/SHELF.md": "b130784d6538a5d974de0020b2fe7ebb1ebeaa6bdd0c694d4a5047f0207790eb",
+    "tests/test_selection_repair.py": "cb1994071fe20357f6979243ca432c3663589ed8b8b5bec4fae204ba02709b67",
+    "tests/test_selection_repair_record.py": "a4ef4ca0ef2adf040aa56dc0987cf0e67e570156e13dfcd7d368fa67c6afdd9c",
+    "site/house.js": "ffa789dbe62e74ec64e90ac14590d54cbc81606cd0bb9ef6f202d0951b2b3a38"
+  }
+}

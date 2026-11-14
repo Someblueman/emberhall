@@ -104,7 +104,7 @@ def expedition_for(shelf: dict, data: dict, actor: str) -> dict:
     return expedition
 
 
-def apply(state: dict, event: dict) -> None:
+def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
     """Apply one candidate shelf event after caller authorization and envelope validation."""
     data, actor, at = event["data"], event["actor"], event["at"]
     require(type(at) in (int, float) and math.isfinite(at) and at >= state["at"], "invalid shelf clock")
@@ -171,16 +171,19 @@ def apply(state: dict, event: dict) -> None:
                                 "seconds": integer(plan, "seconds", 1, 2**53) if "seconds" in plan else 7 * DAY}
         shelf["choices"][key] = {"owner": actor, "status": "open", "candidates": candidates,
             "milestones": milestones, "votes": {}, "opened_sequence": sequence}
+        if selection_version == 2:
+            shelf["choices"][key]["selection_version"] = 2
     elif kind == "choice-vote":
         fields(data, {"choice", "idea", "reason"})
         key = identifier(data, "choice")
         require(key in shelf["choices"] and shelf["choices"][key]["status"] == "open", "choice is not open")
         choice = shelf["choices"][key]
-        idea = identifier(data, "idea")
-        require(idea in choice["candidates"], "idea is outside the frozen shelf")
+        revised = choice.get("selection_version", 1) == 2
+        idea = None if revised and data.get("idea") is None else identifier(data, "idea")
+        require(idea is None or idea in choice["candidates"], "idea is outside the frozen shelf")
         require(actor not in choice["votes"], "resident already weighed in")
         choice["votes"][actor] = {"idea": idea, "reason": text(data, "reason"),
-            "counted": actor != shelf["ideas"][idea]["author"], "sequence": sequence}
+            "counted": idea is None or actor != shelf["ideas"][idea]["author"], "sequence": sequence}
         counted = [v for v in choice["votes"].values() if v["counted"]]
         if len(counted) == 3:
             # One open round reserves the free slot; closing is the same atomic event.
@@ -188,6 +191,15 @@ def apply(state: dict, event: dict) -> None:
             winner = min(choice["candidates"], key=lambda candidate: (
                 -sum(v["idea"] == candidate for v in counted),
                 shelf["ideas"][candidate]["shelved_sequence"], candidate))
+            if revised and sum(v["idea"] == winner for v in counted) < 2:
+                choice.update(status="rejected", winner=None, closed_sequence=sequence)
+                for candidate in choice["candidates"]:
+                    entry = shelf["ideas"][candidate]
+                    entry["status"] = "graveyard"
+                    entry["history"].append({"choice": key, "won": False, "rejected": True,
+                        "lesson": "Shortlist rejected: no candidate earned two of three votes.",
+                        "sequence": sequence})
+                return
             choice.update(status="closed", winner=winner, closed_sequence=sequence)
             for candidate in choice["candidates"]:
                 entry = shelf["ideas"][candidate]

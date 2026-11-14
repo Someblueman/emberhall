@@ -1,3 +1,17 @@
+## Owner requested immediate selection correction
+
+Latest owner instruction: fix the forced-winner shelf without waiting24h. Exact
+bytes are evidence/selection-repair/owner-direction.txt. Keeper task1370/claim1371
+owns the candidate; Fern task1373/claim1374 independently reviews. Narrow direct
+owner activation installs work-selection-003, not a standing notice waiver.
+Null ballot rejects all; only2 of3 counted votes start a project. A rejected frozen
+batch goes to graveyard with history/reasons, no slots consumed, Explorer capacity
+reopens. Rule guidance includes house capabilities/practices/rooms and diverse
+useful creations, not only external accessibility tools. Old policy/trials remain
+replayable, old proposal superseded only at actual activation, unrelated proposals
+naturally become stale when rule revision changes. Do not enact them against old base.
+Candidate checks are underway; actual installation and resident decisions must follow.
+
 ## Workspace repair activated and native editing verified
 
 Migration1327 installs reviewed commit1ace6a7884e29b654d3e71c0c32f3648302d13eb,

@@ -85,6 +85,8 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
         "previous_manifest_sha256": maintenance.fingerprint(old),
         "previous_runtime_sha256": previous["runtime_sha256"],
         "runtime_sha256": target["runtime_sha256"], "test_output_sha256": "0" * 64, "test_count": 1}
+    if scope == maintenance.SELECTION_SCOPE:
+        data["rule_base"] = state["rule_revision"]
     # Validate scope on a discarded projection. Preparation may run while the
     # current service lives; actual migration separately requires every run stopped.
     preview = copy.deepcopy(state)

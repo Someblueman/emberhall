@@ -41,6 +41,8 @@ KEEP_MOVING_SHA256 = "ecc055f87751fe3dbab42c5b143736de025c57b88e9b741d94b18146fb
 WEB_REPAIR_SCOPE = "native-web-repair-20261114"
 MUSE_TRUST_SCOPE = "muse-workspace-trust-20261114"
 WORKSPACE_SCOPE = "resident-workspaces-20261114"
+SELECTION_SCOPE = "work-selection-repair-20261114"
+SELECTION_SHA256 = "e01580a8a78bbbb5b9286635b85df68bd43b8f8a4785cf9df477765767ba1df8"
 RESTORED_SHA256 = "4fa255013b0b0bb0021b5461e6cb25f084de67bb55557cff7c773f137d233fde"
 VERIFIED_KEY_RUN = "fc2795f6b6824fc3ae4b9229e8667b61"
 KEY_BUDGET_SEQUENCE = 594
@@ -58,11 +60,12 @@ SOURCES = {RETRY_SCOPE: OPENCODE_SHA256, GROWTH_SCOPE: GROWTH_SHA256,
            CHECKPOINT_SCOPE: GROWTH_SHA256, BACKLOG_SCOPE: BACKLOG_SHA256,
            RESTORED_SCOPE: RESTORED_SHA256, KEEP_MOVING_SCOPE: KEEP_MOVING_SHA256,
            WEB_REPAIR_SCOPE: KEEP_MOVING_SHA256, MUSE_TRUST_SCOPE: KEEP_MOVING_SHA256,
-           WORKSPACE_SCOPE: KEEP_MOVING_SHA256}
+           WORKSPACE_SCOPE: KEEP_MOVING_SHA256, SELECTION_SCOPE: SELECTION_SHA256}
 RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    SELECTION_SCOPE: OWNER_MODULES | {"house/shelf.py", "house/shelf_gate.py"},
     WORKSPACE_SCOPE: {"house/maintenance.py", "house/files.py", "house/home_work.py", "house/home.py",
         "house/mailbox.py", "house/mailbox_jobs.py", "house/resident_actions.py",
         "house/checkpoint.py", "house/integrate.py"},
@@ -180,6 +183,36 @@ def verified_key_resolution(state: dict, event: dict) -> dict:
             "sequence": state["sequence"] + 1}
 
 
+
+def enact_selection_repair(state: dict, event: dict) -> None:
+    """One exact owner correction, not a resident-accessible ratification waiver."""
+    from . import shelf_gate
+    data = event["data"]
+    require(data["rule_base"] == state["rule_revision"], "selection repair rule base changed")
+    old = state["proposals"].get("work-selection-002", {})
+    require(old.get("status") == "pending" and old.get("base") == state["rule_revision"]
+            and digest(old.get("text", "")) == shelf_gate.POLICY_SHA256,
+            "selection repair requires exact pending predecessor")
+    key = shelf_gate.REVISED_POLICY_ID
+    require(key not in state["proposals"] and key not in state["council"]["rules"]
+            and shelf_gate.policy(state) is None, "selection repair already has a policy")
+    require(not any(c["status"] == "open" for c in state.get("shelf", {}).get("choices", {}).values()),
+            "finish existing choices before selection repair")
+    seq, at = state["sequence"] + 1, event["at"]
+    title = "Choose worthwhile work, or reject the shortlist"
+    authority = {"method": "direct-owner", "scope": SELECTION_SCOPE,
+                 "approval_sha256": SELECTION_SHA256, "sequence": seq}
+    state["proposals"][key] = {"mode": "rule", "author": event["actor"], "title": title,
+        "text": shelf_gate.REVISED_POLICY_TEXT, "base": state["rule_revision"],
+        "reason": "Owner requested correction and immediate activation without the notice delay.",
+        "status": "enacted", "proposed_at": at, "trial": None, "endorsements": {},
+        "notice": None, "enacted_at": at, "enacted_sequence": seq, "ratification": authority}
+    state["council"]["rules"][key] = {"title": title, "text": shelf_gate.REVISED_POLICY_TEXT,
+        "status": "active", "enacted_at": at, "enacted_sequence": seq, "ratification": authority}
+    old.update(status="superseded", superseded_by=key)
+    council.render(state, event, key)
+
+
 def apply(state: dict, event: dict) -> None:
     _owner(state, event)
     data, scope = event["data"], event["data"]["scope"]
@@ -187,7 +220,8 @@ def apply(state: dict, event: dict) -> None:
     if event["op"] == "owner-migrate":
         council.fields(data, {"scope", "approval_sha256", "house", "owner_id",
             "source_head", "source_sha256", "protected_files", "previous_manifest_sha256",
-            "previous_runtime_sha256", "runtime_sha256", "test_output_sha256", "test_count"})
+            "previous_runtime_sha256", "runtime_sha256", "test_output_sha256", "test_count"}
+            | ({"rule_base"} if scope == SELECTION_SCOPE else set()))
         old = protected_manifest(state)
         maintenance = state.get("maintenance", {})
         require(scope not in maintenance.get("migrations", {}), "owner migration already used")
@@ -213,6 +247,8 @@ def apply(state: dict, event: dict) -> None:
         require(not any(run["status"] == "active" for run in
                 state.get("life", {}).get("runs", {}).values()), "drain native residents before migration")
         resolution = verified_key_resolution(state, event) if scope == RESTORED_SCOPE else None
+        if scope == SELECTION_SCOPE:
+            enact_selection_repair(state, event)
         entry = copy.deepcopy(data) | {"at": event["at"], "sequence": seq, "actor": event["actor"]}
         current = copy.deepcopy(maintenance)
         current.setdefault("migrations", {})[scope] = entry
