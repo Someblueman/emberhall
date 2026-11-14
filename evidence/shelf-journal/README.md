@@ -60,8 +60,11 @@ Actual returning Muse Ember read the canonical working tree using its ordinary
 sandbox permissions. It initially verified all ten original hashes and missed
 this issue (1047). After root's finding, it explicitly acknowledged the miss,
 inspected the correction and withdrew that part of its original conclusion
-(1051). `ember-review.json` retains both statements and releases. This is native
-read-only inspection, not independent test execution or committed-byte review.
+(1051). Ember then verified all ten committed blobs at
+`1df84f9d5418ef93f512b467d42202253cb880e2` against the final hashes and worktree
+(1056). `ember-review.json` retains the statements, releases and ten actual native
+COMMIT-OK outputs. This is committed-byte native read-only review, not independent
+test execution, operational trial or activation.
 
 The mode fix changes only `house/shelf_gate.py` and `tests/test_shelf_gate.py`
 relative to the original ten-file hash list. The protected installed runtime and
@@ -69,8 +72,8 @@ active rules remain unchanged throughout. No resident was stopped for this work.
 
 ## Next
 
-Bind independent review to the committed source, then finish the owner-protected
-web capability and public shelf view. Before deploying, provide a controlled way
+Finish the owner-protected web capability and public shelf view. Before deploying,
+provide a controlled way
 to stop admitting new work while current residents finish. The old coordinator
 has no drain state: `stopping` kills still-running children and marks results as
 interrupted, while an ordinary successful reap immediately admits a successor.

@@ -53,7 +53,50 @@
         "id": "mailbox-dd17294922914226b064140ea641ecac-e795fe710f70eee5c70535d749b302ccbef26218c4ce15dd2ef0f570c9d3528e",
         "op": "release"
       }
+    },
+    {
+      "sequence": 1056,
+      "event": {
+        "actor": "resident-019bca8ed8fd490eb908e4f82cc91213",
+        "at": 1794616479.20369,
+        "data": {
+          "text": "Ember binding for shelf-gate-review-v1 (reclaimed 1055, gen3): verified committed 1df84f9 blobs via git show against evidence/shelf-journal/final-source-hashes.json -- all 10 COMMIT-OK and worktree==commit (shelf.py 58a9ea8b, shelf_gate.py 0787f550, model.py 994821d5, __main__.py 06a17f17, mailbox.py 1953ab21, maintenance.py 994637f2, owner_upgrade.py c9531cf3, test_shelf_gate.py e90bec7d, test_shelf_record.py b5634fbe, test_owner_shelf.py ffd306b3). This binds my inspected bytes (1047 as corrected 1051) to the committed source. Lesson shelf-mode-authority (1053) read: text-equality-is-not-purpose is the right generalization of the mode fix; I do not endorse any rule or claim deployment Runtime remains 1004. Limits unchanged: read-only inspection, no repeated suite, no report artifact, no trial/enactment/activation claim."
+        },
+        "id": "mailbox-dd17294922914226b064140ea641ecac-90d2e0fac1def21210801f1adcedfffd651ea09fa8ce13e8730f3c25302b0a8f",
+        "op": "say"
+      }
+    },
+    {
+      "sequence": 1057,
+      "event": {
+        "actor": "resident-019bca8ed8fd490eb908e4f82cc91213",
+        "at": 1794616487.104127,
+        "data": {
+          "note": "Binding of committed 1df84f9 to inspected bytes posted at 1056; no tests run, no edits, no endorsement or deployment claim.",
+          "task": "shelf-gate-review-v1",
+          "token": "dd172949-EMBER-gate-bind-03"
+        },
+        "id": "mailbox-dd17294922914226b064140ea641ecac-1ddf2e85017c8b80db5e4ca778e83b733bdadd72ce74578c89bdc289c4b83a7d",
+        "op": "release"
+      }
     }
   ],
-  "limits": "Read-only working-tree inspection, no independent test execution or committed-byte binding. The first no-blockers conclusion missed mode confusion and was explicitly corrected."
+  "limits": "Read-only native inspection with committed-byte binding1056; no independent test execution, operational trial, enactment or activation. First conclusion missed mode confusion and was explicitly corrected1051.",
+  "committed_source": "1df84f9d5418ef93f512b467d42202253cb880e2",
+  "native_commit_check_output": [
+    "COMMIT-OK   house/__main__.py 06a17f17a5142f4b want 06a17f17a5142f4b | worktree 06a17f17a5142f4b WT-MATCH",
+    "COMMIT-OK   house/mailbox.py 1953ab21a8117a6d want 1953ab21a8117a6d | worktree 1953ab21a8117a6d WT-MATCH",
+    "COMMIT-OK   house/maintenance.py 994637f2e35c33f7 want 994637f2e35c33f7 | worktree 994637f2e35c33f7 WT-MATCH",
+    "COMMIT-OK   house/model.py 994821d509a83856 want 994821d509a83856 | worktree 994821d509a83856 WT-MATCH",
+    "COMMIT-OK   house/owner_upgrade.py c9531cf3bcbd4ee2 want c9531cf3bcbd4ee2 | worktree c9531cf3bcbd4ee2 WT-MATCH",
+    "COMMIT-OK   house/shelf.py 58a9ea8b25d3fda2 want 58a9ea8b25d3fda2 | worktree 58a9ea8b25d3fda2 WT-MATCH",
+    "COMMIT-OK   house/shelf_gate.py 0787f550a9b1a4d4 want 0787f550a9b1a4d4 | worktree 0787f550a9b1a4d4 WT-MATCH",
+    "COMMIT-OK   tests/test_owner_shelf.py ffd306b3e77d1323 want ffd306b3e77d1323 | worktree ffd306b3e77d1323 WT-MATCH",
+    "COMMIT-OK   tests/test_shelf_gate.py e90bec7df3dcd6ea want e90bec7df3dcd6ea | worktree e90bec7df3dcd6ea WT-MATCH",
+    "COMMIT-OK   tests/test_shelf_record.py b5634fbef7c6c608 want b5634fbef7c6c608 | worktree b5634fbef7c6c608 WT-MATCH"
+  ],
+  "native_log_prefix": {
+    "bytes": 1593439,
+    "sha256": "abad469f7e202bf0f57dc659301faf7023285247e90aa15cde3d2a905b966046"
+  }
 }

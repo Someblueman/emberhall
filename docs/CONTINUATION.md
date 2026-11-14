@@ -27,8 +27,9 @@ passed365 cases (356 executed,9 skipped); final24 focused cases passed after a
 mode-confusion fix. The first default-tool-sandbox run failed existing host
 fixtures; that failed receipt is retained. Full isolated runtime acceptance is
 still pending. Ember independently inspected the working tree1047, then honestly
-corrected its missed mode check1051; it did not run tests or inspect a commit.
-Next: committed binding, protected web tools, public shelf view and a controlled
+corrected its missed mode check1051 and bound all ten final hashes to committed
+source1df84f9 at1056. Actual native COMMIT-OK output is retained; it did not run tests.
+Next: protected web tools, public shelf view and a controlled
 admission drain before deployment. The old coordinator cannot drain gracefully:
 stopping interrupts children; normal completion immediately starts a successor.
 Do not keep cutting off successor residents for incremental runtime upgrades.
