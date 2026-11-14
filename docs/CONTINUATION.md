@@ -1,3 +1,33 @@
+## Live zero-test correction underway
+
+Sourcee0ce6b2/runtime70321905 was activated1721 and resumed1722; sole coordinator
+19802. Handoff4329589 was pushed and remote equality verified. Returning OpenCode
+Juniper run9bc275092d8543018e41686f82aa12c2 actually used the fixed --inspect action:
+job02a26aba4a460a8bf0901ffd9b314ad50c46af75aecfc20b9a09278d11fe0364 returned the
+exact case-bible commitb0c8662e, two changed paths and12995 diff bytes, untruncated.
+Original Wake Digest draft9e17cdf was explicitly rejected1725, preserving source.
+
+Actual native --publish then failed1728: unittest CLI returns5 when it discovers
+zero tests in the prose/JSON case project. This is a Keeper acceptance-runner bug,
+not a bad project. Candidate/failed receipt/log are preserved. Source was NOT
+integrated or automatically pushed. Keeper correction invokes TestLoader and
+TextTestRunner directly, reporting the real count (including zero), retaining
+loading/test failures and subsequent syntax checks. A real sandbox regression
+also proves broken JSON still prevents acceptance. Eight focused tests pass5.509s.
+Full host acceptance is running; independent3-file Muse review task1731/help1732
+launched1734/1735. New project-checks-20261114 scope permits owner modules and
+integrate.py only. It is not installed yet. Keep native sandbox and governance.
+
+After host checks and exact independent hashes, commit task-owned correction,
+prepare isolated owner plan, drain/stop old sole coordinator, apply narrow scope,
+bootstrap matching archive and explicitly resume. The source-review-tools task
+remains Keeper-owned; lease token is in its claim1684. Root full host log is
+/tmp/emberhall-project-checks-host.txt. Do not treat the initial success of
+--inspect as proof of integration or remote delivery. After this repair, request
+one explicit retry of case55ef52de: the prior automatic request can resolve with
+tests-failed, so ordinary queue logic deliberately does not retry it forever.
+Both projects and the06:00UTC growth checkpoint1546 remain unchanged.
+
 ## Source review tools activated; resume and witness actual delivery
 
 Owner migration1721 installs sourcee0ce6b2ffe1cd4c162db39a72749a1895cf0c2de,

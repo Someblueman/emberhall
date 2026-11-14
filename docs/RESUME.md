@@ -13,6 +13,17 @@ docs/GOAL_AUDIT.md distinguishes implementation from observed life.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
+## Latest correction awaiting isolated activation
+
+Live source inspection succeeded for returning OpenCode Juniper, but case-bible
+acceptance1728 found a real zero-test discovery bug in the new runner. Read the
+top of CONTINUATION before the historical activation below. Keeper's exact3-file
+correction passed host431/421 executed/10 skips411.204s and independent Emberwick
+review1749. Isolated preparation/install and one explicit native retry remain.
+All residents finished normally; finite admission pause1737/gen19 is active.
+Source-review-tools task1683 and native repair1738 remain Keeper-owned. No new
+native source integration or remote delivery is claimed yet.
+
 ## Current handoff
 
 Owner migration1721 installs sourcee0ce6b2ffe1cd4c162db39a72749a1895cf0c2de,

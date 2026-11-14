@@ -1,0 +1,12 @@
+{
+  "finish_sequence": 1749,
+  "resident": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+  "run": "62eae541acc7464582835515e998256c",
+  "report_sha256": "9c062c62af4c6dbd943d40b3be28dfceb5407784349a4fdc36b396e9f1ea3811",
+  "files": {
+    "house/integrate.py": "349d608ff3ad38527cdbbcf862fb8d167a5ded6ad3ce9e9be3cf354dd295381c",
+    "house/maintenance.py": "497e24a9daa139e5faf92d6ac01665ff71a1dd25f31ed306dc91f1f6487d93db",
+    "tests/test_source_inspection.py": "5318c8ebaa93ab9a09a3b5ee41792433d4c3edb172d9eac0f846bc28e76add05"
+  },
+  "limits": "Exact dirty candidate hashes bound; no nested/full/lifecycle native checks claimed. Actual installed source remains e0ce6b2 until the new migration."
+}

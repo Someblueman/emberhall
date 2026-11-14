@@ -105,7 +105,14 @@ def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[st
         return "foundation", [[sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"]]
     # Test each affected project, including its unchanged tests. No dependency install.
     projects = sorted({"/".join(p.split("/")[:2]) for p in paths})
-    commands = [[sys.executable, "-m", "unittest", "discover", "-s", project, "-v"]
+    # unittest's CLI exits 5 for zero discovered tests. A prose-only project
+    # legitimately has none: report Ran 0 tests, then run its syntax checks.
+    # Loading errors and actual failures still make the result unsuccessful.
+    runner = ("import sys,unittest;"
+              "suite=unittest.defaultTestLoader.discover(sys.argv[1]);"
+              "result=unittest.TextTestRunner(verbosity=2).run(suite);"
+              "raise SystemExit(not result.wasSuccessful())")
+    commands = [[sys.executable, "-c", runner, project]
                 for project in projects if (candidate / project).is_dir()]
     for name in paths:
         path = candidate / name

@@ -131,6 +131,27 @@ class SourceInspectionTests(unittest.TestCase):
         self.assertEqual(result['status'], 'tests-failed')
         self.assertEqual(git(f.repo, 'rev-parse', 'HEAD'), f.base)
 
+    @unittest.skipIf(os.environ.get('EMBERHALL_CANDIDATE_SANDBOX') == '1', 'cannot nest macOS sandboxes')
+    def test_prose_and_json_project_without_tests_reports_zero_and_still_checks_syntax(self):
+        f = self.f
+        room = f.candidate('one', 'base\n')
+        project = room / 'projects/case'
+        project.mkdir(parents=True)
+        (project / 'README.md').write_text('Six facts, no executable code.\n')
+        (project / 'facts.json').write_text('{"facts": [1, 2, 3]}\n')
+        self.amend(room)
+        result = integrate(f.record, 'one', 'alice')
+        self.assertEqual(result['status'], 'reviewed')
+        log = (f.private / (result['candidate'] + '.tests.log')).read_text()
+        self.assertIn('Ran 0 tests', log)
+        self.assertIn('json.load', log)
+        # Zero unit tests must not hide a subsequent JSON syntax error.
+        (project / 'facts.json').write_text('{broken')
+        self.amend(room)
+        result = integrate(f.record, 'one', 'alice', publish=True)
+        self.assertEqual(result['status'], 'tests-failed')
+        self.assertEqual(git(f.repo, 'rev-parse', 'HEAD'), f.base)
+
     def test_native_fixed_parser_keeps_modes_exclusive(self):
         args = parse(['integrate', 'one', '--inspect', '--path', 'document.txt', '--as', 'alice'], 'alice')
         self.assertTrue(args.inspect)

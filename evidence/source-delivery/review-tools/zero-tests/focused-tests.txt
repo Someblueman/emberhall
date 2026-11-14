@@ -1,0 +1,13 @@
+test_actual_git_paths_select_checks_even_if_report_lies (tests.test_source_inspection.SourceInspectionTests.test_actual_git_paths_select_checks_even_if_report_lies) ... ok
+test_inspection_reads_exact_committed_diff_without_receipt_or_lock_mutation (tests.test_source_inspection.SourceInspectionTests.test_inspection_reads_exact_committed_diff_without_receipt_or_lock_mutation) ... ok
+test_large_binary_symlink_and_deleted_content_are_explicit (tests.test_source_inspection.SourceInspectionTests.test_large_binary_symlink_and_deleted_content_are_explicit) ... ok
+test_native_fixed_parser_keeps_modes_exclusive (tests.test_source_inspection.SourceInspectionTests.test_native_fixed_parser_keeps_modes_exclusive) ... ok
+test_project_failure_does_not_publish (tests.test_source_inspection.SourceInspectionTests.test_project_failure_does_not_publish) ... ok
+test_project_tests_gate_real_merge_and_rejection_cannot_erase_acceptance (tests.test_source_inspection.SourceInspectionTests.test_project_tests_gate_real_merge_and_rejection_cannot_erase_acceptance) ... ok
+test_prose_and_json_project_without_tests_reports_zero_and_still_checks_syntax (tests.test_source_inspection.SourceInspectionTests.test_prose_and_json_project_without_tests_reports_zero_and_still_checks_syntax) ... ok
+test_rejection_is_terminal_preserves_source_and_skips_queue (tests.test_source_inspection.SourceInspectionTests.test_rejection_is_terminal_preserves_source_and_skips_queue) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 5.509s
+
+OK

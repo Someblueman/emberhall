@@ -1,0 +1,28 @@
+{
+  "run": "55ef52de145a4301a04d4fe8ed190129",
+  "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+  "base": "4329589dc1b1cf12ac59b176e0ea031282d18f49",
+  "contribution": "b0c8662e39617433fb624c619824e8c49b4cde41",
+  "candidate": "integration-3470b47de5ce4437874ba20cbfa917f5",
+  "status": "tests-failed",
+  "candidate_head": "36ab523ec943efa574c8a7eaee03a165eeebee37",
+  "test_scope": "projects:projects/night-ferry",
+  "test_commands": [
+    [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "projects/night-ferry",
+      "-v"
+    ],
+    [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-c",
+      "import json,sys;json.load(open(sys.argv[1]))",
+      "projects/night-ferry/case/truth-sheet.json"
+    ]
+  ],
+  "test_exit": 5
+}
