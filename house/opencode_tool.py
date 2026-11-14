@@ -86,7 +86,7 @@ export default {id: "emberhall.journal", async setup(ctx) {
     # Clear inherited overrides, including obsolete V1 flags and simulation/server
     # switches. The model never shares the global session database.
     for name in list(env):
-        if name.startswith('OPENCODE_'):
+        if name.startswith('OPENCODE_') or name == 'EXA_API_KEY':
             env.pop(name)
     env.update(OPENCODE_CONFIG_DIR=str(config), XDG_CONFIG_HOME=str(isolated),
                OPENCODE_TEST_HOME=str(isolated), OPENCODE_CONFIG_PROJECT_DISABLE='1',
@@ -122,5 +122,10 @@ export default {id: "emberhall.journal", async setup(ctx) {
                 {"action": "websearch.use", "resource": "*", "effect": "allow" if web else "deny"}]
     policies.extend({"action": "tool.use", "resource": rule["action"] + ':' + rule["resource"],
                      "effect": rule["effect"]} for rule in rules)
+    # Each private run starts without a persisted selection. Otherwise the first
+    # search opens an interactive provider form which headless run cancels.
+    # Native Exa supports its public endpoint without a key; never inherit a
+    # separately billed Exa credential or rotate to another provider.
     return {"permissions": rules, "policies": policies,
+            "websearch": {"provider": "exa"} if web else False,
             "agents": {"emberhall": {"mode": "primary", "permissions": rules}}}

@@ -1,0 +1,18 @@
+test_installed_web_tools_without_shell_or_project_plugins (tests.test_opencode_v2.OpenCodeV2Tests.test_installed_web_tools_without_shell_or_project_plugins) ... FAIL
+
+======================================================================
+FAIL: test_installed_web_tools_without_shell_or_project_plugins (tests.test_opencode_v2.OpenCodeV2Tests.test_installed_web_tools_without_shell_or_project_plugins)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_opencode_v2.py", line 51, in test_installed_web_tools_without_shell_or_project_plugins
+    self.native_permissions(web=True)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/tests/test_opencode_v2.py", line 147, in native_permissions
+    self.assertNotIn('error', data, data)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'error' unexpectedly found in {'error': 'WebSearch.ProviderRequired'} : {'error': 'WebSearch.ProviderRequired'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.669s
+
+FAILED (failures=1)

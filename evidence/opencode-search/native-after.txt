@@ -1,0 +1,8 @@
+test_inherited_server_and_v1_overrides_are_removed (tests.test_opencode_v2.OpenCodeV2Tests.test_inherited_server_and_v1_overrides_are_removed) ... ok
+test_installed_native_registry_permissions_and_project_isolation (tests.test_opencode_v2.OpenCodeV2Tests.test_installed_native_registry_permissions_and_project_isolation) ... ok
+test_installed_web_tools_without_shell_or_project_plugins (tests.test_opencode_v2.OpenCodeV2Tests.test_installed_web_tools_without_shell_or_project_plugins) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.454s
+
+OK

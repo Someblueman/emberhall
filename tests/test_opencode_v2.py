@@ -24,6 +24,7 @@ class OpenCodeV2Tests(unittest.TestCase):
             poison = {name: 'unsafe' for name in ('OPENCODE_CONFIG', 'OPENCODE_CONFIG_CONTENT',
                 'OPENCODE_PURE', 'OPENCODE_SIMULATE', 'OPENCODE_MODELS_URL', 'OPENCODE_PTY_HANDOFF')}
             poison['PWD'] = '/wrong'
+            poison['EXA_API_KEY'] = 'never-inherit-billed-search'
             with patch.dict(os.environ, poison), patch('house.providers.shutil.which', return_value='/bin/opencode'):
                 argv, env = command('opencode', DEFAULTS['opencode'], root, root, root / 'client',
                                     runtime=root / 'runtime.pyz', resident='assigned')
@@ -34,6 +35,7 @@ class OpenCodeV2Tests(unittest.TestCase):
                 if name not in ('PWD', 'OPENCODE_CONFIG_CONTENT'):
                     self.assertNotIn(name, env)
             config = json.loads(env['OPENCODE_CONFIG_CONTENT'])
+            self.assertIs(config['websearch'], False)
             self.assertEqual(config['permissions'], config['agents']['emberhall']['permissions'])
             for key in ('agent', 'permission', 'small_model', 'enabled_providers'):
                 self.assertNotIn(key, config)
@@ -97,6 +99,12 @@ class OpenCodeV2Tests(unittest.TestCase):
                 'const agent=await ctx.agent.get({agentID:"emberhall"});\n'
                 'const session=await ctx.session.create({agent:"emberhall",title:"No-model acceptance"});\n'
                 'const tools=await ctx.tool.list();\n'
+                'let search=null;\n'
+                + ('const providers=await ctx.websearch.providers();let selected;\n'
+                   'await ctx.websearch.transform(editor=>{selected=editor.default.get();\n'
+                   'editor.add({id:"exa",name:"Local Exa fixture",execute:async()=>[]});});\n'
+                   'const searchResult=await ctx.websearch.query({query:"Local fixture only; never sent to web"});\n'
+                   'search={providers,selected,result:searchResult};\n' if web else '') +
                 'const checks={};\n'
                 'const effective=[];for(const tool of tools){const action=tool.options?.permission??tool.name;\n'
                 'try{await ctx.permission.assert({sessionID:session.id,agent:"emberhall",action,resources:["*"],save:["*"]});effective.push(tool.name);}\n'
@@ -114,7 +122,7 @@ class OpenCodeV2Tests(unittest.TestCase):
                 'try{boundary[path]=await tools.find(t=>t.name==="write").execute({path,content:"Native lexical symlink witness"},context);}\n'
                 'catch(error){boundary[path]={denied:String(error)};}}\n'
                 'await tools.find(t=>t.name==="patch").execute({patchText:"*** Begin Patch\\n*** Add File: plain-patch-file\\n+../private/outside-proof.txt\\n*** End Patch"},context);\n'
-                'writeFileSync(' + json.dumps(str(receipt)) + ',JSON.stringify({agent,tools:tools.map(t=>t.name),effective,checks,result,boundary}));\n'
+                'writeFileSync(' + json.dumps(str(receipt)) + ',JSON.stringify({agent,tools:tools.map(t=>t.name),effective,checks,result,boundary,search}));\n'
                 '}catch(error){writeFileSync(' + json.dumps(str(receipt)) + ',JSON.stringify({error:String(error)}));}},250);}};\n')
             version = subprocess.run([executable, '--version'], cwd=room, env=env,
                                      capture_output=True, text=True, timeout=10)
@@ -139,6 +147,10 @@ class OpenCodeV2Tests(unittest.TestCase):
                 self.assertTrue(receipt.exists(), 'Native plugin did not finish no-model checks')
                 data = json.loads(receipt.read_text())
                 self.assertNotIn('error', data, data)
+                if web:
+                    self.assertEqual(data['search']['selected'], 'exa')
+                    self.assertEqual(data['search']['result']['data']['providerID'], 'exa')
+                    self.assertEqual(data['search']['result']['data']['results'], [])
                 self.assertEqual(data['agent']['data']['permissions'][-1]['effect'], 'deny')
                 self.assertIn('house_journal', data['tools'])
                 # Some built-ins register after the private plugin transform;

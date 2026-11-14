@@ -1,0 +1,215 @@
+{
+  "run": "b89d142c403f428bac30b9fa1f43a6fa",
+  "source_head": "6cc0fb09bf77f7c6b84bffece848777537980033",
+  "output_bytes": 1082253,
+  "output_sha256": "3487451817d81735b268b92ef9302cb5089b05e964bd26ddf4f187ed0ee20c78",
+  "tools": [
+    {
+      "tool": "websearch",
+      "status": "error",
+      "input": {
+        "query": "BANA Music Braille Code 2015 official PDF braille music notation"
+      },
+      "error": "Web search cancelled",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tool": "websearch",
+      "status": "error",
+      "input": {
+        "query": "W3C EPUB Accessibility 1.1 specification accessibility metadata schema.org"
+      },
+      "error": "Web search cancelled",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tool": "websearch",
+      "status": "error",
+      "input": {
+        "query": "GTFS Schedule reference specification google transit feed"
+      },
+      "error": "Web search cancelled",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tool": "websearch",
+      "status": "error",
+      "input": {
+        "query": "BANA Music Braille Code 2015 official braille music notation"
+      },
+      "error": "Web search cancelled",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "url": "https://www.w3.org/TR/epub-a11y-11/",
+        "format": "markdown"
+      },
+      "error": null,
+      "output_bytes": 51410,
+      "output_sha256": "d9ac83f0ffbd230e528c0baadc42b64a15dfb53a54ba56fe7a7b4e32cf61e761"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://www.brailleauthority.org/music/music.html"
+      },
+      "error": null,
+      "output_bytes": 1273,
+      "output_sha256": "d0a7c6160bd78f064c500e277e4e075f8753968d3999fc67d22eb84ddbfcf7f6"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://gtfs.org/documentation/schedule/reference/"
+      },
+      "error": null,
+      "output_bytes": 51409,
+      "output_sha256": "425f394e8ab08520557640afc210663dd2665b4a57128cc8ab6d771a7c1aca12"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://github.com/MobilityData/gtfs-validator"
+      },
+      "error": null,
+      "output_bytes": 29434,
+      "output_sha256": "ecddd983c46de3abafa02b0ca6eaf2a9c0465e7663a05b2bbf91f850063457cf"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://gedcom.io/specifications/FamilySearchGEDCOMv7.html"
+      },
+      "error": null,
+      "output_bytes": 51410,
+      "output_sha256": "a791f04fbdb574144f78292c892008e2305a3735a3a28bab4068f380fadb4d23"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://gedcom.io/tools/"
+      },
+      "error": null,
+      "output_bytes": 14113,
+      "output_sha256": "9112d027251b276cc676edd78efc9781b8cec16ec543770d47b8c947a2d2f0bf"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://dcmp.org/learn/captioningkey"
+      },
+      "error": null,
+      "output_bytes": 8504,
+      "output_sha256": "e7c34c445b7e3ff414735dec7fe86dda396e10d13e341cf50e5fedfe72167cbc"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://dcmp.org/learn/601-captioning-key---presentation-rate"
+      },
+      "error": null,
+      "output_bytes": 7388,
+      "output_sha256": "1fbe40b063db33704280efa2d66993a81cd9a600d034f91617c24be27df7cd78"
+    },
+    {
+      "tool": "webfetch",
+      "status": "error",
+      "input": {
+        "format": "markdown",
+        "url": "https://www.loc.gov/nls/services-and-resources/braille-music/"
+      },
+      "error": "StatusCode: non 2xx status code (404 GET https://www.loc.gov/nls/services-and-resources/braille-music/)",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://www.w3.org/2021/a11y-discov-vocab/latest/"
+      },
+      "error": null,
+      "output_bytes": 113,
+      "output_sha256": "83ee857b4a34bfa292e49334709dea0494ee9335de89d5218acd96c32e62801b"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://w3c-cg.github.io/a11y-discov-vocab/latest/"
+      },
+      "error": null,
+      "output_bytes": 55,
+      "output_sha256": "ff26a72e84f3894891e71945849fecd66e0b4ed5fb186c811e6fdeb77435f7c7"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://schema.org/accessibilityFeature"
+      },
+      "error": null,
+      "output_bytes": 22950,
+      "output_sha256": "f692fbf1a3b862eda5d8052495b05534bf827cc53dab106b118207f108b0057b"
+    },
+    {
+      "tool": "websearch",
+      "status": "error",
+      "input": {
+        "query": "braille music transcription tools access gap"
+      },
+      "error": "Web search cancelled",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tool": "webfetch",
+      "status": "completed",
+      "input": {
+        "format": "markdown",
+        "url": "https://www.w3.org/TR/webvtt1/"
+      },
+      "error": null,
+      "output_bytes": 51410,
+      "output_sha256": "4785daf7e31b367ff43b3a38b6be0d50ba134317a310a94118b9159807b2763f"
+    }
+  ],
+  "contribution": {
+    "base": "6cc0fb09bf77f7c6b84bffece848777537980033",
+    "commit": "1ebc8861cc59f9ad90d5268b2dc0bf811870ad90",
+    "paths": [
+      "research/first-expedition.md"
+    ],
+    "status": "pending-review"
+  },
+  "artifact_sha256": "94732a1a18cd84503dd4c25859e088820ffaf06d581ed07f60f7ea8e0f4252bc",
+  "run_outcome": "failed",
+  "terminal_error": {
+    "type": "unknown",
+    "message": "Cancelled a request for input this run cannot answer: Web Search"
+  }
+}

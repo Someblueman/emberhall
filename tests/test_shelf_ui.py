@@ -25,9 +25,10 @@ assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),conte
 vm.runInContext(`
 data={timezone:'Europe/London'};frame={};shelf();
 assert.match(text(root),/not activated/);
-frame={shelf:{enabled:true,policy:null,ideas:[],projects:[]}};shelf();
+frame={residents:[{id:'resident-fixture',name:'Juniper'}],shelf:{enabled:true,policy:null,ideas:[],projects:[]}};shelf();
 assert.match(text(root),/awaits ratification/);assert.match(text(root),/No ideas/);
 frame.shelf.policy='work-selection';
+frame.shelf.explorer={resident:'resident-fixture',agent:'opencode',until:100};
 frame.shelf.ideas=[
  {id:'draft',title:'<img src=x onerror=alert(1)>',status:'shelved',sources:['https://example.org/', 'javascript:alert(1)', 'https://user:secret@example.org/']},
  {id:'winner',title:'Already selected',status:'project',sources:[]},
@@ -37,6 +38,7 @@ shelf();
 assert.doesNotMatch(text(root),/Active projects/);assert.match(text(root),/Finished projects/);
 assert.match(text(root),/Completed map/);assert.doesNotMatch(text(root),/Already selected/);
 assert.match(text(root),/Too large for the first milestone/);
+assert.match(text(root),/Explorer: Juniper · OpenCode/);assert.doesNotMatch(text(root),/resident-fixture/);
 assert.equal(all(root).filter(n=>n.tag==='img').length,0);
 const links=all(root).filter(n=>n.tag==='a');assert.equal(links.length,1);
 assert.equal(links[0].href,'https://example.org/');assert.equal(links[0].rel,'noopener noreferrer');

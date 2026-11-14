@@ -1,0 +1,18 @@
+test_installed_web_tools_without_shell_or_project_plugins (tests.test_opencode_v2.OpenCodeV2Tests.test_installed_web_tools_without_shell_or_project_plugins) ... FAIL
+
+======================================================================
+FAIL: test_installed_web_tools_without_shell_or_project_plugins (tests.test_opencode_v2.OpenCodeV2Tests.test_installed_web_tools_without_shell_or_project_plugins)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_opencode_v2.py", line 51, in test_installed_web_tools_without_shell_or_project_plugins
+    self.native_permissions(web=True)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/tests/test_opencode_v2.py", line 145, in native_permissions
+    self.assertTrue(receipt.exists(), 'Native plugin did not finish no-model checks')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : Native plugin did not finish no-model checks
+
+----------------------------------------------------------------------
+Ran 1 test in 10.423s
+
+FAILED (failures=1)

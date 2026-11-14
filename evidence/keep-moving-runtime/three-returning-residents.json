@@ -1,0 +1,55 @@
+{
+  "observed_at": 1794618382.3331058,
+  "head": "6ddd042c100fcc84cab9bae8b2ea2beaeec0d5d5",
+  "sequence": 1121,
+  "runtime_source": "4e331dad5c3bee85e340deee20ce59e969c794ca",
+  "process_snapshot": "  PID  PPID  PGID STAT COMM\n76111 73884 76111 Ss   /Users/sws/.local/share/mise/installs/node/22.22.0/bin/opencode\n76206 73884 76206 Ss   /Users/sws/.local/bin/agy\n76262 73884 76262 Ss   /Users/sws/.local/bin/codex\n",
+  "runs": [
+    {
+      "run": "b89d142c403f428bac30b9fa1f43a6fa",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "name": "Juniper",
+      "kind": "opencode",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "pgid": 76111,
+      "returning_identity": true,
+      "policy_revision": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+      "source_head": "6cc0fb09bf77f7c6b84bffece848777537980033",
+      "codex_search": false,
+      "codex_workspace_automatic_review": false,
+      "agy_sandbox": false,
+      "opencode_no_auto": true
+    },
+    {
+      "run": "c138fa27526c46e2ac2a2832f7a77c44",
+      "resident": "resident-0d0b65b6d31643ab9af0fe92f301189d",
+      "name": "Reed",
+      "kind": "agy",
+      "model": "gemini-4-hydrogen-low",
+      "pgid": 76206,
+      "returning_identity": true,
+      "policy_revision": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+      "source_head": "6cc0fb09bf77f7c6b84bffece848777537980033",
+      "codex_search": false,
+      "codex_workspace_automatic_review": false,
+      "agy_sandbox": true,
+      "opencode_no_auto": false
+    },
+    {
+      "run": "04c90968f38d4bc6aeaea5aa276b5de7",
+      "resident": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+      "name": "Mallow",
+      "kind": "codex",
+      "model": "gpt-6.1-sol",
+      "pgid": 76262,
+      "returning_identity": true,
+      "policy_revision": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+      "source_head": "6cc0fb09bf77f7c6b84bffece848777537980033",
+      "codex_search": true,
+      "codex_workspace_automatic_review": true,
+      "agy_sandbox": false,
+      "opencode_no_auto": false
+    }
+  ],
+  "scope": "Actual process presence and launch flags, not task completion or proof of a successful web tool."
+}
