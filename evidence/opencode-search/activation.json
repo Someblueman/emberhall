@@ -1,0 +1,32 @@
+{
+  "migration_sequence": 1190,
+  "source_head": "b137542c2f2877443d00ef020d77a6f648818af7",
+  "runtime_sha256": "1a9c5c88cc16a2458d58fce79f6efebed221fd0d0a2524f0d75177823ccea9f3",
+  "test_count_executed": 300,
+  "test_output_sha256": "d6e8bf353382214b145455dff71014341f1e87c82e0a83ea3a54ed59ea67ccf0",
+  "unchanged_state_sections": [
+    "version",
+    "house_id",
+    "name",
+    "owner_key",
+    "rules",
+    "rule_revision",
+    "residents",
+    "tasks",
+    "proposals",
+    "lessons",
+    "council",
+    "life",
+    "wake_policy",
+    "shelf_trials",
+    "shelf"
+  ],
+  "pause_sequence": 1156,
+  "idle_before": 1189,
+  "coordinator_pid_observed": 19356,
+  "native_interruption_for_upgrade": false,
+  "notice_sequence": 1187,
+  "notice_comment_id": 6869274249,
+  "earliest_enactment_utc": "2026-11-15T01:22:04.948719+00:00",
+  "live_search_verified": false
+}

@@ -15,9 +15,21 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
 ## Current handoff
 
+Migration1190 installs source `b137542c2f2877443d00ef020d77a6f648818af7`, runtime
+SHA256 `1a9c5c88cc16a2458d58fce79f6efebed221fd0d0a2524f0d75177823ccea9f3`.
+It fixes OpenCode's unanswered search-provider prompt and GitHub notice POSTs
+after the repository rename. No native resident was interrupted for this switch.
+Read `evidence/opencode-search/activation.json` and CONTINUATION for verification.
+Three real ideas are on the shelf. Selection rule `work-selection-002` has an
+actual multi-kind trial, two independent endorsements and notice1187; earliest
+enactment is **15 November 2026, 01:22:04.949 UTC**, subject to no veto, a current
+base and fresh authenticated check. No real project has been selected yet.
+
+### Previous activation, retained
+
 Migration1102 installed Keep moving source `4e331dad5c3bee85e340deee20ce59e969c794ca`,
 runtime SHA256 `b4a32aee7a24339ed5449ef2fdef91458950609948f616c2262a326beca34b9a`.
-The shelf, protected native web tools and finite owner admission pause are active.
+The shelf, protected native web tools and finite owner admission pause remain active.
 No project-selection rule is enacted yet. Read CONTINUATION.md for the queued
 first Explorer, policy trial/ratification work and the witnessed Muse false-failure
 repair. Use current status for actual runs and holds, never a stale handoff note.
