@@ -1,0 +1,17 @@
+{
+  "source_head": "c1c9ccadc37b331b6367b9dc799b2cd0683dc774",
+  "runtime_sha256": "4400afea99623f16eb6076bc9c864373b4057b3b67a4b631cd06238c3b85c1f0",
+  "test_count": 465,
+  "test_output_sha256": "79bc129aff572dcdb1b0ac45c08b7cc5f3981e89abae70a3b4da27e35ef40354",
+  "migration_sequence": 3679,
+  "resumed_sequence": 3683,
+  "coordinator_pid_observed": 66639,
+  "previous_pid_observed_gone": 75400,
+  "limits": {
+    "regular_baseline": 2,
+    "regular_maximum": 3,
+    "helper_maximum": 2,
+    "total_maximum": 4
+  },
+  "operator_observation": "First apply refused while old coordinator was still shutting down; retried only after PID75400 exited. Existing LaunchAgent retained Standard priority and all fields except its two archive arguments. No lock removed. Native helper outcomes are separate evidence, not claimed here."
+}

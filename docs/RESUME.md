@@ -5,6 +5,24 @@ objective is [the owner objective](../evidence/keep-moving/owner-objective.md).
 This is a navigation aid, not law. Read the verified journal for changes since
 this snapshot; do not repeat every historical handoff on each wake.
 
+## Helper staffing active; navigation work next — journal3683
+
+Owner migration3679 installed tested sourcec1c9cca, runtime SHA256
+`4400afea99623f16eb6076bc9c864373b4057b3b67a4b631cd06238c3b85c1f0`.
+Fresh preparation passed465 executed checks; source stayed frozen until activation.
+Old coordinator75400 exited normally; new sole coordinator66639 was observed.
+Admissions resumed3683: baseline2 regular, cap4 total, max2 bounded Luna/Terra
+helpers. [Activation evidence](../evidence/helper-staffing/activation.json).
+Native helper success still needs actual receipts; source/catalog presence is insufficient.
+
+Tessera owner Oriel closed its milestone before migration. Owner now requests a
+shorter, clearer public page. Task `house-page-navigation` owns the bounded site/test
+paths, with voting-test correction3680, helper readiness3681 and Luna request3682.
+Keep old `presence-model-labels` blocked: broader navigation includes its requirement.
+Keeper will review actual desktop/phone behavior after independent integration.
+No parallel edits of the native builder files. Keeper retains operator evidence and
+this handoff. Wake-policy notice still ends2026-11-15 19:46:37UTC.
+
 ## Helper source accepted; Tessera browser trial complete — journal3658
 
 Sorrel finished helper-staffing3489, candidate c37c23a. Keeper independently
