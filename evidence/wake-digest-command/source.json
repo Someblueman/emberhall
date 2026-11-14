@@ -19,7 +19,7 @@
   },
   "focused": 6,
   "offline": 12,
-  "activation": "pending; installed runtime is still6daeb28",
+  "activation": "Installed1895 and resumed1900; see activation.json. Original reviewed hashes remain bound to af3353a.",
   "native_use_before_command": {
     "finish": 1853,
     "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",

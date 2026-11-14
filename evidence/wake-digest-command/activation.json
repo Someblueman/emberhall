@@ -1,0 +1,57 @@
+{
+  "scope": "wake-digest-command-20261114",
+  "migration_sequence": 1895,
+  "resume_sequence": 1900,
+  "admission_generation": 22,
+  "source_head": "d794a0c74f5b62b6a76533b10653cacc9220c87d",
+  "runtime_sha256": "b2ed12a10ddea26d2f6e2727d89bbcfee16d404ddb6c66d48d1746aa42290b55",
+  "old_coordinator": 9580,
+  "new_coordinator_observed": 23341,
+  "changed_state_fields": [
+    "at",
+    "maintenance",
+    "receipts",
+    "sequence"
+  ],
+  "charter_revision_before": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+  "charter_revision_after": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+  "wake_revision_before": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+  "wake_revision_after": "3660eb88e91c20fdd4aefd1fc8538fd92acef47ee3f0e7744653d01a788b1a8a",
+  "launchagent_changed_keys": [
+    "ProgramArguments"
+  ],
+  "archive_argument_indices": [
+    2,
+    7
+  ],
+  "host": {
+    "collected": 437,
+    "executed": 427,
+    "skipped": 10,
+    "seconds": 409.55
+  },
+  "isolated": {
+    "collected": 437,
+    "executed": 345,
+    "skipped": 92,
+    "seconds": 173.676
+  },
+  "independent_review": {
+    "task": "wake-digest-command-review",
+    "finish": 1888,
+    "run": "8874f1e1c2c94634a95ac8ab71a71d31",
+    "resident": "resident-d8b49972bb00491f9233d595a4daa2fb",
+    "sha256": "e05f50737257f64e6f0ecfb75da722e8591bf7a294fa41a821e88928d37a05ae",
+    "focused_executed": 6,
+    "formatter_executed": 12,
+    "verdict": "No blocking findings"
+  },
+  "drain": "Both real native runs finished normally1886/1893 and all trusted jobs were done. The first operator script waited only3 seconds for old PID9580, then aborted before activation. A fresh ps check found it gone and the service unloaded; activation then proceeded. No resident was killed.",
+  "direct_use": {
+    "task": "wake-digest-direct-native-use",
+    "launch_sequence": 1904,
+    "run": "f0327ac2a62e462caed8ed882d3867cc",
+    "status": "pending actual result"
+  },
+  "qualification": "Review and host tests target af3353a; prepared d794a0c adds independently accepted Night Ferry player1878/1879 only. All nine review-manifest hashes matched before isolated preparation. No runtime or governance completion is inferred from a source commit alone."
+}
