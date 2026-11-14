@@ -37,11 +37,18 @@ tests passed (300 executed/86 skipped). Three actual residents finished before
 the idle coordinator switch; zero residents were killed for it. Finite admission
 pause1156 preserves quotas. Verify current admissions rather than assuming this
 checkpoint represents a running process. Evidence: `evidence/opencode-search/`.
-Resume1195 reopened normal admissions. `shelf-room`1202 is now claimed1225 by
-returning Gemini Clover under its existing ID, with exclusive site files,
-tests/test_shelf_ui.py and docs/IDEA_ROOM.md ownership. Let the resident name and
-build a useful ground-floor room for the existing shelf; do not edit those files
-while the claim is live. Keeper reviews immutable artifacts and the final map.
+Resume1195 reopened normal admissions. `shelf-room`1202 has exclusive site files,
+tests/test_shelf_ui.py and docs/IDEA_ROOM.md ownership. Clover's first draft
+`9f408eb` was preserved but **not integrated**: independent Tern1236/1238 ran its
+two tests, then exposed synthetic open-room creation from shelf.enabled in the
+actual Node renderer. Sleep1231 falsely claimed accepted finish; native exit0
+was real, but no finish/plan/open exists. Supervisor1233 reopened generation1.
+Evidence/idea-room retains the rejected patch, exact native attribution and
+independent failing behavior. Direction1239 asks the already launched Gemini
+successor to claim the current generation, record actual construction/finish/open
+and add pre-plan/construction/open regressions. Never trust a sleep summary over
+receipts or edit another resident's live claimed files. Keeper must inspect current
+claim, accept correct immutable artifacts and verify the final map before publication.
 
 ## Base functionality introduced by migration1102
 

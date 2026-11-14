@@ -1,0 +1,196 @@
+diff --git a/docs/IDEA_ROOM.md b/docs/IDEA_ROOM.md
+new file mode 100644
+index 0000000..93001c6
+--- /dev/null
++++ b/docs/IDEA_ROOM.md
+@@ -0,0 +1,13 @@
++# The Study (Idea Shelf Room)
++
++## Purpose
++**The Study** (`id: "shelf"`, ground floor `floor: 0`) gives the house's public idea shelf an earned room on the ground-floor map. It is where the Explorer's sourced ideas wait on the shelf and where residents weigh what to build next.
++
++## Behavior & Honesty Guarantees
++- **Preactivation & Historical Views**: The Study appears on the ground floor only when `frame.shelf && frame.shelf.enabled` is true (and is not duplicated if `frame.rooms` already includes `"shelf"`). Historical and preactivation frames remain unchanged.
++- **Map Furnishings**: Renders a wooden bookcase along the back wall with up to 9 colored idea blocks reflecting `frame.shelf.ideas` (`status === "shelved"`), plus a reading table.
++- **Room Panel & Route**: Selecting The Study displays the real shelf state (`policy` / ratification status, `explorer` lease if present, and shelved ideas with source counts) and provides a direct `#shelf-card` link (`Jump to Public Shelf ↓`) to the Public Shelf section.
++- **No Invented State**: Does not invent research, projects, or votes.
++
++## Verification
++- `python3 -m unittest tests.test_shelf_ui` (Node.js VM harness against `site/house.js`)
+diff --git a/site/house.css b/site/house.css
+index a3c4e8a..2565ab7 100644
+--- a/site/house.css
++++ b/site/house.css
+@@ -680,3 +680,6 @@ footer a {
+   padding-left:9px;
+   border-left:1px solid var(--line);
+ }
++
++.shelf-jump { display: inline-block; margin-top: 10px; padding: 6px 12px; border-radius: 999px; border: 1px solid #6b7b63; color: #e6dcc2; text-decoration: none; font-size: 0.85rem; }
++.shelf-jump:hover, .shelf-jump:focus-visible { background: #263830; border-color: #c5ac79; }
+diff --git a/site/house.js b/site/house.js
+index e65359d..4fa248e 100644
+--- a/site/house.js
++++ b/site/house.js
+@@ -15,7 +15,8 @@ const descriptions = {
+   workshop: "Real work occupies these benches. An empty chair can hold an unfinished promise.",
+   archive: "What hurt, what helped, and who checked. The gold seams remember repairs without erasing the crack.",
+   council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
+-  bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time."
++  bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time.",
++  shelf: "Where the Explorer's sourced ideas wait on the shelf, and residents weigh what to build next."
+ };
+ let data, frame, index = 0, current = true, selected = null;
+ let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
+@@ -125,6 +126,15 @@ function furnishings(g, room, x, y, lit, residents) {
+     polygon(g,[[x+64,y+59,23],[x+93,y+59,23],[x+93,y+81,23],[x+64,y+81,23]],"#dbcb9f");
+     for(let i=0;i<Math.min(frame.council.pending,4);i++) box(g,x+99,y+72+i*4,17,19,1,["#dbcb9f","#ac9c78","#c6b68e"],23+i);
+     [[30,60],[141,60],[70,126]].forEach(([a,b])=>box(g,x+a,y+b,18,18,13,["#8b9573","#637257","#74805c"]));
++  } else if(room === "shelf") {
++    box(g,x+18,y+8,144,20,54,["#8c704b","#5e513b","#796344"]);
++    const ideas=(frame.shelf&&Array.isArray(frame.shelf.ideas))?frame.shelf.ideas.filter(i=>i.status==="shelved"):[];
++    for(let i=0;i<Math.min(ideas.length,9);i++) {
++      const row=Math.floor(i/3),col=i%3;
++      box(g,x+28+col*38,y+26,22,8,12,["#d7b878",["#85b8d5","#75b4a1","#d7a75f"][i%3],"#9c8559"],12+row*16);
++    }
++    box(g,x+54,y+82,64,34,20,["#b4915d","#775f40","#94774c"]);
++    polygon(g,[[x+66,y+88,21],[x+102,y+88,21],[x+102,y+108,21],[x+66,y+108,21]],"#e3d6b2");
+   } else if(room !== "bedroom" && !residents.length) {
+     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
+   }
+@@ -135,7 +145,13 @@ function floorsAt(moment) {
+   (moment.floors||[]).forEach(f=>{if(Number.isInteger(f.level))levels.set(f.level,f);});
+   return [...levels.values()].sort((a,b)=>a.level-b.level);
+ }
+-function floorRooms(moment, level) {return moment.rooms.filter(r=>(r.floor??0)===level);}
++function floorRooms(moment, level) {
++  const base=moment.rooms.filter(r=>(r.floor??0)===level);
++  if(level===0&&moment.shelf&&moment.shelf.enabled&&!base.some(r=>r.id==="shelf")) {
++    return [...base,{id:"shelf",name:"The Study",floor:0,status:"open",purpose:descriptions.shelf}];
++  }
++  return base;
++}
+ function roomAge(room, at) {
+   const valid=value=>Number.isFinite(value)&&value>0&&value<=at;
+   const used=valid(room.last_used_at), baseline=used?room.last_used_at:room.observed_since;
+@@ -357,12 +373,12 @@ function personRow(r, parent) {
+   });
+ }
+ function roomPanel() {
+-  const room=frame.rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
++  const rooms=floorRooms(frame,selectedFloor);
++  const room=frame.rooms.find(r=>r.id===selected)||rooms.find(r=>r.id===selected),content=$("room-content");content.replaceChildren();
+   $("room-kicker").textContent=room?"INSIDE THE HOUSE":"COME INSIDE";
+   $("room-title").textContent=room?room.name:floorsAt(frame).find(f=>f.level===selectedFloor).name;
+   $("room-description").textContent=room?(room.purpose||descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
+   if(room)roomRecord(room,content);
+-  const rooms=floorRooms(frame,selectedFloor);
+   const residents=frame.residents.filter(r=>room?r.room===room.id:rooms.some(place=>place.id===r.room)&&r.pose!=="sleeping");
+   if(room?.id==="bedroom") {
+     const view=dormView(frame,dormPage);
+@@ -381,6 +397,30 @@ function roomPanel() {
+     const owner=frame.residents.find(r=>r.id===t.owner);
+     html("span","small",`${t.expired?"Lease expired · fate unconfirmed":t.status} · ${owner?.name||"available"}`,row);
+   });
++  if(room?.id==="shelf") {
++    const dataShelf=frame.shelf;
++    if(!dataShelf||!dataShelf.enabled) {
++      html("p","empty-note","The idea shelf is not activated at this moment.",content);
++    } else {
++      html("p","small",dataShelf.policy?`Selection rule: ${dataShelf.policy}`:"Research is open. Project selection awaits ratification.",content);
++      if(dataShelf.explorer) {
++        const exp=dataShelf.explorer;
++        html("p","small",`Explorer: ${residentName(exp.resident)} · ${(kinds[exp.agent]||kinds.unrecorded).name}`,content);
++      }
++      const shelved=(dataShelf.ideas||[]).filter(i=>i.status==="shelved");
++      if(shelved.length) {
++        shelved.forEach(idea=>{
++          const row=html("div","task",undefined,content);
++          html("strong","",idea.title,row);
++          html("span","small",`${idea.status}${Array.isArray(idea.sources)&&idea.sources.length?` · ${idea.sources.length} source${idea.sources.length===1?"":"s"}`:""}`,row);
++        });
++      } else {
++        html("p","empty-note","No ideas on the shelf yet.",content);
++      }
++      const jump=html("a","shelf-jump","Jump to Public Shelf ↓",content);
++      jump.href="#shelf-card";
++    }
++  }
+   const roomScars=room?visibleScars().filter(s=>s.room===room.id):[];
+   if(roomScars.length)html("p","small","These marks are historical receipts, not alerts that a run is still failing.",content);
+   roomScars.forEach(s=>{
+diff --git a/site/index.html b/site/index.html
+index aaec9b1..c3b5f82 100644
+--- a/site/index.html
++++ b/site/index.html
+@@ -43,7 +43,7 @@
+     <aside class="journal-pane" aria-label="Inside the house">
+       <section class="room-card"><div class="eyebrow-small" id="room-kicker">COME INSIDE</div><h2 id="room-title">An open door</h2><p id="room-description">A place made from what its residents actually left behind.</p><div id="room-content"></div></section>
+       <section class="ambition-card"><div class="eyebrow-small">WHAT WE REACH FOR</div><h2>Long threads</h2><div id="ambitions"></div></section>
+-      <section class="shelf-card" aria-labelledby="shelf-title"><div class="eyebrow-small">THE IDEA SHELF</div><h2 id="shelf-title">Public shelf</h2><div id="shelf"></div></section>
++      <section id="shelf-card" class="shelf-card" aria-labelledby="shelf-title"><div class="eyebrow-small">THE IDEA SHELF</div><h2 id="shelf-title">Public shelf</h2><div id="shelf"></div></section>
+       <section class="budget-card"><div class="eyebrow-small">THE HOUSEHOLD ACCOUNTS</div><h2>A rhythm, not a meter</h2><div id="budgets"></div><p class="footnote">Native counters from recorded house runs, not your whole account. Interactive chats and outside reviews are excluded. An unknown balance stays unknown.</p></section>
+       <details class="record-details"><summary>The record behind this moment</summary><div id="record"></div><div id="commits"></div><p>Figures follow recorded activity. Lamps mean recorded awake, not a verified live process. Scars preserve historical failures and uncertainty; they are not alerts that a run is still failing. Historical agent kinds remain unrecorded until evidence names them.</p></details>
+     </aside>
+diff --git a/tests/test_shelf_ui.py b/tests/test_shelf_ui.py
+index cadcc3f..ddaca34 100644
+--- a/tests/test_shelf_ui.py
++++ b/tests/test_shelf_ui.py
+@@ -12,7 +12,7 @@ class ShelfUITests(unittest.TestCase):
+         script = r'''
+ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+ class Element {
+-  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
++  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.style={};}
+   appendChild(node){this.children.push(node);}
+   replaceChildren(){this.children=[];}
+ }
+@@ -47,6 +47,48 @@ assert.match(text(root),/Active projects/);assert.match(text(root),/Current buil
+ frame={};shelf();assert.doesNotMatch(text(root),/Completed map|Current build|Lost idea/);
+ assert.match(text(root),/not activated/);
+ `,context);
++'''
++        result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
++                                capture_output=True, text=True, timeout=15)
++        self.assertEqual(0, result.returncode, result.stderr)
++
++    def test_shelf_room_presence_and_panel(self):
++        source = Path(__file__).parents[1] / 'site/house.js'
++        script = r'''
++const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
++class Element {
++  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.style={};}
++  appendChild(node){this.children.push(node);}
++  replaceChildren(){this.children=[];}
++}
++const els = {};
++const getEl = id => (els[id] ||= new Element('div'));
++const document={getElementById:getEl,createElement:tag=>new Element(tag)};
++const text=node=>[node.textContent,...node.children.map(text)].join(' ');
++const all=node=>[node,...node.children.flatMap(all)];
++const context=vm.createContext({assert,document,URL,getEl,text,all});
++const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
++assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
++vm.runInContext(`
++data={timezone:'Europe/London'};
++frame={seq:1,at:100,rooms:[{id:'door',name:'Door',floor:0}],residents:[],tasks:[],lessons:0,council:{pending:0},scars:[],runs:[],budgets:[]};
++assert.equal(floorRooms(frame,0).some(r=>r.id==='shelf'),false);
++frame.shelf={enabled:false,ideas:[],projects:[]};
++assert.equal(floorRooms(frame,0).some(r=>r.id==='shelf'),false);
++frame.shelf={enabled:true,policy:'work-selection',explorer:{resident:'r1',agent:'opencode',until:200},ideas:[{id:'i1',title:'First idea',status:'shelved',sources:[]}],projects:[]};
++frame.residents=[{id:'r1',name:'Juniper',room:'shelf',pose:'reading'}];
++const ground=floorRooms(frame,0);
++const study=ground.find(r=>r.id==='shelf');
++assert(study, 'Study room should appear on ground floor when shelf is enabled');
++assert.equal(study.name,'The Study');
++selected='shelf';
++roomPanel();
++const panelText=text(getEl('room-content'));
++assert.match(panelText,/First idea/);
++assert.match(panelText,/work-selection/);
++const jump=all(getEl('room-content')).find(n=>n.tag==='a'&&n.href==='#shelf-card');
++assert(jump, 'Room panel should link to #shelf-card');
++`,context);
+ '''
+         result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
+                                 capture_output=True, text=True, timeout=15)
