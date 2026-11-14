@@ -1,0 +1,102 @@
+{
+  "result": "PASS",
+  "reference_sha256": "9ff4f14575fbe426323d7351fe165588b415f25fed3da81a2130f811fe4eb7f2",
+  "accepted_source_head": "e2cb2993586a3acb0bd95dea5505be9c98a30cce",
+  "script_sha256": "8c42051bb0b285b94d4800790434978f8531cfff4f1714e2d81f873f8b7834fb",
+  "fixture": {
+    "restored": {
+      "head": "662254a26b6316242aff458cd10754d3ccfd43b0",
+      "events": 3245,
+      "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+    },
+    "bundle_sha256": "b4ea5a4ab28a484cdedd02671cfce9f7f2951913179f5b4fb2c1193a68e014e0"
+  },
+  "before": {
+    "head": "662254a26b6316242aff458cd10754d3ccfd43b0",
+    "events": 3245,
+    "state_sha256": "04b4b43ae6bca8d843afb29b2155f4a1520ff89e7afe8b8d76d3fb85923a1d94",
+    "refs_sha256": "6518f8c2c7e9178143bf0ba06d72b7b664ab5ba15f6ab9161e3fc24be21274a4",
+    "index_sha256": "0fae5ee458251051a93fa86fa5f4446198bdf1b297eab86cabfce17d166fc1a7",
+    "cursors_sha256": "e37f9d2374a746d265c6a761ee9481dcd56d27da6d03669444cb8ff459526553"
+  },
+  "after": {
+    "head": "662254a26b6316242aff458cd10754d3ccfd43b0",
+    "events": 3245,
+    "state_sha256": "04b4b43ae6bca8d843afb29b2155f4a1520ff89e7afe8b8d76d3fb85923a1d94",
+    "refs_sha256": "6518f8c2c7e9178143bf0ba06d72b7b664ab5ba15f6ab9161e3fc24be21274a4",
+    "index_sha256": "0fae5ee458251051a93fa86fa5f4446198bdf1b297eab86cabfce17d166fc1a7",
+    "cursors_sha256": "e37f9d2374a746d265c6a761ee9481dcd56d27da6d03669444cb8ff459526553"
+  },
+  "commands": [
+    {
+      "name": "task",
+      "arguments": [
+        "--task",
+        "shelf-review-fern-a7f23",
+        "--limit",
+        "200",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "newest-two",
+      "arguments": [
+        "--task",
+        "shelf-review-fern-a7f23",
+        "--limit",
+        "2",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "older-page",
+      "arguments": [
+        "--task",
+        "shelf-review-fern-a7f23",
+        "--limit",
+        "200",
+        "--before",
+        "2337",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "resident",
+      "arguments": [
+        "--resident",
+        "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+        "--limit",
+        "200",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "unknown-task",
+      "arguments": [
+        "--task",
+        "independent-lens-no-such-task-81b9",
+        "--json"
+      ],
+      "exit": 0
+    }
+  ],
+  "checks": [
+    "actual raw sequences and receipt IDs match preregistered reference",
+    "expired generation-one claim distinguished from released generation-two claim",
+    "task complete at generation three",
+    "bounded older pages reconstruct matching task history",
+    "full-head summary stays distinct from older event page",
+    "Cairn targeted help, launch, wake, closure, sleep, resolution and finish linked",
+    "unknown selector yields no invented history",
+    "full projection, all refs, nonempty staged index and all saved cursors unchanged"
+  ],
+  "limitations": [
+    "Disposable copy of actual history through3245, not simulated resident activity.",
+    "Local operator CLI only; native fixed-channel access remains separate work.",
+    "Focused corruption and input rejection tests were run by the integration gate; not repeated here."
+  ]
+}

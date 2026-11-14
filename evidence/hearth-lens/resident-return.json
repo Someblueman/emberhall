@@ -1,0 +1,133 @@
+{
+  "note": "Selected return rows from the actual --resident --limit 200 --json output; this is an explicitly shortened evidence excerpt, not full CLI output.",
+  "full_output_sha256": "4056dfa9674883284950cb8fab3bf748385a25ec925cf2de30787b4284c78a1c",
+  "source": {
+    "journal_head": "662254a26b6316242aff458cd10754d3ccfd43b0",
+    "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "verified_events": 3245,
+    "observation_at": 1794688241.031921,
+    "observation_utc": "2026-11-14T20:30:41+00:00"
+  },
+  "summary_at_head": {
+    "name": "cairn",
+    "recorded_awake": false,
+    "saved_cursor": 3174
+  },
+  "page": {
+    "matching_total": 121,
+    "matching_before": 121,
+    "shown": 121,
+    "omitted_earlier": 0,
+    "excluded_at_or_after_before": 0,
+    "next_before": null
+  },
+  "events": [
+    {
+      "sequence": 3165,
+      "id": "keeper-cairn-targeted-return",
+      "at": 1794687231.405372,
+      "time_utc": "2026-11-14T20:13:51+00:00",
+      "op": "life",
+      "actor": "keeper-01",
+      "fields": {
+        "kind": "help",
+        "request": "cairn-signal-garden-owner-return",
+        "agent": "agy",
+        "model": "gemini-4-hydrogen-low",
+        "target_resident": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49"
+      },
+      "detail": "Return as Cairn, existing owner of Signal Garden house-growth-choice-003. Targeted-return migration3159 is installed and host/archive checks passed. Inspect the selected project mi",
+      "detail_truncated": true
+    },
+    {
+      "sequence": 3167,
+      "id": "home-9060edc0e67e45e9bd644dbdb067ec3f-run-start",
+      "at": 1794687232.370615,
+      "time_utc": "2026-11-14T20:13:52+00:00",
+      "op": "life",
+      "actor": "watch-keeper",
+      "fields": {
+        "kind": "run-start",
+        "run": "9060edc0e67e45e9bd644dbdb067ec3f",
+        "resident": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+        "help_request": "cairn-signal-garden-owner-return",
+        "agent": "agy",
+        "model": "gemini-4-hydrogen-low"
+      }
+    },
+    {
+      "sequence": 3169,
+      "id": "home-9060edc0e67e45e9bd644dbdb067ec3f-run-launched",
+      "at": 1794687233.429444,
+      "time_utc": "2026-11-14T20:13:53+00:00",
+      "op": "life",
+      "actor": "watch-keeper",
+      "fields": {
+        "kind": "run-launched",
+        "run": "9060edc0e67e45e9bd644dbdb067ec3f"
+      }
+    },
+    {
+      "sequence": 3170,
+      "id": "mailbox-9060edc0e67e45e9bd644dbdb067ec3f-d408e480ac9e3fac833518b51cf57d53b6f0556e7e7e34b728f2335d261a1667",
+      "at": 1794687244.499718,
+      "time_utc": "2026-11-14T20:14:04+00:00",
+      "op": "wake",
+      "actor": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+      "fields": {}
+    },
+    {
+      "sequence": 3173,
+      "id": "mailbox-9060edc0e67e45e9bd644dbdb067ec3f-61bafb9ae46da35f23df0d480465201bbc3c94eae5be43839eda687555ae2de1",
+      "at": 1794687348.0334039,
+      "time_utc": "2026-11-14T20:15:48+00:00",
+      "op": "shelf",
+      "actor": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+      "fields": {
+        "kind": "project-done",
+        "project": "house-growth-choice-003"
+      }
+    },
+    {
+      "sequence": 3175,
+      "id": "mailbox-9060edc0e67e45e9bd644dbdb067ec3f-fcfb40870da497004660e6933744edd41c53e2609099e9c0d929d4e3924b95b9",
+      "at": 1794687361.448135,
+      "time_utc": "2026-11-14T20:16:01+00:00",
+      "op": "sleep",
+      "actor": "resident-ce12b0eb3f0c4d4780cda3b9c4456e49",
+      "fields": {
+        "through": 3174
+      },
+      "detail": "Cairn (resident-ce12b0eb3f0c4d4780cda3b9c4456e49) returned on targeted-return request cairn-signal-garden-owner-return, read through 3171, and independently assessed signal-garden-",
+      "detail_truncated": true
+    },
+    {
+      "sequence": 3177,
+      "id": "home-9060edc0e67e45e9bd644dbdb067ec3f-help-resolved",
+      "at": 1794687366.234566,
+      "time_utc": "2026-11-14T20:16:06+00:00",
+      "op": "life",
+      "actor": "watch-keeper",
+      "fields": {
+        "kind": "help-resolved",
+        "request": "cairn-signal-garden-owner-return"
+      },
+      "detail": "Assigned resident completed its native stretch and recorded a sleep handoff.",
+      "detail_truncated": false
+    },
+    {
+      "sequence": 3179,
+      "id": "home-9060edc0e67e45e9bd644dbdb067ec3f-run-finish",
+      "at": 1794687366.841069,
+      "time_utc": "2026-11-14T20:16:06+00:00",
+      "op": "life",
+      "actor": "watch-keeper",
+      "fields": {
+        "kind": "run-finish",
+        "run": "9060edc0e67e45e9bd644dbdb067ec3f",
+        "outcome": "success",
+        "exit_code": 0
+      }
+    }
+  ]
+}

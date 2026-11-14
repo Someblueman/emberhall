@@ -1,0 +1,124 @@
+{
+  "selector": {
+    "task": "shelf-review-fern-a7f23"
+  },
+  "source": {
+    "journal_head": "662254a26b6316242aff458cd10754d3ccfd43b0",
+    "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "verified_events": 3245,
+    "observation_at": 1794688241.031921,
+    "observation_utc": "2026-11-14T20:30:41+00:00"
+  },
+  "summary_at_head": {
+    "title": "Independently review Fern's shelf brief review",
+    "status": "done",
+    "owner": "keeper-01",
+    "generation": 3,
+    "lease_until": 0
+  },
+  "page": {
+    "matching_total": 6,
+    "matching_before": 6,
+    "shown": 6,
+    "omitted_earlier": 0,
+    "excluded_at_or_after_before": 0,
+    "next_before": null
+  },
+  "events": [
+    {
+      "sequence": 2308,
+      "id": "mailbox-22410fa194a549dfa317c90432217cf0-ab619b082b5217d75904aa7f1f585de5d07b90b3539723783f59e43233a3e259",
+      "at": 1794645706.5284212,
+      "time_utc": "2026-11-14T08:41:46+00:00",
+      "op": "task",
+      "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "fields": {
+        "task": "shelf-review-fern-a7f23"
+      },
+      "detail": "Independently review Fern's shelf brief review",
+      "detail_truncated": false
+    },
+    {
+      "sequence": 2310,
+      "id": "mailbox-22410fa194a549dfa317c90432217cf0-16596280e94995dd4d5672efdb0698ec1046f44b0c5d289455de76d91c6cacf6",
+      "at": 1794645910.46863,
+      "time_utc": "2026-11-14T08:45:10+00:00",
+      "op": "claim",
+      "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "fields": {
+        "task": "shelf-review-fern-a7f23",
+        "expect": 0,
+        "generation": 1,
+        "lease_until": 1794647710.46863
+      }
+    },
+    {
+      "sequence": 2333,
+      "id": "mailbox-22410fa194a549dfa317c90432217cf0-2ec8c04c42c77a63335585962b7606fd09a95daf33f85829727f0d252a7dc6b1",
+      "at": 1794648294.708915,
+      "time_utc": "2026-11-14T09:24:54+00:00",
+      "op": "claim",
+      "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "fields": {
+        "task": "shelf-review-fern-a7f23",
+        "expect": 1,
+        "generation": 2,
+        "lease_until": 1794648594.708915
+      },
+      "inference": {
+        "kind": "expired lease before reclaim",
+        "generation": 1,
+        "lease_until": 1794647710.46863,
+        "compared_at": 1794648294.708915,
+        "basis": "clock inference, not a recorded expiry event or process observation"
+      }
+    },
+    {
+      "sequence": 2336,
+      "id": "mailbox-22410fa194a549dfa317c90432217cf0-5ddc1546fa663441bb310896d0c77477839cecab58c479e6c618840acd664903",
+      "at": 1794648528.976456,
+      "time_utc": "2026-11-14T09:28:48+00:00",
+      "op": "release",
+      "actor": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "fields": {
+        "task": "shelf-review-fern-a7f23"
+      },
+      "detail": "Bounded review complete; earlier lease expired during long tool waits, so reclaimed gen1 and released cleanly. Exact e8408dc report is 81 lines/complete, one path, ownership bound ",
+      "detail_truncated": true
+    },
+    {
+      "sequence": 2337,
+      "id": "keeper-close-failed-shelf-review-claim",
+      "at": 1794648629.5081012,
+      "time_utc": "2026-11-14T09:30:29+00:00",
+      "op": "claim",
+      "actor": "keeper-01",
+      "fields": {
+        "task": "shelf-review-fern-a7f23",
+        "expect": 2,
+        "generation": 3,
+        "lease_until": 1794648929.5081012
+      }
+    },
+    {
+      "sequence": 2338,
+      "id": "keeper-close-failed-shelf-review-finish",
+      "at": 1794648629.99924,
+      "time_utc": "2026-11-14T09:30:29+00:00",
+      "op": "finish",
+      "actor": "keeper-01",
+      "fields": {
+        "task": "shelf-review-fern-a7f23"
+      },
+      "detail": "Review work is complete with terminal refusal2324, not source acceptance. Juniper recorded independent findings2326 and released2336 after the failed gate; Keeper inspected the com",
+      "detail_truncated": true
+    }
+  ],
+  "limitations": [
+    "Snapshot of recorded events, not live process or task availability proof.",
+    "Summary and lease expiry use the full verified head time, even on older pages.",
+    "Explicit task/help/run links only; prose mentions and implicit relationships are excluded.",
+    "Speech is a report, not an accepted operation. Details may be shortened; use raw event IDs.",
+    "A filtered view does not acknowledge omitted or unseen events or change a saved cursor."
+  ]
+}
