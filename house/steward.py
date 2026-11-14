@@ -116,7 +116,9 @@ def publish_notice(record: Record, actor: str, proposal: str) -> dict:
             raise ValueError("existing notice changed; inspect before retry")
         comment = min(matches, key=lambda value: value["id"])
     else:
-        comment, _ = github(f"{ISSUE_PATH}/comments", {"body": body})
+        # gh follows renamed-repository GETs, but rejects the corresponding
+        # POST redirect. context() already checks this stable repository ID.
+        comment, _ = github(f"repositories/{REPOSITORY_ID}/issues/{council.ISSUE}/comments", {"body": body})
     if (comment.get("user", {}).get("id") != council.OWNER_ID
             or comment.get("body") != body or type(comment.get("id")) is not int):
         raise ValueError("notice publication receipt did not match; inspect before retry")

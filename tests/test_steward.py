@@ -116,3 +116,22 @@ class StewardTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("network unavailable", errors.getvalue())
         record.append.assert_not_called()
+
+    def test_notice_posts_to_verified_repository_identity_after_rename(self):
+        item = {"mode": "rule", "status": "pending", "title": "A rule", "text": "Exact text\n",
+                "author": "alice", "base": "revision"}
+        record = Mock()
+        record.read.return_value = ({"proposals": {"rule": item}}, [], "head")
+        body = steward.notice_body("rule", item)
+        comment = {"id": 123, "user": {"id": council.OWNER_ID}, "body": body}
+        def post(path, payload):
+            if path != f"repositories/{steward.REPOSITORY_ID}/issues/{council.ISSUE}/comments":
+                raise ValueError("HTTP307: renamed repository POST is not followed by gh")
+            self.assertEqual(payload, {"body": body})
+            return comment, time.time()
+        with patch.object(steward, "context") as context, \
+                patch.object(steward, "comments", return_value=([], time.time())), \
+                patch.object(steward, "github", side_effect=post):
+            steward.publish_notice(record, "alice", "rule")
+        context.assert_called_once_with()
+        self.assertEqual(record.append.call_args.args[2]['comment_id'], 123)

@@ -1,3 +1,11 @@
+test_changed_owner_or_locked_bell_cannot_be_used (tests.test_steward.StewardTests.test_changed_owner_or_locked_bell_cannot_be_used) ... ok
+test_enactment_cannot_bypass_a_failed_fresh_sync (tests.test_steward.StewardTests.test_enactment_cannot_bypass_a_failed_fresh_sync) ... ok
+test_every_page_is_read_and_only_steward_identity_is_forwarded (tests.test_steward.StewardTests.test_every_page_is_read_and_only_steward_identity_is_forwarded) ... ok
+test_github_requires_fresh_server_date_and_success (tests.test_steward.StewardTests.test_github_requires_fresh_server_date_and_success) ... ok
+test_lost_notice_receipt_reuses_exact_public_notice_without_posting (tests.test_steward.StewardTests.test_lost_notice_receipt_reuses_exact_public_notice_without_posting) ... ok
+test_notice_posts_to_verified_repository_identity_after_rename (tests.test_steward.StewardTests.test_notice_posts_to_verified_repository_identity_after_rename) ... ok
+test_wake_authorization_requires_exact_owner_source_before_network_or_append (tests.test_steward.StewardTests.test_wake_authorization_requires_exact_owner_source_before_network_or_append) ... ok
+test_wake_notice_names_protected_scope_without_changing_old_rule_notice (tests.test_steward.StewardTests.test_wake_notice_names_protected_scope_without_changing_old_rule_notice) ... ok
 test_scope_cannot_alter_other_boundaries_or_release_provider (tests.test_owner_search.OwnerSearchTests.test_scope_cannot_alter_other_boundaries_or_release_provider) ... ok
 test_selection_repair_preserves_every_other_state_and_cannot_repeat (tests.test_owner_search.OwnerSearchTests.test_selection_repair_preserves_every_other_state_and_cannot_repeat) ... ok
 test_other_sources_provider_releases_and_missing_pins_reject (tests.test_owner_shelf.OwnerShelfTests.test_other_sources_provider_releases_and_missing_pins_reject) ... ok
@@ -18,6 +26,6 @@ test_only_native_web_tools_are_added (tests.test_windows.WindowsTests.test_only_
 test_real_states_safe_links_reasons_and_historical_reset (tests.test_shelf_ui.ShelfUITests.test_real_states_safe_links_reasons_and_historical_reset) ... ok
 
 ----------------------------------------------------------------------
-Ran 18 tests in 0.261s
+Ran 26 tests in 0.269s
 
 OK

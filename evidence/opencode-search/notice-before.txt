@@ -1,0 +1,28 @@
+test_notice_posts_to_verified_repository_identity_after_rename (tests.test_steward.StewardTests.test_notice_posts_to_verified_repository_identity_after_rename) ... ERROR
+
+======================================================================
+ERROR: test_notice_posts_to_verified_repository_identity_after_rename (tests.test_steward.StewardTests.test_notice_posts_to_verified_repository_identity_after_rename)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_steward.py", line 135, in test_notice_posts_to_verified_repository_identity_after_rename
+    steward.publish_notice(record, "alice", "rule")
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/house/steward.py", line 119, in publish_notice
+    comment, _ = github(f"{ISSUE_PATH}/comments", {"body": body})
+                 ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/unittest/mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/unittest/mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/sws/.local/share/mise/installs/python/3.13.2/lib/python3.13/unittest/mock.py", line 1232, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/sws/Code/longhouse/tests/test_steward.py", line 129, in post
+    raise ValueError("HTTP307: renamed repository POST is not followed by gh")
+ValueError: HTTP307: renamed repository POST is not followed by gh
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (errors=1)

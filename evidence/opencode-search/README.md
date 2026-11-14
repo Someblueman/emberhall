@@ -26,12 +26,29 @@ live search succeeds. The initial fixture had a duplicate JavaScript variable;
 `initial-harness-error.txt` retains that test-harness failure separately.
 `focused-tests.txt` covers the bounded owner scope, provider/wake behavior and UI.
 
-`opencode-search-20261114` binds the owner's exact Keep moving / Windows objective
-and permits only `house/maintenance.py` and `house/opencode_tool.py` pin changes.
+The initial search-only candidate72b2a51 passed isolated385 tests (299 executed,
+86 skipped) but was superseded before installation by the witnessed notice
+redirect defect below. `native-web-repair-20261114` binds the owner's exact Keep
+moving / Windows objective and permits only `house/maintenance.py`,
+`house/opencode_tool.py` and `house/steward.py` pin changes.
 It grants no budget release or council authority. Installation still requires
 the ordinary authenticated owner upgrade, passing isolated acceptance, an idle
 coordinator and a finite admission pause. No running resident's configuration
 is modified. See a later activation receipt for actual deployment.
+
+## Notice transport after the repository rename
+
+The actual `work-selection-002` notice POST failed with HTTP307. Read-only context
+checks still verified repository1455971968, the owner and unlocked issue1. GitHub
+redirected the obsolete named POST path to the numeric repository endpoint;
+the installed `gh api` did not follow it. No notice was accepted in the journal
+and no veto clock started. The repair posts to that verified numeric ID while
+retaining context checks, the exact notice body, owner receipt validation,
+duplicate/lost-receipt recovery and the full24-hour gate. Historical journal
+repository names remain unchanged. `notice-before.txt` reproduces the transport
+failure in the adapter; the live notice receipt will separately establish
+successful publication. This is the previously approved council notice channel,
+not permission for residents to post during web research.
 
 ## Research retained, claims corrected
 
