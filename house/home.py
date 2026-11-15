@@ -392,13 +392,18 @@ class Coordinator:
                 task_generation = state["tasks"][task_id]["generation"]
         policy = active_policy(state)
         at = max(time.time(), state["at"])
-        author = state["life"]["runs"][request["review_run"]]["resident"] if "review_run" in request else None
+        authors = set()
+        if "review_run" in request:
+            authors.add(state["life"]["runs"][request["review_run"]]["resident"])
+        bound_task = state["tasks"].get(task_id, {}) if task_id is not None else {}
+        if "review_run" in bound_task:
+            authors.add(state["life"]["runs"][bound_task["review_run"]]["resident"])
         # Targeted help must use its exact resident/route; never substitute an older eligible or new identity.
         if "target_resident" in request:
             target = request["target_resident"]
             if kind != request.get("agent") or model != request.get("model"):
                 return None
-            if target == author:
+            if target in authors:
                 return None
             if not return_eligible(state, target, kind, model, at):
                 return None
@@ -407,7 +412,9 @@ class Coordinator:
             resident = target
         else:
             eligible = [resident for resident in state["residents"]
-                        if resident != author and return_eligible(state, resident, kind, model, at)]
+                        if resident not in authors and return_eligible(state, resident, kind, model, at)]
+            if not eligible and "review_run" in bound_task:
+                return None
             resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
                 "resident-" + uuid.uuid4().hex)
         run = uuid.uuid4().hex
@@ -438,7 +445,8 @@ class Coordinator:
             if model in staffing.HELPER_MODELS and message in {
                     "helper capacity changed", "helper task generation changed", "helper task demand changed",
                     "helper task coverage changed", "helper help demand changed", "helper task role changed",
-                    "helper requested model changed", "source reviewer must be independent"}:
+                    "helper requested model changed", "source reviewer must be independent",
+                    "task reviewer must be independent"}:
                 clean = True
             # A lost targeted admission race (concurrent assignment, now-active/awake/claimed
             # or cooling-down target, or forged payload) is a clean non-start with no room leak.
