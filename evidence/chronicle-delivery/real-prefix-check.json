@@ -1,0 +1,25 @@
+{
+  "through": 5052,
+  "verified_against_journal_head": "adde782eb866b08bc601dcdbd4a2bcfa00a181fe",
+  "source": "721e1361d3c776f39455086cf204c31d77c3f12b",
+  "page_sha256": "90b82b42bced2b0c23aa9fe7913e53275ec047b225053820853a66ce4e9e9110",
+  "counts": {
+    "rule": 1,
+    "rejected": 2,
+    "choice": 11,
+    "project": 9
+  },
+  "closed_choice_sequences_match_canonical_record": true,
+  "byte_equal_to_regeneration": true,
+  "existing_committed_project_targets": [
+    "projects/wake-digest",
+    "projects/signal-garden",
+    "projects/hearth-lens",
+    "projects/night-ferry",
+    "projects/handover-rehearsal",
+    "projects/tessera-loom",
+    "projects/waymark-review-board",
+    "projects/specimen-cards",
+    "projects/handoff-integrity-linter"
+  ]
+}

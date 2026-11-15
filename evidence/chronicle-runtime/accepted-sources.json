@@ -1,0 +1,68 @@
+[
+  {
+    "run": "78209ab172254e97a5a9fde9ac2a308e",
+    "actor": "keeper-01",
+    "base": "20df9b74e1a98cd5d7cfdacf8770c0d62ea2c13e",
+    "contribution": "decf4987bd4ebdfbdcdaa172aaefc116a8c2c4fb",
+    "candidate": "integration-e2d7652b408846148b0245c631d0656d",
+    "status": "integrated",
+    "candidate_head": "482e308e621ede3c2c0e8081f514436f99fc9f26",
+    "test_scope": "foundation",
+    "test_commands": [
+      [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    ],
+    "test_exit": 0
+  },
+  {
+    "run": "56d8cfe2485b4a0097b26cda79856e00",
+    "actor": "resident-5f81a884cf11496eb675fa94f6eebc52",
+    "base": "482e308e621ede3c2c0e8081f514436f99fc9f26",
+    "contribution": "8623bd78af44d2967d00aebced6bca8735f1155c",
+    "candidate": "integration-15f0b269c75c4c3bbee080c28599e48a",
+    "status": "integrated",
+    "candidate_head": "3c3919b1b8c98850f528bb639e9dfd4b8ff4c33a",
+    "test_scope": "foundation",
+    "test_commands": [
+      [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    ],
+    "test_exit": 0
+  },
+  {
+    "run": "fd73c60ea8884e7cb6baeee348227f10",
+    "actor": "keeper-01",
+    "base": "3c3919b1b8c98850f528bb639e9dfd4b8ff4c33a",
+    "contribution": "e89bc817b5d325913ea67fd8cda7b94b9e3410f8",
+    "candidate": "integration-aa8cd7e2fcdf414784bf92dd1c2b7365",
+    "status": "integrated",
+    "candidate_head": "b94c6513dbb673637dad843a2ce1281272f6ae44",
+    "test_scope": "foundation",
+    "test_commands": [
+      [
+        "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    ],
+    "test_exit": 0
+  }
+]

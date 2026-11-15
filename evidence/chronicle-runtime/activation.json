@@ -1,0 +1,20 @@
+{
+  "source_head": "721e1361d3c776f39455086cf204c31d77c3f12b",
+  "runtime_sha256": "32b5eb39698c77931da182fa8e1e07684c97029a6af92e73c5518d9b060de78a",
+  "migration_sequence": 5053,
+  "test_count": 501,
+  "test_output_sha256": "d4b83d1a600abf55e70cdc63a22a575439824217582c03e8812371095f9942e2",
+  "previous_coordinator_pid": 28190,
+  "previous_coordinator_exited": true,
+  "new_coordinator_pid": 17017,
+  "service_only_archive_arguments_changed": true,
+  "rules_council_and_wake_policy_unchanged": true,
+  "installed_archive_verify": {
+    "events": 5053,
+    "head": "e5ccf8df1e1020d763ec6fff98d239e8f172000c",
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "rule_revision": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+    "valid": true
+  },
+  "observed_at_utc": "2026-11-15T05:19:09Z"
+}
