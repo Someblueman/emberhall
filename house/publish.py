@@ -83,6 +83,10 @@ def publish(record: Record, *, push=False) -> dict:
         contents = {name: committed_blob(record, head, "site/" + name)
                     for name in ("index.html", "house.css", "house.js")}
         contents.update(project_contents(record, head))
+        # Only this reviewed static room page is public, never its journal input.
+        chronicle = committed_blob(record, head, "site/chronicle/index.html", optional=True)
+        if chronicle is not None:
+            contents["chronicle/index.html"] = chronicle
         contents["history.json"] = json.dumps(encode(projection), separators=(",", ":"), allow_nan=False).encode()
         contents[".nojekyll"] = b""
         if any(len(body) > MAX_PUBLIC_BLOB for body in contents.values()):

@@ -71,3 +71,29 @@ class ProjectPublicationTests(HouseCase):
                 with self.assertRaises(ValueError):
                     publish(self.record)
                 self.assertIsNone(self.record.ref('refs/heads/' + BRANCH))
+
+    def test_chronicle_publishes_only_committed_page_not_export(self):
+        folder = self.repo / 'site/chronicle'
+        folder.mkdir()
+        page = folder / 'index.html'
+        page.write_text('accepted static chronicle')
+        publish(self.record)
+        self.assertNotIn('chronicle/index.html',
+                         git(self.repo, 'ls-tree', '-r', '--name-only', BRANCH).splitlines())
+        (folder / 'export.json').write_text('private journal input')
+        self.commit()
+        page.write_text('dirty page must not publish')
+        publish(self.record)
+        self.assertEqual(self.record.git('show', BRANCH + ':chronicle/index.html'),
+                         b'accepted static chronicle')
+        self.assertNotIn('chronicle/export.json',
+                         git(self.repo, 'ls-tree', '-r', '--name-only', BRANCH).splitlines())
+
+    def test_chronicle_rejects_committed_symlink(self):
+        folder = self.repo / 'site/chronicle'
+        folder.mkdir()
+        (folder / 'index.html').symlink_to('../index.html')
+        self.commit()
+        with self.assertRaisesRegex(ValueError, 'not a regular blob'):
+            publish(self.record)
+        self.assertIsNone(self.record.ref('refs/heads/' + BRANCH))

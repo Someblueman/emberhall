@@ -1,0 +1,30 @@
+{
+  "room": "chronicle",
+  "planned_sequence": 4861,
+  "builder": "Tansy",
+  "construction_task": "chronicle-real-record-repair",
+  "public_observation": {
+    "url": "https://someblueman.github.io/emberhall/#house-view",
+    "snapshot_sequence": 4861,
+    "snapshot_label": "15 Nov, 04:35",
+    "room_count": 11,
+    "status": "construction",
+    "screenshot": "scaffolding.jpg",
+    "observed": [
+      "The Chronicle Room \u00b7 building",
+      "Under construction",
+      "Assigned builder: Tansy",
+      "Planned 15 Nov 2026, 04:34"
+    ]
+  },
+  "publication_change_checks": {
+    "command": "python3 -m unittest tests.test_publish_projects tests.test_chronicle_door tests.test_creations_gallery -v",
+    "tests": 6,
+    "result": "passed"
+  },
+  "limits": [
+    "Scaffolding proves recorded construction and its actual public rendering, not room completion.",
+    "Publisher code still needs tested runtime activation.",
+    "Room page repair, independent acceptance, browser links and opening remain outstanding."
+  ]
+}
