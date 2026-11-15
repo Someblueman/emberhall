@@ -159,6 +159,7 @@ def course_prompt(state: dict, assigned: dict) -> str:
 
 
 PUBLISH_CHECK_SECONDS = 5
+HOUSEKEEPING_SECONDS = 600
 
 @dataclass
 class Running:
@@ -187,6 +188,7 @@ class Coordinator:
         self.running: dict[str, Running] = {}
         self.next_poll = 0.0
         self.next_publish_check = 0.0
+        self.next_housekeeping = 0.0
         self.stopping = False
 
     def life(self, kind: str, run: str, **data) -> dict:
@@ -824,6 +826,19 @@ class Coordinator:
                                         retry_seconds=self.poll_seconds)
             except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
                 write_private(self.private / "publish-error.json",
+                              {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
+        if poll and not self.stopping and now >= self.next_housekeeping:
+            # Remove finished rooms and integration checkouts nothing needs any more.
+            self.next_housekeeping = now + HOUSEKEEPING_SECONDS
+            from . import housekeeping
+            try:
+                report = housekeeping.sweep(self.record, self.private, apply=True, limit=40)
+                if report["rooms"] or report["checkouts"]:
+                    write_private(self.private / "housekeeping.json", {"at": time.time(),
+                        "rooms": len(report["rooms"]), "checkouts": len(report["checkouts"]),
+                        "bytes": report["bytes"], "kept": report["kept"]})
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+                write_private(self.private / "housekeeping-error.json",
                               {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
         return {"started": started, "finished": ended, "active": list(self.running)}
 

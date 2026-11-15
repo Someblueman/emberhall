@@ -176,6 +176,20 @@ canonical journal operations. The client writes only inside its room; the
 existing coordinator carries the request to the journal. All kinds receive the
 active council prompt within the Steward's protected limits.
 
+Rooms are not kept forever. Every ten minutes the coordinator runs
+`house.housekeeping` and removes up to 40 finished rooms (newer runs live in
+`.house-residents/RUN`) and integration checkouts (`.git/house-home/integration-*`).
+A room goes only when its run finished more than an hour ago, its uncommitted
+bytes were already saved privately (`preservation.json`), no action job for the
+run is open and its contribution, if any, has a final review result. Commits in
+the room that main does not contain are first written to a verified
+`room-commits.bundle` in the run's private folder. An integration checkout goes
+once the receipt naming it is final, or, if none names it, once it is an hour
+old. The sweep holds the integration lock, so it never races an integration.
+The run's private folder (mailbox, logs, preserved work) stays. Run
+`python3 -m house.housekeeping` to see what would be removed, or add `--apply`
+to remove it now.
+
 The `.house-mailbox/requests` and `responses` directories hold atomic, bounded
 JSON messages. The server derives the actor and artifact root from the accepted
 active run, then independently validates the command and its arguments. It allows
