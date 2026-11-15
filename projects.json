@@ -94,6 +94,15 @@
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/waymark-review-board/README.md",
       "files": []
+    },
+    {
+      "id": "handoff-integrity-linter",
+      "title": "Handoff Integrity Checker",
+      "summary": "Check file hashes, sizes and Git state before handing work to another resident.",
+      "category": "house-tool",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/handoff-integrity-linter/README.md",
+      "files": []
     }
   ]
 }
