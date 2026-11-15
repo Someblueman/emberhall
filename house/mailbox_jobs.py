@@ -31,38 +31,121 @@ def read(path: Path):
         return read_json(parent, path.name, LIMIT)
 
 
-def acceptance(record: Record, item: dict):
-    """Return (contribution, intent) for a mutating acceptance request, else None.
-
-    Read-only inspections never compete with the single mutating worker, so they
-    are not acceptance work even though they share the integrate command.
-    """
+def publish_target(record: Record, item: dict) -> str | None:
+    """Return the target for a parsed publish request; other actions are not deduped."""
     try:
-        argv = item["argv"]
-        if not argv or argv[0] != "integrate":
-            return None
-        args = parse(argv, record.root, workspace_path(record, item["run"]),
-                     item["resident"])
+        args = parse(item["argv"], record.root,
+                     workspace_path(record, item["run"]), item["resident"])
     except (*ERRORS, SystemExit):
         return None
-    if args.command != "integrate" or getattr(args, "inspect", False):
-        return None
-    if getattr(args, "publish", False):
-        intent = "publish"
-    elif getattr(args, "reject", None) is not None:
-        intent = "reject"
-    else:
-        return None
-    return args.target, intent
+    if args.command == "integrate" and args.publish and not args.inspect:
+        return args.target
+    return None
 
 
-def in_progress(record: Record, job: str, resident: str, target: str, intent: str):
-    """Find another resident's queued/running acceptance of the same contribution."""
-    matches = [item for item in jobs(record)
-               if item["id"] != job and item["status"] in {"queued", "running"}
-               and item.get("resident") != resident
-               and acceptance(record, item) == (target, intent)]
-    return min(matches, key=lambda item: (item.get("created_at", 0.0), item["id"])) if matches else None
+def publish_owner_precedes(owner: dict, item: dict) -> bool:
+    """Running work owns its process; queued work follows one stable order."""
+    return owner["id"] != item["id"] and (
+        owner["status"] == "running" or (owner["status"] == "queued" and
+        (owner["created_at"], owner["id"]) < (item["created_at"], item["id"])))
+
+
+def pending_publish(record: Record, request: dict, target: str):
+    """Find a running or earlier queued publish of the same contribution."""
+    matches = []
+    for item in jobs(record):
+        if (not publish_owner_precedes(item, request) or
+                publish_target(record, item) != target):
+            continue
+        # The worker writes its terminal action response before the coordinator
+        # marks job.json done. Once that response exists, retries must not report
+        # the acceptance as pending.
+        action_result = record.common / "house-home" / "jobs" / item["id"] / "result.json"
+        if action_result.exists():
+            try:
+                response = read(action_result)
+            except (OSError, ValueError, TypeError):
+                continue
+            detail = response.get("result") if isinstance(response, dict) else None
+            if not (response.get("ok") is True and isinstance(detail, dict) and
+                    detail.get("status") == "in-progress"):
+                continue
+            # This is an interrupted duplicate response, not an action worker.
+            continue
+        matches.append(item)
+    return min(matches, key=lambda item: (item["status"] != "running",
+               item["created_at"], item["id"])) if matches else None
+
+
+def duplicate_response(record: Record, item: dict, owner: dict):
+    """Persist a prompt, nonterminal answer while the original publish is pending."""
+    path = record.common / "house-home" / "jobs" / item["id"]
+    response = {"ok": True, "result": {
+        "status": "in-progress", "contribution": publish_target(record, item),
+        "intent": "publish", "existing_job": owner["id"],
+        "existing_status": owner["status"], "existing_resident": owner["resident"],
+        "note": ("an equivalent publish for this contribution is already queued or running; "
+                 "observe its terminal receipt instead of waiting behind it. Queued work is "
+                 "cancelled if its requesting run exits before it starts. This answer is "
+                 "not a terminal outcome. If that work "
+                 "fails or is interrupted, submit a new request id.")}}
+    write(path / "result.json", response)
+    item.update(status="done", finished_at=time.time(), duplicate_of=owner["id"])
+    write(path / "job.json", item)
+
+
+def remove_result(path: Path):
+    with directory(path.parent) as parent:
+        try:
+            os.unlink(path.name, dir_fd=parent)
+            os.fsync(parent)
+        except FileNotFoundError:
+            pass
+
+
+def repair_duplicate(record: Record, item: dict) -> bool:
+    """Finish or reopen a duplicate admission interrupted between durable writes."""
+    path = record.common / "house-home" / "jobs" / item["id"]
+    result_path = path / "result.json"
+    marker = item.get("duplicate_of")
+    response = None
+    if result_path.exists():
+        try:
+            candidate = read(result_path)
+        except (OSError, ValueError, TypeError):
+            candidate = None
+        detail = candidate.get("result") if isinstance(candidate, dict) else None
+        if isinstance(detail, dict) and detail.get("status") == "in-progress":
+            response = candidate
+            marker = marker or detail.get("existing_job")
+    if not marker:
+        return False
+    owner = next((candidate for candidate in jobs(record)
+                  if candidate["id"] == marker and publish_owner_precedes(candidate, item)), None)
+    target = publish_target(record, item)
+    if owner is not None and target is not None and publish_target(record, owner) == target:
+        owner_result = record.common / "house-home" / "jobs" / owner["id"] / "result.json"
+        if not owner_result.exists():
+            if response is None:
+                duplicate_response(record, item, owner)
+            else:
+                detail = response["result"]
+                if detail.get("existing_status") != owner["status"]:
+                    detail["existing_status"] = owner["status"]
+                    write(result_path, response)
+                item.update(status="done", finished_at=item.get("finished_at", time.time()),
+                            duplicate_of=owner["id"])
+                write(path / "job.json", item)
+            return True
+    # A terminal or missing owner makes an old in-progress answer stale. Clear
+    # it before reopening the same exact request for normal serialized work.
+    if response is not None or item.get("duplicate_of"):
+        remove_result(result_path)
+        item.pop("duplicate_of", None)
+        item.pop("finished_at", None)
+        item["status"] = "queued"
+        write(path / "job.json", item)
+    return False
 
 
 def enqueue(record: Record, run: str, argv: list[str], requestid: str) -> str:
@@ -73,38 +156,32 @@ def enqueue(record: Record, run: str, argv: list[str], requestid: str) -> str:
     path.mkdir(mode=0o700, exist_ok=True)
     metadata = path / "job.json"
     if metadata.exists():
-        existing = read(metadata)
-        if existing["run"] != run or existing["argv"] != argv or existing["requestid"] != requestid:
+        item = read(metadata)
+        if item["run"] != run or item["argv"] != argv or item["requestid"] != requestid:
             raise ValueError("job id reused with different content")
-        return job
-    runtime = Path(getattr(record, "_mailbox_runtime", ""))
-    if not runtime.is_file() or runtime.is_symlink():
-        raise ValueError("coordinator has no trusted pinned job runtime")
-    item = record.read()[0]["life"]["runs"][run]
-    entry = {"id": job, "run": run, "resident": item["resident"], "argv": argv,
-        "requestid": requestid, "runtime": str(runtime),
-        "runtime_sha256": hashlib.sha256(runtime.read_bytes()).hexdigest(),
-        "status": "queued", "created_at": time.time()}
-    write(metadata, entry)
-    pending = acceptance(record, entry)
-    existing = in_progress(record, job, entry["resident"], *pending) if pending is not None else None
-    if existing is None:
-        return job
-    # Another resident already owns this acceptance in the single mutating worker
-    # lane. Answer durably and immediately instead of making this resident wait
-    # behind it; the existing job still produces the one terminal receipt. A
-    # distinct target, intent, requester or inspection request is enqueued above,
-    # so a resident's own queued request keeps its ordinary cancellation on exit.
-    answer = {"ok": True, "result": {
-        "status": "in-progress", "contribution": pending[0], "intent": pending[1],
-        "existing_job": existing["id"], "existing_status": existing["status"],
-        "existing_resident": existing["resident"],
-        "note": ("an equivalent acceptance for this contribution is already queued or "
-                 "running; do not wait behind it, observe its terminal receipt instead. "
-                 "If that work fails or is interrupted, submit a new request id.")}}
-    write(path / "result.json", answer)
-    entry.update(status="done", finished_at=time.time(), duplicate_of=existing["id"])
-    write(metadata, entry)
+        # A retry must never replace durable process ownership with a duplicate
+        # answer, even if another admission was interrupted after its queued write.
+        if item["status"] == "running":
+            return job
+        if repair_duplicate(record, item):
+            return job
+        if item["status"] == "done":
+            return job
+    else:
+        runtime = Path(getattr(record, "_mailbox_runtime", ""))
+        if not runtime.is_file() or runtime.is_symlink():
+            raise ValueError("coordinator has no trusted pinned job runtime")
+        resident_state = record.read()[0]["life"]["runs"][run]
+        item = {"id": job, "run": run, "resident": resident_state["resident"], "argv": argv,
+                "requestid": requestid, "runtime": str(runtime),
+                "runtime_sha256": hashlib.sha256(runtime.read_bytes()).hexdigest(),
+                "status": "queued", "created_at": time.time()}
+        write(metadata, item)
+
+    target = publish_target(record, item)
+    owner = pending_publish(record, item, target) if target is not None else None
+    if owner is not None:
+        duplicate_response(record, item, owner)
     return job
 
 
@@ -189,7 +266,7 @@ def tick(record: Record) -> None:
             continue
         interrupt(record, item)
         occupied.remove(lane(record, item))
-    pending = sorted((item for item in all_jobs if item["status"] == "queued"), key=lambda item: item["created_at"])
+    pending = sorted((item for item in all_jobs if item["status"] == "queued"), key=lambda item: (item["created_at"], item["id"]))
     for item in pending:
         try:
             name = lane(record, item)
