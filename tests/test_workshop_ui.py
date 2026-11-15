@@ -42,7 +42,7 @@ class WorkshopUITests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_ready_blocked_unknown_and_project_titles(self):
+    def test_ready_not_queued_unknown_and_project_titles(self):
         self.run_renderer(r'''
 frame={seq:10,at:1000,rooms:[{id:'workshop',name:'Workshop'}],
  residents:[{id:'mallow',name:'Mallow',room:'hearth',pose:'standing'}],runs:[],scars:[],
@@ -61,7 +61,7 @@ const r=rows();assert.equal(r.length,4);
 assert.equal(r[0].children[1].textContent,'Unassigned');
 assert.equal(r[0].children[2].textContent,'Declared ready');
 assert.equal(r[0].children[3].textContent,'Project: Night Ferry');
-assert.equal(r[1].children[2].textContent,'Blocked (declared not ready)');
+assert.equal(r[1].children[2].textContent,'Not queued');
 assert.equal(r[1].children[3].textContent,'Project: signal-garden-title-missing');
 assert.equal(r[2].children[2].textContent,'Readiness unknown (unrecorded)');
 assert.equal(r[2].children[3].textContent,'Ordinary house work — no project recorded');
@@ -84,7 +84,7 @@ const r=rows();assert.equal(r.length,2);
 assert.equal(r[0].children[2].textContent,'Readiness unknown (unrecorded)');
 assert.equal(r[0].children[3].textContent,'Ordinary house work — no project recorded');
 assert.equal(r[1].children[2].textContent,'Readiness unknown (unrecorded)');
-assert.doesNotMatch(text(panel()),/Declared ready|Blocked \(declared not ready\)/);
+assert.doesNotMatch(r.map(text).join(' '),/Declared ready|Not queued/);
 assert.equal(all(panel()).filter(n=>n.tag==='img').length,0);
 ''')
 

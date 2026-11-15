@@ -425,7 +425,7 @@ function effectiveTasks() {const at=observationTime();return frame.tasks.map(t=>
 function taskReadinessLabel(t) {
   const ready=t.ready;
   if(ready===true)return "Declared ready";
-  if(ready===false)return "Blocked (declared not ready)";
+  if(ready===false)return "Not queued";
   return "Readiness unknown (unrecorded)";
 }
 function taskProjectLabel(t) {
@@ -442,7 +442,7 @@ function renderWorkshopTasks(content) {
   const unassigned=tasks.length-claimed-expired;
   html("p","small",`${tasks.length} unfinished · ${unassigned} unassigned · ${claimed} recorded claims · ${expired} expired leases`,content);
   html("p","small","Unassigned does not mean ready to start. Recorded claims exclude expired leases and are not live process status.",content);
-  html("p","small","Each row names declared readiness separately (unknown means unrecorded) and any recorded project; readiness is not a live process or guaranteed launch.",content);
+  html("p","small","Queue readiness is declared separately from claims. Not queued can mean deferred or withdrawn work; it does not establish a blocker.",content);
   tasks.forEach(t=>{
     const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
     html("strong","",t.title,row);
