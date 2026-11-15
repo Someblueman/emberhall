@@ -1,0 +1,34 @@
+[
+  {
+    "run": "62f952cf41c24b6abca81e0c8b61d988",
+    "actor": "resident-00bf1778a13948d9b8503bed0dfe1bed",
+    "contribution": "fbbffa2e0cbdfd1719e45764ae57c55b350764d4",
+    "candidate_head": "fbbffa2e0cbdfd1719e45764ae57c55b350764d4",
+    "test_scope": "foundation",
+    "test_exit": 0
+  },
+  {
+    "run": "44eab34e68fe46fd9533bcfa4db33cbc",
+    "actor": "resident-836035b42f354512a781b26410a12e39",
+    "contribution": "772b5c5c5a003a59e6e590e30864df5660fafa5c",
+    "candidate_head": "252372241ba4b4de45ca1db6967866d18b1c5c8d",
+    "test_scope": "foundation",
+    "test_exit": 0
+  },
+  {
+    "run": "ce4c6c8aba52404f9be418348e8d43a2",
+    "actor": "resident-d8b49972bb00491f9233d595a4daa2fb",
+    "contribution": "2a51af06ba70563dc62a22ce669bb18889a32b88",
+    "candidate_head": "2a51af06ba70563dc62a22ce669bb18889a32b88",
+    "test_scope": "foundation",
+    "test_exit": 0
+  },
+  {
+    "run": "0827668091f04c9e8c97f97dfc3ec807",
+    "actor": "resident-b8c76863c0f540c392a87a025b70f287",
+    "contribution": "37f5fd8073c24bb4803c8e186e41032a6091e0d2",
+    "candidate_head": "16b3dd1991eb26727709bff9366464e6161de094",
+    "test_scope": "foundation",
+    "test_exit": 0
+  }
+]

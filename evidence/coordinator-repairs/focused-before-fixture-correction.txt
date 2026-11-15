@@ -1,0 +1,32 @@
+test_exact_scope_preserves_house_authority (tests.test_coordinator_repairs_maintenance.CoordinatorRepairsMaintenanceTests.test_exact_scope_preserves_house_authority) ... FAIL
+test_fixed_client_rejects_other_actor_and_global_repo_override (tests.test_home_work.PrivateWorkTests.test_fixed_client_rejects_other_actor_and_global_repo_override) ... ok
+test_same_path_edits_in_two_source_rooms_cannot_overwrite (tests.test_home_work.PrivateWorkTests.test_same_path_edits_in_two_source_rooms_cannot_overwrite) ... ok
+test_failed_working_scan_reports_blocked_error_instead_of_no_changes (tests.test_home_work.RoomContributionDeliveryTests.test_failed_working_scan_reports_blocked_error_instead_of_no_changes) ... ok
+test_finish_queues_safe_bytes_after_strict_rescue_refuses_symlink (tests.test_home_work.RoomContributionDeliveryTests.test_finish_queues_safe_bytes_after_strict_rescue_refuses_symlink) ... ok
+test_literal_finished_paths_do_not_stage_excluded_files (tests.test_home_work.RoomContributionDeliveryTests.test_literal_finished_paths_do_not_stage_excluded_files) ... ok
+test_no_changes_and_journal_recorded_unchanged (tests.test_home_work.RoomContributionDeliveryTests.test_no_changes_and_journal_recorded_unchanged) ... ok
+test_safe_finished_file_queued_beside_oversized_file (tests.test_home_work.RoomContributionDeliveryTests.test_safe_finished_file_queued_beside_oversized_file) ... ok
+test_safe_finished_file_with_stale_index_lock (tests.test_home_work.RoomContributionDeliveryTests.test_safe_finished_file_with_stale_index_lock) ... ok
+test_unsafe_only_room_produces_blocked_receipt (tests.test_home_work.RoomContributionDeliveryTests.test_unsafe_only_room_produces_blocked_receipt) ... ok
+test_only_regular_routes_receive_overdue_checkpoint_chore (tests.test_helper_focus.HelperFocusTests.test_only_regular_routes_receive_overdue_checkpoint_chore) ... ok
+
+======================================================================
+FAIL: test_exact_scope_preserves_house_authority (tests.test_coordinator_repairs_maintenance.CoordinatorRepairsMaintenanceTests.test_exact_scope_preserves_house_authority)
+----------------------------------------------------------------------
+ValueError: invalid replacement manifest
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_coordinator_repairs_maintenance.py", line 28, in test_exact_scope_preserves_house_authority
+    house.reject("owner-migrate", bad, "outside.*scope")
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sws/Code/longhouse/tests/test_council.py", line 41, in reject
+    with self.assertRaisesRegex(ValueError, pattern):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "outside.*scope" does not match "invalid replacement manifest"
+
+----------------------------------------------------------------------
+Ran 11 tests in 5.067s
+
+FAILED (failures=1)

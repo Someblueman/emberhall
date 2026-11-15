@@ -1,0 +1,6 @@
+test_exact_scope_preserves_house_authority (tests.test_coordinator_repairs_maintenance.CoordinatorRepairsMaintenanceTests.test_exact_scope_preserves_house_authority) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.017s
+
+OK

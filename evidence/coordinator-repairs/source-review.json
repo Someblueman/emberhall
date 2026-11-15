@@ -1,0 +1,10 @@
+{
+  "run": "152c0741099f4244b1a518ed5522ce45",
+  "actor": "resident-3759f50f018c41d99cdd0d5bd2d897fd",
+  "base": "a546aa84492e7cfe06b6f1a5c180df0fb73e4e8d",
+  "contribution": "5068063fc6c865a8c9da78722edcd79b41a715c2",
+  "status": "integrated",
+  "candidate_head": "5068063fc6c865a8c9da78722edcd79b41a715c2",
+  "test_scope": "foundation",
+  "test_exit": 0
+}
