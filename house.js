@@ -564,6 +564,11 @@ function roomPanel() {
     const link=html("a","room-shelf-link","Explore the creations made here →",content);
     link.href="#projects-view";
   }
+  if(room?.id==="chronicle"&&room.status==="open") {
+    const link=html("a","room-shelf-link","Read the Chronicle →",content);
+    link.href="chronicle/index.html";
+    if(!current)html("p","small","Opens the latest published Chronicle, not a reconstruction of this earlier page.",content);
+  }
   if(room?.id==="parlor") renderCatchupPanel(content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") renderWorkshopTasks(content);
   const roomScars=room?visibleScars().filter(s=>s.room===room.id):[];
