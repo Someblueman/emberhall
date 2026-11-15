@@ -300,6 +300,15 @@ def install_requested(record: Record, private: Path) -> dict:
 def status(record: Record) -> dict:
     private = record.common / "house-home"
     found = {"waiting": pending_install(private), "runtime": runtime.selected(record)["source_head"]}
+    if found["waiting"] is not None:
+        from .publication_worker import drained
+        state = record.read()[0]
+        found["draining"] = {
+            "active_residents": sorted(f"{run['agent']} {key[:8]}" for key, run in
+                                       state.get("life", {}).get("runs", {}).items() if run["status"] == "active"),
+            "unfinished_jobs": sum(json.loads(job.read_text()).get("status") != "done"
+                                   for job in (private / "jobs").glob("*/job.json")),
+            "pages_publisher_idle": drained(record)}
     for name in OUTCOMES:
         if (private / name).is_file():
             found[name.removeprefix("owner-install-").removesuffix(".json")] = json.loads((private / name).read_text())

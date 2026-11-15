@@ -288,6 +288,17 @@ class OwnerInstallTests(unittest.TestCase):
             owner_upgrade.request_install(self.record, "keeper-01", "course-correction-20261115", "x")
         self.assertIsNone(owner_upgrade.pending_install(self.private))
 
+    def test_status_says_what_a_waiting_install_waits_for(self):
+        from unittest.mock import patch
+        from house import owner_upgrade
+        self.queue(self.commit("a = 1\n"))
+        self.record.read = lambda: ({"life": {"runs": {"abcdef123": {"agent": "muse", "status": "active"}}}}, [], "h")
+        with patch("house.runtime.selected", return_value={"source_head": "c" * 40}), \
+                patch("house.publication_worker.drained", return_value=True):
+            found = owner_upgrade.status(self.record)
+        self.assertEqual(["muse abcdef12"], found["draining"]["active_residents"])
+        self.assertEqual((0, True), (found["draining"]["unfinished_jobs"], found["draining"]["pages_publisher_idle"]))
+
     def test_house_change_after_request_is_refused_and_releases_the_hold(self):
         from house import owner_upgrade
         self.queue(self.commit("a = 1\n"))
