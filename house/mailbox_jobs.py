@@ -104,9 +104,10 @@ def recover(record: Record):
             interrupt(record, item)
 
 
-def stop(record: Record, run: str):
+def stop(record: Record, run: str, *, running: bool = True):
     for item in jobs(record):
-        if item["run"] == run and item["status"] != "done":
+        if item["run"] == run and (item["status"] == "queued" or
+                                   (running and item["status"] == "running")):
             interrupt(record, item)
 
 
