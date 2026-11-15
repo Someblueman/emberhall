@@ -854,7 +854,15 @@ function roomPanel() {
       const done=(dataShelf.projects||[]).filter(p=>p.status==="done");
       html("p","small",dataShelf.policy?"Selection rules recorded":"Research is open. Project selection awaits ratification.",summary);
       if(dataShelf.policy)recordId(summary,dataShelf.policy,"Selection rule ID");
-      html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
+      if(isGreatWorkShelf(dataShelf)) {
+        const greatIdeas=ideas.filter(i=>ideaScale(i)==="great");
+        const smallIdeas=ideas.filter(i=>ideaScale(i)!=="great");
+        const greatBusy=active.some(p=>projectSlot(p)==="great");
+        const smallBusy=active.some(p=>projectSlot(p)!=="great");
+        html("p","small",`Great slot: ${greatBusy?"busy":"free"} (${greatIdeas.length} great ${greatIdeas.length===1?"idea":"ideas"}) · Small slot: ${smallBusy?"busy":"free"} (${smallIdeas.length} small ${smallIdeas.length===1?"idea":"ideas"}) · ${done.length} finished`,summary);
+      } else {
+        html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
+      }
     }
     const link=html("a","room-shelf-link","View the public shelf",summary);
     link.href="#shelf-card";
@@ -1038,6 +1046,58 @@ function renderViewContext() {
     : `Historical view · event ${frame.seq} · ${snapshotCue(Date.now()/1000,data.observed_at,frame.at,false,data.timezone)}`;
   const latest=$("view-latest");if(latest)latest.hidden=current;
 }
+function isGreatWorkShelf(dataShelf) {
+  return Boolean(dataShelf && dataShelf.policy === "work-selection-004");
+}
+function ideaScale(idea) {
+  return idea && idea.scale === "great" ? "great" : "small";
+}
+function projectSlot(project) {
+  return project && project.slot === "great" ? "great" : "small";
+}
+function formatDurationDays(seconds) {
+  const days = seconds / 86400;
+  return `${days} ${days === 1 ? "day" : "days"}`;
+}
+function renderOrderedMilestones(project, details) {
+  const completed = Array.isArray(project.completed) ? project.completed : [];
+  const doneByStage = new Map(completed.map(entry => [entry.stage, entry]));
+  const currentStage = Number.isInteger(project.stage) ? project.stage : completed.length;
+  if (project.status === "active") {
+    html("p", "small", `Stage ${currentStage + 1} of ${project.milestones.length}`, details);
+  }
+  const list = html("ol", "milestone-list", undefined, details);
+  project.milestones.forEach((stage, idx) => {
+    const done = doneByStage.get(idx);
+    if (done) {
+      const seq = done.sequence != null ? ` (event ${done.sequence})` : "";
+      const note = done.evidence ? ` · ${done.evidence}` : "";
+      html("li", "milestone-done", `${stage.milestone} — done${seq}${note}`, list);
+    } else if (project.status === "active" && idx === currentStage) {
+      html("li", "milestone-current", `${stage.milestone} — current (${formatDurationDays(stage.seconds)})`, list);
+    } else {
+      html("li", "", `${stage.milestone} (${formatDurationDays(stage.seconds)})`, list);
+    }
+  });
+}
+function renderShelfProject(project, statusLabel, parent, residentName) {
+  const item = html("article", "shelf-item", undefined, parent);
+  html("strong", "", titleFor(project, "project"), item);
+  const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
+  html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
+  const details = html("details", "project-details", undefined, item);
+  html("summary", "", "Milestone and details", details);
+  if (Array.isArray(project.milestones) && project.milestones.length) {
+    renderOrderedMilestones(project, details);
+  } else if (project.milestone) {
+    html("p", "", `Milestone: ${project.milestone}`, details);
+  }
+  if (project.deadline) {
+    const deadline = typeof project.deadline === "number" ? clock(project.deadline) : String(project.deadline);
+    html("p", "small", `Deadline: ${deadline}${project.extended ? " (extended)" : ""}`, details);
+  }
+  recordId(details, project.id);
+}
 function shelf() {
   const box = $("shelf");
   if (!box) return;
@@ -1061,17 +1121,40 @@ function shelf() {
   const ideas = rawIdeas.filter(i => i.status === "shelved");
   const activeProjects = rawProjects.filter(p => p.status === "active");
   const completedProjects = rawProjects.filter(p => p.status === "done");
-  html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
+  const greatMode = isGreatWorkShelf(dataShelf);
+  const greatActive = activeProjects.filter(p => projectSlot(p) === "great");
+  const smallActive = activeProjects.filter(p => projectSlot(p) !== "great");
+  const greatIdeas = ideas.filter(i => ideaScale(i) === "great");
+  const smallIdeas = ideas.filter(i => ideaScale(i) !== "great");
+  if (greatMode) {
+    html("p", "shelf-counts", `Building now: ${greatActive.length} of 1 great work, ${smallActive.length} of 1 small project · ${ideas.length} ideas waiting (${greatIdeas.length} great, ${smallIdeas.length} small)`, box);
+  } else {
+    html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
+  }
   const choosing=renderChoiceProgress(box);
   if (dataShelf.policy) {
-    if (activeProjects.length >= 2) {
-      html("p", "small", "Both project slots occupied · build the active projects.", box);
-    } else if (ideas.length&&!choosing) {
-      html("p", "small", "Project slot available · council can choose from the shelf.", box);
+    if (greatMode) {
+      if (greatActive.length >= 1 && smallActive.length >= 1) {
+        html("p", "small", "Both project slots occupied · build the active projects.", box);
+      } else if (!choosing && ((!greatActive.length && greatIdeas.length) || (!smallActive.length && smallIdeas.length))) {
+        html("p", "small", "Project slot available · council can choose from the shelf.", box);
+      }
+      const greatWanted = dataShelf.great_wanted !== undefined ? Boolean(dataShelf.great_wanted) : (!greatActive.length && greatIdeas.length < 2);
+      html("p", "small", dataShelf.explorer
+        ? "One Explorer at a time · see the recorded round above."
+        : greatWanted
+          ? "Room for a great-work Explorer round."
+          : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", box);
+    } else {
+      if (activeProjects.length >= 2) {
+        html("p", "small", "Both project slots occupied · build the active projects.", box);
+      } else if (ideas.length&&!choosing) {
+        html("p", "small", "Project slot available · council can choose from the shelf.", box);
+      }
+      html("p", "small", dataShelf.explorer
+        ? "One Explorer at a time · see the recorded round above."
+        : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", box);
     }
-    html("p", "small", dataShelf.explorer
-      ? "One Explorer at a time · see the recorded round above."
-      : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", box);
   }
   const graveyard = [
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
@@ -1092,33 +1175,12 @@ function shelf() {
   if(activeProjects.length) {
     const group=html("div","shelf-group",undefined,box);
     html("h2","","Active projects",group);
-    activeProjects.forEach(project=>{
-      const item=html("article","shelf-item",undefined,group);
-      html("strong","",titleFor(project,"project"),item);
-      html("span","small",`Active · ${residentName(project.owner)}`,item);
-      const details=html("details","project-details",undefined,item);
-      html("summary","","Milestone and details",details);
-      if(project.milestone)html("p","",`Milestone: ${project.milestone}`,details);
-      if(project.deadline) {
-        const deadline=typeof project.deadline==="number"?clock(project.deadline):String(project.deadline);
-        html("p","small",`Deadline: ${deadline}${project.extended?" (extended)":""}`,details);
-      }
-      recordId(details,project.id);
-    });
+    activeProjects.forEach(project=>renderShelfProject(project,"Active",group,residentName));
   }
   if(completedProjects.length) {
     const completed=html("details","shelf-completed",undefined,box);
     html("summary","",`Finished projects (${completedProjects.length})`,completed);
-    completedProjects.forEach(project=>{
-      const item=html("article","shelf-item",undefined,completed);
-      html("strong","",titleFor(project,"project"),item);
-      html("span","small",`Finished · ${residentName(project.owner)}`,item);
-      const details=html("details","project-details",undefined,item);
-      html("summary","","Milestone and details",details);
-      if(project.milestone)html("p","",`Milestone: ${project.milestone}`,details);
-      if(project.deadline)html("p","small",`Deadline: ${typeof project.deadline==="number"?clock(project.deadline):project.deadline}`,details);
-      recordId(details,project.id);
-    });
+    completedProjects.forEach(project=>renderShelfProject(project,"Finished",completed,residentName));
   }
   if (ideas.length) {
     const group = html("div", "shelf-group", undefined, box);
@@ -1126,7 +1188,11 @@ function shelf() {
     ideas.forEach(idea => {
       const item = html("details", "shelf-item shelf-idea", undefined, group);
       html("summary", "", titleFor(idea,"idea"), item);
-      const meta = [idea.status, residentName(idea.author)].filter(Boolean).join(" · ");
+      const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
+      const lossLabel = typeof idea.losses === "number" && idea.losses > 0
+        ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
+        : null;
+      const meta = [scaleLabel, idea.status, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
       if (idea.what) html("p", "", idea.what, item);
       if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
@@ -1189,19 +1255,31 @@ function voting() {
     };
     const counted = choice.votes.filter(v => v.counted).length;
     const outcome = choice.status === "open" ? `Open · ${counted}/3 counted votes` : choice.status === "rejected" ? "Shortlist rejected" : `Selected: ${title(choice.winner)}`;
+    const choiceLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
     const item = html("details", "vote-round", undefined, box);
     item.id = `vote-choice-${choice.id}`;
-    html("summary", "", `Project choice · ${outcome}`, item);
+    html("summary", "", `${choiceLabel} · ${outcome}`, item);
     recordId(item,choice.id);
     html("p", "small", `Opened by ${person(choice.owner)} at event ${choice.opened_sequence}${choice.closed_sequence ? ` · closed at event ${choice.closed_sequence}` : ""}.`, item);
-    html("p", "small", choice.selection_version === 2 ? "Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available." : "Historical selection rule: three counted votes, plurality with the recorded tie-break. Authors’ votes for their own ideas do not count.", item);
+    const ruleText = choice.selection_version >= 2
+      ? `Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available.${choice.slot === "great" ? " Great works carry 2–8 ordered milestones." : ""}`
+      : "Historical selection rule: three counted votes, plurality with the recorded tie-break. Authors’ votes for their own ideas do not count.";
+    html("p", "small", ruleText, item);
     const alternatives = html("details", "vote-alternatives", undefined, item);
     alternatives.id = `vote-candidates-${choice.id}`;
     html("summary", "", `Frozen alternatives (${choice.candidates.length})`, alternatives);
     choice.candidates.forEach(c => {
       const candidate=html("div","vote-candidate",undefined,alternatives);
       html("strong", "", `${title(c.id)} · by ${person(c.author)}`, candidate);
-      html("p", "small", `${c.milestone||"Milestone unrecorded"}${Number.isFinite(c.seconds)?` · ${c.seconds / 86400} day milestone`:""}`, candidate);
+      if (Array.isArray(c.stages) && c.stages.length) {
+        html("p", "small", `${c.stages.length} ordered milestones${Number.isFinite(c.seconds)?` · ${formatDurationDays(c.seconds)} total`:""}`, candidate);
+        const list = html("ol", "milestone-list", undefined, candidate);
+        c.stages.forEach(stage => {
+          html("li", "", `${stage.milestone}${Number.isFinite(stage.seconds)?` · ${formatDurationDays(stage.seconds)}`:""}`, list);
+        });
+      } else {
+        html("p", "small", `${c.milestone||"Milestone unrecorded"}${Number.isFinite(c.seconds)?` · ${c.seconds / 86400} day milestone`:""}`, candidate);
+      }
       recordId(candidate,c.id,"Candidate record ID");
     });
     for (const vote of choice.votes) {
