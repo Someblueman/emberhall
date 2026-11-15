@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shadow Theatre — Finite-Screen SVG Puzzle Exhibit</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Shadow Theatre</h1>
+    <p class="subtitle">Finite-screen 2D point-light shadow projection (no refraction, mirrors, penumbra, or 3D; no automatic motion).</p>
+  </header>
+
+  <main>
+    <section class="controls-bar" aria-label="Mode and Challenge Selection">
+      <div class="mode-buttons">
+        <button type="button" data-mode="single-gate">1. Single Gate</button>
+        <button type="button" data-mode="twin-pillars">2. Twin Pillars</button>
+        <button type="button" data-mode="clipped-horizon">3. Clipped Horizon</button>
+        <button type="button" data-mode="sandbox">Editable Sandbox</button>
+      </div>
+      <button type="button" id="reset-btn">Reset (R)</button>
+    </section>
+
+    <section class="exhibit-grid">
+      <div class="stage-panel">
+        <svg id="stage" viewBox="-10 -10 125 120" role="img" aria-label="Shadow Theatre SVG Stage" tabindex="0"></svg>
+        <p class="keyboard-hint">
+          Keyboard: <code>0</code> Light, <code>1</code>–<code>3</code> Props,
+          <code>Arrow Keys</code> move, <code>[</code> / <code>]</code> resize prop, <code>R</code> reset.
+        </p>
+      </div>
+
+      <aside class="inspector-panel">
+        <div id="challenge-info" class="card">
+          <h2 id="mode-title">1. Single Gate</h2>
+          <p id="mode-desc"></p>
+          <p id="target-display" class="mono"></p>
+          <p id="status-badge" class="status"></p>
+        </div>
+
+        <div class="card">
+          <h3>Text Interval Output</h3>
+          <pre id="interval-output" class="mono" aria-live="polite"></pre>
+          <p id="error-output" class="error" role="alert"></p>
+        </div>
+
+        <div class="card">
+          <h3>Selected Element</h3>
+          <div id="selection-controls"></div>
+          <div id="sandbox-actions" class="sandbox-actions" hidden>
+            <button type="button" id="add-prop-btn">+ Add Prop (max 3)</button>
+            <button type="button" id="remove-prop-btn">- Remove Prop</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Challenge Import / Export</h3>
+          <div class="io-buttons">
+            <button type="button" id="export-btn">Export JSON</button>
+            <button type="button" id="import-btn">Import JSON</button>
+          </div>
+          <p id="io-message" class="notice" role="status" aria-live="polite"></p>
+          <textarea id="json-io" rows="5" aria-label="Challenge JSON"></textarea>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="scene-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
