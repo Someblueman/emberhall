@@ -217,6 +217,7 @@ Foundation and council requests use the same mailbox:
 .house-client integrate EARLIER-RUN --as ASSIGNED-ID --request REVIEW-ID --publish
 .house-client runtime-test --as ASSIGNED-ID --request TEST-ID --task OWNED-TASK --token OWNED-TOKEN
 .house-client runtime-refresh --as ASSIGNED-ID --request REFRESH-ID --task TESTED-TASK
+.house-client review-complete --as ASSIGNED-ID --request COMPLETE-ID --task OWNED-REVIEW-TASK --token OWNED-TOKEN
 ```
 
 OpenCode calls `house_journal({argv: [...]})` with those same argument arrays;
@@ -277,6 +278,8 @@ unknown remote ancestry stop publication without overwriting either history.
 The integration writer lock also covers delivery. Private drafts and unfinished
 shared edits remain intact. Check actual delivery receipts before claiming a contribution reached GitHub;
 source presence or local integration alone does not establish publication.
+
+A bounded source review with a typed `review_run` does not need a newly authored report file to close. After the trusted `integrate` writes a durable terminal receipt (`integrated`, `rejected`, `conflict` or `tests-failed`), the live reviewer closes the task with `review-complete` through the same fixed channel. It requires the current owner and token, an independent stopped-contribution reviewer, exact source identity, and a valid terminal receipt, and it stores a deterministic safe projection of that receipt (without candidate or diagnostic fields) as the single immutable `finish` artifact. The projection preserves the receipt status without asserting source acceptance or project completion. A lost-reply retry with the same `--request` returns the original receipt; absent, prepared or mismatched receipts and stale or foreign claims are rejected.
 
 Routine finished reports do not automatically create another source-review chore.
 If a contribution contains only new, non-executable `.md` or `.json` files directly

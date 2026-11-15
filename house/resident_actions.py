@@ -9,7 +9,7 @@ from pathlib import Path
 from .files import artifact, workspace_path
 from .record import Record
 
-ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint"})
+ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint", "review-complete"})
 
 
 def parser():
@@ -26,9 +26,9 @@ def parser():
             mode.add_argument("--inspect", action="store_true")
             mode.add_argument("--reject")
             command.add_argument("--path")
-        elif name.startswith("runtime-") or name == "checkpoint":
+        elif name.startswith("runtime-") or name in {"checkpoint", "review-complete"}:
             command.add_argument("--task", required=True)
-            if name in {"runtime-test", "checkpoint"}:
+            if name in {"runtime-test", "checkpoint", "review-complete"}:
                 command.add_argument("--token", required=True)
         else:
             council = command.add_subparsers(dest="action", required=True)
@@ -62,6 +62,10 @@ def known_result(record: Record, resident: str, run: str, argv: list[str], reque
     if args.command == "checkpoint":
         from .checkpoint import known_result as checkpoint_result
         return checkpoint_result(record, resident, run, args.task, args.token, requestid)
+    if args.command == "review-complete":
+        from .review_completion import known_result as review_result
+
+        return review_result(record, args.task, resident, args.token, requestid)
     state, events, _ = record.read()
     key = requestid
     if args.command == "council" and args.action in {"notice", "enact"}:
@@ -99,6 +103,10 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
     if args.command == "checkpoint":
         from .checkpoint import create
         return create(record, workspace, resident, run, args.task, args.token, requestid)
+    if args.command == "review-complete":
+        from .review_completion import complete
+
+        return complete(record, args.task, resident, args.token, requestid)
     if args.command == "integrate":
         from .integrate import integrate, inspect_contribution
         if args.path is not None and not args.inspect:

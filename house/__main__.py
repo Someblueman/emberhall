@@ -132,6 +132,12 @@ def parser() -> argparse.ArgumentParser:
     lens.add_argument("--before", type=int, help="exclusive sequence bound for older matching rows")
     receipt = sub.add_parser("receipt")
     receipt.add_argument("request")
+    review_complete = sub.add_parser("review-complete",
+                                     help="close a review task from its terminal integration receipt")
+    review_complete.add_argument("--as", dest="actor", required=True)
+    review_complete.add_argument("--request", help="stable id for retrying a lost response")
+    review_complete.add_argument("task")
+    review_complete.add_argument("--token", required=True)
     signing = sub.add_parser("ballot")
     signing.add_argument("proposal")
     return p
@@ -286,6 +292,10 @@ def run(args: argparse.Namespace) -> object:
             json.dump(seed, output, indent=2)
             output.write("\n")
         return {"path": args.path, "lessons": len(lessons)}
+    if command == "review-complete":
+        from .review_completion import complete
+
+        return complete(record, args.task, args.actor, args.token, args.request or f"review-complete-{args.task}-{args.actor}")
     data = vars(args).copy()
     for key in ("repo", "artifacts_from", "command", "actor", "request"):
         data.pop(key)
