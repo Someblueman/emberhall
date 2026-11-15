@@ -82,8 +82,13 @@ main {
 }
 .house-layout {
   display:grid;
-  grid-template-columns:minmax(0,1.6fr) minmax(270px,.8fr);
+  grid-template-columns:minmax(0,1.5fr) minmax(300px,.9fr);
   gap:5%;
+  align-items:start;
+}
+.house-pane {
+  align-self:stretch;
+  min-width:0;
 }
 .view-nav {
   display:flex;
@@ -177,6 +182,28 @@ main {
   display:block;
   overflow:hidden;
   max-height:650px;
+  min-height:260px;
+}
+#room-nav {
+  scroll-margin-top:118px;
+}
+.room-card-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.room-card-head > div {
+  min-width:0;
+  flex:1;
+}
+#back-to-rooms {
+  flex:none;
+  margin-top:4px;
+}
+#room-context {
+  grid-column:1 / -1;
+  margin:0;
 }
 .map-hint {
   text-align:center;
@@ -488,10 +515,22 @@ footer a {
     margin-top:-25px;
   }
 }
+@media (max-height:720px) {
+  .stage svg {
+    min-height:220px;
+  }
+}
 @media(max-width:760px) {
   .house-layout {
     grid-template-columns:1fr;
     gap:24px;
+  }
+  #back-to-rooms {
+    min-height:44px;
+    padding:10px 14px;
+  }
+  .room-nav button {
+    min-height:44px;
   }
   .journal-pane {
     border-left:0;
@@ -843,6 +882,56 @@ footer a {
 .dorm-buttons button:disabled {
   opacity:.4;
   cursor:default;
+}
+/* Only the explorer stays beside the work. Its introduction scrolls away.
+   One page scrollbar remains; the map gives space to the real control rows. */
+@media (min-width:1051px) and (min-height:760px) {
+  .house-explorer {
+    position:sticky;
+    top:110px;
+    height:min(900px, calc(100vh - 130px));
+    height:min(900px, calc(100dvh - 130px));
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    gap:8px;
+  }
+  .house-explorer .floor-controls {
+    margin:0;
+    gap:4px 12px;
+  }
+  .house-explorer .stage {
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    margin:0;
+    gap:6px;
+  }
+  .house-explorer .stage svg {
+    flex:1 1 0;
+    min-height:0;
+    height:100%;
+    max-height:650px;
+  }
+  .house-explorer .map-hint, .house-explorer .room-nav {
+    flex:none;
+    margin:0;
+  }
+  .house-explorer .dorm-pager {
+    flex:none;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:2px 8px;
+    margin:0;
+    padding:6px 10px;
+  }
+  .house-explorer .dorm-pager[hidden] { display:none; }
+  .house-explorer .dorm-pager p { margin:0; font-size:11px; }
+  .house-explorer .dorm-pager .small { grid-column:1; font-size:10px; }
+  .house-explorer .dorm-buttons { grid-column:2; grid-row:1 / 3; margin:0; gap:6px; }
+  .house-explorer .time-machine { padding:10px 14px; }
+  .house-explorer .time-heading strong { font-size:18px; }
+  .house-explorer input[type=range] { margin:10px 0 6px; }
 }
 .person>div, .resident-run {
   min-width:0;
