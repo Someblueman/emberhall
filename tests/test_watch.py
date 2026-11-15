@@ -411,3 +411,168 @@ sys.exit(7 if mode == 'fail' else 0)
         payload = json.loads(capture(self.record))
         self.assertIsNone(payload['files']['docs/WATCH_PROMPT.md'])
         self.assertIn('docs/renamed.md', payload['files'])
+
+
+class WatchLaneDeadlineTests(HouseCase):
+    def setUp(self):
+        super().setUp()
+        (self.repo / 'docs').mkdir()
+        self.prompt = (self.repo / 'docs/WATCH_PROMPT.md').resolve()
+        self.prompt.write_text('An inert test prompt.\n')
+        self.record.git('add', 'docs/WATCH_PROMPT.md')
+        self.record.git('-c', 'commit.gpgsign=false', 'commit', '-m', 'test prompt')
+        self.record.append('arrive', ACTOR, {'name': 'Watch keeper'},
+                           'watch-keeper-arrival-v1')
+        self.fixture = self.root / 'codex-inert'
+        self.fixture.write_text(f'''#!{sys.executable}
+import pathlib, sys, time
+assert sys.argv[1:4] == ['exec', '--approve-for-me', '--json']
+assert sys.stdin.read().startswith('RUNNER ASSIGNMENT:')
+(pathlib.Path(sys.argv[sys.argv.index('-o') + 1]).parent / 'started').write_text('started')
+time.sleep(0)
+''')
+        self.fixture.chmod(0o700)
+
+    def history(self):
+        return entries(self.record.read()[1])
+
+    def execute(self, run, seconds, lane=None, *, remaining=None, cleanup=True):
+        import fcntl
+        from unittest.mock import patch
+        from house.watch import admit, private_root, worker
+        admit(self.record, run, seconds, self.prompt, str(self.fixture), lane=lane)
+        children = []
+        popen = subprocess.Popen
+
+        def launch(*args, **kwargs):
+            child = popen(*args, **kwargs)
+            if '_exec' in args[0]:
+                children.append(child)
+            return child
+
+        def stopped(pgid):
+            # This inert fixture has no descendants. Observe its actual Popen;
+            # host-wide ps/group-recovery coverage stays in WatchTests.
+            self.assertEqual([p.pid for p in children], [pgid])
+            self.assertIsNotNone(children[0].poll())
+            return cleanup
+
+        with (private_root(self.record) / 'runner.lock').open('a+b') as lock:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            with patch('house.watch.subprocess.Popen', side_effect=launch), \
+                    patch('house.watch.group_stopped', side_effect=stopped):
+                result = worker(self.record, run, lock.fileno(), str(self.fixture),
+                                self.prompt, time.monotonic() +
+                                (seconds if remaining is None else remaining))
+        return result, children
+
+    def test_invalid_lane_and_duration_do_not_mutate_admission(self):
+        from house.watch import admit
+        before = self.record.read()[2]
+        for lane, seconds in ((None, 1201), ('build', 3601), ('unknown', 1),
+                              ('build', 0), ('build', float('inf')),
+                              ('build', float('nan'))):
+            with self.subTest(lane=lane, seconds=seconds):
+                for call in (lambda: run_watch(self.record, str(self.fixture),
+                                               seconds=seconds, lane=lane),
+                             lambda: admit(self.record, 'bad', seconds, self.prompt,
+                                           str(self.fixture), lane=lane)):
+                    with self.assertRaises(ValueError):
+                        call()
+                self.assertEqual(self.record.read()[2], before)
+
+    def test_build_boundaries_exit_early_without_padding(self):
+        began = time.monotonic()
+        for seconds in (3599, 3600):
+            with self.subTest(seconds=seconds):
+                code, children = self.execute('build-' + str(seconds), seconds, 'build')
+                self.assertEqual(code, 0)
+                self.assertEqual(children[0].returncode, 0)
+                self.assertEqual(self.history()[-1]['outcome'], 'success')
+        self.assertLess(time.monotonic() - began, 15)
+        starts = [x for x in self.history() if x['kind'] == 'start']
+        self.assertEqual([(x['seconds'], x['lane']) for x in starts],
+                         [(3599, 'build'), (3600, 'build')])
+        for start in starts:
+            self.assertAlmostEqual(start['deadline_at'] - start['at'], start['seconds'], places=2)
+
+    def test_short_lanes_and_legacy_starts_keep_short_ceiling(self):
+        for lane in (None, 'review', 'vote', 'upkeep'):
+            with self.subTest(lane=lane):
+                with self.assertRaises(ValueError):
+                    run_watch(self.record, str(self.fixture), seconds=1201, lane=lane)
+                self.assertEqual(self.execute('short-' + str(lane), 1200, lane)[0], 0)
+        legacy = next(x for x in self.history() if x['run'] == 'short-None')
+        self.assertNotIn('lane', legacy)
+
+    def test_worker_rejects_invalid_recorded_lane_and_duration(self):
+        import fcntl
+        from house.watch import private_root, worker
+        for index, (lane, seconds) in enumerate((('build', 3601), ('review', 1201),
+                                                (None, 1201), ('unknown', 1))):
+            run = 'invalid-worker-' + str(index)
+            fields = {} if lane is None else {'lane': lane}
+            self.record.append('say', ACTOR, message('start', run, seconds=seconds, **fields))
+            with (private_root(self.record) / 'runner.lock').open('a+b') as lock:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+                with self.assertRaises(ValueError):
+                    worker(self.record, run, lock.fileno(), str(self.fixture),
+                           self.prompt, time.monotonic() + seconds)
+            self.assertFalse((private_root(self.record) / run).exists())
+
+    def test_build_timeout_kills_real_child_and_retains_outcome(self):
+        self.fixture.write_text(self.fixture.read_text().replace('time.sleep(0)', 'time.sleep(60)'))
+        code, children = self.execute('build-timeout', 3600, 'build', remaining=2)
+        self.assertEqual(code, 1)
+        self.assertTrue((self.record.common / 'house-watch/build-timeout/started').exists())
+        self.assertEqual(children[0].returncode, -signal.SIGKILL)
+        self.assertEqual(self.history()[-1]['outcome'], 'timeout')
+        self.assertEqual(sum(x['kind'] == 'timeout' for x in self.history()), 1)
+
+    def test_build_nonzero_exit_is_not_a_timeout(self):
+        self.fixture.write_text(self.fixture.read_text().replace('time.sleep(0)', 'sys.exit(7)'))
+        code, children = self.execute('build-failed', 3600, 'build')
+        self.assertEqual((code, children[0].returncode), (1, 7))
+        self.assertEqual(self.history()[-1]['outcome'], 'child-failed')
+        self.assertFalse(any(x['kind'] == 'timeout' for x in self.history()))
+
+    def test_known_early_result_survives_delayed_cleanup_recovery(self):
+        from house.watch import recover
+        code, children = self.execute('build-recovery', 3600, 'build', cleanup=False)
+        self.assertEqual((code, children[0].returncode), (1, 0))
+        self.assertFalse(any(x['kind'] == 'finish' for x in self.history()))
+        from unittest.mock import patch
+        with patch('house.watch.group_members', return_value=[]):
+            self.assertIsNone(recover(self.record))
+        final = self.history()[-1]
+        self.assertEqual((final['kind'], final['outcome'], final['exit_code']),
+                         ('finish', 'success', 0))
+        self.assertTrue(final['recovered'])
+
+    def test_cli_rejects_overlong_build_before_start(self):
+        before = self.record.read()[2]
+        result = subprocess.run([sys.executable, '-m', 'house.watch', '--repo', str(self.repo),
+                                 'run', '--lane', 'build', '--seconds', '3601'], cwd=SOURCE,
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(json.loads(result.stderr)['error'], 'ValueError')
+        self.assertEqual(self.record.read()[2], before)
+        # Real CLI accepts both build boundaries and the lane default. A dirty
+        # fixture stops at admission, before any supervisor or model can start.
+        (self.repo / 'unrelated-work').write_text('preserve')
+        for extra in ([], ['--seconds', '3599'], ['--seconds', '3600']):
+            accepted = subprocess.run([sys.executable, '-m', 'house.watch', '--repo',
+                                       str(self.repo), 'run', '--lane', 'build', *extra],
+                                      cwd=SOURCE, capture_output=True, text=True, timeout=10)
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            self.assertEqual(json.loads(accepted.stdout)['reason'], 'dirty-checkout')
+        self.assertFalse(any(x['kind'] == 'start' for x in self.history()))
+
+    def test_inspect_exposes_lane_limits_without_mutation(self):
+        from house.watch import inspect
+        before = self.record.read()[2]
+        summary = inspect(self.record)
+        self.assertEqual(summary['deadline_seconds'], 1200)
+        self.assertEqual(summary['deadline_seconds_by_lane'],
+                         {'build': 3600, 'review': 1200, 'vote': 1200, 'upkeep': 1200})
+        self.assertEqual(self.record.read()[2], before)

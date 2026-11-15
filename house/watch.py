@@ -23,8 +23,23 @@ ACTOR = "watch-keeper"
 PREFIX = "house-watch-v1 "
 MAX_STARTS = 12
 MAX_SECONDS = 1200
+BUILD_MAX_SECONDS = 3600
+LANE_MAX_SECONDS = {
+    "build": BUILD_MAX_SECONDS,
+    "review": MAX_SECONDS,
+    "vote": MAX_SECONDS,
+    "upkeep": MAX_SECONDS,
+}
 DEFAULT_CODEX = "/Users/sws/.local/bin/codex"
 TERMINAL = {"finish", "recovered-interruption"}
+
+
+def max_seconds_for_lane(lane: str | None) -> int:
+    if lane is None:
+        return MAX_SECONDS
+    if lane not in LANE_MAX_SECONDS:
+        raise ValueError(f"unknown lane: {lane}")
+    return LANE_MAX_SECONDS[lane]
 
 
 def local_day(timestamp: float) -> str:
@@ -102,12 +117,17 @@ def inspect(record: Record) -> dict:
     return {"house": state["house_id"], "head": head, "local_day": local_day(now),
             "starts_today": sum(item["local_day"] == local_day(now) for item in starts),
             "daily_limit": MAX_STARTS, "deadline_seconds": MAX_SECONDS,
+            "deadline_seconds_by_lane": dict(LANE_MAX_SECONDS),
             "pending": [item["run"] for item in starts if item["run"] not in ended],
             "blocked": reason, "recoverable_run": rescue["run"] if rescue else None,
             "recent": history[-12:]}
 
 
-def admit(record: Record, run: str, seconds: float, prompt: Path, codex: str) -> dict:
+def admit(record: Record, run: str, seconds: float, prompt: Path, codex: str,
+          lane: str | None = None) -> dict:
+    limit = max_seconds_for_lane(lane)
+    if not math.isfinite(seconds) or not 0 < seconds <= limit:
+        raise ValueError(f"deadline must be positive and at most {limit} seconds")
     # Check ownership and budget against exactly the head that accepts the start.
     with record.locked():
         state, events, head = record.read()
@@ -124,7 +144,8 @@ def admit(record: Record, run: str, seconds: float, prompt: Path, codex: str) ->
             "local_day": day, "deadline_at": wall_time + seconds,
             "seconds": seconds, "prompt": str(prompt.relative_to(record.root)),
             "executable": Path(codex).name, "source_head": source_head(record),
-            "resident": "watch-" + run, "clean_admission": rescue is None}
+            "resident": "watch-" + run, "clean_admission": rescue is None,
+            **({"lane": lane} if lane is not None else {})}
         if rescue and not reason:
             fields.update(recover_from=rescue["run"], prior_resident=rescue["resident"],
                           rescue_commit=rescue["commit"], rescue_fingerprint=rescue["fingerprint"])
@@ -205,7 +226,8 @@ def worker(record: Record, run: str, fd: int, codex: str, prompt: Path,
     if len(history) != 1 or history[0]["kind"] != "start":
         raise ValueError("worker requires a fresh journal start")
     seconds = history[0]["seconds"]
-    if not 0 < seconds <= MAX_SECONDS or not math.isfinite(deadline):
+    limit = max_seconds_for_lane(history[0].get("lane"))
+    if not 0 < seconds <= limit or not math.isfinite(deadline):
         raise ValueError("invalid worker deadline")
     deadline = min(deadline, time.monotonic() + seconds)
     path = private / run
@@ -286,9 +308,14 @@ def worker(record: Record, run: str, fd: int, codex: str, prompt: Path,
 
 
 def run_watch(record: Record, codex: str = DEFAULT_CODEX,
-              prompt: str = "docs/WATCH_PROMPT.md", seconds: float = MAX_SECONDS) -> dict:
-    if not math.isfinite(seconds) or not 0 < seconds <= MAX_SECONDS:
-        raise ValueError("deadline must be positive and at most 1200 seconds")
+              prompt: str = "docs/WATCH_PROMPT.md",
+              seconds: float | None = None,
+              lane: str | None = None) -> dict:
+    limit = max_seconds_for_lane(lane)
+    if seconds is None:
+        seconds = limit
+    if not math.isfinite(seconds) or not 0 < seconds <= limit:
+        raise ValueError(f"deadline must be positive and at most {limit} seconds")
     prompt_path = (record.root / prompt).resolve()
     prompt_path.relative_to(record.root)
     if not os.path.isabs(codex):
@@ -305,7 +332,7 @@ def run_watch(record: Record, codex: str = DEFAULT_CODEX,
         reason = recover(record)
         if reason:
             return emit(record, "skip", run, reason=reason)
-        decision = admit(record, run, seconds, prompt_path, codex)
+        decision = admit(record, run, seconds, prompt_path, codex, lane=lane)
         if decision["kind"] == "skip":
             return decision
         deadline = time.monotonic() + seconds
@@ -346,7 +373,8 @@ def main(argv: list[str] | None = None) -> int:
     run = sub.add_parser("run", help="attempt one bounded wake; never installs a schedule")
     run.add_argument("--codex", default=DEFAULT_CODEX)
     run.add_argument("--prompt", default="docs/WATCH_PROMPT.md")
-    run.add_argument("--seconds", type=float, default=MAX_SECONDS)
+    run.add_argument("--seconds", type=float, default=None)
+    run.add_argument("--lane", choices=tuple(LANE_MAX_SECONDS), default=None)
     work = sub.add_parser("_worker", help=argparse.SUPPRESS)
     for name in ("run-id", "codex", "prompt"):
         work.add_argument("--" + name, required=True)
@@ -373,7 +401,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "inspect":
             result = inspect(record)
         else:
-            result = run_watch(record, args.codex, args.prompt, args.seconds)
+            result = run_watch(record, args.codex, args.prompt, args.seconds, lane=args.lane)
         print(json.dumps(result, indent=2), flush=True)
         return 0
     except (OSError, ValueError, subprocess.SubprocessError) as error:

@@ -1,5 +1,9 @@
 # The bounded watch
 
+This is the legacy scheduled runner. Continuous residents use `house.home`,
+whose inactivity limit is separate; these changes do not install a runtime or
+alter continuous staffing, quotas or provider routes.
+
 The Steward authorized a user-level scheduler to wake headless Codex residents,
 with at most twelve runs per local civil day. This module attempts one wake; it
 does not install a schedule. The integrator owns the planned four daily wakes,
@@ -8,7 +12,17 @@ activation, `docs/WATCH_PROMPT.md`, and uninstall instructions in `docs/RESUME.m
 ```sh
 python3 -m house.watch --repo /Users/sws/Code/longhouse inspect
 python3 -m house.watch --repo /Users/sws/Code/longhouse run
+python3 -m house.watch --repo /Users/sws/Code/longhouse run --lane build --seconds 3600
 ```
+
+`run --lane build` defaults to a 3600-second ceiling. `review`, `vote`, `upkeep`
+and an omitted lane retain 1200 seconds. `--seconds` may shorten either ceiling;
+there is no artificial minimum or idle padding. The lane and duration are recorded
+at admission and checked again by the worker. Older starts without a lane keep
+their original 1200-second limit. `inspect` exposes both the default and lane caps.
+An early CLI exit finishes immediately; a sleep journal event alone does not end
+the process. The supervisor records a deadline kill as `timeout`, separately from
+successful or failed CLI exit.
 
 `inspect` is read-only. It shows today's journal start count, pending runs,
 checkout/claim blockers, an eligible recovery run, and the twelve latest safe watch
@@ -59,8 +73,8 @@ later timezone or backwards-adjusted journal timestamp. Local timezone follows
 the scheduler process/system configuration; keep it consistent with this Mac's
 Europe/London schedule. The attempt is charged even if the launcher dies before
 spawning a model. An attempt crossing midnight before the launch gate is released
-is aborted. The `--seconds` option may shorten the default 1,200-second deadline;
-it cannot increase it.
+is aborted. The `--seconds` option may shorten the selected lane's deadline;
+it cannot exceed that lane's ceiling.
 
 Admission checks the quota, all tracked/untracked dirty work and every live task
 claim against the same verified journal head, under the existing writer lock.
