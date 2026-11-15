@@ -288,6 +288,43 @@ assert.match(body,/<img src=x>/);
 assert.equal(injected.length,0);
 ''')
 
+    def test_exact_model_labels_cover_helpers_fallback_and_hostile_text(self):
+        self.run_renderer(r'''
+data={timezone:'Europe/London',observed_at:4000,frames:[{seq:1,at:1000}]};current=true;
+frame={seq:40,at:4000,rooms:[],scars:[],residents:[
+ {id:'r-luna',name:'Luna',agent:'codex',room:'workshop',pose:'standing'},
+ {id:'r-terra',name:'Terra',agent:'codex',room:'workshop',pose:'standing'},
+ {id:'r-sol',name:'Sol',agent:'codex',room:'hearth',pose:'standing'},
+ {id:'r-muse',name:'Muse Guest',agent:'muse',room:'hearth',pose:'standing'},
+ {id:'r-agy',name:'Agy Guest',agent:'agy',room:'workshop',pose:'standing'},
+ {id:'r-oc',name:'Oc Guest',agent:'opencode',room:'hearth',pose:'standing'}],
+ tasks:[],
+ runs:[
+  {id:'run-luna',resident:'r-luna',agent:'codex',model:'gpt-6-luna',start:3900,sequence:2,status:'launched'},
+  {id:'run-terra',resident:'r-terra',agent:'codex',model:'gpt-6.1-terra',start:3800,sequence:3,status:'launched'},
+  {id:'run-sol',resident:'r-sol',agent:'codex',model:'gpt-6.1-sol',start:3850,sequence:4,status:'started'},
+  {id:'run-ended-known',resident:'r-sol',agent:'codex',model:'gpt-6.1-sol',start:3700,sequence:5,status:'ended',end:3800,outcome:'success'},
+  {id:'run-ended-missing',resident:'r-muse',agent:'muse',start:3600,sequence:6,status:'ended',end:3700,outcome:'success'},
+  {id:'run-ended-blank',resident:'r-agy',agent:'agy',model:'   ',start:3500,sequence:7,status:'ended',end:3600,outcome:'success'},
+  {id:'run-ended-hostile',resident:'r-oc',agent:'opencode',model:'<img src=x onerror=alert(1)>',start:3400,sequence:8,status:'ended',end:3500,outcome:'success'}]};
+renderResidentPulse();
+const body=pulseText();
+const injected=pulseNodes().filter(n=>['img','script','b','i','a'].includes(n.tag));
+''', r'''
+assert.match(body,/3 resident runs open/);
+assert.match(body,/4 recent run endings/);
+assert.match(body,/3 recorded awake outside a house run/);
+assert.match(body,/gpt-6-luna/);
+assert.match(body,/gpt-6\.1-terra/);
+assert.match(body,/gpt-6\.1-sol/);
+assert.match(body,/Model unrecorded/);
+assert.equal((body.match(/Model unrecorded/g)||[]).length,2);
+assert.match(body,/<img src=x onerror=alert\(1\)>/);
+assert.equal(injected.length,0);
+assert.match(body,/Last hour:/);
+assert.match(body,/dated record, not a live process check/);
+''')
+
 
 if __name__ == "__main__":
     unittest.main()
