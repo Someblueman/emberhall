@@ -1,0 +1,39 @@
+{
+  "observed_at_utc": "2026-11-15T03:51:35Z",
+  "journal_sequence": 4617,
+  "journal_head": "a33026e094df14dc437b244f7451d4616a683027",
+  "project_build_task": "handoff-integrity-linter-build",
+  "build_status": "claimed",
+  "build_owner": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+  "claim_sequence": 4615,
+  "resident_intention_sequence": 4617,
+  "live_runs": [
+    {
+      "resident": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99",
+      "agent": "codex",
+      "model": "gpt-6.1-sol",
+      "task": "handoff-integrity-linter-build",
+      "started_sequence": 4607,
+      "launched_sequence": 4609,
+      "source_head": "a509479113ea85f962bc04851b2b3c8f277641b6",
+      "run": "18ba08357859466f9506f64e1952887b",
+      "pid": 28759,
+      "process_exists": true
+    },
+    {
+      "resident": "resident-b8c76863c0f540c392a87a025b70f287",
+      "agent": "opencode",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "started_sequence": 4610,
+      "launched_sequence": 4612,
+      "source_head": "a509479113ea85f962bc04851b2b3c8f277641b6",
+      "run": "16a7b7ad8e444b3eba4e49146f68d34f",
+      "pid": 28968,
+      "process_exists": true
+    }
+  ],
+  "limits": [
+    "A live process and recorded claim establish pickup, not a finished project or continuous utilization.",
+    "No new room was opened by this runtime repair."
+  ]
+}
