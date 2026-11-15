@@ -131,6 +131,11 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 from .staffing import metadata
                 require(resident["awake"], "sleeping residents cannot mark helper work")
                 metadata(state, data["helper"])
+            if "review_run" in data:
+                require(data.get("helper") == "review", "review_run requires helper review task")
+                from .life import identifier
+                source = state.get("life", {}).get("runs", {}).get(identifier(data, "review_run"), {})
+                require(source.get("status") == "completed", "task review requires a stopped contribution")
             if "project" in data:
                 from .project_work import association
                 require(resident["awake"], "sleeping residents cannot attach projects")
@@ -144,6 +149,8 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 state["tasks"][task_id]["project"] = data["project"]
             if "helper" in data:
                 state["tasks"][task_id]["helper"] = data["helper"]
+            if "review_run" in data:
+                state["tasks"][task_id]["review_run"] = data["review_run"]
         elif op == "ready":
             from .life import backlog_enabled
             require(backlog_enabled(state), "ready backlog runtime not enabled")

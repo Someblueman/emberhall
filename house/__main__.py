@@ -72,6 +72,8 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("--project", default=argparse.SUPPRESS, help="active shelf project ID")
             cmd.add_argument("--helper", choices=("build", "review"), default=argparse.SUPPRESS,
                              help="explicit eligibility for a bounded helper")
+            cmd.add_argument("--review-run", default=argparse.SUPPRESS,
+                             help="stopped contribution run whose author cannot take this review task")
         elif name == "ready":
             cmd.add_argument("task")
             cmd.add_argument("--expect", type=int, required=True)

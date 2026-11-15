@@ -55,6 +55,14 @@ def validate_help(state: dict, request: dict) -> None:
 def validate_admission(state: dict, data: dict, at: float) -> None:
     """Called inside the journal writer before any reservation is published."""
     from . import project_work
+    help_id = data.get("help_request")
+    request = state.get("life", {}).get("requests", {}).get(help_id, {})
+    # Help dispatch may name its task only in the request, including for regulars.
+    for task_id in (data.get("task"), request.get("task")):
+        task = state["tasks"].get(task_id, {})
+        if "review_run" in task:
+            source = state["life"]["runs"][task["review_run"]]
+            require(data["resident"] != source["resident"], "task reviewer must be independent")
     c = capacity(state)
     if not helper(data):
         require(c["total"] < c["total_limit"] and c["regular"] < c["regular_limit"],
@@ -64,8 +72,6 @@ def validate_admission(state: dict, data: dict, at: float) -> None:
     require(c["regular"] >= 2 and c["helpers"] < 2 and c["total"] < 4,
             "helper capacity changed")
     require("explore_generation" not in data, "helper cannot explore")
-    help_id = data.get("help_request")
-    request = state.get("life", {}).get("requests", {}).get(help_id, {})
     if help_id is not None:
         require(request.get("status") == "pending" and help_eligible(state, request, at, help_id=help_id),
                 "helper help demand changed")
