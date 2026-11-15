@@ -2,19 +2,42 @@
 
 The offline editor lets you read existing anchors and orphan history, edit comment
 bodies and choose open or resolved using ordinary labelled controls. It is a
-companion to `review.html`: open the code diff in another tab when needed. It does
-not add comments, move anchors, merge reviews or run a server.
+companion to `review.html`: open the code diff in another tab when needed. A
+packet-bound compose page also lets you add anchored comments. It keeps existing
+anchors fixed and uses the same download/apply workflow.
 
-First add comments with `skein.py comment`. For old version-1 comments, explicitly
-run `skein.py migrate-comments PACKET`. Then generate a new page:
+To read lines and add comments without typing Git IDs in a terminal, generate a
+compose page from the whole packet (it works with an empty comments file):
+
+```sh
+python3 projects/review-skein/comment_editor.py compose \
+  /path/to/packet /path/to/new-editor.html
+```
+
+Choose a rendered line in the labelled selector; the preview gives its complete
+text, path, side, line number and commit. Enter a unique ID (1–100 ASCII letters,
+digits, dot, underscore or hyphen, starting with a letter or digit) and body, then
+choose **Add comment to download**. The new comment appears in the ordinary
+comment editor below, where its body and resolution can be changed. Repeat for
+more comments. Download is blocked while an unadded ID/body draft remains: add it
+first, or clear both draft fields. The packet changes only when the download is
+applied through the CLI. There is no delete or move-anchor operation.
+
+For a page that only edits existing comments, retain the comments-file command.
+For old version-1 comments, explicitly run `skein.py migrate-comments PACKET`
+first. Generate a new page:
 
 ```sh
 python3 projects/review-skein/comment_editor.py page \
   /path/to/packet/comments.json /path/to/new-editor.html
 ```
 
-Existing output files are refused. The generator validates every comment with the
-same strict version-2 reader as the other tools. Keep `comment_editor.py`,
+Existing output files are refused. Both generators validate every comment with the
+same strict version-2 reader as the other tools. Compose also validates the
+manifest and anchor table, refusing duplicate line identities or commits on the
+wrong old/base or new/head side. It does not verify the Git bundle or authenticate
+the packet; use `skein.py verify` and a trusted packet source as appropriate.
+Keep `comment_editor.py`,
 `comment_editor.js` and `skein.py` together when generating the page; the resulting
 HTML is self-contained and needs no source files, network or server to open.
 
@@ -42,15 +65,24 @@ HTML is self-contained and needs no source files, network or server to open.
    writer at a time, as with the existing Skein editing CLI. This is not a locking
    or concurrent-merge protocol.
 
-The download format is explicitly versioned: `format: "skein-comment-edits"`,
+The `page` download format is explicitly versioned: `format: "skein-comment-edits"`,
 `version: 1`, `base_sha256` (SHA-256 of the exact original `comments.json` bytes),
 and `document` (the ordinary strict version-2 comments object). It is an edit
 envelope, not a replacement packet schema. The Python apply command validates the
 whole envelope and every comment before writing. It refuses duplicate JSON keys,
 unsupported versions, missing or duplicate IDs, changed order, added/removed
 comments and any mutation of anchor, state, orphan reason or rebase provenance.
-Only body and resolution may change. A stale baseline fails even if a different
-writer changed only whitespace in `comments.json`; regenerate the editor instead
+Version-1 downloads from `page` retain these edit-only semantics. Version-2
+downloads from `compose` add `packet_sha256` and `anchors_sha256`, hashes of the
+exact original manifest and anchor-file bytes. They allow new comments only at
+the end of the document. Existing IDs, order, anchors and provenance stay fixed;
+only their bodies and resolution may change. Every new record must have a unique
+safe ID and name an exact rendered anchor (including text and the side's commit),
+with anchored state and no invented rebase/orphan history. Comments still use the
+unchanged version-2 comments schema. Stale packet/anchor hashes fail before any
+write, including whitespace-only changes. A download cannot supply its own
+replacement anchor table. All validation precedes one atomic comments replacement.
+A stale baseline fails even if a different writer changed only whitespace in `comments.json`; regenerate the editor instead
 of forcing the old edits over new work.
 
 Apply replaces only `comments.json` atomically after validation. An unchanged
@@ -69,8 +101,9 @@ instructions. The static diff and read-only comment viewer still need no script.
 
 Run `python3 -m unittest discover -s projects/review-skein -v`. The Python tests
 exercise a fresh real-Git packet and the CLI boundary; Node tests exercise editor
-events and download data without a browser. Those checks do not establish actual
-rendering, browser download handling, keyboard focus or screen-reader speech.
+events and download data without a browser. They include a real Git compose ->
+Node form events/download -> CLI apply lifecycle and stale/tampered-anchor/duplicate-ID
+rejection without partial writes. Those checks do not establish actual rendering, browser download handling, keyboard focus or screen-reader speech.
 The independent non-author desktop/phone and screen-reader try required by
 milestone 2 stays open; this editor must be included in that try before claiming
 it is accessible or that the milestone is complete.
