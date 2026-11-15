@@ -214,5 +214,115 @@ class EditorLifecycleTests(SkeinFixture):
         self.assertEqual((self.packet / "comments.json").read_bytes(), before)
 
 
+class ComposerLifecycleTests(SkeinFixture):
+    def compose(self):
+        self.export()
+        anchor = skein._load_anchors(self.packet)[0]
+        skein.add_comment(self.packet, "existing", anchor.commit, anchor.path,
+                          anchor.side, anchor.line, "Existing question")
+        page = Page(comment_editor.render_composer(self.packet))
+        return page, json.loads(page.scripts[0]["text"])
+
+    @unittest.skipUnless(shutil.which("node"), "Node needed for generated-page compose lifecycle")
+    def test_real_packet_compose_node_add_download_apply(self):
+        self.export()
+        members = {p.name: p.read_bytes() for p in self.packet.iterdir()}
+        output = self.root / "compose.html"
+        cli = [sys.executable, str(ROOT / "comment_editor.py")]
+        subprocess.run([*cli, "compose", str(self.packet), str(output)], check=True, capture_output=True)
+        html = output.read_bytes()
+        self.assertEqual(html.decode(), comment_editor.render_composer(self.packet))
+        refused = subprocess.run([*cli, "compose", str(self.packet), str(output)], capture_output=True)
+        self.assertEqual(refused.returncode, 1)
+        self.assertEqual(output.read_bytes(), html)
+        page = Page(html.decode())
+        self.assertEqual(len(page.scripts), 3)
+        envelope = self.root / "envelope.json"
+        anchors = self.root / "anchors.json"
+        envelope.write_text(page.scripts[0]["text"])
+        anchors.write_text(page.scripts[1]["text"])
+        self.assertNotIn("<", page.scripts[1]["text"])
+        edits = self.root / "download.json"
+        subprocess.run(["node", str(ROOT / "test_comment_editor_ui.js"), str(envelope), str(edits), str(anchors)],
+                       check=True, capture_output=True)
+        result = subprocess.run([*cli, "apply", str(self.packet), str(edits)], check=True, capture_output=True, text=True)
+        self.assertIn("2 comment", result.stdout)
+        comments = skein.loads_comments((self.packet / "comments.json").read_text())
+        self.assertEqual(len(comments), 2)
+        self.assertEqual(comments[1].resolution, "resolved")
+        for comment in comments:
+            self.assertIn(comment.anchor, skein._load_anchors(self.packet))
+        for name, raw in members.items():
+            if name != "comments.json": self.assertEqual((self.packet / name).read_bytes(), raw)
+
+    def test_packet_bound_download_rejects_tamper_without_any_writes(self):
+        page, envelope = self.compose()
+        anchor = skein._load_anchors(self.packet)[-1]
+        added = skein.Comment("new-one", anchor, "New comment").to_dict()
+        envelope["document"]["comments"].append(added)
+        edits = self.root / "edits.json"
+        original = (self.packet / "comments.json").read_bytes()
+        variants = []
+        for key, value in [("packet_sha256", "wrong"), ("anchors_sha256", "wrong"),
+                           ("version", 1), ("version", True)]:
+            variants.append({**envelope, key: value})
+        for field, value in [("id", "existing"), ("body", " "),
+                             ("state", "orphan"), ("rebased_from", anchor.to_dict())]:
+            bad = json.loads(json.dumps(envelope))
+            bad["document"]["comments"][-1][field] = value
+            variants.append(bad)
+        for field, value in [("commit", "f" * 40), ("line", 999),
+                             ("path", "absent.py"), ("text", "tampered"),
+                             ("side", "old" if anchor.side == "new" else "new")]:
+            bad = json.loads(json.dumps(envelope))
+            bad["document"]["comments"][-1]["anchor"][field] = value
+            variants.append(bad)
+        for comments in [list(reversed(envelope["document"]["comments"])), [added]]:
+            variants.append({**envelope, "document": {**envelope["document"], "comments": comments}})
+        for value in variants:
+            with self.subTest(value=value):
+                edits.write_text(json.dumps(value))
+                with self.assertRaises(skein.SkeinError): comment_editor.apply_edits(self.packet, edits)
+                self.assertEqual((self.packet / "comments.json").read_bytes(), original)
+        edits.write_text(json.dumps(envelope))
+        for name in ("packet.json", "anchors.json", "comments.json"):
+            member = self.packet / name
+            raw = member.read_bytes()
+            member.write_bytes(raw + b"\n")
+            with self.assertRaisesRegex(skein.SkeinError, "stale"):
+                comment_editor.apply_edits(self.packet, edits)
+            self.assertEqual((self.packet / "comments.json").read_bytes(), raw + b"\n" if name == "comments.json" else original)
+            member.write_bytes(raw)
+        # Body/resolution editing of existing comments and additions are one batch.
+        envelope["document"]["comments"][0]["body"] = "Existing edited"
+        edits.write_text(json.dumps(envelope))
+        with patch.object(skein.os, "replace", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError): comment_editor.apply_edits(self.packet, edits)
+        self.assertEqual((self.packet / "comments.json").read_bytes(), original)
+        self.assertFalse(list(self.packet.glob(".comments-*")))
+        self.assertEqual(comment_editor.apply_edits(self.packet, edits), 2)
+
+    def test_compose_refuses_ambiguous_wrong_side_or_symlinked_anchors(self):
+        self.export()
+        path = self.packet / "anchors.json"
+        raw = path.read_bytes()
+        value = json.loads(raw)
+        value["anchors"].append(value["anchors"][0])
+        path.write_text(json.dumps(value))
+        with self.assertRaisesRegex(skein.SkeinError, "duplicate"):
+            comment_editor.render_composer(self.packet)
+        value = json.loads(raw)
+        value["anchors"][0]["commit"] = "f" * 40
+        path.write_text(json.dumps(value))
+        with self.assertRaisesRegex(skein.SkeinError, "side"):
+            comment_editor.render_composer(self.packet)
+        saved = self.root / "saved-anchors.json"
+        saved.write_bytes(raw)
+        path.unlink()
+        path.symlink_to(saved)
+        with self.assertRaisesRegex(skein.SkeinError, "symlink"):
+            comment_editor.render_composer(self.packet)
+
+
 if __name__ == "__main__":
     unittest.main()
