@@ -302,7 +302,7 @@ class Coordinator:
         assignment += (f"Prefix new mutation request IDs with {run}-. Old room-local request aliases do not "
                        "transfer; use the full canonical receipt ID from the earlier handoff to inspect old work.\n")
         checkpoint = workspace / "evidence" / "checkpoint.json"
-        if checkpoint.exists():
+        if not staffing.helper(assigned) and checkpoint.exists():
             last = datetime.fromisoformat(json.loads(checkpoint.read_text())["last_event_utc"]).timestamp()
             if time.time() - last >= 86400:
                 assignment += (
