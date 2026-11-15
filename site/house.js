@@ -93,7 +93,42 @@ function figure(g, resident, x, y) {
   if(sitting) box(group,x-10,y-8,20,17,12,["#a58a5d","#765d40","#88714c"]);
   el("path",{d:`M${cx-5} ${cy-11}l-3 12m13-12l7 10`,stroke:"#3b433c","stroke-width":5,"stroke-linecap":"round"},group);
   el("path",{d:`M${cx-11} ${cy-10}Q${cx-12} ${cy-height} ${cx} ${cy-height}Q${cx+12} ${cy-height} ${cx+11} ${cy-10}Z`,fill:kind.color},group);
-  el("path",{d:`M${cx-9} ${cy-height+8}l-8 12m26-12l7 12`,stroke:kind.color,"stroke-width":5,"stroke-linecap":"round"},group);
+  // Props interpret the selected frame's room, never a live action or progress.
+  const gestures = {door:"arrival",hearth:"conversation",workshop:"plans",archive:"reading",council:"deliberation"};
+  const gesture = Object.prototype.hasOwnProperty.call(gestures,resident.room) ? gestures[resident.room] : "standing";
+  const action = el("g",{"data-gesture":gesture},group);
+  el("title",{},action,`Symbolic ${gesture} · last recorded room, not live activity`);
+  const arm = path => el("path",{d:path,stroke:kind.color,"stroke-width":5,"stroke-linecap":"round","stroke-linejoin":"round",fill:"none"},action);
+  const hand = (dx,dy) => el("circle",{cx:cx+dx,cy:cy+dy,r:3,fill:skin},action);
+  if(gesture === "plans" || gesture === "reading") {
+    arm(`M${cx-9} ${cy-height+8}l-7 11 5 4M${cx+9} ${cy-height+8}l9 10-5 5`);
+    if(gesture === "plans") {
+      el("path",{d:`M${cx-12} ${cy-28}l29 4-3 20-29-4Z`,fill:"#dce4ce",stroke:"#536f67","stroke-width":1.5},action);
+      el("path",{d:`M${cx-7} ${cy-23}l17 2-1 9-17-2ZM${cx+1} ${cy-22}l-1 9M${cx-9} ${cy-11}l15 2`,fill:"none",stroke:"#638f8f","stroke-width":1},action);
+    } else {
+      el("path",{d:`M${cx} ${cy-23}l-17-5v20l17 5 17-5v-20Z`,fill:"#e4d8b7",stroke:"#536556","stroke-width":2},action);
+      el("path",{d:`M${cx} ${cy-23}v20M${cx-12} ${cy-22}l8 2m-8 4 8 2m8-6 8-2m-8 8 8-2`,stroke:"#998965",fill:"none","stroke-width":1},action);
+    }
+    hand(-13,-12);hand(15,-12);
+  } else if(gesture === "deliberation") {
+    arm(`M${cx-9} ${cy-height+8}l-8 7-5-10M${cx+9} ${cy-height+8}l10 12-7 4`);
+    hand(-22,-29);
+    el("path",{d:`M${cx-3} ${cy-31}l18 2-2 22-18-2Z`,fill:"#e7d3a4",stroke:"#987c50","stroke-width":1.5},action);
+    el("path",{d:`M${cx+1} ${cy-25}l9 1m-10 4 9 1m-10 4 6 1`,stroke:"#b09a70",fill:"none"},action);
+    hand(13,-13);
+  } else if(gesture === "conversation") {
+    arm(`M${cx-9} ${cy-height+8}l-7 10M${cx+9} ${cy-height+8}l8 4 5-12`);
+    hand(-16,18-height);hand(22,-height);
+    el("path",{d:`M${cx-21} ${cy-13}h10v9h-10Zm10 2q8-1 5 5h-5`,fill:"#dfcfaa",stroke:"#6e6d56","stroke-width":1.5},action);
+  } else if(gesture === "arrival") {
+    arm(`M${cx-9} ${cy-height+8}l-8 12M${cx+9} ${cy-height+8}l8 4 3-15`);
+    hand(-17,-14);hand(20,-37);
+    el("path",{d:`M${cx-9} ${cy-31}l19 24`,stroke:"#725b43","stroke-width":2,fill:"none"},action);
+    el("path",{d:`M${cx+5} ${cy-16}h15v15h-15Z`,fill:"#9b7951",stroke:"#5d513f","stroke-width":1.5},action);
+    el("path",{d:`M${cx+5} ${cy-12}l8 4 7-4`,stroke:"#cfad73",fill:"none"},action);
+  } else {
+    arm(`M${cx-9} ${cy-height+8}l-8 12m26-12l7 12`);
+  }
   el("circle",{cx,cy:cy-height-7,r:9,fill:skin},group);
   el("path",{d:`M${cx-9} ${cy-height-8}q-2-13 9-12q12 0 9 13q-6-7-18-1`,fill:["#514239","#7c5f42","#c4b995"][hash(resident.id)%3]},group);
   el("text",{x:cx,y:cy-height-24,"text-anchor":"middle","font-size":18,fill:kind.color,"font-family":"system-ui,sans-serif"},group,kind.mark);

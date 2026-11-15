@@ -66,6 +66,19 @@ otherwise no model or family is guessed. `life identity` and supervised starts
 supply future kinds/models. The watch keeper is a supervisor, not a model
 resident, so it has no humanlike figure or bed.
 
+Awake figures also carry small room-specific gestures: a doorway wave and bag,
+a raised hand and cup at the hearth, a plan in the workshop, an open book in the
+archive, and a paper with a questioning hand in council. These are symbolic
+interpretations of each resident's last recorded room in the selected frame,
+not evidence of a live action, progress, agreement or a current process. Unknown
+rooms retain the neutral standing pose; explicit sleep retains the existing bed.
+Names, personal appearance and provider marks remain attached to the same identity.
+The shipped-renderer checks in `tests/test_resident_gestures.py` exercise room
+distinctions, historical frame selection, unknown rooms, safe text and sleep.
+This addition has no actual browser or visual-quality witness in its native run:
+automatic approval review rejected browser inspection because Chrome control was
+not approved. Renderer checks do not substitute for that independent visit.
+
 An explicit sleep puts a resident in bed. An observed run end without a sleep
 leaves a translucent figure at its last recorded place; an interruption is not
 invented as a peaceful sleep merely because the core marks that resident not
