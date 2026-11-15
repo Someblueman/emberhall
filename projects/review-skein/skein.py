@@ -529,12 +529,20 @@ def add_comment(
     return comment
 
 
+ROW_STATUS = {
+    "equal": "Unchanged", "insert": "Added", "delete": "Removed",
+    "replace": "Changed", "meta": "Note",
+}
+
+
 def _row(old_number: int | None, new_number: int | None,
          old: str, new: str, kind: str) -> str:
     def number(value: int | None) -> str:
         return str(value) if value is not None else ""
+    # Change kind must be text, not row colour alone, for screen readers.
+    status = f'<span class="sr">{ROW_STATUS[kind]}.</span> '
     return (
-        f'<tr class="{kind}"><th scope="row" class="number old-number">{number(old_number)}</th>'
+        f'<tr class="{kind}"><th scope="row" class="number old-number">{status}{number(old_number)}</th>'
         f'<th scope="row" class="number new-number">{number(new_number)}</th>'
         f'<td class="old code">{html.escape(old)}</td>'
         f'<td class="new code">{html.escape(new)}</td></tr>\n'
@@ -599,6 +607,14 @@ tr.insert td.new { background: var(--add); } tr.delete td.old { background: var(
 tr.replace td.old { background: var(--del); } tr.replace td.new { background: var(--add); }
 tr.meta td { color: var(--muted); font-style: italic; }
 a { color: inherit; } footer { color: var(--muted); margin-top: 2rem; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: -9999px; top: 0; background: var(--bg); color: var(--fg);
+  padding: .5rem 1rem; z-index: 1; }
+.skip:focus { left: 0; }
+a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+.scroll { overflow-x: auto; }
+@media (max-width: 640px) { table { min-width: 34rem; } main { padding: .5rem; } }
 """
 
 
@@ -609,11 +625,12 @@ def _render_html(metadata: dict[str, Any], rendered: list[tuple[Change, list[str
         title = f"{change.status}: {change.display_path}"
         navigation.append(f'<li><a href="#file-{index}">{html.escape(title)}</a></li>')
         sections.append(
-            f'<section id="file-{index}"><h2>{html.escape(title)}</h2>\n'
-            f'<table><caption>Old line and new line; {len(old)} old / {len(new)} new</caption>\n'
+            f'<section id="file-{index}" aria-labelledby="file-{index}-title">'
+            f'<h2 id="file-{index}-title">{html.escape(title)}</h2>\n'
+            f'<div class="scroll"><table><caption>Old line and new line; {len(old)} old / {len(new)} new</caption>\n'
             '<thead><tr><th scope="col">Old</th><th scope="col">New</th>'
             '<th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>\n'
-            f'<tbody>{_diff_rows(old, new)}</tbody></table></section>\n'
+            f'<tbody>{_diff_rows(old, new)}</tbody></table></div></section>\n'
         )
     if not sections:
         navigation.append("<li>No textual changes between these commits.</li>")
@@ -625,10 +642,10 @@ def _render_html(metadata: dict[str, Any], rendered: list[tuple[Change, list[str
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
 <title>Skein review packet</title><style>{STYLE}</style></head>
-<body><main><h1>Skein review packet</h1>
+<body><a class="skip" href="#files">Skip to changed files</a><main><h1>Skein review packet</h1>
 <p class="identity">Base: <code>{base}</code><br>Head: <code>{head}</code></p>
 <p>This file is static. No network, account, JavaScript or live review service is used.</p>
-<nav aria-label="Changed files"><ol>{''.join(navigation)}</ol></nav>
+<nav id="files" aria-label="Changed files"><ol>{''.join(navigation)}</ol></nav>
 {body}<footer>Review Skein packet format {VERSION}. The adjacent bundle carries the Git objects;
 hashes bind bytes, not people. Comments reside in comments.json.</footer></main></body></html>
 '''

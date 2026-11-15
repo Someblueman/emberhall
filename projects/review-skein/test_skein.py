@@ -155,6 +155,29 @@ class SkeinPacketTests(SkeinFixture):
         self.assertEqual([comment], skein.loads_comments(skein.dumps_comments(stored)))
         self.assertEqual("anchored", comment.state)
 
+    def test_html_change_kind_is_text_with_landmarks_and_skip_link(self) -> None:
+        self.export()
+        page = (self.packet / "review.html").read_text(encoding="utf-8")
+        # Keyboard: first focusable element skips to the changed-files index,
+        # whose links jump to each labelled file section.
+        self.assertIn('<a class="skip" href="#files">Skip to changed files</a>', page)
+        self.assertIn('<nav id="files" aria-label="Changed files">', page)
+        self.assertIn('aria-labelledby="file-1-title"', page)
+        self.assertIn('<h2 id="file-1-title">', page)
+        # Screen reader: every diff row names its change kind as text; the
+        # fixture exercises added, changed and unchanged rows.
+        self.assertEqual(page.count('<tr class="'), page.count('<span class="sr">'))
+        for word in ("Added.", "Changed.", "Unchanged."):
+            self.assertIn(f'<span class="sr">{word}</span>', page)
+        self.assertIn(".sr { position: absolute;", page)
+        # Small screens scroll the table horizontally instead of squeezing it.
+        self.assertIn('<div class="scroll"><table>', page)
+        self.assertIn("@media (max-width: 640px)", page)
+        self.assertIn("a:focus-visible", page)
+        # The accessibility slice must not weaken the offline guarantees.
+        self.assertIn("default-src 'none'", page)
+        self.assertNotIn("<script", page)
+
     def test_reexports_are_byte_identical(self) -> None:
         first = self.root / "first"
         second = self.root / "second"

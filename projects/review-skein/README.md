@@ -38,6 +38,15 @@ Open `review.html` directly in a browser. Its Content Security Policy forbids
 external resources. A console-only reader can inspect the JSON directly. Keep
 the five files together when carrying the packet.
 
+Milestone 2's first slice makes that static page usable without a mouse or
+sight of its colours: the first focusable element skips to the changed-files
+index, each file section is labelled by its heading, every diff row names its
+change kind (`Added`/`Removed`/`Changed`/`Unchanged`) as visually-hidden text
+rather than colour alone, links get a visible focus outline, and tables scroll
+horizontally on narrow screens instead of being squeezed. Still later
+milestone-2 work, not claimed here: comment/resolution editing and an
+independent phone/desktop and screen-reader try by a non-author.
+
 ## Verify the carried Git bytes
 
 ```sh
