@@ -397,6 +397,146 @@ function grounds(g,span,depth,layouts) {
   el("circle",{cx:lx,cy:ly-33,r:9,fill:"#f5c873",opacity:.16,class:"lantern-glow"},g);
   el("rect",{x:lx-3.5,y:ly-38,width:7,height:9,rx:1.5,fill:"#f4c777",stroke:"#3c4a44","stroke-width":1.2},g);
 }
+// Small things that make a room a particular room. Scenery only: none of it
+// stands for a recorded fact (those stay in furnishings, figures and scars).
+const WOOD=["#b08a58","#6f5a40","#8d7149"],DARK=["#6f5b47","#3f372d","#574a3b"],CLOTH=["#9a5548","#5e3731","#7c453b"];
+function rug(g,x,y,r,fill,edge) {
+  const [cx,cy]=p(x,y,.4);
+  el("ellipse",{cx,cy,rx:r*1.22,ry:r*.61,fill,stroke:edge,"stroke-width":1.5},g);
+  el("ellipse",{cx,cy,rx:r*.86,ry:r*.43,fill:"none",stroke:edge,"stroke-width":.8,opacity:.7},g);
+}
+function backArt(g,x1,x2,y,z1,z2,fill,stroke="#d0b984") {
+  return polygon(g,[[x1,y+.5,z1],[x2,y+.5,z1],[x2,y+.5,z2],[x1,y+.5,z2]],fill,stroke,1.5);
+}
+function sideArt(g,x,y1,y2,z1,z2,fill,stroke="#d0b984") {
+  return polygon(g,[[x+.5,y1,z1],[x+.5,y2,z1],[x+.5,y2,z2],[x+.5,y1,z2]],fill,stroke,1.5);
+}
+function plant(g,x,y,tall) {
+  box(g,x,y,9,9,9,["#b8704f","#7a4936","#96583f"]);
+  const [cx,cy]=p(x+4.5,y+4.5,9);
+  (tall?[[0,-20,7],[-6,-12,7],[6,-13,7],[0,-7,7]]:[[0,-9,7],[-5,-5,6],[5,-5,6]]).forEach(([dx,dy,r],n)=>
+    el("circle",{cx:cx+dx,cy:cy+dy,r,fill:["#3f7a55","#356a4b","#47875e","#3a7350"][n%4]},g));
+}
+function chair(g,x,y,colors=WOOD,facing="front") {
+  box(g,x,y,15,15,9,colors);
+  if(facing==="front")box(g,x,y,15,3,22,colors); else box(g,x,y,3,15,22,colors);
+}
+function floorLamp(g,x,y,lit) {
+  const [cx,cy]=p(x,y,0);
+  el("ellipse",{cx,cy,rx:5,ry:2.5,fill:"#3b3a31"},g);
+  el("line",{x1:cx,y1:cy,x2:cx,y2:cy-38,stroke:"#3b3a31","stroke-width":2},g);
+  if(lit)el("circle",{cx,cy:cy-42,r:19,fill:"#f5c873",opacity:.13,class:"lantern-glow"},g);
+  el("path",{d:`M${cx-8} ${cy-36}l4-12h8l4 12Z`,fill:lit?"#f4d28c":"#8f8a70",stroke:"#5d5646","stroke-width":1},g);
+}
+function crate(g,x,y,size=16,z=0) {
+  box(g,x,y,size,size,size*.8,["#b99a63","#7a6442","#98804f"],z);
+  line(g,[[x,y+size,z+size*.1],[x+size,y+size,z+size*.7]],"#5f4e35",1);line(g,[[x,y+size,z+size*.7],[x+size,y+size,z+size*.1]],"#5f4e35",1);
+}
+function decor(g,room,x,y,depth,lit,front) {
+  const far=y+depth;
+  if(room==="door") {
+    if(!front) {
+      polygon(g,[[x+60,y+4],[x+96,y+4],[x+96,y+24],[x+60,y+24]],"#7d5a4a","#c9a36b",1);
+      sideArt(g,x,y+18,y+54,41,44,"#8a6a48","#5d4a36");
+      [["#8a4f43",22],["#4f6d7a",33],["#a58a4a",44]].forEach(([fill,at])=>sideArt(g,x,y+at,y+at+8,20,41,fill,"#3f372d"));
+      box(g,x+150,y+34,9,9,17,DARK);line(g,[[x+154,y+38,17],[x+158,y+36,40]],"#7a3e3a",2.5);line(g,[[x+154,y+38,17],[x+151,y+40,37]],"#3f5d6a",2.5);
+    } else {
+      box(g,x+100,far-34,56,15,10,WOOD);box(g,x+112,far-30,10,6,3,["#5f4636","#3d2d24","#4d392d"],10);
+      plant(g,x+10,far-22,true);
+    }
+  } else if(room==="hearth") {
+    if(!front) {
+      backArt(g,x+8,x+40,y,26,50,"#4c6a5c");line(g,[[x+10,y+.8,32],[x+20,y+.8,42],[x+28,y+.8,34],[x+38,y+.8,40]],"#c9cdbd",1.2);
+      box(g,x+78,y+8,9,6,10,["#d7b878","#8c704b","#b4915d"],48);box(g,x+56,y+10,3,3,8,["#e9dfc2","#b9b097","#cfc6aa"],48);box(g,x+108,y+10,3,3,8,["#e9dfc2","#b9b097","#cfc6aa"],48);
+      [[0,0],[9,0],[4,6]].forEach(([dx,dz])=>box(g,x+128+dx,y+10,8,16,6,["#9b7650","#5d4631","#7b5c40"],dz));
+    } else {
+      chair(g,x+22,y+78,CLOTH,"side");chair(g,x+128,y+84,CLOTH);
+      plant(g,x+156,far-20);
+    }
+  } else if(room==="workshop") {
+    if(!front) {
+      backArt(g,x+18,x+104,y,30,56,"#6b5a45");
+      [[26,36,26,52],[38,34,38,50],[34,50,42,50],[54,36,54,52],[50,36,58,36],[70,34,70,52],[66,40,74,40],[86,36,94,50],[94,36,86,50]].forEach(([a,b,c,d])=>
+        line(g,[[x+a,y+.9,b],[x+c,y+.9,d]],"#d5c49a",2));
+      sideArt(g,x,y+16,y+50,30,52,"#dce4ce","#536f67");line(g,[[x+.9,y+21,36],[x+.9,y+45,36]],"#638f8f",1);line(g,[[x+.9,y+21,44],[x+.9,y+38,44]],"#638f8f",1);
+    } else {
+      box(g,x+82,y+74,11,11,13,WOOD);crate(g,x+150,far-36);crate(g,x+152,far-34,12,13);
+      [[20,118],[28,126],[36,116],[44,128]].forEach(([a,b])=>{const [cx,cy]=p(x+a,y+b,.5);el("ellipse",{cx,cy,rx:3,ry:1.2,fill:"#e1cf9f"},g);});
+      floorLamp(g,x+158,y+34,lit);
+    }
+  } else if(room==="archive") {
+    if(!front) {
+      rug(g,x+76,y+104,40,"#5d6f66","#b8ab7a");
+      line(g,[[x+158,y+44,0],[x+158,y+27,54]],"#c9a36b",2.5);line(g,[[x+170,y+44,0],[x+170,y+27,54]],"#c9a36b",2.5);
+      for(let n=1;n<6;n++)line(g,[[x+158,y+44-n*2.8,n*9],[x+170,y+44-n*2.8,n*9]],"#c9a36b",2);
+    } else {
+      const [gx,gy]=p(x+60,y+92,31);el("line",{x1:gx,y1:gy+9,x2:gx,y2:gy,stroke:"#5d4a36","stroke-width":2},g);
+      el("circle",{cx:gx,cy:gy-3,r:7,fill:"#5f93a8",stroke:"#3d5d6b","stroke-width":1},g);el("path",{d:`M${gx-4} ${gy-5}q4-4 6 0t-2 5`,fill:"#6fa37a"},g);
+      crate(g,x+10,far-36);crate(g,x+12,far-34,12,13);chair(g,x+68,y+122);
+    }
+  } else if(room==="council") {
+    if(!front) {
+      rug(g,x+90,y+80,62,"#6a4a55","#c9a36b");
+      backArt(g,x+34,x+62,y,20,56,"#7a3e3a");const [ex,ey]=p(x+48,y+.9,40);el("circle",{cx:ex,cy:ey,r:6,fill:"none",stroke:"#f0c77b","stroke-width":2},g);
+      backArt(g,x+70,x+98,y,20,56,"#3f5d6a");const [fx,fy]=p(x+84,y+.9,40);el("path",{d:`M${fx-5} ${fy+5}l5-11 5 11Z`,fill:"none",stroke:"#f0c77b","stroke-width":2},g);
+    } else {
+      box(g,x+104,y+54,7,7,9,["#c9d6d6","#7f9494","#a3b6b6"],22);plant(g,x+158,far-20,true);
+    }
+  } else if(room==="bedroom") {
+    if(!front) {
+      box(g,x+150,y+6,24,17,52,WOOD);line(g,[[x+162,y+23,4],[x+162,y+23,50]],"#5f4e35",1.2);
+      sideArt(g,x,y+20,y+48,26,50,"#2c4257");const [mx,my]=p(x+.9,y+38,42);el("circle",{cx:mx,cy:my,r:4,fill:"#efe6c4"},g);
+    } else {
+      box(g,x+8,far-24,12,12,12,WOOD);const [cx,cy]=p(x+14,far-18,12);
+      if(lit)el("circle",{cx,cy:cy-6,r:13,fill:"#f5c873",opacity:.14,class:"lantern-glow"},g);
+      el("rect",{x:cx-3,y:cy-9,width:6,height:8,rx:1.5,fill:"#f4c777",stroke:"#3c4a44","stroke-width":1},g);
+    }
+  } else if(room==="study") {
+    if(!front) {
+      rug(g,x+88,y+104,44,"#4f5f7a","#c9b98c");
+      sideArt(g,x,y+34,y+60,24,52,"#cdbb8c","#7a6442");line(g,[[x+.9,y+38,30],[x+.9,y+46,44],[x+.9,y+56,34]],"#7f9c8a",1.5);
+    } else {
+      chair(g,x+80,y+122);
+      const [lx,ly]=p(x+108,y+92,21);el("line",{x1:lx,y1:ly,x2:lx+4,y2:ly-12,stroke:"#3b3a31","stroke-width":1.8},g);
+      if(lit)el("circle",{cx:lx+5,cy:ly-13,r:13,fill:"#f5c873",opacity:.15,class:"lantern-glow"},g);
+      el("path",{d:`M${lx-1} ${ly-10}l5-7 7 4-3 6Z`,fill:lit?"#f4d28c":"#8f8a70",stroke:"#5d5646","stroke-width":1},g);
+      plant(g,x+156,far-20,true);
+    }
+  } else if(room==="parlor") {
+    if(!front) {
+      rug(g,x+88,y+80,58,"#6f5a70","#c9a36b");
+      box(g,x+74,y+6,56,15,34,DARK);polygon(g,[[x+76,y+21.4,22],[x+128,y+21.4,22],[x+128,y+21.4,26],[x+76,y+21.4,26]],"#efe8d2","#3f372d",.8);
+      backArt(g,x+56,x+70,y,34,52,"#b98f5b");
+      floorLamp(g,x+160,y+34,lit);
+    } else {
+      box(g,x+40,far-40,96,18,11,["#5f8a86","#35544f","#48706b"]);box(g,x+40,far-24,96,5,24,["#5f8a86","#35544f","#48706b"]);
+      box(g,x+44,far-38,20,10,4,["#d9b574","#9a7a45","#b9945a"],11);
+      chair(g,x+146,y+70,["#5f8a86","#35544f","#48706b"],"side");plant(g,x+8,far-22,true);
+    }
+  } else if(room==="gallery") {
+    if(front) {
+      box(g,x+26,y+92,14,14,24,["#e8e2d0","#a8a290","#c8c2b0"]);const [sx,sy]=p(x+33,y+99,24);el("circle",{cx:sx,cy:sy-8,r:7,fill:"#d7a75f",stroke:"#8c6a35","stroke-width":1},g);
+      box(g,x+146,y+94,14,14,24,["#e8e2d0","#a8a290","#c8c2b0"]);const [tx,ty]=p(x+153,y+101,24);el("path",{d:`M${tx-7} ${ty}l7-17 7 17Z`,fill:"#75b4a1",stroke:"#3f7566","stroke-width":1},g);
+    } else if(lit) {
+      [38,87,136].forEach(a=>{const [cx,cy]=p(x+a,y+26,60);el("circle",{cx,cy,r:14,fill:"#f5c873",opacity:.1},g);});
+    }
+  } else if(room==="chronicle") {
+    if(!front) {
+      rug(g,x+90,y+84,52,"#5b5a48","#c9b98c");
+      const [cx,cy]=p(x+.9,y+38,44);el("circle",{cx,cy,r:9,fill:"#efe6c4",stroke:"#8c704b","stroke-width":2.5},g);el("path",{d:`M${cx} ${cy}v-6M${cx} ${cy}l4 2`,stroke:"#3f372d","stroke-width":1.4,fill:"none"},g);
+    } else {
+      box(g,x+150,y+52,14,12,30,WOOD);const [hx,hy]=p(x+157,y+58,30);
+      el("path",{d:`M${hx-5} ${hy-14}h10l-5 7 5 7h-10l5-7Z`,fill:"#e9dfc2",stroke:"#8c704b","stroke-width":1.2},g);
+      box(g,x+12,far-40,28,14,26,DARK);[0,1,2].forEach(n=>{const [rx,ry]=p(x+18+n*8,far-26,8+n*7);el("circle",{cx:rx,cy:ry,r:3.2,fill:"#e6d7ae",stroke:"#8c704b","stroke-width":1},g);});
+    }
+  } else if(!front) {
+    // Rooms the residents add later, and the salvage room: crates, a barrel and a coil of rope.
+    crate(g,x+16,y+12,18);crate(g,x+36,y+12,16);crate(g,x+24,y+14,14,14);
+    box(g,x+146,y+12,16,16,24,["#9b7650","#5d4631","#7b5c40"]);line(g,[[x+146,y+28,8],[x+162,y+28,8]],"#3f372d",1.5);line(g,[[x+146,y+28,17],[x+162,y+28,17]],"#3f372d",1.5);
+    const [cx,cy]=p(x+150,far-24,.5);[7,4.5,2].forEach(r=>el("ellipse",{cx,cy,rx:r*1.3,ry:r*.65,fill:"none",stroke:"#c9b98c","stroke-width":1.6},g));
+    plant(g,x+10,far-22);
+  }
+}
 // Each room opens onto the hall; the Door also opens onto the path.
 function doorway(g,item,lit) {
   if(!item)return;
@@ -575,7 +715,9 @@ function drawHouse() {
       line(g,[[x+132,y,24],[x+132,y,53]],"#63755c",2);
       flame(g,x+15,y+5,42,awake);
       doorway(g,layouts.find(item=>item.room===room),awake);
+      decor(g,room.id,x,y,depth,awake,false);
       furnishings(g,room.id,x,y,awake,members);
+      decor(g,room.id,x,y,depth,awake,true);
     } else building(g,room,x,y,depth,awake);
     wear(g,room,x,y,depth);
     (room.id==="bedroom"?dorm.visible:members).forEach((resident,n)=>{
@@ -805,6 +947,9 @@ function visibleScars() {
 function choose(room) {
   selected=room;$("overview").hidden=!room;
   drawHouse(); roomPanel(); dormControls();
+  // Bring the room's details into view when they open below the drawing.
+  const card=room?document.querySelector?.(".room-card")?.getBoundingClientRect?.():null;
+  if(card&&card.top>window.innerHeight*.6)document.querySelector(".stage")?.scrollIntoView?.({block:"start"});
   document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
 }
 function backToRooms() {
@@ -1005,7 +1150,12 @@ function roomPanel() {
   const floor=floorsAt(frame).find(f=>f.level===selectedFloor);
   const context=$("room-context");
   if(context)context.textContent=room?`${floor?floor.name:"Ground floor"} · ${room.name}`:(floor?`${floor.name} · whole house`:"Whole house");
-  if(room)roomRecord(room,content);
+  if(room) {
+    // Lead with who is here and what the room holds; the room's own record goes last.
+    const here=roomOccupants(frame,room.id).filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
+    const lead=[here?`${here} awake here`:"Nobody awake here",roomStatus(room)==="open"?roomFact(room.id):""].filter(Boolean);
+    html("p","room-lead",lead.join(" · "),content);
+  }
   const rooms=floorRooms(frame,selectedFloor);
   const inView=r=>room?r.room===room.id:rooms.some(place=>place.id===r.room);
   const residents=frame.residents.filter(r=>inView(r)&&r.pose!=="unconfirmed"&&(room||r.pose!=="sleeping"));
@@ -1067,9 +1217,15 @@ function roomPanel() {
   if(room?.id==="parlor") renderCatchupPanel(content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") renderWorkshopTasks(content);
   const roomScars=room?visibleScars().filter(s=>s.room===room.id):[];
-  if(roomScars.length)html("p","small","These marks are historical receipts, not alerts that a run is still failing.",content);
+  // Old marks are kept, but folded away so they do not bury the room.
+  let marks=content;
+  if(roomScars.length) {
+    marks=html("details","room-marks",undefined,content);
+    html("summary","",`${roomScars.length} old ${roomScars.length===1?"mark":"marks"} kept here`,marks);
+    html("p","small","These marks are historical receipts, not alerts that a run is still failing.",marks);
+  }
   roomScars.forEach(s=>{
-    const row=html("div","scar",undefined,content);html("strong","",`${s.mended?"⌁":"!"} ${s.title}`,row);
+    const row=html("div","scar",undefined,marks);html("strong","",`${s.mended?"⌁":"!"} ${s.title}`,row);
     html("span","small",s.detail,row);html("span","small",`Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
     if(findScarTargetIndex(s)>=0){
       const btn=html("button","scar-jump",`View event ${s.sequence}`,row);
@@ -1077,6 +1233,11 @@ function roomPanel() {
       btn.addEventListener("click",()=>jumpToSequence(s.sequence));
     }
   });
+  if(room) {
+    const about=html("details","room-about",undefined,content);
+    html("summary","","About this room",about);
+    roomRecord(room,about);
+  }
   if(!room)html("p","small",`Across the house: ${frame.residents.filter(r=>r.pose==="sleeping").length} residents asleep in the loft · ${visibleScars().length} marks remembered in their rooms.`,content);
   if(!room){const legend=html("div","kind-key",undefined,content);Object.values(kinds).forEach(k=>html("span","",`${k.mark} ${k.name}`,legend));}
 }
@@ -1495,7 +1656,7 @@ function voting() {
       const link = html("a", "", `Public notice · ${stamp(proposal.notice.at)} ↗`, item);
       const href = safeHttpUrl(proposal.notice.url);
       if (href) { link.href = href; link.rel = "noopener noreferrer"; }
-      html("p", "small", `24-hour window ends ${stamp(proposal.notice.until)}. Elapsed time alone does not enact a rule; current base, trial, endorsements and fresh veto check still apply.`, item);
+      html("p", "small", `Veto window ends ${stamp(proposal.notice.until)}. Elapsed time alone does not enact a rule; current base, trial, endorsements and fresh veto check still apply.`, item);
     } else html("p", "small", "No public notice recorded.", item);
     const text = html("details", "vote-alternatives", undefined, item);
     text.id = `vote-wording-${proposal.id}`;
