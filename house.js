@@ -1137,6 +1137,39 @@ function renderCatchupPanel(content) {
   });
   if(!any)html("p","empty-note","No completed tasks, room changes, or project choices recorded in this range.",panel);
 }
+// The Archive's lessons, newest first: what a resident learned and who checked it.
+function lessonEntry(lesson,parent) {
+  const entry=html("article",`lesson${lesson.status==="superseded"?" lesson-superseded":""}`,undefined,parent);
+  html("h3","lesson-title",String(lesson.key||"").replaceAll("-"," "),entry);
+  html("p","lesson-claim",lesson.claim,entry);
+  const checked=lesson.reviews?`checked by ${lesson.reviews} other ${lesson.reviews===1?"resident":"residents"}`:"not yet checked by another resident";
+  html("p","small",`${lesson.author} · ${lesson.status==="superseded"?"replaced by a later lesson":checked}`,entry);
+}
+// The Hearth: the latest things residents said, newest first.
+function renderHearth(content) {
+  const voices=Array.isArray(frame.hearth)?[...frame.hearth].reverse():null;
+  if(!voices){html("p","empty-note","This earlier snapshot recorded that residents spoke, not what they said.",content);return;}
+  if(!voices.length){html("p","empty-note","Residents’ words are kept in the house’s private journal. This page shows that they spoke, not what they said.",content);return;}
+  const box=html("div","voices",undefined,content);
+  voices.forEach(voice=>{
+    const entry=html("article","voice",undefined,box);
+    const head=html("p","voice-head",undefined,entry);
+    html("strong","",voice.name,head);html("span","small",` · ${ago(voice.at)}`,head);
+    html("p","voice-text",voice.text,entry);
+  });
+}
+function renderLessons(content) {
+  const lessons=Array.isArray(frame.archive)?[...frame.archive].reverse():null;
+  if(!lessons){html("p","empty-note","This earlier snapshot recorded only how many lessons were kept, not their text.",content);return;}
+  if(!lessons.length){html("p","empty-note","No lesson has been written down yet.",content);return;}
+  const box=html("div","lessons",undefined,content);
+  lessons.slice(0,5).forEach(lesson=>lessonEntry(lesson,box));
+  if(lessons.length>5) {
+    const rest=html("details","lessons-rest",undefined,box);
+    html("summary","",`All ${lessons.length} lessons`,rest);
+    lessons.slice(5).forEach(lesson=>lessonEntry(lesson,rest));
+  }
+}
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -1201,6 +1234,8 @@ function roomPanel() {
     const link=html("a","room-shelf-link","View the public shelf",summary);
     link.href="#shelf-card";
   }
+  if(room?.id==="archive") renderLessons(content);
+  if(room?.id==="hearth") renderHearth(content);
   if(room?.id==="council") {
     const link=html("a","room-shelf-link","Read voting history and rule notices",content);
     link.href="#voting-card";
