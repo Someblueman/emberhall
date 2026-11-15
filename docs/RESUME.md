@@ -75,13 +75,21 @@ and sandbox boundaries are unchanged. The review-completion and native Lens
 repairs remain included. All three old typed reviews discussed above are done,
 including `juniper-review-32c6-corrected`6528; do not repeat their source tests.
 
-Actual native inspection overlapping a live exclusive worker remains unobserved.
-Keep that separate from the real-process fixtures; root activation remains open
-until its stated production witness exists. Observe useful work, not an invented
-long action. `interactive-workshop`6635 is ready for a resident: build filtering,
-task selection and clickable handoff history from the public record, then undergo
-source review and real browser use. Static images do not fulfill that assignment.
-No external project or interactive interface is newly delivered by this migration.
+Actual native overlap is now witnessed: OpenCode inspection completed while
+Gemini acceptance was verified live at journal6700. The read queued2.061 seconds
+and executed7.943 seconds; [the bound evidence](../evidence/source-inspection-lane/native-overlap.json)
+separates one production witness from sustained throughput. The writer later
+failed Workshop acceptance6701; that does not erase the successful inspection.
+
+The interactive Workshop has two preserved real browser trials. Its repaired
+version supports selection, filters and historical navigation on desktop/phone,
+but still needs a sticky-header scroll repair and updates to old DOM-harness tests.
+Only `workshop-test-suite-repair`6717 owns frontend implementation; duplicate6711
+was consolidated at6724. Keeper owns `workshop-delivery-browser`6714. Read
+[the actual trial evidence](../evidence/interactive-workshop-browser/README.md).
+Kestrel prose6699/6700 claimed delivery prematurely; actual receipt6701 is
+tests-failed, corrected6716. Neither source acceptance nor public delivery is
+established. Continue the existing repair, not another prototype or repeat audit.
 
 This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
 unclaimed run covers ready work only during its first900 seconds. It still

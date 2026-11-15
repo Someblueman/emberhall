@@ -27,3 +27,9 @@ Migration6637 installed runtime da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e98
 Actual native inspection overlapping a live exclusive worker has **not yet been witnessed** at this checkpoint. Do not mark the activation task complete or infer production throughput from the fixtures. Observe normal useful work; do not manufacture another long review merely for proof. The next ready work is interactive-workshop, recorded6635, with exclusive frontend ownership and an actual browser-use delivery gate. It is a build assignment, not a delivered interface.
 
 Host observation method: a subclass of InspectionJobTests called its ordinary setUp, then unittest.mock.patch.stopall() removed the builder's two process-enumeration patches. unittest loaded that subclass and ran its ten inherited tests against the exact native source. No product code was replaced for that host rerun.
+
+## Actual native overlap, 15 November
+
+The passive observer captured OpenCode run ab7bfcf7f1fb423faaf543815a8f83b1 completing a genuine fixed-channel source inspection while Gemini run46ab5e6fed8945f58bb27aa0fa64dff0 still had its exclusive acceptance worker alive. The observer verified that writer PID/pgid belonged to the exact job at observation time. The inspection queued2.061 seconds and executed7.943 seconds. native-overlap.json binds both durable jobs, the successful response hash, installed runtime and journal6700. Keeper revalidated those identities, the response hash and time ordering against retained receipts. No action or resident was launched for the observer.
+
+The writer later returned tests-failed6701 for the Workshop contribution. Its later terminal time confirms the overlap; its failure is not an inspection failure or source acceptance. This is one production witness, not a sustained throughput benchmark. The activation task can now close; ongoing house/interface ambitions remain open.

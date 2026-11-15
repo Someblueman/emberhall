@@ -1,0 +1,72 @@
+{
+  "candidate": "5c1e6b1c5f7f595bcf93b0d54489f8996aa61aef",
+  "run": "c64998ae35c34ba5a7b090013325af71",
+  "files": [
+    {
+      "path": "site/house.css",
+      "sha256": "522c2ed9c30ebbe8172e462cd9df2ea85ff8c6ced1ae157d097b2e7ae02a3e91",
+      "immutable_finish": 6686
+    },
+    {
+      "path": "site/house.js",
+      "sha256": "0c89e0d34fc0db9d0ab892820b34d138a173c54348443d2ff7cbf7415787ec8d",
+      "immutable_finish": 6686
+    },
+    {
+      "path": "site/index.html",
+      "sha256": "bb6e2a988518a470fdce082be852bcb365399dd23a2c95f566239c9547b476cb",
+      "immutable_finish": 6686
+    },
+    {
+      "path": "tests/test_workshop_history.py",
+      "sha256": "27fc9a7fd7ba2cd3584cfc5d2ce75fc9650104d88687a4a169af951b46631339",
+      "immutable_finish": 6686
+    },
+    {
+      "path": "tests/test_workshop_ui.py",
+      "sha256": "a581fc73ec73d60d25a72f76036dbf1d799ce3c181bbb541d817deb5501a37fd",
+      "immutable_finish": 6686
+    }
+  ],
+  "browser": "ChatGPT in-app browser, site-only loopback server",
+  "history": {
+    "pages_commit": "8b6656d11cba831b87ca0e7ee8f5620cc730b773",
+    "sha256": "917b511423948057c5f24914e423acdff40b5c8917abfc4480b084a6b7de7a9a",
+    "bytes": 14025646,
+    "source_head": "5dfc87078e9cf49ecd3c370a68c5c11de2041f63",
+    "journal_head": "af8d4d507a24bc38be8d11ce6e8955305b578e09",
+    "last_sequence": 6681,
+    "format_version": 2,
+    "provenance": "Existing locally published Pages ref; read only, not a fresh invented export."
+  },
+  "observations": [
+    "Initial Workshop: 397 tasks, 392 finished; 9 cards: 2 claims, 3 unassigned, 4 recent finishes. Completed page 1-4 of392.",
+    "Selecting Try the interactive Workshop in a real browser focused workshop-detail and showed Created6667, Claimed6668 and Finished6681 with readable dates.",
+    "From detail, locator keyboard Tab reached Task record ID, then Created6667; Enter moved house history to6667/6681, hid later claim/finish and retained detail focus. Return to present restored all three events.",
+    "Work filter unfinished showed2 claims/3 unassigned and no finishes. Done showed392 recent finishes with a four-card first page. Focus stayed on workshop-filter.",
+    "Find task card on stable desktop focused workshop-task-interactive-workshop-browser and selected the done filter.",
+    "390x844 phone viewport: document clientWidth375 and body scrollWidth375, no horizontal overflow. Detail top415.109 bottom823.609 width337.5; full heading, timeline and Find task card visible.",
+    "Desktop selection scrolls detail top19.921875 and heading34.921875, behind sticky navigation. Top scroll clearance must be repaired."
+  ],
+  "source_acceptance": {
+    "sequence": 6701,
+    "status": "tests-failed",
+    "collected": 702,
+    "skipped": 118,
+    "failures": 3,
+    "failure_file": "tests/test_task_status_ui.py",
+    "cause": "Old DOM stub lacks addEventListener; obsolete row assertions also require adapting to replacement renderer."
+  },
+  "repair": {
+    "task": "workshop-test-suite-repair",
+    "sequence": 6717,
+    "browser_requirement_added": 6724,
+    "duplicate_task_retired": "workshop-delivery-repair"
+  },
+  "limits": [
+    "No public delivery or successful source acceptance.",
+    "Pagination output across context interruption was not retained, so no verified pagination interaction claim.",
+    "Screenshots inspected during trial, no image file retained.",
+    "Initial native Tab and immediate post-resize Find task card were inconclusive; stable anchored interactions are reported separately."
+  ]
+}

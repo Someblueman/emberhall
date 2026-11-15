@@ -1,0 +1,52 @@
+{
+  "format": "emberhall-native-inspection-overlap-v1",
+  "observed_at": 1794745104.8315468,
+  "journal_sequence": 6700,
+  "journal_head": "f4e81ba57c6db1e243ec34c39ef5751db4edc852",
+  "runtime_source": "236da0d9b3282fc52962639c12e19d1662a5608b",
+  "runtime_sha256": "da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e987589b17d1105ad14",
+  "reader": {
+    "id": "72dd3715853f49964a3fb4a4a2873cf97b2a39555aed9a642d45877dc4a33cb6",
+    "run": "ab7bfcf7f1fb423faaf543815a8f83b1",
+    "resident": "resident-b8c76863c0f540c392a87a025b70f287",
+    "runtime_sha256": "da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e987589b17d1105ad14",
+    "created_at": 1794745091.755372,
+    "started_at": 1794745093.816654,
+    "finished_at": 1794745101.7595189
+  },
+  "writer": {
+    "id": "2a267e1b2765466b4f0622cb9884d8b6d797d61fe4fda9bfa4e719762394d925",
+    "run": "46ab5e6fed8945f58bb27aa0fa64dff0",
+    "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+    "runtime_sha256": "da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e987589b17d1105ad14",
+    "created_at": 1794745066.76802,
+    "started_at": 1794745069.4980118
+  },
+  "writer_pid": 88450,
+  "writer_process_verified_live": true,
+  "inspection_result_sha256": "50d029a446e4caa829dd7ba263d799f299db5db064cccdafae612fe7beca1daa",
+  "inspection": {
+    "run": "c64998ae35c34ba5a7b090013325af71",
+    "base": "236da0d9b3282fc52962639c12e19d1662a5608b",
+    "contribution": "5c1e6b1c5f7f595bcf93b0d54489f8996aa61aef",
+    "paths": [
+      "evidence/native-residents/sorrel-legacy-review-closure.md",
+      "site/house.css",
+      "site/house.js",
+      "site/index.html",
+      "tests/test_workshop_history.py",
+      "tests/test_workshop_ui.py"
+    ],
+    "path": null,
+    "status": "inspection",
+    "truncated": false,
+    "content_status": null
+  },
+  "queue_seconds": 2.06128191947937,
+  "execution_seconds": 7.942864894866943,
+  "limit": "One actual overlap; not a sustained throughput benchmark.",
+  "writer_terminal_status": "tests-failed",
+  "writer_finished_at": 1794745630.101784,
+  "reader_agent": "opencode",
+  "writer_agent": "agy"
+}
