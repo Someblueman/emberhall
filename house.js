@@ -69,7 +69,7 @@ function flame(g, x, y, z, lit) {
     el("circle", {cx,cy,r:17,fill:"#f5c873",opacity:".15"},g);
   }
   el("path", {d:`M${cx-5},${cy+7} Q${cx-10},${cy-3} ${cx+1},${cy-12} Q${cx},${cy-3} ${cx+6},${cy} Q${cx+9},${cy+9} ${cx-5},${cy+7}`,
-    fill:lit?"#f4c777":"#605e4d"},g);
+    fill:lit?"#f4c777":"#605e4d",class:lit?"flame-lit":"flame-out"},g);
 }
 function figure(g, resident, x, y) {
   const kind = kinds[resident.agent] || kinds.unrecorded;
@@ -347,6 +347,106 @@ function dormControls() {
   $("dorm-page").textContent=`Six display bunks · ${view.members.length} remembered identities${view.members.length>view.asleep?` (${view.members.length-view.asleep} other recorded room traces)`:""}`;
   $("dorm-previous").disabled=view.page===0;$("dorm-next").disabled=view.page===view.pages-1;
 }
+// What the record says about a room, in a few words, drawn under its name.
+function roomFact(id) {
+  const count=(n,one,many)=>`${n} ${n===1?one:many}`;
+  if(id==="workshop")return frame.tasks.length?count(frame.tasks.length,"thread open","threads open"):"";
+  if(id==="bedroom"){const n=frame.residents.filter(r=>r.pose==="sleeping").length;return n?`${n} asleep`:"";}
+  if(id==="council"){
+    const open=(frame.voting?.choices||[]).filter(c=>c.status==="open").length;
+    if(open)return count(open,"vote open","votes open");
+    const pending=frame.council?.pending||0;return pending?count(pending,"proposal waiting","proposals waiting"):"";
+  }
+  if(id==="gallery"){const n=(frame.shelf?.projects||[]).filter(x=>x.status==="active").length;return n?count(n,"project being built","projects being built"):"";}
+  if(id==="study"){const n=(frame.shelf?.ideas||[]).length;return n?count(n,"idea on the shelf","ideas on the shelf"):"";}
+  if(id==="archive")return frame.lessons?count(frame.lessons,"lesson kept","lessons kept"):"";
+  return "";
+}
+function clip(value,limit) {value=String(value||"");return value.length>limit?value.slice(0,limit-1).trimEnd()+"…":value;}
+function heldWork(id) {
+  const task=effectiveTasks().find(t=>t.owner===id&&t.status==="claimed"&&!t.expired);
+  return task?task.title:null;
+}
+// The most recent thing a resident did, skipping the house's own bookkeeping.
+const QUIET_OPS=new Set(["life","renew","owner-admissions","owner-migrate","council-sync"]);
+function latelyEvents(limit) {
+  const found=[];
+  for(let i=index;i>=0&&i>index-600&&found.length<limit;i--) {
+    const moment=data.frames[i],event=moment?.event;
+    if(!event||QUIET_OPS.has(event.op)||event.actor==="watch-keeper")continue;
+    const last=found.at(-1);
+    if(last&&last.actor===event.actor&&last.op===event.op&&event.op==="say"){last.times++;continue;}
+    found.push({seq:moment.seq,at:moment.at,op:event.op,actor:event.actor,title:event.title,index:i,times:1});
+  }
+  return found;
+}
+function taskTitleAt(id,i) {
+  if(!id)return "";
+  for(const moment of [data.frames[i],data.frames[i-1],frame]) {
+    const task=moment?.tasks?.find(t=>t.id===id);
+    if(task)return task.title;
+  }
+  return id.replaceAll("-"," ");
+}
+function latelySentence(item) {
+  const name=residentName(item.actor),work=item.title?`“${clip(taskTitleAt(item.title,item.index),70)}”`:"";
+  const say={wake:"woke up",sleep:"went to sleep",arrive:"arrived at the door",
+    say:item.times>1?`spoke ${item.times} times`:"spoke",learn:"wrote down a lesson",shelf:"put an idea on the shelf",
+    review:"reviewed a contribution",ready:"marked work ready for review"}[item.op];
+  if(say)return `${name} ${say}`;
+  if(item.op==="claim")return `${name} took up ${work||"a thread"}`;
+  if(item.op==="finish")return `${name} finished ${work||"a thread"}`;
+  if(item.op==="task")return `${name} opened a thread${work?`: ${work}`:""}`;
+  if(item.op==="release")return `${name} set down ${work||"a thread"}`;
+  if(item.op.startsWith("council"))return `${name} brought something to the council`;
+  return `${name} · ${item.op.replaceAll("-"," ")}`;
+}
+function ago(at) {
+  const diff=observationTime()-at;
+  if(!Number.isFinite(diff)||diff<0)return "";
+  if(diff<60)return "just now";
+  if(diff<3600)return `${Math.floor(diff/60)}m ${current?"ago":"earlier"}`;
+  if(diff<86400)return `${Math.floor(diff/3600)}h ${current?"ago":"earlier"}`;
+  return `${Math.floor(diff/86400)}d ${current?"ago":"earlier"}`;
+}
+// Name tags hang over everyone who is awake: who they are and what they hold.
+function nameTags(map,placed) {
+  const awake=placed.filter(item=>!["sleeping","unconfirmed"].includes(item.resident.pose));
+  const latest=current?latelyEvents(1)[0]:null;
+  const where={door:"at the door",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table"};
+  const boxes=[];
+  awake.forEach(item=>{
+    const r=item.resident,[cx,cy]=p(item.px,item.py,0),kind=kinds[r.agent]||kinds.unrecorded;
+    const work=heldWork(r.id),second=work?clip(work,34):(where[r.room]||"here");
+    const width=Math.max(r.name.length*7.6,second.length*5.9)+22;
+    let top=cy-118;
+    // Step a tag upward until it clears the ones already hung.
+    while(boxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+4&&Math.abs(b.top-top)<42))top-=44;
+    boxes.push({cx,top,width});
+    const fresh=latest&&latest.actor===r.id&&observationTime()-latest.at<600;
+    const tag=el("g",{class:`life-tag${fresh?" life-tag-fresh":""}${work?" life-tag-working":""}`,"pointer-events":"none","data-tag":r.id},map);
+    el("line",{x1:cx,y1:top+36,x2:cx,y2:cy-58,class:"life-stem"},tag);
+    el("rect",{x:cx-width/2,y:top,width,height:38,rx:8,class:"life-box"},tag);
+    el("circle",{cx:cx-width/2+11,cy:top+13,r:3.5,fill:kind.color,class:"life-dot"},tag);
+    el("text",{x:cx-width/2+20,y:top+17,class:"life-name"},tag,r.name);
+    el("text",{x:cx-width/2+10,y:top+31,class:"life-work"},tag,second);
+  });
+}
+function renderLately() {
+  const host=$("lately");
+  if(!host||!host.replaceChildren)return;
+  host.replaceChildren();
+  const items=latelyEvents(6);
+  if(!items.length){html("li","lately-empty","Nothing recorded yet.",host);return;}
+  items.forEach((item,n)=>{
+    const row=html("li",n===0&&current&&observationTime()-item.at<600?"lately-fresh":"",undefined,host);
+    const button=html("button","lately-item",undefined,row);
+    button.type="button";
+    html("span","lately-what",latelySentence(item),button);
+    html("span","lately-when",ago(item.at),button);
+    button.addEventListener("click",()=>jumpToSequence(item.seq));
+  });
+}
 function drawHouse() {
   const map = $("house");
   map.replaceChildren();
@@ -365,7 +465,8 @@ function drawHouse() {
   totalDepth=Math.max(170,totalDepth);
   const left=Math.min(0,470-totalDepth*.86-30);
   wholeBounds = `${left} 45 ${830-left} ${Math.max(520,(totalDepth+370)*.43+100)}`;
-  const roomLabels = [];
+  const roomLabels = [], placed = [];
+  document.querySelector?.(".house-layout")?.classList?.toggle("room-open",Boolean(selected));
   const ground = el("g",{},map);
   polygon(ground,[[-18,-18,-12],[389,-18,-12],[389,totalDepth+3,-12],[-18,totalDepth+3,-12]],"#132824", "#607259",1);
   if(!rooms.length) {
@@ -403,6 +504,7 @@ function drawHouse() {
       if(room.id==="bedroom") {px=x+32+(n%3)*55;py=y+54+Math.floor(n/3)*62;}
       else {px=x+36+(n%3)*53;py=y+97+Math.floor(n/3)*40;}
       figure(g,resident,px,py);
+      placed.push({resident,px,py});
     });
     const marks=visibleScars().filter(s=>s.room===room.id);
     marks.forEach((scar,n)=>{
@@ -413,12 +515,14 @@ function drawHouse() {
     });
     const c=p(x+92,y+2,43);
     const roomName=room.name.length>22?room.name.slice(0,21)+"…":room.name;
-    roomLabels.push({x:c[0], y:c[1], name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
+    roomLabels.push({x:c[0], y:c[1], fact:status==="open"?roomFact(room.id):"", name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
     const corners=[p(x-25,y-25,80),p(x+210,y-25,80),p(x+210,y+depth+45,-30),p(x-25,y+depth+45,-30)];
     const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
   });
   roomLabels.forEach(r=>el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name));
+  roomLabels.forEach(r=>{if(r.fact)el("text",{x:r.x,y:r.y+17,class:"room-fact","text-anchor":"middle","pointer-events":"none"},map,r.fact);});
+  nameTags(map,placed);
   map.setAttribute("viewBox",selected?roomBounds[selected]||wholeBounds:wholeBounds);
 }
 function effectiveTasks() {const at=observationTime();return frame.tasks.map(t=>({...t,expired:t.status==="claimed"&&t.until<=at}));}
@@ -1512,7 +1616,7 @@ function render() {
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();lighting();
+  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
@@ -1568,7 +1672,7 @@ function refreshView(changed=false) {
   const searchSelection=activeId==="workshop-search"?{start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
-  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();}
+  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();renderLately();}
   const replacement=$("catchup-seq");
   if(replacement&&draft!==null)replacement.value=draft;
   if(focusId)$(focusId)?.focus({preventScroll:true});
