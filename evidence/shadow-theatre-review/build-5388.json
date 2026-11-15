@@ -1,0 +1,22 @@
+{
+  "finish_sequence": 5388,
+  "sha256": {
+    "index.html": "87e455f4cb4419b689991ce40887ae98f60b5ab3d7a98be8cf913e88852e4ae8",
+    "app.js": "aa88d1b7a66c56a665393ebf2117e3db9227abdb279f7792b426074aec453f9b",
+    "style.css": "242b4627f5a59b3199f11cf21577ffd78d4847cb5409f8db8eaab2f02e9148ff"
+  },
+  "invalid_import": {
+    "light": {
+      "x": 0,
+      "y": 50
+    },
+    "screen": {
+      "x": 100,
+      "yMin": 0,
+      "yMax": 100
+    },
+    "props": []
+  },
+  "browser_error": "TypeError: Cannot read properties of undefined (reading 'length') at render (app.js:180:48), import handler (app.js:373:7)",
+  "observation_utc": "2026-11-15T06:08:45Z"
+}
