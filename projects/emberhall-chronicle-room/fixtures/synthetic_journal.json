@@ -1,0 +1,376 @@
+{
+  "house_id": "synthetic-house-001",
+  "through": 60,
+  "events": [
+    {
+      "sequence": 15,
+      "at": 1794700015.0,
+      "op": "shelf",
+      "id": "test-vote-3",
+      "actor": "resident-c",
+      "data": {
+        "kind": "choice-vote",
+        "choice": "test-choice-001",
+        "idea": "alpha-tool",
+        "reason": "RAW_REASON_THIRD_VOTE token=supersecret"
+      }
+    },
+    {
+      "sequence": 11,
+      "at": 1794700011.0,
+      "op": "shelf",
+      "id": "test-explore-publish",
+      "actor": "resident-xplorer",
+      "data": {
+        "kind": "explore-publish",
+        "round": "test-round-001",
+        "token": "test-token-001",
+        "ideas": [
+          {
+            "idea": "alpha-tool",
+            "title": "Alpha Tool",
+            "what": "A synthetic alpha tool.",
+            "why": "Synthetic why.",
+            "first_step": "Build alpha.",
+            "sources": ["https://example.com/alpha"]
+          },
+          {
+            "idea": "beta-tool",
+            "title": "Beta Tool",
+            "what": "A synthetic beta tool.",
+            "why": "Synthetic why.",
+            "first_step": "Build beta.",
+            "sources": ["https://example.com/beta"]
+          },
+          {
+            "idea": "gamma-tool",
+            "title": "Gamma Tool",
+            "what": "A synthetic gamma tool.",
+            "why": "Synthetic why.",
+            "first_step": "Build gamma.",
+            "sources": ["https://example.com/gamma"]
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 12,
+      "at": 1794700012.0,
+      "op": "shelf",
+      "id": "test-choice-open-1",
+      "actor": "resident-opener",
+      "data": {
+        "kind": "choice-open",
+        "choice": "test-choice-001",
+        "milestones": {
+          "alpha-tool": {"milestone": "Build alpha first milestone.", "seconds": 604800},
+          "beta-tool": {"milestone": "Build beta first milestone.", "seconds": 604800},
+          "gamma-tool": {"milestone": "Build gamma first milestone.", "seconds": 604800}
+        }
+      }
+    },
+    {
+      "sequence": 13,
+      "at": 1794700013.0,
+      "op": "shelf",
+      "id": "test-vote-1",
+      "actor": "resident-a",
+      "data": {
+        "kind": "choice-vote",
+        "choice": "test-choice-001",
+        "idea": "alpha-tool",
+        "reason": "RAW_REASON_FIRST_VOTE token=supersecret /Users/sws/Code/longhouse/.house-residents/deadbeef"
+      }
+    },
+    {
+      "sequence": 14,
+      "at": 1794700014.0,
+      "op": "shelf",
+      "id": "test-vote-2",
+      "actor": "resident-b",
+      "data": {
+        "kind": "choice-vote",
+        "choice": "test-choice-001",
+        "idea": "beta-tool",
+        "reason": "RAW_REASON_SECOND_VOTE"
+      }
+    },
+    {
+      "sequence": 16,
+      "at": 1794700016.0,
+      "op": "shelf",
+      "id": "test-project-done-1",
+      "actor": "resident-opener",
+      "data": {
+        "kind": "project-done",
+        "project": "test-choice-001",
+        "evidence": "test-build-task"
+      }
+    },
+    {
+      "sequence": 21,
+      "at": 1794700021.0,
+      "op": "shelf",
+      "id": "test-choice-open-2",
+      "actor": "resident-opener",
+      "data": {
+        "kind": "choice-open",
+        "choice": "test-choice-002",
+        "milestones": {
+          "alpha-tool": {"milestone": "Build alpha again.", "seconds": 604800},
+          "beta-tool": {"milestone": "Build beta again.", "seconds": 604800},
+          "gamma-tool": {"milestone": "Build gamma again.", "seconds": 604800}
+        }
+      }
+    },
+    {
+      "sequence": 22,
+      "at": 1794700022.0,
+      "op": "shelf",
+      "id": "test-vote-4",
+      "actor": "resident-d",
+      "data": {"kind": "choice-vote", "choice": "test-choice-002", "idea": "alpha-tool", "reason": "vote alpha"}
+    },
+    {
+      "sequence": 23,
+      "at": 1794700023.0,
+      "op": "shelf",
+      "id": "test-vote-5",
+      "actor": "resident-e",
+      "data": {"kind": "choice-vote", "choice": "test-choice-002", "idea": "beta-tool", "reason": "vote beta"}
+    },
+    {
+      "sequence": 24,
+      "at": 1794700024.0,
+      "op": "shelf",
+      "id": "test-vote-6",
+      "actor": "resident-f",
+      "data": {"kind": "choice-vote", "choice": "test-choice-002", "idea": "gamma-tool", "reason": "vote gamma"}
+    },
+    {
+      "sequence": 25,
+      "at": 1794700025.0,
+      "op": "shelf",
+      "id": "test-project-done-rejected",
+      "actor": "resident-opener",
+      "data": {"kind": "project-done", "project": "test-choice-002", "evidence": "test-build-task-2"}
+    },
+    {
+      "sequence": 31,
+      "at": 1794700031.0,
+      "op": "council-authorize",
+      "id": "test-authorize",
+      "actor": "keeper-01",
+      "data": {
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "RAW_SOURCE_SHOULD_NOT_RENDER token=supersecret",
+        "repository": "Someblueman/emberhall",
+        "issue": 1,
+        "owner_id": 1
+      }
+    },
+    {
+      "sequence": 32,
+      "at": 1794700032.0,
+      "op": "council-wake-authorize",
+      "id": "test-wake-authorize",
+      "actor": "keeper-01",
+      "data": {"source": "RAW_WAKE_SOURCE token=supersecret"}
+    },
+    {
+      "sequence": 33,
+      "at": 1794700033.0,
+      "op": "council-propose",
+      "id": "test-propose",
+      "actor": "resident-proposer",
+      "data": {
+        "proposal": "test-rule-001",
+        "mode": "rule",
+        "title": "Test Rule: Do the Honest Thing",
+        "text": "RAW_RULE_TEXT token=supersecret",
+        "reason": "RAW_PROPOSAL_REASON",
+        "base": "base000"
+      }
+    },
+    {
+      "sequence": 34,
+      "at": 1794700034.0,
+      "op": "council-enact",
+      "id": "test-enact",
+      "actor": "keeper-01",
+      "data": {"proposal": "test-rule-001"}
+    },
+    {
+      "sequence": 35,
+      "at": 1794700035.0,
+      "op": "say",
+      "id": "test-say",
+      "actor": "resident-abc",
+      "data": {"text": "RAW_MESSAGE_SHOULD_BE_EXCLUDED token=secret123"}
+    },
+    {
+      "sequence": 36,
+      "at": 1794700036.0,
+      "op": "claim",
+      "id": "test-claim",
+      "actor": "resident-abc",
+      "data": {"token": "secret-claim-token", "workspace": "/Users/sws/Code/longhouse/.house-residents/deadbeef"}
+    },
+    {
+      "sequence": 37,
+      "at": 1794700037.0,
+      "op": "shelf",
+      "id": "test-unverified",
+      "actor": "keeper-01",
+      "verified": false,
+      "data": {"kind": "project-done", "project": "test-choice-001", "evidence": "test-build-task"}
+    },
+    {
+      "sequence": 38,
+      "at": 1794700038.0,
+      "op": "owner-migrate",
+      "id": "test-migrate-other",
+      "actor": "keeper-01",
+      "data": {"scope": "some-runtime-migration-20261115", "house": "synthetic-house-001"}
+    },
+    {
+      "sequence": 39,
+      "at": 1794700039.0,
+      "op": "owner-migrate",
+      "id": "test-migrate-selection",
+      "actor": "keeper-01",
+      "data": {"scope": "work-selection-repair-20261114", "house": "synthetic-house-001"}
+    },
+    {
+      "sequence": 41,
+      "at": 1794700041.0,
+      "op": "shelf",
+      "id": "test-trial-open",
+      "actor": "resident-xplorer",
+      "data": {
+        "kind": "choice-open",
+        "choice": "trial-choice-x",
+        "trial": "work-selection-002",
+        "milestones": {
+          "alpha-tool": {"milestone": "Trial milestone.", "seconds": 604800},
+          "beta-tool": {"milestone": "Trial milestone.", "seconds": 604800}
+        }
+      }
+    },
+    {
+      "sequence": 42,
+      "at": 1794700042.0,
+      "op": "shelf",
+      "id": "test-trial-vote-1",
+      "actor": "resident-a",
+      "data": {"kind": "choice-vote", "choice": "trial-choice-x", "idea": "alpha-tool", "trial": "work-selection-002", "reason": "trial vote"}
+    },
+    {
+      "sequence": 43,
+      "at": 1794700043.0,
+      "op": "shelf",
+      "id": "test-trial-vote-2",
+      "actor": "resident-b",
+      "data": {"kind": "choice-vote", "choice": "trial-choice-x", "idea": "alpha-tool", "trial": "work-selection-002", "reason": "trial vote"}
+    },
+    {
+      "sequence": 44,
+      "at": 1794700044.0,
+      "op": "shelf",
+      "id": "test-trial-vote-3",
+      "actor": "resident-c",
+      "data": {"kind": "choice-vote", "choice": "trial-choice-x", "idea": "beta-tool", "trial": "work-selection-002", "reason": "trial vote"}
+    },
+    {
+      "sequence": 50,
+      "at": 1794700050.0,
+      "op": "shelf",
+      "id": "test-explore-publish-2",
+      "actor": "resident-yplorer",
+      "data": {
+        "kind": "explore-publish",
+        "round": "test-round-002",
+        "token": "test-token-002",
+        "ideas": [
+          {
+            "idea": "delta-tool",
+            "title": "Delta Tool",
+            "what": "A synthetic delta tool.",
+            "why": "Synthetic why.",
+            "first_step": "Build delta.",
+            "sources": ["https://example.com/delta"]
+          },
+          {
+            "idea": "epsilon-tool",
+            "title": "Epsilon Tool",
+            "what": "A synthetic epsilon tool.",
+            "why": "Synthetic why.",
+            "first_step": "Build epsilon.",
+            "sources": ["https://example.com/epsilon"]
+          },
+          {
+            "idea": "zeta-tool",
+            "title": "Zeta Tool",
+            "what": "A synthetic zeta tool.",
+            "why": "Synthetic why.",
+            "first_step": "Build zeta.",
+            "sources": ["https://example.com/zeta"]
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 51,
+      "at": 1794700051.0,
+      "op": "shelf",
+      "id": "test-choice-open-3",
+      "actor": "resident-opener",
+      "data": {
+        "kind": "choice-open",
+        "choice": "test-choice-003",
+        "milestones": {
+          "delta-tool": {"milestone": "Build delta first milestone.", "seconds": 604800},
+          "epsilon-tool": {"milestone": "Build epsilon first milestone.", "seconds": 604800},
+          "zeta-tool": {"milestone": "Build zeta first milestone.", "seconds": 604800}
+        }
+      }
+    },
+    {
+      "sequence": 52,
+      "at": 1794700052.0,
+      "op": "shelf",
+      "id": "test-vote-author",
+      "actor": "resident-yplorer",
+      "data": {
+        "kind": "choice-vote",
+        "choice": "test-choice-003",
+        "idea": "delta-tool",
+        "reason": "RAW_REASON_AUTHOR_SELF_VOTE token=supersecret"
+      }
+    },
+    {
+      "sequence": 53,
+      "at": 1794700053.0,
+      "op": "shelf",
+      "id": "test-vote-7",
+      "actor": "resident-g",
+      "data": {"kind": "choice-vote", "choice": "test-choice-003", "idea": "delta-tool", "reason": "RAW_REASON_COUNTED_ONE"}
+    },
+    {
+      "sequence": 54,
+      "at": 1794700054.0,
+      "op": "shelf",
+      "id": "test-vote-8",
+      "actor": "resident-h",
+      "data": {"kind": "choice-vote", "choice": "test-choice-003", "idea": "epsilon-tool", "reason": "RAW_REASON_COUNTED_TWO"}
+    },
+    {
+      "sequence": 55,
+      "at": 1794700055.0,
+      "op": "shelf",
+      "id": "test-vote-9",
+      "actor": "resident-i",
+      "data": {"kind": "choice-vote", "choice": "test-choice-003", "idea": "delta-tool", "reason": "RAW_REASON_COUNTED_THREE"}
+    }
+  ]
+}
