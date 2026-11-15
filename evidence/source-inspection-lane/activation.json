@@ -1,0 +1,21 @@
+{
+  "scope": "source-inspection-lane-20261115",
+  "source_head": "236da0d9b3282fc52962639c12e19d1662a5608b",
+  "source_sha256": "8d94e10e62d78853cac750074f98920f774ec4bd36205d030ba50e3a06fd12bf",
+  "runtime_sha256": "da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e987589b17d1105ad14",
+  "test_count": 579,
+  "test_output_sha256": "12eaf050d92f26aa0339dc48017979de0f8c9dd156ccca8a56390652295a5ce4",
+  "approval_sha256": "8a01dc45c976a75e0ed548e6e41ab450d09927dcd622e82e3d95159af5bf018d",
+  "migration_sequence": 6637,
+  "paused_sequence": 6612,
+  "resumed_sequence": 6638,
+  "pause_seconds": 1008.2266488075256,
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council",
+    "proposals"
+  ],
+  "drain_order": "Current residents exited naturally; trusted jobs and publisher drained before source lock. Exact tested source revalidated by authenticated apply."
+}

@@ -1,0 +1,15 @@
+test_completed_inspection_result_survives_lost_coordinator_handles (__main__.HostInspectionTests.test_completed_inspection_result_survives_lost_coordinator_handles) ... ok
+test_duplicate_running_lane_fails_closed_before_start_or_signal (__main__.HostInspectionTests.test_duplicate_running_lane_fails_closed_before_start_or_signal) ... ok
+test_exact_inspection_finishes_while_mutation_holds_lock_and_mutations_serialize (__main__.HostInspectionTests.test_exact_inspection_finishes_while_mutation_holds_lock_and_mutations_serialize) ... ok
+test_inspection_runtime_and_durable_launch_gate_remain_enforced (__main__.HostInspectionTests.test_inspection_runtime_and_durable_launch_gate_remain_enforced) ... ok
+test_inspection_still_checks_source_independence_and_exact_changed_path (__main__.HostInspectionTests.test_inspection_still_checks_source_independence_and_exact_changed_path) ... ok
+test_lane_reparses_entire_fixed_command_and_ignores_stored_labels (__main__.HostInspectionTests.test_lane_reparses_entire_fixed_command_and_ignores_stored_labels) ... ok
+test_only_one_inspection_runs_and_each_lane_has_an_inherited_lock (__main__.HostInspectionTests.test_only_one_inspection_runs_and_each_lane_has_an_inherited_lock) ... ok
+test_recovery_stops_both_owned_lanes_retains_results_and_releases_locks (__main__.HostInspectionTests.test_recovery_stops_both_owned_lanes_retains_results_and_releases_locks) ... ok
+test_stopped_requester_cancels_both_queues_but_preserves_started_jobs (__main__.HostInspectionTests.test_stopped_requester_cancels_both_queues_but_preserves_started_jobs) ... ok
+test_timeout_is_per_lane_and_unknown_group_is_never_signalled (__main__.HostInspectionTests.test_timeout_is_per_lane_and_unknown_group_is_never_signalled) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 18.060s
+
+OK

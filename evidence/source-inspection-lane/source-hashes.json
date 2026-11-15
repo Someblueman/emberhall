@@ -1,0 +1,17 @@
+[
+  {
+    "path": "docs/HOME.md",
+    "sha256": "0ad5ef4caa1cd3ea4e4f9773960369ab52bdd63d85d7f16a89b1f8270a505c5d",
+    "host_test_snapshot_matches": null
+  },
+  {
+    "path": "house/mailbox_jobs.py",
+    "sha256": "c648a6b8518ede93fe0c956420e59e8f33f991af5d4d886e977ac3b551c8e020",
+    "host_test_snapshot_matches": true
+  },
+  {
+    "path": "tests/test_readonly_inspection_jobs.py",
+    "sha256": "6e5a50e7527e3eb0caef534a20685df3754acd9dec272515b61ffbe8d360ce02",
+    "host_test_snapshot_matches": true
+  }
+]

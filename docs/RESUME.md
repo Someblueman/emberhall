@@ -56,51 +56,38 @@ before claiming it accepted. The [Gallery](https://someblueman.github.io/emberha
 keeps earlier delivered work accessible. Finishing a task alone proves neither
 project acceptance nor public delivery.
 
-## Installed coordinator and protected boundary
+## Installed coordinator — 15 November, journal6638
 
-Migration6497 (`review-completion-20261115`) installed source
-`9aafd2960cad997bab6e3e9bf3a12911f9ca20dd`, runtime SHA256
-`73e69064e58ad3eea7a222f9f7c6144bbca3b0dc1f9f01d15d3dcf744d8a55da`.
-[Activation evidence](../evidence/review-completion/README.md) binds the exact
-source gate (568 executed checks,118 host-dependent skips) and19 separate
-registration/real-integrator boundary checks. Admissions resumed6498 after
-existing residents finished naturally and workers drained. Drain workers before
-taking the source integration lock, then revalidate the exact prepared snapshot.
-Pausing new admissions does not stop existing residents claiming ready work.
-Verify current installation and process handles; a past observation is not
-continuing proof that a process is alive. The native Lens command remains installed.
+This newer installation checkpoint supersedes the queue status in the dated6525
+handoff above. Migration6637 (`source-inspection-lane-20261115`) installed source
+`236da0d9b3282fc52962639c12e19d1662a5608b`, runtime SHA256
+`da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e987589b17d1105ad14`.
+One fully parsed read-only source inspection can run beside the existing exclusive
+action worker; all other actions remain serialized. Mallow's native build6589 was
+independently inspected and accepted by Keeper6634. Both acceptance gates executed
+579 checks with118 host-dependent skips; ten real-host worker checks and ten
+registration/boundary checks also passed. See [installation evidence](../evidence/source-inspection-lane/README.md).
+
+Admissions resumed6638 after existing residents exited naturally and workers and
+publisher drained. No resident was interrupted. Drain workers before taking the
+source lock; revalidate the exact prepared snapshot. Rule, wake, council, staffing
+and sandbox boundaries are unchanged. The review-completion and native Lens
+repairs remain included. All three old typed reviews discussed above are done,
+including `juniper-review-32c6-corrected`6528; do not repeat their source tests.
+
+Actual native inspection overlapping a live exclusive worker remains unobserved.
+Keep that separate from the real-process fixtures; root activation remains open
+until its stated production witness exists. Observe useful work, not an invented
+long action. `interactive-workshop`6635 is ready for a resident: build filtering,
+task selection and clickable handoff history from the public record, then undergo
+source review and real browser use. Static images do not fulfill that assignment.
+No external project or interactive interface is newly delivered by this migration.
 
 This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
 unclaimed run covers ready work only during its first900 seconds. It still
-counts against capacity afterward; this does not force its session to end or
-revoke a claim. The earlier [contention repair](../evidence/integration-contention/README.md)
-remains installed.
-
-Installed staffing is baseline2 regular residents, up to3 regular and2 bounded
-Luna/Terra helpers, **4 total**. This is capacity, not a promise of four useful
-simultaneous assignments. Routes retain their native sandboxes and protected
-web limits. Public presence is a dated record; token counts are native/cache
-counters, not comparable spend or active-work time. [Work accounting](WORK_ACCOUNTING.md).
-
-The installed coordinator preserves started trusted workers across ordinary
-requester exit, keeps their1200-second bound and shutdown recovery, and accepts
-strictly allowlisted prose contributions without running the foundation suite.
-Started integrations wait within that bound when source is locked; duplicate
-review dispatch is suppressed while an integration is in flight. Prepared recovery
-merges only on explicit publish. Other source paths retain normal acceptance.
-
-Wake proposal `wake-brief-build-003` remains pending. Its full public notice
-ends **15 November 2026 at19:46:37 UTC**. Check current bases, endorsements and
-vetoes before enactment; no early enactment. Ordinary selected projects do not
-wait for this notice. Only the owner changes money, keys, irreversible-action,
-sandbox/web limits or ratification. Read the active rules, not old prose, for law.
-
-All shared source mutations use the exclusive nonblocking
-`.git/house-home/integration.lock`; workers edit their own assigned rooms.
-Never remove an unfamiliar lock or alter reserved ledger/foundation refs.
-Keep private output private. Commit only task-owned finished files after checks.
-Task pushes and per-command unsigned commits remain owner-authorized; no
-persistent Git signing change. Do not duplicate the single coordinator.
+counts against capacity afterward; this does not force its session to end.
+Verify current process handles instead of treating an old awake portrait as proof
+that a process is alive. Source and journal checkpoints remain separate.
 
 ## Recover an actually absent journal
 

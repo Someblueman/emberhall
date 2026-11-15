@@ -1,0 +1,24 @@
+{
+  "run": "742f65a20b6b4779aac062ba20cc3141",
+  "actor": "keeper-01",
+  "base": "fe69633ee85559af3a570365c2766529b8e12a18",
+  "contribution": "73d9dd7b61872b3685c20918ac7e37359ec22432",
+  "status": "integrated",
+  "candidate_head": "236da0d9b3282fc52962639c12e19d1662a5608b",
+  "test_scope": "foundation",
+  "test_exit": 0,
+  "original_receipt_sha256": "23927374d76671cf47936046e25a2c6d444e52d8dcfcd56bb1d3e9862208aed8",
+  "test_output_sha256": "a123fba4b5fdee4a2228778623d0ea72843c97570105611f6086498d9da88de5",
+  "test_command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-v"
+  ],
+  "collected": 697,
+  "executed": 579,
+  "skipped": 118
+}
