@@ -176,6 +176,15 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
                   "at": final["at"]}
 
 
+def chronicle_body(record: Record) -> bytes:
+    """The Chronicle Room page for the journal as it stands now."""
+    from . import chronicle_page
+    state, events, _ = record.read()
+    numbered = [event | {"sequence": sequence} for sequence, event in enumerate(events, 1)]
+    return chronicle_page.render_html(chronicle_page.select_milestones(numbered), through=len(numbered),
+                                      house_id=state.get("house_id")).encode()
+
+
 def publish(record: Record, *, push=False) -> dict:
     private = record.common / "house-home"
     private.mkdir(mode=0o700, exist_ok=True)
@@ -188,9 +197,15 @@ def publish(record: Record, *, push=False) -> dict:
         contents = {name: committed_blob(record, head, "site/" + name)
                     for name in ("index.html", "house.css", "house.js")}
         contents.update(project_contents(record, head))
-        # Only this reviewed static room page is public, never its journal input.
+        # Only the Chronicle page is public, never its journal input. It is
+        # rebuilt from the journal on every publication so it cannot go stale;
+        # the committed page is the fallback (and decides whether the room exists).
         chronicle = committed_blob(record, head, "site/chronicle/index.html", optional=True)
         if chronicle is not None:
+            try:
+                chronicle = chronicle_body(record)
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
             contents["chronicle/index.html"] = chronicle
         contents["history.json"] = history_body
         # Visitors poll this tiny file and fetch the history only when it changes.

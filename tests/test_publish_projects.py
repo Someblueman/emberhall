@@ -72,7 +72,7 @@ class ProjectPublicationTests(HouseCase):
                     publish(self.record)
                 self.assertIsNone(self.record.ref('refs/heads/' + BRANCH))
 
-    def test_chronicle_publishes_only_committed_page_not_export(self):
+    def test_chronicle_is_rebuilt_from_the_journal_and_never_publishes_its_input(self):
         folder = self.repo / 'site/chronicle'
         folder.mkdir()
         page = folder / 'index.html'
@@ -84,8 +84,19 @@ class ProjectPublicationTests(HouseCase):
         self.commit()
         page.write_text('dirty page must not publish')
         publish(self.record)
-        self.assertEqual(self.record.git('show', BRANCH + ':chronicle/index.html'),
-                         b'accepted static chronicle')
+        from house import chronicle_page
+        published = self.record.git('show', BRANCH + ':chronicle/index.html')
+        events = self.record.read()[1]
+        self.assertEqual(published, chronicle_page.render_html(chronicle_page.select_milestones(
+            [event | {'sequence': n} for n, event in enumerate(events, 1)]), through=len(events),
+            house_id=self.record.read()[0].get('house_id')).encode())
+        self.assertIn(b'Emberhall Chronicle Room', published)
+        self.assertNotIn(b'dirty page', published)
+        # The house's copy is the project's generator, apart from its opening note.
+        strip = lambda text: text[text.index('from __future__') if 'from __future__' in text else text.index('import argparse'):]
+        root = Path(__file__).resolve().parents[1]
+        self.assertEqual(strip((root / 'house/chronicle_page.py').read_text()),
+                         strip((root / 'projects/emberhall-chronicle-room/chronicle.py').read_text()))
         self.assertNotIn('chronicle/export.json',
                          git(self.repo, 'ls-tree', '-r', '--name-only', BRANCH).splitlines())
 
