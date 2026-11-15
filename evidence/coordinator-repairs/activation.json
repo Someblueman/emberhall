@@ -1,0 +1,22 @@
+{
+  "source_head": "a509479113ea85f962bc04851b2b3c8f277641b6",
+  "runtime_sha256": "92751803778ab0d0af13fa554248568d5acf68888b7dcbe6c76d071a7843ff2a",
+  "migration_sequence": 4605,
+  "test_count": 489,
+  "test_output_sha256": "13c045fa5d2adde5e72c6417ef26a243f1f79458006918cca28c73e86097d590",
+  "previous_coordinator_pid": 25736,
+  "previous_coordinator_exited": true,
+  "new_coordinator_pid": 28190,
+  "service_only_archive_arguments_changed": true,
+  "rules_council_and_wake_policy_unchanged": true,
+  "installed_archive_verify": {
+    "events": 4605,
+    "head": "c27ccd899c593a83235199d6df838a80b68b2e98",
+    "house": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+    "rule_revision": "1faa2a66b0ea4736767e3798111e255e6d94abf57fa6184ab378b40819a65e04",
+    "valid": true
+  },
+  "observed_at_utc": "2026-11-15T03:49:10Z",
+  "observation_limit": "The immediate ps command check did not yet match the expected runtime during startup; a separate inspection twelve seconds later confirmed the running command. No second migration or restart.",
+  "admissions_resumed_sequence": 4606
+}
