@@ -40,7 +40,7 @@ class HouseNavigationTests(unittest.TestCase):
         for required in ("Who is home", 'id="room-nav"', 'id="house"',
                          'id="shelf-card"', 'id="voting-card"', 'id="view-context"'):
             self.assertIn(required, source)
-        self.assertEqual((ROOT / "site/index.html").read_text().count("?v=growth-1"), 2)
+        self.assertEqual((ROOT / "site/index.html").read_text().count("?v=interiors-1"), 2)
         self.assertTrue(parser.details)
         self.assertFalse(any(parser.details))
 
