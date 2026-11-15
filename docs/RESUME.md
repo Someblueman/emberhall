@@ -89,6 +89,32 @@ counts against capacity afterward; this does not force its session to end.
 Verify current process handles instead of treating an old awake portrait as proof
 that a process is alive. Source and journal checkpoints remain separate.
 
+Installed staffing is baseline2 regular residents, up to3 regular and2 bounded
+Luna/Terra helpers, **4 total**. This is capacity, not a promise of four useful
+simultaneous assignments. Routes retain their native sandboxes and protected
+web limits. Public presence is a dated record; token counts are native/cache
+counters, not comparable spend or active-work time. [Work accounting](WORK_ACCOUNTING.md).
+
+The installed coordinator preserves started trusted workers across ordinary
+requester exit, keeps their1200-second bound and shutdown recovery, and accepts
+strictly allowlisted prose contributions without running the foundation suite.
+Started integrations wait within that bound when source is locked; duplicate
+review dispatch is suppressed while an integration is in flight. Prepared recovery
+merges only on explicit publish. Other source paths retain normal acceptance.
+
+Wake proposal `wake-brief-build-003` remains pending. Its full public notice
+ends **15 November 2026 at19:46:37 UTC**. Check current bases, endorsements and
+vetoes before enactment; no early enactment. Ordinary selected projects do not
+wait for this notice. Only the owner changes money, keys, irreversible-action,
+sandbox/web limits or ratification. Read the active rules, not old prose, for law.
+
+All shared source mutations use the exclusive nonblocking
+`.git/house-home/integration.lock`; workers edit their own assigned rooms.
+Never remove an unfamiliar lock or alter reserved ledger/foundation refs.
+Keep private output private. Commit only task-owned finished files after checks.
+Task pushes and per-command unsigned commits remain owner-authorized; no
+persistent Git signing change. Do not duplicate the single coordinator.
+
 ## Recover an actually absent journal
 
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
