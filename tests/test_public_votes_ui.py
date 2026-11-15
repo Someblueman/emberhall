@@ -59,3 +59,40 @@ assert.match(text(root),/No project ballots/);assert.match(text(root),/No succes
         result = subprocess.run([shutil.which("node"), "-e", script,
             str(Path(__file__).parents[1] / "site/house.js")], capture_output=True, text=True, timeout=15)
         self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_great_work_choice_renders_slot_stages_and_v3_rule_copy(self):
+        script = r"""
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+  appendChild(node){this.children.push(node);}
+  replaceChildren(){this.children=[];}
+  querySelectorAll(selector){return this.children.flatMap(n=>[n,...n.querySelectorAll(selector)]).filter(n=>n.tag==='details'&&(selector!=='details[open]'||n.open));}
+}
+const root=new Element('section'),document={getElementById:()=>root,createElement:tag=>new Element(tag)};
+const text=n=>[n.textContent,...n.children.map(text)].join(' ');
+const context=vm.createContext({assert,document,URL,root,text});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
+vm.runInContext(`
+data={timezone:'UTC'};
+const person={name:'Fable',agent:'opencode',id:'resident-fable'};
+frame={voting:{inbox_checked_at:100,choices:[{
+  id:'great-round-1',status:'open',slot:'great',owner:person,opened_sequence:7560,selection_version:3,
+  candidates:[{id:'obs',title:'Observatory',author:person,milestone:'Stage one',seconds:259200,
+    stages:[{milestone:'Stage one',seconds:86400},{milestone:'Stage two',seconds:172800}]}],
+  votes:[]
+}],proposals:[]}};
+voting();
+const rendered=text(root);
+assert.match(rendered,/Great work choice · Open · 0\\/3 counted votes/);
+assert.match(rendered,/2–8 ordered milestones/);
+assert.doesNotMatch(rendered,/Historical selection rule/);
+assert.match(rendered,/2 ordered milestones/);
+assert.match(rendered,/Stage one · 1 day/);
+assert.match(rendered,/Stage two · 2 days/);
+`,context);
+"""
+        result = subprocess.run([shutil.which("node"), "-e", script,
+            str(Path(__file__).parents[1] / "site/house.js")], capture_output=True, text=True, timeout=15)
+        self.assertEqual(0, result.returncode, result.stderr)

@@ -105,3 +105,78 @@ assert.equal(selected,null);
         result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
                                 capture_output=True, text=True, timeout=15)
         self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_great_work_slots_explorer_readiness_stages_and_study_summary(self):
+        source = Path(__file__).parents[1] / 'site/house.js'
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+  appendChild(node){this.children.push(node);}
+  replaceChildren(){this.children=[];}
+}
+const nodes={};
+const get=id=>(nodes[id]||(nodes[id]=new Element('div')));
+const document={getElementById:get,createElement:tag=>new Element(tag)};
+const text=node=>[node.textContent,...node.children.map(text)].join(' ');
+const all=node=>[node,...node.children.flatMap(all)];
+const context=vm.createContext({assert,document,URL,nodes,text,all});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
+vm.runInContext(`
+data={timezone:'UTC'};
+const study={id:'study',name:'The Study',floor:0,status:'open',purpose:'Shelf room'};
+frame={
+  rooms:[study],residents:[{id:'r1',name:'Fable'}],scars:[],tasks:[],floors:[{level:0,name:'Ground floor'}],
+  shelf:{
+    enabled:true,
+    policy:'work-selection-004',
+    great_wanted:true,
+    explorer:null,
+    ideas:[
+      {id:'s1',title:'Small idea 1',status:'shelved',scale:'small',losses:1,author:'r1',sources:[]},
+      {id:'s2',title:'Small idea 2',status:'shelved',scale:'small',losses:0,author:'r1',sources:[]},
+      {id:'s3',title:'Small idea 3',status:'shelved',scale:'small',losses:0,author:'r1',sources:[]},
+      {id:'g1',title:'Great idea 1',status:'shelved',scale:'great',losses:0,author:'r1',sources:[]}
+    ],
+    projects:[
+      {id:'p-small',title:'Trial Bench',status:'active',slot:'small',owner:'r1',milestone:'Offline trial',deadline:200}
+    ]
+  }
+};
+shelf();
+const shelfText=text(nodes['shelf']);
+assert.match(shelfText,/0 of 1 great work/);
+assert.match(shelfText,/1 of 1 small project/);
+assert.match(shelfText,/1 great, 3 small/);
+assert.match(shelfText,/Room for a great-work Explorer round/);
+assert.doesNotMatch(shelfText,/no Explorer round needed/);
+assert.match(shelfText,/great work/i);
+assert.match(shelfText,/1 loss/);
+assert.match(shelfText,/Small project/);
+selected='study';
+roomPanel();
+const studyText=text(nodes['room-content']);
+assert.match(studyText,/Great slot: free \\(1 great idea\\)/);
+assert.match(studyText,/Small slot: busy \\(3 small ideas\\)/);
+frame.shelf.great_wanted=false;
+frame.shelf.ideas.push({id:'g2',title:'Great idea 2',status:'shelved',scale:'great',losses:0,author:'r1',sources:[]});
+frame.shelf.projects.push({
+  id:'p-great',title:'Public Observatory',status:'active',slot:'great',owner:'r1',
+  stage:1,milestone:'Stage two',deadline:400,
+  milestones:[{milestone:'Stage one',seconds:86400},{milestone:'Stage two',seconds:172800},{milestone:'Stage three',seconds:259200}],
+  completed:[{stage:0,milestone:'Stage one',evidence:'obs-m1',sequence:99}]
+});
+shelf();
+const updatedText=text(nodes['shelf']);
+assert.match(updatedText,/1 of 1 great work/);
+assert.match(updatedText,/Shelf stocked · no Explorer round needed/);
+assert.match(updatedText,/Stage 2 of 3/);
+assert.match(updatedText,/Stage one/);
+assert.match(updatedText,/event 99/);
+assert.match(updatedText,/Stage three/);
+`,context);
+'''
+        result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(0, result.returncode, result.stderr)

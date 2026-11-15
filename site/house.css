@@ -483,6 +483,19 @@ footer a {
   display: grid;
   gap: 0.2rem;
 }
+.milestone-list {
+  margin: 0.35rem 0 0.2rem 1.25rem;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
+.milestone-done {
+  color: var(--muted);
+}
+.milestone-current {
+  font-weight: 600;
+}
 .shelf-sources {
   display: flex;
   flex-wrap: wrap;

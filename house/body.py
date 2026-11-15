@@ -35,9 +35,50 @@ def usage(value: object) -> dict:
             type(v) in (int, float) and math.isfinite(v) and v >= 0}
 
 
+def _stage_views(stages: list[dict]) -> list[dict]:
+    """Sanitize ordered milestone stage descriptors."""
+    return [{"milestone": label(stage["milestone"], 20000),
+             "seconds": stage["seconds"]} for stage in stages]
+
+
+def _project_view(key: str, shelf: dict, project: dict) -> dict:
+    """Format one public project record, keeping legacy shapes intact."""
+    item = {"id": key, "title": label(shelf["ideas"][project["idea"]]["title"], 2000),
+            **{k: label(project[k], 2000) if isinstance(project[k], str) else project[k]
+               for k in ("idea", "owner", "status", "slot", "stage", "milestone", "deadline", "extended", "lesson")
+               if k in project}}
+    if "milestones" in project:
+        item["milestones"] = _stage_views(project["milestones"])
+    if "completed" in project:
+        item["completed"] = [{
+            k: label(v, 20000 if k == "milestone" else 2000) if isinstance(v, str) else v
+            for k, v in entry.items()} for entry in project["completed"]]
+    return item
+
+
+def _candidate_view(shelf: dict, choice: dict, idea: str, person) -> dict:
+    """Format one frozen-shelf alternative, flattening multi-stage plans."""
+    plan = choice["milestones"][idea]
+    raw_stages = plan.get("milestones")
+    if isinstance(raw_stages, list) and raw_stages:
+        stages = _stage_views(raw_stages)
+        milestone = stages[0]["milestone"]
+        seconds = sum(stage["seconds"] for stage in stages)
+    else:
+        stages = None
+        milestone = label(plan["milestone"], 20000)
+        seconds = plan["seconds"]
+    item = {"id": idea, "title": label(shelf["ideas"][idea]["title"], 200),
+            "author": person(shelf["ideas"][idea]["author"]),
+            "milestone": milestone, "seconds": seconds}
+    if stages is not None:
+        item["stages"] = stages
+    return item
+
+
 def shelf_view(state: dict) -> dict:
     """Public real work only; never publish Explorer tokens or isolated trials."""
-    from . import shelf_gate
+    from . import shelf as shelf_model, shelf_gate
     shelf = state.get("shelf", {})
     ideas = []
     for key, idea in shelf.get("ideas", {}).items():
@@ -52,16 +93,18 @@ def shelf_view(state: dict) -> dict:
             history.append(public)
         ideas.append({"id": key, **{k: label(idea[k], 2000) for k in
             ("title", "what", "why", "first_step", "author", "status")},
+            **({"scale": label(idea["scale"], 20)} if "scale" in idea else {}),
             "sources": list(idea["sources"]), "losses": idea["losses"], "history": history})
-    projects = [{"id": key, "title": label(shelf["ideas"][p["idea"]]["title"], 2000),
-                 **{k: label(p[k], 2000) if isinstance(p[k], str) else p[k]
-                    for k in ("idea", "owner", "status", "milestone", "deadline", "extended", "lesson")
-                    if k in p}} for key, p in shelf.get("projects", {}).items()]
+    projects = [_project_view(key, shelf, p) for key, p in shelf.get("projects", {}).items()]
     expedition = shelf.get("rounds", {}).get(shelf.get("explorer"))
-    return {"enabled": shelf_gate.enabled(state), "policy": shelf_gate.policy(state),
+    policy = shelf_gate.policy(state)
+    view = {"enabled": shelf_gate.enabled(state), "policy": policy,
             "ideas": ideas, "projects": projects, "explorer": {
                 "resident": expedition["owner"], "agent": expedition["agent"],
                 "until": expedition["until"]} if expedition else None}
+    if policy == shelf_gate.GREAT_POLICY_ID:
+        view["great_wanted"] = shelf_model.great_wanted(shelf_model.empty() | shelf)
+    return view
 
 
 def voting_view(state: dict, identities: dict, event_times: dict, origins: dict | None = None) -> dict:
@@ -75,20 +118,19 @@ def voting_view(state: dict, identities: dict, event_times: dict, origins: dict 
     shelf = state.get("shelf", {})
     choices = []
     for key, choice in shelf.get("choices", {}).items():
-        candidates = [{"id": idea, "title": label(shelf["ideas"][idea]["title"], 200),
-                       "author": person(shelf["ideas"][idea]["author"]),
-                       "milestone": label(choice["milestones"][idea]["milestone"], 20000),
-                       "seconds": choice["milestones"][idea]["seconds"]}
-                      for idea in choice["candidates"]]
+        candidates = [_candidate_view(shelf, choice, idea, person) for idea in choice["candidates"]]
         votes = [{"resident": person(actor), "idea": vote["idea"],
                   "reason": label(vote["reason"], 20000), "counted": vote["counted"],
                   "sequence": vote["sequence"], "at": event_times[vote["sequence"]]}
                  for actor, vote in choice["votes"].items()]
-        choices.append({"id": key, "status": choice["status"], "owner": person(choice["owner"]),
-                        "opened_sequence": choice["opened_sequence"],
-                        "closed_sequence": choice.get("closed_sequence"),
-                        "selection_version": choice.get("selection_version", 1),
-                        "winner": choice.get("winner"), "candidates": candidates, "votes": votes})
+        item = {"id": key, "status": choice["status"], "owner": person(choice["owner"]),
+                "opened_sequence": choice["opened_sequence"],
+                "closed_sequence": choice.get("closed_sequence"),
+                "selection_version": choice.get("selection_version", 1),
+                "winner": choice.get("winner"), "candidates": candidates, "votes": votes}
+        if "slot" in choice:
+            item["slot"] = label(choice["slot"], 20)
+        choices.append(item)
     proposals = []
     origins = origins or {}
     for key, proposal in state["proposals"].items():
