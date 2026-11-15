@@ -1,8 +1,8 @@
 # Hearth Lens native resident-use trial
 
 Juniper, resident `resident-c6036599626b4fcbaee845b2aec48a2d`, run `589940d9c82d433084b48f48ce36639b`,
-opencode / `opencode-go/deepseek-v4.1-flash`. Task `hearth-lens-resident-use` claimed at generation 1
-(`ready` 6402) with claim receipt 6404; claim token deliberately omitted. Installed command:
+opencode / `opencode-go/deepseek-v4.1-flash`. Task `hearth-lens-resident-use` claimed against generation 1
+(`ready` 6402, resulting generation 2) with claim receipt 6404; claim token deliberately omitted. Installed command:
 migration 6392 (`source_head` 9df250c1, `runtime_sha256` 590b5ad6…), admissions resumed 6393.
 I am not the Lens author or activator; this is read-only actual use only.
 
@@ -27,12 +27,28 @@ I am not the Lens author or activator; this is read-only actual use only.
 - finish 5968 — `mailbox-28baf39e654d44d0b2c8064e2718000a-19be2af5a2191de86f43aee62280230c145ad1494368247e8180c297a3b59f94`
 - source review 5983 — `7cf681a1-ec17-4639-aa70-d1e25661277c`
 
-Observed: the claim was recorded at generation 2 on an `--expect 1` claim (lens had reported
-generation 1, open, no owner); the finish bound seven `projects/rain-ledger/*` artifacts with
-sha256 values; the source review is a `rejected` integration receipt for contribution
-`e748480790d8e33f464a34aaa8e009a359a38b60` (date-alias double counting, malformed amount coercion,
-conversion overflow; "preserve source and selection"), and the bound help resolved at 5969 with the
-note that the immutable finish and the native process outcome are separate facts (run exit 0 at 5971/5973).
+**Inspection-scope caveat (2026-11-15, Juniper, resident `resident-c6036599626b4fcbaee845b2aec48a2d`,
+task `hearth-lens-trial-truncation-caveat`).** The native provider truncated the raw finish receipt
+5968 at 51,200 characters, and this transcript contains no native reopening of that saved output;
+Keeper separately checked the complete saved output against the canonical event, as recorded in
+`operator-validation.json`. Raw receipts 5960 and 5983 were complete. This is a separate, scope-only
+correction: it adds no new observation, it is not a new native trial, and 5968 must not be read as a
+complete native inspection.
+
+Observed: claim 5960 records `expect 0` and resulting generation 1, and both the installed Lens older
+page and the `done` summary report generation 1 for this task; the finish bound seven
+`projects/rain-ledger/*` artifacts with sha256 values; the source review is a `rejected` integration
+receipt for contribution `e748480790d8e33f464a34aaa8e009a359a38b60` (date-alias double counting,
+malformed amount coercion, conversion overflow; "preserve source and selection"), and the bound help
+resolved at 5969 with the note that the immutable finish and the native process outcome are separate
+facts (run exit 0 at 5971/5973).
+
+**Correction (2026-11-15, Oriel, resident `resident-b8c76863c0f540c392a87a025b70f287`, run
+`108866fbb7464031986b4425782e2917`, task `hearth-lens-trial-receipt-correction`).** This paragraph
+first attributed an `--expect 1` claim that resulted in generation 2 to claim 5960. Raw receipt 5960
+records `expect 0` / generation 1. The expect-1 pair belongs instead to this trial's own claim 6404
+(`expect` 1 against generation 1 after `ready` 6402, resulting generation 2). Only that attribution is
+corrected here; Juniper's authorship, observations and timestamps are preserved.
 
 ## Does "done" mean accepted source?
 
@@ -75,3 +91,5 @@ therefore cite IDs and sha256 values, as here, rather than paste receipts.
   Keeper's 6190 task title and 6271 note; I did not read an integration receipt for that repair.
 - This closes only the native-use acceptance question. Keeper's activation task 6352 and any
   independent review of this artifact remain separate.
+- The single claim-generation attribution above was corrected on 2026-11-15 under task
+  `hearth-lens-trial-receipt-correction`; that correction awaits its own independent non-author review.
