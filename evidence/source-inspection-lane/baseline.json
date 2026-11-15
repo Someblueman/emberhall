@@ -1,0 +1,68 @@
+{
+  "observed_sequence": 6576,
+  "source_head": "b164e0d7a7776e3d6015d4d5b3e5361002174a89",
+  "jobs": [
+    {
+      "id": "d264334a14d3c2a46f41198a3144912455fda2fd3562cf686a4474bbea4a1c13",
+      "run": "2c3e1e1f400c4c09a9854516e5ec64bb",
+      "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+      "argv": [
+        "integrate",
+        "108866fbb7464031986b4425782e2917",
+        "--as",
+        "resident-22b4c51faf9048c1ba5af1771f156026",
+        "--inspect",
+        "--path",
+        "evidence/hearth-lens-native/resident-trial.md"
+      ],
+      "status": "done",
+      "created_at": 1794739769.343523,
+      "started_at": 1794740160.324401,
+      "finished_at": 1794740165.222205,
+      "runtime_sha256": "590b5ad698ef290427c56215d3afcd5fea089a01dd6b4e6d4fcf61f7c4345268",
+      "queued_seconds": 390.98087787628174,
+      "execution_seconds": 4.897804021835327
+    },
+    {
+      "id": "4c5af03265e1d8a05fa5d7e82879cf8fd02ca377cda4067e2164d0dfac266366",
+      "run": "2c3e1e1f400c4c09a9854516e5ec64bb",
+      "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+      "argv": [
+        "integrate",
+        "108866fbb7464031986b4425782e2917",
+        "--as",
+        "resident-22b4c51faf9048c1ba5af1771f156026",
+        "--inspect"
+      ],
+      "status": "done",
+      "created_at": 1794739472.389069,
+      "started_at": 1794739687.2306361,
+      "finished_at": 1794739692.915745,
+      "runtime_sha256": "590b5ad698ef290427c56215d3afcd5fea089a01dd6b4e6d4fcf61f7c4345268",
+      "queued_seconds": 214.84156703948975,
+      "execution_seconds": 5.68510890007019
+    },
+    {
+      "id": "2b5b3af0c7a5fe6f111011c92f5eed42490ae5001ccf90199cba8ea6951aced3",
+      "run": "04afd2a106414f3c8dc6d43c571e3805",
+      "resident": "resident-b8c76863c0f540c392a87a025b70f287",
+      "argv": [
+        "integrate",
+        "ac79062786844e78bf0a9d03aa58a732",
+        "--inspect",
+        "--path",
+        "house/hearth_lens.py",
+        "--as",
+        "resident-b8c76863c0f540c392a87a025b70f287"
+      ],
+      "status": "done",
+      "created_at": 1794736411.7053661,
+      "started_at": 1794736726.9199,
+      "finished_at": 1794736730.617707,
+      "runtime_sha256": "7bc91b48cfae10dd9c1e2d7742f4b2279e1e5c642f2d5e404998dad6bdb63959",
+      "queued_seconds": 315.21453380584717,
+      "execution_seconds": 3.6978070735931396
+    }
+  ],
+  "note": "Actual retained trusted-worker receipts from the single-worker runtime. Queue time and worker execution are separate wall-clock intervals; these are not CPU measurements or a simulated load test."
+}
