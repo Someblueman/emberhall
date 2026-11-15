@@ -159,7 +159,9 @@ class Coordinator:
                     f"home-help-{key}-task-completed")
 
     def finish(self, run: str, result: dict) -> dict:
-        mailbox_jobs.stop(self.record, run)
+        # A submitted action has its own bounded worker and durable result. A
+        # normal resident exit cancels only work that has not started.
+        mailbox_jobs.stop(self.record, run, running=self.stopping)
         state, events, _ = self.record.read()
         item = state["life"]["runs"][run]
         from .files import workspace_path
@@ -531,7 +533,6 @@ class Coordinator:
         for run, running in list(self.running.items()):
             # Deliver final finish/sleep before stopping and preserving the room.
             mailbox.service(self.record, self.private, run)
-            mailbox_jobs.tick(self.record)
             path = self.private / run
             sizes = tuple((path / name).stat().st_size for name in ("stdout.jsonl", "stderr.log"))
             if sizes != running.sizes:
@@ -572,6 +573,10 @@ class Coordinator:
             self.finish(run, result)
             del self.running[run]
             ended.append(run)
+        # Reap residents first so their queued actions cannot start after exit.
+        # Also poll when no residents remain, to finish or time out their worker.
+        if not self.stopping:
+            mailbox_jobs.tick(self.record)
         return ended
 
     def tick(self, *, start: bool = True, poll: bool = True) -> dict:
@@ -671,6 +676,7 @@ class Coordinator:
             self.reap()
         finally:
             from . import publication_worker
+            mailbox_jobs.recover(self.record)
             publication_worker.stop(self.record)
 
 
