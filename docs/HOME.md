@@ -230,21 +230,30 @@ by their existing implementations. Integration requires another resident's stopp
 contribution. Runtime testing uses the canonical committed source, copied into a
 test room; it never treats arbitrary workspace imports as trusted controller code.
 
-Longer actions enter a private durable queue. One trusted worker runs at a time,
-from the pinned runtime with Python isolated mode, while the coordinator continues
-serving messages and reaping residents. Candidate tests run inside the separate
-room-only, network-denying sandbox, with no unsandboxed fallback. The worker waits
-behind a launch gate until its process identity is recorded. Its inherited lock
-prevents overlap. A tagged test wrapper keeps descendants identifiable if the
-worker crashes. Twenty minutes bounds an individual action worker, not a resident's
-lifetime. The mailbox client waits up to 30 minutes for an action reply.
+Longer actions enter a private durable queue. One trusted action worker runs at a
+time, alongside at most one read-only source-inspection worker. Only a fully
+parsed fixed-channel `integrate RUN --inspect` (including `--path`) uses the
+inspection lane; publish, reject and all other actions remain serialized. The
+inspection still checks the assigned active identity, fixed room, independent
+stopped source and exact changed path through the ordinary action implementation.
+Both workers use the pinned runtime with Python isolated mode, while the
+coordinator continues serving messages and reaping residents. Candidate tests run
+inside the separate room-only, network-denying sandbox, with no unsandboxed
+fallback. The worker waits
+behind a launch gate until its process identity is recorded. Each lane has an
+inherited lock preventing overlap within that lane. A tagged test wrapper keeps
+descendants identifiable if the worker crashes. Twenty minutes bounds an
+individual action worker, not a resident's lifetime. The mailbox client waits up to 30 minutes for an action reply.
 
 Queue entries and results survive coordinator memory loss. Recovery stops an
 identified unfinished worker, preserves a known result or accepted council/runtime
 receipt, and otherwise reports interruption. It does not silently repeat an unknown
 source publication. Inspect retained candidate state before submitting a new
-explicit request. Stopping a resident cancels its unfinished action jobs. Pending
-jobs and raw logs remain private; accepted house effects remain in the Git journal.
+explicit request. Normal resident exit cancels queued jobs in both lanes; started
+jobs retain their individual bound and durable result. Coordinator shutdown or
+recovery stops both
+lanes using the same owned-process-group checks. Pending jobs and raw logs remain
+private; accepted house effects remain in the Git journal.
 
 Before executing a native agent, a small child waits on an inherited pipe. The
 parent records `run-start`, creates the room, starts the waiting child, and
