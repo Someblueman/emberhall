@@ -1,0 +1,89 @@
+{
+  "run": "f603eb3f293346bf8f4c01b2d34ad66d",
+  "status": "Final immutable artifacts verified; HTML updated to final cache-bust query and group role. CSS and JS identical to first corrected-layout browser trial.",
+  "assets": {
+    "index.html": "cd49e385b92c558099f5068ba1cd355fdab1ddb42a2d053ac4c74ff23b30287b",
+    "house.js": "14c328a68c38ea0b4d4b8fa709927ca6148080a5b74dda1e61a46bc15fa28278",
+    "house.css": "1688199a323fd7ba0ae067dd0b8ea41c80dbd7ea3d7233f5e3fdf082fdb5b0c0",
+    "projects.json": "9417211f49ea5dac653f4002c6abcff5fe5da14eff776aaea30cb5e64ecb1b0d"
+  },
+  "history_sha256": "4096393606f47a93c87b0afd8b9ea8d79e5bc8723bb822c76d3c973758143e66",
+  "history_sequence": 6910,
+  "commit": "5f3663b7e76e8d37919ec476ca78a1da38c338e1",
+  "finish": 6970,
+  "browser": "Actual IAB tab33 with real published6910-event history; final HTML loaded after source binding",
+  "desktop_1280x900": {
+    "explorer": [
+      110,
+      880
+    ],
+    "map_height": 398,
+    "room_nav": [
+      661,
+      732
+    ],
+    "history": [
+      740,
+      880
+    ],
+    "detail_top": 110.328125,
+    "focus": "workshop-detail"
+  },
+  "desktop_1100x760": {
+    "explorer_top": 110,
+    "map_height": 258,
+    "nav_bottom": 592,
+    "history_bottom": 740,
+    "horizontal_overflow": 0
+  },
+  "desktop_1280x780": {
+    "selected_map_height": 278,
+    "selected_nav_bottom": 612,
+    "selected_history_bottom": 760,
+    "whole_house_map_height": 250.5,
+    "whole_house_history_bottom": 663.828125
+  },
+  "bedroom_1280x800": {
+    "map_height": 234,
+    "nav_bottom": 632,
+    "history_bottom": 780,
+    "resident_paging": "page1 to page2 of6; six of33 remembered residents"
+  },
+  "bedroom_1280x760": {
+    "map_height": 194,
+    "nav_bottom": 592,
+    "history_bottom": 740
+  },
+  "whole_house_1280x760": {
+    "map_height": 230.5,
+    "nav_bottom": 585.828125,
+    "history_bottom": 733.828125
+  },
+  "short_1280x700": {
+    "back_to_rooms_focus": "The Door",
+    "nav": [
+      117.6875,
+      188.6875
+    ]
+  },
+  "phone_390x844": {
+    "body_scroll_width": 375,
+    "document_width": 375,
+    "selected_heading_top": 125.109375,
+    "focus": "workshop-detail",
+    "keyboard_rewind": "creation6886 hides claim6899 and finish6906",
+    "return_to_present": 6910,
+    "back_to_rooms_focus": "The Door",
+    "nav": [
+      118.375,
+      312.375
+    ]
+  },
+  "routes": "Projects and House both show the correct exclusive view after hash-change rendering settles.",
+  "limits": [
+    "Earlier preview HTML differed only by cache-busting query parameters and group role; CSS/JS match final contribution exactly. Final HTML was loaded for the whole-house/Bedroom800/760 tests.",
+    "Browser fit is witnessed at these sizes, not every possible viewport or future room count.",
+    "Screenshots inspected in tool; no screenshot file retained. Server stopped and temporary viewport reset.",
+    "Not independent source acceptance or public delivery."
+  ]
+}

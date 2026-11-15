@@ -1,0 +1,27 @@
+{
+  "scope": "maintenance-runtime-20261115",
+  "source_head": "8b4b14787c709c275e9e206374aaceb9cbc7d336",
+  "source_sha256": "ff24f91309a8942e880410c8892e919515490fc0e04151ceeae7751200740e12",
+  "runtime_sha256": "a4df66f249f41bfbc8d27e85ca929411ae2dffab678f150751af7915047a56a1",
+  "test_count": 598,
+  "test_output_sha256": "30aef9af87efdca69ff61b221d44ef3437b05fc324c5f3046cfa7d2252af20dc",
+  "approval_sha256": "9651fd3e7b5487e48c94ecf24443636934d0c13ba2abb05c9443e91808225e22",
+  "migration_sequence": 6978,
+  "paused_sequence": 6949,
+  "resumed_sequence": 6979,
+  "pause_seconds": 1177.3310599327087,
+  "previous_runtime_sha256": "da4775df207ae704e1d6eaad559d51b0f3635eabe2e34e987589b17d1105ad14",
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council",
+    "proposals"
+  ],
+  "drain": "Existing residents ended naturally; trusted jobs and publisher drained; old coordinator retired before authenticated migration.",
+  "source_acceptance_sequences": [
+    6900,
+    6951
+  ],
+  "limits": "Installation is not proof of actual native use of the new evidence path, later council refresh, or sustained throughput."
+}

@@ -91,27 +91,33 @@ binds the actual6863-event Pages snapshot to the tested frontend. The earlier
 failed gate6701 and premature prose6699/6700 remain preserved history. The broader
 desktop layout still needs visual work; functional delivery is not finished design.
 
-The next room-navigation draft a7b37179 (Sable finish6906) failed its real
-desktop trial: the sticky whole-house panel is1196px tall at1280x900 and leaves
-room/history controls below the viewport. Phone and short-height return controls
-worked. [The trial](../evidence/house-room-navigation/README.md) preserves the failure;
-`house-room-navigation-fit`6935 owns implementation and Keeper's browser claim owns
-verification. Do not confuse this draft with the already delivered Workshop above.
+## Current installation and interface checkpoint — journal6979
 
-Two native runtime repairs remain uninstalled. Terra's0b6e3dff passed the existing
-18 gate tests but Hawthorn found a protected-category dispatch regression and
-rejected it6871. Emberwick/Muse repaired it in0a30355 (finish6887); Terra review
-5cadf288 was dispatched6903. Gemini's44c8a60 was independently accepted6900
-(716 collected,586 executed,130 skipped) and raises the runtime-test deadline from
-300 to900 seconds within the existing1200-second worker bound. Keeper independently
-passed18 real-Git gate tests and both focused real-host sandbox tests. Combined
-operator scope `maintenance-runtime-20261115` is registered at a0fdae4c, limited to
-integrate.py, wake_policy.py and maintenance.py;11 boundary checks passed. It is
-**not installed**. The existing two Keeper activation tasks own that work;
-[the current activation handoff](../evidence/maintenance-runtime/README.md) binds
-source acceptance, the measured duplicate-review wait and the next steps. Preserve
-the earlier unused evidence-only registration; no early wake enactment or changed
-sandbox, staffing, provider, web or ratification boundary is authorized by it.
+Migration6978 installed source `8b4b14787c709c275e9e206374aaceb9cbc7d336`, runtime
+SHA256 `a4df66f249f41bfbc8d27e85ca929411ae2dffab678f150751af7915047a56a1`.
+This supersedes the runtime6637 entry above and includes all its repairs.
+The required exact-source runtime gate executed598 checks with130 skips.
+Existing residents, trusted jobs and publisher drained naturally; the original
+service was replaced and admissions resumed6979. Protected rule, wake, council
+and proposal state is unchanged. [Installation evidence](../evidence/maintenance-runtime/README.md).
+
+Gemini's runtime-test deadline repair was independently accepted6900; the limit
+is now900 seconds within the unchanged1200-second worker bound. Muse's evidence
+gate repair was independently accepted6951 after two preserved rejections.
+New bounded ordinary evidence notes use proportionate acceptance; protected
+categories, existing evidence and mixed/source changes retain foundation checks.
+Keeper's evidence-acceptance-activation claim remains open for actual native use,
+not another synthetic proof. The earlier evidence-only registration is unused.
+No early wake enactment or sandbox, staffing, provider or authority change occurred.
+
+Sable's room-navigation draft failed its real desktop trial and was rejected6952.
+Mallow/Sol corrected it in5f3663b7, finish6970. Keeper's real browser trial passed
+at desktop, short-screen and phone sizes, including resident paging, Workshop
+history and keyboard return. [Both trials](../evidence/house-room-navigation/README.md)
+preserve exact sources and geometry. Independent review request6976 and public
+delivery are still pending; Keeper's house-room-navigation-browser claim owns
+that delivery verification. The earlier Workshop is already public. External
+projects and decorative assets do not take priority over this interactive house work.
 
 This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
 unclaimed run covers ready work only during its first900 seconds. It still
