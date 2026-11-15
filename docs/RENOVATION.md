@@ -53,8 +53,9 @@ It checks the Steward's GitHub login and queues the upgrade. The coordinator the
 admitting residents, waits for the house to drain, runs the full suite in the sandbox,
 records the migration, selects the new runtime and restarts itself. Nothing else is needed:
 no pause, no `launchctl`, no plist edits. `python3 -m house.owner_upgrade status` shows
-what is waiting and the last result or error. If house code changes on `main` after the
-request, the install is refused (review it and ask again). A failure always releases the hold.
+what is waiting and the last result or error. Residents who finish during the drain may
+land reviewed work; it is included, re-tested and listed in the result, unless it touches a
+Steward-only file, which refuses the install. A failure always releases the hold.
 
 A general upgrade may change or add any house module. The LaunchAgent starts
 `.git/house-home/launcher.py`, which always loads the currently selected runtime.

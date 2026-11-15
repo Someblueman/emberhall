@@ -286,15 +286,19 @@ def install_requested(record: Record, private: Path) -> dict:
         base = request["source_commit"]
         require(subprocess.run(["git", "merge-base", "--is-ancestor", base, head], cwd=record.root,
                                capture_output=True).returncode == 0, "main no longer contains the requested commit")
+        # Residents finishing during the drain often land reviewed work. It is
+        # included (and re-tested below) unless it touches Steward-only files.
+        from .renovation import STEWARD_ONLY
         moved = record.git("diff", "--name-only", base, head, "--", "house").decode().split()
-        require(not moved, "house code changed after the request (" + ", ".join(moved[:6]) +
+        blocked = sorted(set(moved) & STEWARD_ONLY)
+        require(not blocked, "Steward-only house code changed after the request (" + ", ".join(blocked) +
                 "); review it and request the install again")
         plan = prepare(record, request["actor"], request["scope"], Path(request["note"]), head)
         result = apply(record, plan, coordinator=True)
     finally:
         (private / REQUEST).unlink(missing_ok=True)
     return {"installed": True, "scope": request["scope"], "source_head": head,
-            "runtime": result["runtime"]["entry"]}
+            "runtime": result["runtime"]["entry"], "included_resident_changes": moved}
 
 
 def status(record: Record) -> dict:

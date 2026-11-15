@@ -299,12 +299,25 @@ class OwnerInstallTests(unittest.TestCase):
         self.assertEqual(["muse abcdef12"], found["draining"]["active_residents"])
         self.assertEqual((0, True), (found["draining"]["unfinished_jobs"], found["draining"]["pages_publisher_idle"]))
 
-    def test_house_change_after_request_is_refused_and_releases_the_hold(self):
+    def test_steward_only_change_after_request_is_refused_and_releases_the_hold(self):
+        from house import owner_upgrade
+        self.queue(self.commit("a = 1\n"))
+        (self.root / "house/council.py").write_text("changed = True\n")
+        self.git("add", "-A"); self.git("commit", "-qm", "resident council change")
+        with self.assertRaisesRegex(ValueError, "Steward-only house code changed after the request"):
+            owner_upgrade.install_requested(self.record, self.private)
+        self.assertIsNone(owner_upgrade.pending_install(self.private))
+
+    def test_reviewed_resident_work_landed_while_draining_is_included(self):
+        from unittest.mock import patch
         from house import owner_upgrade
         self.queue(self.commit("a = 1\n"))
         self.commit("a = 2\n")
-        with self.assertRaisesRegex(ValueError, "house code changed after the request"):
-            owner_upgrade.install_requested(self.record, self.private)
+        with patch.object(owner_upgrade, "prepare", return_value=Path("plan")) as prepare, \
+                patch.object(owner_upgrade, "apply", return_value={"runtime": {"entry": "r.pyz"}}):
+            result = owner_upgrade.install_requested(self.record, self.private)
+        self.assertEqual(["house/x.py"], result["included_resident_changes"])
+        self.assertEqual(self.git("rev-parse", "HEAD"), prepare.call_args.args[4])
         self.assertIsNone(owner_upgrade.pending_install(self.private))
 
     def coordinator(self):
