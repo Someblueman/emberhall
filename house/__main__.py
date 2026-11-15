@@ -124,6 +124,12 @@ def parser() -> argparse.ArgumentParser:
         read.add_argument("--as", dest="actor", required=True)
         read.add_argument("--after", type=int)
         read.add_argument("--limit", type=int, default=50)
+    lens = sub.add_parser("lens", help="trace one task or resident without acknowledging events")
+    selector = lens.add_mutually_exclusive_group(required=True)
+    selector.add_argument("--task")
+    selector.add_argument("--resident")
+    lens.add_argument("--limit", type=int, default=40, help="newest matching rows, 1..200")
+    lens.add_argument("--before", type=int, help="exclusive sequence bound for older matching rows")
     receipt = sub.add_parser("receipt")
     receipt.add_argument("request")
     signing = sub.add_parser("ballot")
@@ -188,6 +194,14 @@ def run(args: argparse.Namespace) -> object:
                 "note": "The Steward's recorded authorization supersedes the founding text's historical sealed/signature-only process. Process changes remain Steward-only; charter text and historical events are retained.",
             }
         return result
+    if command == "lens":
+        from .hearth_lens import build_trace
+        if not 1 <= args.limit <= 200 or (args.before is not None and args.before < 1):
+            raise ValueError("limit must be 1..200 and before must be positive")
+        if args.task == "" or args.resident == "":
+            raise ValueError("selector must not be empty")
+        return build_trace(state, events, head, task=args.task, resident=args.resident,
+                           limit=args.limit, before=args.before)
     if command == "ballot":
         sys.stdout.buffer.write(ballot(state, args.proposal))
         return None
