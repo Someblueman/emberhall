@@ -40,7 +40,7 @@ class HouseNavigationTests(unittest.TestCase):
         for required in ("Who is home", 'id="room-nav"', 'id="house"',
                          'id="shelf-card"', 'id="voting-card"', 'id="view-context"'):
             self.assertIn(required, source)
-        self.assertEqual((ROOT / "site/index.html").read_text().count("?v=interiors-1"), 2)
+        self.assertEqual((ROOT / "site/index.html").read_text().count("?v=choice-progress-1"), 2)
         self.assertTrue(parser.details)
         self.assertFalse(any(parser.details))
 
@@ -110,7 +110,12 @@ frame={residents:[person],shelf:{enabled:true,policy:'work-selection',ideas:[
  reason:'A reason',text:'Exact proposed wording',trial:null,endorsements:[],notice:null}]},
  runs:[{id:'run-luna',resident:person.id,agent:'codex',model:'gpt-6-luna',start:100,sequence:1,status:'started'},
  {id:'run-missing',resident:person.id,agent:'codex',start:100,sequence:2,status:'started'}],tasks:[],scars:[],at:100,seq:2};current=true;
+frame.voting.choices.push({...frame.voting.choices[0],id:'unreadable-open-id',status:'open',
+ votes:[frame.voting.choices[0].votes[0],{...frame.voting.choices[0].votes[0],counted:false}]});
 shelf();voting();data.frames=[frame];data.observed_at=100;renderResidentPulse();
+assert.match(text($('shelf')),/Council choosing: 1 of 3 counted votes/);
+assert(!text($('shelf')).includes('Project slot available · council can choose'));
+assert(all($('shelf')).some(node=>node.href==='#voting-card'));
 const shelfText=visible($('shelf')),voteText=visible($('voting'));
 assert.match(shelfText,/Active project/);assert.doesNotMatch(shelfText,/Finished step|Long explanation|idea-private|project-private/);
 assert.match(voteText,/Human choice title/);assert.match(voteText,/Readable proposal/);

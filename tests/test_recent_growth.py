@@ -56,6 +56,18 @@ index=0;frame=frames[0];current=false;renderRecentGrowth();
 assert(text(nodes['recent-growth']).includes('No selected project is active'));
 assert(text(nodes['recent-growth']).includes('No room or project milestone changed'));
 assert(!text(nodes['recent-growth']).includes('Shadow Theatre'));
+// An open choice explains empty build slots, using only the selected frame.
+frame={...frames[0],voting:{choices:[{id:'internal-round',status:'open',candidates:[1,2,3,4,5],
+ votes:[{counted:true},{counted:false},{counted:true}]}]}};
+renderRecentGrowth();
+assert(text(nodes['recent-growth']).includes('Council choosing: 2 of 3 counted votes · 5 candidates'));
+assert(!text(nodes['recent-growth']).includes('No selected project is active'));
+assert(!text(nodes['recent-growth']).includes('internal-round'));
+assert(all(nodes['recent-growth']).some(node=>node.href==='#voting-card'));
+frame.voting.choices[0].status='closed';renderRecentGrowth();
+assert(!text(nodes['recent-growth']).includes('Council choosing'));
+frame=frames[0];renderRecentGrowth(); // older snapshot with no voting projection
+assert(!text(nodes['recent-growth']).includes('Council choosing'));
 // The compact card stays bounded even after a busy day.
 data.frames=Array.from({length:10},(_,i)=>({seq:i+1,at:50000+i,rooms:[],shelf:{projects:
  Array.from({length:i},(_,j)=>({id:String(j),title:'Project '+j,status:'active'}))}}));

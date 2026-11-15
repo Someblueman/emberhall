@@ -1,0 +1,9 @@
+test_window_history_and_visible_actions (tests.test_recent_growth.RecentGrowthTests.test_window_history_and_visible_actions) ... ok
+test_navigation_keyboard_targets_and_record_labels (tests.test_house_navigation.HouseNavigationTests.test_navigation_keyboard_targets_and_record_labels) ... ok
+test_shelf_votes_presence_use_titles_and_exact_models (tests.test_house_navigation.HouseNavigationTests.test_shelf_votes_presence_use_titles_and_exact_models) ... ok
+test_short_default_and_named_collapsed_views (tests.test_house_navigation.HouseNavigationTests.test_short_default_and_named_collapsed_views) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.085s
+
+OK
