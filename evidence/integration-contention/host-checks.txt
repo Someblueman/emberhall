@@ -1,0 +1,19 @@
+test_lock_is_released_on_process_death (tests.test_integration_contention.ContentionTests.test_lock_is_released_on_process_death) ... ok
+test_timeout_waiting_for_lock_and_queued_cancellation (tests.test_integration_contention.ContentionTests.test_timeout_waiting_for_lock_and_queued_cancellation) ... ok
+test_waiting_worker_survives_requester_exit_and_replays (tests.test_integration_contention.ContentionTests.test_waiting_worker_survives_requester_exit_and_replays) ... ok
+test_prepared_explicit_publish_merges_unmerged_candidate (tests.test_integration_contention.PreparedActionTests.test_prepared_explicit_publish_merges_unmerged_candidate) ... ok
+test_prepared_publish_refusal_leaves_source_and_candidate (tests.test_integration_contention.PreparedActionTests.test_prepared_publish_refusal_leaves_source_and_candidate) ... ok
+test_prepared_reject_does_not_merge_and_retains_candidate (tests.test_integration_contention.PreparedActionTests.test_prepared_reject_does_not_merge_and_retains_candidate) ... ok
+test_prepared_review_without_publish_does_not_merge (tests.test_integration_contention.PreparedActionTests.test_prepared_review_without_publish_does_not_merge) ... ok
+test_merge_before_lost_reply_is_recovered_without_repeating_effects (tests.test_integration_contention.ReceiptRecoveryTests.test_merge_before_lost_reply_is_recovered_without_repeating_effects) ... ok
+test_terminal_failure_receipts_replay_without_tests (tests.test_integration_contention.ReceiptRecoveryTests.test_terminal_failure_receipts_replay_without_tests) ... ok
+test_reviews_filtered_while_project_and_explorer_remain (tests.test_integration_contention.SchedulingTests.test_reviews_filtered_while_project_and_explorer_remain) ... ok
+test_coordinator_shutdown_and_timeout_stop_orphaned_worker (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_coordinator_shutdown_and_timeout_stop_orphaned_worker) ... ok
+test_real_integration_completes_once_after_reviewer_exit (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_real_integration_completes_once_after_reviewer_exit) ... ok
+test_reaped_requester_keeps_running_action_and_cancels_queue (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_reaped_requester_keeps_running_action_and_cancels_queue) ... ok
+test_timeout_clears_lock_after_requester_exit (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_timeout_clears_lock_after_requester_exit) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 17.041s
+
+OK

@@ -1,0 +1,22 @@
+{
+  "run": "a57203bb8603404cb230af4ae4c79488",
+  "actor": "keeper-01",
+  "base": "de605f6c08f51f765c68d8fe9a6350d9e7a37974",
+  "contribution": "63b99c22e2464f68b64e449c9f39646b6b44a290",
+  "candidate": "integration-2ec59823d66941389908e9aaf9cdb930",
+  "status": "integrated",
+  "candidate_head": "a8814d4cda1e493a16a182b01eae04081d47c4da",
+  "test_scope": "foundation",
+  "test_commands": [
+    [
+      "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ]
+  ],
+  "test_exit": 0
+}
