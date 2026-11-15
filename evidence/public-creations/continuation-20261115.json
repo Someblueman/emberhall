@@ -79,5 +79,17 @@
     "This window contains repairs and reviews as well as a completed new house tool",
     "No new room opened in this interval",
     "Running helper prompt repair remains unactivated until a separate tested runtime migration"
-  ]
+  ],
+  "public_delivery": {
+    "source": "6471230a9753d6f434723ec061d9163ada5e7fa1",
+    "owner_closure_sequence": 4518,
+    "browser": "Actual Chrome public HTTPS",
+    "gallery": "Specimen Cards marked Completed; four house-tool guides",
+    "app": "https://someblueman.github.io/emberhall/projects/specimen-cards/",
+    "print_fix": "Published DOM status element has status screen-only class",
+    "screenshots": [
+      "specimen-gallery.jpg",
+      "specimen-studio.jpg"
+    ]
+  }
 }
