@@ -75,6 +75,15 @@ def backlog_enabled(state: dict) -> bool:
 
 
 EXPLORER_ADMISSION_SECONDS = 900
+IDLE_COVERAGE_SCOPE = "idle-coverage-20261115"
+
+
+def generic_run_reserved(state: dict, run: dict, at: float) -> bool:
+    """Keep an unclaimed generic admission useful for one finite claim window."""
+    if ("wake_policy" in state
+            and IDLE_COVERAGE_SCOPE not in state.get("maintenance", {}).get("migrations", {})):
+        return True
+    return at < run.get("started_at", at) + EXPLORER_ADMISSION_SECONDS
 
 
 def explorer_reserved(run: dict, at: float) -> bool:
@@ -167,6 +176,7 @@ def workload(state: dict, at: float) -> dict:
     idle = [run["resident"] for key, run in active.items() if run["resident"] not in claimed
             and run["resident"] != exploring
             and not explorer_reserved(run, at)
+            and generic_run_reserved(state, run, at)
             and not ("task" in run and (project_routing or
                      (ballot_work.enabled(state) and "ballot_choice" in state["tasks"].get(run["task"], {}))))
             and not staffing.helper(run)
