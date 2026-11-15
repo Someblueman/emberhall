@@ -43,9 +43,10 @@ sight of its colours: the first focusable element skips to the changed-files
 index, each file section is labelled by its heading, every diff row names its
 change kind (`Added`/`Removed`/`Changed`/`Unchanged`) as visually-hidden text
 rather than colour alone, links get a visible focus outline, and tables scroll
-horizontally on narrow screens instead of being squeezed. Still later
-milestone-2 work, not claimed here: comment/resolution editing and an
-independent phone/desktop and screen-reader try by a non-author.
+horizontally on narrow screens instead of being squeezed. Comment/resolution
+editing is available through the CLI below. An independent phone/desktop and
+screen-reader try by a non-author remains required for milestone 2; markup tests
+do not establish that experience.
 
 ## Verify the carried Git bytes
 
@@ -91,13 +92,50 @@ no automatic guess across duplicate lines. Milestone 1 exposes this model for
 round-trip/orphan behavior; rebase import and multi-reviewer merge are later
 work, not a working merge feature.
 
+## Edit, resolve and reopen a comment
+
+```sh
+python3 projects/review-skein/skein.py edit-comment /path/to/packet \
+  --id reviewer-1-note-1 --body "Revised question after reading the second file."
+python3 projects/review-skein/skein.py resolve-comment /path/to/packet --id reviewer-1-note-1
+python3 projects/review-skein/skein.py reopen-comment /path/to/packet --id reviewer-1-note-1
+```
+
+New comments start with `resolution: "open"`. Resolution is separate from the
+anchor's `state` (`anchored` or `orphan`): resolving an orphan preserves its
+missing-line reason and rebase history. Editing preserves the ID and anchor,
+and resolving or reopening preserves the body. The Python
+`update_comment(packet, identifier, *, body=None, resolution=None)` API supports
+the same operations. Unknown IDs and invalid bodies or resolutions fail before
+writing; updates atomically replace only `comments.json`. Use one writer at a
+time; concurrent editing and comment merging are later work. These commands do
+not add an in-browser comment editor or change the static HTML.
+
+**Saved comments have a new version.** `comments.json` now uses version 2 with a
+required `resolution` field. The packet manifest, anchors and Git bundle keep
+their existing formats. For a packet exported by milestone 1, explicitly migrate
+its comments before verifying, adding or editing comments with this exporter:
+
+```sh
+python3 projects/review-skein/skein.py migrate-comments /path/to/old-packet
+```
+
+Migration validates the entire strict version 1 document before atomically
+replacing it with version 2, setting every existing comment to open. It preserves
+IDs, bodies, anchors, orphan reasons and rebase history, and changes no other
+packet member. Repeating migration on valid version 2 comments leaves the bytes
+unchanged. Malformed records, duplicate keys/IDs and unsupported versions are
+rejected without rewriting the file. Older Skein readers cannot read version 2
+comments; keep a copy of the original packet if those readers must still use it.
+
 ## Test and independent trial
 
 The suite creates real temporary Git repositories and checks branch/tag and
 object identity, a cloneable full bundle, deterministic re-export, HTML escaping,
 renames, Unicode, tabs, duplicate lines, missing anchors and rebase orphans.
 It also exercises tracked/staged/untracked dirt, ambiguous refs, symlinks,
-unsafe paths, binary/non-UTF-8/oversized blobs, CLI comments and malformed JSON:
+unsafe paths, binary/non-UTF-8/oversized blobs, CLI comment editing/resolution,
+explicit version 1 migration, rejected-update byte preservation and malformed JSON:
 
 ```sh
 python3 -m unittest discover -s projects/review-skein -v

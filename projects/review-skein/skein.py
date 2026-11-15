@@ -24,6 +24,7 @@ FORMAT = "review-skein-packet"
 COMMENT_FORMAT = "review-skein-comments"
 ANCHOR_FORMAT = "review-skein-anchors"
 VERSION = 1
+COMMENT_VERSION = 2
 DEFAULT_MAX_FILE_BYTES = 256 * 1024
 JSON_LIMIT = 32 * 1024 * 1024
 GIT_TIMEOUT = 120
@@ -317,6 +318,7 @@ class Comment:
     state: str = "anchored"
     rebased_from: Anchor | None = None
     orphan_reason: str | None = None
+    resolution: str = "open"
 
     def __post_init__(self) -> None:
         if not isinstance(self.identifier, str) or ID_RE.fullmatch(self.identifier) is None:
@@ -335,6 +337,8 @@ class Comment:
                 raise SkeinError("an orphan comment requires an explicit reason")
         elif self.orphan_reason is not None:
             raise SkeinError("an anchored comment cannot retain an orphan reason")
+        if not isinstance(self.resolution, str) or self.resolution not in {"open", "resolved"}:
+            raise SkeinError("comment resolution must be 'open' or 'resolved'")
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -344,11 +348,12 @@ class Comment:
             "state": self.state,
             "rebased_from": self.rebased_from.to_dict() if self.rebased_from else None,
             "orphan_reason": self.orphan_reason,
+            "resolution": self.resolution,
         }
 
     @classmethod
     def from_dict(cls, value: Any) -> Comment:
-        required = {"id", "anchor", "body", "state", "rebased_from", "orphan_reason"}
+        required = {"id", "anchor", "body", "state", "rebased_from", "orphan_reason", "resolution"}
         if not isinstance(value, dict) or set(value) != required:
             raise SkeinError("malformed comment record")
         previous = value["rebased_from"]
@@ -356,6 +361,7 @@ class Comment:
             value["id"], Anchor.from_dict(value["anchor"]), value["body"], value["state"],
             Anchor.from_dict(previous) if previous is not None else None,
             value["orphan_reason"],
+            value["resolution"],
         )
 
 
@@ -436,7 +442,7 @@ def dumps_comments(comments: Iterable[Comment]) -> str:
     if len(identifiers) != len(set(identifiers)):
         raise SkeinError("duplicate comment ID")
     return _json_text({
-        "format": COMMENT_FORMAT, "version": VERSION,
+        "format": COMMENT_FORMAT, "version": COMMENT_VERSION,
         "comments": [item.to_dict() for item in values],
     })
 
@@ -448,8 +454,10 @@ def loads_comments(text: str) -> list[Comment]:
         raise SkeinError(f"invalid comments JSON: {exc}") from exc
     if (not isinstance(value, dict) or set(value) != {"format", "version", "comments"}
             or value["format"] != COMMENT_FORMAT or type(value["version"]) is not int
-            or value["version"] != VERSION or not isinstance(value["comments"], list)):
+            or value["version"] not in {1, COMMENT_VERSION} or not isinstance(value["comments"], list)):
         raise SkeinError("unsupported comments header")
+    if value["version"] == 1:
+        raise SkeinError("comments version 1 requires: migrate-comments PACKET")
     comments = [Comment.from_dict(item) for item in value["comments"]]
     identifiers = [item.identifier for item in comments]
     if len(identifiers) != len(set(identifiers)):
@@ -500,6 +508,49 @@ def _atomic_comments(packet: Path, comments: list[Comment]) -> None:
         except FileNotFoundError:
             pass
         raise
+
+
+def migrate_comments(packet: Path) -> list[Comment]:
+    """Explicitly upgrade a v1 comments file; validate v2 without rewriting it."""
+    packet = packet.expanduser().resolve()
+    _load_packet(packet)
+    value = _read_json(packet / "comments.json")
+    legacy = (isinstance(value, dict) and type(value.get("version")) is int
+              and value["version"] == 1)
+    if legacy:
+        records = value.get("comments")
+        required = {"id", "anchor", "body", "state", "rebased_from", "orphan_reason"}
+        if (not isinstance(records, list)
+                or any(not isinstance(item, dict) or set(item) != required for item in records)):
+            raise SkeinError("malformed version-1 comment record")
+        value = {**value, "version": COMMENT_VERSION,
+                 "comments": [{**item, "resolution": "open"} for item in records]}
+    comments = loads_comments(_json_text(value))
+    if legacy:
+        _atomic_comments(packet, comments)
+    return comments
+
+
+def update_comment(
+    packet: Path, identifier: str, *, body: str | None = None,
+    resolution: str | None = None,
+) -> Comment:
+    """Edit one existing comment without moving its anchor or changing its ID."""
+    if body is None and resolution is None:
+        raise SkeinError("provide a comment body or resolution to update")
+    packet = packet.expanduser().resolve()
+    _load_packet(packet)
+    comments = loads_comments(_json_text(_read_json(packet / "comments.json")))
+    for index, comment in enumerate(comments):
+        if comment.identifier == identifier:
+            updated = replace(
+                comment, body=comment.body if body is None else body,
+                resolution=comment.resolution if resolution is None else resolution,
+            )
+            comments[index] = updated
+            _atomic_comments(packet, comments)
+            return updated
+    raise SkeinError(f"comment ID does not exist: {identifier}")
 
 
 def add_comment(
@@ -789,6 +840,19 @@ def main(argv: list[str] | None = None) -> int:
     comment.add_argument("--side", choices=("old", "new"), required=True)
     comment.add_argument("--line", type=int, required=True)
     comment.add_argument("--body", required=True)
+    edit = subcommands.add_parser("edit-comment", help="replace an existing comment body")
+    edit.add_argument("packet", type=Path)
+    edit.add_argument("--id", required=True, dest="identifier")
+    edit.add_argument("--body", required=True)
+    for command, help_text in (
+        ("resolve-comment", "mark an existing comment resolved"),
+        ("reopen-comment", "mark an existing comment open"),
+    ):
+        resolution = subcommands.add_parser(command, help=help_text)
+        resolution.add_argument("packet", type=Path)
+        resolution.add_argument("--id", required=True, dest="identifier")
+    migrate = subcommands.add_parser("migrate-comments", help="upgrade v1 comments to v2")
+    migrate.add_argument("packet", type=Path)
     arguments = parser.parse_args(argv)
     try:
         if arguments.command == "export":
@@ -801,12 +865,24 @@ def main(argv: list[str] | None = None) -> int:
         elif arguments.command == "verify":
             base, head = verify_packet(arguments.packet)
             print(f"Verified full offline bundle: base {base}, head {head}")
-        else:
+        elif arguments.command == "comment":
             result = add_comment(
                 arguments.packet, arguments.identifier, arguments.commit,
                 arguments.path, arguments.side, arguments.line, arguments.body,
             )
             print(f"Recorded {result.identifier} at {result.anchor.path}:{result.anchor.line}")
+        elif arguments.command == "migrate-comments":
+            comments = migrate_comments(arguments.packet)
+            print(f"Comments version {COMMENT_VERSION}: {len(comments)} comments")
+        else:
+            if arguments.command == "edit-comment":
+                result = update_comment(arguments.packet, arguments.identifier, body=arguments.body)
+            else:
+                result = update_comment(
+                    arguments.packet, arguments.identifier,
+                    resolution="resolved" if arguments.command == "resolve-comment" else "open",
+                )
+            print(f"Updated {result.identifier}: {result.resolution}")
         return 0
     except (SkeinError, OSError) as exc:
         parser.exit(2, f"skein: {exc}\n")

@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -358,6 +359,144 @@ class SkeinPacketTests(SkeinFixture):
         ])
         self.assertEqual("orphan", changed.state)
         self.assertIn("uniquely matching text are missing", changed.orphan_reason)
+
+    def test_cli_edits_resolves_and_reopens_saved_comments(self) -> None:
+        self.export()
+        original = skein.add_comment(
+            self.packet, "editable", self.head, "alpha.txt", "new", 1, "Initial question.",
+        )
+        script = Path(skein.__file__).resolve()
+        for command, extra, expected_body, expected_resolution in (
+            ("edit-comment", ["--body", "Revised ☃ question."], "Revised ☃ question.", "open"),
+            ("resolve-comment", [], "Revised ☃ question.", "resolved"),
+            ("reopen-comment", [], "Revised ☃ question.", "open"),
+        ):
+            with self.subTest(command=command):
+                result = subprocess.run(
+                    [sys.executable, str(script), command, str(self.packet), "--id", "editable", *extra],
+                    env=self.environment, capture_output=True, text=True, timeout=30,
+                )
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertIn(f"Updated editable: {expected_resolution}", result.stdout)
+                stored = skein.loads_comments((self.packet / "comments.json").read_text())
+                self.assertEqual(1, len(stored))
+                self.assertEqual(original.anchor, stored[0].anchor)
+                self.assertEqual(expected_body, stored[0].body)
+                self.assertEqual(expected_resolution, stored[0].resolution)
+                self.assertEqual(stored, skein.loads_comments(skein.dumps_comments(stored)))
+
+    def test_editing_or_resolving_an_orphan_keeps_its_provenance(self) -> None:
+        self.export()
+        first = skein.add_comment(self.packet, "orphan", self.head, "alpha.txt", "new", 1, "Question.")
+        second = skein.add_comment(self.packet, "other", self.head, "alpha.txt", "new", 2, "Leave alone.")
+        orphan = skein.reanchor(first, "f" * 40, [])
+        (self.packet / "comments.json").write_text(skein.dumps_comments([orphan, second]))
+        updated = skein.update_comment(self.packet, "orphan", body="Answered.", resolution="resolved")
+        self.assertEqual("orphan", updated.state)
+        self.assertEqual("resolved", updated.resolution)
+        self.assertEqual(orphan.anchor, updated.anchor)
+        self.assertEqual(orphan.rebased_from, updated.rebased_from)
+        self.assertEqual(orphan.orphan_reason, updated.orphan_reason)
+        stored = skein.loads_comments((self.packet / "comments.json").read_text())
+        self.assertEqual([updated, second], stored)
+        rebound = skein.reanchor(updated, "e" * 40, [
+            skein.Anchor("e" * 40, "alpha.txt", "new", 1, first.anchor.text),
+        ])
+        self.assertEqual("anchored", rebound.state)
+        self.assertEqual("resolved", rebound.resolution)
+
+    def test_invalid_comment_updates_leave_saved_bytes_unchanged(self) -> None:
+        self.export()
+        skein.add_comment(self.packet, "once", self.head, "alpha.txt", "new", 1, "Valid.")
+        path = self.packet / "comments.json"
+        original = path.read_bytes()
+        for identifier, kwargs in (
+            ("missing", {"body": "No such comment."}),
+            ("once", {"body": " "}), ("once", {"body": "x" * 20001}),
+            ("once", {"resolution": "closed"}), ("once", {"resolution": True}),
+            ("once", {"resolution": []}), ("once", {}),
+        ):
+            with self.subTest(identifier=identifier, kwargs=str(kwargs)[:60]):
+                with self.assertRaises(skein.SkeinError):
+                    skein.update_comment(self.packet, identifier, **kwargs)
+                self.assertEqual(original, path.read_bytes())
+        for command in ("edit-comment", "resolve-comment", "reopen-comment"):
+            stderr = io.StringIO()
+            args = [command, str(self.packet), "--id", "missing"]
+            if command == "edit-comment":
+                args.extend(["--body", "Missing."])
+            with contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit) as caught:
+                skein.main(args)
+            self.assertEqual(2, caught.exception.code)
+            self.assertIn("does not exist", stderr.getvalue())
+            self.assertEqual(original, path.read_bytes())
+
+    def test_explicit_v1_migration_preserves_packet_and_existing_comments(self) -> None:
+        self.export()
+        anchor = next(item for item in skein._load_anchors(self.packet)
+                      if item.commit == self.head and item.side == "new")
+        # Exact persisted M1 schema, independent of the current Comment serializer.
+        legacy_record = {
+            "id": "old-note", "anchor": anchor.to_dict(), "body": "Saved before editing existed.",
+            "state": "anchored", "rebased_from": None, "orphan_reason": None,
+        }
+        orphan = {
+            **legacy_record, "id": "old-orphan", "state": "orphan",
+            "rebased_from": anchor.to_dict(), "orphan_reason": "rebase: line missing",
+        }
+        path = self.packet / "comments.json"
+        path.write_text(json.dumps({"format": skein.COMMENT_FORMAT, "version": 1,
+                                    "comments": [legacy_record, orphan]}))
+        other_members = {item.name: item.read_bytes() for item in self.packet.iterdir() if item != path}
+        before = path.read_bytes()
+        with self.assertRaisesRegex(skein.SkeinError, "migrate-comments"):
+            skein.verify_packet(self.packet)
+        self.assertEqual(before, path.read_bytes())
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            self.assertEqual(0, skein.main(["migrate-comments", str(self.packet)]))
+        self.assertIn("Comments version 2: 2 comments", stdout.getvalue())
+        migrated = skein.loads_comments(path.read_text())
+        self.assertEqual(["open", "open"], [item.resolution for item in migrated])
+        for old, new in zip((legacy_record, orphan), migrated):
+            self.assertEqual({**old, "resolution": "open"}, new.to_dict())
+        self.assertEqual((self.base, self.head), skein.verify_packet(self.packet))
+        after = path.read_bytes()
+        self.assertEqual(migrated, skein.migrate_comments(self.packet))
+        self.assertEqual(after, path.read_bytes())
+        self.assertEqual(other_members, {item.name: item.read_bytes()
+                                       for item in self.packet.iterdir() if item != path})
+        edited = skein.update_comment(self.packet, "old-note", body="Updated.", resolution="resolved")
+        self.assertEqual("resolved", edited.resolution)
+
+    def test_migration_and_updates_reject_malformed_comments_without_writes(self) -> None:
+        self.export()
+        comment = skein.add_comment(self.packet, "once", self.head, "alpha.txt", "new", 1, "Valid.")
+        record = comment.to_dict()
+        legacy = {key: value for key, value in record.items() if key != "resolution"}
+        documents = [
+            {"format": skein.COMMENT_FORMAT, "version": 1, "comments": [legacy, legacy]},
+            {"format": skein.COMMENT_FORMAT, "version": 1, "comments": [{**legacy, "surprise": True}]},
+            {"format": "wrong", "version": 1, "comments": [legacy]},
+            {"format": skein.COMMENT_FORMAT, "version": 2, "comments": [record, record]},
+            {"format": skein.COMMENT_FORMAT, "version": 2, "comments": [legacy]},
+            {"format": skein.COMMENT_FORMAT, "version": 2,
+             "comments": [{**record, "resolution": "maybe"}]},
+            {"format": skein.COMMENT_FORMAT, "version": 99, "comments": []},
+        ]
+        texts = [json.dumps(value) for value in documents]
+        texts.append('{"format":"review-skein-comments","version":1,"comments":[],"comments":[]}')
+        path = self.packet / "comments.json"
+        for text in texts:
+            with self.subTest(text=text[:100]):
+                path.write_text(text)
+                before = path.read_bytes()
+                with self.assertRaises(skein.SkeinError):
+                    skein.migrate_comments(self.packet)
+                self.assertEqual(before, path.read_bytes())
+                with self.assertRaises(skein.SkeinError):
+                    skein.update_comment(self.packet, "once", body="Change.")
+                self.assertEqual(before, path.read_bytes())
 
 
 if __name__ == "__main__":
