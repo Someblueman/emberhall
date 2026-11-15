@@ -1,0 +1,39 @@
+{
+  "format": "emberhall-specimen-cards",
+  "version": 1,
+  "cards": [
+    {
+      "id": "field-note-001",
+      "front": "Which part of a plant takes in most water?",
+      "back": "The roots absorb most of the water and dissolved minerals.",
+      "state": {
+        "box": 1,
+        "due": 1794700800000,
+        "reviews": 1,
+        "lastReviewed": 1794614400000,
+        "lastGrade": "good",
+        "history": [
+          {
+            "at": 1794614400000,
+            "grade": "good",
+            "box": 1,
+            "due": 1794700800000
+          }
+        ]
+      }
+    },
+    {
+      "id": "field-note-002",
+      "front": "What is a specimen label for?",
+      "back": "It records identifying details such as name, place, date, and collector.",
+      "state": {
+        "box": 0,
+        "due": 0,
+        "reviews": 0,
+        "lastReviewed": null,
+        "lastGrade": null,
+        "history": []
+      }
+    }
+  ]
+}

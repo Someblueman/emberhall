@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specimen Cards — an offline card studio</title>
+<style>
+:root{color-scheme:light;--ink:#20352e;--leaf:#386b52;--paper:#fffdf6;--wash:#edf2e8;--line:#b9c8b8;--accent:#c24d32;font:16px/1.5 system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink)}main{max-width:1050px;margin:auto;padding:1.25rem}header{padding:1rem 0 1.5rem}h1,h2,h3,p{margin-top:0}h1{font-family:Georgia,serif;font-size:clamp(2rem,6vw,3.5rem);margin-bottom:.25rem}.eyebrow{color:var(--leaf);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem}.lede{max-width:65ch}section{background:var(--paper);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;margin:1rem 0}label{display:block;font-weight:650;margin:.65rem 0 .2rem}input,textarea,button{font:inherit}input[type=text],textarea,input[type=file]{width:100%;padding:.65rem;border:1px solid #72887b;border-radius:.4rem;background:white;color:var(--ink)}textarea{min-height:5rem;resize:vertical}button{border:1px solid var(--leaf);border-radius:.45rem;background:var(--leaf);color:white;padding:.55rem .85rem;cursor:pointer;margin:.25rem .3rem .25rem 0}button.secondary{background:white;color:var(--leaf)}button.danger{background:var(--accent);border-color:var(--accent)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #e3a83a;outline-offset:2px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1rem}.card-list{list-style:none;padding:0;margin:0}.card-list li{display:flex;align-items:center;justify-content:space-between;gap:.75rem;border-top:1px solid var(--line);padding:.6rem 0}.card-list li span{overflow-wrap:anywhere}.review-card{min-height:13rem;border:1px solid var(--line);border-radius:.75rem;background:white;padding:1.25rem;margin:.75rem 0;display:grid;align-content:center}.review-card .face{font:1.4rem/1.4 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere}.review-card .label{font-size:.75rem;text-transform:uppercase;color:var(--leaf);font-weight:700}.actions{display:flex;flex-wrap:wrap;gap:.25rem}.hint{font-size:.9rem;color:#405b4d}.status{min-height:1.5em;font-weight:650;color:#244d38}#import-file{max-width:100%}.hidden{display:none!important}
+@media print{ @page{size:letter;margin:.5in}body{background:white;color:#111;font:10pt/1.3 Georgia,serif}main{max-width:none;margin:0;padding:0}header,.screen-only,section:not(#print-deck),footer{display:none!important}#print-deck{display:block!important;border:0;padding:0;margin:0}.print-grid{display:grid;grid-template-columns:5in;justify-content:center;gap:.2in}.print-card{width:5in;height:3.5in;display:grid;grid-template-columns:1fr 1fr;break-inside:avoid;border:1px solid #555}.print-face{padding:.2in;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere}.print-face+ .print-face{border-left:1px dashed #777}.print-face h2{font:8pt/1.2 system-ui,sans-serif;text-transform:uppercase;margin:0 0 .15in;color:#444}.print-text{font-size:14pt;line-height:1.35}.print-empty{font-size:9pt;color:#555}}
+</style>
+</head>
+<body>
+<main>
+<header><p class="eyebrow">A small offline studio</p><h1>Specimen Cards</h1><p class="lede">Make a deck you can carry as a plain JSON file. Write a prompt on the front and its answer on the back, then review what is due.</p></header>
+<p id="status" class="status screen-only" role="status" aria-live="polite">Ready. Export a deck to keep a portable copy.</p>
+<div class="grid screen-only">
+<section aria-labelledby="edit-heading"><h2 id="edit-heading">Make or edit a card</h2><form id="card-form"><input id="card-id" type="hidden"><label for="front">Front</label><textarea id="front" required maxlength="4000"></textarea><label for="back">Back</label><textarea id="back" required maxlength="4000"></textarea><div class="actions"><button id="save-card" type="submit">Add card</button><button id="cancel-edit" class="secondary hidden" type="button">Cancel edit</button></div></form><h3>Your deck</h3><ul id="card-list" class="card-list"></ul><p id="empty-deck" class="hint">No cards yet. Create one above or import a deck.</p></section>
+<section aria-labelledby="review-heading"><h2 id="review-heading">Review</h2><p id="queue-summary" class="hint"></p><div id="review-card" class="review-card" aria-live="polite"><p class="hint">No card selected.</p></div><div id="review-actions" class="actions hidden"><button data-grade="again">Again</button><button data-grade="hard">Hard</button><button data-grade="good">Good</button><button data-grade="easy">Easy</button></div><p class="hint">Due cards are ordered by due time, then card ID. Reveal the back before grading.</p></section>
+<section aria-labelledby="save-heading"><h2 id="save-heading">Carry your deck</h2><p>There is no account or automatic save. Export creates a portable version 1 JSON file.</p><div class="actions"><button id="export">Export JSON</button><button id="print" class="secondary">Print cards</button></div><label for="import-file">Import a version 1 JSON deck</label><input id="import-file" type="file" accept="application/json,.json"><p class="hint">A bad file is rejected and leaves your current deck unchanged.</p></section>
+</div>
+<section id="print-deck" class="hidden" aria-label="Printable card faces"><div id="print-grid" class="print-grid"></div><p class="print-empty">Each card prints as a 5 × 3.5 inch pair: front and back side by side. Cut at the centre and attach or fold. Printer scaling and physical alignment vary; check print preview.</p></section>
+<footer class="screen-only"><p class="hint">Card text is displayed as plain text. Nothing is sent over the network.</p></footer>
+</main>
+<script>
+"use strict";
+const SpecimenCards = (() => {
+  const FORMAT = "emberhall-specimen-cards";
+  const VERSION = 1;
+  const MINUTE = 60_000;
+  const DAY = 24 * 60 * MINUTE;
+  const grades = new Set(["again", "hard", "good", "easy"]);
+  const keys = value => Object.keys(value).sort().join(",");
+  const need = (condition, message) => { if (!condition) throw new TypeError(message); };
+  function finiteTime(value) { return Number.isSafeInteger(value) && value >= 0; }
+  function validate(deck) {
+    need(deck && typeof deck === "object" && !Array.isArray(deck), "Deck must be an object");
+    need(keys(deck) === "cards,format,version", "Deck has missing or unsupported fields");
+    need(deck.format === FORMAT && deck.version === VERSION, "Unsupported deck format or version");
+    need(Array.isArray(deck.cards), "Deck cards must be an array");
+    const ids = new Set();
+    for (const card of deck.cards) {
+      need(card && typeof card === "object" && !Array.isArray(card), "Each card must be an object");
+      need(keys(card) === "back,front,id,state", "Card has missing or unsupported fields");
+      need(typeof card.id === "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(card.id), "Card ID is invalid");
+      need(!ids.has(card.id), "Card IDs must be unique"); ids.add(card.id);
+      need(typeof card.front === "string" && card.front.length > 0 && card.front.length <= 4000, "Card front must contain 1 to 4000 characters");
+      need(typeof card.back === "string" && card.back.length > 0 && card.back.length <= 4000, "Card back must contain 1 to 4000 characters");
+      const state = card.state;
+      need(state && typeof state === "object" && !Array.isArray(state), "Card review state is invalid");
+      need(keys(state) === "box,due,history,lastGrade,lastReviewed,reviews", "Review state has missing or unsupported fields");
+      need(Number.isInteger(state.box) && state.box >= 0 && state.box <= 4, "Review box must be an integer from 0 to 4");
+      need(finiteTime(state.due) && Number.isSafeInteger(state.reviews), "Review due/count must be finite nonnegative integers");
+      need(state.reviews >= 0 && Array.isArray(state.history) && state.history.length === state.reviews, "Review count must match its history");
+      need(state.history.every((entry, i) => entry && typeof entry === "object" && !Array.isArray(entry) &&
+        keys(entry) === "at,box,due,grade" && finiteTime(entry.at) && finiteTime(entry.due) && entry.due > entry.at &&
+        Number.isInteger(entry.box) && entry.box >= 0 && entry.box <= 4 && grades.has(entry.grade) &&
+        (i === 0 || entry.at >= state.history[i - 1].at)), "Review history is malformed");
+      if (state.reviews === 0) {
+        need(state.lastGrade === null && state.lastReviewed === null, "Unreviewed cards need null last-review fields");
+      } else {
+        const last = state.history[state.history.length - 1];
+        need(state.lastGrade === last.grade && state.lastReviewed === last.at && state.box === last.box && state.due === last.due,
+          "Review state must match its final history entry");
+      }
+      need(state.lastGrade === null || grades.has(state.lastGrade), "Unsupported last grade");
+      need(state.lastReviewed === null || finiteTime(state.lastReviewed), "Last review time must be finite");
+    }
+    return deck;
+  }
+  function createCard(id, front, back, now = 0) {
+    need(finiteTime(now), "Creation time must be a finite nonnegative integer");
+    const deck = {format: FORMAT, version: VERSION, cards: [{id, front, back,
+      state: {box: 0, due: now, reviews: 0, lastReviewed: null, lastGrade: null, history: []}}]};
+    validate(deck); return deck.cards[0];
+  }
+  function parse(text) {
+    let deck;
+    try { deck = JSON.parse(text); } catch (_) { throw new TypeError("File is not valid JSON"); }
+    return validate(deck);
+  }
+  function serialize(deck) { validate(deck); return JSON.stringify(deck, null, 2) + "\n"; }
+  function queue(deck, now) {
+    validate(deck); need(finiteTime(now), "Review time must be a finite nonnegative integer");
+    return deck.cards.filter(card => card.state.due <= now)
+      .slice().sort((a, b) => a.state.due - b.state.due || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }
+  function grade(card, gradeName, now) {
+    need(card && typeof card === "object", "Card is required");
+    validate({format: FORMAT, version: VERSION, cards: [card]});
+    need(grades.has(gradeName), "Unknown review grade");
+    need(finiteTime(now) && now >= card.state.due, "Card is not due at this review time");
+    const old = card.state;
+    const box = gradeName === "again" ? 0 : gradeName === "good" || gradeName === "easy"
+      ? Math.min(4, old.box + 1) : Math.max(1, old.box);
+    const intervals = {again: 5 * MINUTE, hard: 10 * MINUTE,
+      good: [DAY, 3 * DAY, 7 * DAY, 14 * DAY, 30 * DAY],
+      easy: [4 * DAY, 7 * DAY, 14 * DAY, 30 * DAY, 60 * DAY]};
+    const due = now + (Array.isArray(intervals[gradeName]) ? intervals[gradeName][box] : intervals[gradeName]);
+    need(finiteTime(due), "Review due time exceeds the supported range");
+    const history = [...old.history, {at: now, grade: gradeName, box, due}];
+    return {...card, state: {box, due, reviews: history.length, lastReviewed: now,
+      lastGrade: gradeName, history}};
+  }
+  return {FORMAT, VERSION, createCard, validate, parse, serialize, queue, grade};
+})();
+if (typeof module !== "undefined" && module.exports) module.exports = SpecimenCards;
+
+if (typeof document !== "undefined") (() => {
+  const $ = id => document.getElementById(id);
+  const model = SpecimenCards;
+  let deck = {format: model.FORMAT, version: model.VERSION, cards: []};
+  let activeId = null, revealed = false;
+  const status = message => { $("status").textContent = message; };
+  const node = (tag, text, className) => { const item = document.createElement(tag); if (text !== undefined) item.textContent = text; if (className) item.className = className; return item; };
+  function clearForm() { $("card-form").reset(); $("card-id").value = ""; $("save-card").textContent = "Add card"; $("cancel-edit").classList.add("hidden"); }
+  function render() {
+    const list = $("card-list"); list.replaceChildren();
+    for (const card of deck.cards) {
+      const row = node("li"), title = node("span", card.front.replace(/\s+/g, " ").slice(0, 90));
+      const actions = node("div", undefined, "actions");
+      const edit = node("button", "Edit", "secondary"); edit.type = "button"; edit.addEventListener("click", () => {
+        $("card-id").value = card.id; $("front").value = card.front; $("back").value = card.back;
+        $("save-card").textContent = "Save changes"; $("cancel-edit").classList.remove("hidden"); $("front").focus();
+      });
+      const remove = node("button", "Delete", "danger"); remove.type = "button"; remove.addEventListener("click", () => {
+        deck = {...deck, cards: deck.cards.filter(item => item.id !== card.id)};
+        if ($("card-id").value === card.id) clearForm();
+        if (activeId === card.id) { activeId = null; revealed = false; }
+        render(); status("Card deleted. Export to keep the change.");
+      });
+      actions.append(edit, remove); row.append(title, actions); list.append(row);
+    }
+    $("empty-deck").classList.toggle("hidden", deck.cards.length > 0);
+    const due = model.queue(deck, Date.now()); $("queue-summary").textContent = `${due.length} due now · ${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"} total`;
+    if (!activeId || !due.some(card => card.id === activeId)) { activeId = due.length ? due[0].id : null; revealed = false; }
+    const area = $("review-card"), actions = $("review-actions"); area.replaceChildren(); actions.classList.toggle("hidden", !activeId);
+    if (!activeId) { area.append(node("p", deck.cards.length ? "Nothing is due right now." : "Add or import a card to begin.", "hint")); return; }
+    const card = deck.cards.find(item => item.id === activeId);
+    area.append(node("p", revealed ? "Back" : "Front", "label"), node("p", revealed ? card.back : card.front, "face"));
+    if (!revealed) { actions.classList.add("hidden"); const reveal = node("button", "Reveal back"); reveal.type = "button"; reveal.addEventListener("click", () => { revealed = true; render(); }); area.append(reveal); }
+  }
+  $("card-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const id = $("card-id").value;
+    if (id && !deck.cards.some(card => card.id === id)) {
+      status("This card no longer exists. Cancel edit to add a new card."); return;
+    }
+    if (id) deck = {...deck, cards: deck.cards.map(card => card.id === id ? {...card, front: $("front").value, back: $("back").value} : card)};
+    else {
+      let newId; do { newId = `card-${crypto.randomUUID()}`; } while (deck.cards.some(card => card.id === newId));
+      deck = {...deck, cards: [...deck.cards, model.createCard(newId, $("front").value, $("back").value, Date.now())]};
+    }
+    clearForm(); render(); status("Card saved in this page. Export to keep a portable copy.");
+  });
+  $("cancel-edit").addEventListener("click", clearForm);
+  $("review-actions").addEventListener("click", event => {
+    const gradeName = event.target.dataset.grade; if (!gradeName || !activeId) return;
+    const now = Date.now(); deck = {...deck, cards: deck.cards.map(card => card.id === activeId ? model.grade(card, gradeName, now) : card)};
+    activeId = null; revealed = false; render(); status(`Marked ${gradeName}. Export to keep your review state.`);
+  });
+  $("export").addEventListener("click", () => {
+    const blob = new Blob([model.serialize(deck)], {type: "application/json"}); const url = URL.createObjectURL(blob);
+    const link = node("a"); link.href = url; link.download = "specimen-cards.json"; link.click(); URL.revokeObjectURL(url);
+    status("Deck exported as specimen-cards.json.");
+  });
+  $("import-file").addEventListener("change", async event => {
+    const file = event.target.files[0]; if (!file) return;
+    try { const candidate = model.parse(await file.text()); deck = candidate; activeId = null; revealed = false; clearForm(); render(); status(`Imported ${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"}. Export to keep a portable copy.`); }
+    catch (error) { status(`Import rejected: ${error.message}. Current deck is unchanged.`); }
+    finally { event.target.value = ""; }
+  });
+  $("print").addEventListener("click", () => {
+    const grid = $("print-grid"); grid.replaceChildren();
+    for (const card of deck.cards) {
+      const pair = node("article", undefined, "print-card");
+      for (const [label, text] of [["Front", card.front], ["Back", card.back]]) {
+        const face = node("div", undefined, "print-face"); face.append(node("h2", label), node("div", text, "print-text")); pair.append(face);
+      }
+      grid.append(pair);
+    }
+    $("print-deck").classList.remove("hidden"); window.print(); $("print-deck").classList.add("hidden");
+  });
+  render();
+})();
+</script>
+</body>
+</html>
