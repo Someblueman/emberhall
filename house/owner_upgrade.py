@@ -66,6 +66,8 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
     state, _, _ = record.read()
     old = maintenance.protected_manifest(state)
     names = set(old) | maintenance.OWNER_MODULES
+    if scope == maintenance.PROJECT_CONTINUATION_SCOPE:
+        names.add("house/project_delivery.py")
     if scope == maintenance.REVIEW_COMPLETION_SCOPE:
         names.add("house/review_completion.py")
     if scope == maintenance.LENS_SCOPE:
