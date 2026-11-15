@@ -23,7 +23,7 @@ def git(root, *args):
 class HousekeepingTests(unittest.TestCase):
     def setUp(self):
         self.base = Path(tempfile.mkdtemp(prefix="housekeeping-"))
-        self.addCleanup(shutil.rmtree, self.base, True)
+        self.addCleanup(lambda: self.base.exists() and housekeeping._remove(self.base))
         self.root = self.base / "house"
         self.root.mkdir()
         git(self.root, "init", "-q", "-b", "main")
