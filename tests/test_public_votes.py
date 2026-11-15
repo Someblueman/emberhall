@@ -86,3 +86,28 @@ class PublicVotingTests(HouseCase):
         self.assertFalse(p["stale"])
         self.assertEqual("repealed", p["rule_status"])
         self.assertEqual("direct-owner", p["ratification"])
+
+    def test_great_work_choice_exports_ordered_stages_and_slot_without_crashing(self):
+        from house import shelf
+        h = test_shelf.ShelfTests(); h.setUp()
+        original = shelf.apply
+        self.addCleanup(setattr, shelf, "apply", original)
+        shelf.apply = lambda state, event, selection_version=3: original(state, event, selection_version=3)
+        h.send("explore-start", actor="other", round="rg", expect=0, token="rg", seconds=100)
+        h.send("explore-publish", actor="other", round="rg", token="rg",
+               ideas=[test_shelf.idea("g1") | {"scale": "great"}, test_shelf.idea("g2") | {"scale": "great"}])
+        h.send("choice-open", actor="author", choice="great1", slot="great", milestones={
+            k: [{"milestone": f"Stage {n}", "seconds": (n + 2) * shelf.DAY} for n in range(2)]
+            for k in ("g1", "g2")})
+        h.state["proposals"] = {}
+        times = {seq: seq * 10 for seq in range(1, 40)}
+        public = voting_view(h.state, {}, times)["choices"][0]
+        self.assertEqual("great", public["slot"])
+        self.assertEqual(3, public["selection_version"])
+        cand = public["candidates"][0]
+        self.assertEqual("Stage 0", cand["milestone"])
+        self.assertEqual(5 * shelf.DAY, cand["seconds"])
+        self.assertEqual([
+            {"milestone": "Stage 0", "seconds": 2 * shelf.DAY},
+            {"milestone": "Stage 1", "seconds": 3 * shelf.DAY},
+        ], cand["stages"])
