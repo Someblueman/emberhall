@@ -91,9 +91,11 @@ binds the actual6863-event Pages snapshot to the tested frontend. The earlier
 failed gate6701 and premature prose6699/6700 remain preserved history. The broader
 desktop layout still needs visual work; functional delivery is not finished design.
 
-Two native runtime repairs await source acceptance and installation: Terra's
-0b6e3dff bounds new-evidence admission before per-path Git reads, preserving old-note
-foundation dispatch; Gemini's44c8a60 raises the resident runtime-test deadline from
+Two native runtime repairs remain uninstalled. Terra's0b6e3dff passed the existing
+18 gate tests but Hawthorn found a protected-category dispatch regression and
+rejected it6871. Emberwick/Muse claimed `evidence-protected-category-dispatch`6874;
+that is the sole implementation owner for the evidence gate. Gemini's44c8a60,
+still awaiting source acceptance, raises the resident runtime-test deadline from
 300 to900 seconds within the existing1200-second worker bound. Keeper independently
 passed18 real-Git gate tests and both focused real-host sandbox tests. Combined
 operator scope `maintenance-runtime-20261115` is registered at a0fdae4c, limited to

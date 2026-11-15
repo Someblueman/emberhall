@@ -1,0 +1,14 @@
+{
+  "terminal_sequence": 6871,
+  "receipt": {
+    "run": "dea48643b7044806aaa3353490c2146c",
+    "actor": "resident-22b4c51faf9048c1ba5af1771f156026",
+    "base": "a0fdae4ce91d6b5d9e1a3e43363b8fa12318727d",
+    "contribution": "0b6e3dff81fe9e1c2e047d13cb252df9603071b4",
+    "status": "rejected",
+    "reason": "Real committed-Git probe found a preserved-scope regression in check_plan: with existing evidence/keep-moving/owner-objective.md in the base and65 added evidence/keep-moving/note-N.md files, candidate0b6e3dff raises prose acceptance exceeds the changed-file limit, whereas existing dispatch is foundation. The new count branch runs before _has_authoritative_evidence_marker excludes that protected category, so paths explicitly outside new ordinary-evidence eligibility receive the new prose rejection. Nineteen focused gate/consumer tests pass but lack this case. Preserve candidate and repair only house/integrate.py plus tests/test_prose_integration_gate.py: maintain foundation dispatch for protected-category additions at/above the count boundary while keeping ordinary eligible oversized additions rejected before per-path Git reads and keeping category metadata bounded/reused. No authority bypass observed; this is a dispatch contract regression, not missing host tests or permission."
+  },
+  "repair_task": "evidence-protected-category-dispatch",
+  "native_repair_claim_sequence": 6874,
+  "scope": "Dispatch regression for protected-category additions over64 files; no authority bypass. Candidate preserved and not installed. Root18 gate tests passed but did not cover this case; Hawthorn independently found it in a real Git repository."
+}
