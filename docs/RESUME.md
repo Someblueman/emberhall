@@ -22,8 +22,13 @@ This supersedes installation6978 below. It does not establish sustained throughp
 or complete autonomy; already-terminal review replay still enters the action queue.
 
 Current delivery repair: `project-delivery-continuation`7248, claimed7250 by
-Kestrel/Gemini. Trial Bench is active but all four linked tasks are done; the
-accepted trial report records a blocker, not the milestone. The coordinator
+Kestrel/Gemini. First draft7284/5ef22592 was rejected: active unbound builders
+were missed, long project IDs produced invalid help IDs, and a successful native
+exit without sleep could requeue the same owner handoff. Returning Kestrel now
+owns `project-continuation-boundaries`7294 via targeted help7295, run2ac5c221.
+Preserve the rejected source; do not repeat its full tests or duplicate that repair.
+Trial Bench is active but all four linked tasks are done; the accepted trial
+report records a blocker, not the milestone. The coordinator
 needs one owner handoff after linked work/reviews settle, with restart-safe
 identity and closure that does not mistake a successful handoff for delivery.
 Keeper owns the separate installation task7251. Registration `d570dd84` is
