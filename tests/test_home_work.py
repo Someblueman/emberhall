@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+import unittest.mock
 import zipfile
 import time
 
@@ -243,6 +244,27 @@ class RoomContributionDeliveryTests(HouseCase):
         report2, _ = self._report("rec", workspace2, artifacts)
         self.assertEqual(report2["status"], "journal-recorded")
         self.assertEqual(self._show(workspace2, report2["commit"], name), body)
+        self.assertEqual(self._pending(), [])
+
+    def test_failed_working_scan_reports_blocked_error_instead_of_no_changes(self):
+        clean_ws = room(self.record, self.private, "true-clean", self.base)
+        clean_report, _ = self._report("true-clean", clean_ws)
+        self.assertEqual(clean_report["status"], "no-changes")
+        self.assertNotIn("error", clean_report)
+
+        broken_ws = room(self.record, self.private, "scan-fail", self.base)
+        note = broken_ws / "uncommitted.txt"
+        note.write_bytes(b"keep me\n")
+        with unittest.mock.patch(
+            "house.home_work._working_changed",
+            side_effect=subprocess.CalledProcessError(128, ["git", "diff"], stderr=b"corrupt"),
+        ):
+            report, _ = self._report("scan-fail", broken_ws)
+        self.assertEqual(report["status"], "blocked")
+        self.assertEqual(report["paths"], [])
+        self.assertEqual(report["commit"], self.base)
+        self.assertIn("working-tree-scan-failed:", report["error"])
+        self.assertEqual(note.read_bytes(), b"keep me\n")
         self.assertEqual(self._pending(), [])
 
     def _pending(self):

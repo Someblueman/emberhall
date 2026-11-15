@@ -229,10 +229,12 @@ def contribution(workspace: Path, base: str, destination: Path, *,
     """
     destination.parent.mkdir(parents=True, exist_ok=True)
     parent = git(workspace, "rev-parse", "HEAD")
+    scan_error: str | None = None
     try:
         working = _working_changed(workspace)
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError) as exc:
         working = []
+        scan_error = f"working-tree-scan-failed: {type(exc).__name__}: {exc}"[:240]
     safe, excluded = _classify_working(workspace, working, journal_artifacts)
     head = parent
     if safe:
@@ -241,13 +243,15 @@ def contribution(workspace: Path, base: str, destination: Path, *,
     paths = paths_text.splitlines() if paths_text else []
     if paths:
         status = "pending-review"
-    elif working:
+    elif working or scan_error:
         status = "blocked"
     else:
         status = "no-changes"
     report: dict = {"base": base, "commit": head, "paths": paths, "status": status}
     if excluded:
         report["excluded"] = excluded
+    if scan_error:
+        report["error"] = scan_error
     recorded = recorded_report_changes(workspace, base, head, journal_artifacts)
     if recorded:
         report.update(status="journal-recorded", journal_artifacts=recorded)
