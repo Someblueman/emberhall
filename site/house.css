@@ -1167,3 +1167,18 @@ footer a {
 .voice { padding:10px 12px; border:1px solid var(--line); border-radius:12px 12px 12px 3px; background:var(--room); }
 .voice-head { margin:0 0 4px; font-size:13px; }
 .voice-text { margin:0; font-size:13.5px; line-height:1.5; overflow-wrap:anywhere; }
+
+/* The Counting Room: per-family run tallies, lane filters, and link to Household Accounts. */
+.counting-panel { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); display:grid; gap:10px; }
+.counting-families { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr)); gap:8px; }
+.counting-family { padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--room); min-width:0; }
+.counting-family strong { display:block; font-size:12px; }
+.counting-controls { display:flex; flex-wrap:wrap; gap:10px; }
+.counting-controls label { flex:1; min-width:120px; }
+.counting-controls select { display:block; width:100%; margin-top:4px; padding:7px 8px; font:inherit; color:inherit; background:var(--room); border:1px solid var(--line); border-radius:7px; }
+.counting-runs { display:grid; gap:6px; }
+.counting-run { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 9px; border:1px solid var(--line); border-radius:7px; min-width:0; }
+.counting-run-info { min-width:0; flex:1; }
+.counting-run-info strong { display:block; font-size:12px; overflow-wrap:anywhere; }
+.counting-jump { flex:none; padding:5px 9px; font-size:11px; background:transparent; border:1px solid var(--line); border-radius:6px; }
+.counting-jump:hover, .counting-jump:focus-visible { border-color:var(--gold); }
