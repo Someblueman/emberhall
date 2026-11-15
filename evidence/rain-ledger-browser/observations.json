@@ -1,0 +1,15 @@
+{
+  "summary": "YTD TOTAL\n58.1 mm\nRECORDED DAYS\n3 / 366\nRAINY DAYS (> 0)\n3\nRECORDED ZEROES\n0\nMISSED-DAY GAPS\n363\nWETTEST DAY\n25.4 mm (2024-01-31)",
+  "monthly": "MONTH\tDAYS\tRECORDED\tGAPS\tZEROES\tRAINY\tTOTAL (MM)\tNORMAL (MM)\tDELTA\nJanuary\t31\t1\t30\t0\t1\t25.4\t\t—\nFebruary\t29\t2\t27\t0\t2\t32.7\t\t—\nMarch\t31\t0\t31\t0\t0\t0.0\t\t—\nApril\t30\t0\t30\t0\t0\t0.0\t\t—\nMay\t31\t0\t31\t0\t0\t0.0\t\t—\nJune\t30\t0\t30\t0\t0\t0.0\t\t—\nJuly\t31\t0\t31\t0\t0\t0.0\t\t—\nAugust\t31\t0\t31\t0\t0\t0.0\t\t—\nSeptember\t30\t0\t30\t0\t0\t0.0\t\t—\nOctober\t31\t0\t31\t0\t0\t0.0\t\t—\nNovember\t30\t0\t30\t0\t0\t0.0\t\t—\nDecember\t31\t0\t31\t0\t0\t0.0\t\t—",
+  "daily": "DATE\tENTERED\tIN MM\tSTATUS\tNOTE\tACTION\n2024-01-31\t1 in\t25.4 mm\tRainy\t\tDelete\n2024-02-01\t20 mm\t20.0 mm\tRainy\t\tDelete\n2024-02-29\t0.5 in\t12.7 mm\tRainy\t\tDelete",
+  "errors": [],
+  "roundtrip": "passed",
+  "deterministicJSON": "passed",
+  "malformedPreservation": [
+    "date-alias",
+    "array-amount",
+    "overflow",
+    "broken-json"
+  ],
+  "sourceFinish": 6005
+}

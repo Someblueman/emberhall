@@ -1,0 +1,39 @@
+{
+  "schema": "rain-ledger/v1",
+  "year": 2024,
+  "displayUnit": "in",
+  "normalsMm": {
+    "1": null,
+    "2": null,
+    "3": null,
+    "4": null,
+    "5": null,
+    "6": null,
+    "7": null,
+    "8": null,
+    "9": null,
+    "10": null,
+    "11": null,
+    "12": null
+  },
+  "entries": [
+    {
+      "date": "2024-01-31",
+      "amount": 1,
+      "unit": "in",
+      "note": ""
+    },
+    {
+      "date": "2024-02-01",
+      "amount": 20,
+      "unit": "mm",
+      "note": ""
+    },
+    {
+      "date": "2024-02-29",
+      "amount": 0.5,
+      "unit": "in",
+      "note": ""
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+Rain Ledger
+Offline single-gauge year log. Recorded zeros are distinct from missed-day gaps. No gauge accuracy or climate
+claim.
+Year-to-Date Summary (2024 (leap year, 366 days))
+ YTD TOTAL                     RECORDED DAYS                RAINY DAYS (> 0)             RECORDED ZEROES
+ 58.1 mm                       3 / 366                      3                            0
+ MISSED-DAY GAPS               WETTEST DAY
+ 363                           25.4 mm (2024-
+                               01-31)
+Monthly Totals & Optional Normals
+ MONTH          DAYS RECORDED           GAPS ZEROES          RAINY    TOTAL (MM)       NORMAL (MM)        DELTA
+ January        31      1               30       0           1        25.4              —                 —
+ February       29      2               27       0           2        32.7              —                 —
+ March          31      0               31       0           0        0.0               —                 —
+ April          30      0               30       0           0        0.0               —                 —
+ May            31      0               31       0           0        0.0               —                 —
+ June           30      0               30       0           0        0.0               —                 —
+ July           31      0               31       0           0        0.0               —                 —
+ August         31      0               31       0           0        0.0               —                 —
+ September      30      0               30       0           0        0.0               —                 —
+ October        31      0               31       0           0        0.0               —                 —
+ November       30      0               30       0           0        0.0               —                 —
+ December       31      0               31       0           0        0.0               —                 —
+
+Daily Log
+DATE         ENTERED   IN MM     STATUS   NOTE
+2024-01-31   1 in      25.4 mm   Rainy
+2024-02-01   20 mm     20.0 mm   Rainy
+2024-02-29   0.5 in    12.7 mm   Rainy
+
