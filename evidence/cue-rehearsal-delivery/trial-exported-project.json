@@ -1,0 +1,219 @@
+{
+  "version": 1,
+  "title": "The print-and-make workshop",
+  "origin": "Minute 0 · preparation begins",
+  "baseline": {
+    "name": "Original plan",
+    "resources": [
+      {
+        "id": "crew",
+        "name": "Room crew",
+        "available": true
+      },
+      {
+        "id": "projector",
+        "name": "Projector",
+        "available": true
+      },
+      {
+        "id": "printer",
+        "name": "Printer",
+        "available": true
+      },
+      {
+        "id": "paper-team",
+        "name": "Paper team",
+        "available": true
+      },
+      {
+        "id": "host",
+        "name": "Workshop host",
+        "available": true
+      }
+    ],
+    "steps": [
+      {
+        "id": "unlock",
+        "label": "Unlock the room",
+        "track": "Room",
+        "release": 0,
+        "duration": 5,
+        "prerequisites": [],
+        "resource": "crew"
+      },
+      {
+        "id": "tables",
+        "label": "Arrange tables",
+        "track": "Room",
+        "release": 0,
+        "duration": 10,
+        "prerequisites": [
+          "unlock"
+        ],
+        "resource": "crew"
+      },
+      {
+        "id": "projector",
+        "label": "Check projector",
+        "track": "Room",
+        "release": 0,
+        "duration": 8,
+        "prerequisites": [
+          "unlock"
+        ],
+        "resource": "projector"
+      },
+      {
+        "id": "room-ready",
+        "label": "Walk through the room",
+        "track": "Room",
+        "release": 0,
+        "duration": 4,
+        "prerequisites": [
+          "tables",
+          "projector"
+        ],
+        "resource": "crew"
+      },
+      {
+        "id": "print",
+        "label": "Print workshop cards",
+        "track": "Paper",
+        "release": 0,
+        "duration": 6,
+        "prerequisites": [],
+        "resource": "printer"
+      },
+      {
+        "id": "pack",
+        "label": "Pack the card sets",
+        "track": "Paper",
+        "release": 0,
+        "duration": 7,
+        "prerequisites": [
+          "print"
+        ],
+        "resource": "paper-team"
+      },
+      {
+        "id": "welcome",
+        "label": "Welcome the group",
+        "track": "Together",
+        "release": 0,
+        "duration": 3,
+        "prerequisites": [
+          "room-ready",
+          "pack"
+        ],
+        "resource": "host"
+      }
+    ]
+  },
+  "scenario": {
+    "name": "Rehearsal",
+    "resources": [
+      {
+        "id": "crew",
+        "name": "Room crew",
+        "available": true
+      },
+      {
+        "id": "projector",
+        "name": "Projector",
+        "available": true
+      },
+      {
+        "id": "printer",
+        "name": "Printer",
+        "available": true
+      },
+      {
+        "id": "paper-team",
+        "name": "Paper team",
+        "available": true
+      },
+      {
+        "id": "host",
+        "name": "Workshop host",
+        "available": true
+      }
+    ],
+    "steps": [
+      {
+        "id": "unlock",
+        "label": "Unlock the room",
+        "track": "Room",
+        "release": 0,
+        "duration": 5,
+        "prerequisites": [],
+        "resource": "crew"
+      },
+      {
+        "id": "tables",
+        "label": "Arrange tables",
+        "track": "Room",
+        "release": 0,
+        "duration": 10,
+        "prerequisites": [
+          "unlock"
+        ],
+        "resource": "crew"
+      },
+      {
+        "id": "projector",
+        "label": "Check projector",
+        "track": "Room",
+        "release": 0,
+        "duration": 8,
+        "prerequisites": [
+          "unlock"
+        ],
+        "resource": "projector"
+      },
+      {
+        "id": "room-ready",
+        "label": "Walk through the room",
+        "track": "Room",
+        "release": 0,
+        "duration": 4,
+        "prerequisites": [
+          "tables",
+          "projector"
+        ],
+        "resource": "crew"
+      },
+      {
+        "id": "print",
+        "label": "Print workshop cards",
+        "track": "Paper",
+        "release": 0,
+        "duration": 18,
+        "prerequisites": [],
+        "resource": "printer"
+      },
+      {
+        "id": "pack",
+        "label": "Pack the card sets",
+        "track": "Paper",
+        "release": 0,
+        "duration": 7,
+        "prerequisites": [
+          "print"
+        ],
+        "resource": "paper-team"
+      },
+      {
+        "id": "welcome",
+        "label": "Welcome the group",
+        "track": "Together",
+        "release": 0,
+        "duration": 3,
+        "prerequisites": [
+          "room-ready",
+          "pack"
+        ],
+        "resource": "host"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "source_contribution": "7e49303be46f7e52498f30f5c880fa0240650e21",
+  "finish_sequence": 5744,
+  "files": {
+    "index.html": "4420ea436bad09f17eda7237f22771f274ed30f5968d69ecb5ff2946acd508e5",
+    "style.css": "7681ef1a299c4fdefc92ce791b7039f62cf2b820d7fab987255a978953e21d76",
+    "model.js": "e893b2ecea03c308e7dc4ab54cf386897ede6442494a40bcaf530bd9f51c892d",
+    "app.js": "9dd6e3e0f0d3d844e9f5f6490ef3741af85e453f33522e49d2ef4828e05768a9",
+    "README.md": "54d79a5c31ff6ff154dc9905adaa1fa400c91257d1eac3d830f1297d99e28f9a"
+  },
+  "preview": "127.0.0.1:63967",
+  "checks": [
+    "Actual local browser loaded authored baseline and scenario",
+    "Malformed JSON import produced visible refusal; export before and after was byte-identical",
+    "390x844 layout inspected without horizontal overflow",
+    "No console errors observed"
+  ],
+  "limits": [
+    "Not an independent prediction trial",
+    "Not source acceptance or public delivery"
+  ]
+}

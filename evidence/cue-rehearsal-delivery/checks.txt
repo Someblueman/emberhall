@@ -1,0 +1,10 @@
+test_chronicle_publishes_only_committed_page_not_export (tests.test_publish_projects.ProjectPublicationTests.test_chronicle_publishes_only_committed_page_not_export) ... ok
+test_chronicle_rejects_committed_symlink (tests.test_publish_projects.ProjectPublicationTests.test_chronicle_rejects_committed_symlink) ... ok
+test_real_manifest_tree_and_committed_bytes (tests.test_publish_projects.ProjectPublicationTests.test_real_manifest_tree_and_committed_bytes) ... ok
+test_rejects_unsafe_missing_untracked_and_symlink (tests.test_publish_projects.ProjectPublicationTests.test_rejects_unsafe_missing_untracked_and_symlink) ... ok
+test_safe_actions_historical_filter_and_missing_manifest (tests.test_creations_gallery.CreationsGalleryTests.test_safe_actions_historical_filter_and_missing_manifest) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.270s
+
+OK

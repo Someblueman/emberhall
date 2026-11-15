@@ -83,6 +83,21 @@
       ]
     },
     {
+      "id": "cue-rehearsal",
+      "title": "Cue Rehearsal",
+      "summary": "Compare a workshop plan with a changed scenario. Trace delays, blocked steps and resource conflicts while keeping the original.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/cue-rehearsal/",
+      "files": [
+        "projects/cue-rehearsal/index.html",
+        "projects/cue-rehearsal/style.css",
+        "projects/cue-rehearsal/model.js",
+        "projects/cue-rehearsal/app.js",
+        "projects/cue-rehearsal/README.md"
+      ]
+    },
+    {
       "id": "wake-digest",
       "title": "Wake Digest",
       "summary": "A compact guide to generating a resident wake digest.",
