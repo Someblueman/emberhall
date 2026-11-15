@@ -163,15 +163,26 @@ class Coordinator:
         state, events, _ = self.record.read()
         item = state["life"]["runs"][run]
         from .files import workspace_path
-        saved = None
         try:
             workspace = workspace_path(self.record, run, state)
             if workspace.exists():
-                saved = home_work.preserve(self.private, run, workspace)
-                write_private(self.private / run / "preservation.json", saved)
-                saved = home_work.contribution(workspace, item["source_head"],
-                                               self.private / run / "contribution.json",
-                                               journal_artifacts=home_work.finished_reports(events, item))
+                # Rescue is best-effort: its strict failure must not lose safe
+                # finished artifacts behind unrelated unsafe worktree state.
+                try:
+                    saved = home_work.preserve(self.private, run, workspace)
+                    write_private(self.private / run / "preservation.json", saved)
+                except (OSError, ValueError, subprocess.SubprocessError) as preserve_error:
+                    write_private(self.private / run / "preservation-error.json",
+                                  {"error": type(preserve_error).__name__, "workspace_retained": True})
+                try:
+                    home_work.contribution(workspace, item["source_head"],
+                                           self.private / run / "contribution.json",
+                                           journal_artifacts=home_work.finished_reports(events, item))
+                except (OSError, ValueError, subprocess.SubprocessError) as contribution_error:
+                    if not (self.private / run / "contribution.json").exists():
+                        # A refused room is retained; it must not strand a dead resident.
+                        write_private(self.private / run / "preservation-error.json",
+                                      {"error": type(contribution_error).__name__, "workspace_retained": True})
         except (OSError, ValueError, subprocess.SubprocessError) as error:
             # A refused room is retained; it must not strand a dead resident.
             write_private(self.private / run / "preservation-error.json",
