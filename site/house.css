@@ -1070,3 +1070,47 @@ footer a {
 .balance-bar .seg-record{background:#8a9a9b}
 .balance-bar .seg-foundations{background:#5c6f7e}
 .balance-bar .seg-other{background:#b8b2a7}
+
+/* The living house: the drawing leads, and what the record knows hangs on it. */
+.room-fact { font:600 11.5px system-ui,sans-serif; fill:#f0c77b; paint-order:stroke; stroke:#1c2c29e6; stroke-width:3.5px; stroke-linejoin:round; letter-spacing:.3px; }
+.life-box { fill:#132422f2; stroke:#e1ac6477; stroke-width:1; }
+.life-tag-working .life-box { stroke:#e1ac64; }
+.life-name { font:600 13px system-ui,sans-serif; fill:#fff4dc; }
+.life-work { font:11px system-ui,sans-serif; fill:#cfd3bd; }
+.life-stem { stroke:#e1ac6488; stroke-width:1; stroke-dasharray:2 3; }
+.life-tag-fresh .life-box { animation:tag-pulse 2.4s ease-in-out infinite; }
+.flame-lit { animation:flicker 2.6s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+#house g[data-gesture] { animation:breathe 4.5s ease-in-out infinite; }
+@keyframes tag-pulse { 50% { stroke:#ffe4a3; stroke-width:2.2; } }
+@keyframes flicker { 0%,100% { transform:scale(1); opacity:1; } 35% { transform:scale(1.12,.92); opacity:.86; } 70% { transform:scale(.94,1.1); } }
+@keyframes breathe { 50% { transform:translateY(-1.2px); } }
+.lately-strip { margin:10px 0 14px; }
+.lately-strip h2 { font:600 11px/1.4 system-ui,sans-serif; letter-spacing:.14em; color:var(--gold); margin:0; }
+.lately { list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:6px 12px; }
+.lately-item { all:unset; box-sizing:border-box; display:flex; justify-content:space-between; align-items:baseline; gap:12px; width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:var(--room); cursor:pointer; font-size:13px; line-height:1.35; }
+.lately-item:hover, .lately-item:focus-visible { border-color:var(--gold); }
+.lately-when { color:var(--muted); white-space:nowrap; font-size:12px; }
+.lately-fresh .lately-item { border-color:var(--gold); }
+.lately-fresh .lately-what::before { content:"● "; color:var(--gold); }
+.lately-empty { color:var(--muted); font-size:13px; }
+.notes-toggle { display:inline-flex; align-items:center; gap:6px; margin:0 0 8px; font-size:12px; color:var(--muted); cursor:pointer; }
+.presence-section:has(#presence-notes:not(:checked)) :is(.presence-note,.occupancy-legend) { display:none; }
+.floor-controls:has(#floor-picker option:only-child) > :is(label,select,#floor-note) { display:none; }
+@media (min-width:1051px) {
+  .house-layout:not(.room-open) { grid-template-columns:minmax(0,1fr); gap:26px; }
+  .house-layout:not(.room-open) .introduction h1 { font-size:clamp(28px,2.6vw,40px); margin:10px 0 8px; }
+  .house-layout:not(.room-open) .introduction h1 br { display:none; }
+  .house-layout:not(.room-open) .introduction p { max-width:none; }
+  .house-layout:not(.room-open) .house-explorer { position:static; height:auto; display:block; }
+  .house-layout:not(.room-open) .house-explorer .stage { display:block; margin:0; }
+  .house-layout:not(.room-open) .house-explorer .stage svg { height:auto; max-height:min(66vh,780px); }
+  .house-layout:not(.room-open) .house-explorer .map-hint, .house-layout:not(.room-open) .house-explorer .room-nav { margin:8px 0; }
+  .house-layout:not(.room-open) .journal-pane { border-left:0; padding-left:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 36px; align-items:start; }
+  .house-layout:not(.room-open) .journal-pane > details { grid-column:1 / -1; }
+  .house-layout.room-open .journal-pane { display:flex; flex-direction:column; }
+  .house-layout.room-open .room-card { order:-1; }
+  .house-layout.room-open .lately-strip { display:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .life-tag-fresh .life-box, .flame-lit, #house g[data-gesture] { animation:none; }
+}
