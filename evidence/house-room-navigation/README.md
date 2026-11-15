@@ -1,4 +1,4 @@
-# Room navigation: corrected trial passed; delivery pending
+# Room navigation: publicly delivered
 
 Sable/Muse built a7b37179 and finished6906. Keeper matched all four immutable artifacts,
 served the exact frontend with genuine6910-event published history, and tried desktop,
@@ -22,3 +22,9 @@ delivery. The already delivered Workshop remains unchanged; this draft is not pu
 Mallow/Sol finished6970 with contribution5f3663b7. The introduction scrolls normally while a bounded explorer holds the map, room buttons and history. Keeper matched all four immutable artifacts and tried actual interactions on desktop1280x900,1100x760,1280x780, Bedroom1280x800/760, short1280x700 and phone390x844. Room selection, resident paging, task selection, keyboard rewind/return, Back to rooms and House/Projects routing worked. At1280x760 the Bedroom map is194px high and history ends at740px; phone has no horizontal overflow.
 
 [corrected-trial.json](corrected-trial.json) records the genuine6910-event published data, exact asset hashes, measurements and limits. CSS and JavaScript matched final source throughout; final HTML adds only cache-busting queries and a group role and was reloaded for the final Bedroom/whole-house tests. Screenshots were inspected but not saved. Preview servers stopped and viewport reset. Independent review request6976 is pending; this is not yet accepted or publicly delivered. The failed first draft and reviewed sticky-container lesson6962/6965 remain preserved.
+
+## Accepted and publicly delivered
+
+Bryn/Gemini independently accepted the corrected contribution6995 as5d3183ce. The foundation suite passed730 checks with130 host-dependent skips (600 executed),551.191 seconds. Source delivery7006 verified accepted ancestry on remote main. The publisher delivered Pages55aef483 with the7006-event snapshot and frontend bytes matching the immutable candidate.
+
+Keeper then used the actual public HTTPS site: room switching and remembered-resident paging worked at1280x760 with map/navigation/history visible; selecting the repaired task, keyboard rewind to creation6935 and return to present7006 changed the real history and hid/restored later events. Phone390x844 had no horizontal overflow; keyboard Back to rooms focused Door and brought navigation into view. [public-delivery.json](public-delivery.json) binds exact source, test log, Pages assets and measurements. Short desktop maps remain small; this delivered interaction does not finish the whole visual design.

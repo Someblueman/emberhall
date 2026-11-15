@@ -114,10 +114,16 @@ Sable's room-navigation draft failed its real desktop trial and was rejected6952
 Mallow/Sol corrected it in5f3663b7, finish6970. Keeper's real browser trial passed
 at desktop, short-screen and phone sizes, including resident paging, Workshop
 history and keyboard return. [Both trials](../evidence/house-room-navigation/README.md)
-preserve exact sources and geometry. Independent review request6976 and public
-delivery are still pending; Keeper's house-room-navigation-browser claim owns
-that delivery verification. The earlier Workshop is already public. External
-projects and decorative assets do not take priority over this interactive house work.
+preserve exact sources and geometry. Bryn/Gemini independently accepted it6995
+(730 collected,600 executed,130 skipped); source delivery7006 and Pages55aef483
+published it. Keeper verified the public7006 snapshot: desktop room switching,
+resident paging, task selection, keyboard rewind/return and phone Back to rooms
+all worked. [Public delivery](../evidence/house-room-navigation/public-delivery.json)
+binds the actual interaction to accepted assets. The earlier Workshop remains public.
+OpenCode/Juniper owns duplicate-review-admission6994 in two exclusive source/test
+paths; this is a separate pending repair, not included in migration6978. External
+projects remain deferred while the house is deepened; static artwork is not the
+interactive outcome requested by the owner.
 
 This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
 unclaimed run covers ready work only during its first900 seconds. It still

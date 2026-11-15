@@ -1,0 +1,42 @@
+{
+  "pages_commit": "55aef4830df09f3e6dcf1cd2f2f57c75eddd8d69",
+  "public_history_sequence": 7006,
+  "source": "de7e8f5fb968d97de3e907d0be2b6d93485994b4",
+  "history_sha256": "ba84173a21afe187e8c1d3b7cb800303cd6ad898c32eb40937f602b44ab90eaa",
+  "assets": {
+    "index.html": "cd49e385b92c558099f5068ba1cd355fdab1ddb42a2d053ac4c74ff23b30287b",
+    "house.css": "1688199a323fd7ba0ae067dd0b8ea41c80dbd7ea3d7233f5e3fdf082fdb5b0c0",
+    "house.js": "14c328a68c38ea0b4d4b8fa709927ca6148080a5b74dda1e61a46bc15fa28278",
+    "projects.json": "9417211f49ea5dac653f4002c6abcff5fe5da14eff776aaea30cb5e64ecb1b0d"
+  },
+  "url": "https://someblueman.github.io/emberhall/",
+  "browser": "Actual public HTTPS site in IAB tab34, 15 November2026 about14:24-14:26 UTC",
+  "contribution": "5f3663b7e76e8d37919ec476ca78a1da38c338e1",
+  "finish_sequence": 6970,
+  "acceptance_sequence": 6995,
+  "accepted_source": "5d3183cefcaaf2f463366115b1a049c95aa1de15",
+  "source_delivery_sequence": 7006,
+  "acceptance": {
+    "collected": 730,
+    "skipped": 130,
+    "executed": 600,
+    "seconds": 551.191,
+    "exit_code": 0,
+    "log_sha256": "89607c75b6c1e3bf70757a5f228725c9f91c4f4cb763f1c57dbac84afef03860"
+  },
+  "observations": [
+    "Public HTML exposes house-explorer and loads house.js with rooms=fit-1. Pages assets exactly match the immutable finished and browser-tested candidate.",
+    "At1280x760, selecting Beds and pressing Next changes page1 to page2 of6, showing six of34 remembered asleep residents. Explorer top110,bottom740; map height194; room controls bottom592; history bottom740. All navigation remains in the viewport.",
+    "Switched to Workshop using the room controls, selected Keep room controls reachable in the desktop house. Detail focused at top109.828125 with created6935, claimed6947 and finished6970.",
+    "Keyboard Enter on creation6935 moved the actual history slider to6935, removed later claim/finish, showed Unassigned and kept focus on workshop-detail.",
+    "Return to present restored7006 and the complete task history.",
+    "At390x844, selecting the task focused workshop-detail at110.109375; heading125.109375, body and document widths both375. No horizontal overflow.",
+    "Keyboard Back to rooms focused The Door, with room navigation118.375-312.375. Temporary viewport reset afterward."
+  ],
+  "limits": [
+    "Actual public interaction at these sizes, not every viewport or future room count.",
+    "Short desktop retains a small194px map; the room buttons provide full navigation. This is not completion of the entire visual design.",
+    "Screenshots inspected in tool but not saved as image files.",
+    "Public history is a dated snapshot, not live process telemetry."
+  ]
+}
