@@ -54,6 +54,7 @@ PROJECT_WORK_SCOPE = "project-work-routing-20261114"
 TARGETED_WAKE_SCOPE = "targeted-resident-wakes-20261114"
 HELPER_SCOPE = "helper-staffing-20261114"
 CREATIONS_SCOPE = "public-creations-20261114"
+MAINTENANCE_RUNTIME_SCOPE = "maintenance-runtime-20261115"
 EVIDENCE_ACCEPTANCE_SCOPE = "new-evidence-acceptance-20261115"
 INSPECTION_SCOPE = "source-inspection-lane-20261115"
 REVIEW_COMPLETION_SCOPE = "review-completion-20261115"
@@ -75,7 +76,8 @@ FAILED_CLI_OBSERVATION = 465
 FAILED_BOOTSTRAP_RUN = "2c9fc6bd10574c84bf0e45aba78a054c"
 FAILED_BOOTSTRAP_SHA256 = "034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406"
 FAILED_BOOTSTRAP_OBSERVATION = 530
-SOURCES = {EVIDENCE_ACCEPTANCE_SCOPE: "37809ec6a9575d6223e6d2215ed4008f528be413529fb33e23b36e336eed9510",
+SOURCES = {MAINTENANCE_RUNTIME_SCOPE: "9651fd3e7b5487e48c94ecf24443636934d0c13ba2abb05c9443e91808225e22",
+           EVIDENCE_ACCEPTANCE_SCOPE: "37809ec6a9575d6223e6d2215ed4008f528be413529fb33e23b36e336eed9510",
            INSPECTION_SCOPE: "8a01dc45c976a75e0ed548e6e41ab450d09927dcd622e82e3d95159af5bf018d",
            REVIEW_COMPLETION_SCOPE: "b9e80fecc0d67995c7097ccc82373c49e4575a473d5fae5001631994ceb923a8",
            LENS_SCOPE: "f781601c6cde63e51afad54522d0a30b436ec839fecae5433747dfc1041bf988",
@@ -107,6 +109,7 @@ RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    MAINTENANCE_RUNTIME_SCOPE: {"house/maintenance.py", "house/integrate.py", "house/wake_policy.py"},
     EVIDENCE_ACCEPTANCE_SCOPE: {"house/maintenance.py", "house/integrate.py"},
     INSPECTION_SCOPE: {"house/maintenance.py", "house/mailbox_jobs.py"},
     REVIEW_COMPLETION_SCOPE: OWNER_MODULES | {"house/review_completion.py", "house/resident_actions.py", "house/__main__.py"},

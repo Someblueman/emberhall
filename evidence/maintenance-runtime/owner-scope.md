@@ -1,0 +1,11 @@
+# Reviewed maintenance acceptance and runtime test window
+
+The owner authorized fixing Emberhall before further external projects and routine reversible deployment without repeated permission. This bounded installation combines two completed resident repairs so they need one natural drain and runtime replacement. It does not amend the house's rules or grant residents new authority.
+
+The evidence gate repair is specified in ../new-evidence-acceptance/owner-scope.md (SHA256 37809ec6a9575d6223e6d2215ed4008f528be413529fb33e23b36e336eed9510). That earlier unused registration and its exact instruction bytes remain unchanged. Terra repaired the first rejected candidate's excessive preflight Git reads in contribution0b6e3dff81fe9e1c2e047d13cb252df9603071b4, finished6823. Only new bounded ordinary evidence Markdown additions receive the existing prose gate. Existing evidence edits, mixed/source changes, authority documents and unsafe file types retain their prior boundary. Independent source review, immutable artifacts, writer serialization and delivery receipts remain required.
+
+Gemini's contribution44c8a60fb282b0c176ea4abb9591ba3aa0fdeb4a, finished6832, changes the resident runtime-test subprocess deadline from300 to900 seconds. Actual required suites took407.263 and602.714 seconds, exceeding the old deadline. The new finite deadline matches owner preparation and stays below the existing1200-second trusted-action worker bound. It is not a resident session cap. Preserve TEST_ARGS, source/runtime hashes, later-wake eligibility, leases, failure rejection, test counting and output bounds. The two focused real-host sandbox tests passed independently in4.476 seconds; source acceptance and runtime preparation remain separate gates.
+
+Protected changes are limited to house/integrate.py, house/wake_policy.py and the one-use registration in house/maintenance.py. No wake text, law, notice period, ratification, model/provider, staffing, money, credentials, sandbox or web safeguard change. Keep exact reviewed source and runtime tests, authenticated installation and natural resident/worker/publisher drain. Actual installed use must be recorded separately; neither fixtures nor source acceptance establish deployment or later council refresh.
+
+Scope: maintenance-runtime-20261115.
