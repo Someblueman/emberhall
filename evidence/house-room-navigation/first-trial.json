@@ -1,0 +1,74 @@
+{
+  "run": "3420336d53244e0eb70335d3da611e09",
+  "commit": "a7b37179b30fb49b1e7cfbc6659c4aa323780e53",
+  "finish": 6906,
+  "artifacts": {
+    "site/house.css": "4e2e522e622fca086b359cd2af7c94681c9a305fbc08268ad63a6cec1b877a39",
+    "site/house.js": "e77372322a45c5658ef4f36c83a4f7e5cc78f023b61a6dca53e3b369d74fce16",
+    "site/index.html": "52f9df5ad8b2ad8cff7c6f1ccb7832036745863a79cdd03935746ffc03b1dfe4",
+    "tests/test_house_navigation.py": "ae398986e9f7eb6cb48933e47debf509e1fa5f3df9ba9fe619c539e8e34dec7e"
+  },
+  "assets": {
+    "index.html": "52f9df5ad8b2ad8cff7c6f1ccb7832036745863a79cdd03935746ffc03b1dfe4",
+    "house.js": "e77372322a45c5658ef4f36c83a4f7e5cc78f023b61a6dca53e3b369d74fce16",
+    "house.css": "4e2e522e622fca086b359cd2af7c94681c9a305fbc08268ad63a6cec1b877a39",
+    "projects.json": "9417211f49ea5dac653f4002c6abcff5fe5da14eff776aaea30cb5e64ecb1b0d"
+  },
+  "pages_commit": "2d289934b9e226d2e4ad20cc1e5cfa0ccc8eb112",
+  "history_sha256": "4096393606f47a93c87b0afd8b9ea8d79e5bc8723bb822c76d3c973758143e66",
+  "browser": "Actual IAB tab32, site-only loopback preview, 15 November2026",
+  "public_history_sequence": 6910,
+  "observation_sequence": 6934,
+  "result": "Desktop fit failed; source rejected, preserved and not delivered.",
+  "rejection": {
+    "run": "3420336d53244e0eb70335d3da611e09",
+    "actor": "keeper-01",
+    "base": "aef37a13f42dc24c81b782b43e8adb06cf7e917d",
+    "contribution": "a7b37179b30fb49b1e7cfbc6659c4aa323780e53",
+    "status": "rejected",
+    "reason": "Actual browser trial of exact a7b37179 / finish6906 with genuine public history6910 found desktop control clipping. At1280x900, selecting Workshop through the map then task house-room-navigation leaves .house-pane top118,height1196,bottom1314; map490.5-1030.5; room-nav1049-1120; history1144-1314. Whole-pane sticky traps navigation below viewport. At1280x700 static fallback and Back to rooms work (nav117.5-188.5, focus Door); at390x844 keyboard return works (nav117.875-311.875) and detail has no horizontal overflow. Preserve those working parts and delivered Workshop. Existing bounded repair house-room-navigation-fit owns the same four frontend/test paths in a fresh private room. No publication, runtime or governance change. Browser observations recorded6934."
+  },
+  "followup_task": "house-room-navigation-fit",
+  "desktop_1280x900": {
+    "pane": {
+      "top": 118,
+      "height": 1196,
+      "bottom": 1314
+    },
+    "map": {
+      "top": 490.5,
+      "bottom": 1030.5
+    },
+    "room_nav": {
+      "top": 1049,
+      "bottom": 1120
+    },
+    "history": {
+      "top": 1144,
+      "bottom": 1314
+    },
+    "task_detail_top": 109.828125,
+    "focus": "workshop-detail"
+  },
+  "short_1280x700": {
+    "back_to_rooms": "passed",
+    "focused_button": "The Door",
+    "nav_top": 117.5,
+    "nav_bottom": 188.5
+  },
+  "phone_390x844": {
+    "body_scroll_width": 375,
+    "document_client_width": 375,
+    "detail_heading_top": 125.109375,
+    "focused_detail": "workshop-detail",
+    "keyboard_back_to_rooms": "passed",
+    "focused_button": "The Door",
+    "nav_top": 117.875,
+    "nav_bottom": 311.875
+  },
+  "limits": [
+    "Screenshots inspected in tool; no screenshot file retained.",
+    "Default-viewport room button click failed; map selection enabled the measured task trial.",
+    "Preview server stopped; viewport override reset. No public delivery claimed."
+  ]
+}

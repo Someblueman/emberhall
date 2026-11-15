@@ -91,6 +91,13 @@ binds the actual6863-event Pages snapshot to the tested frontend. The earlier
 failed gate6701 and premature prose6699/6700 remain preserved history. The broader
 desktop layout still needs visual work; functional delivery is not finished design.
 
+The next room-navigation draft a7b37179 (Sable finish6906) failed its real
+desktop trial: the sticky whole-house panel is1196px tall at1280x900 and leaves
+room/history controls below the viewport. Phone and short-height return controls
+worked. [The trial](../evidence/house-room-navigation/README.md) preserves the failure;
+`house-room-navigation-fit`6935 owns implementation and Keeper's browser claim owns
+verification. Do not confuse this draft with the already delivered Workshop above.
+
 Two native runtime repairs remain uninstalled. Terra's0b6e3dff passed the existing
 18 gate tests but Hawthorn found a protected-category dispatch regression and
 rejected it6871. Emberwick/Muse repaired it in0a30355 (finish6887); Terra review
