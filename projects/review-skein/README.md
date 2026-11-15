@@ -1,9 +1,28 @@
-# Review Skein — milestone 1: packet and anchors
+# Review Skein — local-first review packets
 
 Skein is a **local-first code-review packet**: an escaped static side-by-side
 review, the matching ordinary Git bundle, and comments anchored to exact lines.
 It is for an occasional reviewer with no forge, account, daemon or network. It
 is not another Git host or identity system.
+
+New here? Run the invented practice workspace in [EXAMPLE.md](EXAMPLE.md)
+first; it exercises every command below on disposable data. The pieces:
+
+| Piece | What it does | Guide |
+| --- | --- | --- |
+| `skein.py` | Export/verify a packet; add, edit, resolve comments | this file |
+| `comments_view.py` | Read comments as terminal text or offline HTML | [COMMENTS.md](COMMENTS.md) |
+| `comment_editor.py` | Edit bodies/resolution in a self-contained offline page | [EDITOR.md](EDITOR.md) |
+| `exchange.py` | Merge several reviewers' comments; carry them onto a revised patch | [EXCHANGE.md](EXCHANGE.md) |
+| `probe.py` | Audit/transcribe a packet's markup without a browser | [PROBE.md](PROBE.md) |
+| `example.py` | Generate a reproducible invented practice workspace | [EXAMPLE.md](EXAMPLE.md) |
+
+Milestones 1–3 are built and independently reviewed: packet/anchors,
+accessible markup plus comment view/edit, and multi-reviewer exchange with a
+non-author two-repository trial recorded in [EXCHANGE.md](EXCHANGE.md). The
+real browser/phone/screen-reader try in [TRIAL.md](TRIAL.md) is still open —
+markup tests and `probe.py` do not substitute for it. Milestone 4 (packet
+recovery and workflow comparison) is in progress, not shipped.
 
 ## Export and read a packet
 
@@ -38,15 +57,17 @@ Open `review.html` directly in a browser. Its Content Security Policy forbids
 external resources. A console-only reader can inspect the JSON directly. Keep
 the five files together when carrying the packet.
 
-Milestone 2's first slice makes that static page usable without a mouse or
+Milestone 2 makes that static page usable without a mouse or
 sight of its colours: the first focusable element skips to the changed-files
 index, each file section is labelled by its heading, every diff row names its
 change kind (`Added`/`Removed`/`Changed`/`Unchanged`) as visually-hidden text
 rather than colour alone, links get a visible focus outline, and tables scroll
 horizontally on narrow screens instead of being squeezed. Comment/resolution
-editing is available through the CLI below. An independent phone/desktop and
-screen-reader try by a non-author remains required for milestone 2; markup tests
-do not establish that experience.
+editing is available through the CLI below, the reader in
+[COMMENTS.md](COMMENTS.md) and the offline editor page in
+[EDITOR.md](EDITOR.md). An independent phone/desktop and
+screen-reader try by a non-author remains required to close milestone 2 — see
+[TRIAL.md](TRIAL.md); markup tests do not establish that experience.
 
 ## Verify the carried Git bytes
 
@@ -88,9 +109,9 @@ The `reanchor(comment, new_commit, available_anchors)` API supports a later
 rebase: exact path/side/line/text wins, otherwise one unique text match on that
 same path and side can move the anchor. Missing or duplicate matches become an
 explicit `orphan` with a reason and `rebased_from` history. There is deliberately
-no automatic guess across duplicate lines. Milestone 1 exposes this model for
-round-trip/orphan behavior; rebase import and multi-reviewer merge are later
-work, not a working merge feature.
+no automatic guess across duplicate lines. Milestone 3 builds the working
+multi-reviewer merge and revised-patch carry on this model — see
+[EXCHANGE.md](EXCHANGE.md).
 
 ## Edit, resolve and reopen a comment
 
@@ -108,8 +129,11 @@ and resolving or reopening preserves the body. The Python
 `update_comment(packet, identifier, *, body=None, resolution=None)` API supports
 the same operations. Unknown IDs and invalid bodies or resolutions fail before
 writing; updates atomically replace only `comments.json`. Use one writer at a
-time; concurrent editing and comment merging are later work. These commands do
-not add an in-browser comment editor or change the static HTML.
+time on a single packet copy; to combine several reviewers' copies, merge them
+with `exchange.py` ([EXCHANGE.md](EXCHANGE.md)). These commands do not change
+the static HTML; for form-based editing, generate the separate offline editor
+page in [EDITOR.md](EDITOR.md), whose downloaded edits are validated and
+applied atomically by `comment_editor.py apply`.
 
 **Saved comments have a new version.** `comments.json` now uses version 2 with a
 required `resolution` field. The packet manifest, anchors and Git bundle keep
@@ -128,6 +152,24 @@ unchanged. Malformed records, duplicate keys/IDs and unsupported versions are
 rejected without rewriting the file. Older Skein readers cannot read version 2
 comments; keep a copy of the original packet if those readers must still use it.
 
+## Merge reviewers and carry comments to a revised patch
+
+```sh
+python3 projects/review-skein/exchange.py merge /path/to/target-packet \
+  /path/to/reviewer-1-packet /path/to/reviewer-2-packet
+python3 projects/review-skein/exchange.py revise /path/to/worktree \
+  BASE_REF NEW_HEAD_REF /path/to/new-packet --from /path/to/old-packet
+```
+
+Merging is deterministic and commutative for packets of the same revision;
+`--base` reconciles one-sided edits, and genuinely divergent same-ID comments
+are kept as both variants or rejected without touching the target, by flag.
+`carry`/`revise` reanchor comments onto a revised patch, turning
+modified/deleted/duplicate-line anchors into explicit orphans. Full semantics,
+flags and the recorded non-author two-repository trial are in
+[EXCHANGE.md](EXCHANGE.md). To just read what reviewers said, use
+`comments_view.py` ([COMMENTS.md](COMMENTS.md)).
+
 ## Test and independent trial
 
 The suite creates real temporary Git repositories and checks branch/tag and
@@ -141,16 +183,20 @@ explicit version 1 migration, rejected-update byte preservation and malformed JS
 python3 -m unittest discover -s projects/review-skein -v
 ```
 
-No package installation or network is used. The project milestone additionally
-requires someone other than the implementation author to export a fixture,
-open its HTML without network, verify that the bundle clones, and record one
-comment. That independent try is acceptance evidence for the milestone, not an
-assertion made by this README.
+No package installation or network is used. The suite also covers the comment
+viewer/editor, deterministic merge/carry/revise and the example generator.
+Beyond tests, milestone 3's exchange has a recorded non-author two-repository
+trial ([EXCHANGE.md](EXCHANGE.md)), while milestone 2 still requires someone
+other than the author to open a real packet on desktop/phone with a screen
+reader ([TRIAL.md](TRIAL.md)). Neither is an assertion made by this README.
 
 ## Honest boundary
 
-Milestone 1 has no authentication, confidentiality, signatures, live service,
-comment merge, patch application or automatic rebase import. Hashing binds bytes,
+Skein has no authentication, confidentiality, signatures, live service or
+patch application; it carries and merges review comments, and applying the
+reviewed change remains ordinary Git work in your own repository. Hashing binds bytes,
 not people. A bundle can contain copyrighted or sensitive history, so share it
 only with intended reviewers. `git bundle` and static HTML do not make a hostile
-Git repository or packet safe; use a trusted local fixture for this first try.
+Git repository or packet safe; use a trusted local fixture for a first try.
+No browser or screen-reader experience is claimed until the
+[TRIAL.md](TRIAL.md) try is actually performed and recorded.
