@@ -436,22 +436,159 @@ function taskProjectLabel(t) {
   if(match&&typeof match.title==="string"&&match.title.trim()!== "")return `Project: ${match.title}`;
   return `Project: ${projectId}`;
 }
-function renderWorkshopTasks(content) {
-  const tasks=effectiveTasks(),expired=tasks.filter(t=>t.expired).length;
-  const claimed=tasks.filter(t=>t.status==="claimed"&&!t.expired).length;
-  const unassigned=tasks.length-claimed-expired;
-  html("p","small",`${tasks.length} unfinished · ${unassigned} unassigned · ${claimed} recorded claims · ${expired} expired leases`,content);
-  html("p","small","Unassigned does not mean ready to start. Recorded claims exclude expired leases and are not live process status.",content);
-  html("p","small","Queue readiness is declared separately from claims. Not queued can mean deferred or withdrawn work; it does not establish a blocker.",content);
-  tasks.forEach(t=>{
-    const row=html("div",`task${t.expired?" expired":""}`,undefined,content);
-    html("strong","",t.title,row);
-    const status=t.expired?"Lease expired · fate unconfirmed":t.status==="claimed"?"Recorded claim":"Unassigned";
-    const owner=t.status==="claimed"?` · ${t.owner?residentName(t.owner):"Owner unrecorded"}`:"";
-    html("span","small",status+owner,row);
-    html("span","small",taskReadinessLabel(t),row);
-    html("span","small",taskProjectLabel(t),row);
+// Public frames expose unfinished tasks; finishes remove them. Creation events carry
+// a human title, so use the state transition rather than treating that title as an ID.
+function workshopTasks(frames, moment, at) {
+  const records=new Map();let previous=new Map();
+  for(const f of frames) {
+    if(f.seq>moment.seq)break;
+    const tasks=new Map((f.tasks||[]).map(t=>[t.id,t]));
+    for(const t of tasks.values()) {
+      const old=records.get(t.id);
+      records.set(t.id,{id:t.id,title:t.title,owner:t.owner,status:t.status,until:t.until,
+        generation:t.generation,ready:t.ready,project:t.project,events:old?.events||[]});
+    }
+    const event=f.event||{},op=event.op;
+    const ids=op==="task"?[...tasks.keys()].filter(id=>!previous.has(id)):
+      ["claim","renew","release","finish","ready"].includes(op)?[event.title]:[];
+    for(const id of ids) {
+      const rec=records.get(id);
+      if(!rec)continue;
+      if(op==="finish") {rec.status="done";rec.finishedSeq=f.seq;}
+      const labels={task:"Created",claim:"Claimed",renew:"Lease renewed",release:"Released",finish:"Finished",
+        ready:`Queue updated · ${taskReadinessLabel(rec)}`};
+      const actor=(f.residents||[]).find(r=>r.id===event.actor)?.name||event.actor||"Resident unrecorded";
+      rec.events.push({seq:f.seq,at:f.at,label:labels[op],actor});
+    }
+    previous=tasks;
+  }
+  // An older/partial snapshot can expose state without any individual history.
+  for(const t of moment.tasks||[]) {
+    const old=records.get(t.id);
+    records.set(t.id,{id:t.id,title:t.title,owner:t.owner,status:t.status,until:t.until,
+      generation:t.generation,ready:t.ready,project:t.project,events:old?.events||[]});
+  }
+  const visible=new Set((moment.tasks||[]).map(t=>t.id));
+  return [...records.values()].filter(t=>visible.has(t.id)||t.status==="done").map(t=>{
+    const expired=t.status==="claimed"&&Number.isFinite(t.until)&&t.until<=at;
+    const state=t.status==="done"?"done":expired?"expired":t.status==="claimed"?"claimed":t.status==="open"?"unassigned":"unknown";
+    return {...t,state};
   });
+}
+let workshopState={filter:"all",readiness:"all",selectedId:null,pages:{}};
+const WORKSHOP_PAGE_SIZE=4;
+function workshopOrder(a,b) {return (b.finishedSeq||b.events.at(-1)?.seq||0)-(a.finishedSeq||a.events.at(-1)?.seq||0);}
+function workshopStatus(t) {
+  if(t.state==="done")return "Finished · acceptance and delivery unknown";
+  if(t.state==="expired")return "Lease expired · fate unconfirmed";
+  if(t.state==="claimed")return `Recorded claim · ${t.owner?residentName(t.owner):"Owner unrecorded"}`;
+  return t.state==="unassigned"?"Unassigned":"State unknown";
+}
+function workshopFocus(id,scroll=false) {
+  const node=$(id);node?.focus?.({preventScroll:true});
+  if(scroll)node?.scrollIntoView?.({block:"nearest"});
+}
+function workshopRedraw(id,scroll=false) {roomPanel();workshopFocus(id,scroll);}
+function workshopButton(parent,label,action,cls="workshop-button") {
+  const button=html("button",cls,label,parent);button.type="button";
+  button.addEventListener("click",action);return button;
+}
+function renderWorkshopTasks(content) {
+  const tasks=workshopTasks(data?.frames||[],frame,observationTime());
+  const unfinished=tasks.filter(t=>t.state!=="done"),done=tasks.length-unfinished.length;
+  const box=html("div","workshop-explorer",undefined,content);
+  html("p","small",`${unfinished.length} unfinished · ${done} finished`,box);
+  if(!tasks.length&&!workshopState.selectedId) {
+    html("p","empty-note","No tasks are exposed at this moment. The house history controls remain available.",box);return;
+  }
+  html("p","small","Claims are recorded ownership, not live processes. Unassigned does not mean ready; not queued does not establish a blocker.",box);
+  if(!current) {
+    const past=html("div","workshop-past",undefined,box);
+    html("span","small",`Event ${frame.seq} · later outcomes hidden`,past);
+    const back=workshopButton(past,"Return to present",()=>{
+      jumpToSequence(data.frames[data.frames.length-1].seq);workshopFocus("workshop-detail",true);
+    });back.id="workshop-present";
+  }
+  const filters=html("div","workshop-filters",undefined,box);
+  for(const [key,label,options] of [
+    ["filter","Work",[["all","All work"],["unfinished","Unfinished"],["claimed","Recorded claims"],["unassigned","Unassigned"],["expired","Expired leases"],["done","Finished"]]],
+    ["readiness","Queue",[["all","Any readiness"],["ready","Declared ready"],["not-queued","Not queued"],["unknown","Readiness unknown"]]]
+  ]) {
+    const wrapper=html("label","small",label,filters),select=html("select","",undefined,wrapper);
+    select.id=`workshop-${key}`;
+    for(const [value,title] of options){const option=html("option","",title,select);option.value=value;}
+    select.value=workshopState[key];
+    select.addEventListener("change",()=>{
+      workshopState[key]=select.value;workshopState.pages={};workshopRedraw(select.id);
+    });
+  }
+  // Detail precedes the bounded board, so a selection is useful even on a phone.
+  const detail=html("div","workshop-detail",undefined,box);detail.id="workshop-detail";detail.tabIndex=-1;
+  detail.setAttribute("role","region");detail.setAttribute("aria-label","Selected task history");
+  const chosen=tasks.find(t=>t.id===workshopState.selectedId);
+  if(chosen) {
+    html("h3","",chosen.title||"Untitled task",detail);
+    html("p","small",workshopStatus(chosen),detail);
+    html("p","small",`${taskReadinessLabel(chosen)} · ${taskProjectLabel(chosen)}`,detail);
+    recordId(detail,chosen.id,"Task record ID");
+    const timeline=html("ol","workshop-timeline",undefined,detail);
+    for(const event of chosen.events) {
+      const item=html("li","",undefined,timeline);
+      workshopButton(item,`${event.label} · ${event.actor} · ${clock(event.at)} · event ${event.seq}`,()=>{
+        jumpToSequence(event.seq);workshopFocus("workshop-detail",true);
+      },"workshop-event");
+    }
+    if(!chosen.events.length)html("p","small","Individual handoffs are not exposed in this snapshot.",detail);
+    workshopButton(detail,"Find task card",()=>{
+      workshopState.filter=chosen.state;workshopState.readiness="all";
+      const position=tasks.filter(t=>t.state===chosen.state).sort(workshopOrder).findIndex(t=>t.id===chosen.id);
+      workshopState.pages[chosen.state]=Math.floor(position/WORKSHOP_PAGE_SIZE);
+      workshopRedraw(`workshop-task-${chosen.id}`,true);
+    });
+  } else {
+    html("h3","",workshopState.selectedId?"Selected task not yet recorded":"Follow a thread",detail);
+    html("p","small",workshopState.selectedId?"Return to present to continue its story. Later facts stay hidden here.":"Choose a card to see its recorded handoffs and visit those moments.",detail);
+  }
+  const filtered=tasks.filter(t=>{
+    const ready=t.ready===true?"ready":t.ready===false?"not-queued":"unknown";
+    return (workshopState.filter==="all"||(workshopState.filter==="unfinished"?t.state!=="done":t.state===workshopState.filter))&&
+      (workshopState.readiness==="all"||ready===workshopState.readiness);
+  });
+  const board=html("div","workshop-board",undefined,box);
+  if(!filtered.length)html("p","empty-note","No work matches these filters at this moment.",board);
+  for(const [key,title] of [["claimed","Recorded claims"],["unassigned","Unassigned"],["expired","Expired leases"],["done","Recent finishes"],["unknown","State unknown"]]) {
+    const group=filtered.filter(t=>t.state===key).sort(workshopOrder);
+    if(!group.length)continue;
+    const section=html("div","workshop-group",undefined,board);
+    html("h3","",`${title} · ${group.length}`,section);
+    const page=Math.min(workshopState.pages[key]||0,Math.ceil(group.length/WORKSHOP_PAGE_SIZE)-1),start=page*WORKSHOP_PAGE_SIZE;
+    const cards=html("div","workshop-cards",undefined,section);
+    for(const task of group.slice(start,start+WORKSHOP_PAGE_SIZE)) {
+      const card=workshopButton(cards,undefined,()=>{
+        workshopState.selectedId=task.id;workshopRedraw("workshop-detail",true);
+      },`workshop-task${task.state=== "expired"?" expired":""}`);
+      card.id=`workshop-task-${task.id}`;card.setAttribute("aria-pressed",String(task.id===workshopState.selectedId));
+      card.setAttribute("aria-controls","workshop-detail");
+      html("strong","",task.title||"Untitled task",card);
+      html("span","small",workshopStatus(task),card);
+      html("span","small",taskReadinessLabel(task),card);
+      html("span","small",taskProjectLabel(task),card);
+    }
+    if(group.length>WORKSHOP_PAGE_SIZE) {
+      const nav=html("div","workshop-pages",undefined,section);
+      nav.id=`workshop-pages-${key}`;nav.tabIndex=-1;
+      nav.setAttribute("role","group");
+      nav.setAttribute("aria-label",`${title} pages`);
+      for(const [delta,label] of [[-1,"Previous"],[1,"Next"]]) {
+        const button=workshopButton(nav,label,()=>{
+          workshopState.pages[key]=page+delta;workshopRedraw(nav.id);
+        });
+        button.id=`workshop-${key}-${label}`;button.disabled=page+delta<0||(page+delta)*WORKSHOP_PAGE_SIZE>=group.length;
+      }
+      const count=html("span","small",`${start+1}–${Math.min(start+WORKSHOP_PAGE_SIZE,group.length)} of ${group.length}`,nav);
+      count.setAttribute("role","status");
+    }
+  }
 }
 function visibleScars() {
   const marks=[...frame.scars];
@@ -1278,7 +1415,8 @@ function refreshView(changed=false) {
   // Capture immediately before the redraw, after the fetch and any visitor edits.
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
-  const focusId=input&&document.activeElement?.id?.startsWith("catchup-")?document.activeElement.id:null;
+  const activeId=document.activeElement?.id;
+  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-"))?activeId:null;
   if(changed)render();
   else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();}
   const replacement=$("catchup-seq");
