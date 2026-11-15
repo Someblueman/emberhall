@@ -1,0 +1,9 @@
+{
+  "house/__main__.py": "7d30e4af4e99653f85267431f1ba28d0dcd00607a1d6ca5e59d90e2deb670153",
+  "house/hearth_lens.py": "85d0a6ebf1b91e5b25f0bbf3284554b3203b77dceb5a4b389235b13ef230bbbb",
+  "house/mailbox.py": "ac218c8e88cb898901ec66d8f632ca3b085fe7e6aec2d5725f363249beac4d67",
+  "projects/hearth-lens/README.md": "b7eed2837f9c5f916a419566aae1844374563667d74551e32620fed36a635e41",
+  "projects/hearth-lens/hearth_lens.py": "8bb8825c72e9b39441007ca9b3d753e7e6d5d942d9c7bfa94d1f5296b313c245",
+  "projects/hearth-lens/test_hearth_lens.py": "0d0dab998ee8d4dddfa606746bcc0511d07ed703ddf8ae8b310f93c6b59c73a7",
+  "tests/test_hearth_lens_command.py": "89dfbfff5c97be4bb9dff9070bd4fe62b09863903812fa3e2dfb48d21a6e68da"
+}

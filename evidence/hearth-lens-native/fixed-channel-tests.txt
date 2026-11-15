@@ -1,0 +1,9 @@
+test_real_house_command_rejects_invalid_bounds_without_writing (tests.test_hearth_lens_command.HearthLensCommandTests.test_real_house_command_rejects_invalid_bounds_without_writing) ... ok
+test_real_house_command_uses_verified_snapshot_and_bounds_rows (tests.test_hearth_lens_command.HearthLensCommandTests.test_real_house_command_uses_verified_snapshot_and_bounds_rows) ... ok
+test_fixed_native_channel_traces_without_cursor_or_journal_changes (tests.test_hearth_lens_command.HearthLensMailboxTests.test_fixed_native_channel_traces_without_cursor_or_journal_changes) ... ok
+test_mailbox_allows_lens_but_still_pins_its_repository (tests.test_hearth_lens_command.HearthLensMailboxTests.test_mailbox_allows_lens_but_still_pins_its_repository) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.600s
+
+OK

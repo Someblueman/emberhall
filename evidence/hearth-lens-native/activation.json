@@ -1,0 +1,24 @@
+{
+  "scope": "hearth-lens-native-20261115",
+  "source_head": "9df250c177f43bb423d0168aa9378a3774f0889c",
+  "source_sha256": "03a6473bd1e0fd69aee8ea271ce6b143a6066eebc1dbc219c1f0ffa6bc5350f0",
+  "runtime_sha256": "590b5ad698ef290427c56215d3afcd5fea089a01dd6b4e6d4fcf61f7c4345268",
+  "test_count": 547,
+  "test_output_sha256": "9f64363b1e62e59c72a165be2286ff5657895ff79ae8ed408d5df8919bf6dc92",
+  "approval_sha256": "f781601c6cde63e51afad54522d0a30b436ec839fecae5433747dfc1041bf988",
+  "migration_sequence": 6392,
+  "paused_sequence": 6372,
+  "pause_extension_sequence": 6384,
+  "resumed_sequence": 6393,
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council",
+    "proposals"
+  ],
+  "drain_order": "Current residents exited naturally; jobs drained before source lock. Exact tested source revalidated by authenticated apply.",
+  "independent_acceptance_sequence": 6369,
+  "native_finish_sequence": 6328,
+  "admission_pause_seconds": 858.393
+}

@@ -1,0 +1,12 @@
+test_bound_pages_preserve_references_order_counts_and_full_head_summary (test_hearth_lens.HearthLensTests.test_bound_pages_preserve_references_order_counts_and_full_head_summary) ... ok
+test_cli_invalid_bounds_and_unfounded_repository_never_create_a_journal (test_hearth_lens.HearthLensTests.test_cli_invalid_bounds_and_unfounded_repository_never_create_a_journal) ... ok
+test_expired_reclaim_is_distinct_from_released_claim_and_ready_generation (test_hearth_lens.HearthLensTests.test_expired_reclaim_is_distinct_from_released_claim_and_ready_generation) ... ok
+test_real_cli_is_read_only_and_rejects_incomplete_journal_without_output (test_hearth_lens.HearthLensTests.test_real_cli_is_read_only_and_rejects_incomplete_journal_without_output) ... ok
+test_source_review_edges_follow_stopped_contribution_without_prose_matching (test_hearth_lens.HearthLensTests.test_source_review_edges_follow_stopped_contribution_without_prose_matching) ... ok
+test_task_and_resident_follow_explicit_help_run_and_controller_receipts (test_hearth_lens.HearthLensTests.test_task_and_resident_follow_explicit_help_run_and_controller_receipts) ... ok
+test_untrusted_speech_reports_are_bounded_and_control_characters_stay_quoted (test_hearth_lens.HearthLensTests.test_untrusted_speech_reports_are_bounded_and_control_characters_stay_quoted) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 3.198s
+
+OK
