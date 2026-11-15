@@ -54,17 +54,7 @@ through the approved council, and refresh the pinned runtime only through the
 tested later-wake gate. Never turn a simulated test into a live witness.
 """
 REPORT_NAME = "runtime-test.json"
-TEST_ARGS = ["-m", "unittest", "discover", "-s", "tests", "-v"]  # Historical reports bind this exact command.
-# New suite runs (integration, owner upgrades, renovations) use the source's own
-# parallel runner (house/testrun.py), falling back to plain discovery when the
-# source has none.
-SUITE_BOOT = ("import importlib.util, runpy, sys\n"
-              "try:\n    spec = importlib.util.find_spec('house.testrun')\n"
-              "except ImportError:\n    spec = None\n"
-              "if spec:\n    runpy.run_module('house.testrun', run_name='__main__')\n"
-              "sys.argv = ['python -m unittest', *sys.argv[1:]]\n"
-              "runpy.run_module('unittest', run_name='__main__')\n")
-SUITE_ARGS = ["-c", SUITE_BOOT, *TEST_ARGS[2:]]
+TEST_ARGS = ["-m", "unittest", "discover", "-s", "tests", "-v"]
 PROTECTED_FILES = frozenset("house/" + name + ".py" for name in (
     "providers", "council", "wake_policy", "steward", "model", "record", "governance",
     "resident_client", "mailbox", "mailbox_jobs", "resident_actions", "opencode_tool", "test_sandbox",

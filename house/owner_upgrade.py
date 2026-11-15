@@ -43,6 +43,9 @@ def atomic_json(path: Path, value: dict) -> None:
             os.unlink(name)
 
 
+from .testrun import SUITE_ARGS
+
+
 def authenticate_owner() -> None:
     steward.context()
     identity, _ = steward.github("user")
@@ -133,7 +136,7 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
         subprocess.run(["git", "clone", "--quiet", "--no-local", "--single-branch", "--no-tags",
                         str(record.root), str(candidate)], check=True, capture_output=True)
         require(wake_policy.source_snapshot(candidate) == snapshot, "test copy differs from reviewed source")
-        tested = test_sandbox.run([str(Path(sys.executable).resolve()), *wake_policy.SUITE_ARGS],
+        tested = test_sandbox.run([str(Path(sys.executable).resolve()), *SUITE_ARGS],
                                  cwd=candidate, stdout=output, timeout=1800)
         require(wake_policy.source_snapshot(candidate) == snapshot, "tests changed their source")
         output.seek(0); raw = output.read(800001)

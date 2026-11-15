@@ -152,7 +152,8 @@ def install(record, private: Path) -> dict:
     from .maintenance import fingerprint, protected_manifest
     from .owner_upgrade import passed_count
     from .runtime import selected
-    from .wake_policy import SUITE_ARGS, active_policy, source_snapshot
+    from .testrun import SUITE_ARGS
+    from .wake_policy import active_policy, source_snapshot
     from .watch_recovery import prepare_runtime
     from . import test_sandbox
     state = record.read()[0]

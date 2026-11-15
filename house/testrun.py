@@ -20,6 +20,16 @@ import time
 import unittest
 
 BATCH = 6
+# The command integration, owner upgrades and renovations run in a candidate:
+# its own runner if it has one, otherwise plain discovery. (Historical runtime
+# reports keep wake_policy.TEST_ARGS exactly.)
+SUITE_BOOT = ("import importlib.util, runpy, sys\n"
+              "try:\n    spec = importlib.util.find_spec('house.testrun')\n"
+              "except ImportError:\n    spec = None\n"
+              "if spec:\n    runpy.run_module('house.testrun', run_name='__main__')\n"
+              "sys.argv = ['python -m unittest', *sys.argv[1:]]\n"
+              "runpy.run_module('unittest', run_name='__main__')\n")
+SUITE_ARGS = ["-c", SUITE_BOOT, "discover", "-s", "tests", "-v"]
 
 
 def _ids(suite) -> list[str]:

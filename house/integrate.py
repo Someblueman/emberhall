@@ -205,7 +205,7 @@ def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[st
         return "prose", []
     project_only = bool(paths) and all(re.fullmatch(r"projects/[A-Za-z0-9_-]+/.+", p) for p in paths)
     if not project_only:
-        from .wake_policy import SUITE_ARGS
+        from .testrun import SUITE_ARGS
         return "foundation", [[sys.executable, *SUITE_ARGS]]
     # Test each affected project, including its unchanged tests. No dependency install.
     projects = sorted({"/".join(p.split("/")[:2]) for p in paths})
