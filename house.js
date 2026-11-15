@@ -574,7 +574,7 @@ function roomFact(id) {
     const pending=frame.council?.pending||0;return pending?count(pending,"proposal waiting","proposals waiting"):"";
   }
   if(id==="gallery"){const n=(frame.shelf?.projects||[]).filter(x=>x.status==="active").length;return n?count(n,"project being built","projects being built"):"";}
-  if(id==="study"){const n=(frame.shelf?.ideas||[]).length;return n?count(n,"idea on the shelf","ideas on the shelf"):"";}
+  if(id==="study"){const n=(frame.shelf?.ideas||[]).filter(idea=>!idea.status||idea.status==="shelved").length;return n?count(n,"idea on the shelf","ideas on the shelf"):"";}
   if(id==="archive")return frame.lessons?count(frame.lessons,"lesson kept","lessons kept"):"";
   return "";
 }
@@ -1520,11 +1520,12 @@ function shelf() {
         html("p", "small", "Project slot available · council can choose from the shelf.", box);
       }
       const greatWanted = dataShelf.great_wanted !== undefined ? Boolean(dataShelf.great_wanted) : (!greatActive.length && greatIdeas.length < 2);
-      html("p", "small", dataShelf.explorer
+      const explorerLine = dataShelf.explorer
         ? "One Explorer at a time · see the recorded round above."
         : greatWanted
           ? "Room for a great-work Explorer round."
-          : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", box);
+          : ideas.length < 3 ? "Room for one Explorer round." : dataShelf.research ? "" : "Shelf stocked · no Explorer round needed.";
+      if (explorerLine) html("p", "small", explorerLine, box);
     } else {
       if (activeProjects.length >= 2) {
         html("p", "small", "Both project slots occupied · build the active projects.", box);
@@ -1535,6 +1536,14 @@ function shelf() {
         ? "One Explorer at a time · see the recorded round above."
         : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", box);
     }
+  }
+  if (dataShelf.policy && dataShelf.research && !dataShelf.explorer) {
+    const research = dataShelf.research, now = observationTime();
+    html("p", "small shelf-research", ideas.length >= (research.ceiling || 10)
+      ? `Research pauses while ${research.ceiling || 10} or more ideas wait.`
+      : ideas.length < 3 || now >= research.next
+        ? "Research continues even with a full shelf · a round may start now."
+        : `Research continues even with a full shelf · next round after ${clock(research.next)}.`, box);
   }
   const graveyard = [
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
@@ -1572,11 +1581,21 @@ function shelf() {
       const lossLabel = typeof idea.losses === "number" && idea.losses > 0
         ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
         : null;
-      const meta = [scaleLabel, idea.status, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
+      const briefLabel = idea.brief ? "researched" : typeof idea.brief_due === "number" ? "no research brief yet" : null;
+      const meta = [scaleLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
       if (idea.what) html("p", "", idea.what, item);
       if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
       if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
+      if (idea.brief) {
+        const brief = html("div", "shelf-brief", undefined, item);
+        html("div", "eyebrow-small", `Research brief · ${residentName(idea.brief.author)}`, brief);
+        [["Who it is for", idea.brief.audience], ["What already exists", idea.brief.exists],
+         ["First usable version", idea.brief.first_version], ["What could sink it", idea.brief.risks]]
+          .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, brief); });
+      } else if (typeof idea.brief_due === "number") {
+        html("p", "small shelf-thin", `No research brief yet · leaves the shelf ${clock(idea.brief_due)} unless a resident researches it.`, item);
+      }
       recordId(item,idea.id);
       const links = (Array.isArray(idea.sources) ? idea.sources : []).map(safeHttpUrl).filter(Boolean);
       if (links.length) {

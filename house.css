@@ -496,6 +496,23 @@ footer a {
 .milestone-current {
   font-weight: 600;
 }
+.shelf-brief {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.3rem 0 0.1rem;
+  padding: 0.5rem 0.65rem;
+  border-left: 2px solid var(--gold);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0 6px 6px 0;
+}
+.shelf-brief p {
+  margin: 0;
+}
+.shelf-thin,
+.shelf-research {
+  color: var(--muted);
+  font-style: italic;
+}
 .shelf-sources {
   display: flex;
   flex-wrap: wrap;
