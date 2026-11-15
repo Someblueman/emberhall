@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Cue Rehearsal · a workshop in two tracks</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="model.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">CUE REHEARSAL <span>01 / THE WORKSHOP</span></p>
+    <h1>A rehearsal before<br>the room fills.</h1>
+    <p class="intro">Two tracks, one workshop. Keep the original plan, change a cue, and trace what follows.</p>
+    <p class="scope">Offline · integer minutes · precedence only</p>
+  </header>
+  <main>
+    <section class="orientation" aria-labelledby="project-title">
+      <div><p class="eyebrow">YOUR WORKING COPY</p><h2 id="project-title"></h2><p id="origin"></p></div>
+      <p>Earliest start = the latest of a step’s release minute and its prerequisite finishes. Resources can block or conflict; they never move a step automatically. <strong>Touching intervals do not overlap.</strong></p>
+    </section>
+    <section class="workbench" aria-labelledby="edit-title">
+      <div class="editor">
+        <p class="eyebrow">TRY A CHANGE</p><h2 id="edit-title">Rehearse one cue</h2>
+        <p>The baseline stays read-only. Changes apply to the scenario.</p>
+        <form id="step-form">
+          <label for="step">Step</label><select id="step"></select>
+          <div class="pair">
+            <div><label for="duration">Duration (min)</label><input id="duration" type="number" min="1" max="1000000" step="1" required></div>
+            <div><label for="release">Release minute</label><input id="release" type="number" min="-1000000" max="1000000" step="1" required></div>
+          </div>
+          <label for="prerequisites">Prerequisite IDs (comma separated)</label><input id="prerequisites" type="text" spellcheck="false" aria-describedby="prereq-help">
+          <small id="prereq-help">Leave empty for an independent start. Missing IDs and cycles are reported.</small>
+          <label for="resource">One resource</label><input id="resource" type="text" list="resource-ids" spellcheck="false" required><datalist id="resource-ids"></datalist>
+          <button id="apply" type="submit">Apply to scenario →</button>
+        </form>
+      </div>
+      <div class="resources">
+        <p class="eyebrow">WHO / WHAT IS AVAILABLE</p><h2>Scenario resources</h2>
+        <p>Uncheck a resource to block its steps and their dependants. An unknown resource ID also blocks a step.</p>
+        <div id="resource-controls"></div>
+        <button id="reset" type="button" class="secondary">Reset scenario from baseline</button>
+        <p id="edit-message" class="message" role="status" aria-live="polite">Both plans begin with the same authored workshop.</p>
+      </div>
+    </section>
+    <section aria-labelledby="compare-title">
+      <div class="section-heading"><div><p class="eyebrow">FOLLOW THE CONSEQUENCES</p><h2 id="compare-title">Original &amp; rehearsal</h2></div><p>All times are minutes relative to the origin.</p></div>
+      <div class="plans">
+        <article class="plan baseline"><div class="plan-heading"><span class="badge">BASELINE</span><h3 id="baseline-name"></h3><p id="baseline-summary"></p></div><div id="baseline-result"></div></article>
+        <article class="plan scenario"><div class="plan-heading"><span class="badge">SCENARIO</span><h3 id="scenario-name"></h3><p id="scenario-summary"></p></div><div id="scenario-result"></div></article>
+      </div>
+      <div class="delta"><h3>Change from baseline</h3><ul id="changes"></ul></div>
+    </section>
+    <section class="transfer" aria-labelledby="transfer-title">
+      <div><p class="eyebrow">KEEP BOTH PLANS</p><h2 id="transfer-title">Take the rehearsal with you</h2>
+        <p>Export both plans as JSON. Import replaces the complete project only after validation. Invalid JSON leaves the current project intact. Reloading the page restores the example; export before leaving.</p>
+        <div class="actions"><button type="button" id="export">Export JSON to text</button><button type="button" id="download" class="secondary">Download JSON file</button><button type="button" id="import" class="secondary">Import JSON from text</button></div>
+        <p id="io-message" class="message" role="status" aria-live="polite">No import or export yet.</p>
+      </div>
+      <div><label for="json">JSON transfer text</label><textarea id="json" rows="12" spellcheck="false" placeholder="Export here, or paste a complete Cue Rehearsal project to import."></textarea></div>
+    </section>
+  </main>
+  <footer><p>Cue Rehearsal / an authored workshop example from Emberhall</p><p>A planning explanation, with no live clock or automatic resource scheduling. <a href="README.md">Format &amp; limits</a></p></footer>
+</body>
+</html>
