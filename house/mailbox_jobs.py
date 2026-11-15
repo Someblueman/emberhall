@@ -1,4 +1,4 @@
-"""One durable trusted action worker; native residents keep their sandbox."""
+"""A serialized action worker and one bounded read-only source inspector."""
 from __future__ import annotations
 
 import argparse
@@ -11,9 +11,9 @@ import subprocess
 import sys
 import time
 
-from .mailbox import directory, read_json, write_json, MAX_RESPONSE, ERRORS, ID
+from .mailbox import directory, read_json, write_json, parse, MAX_RESPONSE, ERRORS, ID
 from .record import Record
-from .resident_actions import execute, known_result
+from .resident_actions import ACTIONS, execute, known_result
 from .files import workspace_path
 from .watch import group_members, group_stopped, kill_group
 
@@ -111,34 +111,56 @@ def stop(record: Record, run: str, *, running: bool = True):
             interrupt(record, item)
 
 
+def lane(record: Record, item: dict) -> str:
+    """Reparse the fixed-channel command; never trust a stored lane label."""
+    args = parse(item["argv"], record.root, workspace_path(record, item["run"]), item["resident"])
+    if args.command not in ACTIONS:
+        raise ValueError("not a trusted action command")
+    return "inspection" if args.command == "integrate" and args.inspect else "worker"
+
+
 def tick(record: Record) -> None:
     all_jobs = jobs(record)
     processes = getattr(record, "_mailbox_processes", {})
     running = [item for item in all_jobs if item["status"] == "running"]
-    if len(running) > 1:
-        raise ValueError("more than one trusted action worker recorded")
-    if running:
-        item = running[0]
+    occupied = set()
+    for item in running:
+        name = lane(record, item)
+        if name in occupied:
+            raise ValueError("more than one trusted action worker recorded in a lane")
+        occupied.add(name)
+    for item in running:
         child = processes.get(item["id"])
         if child is not None and child.poll() is None and time.time() - item["started_at"] < 1200:
-            return
+            continue
         interrupt(record, item)
+        occupied.remove(lane(record, item))
     pending = sorted((item for item in all_jobs if item["status"] == "queued"), key=lambda item: item["created_at"])
-    if not pending:
-        return
-    item = pending[0]
-    state = record.read()[0]
-    run = state.get("life", {}).get("runs", {}).get(item["run"], {})
-    if run.get("status") != "active" or run.get("resident") != item["resident"]:
-        complete(record, item, {"ok": False, "error": "requesting resident has stopped"})
-        return
+    for item in pending:
+        try:
+            name = lane(record, item)
+        except (*ERRORS, SystemExit):
+            complete(record, item, {"ok": False, "error": "invalid trusted action command"})
+            continue
+        if name in occupied:
+            continue
+        state = record.read()[0]
+        run = state.get("life", {}).get("runs", {}).get(item["run"], {})
+        if run.get("status") != "active" or run.get("resident") != item["resident"]:
+            complete(record, item, {"ok": False, "error": "requesting resident has stopped"})
+            continue
+        runtime = Path(item["runtime"])
+        if runtime.is_symlink() or not runtime.is_file() or hashlib.sha256(runtime.read_bytes()).hexdigest() != item["runtime_sha256"]:
+            complete(record, item, {"ok": False, "error": "trusted action runtime bytes changed before launch"})
+            continue
+        start(record, item, name, processes)
+        occupied.add(name)
+
+
+def start(record: Record, item: dict, name: str, processes: dict) -> None:
     root = record.common / "house-home" / "jobs"
     path = root / item["id"]
-    runtime = Path(item["runtime"])
-    if runtime.is_symlink() or not runtime.is_file() or hashlib.sha256(runtime.read_bytes()).hexdigest() != item["runtime_sha256"]:
-        complete(record, item, {"ok": False, "error": "trusted action runtime bytes changed before launch"})
-        return
-    with (root / "worker.lock").open("a+b") as lock:
+    with (root / (name + ".lock")).open("a+b") as lock:
         try:
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
