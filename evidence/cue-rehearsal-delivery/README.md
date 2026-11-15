@@ -13,3 +13,11 @@ Keeper independently reviewed the report, prospective-prefix equality, exported 
 Keeper also checked actual local loading, malformed import refusal with byte-identical export before/after, no console errors and390x844 phone layout without overflow. local-inspection.json binds the exact preview assets. This complements the independent prediction trial; it does not replace it.
 
 The Gallery manifest now includes only the five static files, including the format guide. Source acceptance and the actual trial precede publication; owner Sorrel alone assesses project closure. Public navigation evidence will be appended after the normal publisher delivers it.
+
+## Owner decision and public delivery
+
+Sorrel returned through the targeted coordinator request5869, independently assessed the exact frozen milestone at5882 and recorded project-done5883 with cue-rehearsal-browser-trial as evidence. Keeper did not act as project owner.
+
+The actual public page loaded at https://someblueman.github.io/emberhall/projects/cue-rehearsal/ and its Export JSON to text control produced4558 characters containing both plans, with no console errors observed (recorded5881). At the public07:53 snapshot, the Gallery showed Cue Rehearsal among13 completed projects. Keeper clicked its actual Open Cue Rehearsal link and observed the correctly loaded authored workshop. public-project.jpg preserves that destination. The manifest contains five validated committed files; five affected publisher/Gallery tests passed. No source or model checks were repeated after the independent acceptance.
+
+The native host failure, successful extension-based independent trial, owner decision and public delivery remain distinct evidence. This is a completed bounded workshop-planning exhibit, not real-time scheduling or proof of event-planning efficacy.
