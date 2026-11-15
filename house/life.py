@@ -133,6 +133,10 @@ def targeted_pending_eligible(state: dict, request: dict, at: float) -> bool:
         source = state.get("life", {}).get("runs", {}).get(request["review_run"], {})
         if target == source.get("resident"):
             return False
+    from . import ballot_work
+    task = state.get("tasks", {}).get(request.get("task"), {})
+    if not ballot_work.eligible(state, task, target):
+        return False
     return True
 
 
@@ -143,7 +147,7 @@ def workload(state: dict, at: float) -> dict:
     active = {key: run for key, run in life.get("runs", {}).items() if run["status"] == "active"}
     active_residents = {run["resident"] for run in active.values()}
     requests = life.get("requests", {})
-    from . import project_work
+    from . import ballot_work, project_work
     project_routing = project_work.enabled(state)
     pending = [key for key, request in requests.items() if request["status"] == "pending"
                and project_work.help_available(state, request, at, help_id=key)
@@ -156,12 +160,15 @@ def workload(state: dict, at: float) -> dict:
                if task["status"] == "claimed" and (task["until"] > at or task["owner"] in active_residents)}
     task_reservations = {run["task"] for run in active.values()
                          if "task" in run and project_work.reserved(
-                             run, at, state["tasks"].get(run["task"], {}))} if project_routing else set()
+                             run, at, state["tasks"].get(run["task"], {}))
+                         and (project_routing or (ballot_work.enabled(state) and
+                              "ballot_choice" in state["tasks"].get(run["task"], {})))}
     exploring = explorer_owner(state, at)
     idle = [run["resident"] for key, run in active.items() if run["resident"] not in claimed
             and run["resident"] != exploring
             and not explorer_reserved(run, at)
-            and not (project_routing and "task" in run)
+            and not ("task" in run and (project_routing or
+                     (ballot_work.enabled(state) and "ballot_choice" in state["tasks"].get(run["task"], {}))))
             and not staffing.helper(run)
             and not (requests.get(run.get("help_request"), {}).get("status") == "assigned")]
     ready = [key for key, task in state["tasks"].items()
@@ -170,10 +177,11 @@ def workload(state: dict, at: float) -> dict:
              and key not in reserved and key not in task_reservations
              and (not project_routing or "project" not in task
                   or project_work.active_project(state, task["project"], at) is not None)]
-    uncovered = max(0, len(ready) - len(idle))
+    uncovered_ids = ballot_work.uncovered(state, ready, idle)
+    uncovered = len(uncovered_ids)
     explore = explorer_demand(state, at)
     capacity = staffing.capacity(state)
-    return {"ready_tasks": ready, "idle_residents": idle, "pending_help": pending,
+    return {"ready_tasks": ready, "uncovered_task_ids": uncovered_ids, "idle_residents": idle, "pending_help": pending,
             "uncovered_tasks": uncovered, "explore_generation": explore,
             "wanted_starts": 0 if paused(state, at) else min(max(0, capacity["total_limit"] - len(active)),
                                  max(capacity["baseline"] - capacity["regular"],
@@ -282,7 +290,7 @@ def apply(state, event):
             require(not paused(state, at), "owner paused admissions")
             fields(data, {"kind", "run", "resident", "agent", "model", "source_head",
                           "workspace", "policy_revision", "mode"}, {"help_request", "backlog", "explore_generation",
-                                                          "task", "task_generation"})
+                                                          "task", "task_generation", "ballot_open"})
             from .providers import validate_model
             validate_model(data["agent"], data["model"])
             run = identifier(data, "run")
@@ -306,9 +314,31 @@ def apply(state, event):
                         not {"help_request", "backlog"} & data.keys(), "invalid Explorer admission")
                 require(explorer_demand(state, at) == data["explore_generation"],
                         "Explorer demand changed")
-            if not staffing.helper(data) and {"task", "task_generation"} & data.keys():
-                from .project_work import validate_admission
-                validate_admission(state, data, at)
+            from . import ballot_work, project_work
+            request_task = life["requests"].get(data.get("help_request"), {}).get("task")
+            task_id = data.get("task", request_task)
+            task = state["tasks"].get(task_id, {})
+            requested_task = state["tasks"].get(request_task, {})
+            if ballot_work.enabled(state) and "ballot_choice" in requested_task:
+                require(data.get("task") == request_task, "ballot task binding changed")
+            if ballot_work.enabled(state) and "ballot_choice" in task:
+                require(((data.get("backlog") is True and "help_request" not in data) or
+                         ("help_request" in data and "backlog" not in data)),
+                        "invalid ballot task admission")
+                require(data.get("task") == task_id and type(data.get("task_generation")) is int
+                        and data["task_generation"] == task.get("generation"), "ballot task generation changed")
+                require(project_work.available(state, task_id, at, help_id=data.get("help_request")),
+                        "ballot task demand changed")
+                choice = state["shelf"]["choices"][task["ballot_choice"]]
+                require(type(data.get("ballot_open")) is bool and data["ballot_open"] == (choice["status"] == "open"),
+                        "ballot choice state changed")
+                require(ballot_work.eligible(state, task, resident), "ballot resident eligibility changed")
+                if data.get("backlog") is True:
+                    require(task_id in workload(state, at)["uncovered_task_ids"], "ballot task coverage changed")
+            else:
+                require("ballot_open" not in data, "invalid ballot admission")
+                if not staffing.helper(data) and {"task", "task_generation"} & data.keys():
+                    project_work.validate_admission(state, data, at)
             if "backlog" in data:
                 require(data["backlog"] is True and "help_request" not in data,
                         "invalid backlog admission")

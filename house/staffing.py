@@ -116,10 +116,14 @@ def select(state: dict, at: float, demand: dict) -> dict | None:
     pending = [k for k in demand["pending_help"] if help_eligible(state, requests[k], at, help_id=k)
                and (helper(requests[k]) or
                     ("model" not in requests[k] and requests[k].get("agent", "codex") == "codex"))]
-    ready = [k for k in demand["ready_tasks"] if task_eligible(state["tasks"][k])] if demand["uncovered_tasks"] else []
+    from . import ballot_work
+    candidates = (demand["uncovered_task_ids"] if ballot_work.enabled(state) and
+                  any("ballot_choice" in state["tasks"][k] for k in demand["ready_tasks"])
+                  else demand["ready_tasks"])
+    ready = [k for k in candidates if task_eligible(state["tasks"][k])] if demand["uncovered_tasks"] else []
     # Eligibility cannot let unrelated helpers jump ahead of selected-project work.
     selected = project_work.first(state, at,
-        demand["ready_tasks"] if demand["uncovered_tasks"] else [], demand["pending_help"])
+        candidates if demand["uncovered_tasks"] else [], demand["pending_help"])
     if selected and not (selected.get("task") in ready or selected.get("help_request") in pending):
         return None
     if selected is None:
@@ -133,4 +137,18 @@ def select(state: dict, at: float, demand: dict) -> dict | None:
     previous = [r for r in state.get("life", {}).get("runs", {}).values() if helper(r)]
     last = max(previous, key=lambda r: r["started_sequence"], default={}).get("model")
     selected["helper_model"] = request.get("model", HELPER_MODELS[1] if last == HELPER_MODELS[0] else HELPER_MODELS[0])
+    from . import ballot_work
+    from .life import return_eligible
+    task = state["tasks"].get(selected.get("task"), {})
+    if (ballot_work.enabled(state) and "ballot_choice" in task
+            and state["shelf"]["choices"][task["ballot_choice"]]["status"] == "open"):
+        targets = [request["target_resident"]] if "target_resident" in request else state["residents"]
+        models = [selected["helper_model"]] if "model" in request else [selected["helper_model"],
+                  next(model for model in HELPER_MODELS if model != selected["helper_model"])]
+        eligible_models = [model for model in models if any(
+            ballot_work.eligible(state, task, resident) and
+            return_eligible(state, resident, "codex", model, at) for resident in targets)]
+        if not eligible_models:
+            return None
+        selected["helper_model"] = eligible_models[0]
     return selected

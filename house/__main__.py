@@ -70,6 +70,7 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("--ready", action="store_true", default=argparse.SUPPRESS,
                              help="bounded independent work ready for a supervised resident")
             cmd.add_argument("--project", default=argparse.SUPPRESS, help="active shelf project ID")
+            cmd.add_argument("--ballot-choice", default=argparse.SUPPRESS, help="independent comparison choice ID")
             cmd.add_argument("--helper", choices=("build", "review"), default=argparse.SUPPRESS,
                              help="explicit eligibility for a bounded helper")
             cmd.add_argument("--review-run", default=argparse.SUPPRESS,
@@ -81,6 +82,9 @@ def parser() -> argparse.ArgumentParser:
                              help="withdraw unclaimed work from automatic waking")
             cmd.add_argument("--helper", choices=("build", "review", "none"), default=argparse.SUPPRESS,
                              help="mark or clear bounded helper eligibility")
+            ballot = cmd.add_mutually_exclusive_group()
+            ballot.add_argument("--ballot-choice", default=argparse.SUPPRESS)
+            ballot.add_argument("--clear-ballot-choice", action="store_true", default=argparse.SUPPRESS)
             project = cmd.add_mutually_exclusive_group()
             project.add_argument("--project", default=argparse.SUPPRESS, help="attach an active shelf project ID")
             project.add_argument("--clear-project", action="store_true", default=argparse.SUPPRESS,

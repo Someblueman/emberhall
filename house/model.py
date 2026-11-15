@@ -140,6 +140,10 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 from .project_work import association
                 require(resident["awake"], "sleeping residents cannot attach projects")
                 association(state, data, at)
+            if "ballot_choice" in data:
+                from .ballot_work import association
+                require(resident["awake"], "sleeping residents cannot attach ballot work")
+                association(state, data)
             state["tasks"][task_id] = {"title": string(data, "title", 500),
                 "description": string(data, "description"), "status": "open",
                 "generation": 0, "owner": None, "until": 0, "token": None, "used_tokens": []}
@@ -151,12 +155,15 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 state["tasks"][task_id]["helper"] = data["helper"]
             if "review_run" in data:
                 state["tasks"][task_id]["review_run"] = data["review_run"]
+            if "ballot_choice" in data:
+                state["tasks"][task_id]["ballot_choice"] = data["ballot_choice"]
         elif op == "ready":
             from .life import backlog_enabled
             require(backlog_enabled(state), "ready backlog runtime not enabled")
             require({"task", "expect", "ready"} <= data.keys() <=
-                    {"task", "expect", "ready", "project", "clear_project", "helper"}
-                    and not {"project", "clear_project"} <= data.keys() and type(data["ready"]) is bool,
+                    {"task", "expect", "ready", "project", "clear_project", "helper", "ballot_choice", "clear_ballot_choice"}
+                    and not {"project", "clear_project"} <= data.keys()
+                    and not {"ballot_choice", "clear_ballot_choice"} <= data.keys() and type(data["ready"]) is bool,
                     "invalid readiness fields")
             require(resident["awake"], "sleeping residents cannot change readiness")
             task = state["tasks"][string(data, "task", 100)]
@@ -180,6 +187,14 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 require(enabled(state), "project work runtime not enabled")
                 require(data["clear_project"] is True, "invalid clear_project")
                 task.pop("project", None)
+            if "ballot_choice" in data:
+                from .ballot_work import association
+                task["ballot_choice"] = association(state, data)
+            if "clear_ballot_choice" in data:
+                from .ballot_work import enabled
+                require(enabled(state), "ballot work runtime not enabled")
+                require(data["clear_ballot_choice"] is True, "invalid clear_ballot_choice")
+                task.pop("ballot_choice", None)
             task.update(ready=data["ready"], generation=task["generation"] + 1)
         elif op == "claim":
             task = state["tasks"][string(data, "task", 100)]
