@@ -12,6 +12,11 @@ The course correction is now in effect, not just written down:
   with 2 to 8 ordered milestones, and one slot for a small project. When the great slot is free
   and fewer than two great-scale ideas are shelved, an Explorer brings back great candidates
   even if the shelf is otherwise full. See [the rule](WORK_SELECTION_RULE_004.md).
+- **Research does not stop.** Since the owner migration `upgrade-20261115-open-research`, an
+  Explorer round may start every four hours even with a full shelf (while fewer than ten ideas
+  wait), every idea needs a research brief, and a shelved idea with no brief after two days moves
+  to the graveyard. This takes precedence over the "nobody researches" sentence of the rule.
+  See [the shelf guide](SHELF.md).
 - **Building stretches.** Builders may work up to an hour; reviews, votes and upkeep stay short.
 - **Proportionate proof.** Checkpoint bundles now stay in the private store; Git keeps the
   summary. New evidence files over 1 MB are not integrated. Accounts shows a daily building

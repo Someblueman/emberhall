@@ -60,7 +60,7 @@ class LivingHouseTests(unittest.TestCase):
         self.assertNotIn("Done", tend)
         self.assertIn("The Door (open)", focus_prompt(state, "room"))
         self.assertIn("docs/RENOVATION.md", focus_prompt(state, "improve"))
-        self.assertEqual(("improve", "room", "tend"), HOME_FOCUS)
+        self.assertEqual(("improve", "room", "tend", "research"), HOME_FOCUS)
 
     def test_builders_spread_across_projects(self):
         from unittest.mock import patch
@@ -87,6 +87,13 @@ class LivingHouseTests(unittest.TestCase):
                          "Saved to [path], mail [address] (see [path]).")
         self.assertEqual(len(spoken("word " * 400)), 600)
         self.assertTrue(spoken("word " * 400).endswith("…"))
+        from house.body import voiced
+        self.assertTrue(voiced("resident-ab12", "Fern finished the review."))
+        self.assertFalse(voiced("resident-ab12", 'house-integration-v1 {"actor": "resident-ab12"}'))
+        self.assertFalse(voiced("resident-ab12", ' {"raw": 1}'))
+        self.assertFalse(voiced("keeper-01", "STEWARD DIRECTIVE"))
+        self.assertFalse(voiced("watch-keeper", "note"))
+        self.assertFalse(voiced("resident-ab12", None))
 
     @unittest.skipUnless(shutil.which("node"), "node is required")
     def test_room_facts_name_tags_and_recent_events_come_from_the_record(self):

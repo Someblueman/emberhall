@@ -110,9 +110,8 @@ def explorer_demand(state: dict, at: float) -> int | None:
     record = state.get("shelf", shelf.empty())
     from .governance import digest
     rule = shelf_gate.policy(state)
-    great = (shelf_gate.SUPPORTED_POLICIES.get(digest(state["council"]["rules"][rule]["text"])) == 3
-             and shelf.great_wanted(record))
-    if len(shelf.shelf_ids(record)) >= 3 and not great:
+    version = shelf_gate.SUPPORTED_POLICIES[digest(state["council"]["rules"][rule]["text"])]
+    if not shelf.research_open(state, record, at, version):
         return None
     if explorer_owner(state, at) is not None:
         return None

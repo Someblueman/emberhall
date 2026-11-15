@@ -71,6 +71,54 @@ def great_wanted(shelf: dict) -> bool:
     return slot_free(shelf, "great") and len(great_ideas(shelf)) < 2
 
 
+# Open research (Steward decision, 15 November; owner migration below). Research
+# no longer stops at a full shelf: one round may start every few hours while the
+# shelf is under its ceiling. An idea needs a research brief; a shelved idea
+# with none after two days moves to the graveyard. Before the migration every
+# transition is exactly as it was, so the journal replays unchanged.
+OPEN_RESEARCH = "upgrade-20261115-open-research"
+RESEARCH_GAP_SECONDS = 4 * 3600
+SHELF_CEILING = 10
+BRIEF_SECONDS = 2 * DAY
+BRIEF_FIELDS = ("audience", "exists", "first_version", "risks")
+BRIEF_MINIMUM = 120
+EXPIRED = "No research brief was recorded within two days of shelving."
+
+
+def open_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(OPEN_RESEARCH)
+    return None if entry is None else entry["at"]
+
+
+def research_due(shelf: dict, at: float) -> bool:
+    return (len(shelf_ids(shelf)) < SHELF_CEILING
+            and at - shelf.get("research_at", -math.inf) >= RESEARCH_GAP_SECONDS)
+
+
+def research_open(state: dict, shelf: dict, at: float, selection_version: int) -> bool:
+    """Whether an Explorer round may start now. life.explorer_demand asks the same question."""
+    return (len(shelf_ids(shelf)) < 3 or (selection_version >= 3 and great_wanted(shelf))
+            or (open_since(state) is not None and research_due(shelf, at)))
+
+
+def brief_due(state: dict, idea: dict) -> float | None:
+    """When a shelved idea without a brief expires; None if it does not."""
+    since = open_since(state)
+    if since is None or idea["status"] != "shelved" or "brief" in idea:
+        return None
+    return max(idea.get("shelved_at", since), since) + BRIEF_SECONDS
+
+
+def brief(data: dict, key: str, actor: str, sequence: int) -> dict:
+    value = data.get(key)
+    require(isinstance(value, dict) and set(value) == set(BRIEF_FIELDS),
+            "a brief states audience, exists, first_version and risks")
+    parts = {name: text(value, name) for name in BRIEF_FIELDS}
+    require(all(len(part.strip()) >= BRIEF_MINIMUM for part in parts.values()),
+            f"each part of a brief needs at least {BRIEF_MINIMUM} characters")
+    return parts | {"author": actor, "sequence": sequence}
+
+
 def close_explorer(shelf: dict, reason: str, at: float, sequence: int) -> None:
     key = shelf["explorer"]
     if key is not None:
@@ -107,6 +155,14 @@ def advance(state: dict, at: float, sequence: int) -> None:
         if project["status"] == "active" and at >= project["deadline"] + 7 * DAY:
             which = "second" if project["extended"] else "first"
             drop(shelf, key, f"no timely {which}-deadline decision", at, sequence)
+    if open_since(state) is not None:
+        frozen = {idea for choice in shelf["choices"].values() if choice["status"] == "open"
+                  for idea in choice["candidates"]}
+        for key, idea in shelf["ideas"].items():
+            due = brief_due(state, idea)
+            if due is not None and at >= due and key not in frozen:
+                idea["status"] = "graveyard"
+                idea["history"].append({"expired": True, "lesson": EXPIRED, "sequence": sequence})
 
 
 def sources(data: dict) -> list[str]:
@@ -141,14 +197,16 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
     advance(state, at, sequence)
     shelf = state.setdefault("shelf", empty())
     kind = text(data, "kind", 40)
+    opened = open_since(state) is not None
     if kind == "explore-start":
         fields(data, {"round", "expect", "token", "seconds"})
         key = identifier(data, "round")
         require(key not in shelf["rounds"], "Explorer round already used")
         require(type(data["expect"]) is int and data["expect"] == shelf["generation"], "Explorer generation changed")
         require(shelf["explorer"] is None, "another Explorer is active")
-        require(len(shelf_ids(shelf)) < 3 or (selection_version >= 3 and great_wanted(shelf)),
-                "shelf is full; build instead")
+        require(research_open(state, shelf, at, selection_version),
+                "the shelf is full and a research round started recently; build instead" if opened
+                else "shelf is full; build instead")
         agent = state["residents"][actor].get("agent")
         require(agent in KINDS, "Explorer needs a recorded provider kind")
         other_kind_awake = any(p["awake"] and p.get("agent") in KINDS and p["agent"] != agent
@@ -162,6 +220,9 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             "until": at + integer(data, "seconds", 1, DAY), "status": "active",
             "started_sequence": sequence, "ideas": []}
         shelf.update(explorer=key, last_kind=agent)
+        if opened:
+            shelf["rounds"][key]["started_at"] = at
+            shelf["research_at"] = at
     elif kind == "explore-publish":
         fields(data, {"round", "token", "ideas"})
         expedition = expedition_for(shelf, data, actor)
@@ -169,8 +230,12 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         require(isinstance(ideas, list) and 2 <= len(ideas) <= 4, "publish 2 to 4 ideas together")
         base = {"idea", "title", "what", "why", "first_step", "sources"}
         for entry in ideas:
-            require(isinstance(entry, dict) and (set(entry) == base or
-                    (selection_version >= 3 and set(entry) == base | {"scale"})),
+            require(isinstance(entry, dict), "invalid idea fields")
+            if opened:
+                require("brief" in entry, "each idea needs a research brief: "
+                        "audience, exists, first_version and risks")
+            core = set(entry) - {"brief"} if opened else set(entry)
+            require(core == base or (selection_version >= 3 and core == base | {"scale"}),
                     "invalid idea fields")
             key = identifier(entry, "idea")
             require(key not in shelf["ideas"], "idea ID already used")
@@ -180,6 +245,8 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             if "scale" in entry:
                 require(entry["scale"] in {"great", "small"}, "scale must be great or small")
                 shelf["ideas"][key]["scale"] = entry["scale"]
+            if opened:
+                shelf["ideas"][key].update(shelved_at=at, brief=brief(entry, "brief", actor, sequence))
             expedition["ideas"].append(key)
         close_explorer(shelf, "published", at, sequence)
     elif kind == "explore-release":
@@ -290,6 +357,14 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         entry = shelf["ideas"][key]
         entry["history"].append({"returned_by": actor, "changed": text(data, "changed"), "sequence": sequence})
         entry.update(status="shelved", losses=0, shelved_sequence=sequence)
+        if opened:
+            entry["shelved_at"] = at
+    elif kind == "idea-brief":
+        require(opened, "unknown shelf action")
+        fields(data, {"idea", "brief"})
+        key = identifier(data, "idea")
+        require(key in shelf["ideas"] and shelf["ideas"][key]["status"] == "shelved", "idea is not on the shelf")
+        shelf["ideas"][key]["brief"] = brief(data, "brief", actor, sequence)
     elif kind in {"project-done", "project-drop", "project-extend-vote"}:
         project_action(state, data, actor, at, sequence)
     else:

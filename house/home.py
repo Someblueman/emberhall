@@ -128,7 +128,15 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
     return demand
 
 
-HOME_FOCUS = ("improve", "room", "tend")
+HOME_FOCUS = ("improve", "room", "tend", "research")
+# What a research brief must say; the reducer (house/shelf.py) checks the four parts exist.
+BRIEF_GUIDE = (
+    "A brief has four parts, each at least 120 characters of plain prose: audience (one specific kind of person "
+    "and the moment they would reach for this), exists (the closest existing things you actually opened and read, "
+    "what each does and where it stops), first_version (the smallest version someone outside the house could use, "
+    "and how they would get it) and risks (what would make it fail or not matter, and how the first step tests "
+    "that). Read the real pages of existing work (documentation, source, a demo), never only a search result or "
+    "a landing page, and list the pages you read as sources. Do not write a flattering brief for a weak idea. ")
 HOME_FOCUS_GAP_SECONDS = 1800
 
 
@@ -155,6 +163,24 @@ def focus_prompt(state: dict, focus: str) -> str:
             "task with its artifacts, then record room-open with evidence. A room must hold something real; do "
             "not open an empty one. If no new room is honestly worth building, improve what an existing room "
             "shows on the public page (site/house.js) instead and say why.\n")
+    if focus == "research":
+        from . import shelf as shelf_model
+        ideas = state.get("shelf", {}).get("ideas", {})
+        thin = sorted(((shelf_model.brief_due(state, idea), key, idea) for key, idea in ideas.items()
+                       if shelf_model.brief_due(state, idea) is not None), key=lambda item: item[:2])
+        listing = "; ".join(f"{key}: {idea['title']} (expires in {max(0, round((due - state['at']) / 3600))} h)"
+                            for due, key, idea in thin[:8])
+        return head + (
+            "deepen the idea shelf. By the Steward's decision a shelved idea needs a research brief, and one with "
+            "none after two days moves to the graveyard. Shelved ideas with no brief: " + (listing or "none") + ". "
+            "Pick one (the soonest to expire unless another is clearly more promising), spend most of this run "
+            "researching it under the owner's web safeguards, then record it with shelf kind idea-brief: "
+            '{"kind":"idea-brief","idea":ID,"brief":{"audience":...,"exists":...,"first_version":...,"risks":...}}. '
+            + BRIEF_GUIDE +
+            "If your reading shows the idea is not worth a slot, record no brief, let it expire and say at the "
+            "Hearth what you found. If every shelved idea has a brief, read the graveyard instead: when the reason "
+            "an idea failed no longer holds, return it with idea-return and give it a brief; otherwise improve the "
+            "weakest existing brief (idea-brief replaces it). Do not build an unselected idea.\n")
     stale = [f"{key} (generation {task['generation']}): {task['title']}" for key, task in state["tasks"].items()
              if task["status"] == "open" and task.get("ready") is not True]
     projects = state.get("shelf", {}).get("projects", {})
@@ -465,7 +491,30 @@ class Coordinator:
                 "Claim its current generation before edits. Finish or release every claim, leave a brief handoff "
                 "and explicitly sleep when this assignment ends. Do not research, explore, invent extra work "
                 "or remain in a post-completion wait. Queued contributions do not replace this assignment.\n")
-        if "explore_generation" in assigned:
+        from . import shelf as shelf_model
+        if "explore_generation" in assigned and shelf_model.open_since(state) is not None:
+            assignment += (
+                "Automatic Explorer assignment: the house wants a research round now. By the Steward's standing "
+                "decision of 15 November research continues even with a full shelf: one round may start every four "
+                "hours while fewer than ten ideas are shelved. That decision takes precedence over the older rule "
+                "sentence that nobody researches at three or more ideas. "
+                f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
+                "After waking, read the current shelf, its graveyard (so you do not bring back what already "
+                "failed) and the active rules. Before research use shelf explore-start with current expect "
+                "generation, a unique round/token and a lease of at least 3600 seconds. If another Explorer holds "
+                "the role or the start is refused, do ordinary useful work instead. Research is this run's whole "
+                "job: spend most of it reading under the owner's web safeguards, not writing. "
+                "Bring back 2 to 4 meaningfully different ideas that people outside the house would want: useful "
+                "creations first, then new resident capabilities or rooms with a real purpose. Tools for the "
+                "house's own process are the weakest kind. Each idea has title, what, why, first_step, sources "
+                "(the pages you read, never a search link), scale and a brief; publication is refused without "
+                "the brief. " + BRIEF_GUIDE +
+                "Use explore-publish through your fixed journal channel, then return to ordinary work. "
+                "Do not build an unselected idea. Read docs/SHELF.md for exact JSON fields. "
+                f"If keeping a research artifact, create and claim a task owning only research/explorations/{run}.md. "
+                "A choice needs milestones and independent votes; request those through ordinary help, without "
+                "choosing for others or voting for your own idea.\n")
+        elif "explore_generation" in assigned:
             assignment += (
                 "Automatic Explorer assignment: the shelf has fewer than three unselected ideas. "
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
@@ -748,7 +797,9 @@ class Coordinator:
         last = self.focus_record()
         if last.get("run") in self.running or time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS:
             return None
-        return HOME_FOCUS[last.get("count", 0) % len(HOME_FOCUS)]
+        from . import shelf as shelf_model
+        choices = HOME_FOCUS if shelf_model.open_since(state) is not None else HOME_FOCUS[:3]
+        return choices[last.get("count", 0) % len(choices)]
 
     def focus_record(self) -> dict:
         try:

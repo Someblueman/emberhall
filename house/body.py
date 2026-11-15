@@ -32,6 +32,13 @@ HEARTH_VOICES = 12
 PUBLIC_HEARTH = "upgrade-20261115-public-hearth"
 _LOCAL_PATH = re.compile(r"(?:/Users|/private|/var|/tmp|/home|/opt|/Volumes)/[^\s\"',;)\]]*")
 _ADDRESS = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+_RECEIPT = re.compile(r"\s*(?:house-[a-z0-9-]+-v[0-9]+\b|[{\[])")
+
+
+def voiced(actor: object, value: object) -> bool:
+    """A resident's own remark: not the coordinator's or the Steward's operator notes, not a machine receipt."""
+    return (isinstance(actor, str) and actor.startswith("resident-") and isinstance(value, str)
+            and bool(value.strip()) and _RECEIPT.match(value) is None)
 
 
 def spoken(value: object, limit: int = 600) -> str:
@@ -106,9 +113,13 @@ def shelf_view(state: dict) -> dict:
                 public["reasons"] = [label(v["reason"], 2000) for v in choice["votes"].values()
                                      if v["counted"]]
             history.append(public)
+        due = shelf_model.brief_due(state, idea)
         ideas.append({"id": key, **{k: label(idea[k], 2000) for k in
             ("title", "what", "why", "first_step", "author", "status")},
             **({"scale": label(idea["scale"], 20)} if "scale" in idea else {}),
+            **({"brief": {k: label(idea["brief"][k], 2000) for k in (*shelf_model.BRIEF_FIELDS, "author")}}
+               if "brief" in idea else {}),
+            **({"brief_due": due} if due is not None else {}),
             "sources": list(idea["sources"]), "losses": idea["losses"], "history": history})
     projects = [_project_view(key, shelf, p) for key, p in shelf.get("projects", {}).items()]
     expedition = shelf.get("rounds", {}).get(shelf.get("explorer"))
@@ -119,6 +130,10 @@ def shelf_view(state: dict) -> dict:
                 "until": expedition["until"]} if expedition else None}
     if policy == shelf_gate.GREAT_POLICY_ID:
         view["great_wanted"] = shelf_model.great_wanted(shelf_model.empty() | shelf)
+    if shelf_model.open_since(state) is not None:
+        last = shelf.get("research_at")
+        view["research"] = {"last": last, "ceiling": shelf_model.SHELF_CEILING, "next": max(
+            shelf_model.open_since(state), (last or 0) + shelf_model.RESEARCH_GAP_SECONDS)}
     return view
 
 
@@ -347,7 +362,8 @@ def replay(events: list, context: dict) -> list:
             places[actor] = "council"
         elif op == "say" and actor != "watch-keeper":
             places[actor] = "hearth"
-            if PUBLIC_HEARTH in state.get("maintenance", {}).get("migrations", {}):
+            if (PUBLIC_HEARTH in state.get("maintenance", {}).get("migrations", {})
+                    and voiced(actor, data.get("text"))):
                 hearth.append({"resident": actor, "name": label(state["residents"].get(actor, {}).get("name", actor), 100),
                                "text": spoken(data.get("text", "")), "seq": seq, "at": at})
                 del hearth[:-HEARTH_VOICES]

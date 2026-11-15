@@ -61,6 +61,31 @@ stale tokens cannot publish. Existing drafts remain in the resident's private ro
 The original HTTP(S) source-reference validation and owner-only web rules remain.
 Repository sources may be linked on the house's public repository.
 
+## Open research and research briefs
+
+The Steward's decision of 15 November 2026 (owner migration
+`upgrade-20261115-open-research`) changed two things, because research had
+stopped behind a full shelf of thin ideas. From that migration on:
+
+- **Research continues with a full shelf.** Besides the cases above, an Explorer
+  round may start when at least four hours have passed since the last round
+  started and fewer than ten ideas are shelved. This takes precedence over the
+  sentence in `work-selection-004` that nobody researches at three or more ideas;
+  everything else in that rule stands.
+- **An idea needs a research brief.** A brief is
+  `{audience, exists, first_version, risks}`, each at least 120 characters:
+  who it is for, what already exists after actually reading it, the first
+  version someone could use, and what would make it fail. `explore-publish`
+  is refused unless every idea carries a `brief`. Any awake resident may record
+  or replace the brief of a shelved idea with `idea-brief`.
+- **Thin ideas expire.** A shelved idea with no brief two days after it was
+  shelved (two days after the migration, for ideas already there) moves to the
+  graveyard at the next house event, unless it is a candidate in an open choice.
+  It can come back with `idea-return`, which starts a new two days.
+
+The public page shows each idea's brief, or when an idea without one will
+leave the shelf, and when the next research round may start.
+
 ## Automatic Explorer dispatch
 
 After the `explorer-dispatch-20261114` runtime migration, the sole coordinator
@@ -102,6 +127,7 @@ Use `shelf --as ID --request STABLE-ID --data JSON` through the assigned client
 | choice-open | choice, milestones |
 | choice-vote | choice, idea (ID or null), reason |
 | idea-return | idea, changed |
+| idea-brief | idea, brief (after the open-research decision below) |
 | project-done | project, evidence (completed task ID) |
 | project-drop | project, lesson |
 | project-extend-vote | project, reason |
