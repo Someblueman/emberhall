@@ -31,6 +31,40 @@ def read(path: Path):
         return read_json(parent, path.name, LIMIT)
 
 
+def acceptance(record: Record, item: dict):
+    """Return (contribution, intent) for a mutating acceptance request, else None.
+
+    Read-only inspections never compete with the single mutating worker, so they
+    are not acceptance work even though they share the integrate command.
+    """
+    try:
+        argv = item["argv"]
+        if not argv or argv[0] != "integrate":
+            return None
+        args = parse(argv, record.root, workspace_path(record, item["run"]),
+                     item["resident"])
+    except (*ERRORS, SystemExit):
+        return None
+    if args.command != "integrate" or getattr(args, "inspect", False):
+        return None
+    if getattr(args, "publish", False):
+        intent = "publish"
+    elif getattr(args, "reject", None) is not None:
+        intent = "reject"
+    else:
+        return None
+    return args.target, intent
+
+
+def in_progress(record: Record, job: str, resident: str, target: str, intent: str):
+    """Find another resident's queued/running acceptance of the same contribution."""
+    matches = [item for item in jobs(record)
+               if item["id"] != job and item["status"] in {"queued", "running"}
+               and item.get("resident") != resident
+               and acceptance(record, item) == (target, intent)]
+    return min(matches, key=lambda item: (item.get("created_at", 0.0), item["id"])) if matches else None
+
+
 def enqueue(record: Record, run: str, argv: list[str], requestid: str) -> str:
     job = hashlib.sha256(requestid.encode()).hexdigest()
     root = record.common / "house-home" / "jobs"
@@ -47,10 +81,30 @@ def enqueue(record: Record, run: str, argv: list[str], requestid: str) -> str:
     if not runtime.is_file() or runtime.is_symlink():
         raise ValueError("coordinator has no trusted pinned job runtime")
     item = record.read()[0]["life"]["runs"][run]
-    write(metadata, {"id": job, "run": run, "resident": item["resident"], "argv": argv,
+    entry = {"id": job, "run": run, "resident": item["resident"], "argv": argv,
         "requestid": requestid, "runtime": str(runtime),
         "runtime_sha256": hashlib.sha256(runtime.read_bytes()).hexdigest(),
-        "status": "queued", "created_at": time.time()})
+        "status": "queued", "created_at": time.time()}
+    write(metadata, entry)
+    pending = acceptance(record, entry)
+    existing = in_progress(record, job, entry["resident"], *pending) if pending is not None else None
+    if existing is None:
+        return job
+    # Another resident already owns this acceptance in the single mutating worker
+    # lane. Answer durably and immediately instead of making this resident wait
+    # behind it; the existing job still produces the one terminal receipt. A
+    # distinct target, intent, requester or inspection request is enqueued above,
+    # so a resident's own queued request keeps its ordinary cancellation on exit.
+    answer = {"ok": True, "result": {
+        "status": "in-progress", "contribution": pending[0], "intent": pending[1],
+        "existing_job": existing["id"], "existing_status": existing["status"],
+        "existing_resident": existing["resident"],
+        "note": ("an equivalent acceptance for this contribution is already queued or "
+                 "running; do not wait behind it, observe its terminal receipt instead. "
+                 "If that work fails or is interrupted, submit a new request id.")}}
+    write(path / "result.json", answer)
+    entry.update(status="done", finished_at=time.time(), duplicate_of=existing["id"])
+    write(metadata, entry)
     return job
 
 
