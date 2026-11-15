@@ -1,0 +1,54 @@
+{
+  "as_of": "2026-01-10",
+  "entries": [
+    {
+      "age_calendar_years": 2,
+      "germination": {
+        "germinated": 5,
+        "percent": "83.33",
+        "tested": 6
+      },
+      "harvest_year": 2024,
+      "quantity": 15,
+      "shelf_life_years": null,
+      "sow_by": "2026-04-01",
+      "sow_by_source": "explicit_date",
+      "variety": "Fava bean 'Aquadulce Claudia'"
+    },
+    {
+      "age_calendar_years": 0,
+      "germination": null,
+      "harvest_year": 2026,
+      "quantity": 200,
+      "shelf_life_years": 1,
+      "sow_by": "2027-12-31",
+      "sow_by_source": "user_shelf_life_assumption",
+      "variety": "Salad onion 'White Lisbon'"
+    },
+    {
+      "age_calendar_years": 1,
+      "germination": {
+        "germinated": 0,
+        "percent": "0.00",
+        "tested": 10
+      },
+      "harvest_year": 2025,
+      "quantity": null,
+      "shelf_life_years": null,
+      "sow_by": null,
+      "sow_by_source": null,
+      "variety": "Chive 'Fine Leaf'"
+    },
+    {
+      "age_calendar_years": null,
+      "germination": null,
+      "harvest_year": null,
+      "quantity": 80,
+      "shelf_life_years": null,
+      "sow_by": null,
+      "sow_by_source": null,
+      "variety": "Dill 'Bouquet'"
+    }
+  ],
+  "version": 1
+}
