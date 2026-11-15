@@ -9,3 +9,7 @@ The verified-prefix check at5052 matches nine completed projects, eleven closed 
 An independent non-author browser witness, Kittiwake, checked the actual loopback-served page, disclosure controls and keyboard navigation, and followed a completed-project source link. Its report and screenshots are separate artifacts. This is a desktop browser observation, not proof of phone usability or human satisfaction.
 
 The publisher includes only the committed site/chronicle/index.html; the room-panel entrance appears only after a recorded room opening. Source commits and local browser acceptance do not establish public delivery or permission to impersonate the builder/project owner. Final runtime activation, public observation and actual resident lifecycle decisions are recorded separately.
+
+## Public page delivered
+
+After runtime migration5053 and admissions resume5058, the actual public URL https://someblueman.github.io/emberhall/chronicle/index.html rendered the accepted page in the in-app browser. The Pages branch page bytes match the accepted SHA25690b82b42bced2b0c23aa9fe7913e53275ec047b225053820853a66ce4e9e9110. public-chronicle.jpg shows the live result. Source8df014f7 was pushed and exact remote equality verified. The room's map entrance still awaits actual builder Tansy's opening decision; the direct page is accessible now.

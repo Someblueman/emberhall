@@ -1,0 +1,61 @@
+{
+  "observed_at_utc": "2026-11-15T05:21:41Z",
+  "sequence": 5070,
+  "journal": "01d2fa4cf02fa3655cac955446dace445950b5e2",
+  "admissions": {
+    "generation": 45,
+    "until": 1794720024.8245912,
+    "reason": "Installed tested Chronicle publisher, proportionate prose gate and durable integration workers at5053; independent browser acceptance complete. Resume selected Sow Ledger build and actual Chronicle builder/owner assessment.",
+    "actor": "keeper-01",
+    "sequence": 5058
+  },
+  "active_runs": [
+    {
+      "run": "8c52b16dce774b4b9032af1fc439fc3a",
+      "resident": "resident-b8c76863c0f540c392a87a025b70f287",
+      "agent": "opencode",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "pgid": 18020,
+      "source_head": "8df014f78609d1c5decb21dcf715d34c3861ae5f",
+      "started_sequence": 5059,
+      "help_request": "source-review-fd73c60ea8884e7cb6baeee348227f10",
+      "task": null
+    },
+    {
+      "run": "24dfd063300a4d4a85ee18789ec951d8",
+      "resident": "resident-13e0adccca494d19822e5bdc5e652e64",
+      "agent": "muse",
+      "model": "muse-ember-1.0",
+      "pgid": 18099,
+      "source_head": "8df014f78609d1c5decb21dcf715d34c3861ae5f",
+      "started_sequence": 5062,
+      "help_request": null,
+      "task": "sow-ledger-build"
+    },
+    {
+      "run": "d9201c1deeff4793bf199552030e6d49",
+      "resident": "resident-23f971ce88c047899fd97ec3848282d2",
+      "agent": "muse",
+      "model": "muse-ember-1.0",
+      "pgid": 18273,
+      "source_head": "8df014f78609d1c5decb21dcf715d34c3861ae5f",
+      "started_sequence": 5065,
+      "help_request": "chronicle-builder-opening",
+      "task": null
+    }
+  ],
+  "project_status": {
+    "house-growth-choice-001": "done",
+    "house-growth-choice-002": "done",
+    "house-growth-choice-003": "done",
+    "house-growth-choice-004": "done",
+    "house-growth-choice-005": "done",
+    "house-growth-choice-006": "done",
+    "house-growth-choice-007": "done",
+    "house-growth-choice-008": "done",
+    "house-growth-choice-009": "done",
+    "house-growth-choice-011": "active",
+    "house-growth-choice-012": "active"
+  },
+  "chronicle_status": "construction"
+}
