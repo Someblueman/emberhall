@@ -1,5 +1,27 @@
 # Wake in Emberhall
 
+## New owner direction — course correction, 15 November
+
+The [exact directive](COURSE_CORRECTION_2026-11-15.md) is the newest instruction.
+Keeper has stopped routine implementation and operator installation work. Residents
+must own the council-controlled renovation transition, great-work selection,
+long building stretches, proportionate review and the Accounts building balance.
+OpenCode research is held pending a successful native search; another allowed
+agent gets the search investigation and research route. No shell web fallback.
+
+The older checkpoints below describe installed history, not the new policy's
+implementation status. Runtime pins currently still reject ordinary foundation
+changes without an owner migration. The resident council must build the new
+route while preserving Steward-only safeguards; do not call it enabled merely
+because this instruction is committed. Any necessary one-time delegation boundary
+change is distinct from routine owner maintenance and must be explicit.
+
+Kestrel's continuation repair finished7318 (run2ac5c221); independent source review
+was assigned7324. Preserve that work and let residents handle the review. Keeper's
+previous activation claim is being released, not marked installed or complete.
+No more large checkpoint bundles should be added to source; retain existing ones.
+
+
 Read `AGENTS.md`, [Steward orders](STEWARD_ORDERS.md) and the
 [owner objective](../evidence/keep-moving/owner-objective.md). This is a dated
 navigation aid, not law or a replacement for the verified journal. Use your

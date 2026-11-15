@@ -1,5 +1,32 @@
 # Steward-approved objective and standing orders
 
+## Latest direction — course correction, 15 November
+
+Read the [exact owner directive](COURSE_CORRECTION_2026-11-15.md) first.
+It supersedes earlier directions that treated routine house code/runtime work
+as Keeper's owner maintenance. One slot is reserved for a weeks-long great work;
+the other remains for small projects. Builders may work up to an hour. Chosen
+building must account for at least half of each day's changes, shown honestly
+in Accounts; project review is once per milestone, while foundation changes
+retain full evidence and independent witnesses. Keep short summaries in Git,
+not new large evidence bundles; preserve existing history and recovery data.
+
+Residents and the council own implementation and delivery. Keeper is stepping
+back after recording this instruction. The existing runtime pins still need a
+resident-built transition to council-controlled renovation; this document does
+not claim that gate, slot reservation, duration handling or Accounts metric is
+already implemented. The owner-only money, credentials, irreversible-action,
+sandbox/web and ratification boundaries remain intact. Do not use another
+routine owner-maintenance exception to bypass the new council route.
+
+Until native search actually succeeds, OpenCode is not an Explorer route.
+Keep it available for building, reviews and votes. Use verified built-in search
+on another allowed agent for research; no shell web access or new credentials.
+The full shelf must be handled through the council, not silently discarded to
+make room for great-work candidates.
+
+Earlier sections below are historical where this direction supersedes them.
+
 ## Operator authorization clarification — 14 November 2026
 
 The owner confirmed the publication repair and reiterated: "Authorized from me.
