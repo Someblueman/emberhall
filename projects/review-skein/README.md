@@ -6,7 +6,7 @@ It is for an occasional reviewer with no forge, account, daemon or network. It
 is not another Git host or identity system.
 
 New here? Run the invented practice workspace in [EXAMPLE.md](EXAMPLE.md)
-first; it exercises every command below on disposable data. The pieces:
+first; it exercises the main workflow commands on disposable data. The pieces:
 
 | Piece | What it does | Guide |
 | --- | --- | --- |
@@ -14,15 +14,20 @@ first; it exercises every command below on disposable data. The pieces:
 | `comments_view.py` | Read comments as terminal text or offline HTML | [COMMENTS.md](COMMENTS.md) |
 | `comment_editor.py` | Edit bodies/resolution in a self-contained offline page | [EDITOR.md](EDITOR.md) |
 | `exchange.py` | Merge several reviewers' comments; carry them onto a revised patch | [EXCHANGE.md](EXCHANGE.md) |
+| `review_view.py` | Read the verified diff with comments inline, as text or offline HTML | [REVIEW_VIEW.md](REVIEW_VIEW.md) |
+| `recovery.py` | Diagnose and rebuild a damaged packet; salvage drifted comments | [RECOVERY.md](RECOVERY.md) |
+| `comparison.py` | Measure this workflow against raw `git bundle`, Gerrit and Radicle | [RECOVERY.md](RECOVERY.md) |
 | `probe.py` | Audit/transcribe a packet's markup without a browser | [PROBE.md](PROBE.md) |
 | `example.py` | Generate a reproducible invented practice workspace | [EXAMPLE.md](EXAMPLE.md) |
 
-Milestones 1–3 are built and independently reviewed: packet/anchors,
-accessible markup plus comment view/edit, and multi-reviewer exchange with a
-non-author two-repository trial recorded in [EXCHANGE.md](EXCHANGE.md). The
-real browser/phone/screen-reader try in [TRIAL.md](TRIAL.md) is still open —
-markup tests and `probe.py` do not substitute for it. Milestone 4 (packet
-recovery and workflow comparison) is in progress, not shipped.
+Milestones 1–4 are built and independently reviewed: packet/anchors;
+accessible markup plus comment view/edit; multi-reviewer exchange with a
+non-author two-repository trial recorded in [EXCHANGE.md](EXCHANGE.md); and
+packet recovery with an honest workflow comparison in
+[RECOVERY.md](RECOVERY.md), plus the read-only annotated view in
+[REVIEW_VIEW.md](REVIEW_VIEW.md). The real browser/phone/screen-reader try in
+[TRIAL.md](TRIAL.md) is still open, so milestone 2 is not closed — markup
+tests and `probe.py` do not substitute for it.
 
 ## Export and read a packet
 
@@ -170,6 +175,24 @@ flags and the recorded non-author two-repository trial are in
 [EXCHANGE.md](EXCHANGE.md). To just read what reviewers said, use
 `comments_view.py` ([COMMENTS.md](COMMENTS.md)).
 
+## Read the annotated packet, and recover a damaged one
+
+```sh
+python3 projects/review-skein/review_view.py /path/to/packet
+python3 projects/review-skein/recovery.py diagnose /path/to/damaged-packet
+python3 projects/review-skein/recovery.py rebuild /path/to/damaged-packet /path/to/new-packet
+```
+
+`review_view.py` renders the verified diff with its comments inline (orphans
+in their own section) as terminal text or offline HTML; it never writes to
+the packet — see [REVIEW_VIEW.md](REVIEW_VIEW.md). `recovery.py` diagnoses a
+packet read-only (exit 0 healthy, 1 recoverable, 2 unrecoverable) and rebuilds
+the derived files byte-for-byte into a new directory from `changes.bundle` or
+a local repository, preserving valid comments verbatim — see
+[RECOVERY.md](RECOVERY.md), which also records the measured comparison
+against raw `git bundle`, Gerrit and Radicle and when those are the better
+tool.
+
 ## Test and independent trial
 
 The suite creates real temporary Git repositories and checks branch/tag and
@@ -184,7 +207,8 @@ python3 -m unittest discover -s projects/review-skein -v
 ```
 
 No package installation or network is used. The suite also covers the comment
-viewer/editor, deterministic merge/carry/revise and the example generator.
+viewer/editor, deterministic merge/carry/revise, the annotated packet view,
+packet recovery/rebuild and the example generator.
 Beyond tests, milestone 3's exchange has a recorded non-author two-repository
 trial ([EXCHANGE.md](EXCHANGE.md)), while milestone 2 still requires someone
 other than the author to open a real packet on desktop/phone with a screen
