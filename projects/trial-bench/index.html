@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<title>Trial Bench — Blind-Trial Recorder</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 1.5rem auto; max-width: 52rem; padding: 0 1rem; line-height: 1.5; }
+  fieldset { border: 1px solid #888; border-radius: 6px; margin: 1rem 0; padding: 1rem; }
+  legend { font-weight: bold; padding: 0 .4rem; }
+  label { display: block; margin-top: .8rem; font-weight: bold; }
+  textarea, input { width: 100%; box-sizing: border-box; margin-top: .3rem; font: inherit; }
+  textarea { min-height: 5rem; }
+  button { margin-top: .8rem; font: inherit; padding: .4rem 1rem; }
+  .prompt { border-left: 4px solid #444; padding: .6rem .8rem; margin-top: .8rem; background: #f6f6f4; white-space: pre-wrap; }
+  .status { margin-top: .8rem; padding: .6rem .8rem; border-radius: 4px; }
+  .status[hidden] { display: none; }
+  .ok { background: #e6f4ea; }
+  .err { background: #fde8e8; }
+  .hint { color: #555; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>Trial Bench</h1>
+<p>Records one blind trial in two phases. The receipt hash proves the
+pre-reveal text is unchanged in the exported report; it cannot prove
+honesty or correctness.</p>
+
+<section aria-labelledby="phase1-heading">
+  <h2 id="phase1-heading">Phase 1 — before the prompt</h2>
+  <fieldset id="phase1">
+    <legend>Pre-reveal record</legend>
+    <label for="exposure">Exposure declaration — what have you already seen about this trial?</label>
+    <textarea id="exposure" required placeholder="Declare any prior exposure, or state that there is none."></textarea>
+    <label for="prediction">Prediction — what do you expect to happen?</label>
+    <textarea id="prediction" required placeholder="State a concrete prediction."></textarea>
+    <label for="reasoning">Reasoning — why do you predict this?</label>
+    <textarea id="reasoning" required placeholder="Give the reason behind the prediction."></textarea>
+    <button type="button" id="issue-receipt">Issue receipt (hash phase 1)</button>
+    <p class="hint">Phase 2 stays locked until a receipt exists. Once issued, do not
+    change phase 1 text: the checker rejects any report whose phase 1 no longer
+    matches the receipt.</p>
+    <label for="receipt">Receipt (copyable)</label>
+    <textarea id="receipt" readonly placeholder="No receipt yet."></textarea>
+    <button type="button" id="copy-receipt">Copy receipt</button>
+    <div id="phase1-status" class="status" role="status" aria-live="polite" hidden></div>
+  </fieldset>
+</section>
+
+<section aria-labelledby="phase2-heading">
+  <h2 id="phase2-heading">Phase 2 — after the receipt</h2>
+  <fieldset id="phase2" disabled>
+    <legend>Post-reveal record (locked until receipt)</legend>
+    <p class="hint">The supplied prompt is shown only after the receipt is issued.</p>
+    <div class="prompt" id="supplied-prompt">Synthetic prompt S-01: A closed jar holds
+three glass beads, each hidden in one of two pockets of a cloth pouch. The
+player may reach in once, without looking, and draws one bead. Write down
+what you observe and any edit you make to your prediction.</div>
+    <label for="edit-field">Edit — how, if at all, do you revise your phase 1 record?</label>
+    <textarea id="edit-field" placeholder="Leave blank only if there is no edit."></textarea>
+    <label for="observation">Observation — what did you observe?</label>
+    <textarea id="observation" required placeholder="State the observation in concrete terms."></textarea>
+    <button type="button" id="export-report">Export JSON report</button>
+    <label for="export-output">JSON report</label>
+    <textarea id="export-output" readonly placeholder="No report yet. Export requires the receipt and a non-empty observation."></textarea>
+    <button type="button" id="download-report" disabled>Download report</button>
+    <div id="phase2-status" class="status" role="status" aria-live="polite" hidden></div>
+  </fieldset>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var exposureEl = document.getElementById('exposure');
+  var predictionEl = document.getElementById('prediction');
+  var reasoningEl = document.getElementById('reasoning');
+  var receiptEl = document.getElementById('receipt');
+  var phase1Status = document.getElementById('phase1-status');
+  var phase2Fieldset = document.getElementById('phase2');
+  var editEl = document.getElementById('edit-field');
+  var observationEl = document.getElementById('observation');
+  var exportEl = document.getElementById('export-output');
+  var phase2Status = document.getElementById('phase2-status');
+  var downloadBtn = document.getElementById('download-report');
+
+  // Random trial id; the checker only requires a non-empty string.
+  var trialId = 'trial-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
+    .map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+
+  var phase1 = null;
+  var receipt = null;
+
+  function showStatus(el, message, ok) {
+    el.textContent = message;
+    el.className = 'status ' + (ok ? 'ok' : 'err');
+    el.hidden = false;
+  }
+
+  // Canonical pre-reveal JSON, shared with checker.py: sorted keys
+  // exposure/prediction/reasoning, compact, raw UTF-8.
+  function canonicalPreReveal(block) {
+    return JSON.stringify({
+      exposure: block.exposure,
+      prediction: block.prediction,
+      reasoning: block.reasoning
+    });
+  }
+
+  function sha256Hex(text) {
+    var bytes = new TextEncoder().encode(text);
+    return crypto.subtle.digest('SHA-256', bytes).then(function (hash) {
+      return Array.from(new Uint8Array(hash))
+        .map(function (b) { return b.toString(16).padStart(2, '0'); })
+        .join('');
+    });
+  }
+
+  document.getElementById('issue-receipt').addEventListener('click', function () {
+    var block = {
+      exposure: exposureEl.value,
+      prediction: predictionEl.value,
+      reasoning: reasoningEl.value
+    };
+    if (!block.exposure.trim() || !block.prediction.trim() || !block.reasoning.trim()) {
+      showStatus(phase1Status, 'Exposure, prediction and reasoning are all required before a receipt can be issued.', false);
+      return;
+    }
+    sha256Hex(canonicalPreReveal(block)).then(function (hash) {
+      phase1 = block;
+      receipt = { version: 1, trial_id: trialId, hash: hash };
+      receiptEl.value = JSON.stringify(receipt, null, 2);
+      phase2Fieldset.disabled = false;
+      showStatus(phase1Status, 'Receipt issued and phase 2 unlocked. Copy the receipt text; it is embedded in the exported report.', true);
+    }, function () {
+      showStatus(phase1Status, 'Could not compute the receipt hash in this browser.', false);
+    });
+  });
+
+  document.getElementById('copy-receipt').addEventListener('click', function () {
+    if (!receipt) {
+      showStatus(phase1Status, 'No receipt exists yet; copying is unavailable.', false);
+      return;
+    }
+    receiptEl.focus();
+    receiptEl.select();
+    if (document.execCommand && document.execCommand('copy')) {
+      showStatus(phase1Status, 'Receipt copied.', true);
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(receiptEl.value).then(function () {
+        showStatus(phase1Status, 'Receipt copied.', true);
+      });
+    }
+  });
+
+  document.getElementById('export-report').addEventListener('click', function () {
+    if (!receipt || !phase1) {
+      showStatus(phase2Status, 'No receipt exists; phase 2 cannot export.', false);
+      return;
+    }
+    if (!observationEl.value.trim()) {
+      showStatus(phase2Status, 'Observation must be non-empty before export.', false);
+      return;
+    }
+    var report = {
+      version: 1,
+      trial_id: trialId,
+      phase1: {
+        exposure: phase1.exposure,
+        prediction: phase1.prediction,
+        reasoning: phase1.reasoning
+      },
+      receipt: { hash: receipt.hash },
+      phase2: {
+        edit: editEl.value,
+        observation: observationEl.value
+      }
+    };
+    exportEl.value = JSON.stringify(report, null, 2);
+    downloadBtn.disabled = false;
+    showStatus(phase2Status, 'Report ready below. Validate it with checker.py; the checker rejects edited phase 1, missing exposure, empty observation and hash mismatches.', true);
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    var blob = new Blob([exportEl.value], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'trial-report.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+})();
+</script>
+</body>
+</html>

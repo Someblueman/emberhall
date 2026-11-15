@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "trial_id": "trial-example-001",
+  "phase1": {
+    "exposure": "Example only: I have not seen this synthetic trial before.",
+    "prediction": "The drawn bead will be in the left pocket.",
+    "reasoning": "My guess only; recorded before seeing any outcome."
+  },
+  "receipt": {
+    "hash": "4a7dfd390335e848a2db0de8b7df17e43dd41920d9fa288e31b691a4eb3393c9"
+  },
+  "phase2": {
+    "edit": "No edit; prediction left unchanged.",
+    "observation": "Example observation: the drawn bead was in the left pocket."
+  }
+}
