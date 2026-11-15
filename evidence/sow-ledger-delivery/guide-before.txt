@@ -1,0 +1,34 @@
+test_safe_actions_historical_filter_and_missing_manifest (tests.test_creations_gallery.CreationsGalleryTests.test_safe_actions_historical_filter_and_missing_manifest) ... FAIL
+
+======================================================================
+FAIL: test_safe_actions_historical_filter_and_missing_manifest (tests.test_creations_gallery.CreationsGalleryTests.test_safe_actions_historical_filter_and_missing_manifest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sws/Code/longhouse/tests/test_creations_gallery.py", line 61, in test_safe_actions_historical_filter_and_missing_manifest
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : node:assert:150
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Every committed project must survive the URL filter
+
+9 !== 10
+
+    at evalmachine.<anonymous>:2:9
+    at Script.runInContext (node:vm:149:12)
+    at Object.runInContext (node:vm:301:6)
+    at [eval]:36:5 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 9,
+  expected: 10,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.022s
+
+FAILED (failures=1)

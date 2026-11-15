@@ -16,7 +16,8 @@ class Element {
 }
 const root=new Element('div'),document={getElementById:()=>root,querySelector:()=>root,createElement:t=>new Element(t)};
 const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children.map(text)].join(' ');
-const ctx=vm.createContext({assert,document,URL,AbortSignal,root,all,text,fetch:async()=>({ok:false})});
+const manifest=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+const ctx=vm.createContext({assert,document,URL,AbortSignal,root,all,text,manifest,fetch:async()=>({ok:false})});
 const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
@@ -40,8 +41,21 @@ assert.match(text(root),/current published versions/);
  ctx.fetch=async()=>({ok:true,json:async()=>({version:1,projects:[{id:'garden',title:'Garden',summary:'Play',category:'creation',action:'Play',href:'projects/garden/'},{id:'bad',title:'Bad',summary:'X',category:'creation',href:'javascript:alert(1)'}]})});
  await ctx.loadCatalog('new-source');
  vm.runInContext(`assert.equal(catalog.length,1);assert.equal(catalogSource,'new-source');`,ctx);
+ ctx.fetch=async()=>({ok:true,json:async()=>manifest});
+ await ctx.loadCatalog('actual-manifest');
+ vm.runInContext(`
+ assert.equal(catalog.length,manifest.projects.length,'Every committed project must survive the URL filter');
+ current=true;frame={shelf:{projects:manifest.projects.map(p=>({idea:p.id,status:'done'}))}};
+ renderCollection();
+ const sow=manifest.projects.find(p=>p.id==='sow-ledger');
+ assert.equal(all(root).find(n=>n.tag==='a'&&n.href===sow.href).textContent,'Read guide Sow Ledger →');
+ for(const href of ['https://evil.test/README.md','https://github.com/Other/repo/blob/main/projects/sow-ledger/README.md','https://github.com/Someblueman/emberhall/blob/main/projects/../README.md'])
+  assert.equal(collectionUrl({...sow,href}),null);
+ assert.equal(collectionUrl({...sow,action:'Play'}),null);
+ `,ctx);
+
 })().catch(e=>{console.error(e);process.exitCode=1;});
 '''
         source = Path(__file__).parents[1] / 'site/house.js'
-        result = subprocess.run(['node', '-e', script, str(source)], capture_output=True, text=True, timeout=15)
+        result = subprocess.run(['node', '-e', script, str(source), str(source.with_name('projects.json'))], capture_output=True, text=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
