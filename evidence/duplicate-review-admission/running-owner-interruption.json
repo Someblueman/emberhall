@@ -1,0 +1,26 @@
+{
+  "first_before": "running",
+  "second_before": "queued",
+  "first_after": "done",
+  "second_after": "queued",
+  "response": {
+    "ok": true,
+    "result": {
+      "contribution": "contribution-one",
+      "existing_job": "ca73fef00b2ba3ea40b2b3a83ea2fc3715dc9069779ed734507a512071fedee6",
+      "existing_resident": "other-reviewer",
+      "existing_status": "queued",
+      "intent": "publish",
+      "note": "an equivalent publish for this contribution is already queued or running; observe its terminal receipt instead of waiting behind it. If that work fails or is interrupted, submit a new request id.",
+      "status": "in-progress"
+    }
+  },
+  "contribution": "c1c02007d4c894408560c0d0c438da7ffef484fd",
+  "finish_sequence": 7127,
+  "witness_sequence": 7141,
+  "rejection_sequence": 7148,
+  "repair_task": "duplicate-review-worker-ownership",
+  "method": "Unchanged candidate DuplicateAcceptanceTests fixture. Enqueue original; set its metadata running with a synthetic pgid/start timestamp. Add a second queued equivalent representing an interrupted admission. Retry original request. No real process launched or killed.",
+  "expected": "Original remains running with unchanged supervisor ownership; queued duplicate never becomes owner of a running original.",
+  "limits": "Synthetic metadata regression. Not a real-worker, installed-runtime or production-throughput witness."
+}
