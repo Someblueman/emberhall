@@ -101,22 +101,100 @@ def research_open(state: dict, shelf: dict, at: float, selection_version: int) -
             or (open_since(state) is not None and research_due(shelf, at)))
 
 
+# Worth building (Steward decision, 15 November; owner migration below). An idea
+# is software, design or science: something the house can build and judge with
+# what it has, with nothing to print, assemble or trial in a room. Its brief says
+# why it benefits the world outside Emberhall (people or agents), what research
+# shows about interest, and which single question it is judged by: is it useful,
+# is it beautiful, or does it let someone do or answer what they could not
+# before. Traction is not the test. Earlier briefs stand in the record but no
+# longer keep an idea on the shelf.
+WORTH_BUILDING = "upgrade-20261115-worth-building"
+FIELDS_OF_WORK = ("software", "design", "science")
+WORTH = ("useful", "beautiful", "enabling")
+WORTH_FIELDS = ("benefit", "interest", "exists", "first_version", "check")
+OUTDATED = "Its research brief was not renewed for the worth test within two days."
+
+
+def worth_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(WORTH_BUILDING)
+    return None if entry is None else entry["at"]
+
+
 def brief_due(state: dict, idea: dict) -> float | None:
-    """When a shelved idea without a brief expires; None if it does not."""
-    since = open_since(state)
-    if since is None or idea["status"] != "shelved" or "brief" in idea:
+    """When a shelved idea without a current brief expires; None if it does not."""
+    since, worth = open_since(state), worth_since(state)
+    if since is None or idea["status"] != "shelved":
         return None
-    return max(idea.get("shelved_at", since), since) + BRIEF_SECONDS
+    shelved = max(idea.get("shelved_at", since), since)
+    if "brief" not in idea:
+        return shelved + BRIEF_SECONDS
+    if worth is None or "worth" in idea["brief"]:
+        return None
+    return max(shelved, worth) + BRIEF_SECONDS
 
 
-def brief(data: dict, key: str, actor: str, sequence: int) -> dict:
+def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
     value = data.get(key)
-    require(isinstance(value, dict) and set(value) == set(BRIEF_FIELDS),
-            "a brief states audience, exists, first_version and risks")
-    parts = {name: text(value, name) for name in BRIEF_FIELDS}
+    if worth_since(state) is None:
+        require(isinstance(value, dict) and set(value) == set(BRIEF_FIELDS),
+                "a brief states audience, exists, first_version and risks")
+        parts = {name: text(value, name) for name in BRIEF_FIELDS}
+    else:
+        require(isinstance(value, dict) and set(value) == {"field", "worth", *WORTH_FIELDS},
+                "a brief states field, worth, benefit, interest, exists, first_version and check")
+        require(value["field"] in FIELDS_OF_WORK, "field must be software, design or science")
+        require(value["worth"] in WORTH, "worth must be useful, beautiful or enabling")
+        parts = {name: text(value, name) for name in WORTH_FIELDS}
     require(all(len(part.strip()) >= BRIEF_MINIMUM for part in parts.values()),
             f"each part of a brief needs at least {BRIEF_MINIMUM} characters")
+    if worth_since(state) is not None:
+        parts |= {"field": value["field"], "worth": value["worth"]}
     return parts | {"author": actor, "sequence": sequence}
+
+
+# Needs (same Steward decision): a resident may ask the Steward for something
+# only the Steward can provide. A need is tied to the idea or project it would
+# unblock and says what it unlocks and why the house cannot do without it.
+# Asking changes no safeguard: only the Steward answers, and a granted need is
+# a promise from the Steward, not permission for a resident to act.
+NEED_KINDS = ("funds", "account", "server", "hardware", "access", "other")
+NEEDS_OPEN = 5
+
+
+def need_action(state: dict, data: dict, actor: str, at: float, sequence: int) -> None:
+    shelf = state["shelf"]
+    needs = shelf.setdefault("needs", {})
+    kind = data["kind"]
+    if kind == "need-raise":
+        fields(data, {"need", "need_kind", "for", "ask", "unlocks", "without", "cost"})
+        key = identifier(data, "need")
+        require(key not in needs, "need ID already used")
+        require(data["need_kind"] in NEED_KINDS,
+                "need_kind must be funds, account, server, hardware, access or other")
+        target = identifier(data, "for")
+        require(target in shelf["ideas"] or target in shelf["projects"],
+                "a need names the idea or project it would unblock")
+        parts = {name: text(data, name) for name in ("unlocks", "without")}
+        require(all(len(part.strip()) >= BRIEF_MINIMUM for part in parts.values()),
+                f"unlocks and without each need at least {BRIEF_MINIMUM} characters")
+        require(sum(need["status"] == "open" for need in needs.values()) < NEEDS_OPEN,
+                "five needs are already open; wait for the Steward's answers")
+        needs[key] = {"author": actor, "status": "open", "kind": data["need_kind"], "for": target,
+                      "ask": text(data, "ask", 600), "cost": text(data, "cost", 300), **parts,
+                      "raised_at": at, "raised_sequence": sequence}
+        return
+    withdraw = kind == "need-withdraw"
+    fields(data, {"need", "reason"} if withdraw else {"need", "answer", "note"})
+    key = identifier(data, "need")
+    require(key in needs and needs[key]["status"] == "open", "need is not open")
+    if withdraw:
+        require(actor == needs[key]["author"], "only its author withdraws a need")
+        needs[key].update(status="withdrawn", note=text(data, "reason"), closed_at=at, closed_sequence=sequence)
+    else:
+        require(actor == state.get("council", {}).get("authorized_by"), "only the Steward answers a need")
+        require(data["answer"] in {"granted", "declined"}, "answer must be granted or declined")
+        needs[key].update(status=data["answer"], note=text(data, "note"), closed_at=at, closed_sequence=sequence)
 
 
 def close_explorer(shelf: dict, reason: str, at: float, sequence: int) -> None:
@@ -162,7 +240,8 @@ def advance(state: dict, at: float, sequence: int) -> None:
             due = brief_due(state, idea)
             if due is not None and at >= due and key not in frozen:
                 idea["status"] = "graveyard"
-                idea["history"].append({"expired": True, "lesson": EXPIRED, "sequence": sequence})
+                idea["history"].append({"expired": True, "sequence": sequence,
+                                        "lesson": OUTDATED if "brief" in idea else EXPIRED})
 
 
 def sources(data: dict) -> list[str]:
@@ -232,8 +311,9 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         for entry in ideas:
             require(isinstance(entry, dict), "invalid idea fields")
             if opened:
-                require("brief" in entry, "each idea needs a research brief: "
-                        "audience, exists, first_version and risks")
+                require("brief" in entry, "each idea needs a research brief (docs/SHELF.md)"
+                        if worth_since(state) is not None else
+                        "each idea needs a research brief: audience, exists, first_version and risks")
             core = set(entry) - {"brief"} if opened else set(entry)
             require(core == base or (selection_version >= 3 and core == base | {"scale"}),
                     "invalid idea fields")
@@ -246,7 +326,7 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
                 require(entry["scale"] in {"great", "small"}, "scale must be great or small")
                 shelf["ideas"][key]["scale"] = entry["scale"]
             if opened:
-                shelf["ideas"][key].update(shelved_at=at, brief=brief(entry, "brief", actor, sequence))
+                shelf["ideas"][key].update(shelved_at=at, brief=brief(state, entry, "brief", actor, sequence))
             expedition["ideas"].append(key)
         close_explorer(shelf, "published", at, sequence)
     elif kind == "explore-release":
@@ -364,7 +444,10 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         fields(data, {"idea", "brief"})
         key = identifier(data, "idea")
         require(key in shelf["ideas"] and shelf["ideas"][key]["status"] == "shelved", "idea is not on the shelf")
-        shelf["ideas"][key]["brief"] = brief(data, "brief", actor, sequence)
+        shelf["ideas"][key]["brief"] = brief(state, data, "brief", actor, sequence)
+    elif kind in {"need-raise", "need-withdraw", "need-answer"}:
+        require(worth_since(state) is not None, "unknown shelf action")
+        need_action(state, data, actor, at, sequence)
     elif kind in {"project-done", "project-drop", "project-extend-vote"}:
         project_action(state, data, actor, at, sequence)
     else:

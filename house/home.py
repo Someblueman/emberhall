@@ -137,6 +137,33 @@ BRIEF_GUIDE = (
     "and how they would get it) and risks (what would make it fail or not matter, and how the first step tests "
     "that). Read the real pages of existing work (documentation, source, a demo), never only a search result or "
     "a landing page, and list the pages you read as sources. Do not write a flattering brief for a weak idea. ")
+# The Steward's test for what is worth building (owner migration shelf.WORTH_BUILDING).
+WORTH_GUIDE = (
+    "What is worth building, by the Steward's decision: the work is software, design or science, something this "
+    "house can build and judge with what it has (code, a browser, reading, computation, its own eyes). Nothing "
+    "that must be printed, assembled, measured by hand or trialled in a classroom or venue. It must benefit the "
+    "world outside Emberhall. The audience may be people or other agents; the work may be art or technical. It is "
+    "judged by one plain question, chosen in advance: is it useful, is it beautiful, or does it let someone do "
+    "or answer something they could not yesterday. Traction is not the test and is never the goal. "
+    "A brief has field (software, design or science), worth (useful, beautiful or enabling) and five parts of at "
+    "least 120 characters of plain prose each: benefit (why this benefits the world outside Emberhall, and who "
+    "or what it is for), interest (what your research shows about demand or interest: real people or agents "
+    "asking for it, doing it the hard way, or an open question in the field, with those pages among the "
+    "sources; say so plainly if you found none), exists (the closest existing things you actually opened and "
+    "read, what each does and where it stops), first_version (the smallest version that already answers the "
+    "worth question, and how someone gets it) and check (how a resident who did not build it will answer the "
+    "worth question from the finished thing itself, and what answer would mean drop it). Read real pages "
+    "(documentation, source, a paper, a discussion thread), never only a search result or a landing page. "
+    "Do not write a flattering brief for a weak idea. ")
+
+
+def brief_guide(state: dict) -> tuple[str, str]:
+    """The brief's JSON shape and its guide under the rules now in force."""
+    from . import shelf as shelf_model
+    if shelf_model.worth_since(state) is None:
+        return '{"audience":...,"exists":...,"first_version":...,"risks":...}', BRIEF_GUIDE
+    return ('{"field":"software|design|science","worth":"useful|beautiful|enabling","benefit":...,'
+            '"interest":...,"exists":...,"first_version":...,"check":...}'), WORTH_GUIDE
 HOME_FOCUS_GAP_SECONDS = 1800
 
 
@@ -170,14 +197,17 @@ def focus_prompt(state: dict, focus: str) -> str:
                        if shelf_model.brief_due(state, idea) is not None), key=lambda item: item[:2])
         listing = "; ".join(f"{key}: {idea['title']} (expires in {max(0, round((due - state['at']) / 3600))} h)"
                             for due, key, idea in thin[:8])
+        shape, guide = brief_guide(state)
         return head + (
-            "deepen the idea shelf. By the Steward's decision a shelved idea needs a research brief, and one with "
-            "none after two days moves to the graveyard. Shelved ideas with no brief: " + (listing or "none") + ". "
+            "deepen the idea shelf. By the Steward's decision a shelved idea needs a current research brief, and "
+            "one with none after two days moves to the graveyard. Shelved ideas with no current brief: "
+            + (listing or "none") + ". "
             "Pick one (the soonest to expire unless another is clearly more promising), spend most of this run "
             "researching it under the owner's web safeguards, then record it with shelf kind idea-brief: "
-            '{"kind":"idea-brief","idea":ID,"brief":{"audience":...,"exists":...,"first_version":...,"risks":...}}. '
-            + BRIEF_GUIDE +
-            "If your reading shows the idea is not worth a slot, record no brief, let it expire and say at the "
+            '{"kind":"idea-brief","idea":ID,"brief":' + shape + "}. "
+            + guide +
+            "If your reading shows the idea is not worth a slot, or it cannot honestly meet that test (for "
+            "example it needs a physical trial), record no brief, let it expire and say at the "
             "Hearth what you found. If every shelved idea has a brief, read the graveyard instead: when the reason "
             "an idea failed no longer holds, return it with idea-return and give it a brief; otherwise improve the "
             "weakest existing brief (idea-brief replaces it). Do not build an unselected idea.\n")
@@ -225,6 +255,22 @@ def course_prompt(state: dict, assigned: dict) -> str:
                      "marked with \"scale\": \"great\": ambitious enough to take the house weeks, needing "
                      "residents of several kinds, and something people outside the house would genuinely want. "
                      "Avoid more small offline single-file tools.\n")
+    from . import shelf as shelf_model
+    if shelf_model.worth_since(state) is not None:
+        text += ("THE WORTH TEST (Steward, docs/STEWARD_ORDERS.md): what this house makes is software, design or "
+                 "science for the world outside Emberhall, for people or for other agents. Judge an idea when "
+                 "you vote, and finished work when you review it, by the one question its brief names: is it "
+                 "useful, is it beautiful, or does it let someone do or answer something they could not "
+                 "yesterday. Answer from the thing itself, in a sentence, as someone who did not build it. "
+                 "Traction is not the test. Vote \"none of these\" rather than for an idea that does not meet "
+                 "it, and say so in a review when finished work does not.\n"
+                 "NEEDS: if worthwhile work on a shelved idea or an active project is blocked by something only "
+                 "the Steward can provide (funds, an account, a server, hardware, access), do not work around "
+                 "it and do not quietly drop the work: ask. Use shelf kind need-raise (docs/SHELF.md) naming "
+                 "the idea or project, exactly what you ask for and its likely cost, what it would unlock, "
+                 "and why the house cannot do it with what it has. Ask only for a need you can state that "
+                 "concretely; no wish lists of your own. Asking changes nothing else: you still never spend "
+                 "money, create accounts or credentials, or act on a need until the Steward says it is in place.\n")
     return text
 
 
@@ -504,11 +550,12 @@ class Coordinator:
                 "generation, a unique round/token and a lease of at least 3600 seconds. If another Explorer holds "
                 "the role or the start is refused, do ordinary useful work instead. Research is this run's whole "
                 "job: spend most of it reading under the owner's web safeguards, not writing. "
-                "Bring back 2 to 4 meaningfully different ideas that people outside the house would want: useful "
-                "creations first, then new resident capabilities or rooms with a real purpose. Tools for the "
-                "house's own process are the weakest kind. Each idea has title, what, why, first_step, sources "
-                "(the pages you read, never a search link), scale and a brief; publication is refused without "
-                "the brief. " + BRIEF_GUIDE +
+                "First read docs/WISHES.md: a wish there comes from the Steward or a visitor and is served before "
+                "your own ideas. Start from a need or an open question you can show exists, then ask what would "
+                "meet it; do not start from what is easy to build and invent an audience afterwards. "
+                "Bring back 2 to 4 meaningfully different ideas. Each idea has title, what, why, first_step, "
+                "sources (the pages you read, never a search link), scale and a brief; publication is refused "
+                "without the brief. " + brief_guide(state)[1] +
                 "Use explore-publish through your fixed journal channel, then return to ordinary work. "
                 "Do not build an unselected idea. Read docs/SHELF.md for exact JSON fields. "
                 f"If keeping a research artifact, create and claim a task owning only research/explorations/{run}.md. "

@@ -117,8 +117,9 @@ def shelf_view(state: dict) -> dict:
         ideas.append({"id": key, **{k: label(idea[k], 2000) for k in
             ("title", "what", "why", "first_step", "author", "status")},
             **({"scale": label(idea["scale"], 20)} if "scale" in idea else {}),
-            **({"brief": {k: label(idea["brief"][k], 2000) for k in (*shelf_model.BRIEF_FIELDS, "author")}}
-               if "brief" in idea else {}),
+            **({"brief": {k: label(idea["brief"][k], 2000) for k in (
+                    *shelf_model.BRIEF_FIELDS, *shelf_model.WORTH_FIELDS, "field", "worth", "author")
+                    if k in idea["brief"]}} if "brief" in idea else {}),
             **({"brief_due": due} if due is not None else {}),
             "sources": list(idea["sources"]), "losses": idea["losses"], "history": history})
     projects = [_project_view(key, shelf, p) for key, p in shelf.get("projects", {}).items()]
@@ -130,6 +131,16 @@ def shelf_view(state: dict) -> dict:
                 "until": expedition["until"]} if expedition else None}
     if policy == shelf_gate.GREAT_POLICY_ID:
         view["great_wanted"] = shelf_model.great_wanted(shelf_model.empty() | shelf)
+    if shelf.get("needs"):
+        titles = {key: idea["title"] for key, idea in shelf.get("ideas", {}).items()}
+        titles |= {key: titles.get(project["idea"], key) for key, project in shelf.get("projects", {}).items()}
+        needs = [{"id": key, "for_title": label(titles.get(need["for"], need["for"]), 200),
+                  **{k: label(need[k], 2000) for k in ("author", "status", "kind", "for", "ask", "cost",
+                                                       "unlocks", "without", "note") if k in need},
+                  "raised_at": need["raised_at"], **({"closed_at": need["closed_at"]} if "closed_at" in need else {})}
+                 for key, need in shelf["needs"].items()]
+        view["needs"] = [need for need in needs if need["status"] == "open"] + [
+            need for need in needs if need["status"] != "open"][-10:]
     if shelf_model.open_since(state) is not None:
         last = shelf.get("research_at")
         view["research"] = {"last": last, "ceiling": shelf_model.SHELF_CEILING, "next": max(

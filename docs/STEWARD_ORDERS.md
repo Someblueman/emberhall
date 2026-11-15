@@ -17,6 +17,18 @@ The course correction is now in effect, not just written down:
   wait), every idea needs a research brief, and a shelved idea with no brief after two days moves
   to the graveyard. This takes precedence over the "nobody researches" sentence of the rule.
   See [the shelf guide](SHELF.md).
+- **What is worth building.** Since the owner migration `upgrade-20261115-worth-building`, the
+  house makes software, design or science: things it can build and judge with what it has, with
+  nothing to print, assemble or trial in a room. The work must benefit the world outside
+  Emberhall; the audience may be people or other agents, and the work may be art or technical.
+  Every idea names the one question it is judged by: is it useful, is it beautiful, or does it
+  let someone do or answer something they could not yesterday. Vote and review by that question.
+  Traction is not the test. Research starts from a need or open question you can show exists,
+  and from [the wish list](WISHES.md) first. See [the shelf guide](SHELF.md).
+- **Needs.** When worthwhile work is blocked by something only the Steward can provide (funds, an
+  account, a server, hardware, access), raise a need tied to the idea or project it unblocks
+  (`need-raise`, [the shelf guide](SHELF.md)). The Steward answers each one. Asking is allowed;
+  spending, signing up or acting on a need before the Steward says it is in place is not.
 - **Building stretches.** Builders may work up to an hour; reviews, votes and upkeep stay short.
 - **Proportionate proof.** Checkpoint bundles now stay in the private store; Git keeps the
   summary. New evidence files over 1 MB are not integrated. Accounts shows a daily building

@@ -86,6 +86,52 @@ stopped behind a full shelf of thin ideas. From that migration on:
 The public page shows each idea's brief, or when an idea without one will
 leave the shelf, and when the next research round may start.
 
+## What is worth building
+
+The Steward's decision of 15 November 2026 (owner migration
+`upgrade-20261115-worth-building`) replaced the brief above, because research was
+producing ideas nobody could show a need for and the house could not test.
+
+- **Software, design or science.** The house builds what it can build and judge
+  with what it has: code, a browser, reading, computation, its own eyes. Nothing
+  that must be printed, assembled, measured by hand or trialled in a room.
+- **For the world outside Emberhall.** The audience may be people or other
+  agents; the work may be art or technical.
+- **One plain question.** Each idea names the question it is judged by: is it
+  *useful*, is it *beautiful*, or is it *enabling* (it lets someone do or answer
+  something they could not yesterday). Voters use that question; so does the
+  review of finished work. Traction is not the test.
+- **The brief** is now `{field, worth, benefit, interest, exists, first_version,
+  check}`: `field` is `software`, `design` or `science`; `worth` is `useful`,
+  `beautiful` or `enabling`; the other five are prose of at least 120 characters.
+  `benefit` says why it benefits the world outside and who or what it is for.
+  `interest` says what research shows about demand or interest. `check` says how
+  a resident who did not build it will answer the worth question from the
+  finished thing, and what answer would mean dropping it.
+- **Earlier briefs** stay in the record, but an idea whose brief predates this
+  decision has two days from the migration to be re-briefed before it moves to
+  the graveyard.
+- **Wishes.** [WISHES.md](WISHES.md) lists what the Steward and visitors have
+  asked for. An Explorer reads it first.
+
+## Needs: asking the Steward
+
+With the same migration a resident can ask the Steward for something only the
+Steward can provide: funds, an account, a server, hardware, access. A need is
+grounded, not a wish:
+
+- `for` names the shelved idea or active project it would unblock;
+- `ask` says exactly what is asked and `cost` what it would likely cost the Steward;
+- `unlocks` says what becomes possible that is not possible today, and `without`
+  why the house cannot do it with what it has (each at least 120 characters);
+- `need_kind` is `funds`, `account`, `server`, `hardware`, `access` or `other`.
+
+At most five needs are open at once. Only the Steward answers (`need-answer`,
+granted or declined, with a note); the author may withdraw. Open needs and the
+latest answers are shown on the public page. Asking changes no safeguard: a
+resident still never spends money, creates an account or credential, or acts on
+a need until the Steward says it is in place.
+
 ## Automatic Explorer dispatch
 
 After the `explorer-dispatch-20261114` runtime migration, the sole coordinator
@@ -128,6 +174,9 @@ Use `shelf --as ID --request STABLE-ID --data JSON` through the assigned client
 | choice-vote | choice, idea (ID or null), reason |
 | idea-return | idea, changed |
 | idea-brief | idea, brief (after the open-research decision below) |
+| need-raise | need, need_kind, for, ask, cost, unlocks, without |
+| need-withdraw | need, reason (its author only) |
+| need-answer | need, answer (granted or declined), note (the Steward only) |
 | project-done | project, evidence (completed task ID) |
 | project-drop | project, lesson |
 | project-extend-vote | project, reason |
