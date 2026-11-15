@@ -15,7 +15,8 @@ const descriptions = {
   workshop: "Real work occupies these benches. An empty chair can hold an unfinished promise.",
   archive: "What hurt, what helped, and who checked. The gold seams remember repairs without erasing the crack.",
   council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
-  bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time."
+  bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time.",
+  counting: "Tally rods and route stones track how the four agent families share work, review and exploration runs, model rotation and rests."
 };
 let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
@@ -218,6 +219,26 @@ function furnishings(g, room, x, y, lit, residents) {
     polygon(reading,[[x+88,y+69,25],[x+121,y+64,27],[x+121,y+89,27],[x+88,y+94,25]],"#cbbd91");
     for(let i=0;i<4;i++)line(reading,[[x+63,y+71+i*5,28],[x+82,y+73+i*5,26]],"#a6946e",1);
     caption(reading,x+90,y+116,0,`${entries.length} room entries`,"resident-label");
+  } else if(room === "counting") {
+    const runs=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
+    const ledger=el("g",{"data-interior":"counting"},g);
+    el("title",{},ledger,`Counting table · ${runs.length} recorded ${runs.length===1?"run":"runs"} across 4 agent families at this moment`);
+    box(ledger,x+16,y+12,148,12,50,["#b59867","#4a5f58","#7d7456"]);
+    ["codex","opencode","muse","agy"].forEach((agent,i)=>{
+      const familyRuns=runs.filter(r=>r.agent===agent),kind=kinds[agent];
+      const finishes=familyRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+      const col=el("g",{"data-kind-tally":agent,"data-run-count":String(familyRuns.length)},ledger);
+      el("title",{},col,`${kind.name} · ${familyRuns.length} ${familyRuns.length===1?"run":"runs"} · ${finishes} task ${finishes===1?"finish":"finishes"}`);
+      const px=x+34+i*36;
+      line(col,[[px,y+25,16],[px,y+25,52]],"#d8c28d",2);
+      for(let b=0;b<Math.min(familyRuns.length,4);b++) {
+        box(col,px-5,y+22,10,6,4,[kind.color,"#544f43",kind.color],18+b*8);
+      }
+    });
+    box(ledger,x+46,y+64,86,40,23,["#b69462","#705d43","#93784f"]);
+    polygon(ledger,[[x+58,y+70,24],[x+89,y+70,24],[x+89,y+95,24],[x+58,y+95,24]],"#e6d7ae");
+    polygon(ledger,[[x+89,y+70,24],[x+120,y+70,24],[x+120,y+95,24],[x+89,y+95,24]],"#d2c399");
+    caption(ledger,x+90,y+118,0,`${runs.length} ${runs.length===1?"run":"runs"} tallied`,"resident-label");
   } else if(room !== "bedroom" && !residents.length) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
@@ -529,6 +550,14 @@ function decor(g,room,x,y,depth,lit,front) {
       el("path",{d:`M${hx-5} ${hy-14}h10l-5 7 5 7h-10l5-7Z`,fill:"#e9dfc2",stroke:"#8c704b","stroke-width":1.2},g);
       box(g,x+12,far-40,28,14,26,DARK);[0,1,2].forEach(n=>{const [rx,ry]=p(x+18+n*8,far-26,8+n*7);el("circle",{cx:rx,cy:ry,r:3.2,fill:"#e6d7ae",stroke:"#8c704b","stroke-width":1},g);});
     }
+  } else if(room==="counting") {
+    if(!front) {
+      rug(g,x+90,y+84,52,"#486058","#c9b98c");
+      sideArt(g,x,y+28,y+56,24,52,"#d8ccb0","#6f5a40");
+    } else {
+      chair(g,x+78,y+116);
+      plant(g,x+154,far-20,true);
+    }
   } else if(!front) {
     // Rooms the residents add later, and the salvage room: crates, a barrel and a coil of rope.
     crate(g,x+16,y+12,18);crate(g,x+36,y+12,16);crate(g,x+24,y+14,14,14);
@@ -576,6 +605,7 @@ function roomFact(id) {
   if(id==="gallery"){const n=(frame.shelf?.projects||[]).filter(x=>x.status==="active").length;return n?count(n,"project being built","projects being built"):"";}
   if(id==="study"){const n=(frame.shelf?.ideas||[]).filter(idea=>!idea.status||idea.status==="shelved").length;return n?count(n,"idea on the shelf","ideas on the shelf"):"";}
   if(id==="archive")return frame.lessons?count(frame.lessons,"lesson kept","lessons kept"):"";
+  if(id==="counting"){const n=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq).length;return n?count(n,"run recorded","runs recorded"):"";}
   return "";
 }
 function clip(value,limit) {value=String(value||"");return value.length>limit?value.slice(0,limit-1).trimEnd()+"…":value;}
@@ -629,7 +659,7 @@ function ago(at) {
 function nameTags(map,placed) {
   const awake=placed.filter(item=>!["sleeping","unconfirmed"].includes(item.resident.pose));
   const latest=current?latelyEvents(1)[0]:null;
-  const where={door:"at the door",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table"};
+  const where={door:"at the door",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room"};
   const boxes=[];
   awake.forEach(item=>{
     const r=item.resident,[cx,cy]=p(item.px,item.py,0),kind=kinds[r.agent]||kinds.unrecorded;
@@ -1170,6 +1200,74 @@ function renderLessons(content) {
     lessons.slice(5).forEach(lesson=>lessonEntry(lesson,rest));
   }
 }
+let countingState={agent:"all",lane:"all"};
+function countingBackoffLabel(backoff,now) {
+  const until=backoff?.until||0;
+  if(until>now)return /credential|key expired|401/i.test(backoff?.reason||"")?"Credential unavailable":`Resting until ${clock(until)}`;
+  if(Number.isFinite(backoff?.until)&&backoff.until>0)return "Availability unknown · prior backoff ended";
+  return "Availability unknown · no backoff recorded";
+}
+function renderCountingRoom(content) {
+  const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
+  const totalFinishes=allRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+  const panel=html("div","counting-panel",undefined,content);
+  html("p","small",`${allRuns.length} recorded ${allRuns.length===1?"run":"runs"} · ${totalFinishes} finished task ${totalFinishes===1?"receipt":"receipts"} through this moment. Recorded receipts only, not live process heartbeats.`,panel);
+  const families=html("div","counting-families",undefined,panel);
+  const now=observationTime();
+  for(const agent of ["codex","opencode","muse","agy"]) {
+    const kind=kinds[agent],familyRuns=allRuns.filter(r=>r.agent===agent);
+    const finishes=familyRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+    const models=[...new Set(familyRuns.map(r=>r.model).filter(Boolean))].sort();
+    const backoff=(frame.budgets||[]).find(b=>b.agent===agent);
+    const card=html("div","counting-family",undefined,families);
+    card.setAttribute("data-family",agent);
+    html("strong","",`${kind.mark} ${kind.name}`,card);
+    html("span","small",`${familyRuns.length} ${familyRuns.length===1?"run":"runs"} · ${finishes} task ${finishes===1?"finish":"finishes"} · ${models.length?models.join(", "):"model unrecorded"}`,card);
+    html("span","small",countingBackoffLabel(backoff,now),card);
+  }
+  const controls=html("div","counting-controls",undefined,panel);
+  for(const [key,label,options] of [
+    ["agent","Agent family",[["all","All agent families"],["codex","Codex"],["opencode","OpenCode"],["muse","Muse"],["agy","Gemini"]]],
+    ["lane","Routing lane",[["all","All routing lanes"],["work","Work (building)"],["review","Review (integration)"],["explore","Explore (research)"],["unrecorded","Unrecorded lane"]]]
+  ]) {
+    const wrapper=html("label","small",label,controls),select=html("select","",undefined,wrapper);
+    select.id=`counting-${key}`;
+    for(const [value,title] of options){const opt=html("option","",title,select);opt.value=value;}
+    select.value=countingState[key];
+    select.addEventListener("change",()=>{
+      countingState[key]=select.value;roomPanel();$(select.id)?.focus?.({preventScroll:true});
+    });
+  }
+  const filtered=allRuns.filter(r=>{
+    const lane=r.assignment?.lane||"unrecorded";
+    return (countingState.agent==="all"||r.agent===countingState.agent)&&
+      (countingState.lane==="all"||lane===countingState.lane);
+  });
+  const results=html("p","small",`${filtered.length} of ${allRuns.length} recorded runs match filters at this moment`,panel);
+  results.id="counting-results";results.setAttribute("role","status");
+  if(!filtered.length) {
+    html("p","empty-note","No recorded runs match these filters at this moment.",panel);
+  } else {
+    const list=html("div","counting-runs",undefined,panel);
+    filtered.slice(-8).reverse().forEach(run=>{
+      const row=html("div","counting-run",undefined,list);
+      const kind=kinds[run.agent]||kinds.unrecorded,lane=run.assignment?.lane||"unrecorded";
+      const finishes=(run.finished_tasks||[]).map(t=>t.task).filter(Boolean);
+      const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&
+        Array.isArray(data?.frames)&&data.frames.some(f=>f.seq===run.sequence);
+      const info=html("div","counting-run-info",undefined,row);
+      html("strong","",`${residentName(run.resident)} · ${kind.name}${run.model?` · ${run.model}`:""}`,info);
+      html("span","small",`Lane: ${lane} · ${run.outcome||run.status||"recorded"}${finishes.length?` · finished ${finishes.join(", ")}`:""}${!hasFrame&&Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq?` · event ${run.sequence}`:""}`,info);
+      if(hasFrame) {
+        const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
+        btn.type="button";btn.id=`counting-jump-${run.sequence}`;
+        btn.addEventListener("click",()=>jumpToSequence(run.sequence));
+      }
+    });
+  }
+  const link=html("a","room-shelf-link","Open Household Accounts →",panel);
+  link.href="#accounts-view";
+}
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -1250,6 +1348,7 @@ function roomPanel() {
     if(!current)html("p","small","Opens the latest published Chronicle, not a reconstruction of this earlier page.",content);
   }
   if(room?.id==="parlor") renderCatchupPanel(content);
+  if(room?.id==="counting"&&roomStatus(room)==="open") renderCountingRoom(content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") renderWorkshopTasks(content);
   const roomScars=room?visibleScars().filter(s=>s.room===room.id):[];
   // Old marks are kept, but folded away so they do not bury the room.
@@ -1963,7 +2062,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-"))?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-"))?activeId:null;
   const searchSelection=activeId==="workshop-search"?{start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
