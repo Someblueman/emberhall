@@ -1,0 +1,9 @@
+test_real_cli_prefers_recorded_project_deadlines_not_titles (tests.test_project_work_acceptance.ProjectWorkAcceptanceTests.test_real_cli_prefers_recorded_project_deadlines_not_titles) ... ok
+test_two_processes_reserve_one_task_without_claiming_it (tests.test_helper_staffing.HelperRecordTests.test_two_processes_reserve_one_task_without_claiming_it) ... ok
+test_backlog_claim_during_provider_choice_does_not_launch_stale_work (tests.test_home.HomeTests.test_backlog_claim_during_provider_choice_does_not_launch_stale_work) ... ok
+test_idle_watchdog_stops_real_process_and_preserves_room (tests.test_home.HomeTests.test_idle_watchdog_stops_real_process_and_preserves_room) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 6.409s
+
+OK

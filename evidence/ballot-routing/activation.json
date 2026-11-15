@@ -1,0 +1,20 @@
+{
+  "scope": "ballot-work-routing-20261115",
+  "source_head": "1a07ec0d3a2bd43e54be992133d502e278f4b0ce",
+  "source_sha256": "b1947723fa18461c73455609e1bf44dff35cb918d744e985de8c36a5245fec5c",
+  "runtime_sha256": "8ddac2d25cb97e225d6e1d9b95dc80303478132c8db14f50a40473d9e9f5ca15",
+  "test_count": 534,
+  "test_output_sha256": "91f3b1410c6ef93c25f6d6950afe07b728d2f6f20c2fec455efb254d3d5807df",
+  "approval_sha256": "09ee1382e08ba49151101af0f06a968aa720ecdb26008b7e932b77186a9ad9b0",
+  "migration_sequence": 6027,
+  "resumed_sequence": 6028,
+  "coordinator_pid_observed": 66369,
+  "independent_source_acceptance": 6010,
+  "host_checks": 4,
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council"
+  ]
+}
