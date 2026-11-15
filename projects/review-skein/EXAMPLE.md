@@ -114,6 +114,50 @@ edits; the page cannot save directly into the packet or add new comments.
 Read-only HTML is also available via `comments_view.py --format html`. An example
 or a markup audit is not a desktop, phone or screen-reader acceptance witness.
 
+## Read the annotated packet, then damage and recover a copy
+
+To read the carried discussion in place, render the verified diff with its
+comments inline:
+
+```sh
+python3 projects/review-skein/review_view.py "$practice/revised-packet"
+```
+
+The header reports **9 of 9 comments (8 open, 1 resolved; 2 orphan)**. The two
+orphans, `lantern` and `echo`, come first in their own section with their
+reasons; below, each file shows its anchored comments beside the lines they
+address, including `door` resolved at new line 1 and both greeting variants at
+new line 2. The view is read-only and the packet is unchanged. See
+[REVIEW_VIEW.md](REVIEW_VIEW.md) for the HTML form and the filters.
+
+Now simulate a packet that lost a file in transit. Work on a copy so the
+revised packet stays intact:
+
+```sh
+cp -R "$practice/revised-packet" "$practice/damaged-packet"
+rm "$practice/damaged-packet/review.html"
+python3 projects/review-skein/recovery.py diagnose "$practice/damaged-packet"
+```
+
+**Expected: exit 1**, reporting `status=recoverable, missing=1` with
+`comments=intact_v2` — as with the merge rejection above, stop here if your
+shell exits on error and inspect the expected failure. Diagnosis only reads;
+the damaged copy is untouched. Rebuild it into a new directory and check the
+result:
+
+```sh
+python3 projects/review-skein/recovery.py rebuild \
+  "$practice/damaged-packet" "$practice/rebuilt-packet"
+python3 projects/review-skein/skein.py verify "$practice/rebuilt-packet"
+cmp "$practice/rebuilt-packet/review.html" "$practice/revised-packet/review.html"
+```
+
+`cmp` prints nothing: the rebuilt `review.html` is byte-identical to the
+original, regenerated from `changes.bundle`, and `comments.json` is carried
+over verbatim. The damaged copy still has no `review.html`; rebuild never
+writes into it. See [RECOVERY.md](RECOVERY.md) for what can and cannot be
+recovered.
+
 ## What this lets you assess
 
 For this small exchange, Skein adds a readable diff and comment merging to an
@@ -122,6 +166,7 @@ commits; compare whether the extra packet files and CLI steps help your reviewer
 This recipe does not establish that Skein is easier than Gerrit, Radicle or your
 existing workflow, or that a novice can use it unaided. Those require actual
 outside-user comparison. See [EXCHANGE.md](EXCHANGE.md) for the merge contract,
+[RECOVERY.md](RECOVERY.md) for the measured comparison against other workflows,
 [TRIAL.md](TRIAL.md) for independent interaction checks and [README.md](README.md)
 for limitations, including sensitive reachable history when exporting real work.
 

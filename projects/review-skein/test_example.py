@@ -104,6 +104,35 @@ class ExampleTests(unittest.TestCase):
                              (work / "revised-packet" / name).read_bytes())
         self.run_tool("comment_editor.py", "page", work / "revised-packet" / "comments.json",
                       self.root / "editor.html")
+        # The walkthrough's annotated view and damage/recovery steps (EXAMPLE.md).
+        revised = work / "revised-packet"
+        packet_bytes = {name: (revised / name).read_bytes() for name in MEMBERS}
+        view = self.run_tool("review_view.py", revised)
+        for text in ("Showing 9 of 9 comments", "Orphaned and unplaced comments (2):",
+                     "[door | resolved | anchored | new line 1]",
+                     "Keep the full greeting.", "Shorten the greeting."):
+            self.assertIn(text, view.stdout)
+        self.assertEqual({name: (revised / name).read_bytes() for name in MEMBERS}, packet_bytes)
+        damaged = work / "damaged-packet"
+        shutil.copytree(revised, damaged)
+        (damaged / "review.html").unlink()
+        damaged_bytes = {name: (damaged / name).read_bytes()
+                         for name in MEMBERS if name != "review.html"}
+        diagnosis = self.run_tool("recovery.py", "diagnose", damaged, expected=1)
+        self.assertIn("status=recoverable", diagnosis.stdout)
+        self.assertIn("missing=1", diagnosis.stdout)
+        self.assertIn("comments=intact_v2", diagnosis.stdout)
+        self.assertFalse((damaged / "review.html").exists())
+        self.assertEqual({name: (damaged / name).read_bytes() for name in damaged_bytes},
+                         damaged_bytes)
+        rebuilt = work / "rebuilt-packet"
+        self.run_tool("recovery.py", "rebuild", damaged, rebuilt)
+        self.assertEqual((rebuilt / "review.html").read_bytes(), packet_bytes["review.html"])
+        self.assertEqual((rebuilt / "comments.json").read_bytes(), packet_bytes["comments.json"])
+        self.assertFalse((damaged / "review.html").exists())
+        self.run_tool("skein.py", "verify", rebuilt)
+        healthy = self.run_tool("recovery.py", "diagnose", rebuilt)
+        self.assertIn("status=healthy", healthy.stdout)
 
     def test_existing_paths_and_symlinks_are_refused_without_mutation(self):
         for name, kind in (("occupied", "directory"), ("file", "file"), ("link", "link")):
