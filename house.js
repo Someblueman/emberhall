@@ -647,7 +647,7 @@ function collectionUrl(entry) {
   const href=entry.href;
   if(typeof href!=="string")return null;
   if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*$/.test(href))return href;
-  if(entry.category==="house-tool" && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
+  if((entry.category==="house-tool" || (entry.category==="creation" && entry.action==="Read guide")) && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
   return null;
 }
 async function loadCatalog(sourceHead) {
@@ -681,7 +681,7 @@ function renderCollection() {
     html("h3","",entry.title,article);
     html("p","",entry.summary,article);
     html("span","small","Completed",article);
-    const action=entry.category==="house-tool"?"Read guide":entry.action==="Play"?"Play":"Open";
+    const action=entry.category==="house-tool"||entry.action==="Read guide"?"Read guide":entry.action==="Play"?"Play":"Open";
     const link=html("a","creation-action",`${action} ${entry.title} →`,article);
     link.href=collectionUrl(entry);
   }
