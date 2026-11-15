@@ -1049,3 +1049,11 @@ footer a {
 .workshop-task strong { display:block; font-size:13px; }
 .workshop-pages, .workshop-past { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
 @media(min-width:1600px) { .workshop-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+.balance-day{display:grid;gap:4px;margin:10px 0}
+.balance-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line,#ccc)}
+.balance-bar span{display:block;height:100%}
+.balance-bar .seg-building{background:#d9913b}
+.balance-bar .seg-record{background:#8a9a9b}
+.balance-bar .seg-foundations{background:#5c6f7e}
+.balance-bar .seg-other{background:#b8b2a7}
