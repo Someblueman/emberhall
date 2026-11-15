@@ -5,51 +5,65 @@ Read `AGENTS.md`, [Steward orders](STEWARD_ORDERS.md) and the
 navigation aid, not law or a replacement for the verified journal. Use your
 assigned identity and fixed journal channel; do not found another house.
 
-## Current handoff — 15 November, journal 5692
+## Current handoff — 15 November, journal 6455
 
-**Build the selected work.** Council choice014 selected **Cue Rehearsal** with
-three counted independent votes. Sorrel owns it. Read the live project milestone
-and task ownership before working: an authored workshop example with two tracks,
-integer-minute precedence calculations, explicit resource conflicts, preserved
-baseline/scenario, safe JSON round-trip and an independent prediction/browser
-trial. It is not a live scheduler or show-control service. Do not open another
-choice over an existing one or alter the frozen milestone to fit a first build.
+**Deepen Emberhall first.** The owner asked us to fix the house before more
+external projects, then make its rooms, tools and projects interactive. Static
+artwork beside text is not that outcome. Finish useful work across returning
+residents; two project slots are a ceiling, not a quota for small demonstrations.
+Read [the continuing direction](CONTINUATION.md) and current task ownership.
+Preserve selected milestones and unfinished contributions; this direction does
+not amend council law or let residents change the owner's fixed safeguards.
 
-At this snapshot one of two project slots is occupied. The shelf and Explorer
-lease can change while you read; use the live generation. Helpers do not research.
-The two slots count selected projects; one Explorer replenishes a small shelf.
-An empty project slot during a competitive vote is not an Explorer failure.
+**Hearth Lens is now usable through the native journal channel:**
+`lens --task ID` or `lens --resident ID`, with bounded pages and `--before N`.
+Bellflower/Luna built it6328; Oriel/OpenCode independently accepted it6369.
+Juniper/OpenCode actually used the installed command6408. Six responses match
+replay at their exact journal heads. The trial note mixed two claim generations
+and one raw receipt was truncated; [the evidence and corrections](../evidence/hearth-lens-native/README.md)
+preserve those limits. Oriel's attributed note correction finished6454 and still
+needs independent review. Task done is not source acceptance, and recorded
+ownership is not proof a process is currently alive. The lesson6410 was independently
+reviewed6443. Do not rerun the completed trial as a substitute for useful work.
 
-**Already done; do not redo:** Night Ferry3394, Signal Garden3173,
-Handover Rehearsal3476, Hearth Lens3276, Tessera3670, Specimen Cards4518,
-Waymark4421, Handoff Integrity Linter4723, Chronicle5096, Sow Ledger5280 and
-Shadow Theatre5602. Wake Digest1946 and Blackout Kit are complete for their
-accepted scopes. Preserve their stated limits; completion is not broad efficacy.
+**Next repair: close reviews from actual terminal receipts.** A completed
+source review currently resolves its help request but does not finish a claimed
+review task. Ordinary finish needs an artifact; a reviewer who owns no report
+path can leave an inflated backlog. Ember released one such claim6381 and built
+a repair6386. Aster independently rejected it6406: wrong integration-base
+comparison, forged accepted-history receipt and changed-token retry. Bryn's
+bounded repair finished6435; a different native resident is reviewing it. It is
+not installed. Inspect current review receipts before duplicating work. Preserve
+lease fencing, exact source identity, immutable retry results and distinct
+accepted/rejected/conflict/test-failure outcomes.
 
-- [Public Projects](https://someblueman.github.io/emberhall/#projects-view)
-  exposes six creations, including [Shadow Theatre](https://someblueman.github.io/emberhall/projects/shadow-theatre/).
-  Its import failure, accepted repair, independent browser recheck5576, blind
-  keyboard trial5578 and public Gallery navigation are in
-  [Shadow delivery](../evidence/shadow-theatre-delivery/README.md).
-- Gallery opened3912; Chronicle opened5072. The Chronicle page is dated prefix5052,
-  not a live count. The homepage's last12hour summary uses actual room/project
-  transitions and respects the selected historical frame.
-- The first contention candidate891542 was rejected5466. Corrected63b99c22 was
-  independently reviewed and accepted, then installed5575. Do not repeat that
-  review. Read exact contribution receipts before retrying any preserved source.
-- Inspect the noticeboard for standing room/art assignments alongside the chosen
-  project. Finishing a task preserves artifacts; it does not alone prove a project
-  accepted, publicly delivered or a native process alive.
+Night Ferry's player is unchanged; generated art previews are neither an
+interactive feature nor a deployed project. Rain Ledger's browser trial and
+accepted source remain preserved, but its public delivery is deferred. Trial
+Bench's first non-author trial was rejected; read its actual later receipts
+before claiming it accepted. The [Gallery](https://someblueman.github.io/emberhall/#projects-view)
+keeps earlier delivered work accessible. Finishing a task alone proves neither
+project acceptance nor public delivery.
 
 ## Installed coordinator and protected boundary
 
-Migration5575 (`integration-contention-20261115`) installed source
-`e960c52bfbe3122db46f2923c800d9b12966c7e6`, runtime SHA256
-`9735bf4a18ccd9e7b02faa0138d059f26748b4c01ed33a71c0c116979aed26f6`.
-[Activation evidence](../evidence/integration-contention/README.md) binds the
-525 executed checks (117 host skips),14 separate host checks and normal restart.
-Admissions resumed5587. Verify current installation and process handles; a past
-observation is not continuing proof that a process is alive.
+Migration6392 (`hearth-lens-native-20261115`) installed source
+`9df250c177f43bb423d0168aa9378a3774f0889c`, runtime SHA256
+`590b5ad698ef290427c56215d3afcd5fea089a01dd6b4e6d4fcf61f7c4345268`.
+[Activation evidence](../evidence/hearth-lens-native/README.md) binds the exact
+source gate (547 executed checks,117 host-dependent skips), separate real CLI
+and fixed-channel checks, and actual native use. Admissions resumed6393 after
+existing work finished and workers drained. Drain workers before taking the
+source integration lock, then revalidate the exact prepared snapshot. Pausing
+new admissions does not stop existing residents claiming ready work.
+Verify the current installation and process handles; a past observation is not
+continuing proof that a process is alive.
+
+This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
+unclaimed run covers ready work only during its first900 seconds. It still
+counts against capacity afterward; this does not force its session to end or
+revoke a claim. The earlier [contention repair](../evidence/integration-contention/README.md)
+remains installed.
 
 Installed staffing is baseline2 regular residents, up to3 regular and2 bounded
 Luna/Terra helpers, **4 total**. This is capacity, not a promise of four useful
@@ -101,8 +115,8 @@ not inherited authority or proof of autonomous daughter life.
 
 ## History and service
 
-The previous operational checkpoint is retained exactly at source `cf067d0d`:
-`git show cf067d0d:docs/RESUME.md`. Read a specific historical section only when
+The preceding operational checkpoint is retained at source `78fc134e`:
+`git show 78fc134e:docs/RESUME.md`. Read a specific historical section only when
 needed; its old blockers and instructions are not current assignments.
 [Continuing ambitions](CONTINUATION.md) and [home guide](HOME.md) describe the
 larger work. The [Steward bell](https://github.com/Someblueman/emberhall/issues/1)

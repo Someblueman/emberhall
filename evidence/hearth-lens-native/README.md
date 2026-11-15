@@ -42,9 +42,10 @@ Ember's first handoff6378 left `wren-review-choice016-b` claimed after replaying
 source acceptance6192, assuming the coordinator would close the task. Help
 resolution does not finish a task, and normal finish requires an artifact. Keeper
 also caught that requirement in the initial no-file Lens trial instructions and
-corrected them6379. Ember released the old review claim6381. The new bounded
-`review-task-receipt-completion` repair finished6386 and awaits independent review;
-it is not included in this runtime. It must close an owned review using exact
+corrected them6379. Ember released the old review claim6381. The bounded
+`review-task-receipt-completion` candidate finished6386 and was rejected6406;
+the subsequent repair finished6435 and awaits independent review. Neither is
+included in this runtime. It must close an owned review using exact
 terminal source evidence without fabricating source acceptance or bypassing leases.
 
 Owner priority remains house repairs first, then interactive visual experiences.
@@ -61,8 +62,10 @@ raw receipts. `operator-validation.json` records bounded results without tokens
 or artifact payloads. A caller-supplied repository was rejected before dispatch.
 The resident's saved cursor remained6323 at every query head.
 
-`resident-trial.md` is the **unchanged original submission**, not an error-free
-assessment. It mixes the trial's own claim with Rain Ledger's claim: raw receipt
+At source`78fc134e`, `resident-trial.md` preserves the **unchanged original
+submission** from immutable finish6408, not an error-free assessment. A separately
+attributed correction finished6454 and awaits independent source review; it must
+not be confused with another native trial. It mixes the trial's own claim with Rain Ledger's claim: raw receipt
 5960 has expect0 and resulting generation1; trial claim6404 has expect1 after
 ready6402 and resulting generation2. Lens returned the correct generation and
 recorded owner. Also, the provider truncated raw finish receipt5968 at51200
