@@ -496,6 +496,11 @@ footer a {
 .milestone-current {
   font-weight: 600;
 }
+.shelf-needs {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+}
 .shelf-brief {
   display: grid;
   gap: 0.25rem;
@@ -507,6 +512,11 @@ footer a {
 }
 .shelf-brief p {
   margin: 0;
+}
+.shelf-brief .shelf-worth {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 0.95rem;
 }
 .shelf-thin,
 .shelf-research {

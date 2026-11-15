@@ -647,6 +647,37 @@ function latelySentence(item) {
   if(item.op.startsWith("council"))return `${name} brought something to the council`;
   return `${name} · ${item.op.replaceAll("-"," ")}`;
 }
+function openNeeds() {
+  return (frame?.shelf?.needs || []).filter(need => need.status === "open");
+}
+function renderNeeds(dataShelf, box, residentName) {
+  const needs = Array.isArray(dataShelf.needs) ? dataShelf.needs : [];
+  if (!needs.length) return;
+  const open = needs.filter(need => need.status === "open"), answered = needs.filter(need => need.status !== "open");
+  const group = html("div", "shelf-group shelf-needs", undefined, box);
+  html("div", "eyebrow-small", open.length
+    ? `Asked of the Steward · ${open.length} waiting for an answer`
+    : "Asked of the Steward · nothing waiting", group);
+  const row = (need, host) => {
+    const item = html("details", "shelf-item shelf-need", undefined, host);
+    if (need.status === "open") item.open = true;
+    html("summary", "", need.ask, item);
+    const kind = need.kind ? need.kind[0].toUpperCase() + need.kind.slice(1) : "Need";
+    html("span", "small", [kind, need.status === "open" ? "waiting" : need.status, need.cost ? `likely cost: ${need.cost}` : null,
+      residentName(need.author), need.raised_at ? clock(need.raised_at) : null].filter(Boolean).join(" · "), item);
+    html("p", "small", `For: ${need.for_title || need.for}`, item);
+    if (need.unlocks) html("p", "small", `What it would unlock: ${need.unlocks}`, item);
+    if (need.without) html("p", "small", `Why the house cannot do without it: ${need.without}`, item);
+    if (need.note) html("p", "small", `${need.status === "withdrawn" ? "Withdrawn" : "The Steward's answer"}: ${need.note}`, item);
+    recordId(item, need.id);
+  };
+  open.forEach(need => row(need, group));
+  if (answered.length) {
+    const earlier = html("details", "shelf-needs-answered", undefined, group);
+    html("summary", "", `Answered or withdrawn (${answered.length})`, earlier);
+    answered.forEach(need => row(need, earlier));
+  }
+}
 function ago(at) {
   const diff=observationTime()-at;
   if(!Number.isFinite(diff)||diff<0)return "";
@@ -1116,6 +1147,10 @@ function renderRecentGrowth() {
   if(active.length) {
     const building=html("a","growth-building",`Building now: ${active.map(project=>titleFor(project,"project")).join("; ")}`,box);
     building.href="#shelf-card";
+  }
+  if(openNeeds().length){
+    const asked=html("a","growth-building",`Asked of the Steward: ${openNeeds().length} ${openNeeds().length===1?"need waits":"needs wait"} for an answer`,box);
+    asked.href="#shelf-card";
   }
   const choosing=renderChoiceProgress(box);
   if(!active.length&&!choosing) {
@@ -1610,6 +1645,7 @@ function shelf() {
   } else {
     html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
   }
+  renderNeeds(dataShelf, box, residentName);
   const choosing=renderChoiceProgress(box);
   if (dataShelf.policy) {
     if (greatMode) {
@@ -1680,8 +1716,10 @@ function shelf() {
       const lossLabel = typeof idea.losses === "number" && idea.losses > 0
         ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
         : null;
-      const briefLabel = idea.brief ? "researched" : typeof idea.brief_due === "number" ? "no research brief yet" : null;
-      const meta = [scaleLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
+      const due = typeof idea.brief_due === "number";
+      const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
+      const briefLabel = idea.brief ? (due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
+      const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
       if (idea.what) html("p", "", idea.what, item);
       if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
@@ -1689,10 +1727,16 @@ function shelf() {
       if (idea.brief) {
         const brief = html("div", "shelf-brief", undefined, item);
         html("div", "eyebrow-small", `Research brief · ${residentName(idea.brief.author)}`, brief);
-        [["Who it is for", idea.brief.audience], ["What already exists", idea.brief.exists],
-         ["First usable version", idea.brief.first_version], ["What could sink it", idea.brief.risks]]
+        const question = {useful: "Is it useful?", beautiful: "Is it beautiful?",
+          enabling: "Does it let someone do or answer something they could not yesterday?"}[idea.brief.worth];
+        if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, brief);
+        [["Why it matters outside Emberhall", idea.brief.benefit], ["Who it is for", idea.brief.audience],
+         ["What research shows about interest", idea.brief.interest], ["What already exists", idea.brief.exists],
+         ["First usable version", idea.brief.first_version], ["How the house will judge it", idea.brief.check],
+         ["What could sink it", idea.brief.risks]]
           .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, brief); });
-      } else if (typeof idea.brief_due === "number") {
+        if (due) html("p", "small shelf-thin", `This brief predates the worth test · the idea leaves the shelf ${clock(idea.brief_due)} unless a resident renews it.`, item);
+      } else if (due) {
         html("p", "small shelf-thin", `No research brief yet · leaves the shelf ${clock(idea.brief_due)} unless a resident researches it.`, item);
       }
       recordId(item,idea.id);
@@ -2001,7 +2045,7 @@ function render() {
   const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
   const stopped=frame.residents.filter(r=>r.pose==="unconfirmed").length;
-  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${frame.tasks.length} unfinished threads.`;
+  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${frame.tasks.length} unfinished threads.${openNeeds().length ? ` ${openNeeds().length} ${openNeeds().length === 1 ? "need waits" : "needs wait"} for the Steward.` : ""}`;
   renderViewContext();
   $("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
