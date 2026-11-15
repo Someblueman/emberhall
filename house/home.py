@@ -683,24 +683,31 @@ class Coordinator:
         return ended
 
     def renovate(self) -> bool:
-        """Hold admissions for an enacted renovation; install it once drained.
+        """Hold admissions for a queued owner upgrade or enacted renovation.
 
-        Returns True while admissions are held. A successful installation stops
-        this coordinator so the LaunchAgent restarts it on the new runtime.
+        Once the house drains, install it. Returns True while admissions are
+        held. A successful installation stops this coordinator so the
+        LaunchAgent's launcher restarts it on the new runtime. A failure is
+        recorded and releases the hold; it is never retried in a loop.
         """
-        from . import renovation
+        from . import owner_upgrade, renovation
         state = self.record.read()[0]
-        if not renovation.enabled(state) or not renovation.pending(state):
+        owner = owner_upgrade.pending_install(self.private)
+        if owner is None and not (renovation.enabled(state) and renovation.pending(state)):
             return False
         if self.running or not renovation.drained(self.record, self.private):
             return True
+        name = "owner-install" if owner is not None else "renovation"
         try:
-            result = renovation.install(self.record, self.private)
+            result = (owner_upgrade.install_requested(self.record, self.private) if owner is not None
+                      else renovation.install(self.record, self.private))
         except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
-            write_private(self.private / "renovation-error.json",
-                          {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
-            return True
-        write_private(self.private / "renovation-result.json", result | {"at": time.time()})
+            reason = f"{type(error).__name__}: {error}"[:500]
+            write_private(self.private / f"{name}-error.json", {"reason": reason, "at": time.time()})
+            if owner is None:
+                renovation.record_failure(self.record, renovation.pending(state)[0], reason)
+            return False
+        write_private(self.private / f"{name}-result.json", result | {"at": time.time()})
         if result["installed"]:
             self.stopping = True
         return True

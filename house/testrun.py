@@ -61,7 +61,7 @@ def batches(root: Path) -> list[list[str]]:
 
 
 def run_batch(root: Path, batch: list[str]) -> tuple[list[str], int, bytes]:
-    process = subprocess.run([sys.executable, "-m", "unittest", "-v", *batch], cwd=root,
+    process = subprocess.run([sys.executable, "-m", "unittest", "-v", *batch], cwd=root, stdin=subprocess.DEVNULL,
                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return batch, process.returncode, process.stdout
 

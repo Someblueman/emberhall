@@ -238,3 +238,89 @@ class RenovationTests(unittest.TestCase):
     def test_renovation_mode_needs_the_course_correction(self):
         self.assertIn("renovation", council.MODES)
         self.assertFalse(renovation.enabled({"maintenance": {}}))
+
+
+class OwnerInstallTests(unittest.TestCase):
+    """One-command owner upgrades: the drained coordinator installs a queued request."""
+
+    def setUp(self):
+        import subprocess, tempfile
+        self.subprocess = subprocess
+        self.root = Path(tempfile.mkdtemp(prefix="owner-install-"))
+        self.addCleanup(__import__("shutil").rmtree, self.root, True)
+        self.private = self.root / ".git/house-home"
+        self.git("init", "-q")
+        self.private.mkdir(parents=True)
+        root = self.root
+
+        class FakeRecord:
+            def __init__(self):
+                self.root = root
+                self.common = root / ".git"
+
+            def git(self, *args):
+                return subprocess.run(["git", *args], cwd=root, capture_output=True, check=True).stdout
+
+            def read(self):
+                return {"maintenance": {}, "council": {"rules": {}}}, [], "h"
+        self.record = FakeRecord()
+
+    def git(self, *args):
+        return self.subprocess.run(["git", "-c", "user.name=T", "-c", "user.email=t@local", "-c",
+                                    "commit.gpgsign=false", *args], cwd=self.root, capture_output=True,
+                                   check=True, text=True).stdout.strip()
+
+    def commit(self, text):
+        (self.root / "house").mkdir(exist_ok=True)
+        (self.root / "house/x.py").write_text(text)
+        self.git("add", "-A"); self.git("commit", "-qm", text)
+        return self.git("rev-parse", "HEAD")
+
+    def queue(self, commit):
+        from house import owner_upgrade
+        owner_upgrade.atomic_json(self.private / owner_upgrade.REQUEST, {
+            "format": "emberhall-owner-install-v1", "actor": "keeper-01", "scope": "upgrade-20261116-x",
+            "note": str(self.private / "note.txt"), "source_commit": commit, "requested_at": 1})
+
+    def test_scope_name_is_checked_before_anything_else(self):
+        from house import owner_upgrade
+        with self.assertRaisesRegex(ValueError, "upgrade-YYYYMMDD"):
+            owner_upgrade.request_install(self.record, "keeper-01", "course-correction-20261115", "x")
+        self.assertIsNone(owner_upgrade.pending_install(self.private))
+
+    def test_house_change_after_request_is_refused_and_releases_the_hold(self):
+        from house import owner_upgrade
+        self.queue(self.commit("a = 1\n"))
+        self.commit("a = 2\n")
+        with self.assertRaisesRegex(ValueError, "house code changed after the request"):
+            owner_upgrade.install_requested(self.record, self.private)
+        self.assertIsNone(owner_upgrade.pending_install(self.private))
+
+    def coordinator(self):
+        from house import home
+        fake = type("C", (), {})()
+        fake.record, fake.private, fake.running, fake.stopping = self.record, self.private, {}, False
+        return fake, home.Coordinator.renovate
+
+    def test_coordinator_holds_until_drained_then_installs_and_restarts(self):
+        from unittest.mock import patch
+        from house import owner_upgrade
+        self.queue(self.commit("a = 1\n"))
+        fake, renovate = self.coordinator()
+        with patch("house.renovation.drained", return_value=False):
+            self.assertTrue(renovate(fake))
+        with patch("house.renovation.drained", return_value=True), \
+                patch.object(owner_upgrade, "install_requested", return_value={"installed": True}):
+            self.assertTrue(renovate(fake))
+        self.assertTrue(fake.stopping)
+        self.assertTrue((self.private / "owner-install-result.json").is_file())
+
+    def test_coordinator_failure_is_recorded_once_and_admissions_resume(self):
+        from unittest.mock import patch
+        self.queue(self.commit("a = 1\n"))
+        fake, renovate = self.coordinator()
+        with patch("house.renovation.drained", return_value=True):
+            self.assertFalse(renovate(fake))
+        self.assertFalse(fake.stopping)
+        self.assertIn("note.txt", json.loads((self.private / "owner-install-error.json").read_text())["reason"])
+        self.assertFalse(renovate(fake))  # The request was consumed; nothing is retried.

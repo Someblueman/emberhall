@@ -1,7 +1,20 @@
-"""Prepare and resume an explicitly authorized operator upgrade, never a resident action."""
+"""Owner upgrades of the house's own code, never a resident action.
+
+Normal use is one command from a clean checkout of main with the change committed:
+
+    python3 -m house.owner_upgrade install --scope upgrade-YYYYMMDD-name --note "what and why"
+
+It checks the Steward's GitHub login and queues the upgrade. The coordinator
+then stops admitting residents, waits for the house to drain, runs the full
+suite in the sandbox, records the migration, selects the new runtime and
+restarts itself (the LaunchAgent's launcher loads the selected runtime). See
+``status`` for progress. ``prepare`` and ``apply`` remain for a cold manual
+upgrade with the coordinator stopped.
+"""
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 import copy
 import fcntl
 import hashlib
@@ -190,7 +203,7 @@ def validate_plan(record: Record, plan: dict) -> None:
             "owner test evidence changed")
 
 
-def apply(record: Record, plan_path: Path) -> dict:
+def apply(record: Record, plan_path: Path, *, coordinator: bool = False) -> dict:
     private = record.common / "house-home"
     require(plan_path.resolve().parent == private and not plan_path.is_symlink(), "owner plan outside private store")
     plan = json.loads(plan_path.read_text())
@@ -199,7 +212,10 @@ def apply(record: Record, plan_path: Path) -> dict:
     request = "owner-migration-" + data["scope"]
     # This is a cold operator migration. The old imported coordinator must be
     # retired; switching its archive path would not replace its loaded code.
-    with single_coordinator(private), (private / "runtime.lock").open("a+b") as lock:
+    # (When the drained coordinator itself installs a queued request, it already
+    # holds the coordinator lock and the owner authenticated when queuing.)
+    with (nullcontext() if coordinator else single_coordinator(private)), \
+            (private / "runtime.lock").open("a+b") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         state, events, _ = record.read()
         require(not any(run["status"] == "active" for run in state.get("life", {}).get("runs", {}).values()),
@@ -213,7 +229,8 @@ def apply(record: Record, plan_path: Path) -> dict:
             require(event["op"] == "owner-migrate" and event["actor"] == actor and event["data"] == data,
                     "accepted owner migration differs; preserve state")
         else:
-            authenticate_owner()
+            if not coordinator:
+                authenticate_owner()
             require(wake_policy.source_snapshot(record.root) == plan["snapshot"], "prepared owner source changed")
         selected = runtime.selected(record)
         require(selected["runtime_sha256"] in {data["previous_runtime_sha256"], data["runtime_sha256"]},
@@ -224,6 +241,69 @@ def apply(record: Record, plan_path: Path) -> dict:
             "policy_revision": wake_policy.active_policy(record.read()[0])["revision"]}}
         atomic_json(private / "active-runtime.json", target)
         return {"receipt": receipt, "runtime": target}
+
+
+REQUEST = "owner-install.json"
+OUTCOMES = ("owner-install-result.json", "owner-install-error.json")
+
+
+def request_install(record: Record, actor: str, scope: str, note: str) -> dict:
+    """Queue a general owner upgrade of the committed main for the coordinator."""
+    require(maintenance.UPGRADE.fullmatch(scope) is not None,
+            "scope must look like upgrade-YYYYMMDD-short-name")
+    require(bool(note.strip()) and len(note) <= 4000, "say briefly what the upgrade does")
+    private = record.common / "house-home"
+    require(not (private / REQUEST).exists(), "an owner install is already waiting; see status")
+    state = record.read()[0]
+    require(maintenance.general_upgrade(state, scope), "general owner upgrades are not installed yet")
+    require(scope not in state.get("maintenance", {}).get("migrations", {}), "that upgrade name is already used")
+    authenticate_owner()
+    snapshot = wake_policy.source_snapshot(record.root)
+    note_path = private / f"owner-note-{scope}.txt"
+    note_path.write_text(note.strip() + "\n")
+    note_path.chmod(0o600)
+    for name in OUTCOMES:
+        (private / name).unlink(missing_ok=True)
+    request = {"format": "emberhall-owner-install-v1", "actor": actor, "scope": scope,
+               "note": str(note_path), "source_commit": snapshot["source_head"], "requested_at": time.time()}
+    atomic_json(private / REQUEST, request)
+    return request | {"next": "the coordinator installs it once the house drains; see status"}
+
+
+def pending_install(private: Path) -> dict | None:
+    path = private / REQUEST
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def install_requested(record: Record, private: Path) -> dict:
+    """Run by the drained coordinator: test, migrate and select the new runtime.
+
+    The request is consumed either way, so a failure never holds the house.
+    """
+    request = pending_install(private)
+    try:
+        head = record.git("rev-parse", "--verify", "HEAD").decode().strip()
+        base = request["source_commit"]
+        require(subprocess.run(["git", "merge-base", "--is-ancestor", base, head], cwd=record.root,
+                               capture_output=True).returncode == 0, "main no longer contains the requested commit")
+        moved = record.git("diff", "--name-only", base, head, "--", "house").decode().split()
+        require(not moved, "house code changed after the request (" + ", ".join(moved[:6]) +
+                "); review it and request the install again")
+        plan = prepare(record, request["actor"], request["scope"], Path(request["note"]), head)
+        result = apply(record, plan, coordinator=True)
+    finally:
+        (private / REQUEST).unlink(missing_ok=True)
+    return {"installed": True, "scope": request["scope"], "source_head": head,
+            "runtime": result["runtime"]["entry"]}
+
+
+def status(record: Record) -> dict:
+    private = record.common / "house-home"
+    found = {"waiting": pending_install(private), "runtime": runtime.selected(record)["source_head"]}
+    for name in OUTCOMES:
+        if (private / name).is_file():
+            found[name.removeprefix("owner-install-").removesuffix(".json")] = json.loads((private / name).read_text())
+    return found
 
 
 def release_opencode(record: Record, actor: str, scope: str = maintenance.RETRY_SCOPE) -> dict:
@@ -268,6 +348,10 @@ def main() -> int:
     stage.add_argument("--approval-file", type=Path, required=True)
     stage.add_argument("--source-commit", required=True)
     activate = sub.add_parser("apply"); activate.add_argument("plan", type=Path)
+    queue = sub.add_parser("install", help="queue a general owner upgrade for the coordinator")
+    queue.add_argument("--scope", required=True, help="upgrade-YYYYMMDD-short-name")
+    queue.add_argument("--note", required=True, help="what the upgrade does and why")
+    sub.add_parser("status")
     release = sub.add_parser("release-opencode")
     release.add_argument("--scope", choices=maintenance.RELEASE_SCOPES, default=maintenance.RETRY_SCOPE)
     args = parser.parse_args()
@@ -277,6 +361,10 @@ def main() -> int:
             result = {"plan": str(prepare(record, args.actor, args.scope, args.approval_file, args.source_commit))}
         elif args.command == "apply":
             result = apply(record, args.plan)
+        elif args.command == "install":
+            result = request_install(record, args.actor, args.scope, args.note)
+        elif args.command == "status":
+            result = status(record)
         else:
             result = release_opencode(record, args.actor, args.scope)
         print(json.dumps(result, indent=2)); return 0

@@ -146,6 +146,12 @@ def drained(record, private: Path) -> bool:
     return published(record)
 
 
+def record_failure(record, proposal: str, reason: str) -> None:
+    from .life import CONTROLLER
+    record.append("renovation-failed", CONTROLLER, {"proposal": proposal, "reason": reason[:2000]},
+                  "renovation-" + proposal + "-failed")
+
+
 def install(record, private: Path) -> dict:
     """Install the oldest enacted renovation. Call only from the drained coordinator."""
     from .life import CONTROLLER
@@ -161,8 +167,7 @@ def install(record, private: Path) -> dict:
     request = "renovation-" + proposal
 
     def fail(reason: str) -> dict:
-        record.append("renovation-failed", CONTROLLER, {"proposal": proposal, "reason": reason[:2000]},
-                      request + "-failed")
+        record_failure(record, proposal, reason)
         return {"installed": False, "proposal": proposal, "reason": reason}
 
     snapshot = source_snapshot(record.root)

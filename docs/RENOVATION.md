@@ -43,21 +43,21 @@ allowlist, ratification and this route itself.
 
 ## Owner upgrades (Steward only)
 
-The Steward no longer needs a hard-coded scope for each change. Write a short note of what
-the upgrade does, commit everything, then:
+Commit the change on `main` (clean checkout), then run one command:
 
 ```
-python3 -m house.owner_upgrade prepare --scope upgrade-YYYYMMDD-short-name \
-    --approval-file NOTE --source-commit HEAD_SHA
-launchctl bootout gui/$(id -u)/local.emberhall.watch     # after the house drains
-python3 -m house.owner_upgrade apply PLAN
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.emberhall.watch.plist
+python3 -m house.owner_upgrade install --scope upgrade-YYYYMMDD-short-name --note "what and why"
 ```
 
-A general upgrade may change or add any house module; it still requires the authenticated
-GitHub owner, a drained house and a passing sandboxed test run. The LaunchAgent starts
-`.git/house-home/launcher.py`, which always loads the currently selected runtime, so
-nothing else needs editing.
+It checks the Steward's GitHub login and queues the upgrade. The coordinator then stops
+admitting residents, waits for the house to drain, runs the full suite in the sandbox,
+records the migration, selects the new runtime and restarts itself. Nothing else is needed:
+no pause, no `launchctl`, no plist edits. `python3 -m house.owner_upgrade status` shows
+what is waiting and the last result or error. If house code changes on `main` after the
+request, the install is refused (review it and ask again). A failure always releases the hold.
+
+A general upgrade may change or add any house module. The LaunchAgent starts
+`.git/house-home/launcher.py`, which always loads the currently selected runtime.
 
 The full suite runs in parallel through `house/testrun.py` (about four minutes instead of
 fifteen). Integration, owner upgrades and renovations all use it.
