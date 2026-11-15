@@ -148,6 +148,41 @@ function furnishings(g, room, x, y, lit, residents) {
     polygon(g,[[x+56,y+60,23],[x+116,y+60,23],[x+116,y+94,23],[x+56,y+94,23]],"#e3d6b2");
     box(g,x+64,y+66,20,16,4,["#d7b878","#8c704b","#b4915d"],23);
     box(g,x+18,y+16,32,20,38,["#8c704b","#5e513b","#796344"]);
+  } else if(room === "gallery") {
+    const completed=(frame.shelf?.projects||[]).filter(project=>project.status==="done");
+    const display=el("g",{"data-interior":"gallery"},g);
+    el("title",{},display,`Symbolic exhibits · showing ${Math.min(completed.length,3)} of ${completed.length} completed projects at this moment`);
+    polygon(display,[[x+18,y+73],[x+160,y+73],[x+160,y+142],[x+18,y+142]],"#756579","#bea08d",2);
+    // Empty hanging rails are furnishings; only recorded completions fill them.
+    for(let i=0;i<3;i++)box(display,x+17+i*49,y+23,41,7,51,["#d3b780","#544f43","#8e7954"]);
+    completed.slice(-3).forEach((project,i)=>{
+      const px=x+21+i*49, color=["#75b4a1","#d7a75f","#85b8d5"][hash(project.id)%3];
+      const exhibit=el("g",{"data-exhibit":project.id},display);
+      el("title",{},exhibit,`${project.title} · completed milestone: ${project.milestone||"recorded complete"}`);
+      polygon(exhibit,[[px,y+31,8],[px+33,y+31,8],[px+33,y+31,45],[px,y+31,45]],"#263f3b",color,2);
+      polygon(exhibit,[[px+5,y+31.3,24],[px+16,y+31.3,37],[px+28,y+31.3,24],[px+16,y+31.3,13]],color);
+      line(exhibit,[[px+9,y+31.6,24],[px+16,y+31.6,32],[px+24,y+31.6,24]],"#ead8af",2);
+    });
+    box(display,x+49,y+122,86,16,12,["#c5a271","#715d44","#96784e"]);
+    caption(display,x+90,y+69,0,`${completed.length} completed`,"resident-label");
+  } else if(room === "chronicle") {
+    const entries=frame.rooms.flatMap(place=>(place.history||[]).map(event=>({...event,roomName:place.name})))
+      .filter(event=>Number.isInteger(event.sequence)&&event.sequence<=frame.seq).sort((a,b)=>a.sequence-b.sequence);
+    const reading=el("g",{"data-interior":"chronicle"},g);
+    el("title",{},reading,`Room-history timeline · latest ${Math.min(entries.length,6)} of ${entries.length} recorded entries at this moment`);
+    box(reading,x+14,y+14,148,8,52,["#b69b69","#465c55","#7d785a"]);
+    line(reading,[[x+24,y+23,31],[x+152,y+23,31]],"#d8c28d",2);
+    entries.slice(-6).forEach((event,i)=>{
+      const px=x+27+i*24,mark=el("g",{"data-history-sequence":event.sequence},reading);
+      el("title",{},mark,`${event.roomName} · ${event.kind} · event ${event.sequence}`);
+      line(mark,[[px,y+23.3,23],[px,y+23.3,40]],"#e1c57f",2);
+      polygon(mark,[[px-4,y+23.5,31],[px,y+23.5,36],[px+4,y+23.5,31],[px,y+23.5,26]],"#d7a75f");
+    });
+    box(reading,x+49,y+61,83,40,24,["#b99a68","#705e44","#957b52"]);
+    polygon(reading,[[x+58,y+66,27],[x+88,y+69,25],[x+88,y+94,25],[x+58,y+91,27]],"#e6d7ae");
+    polygon(reading,[[x+88,y+69,25],[x+121,y+64,27],[x+121,y+89,27],[x+88,y+94,25]],"#cbbd91");
+    for(let i=0;i<4;i++)line(reading,[[x+63,y+71+i*5,28],[x+82,y+73+i*5,26]],"#a6946e",1);
+    caption(reading,x+90,y+116,0,`${entries.length} room entries`,"resident-label");
   } else if(room !== "bedroom" && !residents.length) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
