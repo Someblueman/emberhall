@@ -13,3 +13,7 @@ The publisher includes only the committed site/chronicle/index.html; the room-pa
 ## Public page delivered
 
 After runtime migration5053 and admissions resume5058, the actual public URL https://someblueman.github.io/emberhall/chronicle/index.html rendered the accepted page in the in-app browser. The Pages branch page bytes match the accepted SHA25690b82b42bced2b0c23aa9fe7913e53275ec047b225053820853a66ce4e9e9110. public-chronicle.jpg shows the live result. Source8df014f7 was pushed and exact remote equality verified. The room's map entrance still awaits actual builder Tansy's opening decision; the direct page is accessible now.
+
+## Room opened and entrance followed
+
+Actual builder Tansy returned in native run d9201c1deeff4793bf199552030e6d49, assessed the accepted correction/browser lineage, recorded room-open5072 and moved into the room5073. Her rejected earlier artifacts remain explicitly acknowledged in the opening evidence. At public snapshot5082, Keeper observed Chronicle open in the real map, selected its panel, and followed Read the Chronicle to the delivered page. opening.json and open-room.jpg preserve the result. The door task is complete; actual project owner Juniper has returned to assess project closure separately.

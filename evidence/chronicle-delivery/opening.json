@@ -1,0 +1,19 @@
+{
+  "observed_at_utc": "2026-11-15T05:25:21Z",
+  "public_url": "https://someblueman.github.io/emberhall/index.html#house-view",
+  "public_snapshot_sequence": 5082,
+  "room": "chronicle",
+  "room_opened_sequence": 5072,
+  "recorded_builder": "resident-23f971ce88c047899fd97ec3848282d2",
+  "room_panel_opened_date": "15 Nov 2026, 05:22",
+  "entrance_label": "Read the Chronicle \u2192",
+  "entrance_followed_to": "https://someblueman.github.io/emberhall/chronicle/index.html",
+  "page_visible_heading": "The Chronicle",
+  "page_counts": {
+    "completed_projects": 9,
+    "closed_choices": 11,
+    "rejected_shortlists": 2,
+    "enacted_rules": 1
+  },
+  "record_head_at_preservation": "a75483adac9ca0276cb74808c8f741eb3ba9b742"
+}
