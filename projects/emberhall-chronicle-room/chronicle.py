@@ -421,32 +421,38 @@ def render_html(
     house_label = html.escape(house_id) if house_id else "Emberhall"
 
     rows_html: list[str] = []
-    for item in milestones:
-        links_html = ""
-        if item["links"]:
-            anchors = " ".join(
-                f'<a href="{html.escape(href)}">{html.escape(label)}</a>'
-                for label, href in item["links"]
-            )
-            links_html = f'<div class="links">{anchors}</div>'
-        links_line = f'  {links_html}\n' if links_html else ''
+    for item in reversed(milestones):
+        title = item["title"]
+        if item["category_key"] == "choice":
+            title = title.partition(" — ")[2] or title
+        elif item["category_key"] == "rejected":
+            title = "No project selected"
+        links_html = " ".join(
+            f'<a href="{html.escape(href)}">View project files →</a>'
+            for _, href in item["links"]
+        )
         rows_html.append(
             f'<article class="entry entry-{html.escape(item["category_key"])}">\n'
-            f'  <div class="meta">\n'
-            f'    <span class="badge">{html.escape(item["category"])}</span>\n'
-            f'    <span class="seq">seq {item["sequence"]}</span>\n'
-            f'    <span class="time">{html.escape(item["timestamp"])}</span>\n'
-            f'    <span class="actor">{html.escape(item["actor"])}</span>\n'
-            f'  </div>\n'
-            f'  <h3>{html.escape(item["title"])}</h3>\n'
-            f'  <p>{html.escape(item["summary"])}</p>\n'
-            f'{links_line}'
+            f'  <div class="meta"><span class="badge">{html.escape(item["category"])}</span> '
+            f'<span class="time">{html.escape(item["timestamp"])}</span></div>\n'
+            f'  <h3>{html.escape(title)}</h3>\n'
+            f'  <div class="links">{links_html}</div>\n'
+            f'  <details class="record"><summary>View record</summary>\n'
+            f'    <p>{html.escape(item["title"])} · event {item["sequence"]}</p>\n'
+            f'    <p>{html.escape(item["summary"])}</p>\n'
+            f'    <p>Recorded by {html.escape(item["actor"])}</p>\n'
+            f'  </details>\n'
             f'</article>'
         )
 
-    entries_block = "\n".join(rows_html) if rows_html else (
-        '<p class="empty">No allowlisted milestones found in this exported prefix.</p>'
+    entries_block = "\n".join(rows_html[:8]) if rows_html else (
+        '<p class="empty">No milestones recorded in this snapshot.</p>'
     )
+    if len(rows_html) > 8:
+        entries_block += (
+            f'<details class="earlier"><summary>Earlier milestones ({len(rows_html) - 8})</summary>'
+            + "\n".join(rows_html[8:]) + '</details>'
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -531,6 +537,11 @@ def render_html(
     p {{
       margin: 0.2rem 0 0.4rem;
     }}
+    details {{ overflow-wrap: anywhere; }}
+    summary {{ cursor: pointer; color: var(--muted); }}
+    .record {{ margin-top: 0.8rem; font-size: 0.85rem; }}
+    .earlier > summary {{ padding: 1rem 0; }}
+    .snapshot {{ font-size: 0.85rem; margin-bottom: 1rem; }}
     .links a {{
       color: var(--accent);
       margin-right: 0.9rem;
@@ -541,27 +552,18 @@ def render_html(
 <body>
   <main>
     <header>
-      <h1>Emberhall Chronicle Room</h1>
-      <p class="note">
-        Curated static milestone index for <strong>{house_label}</strong> through sequence
-        <code>{html.escape(through_label)}</code>. Complements
-        <a href="../index.html">site/index.html</a> (per-event history scrubber) and
-        <code>site/house.js</code> (live project and council records).
-      </p>
-      <p class="note">
-        <strong>Under construction:</strong> this Chronicle Room is not yet an opened
-        room. The generated page is not an enacted room-construction or room-open
-        lifecycle event. Independent source acceptance and a non-author browser
-        inspection are still required before the project owner assesses the milestone.
-      </p>
-      <p class="note">
-        Rendered from a caller-provided exported journal prefix. Provenance is the
-        caller's responsibility; this generator validates shapes and replays actual
-        choice and council transitions under work-selection-003, rendering only the
-        public-field allowlist (choice, idea titles, sequence, time, actor,
-        completed-project links). Raw message bodies, vote reasons and evidence
-        task IDs are never rendered.
-      </p>
+      <a href="../index.html#house-view">← Return to the house</a>
+      <h1>The Chronicle</h1>
+      <p class="note">What Emberhall has made and decided. Latest milestones first.</p>
+      <p class="note"><a href="../index.html#projects-view">Explore the projects →</a></p>
+      <details class="snapshot">
+        <summary>About this snapshot</summary>
+        <p>House {house_label}, recorded through event {html.escape(through_label)}.
+        This is a dated snapshot; return to the house for current activity.</p>
+        <p>Generated from an exported journal prefix. The generator checks event
+        shapes and replays project choices and rule enactments; the caller verifies
+        the source record. Only public milestone fields are shown.</p>
+      </details>
     </header>
     <section class="stats" aria-label="Milestone summary">
       <div class="stat">Completed projects: {counts["project"]}</div>

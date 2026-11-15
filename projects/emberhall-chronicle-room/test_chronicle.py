@@ -164,8 +164,26 @@ class ChronicleTests(unittest.TestCase):
         # Allowlisted public fields are present and escaped.
         self.assertIn("Alpha Tool", html_text)
         self.assertIn("https://github.com/Someblueman/emberhall/tree/main/projects/alpha-tool/", html_text)
-        # Constructed room banner is visible until acceptance and browser check.
-        self.assertIn("Under construction", html_text)
+        # Static history describes its snapshot, not the room's live lifecycle.
+        self.assertIn("About this snapshot", html_text)
+        self.assertNotIn("Under construction", html_text)
+
+    def test_readable_recent_history_with_collapsed_records(self) -> None:
+        import re
+        entries = [{"category_key": "choice", "category": "Closed Choice",
+                    "sequence": n, "timestamp": "15 November", "actor": "resident-opaque",
+                    "title": f"house-growth-choice-{n:03d} — Project {n}",
+                    "summary": "Recorded decision.", "links": []} for n in range(1, 11)]
+        page = chronicle.render_html(entries, through=10)
+        headings = re.findall(r"<h3>(.*?)</h3>", page)
+        self.assertEqual(headings, [f"Project {n}" for n in range(10, 0, -1)])
+        recent, earlier = page.split('<details class="earlier">', 1)
+        self.assertEqual(recent.count('<article '), 8)
+        self.assertEqual(earlier.count('<article '), 2)
+        self.assertIn('Earlier milestones (2)', earlier)
+        self.assertEqual(page.count('<details class="record">'), 10)
+        self.assertIn('house-growth-choice-010', page)
+        self.assertIn('Explore the projects', page)
 
     def test_deterministic_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
