@@ -1,0 +1,15 @@
+test_exact_scope_preserves_house_authority (tests.test_chronicle_runtime_maintenance.ChronicleRuntimeMaintenanceTests.test_exact_scope_preserves_house_authority) ... ok
+test_active_native_run_prevents_schema_migration (tests.test_owner_maintenance.OwnerMaintenanceTests.test_active_native_run_prevents_schema_migration) ... ok
+test_exact_hold_releases_once_without_claiming_success (tests.test_owner_maintenance.OwnerMaintenanceTests.test_exact_hold_releases_once_without_claiming_success) ... ok
+test_initial_authority_and_pending_council_are_unchanged (tests.test_owner_maintenance.OwnerMaintenanceTests.test_initial_authority_and_pending_council_are_unchanged) ... ok
+test_new_failure_wins_and_future_backoff_remains_monotonic (tests.test_owner_maintenance.OwnerMaintenanceTests.test_new_failure_wins_and_future_backoff_remains_monotonic) ... ok
+test_new_shorter_failure_blocks_release_and_invalidates_granted_permit (tests.test_owner_maintenance.OwnerMaintenanceTests.test_new_shorter_failure_blocks_release_and_invalidates_granted_permit) ... ok
+test_racing_starts_consume_one_credit_even_if_launch_crashes (tests.test_owner_maintenance.OwnerMaintenanceTests.test_racing_starts_consume_one_credit_even_if_launch_crashes) ... ok
+test_release_rejects_wrong_provider_hold_caller_time_and_expiry (tests.test_owner_maintenance.OwnerMaintenanceTests.test_release_rejects_wrong_provider_hold_caller_time_and_expiry) ... ok
+test_resident_action_parser_has_no_owner_operations (tests.test_owner_maintenance.OwnerMaintenanceTests.test_resident_action_parser_has_no_owner_operations) ... ok
+test_wrong_owner_house_source_scope_and_test_claim_reject (tests.test_owner_maintenance.OwnerMaintenanceTests.test_wrong_owner_house_source_scope_and_test_claim_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.162s
+
+OK

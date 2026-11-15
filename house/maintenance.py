@@ -54,6 +54,7 @@ PROJECT_WORK_SCOPE = "project-work-routing-20261114"
 TARGETED_WAKE_SCOPE = "targeted-resident-wakes-20261114"
 HELPER_SCOPE = "helper-staffing-20261114"
 CREATIONS_SCOPE = "public-creations-20261114"
+CHRONICLE_SCOPE = "chronicle-delivery-20261115"
 COORDINATOR_REPAIRS_SCOPE = "coordinator-repairs-20261115"
 DIAGNOSTICS_SCOPE = "integration-diagnostics-20261114"
 SELECTION_SHA256 = "e01580a8a78bbbb5b9286635b85df68bd43b8f8a4785cf9df477765767ba1df8"
@@ -67,7 +68,8 @@ FAILED_CLI_OBSERVATION = 465
 FAILED_BOOTSTRAP_RUN = "2c9fc6bd10574c84bf0e45aba78a054c"
 FAILED_BOOTSTRAP_SHA256 = "034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406"
 FAILED_BOOTSTRAP_OBSERVATION = 530
-SOURCES = {COORDINATOR_REPAIRS_SCOPE: "59e03ca1db2d42fecbcfede67fc987dd2e7e53081141f4f5aa55a9e756cdcbc5",
+SOURCES = {CHRONICLE_SCOPE: "fe1a6093e8fee2e1b26fd3b1d899893e62a25a439d2497813ffd6e2e562ff648",
+           COORDINATOR_REPAIRS_SCOPE: "59e03ca1db2d42fecbcfede67fc987dd2e7e53081141f4f5aa55a9e756cdcbc5",
            CREATIONS_SCOPE: "be58334946fa679386146867f02f0c7e1c7383f849dd95a2954cf78d4bf4b95a",
            HELPER_SCOPE: "4b2f63bfbb054b70e77fce85edeced049257971c28e28ae473c9133685aa7a3a",
            TARGETED_WAKE_SCOPE: "50d7a4acc1521e2887f0d2eb81ba8d0a6bdf1a7c1965f0bbcd2107debd4804f6",
@@ -91,6 +93,7 @@ RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    CHRONICLE_SCOPE: {"house/maintenance.py", "house/publish.py", "house/integrate.py"},
     COORDINATOR_REPAIRS_SCOPE: {"house/maintenance.py", "house/home.py", "house/home_work.py",
         "house/staffing.py", "house/model.py", "house/__main__.py"},
     CREATIONS_SCOPE: {"house/maintenance.py", "house/publish.py"},
