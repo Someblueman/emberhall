@@ -600,6 +600,14 @@ function choose(room) {
   drawHouse(); roomPanel(); dormControls();
   document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
 }
+function backToRooms() {
+  const nav=$("room-nav");
+  if(!nav)return;
+  const buttons=nav.querySelectorAll?nav.querySelectorAll("button"):[];
+  const first=buttons&&buttons[0];
+  if(first&&typeof first.focus==="function")first.focus({preventScroll:true});
+  if(typeof nav.scrollIntoView==="function")nav.scrollIntoView({block:"nearest",behavior:"instant"});
+}
 function showViewForHash(hash, focusTarget=false) {
   const targetId=String(hash||"").replace(/^#/,"");
   const routes={"house-view":"house-view","projects-view":"projects-view","shelf-card":"projects-view",
@@ -787,6 +795,9 @@ function roomPanel() {
   $("room-kicker").textContent=room?"INSIDE THE HOUSE":"COME INSIDE";
   $("room-title").textContent=room?room.name:floorsAt(frame).find(f=>f.level===selectedFloor).name;
   $("room-description").textContent=room?(room.purpose||descriptions[room.id]||"A room added by a resident, preserved from this point in the record."):"Lift away the roof. Touch a room to find its residents, work and old repairs.";
+  const floor=floorsAt(frame).find(f=>f.level===selectedFloor);
+  const context=$("room-context");
+  if(context)context.textContent=room?`${floor?floor.name:"Ground floor"} · ${room.name}`:(floor?`${floor.name} · whole house`:"Whole house");
   if(room)roomRecord(room,content);
   const rooms=floorRooms(frame,selectedFloor);
   const inView=r=>room?r.room===room.id:rooms.some(place=>place.id===r.room);
@@ -1387,6 +1398,7 @@ function bindControls() {
   $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
   $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
   $("overview").addEventListener("click",()=>choose(null));
+  $("back-to-rooms")?.addEventListener("click",backToRooms);
   controlsReady=true;
 }
 function decodePublicHistory(wire) {

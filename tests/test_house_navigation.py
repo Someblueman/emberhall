@@ -15,15 +15,27 @@ class Views(HTMLParser):
         self.views = {}
         self.details = []
         self.links = []
+        self.stack = []
+        self.ancestors = {}
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        if attrs.get("id"):
+            self.ancestors[attrs["id"]] = [item[1] for item in self.stack]
         if tag == "section" and attrs.get("id", "").endswith("-view"):
             self.views[attrs["id"]] = "hidden" not in attrs
         if tag == "details":
             self.details.append("open" in attrs)
         if tag == "a" and attrs.get("href", "").startswith("#"):
             self.links.append((attrs.get("href"), attrs.get("aria-current")))
+        if tag not in {"meta", "link", "br", "input"}:
+            self.stack.append((tag, attrs))
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                del self.stack[index:]
+                break
 
 
 class HouseNavigationTests(unittest.TestCase):
@@ -44,6 +56,67 @@ class HouseNavigationTests(unittest.TestCase):
         self.assertTrue(parser.details)
         self.assertFalse(any(parser.details))
 
+    def test_explorer_contains_controls_but_not_the_introduction(self):
+        # DOM ownership, not a claim that CSS fits an actual screen.
+        source = (ROOT / "site/index.html").read_text()
+        parser = Views()
+        parser.feed(source)
+        for target in ("floor-picker", "room-context", "house", "room-nav", "history"):
+            self.assertIn("house-explorer", [node.get("id") for node in parser.ancestors[target]])
+        self.assertNotIn("house-explorer", [node.get("id") for node in parser.ancestors["house-title"]])
+        self.assertNotIn("house-explorer", [node.get("id") for node in parser.ancestors["presence-line"]])
+        self.assertIn('id="back-to-rooms"', source)
+        self.assertIn("Back to rooms", source)
+
+    @unittest.skipUnless(shutil.which("node"), "Node executes the actual renderer")
+    def test_room_context_updates_and_back_to_rooms_returns_focus(self):
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element{
+ constructor(tag){this.tag=tag;this.children=[];this.attrs={};this.listeners={};this.dataset={};this.style={};this.textContent='';this.className='';this.id='';this.classList={toggle(){},add(){},remove(){}};}
+ appendChild(n){this.children.push(n);return n;}
+ replaceChildren(){this.children=[];}
+ set innerHTML(v){throw Error('Use safe text');}
+ setAttribute(k,v){this.attrs[k]=String(v);if(k==='id')this.id=v;}
+ removeAttribute(k){delete this.attrs[k];}
+ addEventListener(k,fn){this.listeners[k]=fn;}
+ focus(opts){if(!this.disabled)document.activeElement=this;this.focusOpts=opts;}
+ scrollIntoView(opts){this.scrolled=true;this.scrollOpts=opts;}
+ querySelectorAll(sel){const out=[];const walk=n=>{for(const c of n.children){if(sel==='button'&&c.tag==='button')out.push(c);if(sel==='#room-nav button'&&c.tag==='button')out.push(c);walk(c);}};walk(this);return out;}
+}
+const nodes={},all=n=>[n,...n.children.flatMap(all)];
+const document={body:new Element('body'),activeElement:null,
+ getElementById(id){const found=Object.values(nodes).flatMap(all).find(n=>n.id===id);if(found)return found;const node=new Element('div');node.id=id;return nodes[id]=node;},
+ createElement:t=>new Element(t),createElementNS:(ns,t)=>new Element(t),querySelectorAll:()=>[]};
+const context=vm.createContext({assert,document,Date,URL});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
+vm.runInContext(`
+data={timezone:'UTC',frames:[]};current=false;selectedFloor=0;
+frame={seq:10,at:1000,rooms:[{id:'hearth',name:'Hearth'},{id:'workshop',name:'Workshop'}],residents:[],runs:[],scars:[],tasks:[]};
+selected=null;roomPanel();
+assert.match(document.getElementById('room-context').textContent,/Ground floor · whole house/);
+selected='hearth';roomPanel();
+assert.match(document.getElementById('room-context').textContent,/Ground floor · Hearth/);
+assert.equal(document.getElementById('room-title').textContent,'Hearth');
+const nav=document.getElementById('room-nav');
+const btn=document.createElement('button');btn.textContent='Hearth';nav.appendChild(btn);
+backToRooms();
+assert.equal(document.activeElement,btn);
+assert.equal(btn.focusOpts.preventScroll,true);
+assert.equal(nav.scrolled,true);
+assert.equal(nav.scrollOpts.block,'nearest');
+assert.equal(nav.scrollOpts.behavior,'instant');
+selected='workshop';roomPanel();
+assert.match(document.getElementById('room-context').textContent,/Ground floor · Workshop/);
+selected=null;roomPanel();
+assert.match(document.getElementById('room-context').textContent,/Ground floor · whole house/);
+`,context);
+'''
+        result = subprocess.run([shutil.which("node"), "-e", script, str(ROOT / "site/house.js")],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     @unittest.skipUnless(shutil.which("node"), "Node executes the actual renderer")
     def test_navigation_keyboard_targets_and_record_labels(self):
         script = r'''
@@ -53,16 +126,16 @@ class Element {
  appendChild(n){this.children.push(n);} replaceChildren(){this.children=[];}
  setAttribute(k,v){this.attrs[k]=String(v);} removeAttribute(k){delete this.attrs[k];}
  addEventListener(k,fn){this.listeners[k]=fn;} focus(){this.calls.push('focus');} scrollIntoView(){this.calls.push('scroll');}
- querySelectorAll(selector){return selector==='details[open]'?[]:[];}
+ querySelectorAll(selector){return selector==='button'?this.children:[];}
 }
 const ids=['house-view','projects-view','council-view','accounts-view','shelf-card','voting-card',
- 'floor-picker','history','present','previous','next','overview'];
+ 'floor-picker','history','present','previous','next','overview','back-to-rooms','room-nav'];
 const nodes=Object.fromEntries(ids.map(id=>[id,new Element('section',id)]));
 const links=['house-view','projects-view','council-view','accounts-view'].map(id=>{const a=new Element('a');a.hash='#'+id;return a;});
 const views=ids.slice(0,4).map(id=>nodes[id]);
 const document={getElementById:id=>nodes[id]||null,querySelectorAll:s=>s==='.page-view'?views:s==='.view-nav a'?links:[]};
 const listeners={};const window={location:{hash:'#shelf-card'},addEventListener:(k,fn)=>listeners[k]=fn};
-const context=vm.createContext({assert,document,window,links,listeners});
+const context=vm.createContext({assert,document,window,links,listeners,Element});
 const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
@@ -74,6 +147,9 @@ assert.equal($('council-view').hidden,false);assert.equal($('projects-view').hid
 assert.equal($('voting-card').calls.join(','),'focus,scroll');
 assert.equal(links[2].attrs['aria-current'],'page');
 showViewForHash('#accounts-view');assert.equal($('accounts-view').hidden,false);
+const roomButton=new Element('button');$('room-nav').appendChild(roomButton);
+$('back-to-rooms').listeners.click();
+assert.equal(roomButton.calls.join(','),'focus');assert.equal($('room-nav').calls.join(','),'scroll');
 `,context);
 '''
         result = subprocess.run([shutil.which("node"), "-e", script, str(ROOT / "site/house.js")],
