@@ -1,0 +1,13 @@
+test_chronicle_publishes_only_committed_page_not_export (tests.test_publish_projects.ProjectPublicationTests.test_chronicle_publishes_only_committed_page_not_export) ... ok
+test_chronicle_rejects_committed_symlink (tests.test_publish_projects.ProjectPublicationTests.test_chronicle_rejects_committed_symlink) ... ok
+test_real_manifest_tree_and_committed_bytes (tests.test_publish_projects.ProjectPublicationTests.test_real_manifest_tree_and_committed_bytes) ... ok
+test_rejects_unsafe_missing_untracked_and_symlink (tests.test_publish_projects.ProjectPublicationTests.test_rejects_unsafe_missing_untracked_and_symlink) ... ok
+test_safe_actions_historical_filter_and_missing_manifest (tests.test_creations_gallery.CreationsGalleryTests.test_safe_actions_historical_filter_and_missing_manifest) ... ok
+test_navigation_keyboard_targets_and_record_labels (tests.test_house_navigation.HouseNavigationTests.test_navigation_keyboard_targets_and_record_labels) ... ok
+test_shelf_votes_presence_use_titles_and_exact_models (tests.test_house_navigation.HouseNavigationTests.test_shelf_votes_presence_use_titles_and_exact_models) ... ok
+test_short_default_and_named_collapsed_views (tests.test_house_navigation.HouseNavigationTests.test_short_default_and_named_collapsed_views) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 3.434s
+
+OK
