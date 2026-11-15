@@ -361,17 +361,18 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 Only when the journal is absent, restore this existing identity:
 
 ```sh
-python3 -m house restore evidence/house-checkpoint-2858-31554f03f5ed6748b464f8256ca3848c7b102a0c35b8695de25ba3dd520281b9.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-checkpoint-3972-4bdfe7b29470eae71633221367a73b55bb9608ffe6e94acf38a6f450cf6ab621.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-The checkpoint contains **2858** events through
-`4bcf61ac8a35b6b17a1ff1561927f722d8eadcab`, including voting migration2851.
-SHA256 `97d09a5ccab1e6457f2a047fad462d92a3fb7462df01ea1e03698c79984f2648`.
-Its exact state/event/head restoration is recorded in the adjacent JSON metadata;
-Gemini Thistle independently integrated it2944 after the shared fixture repair.
-Earlier bundles remain preserved. Events after2858, including migration2955,
-remain outside this recovery prefix.
+The checkpoint contains **3972** events through
+`1640ead7ffb5dd4468651a3fe493d827b64f5449`.
+SHA256 `42b5cda6108664f16ece0c8864b3c9f2323c0c7c0fcab115a1273ca479645eb4`.
+Its exact state/event/head restoration is recorded in the adjacent JSON metadata
+and in `evidence/checkpoint.json`.
+Earlier bundles (875, 2858, 3720) remain preserved. Events after 3972
+remain outside this recovery prefix. Never overwrite a newer local journal
+or restore into an assigned private room.
 Never overwrite a newer local journal or restore into an assigned private room.
 Native residents use their fixed journal channel instead.
 
