@@ -58,7 +58,7 @@ PROJECT_CONTINUATION_SCOPE = "project-continuation-20261115"
 COURSE_SCOPE = "course-correction-20261115"
 # sha256 of evidence/course-correction/owner-approval.txt (the Steward's own words).
 COURSE_SHA256 = "5af6be9383e59bc7a675277dd3a1e1d8e9820bf5718f6f1dbca13cbc59e32dbc"
-COURSE_MODULES = {"house/course.py", "house/renovation.py"}
+COURSE_MODULES = {"house/course.py", "house/renovation.py", "house/testrun.py"}
 DUPLICATE_REVIEW_SCOPE = "duplicate-review-admission-20261115"
 MAINTENANCE_RUNTIME_SCOPE = "maintenance-runtime-20261115"
 EVIDENCE_ACCEPTANCE_SCOPE = "new-evidence-acceptance-20261115"
@@ -185,6 +185,19 @@ ALLOWED_CHANGES = {
 }
 
 
+# After the course correction, the Steward no longer needs a hard-coded scope
+# for each change: any "upgrade-YYYYMMDD-name" migration by the authenticated
+# owner may change or add house modules. Its approval note is hashed into the
+# journal; the GitHub owner check happens in owner_upgrade, as before.
+UPGRADE = re.compile(r"upgrade-[0-9]{8}-[a-z0-9][a-z0-9-]{0,59}")
+HOUSE_MODULE = re.compile(r"house/[a-z_][a-z0-9_]*\.py")
+
+
+def general_upgrade(state: dict, scope: object) -> bool:
+    return (isinstance(scope, str) and UPGRADE.fullmatch(scope) is not None
+            and COURSE_SCOPE in state.get("maintenance", {}).get("migrations", {}))
+
+
 def protected_manifest(state: dict) -> dict:
     return state.get("maintenance", {}).get("protected_files",
                                             state["wake_policy"]["protected_files"])
@@ -201,8 +214,10 @@ def _owner(state: dict, event: dict) -> None:
     require(data.get("owner_id") == council.OWNER_ID and
             event["actor"] == state["council"]["authorized_by"], "owner operator required")
     require(state["residents"][event["actor"]]["awake"], "owner operator is asleep")
-    require(data.get("scope") in SOURCES and
-            data.get("approval_sha256") == SOURCES[data["scope"]], "wrong owner approval")
+    require((event["op"] == "owner-migrate" and general_upgrade(state, data.get("scope"))
+             and _sha(data.get("approval_sha256"))) or
+            (data.get("scope") in SOURCES and data.get("approval_sha256") == SOURCES[data["scope"]]),
+            "wrong owner approval")
 
 
 def _sha(value: object) -> bool:
@@ -374,10 +389,16 @@ def apply(state: dict, event: dict) -> None:
             extra.add("house/source_delivery.py")
         if scope == KEEP_MOVING_SCOPE:
             extra.update({"house/shelf.py", "house/shelf_gate.py", "house/windows.py", "house/home_control.py"})
-        require(isinstance(manifest, dict) and set(manifest) == set(old) | extra
-                and all(_sha(value) for value in manifest.values()), "invalid replacement manifest")
-        changes = {name for name in manifest if manifest[name] != old.get(name)}
-        require(changes <= ALLOWED_CHANGES[scope], "source change outside owner maintenance scope")
+        if general_upgrade(state, scope):
+            require(isinstance(manifest, dict) and set(manifest) >= set(old) | extra
+                    and all(isinstance(name, str) and HOUSE_MODULE.fullmatch(name)
+                            for name in set(manifest) - set(old))
+                    and all(_sha(value) for value in manifest.values()), "invalid replacement manifest")
+        else:
+            require(isinstance(manifest, dict) and set(manifest) == set(old) | extra
+                    and all(_sha(value) for value in manifest.values()), "invalid replacement manifest")
+            changes = {name for name in manifest if manifest[name] != old.get(name)}
+            require(changes <= ALLOWED_CHANGES[scope], "source change outside owner maintenance scope")
         require(isinstance(data["source_head"], str) and
                 re.fullmatch(r"[0-9a-f]{40}", data["source_head"]), "invalid source commit")
         require(all(_sha(data[key]) for key in ("source_sha256", "previous_runtime_sha256",

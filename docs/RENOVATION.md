@@ -40,3 +40,24 @@ allowlist, ratification and this route itself.
 - Keep renovations small enough to review. The tests are the gate, but a second resident
   reading the change is what catches the wrong idea.
 - Renovations halt the house briefly while it drains and tests. Batch small fixes.
+
+## Owner upgrades (Steward only)
+
+The Steward no longer needs a hard-coded scope for each change. Write a short note of what
+the upgrade does, commit everything, then:
+
+```
+python3 -m house.owner_upgrade prepare --scope upgrade-YYYYMMDD-short-name \
+    --approval-file NOTE --source-commit HEAD_SHA
+launchctl bootout gui/$(id -u)/local.emberhall.watch     # after the house drains
+python3 -m house.owner_upgrade apply PLAN
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.emberhall.watch.plist
+```
+
+A general upgrade may change or add any house module; it still requires the authenticated
+GitHub owner, a drained house and a passing sandboxed test run. The LaunchAgent starts
+`.git/house-home/launcher.py`, which always loads the currently selected runtime, so
+nothing else needs editing.
+
+The full suite runs in parallel through `house/testrun.py` (about four minutes instead of
+fifteen). Integration, owner upgrades and renovations all use it.

@@ -144,14 +144,18 @@ LARGE_EVIDENCE_BYTES = 1_000_000
 
 def reject_large_evidence(candidate: Path, head: str, paths: list[str]) -> None:
     """Steward course correction: large evidence bundles stay out of Git; keep summaries."""
-    for path in paths:
-        if not path.startswith("evidence/"):
+    wanted = {path for path in paths if path.startswith("evidence/")}
+    if not wanted:
+        return
+    listing = subprocess.run(["git", "--literal-pathspecs", "ls-tree", "-r", "-l", "-z", head, "--", "evidence"],
+                             cwd=candidate, capture_output=True, check=True, timeout=60).stdout
+    for entry in filter(None, listing.split(b"\0")):
+        metadata, _, name = entry.partition(b"\t")
+        path = name.decode("utf-8", errors="replace")
+        fields = metadata.split()
+        if path not in wanted or len(fields) != 4 or fields[1] != b"blob":
             continue
-        entry = _tree_entry(candidate, head, path, require_regular=False)
-        if entry is None or entry[0] == b"160000":
-            continue
-        size = int(subprocess.run(["git", "cat-file", "-s", entry[1].decode()], cwd=candidate,
-                                  capture_output=True, check=True, timeout=30).stdout)
+        size = int(fields[3])
         if size > LARGE_EVIDENCE_BYTES:
             raise ValueError(f"{path} is {size} bytes: large evidence bundles stay out of Git under the "
                              "Steward course correction; keep a short summary and leave the bundle private")
@@ -159,7 +163,6 @@ def reject_large_evidence(candidate: Path, head: str, paths: list[str]) -> None:
 
 def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[str]]]:
     paths = changed_paths(candidate, base, head)
-    reject_large_evidence(candidate, head, paths)
     legacy_prose = bool(paths) and all(_is_ordinary_prose_path(path) for path in paths)
     new_evidence = [path for path in paths
                     if not _is_ordinary_prose_path(path) and _is_new_evidence_note_path(path)]
@@ -190,6 +193,7 @@ def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[st
             eligible = False
         else:
             raise ValueError("prose acceptance exceeds the changed-file limit")
+    reject_large_evidence(candidate, head, paths)
     bounded_evidence_additions = (
         eligible
         and all(_tree_entry(candidate, base, path, require_regular=False) is None
@@ -201,7 +205,8 @@ def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[st
         return "prose", []
     project_only = bool(paths) and all(re.fullmatch(r"projects/[A-Za-z0-9_-]+/.+", p) for p in paths)
     if not project_only:
-        return "foundation", [[sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"]]
+        from .wake_policy import SUITE_ARGS
+        return "foundation", [[sys.executable, *SUITE_ARGS]]
     # Test each affected project, including its unchanged tests. No dependency install.
     projects = sorted({"/".join(p.split("/")[:2]) for p in paths})
     # unittest's CLI exits 5 for zero discovered tests. A prose-only project

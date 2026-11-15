@@ -33,8 +33,9 @@ ROTATION = {
     "muse": ("muse-ember-1.0", "muse-wonder-full-1.0"),
     "agy": ("gemini-4-hydrogen-high", "gemini-4-argon-high"),
 }
-# Explorers and great-work builders may use each agent's stronger route.
-STRONG = {"codex": "gpt-6-astra", "opencode": "opencode-go/kimi-k3.1-pro",
+# Explorers and great-work builders may use each agent's stronger route. Codex
+# stays on Sol: the Steward found Astra far too defensive for house work.
+STRONG = {"codex": "gpt-6.1-sol", "opencode": "opencode-go/kimi-k3.1-pro",
           "muse": "muse-wonder-full-1.0", "agy": "gemini-4-argon-high"}
 ROTATION_WINDOW = 24
 

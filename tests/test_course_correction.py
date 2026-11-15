@@ -35,7 +35,8 @@ class RotationTests(unittest.TestCase):
     def test_strong_route_and_helpers_do_not_count(self):
         state = self.state([("codex", "gpt-6-luna")] * 4)
         self.assertEqual("gpt-6.1-sol", course.route(state, "codex"))
-        self.assertEqual("gpt-6-astra", course.route(state, "codex", strong=True))
+        self.assertEqual("gpt-6.1-sol", course.route(state, "codex", strong=True))
+        self.assertNotIn("gpt-6-astra", set(providers.STRONG.values()) | {m for p in providers.ROTATION.values() for m in p})
         state = self.state([("agy", "gemini-4-hydrogen-high")])
         self.assertEqual("gemini-4-argon-high", course.route(state, "agy"))
 
@@ -148,6 +149,27 @@ class CourseMigrationTests(unittest.TestCase):
             self.h.reject("owner-migrate", bad, "outside.*scope")
         self.assertEqual(digest((ROOT / "evidence/course-correction/owner-approval.txt").read_text()),
                          maintenance.COURSE_SHA256)
+
+    def general(self, scope="upgrade-20261116-new-room", **files):
+        old = maintenance.protected_manifest(self.h.state)
+        manifest = old | {"house/windows.py": "8" * 64, "house/new_room.py": "7" * 64} | files
+        return self.prior.migration() | {
+            "scope": scope, "approval_sha256": "6" * 64,
+            "previous_manifest_sha256": maintenance.fingerprint(old), "protected_files": manifest}
+
+    def test_general_owner_upgrade_needs_only_the_course_correction(self):
+        early = self.general(); early.pop("rule_base")
+        self.h.reject("owner-migrate", early, "wrong owner approval")
+        data = self.migration(); data.pop("rule_base")
+        self.h.event("owner-migrate", data)
+        bad = self.general(**{"docs/x.md": "7" * 64}); bad.pop("rule_base")
+        self.h.reject("owner-migrate", bad, "invalid replacement manifest")
+        good = self.general(); good.pop("rule_base")
+        self.h.event("owner-migrate", good)
+        manifest = maintenance.protected_manifest(self.h.state)
+        self.assertEqual(("8" * 64, "7" * 64), (manifest["house/windows.py"], manifest["house/new_room.py"]))
+        self.h.reject("owner-migrate", good, "already used|stale")
+        self.assertIsNone(maintenance.UPGRADE.fullmatch("upgrade-tomorrow"))
 
 
 class RenovationTests(unittest.TestCase):

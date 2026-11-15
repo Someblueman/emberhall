@@ -59,7 +59,9 @@ def passed_count(output: bytes, exit_code: int) -> int:
 
 
 def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_commit: str) -> Path:
-    require(scope in maintenance.SOURCES and sha(approval_file.read_bytes()) == maintenance.SOURCES[scope],
+    general = maintenance.UPGRADE.fullmatch(scope) is not None
+    approval = sha(approval_file.read_bytes())
+    require(general or (scope in maintenance.SOURCES and approval == maintenance.SOURCES[scope]),
             "wrong owner instruction bytes")
     snapshot = wake_policy.source_snapshot(record.root)
     require(snapshot["source_head"] == source_commit, "reviewed source commit changed")
@@ -96,12 +98,15 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
         names.add("house/opencode_auth.py")
     if scope == maintenance.KEEP_MOVING_SCOPE:
         names.update({"house/shelf.py", "house/shelf_gate.py", "house/windows.py", "house/home_control.py"})
+    if general:
+        # A general upgrade pins every house module in the reviewed source.
+        names.update(name for name in snapshot["files"] if maintenance.HOUSE_MODULE.fullmatch(name))
     require(names <= snapshot["files"].keys(), "required owner upgrade module is missing")
     previous = runtime.selected(record)
     private = record.common / "house-home"
     target = prepare_runtime(record, private)
     data = {"scope": scope, "house": state["house_id"], "owner_id": steward.council.OWNER_ID,
-        "approval_sha256": maintenance.SOURCES[scope], "source_head": source_commit,
+        "approval_sha256": approval, "source_head": source_commit,
         "source_sha256": snapshot["source_sha256"],
         "protected_files": {name: snapshot["files"][name] for name in sorted(names)},
         "previous_manifest_sha256": maintenance.fingerprint(old),
@@ -128,8 +133,8 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
         subprocess.run(["git", "clone", "--quiet", "--no-local", "--single-branch", "--no-tags",
                         str(record.root), str(candidate)], check=True, capture_output=True)
         require(wake_policy.source_snapshot(candidate) == snapshot, "test copy differs from reviewed source")
-        tested = test_sandbox.run([str(Path(sys.executable).resolve()), *wake_policy.TEST_ARGS],
-                                 cwd=candidate, stdout=output, timeout=900)
+        tested = test_sandbox.run([str(Path(sys.executable).resolve()), *wake_policy.SUITE_ARGS],
+                                 cwd=candidate, stdout=output, timeout=1800)
         require(wake_policy.source_snapshot(candidate) == snapshot, "tests changed their source")
         output.seek(0); raw = output.read(800001)
     require(len(raw) <= 800000, "owner test evidence exceeds bound")
@@ -255,7 +260,8 @@ def main() -> int:
     parser.add_argument("--as", dest="actor", default="keeper-01")
     sub = parser.add_subparsers(dest="command", required=True)
     stage = sub.add_parser("prepare")
-    stage.add_argument("--scope", choices=sorted(maintenance.SOURCES), required=True)
+    stage.add_argument("--scope", required=True,
+                       help="upgrade-YYYYMMDD-name for a general upgrade, or a historical fixed scope")
     stage.add_argument("--approval-file", type=Path, required=True)
     stage.add_argument("--source-commit", required=True)
     activate = sub.add_parser("apply"); activate.add_argument("plan", type=Path)

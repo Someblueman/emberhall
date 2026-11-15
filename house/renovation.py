@@ -33,7 +33,7 @@ STEWARD_ONLY = frozenset({
     "house/maintenance.py", "house/owner_upgrade.py", "house/renovation.py",
     "house/council.py", "house/governance.py", "house/steward.py", "house/wake_policy.py",
     "house/windows.py", "house/providers.py", "house/opencode_tool.py",
-    "house/opencode_auth.py", "house/test_sandbox.py", "house/runtime.py",
+    "house/opencode_auth.py", "house/test_sandbox.py", "house/runtime.py", "house/testrun.py",
 })
 PATH = re.compile(r"house/[a-z_][a-z0-9_]*\.py")
 MAX_FILES = 40
@@ -152,7 +152,7 @@ def install(record, private: Path) -> dict:
     from .maintenance import fingerprint, protected_manifest
     from .owner_upgrade import passed_count
     from .runtime import selected
-    from .wake_policy import TEST_ARGS, active_policy, source_snapshot
+    from .wake_policy import SUITE_ARGS, active_policy, source_snapshot
     from .watch_recovery import prepare_runtime
     from . import test_sandbox
     state = record.read()[0]
@@ -177,7 +177,7 @@ def install(record, private: Path) -> dict:
                         str(record.root), str(candidate)], check=True, capture_output=True)
         subprocess.run(["git", "-C", str(candidate), "checkout", "--quiet", "--detach",
                         snapshot["source_head"]], check=True, capture_output=True)
-        tested = test_sandbox.run([str(Path(sys.executable).resolve()), *TEST_ARGS],
+        tested = test_sandbox.run([str(Path(sys.executable).resolve()), *SUITE_ARGS],
                                   cwd=candidate, stdout=output, timeout=1800)
         output.seek(0)
         raw = output.read(800001)
