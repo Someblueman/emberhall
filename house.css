@@ -915,3 +915,17 @@ footer a {
 .view-nav { position:sticky; top:0; z-index:20; padding-top:10px; padding-bottom:10px; background:var(--night); border-bottom:1px solid var(--line); }
 .view-status { position:sticky; top:57px; z-index:19; padding:8px 0; background:var(--night); }
 .page-view,#shelf-card,#voting-card { scroll-margin-top:115px; }
+
+/* Recorded outcomes stay visible above the day-to-day household activity. */
+.growth-section { border-left: 3px solid var(--gold, #bba16b); padding-left: .85rem; }
+.growth-building { display: block; margin: .7rem 0; font-weight: 600; }
+.growth-list { padding-left: 1.1rem; margin: .8rem 0; }
+.growth-list li { margin: .65rem 0; }
+.growth-list .small { display: block; }
+.growth-event { color: inherit; font: inherit; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: .2em; }
+.growth-event:hover { color: var(--gold, #bba16b); }
+.growth-empty { line-height: 1.5; }
+
+@media (max-width:760px) {
+  .growth-section, .presence-section { grid-column: 1 / -1; }
+}

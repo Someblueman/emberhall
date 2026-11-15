@@ -476,6 +476,54 @@ function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
   return{startSeq,endSeq,count:visible.length-startIdx,isDefault,tasks,rooms,projects};
 }
 let catchupStartSeq=null;
+function recentGrowth(frames, endIndex, endAt) {
+  const since=endAt-12*3600, changes=[];
+  for(let i=1;i<=endIndex;i++) {
+    const next=frames[i], previous=frames[i-1];
+    if(next.at<since||next.at>endAt)continue;
+    const rooms=new Map((previous.rooms||[]).map(room=>[room.id,room]));
+    for(const room of next.rooms||[]) {
+      const old=rooms.get(room.id), status=room.status||"open";
+      if(old&&(old.status||"open")===status)continue;
+      // Legacy rooms first appearing in a projection are not new construction.
+      if(!old&&!room.planned_at&&!room.opened_at&&status!=="construction")continue;
+      const verb={construction:"Building began",open:"Room opened",closed:"Room closed"}[status];
+      if(verb)changes.push({kind:"room",title:room.name,verb,seq:next.seq,at:next.at});
+    }
+    const projects=new Map((previous.shelf?.projects||[]).map(project=>[project.id,project.status]));
+    for(const project of next.shelf?.projects||[]) {
+      if(projects.get(project.id)===project.status)continue;
+      const verb={active:"Project started",done:"Milestone completed",dropped:"Project dropped"}[project.status];
+      if(verb)changes.push({kind:"project",title:titleFor(project,"project"),verb,seq:next.seq,at:next.at});
+    }
+  }
+  return changes.reverse();
+}
+function renderRecentGrowth() {
+  const box=$("recent-growth");
+  if(!box)return;
+  box.replaceChildren();
+  const endAt=current?data.observed_at:frame.at;
+  const changes=recentGrowth(data.frames,index,endAt);
+  html("p","small",`Twelve hours ending ${clock(endAt)}${current?" · published record":" · selected moment"}.`,box);
+  const active=(frame.shelf?.projects||[]).filter(project=>project.status==="active");
+  const building=html("a","growth-building",active.length
+    ?`Building now: ${active.map(project=>titleFor(project,"project")).join("; ")}`
+    :"No selected project is active. See the shelf and council choices →",box);
+  building.href="#shelf-card";
+  if(!changes.length)html("p","growth-empty","No room or project milestone changed in this window. Task activity alone does not count as growth.",box);
+  else {
+    const list=html("ul","growth-list",undefined,box);
+    changes.slice(0,5).forEach(change=>{
+      const item=html("li","",undefined,list);
+      const button=html("button","growth-event",`${change.verb}: ${change.title}`,item);
+      button.addEventListener("click",()=>jumpToSequence(change.seq));
+      html("span","small",clock(change.at),item);
+    });
+    if(changes.length>5)html("p","small",`Showing the latest 5 of ${changes.length} room and project changes.`,box);
+  }
+  const link=html("a","","Explore what we’ve made →",box);link.href="#projects-view";
+}
 function renderCatchupPanel(content) {
   const panel=html("div","catchup-panel",undefined,content);
   const digest=buildCatchupDigest(data.frames,index,catchupStartSeq);
@@ -1095,7 +1143,7 @@ function render() {
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();lighting();
+  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
@@ -1147,7 +1195,7 @@ function refreshView(changed=false) {
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const focusId=input&&document.activeElement?.id?.startsWith("catchup-")?document.activeElement.id:null;
   if(changed)render();
-  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();}
+  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();}
   const replacement=$("catchup-seq");
   if(replacement&&draft!==null)replacement.value=draft;
   if(replacement&&focusId)$(focusId)?.focus({preventScroll:true});
