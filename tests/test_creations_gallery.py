@@ -18,7 +18,7 @@ const root=new Element('div'),document={getElementById:()=>root,querySelector:()
 const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children.map(text)].join(' ');
 const manifest=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
 const ctx=vm.createContext({assert,document,URL,AbortSignal,root,all,text,manifest,fetch:async()=>({ok:false})});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const creation={id:'garden',title:'<img src=x>',summary:'Send a picture',category:'creation',action:'Play',href:'projects/garden/'};

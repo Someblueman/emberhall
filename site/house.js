@@ -1603,5 +1603,18 @@ async function refresh() {
     else if(current)refreshView();
   }finally{refreshing=false;}
 }
+let watching=false;
+// Poll the tiny head.json; fetch the full history only when the record moved.
+async function watch() {
+  if(watching||refreshing||!data)return;
+  watching=true;
+  try {
+    const response=await fetch(`head.json?t=${Date.now()}`,{cache:"no-store",signal:AbortSignal.timeout(5000)});
+    if(!response.ok)return;
+    const head=await response.json();
+    if(head&&typeof head.journal_head==="string"&&
+       (head.journal_head!==data.journal_head||head.source_head!==data.source_head))await refresh();
+  }catch(error){}finally{watching=false;}
+}
 refresh();
-setInterval(refresh,60000);
+setInterval(refresh,60000);setInterval(watch,10000);

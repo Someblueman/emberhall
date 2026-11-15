@@ -158,6 +158,8 @@ def course_prompt(state: dict, assigned: dict) -> str:
     return text
 
 
+PUBLISH_CHECK_SECONDS = 5
+
 @dataclass
 class Running:
     process: subprocess.Popen
@@ -184,6 +186,7 @@ class Coordinator:
         self.publish = publish
         self.running: dict[str, Running] = {}
         self.next_poll = 0.0
+        self.next_publish_check = 0.0
         self.stopping = False
 
     def life(self, kind: str, run: str, **data) -> dict:
@@ -809,6 +812,11 @@ class Coordinator:
             if self.publish:
                 # Include source-only deliveries; a busy worker retains this pair.
                 publication_target = (self.record.read()[2], source_head(self.record))
+        if self.publish and poll and publication_target is None and now >= self.next_publish_check:
+            # Publish soon after the record changes, not only once per poll.
+            from .record import REF
+            self.next_publish_check = now + PUBLISH_CHECK_SECONDS
+            publication_target = (self.record.ref(REF), source_head(self.record))
         if self.publish:
             from . import publication_worker
             try:

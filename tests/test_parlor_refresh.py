@@ -35,7 +35,7 @@ document.activeElement=document.body;
 let respond;
 const fetch=()=>new Promise(resolve=>{respond=resolve;});
 const ctx=vm.createContext({assert,document,fetch,AbortSignal,structuredClone,console});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 // Unrelated drawing is outside this regression; real render, roomPanel and refresh run.

@@ -10,9 +10,15 @@ import subprocess
 import tempfile
 import time
 
-from .body import export
+import hashlib
+import marshal
+
+from .body import export_inputs, projection as build_projection, replay, replay_context
 from .record import Record
-from .public_history import decode, encode
+from .public_history import Encoder, decode
+
+HISTORY_CACHE = "history-cache.marshal"
+CACHE_FORMAT = 1
 
 BRANCH = "codex/house-pages"
 MAX_PUBLIC_BLOB = 64 * 1024 * 1024  # Fail locally before GitHub's 100 MiB limit.
@@ -108,13 +114,75 @@ def building_balance(record: Record, head: str, days: int = 7) -> dict:
             "note": "Changed text lines per UTC day by area; merges excluded; binary files counted separately."}
 
 
+def code_identity() -> str:
+    """The exact house code building the history; any change forces a full rebuild."""
+    from .watch_recovery import RUNTIME
+    digest = hashlib.sha256()
+    if RUNTIME is not None:
+        digest.update(RUNTIME.read_bytes())
+    else:
+        for path in sorted(Path(__file__).parent.glob("*.py")):
+            digest.update(path.name.encode() + b"\0" + path.read_bytes())
+    return digest.hexdigest()
+
+
+def history(record: Record, private: Path, observed_at: float | None = None) -> tuple[bytes, dict]:
+    """The public history.json, replaying only events newer than the private cache.
+
+    Frames depend only on the events up to them, so the cache keeps the replay
+    context and the already encoded frames. It is used only for the exact same
+    house code and a journal that still contains the cached head; otherwise the
+    history is rebuilt from the start. marshal holds plain data and cannot run code.
+    """
+    final, events, head, source_head, commits, observed_at = export_inputs(record, observed_at)
+    identity = code_identity()
+    path = private / HISTORY_CACHE
+    cache = None
+    try:
+        cache = marshal.loads(path.read_bytes())
+        if not (cache.get("format") == CACHE_FORMAT and cache["code"] == identity
+                and 0 < cache["context"]["replayed"] <= len(events)
+                and (cache["head"] == head or subprocess.run(
+                    ["git", "-C", str(record.root), "merge-base", "--is-ancestor", cache["head"], head],
+                    capture_output=True).returncode == 0)):
+            cache = None
+    except (OSError, ValueError, EOFError, TypeError, KeyError, AttributeError):
+        cache = None
+    if cache is None:
+        cache = {"format": CACHE_FORMAT, "code": identity, "context": replay_context(),
+                 "nodes": [], "seen": {}, "frames": []}
+    context = cache["context"]
+    encoder = Encoder(cache["nodes"], cache["seen"])
+    new_frames = replay(events, context)
+    for frame in new_frames:
+        cache["frames"].append(encoder.value(frame))
+    if not cache["frames"]:
+        raise ValueError("No journal frames to publish")
+    last_seq = len(cache["frames"])
+    encoder.temporary()
+    top = build_projection(final, head, source_head, observed_at, commits, [], context["scars"])
+    root = encoder.intern({key: encoder.intern(cache["frames"]) if key == "frames" else encoder.value(value)
+                           for key, value in top.items()})
+    body = json.dumps({"version": 2, "root": root, "nodes": encoder.nodes},
+                      separators=(",", ":"), allow_nan=False).encode()
+    encoder.forget()
+    if new_frames or cache.get("head") != head:
+        cache["head"] = head
+        temporary = path.with_name(path.name + ".tmp")
+        temporary.write_bytes(marshal.dumps(cache))
+        temporary.chmod(0o600)
+        os.replace(temporary, path)
+    return body, {"journal_head": head, "source_head": source_head, "seq": last_seq,
+                  "at": final["at"]}
+
+
 def publish(record: Record, *, push=False) -> dict:
     private = record.common / "house-home"
     private.mkdir(mode=0o700, exist_ok=True)
     with (private / "publisher.lock").open("a+b") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        projection = export(record)
-        head = projection["source_head"]
+        history_body, summary = history(record, private)
+        head = summary["source_head"]
         if not head:
             raise ValueError("No source HEAD")
         contents = {name: committed_blob(record, head, "site/" + name)
@@ -124,7 +192,9 @@ def publish(record: Record, *, push=False) -> dict:
         chronicle = committed_blob(record, head, "site/chronicle/index.html", optional=True)
         if chronicle is not None:
             contents["chronicle/index.html"] = chronicle
-        contents["history.json"] = json.dumps(encode(projection), separators=(",", ":"), allow_nan=False).encode()
+        contents["history.json"] = history_body
+        # Visitors poll this tiny file and fetch the history only when it changes.
+        contents["head.json"] = json.dumps(summary, separators=(",", ":"), sort_keys=True).encode()
         try:
             contents["balance.json"] = json.dumps(building_balance(record, head), separators=(",", ":")).encode()
         except (OSError, ValueError, subprocess.SubprocessError):
@@ -153,9 +223,13 @@ def publish(record: Record, *, push=False) -> dict:
                 parent = remote_head
                 recovering = True
         if previous:
-            old_wire = json.loads(record.git("show", previous + ":history.json"))
-            old = decode(old_wire)
-            if not recovering and old_wire.get("version") == 2 and (old["journal_head"], old["source_head"]) == (projection["journal_head"], projection["source_head"]):
+            try:
+                old = json.loads(record.git("show", previous + ":head.json"))
+                current_wire = True
+            except ValueError:
+                old_wire = json.loads(record.git("show", previous + ":history.json"))
+                old, current_wire = decode(old_wire), old_wire.get("version") == 2
+            if not recovering and current_wire and (old["journal_head"], old["source_head"]) == (summary["journal_head"], summary["source_head"]):
                 if push:
                     record.git("push", "origin", ref + ":" + ref)
                     if record.git("ls-remote", "origin", ref).decode().split()[0] != previous:
@@ -178,7 +252,7 @@ def publish(record: Record, *, push=False) -> dict:
             args = ["commit-tree", tree]
             if parent:
                 args.extend(["-p", parent])
-            commit = git(*args, data=f"Emberhall journal view through {projection['frames'][-1]['seq']}\n".encode())
+            commit = git(*args, data=f"Emberhall journal view through {summary['seq']}\n".encode())
             git("update-ref", ref, commit, previous or "0" * 40)
             if push:
                 git("push", "origin", ref + ":" + ref)

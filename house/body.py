@@ -217,6 +217,13 @@ def public_task(task_id: str, task: dict) -> dict:
 
 
 def export(record: Record, observed_at: float | None = None) -> dict:
+    final, events, head, source_head, commits, observed_at = export_inputs(record, observed_at)
+    context = replay_context()
+    frames = replay(events, context)
+    return projection(final, head, source_head, observed_at, commits, frames, context["scars"])
+
+
+def export_inputs(record: Record, observed_at: float | None = None) -> tuple:
     final, events, head = record.read()
     observed_at = time.time() if observed_at is None else observed_at
     if not math.isfinite(observed_at) or observed_at < final["at"]:
@@ -235,24 +242,45 @@ def export(record: Record, observed_at: float | None = None) -> dict:
             fields = row.split("\0", 2)
             if len(fields) == 3:
                 commits.append({"id": fields[0], "at": int(fields[1]), "title": label(fields[2])})
+    return final, events, head, source_head, commits, observed_at
 
-    state = None
-    rooms = dict(ROOMS)
-    places: dict[str, str] = {}
-    identities: dict[str, dict] = {}
-    runs: dict[str, dict] = {}
-    scars: dict[str, dict] = {}
-    ambitions: dict[str, dict] = {}
-    budgets: dict[str, dict] = {}
+
+def replay_context() -> dict:
+    """Everything the frame replay carries from one event to the next (plain data only)."""
+    return {"state": None, "rooms": dict(ROOMS), "places": {}, "identities": {}, "runs": {},
+            "scars": {}, "ambitions": {}, "budgets": {}, "event_times": {}, "inbox_checked_at": None,
+            "proposal_origins": {}, "room_uses": {}, "sleeping": set(), "awakened": {},
+            "name_history": {}, "replayed": 0}
+
+
+def projection(final: dict, head: str, source_head: str | None, observed_at: float, commits: list,
+               frames: list, scars: dict) -> dict:
+    # Store immutable scar descriptions once; each frame retains the exact set
+    # and changing review/repair state. This keeps the public checkpoint compact.
+    scar_catalog = {key: {k: v for k, v in scar.items()
+                         if k not in {"mended", "reviews", "lesson_status"}}
+                    for key, scar in scars.items()}
+    return {"version": 1, "name": label(final["name"], 80), "house_id": final["house_id"],
+            "journal_head": head, "source_head": source_head, "observed_at": observed_at,
+            "timezone": "Europe/London", "commits": commits, "frames": frames, "scars": scar_catalog,
+            "limits": "Recorded state, not a live heartbeat. Quota remaining is unknown unless explicitly reported."}
+
+
+def replay(events: list, context: dict) -> list:
+    """Build the public frames for events after context["replayed"], updating context.
+
+    A frame depends only on the events up to it, so a saved context lets a later
+    publication replay only the new events.
+    """
+    state = context["state"]
+    rooms, places, identities, runs = context["rooms"], context["places"], context["identities"], context["runs"]
+    scars, ambitions, budgets = context["scars"], context["ambitions"], context["budgets"]
+    event_times, inbox_checked_at = context["event_times"], context["inbox_checked_at"]
+    proposal_origins, room_uses, sleeping = context["proposal_origins"], context["room_uses"], context["sleeping"]
+    awakened, name_history = context["awakened"], context["name_history"]
     frames = []
-    event_times: dict[int, float] = {}
-    inbox_checked_at = None
-    proposal_origins: dict[str, dict] = {}
-    room_uses: dict[str, dict] = {}
-    sleeping: set[str] = set()
-    awakened: dict[str, int] = {}
-    name_history: dict[str, list[dict]] = {}
-    for seq, event in enumerate(events, 1):
+    start = context["replayed"]
+    for seq, event in enumerate(events[start:], start + 1):
         at, actor, op, data = event["at"], event["actor"], event["op"], event["data"]
         for task_id, task in (state["tasks"].items() if state else []):
             if task["status"] == "claimed" and task["until"] <= at:
@@ -445,20 +473,13 @@ def export(record: Record, observed_at: float | None = None) -> dict:
             frame["shelf"] = shelf_view(state)
         frame["voting"] = voting_view(state, identities, event_times, proposal_origins)
         frame["voting"]["inbox_checked_at"] = inbox_checked_at
-        frames.append(copy.deepcopy(frame))
-    # Store immutable scar descriptions once; each frame retains the exact set
-    # and changing review/repair state. This keeps the public checkpoint compact.
-    scar_catalog = {key: {k: v for k, v in scar.items()
-                         if k not in {"mended", "reviews", "lesson_status"}}
-                    for key, scar in scars.items()}
-    for frame in frames:
+        frame = copy.deepcopy(frame)
         frame["scars"] = [{k: v for k, v in scar.items()
                            if k in {"id", "mended", "reviews", "lesson_status"}}
                           for scar in frame["scars"]]
-    return {"version": 1, "name": label(final["name"], 80), "house_id": final["house_id"],
-            "journal_head": head, "source_head": source_head, "observed_at": observed_at,
-            "timezone": "Europe/London", "commits": commits, "frames": frames, "scars": scar_catalog,
-            "limits": "Recorded state, not a live heartbeat. Quota remaining is unknown unless explicitly reported."}
+        frames.append(frame)
+    context.update(state=state, inbox_checked_at=inbox_checked_at, replayed=start + len(frames))
+    return frames
 
 
 def main() -> None:

@@ -4,25 +4,46 @@ from __future__ import annotations
 import json
 
 
-def encode(projection: dict) -> dict:
-    nodes: list[dict | list] = []
-    seen: dict[str, int] = {}
+class Encoder:
+    """Shared-container encoder whose node table can be kept and extended later."""
 
-    def value(item):
-        if isinstance(item, dict):
-            node = {key: value(child) for key, child in item.items()}
-        elif isinstance(item, list):
-            node = [value(child) for child in item]
-        else:
-            return item
+    def __init__(self, nodes: list | None = None, seen: dict | None = None):
+        self.nodes = [] if nodes is None else nodes
+        self.seen = {} if seen is None else seen
+        self.added: list[str] | None = None
+
+    def intern(self, node):
         key = json.dumps(node, sort_keys=True, separators=(",", ":"), allow_nan=False)
-        if key not in seen:
-            seen[key] = len(nodes)
-            nodes.append(node)
-        return {"ref": seen[key]}
+        index = self.seen.get(key)
+        if index is None:
+            index = self.seen[key] = len(self.nodes)
+            self.nodes.append(node)
+            if self.added is not None:
+                self.added.append(key)
+        return {"ref": index}
 
-    root = value(projection)
-    return {"version": 2, "root": root, "nodes": nodes}
+    def value(self, item):
+        if isinstance(item, dict):
+            return self.intern({key: self.value(child) for key, child in item.items()})
+        if isinstance(item, list):
+            return self.intern([self.value(child) for child in item])
+        return item
+
+    def temporary(self):
+        """Encode a changing tail; forget() drops it again, keeping the stable prefix."""
+        self.added, self.mark = [], len(self.nodes)
+
+    def forget(self):
+        for key in self.added or ():
+            del self.seen[key]
+        del self.nodes[self.mark:]
+        self.added = None
+
+
+def encode(projection: dict) -> dict:
+    encoder = Encoder()
+    root = encoder.value(projection)
+    return {"version": 2, "root": root, "nodes": encoder.nodes}
 
 
 def decode(wire: dict) -> dict:
