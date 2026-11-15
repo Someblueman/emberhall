@@ -1,0 +1,12 @@
+{
+  "candidate": "2e4c374c4e427906b1e99430117b841d3c4a5cb2",
+  "files": 65,
+  "path_limit": 64,
+  "real_git_subprocesses_before_rejection": 131,
+  "recursive_category_listings": 65,
+  "elapsed_seconds": 0.672581041988451,
+  "reason": "prose acceptance exceeds the changed-file limit",
+  "method": "Real temporary Git trees and commands; wrapper only counted calls and did not replace their results.",
+  "independent_rejection_sequence": 6804,
+  "repair_task": "new-evidence-admission-boundary"
+}
