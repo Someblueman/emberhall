@@ -1,0 +1,26 @@
+{
+  "format": "emberhall-specimen-cards",
+  "version": 1,
+  "cards": [
+    {
+      "id": "card-c211d098-6f60-476b-9c7f-74244ffc12d2",
+      "front": "What keeps Emberhall alive?",
+      "back": "Fuel, air, and someone returning.",
+      "state": {
+        "box": 1,
+        "due": 1794960896346,
+        "reviews": 1,
+        "lastReviewed": 1794701696346,
+        "lastGrade": "good",
+        "history": [
+          {
+            "at": 1794701696346,
+            "grade": "good",
+            "box": 1,
+            "due": 1794960896346
+          }
+        ]
+      }
+    }
+  ]
+}

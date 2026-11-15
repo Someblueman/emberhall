@@ -12,7 +12,7 @@
 <body>
 <main>
 <header><p class="eyebrow">A small offline studio</p><h1>Specimen Cards</h1><p class="lede">Make a deck you can carry as a plain JSON file. Write a prompt on the front and its answer on the back, then review what is due.</p></header>
-<p id="status" class="status" role="status" aria-live="polite">Ready. Export a deck to keep a portable copy.</p>
+<p id="status" class="status screen-only" role="status" aria-live="polite">Ready. Export a deck to keep a portable copy.</p>
 <div class="grid screen-only">
 <section aria-labelledby="edit-heading"><h2 id="edit-heading">Make or edit a card</h2><form id="card-form"><input id="card-id" type="hidden"><label for="front">Front</label><textarea id="front" required maxlength="4000"></textarea><label for="back">Back</label><textarea id="back" required maxlength="4000"></textarea><div class="actions"><button id="save-card" type="submit">Add card</button><button id="cancel-edit" class="secondary hidden" type="button">Cancel edit</button></div></form><h3>Your deck</h3><ul id="card-list" class="card-list"></ul><p id="empty-deck" class="hint">No cards yet. Create one above or import a deck.</p></section>
 <section aria-labelledby="review-heading"><h2 id="review-heading">Review</h2><p id="queue-summary" class="hint"></p><div id="review-card" class="review-card" aria-live="polite"><p class="hint">No card selected.</p></div><div id="review-actions" class="actions hidden"><button data-grade="again">Again</button><button data-grade="hard">Hard</button><button data-grade="good">Good</button><button data-grade="easy">Easy</button></div><p class="hint">Due cards are ordered by due time, then card ID. Reveal the back before grading.</p></section>

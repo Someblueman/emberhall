@@ -1,0 +1,47 @@
+{
+  "original_source_acceptance": "eb9add76c14aba679c4218c6d0188014ee27d9e5",
+  "corrected_native_contribution": "bedba1d6557719a0248c4b7573ed56f8a02f570b",
+  "immutable_finish": 3919,
+  "html_sha256": "dff11bf61e1cca380c241923b981423924693ba39e5fe84990bf32649fb24194",
+  "browser": "157.0.8103.51",
+  "actual_chrome_keyboard": [
+    "Tab to front",
+    "type front and back",
+    "Enter Add card",
+    "Edit by keyboard and save",
+    "Reveal back",
+    "Good grade",
+    "Export JSON"
+  ],
+  "isolated_chrome_checks": [
+    "Actual CUA-created/reviewed/downloaded deck reimported in isolated Chrome",
+    "Export after reimport is byte-identical, including stable ID and full review history",
+    "Unsupported import rejected; actual exported current deck unchanged"
+  ],
+  "print_preview": {
+    "actual_ui": "chrome://print/",
+    "generated_pdf": "chrome-untrusted://print/.../0/print.pdf",
+    "observed": "One page, side-by-side front/back card faces; editor, review controls, review state and screen status absent",
+    "screenshot": "print-preview.png",
+    "physical_printing": false
+  },
+  "print_repair": "Actual preview exposed exported-status paragraph printing. Added existing screen-only class and repeated actual preview; no app, deck format or scheduling change.",
+  "model_tests": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "tool_failure": {
+    "tool": "CUA Chrome fileChooser.setFiles",
+    "elapsed_seconds": 10338.3233,
+    "result": "Extension file URL permission unavailable",
+    "permissions_changed": false,
+    "fallback": "Installed Playwright, isolated sandboxed Chrome, project-only loopback page; no dependency installation"
+  },
+  "limits": [
+    "No physical printer or dimensional calibration test",
+    "No learning efficacy claim",
+    "No general accessibility certification",
+    "Keyboard creation/edit/review observed on accepted native source; only subsequent change was print visibility of its status paragraph"
+  ]
+}

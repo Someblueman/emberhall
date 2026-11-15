@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: inline model creates cards and serializes the complete review history losslessly
+ok 1 - inline model creates cards and serializes the complete review history losslessly
+  ---
+  duration_ms: 0.926125
+  type: 'test'
+  ...
+# Subtest: due queue sorts by due timestamp then stable ID and grading follows fixed intervals
+ok 2 - due queue sorts by due timestamp then stable ID and grading follows fixed intervals
+  ---
+  duration_ms: 0.264417
+  type: 'test'
+  ...
+# Subtest: strict version 1 validation rejects malformed, duplicate, unsupported, and nonfinite state
+ok 3 - strict version 1 validation rejects malformed, duplicate, unsupported, and nonfinite state
+  ---
+  duration_ms: 0.246833
+  type: 'test'
+  ...
+# Subtest: a rejected hostile-text import leaves the current deck untouched and text stays data
+ok 4 - a rejected hostile-text import leaves the current deck untouched and text stays data
+  ---
+  duration_ms: 0.124417
+  type: 'test'
+  ...
+# Subtest: deleting an edited card permits a new save, and a missing edit target preserves the draft
+ok 5 - deleting an edited card permits a new save, and a missing edit target preserves the draft
+  ---
+  duration_ms: 1.17025
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 33.876708
