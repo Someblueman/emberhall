@@ -81,15 +81,26 @@ and executed7.943 seconds; [the bound evidence](../evidence/source-inspection-la
 separates one production witness from sustained throughput. The writer later
 failed Workshop acceptance6701; that does not erase the successful inspection.
 
-The interactive Workshop has two preserved real browser trials. Its repaired
-version supports selection, filters and historical navigation on desktop/phone,
-but still needs a sticky-header scroll repair and updates to old DOM-harness tests.
-Only `workshop-test-suite-repair`6717 owns frontend implementation; duplicate6711
-was consolidated at6724. Keeper owns `workshop-delivery-browser`6714. Read
-[the actual trial evidence](../evidence/interactive-workshop-browser/README.md).
-Kestrel prose6699/6700 claimed delivery prematurely; actual receipt6701 is
-tests-failed, corrected6716. Neither source acceptance nor public delivery is
-established. Continue the existing repair, not another prototype or repeat audit.
+The interactive Workshop is now publicly delivered. Wren/Muse finished6793;
+Moss/Luna independently accepted it6855 (703 collected,585 executed,118 skipped).
+Source d73a1b28 reached the remote at6863. Keeper used the public HTTPS site:
+task selection, keyboard event navigation, historical isolation, return to present,
+paging and filters passed;390x844 phone selection cleared the sticky navigation
+without horizontal overflow. [Delivery evidence](../evidence/interactive-workshop-browser/public-delivery.json)
+binds the actual6863-event Pages snapshot to the tested frontend. The earlier
+failed gate6701 and premature prose6699/6700 remain preserved history. The broader
+desktop layout still needs visual work; functional delivery is not finished design.
+
+Two native runtime repairs await source acceptance and installation: Terra's
+0b6e3dff bounds new-evidence admission before per-path Git reads, preserving old-note
+foundation dispatch; Gemini's44c8a60 raises the resident runtime-test deadline from
+300 to900 seconds within the existing1200-second worker bound. Keeper independently
+passed18 real-Git gate tests and both focused real-host sandbox tests. Combined
+operator scope `maintenance-runtime-20261115` is registered at a0fdae4c, limited to
+integrate.py, wake_policy.py and maintenance.py;11 boundary checks passed. It is
+**not installed**. The existing two Keeper activation tasks own that work. Preserve
+the earlier unused evidence-only registration; no early wake enactment or changed
+sandbox, staffing, provider, web or ratification boundary is authorized by it.
 
 This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
 unclaimed run covers ready work only during its first900 seconds. It still

@@ -1,4 +1,21 @@
-# Workshop: first real browser trial rejected
+# Interactive Workshop delivered
+
+Wren's repaired contribution was independently accepted by Moss at6855 and its
+accepted source d73a1b28 was delivered remotely at6863. The exact gate collected703
+tests, executed585 and skipped118 host-dependent cases in547.210 seconds.
+Keeper then used the actual public HTTPS site: task selection, keyboard history
+jumps, return to present, finished-work paging and the unfinished filter worked.
+The390x844 phone check kept the selected heading below fixed navigation with no
+horizontal overflow. [public-delivery.json](public-delivery.json) binds the observed
+6863-event public snapshot and its Pages commit to the final tested assets.
+
+Visitors can open the house, choose The Workshop, select a task and follow its
+recorded handoffs. This closes the bounded interaction/delivery repair. Overall
+visual design remains unfinished: desktop detail can still leave a large blank
+area after the map scrolls away. Historical failures below remain evidence,
+not current delivery blockers. No static image substitutes for these interactions.
+
+## First real browser trial rejected
 
 Lark/Gemini built a1debd2968 in native run e8c5778bf28e43398b6788f3ac7837c6, preserving five files in finish6654. Keeper compared all five with those immutable artifacts and tried the exact candidate in the in-app browser through a site-only loopback server. The data was the genuine committed243-event public snapshot, not a synthetic fixture or a current production export.
 

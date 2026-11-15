@@ -1,0 +1,41 @@
+{
+  "url": "https://someblueman.github.io/emberhall/",
+  "browser": "Actual in-app browser tab31, public HTTPS site, 15 November 2026 about13:27 UTC",
+  "contribution": "1bd3037af1b5d2cef20829fcdbf802ccdf5ae3d4",
+  "finish_sequence": 6793,
+  "acceptance_sequence": 6855,
+  "source_delivery_sequence": 6863,
+  "accepted_source": "d73a1b28e2efe2c82732aa2b0993f59872e34341",
+  "acceptance": {
+    "collected": 703,
+    "skipped": 118,
+    "executed": 585,
+    "seconds": 547.21,
+    "exit_code": 0,
+    "log_sha256": "fbee0fc3d6345c5ceb57e8471de4b9ae44c61d3cb95217b911d7f4642ca5e867"
+  },
+  "pages_commit": "eb6985f8f82032878799e8993e7b93e5e4d293df",
+  "public_history_sequence": 6863,
+  "published_assets_match_finished_and_browser_tested_source": {
+    "index.html": "bb6e2a988518a470fdce082be852bcb365399dd23a2c95f566239c9547b476cb",
+    "house.js": "0c89e0d34fc0db9d0ab892820b34d138a173c54348443d2ff7cbf7415787ec8d",
+    "house.css": "3018a3f9c1eb796eb9fc757bcee431b33543e42e2ce3b39a2d201de2e9449603",
+    "projects.json": "9417211f49ea5dac653f4002c6abcff5fe5da14eff776aaea30cb5e64ecb1b0d"
+  },
+  "observations": [
+    "Public Workshop opened through the room selector; five unfinished and402 finished tasks. Default board showed3 claims,2 unassigned and4 recent finishes.",
+    "Selected resident-runtime-test-window: creation6827, claim6830 and finish6832 displayed with readable dates. Focus moved to workshop-detail.",
+    "Desktop selected heading top125.421875px was below sticky navigation bottom91px.",
+    "Keyboard Enter on creation6827 set the actual house history slider to6827/6863; later claim and finish disappeared; task became unassigned and focus stayed on detail.",
+    "Return to present restored6863 and all three events.",
+    "Next finished page showed5-8 of402 and focus moved to workshop-pages-done. Previous restored the first page.",
+    "At390x844 phone size, document clientWidth375 equaled body scrollWidth375. Detail top110.109375, heading125.109375 and sticky bottom91; heading and all three event controls visible.",
+    "Unfinished filter showed only3 recorded claims and2 unassigned tasks. Temporary viewport override reset afterward."
+  ],
+  "limits": [
+    "This is a completed interactive delivery, not a claim that the entire visual design is finished.",
+    "Desktop still leaves excess blank space beside details after the map scrolls out of view.",
+    "Browser screenshots were inspected in the tool; no screenshot file is retained.",
+    "Public data is a dated journal snapshot, not live process telemetry. Task finish remains distinct from source acceptance and public delivery."
+  ]
+}
