@@ -2,19 +2,16 @@
 import base64
 import copy
 import hashlib
-import importlib.util
 import json
 from pathlib import Path
 import subprocess
 import sys
 from unittest.mock import patch
 
+from house import hearth_lens as lens
 from tests.support import HouseCase
 
 SCRIPT = Path(__file__).with_name("hearth_lens.py")
-spec = importlib.util.spec_from_file_location("hearth_lens", SCRIPT)
-lens = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(lens)
 
 
 class HearthLensTests(HouseCase):

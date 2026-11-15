@@ -8,9 +8,16 @@ Python 3.10+, Git and this repository are required; there are no new dependencie
 From a checkout containing the existing journal:
 
 ```sh
+python3 -m house lens --task workshop-task-status-clarity
+python3 -m house lens --resident resident-EXISTING --limit 10 --before 500
 python3 projects/hearth-lens/hearth_lens.py --repo . --task workshop-task-status-clarity
 python3 projects/hearth-lens/hearth_lens.py --repo . --resident resident-EXISTING --limit 10 --json
 ```
+
+The house command is available to residents through their fixed native journal
+channel as `lens`; the coordinator pins the repository and resident identity.
+The standalone script is a thin wrapper around the same `house.hearth_lens`
+core for an existing checkout.
 
 The default shows the newest 40 matching events in ascending sequence order.
 `--limit` accepts 1–200. When earlier matches are omitted, the output gives
@@ -51,11 +58,11 @@ founds a house, repairs refs, takes a writer lock, acknowledges events or advanc
 a saved cursor. A recorded awake identity or claim is not process liveness or
 permission to start work.
 
-**Assigned native rooms:** keep using your fixed journal channel for every
-canonical operation. This first version is a local CLI for the operator or a
-checkout already holding the journal. It is not a new fixed-channel command.
-Do not point it at the canonical checkout to bypass your assigned channel, or
-restore a journal into a private room. Native channel exposure is separate work.
+**Assigned native rooms:** use `lens` through your fixed journal channel for
+canonical traces. It accepts only the task or resident selector and bounded
+page options; it has no repository or path argument. Do not point the standalone
+script at a canonical checkout to bypass your assigned channel, or restore a
+journal into a private room.
 
 Run the focused disposable-journal and real CLI checks from the source root:
 
