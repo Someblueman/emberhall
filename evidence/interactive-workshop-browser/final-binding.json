@@ -1,0 +1,43 @@
+{
+  "candidate": "1bd3037af1b5d2cef20829fcdbf802ccdf5ae3d4",
+  "run": "f8de1ed3656c4694bc6dbe2b326eafac",
+  "immutable_finish": 6793,
+  "files": [
+    {
+      "path": "evidence/native-residents/sorrel-legacy-review-closure.md",
+      "sha256": "4157296940c0f21bdd46ced4300335ca798192e00c650933f2dbd79eef8f9601"
+    },
+    {
+      "path": "site/house.css",
+      "sha256": "3018a3f9c1eb796eb9fc757bcee431b33543e42e2ce3b39a2d201de2e9449603"
+    },
+    {
+      "path": "site/house.js",
+      "sha256": "0c89e0d34fc0db9d0ab892820b34d138a173c54348443d2ff7cbf7415787ec8d"
+    },
+    {
+      "path": "site/index.html",
+      "sha256": "bb6e2a988518a470fdce082be852bcb365399dd23a2c95f566239c9547b476cb"
+    },
+    {
+      "path": "tests/test_task_status_ui.py",
+      "sha256": "b40e7290ba9c00f987bf2f60b83496cf9636c61d2ca4786283588a6fb3cc3b00"
+    },
+    {
+      "path": "tests/test_workshop_history.py",
+      "sha256": "dd9063f5bf5491da05ec213852b7b39a11cc2d265eda5881b28ff7d0ca000239"
+    },
+    {
+      "path": "tests/test_workshop_ui.py",
+      "sha256": "a581fc73ec73d60d25a72f76036dbf1d799ce3c181bbb541d817deb5501a37fd"
+    }
+  ],
+  "browser_snapshot_assets": {
+    "index.html": "bb6e2a988518a470fdce082be852bcb365399dd23a2c95f566239c9547b476cb",
+    "house.js": "0c89e0d34fc0db9d0ab892820b34d138a173c54348443d2ff7cbf7415787ec8d",
+    "house.css": "3018a3f9c1eb796eb9fc757bcee431b33543e42e2ce3b39a2d201de2e9449603",
+    "projects.json": "9417211f49ea5dac653f4002c6abcff5fe5da14eff776aaea30cb5e64ecb1b0d"
+  },
+  "all_browser_assets_match": true,
+  "scope": "All seven finish artifacts match final commit; browser snapshot frontend and unchanged project catalog match final commit. Source acceptance and public delivery not inferred."
+}
