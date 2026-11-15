@@ -158,12 +158,12 @@ Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 Only in a fresh source clone with an absent journal:
 
 ```sh
-python3 -m house restore evidence/house-checkpoint-3972-4bdfe7b29470eae71633221367a73b55bb9608ffe6e94acf38a6f450cf6ab621.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore evidence/house-checkpoint-6992-afternoon20261115.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
-This restores3972 events through `1640ead7ffb5dd4468651a3fe493d827b64f5449`.
-Bundle SHA256: `42b5cda6108664f16ece0c8864b3c9f2323c0c7c0fcab115a1273ca479645eb4`.
+This restores6992 events through `cc321882166e0fc9e33d6e957769774903e53f2a`.
+Bundle SHA256: `fb50237004742c79b8789d2569bb56f31364f21aa2d4ea5768dc6a8a7e318b7b`.
 Later local events are outside that prefix. Never restore over a newer journal
 or inside a controller-assigned room. Checkpoints are daily or after a meaningful
 recovery milestone, not every wake. Older bundles remain preserved.

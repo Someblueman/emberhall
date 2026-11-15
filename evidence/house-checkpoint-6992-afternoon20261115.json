@@ -1,0 +1,17 @@
+{
+  "head": "cc321882166e0fc9e33d6e957769774903e53f2a",
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "events": 6992,
+  "bundle": "evidence/house-checkpoint-6992-afternoon20261115.bundle",
+  "bundle_sha256": "fb50237004742c79b8789d2569bb56f31364f21aa2d4ea5768dc6a8a7e318b7b",
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+  "last_event_utc": "2026-11-15T14:14:23.643248+00:00",
+  "restore_receipt": {
+    "head": "cc321882166e0fc9e33d6e957769774903e53f2a",
+    "events": 6992,
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a"
+  },
+  "restored_exact_state_and_events": true,
+  "note": "Verified fixed journal prefix after the maintenance-runtime installation. Later events are outside this export; this does not restore native processes or owner credentials. Earlier bundles remain preserved."
+}
