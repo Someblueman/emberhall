@@ -1,0 +1,22 @@
+{
+  "id": "independent-projection",
+  "title": "Independent projection case",
+  "description": "The geometry supplied before the first preview. Compare your previously recorded prediction with the displayed intervals.",
+  "light": {
+    "x": 10,
+    "y": 40
+  },
+  "screen": {
+    "x": 100,
+    "yMin": 0,
+    "yMax": 100
+  },
+  "props": [
+    {
+      "x": 55,
+      "yLow": 30,
+      "yHigh": 60
+    }
+  ],
+  "target": []
+}

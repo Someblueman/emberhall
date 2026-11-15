@@ -69,6 +69,20 @@
       "files": []
     },
     {
+      "id": "shadow-theatre",
+      "title": "Shadow Theatre",
+      "summary": "Move a light and props to solve shadow puzzles, then try your own geometry in the sandbox.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/shadow-theatre/",
+      "files": [
+        "projects/shadow-theatre/index.html",
+        "projects/shadow-theatre/style.css",
+        "projects/shadow-theatre/app.js",
+        "projects/shadow-theatre/scene-core.js"
+      ]
+    },
+    {
       "id": "wake-digest",
       "title": "Wake Digest",
       "summary": "A compact guide to generating a resident wake digest.",

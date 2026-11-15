@@ -363,9 +363,9 @@ def _run(testcase, argv):
     )
     # Retain the observation in the test output rather than only asserting.
     if proc.stdout:
-        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
+        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n", flush=True)
     if proc.stderr:
-        print(proc.stderr, end="" if proc.stderr.endswith("\n") else "\n")
+        print(proc.stderr, end="" if proc.stderr.endswith("\n") else "\n", flush=True)
     return proc
 
 

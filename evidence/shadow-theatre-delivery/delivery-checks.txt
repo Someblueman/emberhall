@@ -1,0 +1,116 @@
+$ python3 -m unittest tests.test_shadow_theatre_js -v
+test_page_wires_the_tested_model_before_the_ui (tests.test_shadow_theatre_js.ShadowTheatreJavaScriptTests.test_page_wires_the_tested_model_before_the_ui) ... ok
+test_projection_validation_and_import_boundary (tests.test_shadow_theatre_js.ShadowTheatreJavaScriptTests.test_projection_validation_and_import_boundary) ... ok 1 - analytic endpoint projection
+ok 2 - analytic total length 40
+ok 3 - overlapping intervals merge
+ok 4 - overlap total length 60
+ok 5 - touching intervals merge
+ok 6 - touching total length 60
+ok 7 - disjoint intervals stay separate and sorted
+ok 8 - disjoint total length 40
+ok 9 - clipping keeps the visible part and drops the offscreen prop
+ok 10 - clipped total length 40
+ok 11 - repeated computation is deterministic
+ok 12 - exactly three built-in challenges
+ok 13 - lossless import of single-gate
+ok 14 - export of single-gate round-trips byte for byte
+ok 15 - imported single-gate displays cleanly
+ok 16 - lossless import of twin-pillars
+ok 17 - export of twin-pillars round-trips byte for byte
+ok 18 - imported twin-pillars displays cleanly
+ok 19 - lossless import of clipped-horizon
+ok 20 - export of clipped-horizon round-trips byte for byte
+ok 21 - imported clipped-horizon displays cleanly
+ok 22 - unknown challenge fields survive a round trip
+ok 23 - sandbox exports without a target
+ok 24 - sandbox with an empty target is accepted
+ok 25 - recorded incomplete-challenge import is rejected
+ok 26 - rejected import returns no scene to assign
+ok 27 - rejected import reports the missing field
+ok 28 - rejected import leaves the scene object unchanged
+ok 29 - rejected import leaves the export unchanged
+ok 30 - rejected import leaves the displayed view unchanged
+ok 31 - rejected import did not blank the title
+ok 32 - rejected import leaves the target unchanged
+ok 33 - malformed JSON is rejected
+ok 34 - empty import text is rejected
+ok 35 - JSON null is rejected
+ok 36 - JSON array is rejected
+ok 37 - missing field is rejected: id
+ok 38 - missing field is rejected: title
+ok 39 - missing field is rejected: description
+ok 40 - missing field is rejected: screen
+ok 41 - missing field is rejected: light
+ok 42 - missing field is rejected: props
+ok 43 - missing field is rejected: target
+ok 44 - string coordinate is rejected
+ok 45 - null coordinate is rejected
+ok 46 - numeric title is rejected
+ok 47 - blank title is rejected
+ok 48 - numeric id is rejected
+ok 49 - numeric description is rejected
+ok 50 - screen as array is rejected
+ok 51 - light as string is rejected
+ok 52 - props as object is rejected
+ok 53 - prop as number is rejected
+ok 54 - target as object is rejected
+ok 55 - target pair of wrong length is rejected
+ok 56 - target pair of strings is rejected
+ok 57 - string tolerance is rejected
+ok 58 - negative tolerance is rejected
+ok 59 - JSON overflow to Infinity is rejected
+ok 60 - NaN in an object is rejected
+ok 61 - Infinity in an object is rejected
+ok 62 - non-JSON extras are rejected instead of being silently dropped
+ok 63 - four props are rejected
+ok 64 - four target intervals are rejected
+ok 65 - light at the screen is rejected
+ok 66 - light beyond the screen is rejected
+ok 67 - prop at the light is rejected
+ok 68 - prop behind the light is rejected
+ok 69 - prop at the screen is rejected
+ok 70 - prop beyond the screen is rejected
+ok 71 - degenerate screen is rejected
+ok 72 - inverted screen is rejected
+ok 73 - zero-length prop is rejected
+ok 74 - inverted prop is rejected
+ok 75 - target above the screen is rejected
+ok 76 - target below the screen is rejected
+ok 77 - target with start >= end is rejected
+ok 78 - unsorted target is rejected
+ok 79 - overlapping target is rejected
+ok 80 - import without a target is rejected
+ok 81 - failed import then export is identical
+ok 82 - failed import then displayed view is identical
+ok 83 - failed-import export still parses
+ok 84 - first repeatable import succeeds
+ok 85 - second repeatable import succeeds
+ok 86 - repeated identical imports agree
+ok 87 - repeated identical imports export identically
+ok 88 - repeated identical imports display identically
+ok 89 - export refuses an invalid displayed scene
+ok 90 - invalid displayed scene is reported, not rendered
+ok 91 - target match allows the stated tolerance
+ok 92 - target match rejects beyond the stated tolerance
+ok 93 - target match refuses an empty target
+checks=93 failures=0
+JS-CHECKS-PASS
+ok
+test_shipped_javascript_parses (tests.test_shadow_theatre_js.ShadowTheatreJavaScriptTests.test_shipped_javascript_parses) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.058s
+
+OK
+
+Strict runtime verdict parser: 3 executed tests accepted.
+
+$ python3 -m unittest tests.test_publish tests.test_creations_gallery -v
+test_publication_preserves_dirty_source_and_does_not_repeat_unchanged_views (tests.test_publish.PublishTests.test_publication_preserves_dirty_source_and_does_not_repeat_unchanged_views) ... ok
+test_rejected_local_chain_is_preserved_and_remote_history_fast_forwards (tests.test_publish.PublishTests.test_rejected_local_chain_is_preserved_and_remote_history_fast_forwards) ... ok
+test_safe_actions_historical_filter_and_missing_manifest (tests.test_creations_gallery.CreationsGalleryTests.test_safe_actions_historical_filter_and_missing_manifest) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.063s
+
+OK
