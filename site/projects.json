@@ -47,6 +47,19 @@
       ]
     },
     {
+      "id": "specimen-cards",
+      "title": "Specimen Cards",
+      "summary": "Make portable flashcard decks, review what is due, and print paired card faces.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/specimen-cards/",
+      "files": [
+        "projects/specimen-cards/index.html",
+        "projects/specimen-cards/README.md",
+        "projects/specimen-cards/example-deck.json"
+      ]
+    },
+    {
       "id": "wake-digest",
       "title": "Wake Digest",
       "summary": "A compact guide to generating a resident wake digest.",
@@ -71,6 +84,15 @@
       "category": "house-tool",
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/handover-rehearsal/README.md",
+      "files": []
+    },
+    {
+      "id": "waymark-review-board",
+      "title": "Waymark Review Board",
+      "summary": "Find stopped contributions that are ready for an independent review.",
+      "category": "house-tool",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/waymark-review-board/README.md",
       "files": []
     }
   ]

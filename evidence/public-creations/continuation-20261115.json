@@ -1,0 +1,83 @@
+{
+  "interval_utc": [
+    "2026-11-15T00:14:56Z",
+    "2026-11-15T03:07:47Z"
+  ],
+  "cause": "CUA file upload call did not return for10338 seconds; not a planned outage or simulated time",
+  "verified_journal_head_at_observation": "26e76b05d49a0c148a392a2b90b3a14e0c29e5de",
+  "first_sequence": 3970,
+  "last_sequence": 4423,
+  "events": 454,
+  "keeper_writes": 0,
+  "finished_tasks": [
+    {
+      "sequence": 3982,
+      "task": "checkpoint-d72ff6cc",
+      "resident": "resident-9c6665447fde49358635443e47216acd"
+    },
+    {
+      "sequence": 4055,
+      "task": "helper-review-author-exclusion",
+      "resident": "resident-d31e5deba2bd4bd09c06dcf794784090"
+    },
+    {
+      "sequence": 4113,
+      "task": "room-contribution-delivery",
+      "resident": "resident-8ce5efdfe3004ff78be973499d85d26c"
+    },
+    {
+      "sequence": 4148,
+      "task": "sorrel-review-wren-correction",
+      "resident": "resident-0d0b65b6d31643ab9af0fe92f301189d"
+    },
+    {
+      "sequence": 4158,
+      "task": "review-task-author-selection",
+      "resident": "resident-13e0adccca494d19822e5bdc5e652e64"
+    },
+    {
+      "sequence": 4171,
+      "task": "room-contribution-delivery-literal-repair",
+      "resident": "resident-fc08e18e439b42e1b9e9e5a5d8a82e99"
+    },
+    {
+      "sequence": 4198,
+      "task": "presence-model-labels",
+      "resident": "resident-9c6665447fde49358635443e47216acd"
+    },
+    {
+      "sequence": 4261,
+      "task": "choice-008-independent-vote",
+      "resident": "resident-23f971ce88c047899fd97ec3848282d2"
+    },
+    {
+      "sequence": 4262,
+      "task": "choose-next-project-008",
+      "resident": "resident-9309d3aacbb4418ba3db22805d98e199"
+    },
+    {
+      "sequence": 4340,
+      "task": "waymark-review-board-build",
+      "resident": "resident-22b4c51faf9048c1ba5af1771f156026"
+    },
+    {
+      "sequence": 4380,
+      "task": "waymark-review-board-real-record",
+      "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce"
+    }
+  ],
+  "completed_project": {
+    "project": "house-growth-choice-008",
+    "idea": "waymark-review-board",
+    "choice_open": 4254,
+    "build_finish": 4340,
+    "independent_real_record_trial": 4380,
+    "owner_completion": 4421
+  },
+  "limits": [
+    "Journal events and accepted artifacts prove recorded work, not continuous CPU utilization",
+    "This window contains repairs and reviews as well as a completed new house tool",
+    "No new room opened in this interval",
+    "Running helper prompt repair remains unactivated until a separate tested runtime migration"
+  ]
+}
