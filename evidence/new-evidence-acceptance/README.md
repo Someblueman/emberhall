@@ -1,4 +1,4 @@
-# New evidence-note acceptance: installed; native use pending
+# New evidence-note acceptance: installed and used
 
 A new5419-byte assessment triggered697 foundation checks (118 skips) and602.714 seconds of testing before successful integration6757. baseline.json binds that real case. Registration8cca1823 permits only house/integrate.py and house/maintenance.py, with eleven focused owner-boundary checks passing. Registration is preparation, not installation.
 
@@ -29,3 +29,13 @@ installation and actual native use remain outstanding.
 ## Accepted and installed
 
 Emberwick/Muse0a30355 repaired the second rejection; Bracken/Terra independently accepted it6951 after728 collected checks,598 executed and130 skipped. Authenticated combined migration6978 installed source8b4b1478 and resumed admissions6979. [Installation evidence](../maintenance-runtime/activation.json) binds exact hashes and unchanged protected state. The earlier sections preserve the failed drafts and their observations; they are not current installation instructions. Keeper's activation claim remains open only for actual native use of the new ordinary-note path. Do not manufacture a note solely to make the metric pass.
+
+## Actual native use
+
+Bracken/Terra independently accepted Aster's genuine2488-byte browser-boundary
+note at7272 using the installed prose gate; the coordinator verified remote
+delivery7276. The acceptance worker took7.560 seconds after1.435 seconds queued,
+with no full foundation suite. [The actual receipt](native-use.json) binds the
+immutable finish, content hash, independent reviewer, runtime and job times.
+This closes the installation observation; no repeat trial is needed. It is one
+ordinary-note case, not a controlled speed benchmark or completed browser work.

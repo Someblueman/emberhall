@@ -1,0 +1,29 @@
+{
+  "journal_head": "21322411ceafc20316c9dd9deb6685281d632321",
+  "observed_through": 7281,
+  "run": "8517351f6bad4a72bcb42888e972346f",
+  "reviewer_run": "7d8da32331de4617959d7a4fd73051d7",
+  "contribution": "5e649a4333dcc42a17d6fea4d0cf6c78c1709235",
+  "accepted_commit": "84a3b4e382079bbc1a4c15fe571dc278040f2f56",
+  "finish_sequence": 7237,
+  "acceptance_sequence": 7272,
+  "delivery_sequence": 7276,
+  "artifact": {
+    "path": "evidence/resident-native-browser-trial/outcome.md",
+    "bytes": 2488,
+    "sha256": "42905bc85b6f6c763a3c3848fa1d7300d059b68f34f0ccb1eee961a25e29c794"
+  },
+  "test_scope": "prose",
+  "test_commands": [],
+  "test_exit": 0,
+  "runtime_sha256": "ca3c9973bbc86262533889c8214e45566cc398fce1679974fd7feca529169bdc",
+  "job": {
+    "id": "88f19fcda84d02e8076a410d284da51a600bdce35eba66459bbc37332b0db390",
+    "created_at": 1794758150.7359118,
+    "started_at": 1794758152.1706529,
+    "finished_at": 1794758159.730992
+  },
+  "queue_seconds": 1.4347410202026367,
+  "worker_seconds": 7.5603392124176025,
+  "limits": "One genuine new ordinary evidence note; no foundation suite needed. Structural committed-file checks and independent native review remained. This is not browser capability, project completion, or a controlled speed benchmark."
+}

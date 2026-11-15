@@ -41,8 +41,8 @@ another browser-failure note as substitute work.
 
 The unready duplicate task `preserve-running-review-owner` was withdrawn7153;
 Sorrel alone owned and finished the correction. README draft is deferred and
-unclaimed. Existing new-evidence acceptance installation still awaits genuine
-native use; do not invent a note merely to satisfy that observation. The later
+unclaimed. New-evidence acceptance was genuinely used by Bracken/Terra7272 and delivered7276;
+its installation observation is complete. Do not repeat that trial. The later
 wake proposal still requires its full notice ending19:46:37 UTC; no early enactment.
 
 ## Earlier handoff — 15 November, journal6525
