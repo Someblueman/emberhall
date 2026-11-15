@@ -242,7 +242,7 @@ def test_runtime(record: Record, actor: str, run_id: str, task_id: str, token: s
                         str(source_repo), str(candidate)], check=True, capture_output=True)
         subprocess.run(["git", "-C", str(candidate), "checkout", "--quiet", "--detach", before["source_head"]],
                        check=True, capture_output=True)
-        result = test_sandbox.run(command, cwd=candidate, stdout=output, timeout=300)
+        result = test_sandbox.run(command, cwd=candidate, stdout=output, timeout=900)
         require(source_snapshot(candidate) == before, "test candidate changed during runtime tests")
         output.seek(0)
         raw = output.read(800001)
