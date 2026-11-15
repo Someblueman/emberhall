@@ -42,7 +42,7 @@ class ProjectRoutingTests(HouseCase):
         self.record.append("life", life.CONTROLLER, {"kind": "run-finish", "run": key,
             "outcome": "interrupted", "exit_code": None, "usage": {}, "elapsed_seconds": 1})
 
-    def test_deadline_then_ids_order_projects_before_unrelated_help(self):
+    def test_least_staffed_project_then_deadline_and_ids_before_unrelated_help(self):
         self.offer("housekeeping")
         self.help("unrelated")
         self.offer("a-late", "later")
@@ -50,9 +50,10 @@ class ProjectRoutingTests(HouseCase):
         self.offer("b-early", "earlier")
         self.assertEqual({"task": "b-early", "task_generation": 0}, self.pick())
         self.start("first", backlog=True, task="b-early", task_generation=0)
-        self.assertEqual({"task": "z-early", "task_generation": 0}, self.pick())
-        self.start("second", backlog=True, task="z-early", task_generation=0)
+        # A builder is on the earlier project now, so the next goes to the other one.
         self.assertEqual({"task": "a-late", "task_generation": 0}, self.pick())
+        self.start("second", backlog=True, task="a-late", task_generation=0)
+        self.assertEqual({"task": "z-early", "task_generation": 0}, self.pick())
         self.assertEqual("pending", self.state()["life"]["requests"]["unrelated"]["status"])
         state = self.state()
         state["shelf"]["projects"]["later"]["deadline"] = state["shelf"]["projects"]["earlier"]["deadline"]

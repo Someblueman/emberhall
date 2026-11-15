@@ -82,9 +82,18 @@ def help_projects(state: dict, request: dict, at: float, *, help_id: str) -> set
 
 
 def first(state: dict, at: float, ready: list[str], pending: list[str]) -> dict | None:
-    """Deadline, project ID and task/request ID provide a stable total ordering."""
+    """Least-staffed project first, then deadline, project ID and task/request ID.
+
+    Counting the runs already pointed at each project spreads builders across
+    the active projects instead of sending every one to the same project.
+    """
     if not enabled(state):
         return None
+    busy: dict[str, int] = {}
+    for run in state.get("life", {}).get("runs", {}).values():
+        staffed = state["tasks"].get(run.get("task"), {}).get("project") if run["status"] == "active" else None
+        if staffed:
+            busy[staffed] = busy.get(staffed, 0) + 1
     choices = []
     for task_id in ready:
         task = state["tasks"][task_id]
@@ -92,13 +101,13 @@ def first(state: dict, at: float, ready: list[str], pending: list[str]) -> dict 
         if project and available(state, task_id, at):
             item = active_project(state, project, at)
             if item:
-                choices.append(((item["deadline"], project, task_id, ""),
+                choices.append(((busy.get(project, 0), item["deadline"], project, task_id, ""),
                                 {"task": task_id, "task_generation": task["generation"]}))
     for key in pending:
         request = state["life"]["requests"][key]
         for project in help_projects(state, request, at, help_id=key):
             item = active_project(state, project, at)
-            choices.append(((item["deadline"], project, request.get("task", ""), key),
+            choices.append(((busy.get(project, 0), item["deadline"], project, request.get("task", ""), key),
                             {"help_request": key}))
     return min(choices, key=lambda pair: pair[0])[1] if choices else None
 

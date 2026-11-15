@@ -26,6 +26,20 @@ def label(value: object, limit: int = 180) -> str:
     return " ".join(str(value).split())[:limit]
 
 
+HEARTH_VOICES = 12
+# Residents' words stay private unless the Steward installs this scope. Only
+# speech recorded after that is published; nothing said before it ever is.
+PUBLIC_HEARTH = "upgrade-20261115-public-hearth"
+_LOCAL_PATH = re.compile(r"(?:/Users|/private|/var|/tmp|/home|/opt|/Volumes)/[^\s\"',;)\]]*")
+_ADDRESS = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+
+
+def spoken(value: object, limit: int = 600) -> str:
+    """What a resident said at the hearth, without local paths or addresses."""
+    text = _ADDRESS.sub("[address]", _LOCAL_PATH.sub("[path]", " ".join(str(value).split())))
+    return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
+
+
 def usage(value: object) -> dict:
     """Never publish arbitrary provider responses, credentials or log text."""
     if not isinstance(value, dict):
@@ -251,7 +265,7 @@ def replay_context() -> dict:
     return {"state": None, "rooms": dict(ROOMS), "places": {}, "identities": {}, "runs": {},
             "scars": {}, "ambitions": {}, "budgets": {}, "event_times": {}, "inbox_checked_at": None,
             "proposal_origins": {}, "room_uses": {}, "sleeping": set(), "awakened": {},
-            "name_history": {}, "replayed": 0}
+            "name_history": {}, "hearth": [], "replayed": 0}
 
 
 def projection(final: dict, head: str, source_head: str | None, observed_at: float, commits: list,
@@ -279,6 +293,7 @@ def replay(events: list, context: dict) -> list:
     event_times, inbox_checked_at = context["event_times"], context["inbox_checked_at"]
     proposal_origins, room_uses, sleeping = context["proposal_origins"], context["room_uses"], context["sleeping"]
     awakened, name_history = context["awakened"], context["name_history"]
+    hearth = context.setdefault("hearth", [])
     frames = []
     start = context["replayed"]
     for seq, event in enumerate(events[start:], start + 1):
@@ -332,6 +347,10 @@ def replay(events: list, context: dict) -> list:
             places[actor] = "council"
         elif op == "say" and actor != "watch-keeper":
             places[actor] = "hearth"
+            if PUBLIC_HEARTH in state.get("maintenance", {}).get("migrations", {}):
+                hearth.append({"resident": actor, "name": label(state["residents"].get(actor, {}).get("name", actor), 100),
+                               "text": spoken(data.get("text", "")), "seq": seq, "at": at})
+                del hearth[:-HEARTH_VOICES]
 
         # These existing figure movements are also actual recorded room use.
         # Keep this view-derived observation out of the replayed protocol state.
@@ -463,6 +482,13 @@ def replay(events: list, context: dict) -> list:
             "tasks": tasks, "scars": list(scars.values()), "ambitions": list(ambitions.values()),
             "budgets": list(budgets.values()), "runs": list(runs.values()),
             "lessons": len(state["lessons"]),
+            # The latest things residents said at the hearth (the coordinator's own notes are left out).
+            "hearth": list(hearth),
+            # The Archive's shelves: each lesson's claim, never its evidence text.
+            "archive": [{"key": label(lesson["key"], 100), "claim": label(lesson["claim"], 900),
+                         "author": label(state["residents"].get(lesson["author"], {}).get("name", lesson["author"]), 100),
+                         "status": label(lesson["status"], 20), "reviews": len(lesson["reviews"])}
+                        for lesson in state["lessons"].values()],
             "council": {"pending": sum(p["status"] == "pending" for p in state["proposals"].values()) +
                                      sum(p.get("status") == "pending" for p in proposals.values()),
                         "enacted": sum(p["status"] in {"ratified", "enacted"} for p in state["proposals"].values()) +

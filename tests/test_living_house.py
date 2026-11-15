@@ -30,10 +30,64 @@ assert.equal(run(`heldWork('b')`),null);
 assert.deepEqual(run(`latelyEvents(6).map(latelySentence)`),
   ['Ash finished “Mend the roof”','Bay spoke 2 times','Ash took up “Mend the roof”','Ash woke up']);
 assert.equal(run(`clip('abcdefghij',6)`),'abcde…');
+// The Archive lists lessons newest first and says who checked them.
+const made=[];
+context.document.createElement=tag=>{const node={tag,children:[],appendChild(child){this.children.push(child);}};made.push(node);return node;};
+run(`frame.archive=[{key:'old-lesson',claim:'Old.',author:'Ash',status:'superseded',reviews:0},
+  {key:'check-twice',claim:'Check twice.',author:'Bay',status:'observed',reviews:2}];renderLessons({appendChild(){}});`);
+const text=made.map(node=>node.textContent).filter(Boolean);
+assert.deepEqual(text.slice(0,3),['check twice','Check twice.','Bay · checked by 2 other residents']);
+assert(text.includes('Ash · replaced by a later lesson'));
+// The Hearth shows what was said, newest first.
+made.length=0;
+run(`frame.hearth=[{name:'Ash',text:'First.',at:1001,seq:1},{name:'Bay',text:'Second.',at:1005,seq:5}];renderHearth({appendChild(){}});`);
+assert.deepEqual(made.map(node=>node.textContent).filter(Boolean).filter(t=>!t.startsWith(' · ')),['Bay','Second.','Ash','First.']);
 '''
 
 
 class LivingHouseTests(unittest.TestCase):
+    def test_house_focus_names_stale_tasks_and_stalled_projects(self):
+        from house.home import HOME_FOCUS, focus_prompt
+        state = {"tasks": {"old": {"status": "open", "ready": False, "generation": 2, "title": "Old chore"},
+                           "next": {"status": "open", "ready": True, "generation": 0, "title": "Next", "project": "busy"},
+                           "done": {"status": "done", "generation": 1, "title": "Done"}},
+                 "shelf": {"projects": {"busy": {"status": "active"}, "idle": {"status": "active"},
+                                        "over": {"status": "done"}}},
+                 "life": {"rooms": {"door": {"name": "The Door", "status": "open"}}}}
+        tend = focus_prompt(state, "tend")
+        self.assertIn("old (generation 2): Old chore", tend)
+        self.assertIn("no ready task: idle.", tend)
+        self.assertNotIn("Done", tend)
+        self.assertIn("The Door (open)", focus_prompt(state, "room"))
+        self.assertIn("docs/RENOVATION.md", focus_prompt(state, "improve"))
+        self.assertEqual(("improve", "room", "tend"), HOME_FOCUS)
+
+    def test_builders_spread_across_projects(self):
+        from unittest.mock import patch
+        from house import project_work
+        state = {"tasks": {"a1": {"project": "a", "generation": 0}, "b1": {"project": "b", "generation": 0},
+                           "a0": {"project": "a", "generation": 0}},
+                 "life": {"runs": {}, "requests": {}}}
+        project = {"a": {"deadline": 10}, "b": {"deadline": 20}}
+        with patch.object(project_work, "enabled", return_value=True), \
+                patch.object(project_work, "available", return_value=True), \
+                patch.object(project_work, "active_project", side_effect=lambda state, key, at: project[key]):
+            self.assertEqual("a1", project_work.first(state, 0, ["a1", "b1"], [])["task"])
+            state["life"]["runs"]["r"] = {"status": "active", "task": "a0"}
+            self.assertEqual("b1", project_work.first(state, 0, ["a1", "b1"], [])["task"])
+
+    def test_hearth_words_are_private_until_the_steward_opens_it(self):
+        from house import body
+        self.assertEqual("upgrade-20261115-public-hearth", body.PUBLIC_HEARTH)
+        self.assertEqual([], body.replay_context()["hearth"])
+
+    def test_speech_is_published_without_local_paths_or_addresses(self):
+        from house.body import spoken
+        self.assertEqual(spoken("Saved  to /Users/someone/Code/x.py, mail a.b@example.org (see /tmp/out)."),
+                         "Saved to [path], mail [address] (see [path]).")
+        self.assertEqual(len(spoken("word " * 400)), 600)
+        self.assertTrue(spoken("word " * 400).endswith("…"))
+
     @unittest.skipUnless(shutil.which("node"), "node is required")
     def test_room_facts_name_tags_and_recent_events_come_from_the_record(self):
         result = subprocess.run([shutil.which("node"), "-e", SCRIPT, str(ROOT / "site/house.js")],

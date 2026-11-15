@@ -128,6 +128,50 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
     return demand
 
 
+HOME_FOCUS = ("improve", "room", "tend")
+HOME_FOCUS_GAP_SECONDS = 1800
+
+
+def focus_prompt(state: dict, focus: str) -> str:
+    """One resident at a time looks after the house itself, not the current project."""
+    head = ("HOUSE FOCUS for this run (instead of the current project; other residents are building that): ")
+    if focus == "improve":
+        return head + (
+            "improve the house itself. Pick one thing that would make Emberhall work or read better for a visitor "
+            "or for the next resident: its own code under house/, its public page under site/, or a room's view. "
+            "Create a task with clear file ownership and --ready, claim it, build and test it, commit in your room "
+            "and finish it this run. Code under house/ goes live through a council renovation (docs/RENOVATION.md), "
+            "which now needs only a one-hour notice after its trial and two endorsements; site/ and docs changes go "
+            "live once reviewed and integrated. Prefer something people will notice over more process or proof.\n")
+    if focus == "room":
+        rooms = state.get("life", {}).get("rooms", {})
+        names = ", ".join(f"{room['name']} ({room['status']})" for room in rooms.values())
+        return head + (
+            "the house's rooms (docs/BUILDING.md). Rooms now: " + names + ". Room growth is on, and no room has "
+            "been planned for a long time. If a room is under construction, continue it. Otherwise decide whether "
+            "work the house already does has no place of its own, and if so build that room in this run: create "
+            "and claim a task, record life kind room-plan (room, expect 0, name, purpose, reason, floor 0, task), "
+            "build what the room holds (a page, a tool or a view of the record that people can use), finish the "
+            "task with its artifacts, then record room-open with evidence. A room must hold something real; do "
+            "not open an empty one. If no new room is honestly worth building, improve what an existing room "
+            "shows on the public page (site/house.js) instead and say why.\n")
+    stale = [f"{key} (generation {task['generation']}): {task['title']}" for key, task in state["tasks"].items()
+             if task["status"] == "open" and task.get("ready") is not True]
+    projects = state.get("shelf", {}).get("projects", {})
+    live = {task.get("project") for task in state["tasks"].values()
+            if task["status"] != "done" and task.get("ready") is True}
+    stalled = [key for key, project in projects.items() if project.get("status") == "active" and key not in live]
+    return head + (
+        "tend the backlog so others have work to pick up. Open tasks nobody is pointed at because they are not "
+        "marked ready: " + ("; ".join(stale[:12]) or "none") + ". For each, mark it ready if it is still worth "
+        "doing (ready TASK --expect GENERATION), or claim and finish it with a short note if it is already "
+        "delivered or obsolete. The Steward's 15 November course correction (model rotation, the great-work slot, "
+        "the renovation route and its one-hour notice) is already installed, so tasks that only repeat it can be "
+        "closed. Active projects with no ready task: " + (", ".join(stalled) or "none") + ". For each, create its "
+        "next ready task with --project so a builder can be pointed at it, or record why it is stuck. Keep this "
+        "short, then take one of the tasks you made ready.\n")
+
+
 def course_prompt(state: dict, assigned: dict) -> str:
     """Steward course correction guidance for ordinary (non-helper) residents."""
     from . import course
@@ -189,6 +233,7 @@ class Coordinator:
         self.next_poll = 0.0
         self.next_publish_check = 0.0
         self.next_housekeeping = 0.0
+        self.focus = None
         self.stopping = False
 
     def life(self, kind: str, run: str, **data) -> dict:
@@ -438,6 +483,13 @@ class Coordinator:
         from . import course
         if course.enabled(state) and not staffing.helper(assigned):
             assignment += course_prompt(state, assigned)
+            if self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
+                assignment += focus_prompt(state, self.focus)
+        from .body import PUBLIC_HEARTH
+        if PUBLIC_HEARTH in state.get("maintenance", {}).get("migrations", {}):
+            assignment += ("What you say with `say` is shown publicly at the Hearth on the house's page (local paths "
+                           "and addresses are removed). Speak there as you would in public: plain words about what "
+                           "you did or found, never secrets, raw tool output or private details.\n")
         from .source_delivery import integration_inflight
         candidates = [] if integration_inflight(self.record, self.private) else pending_contributions(self.private)
         if candidates:
@@ -460,7 +512,8 @@ class Coordinator:
     def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False,
               explore_generation: int | None = None, scheduled: bool = False,
               task_id: str | None = None, task_generation: int | None = None,
-              helper_model: str | None = None) -> str | None:
+              helper_model: str | None = None, focus: str | None = None) -> str | None:
+        self.focus = focus
         self.refresh_runtime()
         self.resolve_completed_help()
         state = self.record.read()[0]
@@ -687,6 +740,23 @@ class Coordinator:
             mailbox_jobs.tick(self.record)
         return ended
 
+    def home_focus(self, state: dict) -> str | None:
+        """The house focus for the next ordinary run, or None while one is under way or recent."""
+        from . import course
+        if not course.enabled(state):
+            return None
+        last = self.focus_record()
+        if last.get("run") in self.running or time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS:
+            return None
+        return HOME_FOCUS[last.get("count", 0) % len(HOME_FOCUS)]
+
+    def focus_record(self) -> dict:
+        try:
+            value = json.loads((self.private / "home-focus.json").read_text())
+        except (OSError, ValueError):
+            return {}
+        return value if isinstance(value, dict) else {}
+
     def renovate(self) -> bool:
         """Hold admissions for a queued owner upgrade or enacted renovation.
 
@@ -777,7 +847,14 @@ class Coordinator:
                                               candidates if demand["uncovered_tasks"] else [],
                                               [key for key, _ in pending])
                 task_args = {}
-                if selected and "task" in selected:
+                # One resident at a time looks after the house itself rather than the current project.
+                focus = None
+                if (not pending and demand["explore_generation"] is None and (not selected or "task" in selected)
+                        and not any("ballot_choice" in state["tasks"][key] for key in demand["ready_tasks"])):
+                    focus = self.home_focus(state)
+                if focus:
+                    request, backlog, explore = (None, {}), False, None
+                elif selected and "task" in selected:
                     request = (None, {})
                     backlog, explore = True, None
                     task_args = {"task_id": selected["task"], "task_generation": selected["task_generation"]}
@@ -798,7 +875,13 @@ class Coordinator:
                                        reviewing="review_run" in request[1], ballot_task=ballot_task)
                 if kind is None:
                     break
-                run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True, **task_args)
+                run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True,
+                                 focus=focus, **task_args)
+                if focus:
+                    # Recorded even when the start failed, so a refused start is not retried every tick.
+                    write_private(self.private / "home-focus.json", {
+                        "run": run, "focus": focus, "at": time.time(),
+                        "count": self.focus_record().get("count", 0) + (run is not None)})
                 if run is None:
                     break
                 started.append(run)
