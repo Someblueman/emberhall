@@ -458,7 +458,7 @@ function workshopTasks(frames, moment, at) {
       const labels={task:"Created",claim:"Claimed",renew:"Lease renewed",release:"Released",finish:"Finished",
         ready:`Queue updated · ${taskReadinessLabel(rec)}`};
       const actor=(f.residents||[]).find(r=>r.id===event.actor)?.name||event.actor||"Resident unrecorded";
-      rec.events.push({seq:f.seq,at:f.at,label:labels[op],actor});
+      rec.events.push({seq:f.seq,at:f.at,label:labels[op],actor,actorId:event.actor});
     }
     previous=tasks;
   }
@@ -475,8 +475,9 @@ function workshopTasks(frames, moment, at) {
     return {...t,state};
   });
 }
-let workshopState={filter:"all",readiness:"all",selectedId:null,pages:{}};
+let workshopState={filter:"all",readiness:"all",query:"",selectedId:null,pages:{}};
 const WORKSHOP_PAGE_SIZE=4;
+function workshopSearchText(value) {return (value||"").trim().replace(/\s+/g," ").toLowerCase();}
 function workshopOrder(a,b) {return (b.finishedSeq||b.events.at(-1)?.seq||0)-(a.finishedSeq||a.events.at(-1)?.seq||0);}
 function workshopStatus(t) {
   if(t.state==="done")return "Finished · acceptance and delivery unknown";
@@ -522,6 +523,18 @@ function renderWorkshopTasks(content) {
       workshopState[key]=select.value;workshopState.pages={};workshopRedraw(select.id);
     });
   }
+  const searchRow=html("div","workshop-search",undefined,box);
+  const searchLabel=html("label","small","Find work",searchRow);
+  const search=html("input","",undefined,searchLabel);search.id="workshop-search";search.type="search";
+  search.placeholder="Task title or resident name";search.value=workshopState.query;
+  search.setAttribute("aria-describedby","workshop-results");
+  search.addEventListener("input",()=>{
+    workshopState.query=search.value;workshopState.pages={};renderBoard();
+  });
+  const clear=workshopButton(searchRow,"Clear search",()=>{
+    workshopState.query="";search.value="";workshopState.pages={};renderBoard();search.focus({preventScroll:true});
+  });clear.id="workshop-clear";
+  const results=html("p","small",undefined,box);results.id="workshop-results";results.setAttribute("role","status");
   // Detail precedes the bounded board, so a selection is useful even on a phone.
   const detail=html("div","workshop-detail",undefined,box);detail.id="workshop-detail";detail.tabIndex=-1;
   detail.setAttribute("role","region");detail.setAttribute("aria-label","Selected task history");
@@ -540,7 +553,7 @@ function renderWorkshopTasks(content) {
     }
     if(!chosen.events.length)html("p","small","Individual handoffs are not exposed in this snapshot.",detail);
     workshopButton(detail,"Find task card",()=>{
-      workshopState.filter=chosen.state;workshopState.readiness="all";
+      workshopState.filter=chosen.state;workshopState.readiness="all";workshopState.query="";
       const position=tasks.filter(t=>t.state===chosen.state).sort(workshopOrder).findIndex(t=>t.id===chosen.id);
       workshopState.pages[chosen.state]=Math.floor(position/WORKSHOP_PAGE_SIZE);
       workshopRedraw(`workshop-task-${chosen.id}`,true);
@@ -549,46 +562,56 @@ function renderWorkshopTasks(content) {
     html("h3","",workshopState.selectedId?"Selected task not yet recorded":"Follow a thread",detail);
     html("p","small",workshopState.selectedId?"Return to present to continue its story. Later facts stay hidden here.":"Choose a card to see its recorded handoffs and visit those moments.",detail);
   }
-  const filtered=tasks.filter(t=>{
-    const ready=t.ready===true?"ready":t.ready===false?"not-queued":"unknown";
-    return (workshopState.filter==="all"||(workshopState.filter==="unfinished"?t.state!=="done":t.state===workshopState.filter))&&
-      (workshopState.readiness==="all"||ready===workshopState.readiness);
-  });
   const board=html("div","workshop-board",undefined,box);
-  if(!filtered.length)html("p","empty-note","No work matches these filters at this moment.",board);
-  for(const [key,title] of [["claimed","Recorded claims"],["unassigned","Unassigned"],["expired","Expired leases"],["done","Recent finishes"],["unknown","State unknown"]]) {
-    const group=filtered.filter(t=>t.state===key).sort(workshopOrder);
-    if(!group.length)continue;
-    const section=html("div","workshop-group",undefined,board);
-    html("h3","",`${title} · ${group.length}`,section);
-    const page=Math.min(workshopState.pages[key]||0,Math.ceil(group.length/WORKSHOP_PAGE_SIZE)-1),start=page*WORKSHOP_PAGE_SIZE;
-    const cards=html("div","workshop-cards",undefined,section);
-    for(const task of group.slice(start,start+WORKSHOP_PAGE_SIZE)) {
-      const card=workshopButton(cards,undefined,()=>{
-        workshopState.selectedId=task.id;workshopRedraw("workshop-detail",true);
-      },`workshop-task${task.state=== "expired"?" expired":""}`);
-      card.id=`workshop-task-${task.id}`;card.setAttribute("aria-pressed",String(task.id===workshopState.selectedId));
-      card.setAttribute("aria-controls","workshop-detail");
-      html("strong","",task.title||"Untitled task",card);
-      html("span","small",workshopStatus(task),card);
-      html("span","small",taskReadinessLabel(task),card);
-      html("span","small",taskProjectLabel(task),card);
-    }
-    if(group.length>WORKSHOP_PAGE_SIZE) {
-      const nav=html("div","workshop-pages",undefined,section);
-      nav.id=`workshop-pages-${key}`;nav.tabIndex=-1;
-      nav.setAttribute("role","group");
-      nav.setAttribute("aria-label",`${title} pages`);
-      for(const [delta,label] of [[-1,"Previous"],[1,"Next"]]) {
-        const button=workshopButton(nav,label,()=>{
-          workshopState.pages[key]=page+delta;workshopRedraw(nav.id);
-        });
-        button.id=`workshop-${key}-${label}`;button.disabled=page+delta<0||(page+delta)*WORKSHOP_PAGE_SIZE>=group.length;
+  const names=new Map((frame.residents||[]).map(r=>[r.id,r.name]));
+  function renderBoard() {
+    const query=workshopSearchText(workshopState.query);
+    const filtered=tasks.filter(t=>{
+      const ready=t.ready===true?"ready":t.ready===false?"not-queued":"unknown";
+      return (workshopState.filter==="all"||(workshopState.filter==="unfinished"?t.state!=="done":t.state===workshopState.filter))&&
+        (workshopState.readiness==="all"||ready===workshopState.readiness)&&
+        (!query||[t.title,names.get(t.owner),...t.events.flatMap(e=>[names.get(e.actorId),e.actor!==e.actorId?e.actor:null])]
+          .some(value=>workshopSearchText(value).includes(query)));
+    });
+    clear.disabled=!workshopState.query;
+    results.textContent=`${filtered.length} of ${tasks.length} tasks match search and filters at this moment`;
+    board.replaceChildren();
+    if(!filtered.length)html("p","empty-note","No work matches this search and these filters at this moment. Clear search or change Work and Queue to look again.",board);
+    for(const [key,title] of [["claimed","Recorded claims"],["unassigned","Unassigned"],["expired","Expired leases"],["done","Recent finishes"],["unknown","State unknown"]]) {
+      const group=filtered.filter(t=>t.state===key).sort(workshopOrder);
+      if(!group.length)continue;
+      const section=html("div","workshop-group",undefined,board);
+      html("h3","",`${title} · ${group.length}`,section);
+      const page=Math.min(workshopState.pages[key]||0,Math.ceil(group.length/WORKSHOP_PAGE_SIZE)-1),start=page*WORKSHOP_PAGE_SIZE;
+      const cards=html("div","workshop-cards",undefined,section);
+      for(const task of group.slice(start,start+WORKSHOP_PAGE_SIZE)) {
+        const card=workshopButton(cards,undefined,()=>{
+          workshopState.selectedId=task.id;workshopRedraw("workshop-detail",true);
+        },`workshop-task${task.state=== "expired"?" expired":""}`);
+        card.id=`workshop-task-${task.id}`;card.setAttribute("aria-pressed",String(task.id===workshopState.selectedId));
+        card.setAttribute("aria-controls","workshop-detail");
+        html("strong","",task.title||"Untitled task",card);
+        html("span","small",workshopStatus(task),card);
+        html("span","small",taskReadinessLabel(task),card);
+        html("span","small",taskProjectLabel(task),card);
       }
-      const count=html("span","small",`${start+1}–${Math.min(start+WORKSHOP_PAGE_SIZE,group.length)} of ${group.length}`,nav);
-      count.setAttribute("role","status");
+      if(group.length>WORKSHOP_PAGE_SIZE) {
+        const nav=html("div","workshop-pages",undefined,section);
+        nav.id=`workshop-pages-${key}`;nav.tabIndex=-1;
+        nav.setAttribute("role","group");
+        nav.setAttribute("aria-label",`${title} pages`);
+        for(const [delta,label] of [[-1,"Previous"],[1,"Next"]]) {
+          const button=workshopButton(nav,label,()=>{
+            workshopState.pages[key]=page+delta;workshopRedraw(nav.id);
+          });
+          button.id=`workshop-${key}-${label}`;button.disabled=page+delta<0||(page+delta)*WORKSHOP_PAGE_SIZE>=group.length;
+        }
+        const count=html("span","small",`${start+1}–${Math.min(start+WORKSHOP_PAGE_SIZE,group.length)} of ${group.length}`,nav);
+        count.setAttribute("role","status");
+      }
     }
   }
+  renderBoard();
 }
 function visibleScars() {
   const marks=[...frame.scars];
@@ -1429,11 +1452,14 @@ function refreshView(changed=false) {
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
   const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-"))?activeId:null;
+  const searchSelection=activeId==="workshop-search"?{start:document.activeElement.selectionStart,
+    end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
   else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();}
   const replacement=$("catchup-seq");
   if(replacement&&draft!==null)replacement.value=draft;
-  if(replacement&&focusId)$(focusId)?.focus({preventScroll:true});
+  if(focusId)$(focusId)?.focus({preventScroll:true});
+  if(searchSelection)$("workshop-search")?.setSelectionRange?.(searchSelection.start,searchSelection.end,searchSelection.direction);
 }
 async function refresh() {
   if(refreshing)return;
