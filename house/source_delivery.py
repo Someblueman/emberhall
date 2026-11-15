@@ -35,10 +35,30 @@ def review_result(private: Path, run: str) -> dict | None:
     return None
 
 
+def integration_busy(private: Path) -> bool:
+    """Probe kernel ownership, not the persistent lock filename."""
+    with (private / "integration.lock").open("a+b") as lock:
+        try:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return True
+        return False
+
+
+def integration_inflight(record, private: Path) -> bool:
+    from .mailbox_jobs import jobs
+    return integration_busy(private) or ((private / "jobs").exists() and any(
+        item["status"] in {"queued", "running"} and item["argv"]
+        and item["argv"][0] == "integrate" and "--inspect" not in item["argv"]
+        for item in jobs(record)))
+
+
 def queue_review(record, private: Path) -> None:
     from .home import pending_contributions
     state = record.read()[0]
     if not enabled(state):
+        return
+    if integration_inflight(record, private):
         return
     requests = state["life"]["requests"]
     if any("review_run" in r and r["status"] in {"pending", "assigned"} for r in requests.values()):

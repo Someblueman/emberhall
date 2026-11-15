@@ -92,11 +92,29 @@ def pending_contributions(private: Path) -> list[dict]:
     for path in sorted(private.glob("*/contribution.json")):
         item = json.loads(path.read_text())
         reviewed = review_result(private, path.parent.name)
-        if reviewed and reviewed["status"] in {"integrated", "rejected"}:
+        if reviewed:
             continue
         if item.get("status") == "pending-review":
             result.append({"run": path.parent.name, "commit": item["commit"], "paths": item["paths"]})
     return result
+
+
+def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
+    """Exclude reviews already in flight or terminal without suppressing other work."""
+    from .source_delivery import review_result
+    def blocked(item):
+        target = item.get("review_run")
+        return target is not None and (busy or review_result(private, target))
+    demand["pending_help"] = [key for key in demand["pending_help"]
+        if not blocked(state["life"]["requests"][key])]
+    demand["ready_tasks"] = [key for key in demand["ready_tasks"]
+        if not blocked(state["tasks"][key])]
+    demand["uncovered_tasks"] = max(0, len(demand["ready_tasks"]) - len(demand["idle_residents"]))
+    capacity = staffing.capacity(state)
+    demand["wanted_starts"] = min(demand["wanted_starts"], max(
+        capacity["baseline"] - capacity["regular"], len(demand["pending_help"])
+        + demand["uncovered_tasks"] + (demand["explore_generation"] is not None)))
+    return demand
 
 
 @dataclass
@@ -150,6 +168,12 @@ class Coordinator:
         from .source_delivery import review_result
         state = self.record.read()[0]
         for key, request in state.get("life", {}).get("requests", {}).items():
+            if (request["status"] in {"pending", "assigned"} and "review_run" in request
+                    and review_result(self.private, request["review_run"])):
+                self.record.append("life", CONTROLLER, {"kind": "help-resolved", "request": key,
+                    "reason": "The contribution has a terminal integration receipt."},
+                    f"home-help-{key}-review-completed")
+                continue
             if (request["status"] in {"pending", "assigned"} and "task" in request
                     and state["tasks"][request["task"]]["status"] == "done"
                     and ("review_run" not in request or review_result(self.private, request["review_run"]))):
@@ -363,7 +387,8 @@ class Coordinator:
                 f"If keeping a research artifact, create and claim a task owning only research/explorations/{run}.md. "
                 "A full shelf needs competitive council choice with milestones and independent votes; "
                 "request those through ordinary help, without choosing for others or voting for your own idea.\n")
-        candidates = pending_contributions(self.private)
+        from .source_delivery import integration_inflight
+        candidates = [] if integration_inflight(self.record, self.private) else pending_contributions(self.private)
         if candidates:
             assignment += ("Earlier source contributions await an actual resident review (never automatically accepted):\n" +
                            json.dumps(candidates[:12], ensure_ascii=False) + "\n" +
@@ -595,6 +620,8 @@ class Coordinator:
             for _ in range(staffing.capacity(self.record.read()[0])["total_limit"]):
                 state = self.record.read()[0]
                 demand = workload(state, max(time.time(), state["at"]))
+                from .source_delivery import integration_inflight
+                demand = review_demand(state, demand, self.private, integration_inflight(self.record, self.private))
                 if not demand["wanted_starts"]:
                     break
                 at = max(time.time(), state["at"])
