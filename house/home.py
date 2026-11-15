@@ -67,9 +67,18 @@ def inspect(record: Record) -> dict:
 
 
 def choose_provider(state: dict, now: float, preferred: str | None = None, *,
-                    exploring: bool = False, reviewing: bool = False) -> str | None:
+                    exploring: bool = False, reviewing: bool = False, ballot_task: dict | None = None) -> str | None:
     life = state.get("life", {})
     available = [kind for kind in KINDS if provider_available(state, kind, now)]
+    if ballot_task is not None:
+        from . import ballot_work
+        choice = state["shelf"]["choices"][ballot_task["ballot_choice"]]
+        if choice["status"] == "open":
+            available = [kind for kind in available if any(
+                ballot_work.eligible(state, ballot_task, resident)
+                and any(not staffing.helper({"agent": kind, "model": model}) and
+                        return_eligible(state, resident, kind, model, now) for model in providers.MODELS[kind])
+                for resident in state["residents"])]
     if exploring:
         different = [kind for kind in available if kind != state.get("shelf", {}).get("last_kind")]
         available = different or available
@@ -109,7 +118,9 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
         if not blocked(state["life"]["requests"][key])]
     demand["ready_tasks"] = [key for key in demand["ready_tasks"]
         if not blocked(state["tasks"][key])]
-    demand["uncovered_tasks"] = max(0, len(demand["ready_tasks"]) - len(demand["idle_residents"]))
+    from . import ballot_work
+    demand["uncovered_task_ids"] = ballot_work.uncovered(state, demand["ready_tasks"], demand["idle_residents"])
+    demand["uncovered_tasks"] = len(demand["uncovered_task_ids"])
     capacity = staffing.capacity(state)
     demand["wanted_starts"] = min(demand["wanted_starts"], max(
         capacity["baseline"] - capacity["regular"], len(demand["pending_help"])
@@ -357,6 +368,8 @@ class Coordinator:
                 f"Suggested {'project ' if project else ''}task: {assigned['task']}; generation {assigned['task_generation']}; "
                 + (f"project {task['project']}; milestone deadline {project['deadline']}.\n" if project else "\n") +
                 f"Title: {task['title']}\nFull task: {task['description']}\n"
+                + ("The linked choice is closed: record that verified finding; do not cast a ballot.\n"
+                   if "ballot_choice" in task and state["shelf"]["choices"][task["ballot_choice"]]["status"] != "open" else "") +
                 "This finite admission hint is not ownership. Read current state and claim the current generation "
                 "with a fresh token before editing; if blocked, claimed or changed, do not overwrite another resident. "
                 "Build this assigned project work before unrelated contribution reviews.\n")
@@ -428,6 +441,11 @@ class Coordinator:
             if "task" in request and "review_run" not in request and task_id is None:
                 task_id = request["task"]
                 task_generation = state["tasks"][task_id]["generation"]
+        from . import ballot_work
+        if (task_id is None and "task" in request and "review_run" not in request
+                and ballot_work.enabled(state) and "ballot_choice" in state["tasks"].get(request["task"], {})):
+            task_id = request["task"]
+            task_generation = state["tasks"][task_id]["generation"]
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         authors = set()
@@ -436,12 +454,24 @@ class Coordinator:
         bound_task = state["tasks"].get(task_id, {}) if task_id is not None else {}
         if "review_run" in bound_task:
             authors.add(state["life"]["runs"][bound_task["review_run"]]["resident"])
+        if ("target_resident" not in request and "model" not in request and helper_model is None and ballot_work.enabled(state)
+                and "ballot_choice" in bound_task
+                and state["shelf"]["choices"][bound_task["ballot_choice"]]["status"] == "open"):
+            returning = [resident for resident in state["residents"]
+                         if resident not in authors and ballot_work.eligible(state, bound_task, resident)
+                         and (previous := latest_run(state, resident)) is not None
+                         and previous["agent"] == kind and not staffing.helper(previous)
+                         and return_eligible(state, resident, kind, previous["model"], at)]
+            if not returning:
+                return None
+            first = min(returning, key=lambda key: (latest_run(state, key)["ended_sequence"], key))
+            model = latest_run(state, first)["model"]
         # Targeted help must use its exact resident/route; never substitute an older eligible or new identity.
         if "target_resident" in request:
             target = request["target_resident"]
             if kind != request.get("agent") or model != request.get("model"):
                 return None
-            if target in authors:
+            if target in authors or not ballot_work.eligible(state, bound_task, target):
                 return None
             if not return_eligible(state, target, kind, model, at):
                 return None
@@ -450,8 +480,11 @@ class Coordinator:
             resident = target
         else:
             eligible = [resident for resident in state["residents"]
-                        if resident not in authors and return_eligible(state, resident, kind, model, at)]
-            if not eligible and "review_run" in bound_task:
+                        if resident not in authors and ballot_work.eligible(state, bound_task, resident)
+                        and return_eligible(state, resident, kind, model, at)]
+            if not eligible and ("review_run" in bound_task or
+                                 (ballot_work.enabled(state) and "ballot_choice" in bound_task
+                                  and state["shelf"]["choices"][bound_task["ballot_choice"]]["status"] == "open")):
                 return None
             resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
                 "resident-" + uuid.uuid4().hex)
@@ -466,6 +499,8 @@ class Coordinator:
             extra["explore_generation"] = explore_generation
         if task_id is not None:
             extra.update(task=task_id, task_generation=task_generation)
+            if ballot_work.enabled(state) and "ballot_choice" in bound_task:
+                extra["ballot_open"] = state["shelf"]["choices"][bound_task["ballot_choice"]]["status"] == "open"
         mode = ("review" if "review_run" in request else "work") if project_work.enabled(state) else (
             "review" if pending_contributions(self.private) else "work")
         if model in staffing.HELPER_MODELS and task_id is not None:
@@ -479,7 +514,9 @@ class Coordinator:
             clean = message in {"owner paused admissions", "Explorer demand changed", "resident capacity reached",
                                 "three residents are already home", "provider is cooling down", "help already taken",
                                 "project task demand changed", "project task generation changed",
-                                "project help demand changed"} or (backlog and message == "ready backlog demand changed")
+                                "project help demand changed", "ballot task generation changed", "ballot task demand changed",
+                                "ballot choice state changed", "ballot resident eligibility changed",
+                                "ballot task coverage changed", "ballot task binding changed"} or (backlog and message == "ready backlog demand changed")
             if model in staffing.HELPER_MODELS and message in {
                     "helper capacity changed", "helper task generation changed", "helper task demand changed",
                     "helper task coverage changed", "helper help demand changed", "helper task role changed",
@@ -647,8 +684,12 @@ class Coordinator:
                 if (limits["regular"] >= limits["baseline"] and not pending
                         and not demand["uncovered_tasks"] and demand["explore_generation"] is None):
                     break
+                from . import ballot_work
+                candidates = (demand["uncovered_task_ids"] if ballot_work.enabled(state) and
+                              any("ballot_choice" in state["tasks"][k] for k in demand["ready_tasks"])
+                              else demand["ready_tasks"])
                 selected = project_work.first(state, max(time.time(), state["at"]),
-                                              demand["ready_tasks"] if demand["uncovered_tasks"] else [],
+                                              candidates if demand["uncovered_tasks"] else [],
                                               [key for key, _ in pending])
                 task_args = {}
                 if selected and "task" in selected:
@@ -659,9 +700,17 @@ class Coordinator:
                     help_id = selected["help_request"] if selected else pending[0][0] if pending else None
                     request = (help_id, state["life"]["requests"][help_id]) if help_id else (None, {})
                     backlog = help_id is None and demand["uncovered_tasks"] > 0
+                    if backlog and demand["uncovered_task_ids"]:
+                        candidate = demand["uncovered_task_ids"][0]
+                        if "ballot_choice" in state["tasks"][candidate]:
+                            task_args = {"task_id": candidate, "task_generation": state["tasks"][candidate]["generation"]}
                     explore = demand["explore_generation"] if help_id is None and not backlog else None
+                from . import ballot_work
+                bound = state["tasks"].get(task_args.get("task_id") or request[1].get("task"), {})
+                ballot_task = bound if (ballot_work.enabled(state) and "ballot_choice" in bound
+                                        and "target_resident" not in request[1]) else None
                 kind = choose_provider(state, time.time(), request[1].get("agent"), exploring=explore is not None,
-                                       reviewing="review_run" in request[1])
+                                       reviewing="review_run" in request[1], ballot_task=ballot_task)
                 if kind is None:
                     break
                 run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True, **task_args)
