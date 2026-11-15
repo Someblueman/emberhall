@@ -534,6 +534,15 @@ function recentGrowth(frames, endIndex, endAt) {
   }
   return changes.reverse();
 }
+function renderChoiceProgress(box) {
+  const choices=(frame.voting?.choices||[]).filter(choice=>choice.status==="open");
+  for(const choice of choices) {
+    const counted=choice.votes.filter(vote=>vote.counted===true).length;
+    const row=html("p","",`Council choosing: ${counted} of 3 counted votes · ${choice.candidates.length} candidates. `,box);
+    const link=html("a","","See candidates and votes →",row);link.href="#voting-card";
+  }
+  return choices.length>0;
+}
 function renderRecentGrowth() {
   const box=$("recent-growth");
   if(!box)return;
@@ -542,10 +551,15 @@ function renderRecentGrowth() {
   const changes=recentGrowth(data.frames,index,endAt);
   html("p","small",`Twelve hours ending ${clock(endAt)}${current?" · published record":" · selected moment"}.`,box);
   const active=(frame.shelf?.projects||[]).filter(project=>project.status==="active");
-  const building=html("a","growth-building",active.length
-    ?`Building now: ${active.map(project=>titleFor(project,"project")).join("; ")}`
-    :"No selected project is active. See the shelf and council choices →",box);
-  building.href="#shelf-card";
+  if(active.length) {
+    const building=html("a","growth-building",`Building now: ${active.map(project=>titleFor(project,"project")).join("; ")}`,box);
+    building.href="#shelf-card";
+  }
+  const choosing=renderChoiceProgress(box);
+  if(!active.length&&!choosing) {
+    const link=html("a","growth-building","No selected project is active. See the shelf and council choices →",box);
+    link.href="#shelf-card";
+  }
   if(!changes.length)html("p","growth-empty","No room or project milestone changed in this window. Task activity alone does not count as growth.",box);
   else {
     const list=html("ul","growth-list",undefined,box);
@@ -807,10 +821,11 @@ function shelf() {
   const activeProjects = rawProjects.filter(p => p.status === "active");
   const completedProjects = rawProjects.filter(p => p.status === "done");
   html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
+  const choosing=renderChoiceProgress(box);
   if (dataShelf.policy) {
     if (activeProjects.length >= 2) {
       html("p", "small", "Both project slots occupied · build the active projects.", box);
-    } else if (ideas.length) {
+    } else if (ideas.length&&!choosing) {
       html("p", "small", "Project slot available · council can choose from the shelf.", box);
     }
     html("p", "small", dataShelf.explorer
