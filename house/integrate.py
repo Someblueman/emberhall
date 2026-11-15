@@ -34,7 +34,7 @@ DIAGNOSTIC_CHUNK = 64 * 1024
 JOURNAL_EXCLUDED_FIELDS = frozenset({"candidate", "diagnostics"})
 
 
-def source(record: Record, run: str, actor: str):
+def source(record: Record, run: str, actor: str, *, admitted: bool = False):
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", run):
         raise ValueError("invalid run ID")
     state, _, _ = record.read()
@@ -43,7 +43,7 @@ def source(record: Record, run: str, actor: str):
         raise ValueError("contribution requires a stopped resident")
     if actor not in state["residents"]:
         raise ValueError("integrator must be a resident")
-    if actor == item["resident"] or not state["residents"][actor]["awake"]:
+    if actor == item["resident"] or (not admitted and not state["residents"][actor]["awake"]):
         raise ValueError("integration requires a different, awake resident")
     workspace = workspace_path(record, run, state)
     report = json.loads((record.common / "house-home" / run / "contribution.json").read_text())
@@ -239,9 +239,14 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
         raise ValueError("rejection needs a bounded reason and cannot publish")
     private = record.common / "house-home"
     private.mkdir(mode=0o700, exist_ok=True)
+    # A trusted action is admitted while its reviewer is awake. It may finish
+    # after that requester exits, just like an already-running acceptance test.
+    job = bool(os.environ.get("EMBERHALL_ACTION_JOB"))
+    if job:
+        source(record, run, actor)
     with (private / "integration.lock").open("a+b") as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        workspace, report = source(record, run, actor)
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | (0 if job else fcntl.LOCK_NB))
+        workspace, report = source(record, run, actor, admitted=job)
         head = git(record.root, "rev-parse", "HEAD")
         path = private / run / "integration.json"
         if path.exists():
@@ -273,10 +278,19 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
                     if contains.returncode != 0:
                         raise ValueError("accepted contribution is absent from its merge commit; preserve it")
                 return accepted
-            if accepted.get("status") == "rejected":
+            if accepted.get("status") in {"rejected", "conflict", "tests-failed"}:
                 if accepted.get("run") != run or accepted.get("contribution") != report["commit"]:
                     raise ValueError("rejected contribution receipt is inconsistent; preserve it")
                 return accepted
+            if accepted.get("status") == "prepared":
+                # Only an explicit publish may merge a prepared candidate.
+                # A reject or a non-publishing review replays without merging,
+                # leaving source unchanged and retaining the candidate.
+                if reject is not None:
+                    raise ValueError("prepared candidate retained; reject does not merge; preserve it")
+                if not publish:
+                    return accepted
+                return publish_prepared(record, run, actor, report, path, accepted, admitted=job)
         if reject is not None:
             receipt = {"run": run, "actor": actor, "base": head, "contribution": report["commit"],
                        "status": "rejected", "reason": reject}
@@ -327,18 +341,49 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
                     "expected_head": receipt["candidate_head"], "actual_head": actual_head,
                     "dirty": dirty}
         if publish and receipt["status"] == "reviewed":
-            if head != git(record.root, "rev-parse", "HEAD") or git(record.root, "status", "--porcelain", "--untracked-files=all"):
-                raise ValueError("shared source changed during review; candidate retained")
-            # Git itself refuses overwrites if an interactive writer dirties a
-            # touched path between the check and this fast-forward operation.
-            git(record.root, "fetch", "--quiet", str(candidate), receipt["candidate_head"])
-            git(record.root, "merge", "--ff-only", receipt["candidate_head"])
-            receipt["status"] = "integrated"
+            receipt["status"] = "prepared"
+            persist_result(path, receipt)
+            return publish_prepared(record, run, actor, report, path, receipt, admitted=job)
         save_result(record, actor, path, receipt)
         return receipt
 
 
-def save_result(record: Record, actor: str, path: Path, receipt: dict):
+def publish_prepared(record: Record, run: str, actor: str, report: dict, path: Path,
+                     receipt: dict, *, admitted: bool) -> dict:
+    candidate_name = receipt.get("candidate", "")
+    target = receipt.get("candidate_head", "")
+    base = receipt.get("base", "")
+    if (receipt.get("run") != run or receipt.get("contribution") != report["commit"]
+            or receipt.get("test_exit") != 0 or not re.fullmatch(r"integration-[0-9a-f]{32}", candidate_name)
+            or not re.fullmatch(r"[0-9a-f]{40}", target) or not re.fullmatch(r"[0-9a-f]{40}", base)):
+        raise ValueError("prepared integration receipt is inconsistent; preserve it")
+    candidate = path.parent.parent / candidate_name
+    if (git(candidate, "rev-parse", "HEAD") != target
+            or git(candidate, "status", "--porcelain", "--untracked-files=all")):
+        raise ValueError("prepared candidate changed; preserve it")
+    if subprocess.run(["git", "merge-base", "--is-ancestor", report["commit"], target],
+                      cwd=candidate, capture_output=True).returncode:
+        raise ValueError("prepared candidate lacks contribution; preserve it")
+    head = git(record.root, "rev-parse", "HEAD")
+    already = subprocess.run(["git", "merge-base", "--is-ancestor", target, head],
+                             cwd=record.root, capture_output=True).returncode == 0
+    if not already:
+        if head != base or git(record.root, "status", "--porcelain", "--untracked-files=all"):
+            raise ValueError("shared source changed during review; candidate retained")
+        git(record.root, "fetch", "--quiet", str(candidate), target)
+        _, current_report = source(record, run, actor, admitted=admitted)
+        if current_report != report:
+            raise ValueError("contribution changed during review; candidate retained")
+        if (git(record.root, "rev-parse", "HEAD") != base
+                or git(record.root, "status", "--porcelain", "--untracked-files=all")):
+            raise ValueError("shared source changed during review; candidate retained")
+        git(record.root, "merge", "--ff-only", target)
+    receipt["status"] = "integrated"
+    save_result(record, actor, path, receipt)
+    return receipt
+
+
+def persist_result(path: Path, receipt: dict):
     temporary = path.with_suffix(".tmp")
     with temporary.open("w") as output:
         temporary.chmod(0o600)
@@ -350,6 +395,10 @@ def save_result(record: Record, actor: str, path: Path, receipt: dict):
         os.fsync(directory)
     finally:
         os.close(directory)
+
+
+def save_result(record: Record, actor: str, path: Path, receipt: dict):
+    persist_result(path, receipt)
     record.append("say", actor, {"text": "house-integration-v1 " + json.dumps({
         k: v for k, v in receipt.items() if k not in JOURNAL_EXCLUDED_FIELDS}, sort_keys=True)})
 
