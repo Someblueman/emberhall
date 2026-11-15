@@ -54,6 +54,7 @@ PROJECT_WORK_SCOPE = "project-work-routing-20261114"
 TARGETED_WAKE_SCOPE = "targeted-resident-wakes-20261114"
 HELPER_SCOPE = "helper-staffing-20261114"
 CREATIONS_SCOPE = "public-creations-20261114"
+REVIEW_COMPLETION_SCOPE = "review-completion-20261115"
 LENS_SCOPE = "hearth-lens-native-20261115"
 IDLE_COVERAGE_SCOPE = "idle-coverage-20261115"
 BALLOT_SCOPE = "ballot-work-routing-20261115"
@@ -72,7 +73,8 @@ FAILED_CLI_OBSERVATION = 465
 FAILED_BOOTSTRAP_RUN = "2c9fc6bd10574c84bf0e45aba78a054c"
 FAILED_BOOTSTRAP_SHA256 = "034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406"
 FAILED_BOOTSTRAP_OBSERVATION = 530
-SOURCES = {LENS_SCOPE: "f781601c6cde63e51afad54522d0a30b436ec839fecae5433747dfc1041bf988",
+SOURCES = {REVIEW_COMPLETION_SCOPE: "b9e80fecc0d67995c7097ccc82373c49e4575a473d5fae5001631994ceb923a8",
+           LENS_SCOPE: "f781601c6cde63e51afad54522d0a30b436ec839fecae5433747dfc1041bf988",
            IDLE_COVERAGE_SCOPE: "5f4fbc269934c939c5cea27715a58cf2aa697030ce950e4e6a8e976a333f8560",
            BALLOT_SCOPE: "09ee1382e08ba49151101af0f06a968aa720ecdb26008b7e932b77186a9ad9b0",
            CONTENTION_SCOPE: "77394ab900f064f2022ac12bd859df192a575c59a3e5b213f22fccccd03cb781",
@@ -101,6 +103,7 @@ RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    REVIEW_COMPLETION_SCOPE: OWNER_MODULES | {"house/review_completion.py", "house/resident_actions.py", "house/__main__.py"},
     LENS_SCOPE: OWNER_MODULES | {"house/hearth_lens.py", "house/__main__.py", "house/mailbox.py"},
     IDLE_COVERAGE_SCOPE: {"house/life.py", "house/maintenance.py"},
     BALLOT_SCOPE: OWNER_MODULES | {"house/ballot_work.py", "house/model.py", "house/__main__.py",
@@ -293,6 +296,8 @@ def apply(state: dict, event: dict) -> None:
         extra = OWNER_MODULES | ({"house/building.py"} if scope == GROWTH_SCOPE else set())
         if scope == REPAIR_SCOPE:
             extra.add("house/opencode_auth.py")
+        if scope == REVIEW_COMPLETION_SCOPE:
+            extra.add("house/review_completion.py")
         if scope == LENS_SCOPE:
             extra.add("house/hearth_lens.py")
         if scope == BALLOT_SCOPE:
