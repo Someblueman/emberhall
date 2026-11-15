@@ -141,7 +141,43 @@ def failure_diagnostics(log: Path, test_exit: int) -> dict:
 
 def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[str]]]:
     paths = changed_paths(candidate, base, head)
-    if paths and all(_is_ordinary_prose_path(path) for path in paths):
+    legacy_prose = bool(paths) and all(_is_ordinary_prose_path(path) for path in paths)
+    new_evidence = [path for path in paths
+                    if not _is_ordinary_prose_path(path) and _is_new_evidence_note_path(path)]
+    eligible = bool(new_evidence) and all(
+        _is_ordinary_prose_path(path) or _is_new_evidence_note_path(path) for path in paths)
+    categories = {path.split("/", 2)[1] for path in new_evidence}
+    marker_by_category: dict[str, bool] = {}
+
+    def has_marker(category: str) -> bool:
+        if category not in marker_by_category:
+            marker_by_category[category] = _has_authoritative_evidence_marker(
+                candidate, base, category)
+        return marker_by_category[category]
+
+    if eligible and len(paths) > PROSE_PATH_LIMIT:
+        # One committed-tree diff distinguishes old evidence from additions without
+        # doing a Git lookup for each path in an unbounded candidate. Protected
+        # categories are checked once per category and keep foundation dispatch.
+        non_additions = subprocess.run(
+            ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv",
+             "--no-renames", "--diff-filter=DMRTUXB", "--name-only", "-z", base, head, "--"],
+            cwd=candidate, capture_output=True, check=True, timeout=30,
+        ).stdout
+        changed_existing = {p.decode("utf-8") for p in non_additions.split(b"\0") if p}
+        if changed_existing.intersection(new_evidence):
+            eligible = False
+        elif any(has_marker(category) for category in categories):
+            eligible = False
+        else:
+            raise ValueError("prose acceptance exceeds the changed-file limit")
+    bounded_evidence_additions = (
+        eligible
+        and all(_tree_entry(candidate, base, path, require_regular=False) is None
+                for path in new_evidence)
+        and all(not has_marker(category) for category in categories)
+    )
+    if legacy_prose or bounded_evidence_additions:
         _validate_prose_commit(candidate, base, head, paths)
         return "prose", []
     project_only = bool(paths) and all(re.fullmatch(r"projects/[A-Za-z0-9_-]+/.+", p) for p in paths)
@@ -180,7 +216,46 @@ def _is_ordinary_prose_path(path: str) -> bool:
     )
 
 
-def _tree_entry(candidate: Path, tree: str, path: str) -> tuple[bytes, bytes] | None:
+def _is_new_evidence_note_path(path: str) -> bool:
+    if not re.fullmatch(r"evidence/(?:[A-Za-z0-9][A-Za-z0-9._-]*/)+[A-Za-z0-9][A-Za-z0-9._-]*\.md", path):
+        return False
+    category = path.split("/", 2)[1]
+    filename = path.rsplit("/", 1)[-1].lower()
+    return (
+        not re.fullmatch(r"choice-[0-9]+", category)
+        and filename not in {
+            "agents.md", "skill.md", "readme.md", "contributing.md", "instructions.md",
+            "prompt.md", "claude.md", "gemini.md", "owner-objective.md", "owner-addition.md",
+            "owner-authorization.md", "owner-scope.md", "owner-steering.md",
+            "charter.md", "rules.md", "authority.md", "policy.md",
+        }
+    )
+
+
+def _has_authoritative_evidence_marker(candidate: Path, base: str, category: str) -> bool:
+    output = subprocess.run(
+        ["git", "--literal-pathspecs", "ls-tree", "-r", "--name-only", "-z", base,
+         "--", f"evidence/{category}"],
+        cwd=candidate, capture_output=True, check=True, timeout=30,
+    ).stdout
+    markers = {
+        "agents.md", "skill.md", "readme.md", "contributing.md", "instructions.md",
+        "prompt.md", "claude.md", "gemini.md", "summary.md", "continue.md",
+        "review.md", "disposition.md",
+    }
+    policy_terms = (
+        "owner-", "objective", "addition", "authorization", "scope", "steering",
+        "charter", "ratification", "authority", "policy", "rules", "instruction",
+        "proposal", "approval",
+    )
+    return any(
+        (filename := name.rsplit(b"/", 1)[-1].decode("utf-8", errors="ignore").lower()) in markers
+        or any(term in filename for term in policy_terms)
+        for name in output.split(b"\0") if name
+    )
+
+
+def _tree_entry(candidate: Path, tree: str, path: str, *, require_regular: bool = True) -> tuple[bytes, bytes] | None:
     output = subprocess.run(
         ["git", "--literal-pathspecs", "ls-tree", "-z", tree, "--", path],
         cwd=candidate, capture_output=True, check=True, timeout=30,
@@ -195,7 +270,7 @@ def _tree_entry(candidate: Path, tree: str, path: str) -> tuple[bytes, bytes] | 
     if entry_path != path.encode("utf-8") or len(fields) != 3:
         raise ValueError("prose acceptance found malformed tree metadata")
     mode, kind, oid = fields
-    if mode != b"100644" or kind != b"blob":
+    if require_regular and (mode != b"100644" or kind != b"blob"):
         raise ValueError("prose acceptance requires committed non-executable regular files")
     if not re.fullmatch(rb"[0-9a-f]{40}|[0-9a-f]{64}", oid):
         raise ValueError("prose acceptance found malformed tree metadata")
