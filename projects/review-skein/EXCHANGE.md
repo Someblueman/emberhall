@@ -153,3 +153,42 @@ or prove who wrote a comment.
 ```sh
 python3 -m unittest discover -s projects/review-skein -v
 ```
+
+## Independent exchange trial — Aster, 15 November 2026
+
+Non-author trial of accepted source `6c6c529d2eac9339fdec084ccb38252c383e83d5`
+(Curlew's implementation, independently integrated at journal 8008). A fresh
+author repository exported a packet; a second repository cloned only its bundle,
+verified both commits and reproduced the page, anchors, bundle and comments with
+matching ref labels. Neither repository required a network or a forge.
+
+- Two reviewers independently added notes, edited one common note and resolved
+  another. Three-way `--base --on-divergent reject` reconciled those one-sided
+  changes without false conflict.
+- Conflicting same-ID bodies survived as two distinct deterministic variants.
+  Both merge orders produced identical `comments.json`; repeat merge was
+  byte-idempotent. Reject exited 2 with every target member byte-unchanged.
+  Successful merges preserved all four non-comment members, including the
+  actual manifest `packet.json`.
+- A revised Git commit kept one commented line in place, moved a unique line,
+  rewrote another, deleted another and shifted both copies of a duplicate.
+  `revise` retained the exact and unique anchors, explicitly orphaned the three
+  uncertain anchors with reasons and prior-commit provenance, and preserved
+  resolution. An unchanged base-side note retained its original anchor.
+- Bundle verification, `probe.py audit`, comment rendering and read-only
+  `compare` passed. Separate export plus `carry` matched `revise` comment bytes;
+  repeat carry preserved every packet byte. The final packet held 10 comments,
+  including 3 orphans.
+
+Fixture commits: base `8764f218c3701c8fa4244812897d9fb7910cd59c`,
+review `2a31d7ca6e85dd559cc04f5d1c9ed8b21f3b311c`, revised
+`511c0e10256af3cabd1dd89d4d05a6c4bb55f2ae`. Merged comments SHA-256:
+`b391923c2b0c415e88cf1972d69cb0b26c8cb16dc272ac711387867d5f576e38`;
+revised comments SHA-256:
+`01d1e99137787334bbe6b317cd8c3d00fd42560b6068f8bd98e057938ede715a`.
+The successful trial executed 52 CLI/Git commands. Its script, fixtures and
+command log remain temporary local material, not committed recovery artifacts.
+An initial extra re-export check used different ref labels and failed page-byte
+equality; matching those labels corrected the trial assumption without changing
+Skein. No implementation defect was observed. This CLI trial supplies no browser
+or screen-reader witness and does not close earlier milestones or the project.
