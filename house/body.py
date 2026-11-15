@@ -10,6 +10,7 @@ import re
 import subprocess
 import time
 
+from .council import veto_window
 from .model import apply_event
 from .record import Record
 from .work_metrics import public_observation
@@ -149,7 +150,7 @@ def voting_view(state: dict, identities: dict, event_times: dict, origins: dict 
                               "at": v["at"]} for actor, v in proposal.get("endorsements", {}).items()],
             "trial": {"task": trial["task"], "at": trial["at"],
                       "evidence": label(trial["evidence"], 20000)} if trial else None,
-            "notice": {"at": notice["at"], "until": notice["at"] + 86400,
+            "notice": {"at": notice["at"], "until": notice["at"] + veto_window(state, proposal),
                        "url": "https://github.com/Someblueman/emberhall/issues/1#issuecomment-"
                               + str(notice["comment_id"])} if notice else None})
     return {"choices": choices, "proposals": proposals}

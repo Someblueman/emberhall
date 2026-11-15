@@ -700,6 +700,13 @@ class Coordinator:
         owner = owner_upgrade.pending_install(self.private)
         if owner is None and not (renovation.enabled(state) and renovation.pending(state)):
             return False
+        if owner is None:
+            # Do not halt the house for a renovation main has already moved past.
+            reason = renovation.outdated(self.record, state)
+            if reason:
+                renovation.record_failure(self.record, renovation.pending(state)[0], reason)
+                write_private(self.private / "renovation-error.json", {"reason": reason[:500], "at": time.time()})
+                return False
         if self.running or not renovation.drained(self.record, self.private):
             return True
         name = "owner-install" if owner is not None else "renovation"

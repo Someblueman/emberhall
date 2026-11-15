@@ -98,8 +98,9 @@ def notice_body(proposal: str, item: dict) -> str:
             f"ID: `{proposal}`\n\nAuthor: `{item['author']}`\n\n"
             f"Base revision: `{item['base']}`\n\nText SHA-256: `{sha}`\n\n"
             "The following is the exact proposed rule text:\n\n"
-            + item["text"] + "\n\n" + scope +
-            "The full 24-hour veto window begins only when this notice is accepted in the journal. "
+            + item["text"] + "\n\n" + scope
+            + ("The one-hour renovation veto window" if item.get("mode") == "renovation" else "The full 24-hour veto window")
+            + " begins only when this notice is accepted in the journal. "
             "Recorded trial evidence and two independent non-author endorsements are also required. "
             f"To veto from your phone, comment `VETO {proposal}` in this issue. "
             "Only the Steward's authenticated account counts. This notice does not enact the rule.\n")

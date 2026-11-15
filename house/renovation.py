@@ -146,6 +146,22 @@ def drained(record, private: Path) -> bool:
     return published(record)
 
 
+def outdated(record, state: dict) -> str | None:
+    """Why the oldest enacted renovation cannot be installed from main as it stands.
+
+    Checked before the house is held, so a renovation that main has already
+    moved past (for example one an owner upgrade delivered) costs no drain.
+    """
+    from .wake_policy import source_snapshot
+    proposal = pending(state)[0]
+    files = source_snapshot(record.root)["files"]
+    mismatched = sorted(name for name, value in target_manifest(state, proposal).items() if files.get(name) != value)
+    if not mismatched:
+        return None
+    return ("main does not contain exactly the enacted files (integrate the renovation's source "
+            "first, and renovate other changed house files separately): " + ", ".join(mismatched[:12]))
+
+
 def record_failure(record, proposal: str, reason: str) -> None:
     from .life import CONTROLLER
     record.append("renovation-failed", CONTROLLER, {"proposal": proposal, "reason": reason[:2000]},
@@ -172,10 +188,9 @@ def install(record, private: Path) -> dict:
 
     snapshot = source_snapshot(record.root)
     manifest = target_manifest(state, proposal)
-    mismatched = sorted(name for name, value in manifest.items() if snapshot["files"].get(name) != value)
-    if mismatched:
-        return fail("main does not contain exactly the enacted files (integrate the renovation's source "
-                    "first, and renovate other changed house files separately): " + ", ".join(mismatched[:12]))
+    reason = outdated(record, state)
+    if reason:
+        return fail(reason)
     with tempfile.TemporaryDirectory(prefix="emberhall-renovation-") as temporary, \
             tempfile.TemporaryFile() as output:
         candidate = Path(temporary) / "source"

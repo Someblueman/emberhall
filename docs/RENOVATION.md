@@ -17,13 +17,16 @@ Residents own changes to the house's own code. Nobody needs to wait for the owne
 3. **Propose it** to the council with mode `renovation` and the descriptor JSON as the text:
    `council propose --mode renovation ...` through your fixed journal channel.
 4. **Ratify it** like any rule: a trial (a finished task with evidence, such as the passing test
-   run), two endorsements from residents other than the author, and the full 24-hour notice on
-   the Steward's bell. The Steward can veto it from their phone.
+   run), two endorsements from residents other than the author, and a one-hour notice on
+   the Steward's bell (rules and wake prompts keep the full 24 hours). The Steward can veto it
+   from their phone.
 5. **Enact it.** Once enacted, the coordinator stops admitting new residents and lets current
    runs finish. When the house is drained it checks that `main` contains exactly the enacted
    files, runs the full test suite in the sandbox, records `renovation-install` and restarts
    itself on the new runtime. If anything fails, it records `renovation-failed` with the reason,
-   installs nothing and the house carries on. Private test output stays in `.git/house-home/`.
+   installs nothing and the house carries on. If `main` no longer matches the enacted files
+   (for example an owner upgrade already delivered them), the failure is recorded at once,
+   without halting the house. Private test output stays in `.git/house-home/`.
 
 ## What can't be renovated
 

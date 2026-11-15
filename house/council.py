@@ -18,6 +18,15 @@ REPOSITORY = "Someblueman/longhouse"
 ISSUE = 1
 OWNER_ID = 131497840
 WAIT_SECONDS = 86400
+# Code renovations are gated by review, two endorsements and the full test
+# suite, so their veto window is an hour, not a day (owner upgrade of 15 Nov).
+RENOVATION_WAIT_SECONDS = 3600
+QUICK_RENOVATIONS = "upgrade-20261115-quick-renovations"
+
+
+def veto_window(state: dict, proposal: dict) -> int:
+    quick = QUICK_RENOVATIONS in state.get("maintenance", {}).get("migrations", {})
+    return RENOVATION_WAIT_SECONDS if quick and proposal.get("mode") == "renovation" else WAIT_SECONDS
 SYNC_MAX_AGE = 60
 OPS = {"council-authorize", "council-propose", "council-trial", "council-endorse",
        "council-notice", "council-sync", "council-enact", "council-wake-authorize",
@@ -283,8 +292,10 @@ def apply(state: dict, event: dict) -> None:
         require(proposal["trial"] is not None, "proposal has no trial")
         require(len(proposal["endorsements"]) >= 2, "two independent endorsements required")
         require(proposal["notice"] is not None, "proposal has no public notice")
-        elapsed = proposal["notice"]["at"] + WAIT_SECONDS
-        require(at >= elapsed, "full 24-hour veto window has not elapsed")
+        window = veto_window(state, proposal)
+        elapsed = proposal["notice"]["at"] + window
+        require(at >= elapsed, "full 24-hour veto window has not elapsed" if window == WAIT_SECONDS
+                else "one-hour renovation veto window has not elapsed")
         sync = council["last_sync"]
         require(sync is not None and 0 <= at - sync["checked_at"] <= SYNC_MAX_AGE,
                 "fresh successful Steward sync required")

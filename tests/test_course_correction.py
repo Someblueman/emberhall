@@ -235,6 +235,23 @@ class RenovationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "not awaiting"):
             renovation.apply(state, self.install_event(state))
 
+    def test_renovations_wait_an_hour_and_rules_a_day(self):
+        state = {"maintenance": {"migrations": {council.QUICK_RENOVATIONS: {}}}}
+        self.assertEqual(3600, council.veto_window(state, {"mode": "renovation"}))
+        self.assertEqual(86400, council.veto_window(state, {"mode": "rule"}))
+        self.assertEqual(86400, council.veto_window(state, {"mode": "wake-prompt"}))
+        # History before the upgrade replays with the old window.
+        self.assertEqual(86400, council.veto_window({"maintenance": {"migrations": {}}}, {"mode": "renovation"}))
+
+    def test_outdated_renovation_is_named_without_draining(self):
+        from unittest.mock import patch
+        state = self.state()
+        record = type("R", (), {"root": Path(".")})()
+        with patch("house.wake_policy.source_snapshot", return_value={"files": {"house/home.py": "0" * 64, "house/council.py": "2" * 64}}):
+            self.assertIn("house/home.py", renovation.outdated(record, state))
+        with patch("house.wake_policy.source_snapshot", return_value={"files": {"house/home.py": "b" * 64, "house/council.py": "2" * 64}}):
+            self.assertIsNone(renovation.outdated(record, state))
+
     def test_renovation_mode_needs_the_course_correction(self):
         self.assertIn("renovation", council.MODES)
         self.assertFalse(renovation.enabled({"maintenance": {}}))
