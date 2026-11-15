@@ -1,0 +1,2596 @@
+{
+  "anchors": [
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 1,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "# Read the review comments"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 2,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 3,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "The comment viewer turns the packet's `comments.json` into readable terminal"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 4,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "output or a standalone offline HTML page. It uses Skein's existing strict"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 5,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "version-2 comment reader. It shows IDs, bodies, full commit/path/side/line anchors"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 6,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "and their source text, open/resolved status, orphan reasons and rebase history."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 7,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "It reads the comments file only, does not change the packet, and needs neither"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 8,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "Git nor a bundle to display those comments."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 9,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 10,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "```sh"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 11,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "python3 projects/review-skein/comments_view.py /path/to/packet/comments.json"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 12,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "python3 projects/review-skein/comments_view.py /path/to/packet/comments.json \\"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 13,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "  --resolution open --state orphan"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 14,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "```"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 15,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 16,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "Both filters default to `all`. Resolution is `open` or `resolved`; anchor state"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 17,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "is `anchored` or `orphan`. Filters combine: the example shows only open orphans."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 18,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "The first lines report shown/total counts, the selected filters, and totals for"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 19,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "the entire file, so an empty result does not imply that the packet has no comments."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 20,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "Comments retain their stored order; nothing is reanchored, resolved or edited."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 21,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "Terminal and HTML output display control/direction characters as literal Unicode"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 22,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "escapes, preserving ordinary Unicode prose, newlines and tabs."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 23,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 24,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "For a page you can carry to a browser:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 25,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 26,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "```sh"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 27,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "python3 projects/review-skein/comments_view.py /path/to/packet/comments.json \\"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 28,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "  --format html > /path/to/comments-review.html"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 29,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "```"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 30,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 31,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "Choose a separate output file: shell redirection truncates an existing target,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 32,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "so never redirect over `comments.json` or another packet member. The viewer itself"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 33,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "only writes to standard output. Open the result as a local file in a browser;"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 34,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "it has a comments index, skip link, headings, textual status, wrapped text and"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 35,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "visible link focus. All user text is escaped. It contains no scripts, external"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 36,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "resources or network links, and its CSP denies external resources. It is a"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 37,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "snapshot: regenerate it after using `skein.py edit-comment`, `resolve-comment`"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 38,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "or `reopen-comment`. Existing `review.html` remains the code diff."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 39,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 40,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "A version-1 comments file fails with the existing `migrate-comments PACKET`"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 41,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "instruction. Migration is a separate deliberate action through `skein.py`;"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 42,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "the viewer never silently upgrades data. Invalid UTF-8, malformed JSON,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 43,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "duplicate keys/IDs, invalid comments, missing/symlink inputs and inputs larger"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 44,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "than Skein's 32 MiB JSON limit fail with exit 1 and no rendered output. Invalid"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 45,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "CLI arguments exit 2; successful output exits 0. Every record is validated"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 46,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "before applying filters, so filtering cannot hide malformed comments."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 47,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 48,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "This view reports what the comments file says. It does not authenticate authors,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 49,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "verify the Git bundle or check that an anchor still exists in the diff. An orphan"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 50,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "remains visibly orphaned. The original file and comments model remain the record;"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 51,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "HTML is derived output. Markup and CLI tests do not establish browser rendering"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 52,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "or screen-reader speech. The non-author phone/desktop and screen-reader try"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 53,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "required by milestone 2 is still open."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 54,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 55,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "Run the project's existing suite, including real-Git viewer lifecycle checks:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 56,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 57,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "```sh"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 58,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "python3 -m unittest discover -s projects/review-skein -v"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 59,
+      "path": "projects/review-skein/COMMENTS.md",
+      "side": "new",
+      "text": "```"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 1,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "\"\"\"Read strict Skein comments as text or a standalone, offline HTML snapshot.\"\"\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 2,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "from __future__ import annotations"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 3,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 4,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "import argparse"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 5,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "import html"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 6,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "from pathlib import Path"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 7,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "import sys"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 8,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "import unicodedata"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 9,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 10,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "import skein"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 11,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 12,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 13,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "def _visible(value: str) -> str:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 14,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    \"\"\"Keep multiline prose while displaying control and direction markers literally.\"\"\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 15,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    return \"\".join("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 16,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        (f\"\\\\u{ord(character):04x}\" if ord(character) <= 0xFFFF"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 17,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "         else f\"\\\\U{ord(character):08x}\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 18,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        if character not in \"\\n\\t\" and unicodedata.category(character) in {\"Cc\", \"Cf\"}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 19,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        else character"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 20,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        for character in value"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 21,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    )"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 22,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 23,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 24,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "def _anchor_text(anchor: skein.Anchor) -> str:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 25,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    return (f\"{_visible(anchor.path)} | {anchor.side} line {anchor.line}\\n\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 26,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            f\"Commit: {anchor.commit}\\n{_visible(anchor.text)}\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 27,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 28,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 29,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "def render_comments("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 30,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    comments: list[skein.Comment], *, output_format: str = \"text\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 31,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    resolution: str = \"all\", state: str = \"all\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 32,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ") -> str:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 33,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    \"\"\"Render a snapshot; filters hide rows without changing the underlying comments.\"\"\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 34,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    if output_format not in {\"text\", \"html\"}:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 35,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        raise ValueError(\"format must be text or html\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 36,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    if resolution not in {\"all\", \"open\", \"resolved\"} or state not in {\"all\", \"anchored\", \"orphan\"}:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 37,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        raise ValueError(\"unsupported comment filter\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 38,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    selected = [comment for comment in comments"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 39,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                if (resolution == \"all\" or comment.resolution == resolution)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 40,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                and (state == \"all\" or comment.state == state)]"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 41,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    summary = (f\"Showing {len(selected)} of {len(comments)} comments. \""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 42,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "               f\"Filters: resolution={resolution}, state={state}.\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 43,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    totals = (f\"All comments: {sum(c.resolution == 'open' for c in comments)} open, \""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 44,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "              f\"{sum(c.resolution == 'resolved' for c in comments)} resolved; \""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 45,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "              f\"{sum(c.state == 'orphan' for c in comments)} orphan.\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 46,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    if output_format == \"text\":"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 47,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        parts = [\"Skein comments\", summary, totals]"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 48,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        for comment in selected:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 49,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            parts.extend(["
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 50,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                \"\", f\"{comment.identifier} | {comment.resolution} | {comment.state}\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 51,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                _anchor_text(comment.anchor), \"Body:\", _visible(comment.body),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 52,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            ])"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 53,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            if comment.orphan_reason is not None:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 54,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                parts.append(f\"Orphan reason: {_visible(comment.orphan_reason)}\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 55,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            if comment.rebased_from is not None:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 56,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                parts.extend([\"Rebased from:\", _anchor_text(comment.rebased_from)])"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 57,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        if not selected:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 58,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            parts.extend([\"\", \"No comments match these filters.\"])"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 59,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        return \"\\n\".join(parts) + \"\\n\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 60,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 61,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    def escaped(value: str) -> str:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 62,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        return html.escape(_visible(value))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 63,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 64,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    navigation = \"\".join("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 65,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        f'<li><a href=\"#note-{comment.identifier}\">{comment.identifier}: '"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 66,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        f'{comment.resolution}, {comment.state}</a></li>' for comment in selected"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 67,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    )"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 68,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    articles = []"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 69,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    for comment in selected:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 70,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        provenance = \"\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 71,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        if comment.orphan_reason is not None:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 72,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            provenance += f'<p>Orphan reason: {escaped(comment.orphan_reason)}</p>'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 73,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        if comment.rebased_from is not None:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 74,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            provenance += (f'<h3>Rebased from</h3><pre>'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 75,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                           f'{escaped(_anchor_text(comment.rebased_from))}</pre>')"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 76,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        articles.append("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 77,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            f'<article id=\"note-{comment.identifier}\" aria-labelledby=\"title-{comment.identifier}\">'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 78,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            f'<h2 id=\"title-{comment.identifier}\">{comment.identifier}</h2>'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 79,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            f'<p>Status: {comment.resolution}. Anchor: {comment.state}.</p>'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 80,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            f'<h3>Anchor</h3><pre>{escaped(_anchor_text(comment.anchor))}</pre>'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 81,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            f'<h3>Comment</h3><pre>{escaped(comment.body)}</pre>{provenance}</article>'"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 82,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        )"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 83,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    body = \"\\n\".join(articles) or \"<p>No comments match these filters.</p>\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 84,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    return f'''<!doctype html>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 85,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<html lang=\"en\"><head><meta charset=\"utf-8\">"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 86,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 87,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\">"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 88,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<title>Skein comments</title><style>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 89,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "body {{ margin: auto; max-width: 64rem; padding: 1rem; color: #20252b; background: #fff; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 90,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "body, pre {{ font: 1rem/1.6 system-ui, sans-serif; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 91,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "pre, a, h2 {{ white-space: pre-wrap; overflow-wrap: anywhere; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 92,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "article {{ border-top: 2px solid #596774; padding-block: 1rem; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 93,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "pre {{ border-left: 3px solid #596774; padding: .5rem 1rem; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 94,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "a {{ color: #153f8c; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 95,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "a:focus-visible, article:target {{ outline: 3px solid #964400; outline-offset: 3px; }}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 96,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "</style></head><body><a href=\"#comments\">Skip to comments</a><main>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 97,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<h1>Skein comments</h1><p>{summary}</p><p>{totals}</p>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 98,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<p>Read-only snapshot of comments.json. Regenerate after editing or resolving comments."
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 99,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "This page neither verifies the Git bundle nor authenticates a reviewer.</p>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 100,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "<nav id=\"comments\" aria-label=\"Comments\"><ol>{navigation}</ol></nav>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 101,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "{body}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 102,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "</main></body></html>"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 103,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "'''"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 104,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 105,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 106,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "def main(argv: list[str] | None = None) -> int:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 107,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    parser = argparse.ArgumentParser(description=__doc__)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 108,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    parser.add_argument(\"comments\", type=Path, help=\"the packet's version-2 comments.json\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 109,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    parser.add_argument(\"--format\", choices=(\"text\", \"html\"), default=\"text\", dest=\"output_format\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 110,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    parser.add_argument(\"--resolution\", choices=(\"all\", \"open\", \"resolved\"), default=\"all\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 111,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    parser.add_argument(\"--state\", choices=(\"all\", \"anchored\", \"orphan\"), default=\"all\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 112,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    arguments = parser.parse_args(argv)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 113,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    try:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 114,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        path = arguments.comments"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 115,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        if path.is_symlink() or not path.is_file():"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 116,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            raise skein.SkeinError(\"comments must be a regular file, not a symlink\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 117,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        with path.open(\"rb\") as stream:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 118,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            data = stream.read(skein.JSON_LIMIT + 1)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 119,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        if len(data) > skein.JSON_LIMIT:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 120,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "            raise skein.SkeinError(f\"comments exceed {skein.JSON_LIMIT} bytes\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 121,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        comments = skein.loads_comments(data.decode(\"utf-8\"))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 122,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        result = render_comments(comments, output_format=arguments.output_format,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 123,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "                                 resolution=arguments.resolution, state=arguments.state)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 124,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        sys.stdout.write(result)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 125,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        sys.stdout.flush()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 126,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    except BrokenPipeError:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 127,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        return 1"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 128,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    except (OSError, UnicodeError, skein.SkeinError) as exc:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 129,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        print(f\"comments-view: {exc}\", file=sys.stderr)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 130,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "        return 1"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 131,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    return 0"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 132,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 133,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 134,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "if __name__ == \"__main__\":"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 135,
+      "path": "projects/review-skein/comments_view.py",
+      "side": "new",
+      "text": "    raise SystemExit(main())"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 1,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "\"\"\"Comment viewing boundaries and a real exported-packet CLI lifecycle.\"\"\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 2,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "from __future__ import annotations"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 3,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 4,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import contextlib"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 5,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "from dataclasses import replace"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 6,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "from html.parser import HTMLParser"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 7,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import io"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 8,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import json"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 9,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "from pathlib import Path"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 10,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import subprocess"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 11,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import sys"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 12,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import tempfile"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 13,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import unittest"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 14,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "from unittest.mock import patch"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 15,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 16,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import comments_view"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 17,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "import skein"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 18,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "from test_skein import SkeinFixture"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 19,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 20,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 21,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "class Page(HTMLParser):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 22,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def __init__(self, value: str) -> None:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 23,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        super().__init__()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 24,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.tags: list[tuple[str, dict]] = []"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 25,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.words: list[str] = []"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 26,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.feed(value)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 27,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 28,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def handle_starttag(self, tag, attrs):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 29,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.tags.append((tag, dict(attrs)))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 30,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 31,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def handle_data(self, data):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 32,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.words.append(data)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 33,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 34,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 35,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "def examples() -> list[skein.Comment]:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 36,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    anchor = skein.Anchor(\"a\" * 40, \"café.py\", \"new\", 12, '<code> & \"quoted\"')"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 37,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    return ["
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 38,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        skein.Comment(\"reader-1\", anchor, \"Question\\n\\twith café ☃\"),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 39,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        skein.Comment(\"reader-2\", replace(anchor, commit=\"b\" * 40), \"Resolved reply\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 40,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                      state=\"orphan\", rebased_from=anchor, orphan_reason=\"line missing\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 41,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                      resolution=\"resolved\"),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 42,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    ]"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 43,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 44,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 45,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "class CommentViewTests(unittest.TestCase):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 46,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_text_preserves_identity_status_body_and_orphan_provenance(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 47,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        output = comments_view.render_comments(examples())"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 48,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        for value in (\"Showing 2 of 2\", \"1 open, 1 resolved; 1 orphan\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 49,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                      \"reader-1 | open | anchored\", \"reader-2 | resolved | orphan\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 50,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                      \"café.py | new line 12\", \"a\" * 40, \"b\" * 40,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 51,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                      \"Question\\n\\twith café ☃\", '<code> & \"quoted\"',"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 52,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                      \"Orphan reason: line missing\", \"Rebased from:\"):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 53,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(value, output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 54,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 55,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_combined_filters_empty_results_and_totals_are_explicit(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 56,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        for output_format in (\"text\", \"html\"):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 57,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            output = comments_view.render_comments("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 58,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                examples(), output_format=output_format, state=\"orphan\", resolution=\"resolved\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 59,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            )"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 60,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"Showing 1 of 2\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 61,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"resolution=resolved, state=orphan\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 62,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"1 open, 1 resolved; 1 orphan\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 63,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"reader-2\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 64,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertNotIn(\"reader-1\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 65,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            empty = comments_view.render_comments("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 66,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                examples(), output_format=output_format, state=\"orphan\", resolution=\"open\","
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 67,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            )"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 68,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"Showing 0 of 2\", empty)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 69,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"No comments match\", empty)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 70,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"Showing 0 of 0\", comments_view.render_comments("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 71,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                [], output_format=output_format,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 72,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            ))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 73,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 74,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_html_is_escaped_offline_navigable_and_deterministic(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 75,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        records = examples()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 76,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        records[0] = replace(records[0], body='<script src=\"https://example.invalid\">&</script>')"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 77,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        output = comments_view.render_comments(records, output_format=\"html\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 78,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertEqual(output, comments_view.render_comments(records, output_format=\"html\"))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 79,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        page = Page(output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 80,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertNotIn(\"script\", [tag for tag, attrs in page.tags])"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 81,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        identifiers = [attrs[\"id\"] for tag, attrs in page.tags if \"id\" in attrs]"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 82,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertEqual(len(identifiers), len(set(identifiers)))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 83,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn((\"html\", {\"lang\": \"en\"}), page.tags)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 84,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        for tag, attrs in page.tags:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 85,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertFalse(any(key.startswith(\"on\") for key in attrs))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 86,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertNotIn(\"src\", attrs)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 87,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            for key in (\"href\", \"aria-labelledby\"):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 88,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                if key in attrs:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 89,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertIn(attrs[key].removeprefix(\"#\"), identifiers)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 90,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn(\"default-src 'none'\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 91,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn(\"&lt;script src=&quot;https://example.invalid&quot;&gt;&amp;&lt;/script&gt;\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 92,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn('<code> & \"quoted\"', \"\".join(page.words))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 93,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn(\"Status: resolved. Anchor: orphan.\", \"\".join(page.words))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 94,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn(\"Rebased from\", \"\".join(page.words))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 95,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.assertIn(\"Read-only snapshot\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 96,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 97,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_control_characters_are_literal_in_text_and_html(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 98,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        records = [replace(examples()[0], body=\"Escape\\x1b[31m\\r\\x7f\\u202e\\n\\t☃\")]"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 99,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        for output_format in (\"text\", \"html\"):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 100,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            output = comments_view.render_comments(records, output_format=output_format)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 101,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertIn(\"Escape\\\\u001b[31m\\\\u000d\\\\u007f\\\\u202e\\n\\t☃\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 102,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            for control in (\"\\x1b\", \"\\r\", \"\\x7f\", \"\\u202e\"):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 103,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                self.assertNotIn(control, output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 104,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 105,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_invalid_api_filter_does_not_silently_hide_comments(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 106,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        for kwargs in ({\"resolution\": \"closed\"}, {\"state\": \"missing\"}, {\"output_format\": \"json\"}):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 107,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            with self.assertRaises(ValueError):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 108,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                comments_view.render_comments(examples(), **kwargs)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 109,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 110,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_reader_errors_produce_no_partial_output_and_preserve_bytes(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 111,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        valid = skein.dumps_comments(examples())"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 112,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        malformed = json.loads(valid)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 113,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        malformed[\"comments\"][1][\"resolution\"] = \"closed\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 114,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        duplicate_ids = json.loads(valid)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 115,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        duplicate_ids[\"comments\"][1][\"id\"] = \"reader-1\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 116,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        inputs = [b\"\\xff\", b\"{\", valid.replace('\"version\": 2', '\"version\": 1').encode(),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 117,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                  valid.replace('\"version\": 2', '\"version\": 2, \"version\": 2').encode(),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 118,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                  json.dumps(malformed).encode(), json.dumps(duplicate_ids).encode()]"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 119,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        with tempfile.TemporaryDirectory() as directory:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 120,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            path = Path(directory) / \"comments.json\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 121,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            for data in inputs:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 122,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                with self.subTest(data=data[:40]):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 123,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    path.write_bytes(data)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 124,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    stdout, stderr = io.StringIO(), io.StringIO()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 125,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 126,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                        code = comments_view.main([str(path), \"--resolution\", \"open\"])"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 127,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertEqual(1, code)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 128,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertEqual(\"\", stdout.getvalue())"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 129,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertIn(\"comments-view:\", stderr.getvalue())"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 130,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertEqual(data, path.read_bytes())"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 131,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            path.write_text(valid, encoding=\"utf-8\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 132,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            link = Path(directory) / \"link.json\""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 133,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            link.symlink_to(path)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 134,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            for unreadable in (link, Path(directory), Path(directory) / \"absent.json\"):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 135,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 136,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertEqual(1, comments_view.main([str(unreadable)]))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 137,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            with patch.object(skein, \"JSON_LIMIT\", 10):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 138,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 139,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                    self.assertEqual(1, comments_view.main([str(path)]))"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 140,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 141,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 142,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "class CommentViewCliTests(SkeinFixture):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 143,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    def test_real_packet_cli_edit_resolve_reopen_and_read_only_view(self):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 144,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        self.export()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 145,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        skein.add_comment(self.packet, \"cli-note\", self.head, \"alpha.txt\", \"new\", 1, \"First question\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 146,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        viewer = Path(comments_view.__file__).resolve()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 147,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        exporter = Path(skein.__file__).resolve()"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 148,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 149,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        def invoke(script, *arguments):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 150,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            result = subprocess.run("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 151,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                [sys.executable, str(script), *map(str, arguments)],"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 152,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30,"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 153,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            )"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 154,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertEqual(0, result.returncode, result.stderr)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 155,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            return result.stdout.decode(\"utf-8\")"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 156,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 157,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        for command, extra, expected_body, expected_status in ("
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 158,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            (None, [], \"First question\", \"open\"),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 159,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            (\"edit-comment\", [\"--body\", \"Edited ☃ question\"], \"Edited ☃ question\", \"open\"),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 160,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            (\"resolve-comment\", [], \"Edited ☃ question\", \"resolved\"),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 161,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            (\"reopen-comment\", [], \"Edited ☃ question\", \"open\"),"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 162,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "        ):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 163,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            if command:"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 164,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                invoke(exporter, command, self.packet, \"--id\", \"cli-note\", *extra)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 165,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            before = {p.name: p.read_bytes() for p in self.packet.iterdir()}"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 166,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            for arguments in ([], [\"--format\", \"html\"]):"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 167,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                output = invoke(viewer, self.packet / \"comments.json\", *arguments)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 168,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                self.assertIn(expected_body, output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 169,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                self.assertIn(expected_status, output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 170,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                self.assertIn(self.head, output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 171,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "                self.assertIn(\"alpha.txt\", output)"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 172,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "            self.assertEqual(before, {p.name: p.read_bytes() for p in self.packet.iterdir()})"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 173,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 174,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": ""
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 175,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "if __name__ == \"__main__\":"
+    },
+    {
+      "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+      "line": 176,
+      "path": "projects/review-skein/test_comments_view.py",
+      "side": "new",
+      "text": "    unittest.main()"
+    }
+  ],
+  "format": "review-skein-anchors",
+  "version": 1
+}
