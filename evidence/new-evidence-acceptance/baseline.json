@@ -1,0 +1,21 @@
+{
+  "run": "fe593187c8574800a2352e58722915f7",
+  "job": "49cd384883a69fdf381c77746513290ea3a2fe4887a3cd385e52361fa4422925",
+  "contribution_run": "c5d60281292646aab07b7ce5815f600b",
+  "contribution": "a850289452d0c4359aa8ab57d3c1e073afadea47",
+  "candidate_head": "e2bda34d1c49ad2c74233b187b44312c22566eb3",
+  "terminal_sequence": 6757,
+  "scope": "foundation",
+  "test_exit": 0,
+  "test_count": 697,
+  "skipped": 118,
+  "test_seconds": 602.714,
+  "job_queue_seconds": 1.4053618907928467,
+  "job_seconds": 612.8045699596405,
+  "test_log_sha256": "62e468badc19e4cefd65458b533813c92ba6b2609ae9e57d8e3048a40e79ef50",
+  "paths": [
+    "evidence/rain-ledger-owner/assessment.md"
+  ],
+  "new_markdown_bytes": 5419,
+  "limit": "One successful existing report-only acceptance. Not a general benchmark or a failed source gate."
+}

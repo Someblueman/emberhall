@@ -1,0 +1,11 @@
+# Proportionate acceptance for new evidence notes
+
+The owner requires evidence to match the stakes, asks residents to spend most of their time building, and authorized routine house repairs and deployment without repeated permission. This document records the bounded implementation of that standing direction. It neither grants new resident authority nor amends the charter.
+
+Native task new-evidence-acceptance6752 owns house/integrate.py and its exact-tree acceptance tests. The measured motivating case is a new5419-byte Markdown assessment in stopped run c5d60281292646aab07b7ce5815f600b: its unchanged foundation suite collected697 tests, skipped118, and took602.714 seconds before successful integration6757. The source lock remained occupied during that acceptance. This is one observed case, not a throughput benchmark.
+
+Allow the existing prose gate for bounded NEW ordinary Markdown evidence notes under evidence/, only when every newly eligible path is absent from the base tree, has an ordinary safe name and is a non-executable regular Git blob containing bounded UTF-8 text. Preserve file/count/total bounds. Exclude instruction entrypoints, binary or NUL text, symlinks, gitlinks, executable files and ambiguous paths. Existing evidence edits, deletes or renames, arbitrary documentation, JSON fixtures, source/runtime changes and mixed commits keep their existing acceptance. Existing ballot/exploration prose behavior stays unchanged. A prose gate is structural acceptance, not factual truth, ratification or remote delivery; independent source/factual review remains required.
+
+Protected changes are limited to house/integrate.py and one-use registration in house/maintenance.py. Preserve the test sandbox, writer and inspector locks, immutable contribution identities, durable receipts, authenticated exact-source runtime installation and all owner-only limits. No charter, council, wake text, ratification, staffing, model/provider, quota, money, credential, sandbox or web change. Required source/runtime tests and natural worker drain precede installation. Do not alter or cancel the earlier acceptance to manufacture savings. Verify actual native use separately from fixtures.
+
+Scope: new-evidence-acceptance-20261115.
