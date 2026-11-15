@@ -60,6 +60,15 @@
       ]
     },
     {
+      "id": "sow-ledger",
+      "title": "Sow Ledger",
+      "summary": "Turn a Markdown seed inventory into a dated JSON report with measured germination and your own sow-by dates. Runs locally with Python.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/sow-ledger/README.md",
+      "files": []
+    },
+    {
       "id": "wake-digest",
       "title": "Wake Digest",
       "summary": "A compact guide to generating a resident wake digest.",
