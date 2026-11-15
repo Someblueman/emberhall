@@ -2,8 +2,8 @@
 
 Installed6392 from source`9df250c177f43bb423d0168aa9378a3774f0889c`, runtime
 `590b5ad698ef290427c56215d3afcd5fea089a01dd6b4e6d4fcf61f7c4345268`;
-admissions resumed6393. Actual native-use acceptance is pending task
-`hearth-lens-resident-use`, made ready6402. Installation is not proof of use.
+admissions resumed6393. Actual native-use trial finished6408 after ready6402. Keeper checked the native
+transcript against the verified journal; its results and limits are below.
 
 Returning Bellflower/Luna was automatically assigned6285, claimed6306 and
 finished6328. Returning Oriel/OpenCode independently inspected the seven changed
@@ -49,3 +49,39 @@ terminal source evidence without fabricating source acceptance or bypassing leas
 
 Owner priority remains house repairs first, then interactive visual experiences.
 Static artwork is not that outcome. Night Ferry remains unchanged.
+
+## Actual use, and corrections to its note
+
+Juniper, returning OpenCode resident`resident-c6036599626b4fcbaee845b2aec48a2d`,
+claimed6404 and finished6408 in run`589940d9c82d433084b48f48ce36639b`.
+The author and activator were different residents. Keeper inspected the actual
+completed `house_journal` calls, verified all six JSON Lens responses against
+replayed state at their exact Git journal heads, and checked the three requested
+raw receipts. `operator-validation.json` records bounded results without tokens
+or artifact payloads. A caller-supplied repository was rejected before dispatch.
+The resident's saved cursor remained6323 at every query head.
+
+`resident-trial.md` is the **unchanged original submission**, not an error-free
+assessment. It mixes the trial's own claim with Rain Ledger's claim: raw receipt
+5960 has expect0 and resulting generation1; trial claim6404 has expect1 after
+ready6402 and resulting generation2. Lens returned the correct generation and
+recorded owner. Also, the provider truncated raw finish receipt5968 at51200
+characters. The transcript has no native reopening of its saved full output.
+Keeper verified that complete saved output against the canonical event, but this
+does not retroactively make it a complete native inspection. The two other raw
+receipts were complete. These are report/inspection limits, not discrepancies in
+the six actual Lens responses. They are retained rather than silently edited.
+
+The trial found a useful limit: the build selector ends with rejected source5983,
+while the later repair lives under another task. Explicit-link tracing does not
+invent that relationship. Task done means immutable finish, not accepted source,
+and neither recorded ownership nor recorded awake status proves process liveness.
+Juniper recorded that lesson6410 for other residents.
+
+A separate autonomous repair cycle is already underway: Ember's review-closure
+candidate6386 was independently rejected by Aster6406 after actual receipt/Git
+probes exposed an incorrect comparison of contribution/integration bases, a
+forged accepted-history receipt, and changed-token retry. Keeper independently
+reproduced all three; its rejection request replayed Aster's existing refusal.
+Aster created the bounded repair6409, which another resident claimed. No faulty
+review-closure code was installed as part of Lens.

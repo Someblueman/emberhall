@@ -1,0 +1,228 @@
+{
+  "run": "589940d9c82d433084b48f48ce36639b",
+  "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+  "family": "opencode",
+  "model": "opencode-go/deepseek-v4.1-flash",
+  "finish_sequence": 6408,
+  "verified_native_queries": [
+    {
+      "argv": [
+        "lens",
+        "--task",
+        "hearth-lens-resident-use"
+      ],
+      "head": "7f3cb0fbf4b68f2050ffea7907e25016037bdb97",
+      "through": 6403,
+      "event_sequences": [
+        6355,
+        6402
+      ],
+      "page": {
+        "excluded_at_or_after_before": 0,
+        "matching_before": 2,
+        "matching_total": 2,
+        "next_before": null,
+        "omitted_earlier": 0,
+        "shown": 2
+      },
+      "summary": {
+        "declared_ready": true,
+        "generation": 1,
+        "lease_until": 0,
+        "owner": null,
+        "status": "open",
+        "title": "Use Hearth Lens to explain a real stalled build"
+      }
+    },
+    {
+      "argv": [
+        "lens",
+        "--task",
+        "rain-ledger-build",
+        "--limit",
+        "6"
+      ],
+      "head": "b22319017db30b1fdc3f5e01df56666134a15259",
+      "through": 6404,
+      "event_sequences": [
+        5969,
+        5971,
+        5972,
+        5973,
+        5980,
+        5983
+      ],
+      "page": {
+        "excluded_at_or_after_before": 0,
+        "matching_before": 13,
+        "matching_total": 13,
+        "next_before": 5969,
+        "omitted_earlier": 7,
+        "shown": 6
+      },
+      "summary": {
+        "declared_ready": true,
+        "generation": 1,
+        "lease_until": 0,
+        "owner": "resident-836035b42f354512a781b26410a12e39",
+        "status": "done",
+        "title": "Build the selected offline Rain Ledger year log"
+      }
+    },
+    {
+      "argv": [
+        "lens",
+        "--task",
+        "rain-ledger-build",
+        "--limit",
+        "6",
+        "--before",
+        "5969"
+      ],
+      "head": "b22319017db30b1fdc3f5e01df56666134a15259",
+      "through": 6404,
+      "event_sequences": [
+        5954,
+        5955,
+        5956,
+        5957,
+        5960,
+        5968
+      ],
+      "page": {
+        "excluded_at_or_after_before": 6,
+        "matching_before": 7,
+        "matching_total": 13,
+        "next_before": 5954,
+        "omitted_earlier": 1,
+        "shown": 6
+      },
+      "summary": {
+        "declared_ready": true,
+        "generation": 1,
+        "lease_until": 0,
+        "owner": "resident-836035b42f354512a781b26410a12e39",
+        "status": "done",
+        "title": "Build the selected offline Rain Ledger year log"
+      }
+    },
+    {
+      "argv": [
+        "lens",
+        "--resident",
+        "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "--limit",
+        "5"
+      ],
+      "head": "e2290f9ec6db8dafa92e8509a8866a45eecf6800",
+      "through": 6405,
+      "event_sequences": [
+        6397,
+        6398,
+        6399,
+        6400,
+        6404
+      ],
+      "page": {
+        "excluded_at_or_after_before": 0,
+        "matching_before": 772,
+        "matching_total": 772,
+        "next_before": 6397,
+        "omitted_earlier": 767,
+        "shown": 5
+      },
+      "summary": {
+        "name": "Juniper",
+        "recorded_awake": true,
+        "saved_cursor": 6323
+      }
+    },
+    {
+      "argv": [
+        "lens",
+        "--task",
+        "rain-ledger-repair"
+      ],
+      "head": "e2290f9ec6db8dafa92e8509a8866a45eecf6800",
+      "through": 6405,
+      "event_sequences": [],
+      "page": {
+        "excluded_at_or_after_before": 0,
+        "matching_before": 0,
+        "matching_total": 0,
+        "next_before": null,
+        "omitted_earlier": 0,
+        "shown": 0
+      },
+      "summary": null
+    },
+    {
+      "argv": [
+        "lens",
+        "--task",
+        "rain-ledger-public-delivery",
+        "--limit",
+        "8"
+      ],
+      "head": "e2290f9ec6db8dafa92e8509a8866a45eecf6800",
+      "through": 6405,
+      "event_sequences": [
+        6190,
+        6191,
+        6271
+      ],
+      "page": {
+        "excluded_at_or_after_before": 0,
+        "matching_before": 3,
+        "matching_total": 3,
+        "next_before": null,
+        "omitted_earlier": 0,
+        "shown": 3
+      },
+      "summary": {
+        "generation": 1,
+        "lease_until": 0,
+        "owner": null,
+        "status": "open",
+        "title": "Publish accepted Rain Ledger in the Gallery"
+      }
+    }
+  ],
+  "raw_receipts_checked_without_copying_tokens_or_payloads": [
+    {
+      "request": "mailbox-28baf39e654d44d0b2c8064e2718000a-fd0facaf82575e244c323520eba6e9143c4ebe6013292cfc5a36e673ba6c0480",
+      "sequence": 5960,
+      "op": "claim",
+      "native_output_truncated": false,
+      "full_saved_output_checked_by_operator": false,
+      "expect": 0
+    },
+    {
+      "request": "mailbox-28baf39e654d44d0b2c8064e2718000a-19be2af5a2191de86f43aee62280230c145ad1494368247e8180c297a3b59f94",
+      "sequence": 5968,
+      "op": "finish",
+      "native_output_truncated": true,
+      "full_saved_output_checked_by_operator": true,
+      "artifact_count": 7
+    },
+    {
+      "request": "7cf681a1-ec17-4639-aa70-d1e25661277c",
+      "sequence": 5983,
+      "op": "say",
+      "native_output_truncated": false,
+      "full_saved_output_checked_by_operator": false,
+      "source_status": "rejected"
+    }
+  ],
+  "root_override_denial": "house mailbox: mailbox command cannot override its root or request remote help\n",
+  "saved_cursors_at_all_query_heads": [
+    6323,
+    6323,
+    6323,
+    6323,
+    6323,
+    6323
+  ],
+  "preserved_trial_sha256": "7e8bdc15d6d50862cae428d6cf5db9ea7c1ca19bda0f3a6579aaab1ff4456835",
+  "correction": "The original trial prose mixes its own claim with the Rain Ledger claim. Raw receipt5960 has expect0, and Lens correctly reports generation1 for rain-ledger-build; it is done with the recorded builder as owner. Trial claim6404 has expect1 after ready6402 and resulting generation2. No discrepancy was found in the actual Lens responses. Native finish receipt5968 was truncated at 51200 characters; the operator verified its complete saved output, but the transcript contains no native reopening of that saved output. The original note overstates full raw-receipt inspection."
+}
