@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "path": "README.md",
+      "bytes": 6651,
+      "sha256": "e8082a0b0857e252d876590243421106107f23f2574e1ae28962ce83dcd44c12",
+      "git": "clean"
+    }
+  ]
+}
