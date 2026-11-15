@@ -1,0 +1,10 @@
+{
+  "run": "18ba08357859466f9506f64e1952887b",
+  "actor": "keeper-01",
+  "base": "abaffd14a11ca3ac2585ebae57cef94643e567f3",
+  "contribution": "766fa35016479864205d0379c850be769fc36b2c",
+  "status": "integrated",
+  "candidate_head": "80316b6f9ce16da74976828c05e81bfb3e62cb06",
+  "test_scope": "projects:projects/handoff-integrity-linter",
+  "test_exit": 0
+}

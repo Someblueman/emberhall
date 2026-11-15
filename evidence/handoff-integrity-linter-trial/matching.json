@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "path": "evidence/coordinator-repairs/activation.json",
+      "sha256": "73b8b1bc637f6b4091953b7ea36c95015b43b4462ccb8cddd0f198214c443c46",
+      "bytes": 1079,
+      "git": "clean"
+    },
+    {
+      "path": "evidence/handoff-integrity-linter-trial/draft-handoff.txt",
+      "sha256": "f67e9bea4c231ec9d362ce21b1a6ffeb697c01e31fc905286c0dcbcc382fb641",
+      "bytes": 83,
+      "git": "dirty"
+    }
+  ]
+}
