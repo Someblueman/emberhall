@@ -203,8 +203,13 @@ def prepare(record: Record, fd: int, job: Path, metadata: dict) -> None:
             "checkpoint restore did not reproduce exact state and events")
     shutil.rmtree(restore_path)  # Only this successfully verified, generated temporary repo.
     stem = "house-checkpoint-" + str(len(events)) + "-" + job.name
+    from .course import enabled as course_enabled
+    # Course correction: the verified bundle stays in the private store; Git keeps the summary.
+    keep_private = course_enabled(record.read()[0])
+    bundle_path = (".git/house-home/" + job.relative_to(record.common / "house-home").as_posix()
+                   + "/checkpoint.bundle") if keep_private else "evidence/" + stem + ".bundle"
     document = {"house_id": state["house_id"], "name": state["name"], "head": head,
-        "anchor": refs[ANCHOR], "events": len(events), "bundle": "evidence/" + stem + ".bundle",
+        "anchor": refs[ANCHOR], "events": len(events), "bundle": bundle_path,
         "bundle_sha256": sha(bundle_body),
         "first_event_utc": datetime.fromtimestamp(events[0]["at"], timezone.utc).isoformat(),
         "last_event_utc": datetime.fromtimestamp(events[-1]["at"], timezone.utc).isoformat(),
@@ -216,8 +221,9 @@ def prepare(record: Record, fd: int, job: Path, metadata: dict) -> None:
         write_new(fd, "checkpoint.json", raw)
     except FileExistsError:
         require(read_file(fd, "checkpoint.json", FILE_LIMIT)[0] == raw, "cached checkpoint metadata differs")
+    delivered = ((".json", raw),) if keep_private else ((".bundle", bundle_body), (".json", raw))
     metadata["outputs"] = {stem + suffix: {"cache": "checkpoint" + suffix,
-        "sha256": sha(body), "size": len(body)} for suffix, body in ((".bundle", bundle_body), (".json", raw))}
+        "sha256": sha(body), "size": len(body)} for suffix, body in delivered}
     metadata["result"] = {"format": "emberhall-resident-checkpoint-v1", "run": metadata["binding"]["run"],
         "task": metadata["binding"]["task"], "task_generation": metadata["task_generation"], "head": head, "anchor": refs[ANCHOR], "events": len(events),
         "bundle": document["bundle"], "metadata": "evidence/" + stem + ".json",

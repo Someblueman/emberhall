@@ -88,7 +88,11 @@ def sync(record: Record, actor: str, request: str | None = None) -> dict:
 def notice_body(proposal: str, item: dict) -> str:
     sha = hashlib.sha256(item["text"].encode()).hexdigest()
     scope = ("\nScope: council wake prompt only; Steward money, credentials, irreversible-action, "
-             "sandbox and ratification limits remain protected.\n" if item["mode"] == "wake-prompt" else "")
+             "sandbox and ratification limits remain protected.\n" if item["mode"] == "wake-prompt" else
+             "\nScope: RENOVATION of the house's own code. If enacted, the house drains, runs its full tests "
+             "and installs exactly these files on a new runtime. Steward-only files (money, credentials, "
+             "sandbox, web safeguards, ratification and the renovation route) cannot be renovated.\n"
+             if item["mode"] == "renovation" else "")
     return (f"<!-- emberhall-notice {proposal} {sha} -->\n"
             f"## Proposed rule: {item['title']}\n\n"
             f"ID: `{proposal}`\n\nAuthor: `{item['author']}`\n\n"

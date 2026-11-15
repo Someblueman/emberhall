@@ -889,6 +889,7 @@ function roomPanel() {
   if(!room){const legend=html("div","kind-key",undefined,content);Object.values(kinds).forEach(k=>html("span","",`${k.mark} ${k.name}`,legend));}
 }
 function accounts() {
+  loadBalance(data?.source_head);
   const box=$("budgets");box.replaceChildren();
   Object.keys(kinds).filter(k=>k!=="unrecorded").forEach(agent=>{
     const runs=frame.runs.filter(r=>r.agent===agent),backoff=frame.budgets.find(b=>b.agent===agent);
@@ -927,6 +928,17 @@ function accounts() {
         for(const task of run.finished_tasks||[])html("small","",`Finished ${task.task} · event ${task.sequence}`,detail);
       }
     }
+    const models=[...new Set(runs.map(r=>r.model).filter(Boolean))].sort();
+    if(models.length) {
+      const detail=html("details","",undefined,row);
+      html("summary","",`${models.length} model${models.length===1?"":"s"} in use`,detail);
+      for(const model of models) {
+        const mine=runs.filter(r=>r.model===model);
+        const ok=mine.filter(r=>r.outcome==="success").length;
+        const done=mine.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+        html("small","",`${model} · ${mine.length} runs · ${ok} successful exits · ${done} task finishes`,detail);
+      }
+    }
     if(until>now)html("small","",`Until ${clock(until)} · ${backoff.reason}`,row);
     const totals={};runs.forEach(r=>Object.entries(r.usage).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;}));
     for(const [key,label] of [["input_tokens","Native input"],["cached_input_tokens","Cached input"],
@@ -936,6 +948,29 @@ function accounts() {
       else if(key==="cached_input_tokens")html("small","","Cached input: unreported",row);
     }
   });
+}
+let balanceSource=null;
+async function loadBalance(sourceHead) {
+  const box=document.querySelector?.("#balance");
+  if(!box||balanceSource===sourceHead)return;
+  try {
+    const response=await fetch("balance.json",{cache:"no-cache",signal:AbortSignal.timeout(5000)});
+    if(!response.ok)throw new Error("Balance unavailable");
+    const balance=await response.json();
+    balanceSource=sourceHead;box.replaceChildren();
+    const areas=[["building","Building"],["record","Record"],["foundations","Foundations"],["other","Other"]];
+    for(const day of balance.days.slice().reverse()) {
+      const total=areas.reduce((n,[key])=>n+(day[key]||0),0);
+      const row=html("div","balance-day",undefined,box);
+      const share=total?day.building/total:0;
+      html("strong","",`${day.day} · ${Math.round(share*100)}% building`,row);
+      const bar=html("div","balance-bar",undefined,row);
+      bar.setAttribute("role","img");
+      bar.setAttribute("aria-label",areas.map(([key,label])=>`${label} ${day[key]||0} lines`).join(", "));
+      for(const [key] of areas){if(total&&day[key]){const seg=html("span","seg-"+key,undefined,bar);seg.style.width=`${(100*day[key]/total).toFixed(1)}%`;}}
+      html("small","",areas.map(([key,label])=>`${label} ${(day[key]||0).toLocaleString()}`).join(" · ")+(day.binary_files?` · ${day.binary_files} binary files`:""),row);
+    }
+  } catch { box.replaceChildren();html("small","","Balance unavailable for this snapshot.",box); }
 }
 function clock(at, opts={}) {return new Intl.DateTimeFormat("en-GB",{timeZone:data.timezone,day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",...opts}).format(new Date(at*1000));}
 function safeHttpUrl(raw) {

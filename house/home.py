@@ -128,6 +128,36 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
     return demand
 
 
+def course_prompt(state: dict, assigned: dict) -> str:
+    """Steward course correction guidance for ordinary (non-helper) residents."""
+    from . import course
+    text = ("STEWARD COURSE CORRECTION (docs/COURSE_CORRECTION_2026-11-15.md): building is the main work. "
+            "A building stretch may last up to an hour: keep going past the first small piece, commit coherent "
+            "progress in your room and leave a handoff the next builder can continue from. Reviews, votes and "
+            "upkeep should stay short. Proof is proportionate: full witnesses only for changes to the house's "
+            "foundations; a project gets one review per milestone. Do not add large evidence bundles to Git; keep "
+            "short summaries. Changes to the house's own code are installed through a council renovation "
+            "(docs/RENOVATION.md), not by waiting for the owner.\n")
+    task = state["tasks"].get(assigned.get("task"), {})
+    project = course.great_project(state, task)
+    if project is not None:
+        stage = project.get("stage", 0)
+        text += (f"This task belongs to the house's GREAT WORK ({task['project']}), milestone {stage + 1} of "
+                 f"{len(project['milestones'])}: {project['milestone']}. Treat it as weeks-long work for many "
+                 "residents: build substantial, durable pieces, and keep the project's plan current so others "
+                 "can pick up the thread.\n")
+    if "explore_generation" in assigned:
+        shelf = state.get("shelf", {})
+        great_active = any(p["status"] == "active" and p.get("slot") == "great"
+                           for p in shelf.get("projects", {}).values())
+        if not great_active:
+            text += ("No great work is active. At least two of your ideas must be great-work candidates, "
+                     "marked with \"scale\": \"great\": ambitious enough to take the house weeks, needing "
+                     "residents of several kinds, and something people outside the house would genuinely want. "
+                     "Avoid more small offline single-file tools.\n")
+    return text
+
+
 @dataclass
 class Running:
     process: subprocess.Popen
@@ -400,6 +430,9 @@ class Coordinator:
                 f"If keeping a research artifact, create and claim a task owning only research/explorations/{run}.md. "
                 "A full shelf needs competitive council choice with milestones and independent votes; "
                 "request those through ordinary help, without choosing for others or voting for your own idea.\n")
+        from . import course
+        if course.enabled(state) and not staffing.helper(assigned):
+            assignment += course_prompt(state, assigned)
         from .source_delivery import integration_inflight
         candidates = [] if integration_inflight(self.record, self.private) else pending_contributions(self.private)
         if candidates:
@@ -446,6 +479,14 @@ class Coordinator:
                 and ballot_work.enabled(state) and "ballot_choice" in state["tasks"].get(request["task"], {})):
             task_id = request["task"]
             task_generation = state["tasks"][task_id]["generation"]
+        from . import course
+        if (course.enabled(state) and helper_model is None and not
+                (request.get("agent") == kind and "model" in request)):
+            # Course correction: rotate ordinary routes; stronger routes for
+            # Explorers and great-work builders. Explicit requests are kept.
+            bound = state["tasks"].get(task_id or request.get("task"), {})
+            model = course.route(state, kind, strong=explore_generation is not None
+                                 or course.great_project(state, bound) is not None)
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         authors = set()
@@ -641,11 +682,36 @@ class Coordinator:
             mailbox_jobs.tick(self.record)
         return ended
 
+    def renovate(self) -> bool:
+        """Hold admissions for an enacted renovation; install it once drained.
+
+        Returns True while admissions are held. A successful installation stops
+        this coordinator so the LaunchAgent restarts it on the new runtime.
+        """
+        from . import renovation
+        state = self.record.read()[0]
+        if not renovation.enabled(state) or not renovation.pending(state):
+            return False
+        if self.running or not renovation.drained(self.record, self.private):
+            return True
+        try:
+            result = renovation.install(self.record, self.private)
+        except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+            write_private(self.private / "renovation-error.json",
+                          {"error": type(error).__name__, "reason": str(error)[:500], "at": time.time()})
+            return True
+        write_private(self.private / "renovation-result.json", result | {"at": time.time()})
+        if result["installed"]:
+            self.stopping = True
+        return True
+
     def tick(self, *, start: bool = True, poll: bool = True) -> dict:
         ended = self.reap()
         self.resolve_completed_help()
         now = time.monotonic()
         started = []
+        if start and not self.stopping and self.renovate():
+            start = False
         if start and not self.stopping:
             from .source_delivery import queue_review
             try:

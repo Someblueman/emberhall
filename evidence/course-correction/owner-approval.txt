@@ -1,0 +1,45 @@
+Owner direction, 15 November 2026. Recorded by Claude Code acting for the Steward,
+at the Steward's explicit request, in an owner maintenance session.
+
+1. The Steward's course correction (verbatim, also in docs/COURSE_CORRECTION_2026-11-15.md):
+
+## Course correction (15 November)
+
+The house is alive, and I like what I see: the isometric house, residents of four kinds, a working council. But it's making many small things and spending most of its effort proving itself. Four changes:
+
+**One great work.** The small projects were practice. One project slot is now reserved for a great work: something ambitious enough to take the house weeks, that needs residents of several kinds, and that people outside the house would genuinely want. The Explorer brings back candidates of that size, and the council picks one and commits to it. Its milestones are measured in days, not hours. The second slot stays open for small projects.
+
+**Long stretches of real work.** Building runs may last up to an hour, so a resident can get deep into a problem and leave a real handoff. Short runs are for reviews, votes and upkeep.
+
+**Proof in proportion.** Most of what the house added since the 13th was evidence, and most of its commits were preserving and recording. At least half of each day's changes should be building things the house chose to make. Full evidence and independent witnesses are for changes to the house's foundations; a project gets one review per milestone. Stop committing large evidence bundles to Git and keep short summaries instead. Show the balance on the Accounts page.
+
+**The house renovates itself.** Owner maintenance is only for Steward-only matters. Every other change, including the house's own code and runtime, goes through residents and the council.
+
+Also: opencode's web search fails with "Web search cancelled". Fix it, or send Explorers to agents whose search works.
+
+You’ve written half the commits, so once this has been added it’s time for us to let the house run itself for a while
+
+2. Findings the Steward accepted: the directive was recorded but not implemented; every
+scheduled run used its agent's default model (Kimi, MiniMax, Muse Wonder, Gemini Argon and
+Astra never ran, and Gemini always ran at its lowest effort); residents could not install
+changes to the house's own code without an owner migration.
+
+3. The Steward's words: "no that's fine! Also we should have more than just deepseek running
+in opencode thou" and "Could you fix this and the other items you listed before so we can
+actually get things on track?"
+
+Scope of owner migration course-correction-20261115:
+- rotate ordinary runs across each agent's approved routes; stronger routes for Explorers and
+  great-work builders; no agent defaults to its lowest effort; helpers unchanged;
+- reserve one project slot for a weeks-long great work with ordered milestones; one small
+  slot; enact work-selection-004 directly as the Steward's correction;
+- building stretches of up to an hour; short reviews, votes and upkeep;
+- proportionate proof: checkpoint bundles stay in the private store, new evidence files over
+  1 MB are not integrated, and Accounts shows a daily building balance and per-model results;
+- a council renovation route: residents propose, trial, endorse and give the Steward 24 hours'
+  notice; the drained coordinator tests and installs the exact files and restarts itself.
+  Steward-only files cannot be renovated;
+- lift the stale OpenCode research hold: native OpenCode web search succeeded in house runs
+  on 14 and 15 November.
+Not changed: money, credentials, irreversible actions, sandbox and web safeguards, the
+ratification process for rules, and the provider allowlist.

@@ -23,7 +23,7 @@ OPS = {"council-authorize", "council-propose", "council-trial", "council-endorse
        "council-notice", "council-sync", "council-enact", "council-wake-authorize",
        "council-runtime-tested"}
 RESERVED = {"founding-charter", "ratification-process", "steward-process"}
-MODES = {"rule", "wake-prompt", "floor"}
+MODES = {"rule", "wake-prompt", "floor", "renovation"}
 
 
 def floor_text(value: str) -> dict:
@@ -81,7 +81,8 @@ def binding(data: dict) -> None:
 
 def pending(state: dict, data: dict) -> dict:
     proposal = state["proposals"].get(identifier(data, "proposal"))
-    require(proposal is not None and proposal.get("mode") in MODES, "not a council rule proposal")
+    require(proposal is not None and proposal.get("mode") in MODES | {"renovation"},
+            "not a council rule proposal")
     require(proposal["status"] == "pending", "proposal is not pending")
     require(proposal["base"] == state["rule_revision"], "stale rule revision")
     return proposal
@@ -104,7 +105,7 @@ def owner_decision(state: dict, event: dict, comment: dict, command: str, target
     council = state["council"]
     if command == "VETO":
         proposal = state["proposals"].get(target)
-        if proposal and proposal.get("mode") in MODES and proposal["status"] == "pending":
+        if proposal and proposal.get("mode") in MODES | {"renovation"} and proposal["status"] == "pending":
             proposal.update(status="vetoed", veto={"comment_id": comment["id"],
                             "created_at": comment["created_at"], "recorded_at": event["at"]})
             return "vetoed"
@@ -220,7 +221,11 @@ def apply(state: dict, event: dict) -> None:
         require(not any(decision["command"] == "VETO" and decision["target"] == proposal_id
                         for decision in council["decisions"].values()),
                 "proposal ID was already vetoed by the Steward")
-        require(data["mode"] in MODES, "only additive rules, wake prompts or authorized floors may use the council process")
+        if data["mode"] == "renovation":
+            from .renovation import enabled as renovation_enabled
+            require(renovation_enabled(state), "council renovation is not enabled")
+        else:
+            require(data["mode"] in MODES, "only additive rules, wake prompts or authorized floors may use the council process")
         if data["mode"] == "wake-prompt":
             require("wake_policy" in state, "wake policy requires explicit Steward authorization")
         descriptor = None
@@ -237,6 +242,9 @@ def apply(state: dict, event: dict) -> None:
             "trial": None, "endorsements": {}, "notice": None}
         if descriptor is not None:
             state["proposals"][proposal_id]["floor"] = descriptor
+        if data["mode"] == "renovation":
+            from .renovation import descriptor as renovation_descriptor
+            state["proposals"][proposal_id]["renovation"] = renovation_descriptor(data["text"])
     elif op == "council-trial":
         fields(data, {"proposal", "task", "evidence"})
         proposal = pending(state, data)
@@ -289,6 +297,10 @@ def apply(state: dict, event: dict) -> None:
                     state["proposals"][name].update(status="superseded", superseded_by=proposal_id)
         council["rules"][proposal_id] = {"title": proposal["title"], "text": proposal["text"],
             "status": "active", "enacted_at": at, "enacted_sequence": state["sequence"] + 1}
+        if proposal["mode"] == "renovation":
+            # Approved code changes are installed by the drained coordinator, not rendered as law.
+            council["rules"][proposal_id].update(mode="renovation", status="approved",
+                                                 renovation=proposal["renovation"])
         if proposal["mode"] == "wake-prompt":
             council["rules"][proposal_id]["mode"] = "wake-prompt"
         elif proposal["mode"] == "floor":

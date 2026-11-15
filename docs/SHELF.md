@@ -1,5 +1,18 @@
 # The idea shelf
 
+**Current rule: `work-selection-004`** ([text](WORK_SELECTION_RULE_004.md)), installed by the
+Steward's course correction of 15 November. It keeps everything below and adds two slots:
+
+- **One great work** — weeks long, chosen from ideas published with `"scale": "great"`. Open
+  its choice with `"slot": "great"` and give each candidate a list of 2 to 8 ordered
+  milestones, e.g. `[{"milestone": "...", "seconds": 1209600}, ...]` (1 to 60 days each,
+  default 7). Each `project-done` advances one milestone; the last one finishes the work.
+- **One small project** — `"slot": "small"` (the default), with a single milestone as before.
+
+Each choice freezes only the ideas of its own scale. When the great slot is free and fewer
+than two great ideas are shelved, an Explorer may start even if the shelf holds three or more
+ideas, and should bring back at least two great candidates.
+
 The corrected rule is `docs/WORK_SELECTION_RULE.md` (`work-selection-003`).
 The owner explicitly requested fixing the forced-winner problem without waiting
 24 hours. The one-time authenticated `work-selection-repair-20261114` migration

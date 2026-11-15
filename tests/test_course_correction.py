@@ -1,0 +1,218 @@
+"""Steward course correction of 15 November: rotation, great work and renovation."""
+import copy
+import json
+from pathlib import Path
+import unittest
+
+from house import course, council, maintenance, providers, renovation, shelf, shelf_gate
+from house.governance import digest
+from tests import test_selection_repair, test_shelf
+
+ROOT = Path(__file__).parents[1]
+
+
+def great_idea(key):
+    return test_shelf.idea(key) | {"scale": "great"}
+
+
+class RotationTests(unittest.TestCase):
+    def state(self, runs):
+        return {"life": {"runs": {str(i): {"agent": agent, "model": model, "started_sequence": i}
+                                  for i, (agent, model) in enumerate(runs, 1)}}}
+
+    def test_least_used_route_wins_and_nothing_defaults_to_lowest_effort(self):
+        deepseek = "opencode-go/deepseek-v4.1-flash"
+        state = self.state([("opencode", deepseek)] * 5)
+        self.assertEqual("opencode-go/kimi-k3.1-pro", course.route(state, "opencode"))
+        state = self.state([("opencode", deepseek), ("opencode", "opencode-go/kimi-k3.1-pro")])
+        self.assertEqual("opencode-go/minimax-m3.1-flash", course.route(state, "opencode"))
+        for kind, pool in providers.ROTATION.items():
+            for model in pool:
+                providers.validate_model(kind, model)
+                self.assertFalse(model.endswith("-low"), model)
+            providers.validate_model(kind, providers.STRONG[kind])
+
+    def test_strong_route_and_helpers_do_not_count(self):
+        state = self.state([("codex", "gpt-6-luna")] * 4)
+        self.assertEqual("gpt-6.1-sol", course.route(state, "codex"))
+        self.assertEqual("gpt-6-astra", course.route(state, "codex", strong=True))
+        state = self.state([("agy", "gemini-4-hydrogen-high")])
+        self.assertEqual("gemini-4-argon-high", course.route(state, "agy"))
+
+
+class GreatWorkTests(unittest.TestCase):
+    def setUp(self):
+        self.f = test_shelf.ShelfTests(); self.f.setUp()
+        original = shelf.apply
+        self.addCleanup(setattr, shelf, "apply", original)
+        shelf.apply = lambda state, event, selection_version=3: original(state, event, selection_version=3)
+
+    def publish_great(self, keys=("g1", "g2"), round_id="rg"):
+        f = self.f
+        generation = f.state.get("shelf", {}).get("generation", 0)
+        f.send("explore-start", actor="other", round=round_id, expect=generation, token=round_id, seconds=100)
+        f.send("explore-publish", actor="other", round=round_id, token=round_id,
+               ideas=[great_idea(k) for k in keys])
+
+    def open_great(self, key="great1", stages=2):
+        f = self.f
+        candidates = shelf.great_ideas(f.state["shelf"])
+        f.send("choice-open", actor="author", choice=key, slot="great", milestones={
+            k: [{"milestone": f"Stage {n}", "seconds": 2 * shelf.DAY} for n in range(stages)] for k in candidates})
+
+    def test_full_shelf_still_admits_a_great_explorer_and_slots_are_separate(self):
+        f = self.f
+        f.publish(keys=("a", "b", "c"))
+        self.assertTrue(shelf.great_wanted(f.state["shelf"]))
+        self.publish_great()
+        self.assertFalse(shelf.great_wanted(f.state["shelf"]))
+        f.reject("shelf is full", "explore-start", actor="v1", round="r9", expect=2, token="r9", seconds=10)
+        # A small choice freezes only small ideas.
+        f.send("choice-open", actor="other", choice="small1", slot="small",
+               milestones={k: {"milestone": "One example"} for k in ("a", "b", "c")})
+        for voter in ("v1", "v2", "v3"):
+            f.send("choice-vote", actor=voter, choice="small1", idea="a", reason="Useful")
+        self.assertEqual("small", f.state["shelf"]["projects"]["small1"]["slot"])
+        f.reject("small project slot is occupied", "choice-open", choice="small2", slot="small",
+                 milestones={k: {"milestone": "x"} for k in ("b", "c")})
+        f.reject("2 to 8", "choice-open", choice="great1", slot="great",
+                 milestones={k: [{"milestone": "only one"}] for k in ("g1", "g2")})
+        self.open_great()
+        self.assertEqual(["g1", "g2"], f.state["shelf"]["choices"]["great1"]["candidates"])
+        for voter in ("v1", "v2", "v3"):
+            f.send("choice-vote", actor=voter, choice="great1", idea="g1", reason="Ambitious and wanted")
+        project = f.state["shelf"]["projects"]["great1"]
+        self.assertEqual(("great", 0, "Stage 0"), (project["slot"], project["stage"], project["milestone"]))
+        self.assertEqual(2, len(shelf.active_projects(f.state["shelf"])))
+
+    def test_great_work_advances_milestone_by_milestone(self):
+        f = self.f
+        self.publish_great(); self.open_great(stages=3)
+        for voter in ("v1", "v2", "v3"):
+            f.send("choice-vote", actor=voter, choice="great1", idea="g2", reason="Yes")
+        f.state["tasks"]["m"] = {"status": "done", "artifacts": {"a.txt": {"sha256": "x"}}}
+        for stage in (1, 2):
+            f.send("project-done", actor="author", project="great1", evidence="m")
+            project = f.state["shelf"]["projects"]["great1"]
+            self.assertEqual(("active", stage, f"Stage {stage}"),
+                             (project["status"], project["stage"], project["milestone"]))
+        f.send("project-done", actor="author", project="great1", evidence="m")
+        project = f.state["shelf"]["projects"]["great1"]
+        self.assertEqual("done", project["status"])
+        self.assertEqual([0, 1, 2], [entry["stage"] for entry in project["completed"]])
+
+
+class LegacyShelfTests(unittest.TestCase):
+    def test_older_versions_replay_unchanged(self):
+        f = test_shelf.ShelfTests(); f.setUp()
+        f.send("explore-start", round="r1", expect=0, token="r1", seconds=100)
+        f.reject("invalid idea fields", "explore-publish", round="r1", token="r1",
+                 ideas=[great_idea("a"), great_idea("b")])
+
+    def test_policy_text_is_exactly_documented(self):
+        self.assertEqual((ROOT / "docs/WORK_SELECTION_RULE_004.md").read_text(), shelf_gate.GREAT_POLICY_TEXT)
+        self.assertEqual(3, shelf_gate.SUPPORTED_POLICIES[digest(shelf_gate.GREAT_POLICY_TEXT)])
+
+
+class CourseMigrationTests(unittest.TestCase):
+    def setUp(self):
+        self.prior = test_selection_repair.SelectionRepairTests(); self.prior.setUp()
+        self.h = self.prior.h
+        self.h.event("owner-migrate", self.prior.migration())
+
+    def migration(self):
+        old = maintenance.protected_manifest(self.h.state)
+        extra = maintenance.OWNER_MODULES | maintenance.COURSE_MODULES
+        changed = {name: "9" * 64 for name in maintenance.ALLOWED_CHANGES[maintenance.COURSE_SCOPE]
+                   if name in old or name in extra}
+        changed.update({name: "9" * 64 for name in extra})
+        return self.prior.migration() | {
+            "scope": maintenance.COURSE_SCOPE, "approval_sha256": maintenance.COURSE_SHA256,
+            "previous_manifest_sha256": maintenance.fingerprint(old), "protected_files": old | changed}
+
+    def test_enacts_great_work_rule_and_enables_course(self):
+        data = self.migration(); data.pop("rule_base")
+        self.h.event("owner-migrate", data)
+        state = self.h.state
+        self.assertTrue(course.enabled(state))
+        self.assertEqual(shelf_gate.GREAT_POLICY_ID, shelf_gate.policy(state))
+        self.assertEqual("superseded", state["council"]["rules"][shelf_gate.REVISED_POLICY_ID]["status"])
+        self.assertTrue(set(maintenance.COURSE_MODULES) <= set(maintenance.protected_manifest(state)))
+
+    def test_scope_is_bounded_and_bound_to_the_owner_words(self):
+        data = self.migration(); data.pop("rule_base")
+        for name in ("house/windows.py", "house/opencode_tool.py", "house/wake_policy.py", "house/test_sandbox.py"):
+            if name not in data["protected_files"]:
+                continue
+            bad = copy.deepcopy(data); bad["protected_files"][name] = "0" * 64
+            self.h.reject("owner-migrate", bad, "outside.*scope")
+        self.assertEqual(digest((ROOT / "evidence/course-correction/owner-approval.txt").read_text()),
+                         maintenance.COURSE_SHA256)
+
+
+class RenovationTests(unittest.TestCase):
+    def descriptor(self, **files):
+        return json.dumps({"source_commit": "a" * 40, "summary": "Teach the house a new trick",
+                           "files": files or {"house/home.py": "b" * 64}})
+
+    def test_descriptor_rejects_steward_only_and_foreign_paths(self):
+        self.assertEqual({"house/home.py": "b" * 64}, renovation.descriptor(self.descriptor())["files"])
+        for name in sorted(renovation.STEWARD_ONLY):
+            with self.assertRaisesRegex(ValueError, "Steward-only"):
+                renovation.descriptor(self.descriptor(**{name: "b" * 64}))
+        for name in ("docs/x.md", "house/../x.py", "house/sub/x.py", "tests/test_x.py"):
+            with self.assertRaisesRegex(ValueError, "not a house module"):
+                renovation.descriptor(self.descriptor(**{name: "b" * 64}))
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            renovation.descriptor('{"source_commit": "' + "a" * 40 + '", "summary": "x", "summary": "y", "files": {}}')
+
+    def state(self):
+        manifest = {"house/home.py": "1" * 64, "house/council.py": "2" * 64}
+        return {"sequence": 5, "wake_policy": {"protected_files": manifest}, "maintenance": {"migrations": {course.SCOPE: {}}, "protected_files": manifest},
+                "life": {"runs": {}}, "residents": {"watch-keeper": {"awake": True}},
+                "proposals": {"reno-1": {"status": "enacted"}},
+                "council": {"rules": {"reno-1": {"mode": "renovation", "status": "approved", "enacted_sequence": 4,
+                                                 "renovation": renovation.descriptor(self.descriptor())}}}}
+
+    def install_event(self, state, **changes):
+        manifest = renovation.target_manifest(state, "reno-1")
+        data = {"proposal": "reno-1", "source_head": "c" * 40, "protected_files": manifest,
+                "previous_manifest_sha256": maintenance.fingerprint(maintenance.protected_manifest(state)),
+                "previous_runtime_sha256": "d" * 64, "runtime_sha256": "e" * 64,
+                "test_output_sha256": "f" * 64, "test_count": 3} | changes
+        return {"op": "renovation-install", "actor": "watch-keeper", "at": 10, "data": data}
+
+    def test_install_updates_only_the_enacted_files(self):
+        state = self.state()
+        self.assertEqual(["reno-1"], renovation.pending(state))
+        renovation.apply(state, self.install_event(state))
+        self.assertEqual({"house/home.py": "b" * 64, "house/council.py": "2" * 64},
+                         state["maintenance"]["protected_files"])
+        self.assertEqual("installed", state["council"]["rules"]["reno-1"]["status"])
+        self.assertEqual([], renovation.pending(state))
+
+    def test_install_rejects_other_files_resident_actor_active_runs_and_no_tests(self):
+        for change, message in [
+                ({"protected_files": {"house/home.py": "b" * 64, "house/council.py": "9" * 64}}, "differ"),
+                ({"test_count": 0}, "passing tests")]:
+            state = self.state()
+            with self.assertRaisesRegex(ValueError, message):
+                renovation.apply(state, self.install_event(state, **change))
+        state = self.state()
+        with self.assertRaisesRegex(ValueError, "coordinator"):
+            renovation.apply(state, self.install_event(state) | {"actor": "resident-x"})
+        state["life"]["runs"]["r"] = {"status": "active"}
+        with self.assertRaisesRegex(ValueError, "drain"):
+            renovation.apply(state, self.install_event(state))
+
+    def test_failure_is_recorded_once(self):
+        state = self.state()
+        renovation.apply(state, {"op": "renovation-failed", "actor": "watch-keeper", "at": 10,
+                                 "data": {"proposal": "reno-1", "reason": "tests failed"}})
+        self.assertEqual("failed", state["council"]["rules"]["reno-1"]["status"])
+        with self.assertRaisesRegex(ValueError, "not awaiting"):
+            renovation.apply(state, self.install_event(state))
+
+    def test_renovation_mode_needs_the_course_correction(self):
+        self.assertIn("renovation", council.MODES)
+        self.assertFalse(renovation.enabled({"maintenance": {}}))

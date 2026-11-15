@@ -68,6 +68,8 @@ def prepare(record: Record, actor: str, scope: str, approval_file: Path, source_
     names = set(old) | maintenance.OWNER_MODULES
     if scope == maintenance.PROJECT_CONTINUATION_SCOPE:
         names.add("house/project_delivery.py")
+    if scope == maintenance.COURSE_SCOPE:
+        names.update(maintenance.COURSE_MODULES)
     if scope == maintenance.REVIEW_COMPLETION_SCOPE:
         names.add("house/review_completion.py")
     if scope == maintenance.LENS_SCOPE:

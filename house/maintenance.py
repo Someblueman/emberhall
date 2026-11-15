@@ -55,6 +55,10 @@ TARGETED_WAKE_SCOPE = "targeted-resident-wakes-20261114"
 HELPER_SCOPE = "helper-staffing-20261114"
 CREATIONS_SCOPE = "public-creations-20261114"
 PROJECT_CONTINUATION_SCOPE = "project-continuation-20261115"
+COURSE_SCOPE = "course-correction-20261115"
+# sha256 of evidence/course-correction/owner-approval.txt (the Steward's own words).
+COURSE_SHA256 = "5af6be9383e59bc7a675277dd3a1e1d8e9820bf5718f6f1dbca13cbc59e32dbc"
+COURSE_MODULES = {"house/course.py", "house/renovation.py"}
 DUPLICATE_REVIEW_SCOPE = "duplicate-review-admission-20261115"
 MAINTENANCE_RUNTIME_SCOPE = "maintenance-runtime-20261115"
 EVIDENCE_ACCEPTANCE_SCOPE = "new-evidence-acceptance-20261115"
@@ -78,7 +82,8 @@ FAILED_CLI_OBSERVATION = 465
 FAILED_BOOTSTRAP_RUN = "2c9fc6bd10574c84bf0e45aba78a054c"
 FAILED_BOOTSTRAP_SHA256 = "034347cdaac227cd535f60f5d01d91fa83a90b458245e4aaa0ea61da787a7406"
 FAILED_BOOTSTRAP_OBSERVATION = 530
-SOURCES = {PROJECT_CONTINUATION_SCOPE: "95a1edc9f54f3cbd8b0902391f10f5f8314f9fb49dd7539ae1e44f86ebf88d67",
+SOURCES = {COURSE_SCOPE: COURSE_SHA256,
+           PROJECT_CONTINUATION_SCOPE: "95a1edc9f54f3cbd8b0902391f10f5f8314f9fb49dd7539ae1e44f86ebf88d67",
            DUPLICATE_REVIEW_SCOPE: "9f322bc475f24540e9861d5f8450dadd7c8b1e1e3f7d5c4e33fccc983b54459f",
            MAINTENANCE_RUNTIME_SCOPE: "9651fd3e7b5487e48c94ecf24443636934d0c13ba2abb05c9443e91808225e22",
            EVIDENCE_ACCEPTANCE_SCOPE: "37809ec6a9575d6223e6d2215ed4008f528be413529fb33e23b36e336eed9510",
@@ -113,6 +118,11 @@ RETRY_BUDGET_SEQUENCE = 300
 RETRY_BUDGET_UNTIL = 1794676437.592195
 OWNER_MODULES = {"house/maintenance.py", "house/owner_upgrade.py"}
 ALLOWED_CHANGES = {
+    COURSE_SCOPE: OWNER_MODULES | COURSE_MODULES | {"house/providers.py", "house/home.py",
+        "house/shelf.py", "house/shelf_gate.py", "house/life.py", "house/council.py", "house/model.py",
+        "house/steward.py", "house/public_history.py", "house/work_metrics.py", "house/integrate.py",
+        "house/checkpoint.py", "house/body.py", "house/resident_actions.py", "house/__main__.py",
+        "house/publish.py"},
     PROJECT_CONTINUATION_SCOPE: OWNER_MODULES | {"house/home.py", "house/project_delivery.py"},
     DUPLICATE_REVIEW_SCOPE: {"house/maintenance.py", "house/mailbox_jobs.py"},
     MAINTENANCE_RUNTIME_SCOPE: {"house/maintenance.py", "house/integrate.py", "house/wake_policy.py"},
@@ -294,6 +304,33 @@ def enact_selection_repair(state: dict, event: dict) -> None:
     council.render(state, event, key)
 
 
+def enact_great_work(state: dict, event: dict) -> None:
+    """The Steward's 15 November course correction: one slot for a great work."""
+    from . import shelf_gate
+    current = shelf_gate.REVISED_POLICY_ID
+    rule = state["council"]["rules"].get(current, {})
+    require(rule.get("status") == "active" and digest(rule.get("text", "")) == shelf_gate.REVISED_POLICY_SHA256,
+            "great-work revision requires the active work-selection-003 rule")
+    key = shelf_gate.GREAT_POLICY_ID
+    require(key not in state["proposals"] and key not in state["council"]["rules"], "great-work rule already exists")
+    require(not any(c["status"] == "open" for c in state.get("shelf", {}).get("choices", {}).values()),
+            "finish existing choices before the great-work revision")
+    seq, at = state["sequence"] + 1, event["at"]
+    title = "Choose worthwhile work: one great work and one small project"
+    authority = {"method": "direct-owner", "scope": COURSE_SCOPE, "approval_sha256": COURSE_SHA256, "sequence": seq}
+    state["proposals"][key] = {"mode": "rule", "author": event["actor"], "title": title,
+        "text": shelf_gate.GREAT_POLICY_TEXT, "base": state["rule_revision"],
+        "reason": "Steward course correction of 15 November: reserve one slot for a weeks-long great work.",
+        "status": "enacted", "proposed_at": at, "trial": None, "endorsements": {},
+        "notice": None, "enacted_at": at, "enacted_sequence": seq, "ratification": authority}
+    state["council"]["rules"][key] = {"title": title, "text": shelf_gate.GREAT_POLICY_TEXT,
+        "status": "active", "enacted_at": at, "enacted_sequence": seq, "ratification": authority}
+    rule.update(status="superseded", superseded_by=key)
+    if current in state["proposals"]:
+        state["proposals"][current].update(status="superseded", superseded_by=key)
+    council.render(state, event, key)
+
+
 def apply(state: dict, event: dict) -> None:
     _owner(state, event)
     data, scope = event["data"], event["data"]["scope"]
@@ -311,6 +348,8 @@ def apply(state: dict, event: dict) -> None:
         extra = OWNER_MODULES | ({"house/building.py"} if scope == GROWTH_SCOPE else set())
         if scope == PROJECT_CONTINUATION_SCOPE:
             extra.add("house/project_delivery.py")
+        if scope == COURSE_SCOPE:
+            extra.update(COURSE_MODULES)
         if scope == REPAIR_SCOPE:
             extra.add("house/opencode_auth.py")
         if scope == REVIEW_COMPLETION_SCOPE:
@@ -350,6 +389,8 @@ def apply(state: dict, event: dict) -> None:
         resolution = verified_key_resolution(state, event) if scope == RESTORED_SCOPE else None
         if scope == SELECTION_SCOPE:
             enact_selection_repair(state, event)
+        if scope == COURSE_SCOPE:
+            enact_great_work(state, event)
         entry = copy.deepcopy(data) | {"at": event["at"], "sequence": seq, "actor": event["actor"]}
         current = copy.deepcopy(maintenance)
         current.setdefault("migrations", {})[scope] = entry

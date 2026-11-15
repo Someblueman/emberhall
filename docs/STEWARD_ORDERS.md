@@ -1,5 +1,26 @@
 # Steward-approved objective and standing orders
 
+## Installed — course correction, 15 November (owner migration `course-correction-20261115`)
+
+The course correction is now in effect, not just written down:
+
+- **Model rotation.** Ordinary runs rotate across each agent's approved routes: Codex Sol;
+  OpenCode Kimi K3.1 Pro, MiniMax M3.1 Flash and DeepSeek V4.1 Flash; Muse Ember and Wonder;
+  Gemini 4 Hydrogen and Argon at high effort. Explorers and great-work builders get the
+  stronger route (Astra, Kimi, Muse Wonder, Argon). Helpers keep Luna and Terra.
+- **One great work.** Rule `work-selection-004` reserves one slot for a weeks-long great work
+  with 2 to 8 ordered milestones, and one slot for a small project. When the great slot is free
+  and fewer than two great-scale ideas are shelved, an Explorer brings back great candidates
+  even if the shelf is otherwise full. See [the rule](WORK_SELECTION_RULE_004.md).
+- **Building stretches.** Builders may work up to an hour; reviews, votes and upkeep stay short.
+- **Proportionate proof.** Checkpoint bundles now stay in the private store; Git keeps the
+  summary. New evidence files over 1 MB are not integrated. Accounts shows a daily building
+  balance (target: at least half) and how each model is doing.
+- **Residents renovate the house.** See [RENOVATION.md](RENOVATION.md). Routine owner
+  maintenance is over; owner migrations are for Steward-only matters.
+- **OpenCode research is open again.** Native OpenCode web search succeeded in house runs on
+  14 and 15 November (for example run `6f7cc763`); the earlier hold is lifted.
+
 ## Latest direction — course correction, 15 November
 
 Read the [exact owner directive](COURSE_CORRECTION_2026-11-15.md) first.
@@ -12,16 +33,14 @@ retain full evidence and independent witnesses. Keep short summaries in Git,
 not new large evidence bundles; preserve existing history and recovery data.
 
 Residents and the council own implementation and delivery. Keeper is stepping
-back after recording this instruction. The existing runtime pins still need a
-resident-built transition to council-controlled renovation; this document does
-not claim that gate, slot reservation, duration handling or Accounts metric is
-already implemented. The owner-only money, credentials, irreversible-action,
+back after recording this instruction. (Superseded on the same day: the Steward
+installed the renovation route, slots, duration guidance and Accounts balance
+directly; see the top of this file.) The owner-only money, credentials, irreversible-action,
 sandbox/web and ratification boundaries remain intact. Do not use another
 routine owner-maintenance exception to bypass the new council route.
 
-Until native search actually succeeds, OpenCode is not an Explorer route.
-Keep it available for building, reviews and votes. Use verified built-in search
-on another allowed agent for research; no shell web access or new credentials.
+OpenCode's native search has since succeeded in house runs, so it is an
+Explorer route again; still no shell web access or new credentials.
 The full shelf must be handled through the council, not silently discarded to
 make room for great-work candidates.
 

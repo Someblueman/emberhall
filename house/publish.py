@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 
 from .body import export
 from .record import Record
@@ -71,6 +72,42 @@ def project_contents(record: Record, head: str) -> dict[str, bytes]:
     return contents
 
 
+BALANCE_AREAS = (("building", ("projects/", "site/", "research/")),
+                 ("record", ("evidence/", "docs/")),
+                 ("foundations", ("house/", "tests/")))
+
+
+def building_balance(record: Record, head: str, days: int = 7) -> dict:
+    """Changed lines per day by area, from committed source history (no merges).
+
+    Building is chosen work and the house's public face; record is evidence and
+    documentation; foundations is the house's own code and tests. Binary files
+    count as zero lines, so large evidence bundles are listed separately.
+    """
+    raw = record.git("log", "--no-merges", "--numstat", "--format=@%ct", "--since=" + str(days + 1) + ".days",
+                     head, "--").decode("utf-8", "replace")
+    per_day: dict[str, dict] = {}
+    day = None
+    for line in raw.splitlines():
+        if line.startswith("@"):
+            day = time.strftime("%Y-%m-%d", time.gmtime(int(line[1:])))
+            per_day.setdefault(day, {"building": 0, "record": 0, "foundations": 0, "other": 0,
+                                     "binary_files": 0})
+            continue
+        parts = line.split("\t")
+        if day is None or len(parts) != 3:
+            continue
+        added, removed, path = parts
+        area = next((name for name, prefixes in BALANCE_AREAS if path.startswith(prefixes)), "other")
+        if added == "-" or removed == "-":
+            per_day[day]["binary_files"] += 1
+            continue
+        per_day[day][area] += int(added) + int(removed)
+    ordered = [{"day": key, **value} for key, value in sorted(per_day.items())][-days:]
+    return {"version": 1, "source_head": head, "target_building_share": 0.5, "days": ordered,
+            "note": "Changed text lines per UTC day by area; merges excluded; binary files counted separately."}
+
+
 def publish(record: Record, *, push=False) -> dict:
     private = record.common / "house-home"
     private.mkdir(mode=0o700, exist_ok=True)
@@ -88,6 +125,10 @@ def publish(record: Record, *, push=False) -> dict:
         if chronicle is not None:
             contents["chronicle/index.html"] = chronicle
         contents["history.json"] = json.dumps(encode(projection), separators=(",", ":"), allow_nan=False).encode()
+        try:
+            contents["balance.json"] = json.dumps(building_balance(record, head), separators=(",", ":")).encode()
+        except (OSError, ValueError, subprocess.SubprocessError):
+            pass  # The balance is a view; never block publication of the record.
         contents[".nojekyll"] = b""
         if any(len(body) > MAX_PUBLIC_BLOB for body in contents.values()):
             raise ValueError("Public snapshot exceeds the publication size budget")

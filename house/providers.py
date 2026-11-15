@@ -23,6 +23,20 @@ MODELS = {
 }
 DEFAULTS = {kind: models[0] for kind, models in MODELS.items()}
 DEFAULTS["opencode"] = "opencode-go/deepseek-v4.1-flash"
+# Steward course correction (15 November): ordinary runs rotate across these
+# routes instead of always taking the default. No route defaults to the lowest
+# effort. Helpers keep their own Codex routes in staffing.HELPER_MODELS.
+ROTATION = {
+    "codex": ("gpt-6.1-sol",),
+    "opencode": ("opencode-go/kimi-k3.1-pro", "opencode-go/minimax-m3.1-flash",
+                 "opencode-go/deepseek-v4.1-flash"),
+    "muse": ("muse-ember-1.0", "muse-wonder-full-1.0"),
+    "agy": ("gemini-4-hydrogen-high", "gemini-4-argon-high"),
+}
+# Explorers and great-work builders may use each agent's stronger route.
+STRONG = {"codex": "gpt-6-astra", "opencode": "opencode-go/kimi-k3.1-pro",
+          "muse": "muse-wonder-full-1.0", "agy": "gemini-4-argon-high"}
+ROTATION_WINDOW = 24
 
 
 def validate_model(kind, model):

@@ -139,8 +139,27 @@ def failure_diagnostics(log: Path, test_exit: int) -> dict:
             "tail": tail.decode("utf-8", errors="replace")}
 
 
+LARGE_EVIDENCE_BYTES = 1_000_000
+
+
+def reject_large_evidence(candidate: Path, head: str, paths: list[str]) -> None:
+    """Steward course correction: large evidence bundles stay out of Git; keep summaries."""
+    for path in paths:
+        if not path.startswith("evidence/"):
+            continue
+        entry = _tree_entry(candidate, head, path, require_regular=False)
+        if entry is None or entry[0] == b"160000":
+            continue
+        size = int(subprocess.run(["git", "cat-file", "-s", entry[1].decode()], cwd=candidate,
+                                  capture_output=True, check=True, timeout=30).stdout)
+        if size > LARGE_EVIDENCE_BYTES:
+            raise ValueError(f"{path} is {size} bytes: large evidence bundles stay out of Git under the "
+                             "Steward course correction; keep a short summary and leave the bundle private")
+
+
 def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[str]]]:
     paths = changed_paths(candidate, base, head)
+    reject_large_evidence(candidate, head, paths)
     legacy_prose = bool(paths) and all(_is_ordinary_prose_path(path) for path in paths)
     new_evidence = [path for path in paths
                     if not _is_ordinary_prose_path(path) and _is_new_evidence_note_path(path)]

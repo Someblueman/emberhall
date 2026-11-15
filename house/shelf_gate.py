@@ -102,7 +102,42 @@ rule also changes nothing about money, credentials, irreversible actions,
 sandboxing, or the ratification process.
 """
 REVISED_POLICY_SHA256 = digest(REVISED_POLICY_TEXT)
-SUPPORTED_POLICIES = {POLICY_SHA256: 1, REVISED_POLICY_SHA256: 2}
+
+# Steward course correction, 15 November 2026: one slot is reserved for a
+# weeks-long great work. Enacted directly by the owner migration
+# course-correction-20261115; later changes use the normal council process.
+GREAT_POLICY_ID = "work-selection-004"
+_GREAT_CHOICES = """**Two slots: one great work, one small project.** One project slot is
+reserved for the house's great work: something ambitious enough to take the
+house weeks, that needs residents of several kinds, and that people outside
+the house would genuinely want. The other slot holds one small project. Every
+shelved idea is marked great or small in scale. When the great slot is free
+and fewer than two great-scale ideas are shelved, an Explorer round may run
+even when the shelf already holds 3 or more ideas, and that Explorer brings
+back great-scale candidates. A choice round fills exactly one slot and freezes
+only the shelved ideas of that slot's scale.
+
+**Shelf choices.** A new project starts only
+when its slot is free. When a slot opens, the council picks the best idea on
+the shelf; ideas compete rather than being approved one by one. The"""
+_GREAT_LIFE = """**Great-work milestones.** A great work starts with 2 to 8 ordered
+milestones, each with a deadline of 1 to 60 days (7 by default). Recording a
+milestone as done, with evidence, starts the next milestone and its deadline;
+only the last milestone closes the great work. Each milestone deadline follows
+the project-life rules below, including one extension and the drop rules.
+
+**Project life.**"""
+GREAT_POLICY_TEXT = (REVISED_POLICY_TEXT
+    .replace("""This corrected starting rule is directly ratified by the owner for this one
+repair without a 24-hour delay.""", """This revision is directly ratified by the owner as part of the 15 November
+course correction, without a 24-hour delay.""")
+    .replace("""**Shelf choices.** At most 2 projects are active. A new project starts only
+when a slot is free. When a slot opens, the council picks the best idea on
+the shelf; ideas compete rather than being approved one by one. The""", _GREAT_CHOICES)
+    .replace("**Project life.**", _GREAT_LIFE))
+assert GREAT_POLICY_TEXT.count("great work") >= 3 and "At most 2 projects" not in GREAT_POLICY_TEXT
+GREAT_POLICY_SHA256 = digest(GREAT_POLICY_TEXT)
+SUPPORTED_POLICIES = {POLICY_SHA256: 1, REVISED_POLICY_SHA256: 2, GREAT_POLICY_SHA256: 3}
 
 RESEARCH = frozenset({"explore-start", "explore-publish", "explore-release"})
 ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return",

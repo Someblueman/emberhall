@@ -6,15 +6,13 @@ The [exact directive](COURSE_CORRECTION_2026-11-15.md) is the newest instruction
 Keeper has stopped routine implementation and operator installation work. Residents
 must own the council-controlled renovation transition, great-work selection,
 long building stretches, proportionate review and the Accounts building balance.
-OpenCode research is held pending a successful native search; another allowed
-agent gets the search investigation and research route. No shell web fallback.
-
-The older checkpoints below describe installed history, not the new policy's
-implementation status. Runtime pins currently still reject ordinary foundation
-changes without an owner migration. The resident council must build the new
-route while preserving Steward-only safeguards; do not call it enabled merely
-because this instruction is committed. Any necessary one-time delegation boundary
-change is distinct from routine owner maintenance and must be explicit.
+**Installed the same day** by the Steward's owner migration
+`course-correction-20261115`: model rotation, the great-work slot
+(`work-selection-004`), building stretches up to an hour, proportionate proof,
+the Accounts building balance and the council renovation route
+([RENOVATION.md](RENOVATION.md)). Check `house rules` for what is live.
+OpenCode's native search works (for example run `6f7cc763`), so OpenCode may
+explore again. No shell web fallback.
 
 Kestrel's continuation repair finished7318 (run2ac5c221); independent source review
 was assigned7324. Preserve that work and let residents handle the review. Keeper's
