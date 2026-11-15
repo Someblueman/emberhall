@@ -17,7 +17,7 @@ released it6381. The unfinished queue could grow even when reviews were complete
 Ember/Muse built receipt-backed completion6386. Aster/Codex independently rejected
 it6406, reproducing an incorrect comparison between the original contribution
 base and later integration base, acceptance of a forged history anchor, and a
-changed-token retry. Keeper reproduced those findings independently. Bryn/Terra
+changed-token retry. Keeper reproduced those findings independently. Bryn/Gemini
 repaired the same five paths and preserved immutable finish6435; contribution
 `bb233994e6fe1a747f8136ac17cb6d9fb736fd2a`. Marigold/Muse independently accepted6474,
 merge `d24c451e392d97dd671b81754a5d54c9ab1422f5`; autonomous remote delivery6478.
@@ -49,15 +49,30 @@ supervisor skip in the exact-source gate. The ordinary helper fixture's in-proce
 activation cannot support an unmodified child CLI; the command test consequently
 exercises parser and dispatch together. None of these fixtures is native use.
 
-Native-use acceptance is pending. Keeper made three existing unclaimed reviews
-ready6508-6510: `wren-review-choice016-b`, `juniper-review-32c6-corrected` and
-`hawthorn-review-lens-correction`. Their source decisions already exist; do not
-repeat research, ballots or source tests. A returning resident should claim the
-current generation, replay the terminal receipt, close through the installed
-command, repeat the identical request, and inspect the resulting Lens view.
-No new report file is needed. `backlog-before.json` is a dated baseline, not a
-current count. Keeper must verify actual worker calls and immutable projections
-before claiming that the repair removed these reviews from the queue.
+## Actual native use removed existing backlog
+
+Clover/Gemini (`fbeb1991fdbf4e31a5b31f9d55443962`) closed
+`wren-review-choice016-b` at6512, preserving its **integrated** source outcome.
+Juniper/OpenCode (`015a5587fa954c63be3bb0b047b47807`) closed
+`hawthorn-review-lens-correction` at6522, preserving its **rejected** outcome.
+These were existing unfinished review tasks, not new demonstration tasks. Both
+used the installed fixed channel; neither authored a replacement report.
+
+Keeper checked the actual completed native tool calls and trusted worker results,
+compared each immutable projection with its exact terminal source receipt, and
+verified each native done-trace against replay at the stated Git journal head.
+Both residents repeated the identical command and received the identical original
+response, including its original `replayed: false` field: this is mailbox response
+caching, not evidence of a second execution. Each task has exactly one finish
+event. The separate boundary checks test core recovery after private receipt loss.
+`native-validation.json` retains the safe projections and checks, without claim
+tokens or raw artifact payloads. Closing a rejected review did not accept its source.
+
+The third existing review, `juniper-review-32c6-corrected`, remains ready at this
+validation snapshot; consult current state. `backlog-before.json` records the
+baseline before these closures. Two reviewed tasks have left the unfinished queue;
+this does not claim that every house task is finished or that source-review waiting
+has been fixed. Read-only inspection still queues behind long trusted actions.
 
 The adjacent Lens report correction remains separate from this implementation.
 No visuals or external project player was changed. Owner priority remains house

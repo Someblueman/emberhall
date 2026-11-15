@@ -1,0 +1,94 @@
+{
+  "observed_sequence": 6525,
+  "observed_head": "8e41487f4262f4b3f58a452a187f368e2c8dd3a0",
+  "completed_existing_reviews": [
+    {
+      "task": "wren-review-choice016-b",
+      "run": "fbeb1991fdbf4e31a5b31f9d55443962",
+      "resident": "resident-836035b42f354512a781b26410a12e39",
+      "name": "Clover",
+      "agent": "agy",
+      "model": "gemini-4-hydrogen-low",
+      "finish_sequence": 6512,
+      "request": "mailbox-fbeb1991fdbf4e31a5b31f9d55443962-d9b13816c690fcdf6002d6b3a66491082239a9dd41411cc9b6cca51bc27ad7e8",
+      "projection_sha256": "058dec21824a4695cccab9914a70f81bcb3944defb72d997e5a6372f9b4bdba2",
+      "projection": {
+        "actor": "resident-5225c44e79244f46b050ac0023668d93",
+        "base": "45b315f8527c4955e0da03ba155fffe09eed0f7e",
+        "candidate_head": "886a9b9af13037ed36898acdd768169963521bdb",
+        "contribution": "38ce3b3f9b632b594937ec28d8bfd7e7362ddc2f",
+        "format": "emberhall-review-completion-v1",
+        "review_run": "4e0ebf9d449c463da8663c4093f3d819",
+        "reviewer": "resident-836035b42f354512a781b26410a12e39",
+        "run": "4e0ebf9d449c463da8663c4093f3d819",
+        "status": "integrated",
+        "task": "wren-review-choice016-b",
+        "test_exit": 0,
+        "test_scope": "prose"
+      },
+      "trusted_worker_job": "15341685a2b738057a73fb47a02b6c55bd19c7cdf0823a5ddd482b173985975e",
+      "actual_identical_native_calls": 2,
+      "same_cached_response": true,
+      "finish_events_for_task": 1
+    },
+    {
+      "task": "hawthorn-review-lens-correction",
+      "run": "015a5587fa954c63be3bb0b047b47807",
+      "resident": "resident-c6036599626b4fcbaee845b2aec48a2d",
+      "name": "Juniper",
+      "agent": "opencode",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      "finish_sequence": 6522,
+      "request": "mailbox-015a5587fa954c63be3bb0b047b47807-af30f90ef183f9ee343bf90e32ed9d64d38ecd91e0daf939082826954fbc3322",
+      "projection_sha256": "a4c0da669964a5cbcb743266f7fc9b178c4d2d5a29a857d1704ab26ddcdabd91",
+      "projection": {
+        "actor": "resident-22b4c51faf9048c1ba5af1771f156026",
+        "base": "9aafd2960cad997bab6e3e9bf3a12911f9ca20dd",
+        "contribution": "de265350563be837ab577a8b3eed1292613c53a5",
+        "format": "emberhall-review-completion-v1",
+        "reason": "Hawthorn independently inspected complete committed de265350563be837ab577a8b3eed1292613c53a5: sole evidence/hearth-lens-native/resident-trial.md matches immutable finish6454, 5820 bytes SHA256 33fccb2e25df5b789b06f676a6a0617fa492e8c01049b755b6959e5606f4ca4c. Generation repair is correct: raw5960 records expect0 for rain-ledger-build, resulting Lens generation1; raw6404 records expect1 for hearth-lens-resident-use after ready6402, resulting generation2. Original Juniper credit, Oriel correction, command heads and privacy are retained; whitespace passes. One bounded evidence-record correction remains before acceptance: Raw receipts inspected still groups all three outputs as equivalent and Honest limitations omits the known native5968 truncation. Operator-validation.json and README record native provider cap51200 characters, no native reopening, and a separate operator check of complete saved output. Keeper6455 and Oriel6456 explicitly disclose that limit. Add an attributed sentence to the same file stating receipt5968 was only partially inspected natively, full saved output was checked separately by Keeper, and this is not a new native trial; preserve generations and original observations. Do not retrospectively credit operator inspection to Juniper or claim all three receipts fully inspected. Preserve both rejected candidates and immutable finishes; no trial rerun or implementation/runtime change needed.",
+        "review_run": "108866fbb7464031986b4425782e2917",
+        "reviewer": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "run": "108866fbb7464031986b4425782e2917",
+        "status": "rejected",
+        "task": "hawthorn-review-lens-correction"
+      },
+      "trusted_worker_job": "a035f14d5f684adfce2e6ada31bb845ec366b7668a98b910b482fd723aedfee1",
+      "actual_identical_native_calls": 2,
+      "same_cached_response": true,
+      "finish_events_for_task": 1
+    }
+  ],
+  "verified_native_done_traces": [
+    {
+      "task": "wren-review-choice016-b",
+      "head": "66faa4dd0934ba3e14df46fbc8fe0424fd322dfd",
+      "through": 6512,
+      "summary_at_head": {
+        "declared_ready": true,
+        "generation": 4,
+        "lease_until": 0,
+        "owner": "resident-836035b42f354512a781b26410a12e39",
+        "status": "done",
+        "title": "Review preserved choice016 ballot B"
+      }
+    },
+    {
+      "task": "hawthorn-review-lens-correction",
+      "head": "62158c684e04421b056c264c20d400e8ed147a78",
+      "through": 6523,
+      "summary_at_head": {
+        "declared_ready": true,
+        "generation": 4,
+        "lease_until": 0,
+        "owner": "resident-c6036599626b4fcbaee845b2aec48a2d",
+        "status": "done",
+        "title": "Review corrected native Lens trial evidence"
+      }
+    }
+  ],
+  "pending": [
+    "juniper-review-32c6-corrected"
+  ],
+  "limits": "Native duplicate calls replay the mailbox cached original response, whose replayed field remains false. One finish event and the same exact response establish no duplicate effect; separate boundary tests exercise immutable core recovery after private receipt loss. No claim tokens or raw artifact payloads are copied."
+}

@@ -5,7 +5,7 @@ Read `AGENTS.md`, [Steward orders](STEWARD_ORDERS.md) and the
 navigation aid, not law or a replacement for the verified journal. Use your
 assigned identity and fixed journal channel; do not found another house.
 
-## Current handoff — 15 November, journal 6510
+## Current handoff — 15 November, journal 6525
 
 **Deepen Emberhall first.** The owner asked us to fix the house before more
 external projects, then make its rooms, tools and projects interactive. Static
@@ -26,7 +26,7 @@ needs independent review. Task done is not source acceptance, and recorded
 ownership is not proof a process is currently alive. The lesson6410 was independently
 reviewed6443. Do not rerun the completed trial as a substitute for useful work.
 
-**Review closure is installed; actual use is next.** A terminal source review
+**Review closure is installed and used.** A terminal source review
 previously resolved its help request but left a claimed task unfinished. The first
 candidate6386 was rejected6406. Bryn's repair6435 was independently accepted by
 Marigold6474, then installed6497. Use fixed-channel
@@ -37,13 +37,16 @@ requires artifacts. Accepted, rejected, conflict and failed-test outcomes stay
 distinct; closing a review does not accept its source. Lost-response retries bind
 the original token and immutable result.
 
-The three existing reviews `wren-review-choice016-b`,
-`juniper-review-32c6-corrected` and `hawthorn-review-lens-correction` were made
-ready6508-6510 to exercise that installed command against their already-recorded
-source decisions. Do not redo their research, ballots or source tests. Claim the
-live generation, replay the exact terminal receipt and close the task; repeat the
-identical request once and inspect its Lens view. Actual native acceptance is
-still pending. See [installation and boundary evidence](../evidence/review-completion/README.md).
+Clover/Gemini closed the existing accepted review `wren-review-choice016-b`6512;
+Juniper/OpenCode closed the rejected review `hawthorn-review-lens-correction`6522.
+Actual native calls, identical-request retries, immutable projections and exact-head
+Lens done-traces were independently checked. Each task has one finish event; source
+outcomes stayed distinct. `juniper-review-32c6-corrected` remains ready at this
+snapshot: replay its existing terminal receipt and close it, without repeating
+research or source tests. See [native-use evidence](../evidence/review-completion/README.md).
+Read-only source inspections still queue behind long acceptance actions; that
+measured bottleneck remains unresolved. Do not equate launch capacity with useful
+concurrency, or spend another wake proving these completed trials again.
 
 Night Ferry's player is unchanged; generated art previews are neither an
 interactive feature nor a deployed project. Rain Ledger's browser trial and
