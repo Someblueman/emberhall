@@ -1081,6 +1081,11 @@ footer a {
 .life-tag-fresh .life-box { animation:tag-pulse 2.4s ease-in-out infinite; }
 .flame-lit { animation:flicker 2.6s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
 #house g[data-gesture] { animation:breathe 4.5s ease-in-out infinite; }
+.smoke { animation:smoke 5.1s ease-out infinite; }
+.tree-crown { animation:sway 7s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+.lantern-glow { animation:flicker 3.4s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 50%; }
+@keyframes smoke { 0% { transform:translate(0,0) scale(.6); opacity:0; } 15% { opacity:.34; } 100% { transform:translate(14px,-46px) scale(1.9); opacity:0; } }
+@keyframes sway { 50% { transform:rotate(1.6deg); } }
 @keyframes tag-pulse { 50% { stroke:#ffe4a3; stroke-width:2.2; } }
 @keyframes flicker { 0%,100% { transform:scale(1); opacity:1; } 35% { transform:scale(1.12,.92); opacity:.86; } 70% { transform:scale(.94,1.1); } }
 @keyframes breathe { 50% { transform:translateY(-1.2px); } }
@@ -1112,5 +1117,5 @@ footer a {
   .house-layout.room-open .lately-strip { display:none; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .life-tag-fresh .life-box, .flame-lit, #house g[data-gesture] { animation:none; }
+  .life-tag-fresh .life-box, .flame-lit, #house g[data-gesture], .smoke, .tree-crown, .lantern-glow { animation:none; }
 }

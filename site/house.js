@@ -347,6 +347,82 @@ function dormControls() {
   $("dorm-page").textContent=`Six display bunks · ${view.members.length} remembered identities${view.members.length>view.asleep?` (${view.members.length-view.asleep} other recorded room traces)`:""}`;
   $("dorm-previous").disabled=view.page===0;$("dorm-next").disabled=view.page===view.pages-1;
 }
+// One house, not a row of boxes: a shared footing, a hall between the two wings,
+// a door from every room onto it, a front path, a chimney and a garden. All of
+// it is scenery; rooms, lamps, figures and scars still come from the record.
+const HALL=38;
+function tree(g,x,y,size=1) {
+  const [cx,cy]=p(x,y,0);
+  el("ellipse",{cx,cy:cy+2,rx:17*size,ry:7*size,fill:"#0d1f1b",opacity:.45},g);
+  el("rect",{x:cx-2.5*size,y:cy-24*size,width:5*size,height:25*size,fill:"#5d4a36"},g);
+  const crown=el("g",{class:"tree-crown"},g);
+  [[0,-44,17,"#2f5d45"],[-11,-33,13,"#28523d"],[11,-34,13,"#356a4c"],[0,-30,12,"#2b5740"]].forEach(([dx,dy,r,fill])=>
+    el("circle",{cx:cx+dx*size,cy:cy+dy*size,r:r*size,fill},crown));
+}
+function shrub(g,x,y,flower) {
+  const [cx,cy]=p(x,y,0);
+  el("ellipse",{cx,cy:cy+2,rx:13,ry:5,fill:"#0d1f1b",opacity:.4},g);
+  [[-6,-5,8,"#2c5a42"],[5,-6,9,"#346a4b"],[0,-11,8,"#2f6046"]].forEach(([dx,dy,r,fill])=>el("circle",{cx:cx+dx,cy:cy+dy,r,fill},g));
+  if(flower)[[-5,-9],[4,-12],[7,-5]].forEach(([dx,dy])=>el("circle",{cx:cx+dx,cy:cy+dy,r:1.8,fill:flower},g));
+}
+function grounds(g,span,depth,layouts) {
+  // Footing and the hall floor that joins the wings.
+  box(g,-9,-9,span+18,depth+8,11,["#8d8a72","#4f5a4d","#69705c"],-11);
+  polygon(g,[[180,0],[180+HALL,0],[180+HALL,depth-10],[180,depth-10]],"#a38b62","#8a7650",1);
+  for(let n=1;n<(depth-10)/16;n++) line(g,[[180,n*16],[180+HALL,n*16]],"#8a7650",1);
+  polygon(g,[[188,14],[172+HALL,14],[172+HALL,depth-24],[188,depth-24]],"#8c4f43","#c9a36b",1.5);
+  polygon(g,[[193,20],[167+HALL,20],[167+HALL,depth-30],[193,depth-30]],"none","#c9a36b",.8);
+  // The front path runs from the garden gate to the door.
+  const door=layouts.find(item=>item.room.id==="door")||layouts[0];
+  const px=door.x+78;
+  polygon(g,[[px-9,-74],[px+9,-74],[px+9,-9],[px-9,-9]],"#6f6a57","#4e5547",1).setAttribute("class","path");
+  for(let n=0;n<4;n++) polygon(g,[[px-6,-68+n*15],[px+6,-68+n*15],[px+6,-58+n*15],[px-6,-58+n*15]],"#a39c82","#5d6152",1);
+  // Chimney behind the hearth, with a thread of smoke.
+  const hearth=layouts.find(item=>item.room.id==="hearth");
+  if(hearth) {
+    box(g,hearth.x+52,hearth.y-15,30,13,104,["#a08872","#5f5346","#7d6a59"]);
+    box(g,hearth.x+49,hearth.y-17,36,17,6,["#b59b82","#6a5c4d","#8b7664"],104);
+    const [sx,sy]=p(hearth.x+67,hearth.y-9,112);
+    [0,1,2].forEach(n=>el("circle",{cx:sx,cy:sy,r:5+n*1.5,fill:"#c9cdbd",opacity:0,class:"smoke",style:`animation-delay:${n*1.7}s`},g));
+  }
+  tree(g,-45,-50,1.05);tree(g,span+40,-48,.9);
+  // A low fence and gate along the front of the garden.
+  for(let x=-64;x<=span+64;x+=16) {
+    if(Math.abs(x-px)<12)continue;
+    line(g,[[x,-72,0],[x,-72,12]],"#b9a67c",2);
+  }
+  line(g,[[-64,-72,9],[px-12,-72,9]],"#b9a67c",1.5);line(g,[[px+12,-72,9],[span+64,-72,9]],"#b9a67c",1.5);
+  const [lx,ly]=p(px+16,-66,0);
+  el("line",{x1:lx,y1:ly,x2:lx,y2:ly-30,stroke:"#3c4a44","stroke-width":2.5},g);
+  el("circle",{cx:lx,cy:ly-33,r:9,fill:"#f5c873",opacity:.16,class:"lantern-glow"},g);
+  el("rect",{x:lx-3.5,y:ly-38,width:7,height:9,rx:1.5,fill:"#f4c777",stroke:"#3c4a44","stroke-width":1.2},g);
+}
+// Each room opens onto the hall; the Door also opens onto the path.
+function doorway(g,item,lit) {
+  if(!item)return;
+  const {room,x,y,depth,col}=item,from=y+depth*.5-14,to=from+28;
+  if(col===1) {
+    polygon(g,[[x+.4,from,0],[x+.4,to,0],[x+.4,to,46],[x+.4,from,46]],"#263a35","#d0b984",2.5).setAttribute("class","doorway");
+    polygon(g,[[x+.6,from+3,0],[x+.6,from+12,0],[x+.6,from+12,43],[x+.6,from+3,43]],"#8a6a48","#5d4a36",1);
+    polygon(g,[[x-9,from,.3],[x,from,.3],[x,to,.3],[x-9,to,.3]],lit?"#d9b574":"#8c8463");
+  } else {
+    box(g,x+177,from-3,4,3,46,["#d0b984","#8d7a55","#b29e72"]);
+    box(g,x+177,to,4,3,46,["#d0b984","#8d7a55","#b29e72"]);
+    line(g,[[x+179,from-3,47],[x+179,to+3,47]],"#d0b984",4);
+    polygon(g,[[x+180,from,.3],[x+189,from,.3],[x+189,to,.3],[x+180,to,.3]],lit?"#d9b574":"#8c8463");
+  }
+  if(room.id==="door") {
+    polygon(g,[[x+62,y+.4,0],[x+94,y+.4,0],[x+94,y+.4,50],[x+62,y+.4,50]],"#7b5a3c","#d0b984",2.5).setAttribute("class","front-door");
+    polygon(g,[[x+67,y+.5,26],[x+89,y+.5,26],[x+89,y+.5,44],[x+67,y+.5,44]],lit?"#e4c47f":"#435c52","#5d4a36",1);
+    const [kx,ky]=p(x+90,y+.5,24);el("circle",{cx:kx,cy:ky,r:1.8,fill:"#f0c77b"},g);
+  }
+}
+// Planting in front of everything else, so it reads as the near side of the garden.
+function garden(g,span,depth) {
+  shrub(g,-38,depth*.35,"#e9c46a");shrub(g,-40,depth*.75);
+  shrub(g,span+38,depth*.3);shrub(g,span+40,depth*.7,"#e58f8f");
+  tree(g,-42,depth+30,1.1);shrub(g,span*.5,depth+38,"#e9c46a");tree(g,span+36,depth+34,.95);
+}
 // What the record says about a room, in a few words, drawn under its name.
 function roomFact(id) {
   const count=(n,one,many)=>`${n} ${n===1?one:many}`;
@@ -459,16 +535,18 @@ function drawHouse() {
       const count=roomOccupants(frame,room.id).length;
       return {room,depth:roomDepth(room,count)};
     });
-    pair.forEach((item,col)=>layouts.push({...item,x:col*190,y:totalDepth}));
+    pair.forEach((item,col)=>layouts.push({...item,col,x:col*(180+HALL),y:totalDepth}));
     totalDepth+=Math.max(...pair.map(item=>item.depth))+10;
   }
   totalDepth=Math.max(170,totalDepth);
-  const left=Math.min(0,470-totalDepth*.86-30);
-  wholeBounds = `${left} 45 ${830-left} ${Math.max(520,(totalDepth+370)*.43+100)}`;
+  const left=Math.min(0,470-(totalDepth+130)*.86-12);
+  wholeBounds = `${left} 8 ${952-left} ${Math.max(520,(totalDepth+HALL+490)*.43+150)}`;
   const roomLabels = [], placed = [];
   document.querySelector?.(".house-layout")?.classList?.toggle("room-open",Boolean(selected));
   const ground = el("g",{},map);
-  polygon(ground,[[-18,-18,-12],[389,-18,-12],[389,totalDepth+3,-12],[-18,totalDepth+3,-12]],"#132824", "#607259",1);
+  const span=360+HALL;
+  polygon(ground,[[-70,-75,-12],[span+70,-75,-12],[span+70,totalDepth+60,-12],[-70,totalDepth+60,-12]],"#17352a","#3f5f49",1).setAttribute("class","lawn");
+  if(rooms.length) grounds(ground,span,totalDepth,layouts);
   if(!rooms.length) {
     polygon(ground,[[12,12],[358,12],[358,145],[12,145]],"none","#c5ac79",2);
     caption(ground,185,80,0,selectedFloor===0?"No rooms recorded on this floor.":"A floor approved. Rooms still to come.","room-label");
@@ -496,6 +574,7 @@ function drawHouse() {
       polygon(g,[[x+113,y+.3,24],[x+151,y+.3,24],[x+151,y+.3,53],[x+113,y+.3,53]],awake?"#e4c47f":"#435c52","#596955",3);
       line(g,[[x+132,y,24],[x+132,y,53]],"#63755c",2);
       flame(g,x+15,y+5,42,awake);
+      doorway(g,layouts.find(item=>item.room===room),awake);
       furnishings(g,room.id,x,y,awake,members);
     } else building(g,room,x,y,depth,awake);
     wear(g,room,x,y,depth);
@@ -520,6 +599,7 @@ function drawHouse() {
     const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
   });
+  if(rooms.length) garden(el("g",{"pointer-events":"none"},map),span,totalDepth);
   roomLabels.forEach(r=>el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name));
   roomLabels.forEach(r=>{if(r.fact)el("text",{x:r.x,y:r.y+17,class:"room-fact","text-anchor":"middle","pointer-events":"none"},map,r.fact);});
   nameTags(map,placed);
