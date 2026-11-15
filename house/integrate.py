@@ -23,6 +23,9 @@ from .files import workspace_path
 
 
 INSPECTION_LIMIT = 64_000
+PROSE_FILE_LIMIT = 64_000
+PROSE_TOTAL_LIMIT = 256_000
+PROSE_PATH_LIMIT = 64
 DIAGNOSTIC_LIMIT = 8_000
 DIAGNOSTIC_CHUNK = 64 * 1024
 # Receipt fields that must never reach the journal notice: a private candidate
@@ -138,6 +141,9 @@ def failure_diagnostics(log: Path, test_exit: int) -> dict:
 
 def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[str]]]:
     paths = changed_paths(candidate, base, head)
+    if paths and all(_is_ordinary_prose_path(path) for path in paths):
+        _validate_prose_commit(candidate, base, head, paths)
+        return "prose", []
     project_only = bool(paths) and all(re.fullmatch(r"projects/[A-Za-z0-9_-]+/.+", p) for p in paths)
     if not project_only:
         return "foundation", [[sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"]]
@@ -165,6 +171,66 @@ def check_plan(candidate: Path, base: str, head: str) -> tuple[str, list[list[st
         elif path.suffix in {".js", ".mjs", ".cjs"}:
             commands.append(["node", "--check", name])
     return "projects:" + ",".join(projects), commands
+
+
+def _is_ordinary_prose_path(path: str) -> bool:
+    return bool(
+        re.fullmatch(r"evidence/choice-[0-9]{3}/(?:selection|vote(?:-[A-Za-z0-9_-]+)?)\.md", path)
+        or re.fullmatch(r"research/explorations/[A-Za-z0-9][A-Za-z0-9._-]*\.md", path)
+    )
+
+
+def _tree_entry(candidate: Path, tree: str, path: str) -> tuple[bytes, bytes] | None:
+    output = subprocess.run(
+        ["git", "--literal-pathspecs", "ls-tree", "-z", tree, "--", path],
+        cwd=candidate, capture_output=True, check=True, timeout=30,
+    ).stdout
+    entries = [entry for entry in output.split(b"\0") if entry]
+    if not entries:
+        return None
+    if len(entries) != 1 or b"\t" not in entries[0]:
+        raise ValueError("prose acceptance found malformed tree metadata")
+    metadata, entry_path = entries[0].split(b"\t", 1)
+    fields = metadata.split()
+    if entry_path != path.encode("utf-8") or len(fields) != 3:
+        raise ValueError("prose acceptance found malformed tree metadata")
+    mode, kind, oid = fields
+    if mode != b"100644" or kind != b"blob":
+        raise ValueError("prose acceptance requires committed non-executable regular files")
+    if not re.fullmatch(rb"[0-9a-f]{40}|[0-9a-f]{64}", oid):
+        raise ValueError("prose acceptance found malformed tree metadata")
+    return mode, oid
+
+
+def _validate_prose_commit(candidate: Path, base: str, head: str, paths: list[str]) -> None:
+    if len(paths) > PROSE_PATH_LIMIT:
+        raise ValueError("prose acceptance exceeds the changed-file limit")
+    total = 0
+    for path in paths:
+        for tree in (base, head):
+            entry = _tree_entry(candidate, tree, path)
+            if entry is None:
+                continue
+            _, oid = entry
+            size = int(subprocess.run(
+                ["git", "cat-file", "-s", oid.decode("ascii")], cwd=candidate,
+                capture_output=True, check=True, timeout=30,
+            ).stdout)
+            if size > PROSE_FILE_LIMIT:
+                raise ValueError("prose acceptance requires bounded UTF-8 Markdown")
+            total += size
+            if total > PROSE_TOTAL_LIMIT:
+                raise ValueError("prose acceptance exceeds the content limit")
+            content = subprocess.run(
+                ["git", "cat-file", "blob", oid.decode("ascii")], cwd=candidate,
+                capture_output=True, check=True, timeout=30,
+            ).stdout
+            try:
+                decoded = content.decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise ValueError("prose acceptance requires valid UTF-8 Markdown") from error
+            if "\0" in decoded:
+                raise ValueError("prose acceptance rejects binary Markdown")
 
 
 def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
