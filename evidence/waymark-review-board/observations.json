@@ -1,0 +1,72 @@
+{
+  "task": "waymark-review-board-real-record",
+  "observer": {
+    "name": "Kestrel",
+    "resident": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+    "run": "787497bbace74cdba21adb10fff9d073"
+  },
+  "source": {
+    "commit": "6a8cb8ce442b58c0ba5b62dd05b3517327b9ca21",
+    "files": {
+      "projects/waymark-review-board/waymark.py": "8a13604a0941afb6dfc71817b5f0522816910146c3da9e23ac399932d742fa3b",
+      "projects/waymark-review-board/README.md": "31573186110794f601933acc25fb21ce5e41f1b9f948d30475667771dd31aa05",
+      "projects/waymark-review-board/test_waymark.py": "f6cb74b34ef4f797d50d640eabae73588432f9e5b3f09e0de9f239dedbbe32b2"
+    }
+  },
+  "prefix": {
+    "repo": "/Users/sws/Code/longhouse",
+    "reviewer": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+    "through": 4357,
+    "through_event": {
+      "id": "mailbox-ebc6899249c24645a158e10395defa70-063fc684f0c75e356c0ea401ecb216b699f41a3e95d9c07837650154f7119426",
+      "sequence": 4357
+    },
+    "incomplete_prefix": true,
+    "verified_repository_events": 4372,
+    "verified_repository_head": "0165a70409c52e46f0123422cf11bb91f78c9145"
+  },
+  "commands": [
+    "python3 projects/waymark-review-board/waymark.py --repo /Users/sws/Code/longhouse --reviewer resident-f5598eadc3044c00a20bdd2a6a9be9ce --through 4357 --limit 50",
+    "python3 projects/waymark-review-board/waymark.py --repo /Users/sws/Code/longhouse --reviewer resident-f5598eadc3044c00a20bdd2a6a9be9ce --through 4357 --include-excluded --limit 50 --offset <0,50,100>"
+  ],
+  "results": {
+    "totals": {
+      "excluded": 83,
+      "suggested": 0,
+      "unknown": 34,
+      "total_with_excluded": 117
+    },
+    "ordinary_rotation": {
+      "basis": "helpers excluded before last-32 slice, independently per lane; context only, not row ranking",
+      "window": 32,
+      "review": {"agy": 8, "codex": 8, "muse": 9, "opencode": 7},
+      "work": {"agy": 7, "codex": 8, "muse": 8, "opencode": 9}
+    },
+    "sampled_rows": {
+      "638a70464b6046d68d31506ebc15a605": {
+        "author": "resident-22b4c51faf9048c1ba5af1771f156026",
+        "decision": "excluded",
+        "reasons": ["active-assignment"],
+        "terminal": [],
+        "assignments": [
+          {
+            "event": {"id": "source-review-638a70464b6046d68d31506ebc15a605", "sequence": 4345},
+            "request": "source-review-638a70464b6046d68d31506ebc15a605",
+            "run": "54f4a8dd0ce74a8c9952ae6d08f3b352"
+          }
+        ]
+      },
+      "f8ad724b995344bea1b792e98ff9099b": {
+        "author": "resident-f5598eadc3044c00a20bdd2a6a9be9ce",
+        "decision": "excluded",
+        "reasons": ["source-author", "recorded-terminal-review"]
+      }
+    }
+  },
+  "unchanged": {
+    "journal_refs": "untouched (read-only)",
+    "source_refs": "6a8cb8ce442b58c0ba5b62dd05b3517327b9ca21",
+    "index": "clean before evidence commit",
+    "cursors": "paginated read-only to 4370"
+  }
+}
