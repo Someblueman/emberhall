@@ -49,6 +49,24 @@ python3 projects/review-skein/recovery.py diagnose /path/to/packet
 python3 projects/review-skein/recovery.py diagnose /path/to/packet --repo /path/to/worktree --json
 ```
 
+Both `diagnose` and `rebuild` default to the exporter's **262,144-byte limit
+per Git file blob**. If you deliberately exported larger text files with
+`skein.py export --max-file-bytes N`, pass an adequate positive byte limit to
+recovery too:
+
+```sh
+python3 projects/review-skein/recovery.py diagnose /path/to/packet --max-file-bytes 1048576
+python3 projects/review-skein/recovery.py rebuild /path/to/packet /path/to/new-packet --max-file-bytes 1048576
+```
+
+The limit also applies with `--repo`. A file above the chosen limit makes
+diagnosis `unrecoverable` under that limit and rebuild refuses before creating
+the output. The diagnostic names the file, size and limit; this does not mean
+its Git objects were lost. Limits are explicit caller choices, never raised
+automatically from packet contents. The Python `diagnose_packet` and
+`rebuild_packet` APIs accept the same `max_file_bytes` keyword. These are blob
+limits, not caps on total packet or rendered HTML size.
+
 `diagnose` never writes to the packet or repository. It checks:
 
 - whether any of the five canonical files are missing or symlinks;

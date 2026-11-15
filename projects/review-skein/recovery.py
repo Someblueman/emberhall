@@ -254,8 +254,13 @@ def salvage_comments_list(
     return final_comments, summary
 
 
-def diagnose_packet(packet: Path, *, repo: Path | None = None) -> dict[str, Any]:
+def diagnose_packet(
+    packet: Path, *, repo: Path | None = None,
+    max_file_bytes: int = skein.DEFAULT_MAX_FILE_BYTES,
+) -> dict[str, Any]:
     """Inspect a packet directory read-only and report health, missing/corrupt files and recovery path."""
+    if type(max_file_bytes) is not int or max_file_bytes < 1:
+        raise skein.SkeinError("max_file_bytes must be a positive integer")
     raw = packet.expanduser()
     if raw.is_symlink() or not raw.is_dir():
         return {
@@ -359,6 +364,7 @@ def diagnose_packet(packet: Path, *, repo: Path | None = None) -> dict[str, Any]
                 base_commit=base_commit,
                 head_ref=head_ref,
                 head_commit=head_commit,
+                max_file_bytes=max_file_bytes,
             )
         except skein.SkeinError as exc:
             issues.append(f"cannot reconstruct packet from Git objects: {exc}")
@@ -462,6 +468,8 @@ def rebuild_packet(
     max_file_bytes: int = skein.DEFAULT_MAX_FILE_BYTES,
 ) -> dict[str, Any]:
     """Rebuild a damaged or partial packet into a new verified packet directory."""
+    if type(max_file_bytes) is not int or max_file_bytes < 1:
+        raise skein.SkeinError("max_file_bytes must be a positive integer")
     raw_in = damaged_packet.expanduser()
     if raw_in.is_symlink() or not raw_in.is_dir():
         raise skein.SkeinError(f"damaged packet must be a regular directory: {damaged_packet}")
@@ -688,6 +696,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     diag_p.add_argument("packet", type=Path)
     diag_p.add_argument("--repo", type=Path, default=None)
+    diag_p.add_argument(
+        "--max-file-bytes", type=int, default=skein.DEFAULT_MAX_FILE_BYTES,
+        help="maximum bytes per Git file blob (default: %(default)s); match the export limit",
+    )
     diag_p.add_argument("--json", action="store_true", dest="as_json")
 
     rebuild_p = subcommands.add_parser(
@@ -700,6 +712,10 @@ def main(argv: list[str] | None = None) -> int:
     rebuild_p.add_argument("--head-ref", default=None)
     rebuild_p.add_argument("--salvage-comments", action="store_true")
     rebuild_p.add_argument("--trust-bundle", action="store_true")
+    rebuild_p.add_argument(
+        "--max-file-bytes", type=int, default=skein.DEFAULT_MAX_FILE_BYTES,
+        help="maximum bytes per Git file blob (default: %(default)s); match the export limit",
+    )
     rebuild_p.add_argument("--json", action="store_true", dest="as_json")
 
     salvage_p = subcommands.add_parser(
@@ -722,7 +738,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "diagnose":
-            report = diagnose_packet(args.packet, repo=args.repo)
+            report = diagnose_packet(
+                args.packet, repo=args.repo, max_file_bytes=args.max_file_bytes,
+            )
             if args.as_json:
                 print(skein._json_text(report), end="")
             else:
@@ -746,6 +764,7 @@ def main(argv: list[str] | None = None) -> int:
                 head_ref=args.head_ref,
                 salvage_comments=args.salvage_comments,
                 trust_bundle=args.trust_bundle,
+                max_file_bytes=args.max_file_bytes,
             )
             if args.as_json:
                 print(skein._json_text(result), end="")
