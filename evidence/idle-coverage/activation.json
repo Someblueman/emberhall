@@ -1,0 +1,20 @@
+{
+  "scope": "idle-coverage-20261115",
+  "source_head": "f8f3a34850dc10a1b067d29a68ba164423df50f0",
+  "source_sha256": "c2d6ed058921783d017ac25962eb1497078f68f7ba01abf7d8ad7727a4334dde",
+  "runtime_sha256": "7bc91b48cfae10dd9c1e2d7742f4b2279e1e5c642f2d5e404998dad6bdb63959",
+  "test_count": 539,
+  "test_output_sha256": "ddb14bf27f39ae2f229c17d9aa8d28db90e13c126912c59af781b02b00413e41",
+  "approval_sha256": "5f4fbc269934c939c5cea27715a58cf2aa697030ce950e4e6a8e976a333f8560",
+  "migration_sequence": 6341,
+  "paused_sequence": 6322,
+  "resumed_sequence": 6342,
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council",
+    "proposals"
+  ],
+  "drain_retry": "First attempt held source lock during shutdown; aborted before migration. Unchanged service recovered all runs and jobs. Retry drained before acquiring source lock. Luna finish6328 preserved before maintenance interruption6329."
+}

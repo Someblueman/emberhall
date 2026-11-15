@@ -14,11 +14,13 @@ Keeper intervention, not filled project slots or another small demonstration.
 Two slots are a ceiling, not a production quota. Preserve selected milestones;
 this work direction does not amend council law or its ratification process.
 
-Visual design is part of a finished experience, not optional decoration. After
-the house repairs, improve its record-derived rooms and residents and deepen
-existing creations such as Night Ferry. Do not invent activity or clues. Keeper
-paused Night Ferry visual integration before editing its player; the two generated
-art previews remain in the Codex generated-images directory, not deployed assets.
+The owner clarified that visual means usable interaction and visible consequences,
+not static imagery beside text. After house repairs, make rooms and residents'
+work inspectable and usable, and deepen existing projects through direct interaction.
+Judge the result by what a person can do and understand through the interface.
+Artwork supports that experience; it does not establish completion. Do not invent
+activity or clues. Night Ferry remains unchanged; generated previews are not a
+finished interaction or a deployed feature.
 
 ## Make the chosen work useful
 

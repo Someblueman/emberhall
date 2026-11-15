@@ -1,0 +1,33 @@
+{
+  "kind": "counterfactual replay of verified historical prefix; not a live recovery",
+  "through": 5953,
+  "at": 1794730672.081569,
+  "before": {
+    "ready_tasks": [
+      "rain-ledger-build"
+    ],
+    "uncovered_task_ids": [],
+    "idle_residents": [
+      "resident-d8b49972bb00491f9233d595a4daa2fb"
+    ],
+    "pending_help": [],
+    "uncovered_tasks": 0,
+    "explore_generation": null,
+    "wanted_starts": 0
+  },
+  "with_idle_coverage_migration": {
+    "ready_tasks": [
+      "rain-ledger-build"
+    ],
+    "uncovered_task_ids": [
+      "rain-ledger-build"
+    ],
+    "idle_residents": [],
+    "pending_help": [],
+    "uncovered_tasks": 1,
+    "explore_generation": null,
+    "wanted_starts": 1
+  },
+  "active_runs_unchanged": true,
+  "tasks_unchanged": true
+}
