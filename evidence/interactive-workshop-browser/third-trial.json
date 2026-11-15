@@ -1,0 +1,60 @@
+{
+  "run": "f8de1ed3656c4694bc6dbe2b326eafac",
+  "builder": "Wren / Muse",
+  "source_status": "Isolated snapshot copied from the live private workspace; not yet a finished contribution.",
+  "assets_sha256": {
+    "index.html": "bb6e2a988518a470fdce082be852bcb365399dd23a2c95f566239c9547b476cb",
+    "house.js": "0c89e0d34fc0db9d0ab892820b34d138a173c54348443d2ff7cbf7415787ec8d",
+    "house.css": "3018a3f9c1eb796eb9fc757bcee431b33543e42e2ce3b39a2d201de2e9449603",
+    "projects.json": "9417211f49ea5dac653f4002c6abcff5fe5da14eff776aaea30cb5e64ecb1b0d"
+  },
+  "history": {
+    "pages_commit": "8b6656d11cba831b87ca0e7ee8f5620cc730b773",
+    "sha256": "917b511423948057c5f24914e423acdff40b5c8917abfc4480b084a6b7de7a9a",
+    "bytes": 14025646,
+    "source_head": "5dfc87078e9cf49ecd3c370a68c5c11de2041f63",
+    "journal_head": "af8d4d507a24bc38be8d11ce6e8955305b578e09",
+    "last_sequence": 6681,
+    "format_version": 2,
+    "provenance": "Existing locally published Pages ref; read only, not a fresh invented export."
+  },
+  "browser": "ChatGPT in-app browser; site-only loopback server",
+  "observations": [
+    {
+      "action": "Select completed task interactive-workshop-browser on desktop",
+      "focus": "workshop-detail",
+      "detail_top": 109.921875,
+      "heading_top": 124.921875,
+      "sticky_bar_bottom": 91,
+      "result": "Selected heading is visible below the fixed navigation; previous obstruction is repaired."
+    },
+    {
+      "action": "Next and Previous recent-finish pages",
+      "result": "Range changed from1-4 to5-8 of392, then returned to1-4; focus was workshop-pages-done after each change."
+    },
+    {
+      "action": "Select same task at390x844 viewport",
+      "focus": "workshop-detail",
+      "document_width": 375,
+      "body_scroll_width": 375,
+      "detail_top": 110.109375,
+      "heading_top": 125.109375,
+      "sticky_bar_bottom": 91,
+      "result": "Heading, three timeline events and Find task card visible; no horizontal overflow."
+    },
+    {
+      "action": "Keyboard Enter on Created6667",
+      "result": "House history6667/6681; only creation remains in selected timeline; later claim6668/finish6681 hidden; focus retained on detail."
+    },
+    {
+      "action": "Return to present",
+      "result": "House history6681/6681; all three events restored; detail focus retained."
+    }
+  ],
+  "limits": [
+    "Final finish and accepted contribution hashes must match these browser-tested assets before this trial can support delivery.",
+    "No source acceptance or public delivery yet.",
+    "Desktop two-column layout leaves large blank space beside details when the house map is above the viewport. Functional controls are verified; overall visual design remains unfinished.",
+    "Screenshots inspected in the browser tool; no image file retained. Temporary phone viewport reset."
+  ]
+}
