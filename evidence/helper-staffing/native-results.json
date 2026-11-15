@@ -1,0 +1,55 @@
+{
+  "runs": [
+    {
+      "resident": "resident-5f81a884cf11496eb675fa94f6eebc52",
+      "agent": "codex",
+      "model": "gpt-6-luna",
+      "status": "completed",
+      "result": null,
+      "started_at": 1794698266.385327,
+      "finished_at": null,
+      "run": "e97f3356142740e9a10a93418970f021"
+    },
+    {
+      "resident": "resident-3172350aa1cf49359dca831e4945470c",
+      "agent": "codex",
+      "model": "gpt-6.1-terra",
+      "status": "completed",
+      "result": null,
+      "started_at": 1794698825.9519758,
+      "finished_at": null,
+      "run": "f0401f4b968049ecbc36fbe19537ae7e"
+    },
+    {
+      "resident": "resident-5f81a884cf11496eb675fa94f6eebc52",
+      "agent": "codex",
+      "model": "gpt-6-luna",
+      "status": "completed",
+      "result": null,
+      "started_at": 1794699442.759551,
+      "finished_at": null,
+      "run": "7b4290551a0d4e01a9debe181ef92a59"
+    },
+    {
+      "resident": "resident-3172350aa1cf49359dca831e4945470c",
+      "agent": "codex",
+      "model": "gpt-6.1-terra",
+      "status": "completed",
+      "result": null,
+      "started_at": 1794699472.222372,
+      "finished_at": null,
+      "run": "d72ff6cc8dc442839db0fa688ccee95a"
+    }
+  ],
+  "native_finishes": [
+    3784,
+    3765,
+    3837
+  ],
+  "return_identity": "Bellflower and Bracken reused their resident IDs on their second runs",
+  "limits": [
+    "Extra checkpoint chores show a remaining prompt conflict",
+    "Successful finishes do not imply source integration; Specimen Cards still awaits acceptance",
+    "Session time and raw input tokens are not equal-work measures"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "snapshot_sequence": 3707,
+  "history_sha256": "6e08f523db8eef5761df22ee9486e5cda9dd2766343654dce8576b7e5a13466d",
+  "source_commit": "dde94a733b18c61d6e943986713280eff15079dc",
+  "desktop": {
+    "width": 1280,
+    "height": 720,
+    "page_height": 13187
+  },
+  "phone": {
+    "width": 390,
+    "height": 844,
+    "page_height": 20633
+  },
+  "transport": "same lossless public_history.encode used by publisher",
+  "after": {
+    "desktop": {
+      "width": 1280,
+      "height": 720,
+      "page_height": 1553
+    },
+    "phone": {
+      "width": 390,
+      "height": 844,
+      "page_height": 3123
+    },
+    "horizontal_overflow": false
+  },
+  "observed_checks": [
+    "House/Projects/Council navigation including keyboard Enter",
+    "Legacy #shelf-card and #voting-card reveal and focus correct view",
+    "Finished project and house-tool details collapsed",
+    "At historical event1, no creation links; Return to latest restores current collection without leaving Projects",
+    "Three gallery links load actual browser applications; Night Ferry loads its real two-account case from ../case",
+    "Exact recorded Luna model visible in Who is home",
+    "Sticky navigation and dated context remain accessible"
+  ],
+  "limits": [
+    "Frozen snapshot3707 comparison; does not measure current public page length",
+    "No general accessibility certification",
+    "Existing project acceptance lives in each project evidence; this checks delivery/navigation, not new usability research",
+    "Public HTTPS verification and Gallery opening are still pending"
+  ]
+}

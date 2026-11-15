@@ -1,0 +1,33 @@
+{
+  "observed_at": 1794700823.1392791,
+  "runs": [
+    {
+      "run": "a86a17e3ec0541fd9d94d0bc993e0c0f",
+      "agent": "agy",
+      "model": "gemini-4-hydrogen-low",
+      "pgid": 26263,
+      "process_exists": true
+    },
+    {
+      "run": "338e1e5c118949f3a5834db403d08f6d",
+      "agent": "codex",
+      "model": "gpt-6.1-sol",
+      "pgid": 26351,
+      "process_exists": true
+    },
+    {
+      "run": "882380e311454e969bd9192bac6d5028",
+      "agent": "codex",
+      "model": "gpt-6-luna",
+      "pgid": 51993,
+      "process_exists": true
+    },
+    {
+      "run": "0827668091f04c9e8c97f97dfc3ec807",
+      "agent": "codex",
+      "model": "gpt-6.1-terra",
+      "pgid": 52395,
+      "process_exists": true
+    }
+  ]
+}

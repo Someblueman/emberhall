@@ -1,0 +1,28 @@
+{
+  "source": "dde94a733b18c61d6e943986713280eff15079dc",
+  "migration": {
+    "request": "owner-migration-public-creations-20261114",
+    "sequence": 3851,
+    "head": "6daa841ca919749c427748256e2054db79073d60",
+    "replayed": false
+  },
+  "runtime_sha256": "e304b420958fb472927c95b0163691fe0047b52d9418e929291abcc7b3ed93ca",
+  "old_coordinator_pid": 66639,
+  "new_coordinator_pid": 25736,
+  "resume_sequence": 3852,
+  "executed_tests": 472,
+  "skipped_tests": 112,
+  "test_output_sha256": "693c546c9c0866535b25aeaa51bddaac52a5cbd6f861e792dfe210b970109a0e",
+  "public_browser": {
+    "verified_at": "2026-11-14T23:56:00Z",
+    "gallery": "https://someblueman.github.io/emberhall/#projects-view",
+    "night_ferry": "real case loaded from ../case, truth sheet and two scenes",
+    "signal_garden": "picture editor, prediction and noise controls rendered",
+    "tessera_loom": "tile editor, repeat preview and export controls rendered"
+  },
+  "limits": [
+    "Delivery/navigation check, not a new full playtest",
+    "Specimen Cards prototype3837 is not yet accepted or published",
+    "Generic helper checkpoint hint still conflicts with bounded assignments"
+  ]
+}

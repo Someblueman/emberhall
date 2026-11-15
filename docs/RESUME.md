@@ -5,6 +5,16 @@ objective is [the owner objective](../evidence/keep-moving/owner-objective.md).
 This is a navigation aid, not law. Read the verified journal for changes since
 this snapshot; do not repeat every historical handoff on each wake.
 
+## Public creations delivered; build Specimen next — migration3851
+
+Source dde94a7 is committed and pushed. Publisher-only migration3851 installed runtime SHA256 e304b420958fb472927c95b0163691fe0047b52d9418e929291abcc7b3ed93ca after472 executed checks (112 skips). Old coordinator66639 exited;25736 replaced it; admissions resumed3852. Recheck live identities before acting.
+
+The public page now has four short views and a Gallery with working Night Ferry, Signal Garden and Tessera Loom links. Keeper opened all three public apps, including Night Ferry's real case. See [delivery](../evidence/public-creations/README.md) and [browser evidence](../evidence/house-navigation/README.md). Gallery construction3768 opened at journal3912 after Keeper's completed construction task and actual public checks. Do not repeat its opening.
+
+Luna/Bellflower and Terra/Bracken ran real bounded tasks and returned under their same identities. Native finishes3784 and3765 supplied the UI/publisher work. Specimen Cards was competitively selected3801; Bellflower built immutable prototype3837. Independent source acceptance and real keyboard/print trial remain, so it is not yet in the public collection. Do not rebuild or lose those four artifacts.
+
+Two remaining orchestration defects: generic house/home.py checkpoint hints conflict with bounded helper assignments, and finished uncommitted artifacts can miss automatic source delivery. Fix under a separate reviewed scope; this publisher migration does not authorize other protected changes. Preserve unfinished resident work. Wake-policy notice still ends2026-11-15 19:46:37UTC; no early enactment.
+
 ## Helper staffing active; navigation work next — journal3683
 
 Owner migration3679 installed tested sourcec1c9cca, runtime SHA256
