@@ -1,0 +1,53 @@
+{
+  "observed_utc": "2026-11-15T15:37Z",
+  "note": "Machine-local paths redacted; no page loaded and no download occurred. No troubleshooting link was fetched.",
+  "attempts": [
+    {
+      "headless": true,
+      "profile": "<isolated temporary profile>",
+      "fixture": "fixture.html",
+      "puppeteer": "25.3.0",
+      "launch_args": [
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-sync",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=0",
+        "--user-data-dir=<isolated temporary profile>",
+        "--headless=new",
+        "about:blank"
+      ],
+      "stage": "launch",
+      "success": false,
+      "error": {
+        "name": "Error",
+        "message": "Failed to launch the browser process:  Code: null\n\nstderr:\n\n\nTROUBLESHOOTING: https://pptr.dev/troubleshooting\n"
+      }
+    },
+    {
+      "headless": false,
+      "profile": "<isolated temporary profile>",
+      "fixture": "fixture.html",
+      "puppeteer": "25.3.0",
+      "launch_args": [
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-sync",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=0",
+        "--user-data-dir=<isolated temporary profile>",
+        "about:blank"
+      ],
+      "stage": "launch",
+      "success": false,
+      "error": {
+        "name": "Error",
+        "message": "Failed to launch the browser process:  Code: null\n\nstderr:\n[1115/153736.364915:ERROR:third_party/crashpad/crashpad/util/mach/bootstrap.cc:65] bootstrap_check_in org.chromium.crashpad.child_port_handshake.16026.100494914.MIATEKOVVIYNEIEU: Permission denied (1100)\n[1115/153736.365426:ERROR:third_party/crashpad/crashpad/util/file/file_io.cc:103] ReadExactly: expected 4, observed 0\n[1115/153736.365978:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:208] open <user-home>/Library/Application Support/Google/Chrome/Crashpad/settings.dat: Operation not permitted (1)\n[1115/153736.366085:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:208] open <user-home>/Library/Application Support/Google/Chrome/Crashpad/settings.dat: Operation not permitted (1)\n\nTROUBLESHOOTING: https://pptr.dev/troubleshooting\n"
+      }
+    }
+  ]
+}

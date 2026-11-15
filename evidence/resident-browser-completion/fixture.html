@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Resident local browser fixture</title>
+<h1>Resident local browser fixture</h1>
+<p id="status" role="status">Count: 0</p>
+<button id="increment" type="button">Add one</button>
+<button id="download" type="button">Download JSON</button>
+<script>
+let count = 0;
+document.querySelector('#increment').addEventListener('click', () => {
+  count += 1;
+  document.querySelector('#status').textContent = `Count: ${count}`;
+});
+document.querySelector('#download').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({fixture: 'resident-browser', count}) + '\n'],
+    {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'resident-browser.json';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+</script>
+</html>
