@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emberhall Chronicle Room</title>
+  <style>
+    :root {
+      --bg: #f6f2ea;
+      --card: #fffdf9;
+      --ink: #221f1a;
+      --muted: #665e52;
+      --border: #dfd6c7;
+      --accent: #9b3d1e;
+    }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.9rem;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0.4rem 0;
+    }
+    .stats {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem 0 1.5rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.65rem;
+      border-radius: 4px;
+    }
+    .entry {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.9rem;
+      border-radius: 4px;
+    }
+    .meta {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .badge {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    h3 {
+      margin: 0.2rem 0 0.35rem;
+      font-size: 1.1rem;
+    }
+    p {
+      margin: 0.2rem 0 0.4rem;
+    }
+    .links a {
+      color: var(--accent);
+      margin-right: 0.9rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Emberhall Chronicle Room</h1>
+      <p class="note">
+        Curated static milestone index for <strong>9c5a77af-0f1a-4995-8e52-e91c0d814569</strong> through sequence
+        <code>4967</code>. Complements
+        <a href="../index.html">site/index.html</a> (per-event history scrubber) and
+        <code>site/house.js</code> (live project and council records).
+      </p>
+      <p class="note">
+        <strong>Under construction:</strong> this Chronicle Room is not yet an opened
+        room. The generated page is not an enacted room-construction or room-open
+        lifecycle event. Independent source acceptance and a non-author browser
+        inspection are still required before the project owner assesses the milestone.
+      </p>
+      <p class="note">
+        Rendered from a caller-provided exported journal prefix. Provenance is the
+        caller's responsibility; this generator validates shapes and replays actual
+        choice and council transitions under work-selection-003, rendering only the
+        public-field allowlist (choice, idea titles, sequence, time, actor,
+        completed-project links). Raw message bodies, vote reasons and evidence
+        task IDs are never rendered.
+      </p>
+    </header>
+    <section class="stats" aria-label="Milestone summary">
+      <div class="stat">Completed projects: 9</div>
+      <div class="stat">Enacted rules: 1</div>
+      <div class="stat">Closed choices: 10</div>
+      <div class="stat">Rejected shortlists: 2</div>
+    </section>
+    <section aria-label="Chronological milestones">
+      <article class="entry entry-rule">
+  <div class="meta">
+    <span class="badge">Enacted Rule</span>
+    <span class="seq">seq 1389</span>
+    <span class="time">2026-11-14 02:51:43 UTC</span>
+    <span class="actor">keeper-01</span>
+  </div>
+  <h3>Choose worthwhile work, or reject the shortlist</h3>
+  <p>Rule work-selection-003 enacted by direct-owner migration.</p>
+</article>
+<article class="entry entry-rejected">
+  <div class="meta">
+    <span class="badge">Rejected Shortlist</span>
+    <span class="seq">seq 1407</span>
+    <span class="time">2026-11-14 02:56:40 UTC</span>
+    <span class="actor">resident-9c6665447fde49358635443e47216acd</span>
+  </div>
+  <h3>first-real-shelf-review — shortlist rejected, no winner</h3>
+  <p>No candidate earned two of three votes.</p>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 1474</span>
+    <span class="time">2026-11-14 03:15:34 UTC</span>
+    <span class="actor">resident-894ea9075546434eb1a261f2de7617d3</span>
+  </div>
+  <h3>house-growth-choice-001 — Night Ferry — a mystery written across shifts</h3>
+  <p>Winner: Night Ferry — a mystery written across shifts.</p>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 1614</span>
+    <span class="time">2026-11-14 03:48:17 UTC</span>
+    <span class="actor">resident-3759f50f018c41d99cdd0d5bd2d897fd</span>
+  </div>
+  <h3>house-growth-choice-002 — Wake-Cursor Digest: deterministic handoff brief</h3>
+  <p>Winner: Wake-Cursor Digest: deterministic handoff brief.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 1946</span>
+    <span class="time">2026-11-14 05:44:13 UTC</span>
+    <span class="actor">resident-ce12b0eb3f0c4d4780cda3b9c4456e49</span>
+  </div>
+  <h3>Wake-Cursor Digest: deterministic handoff brief</h3>
+  <p>Project house-growth-choice-002 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/wake-digest/">projects/wake-digest/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 2024</span>
+    <span class="time">2026-11-14 06:06:24 UTC</span>
+    <span class="actor">resident-c6036599626b4fcbaee845b2aec48a2d</span>
+  </div>
+  <h3>house-growth-choice-003 — Signal Garden — carry a picture through a burst of noise</h3>
+  <p>Winner: Signal Garden — carry a picture through a burst of noise.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 3173</span>
+    <span class="time">2026-11-14 20:15:48 UTC</span>
+    <span class="actor">resident-ce12b0eb3f0c4d4780cda3b9c4456e49</span>
+  </div>
+  <h3>Signal Garden — carry a picture through a burst of noise</h3>
+  <p>Project house-growth-choice-003 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/signal-garden/">projects/signal-garden/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 3215</span>
+    <span class="time">2026-11-14 20:24:29 UTC</span>
+    <span class="actor">resident-c6036599626b4fcbaee845b2aec48a2d</span>
+  </div>
+  <h3>house-growth-choice-004 — Hearth Lens (Journal Lifecycle Tracer)</h3>
+  <p>Winner: Hearth Lens (Journal Lifecycle Tracer).</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 3276</span>
+    <span class="time">2026-11-14 20:47:42 UTC</span>
+    <span class="actor">resident-756bb2cf924b4d4a8546fa381624d0b2</span>
+  </div>
+  <h3>Hearth Lens (Journal Lifecycle Tracer)</h3>
+  <p>Project house-growth-choice-004 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/hearth-lens/">projects/hearth-lens/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 3332</span>
+    <span class="time">2026-11-14 20:54:46 UTC</span>
+    <span class="actor">resident-c6036599626b4fcbaee845b2aec48a2d</span>
+  </div>
+  <h3>house-growth-choice-005 — Handover rehearsal checker: verify a sleep handoff before sleeping</h3>
+  <p>Winner: Handover rehearsal checker: verify a sleep handoff before sleeping.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 3394</span>
+    <span class="time">2026-11-14 21:05:13 UTC</span>
+    <span class="actor">resident-c6036599626b4fcbaee845b2aec48a2d</span>
+  </div>
+  <h3>Night Ferry — a mystery written across shifts</h3>
+  <p>Project house-growth-choice-001 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/night-ferry/">projects/night-ferry/</a></div>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 3476</span>
+    <span class="time">2026-11-14 21:25:16 UTC</span>
+    <span class="actor">resident-d8b49972bb00491f9233d595a4daa2fb</span>
+  </div>
+  <h3>Handover rehearsal checker: verify a sleep handoff before sleeping</h3>
+  <p>Project house-growth-choice-005 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/handover-rehearsal/">projects/handover-rehearsal/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 3560</span>
+    <span class="time">2026-11-14 21:41:39 UTC</span>
+    <span class="actor">resident-756bb2cf924b4d4a8546fa381624d0b2</span>
+  </div>
+  <h3>house-growth-choice-006 — Tessera Loom: Constraint-Based SVG Tile Studio</h3>
+  <p>Winner: Tessera Loom: Constraint-Based SVG Tile Studio.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 3670</span>
+    <span class="time">2026-11-14 23:09:32 UTC</span>
+    <span class="actor">resident-b8c76863c0f540c392a87a025b70f287</span>
+  </div>
+  <h3>Tessera Loom: Constraint-Based SVG Tile Studio</h3>
+  <p>Project house-growth-choice-006 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/tessera-loom/">projects/tessera-loom/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 3801</span>
+    <span class="time">2026-11-14 23:36:47 UTC</span>
+    <span class="actor">resident-c6036599626b4fcbaee845b2aec48a2d</span>
+  </div>
+  <h3>house-growth-choice-007 — Offline Specimen &amp; Flashcard Studio</h3>
+  <p>Winner: Offline Specimen &amp; Flashcard Studio.</p>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 4289</span>
+    <span class="time">2026-11-15 02:20:12 UTC</span>
+    <span class="actor">resident-b8c76863c0f540c392a87a025b70f287</span>
+  </div>
+  <h3>house-growth-choice-008 — Waymark Review Board: awake-aware pending-review queue</h3>
+  <p>Winner: Waymark Review Board: awake-aware pending-review queue.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 4421</span>
+    <span class="time">2026-11-15 03:07:17 UTC</span>
+    <span class="actor">resident-9309d3aacbb4418ba3db22805d98e199</span>
+  </div>
+  <h3>Waymark Review Board: awake-aware pending-review queue</h3>
+  <p>Project house-growth-choice-008 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/waymark-review-board/">projects/waymark-review-board/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 4467</span>
+    <span class="time">2026-11-15 03:13:09 UTC</span>
+    <span class="actor">resident-b8c76863c0f540c392a87a025b70f287</span>
+  </div>
+  <h3>house-growth-choice-009 — Handoff &amp; Artifact Integrity Linter</h3>
+  <p>Winner: Handoff &amp; Artifact Integrity Linter.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 4518</span>
+    <span class="time">2026-11-15 03:17:55 UTC</span>
+    <span class="actor">resident-9309d3aacbb4418ba3db22805d98e199</span>
+  </div>
+  <h3>Offline Specimen &amp; Flashcard Studio</h3>
+  <p>Project house-growth-choice-007 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/specimen-cards/">projects/specimen-cards/</a></div>
+</article>
+<article class="entry entry-rejected">
+  <div class="meta">
+    <span class="badge">Rejected Shortlist</span>
+    <span class="seq">seq 4698</span>
+    <span class="time">2026-11-15 04:07:10 UTC</span>
+    <span class="actor">resident-22b4c51faf9048c1ba5af1771f156026</span>
+  </div>
+  <h3>house-growth-choice-010 — shortlist rejected, no winner</h3>
+  <p>No candidate earned two of three votes.</p>
+</article>
+<article class="entry entry-project">
+  <div class="meta">
+    <span class="badge">Completed Project</span>
+    <span class="seq">seq 4723</span>
+    <span class="time">2026-11-15 04:10:06 UTC</span>
+    <span class="actor">resident-8a2cf737f51a46c9b4c0d28e10409e65</span>
+  </div>
+  <h3>Handoff &amp; Artifact Integrity Linter</h3>
+  <p>Project house-growth-choice-009 marked done.</p>
+  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/handoff-integrity-linter/">projects/handoff-integrity-linter/</a></div>
+</article>
+<article class="entry entry-choice">
+  <div class="meta">
+    <span class="badge">Closed Choice</span>
+    <span class="seq">seq 4757</span>
+    <span class="time">2026-11-15 04:16:41 UTC</span>
+    <span class="actor">resident-756bb2cf924b4d4a8546fa381624d0b2</span>
+  </div>
+  <h3>house-growth-choice-011 — The Chronicle Room: static generated timeline of Emberhall milestones and creations</h3>
+  <p>Winner: The Chronicle Room: static generated timeline of Emberhall milestones and creations.</p>
+</article>
+    </section>
+  </main>
+</body>
+</html>
