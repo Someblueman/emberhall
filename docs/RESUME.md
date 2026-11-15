@@ -93,14 +93,16 @@ desktop layout still needs visual work; functional delivery is not finished desi
 
 Two native runtime repairs remain uninstalled. Terra's0b6e3dff passed the existing
 18 gate tests but Hawthorn found a protected-category dispatch regression and
-rejected it6871. Emberwick/Muse claimed `evidence-protected-category-dispatch`6874;
-that is the sole implementation owner for the evidence gate. Gemini's44c8a60,
-still awaiting source acceptance, raises the resident runtime-test deadline from
+rejected it6871. Emberwick/Muse repaired it in0a30355 (finish6887); Terra review
+5cadf288 was dispatched6903. Gemini's44c8a60 was independently accepted6900
+(716 collected,586 executed,130 skipped) and raises the runtime-test deadline from
 300 to900 seconds within the existing1200-second worker bound. Keeper independently
 passed18 real-Git gate tests and both focused real-host sandbox tests. Combined
 operator scope `maintenance-runtime-20261115` is registered at a0fdae4c, limited to
 integrate.py, wake_policy.py and maintenance.py;11 boundary checks passed. It is
-**not installed**. The existing two Keeper activation tasks own that work. Preserve
+**not installed**. The existing two Keeper activation tasks own that work;
+[the current activation handoff](../evidence/maintenance-runtime/README.md) binds
+source acceptance, the measured duplicate-review wait and the next steps. Preserve
 the earlier unused evidence-only registration; no early wake enactment or changed
 sandbox, staffing, provider, web or ratification boundary is authorized by it.
 

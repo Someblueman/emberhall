@@ -1,0 +1,68 @@
+{
+  "jobs": [
+    {
+      "job": "58acfc4ef453d2155c306824c52c9ed51b63ee5b5a0605eb95deaa4c10a43bbd",
+      "requester_run": "2b82accb63244412bcc9bd3296b56e5c",
+      "queued_seconds": 1.479623794555664,
+      "total_seconds": 571.1330668926239,
+      "result": {
+        "ok": true,
+        "result": {
+          "actor": "resident-5f81a884cf11496eb675fa94f6eebc52",
+          "base": "8bbfd05a0a3e93f5834d2962ae96825fa4103b96",
+          "candidate": "integration-d6a3c83a134e4643b96ba0c52a9c374f",
+          "candidate_head": "baf400b56a298a6868cb02d49c0258b91efe7f68",
+          "contribution": "44c8a60fb282b0c176ea4abb9591ba3aa0fdeb4a",
+          "run": "6ca49179505f4a13a8e600f95a33d16e",
+          "status": "integrated",
+          "test_commands": [
+            [
+              "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ]
+          ],
+          "test_exit": 0,
+          "test_scope": "foundation"
+        }
+      }
+    },
+    {
+      "job": "fd24c477440c573fc249d7c3cd8534a2acf9671dcd8426d50b22d95990d90b53",
+      "requester_run": "5793bc1189254ae2ad4c4d6e9decdc21",
+      "queued_seconds": 456.1015901565552,
+      "total_seconds": 462.5098171234131,
+      "result": {
+        "ok": true,
+        "result": {
+          "actor": "resident-5f81a884cf11496eb675fa94f6eebc52",
+          "base": "8bbfd05a0a3e93f5834d2962ae96825fa4103b96",
+          "candidate": "integration-d6a3c83a134e4643b96ba0c52a9c374f",
+          "candidate_head": "baf400b56a298a6868cb02d49c0258b91efe7f68",
+          "contribution": "44c8a60fb282b0c176ea4abb9591ba3aa0fdeb4a",
+          "run": "6ca49179505f4a13a8e600f95a33d16e",
+          "status": "integrated",
+          "test_commands": [
+            [
+              "/Users/sws/.local/share/mise/installs/python/3.13.2/bin/python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ]
+          ],
+          "test_exit": 0,
+          "test_scope": "foundation"
+        }
+      }
+    }
+  ],
+  "same_terminal_result": true,
+  "interpretation": "Second request waited456.102 seconds and replayed the first independent acceptance. It did not run another suite. This protects source consistency but wastes resident availability; future coordination repair should return a clear in-progress result rather than hold a second requester."
+}
