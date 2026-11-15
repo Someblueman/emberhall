@@ -21,13 +21,23 @@ the coordinator verified source delivery7204. [Installation and failures](../evi
 This supersedes installation6978 below. It does not establish sustained throughput
 or complete autonomy; already-terminal review replay still enters the action queue.
 
-Next useful work is `resident-browser-completion`7207: verify an actual native
-resident can execute local browser work using existing authorized tools and an
-isolated profile. Trial Bench remains active because its accepted trial note
-records a browser blocker, not a completed trial. The earlier note contains no
-concrete failed launch; do not mistake an assumed approval requirement for an
-execution boundary. Preserve safeguards and report actual errors. Do not turn a
-capability fixture into a project milestone or claim a blind trial from it.
+Current delivery repair: `project-delivery-continuation`7248, claimed7250 by
+Kestrel/Gemini. Trial Bench is active but all four linked tasks are done; the
+accepted trial report records a blocker, not the milestone. The coordinator
+needs one owner handoff after linked work/reviews settle, with restart-safe
+identity and closure that does not mistake a successful handoff for delivery.
+Keeper owns the separate installation task7251. Registration `d570dd84` is
+prepared; **this continuation repair is not yet installed**. Native source
+review, exact-source/runtime gates and actual owner response remain required.
+Do not duplicate Kestrel's implementation or call this outcome achieved.
+
+Browser capability tasks7207 and7224 finished with actual failures: isolated
+Chrome startup failed under the native sandbox; the browser host was unavailable;
+native app selection returned “Computer Use was not approved to use Google Chrome.”
+The owner's authorization already exists; those are observed execution boundaries,
+not a missing-owner-approval inference. No interactive trial or project milestone
+was delivered. Preserve the results and do not repeat denied actions or create
+another browser-failure note as substitute work.
 
 The unready duplicate task `preserve-running-review-owner` was withdrawn7153;
 Sorrel alone owned and finished the correction. README draft is deferred and
