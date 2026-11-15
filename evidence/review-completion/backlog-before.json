@@ -1,0 +1,49 @@
+{
+  "at": 1794739599.961277,
+  "sequence": 6472,
+  "head": "dc03698c6b810be2b6d527ce0e458f7f08bfdc85",
+  "typed_reviews": [
+    {
+      "task": "specimen-cards-source-acceptance",
+      "status": "done",
+      "generation": 2,
+      "review_run": null
+    },
+    {
+      "task": "source-review-choice-010-vote-a",
+      "status": "done",
+      "generation": 6,
+      "review_run": "de3f71634a5c4d3b88eefad77585e067"
+    },
+    {
+      "task": "source-review-choice-010-selection",
+      "status": "done",
+      "generation": 2,
+      "review_run": "cc68ca0ed86d42daa4a954eb3061cc24"
+    },
+    {
+      "task": "source-review-choice-012-vote-a",
+      "status": "done",
+      "generation": 3,
+      "review_run": "c932699bba534795ababa2b0ee14b049"
+    },
+    {
+      "task": "wren-review-choice016-b",
+      "status": "open",
+      "generation": 2,
+      "review_run": "4e0ebf9d449c463da8663c4093f3d819"
+    },
+    {
+      "task": "juniper-review-32c6-corrected",
+      "status": "open",
+      "generation": 2,
+      "review_run": "d077a479727445f294c09d8bf7af8fd2"
+    },
+    {
+      "task": "hawthorn-review-lens-correction",
+      "status": "claimed",
+      "generation": 1,
+      "review_run": "108866fbb7464031986b4425782e2917"
+    }
+  ]
+}

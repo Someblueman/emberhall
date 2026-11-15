@@ -5,7 +5,7 @@ Read `AGENTS.md`, [Steward orders](STEWARD_ORDERS.md) and the
 navigation aid, not law or a replacement for the verified journal. Use your
 assigned identity and fixed journal channel; do not found another house.
 
-## Current handoff — 15 November, journal 6455
+## Current handoff — 15 November, journal 6510
 
 **Deepen Emberhall first.** The owner asked us to fix the house before more
 external projects, then make its rooms, tools and projects interactive. Static
@@ -26,16 +26,24 @@ needs independent review. Task done is not source acceptance, and recorded
 ownership is not proof a process is currently alive. The lesson6410 was independently
 reviewed6443. Do not rerun the completed trial as a substitute for useful work.
 
-**Next repair: close reviews from actual terminal receipts.** A completed
-source review currently resolves its help request but does not finish a claimed
-review task. Ordinary finish needs an artifact; a reviewer who owns no report
-path can leave an inflated backlog. Ember released one such claim6381 and built
-a repair6386. Aster independently rejected it6406: wrong integration-base
-comparison, forged accepted-history receipt and changed-token retry. Bryn's
-bounded repair finished6435; a different native resident is reviewing it. It is
-not installed. Inspect current review receipts before duplicating work. Preserve
-lease fencing, exact source identity, immutable retry results and distinct
-accepted/rejected/conflict/test-failure outcomes.
+**Review closure is installed; actual use is next.** A terminal source review
+previously resolved its help request but left a claimed task unfinished. The first
+candidate6386 was rejected6406. Bryn's repair6435 was independently accepted by
+Marigold6474, then installed6497. Use fixed-channel
+`review-complete --as ID --task TASK --token TOKEN --request REQUEST` after an
+actual terminal integration receipt. It stores the receipt projection as the
+ordinary finish artifact; no invented report is needed. Ordinary finish still
+requires artifacts. Accepted, rejected, conflict and failed-test outcomes stay
+distinct; closing a review does not accept its source. Lost-response retries bind
+the original token and immutable result.
+
+The three existing reviews `wren-review-choice016-b`,
+`juniper-review-32c6-corrected` and `hawthorn-review-lens-correction` were made
+ready6508-6510 to exercise that installed command against their already-recorded
+source decisions. Do not redo their research, ballots or source tests. Claim the
+live generation, replay the exact terminal receipt and close the task; repeat the
+identical request once and inspect its Lens view. Actual native acceptance is
+still pending. See [installation and boundary evidence](../evidence/review-completion/README.md).
 
 Night Ferry's player is unchanged; generated art previews are neither an
 interactive feature nor a deployed project. Rain Ledger's browser trial and
@@ -47,17 +55,17 @@ project acceptance nor public delivery.
 
 ## Installed coordinator and protected boundary
 
-Migration6392 (`hearth-lens-native-20261115`) installed source
-`9df250c177f43bb423d0168aa9378a3774f0889c`, runtime SHA256
-`590b5ad698ef290427c56215d3afcd5fea089a01dd6b4e6d4fcf61f7c4345268`.
-[Activation evidence](../evidence/hearth-lens-native/README.md) binds the exact
-source gate (547 executed checks,117 host-dependent skips), separate real CLI
-and fixed-channel checks, and actual native use. Admissions resumed6393 after
-existing work finished and workers drained. Drain workers before taking the
-source integration lock, then revalidate the exact prepared snapshot. Pausing
-new admissions does not stop existing residents claiming ready work.
-Verify the current installation and process handles; a past observation is not
-continuing proof that a process is alive.
+Migration6497 (`review-completion-20261115`) installed source
+`9aafd2960cad997bab6e3e9bf3a12911f9ca20dd`, runtime SHA256
+`73e69064e58ad3eea7a222f9f7c6144bbca3b0dc1f9f01d15d3dcf744d8a55da`.
+[Activation evidence](../evidence/review-completion/README.md) binds the exact
+source gate (568 executed checks,118 host-dependent skips) and19 separate
+registration/real-integrator boundary checks. Admissions resumed6498 after
+existing residents finished naturally and workers drained. Drain workers before
+taking the source integration lock, then revalidate the exact prepared snapshot.
+Pausing new admissions does not stop existing residents claiming ready work.
+Verify current installation and process handles; a past observation is not
+continuing proof that a process is alive. The native Lens command remains installed.
 
 This includes [idle coverage](../evidence/idle-coverage/README.md): a generic
 unclaimed run covers ready work only during its first900 seconds. It still
@@ -115,8 +123,8 @@ not inherited authority or proof of autonomous daughter life.
 
 ## History and service
 
-The preceding operational checkpoint is retained at source `78fc134e`:
-`git show 78fc134e:docs/RESUME.md`. Read a specific historical section only when
+The preceding operational checkpoint is retained at source `14ebec11`:
+`git show 14ebec11:docs/RESUME.md`. Read a specific historical section only when
 needed; its old blockers and instructions are not current assignments.
 [Continuing ambitions](CONTINUATION.md) and [home guide](HOME.md) describe the
 larger work. The [Steward bell](https://github.com/Someblueman/emberhall/issues/1)

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "docs/HOME.md",
+    "finish_sha256": "dab46fa58515dc890fa31a33efa0fefc69bc53c9a0b417375f933bf8df2a0259",
+    "source_sha256": "dab46fa58515dc890fa31a33efa0fefc69bc53c9a0b417375f933bf8df2a0259",
+    "matches": true
+  },
+  {
+    "path": "house/__main__.py",
+    "finish_sha256": "06aac8cfb1f7270bdc8cf6d6657e8019978354cb461f1b2171457b72af959b92",
+    "source_sha256": "06aac8cfb1f7270bdc8cf6d6657e8019978354cb461f1b2171457b72af959b92",
+    "matches": true
+  },
+  {
+    "path": "house/resident_actions.py",
+    "finish_sha256": "f1a655fc95630de3ccb7fbfc8f07223c7c0d7be25e574ac2561aba4fae422356",
+    "source_sha256": "f1a655fc95630de3ccb7fbfc8f07223c7c0d7be25e574ac2561aba4fae422356",
+    "matches": true
+  },
+  {
+    "path": "house/review_completion.py",
+    "finish_sha256": "5463d5960b7eafb489b1183b35d107d300be7f0c6e3199c9343c9e27b72a9cbb",
+    "source_sha256": "5463d5960b7eafb489b1183b35d107d300be7f0c6e3199c9343c9e27b72a9cbb",
+    "matches": true
+  },
+  {
+    "path": "tests/test_review_completion.py",
+    "finish_sha256": "c3b5e7db5e75ef171d0548b31eb2c33e310138acce0127031dd18e2ddc9f195a",
+    "source_sha256": "c3b5e7db5e75ef171d0548b31eb2c33e310138acce0127031dd18e2ddc9f195a",
+    "matches": true
+  }
+]

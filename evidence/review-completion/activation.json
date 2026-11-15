@@ -1,0 +1,21 @@
+{
+  "scope": "review-completion-20261115",
+  "source_head": "9aafd2960cad997bab6e3e9bf3a12911f9ca20dd",
+  "source_sha256": "af837a6a8cd9dfa335d644dd6fc0f9c14c1a3649721b860f54ba08fa3f2446f1",
+  "runtime_sha256": "73e69064e58ad3eea7a222f9f7c6144bbca3b0dc1f9f01d15d3dcf744d8a55da",
+  "test_count": 568,
+  "test_output_sha256": "541bd2d4a562d7f74b2dce9fd346263734642b01a7f34fbf94e48bc11254bd9c",
+  "approval_sha256": "b9e80fecc0d67995c7097ccc82373c49e4575a473d5fae5001631994ceb923a8",
+  "migration_sequence": 6497,
+  "paused_sequence": 6473,
+  "resumed_sequence": 6498,
+  "pause_seconds": 658.4627909660339,
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council",
+    "proposals"
+  ],
+  "drain_order": "Current residents exited naturally; trusted jobs and publisher drained before source lock. Exact tested source revalidated by authenticated apply."
+}
