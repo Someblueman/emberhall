@@ -1,0 +1,37 @@
+{
+  "recorded_at": "2026-11-15T04:29:16.556124+00:00",
+  "project": "house-growth-choice-009",
+  "owner_closure_sequence": 4723,
+  "source_acceptance_commit": "80316b6f9ce16da74976828c05e81bfb3e62cb06",
+  "real_workspace_evidence_commit": "37b0e79f70d0d3e1922c6e234294a97876964a87",
+  "manifest_commit": "78f56f082549d0ec6879648bec0ca48f1751302f",
+  "manifest_remote_equality_verified": true,
+  "checks": {
+    "command": "python3 -m unittest tests.test_creations_gallery tests.test_publish_projects -v",
+    "tests": 3,
+    "result": "passed after manifest edit"
+  },
+  "browser": {
+    "method": "Actual in-app browser navigation from public Projects page through displayed Read guide link",
+    "gallery_url": "https://someblueman.github.io/emberhall/#projects-view",
+    "observed_gallery": [
+      "Four finished playable/browser creations",
+      "Tools for the house (5)",
+      "Handoff Integrity Checker marked Completed",
+      "Chronicle listed as active project; 1 of 2 slots occupied"
+    ],
+    "guide_url": "https://github.com/Someblueman/emberhall/blob/main/projects/handoff-integrity-linter/README.md",
+    "observed_guide": [
+      "Handoff integrity checker heading",
+      "Python 3.10+, POSIX, standard library requirements",
+      "Actual CLI invocation and unittest command",
+      "Claim format and exit status documentation"
+    ],
+    "authentication_required": false
+  },
+  "limits": [
+    "This is guide publication, not a newly opened physical room.",
+    "The checker positive and negative real-workspace trials are in observations.json; browser navigation does not establish checker correctness.",
+    "Chronicle is selected and its build task claimed; no completed room claimed here."
+  ]
+}
