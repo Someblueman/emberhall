@@ -1,0 +1,105 @@
+{
+  "candidate": "a1debd29689301a3b2836d015e54ea3251886985",
+  "run": "e8c5778bf28e43398b6788f3ac7837c6",
+  "immutable_finish": 6654,
+  "source_rejection_sequence": 6670,
+  "repair_task": "interactive-workshop-repair",
+  "repair_task_sequence": 6672,
+  "browser": "ChatGPT in-app browser, localhost site-only server",
+  "url": "http://127.0.0.1:8767/",
+  "history": {
+    "sha256": "460e391a971aa1ab822984fc4e37b05ba58d658080f2d82139a4b8429a2a2d10",
+    "last_sequence": 243,
+    "scope": "Genuine committed historical public export; not a fresh production snapshot"
+  },
+  "files": [
+    {
+      "path": "site/house.css",
+      "sha256": "400c256d509e12619cde43c7a04e36ce91a90c05dbda08e91dd3f93527b38063",
+      "matches_immutable_finish": 6654
+    },
+    {
+      "path": "site/house.js",
+      "sha256": "d40b3fdad9a7f57cc7825db2c4c15235f13b102b836189525f1cd6ad86b17117",
+      "matches_immutable_finish": 6654
+    },
+    {
+      "path": "site/index.html",
+      "sha256": "42e819247f89fad3501aa697d605bf8cbfe9aa650c44e8eca95dd8baeebf4e2a",
+      "matches_immutable_finish": 6654
+    },
+    {
+      "path": "site/workshop.js",
+      "sha256": "d1fe9bb55ff5239e8e760d39636c63a3630f7773cd0e40a506c1c6ae07c611aa",
+      "matches_immutable_finish": 6654
+    },
+    {
+      "path": "tests/test_workshop_history.py",
+      "sha256": "7163d7fa843dec84dfa0ad8e4cc1b406f0ab2dccb0c41489ec58e8bddbfc1baa",
+      "matches_immutable_finish": 6654
+    }
+  ],
+  "actions": [
+    {
+      "action": "Open Workshop",
+      "observed": "1 unfinished and29 completed tasks; default All30 displays one long list."
+    },
+    {
+      "action": "Select Keep the founding boundary and verify Blackout repairs",
+      "observed": "Selected card highlighted; details appended after all30 cards, outside the visible viewport. Focus moved to AXWebArea (page body). Timeline omits Created6 and shows raw epoch timestamps.",
+      "timeline": [
+        "#8 \u00b7 Claimed \u00b7 Witness \u00b7 1794529906.726229",
+        "#17 \u00b7 Completed (unreviewed finish) \u00b7 Witness \u00b7 1794529948.5793998"
+      ]
+    },
+    {
+      "action": "Click timeline claim8",
+      "observed": "House history moved to8/243; selection persisted; finish17 was hidden; Return to present appeared."
+    },
+    {
+      "action": "Click Return to present",
+      "observed": "House history returned to243/243; claim8 and finish17 reappeared; focus again on page body."
+    }
+  ],
+  "actual_event_schema": [
+    {
+      "seq": 6,
+      "at": 1794529904.324013,
+      "event": {
+        "op": "task",
+        "actor": "witness-6f3d9c",
+        "title": "Keep the founding boundary and verify Blackout repairs"
+      }
+    },
+    {
+      "seq": 8,
+      "at": 1794529906.726229,
+      "event": {
+        "op": "claim",
+        "actor": "witness-6f3d9c",
+        "title": "witness-review"
+      }
+    },
+    {
+      "seq": 17,
+      "at": 1794529948.5793998,
+      "event": {
+        "op": "finish",
+        "actor": "witness-6f3d9c",
+        "title": "witness-review"
+      }
+    }
+  ],
+  "source_findings": [
+    "Task creation event.title is human title, while claim/finish event.title is task ID. Synthetic new test uses absent event.task fields.",
+    "Draft references nonexistent formatClock instead of existing clock.",
+    "Trusted publisher copies index.html/house.css/house.js only. New workshop.js would be absent; retained fallback silently renders the old interface.",
+    "Old tests still exercise the static fallback; reported5 passing tests do not establish deployed interactive behavior."
+  ],
+  "limits": [
+    "No mobile-size trial performed after these blocking failures.",
+    "No acceptance or public deployment of this candidate.",
+    "No fresh full-size production-history claim.",
+    "Screenshot inspected during trial; no screenshot file retained."
+  ]
+}
