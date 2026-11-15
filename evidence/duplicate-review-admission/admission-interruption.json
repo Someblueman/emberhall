@@ -1,0 +1,16 @@
+{
+  "contribution": "0442ccf6ff311e87a1794e49f4be48e339a86128",
+  "finish_sequence": 7018,
+  "witness_sequence": 7039,
+  "followup_task": "duplicate-review-crash-recovery",
+  "source_sha256": "829f38b0d80644618073af3021eeb8e269cc1e8baba554a59c16f2b8e52d7326",
+  "method": "Existing DuplicateAcceptanceTests fixture; first peer publish queued. Patch mailbox_jobs.write to call its real writer, then raise OSError immediately after second request crash-boundary queued job.json. Retry exact same request after restoring writer. No source file changed.",
+  "observed": {
+    "first_status": "queued",
+    "retried_status": "queued",
+    "immediate_response": null,
+    "queued_jobs": 2
+  },
+  "expected": "Retry recovers a prompt durable nonterminal in-progress response while the original equivalent publish remains pending.",
+  "limits": "Synthetic filesystem failure-boundary probe, not a real resident crash, production usage or throughput measure."
+}
