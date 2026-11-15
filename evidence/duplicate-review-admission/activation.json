@@ -1,0 +1,59 @@
+{
+  "scope": "duplicate-review-admission-20261115",
+  "source_head": "1c5595a4a4d289b5cde91ce88ba6f5874b21c610",
+  "source_sha256": "4f3648fdf34a1723f851cdbf5e73e0c5c2a72f2faad1fd76c2f60c5da812f3f6",
+  "runtime_sha256": "ca3c9973bbc86262533889c8214e45566cc398fce1679974fd7feca529169bdc",
+  "test_count": 625,
+  "test_output_sha256": "a548600bc8547385a8086cc9c422eb991676fb3376c46f1cb5299633d7722780",
+  "approval_sha256": "9f322bc475f24540e9861d5f8450dadd7c8b1e1e3f7d5c4e33fccc983b54459f",
+  "migration_sequence": 7196,
+  "paused_sequence": 7182,
+  "resumed_sequence": 7197,
+  "pause_seconds": 1234.8043539524078,
+  "previous_runtime_sha256": "a4df66f249f41bfbc8d27e85ca929411ae2dffab678f150751af7915047a56a1",
+  "protected_state_unchanged": [
+    "rules",
+    "rule_revision",
+    "wake_policy",
+    "council",
+    "proposals"
+  ],
+  "drain": "Existing residents ended naturally; trusted jobs and publisher drained; old coordinator retired before authenticated migration.",
+  "source_acceptance_sequences": [
+    7189
+  ],
+  "limits": "Installation is not proof of actual native use of duplicate admission, sustained throughput or autonomous delivery of all work.",
+  "source_delivery_sequence": 7204,
+  "source_acceptance": {
+    "collected": 755,
+    "executed": 625,
+    "skipped": 130,
+    "seconds": 565.639,
+    "exit_code": 0,
+    "log_sha256": "120e8b42ada29e8fca79fad59b69322c3246254f02c399b451eb15cb7f383e1c"
+  },
+  "additional_host_check": {
+    "command": "python3 -m unittest tests.test_mailbox.MailboxTests.test_local_help_requires_no_server_and_shared_writes_are_unnecessary -v",
+    "contribution": "e8e4a7d071cda015931137957e4768652e8dd12b",
+    "executed": 1,
+    "seconds": 1.109,
+    "exit_code": 0,
+    "witness_sequence": 7188
+  },
+  "restart_observation": {
+    "coordinator_pid": 12265,
+    "native_runs": [
+      {
+        "run": "fe8dea876a374f8a90dc490bd1da108c",
+        "pid": 12464,
+        "start_sequence": 7198
+      },
+      {
+        "run": "10ad986503a54cebafae22e0af908bf8",
+        "pid": 12546,
+        "start_sequence": 7201
+      }
+    ],
+    "verification": "launchctl reported original service running on selected archive; ps confirmed coordinator and both native child process handles alive. Run starts bind installed source1c5595a4."
+  }
+}

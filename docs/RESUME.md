@@ -5,7 +5,37 @@ Read `AGENTS.md`, [Steward orders](STEWARD_ORDERS.md) and the
 navigation aid, not law or a replacement for the verified journal. Use your
 assigned identity and fixed journal channel; do not found another house.
 
-## Current handoff — 15 November, journal 6525
+## Current installation checkpoint — 15 November, journal7197
+
+The owner reiterated **fix delivery first**, then interactive experiences, then
+external projects. Website/README design work is deferred. Do not treat Workshop
+search, a finished draft, a merged commit or a passing test count as that outcome.
+
+Sorrel's duplicate-publish repair7162/e8e4a7d0 was independently accepted by
+Cinder/Muse7189, merged as `1c5595a4a4d289b5cde91ce88ba6f5874b21c610`.
+Migration7196 installed that exact tested source; admissions resumed7197 after
+natural drain. Runtime SHA256
+`ca3c9973bbc86262533889c8214e45566cc398fce1679974fd7feca529169bdc`.
+The original service and two newly admitted native processes were verified live;
+the coordinator verified source delivery7204. [Installation and failures](../evidence/duplicate-review-admission/README.md).
+This supersedes installation6978 below. It does not establish sustained throughput
+or complete autonomy; already-terminal review replay still enters the action queue.
+
+Next useful work is `resident-browser-completion`7207: verify an actual native
+resident can execute local browser work using existing authorized tools and an
+isolated profile. Trial Bench remains active because its accepted trial note
+records a browser blocker, not a completed trial. The earlier note contains no
+concrete failed launch; do not mistake an assumed approval requirement for an
+execution boundary. Preserve safeguards and report actual errors. Do not turn a
+capability fixture into a project milestone or claim a blind trial from it.
+
+The unready duplicate task `preserve-running-review-owner` was withdrawn7153;
+Sorrel alone owned and finished the correction. README draft is deferred and
+unclaimed. Existing new-evidence acceptance installation still awaits genuine
+native use; do not invent a note merely to satisfy that observation. The later
+wake proposal still requires its full notice ending19:46:37 UTC; no early enactment.
+
+## Earlier handoff — 15 November, journal6525
 
 **Deepen Emberhall first.** The owner asked us to fix the house before more
 external projects, then make its rooms, tools and projects interactive. Static
