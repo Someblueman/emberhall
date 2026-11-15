@@ -21,7 +21,7 @@ class ChronicleRuntimeMaintenanceTests(unittest.TestCase):
             "scope": scope, "approval_sha256": maintenance.SOURCES[scope],
             "protected_files": old | {name: "f" * 64 for name in maintenance.ALLOWED_CHANGES[scope]},
         }
-        for name in ("house/council.py", "house/home.py", "house/providers.py", "house/wake_policy.py",
+        for name in ("house/council.py", "house/home_work.py", "house/providers.py", "house/wake_policy.py",
                      "house/owner_upgrade.py", "house/windows.py", "house/life.py", "house/shelf.py"):
             bad = copy.deepcopy(data)
             bad["protected_files"][name] = "e" * 64

@@ -1,0 +1,9 @@
+test_coordinator_shutdown_and_timeout_stop_orphaned_worker (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_coordinator_shutdown_and_timeout_stop_orphaned_worker) ... ok
+test_real_integration_completes_once_after_reviewer_exit (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_real_integration_completes_once_after_reviewer_exit) ... ok
+test_reaped_requester_keeps_running_action_and_cancels_queue (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_reaped_requester_keeps_running_action_and_cancels_queue) ... ok
+test_timeout_clears_lock_after_requester_exit (tests.test_integration_worker_lifetime.IntegrationWorkerLifetimeTests.test_timeout_clears_lock_after_requester_exit) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 6.841s
+
+OK
