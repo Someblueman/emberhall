@@ -1,101 +1,78 @@
-"""Exercise Workshop task labels and counts in the actual renderer; no visual claim."""
-from pathlib import Path
+"""Exercise task expiry, owner unknowns and safe text in the actual renderer."""
 import shutil
-import subprocess
 import unittest
 
-
-SOURCE = Path(__file__).parents[1] / "site/house.js"
-HARNESS = r'''
-const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-class Element {
-  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
-  appendChild(node){this.children.push(node);}
-  replaceChildren(){this.children=[];}
-  set innerHTML(value){throw new Error('Render text safely');}
-}
-const nodes={},get=id=>(nodes[id]||(nodes[id]=new Element('div')));
-const document={getElementById:get,createElement:tag=>new Element(tag)};
-const text=node=>[node.textContent,...node.children.map(text)].join(' ');
-const all=node=>[node,...node.children.flatMap(all)];
-class FixedDate extends Date {static now(){return 2000000;}}
-const context=vm.createContext({assert,document,nodes,text,all,Date:FixedDate});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);\n';
-assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
-vm.runInContext(`
-data={timezone:'Europe/London'};current=true;selected='workshop';
-frame={seq:10,at:1000,rooms:[{id:'workshop',name:'Workshop'},{id:'door',name:'Door'}],
- residents:[{id:'mallow',name:'Mallow',room:'hearth',pose:'standing'}],runs:[],scars:[],tasks:[
-  {id:'open',title:'<img src=x onerror=alert(1)>',owner:null,status:'open',until:0,generation:0},
-  {id:'claimed',title:'Build',owner:'mallow',status:'claimed',until:3000,generation:1},
-  {id:'expired',title:'Repair',owner:'mallow',status:'claimed',until:1500,generation:1}
- ]};
-const panel=()=>nodes['room-content'];
-const rows=()=>all(panel()).filter(n=>n.className==='task'||n.className==='task expired');
-`,context);
-'''
+from tests.test_workshop_ui import RendererMixin
 
 
 @unittest.skipUnless(shutil.which("node"), "Node executes the actual house renderer")
-class TaskStatusUITests(unittest.TestCase):
-    def run_renderer(self, assertions):
-        script = HARNESS + "\nvm.runInContext(" + repr(assertions) + ",context);"
-        result = subprocess.run(
-            [shutil.which("node"), "-e", script, str(SOURCE)],
-            capture_output=True, text=True, timeout=15,
-        )
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def test_unfinished_counts_claims_and_safe_unassigned_label(self):
+class TaskStatusUITests(RendererMixin, unittest.TestCase):
+    def test_expiry_boundary_historical_and_current(self):
         self.run_renderer(r'''
-const before=JSON.stringify(frame);
-roomPanel();
-assert.match(text(panel()),/3 unfinished · 1 unassigned · 1 recorded claims · 1 expired leases/);
-assert.match(text(panel()),/Unassigned does not mean ready to start/);
-assert.match(text(panel()),/Recorded claims exclude expired leases and are not live process status/);
-assert.equal(rows().length,3);
-assert.equal(rows()[0].children[1].textContent,'Unassigned');
-assert.equal(rows()[1].children[1].textContent,'Recorded claim · Mallow');
-assert.equal(rows()[2].children[1].textContent,'Lease expired · fate unconfirmed · Mallow');
-assert.equal(rows()[2].className,'task expired');
-assert.doesNotMatch(text(panel()),/available|blocked|completed/);
-assert.equal(rows()[0].children[0].textContent,'<img src=x onerror=alert(1)>');
-assert.equal(all(panel()).filter(n=>n.tag==='img').length,0);
-assert.equal(JSON.stringify(frame),before);
-// The whole-floor view uses the same summary and task rows.
-selected=null;roomPanel();
-assert.match(text(panel()),/3 unfinished · 1 unassigned · 1 recorded claims · 1 expired leases/);
-assert.equal(rows().length,3);
-selected='door';roomPanel();
-assert.equal(rows().length,0);
-assert.doesNotMatch(text(panel()),/unfinished|readiness/);
-''')
-
-    def test_history_and_current_clock_expiry_boundary(self):
-        self.run_renderer(r'''
-current=false;roomPanel();
-assert.match(text(panel()),/3 unfinished · 1 unassigned · 2 recorded claims · 0 expired leases/);
-assert.equal(rows()[2].children[1].textContent,'Recorded claim · Mallow');
+current=false;
+draw([
+ {id:'open',title:'Open work',status:'open',until:0,generation:0},
+ {id:'watch',title:'Watch',status:'claimed',owner:'mallow',until:1500,generation:1},
+ {id:'stale',title:'Stale',status:'claimed',owner:'mallow',until:500,generation:1}
+]);
+frame.residents=[{id:'mallow',name:'Mallow',room:'hearth',pose:'standing'}];roomPanel();
+// Historical frame at 1000: until 1500 not yet expired, until 500 expired.
+assert.match(text(panel()),/3 unfinished · 0 finished/);
+assert.equal(cards().length,3);
+const cardByTitle=t=>cards().find(c=>text(c).includes(t));
+assert.match(text(cardByTitle('Watch')),/Recorded claim · Mallow/);
+assert.doesNotMatch(text(cardByTitle('Watch')),/Lease expired/);
+assert.match(text(cardByTitle('Stale')),/Lease expired · fate unconfirmed/);
+assert.doesNotMatch(text(cardByTitle('Stale')),/Mallow/);
+assert.match(text(cardByTitle('Open work')),/Unassigned/);
+// Boundary is inclusive: at exactly 1500 the 1500 lease is expired.
 frame.at=1500;roomPanel();
-assert.equal(rows()[2].children[1].textContent,'Lease expired · fate unconfirmed · Mallow');
+assert.match(text(cardByTitle('Watch')),/Lease expired · fate unconfirmed/);
 frame.at=1499;roomPanel();
-assert.equal(rows()[2].children[1].textContent,'Recorded claim · Mallow');
+assert.match(text(cardByTitle('Watch')),/Recorded claim · Mallow/);
+assert.doesNotMatch(text(cardByTitle('Watch')),/Lease expired/);
+// Current view uses the wall clock, not frame.at.
+const now=Date.now()/1000;
+frame.tasks=[
+ {id:'old',title:'Old',status:'claimed',owner:'mallow',until:now-1000,generation:1},
+ {id:'fresh',title:'Fresh',status:'claimed',owner:'mallow',until:now+100000,generation:1}
+];
+frame.residents=[{id:'mallow',name:'Mallow',room:'hearth',pose:'standing'}];
 current=true;roomPanel();
-assert.equal(rows()[2].children[1].textContent,'Lease expired · fate unconfirmed · Mallow');
-assert.match(text(panel()),/3 unfinished · 1 unassigned · 1 recorded claims · 1 expired leases/);
+assert.match(text(cardByTitle('Old')),/Lease expired · fate unconfirmed/);
+assert.match(text(cardByTitle('Fresh')),/Recorded claim · Mallow/);
+assert.doesNotMatch(text(cardByTitle('Fresh')),/Lease expired/);
 ''')
 
-    def test_missing_resident_and_empty_snapshot_do_not_advertise_work(self):
+    def test_missing_resident_and_empty_snapshot(self):
         self.run_renderer(r'''
-frame.residents=[];roomPanel();
-assert.equal(rows()[1].children[1].textContent,'Recorded claim · mallow');
+current=false;
+draw([
+ {id:'orphan',title:'Orphan work',status:'claimed',owner:'ghost',until:3000,generation:1}
+]);
+frame.residents=[];
+roomPanel();
+assert.match(text(panel()),/1 unfinished · 0 finished/);
+assert.match(text(cards()[0]),/Recorded claim · ghost/);
 assert.doesNotMatch(text(panel()),/available/);
-frame.tasks=[];roomPanel();
-assert.match(text(panel()),/0 unfinished · 0 unassigned · 0 recorded claims · 0 expired leases/);
-assert.equal(rows().length,0);
-assert.doesNotMatch(text(panel()),/Build|Repair|<img/);
+draw([]);
+assert.match(text(panel()),/No tasks are exposed/);
+assert.equal(cards().length,0);
+assert.doesNotMatch(text(panel()),/Orphan work/);
 ''')
 
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_hostile_title_is_safe_text(self):
+        self.run_renderer(r'''
+current=false;
+draw([
+ {id:'xss',title:'<img src=x onerror=alert(1)>',status:'open',until:0,generation:0}
+]);
+roomPanel();
+assert.equal(cards().length,1);
+assert.match(text(cards()[0]),/Unassigned/);
+assert.equal(all(panel()).filter(n=>n.tag==='img').length,0);
+// Selecting the card shows the title as text, never as markup.
+cards()[0].click();
+assert.equal(all(panel()).filter(n=>n.tag==='img').length,0);
+assert.match(text($('workshop-detail')),/Unassigned/);
+''')
