@@ -1,0 +1,7 @@
+{
+  "files": {
+    "house/checkpoint.py": "c763702cd07c32cccdb50326c0a1dc4bdaa549bd69437169a15011f701c46b38"
+  },
+  "source_commit": "7f94d2e71be29237fa569dcb42339eb4d9e59957",
+  "summary": "Restore resident checkpoint exports once the growing journal exceeds the shared 8 MiB outside-file limit. Give generated journal bundles their own 256 MiB ceiling, retain bounded metadata and legacy-job limits, read each file at its recorded size, and report bundle_bytes. Accepted source511c7d00 was independently integrated at8754 as7f94d2e with a passing trusted foundation gate and remotely delivered8761. Installation remains subject to recorded trial, two independent non-author endorsements, public notice and a fresh authenticated Steward check. For this assignment, do not enact before a full 24 hours after the recorded notice, even if a shorter runtime gate is available. No protected limit or ratification-process change is proposed; no successful real checkpoint or installed behavior is claimed."
+}
