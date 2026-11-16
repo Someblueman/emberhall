@@ -2196,11 +2196,14 @@ function shelf() {
   }
   if (dataShelf.policy && dataShelf.research && !dataShelf.explorer) {
     const research = dataShelf.research, now = observationTime();
-    html("p", "small shelf-research", ideas.length >= (research.ceiling || 10)
-      ? `Research pauses while ${research.ceiling || 10} or more ideas wait.`
+    // Once only ideas shown to be asked for count toward the ceiling, the house publishes that count.
+    const backed = Number.isInteger(research.counted), load = backed ? research.counted : ideas.length;
+    const goes = backed ? "Research continues · ideas nobody has shown to be asked for hold no place" : "Research continues even with a full shelf";
+    html("p", "small shelf-research", load >= (research.ceiling || 10)
+      ? `Research pauses while ${research.ceiling || 10} or more ideas ${backed ? "that someone asked for " : ""}wait.`
       : ideas.length < 3 || now >= research.next
-        ? "Research continues even with a full shelf · a round may start now."
-        : `Research continues even with a full shelf · next round after ${clock(research.next)}.`, next);
+        ? `${goes} · a round may start now.`
+        : `${goes} · next round after ${clock(research.next)}.`, next);
   }
   if (ideas.length) {
     // Ideas with a current research brief first; those about to leave the shelf after them.
