@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "trial_id": "mallow-synthetic-sort-2026-11-16",
+  "phase1": {
+    "exposure": "Mallow is not the Trial Bench implementation author. I read README.md, checker.py, test_checker.py and historical task summaries; the existing test suite internally reads the example report. I wrote these fields fresh without copying example_report.json. This is a constructed deterministic CLI trial, not a blind trial or a browser session.",
+    "prediction": "For the synthetic input [12, 3, 8, 3], ascending sorting will return [3, 3, 8, 12].",
+    "reasoning": "The two equal values remain present, 3 is less than 8, and 8 is less than 12. This simple synthetic calculation gives a concrete observation to record after hashing."
+  },
+  "receipt": {
+    "hash": "767eeccc23c2c35a36cd14ec724571dfba5d971ee49c186214f9b8d59025f3bd"
+  },
+  "phase2": {
+    "edit": "No revision to the synthetic prediction.",
+    "observation": "After issuing the CLI receipt, I evaluated Python sorted([12, 3, 8, 3]) and observed [3, 3, 8, 12]. This is a synthetic computation; no physical draw or browser export occurred."
+  }
+}
