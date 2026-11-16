@@ -20,6 +20,14 @@ class ProjectsViewTests(unittest.TestCase):
         self.assertIn('<a href="#gallery-view">Gallery</a>', page)
         self.assertIn('class="gallery-invitation" href="#gallery-view"', page)
 
+    def test_home_page_says_what_the_experiment_is(self):
+        page = (ROOT / 'site/index.html').read_text()
+        title, about, presence = (page.index(mark) for mark in ('id="house-title"', 'id="about-line"', 'id="presence-line"'))
+        self.assertTrue(title < about < presence)
+        line = page[about:presence]
+        for word in ('experiment', 'AI agents', 'Steward', 'journal'):
+            self.assertIn(word, line)
+
     def test_projects_orders_motion_asks_and_next_and_sends_finished_work_to_the_gallery(self):
         script = r'''
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
