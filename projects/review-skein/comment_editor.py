@@ -69,6 +69,11 @@ label {{ display: block; font-weight: bold; margin-top: .8rem; }}
 textarea {{ box-sizing: border-box; width: 100%; min-height: 8rem; }}
 input, textarea, select, button {{ max-width: 100%; font: inherit; padding: .5rem; }}
 button {{ margin-block: .75rem; }}
+.filter-row {{ display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: end; margin-block: .5rem; }}
+.filter-field {{ flex: 1 1 12rem; min-width: 0; }}
+.filter-field label {{ margin-top: .25rem; }}
+.filter-field select, .filter-field input, #new-anchor {{ box-sizing: border-box; width: 100%; }}
+[hidden] {{ display: none !important; }}
 :focus-visible {{ outline: 3px solid #964400; outline-offset: 3px; }}
 </style></head><body><a href="#comments">Skip to comments</a><main>
 <h1>Edit Skein comments</h1>
