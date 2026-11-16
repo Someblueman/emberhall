@@ -56,8 +56,8 @@ rather than with a hidden number.
 | churn spread | the share of changed lines in the largest file, and how many files hold 80% of the churn |
 | groups nothing links | files joined by a textual mention of one another (an import, a quoted path, a file name); the connected components are the groups |
 | mixed documentation and code | some changed file has only blank or comment lines changed, or is a pure move, while another file changes code |
-| production file without a test | a changed source file whose name has no matching changed test file (`test_x.py`, `x_test.py`, `x.test.js`, `x.spec.ts`, or a file under `tests/`) |
-| content a reviewer would never see | a path named in the change that exists in the tree but is not part of the change; untracked files; unstaged edits outside the range |
+| production file without a test | a changed source file with no changed test file for it: none matched by name (`test_x.py`, `x_test.py`, `x.test.js`, `x.spec.ts`, or a file under `tests/`) and no changed test file that names it (an import, a quoted path or a file name in the changed lines or their nearby context), so a differently-named test still counts |
+| content a reviewer would never see | a path named in the change that exists in the tree but is not part of the change, listed once however many changed files name it; untracked files; unstaged edits outside the range |
 
 Links between files are textual mentions in the changed lines and their
 nearby context, not a dependency graph. A missing link can hide a real
@@ -108,8 +108,12 @@ the worth question this first version answers: *what will this cost the person
 - It counts reading load, not comprehension, and it never estimates time.
 - "Must be read whole" is a proxy with a stated rule, not a measurement of
   what a reader would actually do.
-- Links are textual mentions near the change, not a dependency graph.
-- "Production file without a test" is a file-name convention, not coverage.
+- Links are textual mentions near the change, not a dependency graph. A
+  bare common file name (`index.html`, `summary.json`) can match an
+  unrelated path that happens to share the name.
+- "Production file without a test" is a file-name convention plus test files
+  naming the file, not coverage; a test that exercises a file without naming
+  it in the changed lines or their context still looks absent.
 - A documentation-only edit is detected from comment markers; a docstring body
   counts as code.
 - Binary files are reported as unreadable in a text diff rather than measured.

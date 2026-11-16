@@ -257,6 +257,39 @@ class AnalyseTest(unittest.TestCase):
         self.assertNotIn("src/alpha.py", report["flags"]["production_files_without_tests"])
         self.assertEqual(report["flags"]["changed_test_files"], ["tests/test_alpha.py"])
 
+    def test_a_differently_named_test_that_names_the_file_counts(self):
+        diff = DIFF + ("diff --git a/tests/test_other.py b/tests/test_other.py\n"
+                       "--- a/tests/test_other.py\n"
+                       "+++ b/tests/test_other.py\n"
+                       "@@ -1,1 +1,2 @@\n"
+                       " import unittest\n"
+                       "+import alpha\n")
+        report = self.report(diff=diff)
+        self.assertNotIn("src/alpha.py", report["flags"]["production_files_without_tests"])
+        self.assertIn("src/beta.py", report["flags"]["production_files_without_tests"])
+        self.assertEqual(report["flags"]["changed_test_files"], ["tests/test_other.py"])
+
+    def test_each_invisible_path_is_one_action_however_often_named(self):
+        diff = ("diff --git a/src/alpha.py b/src/alpha.py\n"
+                "--- a/src/alpha.py\n"
+                "+++ b/src/alpha.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-from gamma import thing\n"
+                "+from gamma import other\n"
+                "diff --git a/src/beta.py b/src/beta.py\n"
+                "--- a/src/beta.py\n"
+                "+++ b/src/beta.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-from gamma import thing\n"
+                "+from gamma import another\n")
+        report = self.report(diff=diff)
+        invisible_actions = [action["detail"] for action in report["actions"]
+                             if action["kind"] == "invisible"]
+        self.assertEqual(len(invisible_actions), 1)
+        self.assertIn("src/gamma.py", invisible_actions[0])
+        for entry in report["files"]:
+            self.assertEqual(entry["invisible"], ["src/gamma.py"])
+
     def test_documentation_only_edits_are_flagged_when_mixed(self):
         report = self.report()
         self.assertFalse(report["flags"]["mixed_documentation_and_code"])
