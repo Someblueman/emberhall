@@ -131,8 +131,8 @@ def render_composer(packet: Path) -> str:
     return _render(envelope, anchors)
 
 
-def apply_edits(packet: Path, edits: Path) -> int:
-    """Validate edits and optional packet-bound additions before one atomic write."""
+def _validated_edits(packet: Path, edits: Path) -> tuple[list[skein.Comment], list[skein.Comment]]:
+    """Read and validate the complete batch for both preview and application."""
     packet = packet.expanduser().resolve()
     skein._load_packet(packet)
     original = _read(packet / "comments.json")
@@ -167,16 +167,62 @@ def apply_edits(packet: Path, edits: Path) -> int:
         if (added.state != "anchored" or added.rebased_from is not None
                 or added.orphan_reason is not None or added.anchor not in available):
             raise skein.SkeinError("new comments must name an exact packet anchor without provenance")
+    # Catch intervening changes during validation. Like the existing editing CLI,
+    # this is a one-writer workflow, not a cross-process transaction protocol.
+    if _read(packet / "comments.json") != original:
+        raise skein.SkeinError("comments.json changed during validation; nothing applied")
+    if any(_read(packet / name) != raw for name, raw in snapshots.items()):
+        raise skein.SkeinError("packet changed during validation; nothing applied")
+    return before, after
+
+
+def apply_edits(packet: Path, edits: Path) -> int:
+    """Validate edits and optional packet-bound additions before one atomic write."""
+    packet = packet.expanduser().resolve()
+    before, after = _validated_edits(packet, edits)
     changed = sum(old != new for old, new in zip(before, after)) + len(after) - len(before)
     if changed:
-        # Catch intervening changes during validation. Like the existing editing CLI,
-        # this is a one-writer workflow, not a cross-process transaction protocol.
-        if _read(packet / "comments.json") != original:
-            raise skein.SkeinError("comments.json changed during validation; nothing applied")
-        if any(_read(packet / name) != raw for name, raw in snapshots.items()):
-            raise skein.SkeinError("packet changed during validation; nothing applied")
         skein._atomic_comments(packet, after)
     return changed
+
+
+def preview_edits(packet: Path, edits: Path) -> dict:
+    """Validate exactly as apply does and describe changes without writing files."""
+    before, after = _validated_edits(packet, edits)
+    changes = [{"before": old.to_dict(), "after": new.to_dict()}
+               for old, new in zip(before, after) if old != new]
+    updated = len(changes)
+    changes.extend({"before": None, "after": added.to_dict()} for added in after[len(before):])
+    return {"format": "skein-edit-preview", "version": 1,
+            "updated": updated, "added": len(after) - len(before), "changes": changes}
+
+
+def _preview_text(preview: dict) -> str:
+    # Keep the existing three-file page/compose/apply distribution usable.
+    from comments_view import _visible
+
+    lines = [f"Validated edits: {preview['updated']} updated, {preview['added']} added.",
+             "Read-only preview; no packet files changed."]
+    if not preview["changes"]:
+        lines.append("No comment changes.")
+    for change in preview["changes"]:
+        before, after = change["before"], change["after"]
+        anchor = after["anchor"]
+        lines.extend(["", f"{'Added' if before is None else 'Updated'} comment: {after['id']}",
+                      f"{anchor['path']} | {anchor['side']} line {anchor['line']}",
+                      f"Commit: {anchor['commit']}", f"Anchor text: {anchor['text']}",
+                      f"Anchor state: {after['state']}"])
+        if after["orphan_reason"] is not None:
+            lines.append(f"Orphan reason: {after['orphan_reason']}")
+        if after["rebased_from"] is not None:
+            lines.append("Rebased from: " + json.dumps(after["rebased_from"], ensure_ascii=True))
+        for label, record in (("Before", before), ("After", after)):
+            if record is None:
+                lines.append(f"{label}: absent")
+            else:
+                lines.extend([f"{label} resolution: {record['resolution']}", f"{label} body:"])
+                lines.extend("  " + line for line in record["body"].split("\n"))
+    return _visible("\n".join(lines)) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -191,6 +237,10 @@ def main(argv: list[str] | None = None) -> int:
     apply = commands.add_parser("apply", help="validate and atomically apply downloaded edits")
     apply.add_argument("packet", type=Path)
     apply.add_argument("edits", type=Path)
+    check = commands.add_parser("check", help="validate and preview downloaded edits without writing")
+    check.add_argument("packet", type=Path)
+    check.add_argument("edits", type=Path)
+    check.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)
     try:
         if args.command in {"page", "compose"}:
@@ -199,6 +249,12 @@ def main(argv: list[str] | None = None) -> int:
             with args.output.open("x", encoding="utf-8", newline="\n") as stream:
                 stream.write(result)
             print(f"Created {args.output}")
+        elif args.command == "check":
+            preview = preview_edits(args.packet, args.edits)
+            if args.format == "json":
+                print(json.dumps(preview, ensure_ascii=True, sort_keys=True, indent=2))
+            else:
+                print(_preview_text(preview), end="")
         else:
             changed = apply_edits(args.packet, args.edits)
             print(f"Applied edits to {changed} comment(s).")
