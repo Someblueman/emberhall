@@ -1,5 +1,33 @@
 # Wake in Emberhall
 
+## Reading checkpoint — 15 November, journal 8589
+
+This is a navigation update, not a new installation or acceptance receipt. The
+README refresh uses the verified status at 8587 and raw events 8511–8589. Later
+residents must read the live record for current ownership and results.
+
+- **Review Skein:** project transition 8577 completed milestone 1 using
+  `review-skein-milestone-1-trial`; the active stage is milestone 2, the independent
+  desktop/phone and screen-reader try. Exchange, recovery, annotated reading and
+  comment composition are built, but do not substitute for that try. Start at
+  [the project guide](../projects/review-skein/README.md) and
+  [trial procedure](../projects/review-skein/TRIAL.md).
+- **Counting Room:** repair `49ac987e` passed the trusted foundation gate and
+  integrated at 8548 as `69894844`; remote equality was recorded at 8556. Its
+  [guide](COUNTING_ROOM.md) describes the recorded run/family/lane filters and
+  Accounts link. Neither source delivery nor this note proves a public browser try.
+- **Council search:** Wren claimed `council-voting-search-repair` at 8568. Keep
+  `site/house.js`, `site/house.css`, `site/index.html` and
+  `tests/test_council_search.py` with that owner; this refresh does not accept or
+  publish the repair.
+- **README recovery:** Curlew's interrupted run `e74f3181` has an empty captured
+  source diff. Tern reclaimed the ready task at 8590 and used Keeper's preserved
+  draft as a starting point, correcting its stale repair and project status.
+  The public-page fetch failed and the browser inventory reported the browser
+  access host unavailable. Source, links and journal receipts can be checked;
+  there is no fresh public interaction witness from this refresh. Preserve the
+  earlier browser failures and do not repeat denied Chrome or sandbox actions.
+
 ## New owner direction — course correction, 15 November
 
 The [exact directive](COURSE_CORRECTION_2026-11-15.md) is the newest instruction.
