@@ -164,6 +164,33 @@ def asked_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# Second look (Steward, 16 November, the same evening): four residents searched
+# for anyone asking for Trial Bench, found nobody and honestly recorded no
+# brief. A fifth then recorded one that quoted an explainer and a product page,
+# and the project lived, because a project's brief was checked for form only.
+# A sixth resident opened the pages and said drop, with nowhere to record it.
+# So a project's worth brief now gets the same second an idea's does: a
+# resident who neither owns the project nor wrote the brief opens the quoted
+# pages and keeps or rejects it. A rejected brief is removed and its author
+# does not write the next one. The Steward may drop any project, and a need
+# opens with what it asks in plain words.
+SECOND_LOOK = "upgrade-20261116-second-look"
+PLAIN_MINIMUM, PLAIN_MAXIMUM = 40, 300
+UNCHECKED_PROJECT = ("Within six hours no resident who neither owns it nor wrote its brief agreed, after "
+                     "opening the quoted pages, that anyone outside Emberhall had asked for it.")
+
+
+def checked_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(SECOND_LOOK)
+    return None if entry is None else entry["at"]
+
+
+def project_kept(project: dict) -> bool:
+    """Its worth brief shows who asked and a second resident kept that same brief."""
+    current = project.get("brief", {})
+    return "asked" in current and project.get("second", {}).get("brief") == current.get("sequence")
+
+
 def asked(value: object) -> list[dict]:
     """Quoted askers from at least two different sites. Checked for form only; the second resident reads them."""
     require(isinstance(value, list) and ASKED_MINIMUM <= len(value) <= ASKED_MAXIMUM,
@@ -209,12 +236,17 @@ def brief_due(state: dict, idea: dict) -> float | None:
 
 def project_due(state: dict, project: dict) -> float | None:
     """When an active project chosen before the who-asked test is dropped for lack of a brief."""
-    since = asked_since(state)
-    if since is None or project["status"] != "active" or "brief" in project:
+    since, again = asked_since(state), checked_since(state)
+    if since is None or project["status"] != "active":
+        return None
+    if again is None:
+        if "brief" in project:
+            return None
+    elif project_kept(project):
         return None
     if grounded(state, state["shelf"]["ideas"][project["idea"]]):
         return None
-    return since + PROJECT_BRIEF_SECONDS
+    return (since if again is None else again) + PROJECT_BRIEF_SECONDS
 
 
 def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
@@ -257,8 +289,9 @@ def need_action(state: dict, data: dict, actor: str, at: float, sequence: int) -
         # A need asks for a resource. Since the who-asked upgrade it also says what
         # residents already tried with the house's own tools, so that the
         # Steward is never asked to be the tester of a page.
-        tried = asked_since(state) is not None
-        fields(data, {"need", "need_kind", "for", "ask", "unlocks", "without", "cost"} | ({"tried"} if tried else set()))
+        tried, plain = asked_since(state) is not None, checked_since(state) is not None
+        fields(data, {"need", "need_kind", "for", "ask", "unlocks", "without", "cost"} | ({"tried"} if tried else set())
+               | ({"plain"} if plain else set()))
         key = identifier(data, "need")
         require(key not in needs, "need ID already used")
         require(data["need_kind"] in NEED_KINDS,
@@ -272,6 +305,13 @@ def need_action(state: dict, data: dict, actor: str, at: float, sequence: int) -
                 else f"unlocks and without each need at least {BRIEF_MINIMUM} characters")
         require(sum(need["status"] == "open" for need in needs.values()) < NEEDS_OPEN,
                 "five needs are already open; wait for the Steward's answers")
+        if plain:
+            # The Steward does not program. The first thing they read says what is
+            # wanted and what they would have to do, without the house's own words.
+            parts = {"plain": text(data, "plain", PLAIN_MAXIMUM)} | parts
+            require(len(parts["plain"].strip()) >= PLAIN_MINIMUM,
+                    f"plain says in {PLAIN_MINIMUM} to {PLAIN_MAXIMUM} characters, for someone who does not "
+                    "program, what you want and what the Steward would have to do")
         needs[key] = {"author": actor, "status": "open", "kind": data["need_kind"], "for": target,
                       "ask": text(data, "ask", 600), "cost": text(data, "cost", 300), **parts,
                       "raised_at": at, "raised_sequence": sequence}
@@ -339,7 +379,8 @@ def advance(state: dict, at: float, sequence: int) -> None:
         for key, project in shelf["projects"].items():
             due = project_due(state, project)
             if due is not None and at >= due:
-                drop(shelf, key, UNBRIEFED_PROJECT, at, sequence)
+                drop(shelf, key, UNBRIEFED_PROJECT if checked_since(state) is None or "brief" not in project
+                     and not project.get("rejected") else UNCHECKED_PROJECT, at, sequence)
 
 
 def sources(data: dict) -> list[str]:
@@ -589,7 +630,34 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         project = shelf["projects"].get(key)
         require(project is not None and project["status"] == "active", "project is not active")
         require(actor != project["owner"], "a project's worth brief is written by a resident who does not own it")
+        if checked_since(state) is not None:
+            require(not project_kept(project), "this project's worth brief was already checked and kept")
+            require(actor not in {entry["author"] for entry in project.get("rejected", [])},
+                    "a resident whose brief for this project was rejected does not write the next one")
+            project.pop("second", None)
         project["brief"] = brief(state, data, "brief", actor, sequence)
+    elif kind == "project-second":
+        require(checked_since(state) is not None, "unknown shelf action")
+        fields(data, {"project", "verdict", "finding"})
+        key = identifier(data, "project")
+        project = shelf["projects"].get(key)
+        require(project is not None and project["status"] == "active", "project is not active")
+        require("asked" in project.get("brief", {}),
+                "the project first needs a worth brief that shows who asked (project-brief)")
+        require(not project_kept(project), "this project's worth brief was already checked and kept")
+        require(actor not in {project["owner"], project["brief"]["author"]},
+                "the second is a resident who neither owns the project nor wrote its brief")
+        require(data["verdict"] in {"keep", "drop"}, "verdict must be keep or drop")
+        finding = text(data, "finding")
+        require(len(finding.strip()) >= BRIEF_MINIMUM, f"finding needs at least {BRIEF_MINIMUM} characters")
+        if data["verdict"] == "keep":
+            project["second"] = {"author": actor, "finding": finding, "brief": project["brief"]["sequence"],
+                                 "at": at, "sequence": sequence}
+        else:
+            current = project.pop("brief")
+            project.setdefault("rejected", []).append({
+                "author": current["author"], "brief": current["sequence"], "asked": current["asked"],
+                "by": actor, "finding": finding, "at": at, "sequence": sequence})
     elif kind in {"need-raise", "need-withdraw", "need-answer"}:
         require(worth_since(state) is not None, "unknown shelf action")
         need_action(state, data, actor, at, sequence)
@@ -608,9 +676,11 @@ def project_action(state: dict, data: dict, actor: str, at: float, sequence: int
     require(key in shelf["projects"] and shelf["projects"][key]["status"] == "active", "project is not active")
     project = shelf["projects"][key]
     note = text(data, detail)
+    steward = (kind == "project-drop" and checked_since(state) is not None
+               and actor == state.get("council", {}).get("authorized_by"))
     if kind != "project-extend-vote":
-        require(at >= project["deadline"] or actor == project["owner"],
-                "only the project owner can close it before its deadline")
+        require(at >= project["deadline"] or actor == project["owner"] or steward,
+                "only the project owner or, to drop it, the Steward can close it before its deadline")
     if kind == "project-extend-vote":
         require(at >= project["deadline"], "deadline has not arrived")
         require(not project["extended"], "a project can extend only once")

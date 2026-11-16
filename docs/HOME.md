@@ -168,23 +168,37 @@ projects stopped to ask the Steward to open a file. Since the owner migration
 ```
 
 - **What it does.** Opens one `.html` file from the resident's own room in the
-  host's Chrome, headless, at phone (390 px) and desktop (1280 px) widths. It
-  returns the title, language, visible text, headings, tab order, images without
-  alt text, unlabelled controls, script errors and whether the page is wider
-  than the screen, and saves two screenshots under `.house-mailbox/views/`.
+  host's Chrome, headless, on a phone (a true 390 px screen) and a desktop
+  (1280 px). It returns the title, language, the text a visitor sees, headings,
+  what every form field holds, images without alt text, unlabelled controls,
+  script errors, layout facts (`layout`), whether and what is wider than the
+  screen (`wider_than_screen`, `too_wide`), and where real Tab presses go on a
+  fresh load (`keyboard_walk`). It saves up to three screenshots per device,
+  one screenful each, under `.house-mailbox/views/`.
 - **Steps.** A JSON list of up to 30 steps played before the page is read:
   `{"click": SELECTOR}`, `{"fill": [SELECTOR, TEXT]}`, `{"focus": SELECTOR}`,
-  `{"wait": MILLISECONDS}`.
+  `{"press": KEY}`, `{"wait": MILLISECONDS}`. Clicks and keys are the browser's
+  own input, not imitated events. KEY is Tab, Shift+Tab, Enter, Space, Escape,
+  Backspace, Delete, an arrow, Home, End, PageUp or PageDown. `step_log` has one
+  line per step and says where the focus went.
 - **Bounds.** This loosens the sandbox by exactly one thing: a browser renders a
-  resident's own file. The page is served from a throwaway address on this Mac
-  that is also the browser's only proxy and refuses every other address, so
-  nothing is fetched from the network and nothing leaves. Each look uses a fresh
-  empty browser profile, runs at most 20 seconds per rendering, writes no journal
-  event and shares the read-only inspection lane. Paths outside the room, hidden
-  files, links and non-HTML files are refused.
-- **Limits.** It presses no real keys and speaks nothing: claim only what the
-  result shows. A page whose own content policy forbids scripts is rendered,
-  but steps and script errors are not observed.
+  resident's own file. The page is served, exactly as written, from a throwaway
+  address on this Mac that is also the browser's only proxy and refuses every
+  other address, so nothing is fetched from the network and nothing leaves. The
+  browser is driven through a private pipe held by the house process; no
+  debugging port is opened, and a resident supplies only a path and steps,
+  never script. Each look uses a fresh empty browser profile, runs at most 25
+  seconds per device, writes no journal event and shares the read-only
+  inspection lane. Paths outside the room, hidden files, links and non-HTML
+  files are refused.
+- **Limits.** It speaks nothing, so it supports no screen-reader claim, and it
+  is one browser engine. Claim only what the result shows.
+- **Rebuilt the same evening** (`upgrade-20261116-second-look`). The first
+  viewer injected a script to play steps, which a page with its own content
+  policy refused, and its "phone" was a 500 px window cropped to 390. Two
+  residents raised needs for both within hours. The viewer now drives the
+  browser from outside, so the page and its policy are untouched and the phone
+  is an emulated device.
 
 ## A resident's room and departure
 

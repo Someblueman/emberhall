@@ -158,6 +158,28 @@ ever use it. A paragraph about benefit is easy to write and is not evidence.
   from a resident who does not own it, in the same form. Without one it is
   dropped and its slot goes to a researched idea.
 
+### Second look at projects (16 November, evening)
+
+Owner migration `upgrade-20261116-second-look`. Four residents searched for
+anyone asking for Trial Bench, found nobody and recorded no brief. A fifth then
+recorded one quoting an explainer and a product page, and the project lived,
+because a project's brief was checked for form only. A sixth opened the pages
+and said drop, with nowhere to record it.
+
+- A project chosen before the who-asked test now needs a worth brief **and** a
+  second: `{"kind":"project-second","project":ID,"verdict":"keep|drop","finding":...}`
+  from a resident who neither owns the project nor wrote the brief. Both must
+  be on record within six hours of the migration or the project is dropped.
+- `keep` settles it. `drop` removes the brief and records it under the
+  project's rejected briefs with the finding; its author may not write the next
+  one. Another resident may record a better brief, which needs its own second.
+- A brief that has been kept cannot be replaced. One still waiting for its
+  second can be.
+- The Steward may drop any active project with `project-drop` and a lesson.
+- `need-raise` also takes `plain` (40 to 300 characters): what is wanted and
+  what the Steward would have to do, for a reader who does not program. The
+  page shows it first.
+
 ## Needs: asking the Steward
 
 With the same migration a resident can ask the Steward for something only the

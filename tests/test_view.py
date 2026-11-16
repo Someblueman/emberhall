@@ -13,7 +13,8 @@ from urllib.error import HTTPError
 from house import mailbox, mailbox_jobs, resident_actions, view
 from tests.test_mailbox import MailboxCase
 
-PAGE = """<!doctype html><html lang="en"><head><title>Try me</title>
+PAGE = """<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try me</title>
 <style>.wide{width:900px}</style></head><body>
 <h1>A small page</h1><p id="out">before</p>
 <label for="name">Name</label><input id="name"><input id="bare">
@@ -61,10 +62,12 @@ class PathTests(unittest.TestCase):
             (self.room / "steps.json").write_text(json.dumps(value))
             return view.steps_from(self.room, "steps.json")
         self.assertEqual([], view.steps_from(self.room, None))
-        good = [{"fill": ["#name", "Ada"]}, {"click": "#go", "wait": 50}, {"focus": "#go"}, {"wait": 10}]
+        good = [{"fill": ["#name", "Ada"]}, {"click": "#go", "wait": 50}, {"focus": "#go"}, {"wait": 10},
+                {"press": "Tab"}, {"press": "Shift+Tab", "wait": 20}]
         self.assertEqual(good, steps(good))
         for bad in ({"click": "#go"}, [{"click": "#a"}] * 31, [{"eval": "alert(1)"}], [{"click": 5}],
-                    [{"click": "#a", "focus": "#b"}], [{"fill": "#name"}], [{"wait": 60000}]):
+                    [{"click": "#a", "focus": "#b"}], [{"fill": "#name"}], [{"wait": 60000}], [{"press": "F5"}],
+                    [{"press": "Control+L"}], [{"press": "Tab", "click": "#a"}]):
             with self.assertRaises(ValueError, msg=bad):
                 steps(bad)
         for name in ("../steps.json", "/tmp/steps.json", ".secret.json", "missing.json"):
@@ -83,7 +86,7 @@ class PathTests(unittest.TestCase):
 
     @SOCKETS
     def test_the_proxy_serves_the_room_and_refuses_every_other_address(self):
-        httpd = view.server(self.room, self.room / "pages/ok.html", [])
+        httpd = view.server(self.room)
         self.addCleanup(httpd.server_close)
         self.addCleanup(httpd.shutdown)
         port = httpd.server_address[1]
@@ -96,7 +99,7 @@ class PathTests(unittest.TestCase):
                 return error.code
         self.assertEqual(200, status(f"http://127.0.0.1:{port}/pages/ok.html"))
         body = through.open(f"http://127.0.0.1:{port}/pages/ok.html", timeout=5).read().decode()
-        self.assertIn(view.REPORT, body, "the looked-at page carries the viewer's own report script")
+        self.assertEqual(PAGE, body, "the page is served exactly as written; nothing is injected into it")
         # Asked the way a browser asks its proxy. (urllib would skip the proxy for some hosts by itself.)
         import http.client
         for url in ("http://example.org/", f"http://127.0.0.1:{port + 1}/", f"http://localhost:{port}/pages/ok.html",
@@ -139,6 +142,37 @@ class RenderTests(MailboxCase):
         (self.workspace / "pages/try.html").write_text(
             PAGE.replace("OUTSIDE", f"http://127.0.0.1:{self.outside.server_address[1]}/secret"))
         (self.workspace / "steps.json").write_text(json.dumps([{"fill": ["#name", "Ada"]}, {"click": "#go"}]))
+        # A page whose own policy allows only its one script by hash: nothing injected could run in it.
+        script = ("document.getElementById('go').addEventListener('click',function(){document.getElementById('out')"
+                  ".value='pressed '+document.getElementById('name').value;});")
+        import base64, hashlib
+        allowed = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
+        (self.workspace / "pages/strict.html").write_text(
+            '<!doctype html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src '
+            f"'none'; script-src 'sha256-{allowed}'\"><meta name=\"viewport\" content=\"width=device-width\">"
+            '<title>Strict</title></head><body><h1>Strict</h1><a href="#go">Skip</a>'
+            '<input id="name" aria-label="Name"><button id="go">Go</button>'
+            f'<textarea id="out" aria-label="Result"></textarea><script>{script}</script></body></html>')
+        (self.workspace / "keys.json").write_text(json.dumps(
+            [{"fill": ["#name", "Ada"]}, {"press": "Tab"}, {"press": "Enter"}, {"click": "#missing"}]))
+
+    def test_real_keys_work_on_a_page_with_its_own_policy_at_a_true_phone_width(self):
+        result = view.render(self.workspace, "pages/strict.html", "keys.json")
+        self.assertIn("script-src 'sha256-", result["own_policy"])
+        self.assertEqual({"phone": [], "desktop": []}, result["script_errors"])
+        for label in ("phone", "desktop"):
+            log = result["step_log"][label]
+            self.assertEqual("2. pressed Tab; focus is on button#go: Go", log[1], label)
+            self.assertIn("pressed Enter", log[2])
+            self.assertEqual("4. click: nothing matches #missing", log[3])
+        self.assertIn({"field": "textarea#out", "holds": "pressed Ada"}, result["fields"],
+                      "the page's own script answered a real key press, and the field's value is reported")
+        self.assertEqual(["a: Skip", "input#name: Name", "button#go: Go", "textarea#out: Result"],
+                         result["keyboard_walk"], "a fresh load, walked with real Tab presses")
+        self.assertEqual((390, 390, True), tuple(result["layout"]["phone"][k] for k in (
+            "screen_width", "layout_width", "declares_viewport")), "the phone is 390 pixels wide, not a cropped window")
+        self.assertEqual(780, result["screenshots"]["phone"]["image_width"])
+        self.assertEqual([], self.hits)
 
     def test_a_resident_sees_their_page_through_the_mailbox_and_nothing_leaves(self):
         argv = ["view", "pages/try.html", "--as", self.resident, "--request", "look-1", "--steps", "steps.json"]
@@ -164,6 +198,11 @@ class RenderTests(MailboxCase):
         self.assertEqual(1, result["unlabelled_controls"])
         self.assertTrue(result["wider_than_screen"]["phone"])
         self.assertFalse(result["wider_than_screen"]["desktop"])
+        self.assertEqual(["div: wide reaches 908px"], result["too_wide"]["phone"])
+        self.assertEqual(390, result["layout"]["phone"]["layout_width"])
+        self.assertEqual(["1. filled input#name", "2. clicked button#go: Go"], result["step_log"]["phone"])
+        self.assertIn({"field": "input#name", "holds": "Ada"}, result["fields"])
+        self.assertEqual(["input#name", "input#bare", "button#go: Go"], result["keyboard_walk"])
         for label in ("phone", "desktop"):
             shot = self.workspace / result["screenshots"][label]["file"]
             self.assertTrue(shot.is_file() and shot.read_bytes().startswith(b"\x89PNG"), label)

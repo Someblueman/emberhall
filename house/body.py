@@ -156,6 +156,18 @@ def shelf_view(state: dict) -> dict:
         if asked:
             if "brief" in project:
                 item["brief"] = _brief_view(project["brief"])
+            if shelf_model.checked_since(state) is not None:
+                # Whether a second resident has opened the quoted pages, and every brief one of them rejected.
+                if shelf_model.project_kept(project):
+                    item["second"] = {"author": label(project["second"]["author"], 200),
+                                      "finding": label(project["second"]["finding"], 2000),
+                                      "at": project["second"]["at"]}
+                elif "brief" in project and project["status"] == "active":
+                    item["brief_unchecked"] = True
+                if project.get("rejected"):
+                    item["rejected"] = [{"author": label(entry["author"], 200), "by": label(entry["by"], 200),
+                                         "finding": label(entry["finding"], 2000), "at": entry["at"]}
+                                        for entry in project["rejected"][-5:]]
             brief_due = shelf_model.project_due(state, project)
             if brief_due is not None:
                 item["brief_due"] = brief_due
@@ -172,7 +184,7 @@ def shelf_view(state: dict) -> dict:
         titles = {key: idea["title"] for key, idea in shelf.get("ideas", {}).items()}
         titles |= {key: titles.get(project["idea"], key) for key, project in shelf.get("projects", {}).items()}
         needs = [{"id": key, "for_title": label(titles.get(need["for"], need["for"]), 200),
-                  **{k: label(need[k], 2000) for k in ("author", "status", "kind", "for", "ask", "cost",
+                  **{k: label(need[k], 2000) for k in ("author", "status", "kind", "for", "plain", "ask", "cost",
                                                        "unlocks", "without", "tried", "note") if k in need},
                   "raised_at": need["raised_at"], **({"closed_at": need["closed_at"]} if "closed_at" in need else {})}
                  for key, need in shelf["needs"].items()]

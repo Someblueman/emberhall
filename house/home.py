@@ -182,12 +182,35 @@ def asked_prompt(state: dict, resident: str) -> str:
             "idea or project stands only when its brief quotes real people outside Emberhall asking for it, and "
             "a resident who wrote neither the idea nor the brief has opened those pages and agreed. Only such "
             "ideas can enter a choice; the rest leave the shelf after a day.\n")
-    owned, briefable = [], []
+    owned, briefable, checkable = [], [], []
+    again = shelf_model.checked_since(state) is not None
     for key, project in shelf.get("projects", {}).items():
         due = shelf_model.project_due(state, project)
         if due is not None:
-            title = ideas[project["idea"]]["title"]
-            (owned if project["owner"] == resident else briefable).append(f"{key}: {title} ({hours(due)})")
+            line = f"{key}: {ideas[project['idea']]['title']} ({hours(due)})"
+            if project["owner"] == resident:
+                owned.append(line)
+            elif again and "brief" in project:
+                if project["brief"]["author"] != resident:
+                    checkable.append(line)
+            elif resident not in {entry["author"] for entry in project.get("rejected", [])}:
+                briefable.append(line)
+    if checkable:
+        text += ("DO THIS FIRST, before any other work this run (second look, Steward, 16 November evening): a "
+                 "worth brief kept Trial Bench alive by quoting an explainer and a product page after four "
+                 "residents had honestly found nobody asking, and the Steward asked why it was still going. A "
+                 "project's worth brief now needs the same second an idea's does. These projects have a brief "
+                 "you did not write and are dropped unless a resident who neither owns them nor wrote it keeps "
+                 "it in time: " + "; ".join(checkable) + ". Open every page the brief lists under asked and "
+                 "judge each quotation by one test: is this a person asking for this thing, complaining that it "
+                 "is missing, or doing it the hard way? An explainer, a tutorial, an invented example, a product "
+                 "page or a description of a practice is not. Then record shelf kind project-second: "
+                 '{"kind":"project-second","project":ID,"verdict":"keep|drop","finding":...} with a finding of '
+                 "at least 120 characters naming what you opened and what each quotation really is. Keep only "
+                 "a brief you would defend to the Steward in one sentence. Drop removes that brief, and its "
+                 "author may not write the next one; another resident may then record a better brief, which "
+                 "needs its own second. If you already checked one of these briefs and said so at the Hearth, "
+                 "record that verdict now; until it is recorded it decides nothing.\n")
     shape, guide = brief_guide(state)
     if briefable:
         text += ("DO THIS FIRST, before any other work this run: these active projects were chosen before the "
@@ -213,13 +236,20 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "defend to the Steward in one sentence. Drop sends it to the graveyard with your finding as "
                  "its lesson, and is a good result. A few minutes each; prefer ideas from a different kind "
                  "of mind than yours.\n")
-    text += ("PAGE VIEWER: you can now see a page you built. Through your fixed channel, `view PATH --as "
+    text += ("PAGE VIEWER: you can see and try a page you built. Through your fixed channel, `view PATH --as "
              f"{resident} --request NEW-ID` (optionally `--steps FILE`) opens one .html file in your room in "
-             "the house's own browser with the network refused, at phone and desktop widths. It returns the "
-             "visible text, headings, tab order, images without alt text, unlabelled controls, script errors "
-             "and whether the page is wider than the screen, and saves two screenshots under "
-             ".house-mailbox/views/ that you can open and look at. A steps file is a JSON list of up to 30 "
-             'steps: {"click":SELECTOR}, {"fill":[SELECTOR,TEXT]}, {"focus":SELECTOR}, {"wait":MILLISECONDS}. '
+             "the house's own browser with the network refused, on a phone and on a desktop. It returns the "
+             "text a visitor sees, headings, what every form field holds, images without alt text, unlabelled "
+             "controls, script errors, layout facts, what is too wide for the screen and where real Tab "
+             "presses go, and saves screenshots under .house-mailbox/views/ that you can open and look at. A "
+             'steps file is a JSON list of up to 30 steps: {"click":SELECTOR}, {"fill":[SELECTOR,TEXT]}, '
+             '{"focus":SELECTOR}, {"press":KEY}, {"wait":MILLISECONDS}. '
+             + ("Rebuilt 16 November evening after two residents' needs: the phone is now a true 390 pixel "
+                "screen (layout_width says so), clicks and keys are the browser's own (KEY is Tab, Shift+Tab, "
+                "Enter, Space, Escape, Backspace, Delete, an arrow, Home, End, PageUp or PageDown, and "
+                "step_log says where focus went), steps work on a page with its own content policy because "
+                "nothing is injected into it, and long pages get up to three screenshots per device. "
+                if again else "") +
              "Use a new request ID for each look. Trying a page is residents' work: view it yourself, fix "
              "what you see, and have another resident view it for a milestone review.\n"
              "NEEDS, tightened: a need asks the Steward for a resource (funds, an account, a server, "
@@ -228,6 +258,13 @@ def asked_prompt(state: dict, resident: str) -> str:
              "also takes tried: what residents already did with the house's own tools, including the page "
              "viewer, and why that cannot answer it. Write milestones and acceptance checks that residents "
              "can carry out with the house's tools; never one that waits for a human trial.\n")
+    if again:
+        text += ("The Steward read the latest needs and could not follow them. need-raise now also takes plain: "
+                 "40 to 300 characters, shown to the Steward first, saying what you want and what the Steward "
+                 "would have to do, for a reader who does not program and has never seen your project. No file "
+                 "names, no abbreviations, no numbers of pixels. If what is missing is a fault in one of the "
+                 "house's own Steward-only tools, say plainly what the tool does wrong; that is a fair need. "
+                 "The Steward may now drop any project, with a reason shown on its page.\n")
     return text
 
 

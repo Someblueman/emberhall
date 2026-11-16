@@ -205,5 +205,122 @@ class WhoAskedTests(unittest.TestCase):
         self.assertIn("show who asked", focus_prompt(f.state | {"life": {}}, "research"))
 
 
+class SecondLookTests(WhoAskedTests):
+    """The same evening: a project's worth brief needs a second, the Steward may drop, a need speaks plainly."""
+
+    def started(self):
+        f = self.f
+        self.publish([worthy("a"), worthy("b")])
+        f.choose(votes=("a", "a", "b"), seconds=30 * 24 * HOUR)
+        f.state["council"] = {"authorized_by": "v3"}     # the Steward's operator, an awake member of the house
+        at = self.install()
+        f.send("project-brief", actor="v1", at=at + HOUR, project="choice1", brief=grounded_brief())
+        return at
+
+    def again(self, at):
+        self.f.state["maintenance"]["migrations"][shelf.SECOND_LOOK] = {"at": at}
+        return at
+
+    def project(self):
+        return self.f.state["shelf"]["projects"]["choice1"]
+
+    def test_before_the_second_look_a_brief_alone_still_keeps_a_project(self):
+        f = self.f
+        self.started()
+        self.assertIsNone(shelf.project_due(f.state, self.project()))
+        f.reject("unknown shelf action", "project-second", actor="v2", project="choice1", verdict="drop", finding=PART)
+        f.reject("only the project owner", "project-drop", actor="v3", project="choice1", lesson=PART)
+        view = body.shelf_view(f.state)["projects"][0]
+        self.assertFalse({"second", "brief_unchecked", "rejected"} & set(view))
+        self.assertNotIn("project-second", asked_prompt(f.state, "v2"))
+        self.assertNotIn("plain", asked_prompt(f.state, "v2"))
+
+    def test_a_rejected_brief_is_removed_and_a_kept_one_settles_it(self):
+        f = self.f
+        first = self.started()
+        at = self.again(first + 5 * HOUR)
+        self.assertEqual(at + 6 * HOUR, shelf.project_due(f.state, self.project()), "the brief has not been checked")
+        self.assertTrue(body.shelf_view(f.state)["projects"][0]["brief_unchecked"])
+        for actor, words in (("other", "neither owns the project nor wrote its brief"),
+                             ("v1", "neither owns the project nor wrote its brief")):
+            f.reject(words, "project-second", actor=actor, at=at + 1, project="choice1", verdict="keep", finding=PART)
+        f.reject("keep or drop", "project-second", actor="v2", at=at + 1, project="choice1", verdict="fine", finding=PART)
+        f.reject("at least 120", "project-second", actor="v2", at=at + 1, project="choice1", verdict="drop",
+                 finding="Not people asking.")
+        prompt = asked_prompt(f.state, "v2")
+        self.assertIn("DO THIS FIRST", prompt)
+        self.assertIn('"kind":"project-second"', prompt)
+        self.assertIn("choice1: a (10 h left)", prompt)
+        self.assertNotIn("project-second", asked_prompt(f.state, "v1"), "its author does not check their own brief")
+        self.assertIn("You cannot write its worth brief yourself", asked_prompt(f.state, "other"))
+        f.send("project-second", actor="v2", at=at + 60, project="choice1", verdict="drop",
+               finding=PART + "An explainer and a product page.")
+        self.assertNotIn("brief", self.project())
+        self.assertEqual(("v1", "v2"), tuple(self.project()["rejected"][0][k] for k in ("author", "by")))
+        self.assertEqual(at + 6 * HOUR, shelf.project_due(f.state, self.project()))
+        view = body.shelf_view(f.state)["projects"][0]
+        self.assertEqual("v2", view["rejected"][0]["by"])
+        self.assertNotIn("brief", view)
+        f.reject("first needs a worth brief", "project-second", actor="v3", at=at + 61, project="choice1",
+                 verdict="keep", finding=PART)
+        f.reject("was rejected does not write the next one", "project-brief", actor="v1", at=at + 62,
+                 project="choice1", brief=grounded_brief())
+        self.assertIn('"kind":"project-brief"', asked_prompt(f.state, "v3"))
+        self.assertNotIn('"kind":"project-brief"', asked_prompt(f.state, "v1"))
+        f.send("project-brief", actor="v3", at=at + 100, project="choice1", brief=grounded_brief())
+        f.send("project-brief", actor="v2", at=at + 110, project="choice1", brief=grounded_brief())
+        self.assertEqual("v2", self.project()["brief"]["author"], "an unchecked brief can still be replaced")
+        f.send("project-second", actor="v3", at=at + 120, project="choice1", verdict="keep", finding=PART)
+        self.assertIsNone(shelf.project_due(f.state, self.project()))
+        for kind, more in (("project-brief", {"brief": grounded_brief()}), ("project-second", {"verdict": "drop", "finding": PART})):
+            f.reject("already checked and kept", kind, actor="author", at=at + 130, project="choice1", **more)
+        view = body.shelf_view(f.state)["projects"][0]
+        self.assertEqual(("v3", False), (view["second"]["author"], "brief_due" in view))
+        shelf.advance(f.state, at + 7 * HOUR, 950)
+        self.assertEqual("active", self.project()["status"])
+        self.assertNotIn("DO THIS FIRST", asked_prompt(f.state, "author"))
+        self.assertIn("project-second", shelf_gate.ACTIONS)
+
+    def test_an_unchecked_or_rejected_project_is_dropped_after_six_hours(self):
+        f = self.f
+        at = self.again(self.started() + 2 * HOUR)
+        unchecked = copy.deepcopy(f.state)
+        shelf.advance(unchecked, at + 6 * HOUR - 1, 900)
+        self.assertEqual("active", unchecked["shelf"]["projects"]["choice1"]["status"])
+        shelf.advance(unchecked, at + 6 * HOUR, 901)
+        self.assertEqual(("dropped", shelf.UNCHECKED_PROJECT),
+                         tuple(unchecked["shelf"]["projects"]["choice1"][k] for k in ("status", "lesson")))
+        f.send("project-second", actor="v2", at=at + 60, project="choice1", verdict="drop", finding=PART)
+        shelf.advance(f.state, at + 6 * HOUR, 902)
+        self.assertEqual(("dropped", shelf.UNCHECKED_PROJECT), (self.project()["status"], self.project()["lesson"]))
+        self.assertEqual("graveyard", f.state["shelf"]["ideas"]["a"]["status"])
+
+    def test_the_steward_may_drop_any_project(self):
+        f = self.f
+        at = self.again(self.started() + HOUR)
+        f.reject("only the project owner or, to drop it, the Steward", "project-drop", actor="v2", at=at + 1,
+                 project="choice1", lesson=PART)
+        f.reject("only the project owner or, to drop it, the Steward", "project-done", actor="v3", at=at + 1,
+                 project="choice1", evidence="nothing")
+        f.send("project-drop", actor="v3", at=at + 2, project="choice1", lesson="Nobody outside the house asked for it.")
+        self.assertEqual(("dropped", "Nobody outside the house asked for it."),
+                         (self.project()["status"], self.project()["lesson"]))
+
+    def test_a_need_opens_with_what_it_asks_in_plain_words(self):
+        f = self.f
+        self.publish([worthy("a"), worthy("b")])
+        self.again(self.install())
+        need = {"need": "n1", "need_kind": "other", "for": "a", "ask": "A fix to the page viewer",
+                "cost": "nothing", "unlocks": PART, "without": PART, "tried": PART}
+        f.reject("unexpected shelf fields", "need-raise", **need)
+        f.reject("plain says in 40 to 300 characters", "need-raise", **(need | {"plain": "Fix it."}))
+        plain = "The house's page viewer shows phones wrongly; we ask you to have it repaired."
+        f.send("need-raise", **(need | {"plain": plain}))
+        self.assertEqual(plain, body.shelf_view(f.state)["needs"][0]["plain"])
+        prompt = asked_prompt(f.state, "v2")
+        for words in ("need-raise now also takes plain", '{"press":KEY}', "true 390 pixel"):
+            self.assertIn(words, prompt)
+
+
 if __name__ == "__main__":
     unittest.main()

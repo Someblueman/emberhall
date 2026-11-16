@@ -1,24 +1,38 @@
-"""Let a resident see one of its own pages the way a visitor would.
+"""Let a resident see and try one of its own pages the way a visitor would.
 
 Residents cannot run a browser in their rooms, so until 16 November no resident
 had ever seen a page of theirs rendered, and three milestones were waiting for
 the Steward to open a page by hand. This trusted action runs the host's Chrome,
 headless, on one HTML file from the asking resident's room and gives back
-screenshots at phone and desktop width, the page's text after its scripts have
-run, its headings, its keyboard tab order, a few plain accessibility facts and
-any script errors. A short list of steps (click, fill, focus, wait) can be
-played first, so a form or a two-phase page can be taken to a later state.
+screenshots at a true phone width and at desktop width, the text a visitor
+would see, its headings, what every form field holds, the order real Tab
+presses visit, what is too wide for the screen, and any script errors. A short
+list of steps (click, fill, focus, press a key, wait) is played first with
+real mouse and keyboard input, so a form or a two-phase page can be taken to a
+later state.
+
+The first viewer injected a script into the page to play the steps and asked
+Chrome for a narrow window. A page with its own content policy refused that
+script, and Chrome never makes a window narrower than 500 pixels, so the
+"phone" picture was a cropped wider page. Residents found both the same
+afternoon. The browser is now driven from outside through its debugging pipe:
+the page's bytes and policy are untouched, the phone is an emulated 390 pixel
+device, and clicks and keys are the browser's own.
 
 Bounds. The page is served from a throwaway loopback server rooted at the
 room, and Chrome is told to use that same server as its proxy for everything,
 loopback included, so any other address (the internet, other local services)
-answers 403. Nothing is opened as file://. Each look uses a fresh browser
-profile, lasts at most a minute, and writes only inside the room's
-.house-mailbox/views/ folder, which is never committed. It cannot press real
-keys, speak like a screen reader, or stand in for a person outside the house.
+answers 403. Nothing is opened as file://. The debugging pipe is a pair of
+file descriptors held by this process alone; no debugging port is opened. A
+resident supplies only the page path and the list of steps, never script.
+Each look uses a fresh browser profile, lasts at most a minute, and writes
+only inside the room's .house-mailbox/views/ folder, which is never committed.
+It cannot speak like a screen reader or stand in for a person outside the house.
 """
 from __future__ import annotations
 
+import base64
+import fcntl
 from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -26,53 +40,79 @@ import mimetypes
 import os
 from pathlib import Path
 import re
+import select
 import shutil
+import signal
 import subprocess
 import tempfile
 import threading
+import time
 from urllib.parse import unquote, urlsplit
 
 BROWSERS = ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
             "/Applications/Chromium.app/Contents/MacOS/Chromium", "google-chrome", "chromium", "chromium-browser")
-WIDTHS = {"phone": (390, 1800), "desktop": (1280, 1800)}
-SECONDS = 20
+# Layout width, height of one screenful, pixel density, and whether it is a phone.
+DEVICES = {"phone": (390, 780, 2, True), "desktop": (1280, 1100, 1, False)}
+SCREENS = 3            # screenfuls photographed from the top of the page
+SECONDS = 25           # for one device, from launch to the last picture
 MAX_PAGE = 5_000_000
 MAX_STEPS = 30
 TEXT_LIMIT = 20_000
-REPORT = "house-view-report"
+WALK = 60              # Tab presses in the keyboard walk
+# Keys a step may press: name -> (key, code, virtual key code, text typed).
+KEYS = {"Tab": ("Tab", "Tab", 9, ""), "Enter": ("Enter", "Enter", 13, "\r"), "Space": (" ", "Space", 32, " "),
+        "Escape": ("Escape", "Escape", 27, ""), "Backspace": ("Backspace", "Backspace", 8, ""),
+        "Delete": ("Delete", "Delete", 46, ""), "ArrowUp": ("ArrowUp", "ArrowUp", 38, ""),
+        "ArrowDown": ("ArrowDown", "ArrowDown", 40, ""), "ArrowLeft": ("ArrowLeft", "ArrowLeft", 37, ""),
+        "ArrowRight": ("ArrowRight", "ArrowRight", 39, ""), "Home": ("Home", "Home", 36, ""),
+        "End": ("End", "End", 35, ""), "PageUp": ("PageUp", "PageUp", 33, ""),
+        "PageDown": ("PageDown", "PageDown", 34, "")}
+PRESSES = frozenset(KEYS) | {"Shift+Tab"}
 
-# Played inside the page before it is looked at. Synthetic events only.
-DRIVER = """
-<script>(function(){
-  var steps=%s, errors=[], notes=[];
-  window.addEventListener('error',function(e){errors.push(String(e.message||e.error||'error').slice(0,300));});
-  window.addEventListener('unhandledrejection',function(e){errors.push(('Unhandled rejection: '+String(e.reason)).slice(0,300));});
-  var say=console.error;console.error=function(){errors.push(Array.prototype.join.call(arguments,' ').slice(0,300));return say.apply(console,arguments);};
-  function find(sel){var el=document.querySelector(sel);if(!el)notes.push('nothing matches '+sel);return el;}
-  function play(i){
-    if(i>=steps.length)return done();
-    var s=steps[i],el;
-    try{
-      if(s.click){el=find(s.click);if(el){el.focus&&el.focus();el.click();}}
-      else if(s.fill){el=find(s.fill[0]);if(el){el.focus&&el.focus();el.value=s.fill[1];
-        el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}}
-      else if(s.focus){el=find(s.focus);if(el)el.focus();}
-    }catch(e){notes.push('step '+(i+1)+' failed: '+String(e).slice(0,200));}
-    setTimeout(function(){play(i+1);},s.wait||150);
-  }
-  function done(){
-    var a=document.activeElement,box=document.createElement('script');
-    box.type='application/json';box.id='%s';
-    box.textContent=JSON.stringify({errors:errors.slice(0,30),notes:notes.slice(0,30),steps:steps.length,
-      focused:a&&a!==document.body?(a.tagName.toLowerCase()+(a.id?'#'+a.id:'')):null,
-      secure:window.isSecureContext,width:window.innerWidth,
-      overflow:document.documentElement.scrollWidth>window.innerWidth+1});
-    document.documentElement.appendChild(box);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){play(0);},100);});
-  else setTimeout(function(){play(0);},100);
-})();</script>
-"""
+# Small readers run from outside the page, in a world of their own: they see the
+# page's elements but not its script, and the page cannot see or replace them.
+NAME = """function name(el){if(!el||el===document.body||el===document.documentElement)return null;
+  var t=(el.getAttribute('aria-label')||el.innerText||el.value||el.getAttribute('placeholder')||el.getAttribute('title')
+    ||el.getAttribute('alt')||'').replace(/\\s+/g,' ').trim().slice(0,80);
+  return el.tagName.toLowerCase()+(el.id?'#'+el.id:'')+(t?': '+t:'');}"""
+LOCATE = "(function(sel){" + NAME + """
+  var el=document.querySelector(sel);if(!el)return {missing:true};
+  el.scrollIntoView({block:'center',inline:'center'});var r=el.getBoundingClientRect();
+  return {x:r.left+r.width/2,y:r.top+r.height/2,shown:r.width>0&&r.height>0,tag:el.tagName.toLowerCase(),
+    name:name(el)};})(%s)"""
+FILL = "(function(sel,value){" + NAME + """
+  var el=document.querySelector(sel);if(!el)return {missing:true};
+  el.focus();
+  if(el.tagName==='SELECT'||/^(checkbox|radio|range|color|date|time|file)$/.test(el.type||'')){
+    if(el.type==='checkbox'||el.type==='radio')el.checked=!/^(|false|0|off|no)$/i.test(value);else el.value=value;
+    el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
+    return {set:true,name:name(el)};}
+  if(el.select)el.select();else if(el.isContentEditable)document.getSelection().selectAllChildren(el);
+  return {typed:true,name:name(el)};})(%s,%s)"""
+FOCUS = "(function(sel){" + NAME + """var el=document.querySelector(sel);if(!el)return {missing:true};el.focus();
+  return {name:name(document.activeElement)};})(%s)"""
+ACTIVE = "(function(){" + NAME + "return name(document.activeElement);})()"
+FACTS = "(function(device){" + NAME + """
+  var d=document.documentElement,v=window.visualViewport,wide=[],seen=new Set();
+  var meta=!!document.querySelector('meta[name=viewport]'),inner=window.innerWidth;
+  // A page that declares a viewport is meant to fit the device; one that does not is laid out wide and shrunk.
+  var w=meta?Math.min(device,inner):inner;
+  function clipped(el){for(var p=el.parentElement;p&&p!==d;p=p.parentElement){
+    if(getComputedStyle(p).overflowX!=='visible'&&p.getBoundingClientRect().right<=w+1)return true;}return false;}
+  var over=d.scrollWidth>w+1,all=document.body?document.body.querySelectorAll('*'):[];
+  for(var i=0;over&&i<all.length&&i<5000&&wide.length<8;i++){var el=all[i],r=el.getBoundingClientRect();
+    if(r.width>0&&r.right>w+1){seen.add(el);if(!seen.has(el.parentElement)&&!clipped(el))
+      wide.push((name(el)||el.tagName.toLowerCase()).slice(0,70)+' reaches '+Math.round(r.right)+'px');}}
+  var fields=[],controls=document.querySelectorAll('input,textarea,select,output');
+  for(var j=0;j<controls.length&&fields.length<40;j++){var c=controls[j],kind=c.type||c.tagName.toLowerCase();
+    if(kind==='password'||kind==='hidden')continue;
+    fields.push({field:c.tagName.toLowerCase()+(c.id?'#'+c.id:c.name?'[name='+c.name+']':''),
+      holds:kind==='checkbox'||kind==='radio'?(c.checked?'checked':'unchecked'):String(c.value||c.textContent||'').slice(0,4000)});}
+  return {layout_width:d.clientWidth,fit_width:w,page_width:d.scrollWidth,page_height:Math.ceil(Math.max(d.getBoundingClientRect().height,document.body?document.body.getBoundingClientRect().bottom+window.scrollY:0)),
+    zoom:v?Math.round(v.scale*1000)/1000:1,
+    declares_viewport:meta,over:over,wide:wide,fields:fields,
+    focused:name(document.activeElement),title:document.title,
+    text:document.body?document.body.innerText:''};})(%d)"""
 
 
 def browser() -> str:
@@ -110,21 +150,22 @@ def steps_from(workspace: Path, name: str | None) -> list[dict]:
     if not isinstance(steps, list) or len(steps) > MAX_STEPS:
         raise ValueError(f"steps is a list of at most {MAX_STEPS} steps")
     for step in steps:
-        ok = isinstance(step, dict) and len(set(step) & {"click", "fill", "focus"}) <= 1 and set(step) <= {
-            "click", "fill", "focus", "wait"}
+        ok = isinstance(step, dict) and len(set(step) & {"click", "fill", "focus", "press"}) <= 1 and set(step) <= {
+            "click", "fill", "focus", "press", "wait"}
         ok = ok and all(isinstance(step.get(key, ""), str) and len(step.get(key, "")) <= 300 for key in ("click", "focus"))
         ok = ok and ("fill" not in step or (isinstance(step["fill"], list) and len(step["fill"]) == 2 and all(
             isinstance(part, str) and len(part) <= 5000 for part in step["fill"])))
+        ok = ok and ("press" not in step or (isinstance(step["press"], str) and step["press"] in PRESSES))
         ok = ok and type(step.get("wait", 0)) is int and 0 <= step.get("wait", 0) <= 2000
         if not ok:
-            raise ValueError('each step is {"click": SELECTOR}, {"fill": [SELECTOR, TEXT]}, {"focus": SELECTOR} '
-                             'or {"wait": MILLISECONDS}, with an optional wait')
+            raise ValueError('each step is {"click": SELECTOR}, {"fill": [SELECTOR, TEXT]}, {"focus": SELECTOR}, '
+                             '{"press": KEY} or {"wait": MILLISECONDS}, with an optional wait; KEY is one of '
+                             + ", ".join(sorted(PRESSES)))
     return steps
 
 
-def server(root: Path, page: Path, steps: list[dict]):
-    """Serve the room on loopback and refuse, as a proxy, every other address."""
-    driver = (DRIVER % (json.dumps(steps).replace("</", "<\\/"), REPORT)).encode()
+def server(root: Path):
+    """Serve the room on loopback, each file exactly as written, and refuse, as a proxy, every other address."""
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -151,8 +192,6 @@ def server(root: Path, page: Path, steps: list[dict]):
             except OSError:
                 self.send_response(404); self.send_header("Content-Length", "0"); self.end_headers()
                 return
-            if file == page:
-                body += driver
             kind = mimetypes.guess_type(file.name)[0] or "application/octet-stream"
             self.send_response(200)
             self.send_header("Content-Type", kind + ("; charset=utf-8" if kind.startswith("text/") else ""))
@@ -169,18 +208,243 @@ def server(root: Path, page: Path, steps: list[dict]):
     return httpd
 
 
-def chrome(executable: str, port: int, profile: Path, size: tuple[int, int], url: str, *extra: str) -> str:
-    argv = [executable, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--no-first-run",
-            "--no-default-browser-check", "--disable-extensions", "--disable-sync", "--disable-background-networking",
-            "--disable-component-update", "--disable-default-apps", "--mute-audio", "--incognito",
-            # Nothing leaves except through the refusing proxy: no direct UDP and no name lookups.
-            "--force-webrtc-ip-handling-policy=disable_non_proxied_udp", "--dns-prefetch-disable",
-            "--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1",
-            f"--user-data-dir={profile}", f"--proxy-server=http://127.0.0.1:{port}", "--proxy-bypass-list=<-loopback>",
-            f"--window-size={size[0]},{size[1]}", "--virtual-time-budget=8000", "--run-all-compositor-stages-before-draw",
-            *extra, url]
-    done = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, timeout=SECONDS, start_new_session=True)
-    return done.stdout.decode("utf-8", errors="replace")
+class Chrome:
+    """One headless Chrome, driven over its debugging pipe and killed afterwards."""
+
+    def __init__(self, executable: str, port: int, profile: Path):
+        down, mine_out = os.pipe()      # we write, Chrome reads on its descriptor 3
+        mine_in, up = os.pipe()         # Chrome writes on its descriptor 4, we read
+        high = [fcntl.fcntl(fd, fcntl.F_DUPFD, 10) for fd in (down, up)]
+        os.close(down); os.close(up)
+        argv = [executable, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--no-first-run",
+                "--no-default-browser-check", "--disable-extensions", "--disable-sync", "--disable-background-networking",
+                "--disable-component-update", "--disable-default-apps", "--mute-audio", "--incognito",
+                # Nothing leaves except through the refusing proxy: no direct UDP and no name lookups.
+                "--force-webrtc-ip-handling-policy=disable_non_proxied_udp", "--dns-prefetch-disable",
+                "--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1",
+                f"--user-data-dir={profile}", f"--proxy-server=http://127.0.0.1:{port}",
+                "--proxy-bypass-list=<-loopback>", "--remote-debugging-pipe", "about:blank"]
+        try:
+            # The shell only moves the two pipe ends to the descriptors Chrome expects, then becomes Chrome.
+            self.process = subprocess.Popen(
+                ["/bin/sh", "-c", f'exec "$@" 3<&{high[0]} 4>&{high[1]}', "sh", *argv], stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, pass_fds=high, start_new_session=True)
+        finally:
+            os.close(high[0]); os.close(high[1])
+        self.out, self.inp, self.buffer, self.events, self.last = mine_out, mine_in, b"", [], 0
+        self.deadline = time.monotonic() + SECONDS
+        self.session = None
+
+    def close(self) -> None:
+        for fd in (self.out, self.inp):
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        try:
+            os.killpg(self.process.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+        try:
+            self.process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            pass
+
+    def messages(self, until: float):
+        """Yield messages from Chrome until the given moment (never past the look's deadline)."""
+        while True:
+            while b"\0" in self.buffer:
+                raw, self.buffer = self.buffer.split(b"\0", 1)
+                yield json.loads(raw)
+            left = min(until, self.deadline) - time.monotonic()
+            if left <= 0 or not select.select([self.inp], [], [], left)[0]:
+                return
+            chunk = os.read(self.inp, 1 << 16)
+            if not chunk:
+                raise ValueError("the browser stopped before the page was seen")
+            self.buffer += chunk
+
+    def call(self, method: str, params: dict | None = None, root: bool = False) -> dict:
+        self.last += 1
+        message = {"id": self.last, "method": method, "params": params or {}}
+        if self.session and not root:
+            message["sessionId"] = self.session
+        os.write(self.out, json.dumps(message).encode() + b"\0")
+        for answer in self.messages(self.deadline):
+            if answer.get("id") == self.last:
+                if "error" in answer:
+                    raise LookupError(f"{method}: {answer['error'].get('message', 'refused')}")
+                return answer.get("result", {})
+            if "method" in answer:
+                self.events.append(answer)
+        raise TimeoutError
+
+    def wait(self, name: str, seconds: float) -> bool:
+        """Let the page run for up to this long; true as soon as the named event has arrived."""
+        def seen() -> bool:
+            return any(event["method"] == name for event in self.events)
+        if seen():
+            return True
+        for answer in self.messages(time.monotonic() + seconds):
+            if "method" in answer:
+                self.events.append(answer)
+                if answer["method"] == name:
+                    return True
+        return seen()
+
+    def pause(self, milliseconds: int) -> None:
+        self.wait("never", milliseconds / 1000)
+
+    def world(self, frame: str) -> None:
+        self.context = self.call("Page.createIsolatedWorld", {"frameId": frame, "worldName": "house-view"})[
+            "executionContextId"]
+
+    def ask(self, expression: str):
+        """Evaluate one of the readers above in the viewer's own world and return its plain value."""
+        for attempt in (0, 1):
+            try:
+                answer = self.call("Runtime.evaluate", {"expression": expression, "returnByValue": True,
+                                                        "contextId": self.context})
+                break
+            except LookupError:
+                if attempt:      # a step loaded another page; its world is gone, so make a new one once
+                    raise
+                self.world(self.call("Page.getFrameTree")["frameTree"]["frame"]["id"])
+        if "exceptionDetails" in answer:
+            raise LookupError(answer["exceptionDetails"].get("text", "the page could not be read"))
+        return answer["result"].get("value")
+
+    def key(self, name: str) -> None:
+        shift = 8 if name == "Shift+Tab" else 0
+        key, code, number, typed = KEYS["Tab" if shift else name]
+        common = {"key": key, "code": code, "windowsVirtualKeyCode": number, "modifiers": shift}
+        self.call("Input.dispatchKeyEvent", common | ({"type": "keyDown", "text": typed} if typed
+                                                       else {"type": "rawKeyDown"}))
+        self.call("Input.dispatchKeyEvent", common | {"type": "keyUp"})
+
+    def click(self, x: float, y: float) -> None:
+        self.call("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": x, "y": y})
+        for kind in ("mousePressed", "mouseReleased"):
+            self.call("Input.dispatchMouseEvent", {"type": kind, "x": x, "y": y, "button": "left", "clickCount": 1})
+
+    def errors(self) -> list[str]:
+        found = []
+        for event in self.events:
+            params = event.get("params", {})
+            if event["method"] == "Runtime.exceptionThrown":
+                detail = params.get("exceptionDetails", {})
+                found.append(detail.get("exception", {}).get("description") or detail.get("text", "script error"))
+            elif event["method"] == "Runtime.consoleAPICalled" and params.get("type") == "error":
+                found.append(" ".join(str(arg.get("value", arg.get("description", ""))) for arg in params.get("args", [])))
+            elif event["method"] == "Log.entryAdded" and params.get("entry", {}).get("level") == "error":
+                entry = params["entry"]
+                found.append(entry.get("text", "") + (f" ({entry['url']})" if entry.get("url") else ""))
+        return [" ".join(line.split())[:300] for line in found if "/favicon.ico)" not in line][:30]
+
+
+def play(chrome: Chrome, steps: list[dict]) -> list[str]:
+    """Play the steps with the browser's own mouse and keyboard; one plain line per step."""
+    log = []
+    for number, step in enumerate(steps, 1):
+        try:
+            if "click" in step:
+                at = chrome.ask(LOCATE % json.dumps(step["click"]))
+                if at.get("missing"):
+                    line = f"click: nothing matches {step['click']}"
+                elif not at["shown"]:
+                    line = f"click: {step['click']} is not shown on the page, so nobody could click it"
+                else:
+                    chrome.click(at["x"], at["y"])
+                    line = f"clicked {at['name']}"
+            elif "fill" in step:
+                selector, value = step["fill"]
+                done = chrome.ask(FILL % (json.dumps(selector), json.dumps(value)))
+                if done.get("missing"):
+                    line = f"fill: nothing matches {selector}"
+                else:
+                    if done.get("typed"):
+                        if value:
+                            chrome.call("Input.insertText", {"text": value})
+                        else:
+                            chrome.key("Backspace")
+                    line = f"filled {done['name'] or selector}"
+            elif "focus" in step:
+                done = chrome.ask(FOCUS % json.dumps(step["focus"]))
+                line = (f"focus: nothing matches {step['focus']}" if done.get("missing")
+                        else f"focus is on {done['name'] or 'nothing'}")
+            elif "press" in step:
+                chrome.key(step["press"])
+                chrome.pause(60)
+                line = f"pressed {step['press']}; focus is on {chrome.ask(ACTIVE) or 'nothing (the page body)'}"
+            else:
+                line = "waited"
+        except LookupError as error:
+            line = f"failed: {str(error)[:200]}"
+        log.append(f"{number}. {line}")
+        chrome.pause(step.get("wait", 150))
+    return log
+
+
+def look(executable: str, port: int, profile: Path, label: str, url: str, steps: list[dict], shots: Path,
+         stem: str) -> dict:
+    """Open the page on one device, play the steps, photograph it and read it."""
+    width, height, density, mobile = DEVICES[label]
+    chrome = Chrome(executable, port, profile)
+    try:
+        target = chrome.call("Target.createTarget", {"url": "about:blank"})["targetId"]
+        chrome.session = chrome.call("Target.attachToTarget", {"targetId": target, "flatten": True})["sessionId"]
+        for domain in ("Page", "Runtime", "Log"):
+            chrome.call(domain + ".enable")
+        chrome.call("Emulation.setDeviceMetricsOverride", {"width": width, "height": height,
+                                                           "deviceScaleFactor": density, "mobile": mobile})
+        chrome.events.clear()
+        frame = chrome.call("Page.navigate", {"url": url})["frameId"]
+        loaded = chrome.wait("Page.loadEventFired", 12)
+        chrome.pause(400)
+        chrome.world(frame)
+        log = play(chrome, steps)
+        chrome.pause(250)
+        facts = chrome.ask(FACTS % width)
+        dom = chrome.ask("document.documentElement.outerHTML")
+        files, covered = [], 0
+        # Clip is in page pixels. A phone page with no viewport line is laid out wide and shown small.
+        wide = facts["fit_width"]
+        screenful = height * wide / width
+        for screen in range(SCREENS):
+            tall = min(screenful, facts["page_height"] - covered) if screen else screenful
+            if tall < 1:
+                break
+            data = chrome.call("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": True, "clip": {
+                "x": 0, "y": covered, "width": wide, "height": tall, "scale": width / wide}})["data"]
+            shot = shots / (f"{stem}-{label}.png" if not screen else f"{stem}-{label}-{screen + 1}.png")
+            shot.write_bytes(base64.b64decode(data))
+            shot.chmod(0o600)
+            files.append(shot)
+            covered += tall
+        errors, walk = chrome.errors(), None
+        if not mobile:
+            # Last, on a fresh load of the page without the steps: where real Tab presses go from the top.
+            chrome.events.clear()
+            chrome.call("Page.reload")
+            chrome.wait("Page.loadEventFired", 8)
+            chrome.pause(300)
+            chrome.world(frame)
+            walk = []
+            for _ in range(WALK):
+                chrome.key("Tab")
+                chrome.pause(15)
+                here = chrome.ask(ACTIVE)
+                if here is None:
+                    break
+                walk.append(here)
+        return {"loaded": loaded, "log": log, "facts": facts, "dom": dom, "files": files, "errors": errors,
+                "covered": round(covered), "walk": walk}
+    except TimeoutError:
+        raise ValueError(f"the page did not settle within {SECONDS} seconds on the {label}") from None
+    except LookupError as error:
+        raise ValueError(f"the browser could not show the page: {str(error)[:200]}") from None
+    finally:
+        chrome.close()
 
 
 class Reader(HTMLParser):
@@ -191,12 +455,10 @@ class Reader(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.text, self.headings, self.stops, self.facts = [], [], [], {"images_without_alt": 0, "unlabelled_controls": 0}
         self.skip, self.heading, self.stop, self.labels, self.lang, self.title, self.in_title = 0, None, None, set(), None, "", False
-        self.report, self.in_report, self.controls = "", False, []
+        self.controls = []
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
-        if tag == "script" and attrs.get("id") == REPORT:
-            self.in_report = True
         if tag in {"script", "style", "template", "noscript"}:
             self.skip += 1
         if tag == "html":
@@ -228,7 +490,6 @@ class Reader(HTMLParser):
     def handle_endtag(self, tag):
         if tag in {"script", "style", "template", "noscript"}:
             self.skip = max(0, self.skip - 1)
-            self.in_report = False
         if tag == "title":
             self.in_title = False
         if self.heading and tag == self.heading[0]:
@@ -240,8 +501,6 @@ class Reader(HTMLParser):
             self.text.append("\n")
 
     def handle_data(self, data):
-        if self.in_report:
-            self.report += data
         if self.in_title:
             self.title += data
         if self.skip:
@@ -262,15 +521,16 @@ def read(dom: str) -> dict:
         stop for stop in reader.stops if stop["order"] == 0]
     reader.facts["unlabelled_controls"] = sum(1 for ident, named in reader.controls
                                               if not named and (ident is None or ident not in reader.labels))
-    try:
-        report = json.loads(reader.report) if reader.report else None
-    except ValueError:
-        report = None
     return {"title": " ".join(reader.title.split())[:200], "language": reader.lang,
             "text": text[:TEXT_LIMIT], "text_truncated": len(text) > TEXT_LIMIT, "headings": reader.headings[:80],
             "tab_order": [f"{n}. {stop['tag']}{'#' + stop['id'] if stop['id'] else ''}: {stop['name'] or '(no name)'}"
                           for n, stop in enumerate(ordered[:80], 1)],
-            "tab_stops": len(ordered), **reader.facts, "page_report": report}
+            "tab_stops": len(ordered), **reader.facts}
+
+
+def tidy(text: str) -> str:
+    text = re.sub(r"[ \t\r\f\v]+", " ", text)
+    return re.sub(r"\n\s*\n+", "\n", text).strip()
 
 
 def render(workspace: Path, name: str, steps_name: str | None = None) -> dict:
@@ -280,36 +540,52 @@ def render(workspace: Path, name: str, steps_name: str | None = None) -> dict:
     out = workspace / ".house-mailbox" / "views"
     out.mkdir(parents=True, exist_ok=True)
     stem = re.sub(r"[^A-Za-z0-9]+", "-", name[:-len(Path(name).suffix)]).strip("-")[-60:] or "page"
-    httpd = server(workspace, page, steps)
+    for old in out.glob(f"{stem}-*.png"):
+        if re.fullmatch(re.escape(stem) + r"-(phone|desktop)(-\d)?\.png", old.name):
+            old.unlink()
+    httpd = server(workspace)
     port = httpd.server_address[1]
-    url = f"http://127.0.0.1:{port}/" + "/".join(Path(name).parts)
-    result = {"page": name, "steps_played": len(steps), "screenshots": {}}
+    url = f"http://127.0.0.1:{port}/" + "/".join(page.relative_to(workspace).parts)
+    seen = {}
     try:
         with tempfile.TemporaryDirectory(prefix="house-view-") as scratch:
-            for label, size in WIDTHS.items():
-                shot = out / f"{stem}-{label}.png"
-                shot.unlink(missing_ok=True)
-                chrome(executable, port, Path(scratch) / label, size, url, f"--screenshot={shot}")
-                if shot.is_file():
-                    shot.chmod(0o600)
-                    result["screenshots"][label] = {"file": str(shot.relative_to(workspace)), "width": size[0],
-                                                    "height": size[1]}
-                result[label] = read(chrome(executable, port, Path(scratch) / (label + "-dom"), size, url, "--dump-dom"))
-    except subprocess.TimeoutExpired:
-        raise ValueError(f"the page did not settle within {SECONDS} seconds") from None
+            for label in DEVICES:
+                seen[label] = look(executable, port, Path(scratch) / label, label, url, steps, out, stem)
     finally:
         httpd.shutdown(); httpd.server_close()
-    phone, desktop = result.pop("phone"), result.pop("desktop")
-    for label, view in (("phone", phone), ("desktop", desktop)):
-        report = view.pop("page_report") or {}
-        silent = ("the page's own content policy forbids scripts, so steps and script errors are not observed"
-                  if "own_policy" in view else "the page did not finish loading within the viewer's time")
-        result.setdefault("script_errors", {})[label] = report.get("errors", [silent])
-        result.setdefault("step_notes", {})[label] = report.get("notes", [])
-        result.setdefault("wider_than_screen", {})[label] = report.get("overflow")
-        result.setdefault("focused_after_steps", {})[label] = report.get("focused")
+    result = {"page": name, "steps_played": len(steps), "screenshots": {}, "step_log": {}, "script_errors": {},
+              "layout": {}, "wider_than_screen": {}, "too_wide": {}, "focused_after_steps": {}}
+    for label, view in seen.items():
+        facts = view["facts"]
+        width, height, density, _ = DEVICES[label]
+        files = [str(file.relative_to(workspace)) for file in view["files"]]
+        result["screenshots"][label] = {"file": files[0], "files": files, "width": width,
+                                        "image_width": width * density, "page_height": facts["page_height"],
+                                        "pictured_to": min(view["covered"], facts["page_height"])}
+        result["step_log"][label] = view["log"]
+        result["script_errors"][label] = view["errors"] + ([] if view["loaded"] else [
+            "the page had not finished loading when it was read"])
+        result["layout"][label] = {"screen_width": width, "layout_width": facts["layout_width"],
+                                   "page_width": facts["page_width"], "zoom": facts["zoom"],
+                                   "declares_viewport": facts["declares_viewport"]}
+        result["wider_than_screen"][label] = facts["over"]
+        result["too_wide"][label] = facts["wide"]
+        result["focused_after_steps"][label] = facts["focused"]
+    desktop, phone = read(seen["desktop"]["dom"]), read(seen["phone"]["dom"])
+    text, small = tidy(seen["desktop"]["facts"]["text"]), tidy(seen["phone"]["facts"]["text"])
     result.update(desktop)
-    result["phone_text_differs"] = phone["text"] != desktop["text"]
-    result["note"] = ("Open the screenshot files to look at the page. This is the house's own Chrome with the network "
-                      "refused; it presses no real keys and speaks nothing, so claim only what is shown here.")
+    result.update(title=" ".join(seen["desktop"]["facts"]["title"].split())[:200] or desktop["title"],
+                  text=text[:TEXT_LIMIT], text_truncated=len(text) > TEXT_LIMIT,
+                  fields=seen["desktop"]["facts"]["fields"], keyboard_walk=seen["desktop"]["walk"],
+                  phone_text_differs=small != text)
+    if small != text:
+        result["phone_text"] = small[:TEXT_LIMIT]
+    if phone.get("own_policy"):
+        result["own_policy"] = phone["own_policy"]
+    result["note"] = (
+        "Open the screenshot files to look at the page. text is what a visitor sees after your steps; fields is "
+        "what each form field holds; keyboard_walk is where real Tab presses go on a fresh load of the page, without "
+        "your steps (use press steps to walk a later state). The phone is a 390 pixel wide screen: if layout_width is larger and zoom is below "
+        "1, the page has no viewport line and a real phone shows it shrunk like this. This is the house's own "
+        "Chrome with the network refused. It speaks nothing, so make no screen-reader claim from it.")
     return result

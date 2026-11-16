@@ -96,6 +96,30 @@ assert.match(who,/Only its author has said who would use this · leaves the shel
 assert.match(who,/Nobody has shown who asked for this · leaves the shelf/);
 assert.match(who,/Nobody but its owner has shown who this is for · dropped .* unless another resident writes its worth brief/);
 assert.match(who,/Worth brief, by a resident who does not own it · Juniper/);
+// Second look: a stage's days are the residents' allowance, a brief waits for its check, an ask opens plainly.
+const saved={projects:frame.shelf.projects,needs:frame.shelf.needs};
+frame.shelf.projects=[
+  {id:'p-u',idea:'skein',title:'Skein',status:'active',owner:'r1',stage:1,deadline:1000+86400,milestone:'Use the packet (10 days): keyboard review',
+   milestones:[{milestone:'Packet (7 days): build',seconds:604800},{milestone:'Use the packet (10 days): keyboard review',seconds:864000}],
+   completed:[{stage:0,milestone:'Packet',sequence:4}],brief_due:1000+6*3600,brief_unchecked:true,brief:{field:'software',worth:'useful',author:'r1',asked}},
+  {id:'p-r',idea:'bench',title:'Bench',status:'active',owner:'r1',deadline:1000+86400,milestone:'Try it',brief_due:1000+6*3600,
+   rejected:[{author:'r1',by:'r1',finding:'An explainer and a product page.',at:900}]},
+  {id:'p-k',idea:'kept',title:'Kept',status:'active',owner:'r1',deadline:1000+86400,milestone:'Try it',
+   brief:{field:'software',worth:'useful',author:'r1',asked},second:{author:'r1',finding:'Both people ask for it.',at:900}}];
+frame.shelf.needs=[{id:'n2',status:'open',kind:'other',for:'p-u',for_title:'Skein',author:'r1',
+  plain:'The page viewer shows phones wrongly; please have it repaired.',ask:'Provide a genuine 390px layout viewport.',unlocks:'u',without:'w'}];
+shelf();
+const look=text(nodes.shelf);
+assert.match(look,/Now · milestone 2 of 2 · the residents have up to 10 days to finish it/);
+assert.match(look,/Use the packet: keyboard review — current · the residents have up to 10 days to finish it/);
+assert.match(look,/Packet: build — done/);assert.doesNotMatch(look,/\\(10 days\\)|\\(7 days\\)/);
+assert.match(look,/Its worth brief has not been checked · dropped .* unless a resident who neither owns it nor wrote the brief opens the quoted pages and keeps it/);
+assert.match(look,/Juniper opened the pages its worth brief quoted and rejected it · dropped .* unless another resident shows who is asking for this/);
+assert.match(look,/A worth brief by Juniper was rejected by Juniper: An explainer and a product page\\./);
+assert.match(look,/Checked by Juniper, who neither owns it nor wrote the brief: Both people ask for it\\./);
+assert.match(look,/Skein:\\s+The page viewer shows phones wrongly; please have it repaired\\./);
+assert.match(look,/In the residents' own words: Provide a genuine 390px layout viewport\\./);
+frame.shelf.projects=saved.projects;frame.shelf.needs=saved.needs;
 const places=all(nodes.shelf).filter(n=>n.tag==='a'&&n.textContent==='where they said it ↗').map(n=>n.href);
 assert(places.length>=3&&places.every(href=>href==='https://forum.example.org/t/1'),'only real web addresses become links');
 frame={};shelf();

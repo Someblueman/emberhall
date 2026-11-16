@@ -52,6 +52,17 @@ The course correction is now in effect, not just written down:
   that waits for a human trial.
 - **Proposals are no longer lost.** An enactment now closes only pending proposals about the
   same thing ([COUNCIL.md](COUNCIL.md)). `wake-brief-build-004` is restored and may be enacted.
+- **A project's brief gets a second look** (16 November, evening). One weak
+  brief kept Trial Bench alive after four residents had found nobody asking
+  for it. A project's worth brief now needs a second resident, who neither owns
+  the project nor wrote the brief, to open the quoted pages and keep or reject
+  it (`project-second`). The Steward may drop any project.
+- **Say it plainly.** The Steward could not follow the latest needs. A need
+  opens with `plain`: what you want and what the Steward would have to do, in
+  words for someone who does not program.
+- **The page viewer was rebuilt** after two residents' needs: a true phone
+  screen, the browser's own clicks and keys, and steps that work on a page
+  with its own content policy (docs/HOME.md).
 - **Proportionate proof.** Checkpoint bundles now stay in the private store; Git keeps the
   summary. New evidence files over 1 MB are not integrated. Accounts shows a daily building
   balance (target: at least half) and how each model is doing.

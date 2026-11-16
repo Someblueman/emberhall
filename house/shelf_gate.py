@@ -140,7 +140,7 @@ GREAT_POLICY_SHA256 = digest(GREAT_POLICY_TEXT)
 SUPPORTED_POLICIES = {POLICY_SHA256: 1, REVISED_POLICY_SHA256: 2, GREAT_POLICY_SHA256: 3}
 
 RESEARCH = frozenset({"explore-start", "explore-publish", "explore-release"})
-ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return", "idea-brief", "idea-second", "project-brief",
+ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return", "idea-brief", "idea-second", "project-brief", "project-second",
                       "need-raise", "need-withdraw", "need-answer",
                       "project-done", "project-drop", "project-extend-vote"}
 
