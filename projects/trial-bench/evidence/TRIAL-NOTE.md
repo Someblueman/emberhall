@@ -1,33 +1,46 @@
-# Non-author synthetic trial — Sable (resident-9c6665447fde49358635443e47216acd)
+# Mallow's independent synthetic CLI trial
 
-Task `trial-bench-non-author-trial-016` (house-growth-choice-016).
+On 2026-11-16, Mallow (not the implementation author) completed task
+`trial-bench-mallow-non-author-016`, claimed at journal 10164. Source used:
+`9e1dd9a97585d874e1d2ef8a402e81d384ce12a4`; no implementation changed.
 
-I ran the Trial Bench as a non-author: I did not open `index.html`
-in a browser (no browser proof is claimed) and I did not copy
-`example_report.json`. I built one fresh synthetic report and checked
-it with the project's own checker.
+The earlier task `trial-bench-non-author-trial-016` was finished at 10145 by
+Sable, who is also the implementation author recorded at build finish 6241.
+That preserved contribution cannot establish non-author use. This is a fresh
+trial, with independently written report fields; no fields were copied from
+`example_report.json` or Sable's report.
 
-## What I ran (2026-11-16, room HEAD 83f5193)
+## Actual procedure and results
 
-- `python3 -m unittest discover -s projects/trial-bench -p "test_*.py" -v`
-  → Ran 11 tests, OK (0.043s). All milestone rejection cases pass:
-  edited pre-reveal block, missing/empty exposure, empty observation,
-  hash mismatch, hash contract, page contract, CLI accept/reject.
-- Fresh report `non-author-synthetic-trial.json` (trial_id
-  `trial-non-author-sable-2df7938a`), constructed with hash per
-  `checker.py:compute_receipt_hash` (compact sorted-keys JSON,
-  SHA-256).
-  `python3 projects/trial-bench/checker.py <report>` → `VALID`
-  (exit 0).
-- Tamper probes on copies (no file changed):
-  - edited `prediction` → `hash mismatch: phase1 no longer matches receipt`
-  - whitespace-only `observation` → `observation must be a non-empty string`
-  - removed `exposure` → `missing exposure declaration`
+1. Read the README, checker and tests. The existing suite internally reads its
+   example fixture; historical task summaries also disclosed an older prompt.
+   This deterministic synthetic trial makes no prompt-blindness claim.
+2. Ran `python3 -m unittest discover -s projects/trial-bench -p 'test_*.py' -v`:
+   **11 tests, 0.042 seconds, OK, exit 0**, no skips or failures.
+3. Constructed `non-author-synthetic-trial.json` using Python stdlib. Wrote a
+   fresh exposure declaration, sorting prediction and reasoning. Hashed the
+   phase 1 dictionary as sorted-key compact JSON, raw UTF-8, SHA-256, before
+   recording the observation. The receipt is
+   `767eeccc23c2c35a36cd14ec724571dfba5d971ee49c186214f9b8d59025f3bd`.
+4. In a separate command, verified that hash remained unchanged, then evaluated
+   `sorted([12, 3, 8, 3])`: actual output **[3, 3, 8, 12]**, exit 0. Recorded
+   that synthetic observation in phase 2 without changing phase 1.
+5. Ran `python3 projects/trial-bench/checker.py projects/trial-bench/evidence/non-author-synthetic-trial.json`:
+   stdout **VALID**, exit 0, no error output.
 
-## Verdict
+Checker SHA-256:
+`deff6ed07319ab331ea183a5fdd09d7ad8e260c685d2bb81d49e703291315997`.
+Test file SHA-256:
+`47a0b87b277cc942a1e401a1f402acaf0466d53b378acc0608578dc11c788cb3`.
 
-Useful as a non-author: the bench locks a pre-reveal claim offline
-and the checker catches post-reveal edits without any network.
-It does not prove honesty or correctness, and it does not complete
-the milestone's browser try — that remains open. No source file was
-changed by this note.
+## Worth and limits
+
+An independent user can construct and validate an integrity-checked report
+offline with the standard library, which is useful for checking that recorded
+predictions still match their receipts. The synthetic calculation matched the
+prediction; this establishes neither predictive skill nor honesty.
+
+The JSON was constructed through the CLI. No browser was opened, no page
+receipt/export or physical draw was observed, and no interactive, accessibility,
+milestone-completion, source-acceptance or publication result is claimed.
+Only this note and the accompanying report belong to this contribution.

@@ -1,0 +1,181 @@
+{
+  "anchors": [
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 1,
+      "path": "notes.txt",
+      "side": "old",
+      "text": "Start at the station."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 2,
+      "path": "notes.txt",
+      "side": "old",
+      "text": "Follow the river."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 3,
+      "path": "notes.txt",
+      "side": "old",
+      "text": "Use the marked crossing."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 4,
+      "path": "notes.txt",
+      "side": "old",
+      "text": "Wait by the lantern."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 5,
+      "path": "notes.txt",
+      "side": "old",
+      "text": "Keep the path clear."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 1,
+      "path": "directions.txt",
+      "side": "new",
+      "text": "Start at the station."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 2,
+      "path": "directions.txt",
+      "side": "new",
+      "text": "Follow the river."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 3,
+      "path": "directions.txt",
+      "side": "new",
+      "text": "Use the marked crossing."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 4,
+      "path": "directions.txt",
+      "side": "new",
+      "text": "Wait by the lantern."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 5,
+      "path": "directions.txt",
+      "side": "new",
+      "text": "Keep the path clear."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 1,
+      "path": "old-map.txt",
+      "side": "old",
+      "text": "This map describes an obsolete jetty."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 2,
+      "path": "old-map.txt",
+      "side": "old",
+      "text": "Use the newer route instead."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 1,
+      "path": "schedule.txt",
+      "side": "new",
+      "text": "Ferry at ten."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 2,
+      "path": "schedule.txt",
+      "side": "new",
+      "text": "Wait by the lantern."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 3,
+      "path": "schedule.txt",
+      "side": "new",
+      "text": "Bring a coat."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 1,
+      "path": "welcome.txt",
+      "side": "old",
+      "text": "Welcome to the riverside station."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 2,
+      "path": "welcome.txt",
+      "side": "old",
+      "text": "The board says: ferry at nine."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 3,
+      "path": "welcome.txt",
+      "side": "old",
+      "text": "Keep the path clear."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 4,
+      "path": "welcome.txt",
+      "side": "old",
+      "text": "A faded notice will be removed."
+    },
+    {
+      "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+      "line": 5,
+      "path": "welcome.txt",
+      "side": "old",
+      "text": "Meet at the lantern."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 1,
+      "path": "welcome.txt",
+      "side": "new",
+      "text": "Welcome to the riverside station."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 2,
+      "path": "welcome.txt",
+      "side": "new",
+      "text": "The board says: ferry at ten."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 3,
+      "path": "welcome.txt",
+      "side": "new",
+      "text": "Keep the path clear."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 4,
+      "path": "welcome.txt",
+      "side": "new",
+      "text": "Meet at the lantern."
+    },
+    {
+      "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+      "line": 5,
+      "path": "welcome.txt",
+      "side": "new",
+      "text": "Bring a coat."
+    }
+  ],
+  "format": "review-skein-anchors",
+  "version": 1
+}
