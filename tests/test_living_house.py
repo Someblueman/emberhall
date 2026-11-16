@@ -34,7 +34,7 @@ assert.equal(run(`clip('abcdefghij',6)`),'abcde…');
 const made=[];
 context.document.createElement=tag=>{const node={tag,children:[],appendChild(child){this.children.push(child);}};made.push(node);return node;};
 run(`frame.archive=[{key:'old-lesson',claim:'Old.',author:'Ash',status:'superseded',reviews:0},
-  {key:'check-twice',claim:'Check twice.',author:'Bay',status:'observed',reviews:2}];renderLessons({appendChild(){}});`);
+  {key:'check-twice',claim:'Check twice.',author:'Bay',status:'observed',reviews:2}];[...frame.archive].reverse().forEach(lesson=>lessonEntry(lesson,{appendChild(){}}));`);
 const text=made.map(node=>node.textContent).filter(Boolean);
 assert.deepEqual(text.slice(0,3),['check twice','Check twice.','Bay · checked by 2 other residents']);
 assert(text.includes('Ash · replaced by a later lesson'));
