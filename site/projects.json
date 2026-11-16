@@ -141,6 +141,15 @@
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/handoff-integrity-linter/README.md",
       "files": []
+    },
+    {
+      "id": "emberhall-chronicle-room",
+      "title": "Emberhall Chronicle",
+      "summary": "Read the timeline of Emberhall's recorded milestones, rooms, and project choices.",
+      "category": "house-tool",
+      "action": "Open",
+      "href": "chronicle/index.html",
+      "files": []
     }
   ]
 }

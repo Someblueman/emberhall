@@ -1483,15 +1483,40 @@ async function loadBalance(sourceHead) {
     const balance=await response.json();
     balanceSource=sourceHead;box.replaceChildren();
     const areas=[["building","Building"],["record","Record"],["foundations","Foundations"],["other","Other"]];
-    for(const day of balance.days.slice().reverse()) {
+    const days=Array.isArray(balance.days)?balance.days:[];
+    const target=typeof balance.target_building_share==="number"&&Number.isFinite(balance.target_building_share)&&balance.target_building_share>0&&balance.target_building_share<=1?balance.target_building_share:0.5;
+    const targetPct=Math.round(target*100);
+    const totalLines=days.reduce((n,day)=>n+areas.reduce((m,[key])=>m+(day[key]||0),0),0);
+    const buildingLines=days.reduce((n,day)=>n+(day.building||0),0);
+    const dates=days.length?`Recorded UTC commit dates (${days.length}): ${days[0].day}${days.length>1?` to ${days[days.length-1].day}`:""}`:"";
+    const summaryText=days.length
+      ?(totalLines
+        ?`${dates} · ${Math.round(100*buildingLines/totalLines)}% building (${buildingLines.toLocaleString()} of ${totalLines.toLocaleString()} lines) · Steward target: ${targetPct}%`
+        :`${dates} · no text line changes · Steward target: ${targetPct}%`)
+      :"No recent committed changes in this window.";
+    html("p","balance-summary small",summaryText,box);
+    const legend=html("div","balance-legend",undefined,box);
+    for(const [key,label] of areas) {
+      const item=html("span","balance-legend-item",undefined,legend);
+      const swatch=html("span",`balance-swatch seg-${key}`,undefined,item);
+      swatch.setAttribute("aria-hidden","true");
+      html("span","",label,item);
+    }
+    for(const day of days.slice().reverse()) {
       const total=areas.reduce((n,[key])=>n+(day[key]||0),0);
       const row=html("div","balance-day",undefined,box);
-      const share=total?day.building/total:0;
-      html("strong","",`${day.day} · ${Math.round(share*100)}% building`,row);
-      const bar=html("div","balance-bar",undefined,row);
+      const share=total?(day.building||0)/total:0;
+      const status=total?(share>=target?` · meets ${targetPct}% target`:` · below ${targetPct}% target`):" · no text changes";
+      html("strong","",`${day.day} · ${Math.round(share*100)}% building${status}`,row);
+      const wrap=html("div","balance-bar-wrap",undefined,row);
+      const bar=html("div","balance-bar",undefined,wrap);
       bar.setAttribute("role","img");
       bar.setAttribute("aria-label",areas.map(([key,label])=>`${label} ${day[key]||0} lines`).join(", "));
       for(const [key] of areas){if(total&&day[key]){const seg=html("span","seg-"+key,undefined,bar);seg.style.width=`${(100*day[key]/total).toFixed(1)}%`;}}
+      const marker=html("span","balance-target",undefined,wrap);
+      marker.style.left=`${targetPct}%`;
+      marker.setAttribute("aria-hidden","true");
+      marker.title=`Steward target: ${targetPct}% building`;
       html("small","",areas.map(([key,label])=>`${label} ${(day[key]||0).toLocaleString()}`).join(" · ")+(day.binary_files?` · ${day.binary_files} binary files`:""),row);
     }
   } catch { box.replaceChildren();html("small","","Balance unavailable for this snapshot.",box); }
@@ -1509,6 +1534,7 @@ function collectionUrl(entry) {
   const href=entry.href;
   if(typeof href!=="string")return null;
   if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*$/.test(href))return href;
+  if(entry.category==="house-tool" && entry.action==="Open" && href==="chronicle/index.html")return href;
   if((entry.category==="house-tool" || (entry.category==="creation" && entry.action==="Read guide")) && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
   return null;
 }
@@ -1610,7 +1636,15 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
   }
   if (project.deadline) {
     const deadline = typeof project.deadline === "number" ? clock(project.deadline) : String(project.deadline);
-    html("p", "small", `Deadline: ${deadline}${project.extended ? " (extended)" : ""}`, details);
+    let cue = "";
+    if (project.status === "active" && typeof project.deadline === "number" && Number.isFinite(project.deadline)) {
+      const now = observationTime();
+      if (typeof now === "number" && Number.isFinite(now) && now > 0) {
+        const delta = project.deadline - now;
+        cue = delta <= 0 ? " · past deadline" : delta < 86400 ? ` · ${Math.max(1, Math.round(delta / 3600))}h left` : ` · ${Math.ceil(delta / 86400)}d left`;
+      }
+    }
+    html("p", "small", `Deadline: ${deadline}${project.extended ? " (extended)" : ""}${cue}`, details);
   }
   recordId(details, project.id);
 }
@@ -1713,13 +1747,25 @@ function shelf() {
     html("div", "eyebrow-small", "Ideas · not selected projects", group);
     ideas.forEach(idea => {
       const item = html("details", "shelf-item shelf-idea", undefined, group);
-      html("summary", "", titleFor(idea,"idea"), item);
+      const summary = html("summary", "", undefined, item);
+      html("span", "shelf-idea-title", titleFor(idea, "idea"), summary);
       const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
       const lossLabel = typeof idea.losses === "number" && idea.losses > 0
         ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
         : null;
       const due = typeof idea.brief_due === "number";
       const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
+      const worthTag = idea.brief?.worth ? idea.brief.worth[0].toUpperCase() + idea.brief.worth.slice(1) : null;
+      const summaryTags = [
+        (greatMode || idea.scale) ? (idea.scale === "great" ? {text: "Great work", cls: "shelf-tag shelf-tag-great"} : {text: "Small project", cls: "shelf-tag"}) : null,
+        fieldLabel ? {text: fieldLabel, cls: "shelf-tag"} : null,
+        worthTag ? {text: worthTag, cls: "shelf-tag"} : null,
+        idea.brief ? (due ? {text: "Renew brief", cls: "shelf-tag shelf-tag-warn"} : {text: "Researched", cls: "shelf-tag"}) : (due ? {text: "Needs brief", cls: "shelf-tag shelf-tag-warn"} : null),
+      ].filter(Boolean);
+      if (summaryTags.length) {
+        const tagRow = html("span", "shelf-idea-tags", undefined, summary);
+        summaryTags.forEach(tag => html("span", tag.cls, tag.text, tagRow));
+      }
       const briefLabel = idea.brief ? (due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
       const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
       if (meta) html("span", "small", meta, item);
