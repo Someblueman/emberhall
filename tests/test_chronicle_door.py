@@ -14,20 +14,25 @@ class ChronicleDoorTests(unittest.TestCase):
 vm.runInContext(`
 selected='chronicle';
 frame={seq:5,at:1000,rooms:[],residents:[],runs:[],scars:[],tasks:[],floors:[{level:0,name:'Ground floor'}]};
+const bookmarkLinks=()=>all(panel()).filter(n=>n.tag==='a'&&n.href==='#room/chronicle');
+const nonBookmarkLinks=()=>all(panel()).filter(n=>n.tag==='a'&&!String(n.href).startsWith('#room/'));
 roomPanel();assert.equal(all(panel()).filter(n=>n.tag==='a').length,0);
 const room={id:'chronicle',name:'The Chronicle',floor:0,status:'construction'};
 frame.rooms.push(room);
 for(const status of ['construction','closed',undefined]) {
- room.status=status;roomPanel();assert.equal(all(panel()).filter(n=>n.tag==='a').length,0);
+ room.status=status;roomPanel();
+ assert.equal(bookmarkLinks().length,1);
+ assert.equal(nonBookmarkLinks().length,0);
 }
 room.status='open';roomPanel();
-assert.equal(all(panel()).filter(n=>n.tag==='a').length,1);
-assert.equal(all(panel()).find(n=>n.tag==='a').href,'chronicle/index.html');
+assert.equal(bookmarkLinks().length,1);
+assert.equal(nonBookmarkLinks().length,1);
+assert.equal(nonBookmarkLinks()[0].href,'chronicle/index.html');
 assert.match(text(panel()),/Read the Chronicle/);
 current=false;roomPanel();assert.match(text(panel()),/latest published Chronicle/);
 frame.rooms=[];roomPanel();assert.equal(all(panel()).filter(n=>n.tag==='a').length,0);
 `,context);
 '''
         result = subprocess.run(['node', '-e', script, str(Path(__file__).parents[1] / 'site/house.js')],
-                                capture_output=True, text=True, timeout=15)
+                                input='', capture_output=True, text=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

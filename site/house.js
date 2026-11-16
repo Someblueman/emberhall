@@ -1051,12 +1051,21 @@ function visibleScars() {
   return marks;
 }
 function choose(room) {
+  if(typeof window!=="undefined") {
+    const fragment=room?`#room/${encodeURIComponent(room)}`:"#house-view";
+    if(window.location?.hash!==fragment)window.history?.pushState(null,"",fragment);
+  }
   selected=room;$("overview").hidden=!room;
   drawHouse(); roomPanel(); dormControls();
   // Bring the room's details into view when they open below the drawing.
   const card=room?document.querySelector?.(".room-card")?.getBoundingClientRect?.():null;
   if(card&&card.top>window.innerHeight*.6)document.querySelector(".stage")?.scrollIntoView?.({block:"start"});
   document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
+}
+function linkedRoom() {
+  const fragment=typeof window!=="undefined"?window.location?.hash:"";
+  if(!fragment?.startsWith("#room/"))return null;
+  try{return decodeURIComponent(fragment.slice(6));}catch{return "";}
 }
 function backToRooms() {
   const nav=$("room-nav");
@@ -1068,6 +1077,7 @@ function backToRooms() {
 }
 function showViewForHash(hash, focusTarget=false) {
   const targetId=String(hash||"").replace(/^#/,"");
+  const roomRoute=targetId.startsWith("room/");
   const routes={"house-view":"house-view","projects-view":"projects-view","shelf-card":"projects-view",
     "gallery-view":"gallery-view","creations-card":"gallery-view","finished-card":"gallery-view",
     "council-view":"council-view","voting-card":"council-view","accounts-view":"accounts-view"};
@@ -1078,10 +1088,14 @@ function showViewForHash(hash, focusTarget=false) {
     if(link.hash===`#${viewId}`)link.setAttribute("aria-current","page");
     else link.removeAttribute("aria-current");
   });
+  if(frame&&(roomRoute||targetId==="house-view"||!targetId)) {
+    if(!roomRoute)selected=null;
+    render();
+  }
   if(focusTarget) {
-    const target=$(targetId)||view;
-    target.focus?.({preventScroll:true});
-    target.scrollIntoView?.({block:"start"});
+    const target=roomRoute?document.querySelector(".room-card"):$(targetId)||view;
+    target?.focus?.({preventScroll:true});
+    target?.scrollIntoView?.({block:"start"});
   }
 }
 function personRow(r, parent) {
@@ -1527,6 +1541,7 @@ function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
   if(!room) {
+    if(linkedRoom()!==null)html("p","empty-note","This room is not recorded at this moment. Choose another room or return to Latest to look again.",content);
     const overview=html("details","overview-record",undefined,content);
     html("summary","","Residents and unfinished work",overview);content=overview;
   }
@@ -1537,6 +1552,9 @@ function roomPanel() {
   const context=$("room-context");
   if(context)context.textContent=room?`${floor?floor.name:"Ground floor"} · ${room.name}`:(floor?`${floor.name} · whole house`:"Whole house");
   if(room) {
+    const link=html("a","room-shelf-link",`Link to ${room.name}`,content);
+    link.href=`#room/${encodeURIComponent(room.id)}`;
+    html("p","small","Bookmark this room or copy its link. It opens at the latest published moment.",content);
     // Lead with who is here and what the room holds; the room's own record goes last.
     const here=roomOccupants(frame,room.id).filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
     const lead=[here?`${here} awake here`:"Nobody awake here",roomStatus(room)==="open"?roomFact(room.id):""].filter(Boolean);
@@ -2661,6 +2679,12 @@ function renderResidentPulse() {
 }
 function render() {
   frame=data.frames[index];
+  const roomLink=linkedRoom();
+  if(roomLink!==null) {
+    const room=frame.rooms.find(r=>r.id===roomLink);
+    selected=room?.id||null;
+    if(room)selectedFloor=room.floor||0;
+  }
   if(!floorsAt(frame).some(f=>f.level===selectedFloor))selectedFloor=0;
   if(!floorRooms(frame,selectedFloor).some(r=>r.id===selected))selected=null;
   floorControls();
@@ -2691,7 +2715,11 @@ function render() {
 function bindControls() {
   window.addEventListener("hashchange",()=>showViewForHash(window.location.hash,true));
   showViewForHash(window.location.hash,Boolean(window.location.hash));
-  $("floor-picker").addEventListener("change",e=>{selectedFloor=Number(e.target.value);selected=null;render();});
+  $("floor-picker").addEventListener("change",e=>{
+    selectedFloor=Number(e.target.value);selected=null;
+    if(linkedRoom()!==null)window.history?.pushState(null,"","#house-view");
+    render();
+  });
   $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
   $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
   $("view-latest")?.addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});

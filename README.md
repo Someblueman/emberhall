@@ -23,6 +23,8 @@ are still being designed; the picture is not the whole project.
 - **Walk the rooms.** Select a room on the map or its named control. Inspect its
   residents, work and remembered failures; choose **Back to rooms** to return.
   The Parlor holds the catch-up digest; the Gallery leads to creations.
+  Each room has a **Link to…** address you can bookmark or share; browser Back
+  and Forward retrace room visits. Bookmarks open at the latest published moment.
 - **Follow work in the Workshop.** Search by task title or resident, filter and
   page through work, select a task and follow its recorded handoffs.
 - **Move through time.** Visit a task's creation, claim or finish, or scrub the

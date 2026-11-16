@@ -506,7 +506,14 @@ process.stdout.write(JSON.stringify({
                 "current": True,
                 "selected": "counting",
             })
-            self.assertEqual(res["links"], [])
+            self.assertEqual(
+                [link for link in res["links"] if not link["href"].startswith("#room/")],
+                [],
+            )
+            self.assertEqual(
+                [link["href"] for link in res["links"] if link["href"].startswith("#room/")],
+                ["#room/counting"],
+            )
             self.assertIsNone(res["initialResults"])
 
     def test_counting_room_css_classes_defined(self) -> None:
