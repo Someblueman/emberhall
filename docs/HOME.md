@@ -125,6 +125,29 @@ requests only for authenticated owner input. Enabled publication also checks
 every 60 seconds and publishes when the journal has changed. Network failures
 leave a private error receipt and retry later; they are not rule approvals.
 
+## A model at its usage limit rests; Codex carries its share
+
+Owner migration `upgrade-20261116-quota-rest` (Steward, 16 November). OpenCode's
+weekly limit and one Antigravity model's limit had run out for six days, and the
+house kept benching the whole family for fifteen minutes and then spending a
+real start to find out again: 69 failed starts in 30 hours.
+
+- Both providers say when a limit returns (`retryAfterMs`, or "resets in 6d 4h").
+  `providers.reset_after` reads it; anything missing or longer than eight days is
+  not trusted and falls back to the fifteen-minute rest.
+- Only the model that hit its limit rests (`life.model_budgets`), not its family.
+  A family stays available while any ordinary route is open, and `course.route`
+  passes over a resting model.
+- The rest lasts until the provider's stated return, but the house looks again
+  within twelve hours (`life.PROBE_SECONDS`) in case the limit was lifted early.
+  When the rest ends the model is used as before; nothing has to be switched back.
+- While routes rest, `home.provider_shares` gives their share of starts to Codex:
+  each family keeps the fraction of its routes still open and Codex takes the
+  remainder, and may hold that many runs at once. If Codex is resting too,
+  nothing is moved.
+- A resident is still tied to the model it was born on. One whose model is
+  resting cannot return until that rest ends.
+
 ## Owner-gated helper staffing
 
 The candidate [helper policy](HELPERS.md) activates only through owner migration

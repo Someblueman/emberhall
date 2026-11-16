@@ -63,10 +63,37 @@ def return_eligible(state: dict, resident: str, agent: str, model: str, at: floa
                    for task in state["tasks"].values())
 
 
+# Quota rest (Steward, 16 November, late; owner migration below). OpenCode's weekly limit and one
+# Antigravity model's limit had run out for six days, and each says so when it refuses. The house
+# benched the whole family for fifteen minutes and then spent a real start finding out again: 66
+# starts lost in a day, and Antigravity's other model, which still worked, sat out with the capped
+# one. From this migration a quota rests the one model that hit it, until the time its provider
+# gave (checked again every twelve hours in case the limit was lifted early), and the family stays
+# available while any of its ordinary routes is open. Codex takes the share the resting routes leave.
+QUOTA_REST = "upgrade-20261116-quota-rest"
+PROBE_SECONDS = 12 * 3600
+
+
+def quota_rest(state: dict) -> bool:
+    return QUOTA_REST in state.get("maintenance", {}).get("migrations", {})
+
+
+def model_available(state: dict, agent: str, model: str, at: float) -> bool:
+    return state.get("life", {}).get("model_budgets", {}).get(agent, {}).get(model, {}).get("until", 0) <= at
+
+
+def open_models(state: dict, agent: str, at: float) -> list[str]:
+    """This family's ordinary routes that are not resting on a quota."""
+    from .providers import ROTATION
+    return [model for model in ROTATION[agent] if model_available(state, agent, model, at)]
+
+
 def provider_available(state: dict, agent: str, at: float) -> bool:
     from .maintenance import retry_permit
-    return (state.get("life", {}).get("budgets", {}).get(agent, {}).get("until", 0) <= at
-            or retry_permit(state, agent, at) is not None)
+    if not (state.get("life", {}).get("budgets", {}).get(agent, {}).get("until", 0) <= at
+            or retry_permit(state, agent, at) is not None):
+        return False
+    return not state.get("life", {}).get("model_budgets", {}).get(agent) or bool(open_models(state, agent, at))
 
 
 def backlog_enabled(state: dict) -> bool:
@@ -317,6 +344,8 @@ def apply(state, event):
             require(all(r["resident"] != resident for r in active), "resident already running")
             require(provider_available(state, data["agent"], at),
                     "provider is cooling down")
+            require(model_available(state, data["agent"], data["model"], at),
+                    "this model is resting until its quota returns")
             require(data["mode"] in {"work", "review"}, "invalid work mode")
             require(re.fullmatch("[0-9a-f]{40}", data["source_head"]) is not None,
                     "invalid source head")
@@ -426,6 +455,20 @@ def apply(state, event):
                 if request.get("run") == data["run"] and request["status"] == "assigned":
                     request.update(status="pending")
                     request.pop("run", None)
+        elif kind == "budget" and "model" in data:
+            # One model's quota: only that route rests. resets_at is when its provider said it returns.
+            require(quota_rest(state), "model quota rests are not enabled yet")
+            fields(data, {"kind", "agent", "model", "until", "reason"}, {"resets_at"})
+            require(data["agent"] in KINDS, "unknown agent kind")
+            from .providers import validate_model
+            validate_model(data["agent"], data["model"])
+            number(data["until"], "cooldown", at)
+            if "resets_at" in data:
+                number(data["resets_at"], "quota reset", at)
+            string(data, "reason", 1000)
+            rests = life.setdefault("model_budgets", {}).setdefault(data["agent"], {})
+            if data["until"] >= rests.get(data["model"], {}).get("until", 0):
+                rests[data["model"]] = {**data, "at": at, "sequence": seq}
         elif kind == "budget":
             fields(data, {"kind", "agent", "until", "reason"})
             require(data["agent"] in KINDS, "unknown agent kind")

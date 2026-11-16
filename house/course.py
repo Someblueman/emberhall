@@ -26,16 +26,20 @@ def great_project(state: dict, task: dict | None) -> dict | None:
     return None
 
 
-def route(state: dict, kind: str, *, strong: bool = False) -> str:
+def route(state: dict, kind: str, *, strong: bool = False, at: float | None = None) -> str:
     """Spread ordinary runs across an agent's approved routes.
 
     The least-used route among this agent's recent non-helper runs wins; ties go
     to the route used least recently, then to the listed order. Explorers and
     great-work builders take the agent's stronger route.
     """
-    if strong:
+    from .life import model_available, open_models
+    # A route resting on its quota is passed over; the stronger route falls back to the ordinary ones.
+    if strong and (at is None or model_available(state, kind, providers.STRONG[kind], at)):
         return providers.STRONG[kind]
     pool = providers.ROTATION[kind]
+    if at is not None:
+        pool = tuple(open_models(state, kind, at)) or pool
     runs = sorted((run for run in state.get("life", {}).get("runs", {}).values()
                    if run["agent"] == kind and not staffing.helper(run)),
                   key=lambda run: run["started_sequence"])

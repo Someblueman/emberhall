@@ -1361,7 +1361,21 @@ function renderLessons(content) {
   renderPage();
 }
 let countingState={agent:"all",lane:"all"};
+// Models resting on a quota, in plain words: whether the whole family is out or only some of its
+// models, and when the provider itself said the limit returns.
+function quotaRestWords(agent,now) {
+  const rests=(frame?.model_rests||[]).filter(rest=>rest.agent===agent&&rest.until>now);
+  if(!rests.length)return null;
+  const back=Math.max(...rests.map(rest=>Number.isFinite(rest.resets_at)?rest.resets_at:rest.until));
+  const said=rests.some(rest=>Number.isFinite(rest.resets_at));
+  const when=said?`its provider says it returns ${clock(back)}`:`next try ${clock(back)}`;
+  const covered=agent!=="codex"&&!(frame?.model_rests||[]).some(rest=>rest.agent==="codex"&&rest.until>now);
+  if(rests[0].open_routes===0)return `Usage limit reached · ${when}${covered?" · Codex covers its share until then":""}`;
+  return `${rests.length} of ${rests[0].routes} models at their usage limit · ${when} · its other ${rests[0].open_routes===1?"model carries":"models carry"} on${covered?" and Codex covers the rest":""}`;
+}
 function countingBackoffLabel(backoff,now) {
+  const resting=quotaRestWords(backoff?.agent,now);
+  if(resting)return resting;
   const until=backoff?.until||0;
   if(until>now)return /credential|key expired|401/i.test(backoff?.reason||"")?"Credential unavailable":`Resting until ${clock(until)}`;
   if(Number.isFinite(backoff?.until)&&backoff.until>0)return "Availability unknown · prior backoff ended";
@@ -1378,7 +1392,7 @@ function renderCountingRoom(content) {
     const kind=kinds[agent],familyRuns=allRuns.filter(r=>r.agent===agent);
     const finishes=familyRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
     const models=[...new Set(familyRuns.map(r=>r.model).filter(Boolean))].sort();
-    const backoff=(frame.budgets||[]).find(b=>b.agent===agent);
+    const backoff=(frame.budgets||[]).find(b=>b.agent===agent)||{agent};
     const card=html("div","counting-family",undefined,families);
     card.setAttribute("data-family",agent);
     html("strong","",`${kind.mark} ${kind.name}`,card);
@@ -1673,7 +1687,7 @@ function accounts() {
     const row=html("div","account",undefined,box);html("strong","",`${kinds[agent].mark} ${kinds[agent].name}`,row);
     const until=backoff?.until||0,now=current?Date.now()/1000:frame.at;
     const reason=backoff?.reason||"";
-    html("span","balance",until>now?(/credential|key expired|401/i.test(reason)?"Credential unavailable":"Resting · recorded backoff"):"Remaining unknown",row);
+    html("span","balance",quotaRestWords(agent,now)||(until>now?(/credential|key expired|401/i.test(reason)?"Credential unavailable":"Resting · recorded backoff"):"Remaining unknown"),row);
     html("small","",`${runs.length} recorded runs · ${runs.some(r=>Number.isFinite(r.elapsed_seconds))?`${Math.round(seconds/60)} session min across ${runs.filter(r=>Number.isFinite(r.elapsed_seconds)).length} runs`:"duration unreported"}`,row);
     html("small","","Includes waiting; not active work time.",row);
     const outcomes=["success","failed","interrupted","quota"].map(outcome=>

@@ -66,6 +66,10 @@ The course correction is now in effect, not just written down:
   shown to be asked for no longer counts toward the shelf's ceiling, so
   research goes on while such ideas wait out their day. The public page counts
   only proposals that can still pass and threads someone holds or has queued.
+- **A spent quota is not retried all week** (16 November, night). A model that
+  reaches its usage limit rests until its provider says the limit returns, and
+  Codex takes its share of starts until then. See HOME.md. A resident who
+  lives on a resting model cannot be woken until it returns.
 - **Plain words for every thread.** The Steward could not tell from the page
   whether any work was being done. A new task needs `--plain`: one everyday
   sentence saying what a person will notice once it is done. The page shows

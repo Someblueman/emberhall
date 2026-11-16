@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import fcntl
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -17,7 +18,8 @@ import time
 import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, project_work, providers, staffing, work_metrics
-from .life import CONTROLLER, latest_run, provider_available, return_eligible, workload
+from .life import (CONTROLLER, PROBE_SECONDS, latest_run, model_available, open_models, provider_available,
+                   quota_rest, return_eligible, workload)
 from .record import Record
 from .wake_policy import active_policy, active_prompt
 from .watch import group_members, group_stopped, kill_group
@@ -87,12 +89,31 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
     if not available:
         return None
     runs = [r for r in life.get("runs", {}).values() if not staffing.helper(r)]
-    busy = {run["agent"] for run in runs if run["status"] == "active"}
     counts = work_metrics.counts(state, "explore" if exploring else "review" if reviewing else "work", KINDS)
-    return min(available, key=lambda kind: (kind in busy,
-        counts[kind],
+    share = provider_shares(state, now)
+    active = {kind: sum(run["agent"] == kind and run["status"] == "active" for run in runs) for kind in KINDS}
+    # A family is busy once it holds as many runs as its share allows: one each, more for Codex
+    # while it carries routes that are resting on a quota.
+    return min(available, key=lambda kind: (active[kind] >= max(1, math.ceil(share[kind])),
+        counts[kind] / share[kind] if share[kind] else math.inf,
         max((run["started_sequence"] for run in runs if run["agent"] == kind), default=0),
         KINDS.index(kind)))
+
+
+def provider_shares(state: dict, now: float) -> dict:
+    """Each family's share of starts. One each, until a quota rests some of a family's routes:
+    then that family keeps the fraction still open and Codex, which has far more room, takes the rest."""
+    share = {kind: 1.0 for kind in KINDS}
+    if not quota_rest(state) or not provider_available(state, "codex", now):
+        return share
+    for kind in KINDS:
+        rests = state.get("life", {}).get("model_budgets", {}).get(kind)
+        if kind == "codex" or not rests:
+            continue
+        open_now = len(open_models(state, kind, now)) / len(providers.ROTATION[kind])
+        share[kind] = open_now
+        share["codex"] += 1 - open_now
+    return share
 
 
 def pending_contributions(private: Path) -> list[dict]:
@@ -478,15 +499,25 @@ class Coordinator:
         return self.record.append("life", CONTROLLER, {"kind": kind, "run": run, **data},
                                   f"home-{run}-{kind}")
 
-    def cooldown(self, kind: str, run: str, outcome: str, reset: float | None = None) -> None:
+    def cooldown(self, kind: str, run: str, outcome: str, reset: float | None = None,
+                 model: str | None = None) -> None:
         request = f"home-{run}-cooldown"
-        if request in self.record.read()[0]["receipts"]:
+        state = self.record.read()[0]
+        if request in state["receipts"]:
             return
         now = time.time()
         seconds = 900 if outcome == "quota" else 300
         until = max(now + 1, reset) if reset is not None else now + seconds
-        self.record.append("life", CONTROLLER, {"kind": "budget", "agent": kind,
-            "until": until, "reason": outcome}, request)
+        data = {"kind": "budget", "agent": kind, "until": until, "reason": outcome}
+        if model is not None and outcome == "quota" and quota_rest(state):
+            # Rest only the route that hit its quota, until its provider's own reset time, but look
+            # again within twelve hours in case the limit was lifted early.
+            data["model"] = model
+            if reset is not None:
+                data.update(until=min(until, now + PROBE_SECONDS), resets_at=until)
+        elif outcome == "quota" and reset is not None:
+            data["until"] = now + seconds      # before the migration a quota is a fifteen-minute rest
+        self.record.append("life", CONTROLLER, data, request)
 
     def observed(self, run: str, result: dict) -> None:
         self.record.append("say", CONTROLLER, {"text": RESULT_PREFIX + json.dumps(
@@ -543,7 +574,7 @@ class Coordinator:
             write_private(self.private / run / "preservation-error.json",
                           {"error": type(error).__name__, "workspace_retained": True})
         if result["outcome"] in {"quota", "failed"}:
-            self.cooldown(item["agent"], run, result["outcome"])
+            self.cooldown(item["agent"], run, result["outcome"], model=item["model"])
         self.resolve_completed_help()
         handed_off = (item["resident"] in state["residents"] and
             not state["residents"][item["resident"]]["awake"] and
@@ -814,7 +845,8 @@ class Coordinator:
             # Course correction: rotate ordinary routes; stronger routes for
             # Explorers and great-work builders. Explicit requests are kept.
             bound = state["tasks"].get(task_id or request.get("task"), {})
-            model = course.route(state, kind, strong=explore_generation is not None
+            model = course.route(state, kind, at=max(time.time(), state["at"]),
+                                 strong=explore_generation is not None
                                  or course.great_project(state, bound) is not None)
         policy = active_policy(state)
         at = max(time.time(), state["at"])
@@ -858,6 +890,8 @@ class Coordinator:
                 return None
             resident = min(eligible, key=lambda key: (latest_run(state, key)["ended_sequence"], key)) if eligible else (
                 "resident-" + uuid.uuid4().hex)
+        if not model_available(state, kind, model, at):
+            return None     # this exact route is resting on its quota; the record would refuse the start
         run = uuid.uuid4().hex
         path = self.private / run
         path.mkdir(mode=0o700)
@@ -992,8 +1026,9 @@ class Coordinator:
                         tails.append((prefix + stream.read()).decode("utf-8", errors="replace"))
                 parsed = providers.result(item["agent"], *tails, code)
                 if parsed.get("retry_after_seconds"):
-                    self.cooldown(item["agent"], run, "credentials unavailable",
-                                  reset=time.time() + parsed["retry_after_seconds"])
+                    self.cooldown(item["agent"], run,
+                                  "quota" if parsed["outcome"] == "quota" else "credentials unavailable",
+                                  reset=time.time() + parsed["retry_after_seconds"], model=item["model"])
                 running.result = {"outcome": "interrupted" if interrupted else parsed["outcome"],
                     "exit_code": code, "usage": {} if truncated else parsed["usage"],
                     "elapsed_seconds": max(0, time.time() - item["started_at"])}

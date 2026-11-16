@@ -486,6 +486,8 @@ def replay(events: list, context: dict) -> list:
                 key = str(item["ambition"])
                 ambitions[key] = {"id": key, **{k: label(item.get(k, ""), 350)
                     for k in ("title", "description", "status", "next_step")}, "sequence": seq}
+            elif kind == "budget" and life and "model" in item:
+                pass    # one model's quota rest: published from the record as model_rests below
             elif kind == "budget" and life:
                 agent = str(item["agent"])
                 accepted = state["life"]["budgets"][agent]
@@ -607,6 +609,17 @@ def replay(events: list, context: dict) -> list:
         from .shelf import SECOND_LOOK
         if SECOND_LOOK in state.get("maintenance", {}).get("migrations", {}):
             frame["work"] = work_view(state, event_times, at)
+        from .life import quota_rest
+        if quota_rest(state):
+            # Models resting on a quota: when the house looks again, and when the provider said it returns.
+            from .life import open_models
+            from .providers import ROTATION
+            frame["model_rests"] = [
+                {"agent": agent, "model": label(model, 80), "until": rest["until"],
+                 "open_routes": len(open_models(state, agent, at)), "routes": len(ROTATION[agent]),
+                 **({"resets_at": rest["resets_at"]} if "resets_at" in rest else {})}
+                for agent, rests in sorted(state.get("life", {}).get("model_budgets", {}).items())
+                for model, rest in sorted(rests.items()) if rest["until"] > at]
         frame["voting"] = voting_view(state, identities, event_times, proposal_origins)
         frame["voting"]["inbox_checked_at"] = inbox_checked_at
         frame = copy.deepcopy(frame)

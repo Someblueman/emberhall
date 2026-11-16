@@ -97,6 +97,28 @@ def command(kind: str, model: str, workspace: Path, private: Path,
     return argv, env
 
 
+RESET_CEILING_SECONDS = 8 * 86400
+
+
+def reset_after(failure: str) -> float | None:
+    """Seconds until a quota returns, when the provider's own terminal error says so.
+
+    OpenCode Go reports ``"retryAfterMs": 535655000`` beside "resets in 6d 4h"; Antigravity says
+    "Resets in 143h1m4s". Anything else, or a wait longer than eight days, is treated as not said.
+    """
+    found = re.search(r'retryAfterMs\\*"?\s*:\s*(\d{1,12})', failure)
+    seconds = int(found.group(1)) / 1000 if found else None
+    if seconds is None:
+        spoken = re.search(r"resets?\s+in\s+((?:\d{1,4}\s*[dhms]\s*){1,4})", failure, re.I)
+        if spoken:
+            units = {"d": 86400, "h": 3600, "m": 60, "s": 1}
+            seconds = sum(int(number) * units[unit.lower()]
+                          for number, unit in re.findall(r"(\d{1,4})\s*([dhms])", spoken.group(1), re.I))
+    if seconds is None or not 0 < seconds <= RESET_CEILING_SECONDS:
+        return None
+    return max(60.0, float(seconds))
+
+
 def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
     """Parse only native terminal usage/errors, never tool text quoting a quota.
 
@@ -216,4 +238,5 @@ def result(kind: str, output: str, errors: str, exit_code: int | None) -> dict:
     quota = bool(re.search(r"quota|usage.limit|rate.limit|too many requests|\b429\b|allowance.exhaust",
                            failure, re.I))
     outcome = "quota" if quota else "success" if exit_code == 0 and terminal and not error_text else "failed"
-    return {"outcome": outcome, "usage": usage}
+    wait = reset_after(failure) if quota else None
+    return {"outcome": outcome, "usage": usage, **({"retry_after_seconds": wait} if wait else {})}
