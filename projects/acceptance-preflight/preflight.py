@@ -56,7 +56,7 @@ LIMITS = (
     "This counts what a reader would have to open. It does not predict how long a review takes.",
     "A whole-file read is a proxy: a new or deleted file, or a change touching a third of the file's lines.",
     "Links between files are textual mentions, not a dependency graph; a missing link can hide a real dependency.",
-    "Production files without a test are matched by file-name convention, not by test coverage.",
+    "Production files without a test are matched by file-name convention or by a changed test file naming them, not by test coverage.",
     "Documentation-only means every changed line is blank or a comment; a docstring body counts as code.",
 )
 
@@ -394,12 +394,13 @@ def analyse(changes, sizes, base_paths, limit: int, tree=None) -> dict:
 
     changed_paths = [info.change.path for info in files]
     changed_stems = {stem for stem in (test_stem(path) for path in changed_paths) if stem}
+    test_named = {target for info in files if info.is_test for target in info.mentions}
     production_without_test = []
     for info in files:
         if info.is_test or not is_code_path(info.change.path):
             continue
         stem = info.change.path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
-        if stem not in changed_stems:
+        if stem not in changed_stems and info.change.path not in test_named:
             production_without_test.append(info.change.path)
 
     documentation_only = [info.change.path for info in files if info.documentation_only]
@@ -448,8 +449,12 @@ def analyse(changes, sizes, base_paths, limit: int, tree=None) -> dict:
     for path in production_without_test:
         actions.append({"kind": "no-test",
                         "detail": f"{path} changed with no test file in this change"})
+    named_invisible = set()
     for info in files:
         for path in info.invisible:
+            if path in named_invisible:
+                continue
+            named_invisible.add(path)
             actions.append({"kind": "invisible",
                             "detail": f"{path} is in the tree but not in the change a reviewer sees"})
     for path in untracked:
