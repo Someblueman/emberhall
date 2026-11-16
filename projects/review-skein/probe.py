@@ -14,11 +14,20 @@ acceptance still needs a real browser and screen-reader try by a non-author.
 
 Usage:
     python3 projects/review-skein/probe.py audit PACKET [--json]
+    python3 projects/review-skein/probe.py audit EDITOR_PAGE --editor [--json]
     python3 projects/review-skein/probe.py transcript PACKET [--max-rows N]
+
+``--editor`` audits a generated offline comment-editor page instead of a
+static packet page: script is expected there, so the probe checks the page's
+Content Security Policy and script hashes, its skip link, live status region,
+noscript fallback and the accessible names of its static controls. Controls
+the script builds at runtime are not in the markup and cannot be checked.
 """
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import json
 import re
 import sys
@@ -232,11 +241,152 @@ def summarize(tree: Node) -> dict:
     }
 
 
-def audit(tree: Node, notes=()) -> list:
+def _parents(tree: Node) -> dict:
+    """Map each element's id() to its parent element."""
+    result: dict = {}
+
+    def visit(node: Node) -> None:
+        for child in node.children:
+            if isinstance(child, Node):
+                result[id(child)] = node
+                visit(child)
+
+    visit(tree)
+    return result
+
+
+def _control_name(node: Node, ids: dict, hidden_tree: set[int],
+                  parents: dict, labels: dict) -> str:
+    """The accessible name of a static form control, or ``""``."""
+    name = accessible_name(node, ids, hidden_tree)
+    if name:
+        return name
+    if node.tag == "button":
+        return text_of(node, hidden_tree)
+    if node.tag == "input" and node.attrs.get("type", "").strip().lower() in (
+            "button", "submit", "reset"):
+        return collapse(node.attrs.get("value", ""))
+    identifier = node.attrs.get("id", "").strip()
+    if identifier and identifier in labels:
+        return text_of(labels[identifier], hidden_tree)
+    parent = parents.get(id(node))
+    while parent is not None:
+        if parent.tag == "label":
+            return text_of(parent, hidden_tree)
+        parent = parents.get(id(parent))
+    return ""
+
+
+def _editor_findings(tree: Node, nodes: list, ids: dict,
+                     hidden_tree: set[int]) -> list:
+    """Findings specific to a generated offline editor page.
+
+    The editor legitimately runs one embedded script, so instead of forbidding
+    script the probe holds the page to its own stated boundary: a hash-only
+    ``script-src`` CSP that matches the script actually present, no network or
+    form submission, a skip link, a live status region, a noscript fallback,
+    and a name for every control present in the static markup.
+
+    A live status region only counts when a screen reader can reach it. A node
+    hidden by itself - a ``script``, ``style`` or ``template``, the ``hidden``
+    attribute, ``aria-hidden="true"``, an inline ``display:none`` or
+    ``visibility:hidden`` - or hidden by an ancestor announces nothing, so it
+    cannot satisfy the check.
+    """
+    findings = []
+    policies = [node for node in nodes if node.tag == "meta"
+                and node.attrs.get("http-equiv", "").strip().lower()
+                == "content-security-policy"]
+    directives: dict = {}
+    if not policies:
+        findings.append(Finding("editor-csp", "error",
+                                "the editor page has no Content-Security-Policy"))
+    else:
+        for part in policies[0].attrs.get("content", "").split(";"):
+            tokens = part.split()
+            if tokens:
+                directives.setdefault(tokens[0].lower(), tokens[1:])
+        for directive in ("default-src", "form-action"):
+            if directives.get(directive) != ["'none'"]:
+                findings.append(Finding(
+                    "editor-csp", "error",
+                    f"CSP {directive} is {directives.get(directive)!r}, not 'none'"))
+        sources = directives.get("script-src", [])
+        hashes = [token[len("'sha256-"):-1] for token in sources
+                  if token.startswith("'sha256-") and token.endswith("'")]
+        if not sources or len(hashes) != len(sources):
+            findings.append(Finding(
+                "editor-csp", "error",
+                "CSP script-src must list only 'sha256-...' hashes"))
+        for script in (node for node in nodes if node.tag == "script"):
+            kind = script.attrs.get("type", "").strip().lower()
+            if kind not in ("", "text/javascript", "application/javascript", "module"):
+                continue
+            if script.attrs.get("src", "").strip():
+                continue
+            raw = "".join(child for child in script.children if isinstance(child, str))
+            digest = base64.b64encode(
+                hashlib.sha256(raw.encode("utf-8")).digest()).decode("ascii")
+            if digest not in hashes:
+                findings.append(Finding(
+                    "editor-csp", "error",
+                    "an inline script's sha256 is not in the CSP script-src; "
+                    "the page was changed after generation or its CSP is stale"))
+
+    skips = [node for node in nodes if node.tag == "a"
+             and node.attrs.get("href", "").strip().startswith("#")
+             and text_of(node, hidden_tree).lower().startswith("skip")]
+    if not skips:
+        findings.append(Finding("editor-skip-link", "error",
+                                "the editor page has no skip link"))
+    live = [node for node in nodes
+            if id(node) not in hidden_tree
+            and (node.attrs.get("role", "").strip().lower() == "status"
+                 or node.attrs.get("aria-live", "").strip().lower()
+                 in ("polite", "assertive"))]
+    if not live:
+        findings.append(Finding("editor-status-region", "error",
+                                "the editor page has no live status region"))
+    fallbacks = [node for node in nodes if node.tag == "noscript"
+                 and text_of(node, hidden_tree)]
+    if not fallbacks:
+        findings.append(Finding("editor-noscript", "error",
+                                "the editor page has no noscript fallback text"))
+
+    labels = {}
+    for node in nodes:
+        if node.tag == "label":
+            target = node.attrs.get("for", "").strip()
+            if target and target not in labels:
+                labels[target] = node
+    parents = _parents(tree)
+    controls = [node for node in nodes
+                if node.tag in ("input", "select", "textarea", "button")
+                and id(node) not in hidden_tree
+                and not (node.tag == "input"
+                         and node.attrs.get("type", "").strip().lower() == "hidden")]
+    for control in controls:
+        if not _control_name(control, ids, hidden_tree, parents, labels):
+            identifier = control.attrs.get("id", "").strip()
+            findings.append(Finding(
+                "unlabelled-control", "error",
+                f"<{control.tag}{' id=' + repr(identifier) if identifier else ''}> "
+                "has no accessible name"))
+    findings.append(Finding(
+        "editor-dynamic-controls", "notice",
+        f"{len(controls)} static control(s) checked; controls the script builds "
+        "at runtime are not in the markup and were not checked"))
+    return findings
+
+
+def audit(tree: Node, notes=(), editor: bool = False) -> list:
     """Report what the markup shows, as a list of findings.
 
     ``error`` findings are defects a reader would trip over. ``notice`` findings
-    are worth a human glance but are not defects on their own.
+    are worth a human glance but are not defects on their own. With
+    ``editor=True`` the page is a generated offline editor page: script and
+    forms are expected, diff-table checks do not apply, and the editor checks
+    in ``_editor_findings`` run instead.
     """
     findings = list(notes)
     nodes = list(walk(tree))
@@ -265,10 +415,10 @@ def audit(tree: Node, notes=()) -> list:
                                     f"<html lang={language!r}> is not a plain language tag"))
 
     for node in nodes:
-        if node.tag == "script":
+        if node.tag == "script" and not editor:
             findings.append(Finding("script-element", "error",
                                     "<script> is not allowed in a static packet"))
-        if node.tag == "form":
+        if node.tag == "form" and not editor:
             findings.append(Finding("form-element", "error",
                                     "<form> is not allowed in a static packet"))
         for name in sorted(node.attrs):
@@ -306,7 +456,8 @@ def audit(tree: Node, notes=()) -> list:
             findings.append(Finding("empty-heading", "error", f"<{node.tag}> has no text"))
         previous = level
 
-    for number, table in enumerate([node for node in nodes if node.tag == "table"], 1):
+    for number, table in enumerate(
+            [] if editor else [node for node in nodes if node.tag == "table"], 1):
         captions = [child for child in table.children
                     if isinstance(child, Node) and child.tag == "caption"
                     and id(child) not in hidden_tree and text_of(child, hidden_tree)]
@@ -367,6 +518,8 @@ def audit(tree: Node, notes=()) -> list:
         if node.tag == "section" and not accessible_name(node, first, hidden_tree):
             findings.append(Finding("unlabelled-section", "notice",
                                     "<section> has no accessible name"))
+    if editor:
+        findings.extend(_editor_findings(tree, nodes, first, hidden_tree))
     return findings
 
 
@@ -509,6 +662,8 @@ def main(argv=None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     audit_command = commands.add_parser("audit", help="report accessibility and offline findings")
     audit_command.add_argument("packet", help="packet directory or standalone HTML file")
+    audit_command.add_argument("--editor", action="store_true",
+                               help="audit a generated offline editor page, not a static packet")
     audit_command.add_argument("--json", action="store_true", help="print the findings as JSON")
     transcript_command = commands.add_parser("transcript", help="print a linear reading transcript")
     transcript_command.add_argument("packet", help="packet directory or standalone HTML file")
@@ -524,7 +679,7 @@ def main(argv=None) -> int:
         print(f"probe: {error}", file=sys.stderr)
         return 2
     if arguments.command == "audit":
-        findings = audit(tree, notes)
+        findings = audit(tree, notes, editor=arguments.editor)
         errors = [finding for finding in findings if finding.severity == "error"]
         if arguments.json:
             print(json.dumps({

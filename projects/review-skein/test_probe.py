@@ -7,6 +7,7 @@ judgements rather than Skein's own renderer.
 """
 from __future__ import annotations
 
+import base64
 import contextlib
 import hashlib
 import io
@@ -16,6 +17,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import comment_editor
 import probe
 import skein
 
@@ -150,6 +152,112 @@ class ProbeAuditTest(unittest.TestCase):
         second = probe.audit(probe.parse(page))
         self.assertEqual([finding.code for finding in first],
                          [finding.code for finding in second])
+
+
+STATUS_ELEMENT = '<p id="editor-status" role="status" aria-live="polite">Loading comments…</p>'
+
+
+def editor_page(script: str = "var ready = true;") -> str:
+    """A minimal generated-editor shape whose CSP hash matches its script."""
+    digest = base64.b64encode(
+        hashlib.sha256(script.encode("utf-8")).digest()).decode("ascii")
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-{digest}'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Edit Skein comments</title></head>
+<body><a href="#comments">Skip to comments</a><main>
+<h1>Edit Skein comments</h1>
+<noscript>Use the skein.py comment commands instead.</noscript>
+{STATUS_ELEMENT}
+<button id="download" type="button">Download edits</button>
+<label for="search">Search comments</label><input id="search" type="text">
+<section id="comments" tabindex="-1" aria-label="Comment editor"></section>
+</main><script type="application/json" id="editor-data">{{}}</script><script>{script}</script>
+</body></html>
+"""
+
+
+class ProbeEditorAuditTest(unittest.TestCase):
+    """The probe's judgements about a generated offline editor page."""
+
+    def errors(self, page: str) -> list:
+        return sorted(finding.code for finding in probe.audit(
+            probe.parse(page), editor=True) if finding.severity == "error")
+
+    def test_clean_editor_page_has_no_errors(self):
+        self.assertEqual(self.errors(editor_page()), [])
+
+    def test_editor_page_still_errors_as_a_packet(self):
+        codes = [finding.code for finding in probe.audit(probe.parse(editor_page()))]
+        self.assertIn("script-element", codes)
+
+    def test_real_generated_editor_page_has_no_errors(self):
+        page = comment_editor.render_editor(skein.dumps_comments([]).encode("utf-8"))
+        self.assertEqual(self.errors(page), [])
+
+    def test_missing_csp_is_reported(self):
+        page = editor_page().replace("Content-Security-Policy", "X-Policy")
+        self.assertIn("editor-csp", self.errors(page))
+
+    def test_unsafe_inline_script_src_is_reported(self):
+        page = editor_page().replace("script-src 'sha256-",
+                                      "script-src 'unsafe-inline' 'sha256-")
+        self.assertIn("editor-csp", self.errors(page))
+
+    def test_tampered_script_hash_is_reported(self):
+        page = editor_page().replace("<script>var", "<script>var extra = 1; var")
+        self.assertIn("editor-csp", self.errors(page))
+
+    def test_missing_skip_link_status_and_noscript_are_reported(self):
+        self.assertIn("editor-skip-link", self.errors(
+            editor_page().replace("Skip to comments", "Comments")))
+        self.assertIn("editor-status-region", self.errors(
+            editor_page().replace(STATUS_ELEMENT, "")))
+        self.assertIn("editor-noscript", self.errors(
+            editor_page().replace("<noscript>", "<p hidden>").replace(
+                "</noscript>", "</p>")))
+
+    def test_unlabelled_control_is_reported(self):
+        page = editor_page().replace(
+            "</main>", '<input id="orphan" type="text"></main>')
+        self.assertIn("unlabelled-control", self.errors(page))
+
+    def test_wrapping_label_names_a_control(self):
+        page = editor_page().replace(
+            "</main>", '<label>Filter <input type="text"></label></main>')
+        self.assertEqual(self.errors(page), [])
+
+    def test_dynamic_controls_notice_is_always_present(self):
+        codes = [finding.code for finding in probe.audit(
+            probe.parse(editor_page()), editor=True)]
+        self.assertIn("editor-dynamic-controls", codes)
+
+    def test_editor_cli_exit_codes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            page = Path(directory) / "editor.html"
+            page.write_text(editor_page(), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(probe.main(["audit", str(page), "--editor"]), 0)
+                self.assertEqual(probe.main(["audit", str(page)]), 1)
+
+    def test_hidden_status_region_is_not_a_live_region(self):
+        """A live region a screen reader cannot reach must not pass the check."""
+        for replacement in (
+            '<div hidden role="status"></div>',
+            '<p aria-hidden="true" role="status"></p>',
+            '<p role="status" style="display:none"></p>',
+            '<p role="status" style="visibility:hidden"></p>',
+            '<div hidden><p role="status"></p></div>',
+            '<template><p role="status"></p></template>',
+        ):
+            page = editor_page().replace(STATUS_ELEMENT, replacement)
+            self.assertIn("editor-status-region", self.errors(page), replacement)
+
+    def test_script_cannot_stand_in_for_the_live_region(self):
+        """A script carrying role=status announces nothing, so it cannot pass."""
+        page = editor_page().replace(STATUS_ELEMENT, "").replace(
+            "<script>", '<script role="status">')
+        self.assertIn("editor-status-region", self.errors(page))
 
 
 class ProbeTranscriptTest(unittest.TestCase):
