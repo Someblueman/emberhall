@@ -27,11 +27,13 @@ non-author two-repository trial recorded in [EXCHANGE.md](EXCHANGE.md); and
 packet recovery with an honest workflow comparison in
 [RECOVERY.md](RECOVERY.md), plus the read-only annotated view in
 [REVIEW_VIEW.md](REVIEW_VIEW.md). The independent view-based try in
-[TRIAL.md](TRIAL.md) (a limited rendered-content inspection through the house
-viewer, with unobserved phone geometry recorded `NOT RUN / uncertain` when
-`null`/clipped and keyboard activation, 200 % zoom and speech recorded
-`NOT RUN`) is still open, so milestone 2 is not closed — markup tests and
-`probe.py` do not substitute for it.
+[TRIAL.md](TRIAL.md) is still open, so milestone 2 is not closed. The rebuilt
+house viewer can test real keys and measured phone/desktop layouts, including
+pages with their own content policy. A limited rendered-content and interaction
+inspection needs actual observed results; markup tests and `probe.py` do not
+substitute for it. Browser zoom and screen-reader speech remain `NOT RUN` under
+the viewer. Edited-state viewer attempts currently time out; the suspected
+unsaved-changes confirmation limit is recorded in [TRIAL_EDITOR.md](TRIAL_EDITOR.md).
 
 ## Export and read a packet
 
@@ -74,16 +76,13 @@ rather than colour alone, links get a visible focus outline, and tables scroll
 horizontally on narrow screens instead of being squeezed. Comment/resolution
 editing is available through the CLI below, the reader in
 [COMMENTS.md](COMMENTS.md) and the offline editor page in
-[EDITOR.md](EDITOR.md). One independent non-author view-based try remains
-required to close milestone 2 as a limited rendered-content inspection
-(steps 1–6 `PASS` on returned names and text only, no observed
-`wider_than_screen: true` overflow, intact phone-width rendered content
-meaning `phone_text_differs` `false` with a non-blank phone screenshot,
-unobserved phone geometry recorded `NOT RUN / uncertain` when
-`null`/clipped, and the skip link's unreturned target, keyboard
-activation, 200 % zoom and screen-reader speech recorded `NOT RUN`), or
-a full real-browser and screen-reader try — see [TRIAL.md](TRIAL.md);
-markup tests and `probe.py` do not establish that experience.
+[EDITOR.md](EDITOR.md). One independent non-author try remains
+required to close milestone 2. Use [TRIAL.md](TRIAL.md) for measured phone fit,
+real key observations and honest limits; use [TRIAL_EDITOR.md](TRIAL_EDITOR.md)
+for composition, editing and the exported-envelope roundtrip. An unknown target,
+unpictured control or unmeasured layout stays `NOT RUN` / `NOT RUN / uncertain`.
+A full accessibility try additionally requires actual browser zoom and speech;
+neither a DOM transcript nor source tests establish those experiences.
 
 ## Verify the carried Git bytes
 
@@ -222,12 +221,10 @@ viewer/editor, deterministic merge/carry/revise, the annotated packet view,
 packet recovery/rebuild and the example generator.
 Beyond tests, milestone 3's exchange has a recorded non-author two-repository
 trial ([EXCHANGE.md](EXCHANGE.md)), while milestone 2 still requires one
-independent non-author view-based try (limited rendered-content inspection
-through the house viewer, keeping unobserved phone geometry
-`NOT RUN / uncertain` and steps 8–10 plus real keyboard activation
-`NOT RUN`) or a full real-browser and screen-reader try
-([TRIAL.md](TRIAL.md)). The preferred packet for that try is the
-mixed-change page at `sample/milestone-2-mixed/review.html` (published at
+independent non-author view-based try of actual keys and measured layout,
+with browser zoom and speech kept `NOT RUN` when unavailable, or a full
+real-browser and screen-reader try ([TRIAL.md](TRIAL.md)). The preferred packet
+for that try is the mixed-change page at `sample/milestone-2-mixed/review.html` (published at
 `https://someblueman.github.io/emberhall/projects/review-skein/sample/milestone-2-mixed/review.html`,
 base `f730e964e18e0245862f09f7e0662ab14775e8bd`, head
 `7118f31b4d6d4ca429946929d95d9b3d6149f99a`); the older all-added sample
@@ -243,7 +240,7 @@ not people. A bundle can contain copyrighted or sensitive history, so share it
 only with intended reviewers. `git bundle` and static HTML do not make a hostile
 Git repository or packet safe; use a trusted local fixture for a first try.
 No viewer experience is claimed until the [TRIAL.md](TRIAL.md) try is actually
-performed and recorded; keyboard activation, 200 % zoom and screen-reader
-speech remain `NOT RUN` under the viewer, and unobserved phone-width geometry
-(`wider_than_screen` `null` / clipped phone image) remains
-`NOT RUN / uncertain`.
+performed and recorded. Only executed input with an observed outcome supplies
+keyboard evidence. Unmeasured phone geometry remains `NOT RUN / uncertain`;
+missing visual coverage remains uninspected, and browser zoom and screen-reader
+speech remain `NOT RUN` under the viewer.
