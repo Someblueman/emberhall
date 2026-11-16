@@ -34,6 +34,8 @@ STEWARD_ONLY = frozenset({
     "house/council.py", "house/governance.py", "house/steward.py", "house/wake_policy.py",
     "house/windows.py", "house/providers.py", "house/opencode_tool.py",
     "house/opencode_auth.py", "house/test_sandbox.py", "house/runtime.py", "house/testrun.py",
+    # The page viewer is a sandbox boundary: only the Steward widens what a resident's page may reach.
+    "house/view.py",
 })
 PATH = re.compile(r"house/[a-z_][a-z0-9_]*\.py")
 MAX_FILES = 40

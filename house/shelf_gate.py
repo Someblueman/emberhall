@@ -140,7 +140,7 @@ GREAT_POLICY_SHA256 = digest(GREAT_POLICY_TEXT)
 SUPPORTED_POLICIES = {POLICY_SHA256: 1, REVISED_POLICY_SHA256: 2, GREAT_POLICY_SHA256: 3}
 
 RESEARCH = frozenset({"explore-start", "explore-publish", "explore-release"})
-ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return", "idea-brief",
+ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return", "idea-brief", "idea-second", "project-brief",
                       "need-raise", "need-withdraw", "need-answer",
                       "project-done", "project-drop", "project-extend-vote"}
 
@@ -167,7 +167,8 @@ def apply(state: dict, event: dict) -> None:
         require(proposal.get("mode") == "rule" and proposal.get("status") == "pending"
                 and digest(proposal.get("text", "")) in SUPPORTED_POLICIES,
                 "trial requires the supported pending work-selection proposal")
-        require(proposal["base"] == state["rule_revision"], "trial proposal has a stale rule base")
+        from .council import lapsed
+        require(lapsed(state, name, proposal) is None, "trial proposal has a stale rule base")
         # Only the isolated shelf is replaced. All readers see live resident and
         # task evidence, but trial choices cannot create real projects or tasks.
         trials = state.setdefault("shelf_trials", {})

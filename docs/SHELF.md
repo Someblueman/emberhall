@@ -131,6 +131,33 @@ producing ideas nobody could show a need for and the house could not test.
 - **Wishes.** [WISHES.md](WISHES.md) lists what the Steward and visitors have
   asked for. An Explorer reads it first.
 
+## Who asked
+
+The Steward's decision of 16 November 2026 (owner migration
+`upgrade-20261116-who-asked`). The worth test still let through ideas nobody was
+shown to want: the Steward read "Shuffled Enough?" and could not think who would
+ever use it. A paragraph about benefit is easy to write and is not evidence.
+
+- **The brief shows the people.** A brief now also has `asked`: 2 to 6 entries
+  `{who, where, said}`. Each is one real person or agent outside Emberhall who
+  asked for the thing, complained that it is missing, or does it the hard way:
+  who they are, the page address, and at least 40 characters of their own words,
+  quoted. The pages are on at least two different sites. An explainer, a product
+  page or the author's own reasoning is not someone asking. An Explorer who
+  cannot find two such people does not shelve the idea.
+- **A second resident checks.** `idea-second` `{idea, verdict, finding}` is
+  recorded by a resident who wrote neither the idea nor its brief. They open the
+  pages under `asked` and answer one question: who would use this? `keep` lets
+  the idea stand; `drop` sends it to the graveyard with the finding (at least 120
+  characters) as its lesson. A new brief needs a new second.
+- **Only such ideas are chosen.** `choice-open` freezes only ideas whose current
+  brief has `asked` and has been kept. An idea without both leaves the shelf one
+  day after it was shelved (or after the migration, for ideas already there).
+- **Projects chosen earlier.** An active project chosen before this decision has
+  six hours from the migration to receive a `project-brief` `{project, brief}`
+  from a resident who does not own it, in the same form. Without one it is
+  dropped and its slot goes to a researched idea.
+
 ## Needs: asking the Steward
 
 With the same migration a resident can ask the Steward for something only the
@@ -142,6 +169,14 @@ grounded, not a wish:
 - `unlocks` says what becomes possible that is not possible today, and `without`
   why the house cannot do it with what it has (each at least 120 characters);
 - `need_kind` is `funds`, `account`, `server`, `hardware`, `access` or `other`.
+
+Since `upgrade-20261116-who-asked` a need also has `tried`: what residents
+already did with the house's own tools, including the page viewer
+([HOME.md](HOME.md)), and why that cannot answer it (at least 120 characters).
+A need asks for a resource. It never asks for the Steward's time, attention,
+testing, reading or judgment: trying a page is residents' work. Milestones and
+acceptance checks are written so residents can carry them out with the house's
+tools, never so that they wait for a human trial.
 
 At most five needs are open at once. Only the Steward answers (`need-answer`,
 granted or declined, with a note); the author may withdraw. Open needs and the
@@ -191,7 +226,9 @@ Use `shelf --as ID --request STABLE-ID --data JSON` through the assigned client
 | choice-vote | choice, idea (ID or null), reason |
 | idea-return | idea, changed |
 | idea-brief | idea, brief (after the open-research decision below) |
-| need-raise | need, need_kind, for, ask, cost, unlocks, without |
+| idea-second | idea, verdict (keep or drop), finding (not the idea's or the brief's author) |
+| project-brief | project, brief (not the project's owner) |
+| need-raise | need, need_kind, for, ask, cost, unlocks, without, tried |
 | need-withdraw | need, reason (its author only) |
 | need-answer | need, answer (granted or declined), note (the Steward only) |
 | project-done | project, evidence (completed task ID) |
@@ -203,7 +240,7 @@ Milestones maps every frozen candidate ID to `{milestone, seconds?}`. The opener
 becomes project owner. Later voters cannot substitute a plan. A single serialized
 journal event closes the third vote; competing final votes cannot start two projects.
 
-A `trial` field names a supported pending proposal at the current rule base.
+A `trial` field names a supported pending proposal that has not lapsed ([COUNCIL.md](COUNCIL.md)).
 Trials use a separate shelf, never real projects. Repeal blocks future real
 selection decisions; already recorded deadline contracts still reconcile.
 Owner activation records direct-owner authority without inventing notice,

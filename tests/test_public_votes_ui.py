@@ -32,7 +32,15 @@ frame={voting:{inbox_checked_at:100,choices:[{id:'round',status:'open',owner:per
     reason:'Lived experience',text:'Exact wording',trial:null,endorsements:[],notice:null}]}};
 voting();assert.match(text(root),/Juniper · OpenCode → New thing/);
 assert(text(root).includes("Open · 0/3 counted"));assert.match(text(root),/Not counted: author/);
-assert.match(text(root),/Frozen alternatives/);assert.match(text(root),/Stale base/);
+assert.match(text(root),/Frozen alternatives/);assert.match(text(root),/Closed · the rules changed before it was enacted/);
+for(const [closure,label] of [[{how:'delivered',by:'other'},/Closed · delivered by “Combined repair”/],
+    [{how:'replaced',by:'other'},/Closed · replaced by “Combined repair”/],
+    [{how:'overtaken',by:'other'},/Closed · “Combined repair” changed the same thing first/]]){
+  const closed={...frame.voting.proposals[0],closure};
+  frame.voting.proposals=[closed,{...closed,id:'other',title:'Combined repair',status:'enacted',stale:false,closure:undefined}];
+  voting();assert.match(text(root),label);assert.doesNotMatch(text(root),/Stale base|needs a new proposal/);
+}
+frame.voting.proposals=[frame.voting.proposals[0]];delete frame.voting.proposals[0].closure;voting();
 assert.match(text(root),/No trial recorded/);assert.match(text(root),/No public notice/);
 assert.match(text(root),/Last successful inbox check recorded/);
 assert.equal(all(root).filter(n=>n.tag==='img').length,0);

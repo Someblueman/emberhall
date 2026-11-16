@@ -157,13 +157,90 @@ WORTH_GUIDE = (
     "Do not write a flattering brief for a weak idea. ")
 
 
+# Who asked (owner migration shelf.WHO_ASKED): a brief shows the people, a second resident checks them.
+ASKED_GUIDE = (
+    "The brief also has asked: 2 to 6 entries, each {who, where, said}. Each is one real person or agent "
+    "outside Emberhall who asked for this, complained that it is missing, or is doing it the hard way: who "
+    "they are in a few words, the exact page address where they said it, and at least 40 characters of "
+    "their own words, quoted, not paraphrased. The pages must be on at least two different sites. An "
+    "explainer, a product page, a paper showing the thing is possible, or your own reasoning about who "
+    "might like it is not someone asking. If you cannot find two such people, the idea is not ready: do "
+    "not shelve it, and say what you looked for. A second resident will open those pages. ")
+
+
+def asked_prompt(state: dict, resident: str) -> str:
+    """The who-asked test, the page viewer and what a need may ask (owner migration shelf.WHO_ASKED)."""
+    from . import shelf as shelf_model
+    if shelf_model.asked_since(state) is None:
+        return ""
+    shelf = state.get("shelf", {})
+    ideas, now = shelf.get("ideas", {}), state["at"]
+    def hours(due: float) -> str:
+        return f"{max(0, round((due - now) / 3600))} h left"
+    text = ("WHO ASKED (Steward, 16 November, docs/STEWARD_ORDERS.md): the Steward read a researched idea and "
+            "could not think who would ever use it. A paragraph about benefit is not evidence. From now on an "
+            "idea or project stands only when its brief quotes real people outside Emberhall asking for it, and "
+            "a resident who wrote neither the idea nor the brief has opened those pages and agreed. Only such "
+            "ideas can enter a choice; the rest leave the shelf after a day.\n")
+    owned, briefable = [], []
+    for key, project in shelf.get("projects", {}).items():
+        due = shelf_model.project_due(state, project)
+        if due is not None:
+            title = ideas[project["idea"]]["title"]
+            (owned if project["owner"] == resident else briefable).append(f"{key}: {title} ({hours(due)})")
+    shape, guide = brief_guide(state)
+    if briefable:
+        text += ("DO THIS FIRST, before any other work this run: these active projects were chosen before the "
+                 "test and are dropped unless a resident who does not own them records a worth brief in time: "
+                 + "; ".join(briefable) + ". Read the project and what it has built, research who actually asks "
+                 "for such a thing, then record shelf kind project-brief: "
+                 '{"kind":"project-brief","project":ID,"brief":' + shape + "}. " + guide +
+                 "If your research finds nobody asking, record no brief, say at the Hearth what you found and "
+                 "let the project drop; that is an honest result, and its slot goes to a researched idea.\n")
+    if owned:
+        text += ("You own " + "; ".join(owned) + ". You cannot write its worth brief yourself. Ask another "
+                 "resident through a life help request now, and keep building meanwhile.\n")
+    second = [f"{key}: {idea['title']}" for key, idea in ideas.items()
+              if idea["status"] == "shelved" and "asked" in idea.get("brief", {})
+              and not shelf_model.grounded(state, idea)
+              and resident not in {idea["author"], idea["brief"]["author"]}]
+    if second:
+        text += ("Shelved ideas waiting for a second resident you may be: " + "; ".join(second[:8]) + ". For one "
+                 "of them open the pages its brief lists under asked and answer plainly: who would use this, "
+                 "and did these people really ask for it? Record shelf kind idea-second: "
+                 '{"kind":"idea-second","idea":ID,"verdict":"keep|drop","finding":...} with a finding of at '
+                 "least 120 characters saying what you opened and what you saw. Keep only an idea you would "
+                 "defend to the Steward in one sentence. Drop sends it to the graveyard with your finding as "
+                 "its lesson, and is a good result. A few minutes each; prefer ideas from a different kind "
+                 "of mind than yours.\n")
+    text += ("PAGE VIEWER: you can now see a page you built. Through your fixed channel, `view PATH --as "
+             f"{resident} --request NEW-ID` (optionally `--steps FILE`) opens one .html file in your room in "
+             "the house's own browser with the network refused, at phone and desktop widths. It returns the "
+             "visible text, headings, tab order, images without alt text, unlabelled controls, script errors "
+             "and whether the page is wider than the screen, and saves two screenshots under "
+             ".house-mailbox/views/ that you can open and look at. A steps file is a JSON list of up to 30 "
+             'steps: {"click":SELECTOR}, {"fill":[SELECTOR,TEXT]}, {"focus":SELECTOR}, {"wait":MILLISECONDS}. '
+             "Use a new request ID for each look. Trying a page is residents' work: view it yourself, fix "
+             "what you see, and have another resident view it for a milestone review.\n"
+             "NEEDS, tightened: a need asks the Steward for a resource (funds, an account, a server, "
+             "hardware, access to a service). It never asks for the Steward's time, attention, testing, "
+             "reading or judgment: do not ask the Steward to open, try or approve your work. need-raise now "
+             "also takes tried: what residents already did with the house's own tools, including the page "
+             "viewer, and why that cannot answer it. Write milestones and acceptance checks that residents "
+             "can carry out with the house's tools; never one that waits for a human trial.\n")
+    return text
+
+
 def brief_guide(state: dict) -> tuple[str, str]:
     """The brief's JSON shape and its guide under the rules now in force."""
     from . import shelf as shelf_model
     if shelf_model.worth_since(state) is None:
         return '{"audience":...,"exists":...,"first_version":...,"risks":...}', BRIEF_GUIDE
-    return ('{"field":"software|design|science","worth":"useful|beautiful|enabling","benefit":...,'
-            '"interest":...,"exists":...,"first_version":...,"check":...}'), WORTH_GUIDE
+    shape = ('{"field":"software|design|science","worth":"useful|beautiful|enabling","benefit":...,'
+             '"interest":...,"exists":...,"first_version":...,"check":...')
+    if shelf_model.asked_since(state) is None:
+        return shape + "}", WORTH_GUIDE
+    return shape + ',"asked":[{"who":...,"where":URL,"said":...},...]}', WORTH_GUIDE + ASKED_GUIDE
 HOME_FOCUS_GAP_SECONDS = 1800
 
 
@@ -200,7 +277,10 @@ def focus_prompt(state: dict, focus: str) -> str:
         shape, guide = brief_guide(state)
         return head + (
             "deepen the idea shelf. By the Steward's decision a shelved idea needs a current research brief, and "
-            "one with none after two days moves to the graveyard. Shelved ideas with no current brief: "
+            "one with none after two days moves to the graveyard. "
+            + ("Since 16 November the brief must also show who asked, and a second resident must keep the "
+               "idea, within a day. " if shelf_model.asked_since(state) is not None else "") +
+            "Shelved ideas with no current brief: "
             + (listing or "none") + ". "
             "Pick one (the soonest to expire unless another is clearly more promising), spend most of this run "
             "researching it under the owner's web safeguards, then record it with shelf kind idea-brief: "
@@ -613,6 +693,7 @@ class Coordinator:
         if course.enabled(state) and not staffing.helper(assigned):
             assignment += course_prompt(state, assigned)
             assignment += deep_prompt(state, assigned)
+            assignment += asked_prompt(state, resident)
             if self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
                 assignment += focus_prompt(state, self.focus)
         from .body import PUBLIC_HEARTH

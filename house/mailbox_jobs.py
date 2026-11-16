@@ -247,7 +247,8 @@ def lane(record: Record, item: dict) -> str:
     args = parse(item["argv"], record.root, workspace_path(record, item["run"]), item["resident"])
     if args.command not in ACTIONS:
         raise ValueError("not a trusted action command")
-    return "inspection" if args.command == "integrate" and args.inspect else "worker"
+    # Looking at a page changes nothing, so it shares the read-only lane and never waits behind an integration.
+    return "inspection" if args.command == "view" or (args.command == "integrate" and args.inspect) else "worker"
 
 
 def tick(record: Record) -> None:

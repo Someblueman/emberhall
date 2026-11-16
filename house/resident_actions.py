@@ -9,7 +9,8 @@ from pathlib import Path
 from .files import artifact, workspace_path
 from .record import Record
 
-ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint", "review-complete"})
+ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint", "review-complete",
+                     "view"})
 
 
 def parser():
@@ -26,6 +27,10 @@ def parser():
             mode.add_argument("--inspect", action="store_true")
             mode.add_argument("--reject")
             command.add_argument("--path")
+        elif name == "view":
+            # See one page of your own room rendered (house/view.py); no journal event.
+            command.add_argument("path")
+            command.add_argument("--steps")
         elif name.startswith("runtime-") or name in {"checkpoint", "review-complete"}:
             command.add_argument("--task", required=True)
             if name in {"runtime-test", "checkpoint", "review-complete"}:
@@ -59,6 +64,8 @@ def parse(argv: list[str], resident: str):
 def known_result(record: Record, resident: str, run: str, argv: list[str], requestid: str):
     """Recognize accepted effects after a lost worker reply; never execute here."""
     args = parse(argv, resident)
+    if args.command == "view":
+        return None
     if args.command == "checkpoint":
         from .checkpoint import known_result as checkpoint_result
         return checkpoint_result(record, resident, run, args.task, args.token, requestid)
@@ -100,6 +107,9 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
     previous = known_result(record, resident, run, argv, requestid)
     if previous is not None:
         return previous
+    if args.command == "view":
+        from .view import render
+        return render(workspace, args.path, args.steps)
     if args.command == "checkpoint":
         from .checkpoint import create
         return create(record, workspace, resident, run, args.task, args.token, requestid)

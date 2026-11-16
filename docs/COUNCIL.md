@@ -47,6 +47,18 @@ Steward repeal one without erasing later unrelated rules. Process changes cannot
 use this path; they still require the Steward. Historical whole-charter proposals
 and signature events remain in the journal and cannot bypass this process.
 
+**What closes a pending proposal.** Every enactment changes the rule revision.
+Until 16 November 2026 that alone closed every other pending proposal, whatever
+it was about, so finished proposals were lost to unrelated enactments and nobody
+re-proposed them. Since the owner migration `upgrade-20261116-who-asked` an
+enactment or repeal closes only pending proposals about the same thing: a rule
+closes rules, a wake prompt closes wake prompts, a floor closes floors, and a
+renovation closes renovations that replace one of the same files. Everything
+else keeps its trial, endorsements and notice and may still be enacted.
+Proposals that had already lapsed under the old rule stay closed, except
+`wake-brief-build-004`, which the Steward restored. A closed proposal asks
+nothing of anyone; the public page says what closed it.
+
 A lost public-post receipt is recovered by matching the exact notice marker and
 body before any retry. A previously accepted owner decision remains effective
 when absent from later fetches. Changed decision text fails closed. A veto fetched

@@ -22,6 +22,11 @@ WAIT_SECONDS = 86400
 # suite, so their veto window is an hour, not a day (owner upgrade of 15 Nov).
 RENOVATION_WAIT_SECONDS = 3600
 QUICK_RENOVATIONS = "upgrade-20261115-quick-renovations"
+# An enactment closes only pending proposals about the same thing (owner
+# upgrade of 16 Nov). wake-brief-build-004 had its trial, endorsements and
+# notice and was closed twice by unrelated enactments; the Steward restored it.
+SCOPED_LAPSE = "upgrade-20261116-who-asked"
+RESTORED = frozenset({"wake-brief-build-004"})
 
 
 def veto_window(state: dict, proposal: dict) -> int:
@@ -93,8 +98,60 @@ def pending(state: dict, data: dict) -> dict:
     require(proposal is not None and proposal.get("mode") in MODES | {"renovation"},
             "not a council rule proposal")
     require(proposal["status"] == "pending", "proposal is not pending")
-    require(proposal["base"] == state["rule_revision"], "stale rule revision")
+    closed = lapsed(state, data["proposal"], proposal)
+    require(closed is None, "stale rule revision" if closed == "" else
+            f"proposal lapsed: {closed} changed the same thing after it was proposed")
     return proposal
+
+
+def kind(item: dict) -> str:
+    return item.get("mode") or "rule"
+
+
+def touched(state: dict, proposal: dict, until: float | None = None, same: bool = False) -> str | None:
+    """Name the first enactment or repeal recorded after the proposal was made.
+
+    With same=True only a change to the same thing counts: a rule for a rule, a
+    wake prompt for a wake prompt, a floor for a floor, and for a renovation
+    another renovation that replaces one of the same files.
+    """
+    council = state.get("council", {})
+    since = proposal.get("proposed_at", 0)
+    files = set(proposal.get("renovation", {}).get("files", {}))
+    def counts(moment: object) -> bool:
+        return moment is not None and moment > since and (until is None or moment <= until)
+    for name, rule in council.get("rules", {}).items():
+        if not (counts(rule.get("enacted_at")) or counts(rule.get("repealed_at"))):
+            continue
+        if same and kind(rule) != kind(proposal):
+            continue
+        if same and kind(rule) == "renovation" and not files & set(rule.get("renovation", {}).get("files", {})):
+            continue
+        return name
+    for decision in council.get("decisions", {}).values():
+        if (decision["target"] == "founding-charter" and decision["outcome"] == "repealed"
+                and counts(decision["recorded_at"]) and (not same or kind(proposal) == "rule")):
+            return "founding-charter"
+    return None
+
+
+def lapsed(state: dict, name: str, proposal: dict) -> str | None:
+    """None while a pending proposal may still proceed, else what closed it.
+
+    Every enactment changes the rule revision. Before the scoped rule that
+    alone closed every other pending proposal, whatever it was about. Since
+    then only a change to the same thing closes one. Proposals that had already
+    lapsed under the old rule stay closed, except those the Steward restored.
+    An empty string means the old rule closed it.
+    """
+    if proposal.get("base") == state["rule_revision"]:
+        return None
+    scoped = state.get("maintenance", {}).get("migrations", {}).get(SCOPED_LAPSE)
+    if scoped is None:
+        return ""
+    if name not in RESTORED and touched(state, proposal, until=scoped["at"]) is not None:
+        return ""
+    return touched(state, proposal, same=True)
 
 
 def render(state: dict, event: dict, target: str) -> None:

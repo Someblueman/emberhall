@@ -204,7 +204,7 @@ const wakeSummary = all(root).find(n => n.id === "vote-rule-prop-wake-secret").c
 assert.match(text(wakeSummary), /Wake prompt/);
 assert.match(text(wakeSummary), /Notice active/);
 const staleSummary = all(root).find(n => n.id === "vote-rule-prop-stale-secret").children[0];
-assert.match(text(staleSummary), /Stale base/);
+assert.match(text(staleSummary), /Closed/);
 '''
         result = subprocess.run(
             ["node", "-e", script, str(HOUSE_JS)],

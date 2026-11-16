@@ -10,7 +10,7 @@ import re
 import subprocess
 import time
 
-from .council import veto_window
+from .council import lapsed, veto_window
 from .model import apply_event
 from .record import Record
 from .work_metrics import public_observation
@@ -78,6 +78,31 @@ def _project_view(key: str, shelf: dict, project: dict) -> dict:
     return item
 
 
+def _brief_view(brief: dict) -> dict:
+    from . import shelf as shelf_model
+    item = {k: label(brief[k], 2000) for k in (
+        *shelf_model.BRIEF_FIELDS, *shelf_model.WORTH_FIELDS, "field", "worth", "author") if k in brief}
+    if "asked" in brief:
+        item["asked"] = [{k: label(entry[k], 600) for k in ("who", "where", "said")} for entry in brief["asked"]]
+    return item
+
+
+def _closure(state: dict, key: str, proposal: dict, closed: str) -> dict:
+    """Say plainly what became of a pending proposal that can no longer proceed."""
+    since = proposal.get("proposed_at", 0)
+    files = set(proposal.get("renovation", {}).get("files", {}))
+    for name, rule in state.get("council", {}).get("rules", {}).items():
+        if (files and files <= set(rule.get("renovation", {}).get("files", {}))
+                and rule["status"] in {"approved", "installed"} and rule["enacted_at"] > since):
+            return {"how": "delivered", "by": name}
+    stem, number = re.fullmatch(r"(.*?)(?:-(\d+))?", key).groups()
+    later = [name for name in state["proposals"] if (match := re.fullmatch(re.escape(stem) + r"-(\d+)", name))
+             and int(match.group(1)) > int(number or 0)]
+    if later:
+        return {"how": "replaced", "by": max(later, key=lambda name: int(name.rsplit("-", 1)[1]))}
+    return {"how": "overtaken", "by": closed} if closed else {"how": "lapsed", "by": None}
+
+
 def _candidate_view(shelf: dict, choice: dict, idea: str, person) -> dict:
     """Format one frozen-shelf alternative, flattening multi-stage plans."""
     plan = choice["milestones"][idea]
@@ -102,6 +127,7 @@ def shelf_view(state: dict) -> dict:
     """Public real work only; never publish Explorer tokens or isolated trials."""
     from . import shelf as shelf_model, shelf_gate
     shelf = state.get("shelf", {})
+    asked = shelf_model.asked_since(state) is not None
     ideas = []
     for key, idea in shelf.get("ideas", {}).items():
         history = []
@@ -117,12 +143,23 @@ def shelf_view(state: dict) -> dict:
         ideas.append({"id": key, **{k: label(idea[k], 2000) for k in
             ("title", "what", "why", "first_step", "author", "status")},
             **({"scale": label(idea["scale"], 20)} if "scale" in idea else {}),
-            **({"brief": {k: label(idea["brief"][k], 2000) for k in (
-                    *shelf_model.BRIEF_FIELDS, *shelf_model.WORTH_FIELDS, "field", "worth", "author")
-                    if k in idea["brief"]}} if "brief" in idea else {}),
+            **({"brief": _brief_view(idea["brief"])} if "brief" in idea else {}),
             **({"brief_due": due} if due is not None else {}),
+            **({"second": {"author": label(idea["second"]["author"], 200),
+                           "finding": label(idea["second"]["finding"], 2000), "at": idea["second"]["at"]}}
+               if asked and "second" in idea and idea["second"]["brief"] == idea.get("brief", {}).get("sequence") else {}),
+            **({"grounded": shelf_model.grounded(state, idea)} if asked and idea["status"] == "shelved" else {}),
             "sources": list(idea["sources"]), "losses": idea["losses"], "history": history})
-    projects = [_project_view(key, shelf, p) for key, p in shelf.get("projects", {}).items()]
+    projects = []
+    for key, project in shelf.get("projects", {}).items():
+        item = _project_view(key, shelf, project)
+        if asked:
+            if "brief" in project:
+                item["brief"] = _brief_view(project["brief"])
+            brief_due = shelf_model.project_due(state, project)
+            if brief_due is not None:
+                item["brief_due"] = brief_due
+        projects.append(item)
     expedition = shelf.get("rounds", {}).get(shelf.get("explorer"))
     policy = shelf_gate.policy(state)
     view = {"enabled": shelf_gate.enabled(state), "policy": policy,
@@ -136,7 +173,7 @@ def shelf_view(state: dict) -> dict:
         titles |= {key: titles.get(project["idea"], key) for key, project in shelf.get("projects", {}).items()}
         needs = [{"id": key, "for_title": label(titles.get(need["for"], need["for"]), 200),
                   **{k: label(need[k], 2000) for k in ("author", "status", "kind", "for", "ask", "cost",
-                                                       "unlocks", "without", "note") if k in need},
+                                                       "unlocks", "without", "tried", "note") if k in need},
                   "raised_at": need["raised_at"], **({"closed_at": need["closed_at"]} if "closed_at" in need else {})}
                  for key, need in shelf["needs"].items()]
         view["needs"] = [need for need in needs if need["status"] == "open"] + [
@@ -178,10 +215,12 @@ def voting_view(state: dict, identities: dict, event_times: dict, origins: dict 
         notice = proposal.get("notice")
         trial = proposal.get("trial")
         rule = state.get("council", {}).get("rules", {}).get(key, {})
+        closed = lapsed(state, key, proposal) if proposal["status"] == "pending" else None
         proposals.append({"id": key, "title": label(proposal.get("title", key), 200),
             "mode": proposal.get("mode", "legacy"), "author": person(proposal.get("author", origins.get(key, {}).get("actor", "unrecorded"))),
             "status": proposal["status"], "rule_status": rule.get("status"),
-            "stale": proposal["status"] == "pending" and proposal["base"] != state["rule_revision"],
+            "stale": closed is not None,
+            **({"closure": _closure(state, key, proposal, closed)} if closed is not None else {}),
             "reason": label(proposal.get("reason", ""), 20000),
             "text": proposal["text"][:100000],
             "proposed_at": proposal.get("proposed_at", origins.get(key, {}).get("at")),

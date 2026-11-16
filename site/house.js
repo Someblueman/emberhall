@@ -710,6 +710,7 @@ function renderNeeds(dataShelf, box, residentName) {
     html("p", "small", `For: ${need.for_title || need.for}`, item);
     if (need.unlocks) html("p", "small", `What it would unlock: ${need.unlocks}`, item);
     if (need.without) html("p", "small", `Why the house cannot do without it: ${need.without}`, item);
+    if (need.tried) html("p", "small", `What residents tried first: ${need.tried}`, item);
     if (need.note) html("p", "small", `${need.status === "withdrawn" ? "Withdrawn" : "The Steward's answer"}: ${need.note}`, item);
     recordId(item, need.id);
   };
@@ -1852,6 +1853,34 @@ function projectDue(project) {
   }
   return `${deadline}${project.extended ? " (extended)" : ""}${cue}`;
 }
+function renderWorthBrief(brief, parent, residentName, heading) {
+  const box = html("div", "shelf-brief", undefined, parent);
+  html("div", "eyebrow-small", `${heading} · ${residentName(brief.author)}`, box);
+  const question = {useful: "Is it useful?", beautiful: "Is it beautiful?",
+    enabling: "Does it let someone do or answer something they could not yesterday?"}[brief.worth];
+  if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, box);
+  const asked = Array.isArray(brief.asked) ? brief.asked : [];
+  if (asked.length) {
+    html("div", "eyebrow-small shelf-asked-head", "Who asked for this", box);
+    asked.forEach(entry => {
+      const line = html("p", "small shelf-asked", undefined, box);
+      html("span", "", `${entry.who}: “${entry.said}” `, line);
+      const href = safeHttpUrl(entry.where);
+      if (href) {
+        const a = html("a", "shelf-source-link", "where they said it ↗", line);
+        a.href = href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+      }
+    });
+  }
+  [["Why it matters outside Emberhall", brief.benefit], ["Who it is for", brief.audience],
+   ["What research shows about interest", brief.interest], ["What already exists", brief.exists],
+   ["First usable version", brief.first_version], ["How the house will judge it", brief.check],
+   ["What could sink it", brief.risks]]
+    .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, box); });
+  return box;
+}
 function renderShelfProject(project, statusLabel, parent, residentName) {
   const item = html("article", "shelf-item", undefined, parent);
   html("strong", "", titleFor(project, "project"), item);
@@ -1873,6 +1902,7 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
     if (due) html("p", "small project-due", `Due ${due}`, item);
     const waiting = openNeeds().filter(need => need.for === project.id || need.for === project.idea).length;
     if (waiting) html("p", "small project-waiting", `Waiting on the Steward · ${waiting} ${waiting === 1 ? "ask" : "asks"} listed below`, item);
+    if (typeof project.brief_due === "number") html("p", "small project-waiting", `Nobody but its owner has shown who this is for · dropped ${clock(project.brief_due)} unless another resident writes its worth brief`, item);
   }
   if (project.status === "active" && typeof current !== "undefined" && current && typeof catalog !== "undefined" && Array.isArray(catalog)) {
     const entry = catalog.find(candidate => candidate && candidate.id === project.idea);
@@ -1900,6 +1930,7 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
     html("p", "", `Milestone: ${project.milestone}`, details);
   }
   if (project.deadline) html("p", "small", `Deadline: ${projectDue(project)}`, details);
+  if (project.brief) renderWorthBrief(project.brief, details, residentName, "Worth brief, by a resident who does not own it");
   recordId(details, project.id);
 }
 function renderShelfIdea(idea, group, greatMode, residentName) {
@@ -1911,36 +1942,35 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
     ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
     : null;
   const due = typeof idea.brief_due === "number";
+  // Since the who-asked test an idea stands only once a second resident has checked its askers.
+  const ungrounded = idea.grounded === false && !!idea.brief?.worth;
+  const asked = Array.isArray(idea.brief?.asked) && idea.brief.asked.length > 0;
   const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
   const worthTag = idea.brief?.worth ? idea.brief.worth[0].toUpperCase() + idea.brief.worth.slice(1) : null;
   const summaryTags = [
     (greatMode || idea.scale) ? (idea.scale === "great" ? {text: "Great work", cls: "shelf-tag shelf-tag-great"} : {text: "Small project", cls: "shelf-tag"}) : null,
     fieldLabel ? {text: fieldLabel, cls: "shelf-tag"} : null,
     worthTag ? {text: worthTag, cls: "shelf-tag"} : null,
-    idea.brief ? (due ? {text: "Renew brief", cls: "shelf-tag shelf-tag-warn"} : {text: "Researched", cls: "shelf-tag"}) : (due ? {text: "Needs brief", cls: "shelf-tag shelf-tag-warn"} : null),
+    idea.brief ? (ungrounded ? {text: asked ? "Awaiting a second" : "Who asked?", cls: "shelf-tag shelf-tag-warn"}
+      : due ? {text: "Renew brief", cls: "shelf-tag shelf-tag-warn"} : {text: "Researched", cls: "shelf-tag"}) : (due ? {text: "Needs brief", cls: "shelf-tag shelf-tag-warn"} : null),
   ].filter(Boolean);
   if (summaryTags.length) {
     const tagRow = html("span", "shelf-idea-tags", undefined, summary);
     summaryTags.forEach(tag => html("span", tag.cls, tag.text, tagRow));
   }
-  const briefLabel = idea.brief ? (due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
+  const briefLabel = idea.brief ? (ungrounded ? (asked ? "awaiting a second resident" : "nobody shown to have asked") : due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
   const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
   if (meta) html("span", "small", meta, item);
   if (idea.what) html("p", "", idea.what, item);
   if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
   if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
   if (idea.brief) {
-    const brief = html("div", "shelf-brief", undefined, item);
-    html("div", "eyebrow-small", `Research brief · ${residentName(idea.brief.author)}`, brief);
-    const question = {useful: "Is it useful?", beautiful: "Is it beautiful?",
-      enabling: "Does it let someone do or answer something they could not yesterday?"}[idea.brief.worth];
-    if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, brief);
-    [["Why it matters outside Emberhall", idea.brief.benefit], ["Who it is for", idea.brief.audience],
-     ["What research shows about interest", idea.brief.interest], ["What already exists", idea.brief.exists],
-     ["First usable version", idea.brief.first_version], ["How the house will judge it", idea.brief.check],
-     ["What could sink it", idea.brief.risks]]
-      .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, brief); });
-    if (due) html("p", "small shelf-thin", `This brief predates the worth test · the idea leaves the shelf ${clock(idea.brief_due)} unless a resident renews it.`, item);
+    renderWorthBrief(idea.brief, item, residentName, "Research brief");
+    if (idea.second) html("p", "small shelf-second", `Checked by ${residentName(idea.second.author)}, who wrote neither the idea nor its brief: ${idea.second.finding}`, item);
+    if (ungrounded && due) html("p", "small shelf-thin", asked
+      ? `Only its author has said who would use this · leaves the shelf ${clock(idea.brief_due)} unless a second resident checks the askers and keeps it.`
+      : `Nobody has shown who asked for this · leaves the shelf ${clock(idea.brief_due)} unless a resident finds them and a second resident agrees.`, item);
+    else if (due) html("p", "small shelf-thin", `This brief predates the worth test · the idea leaves the shelf ${clock(idea.brief_due)} unless a resident renews it.`, item);
   } else if (due) {
     html("p", "small shelf-thin", `No research brief yet · leaves the shelf ${clock(idea.brief_due)} unless a resident researches it.`, item);
   }
@@ -2101,8 +2131,20 @@ function councilNowSec() {
     ? Date.now() / 1000
     : (frame && Number.isFinite(frame.at) ? frame.at : NaN);
 }
+// A pending proposal that can no longer proceed is closed: nothing is asked of anyone.
+function proposalClosure(proposal) {
+  const closure = proposal.closure || {};
+  const other = typeof closure.by === "string" && closure.by
+    ? ((frame && frame.voting && Array.isArray(frame.voting.proposals) ? frame.voting.proposals : [])
+        .find(candidate => candidate.id === closure.by)?.title || closure.by)
+    : null;
+  if (closure.how === "delivered" && other) return { tag: "Delivered", label: `Closed · delivered by “${other}”` };
+  if (closure.how === "replaced" && other) return { tag: "Replaced", label: `Closed · replaced by “${other}”` };
+  if (closure.how === "overtaken" && other) return { tag: "Closed", label: `Closed · “${other}” changed the same thing first` };
+  return { tag: "Closed", label: "Closed · the rules changed before it was enacted" };
+}
 function proposalStatusLabel(proposal) {
-  if (proposal.stale) return "Stale base · needs a new proposal";
+  if (proposal.stale) return proposalClosure(proposal).label;
   if (proposal.rule_status === "approved") return "Enacted · awaiting install";
   if (proposal.rule_status === "installed") return "Installed";
   if (proposal.rule_status === "failed") return "Install failed";
@@ -2114,7 +2156,7 @@ function proposalSummaryTags(proposal, nowSec) {
   const tags = [];
   if (modeText) tags.push({ text: modeText, cls: proposal.mode === "renovation" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
   if (proposal.stale) {
-    tags.push({ text: "Stale base", cls: "shelf-tag shelf-tag-warn" });
+    tags.push({ text: proposalClosure(proposal).tag, cls: "shelf-tag" });
   } else if (proposal.status === "pending") {
     if (proposal.notice) {
       const until = proposal.notice.until;
@@ -2257,7 +2299,7 @@ function voting() {
   bellLink.href = "https://github.com/Someblueman/emberhall/issues/1";
   const controls = html("div", "voting-controls", undefined, box);
   for (const [key, label, options] of [
-    ["status", "Status", [["all", "All statuses"], ["action", "Needs action (open / pending)"], ["enacted", "Active & installed"], ["historical", "Stale, superseded or closed"]]],
+    ["status", "Status", [["all", "All statuses"], ["action", "Needs action (open / pending)"], ["enacted", "Active & installed"], ["historical", "Closed, replaced or superseded"]]],
     ["kind", "Kind", [["all", "All kinds"], ["choices", "Project choices"], ["renovation", "Renovations"], ["rule", "Rules & floors"], ["wake-prompt", "Wake prompts"], ["legacy", "Legacy"]]]
   ]) {
     const wrapper = html("label", "small", label, controls), select = html("select", "", undefined, wrapper);

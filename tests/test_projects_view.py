@@ -77,6 +77,27 @@ assert(need&&!need.open,'an ask is one line until opened');
 frame.shelf.projects=frame.shelf.projects.filter(p=>p.status!=='done');shelf();
 assert.match(text(nodes.finished),/No finished projects at this moment/);
 assert.doesNotMatch(text(nodes.shelf),/in the Gallery/);
+// Who asked: quoted askers, the second resident's check, and a project's deadline for a worth brief.
+const asked=[{who:'A teacher on a forum',where:'https://forum.example.org/t/1',said:'Is there any tool that does this for me?'},
+  {who:'A tutor',where:'javascript:alert(1)',said:'I do this by hand every week and it is slow.'}];
+frame.shelf.ideas=[
+  {id:'kept',title:'Kept idea',status:'shelved',grounded:true,author:'r1',brief:{field:'software',worth:'useful',author:'r1',asked},
+   second:{author:'r1',finding:'Opened both pages; they ask for exactly this.',at:900}},
+  {id:'unchecked',title:'Unchecked idea',status:'shelved',grounded:false,brief_due:9000,brief:{field:'software',worth:'useful',author:'r1',asked}},
+  {id:'unasked',title:'Unasked idea',status:'shelved',grounded:false,brief_due:9000,brief:{field:'science',worth:'enabling',author:'r1'}}];
+frame.shelf.projects=[{id:'p-live',idea:'skein',title:'Skein',status:'active',owner:'r1',deadline:1000+86400,milestone:'Use it',brief_due:1000+6*3600},
+  {id:'p-ok',idea:'bench',title:'Bench',status:'active',owner:'r1',deadline:1000+86400,milestone:'Try it',brief:{field:'software',worth:'useful',author:'r1',asked,benefit:'Helps reviewers.'}}];
+shelf();
+const who=text(nodes.shelf);
+assert.match(who,/Who asked for this/);assert.match(who,/A teacher on a forum: “Is there any tool that does this for me\\?”/);
+assert.match(who,/Checked by Juniper, who wrote neither the idea nor its brief: Opened both pages/);
+assert.match(who,/Kept idea.*Researched/s);assert.match(who,/Unchecked idea.*Awaiting a second/s);assert.match(who,/Unasked idea.*Who asked\\?/s);
+assert.match(who,/Only its author has said who would use this · leaves the shelf/);
+assert.match(who,/Nobody has shown who asked for this · leaves the shelf/);
+assert.match(who,/Nobody but its owner has shown who this is for · dropped .* unless another resident writes its worth brief/);
+assert.match(who,/Worth brief, by a resident who does not own it · Juniper/);
+const places=all(nodes.shelf).filter(n=>n.tag==='a'&&n.textContent==='where they said it ↗').map(n=>n.href);
+assert(places.length>=3&&places.every(href=>href==='https://forum.example.org/t/1'),'only real web addresses become links');
 frame={};shelf();
 assert.match(text(nodes.shelf),/not activated/);assert.match(text(nodes.finished),/No finished projects/);
 `,context);

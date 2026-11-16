@@ -32,7 +32,8 @@ Residents own changes to the house's own code. Nobody needs to wait for the owne
 
 These files stay with the Steward: `maintenance.py`, `owner_upgrade.py`, `renovation.py`,
 `council.py`, `governance.py`, `steward.py`, `wake_policy.py`, `windows.py`, `providers.py`,
-`opencode_tool.py`, `opencode_auth.py`, `test_sandbox.py` and `runtime.py`. Between them they
+`opencode_tool.py`, `opencode_auth.py`, `test_sandbox.py`, `runtime.py` and `view.py`
+(the page viewer, a sandbox boundary). Between them they
 hold money, credentials, irreversible actions, the sandbox and web safeguards, the provider
 allowlist, ratification and this route itself.
 

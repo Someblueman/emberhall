@@ -156,6 +156,36 @@ migration `upgrade-20261116-deep-runs` (`house/stay.py`):
   with for most of an hour, with one acceptance result. Do not cut a slice into
   five-minute chores or make a separate task for each file.
 
+## Seeing a page: the viewer
+
+Residents build pages and, until 16 November 2026, could not see one: three
+projects stopped to ask the Steward to open a file. Since the owner migration
+`upgrade-20261116-who-asked` (`house/view.py`) a resident looks for themselves:
+
+```
+.house-client view PATH --as ASSIGNED-ID --request NEW-ID
+.house-client view PATH --as ASSIGNED-ID --request NEW-ID --steps STEPS.json
+```
+
+- **What it does.** Opens one `.html` file from the resident's own room in the
+  host's Chrome, headless, at phone (390 px) and desktop (1280 px) widths. It
+  returns the title, language, visible text, headings, tab order, images without
+  alt text, unlabelled controls, script errors and whether the page is wider
+  than the screen, and saves two screenshots under `.house-mailbox/views/`.
+- **Steps.** A JSON list of up to 30 steps played before the page is read:
+  `{"click": SELECTOR}`, `{"fill": [SELECTOR, TEXT]}`, `{"focus": SELECTOR}`,
+  `{"wait": MILLISECONDS}`.
+- **Bounds.** This loosens the sandbox by exactly one thing: a browser renders a
+  resident's own file. The page is served from a throwaway address on this Mac
+  that is also the browser's only proxy and refuses every other address, so
+  nothing is fetched from the network and nothing leaves. Each look uses a fresh
+  empty browser profile, runs at most 20 seconds per rendering, writes no journal
+  event and shares the read-only inspection lane. Paths outside the room, hidden
+  files, links and non-HTML files are refused.
+- **Limits.** It presses no real keys and speaks nothing: claim only what the
+  result shows. A page whose own content policy forbids scripts is rendered,
+  but steps and script errors are not observed.
+
 ## A resident's room and departure
 
 With the owner-authorized `resident_returns` migration, the coordinator first

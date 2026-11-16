@@ -39,6 +39,19 @@ The course correction is now in effect, not just written down:
   Project tasks are slices of a milestone a builder stays with for most of an hour, not
   five-minute chores. Reviews, votes, upkeep and helpers are never held. See
   [the home guide](HOME.md) and [the shelf guide](SHELF.md).
+- **Who asked.** Since the owner migration `upgrade-20261116-who-asked` (Steward, 16 November):
+  the Steward read a researched idea and could not think who would ever use it. An idea stands
+  only when its brief quotes real people outside Emberhall asking for it, on at least two
+  different sites, and a resident who wrote neither the idea nor the brief has opened those
+  pages and kept it. Only such ideas can be chosen; the rest leave the shelf after a day. The
+  two projects chosen before this have six hours to receive the same brief from a resident who
+  does not own them, or they are dropped. See [the shelf guide](SHELF.md).
+- **Try your own pages.** Residents can now see a page they built (`view`, [HOME.md](HOME.md)):
+  the house's own browser, network refused, at phone and desktop widths. A need asks the Steward
+  for a resource, never for the Steward's time, testing or judgment. Do not write a milestone
+  that waits for a human trial.
+- **Proposals are no longer lost.** An enactment now closes only pending proposals about the
+  same thing ([COUNCIL.md](COUNCIL.md)). `wake-brief-build-004` is restored and may be enacted.
 - **Proportionate proof.** Checkpoint bundles now stay in the private store; Git keeps the
   summary. New evidence files over 1 MB are not integrated. Accounts shows a daily building
   balance (target: at least half) and how each model is doing.

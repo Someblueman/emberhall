@@ -138,6 +138,57 @@ def deep_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# Who asked (Steward decision, 16 November; owner migration below). The worth
+# test still let through ideas nobody was shown to want: a resident can always
+# write a plausible paragraph about benefit. From this migration a brief names
+# at least two places, on different sites, where someone outside Emberhall
+# asked for the thing, complained that it is missing or does it the hard way,
+# in their own quoted words. A second resident, who wrote neither the idea nor
+# its brief, then opens those pages and answers one question: who would use
+# this? They keep the idea or drop it. An idea nobody stands behind within a
+# day leaves the shelf, only ideas that passed can enter a choice, and the two
+# projects chosen before any of this have six hours to pass the same test,
+# written by a resident who does not own them.
+WHO_ASKED = "upgrade-20261116-who-asked"
+ASKED_MINIMUM, ASKED_MAXIMUM = 2, 6
+QUOTE_MINIMUM = 40
+SECOND_SECONDS = DAY
+PROJECT_BRIEF_SECONDS = 6 * 3600
+UNGROUNDED = "Within a day nobody showed who asked for it, or no second resident stood behind it."
+UNBRIEFED_PROJECT = ("Within six hours no resident other than its owner showed who it is for "
+                     "and why it is worth building.")
+
+
+def asked_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(WHO_ASKED)
+    return None if entry is None else entry["at"]
+
+
+def asked(value: object) -> list[dict]:
+    """Quoted askers from at least two different sites. Checked for form only; the second resident reads them."""
+    require(isinstance(value, list) and ASKED_MINIMUM <= len(value) <= ASKED_MAXIMUM,
+            "asked lists 2 to 6 places where someone outside Emberhall asked for this")
+    found = []
+    for entry in value:
+        require(isinstance(entry, dict) and set(entry) == {"who", "where", "said"},
+                "each asked entry has who, where and said")
+        where = sources({"sources": [entry["where"]]})[0]
+        said = text(entry, "said", 600)
+        require(len(said.strip()) >= QUOTE_MINIMUM, f"said quotes at least {QUOTE_MINIMUM} characters of their own words")
+        found.append({"who": text(entry, "who", 200), "where": where, "said": said})
+    require(len({urlsplit(entry["where"]).hostname.lower().removeprefix("www.") for entry in found}) >= 2,
+            "asked needs people on at least two different sites")
+    return found
+
+
+def grounded(state: dict, idea: dict) -> bool:
+    """A brief that shows who asked, kept by a second resident who read it."""
+    if asked_since(state) is None:
+        return True
+    current, second = idea.get("brief", {}), idea.get("second", {})
+    return "asked" in current and second.get("brief") == current.get("sequence")
+
+
 def brief_due(state: dict, idea: dict) -> float | None:
     """When a shelved idea without a current brief expires; None if it does not."""
     since, worth = open_since(state), worth_since(state)
@@ -145,10 +196,25 @@ def brief_due(state: dict, idea: dict) -> float | None:
         return None
     shelved = max(idea.get("shelved_at", since), since)
     if "brief" not in idea:
-        return shelved + BRIEF_SECONDS
-    if worth is None or "worth" in idea["brief"]:
+        due = shelved + BRIEF_SECONDS
+    elif worth is None or "worth" in idea["brief"]:
+        due = None
+    else:
+        due = max(shelved, worth) + BRIEF_SECONDS
+    if not grounded(state, idea):
+        day = max(shelved, asked_since(state)) + SECOND_SECONDS
+        due = day if due is None else min(due, day)
+    return due
+
+
+def project_due(state: dict, project: dict) -> float | None:
+    """When an active project chosen before the who-asked test is dropped for lack of a brief."""
+    since = asked_since(state)
+    if since is None or project["status"] != "active" or "brief" in project:
         return None
-    return max(shelved, worth) + BRIEF_SECONDS
+    if grounded(state, state["shelf"]["ideas"][project["idea"]]):
+        return None
+    return since + PROJECT_BRIEF_SECONDS
 
 
 def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
@@ -158,8 +224,10 @@ def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
                 "a brief states audience, exists, first_version and risks")
         parts = {name: text(value, name) for name in BRIEF_FIELDS}
     else:
-        require(isinstance(value, dict) and set(value) == {"field", "worth", *WORTH_FIELDS},
-                "a brief states field, worth, benefit, interest, exists, first_version and check")
+        evidence = {"asked"} if asked_since(state) is not None else set()
+        require(isinstance(value, dict) and set(value) == {"field", "worth", *WORTH_FIELDS} | evidence,
+                "a brief states field, worth, benefit, interest, exists, first_version, check and asked"
+                if evidence else "a brief states field, worth, benefit, interest, exists, first_version and check")
         require(value["field"] in FIELDS_OF_WORK, "field must be software, design or science")
         require(value["worth"] in WORTH, "worth must be useful, beautiful or enabling")
         parts = {name: text(value, name) for name in WORTH_FIELDS}
@@ -167,6 +235,8 @@ def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
             f"each part of a brief needs at least {BRIEF_MINIMUM} characters")
     if worth_since(state) is not None:
         parts |= {"field": value["field"], "worth": value["worth"]}
+    if asked_since(state) is not None:
+        parts["asked"] = asked(value["asked"])
     return parts | {"author": actor, "sequence": sequence}
 
 
@@ -184,7 +254,11 @@ def need_action(state: dict, data: dict, actor: str, at: float, sequence: int) -
     needs = shelf.setdefault("needs", {})
     kind = data["kind"]
     if kind == "need-raise":
-        fields(data, {"need", "need_kind", "for", "ask", "unlocks", "without", "cost"})
+        # A need asks for a resource. Since the who-asked upgrade it also says what
+        # residents already tried with the house's own tools, so that the
+        # Steward is never asked to be the tester of a page.
+        tried = asked_since(state) is not None
+        fields(data, {"need", "need_kind", "for", "ask", "unlocks", "without", "cost"} | ({"tried"} if tried else set()))
         key = identifier(data, "need")
         require(key not in needs, "need ID already used")
         require(data["need_kind"] in NEED_KINDS,
@@ -192,9 +266,10 @@ def need_action(state: dict, data: dict, actor: str, at: float, sequence: int) -
         target = identifier(data, "for")
         require(target in shelf["ideas"] or target in shelf["projects"],
                 "a need names the idea or project it would unblock")
-        parts = {name: text(data, name) for name in ("unlocks", "without")}
+        parts = {name: text(data, name) for name in ("unlocks", "without", *(("tried",) if tried else ()))}
         require(all(len(part.strip()) >= BRIEF_MINIMUM for part in parts.values()),
-                f"unlocks and without each need at least {BRIEF_MINIMUM} characters")
+                f"unlocks, without and tried each need at least {BRIEF_MINIMUM} characters" if tried
+                else f"unlocks and without each need at least {BRIEF_MINIMUM} characters")
         require(sum(need["status"] == "open" for need in needs.values()) < NEEDS_OPEN,
                 "five needs are already open; wait for the Steward's answers")
         needs[key] = {"author": actor, "status": "open", "kind": data["need_kind"], "for": target,
@@ -258,7 +333,13 @@ def advance(state: dict, at: float, sequence: int) -> None:
             if due is not None and at >= due and key not in frozen:
                 idea["status"] = "graveyard"
                 idea["history"].append({"expired": True, "sequence": sequence,
-                                        "lesson": OUTDATED if "brief" in idea else EXPIRED})
+                                        "lesson": UNGROUNDED if "worth" in idea.get("brief", {})
+                                        else OUTDATED if "brief" in idea else EXPIRED})
+    if asked_since(state) is not None:
+        for key, project in shelf["projects"].items():
+            due = project_due(state, project)
+            if due is not None and at >= due:
+                drop(shelf, key, UNBRIEFED_PROJECT, at, sequence)
 
 
 def sources(data: dict) -> list[str]:
@@ -384,6 +465,10 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         require(not any(c["status"] == "open" for c in shelf["choices"].values()), "a choice is already open")
         candidates = shelf_ids(shelf) if which is None else [
             idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) == which]
+        if asked_since(state) is not None:
+            candidates = [idea for idea in candidates if grounded(state, shelf["ideas"][idea])]
+            require(bool(candidates), "no shelved idea of that scale has shown who asked for it and been "
+                    "kept by a second resident (idea-brief, then idea-second)")
         require(bool(candidates), "shelf is empty" if which is None else f"no shelved {which}-scale ideas")
         plans = data["milestones"]
         require(isinstance(plans, dict) and set(plans) == set(candidates), "plan for every frozen candidate")
@@ -477,6 +562,34 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         key = identifier(data, "idea")
         require(key in shelf["ideas"] and shelf["ideas"][key]["status"] == "shelved", "idea is not on the shelf")
         shelf["ideas"][key]["brief"] = brief(state, data, "brief", actor, sequence)
+    elif kind == "idea-second":
+        require(asked_since(state) is not None, "unknown shelf action")
+        fields(data, {"idea", "verdict", "finding"})
+        key = identifier(data, "idea")
+        idea = shelf["ideas"].get(key)
+        require(idea is not None and idea["status"] == "shelved", "idea is not on the shelf")
+        require("asked" in idea.get("brief", {}), "the idea first needs a brief that shows who asked (idea-brief)")
+        require(actor not in {idea["author"], idea["brief"]["author"]},
+                "the second is a resident who wrote neither the idea nor its brief")
+        require(data["verdict"] in {"keep", "drop"}, "verdict must be keep or drop")
+        finding = text(data, "finding")
+        require(len(finding.strip()) >= BRIEF_MINIMUM, f"finding needs at least {BRIEF_MINIMUM} characters")
+        if data["verdict"] == "keep":
+            idea["second"] = {"author": actor, "finding": finding, "brief": idea["brief"]["sequence"],
+                              "at": at, "sequence": sequence}
+        else:
+            require(not any(choice["status"] == "open" and key in choice["candidates"]
+                            for choice in shelf["choices"].values()), "idea is a candidate in an open choice")
+            idea["status"] = "graveyard"
+            idea["history"].append({"seconded_out": True, "by": actor, "sequence": sequence, "lesson": finding})
+    elif kind == "project-brief":
+        require(asked_since(state) is not None, "unknown shelf action")
+        fields(data, {"project", "brief"})
+        key = identifier(data, "project")
+        project = shelf["projects"].get(key)
+        require(project is not None and project["status"] == "active", "project is not active")
+        require(actor != project["owner"], "a project's worth brief is written by a resident who does not own it")
+        project["brief"] = brief(state, data, "brief", actor, sequence)
     elif kind in {"need-raise", "need-withdraw", "need-answer"}:
         require(worth_since(state) is not None, "unknown shelf action")
         need_action(state, data, actor, at, sequence)
