@@ -15,6 +15,7 @@ boundary below.
 python3 projects/review-skein/probe.py audit /path/to/packet
 python3 projects/review-skein/probe.py audit /path/to/standalone.html
 python3 projects/review-skein/probe.py audit /path/to/packet --json
+python3 projects/review-skein/probe.py audit /path/to/editor.html --editor
 python3 projects/review-skein/probe.py transcript /path/to/packet --max-rows 200
 ```
 
@@ -65,6 +66,31 @@ Every non-header diff row must carry its status (`Added`, `Removed`, `Changed`,
 excluded by `aria-hidden="true"`, `hidden`, `display:none` or `visibility:hidden`
 on the cell, row or any ancestor. A row whose status is hidden from assistive
 technology is reported as an error by `audit` and excluded from `transcript`.
+
+## Auditing an editor page
+
+A generated offline editor page ([EDITOR.md](EDITOR.md)) legitimately runs one
+embedded script, so the packet audit above can only reject it. With
+`--editor`, the probe audits that page against its own stated boundary
+instead. The language, duplicate-id, reference, fragment, heading,
+inline-handler and external-reference checks still run; the script/form ban
+and the diff-table checks do not. In their place:
+
+| code | what it means |
+| --- | --- |
+| `editor-csp` | there is no Content-Security-Policy, or `default-src`/`form-action` is not `'none'`, or `script-src` lists anything but `'sha256-...'` hashes, or an executable inline script's actual sha256 is not among them (the page was changed after generation, or its CSP is stale) |
+| `editor-skip-link` | no fragment link whose text starts with "Skip" |
+| `editor-status-region` | no live region a screen reader can reach: the region must carry `role="status"` or `aria-live="polite"`/`"assertive"` **and** be visible. A region hidden by itself (a `script`, `style` or `template`, the `hidden` attribute, `aria-hidden="true"`, an inline `display:none` or `visibility:hidden`) or hidden by an ancestor announces nothing, so it does not count and the page is reported |
+| `editor-noscript` | no `<noscript>` fallback text pointing at the CLI |
+| `unlabelled-control` | a static `input`/`select`/`textarea`/`button` has no accessible name (label, wrapping label, `aria-label`/`aria-labelledby`, button text or button-input value) |
+
+Every editor audit also emits an `editor-dynamic-controls` notice: most of
+the editor's controls are built by its script at runtime, are not in the
+static markup, and were **not** checked. The notice says how many static
+controls were checked. A clean editor audit therefore means the page's shell
+and its script boundary are as generated; it does not establish that the
+runtime-built form is usable with a keyboard or a screen reader. The editor
+remains part of the real browser/screen-reader try in [TRIAL.md](TRIAL.md).
 
 ## What the transcript is
 
@@ -119,12 +145,22 @@ defect, including missing `scope="row"` headers, `aria-hidden="true"` status
 cells/rows/ancestors, and relative or `..` references leaving `review.html` —
 and also exports a real Git fixture packet through `skein.export_packet` to
 verify that a real export audits with 0 errors, produces a complete spoken
-transcript, and leaves all exported packet bytes unchanged.
+transcript, and leaves all exported packet bytes unchanged. Editor-mode
+tests cover a minimal editor fixture (clean, missing/weak CSP, tampered
+script hash, missing skip link/status region/noscript, unlabelled and
+wrapping-labelled controls) and a real page from
+`comment_editor.render_editor` auditing with 0 errors. They also cover the
+live-region rule: a status region hidden by itself — a script carrying
+`role="status"`, a `hidden` div, an `aria-hidden` paragraph, an inline
+`display:none`, a `visibility:hidden` paragraph, a `template` — or hidden by
+an ancestor must be reported as a missing live region instead of passing.
 
 ## Ownership
 
 This probe belongs to `review-skein-milestone-2-probe` and its boundary repair
-`review-skein-probe-boundary-repair`: it owns `projects/review-skein/probe.py`,
+`review-skein-probe-boundary-repair`, and to the editor-audit repair
+`review-skein-probe-editor-audit-repair`: it owns
+`projects/review-skein/probe.py`,
 `projects/review-skein/test_probe.py` and `projects/review-skein/PROBE.md`
 (alongside `projects/review-skein/TRIAL.md`). It does not touch `skein.py`,
 `test_skein.py` or `README.md`, and it does not change the packet format, the
