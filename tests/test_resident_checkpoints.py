@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import tempfile
 import time
 from unittest.mock import patch
 
@@ -187,12 +188,45 @@ class ResidentCheckpointTests(HouseCase):
             else: self.assertFalse(target.exists())
 
     def test_oversized_bundle_is_kept_private_and_never_delivered(self):
-        with patch("house.checkpoint.FILE_LIMIT", 64):
+        with patch("house.checkpoint.BUNDLE_LIMIT", 64):
             with self.assertRaisesRegex(ValueError, "bounded"):
                 self.create()
         self.assertTrue((self.job() / "checkpoint.bundle").is_file())
         self.assertFalse((self.workspace / "evidence").exists())
         self.assertIsNone(self.known())
+
+    def test_house_bundle_is_not_bound_by_the_shared_file_limit(self):
+        # The house's own journal bundle outgrew the shared file bound. The
+        # export must depend on the bundle's own bound, not on that shared one.
+        with patch("house.checkpoint.FILE_LIMIT", 64):
+            result = self.create()
+        bundle = self.workspace / result["bundle"]
+        self.assertGreater(bundle.stat().st_size, 64)
+        self.assertTrue(result["restored_exact_state_and_events"])
+        document = json.loads((self.workspace / result["metadata"]).read_text())
+        self.assertEqual(document["bundle_sha256"], hashlib.sha256(bundle.read_bytes()).hexdigest())
+        self.assertEqual(document["bundle_bytes"], bundle.stat().st_size)
+        self.assertGreater(checkpoint.BUNDLE_LIMIT, checkpoint.FILE_LIMIT)
+
+    def test_output_limit_keeps_the_shared_bound_for_older_jobs(self):
+        self.assertEqual(checkpoint.output_limit({}), checkpoint.FILE_LIMIT)
+        self.assertEqual(checkpoint.output_limit({"limit": 0}), checkpoint.FILE_LIMIT)
+        self.assertEqual(checkpoint.output_limit({"limit": "4096"}), checkpoint.FILE_LIMIT)
+        self.assertEqual(checkpoint.output_limit({"limit": 4096}), 4096)
+
+    def test_read_at_the_exact_bound_is_accepted_and_one_more_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                handle = os.open("exact", os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600, dir_fd=fd)
+                with os.fdopen(handle, "wb") as output:
+                    output.write(b"x" * 64)
+                body, _ = checkpoint.read_file(fd, "exact", 64)
+                self.assertEqual(body, b"x" * 64)
+                with self.assertRaisesRegex(ValueError, "bounded"):
+                    checkpoint.read_file(fd, "exact", 63)
+            finally:
+                os.close(fd)
 
     def test_competitor_at_no_clobber_link_boundary_is_preserved(self):
         original_link = os.link

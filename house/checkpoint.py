@@ -2,6 +2,10 @@
 
 Private receipts fence cooperative resident retries, not hostile same-user shells.
 The native-writable copies never share an inode with the protected cached payload.
+
+The exported bundle is the house's own journal and grows with the record, so it is
+bounded by its own generous ceiling rather than by the shared file bound kept for
+outside files. Each output records the bound it was written under.
 """
 from __future__ import annotations
 
@@ -25,6 +29,11 @@ from .watch_recovery import FILE_LIMIT
 from .files import workspace_path
 
 META_LIMIT = 256_000
+# The house's own journal bundle is written by the house into its private store
+# and verified by digest, so it is bounded by its own generous ceiling instead of
+# the shared file bound kept for outside files. It grows with the record; the
+# checkpoint document records its size so the growth stays visible.
+BUNDLE_LIMIT = 256 * 1024 * 1024
 DIRECTORY = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 
 
@@ -62,7 +71,9 @@ def read_file(fd: int, name: str, limit: int) -> tuple[bytes, list]:
         require(stat.S_ISREG(before.st_mode) and before.st_size <= limit,
                 "checkpoint file must be bounded and regular")
         with os.fdopen(handle, "rb", closefd=False) as source:
-            body = source.read(limit + 1)
+            # Read the file's own size, not the whole bound: a generous bundle
+            # ceiling must not cost that much memory on every read.
+            body = source.read(before.st_size + 1)
         require(len(body) <= limit and identity(before) == identity(os.fstat(handle)),
                 "checkpoint file changed during read")
         return body, identity(before)
@@ -127,8 +138,14 @@ def guard(record: Record, expected: dict, generation: int | None = None) -> int:
     return task["generation"]
 
 
+def output_limit(output: dict) -> int:
+    """Each output carries the bound it was written under; older jobs fall back."""
+    limit = output.get("limit", FILE_LIMIT)
+    return limit if isinstance(limit, int) and limit > 0 else FILE_LIMIT
+
+
 def cached(fd: int, output: dict) -> bytes:
-    body, _ = read_file(fd, output["cache"], FILE_LIMIT)
+    body, _ = read_file(fd, output["cache"], output_limit(output))
     require(len(body) == output["size"] and sha(body) == output["sha256"], "cached checkpoint payload changed")
     return body
 
@@ -139,7 +156,7 @@ def completed(fd: int, workspace: Path, metadata: dict) -> dict | None:
     with directory(workspace / "evidence") as target:
         for name, output in metadata["outputs"].items():
             cached(fd, output)
-            body, fingerprint = read_file(target, name, FILE_LIMIT)
+            body, fingerprint = read_file(target, name, output_limit(output))
             require(fingerprint == output["delivered"] and sha(body) == output["sha256"],
                     "delivered checkpoint changed; preserve it")
     return metadata["receipt"]
@@ -169,10 +186,10 @@ def prepare(record: Record, fd: int, job: Path, metadata: dict) -> None:
         return
     exported = metadata.get("prefix")
     try:
-        bundle_body, _ = read_file(fd, "checkpoint.bundle", FILE_LIMIT)
+        bundle_body, _ = read_file(fd, "checkpoint.bundle", BUNDLE_LIMIT)
     except FileNotFoundError:
         exported = record.bundle(str(job / "checkpoint.bundle"))
-        bundle_body, _ = read_file(fd, "checkpoint.bundle", FILE_LIMIT)
+        bundle_body, _ = read_file(fd, "checkpoint.bundle", BUNDLE_LIMIT)
     handle = os.open("checkpoint.bundle", os.O_RDONLY | os.O_NOFOLLOW, dir_fd=fd)
     try:
         os.fsync(handle)
@@ -210,7 +227,7 @@ def prepare(record: Record, fd: int, job: Path, metadata: dict) -> None:
                    + "/checkpoint.bundle") if keep_private else "evidence/" + stem + ".bundle"
     document = {"house_id": state["house_id"], "name": state["name"], "head": head,
         "anchor": refs[ANCHOR], "events": len(events), "bundle": bundle_path,
-        "bundle_sha256": sha(bundle_body),
+        "bundle_sha256": sha(bundle_body), "bundle_bytes": len(bundle_body),
         "first_event_utc": datetime.fromtimestamp(events[0]["at"], timezone.utc).isoformat(),
         "last_event_utc": datetime.fromtimestamp(events[-1]["at"], timezone.utc).isoformat(),
         "restored_exact_state_and_events": True, "restore_receipt": receipt,
@@ -220,22 +237,25 @@ def prepare(record: Record, fd: int, job: Path, metadata: dict) -> None:
     try:
         write_new(fd, "checkpoint.json", raw)
     except FileExistsError:
-        require(read_file(fd, "checkpoint.json", FILE_LIMIT)[0] == raw, "cached checkpoint metadata differs")
+        require(read_file(fd, "checkpoint.json", META_LIMIT)[0] == raw, "cached checkpoint metadata differs")
     delivered = ((".json", raw),) if keep_private else ((".bundle", bundle_body), (".json", raw))
+    limits = {".json": META_LIMIT, ".bundle": BUNDLE_LIMIT}
     metadata["outputs"] = {stem + suffix: {"cache": "checkpoint" + suffix,
-        "sha256": sha(body), "size": len(body)} for suffix, body in delivered}
+        "sha256": sha(body), "size": len(body), "limit": limits[suffix]} for suffix, body in delivered}
     metadata["result"] = {"format": "emberhall-resident-checkpoint-v1", "run": metadata["binding"]["run"],
         "task": metadata["binding"]["task"], "task_generation": metadata["task_generation"], "head": head, "anchor": refs[ANCHOR], "events": len(events),
         "bundle": document["bundle"], "metadata": "evidence/" + stem + ".json",
-        "bundle_sha256": sha(bundle_body), "metadata_sha256": sha(raw), "restored_exact_state_and_events": True}
+        "bundle_sha256": sha(bundle_body), "bundle_bytes": len(bundle_body),
+        "metadata_sha256": sha(raw), "restored_exact_state_and_events": True}
     save(fd, metadata)
 
 
 def deliver(fd: int, target: int, metadata: dict) -> None:
     for name, output in metadata["outputs"].items():
+        limit = output_limit(output)
         body = cached(fd, output)
         if "delivered" in output:
-            actual, fingerprint = read_file(target, name, FILE_LIMIT)
+            actual, fingerprint = read_file(target, name, limit)
             require(fingerprint == output["delivered"] and actual == body, "delivered checkpoint changed; preserve it")
             continue
         if "temporary" not in output:
@@ -252,21 +272,21 @@ def deliver(fd: int, target: int, metadata: dict) -> None:
             save(fd, metadata)  # Durable intent precedes the no-clobber link.
         temporary = output["temporary"]
         try:
-            actual, fingerprint = read_file(target, name, FILE_LIMIT)
+            actual, fingerprint = read_file(target, name, limit)
         except FileNotFoundError:
-            actual, fingerprint = read_file(target, temporary, FILE_LIMIT)
+            actual, fingerprint = read_file(target, temporary, limit)
             require(actual == body and fingerprint[:2] == output["inode"], "checkpoint temporary changed")
             os.link(temporary, name, src_dir_fd=target, dst_dir_fd=target, follow_symlinks=False)
             os.fsync(target)
-            actual, fingerprint = read_file(target, name, FILE_LIMIT)
+            actual, fingerprint = read_file(target, name, limit)
         require(actual == body and fingerprint[:2] == output["inode"], "checkpoint destination is not this delivery")
         try:
-            _, temporary_fingerprint = read_file(target, temporary, FILE_LIMIT)
+            _, temporary_fingerprint = read_file(target, temporary, limit)
             require(temporary_fingerprint[:2] == output["inode"], "checkpoint temporary replaced")
             os.unlink(temporary, dir_fd=target); os.fsync(target)
         except FileNotFoundError:
             pass  # Crash after unlink but before the delivered receipt.
-        final_body, fingerprint = read_file(target, name, FILE_LIMIT)
+        final_body, fingerprint = read_file(target, name, limit)
         require(final_body == body and fingerprint[:2] == output["inode"], "checkpoint destination changed")
         output["delivered"] = fingerprint
         save(fd, metadata)
