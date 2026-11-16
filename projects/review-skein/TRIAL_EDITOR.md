@@ -1,8 +1,14 @@
 # The independent try for the Skein comment editor
 
 This is a companion to [TRIAL.md](TRIAL.md), for the editing part of milestone 2.
-It does not replace or change that file's ten-step milestone-2 criterion. Try
-both surfaces in the same sitting when possible, and record their results
+It does not replace or change that file's milestone-2 criterion
+(limited rendered-content inspection through the house viewer: steps 1–6
+`PASS` on returned names and text only, step 7 with `wider_than_screen`
+not `true` and phone-width rendered content intact — `phone_text_differs`
+`false`, phone screenshot non-blank — while recording unobserved phone
+geometry `NOT RUN / uncertain` when `null`/clipped, and steps 8–10, real
+keyboard activation and the skip link's unreturned target `NOT RUN`).
+Try both surfaces in the same sitting when possible, and record their results
 separately. A completed editor try alone cannot close the milestone.
 
 This file is the method, not evidence of a try. Authoring it, generating HTML,
@@ -15,9 +21,38 @@ steps or establish browser usability, downloads or accessibility.
   no server, account or network connection is needed.
 - A desktop with a window you can narrow to about 360 CSS pixels, or a phone
   that can open the generated file; browser zoom to 200 percent on desktop.
+  The house viewer (`view`) cannot zoom: with the viewer, actual zoom is
+  `NOT RUN` (step 8) and is not required for a view-based editor check.
 - A **real screen reader** and someone who can operate it, for step 6:
   VoiceOver, NVDA or TalkBack, for example. Mark missing speech evidence
-  `BLOCKED` or `NOT RUN`; DOM inspection and a predicted transcript cannot supply it.
+  `BLOCKED` or `NOT RUN`; DOM inspection and a predicted transcript cannot
+  supply it. The viewer speaks nothing, so speech under the viewer is
+  always `NOT RUN`.
+
+## House viewer limits (if you use `view`)
+
+`view` renders the generated editor at phone (390 px) and desktop (1280 px)
+widths with the network refused and returns text, headings, tab order,
+labels, script errors, `wider_than_screen` and screenshots. The return
+carries no `href` and no ID of any element that is not itself a tab stop,
+so a skip link's target is unobserved under the viewer. It presses no
+real keys, takes no zoom steps, speaks nothing and saves no download, and on
+pages whose content policy restricts scripts it also leaves `wider_than_screen`
+unmeasured (`null`). Steps requiring real interaction — keyboard navigation
+and composition (steps 2–5), speech (step 6), zoom (step 8) and the
+saved-download witness (step 9) — are `NOT RUN` under the viewer and never
+`PASS`. Phone-width fit in step 7 is `NOT RUN / uncertain` whenever
+`wider_than_screen` is `null` and the phone screenshot is clipped; only a real
+browser or unclipped measured view can earn phone-fit `PASS`. The
+`view`-checkable parts are the static-shell / rendered-content inspection in
+steps 1, 7 (rendered DOM content and desktop screenshot) and 12: each `PASS`
+names the returned signal (`text`, `headings`, `tab_order`,
+`unlabelled_controls`, `wider_than_screen` when non-null) plus the named
+screenshot. The CLI stages (steps 10–11) are shell-observable and unaffected.
+A view-based editor check is a partial limited rendered-content inspection
+by definition and is never "full" (see Recording the result); only a real
+browser with keys, zoom, speech and downloads can be full. The CLI prepare
+stages are unchanged.
 - Python 3.10+, Git and this checkout for the CLI stages, or a preparer who
   can run those stages with you while you judge the browser experience.
 - A disposable, complete packet with at least one rendered text line, using
@@ -83,29 +118,51 @@ prerequisite, and `NOT RUN` for a step you did not attempt, with the reason.
 Continue independent steps where possible. Missing speech, viewport or CLI
 steps leave this companion try partial; never infer a pass from generated HTML.
 
-1. **Open the compose page offline.** Disconnect the network or use the
-   browser's offline mode, then open `new-editor.html` as a local file.
-   *You should see:* “Edit Skein comments”, a download control, an “Add an
-   anchored comment” section with a rendered-line selector, and existing
-   comments if the packet has any. The loading message gives way to a comment
-   count and the explanation that the packet stays unchanged until CLI apply.
-   *It fails if:* the page is blank, stuck loading, missing working controls,
-   or needs a network resource. Record how you checked for network requests;
-   if you could not inspect them, record that limit rather than invent a check.
+1. **Open the compose page (view or browser).** File a fresh `view` (new
+   request ID) or open the file offline; open both screenshots.
+   *You should see in the returned output (view) or on the page (browser):*
+   “Edit Skein comments” in `text` / `headings`, a download control in
+   `tab_order`, an “Add an anchored comment” section with a rendered-line
+   selector, and existing comments in `text` if the packet has any; the
+   loading message gone, a comment count present, `script_errors` without
+   an unexpected runtime crash (on script-hash CSP pages, `view` reports
+   its own content-policy note), `wider_than_screen` not `true` (`null`
+   means overflow geometry was `NOT RUN / uncertain`, not `PASS`), and the
+   explanation that the packet stays unchanged until CLI apply. Record how
+   network refusal was checked (`view` refuses every address except its own
+   page); if you could not inspect requests, record that limit rather than
+   invent a check.
+   *It fails if:* `wider_than_screen` is `true` at either width (DOM `text`
+   and desktop screenshots cannot override measured overflow); `text` is
+   blank, the title or controls are missing from `text` / `tab_order`, the
+   screenshots show a blank page, or the page needs a network resource per
+   the returned output.
 
-2. **Navigate with the keyboard.** Put the mouse down for page interactions.
-   From a fresh load use `Tab`, `Shift+Tab`, `Enter`, `Space` and arrow keys
-   as appropriate for native controls. Activate **Skip to comments**, then
-   navigate back to the composer. If there are no comments yet, the skip target
+2. **Navigate with the keyboard (real browser only; NOT RUN under view).**
+   Put the mouse down. From a fresh load use `Tab`, `Shift+Tab`, `Enter`,
+   `Space` and arrow keys. Activate **Skip to comments**, then navigate
+   back to the composer. If there are no comments yet, the skip target
    may be empty; repeat the skip after step 3 adds one.
-   *You should see:* the first page control is the skip link; its target is
-   the comment editor. The download button, composer, comment index and
-   existing body/resolution fields are reachable, with visible focus and no trap.
-   *It fails if:* a control is unreachable, focus disappears, the skip link
-   leads nowhere useful once a comment exists, or you must use the mouse.
+   *You should see (real browser):* the first page control is the skip
+   link; its target is the comment editor. The download button, composer,
+   comment index and existing body/resolution fields are reachable, with
+   visible focus and no trap. Under the viewer this step stays
+   `NOT RUN`: note only the snapshot for the step 1 inspection —
+   `tab_order` entry 1's returned name is the skip link and
+   `unlabelled_controls` is 0. The viewer returns no `href`, so the
+   link's target is unobserved, and real key presses are `NOT RUN` —
+   never claim either from the snapshot, and never record this step
+   `PASS` under the viewer.
+   *It fails if (real browser):* a control is unreachable, focus
+   disappears, the skip leads nowhere once a comment exists, or you must
+   use the mouse. Under the viewer there is no step 2 verdict; a
+   snapshot contradiction (entry 1 not the named skip link, or
+   `unlabelled_controls` above 0) is a `FAIL` finding against the
+   step 1 rendered-content inspection, not a keyboard result.
 
-3. **Compose a comment with the keyboard.** Select a rendered line. Read its
-   path, side, line number, commit and context; compare it with `review.html`.
+3. **Compose a comment with the keyboard (real browser only; NOT RUN under view).**
+   Select a rendered line. Read its path, side, line number, commit and
+   context; compare it with `review.html`.
    Enter a new unique ID such as `trial-editor-note` and body `First trial note.`;
    record the actual ID and anchor. Choose **Add comment to download**.
    *You should see:* the comment appears in the index and editor with that
@@ -115,15 +172,17 @@ steps leave this companion try partial; never infer a pass from generated HTML.
    *It fails if:* you cannot identify or select a line, the wrong anchor is
    used, the comment disappears, or you need to type a Git ID to add it.
 
-4. **Edit the body with the keyboard.** Reach **Body for YOUR-ID**, replace
-   the text with `Edited trial note.`, then tab out.
+4. **Edit the body with the keyboard (real browser only; NOT RUN under view).**
+   Reach **Body for YOUR-ID**, replace the text with `Edited trial note.`,
+   then tab out.
    *You should see:* the new text remains in that comment and the status still
    warns that changes have not been downloaded. Its anchor stays fixed.
    *It fails if:* typing loses focus, changes a different comment, loses the
    text on blur, or moves the anchor.
 
-5. **Resolve and reopen with the keyboard.** Reach **Resolution for YOUR-ID**,
-   choose `resolved`, then choose `open` again. Keep it open for the download.
+5. **Resolve and reopen with the keyboard (real browser only; NOT RUN under view).**
+   Reach **Resolution for YOUR-ID**, choose `resolved`, then choose `open`
+   again. Keep it open for the download.
    *You should see:* each selected value takes effect, with no lost body text
    or changed anchor. “Anchor state” remains separate from resolution: resolving
    a comment does not reattach an orphan or move a line.
@@ -147,29 +206,52 @@ steps leave this companion try partial; never infer a pass from generated HTML.
    yourself is not this step. Without a real screen reader, mark it `BLOCKED`
    or `NOT RUN`; keep the actual final body from step 4 for later steps.
 
-7. **A narrow screen.** Narrow the window to about 360 CSS pixels, or open
-   the same generated file on a phone. Record the width/device used. A second
-   device starts from the original data: repeat steps 3–5 there if needed and
-   keep its download separate from the desktop one.
-   *You should see:* labels, line context, body fields, resolution selectors
-   and buttons remain readable and usable; long content does not force the
-   whole page to scroll sideways. Reach the composer and edited comment again.
-   *It fails if:* content overlaps or is clipped, a control cannot be operated,
-   or page-wide horizontal scrolling is needed. Record whether this was an
-   actual phone or a narrow desktop window; one does not establish the other.
+7. **A narrow screen (view or phone).** Narrow the window to about 360 CSS
+   pixels, open the same generated file on a phone, or file a `view`
+   (phone 390 px, desktop 1280 px). Record the width/device used. A second
+   device starts from the original data: repeat steps 3–5 there if needed
+   and keep its download separate from the desktop one.
+   *Phone-fit geometry (`PASS`):* phone-width fit earns `PASS` only when
+   `wider_than_screen` is observed `false` at both widths **and** the phone
+   screenshot (`390 px`) visibly shows labels, line context, body fields,
+   resolution selectors and buttons unclipped and readable without overlap
+   or whole-page horizontal scrolling.
+   *Unobserved geometry (`NOT RUN / uncertain`):* when `wider_than_screen`
+   at phone width is `null` (CSP blocks measurement) and the phone
+   screenshot is clipped, phone-width layout fit and overflow geometry are
+   explicitly **`NOT RUN / uncertain`** — **never a phone-fit `PASS`**.
+   Intact DOM `text`, `tab_order` or a readable desktop screenshot cannot
+   establish phone fit or phone usability. Under that limit, record only
+   the phone-derived content observables actually returned
+   (`wider_than_screen` not `true`, `phone_text_differs` `false` — the
+   phone-width DOM text equals the returned desktop-width `text`; no
+   phone-width `tab_order` is returned — and a non-blank phone
+   screenshot), plus any visible right-edge clipping as uncertain.
+   *It fails if:* `wider_than_screen` is `true` at either width (DOM `text`
+   and desktop screenshots cannot override or contradict measured overflow);
+   the phone screenshot is blank or the page fails to render; or content
+   overlaps within the phone screenshot's visible, unclipped area. Words
+   cut off at the right edge under `null` geometry are
+   `NOT RUN / uncertain`, not by themselves a `FAIL`.
+   Record whether this was `view`, an actual phone, or a narrow desktop
+   window; one does not establish the other.
 
-8. **Zoom.** On desktop set browser zoom to 200 percent and navigate the
-   composer, edited body, resolution and download control again. Do not reload
-   the page, which would discard these undownloaded edits.
+8. **Zoom (NOT RUN under view).** On desktop set browser zoom to 200 percent
+   and navigate the composer, edited body, resolution and download control
+   again. Do not reload the page, which would discard these undownloaded
+   edits. The viewer takes no zoom steps, so under the viewer record
+   `NOT RUN` with that limit and never `PASS`.
    *You should see:* readable, reachable controls without overlapping or cut-off
    content or whole-page horizontal scrolling.
    *It fails if:* zoom hides a control, obscures focus, clips text or breaks
    the layout. Record the viewport and zoom; a phone pinch gesture alone is
    not this desktop browser-zoom check.
 
-9. **Download the edit envelope.** Ensure the draft ID/body are empty and
-   the new comment has the intended final body and `open` resolution. Choose
-   **Download edits** with the keyboard, then inspect the browser's saved file.
+9. **Download the edit envelope (real browser only; NOT RUN under view).**
+   Ensure the draft ID/body are empty and the new comment has the intended
+   final body and `open` resolution. Choose **Download edits** with the
+   keyboard, then inspect the browser's saved file. The viewer saves no
+   download, so under the viewer record `NOT RUN` and never `PASS`.
    *You should see:* a saved, nonempty `skein-comment-edits.json` (or the
    browser's renamed copy), and a status saying the download was requested
    and the packet is still unchanged. Record the actual saved filename/path.
@@ -248,7 +330,11 @@ Editor try: full / failed / partial. TRIAL.md ten-step result: separate referenc
 ```
 
 Call this companion full only if every step, including the required real
-screen-reader observations, was performed and passed. Any executed mismatch
+screen-reader observations and the saved-file witness, was performed and
+passed. A view-based try is a partial limited rendered-content inspection by
+definition (steps 2–6, 8 and 9 are `NOT RUN` under the viewer, and step 7
+phone geometry is `NOT RUN / uncertain` when `wider_than_screen` is `null`
+and the phone screenshot is clipped) and is never "full". Any executed mismatch
 is a failed try; any unperformed required part leaves it partial. Keep failures
 and unavailable capabilities visible even when later steps work. Share a short
 summary through the journal's `say` channel if you are a resident, without
