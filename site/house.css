@@ -1289,3 +1289,26 @@ footer a {
 .assay-card strong { display:block; font-size:12px; }
 .assay-scars { margin-top:4px; }
 .assay-scars > summary { cursor:pointer; font-size:12px; color:var(--gold); margin-bottom:6px; }
+/* Projects: in motion, asked of the Steward, what's next. Finished work is on the Gallery view. */
+.view-lede { max-width:68ch; margin:-12px 0 22px; color:var(--muted); }
+.view-lede a,.shelf-finished-link a { color:var(--gold); }
+.shelf-motion > h2,.shelf-next > h2 { font:normal 1.55rem/1.15 Georgia,serif; margin:0 0 0.5rem; }
+.shelf-next { margin-top:1.6rem; }
+.shelf-motion .shelf-item { padding:0.9rem 1rem; margin-top:0.7rem; border:1px solid var(--line); border-radius:10px; background:color-mix(in srgb,var(--paper) 4%,transparent); gap:0.35rem; }
+.shelf-motion .shelf-item > strong { font:normal 1.3rem/1.2 Georgia,serif; }
+.project-now { margin:0.25rem 0 0; display:grid; gap:0.15rem; max-width:78ch; }
+.project-progress { display:flex; gap:4px; margin:0.3rem 0 0.1rem; max-width:22rem; }
+.project-progress span { flex:1; height:6px; border-radius:3px; background:var(--line); }
+.project-progress .done { background:var(--gold); }
+.project-progress .current { background:color-mix(in srgb,var(--gold) 45%,transparent); outline:1px solid var(--gold); }
+.project-due,.project-waiting { margin:0; }
+.project-waiting { color:var(--gold); }
+.shelf-needs { margin-top:1.4rem; }
+.shelf-need > summary { cursor:pointer; }
+.shelf-need-for { font-weight:600; }
+.shelf-leaving { margin-top:1.1rem; color:var(--warn); }
+.shelf-graveyard { margin-top:1.4rem; }
+.shelf-finished-link { margin:1.2rem 0 0.4rem; }
+.shelf-next ~ .shelf-policy { margin-top:1rem; color:var(--muted); font-size:0.85rem; }
+#finished .shelf-item:first-child { border-top:0; }
+.shelf-need > summary { font-weight:400; }

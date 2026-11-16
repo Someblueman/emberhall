@@ -37,7 +37,7 @@ frame.shelf.ideas=[
  {id:'lost',title:'Lost idea',status:'graveyard',losses:2,history:[{reasons:['Too large for the first milestone']}]}];
 frame.shelf.projects=[{id:'done',title:'Completed map',status:'done',milestone:'Demo',deadline:100,extended:false}];
 shelf();
-assert.doesNotMatch(text(root),/Active projects/);assert.match(text(root),/Finished projects/);
+assert.doesNotMatch(text(root),/In motion/);assert.match(text(root),/Finished projects/);
 assert.match(text(root),/Completed map/);assert.doesNotMatch(text(root),/Already selected/);
 assert.match(text(root),/Too large for the first milestone/);
 assert.match(text(root),/Explorer: Juniper · OpenCode/);assert.doesNotMatch(text(root),/resident-fixture/);
@@ -46,7 +46,7 @@ assert.equal(all(root).filter(n=>n.tag==='img').length,0);
 const links=all(root).filter(n=>n.tag==='a');assert.equal(links.length,1);
 assert.equal(links[0].href,'https://example.org/');assert.equal(links[0].rel,'noopener noreferrer');
 frame.shelf.projects.push({id:'live',title:'Current build',status:'active',deadline:200});shelf();
-assert.match(text(root),/Active projects/);assert.match(text(root),/Current build/);
+assert.match(text(root),/In motion/);assert.match(text(root),/Current build/);
 frame.shelf.explorer=null;
 frame.shelf.ideas.push({id:'second',status:'shelved'},{id:'third',status:'shelved'});
 shelf();assert.match(text(root),/Project slot available/);assert.match(text(root),/no Explorer round needed/);

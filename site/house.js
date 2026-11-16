@@ -700,8 +700,10 @@ function renderNeeds(dataShelf, box, residentName) {
     : "Asked of the Steward · nothing waiting", group);
   const row = (need, host) => {
     const item = html("details", "shelf-item shelf-need", undefined, host);
-    if (need.status === "open") item.open = true;
-    html("summary", "", need.ask, item);
+    const summary = html("summary", "", undefined, item);
+    html("span", "shelf-need-for", `${need.for_title || need.for}: `, summary);
+    html("span", "", clip(need.ask, 150), summary);
+    if (String(need.ask || "").length > 150) html("p", "", need.ask, item);
     const kind = need.kind ? need.kind[0].toUpperCase() + need.kind.slice(1) : "Need";
     html("span", "small", [kind, need.status === "open" ? "waiting" : need.status, need.cost ? `likely cost: ${need.cost}` : null,
       residentName(need.author), need.raised_at ? clock(need.raised_at) : null].filter(Boolean).join(" · "), item);
@@ -1066,6 +1068,7 @@ function backToRooms() {
 function showViewForHash(hash, focusTarget=false) {
   const targetId=String(hash||"").replace(/^#/,"");
   const routes={"house-view":"house-view","projects-view":"projects-view","shelf-card":"projects-view",
+    "gallery-view":"gallery-view","creations-card":"gallery-view","finished-card":"gallery-view",
     "council-view":"council-view","voting-card":"council-view","accounts-view":"accounts-view"};
   const viewId=routes[targetId]||"house-view",view=$(viewId);
   if(!view)return;
@@ -1836,11 +1839,41 @@ function renderOrderedMilestones(project, details) {
     }
   });
 }
+function projectDue(project) {
+  if (!project.deadline) return "";
+  const deadline = typeof project.deadline === "number" ? clock(project.deadline) : String(project.deadline);
+  let cue = "";
+  if (project.status === "active" && typeof project.deadline === "number" && Number.isFinite(project.deadline)) {
+    const now = observationTime();
+    if (typeof now === "number" && Number.isFinite(now) && now > 0) {
+      const delta = project.deadline - now;
+      cue = delta <= 0 ? " · past deadline" : delta < 86400 ? ` · ${Math.max(1, Math.round(delta / 3600))}h left` : ` · ${Math.ceil(delta / 86400)}d left`;
+    }
+  }
+  return `${deadline}${project.extended ? " (extended)" : ""}${cue}`;
+}
 function renderShelfProject(project, statusLabel, parent, residentName) {
   const item = html("article", "shelf-item", undefined, parent);
   html("strong", "", titleFor(project, "project"), item);
   const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
   html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
+  if (project.status === "active") {
+    const stages = Array.isArray(project.milestones) ? project.milestones.length : 0;
+    const stage = Number.isInteger(project.stage) ? project.stage : Array.isArray(project.completed) ? project.completed.length : 0;
+    if (project.milestone) {
+      const now = html("p", "project-now", undefined, item);
+      html("span", "eyebrow-small", stages > 1 ? `Now · milestone ${stage + 1} of ${stages}` : "Now · milestone", now);
+      html("span", "", clip(project.milestone, 320), now);
+    }
+    if (stages > 1) {
+      const bar = html("div", "project-progress", undefined, item);
+      project.milestones.forEach((_, idx) => html("span", idx < stage ? "done" : idx === stage ? "current" : "", undefined, bar));
+    }
+    const due = projectDue(project);
+    if (due) html("p", "small project-due", `Due ${due}`, item);
+    const waiting = openNeeds().filter(need => need.for === project.id || need.for === project.idea).length;
+    if (waiting) html("p", "small project-waiting", `Waiting on the Steward · ${waiting} ${waiting === 1 ? "ask" : "asks"} listed below`, item);
+  }
   if (project.status === "active" && typeof current !== "undefined" && current && typeof catalog !== "undefined" && Array.isArray(catalog)) {
     const entry = catalog.find(candidate => candidate && candidate.id === project.idea);
     const sampleHref = entry ? collectionUrl(entry) : null;
@@ -1866,38 +1899,81 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
   } else if (project.milestone) {
     html("p", "", `Milestone: ${project.milestone}`, details);
   }
-  if (project.deadline) {
-    const deadline = typeof project.deadline === "number" ? clock(project.deadline) : String(project.deadline);
-    let cue = "";
-    if (project.status === "active" && typeof project.deadline === "number" && Number.isFinite(project.deadline)) {
-      const now = observationTime();
-      if (typeof now === "number" && Number.isFinite(now) && now > 0) {
-        const delta = project.deadline - now;
-        cue = delta <= 0 ? " · past deadline" : delta < 86400 ? ` · ${Math.max(1, Math.round(delta / 3600))}h left` : ` · ${Math.ceil(delta / 86400)}d left`;
-      }
-    }
-    html("p", "small", `Deadline: ${deadline}${project.extended ? " (extended)" : ""}${cue}`, details);
-  }
+  if (project.deadline) html("p", "small", `Deadline: ${projectDue(project)}`, details);
   recordId(details, project.id);
+}
+function renderShelfIdea(idea, group, greatMode, residentName) {
+  const item = html("details", "shelf-item shelf-idea", undefined, group);
+  const summary = html("summary", "", undefined, item);
+  html("span", "shelf-idea-title", titleFor(idea, "idea"), summary);
+  const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
+  const lossLabel = typeof idea.losses === "number" && idea.losses > 0
+    ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
+    : null;
+  const due = typeof idea.brief_due === "number";
+  const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
+  const worthTag = idea.brief?.worth ? idea.brief.worth[0].toUpperCase() + idea.brief.worth.slice(1) : null;
+  const summaryTags = [
+    (greatMode || idea.scale) ? (idea.scale === "great" ? {text: "Great work", cls: "shelf-tag shelf-tag-great"} : {text: "Small project", cls: "shelf-tag"}) : null,
+    fieldLabel ? {text: fieldLabel, cls: "shelf-tag"} : null,
+    worthTag ? {text: worthTag, cls: "shelf-tag"} : null,
+    idea.brief ? (due ? {text: "Renew brief", cls: "shelf-tag shelf-tag-warn"} : {text: "Researched", cls: "shelf-tag"}) : (due ? {text: "Needs brief", cls: "shelf-tag shelf-tag-warn"} : null),
+  ].filter(Boolean);
+  if (summaryTags.length) {
+    const tagRow = html("span", "shelf-idea-tags", undefined, summary);
+    summaryTags.forEach(tag => html("span", tag.cls, tag.text, tagRow));
+  }
+  const briefLabel = idea.brief ? (due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
+  const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
+  if (meta) html("span", "small", meta, item);
+  if (idea.what) html("p", "", idea.what, item);
+  if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
+  if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
+  if (idea.brief) {
+    const brief = html("div", "shelf-brief", undefined, item);
+    html("div", "eyebrow-small", `Research brief · ${residentName(idea.brief.author)}`, brief);
+    const question = {useful: "Is it useful?", beautiful: "Is it beautiful?",
+      enabling: "Does it let someone do or answer something they could not yesterday?"}[idea.brief.worth];
+    if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, brief);
+    [["Why it matters outside Emberhall", idea.brief.benefit], ["Who it is for", idea.brief.audience],
+     ["What research shows about interest", idea.brief.interest], ["What already exists", idea.brief.exists],
+     ["First usable version", idea.brief.first_version], ["How the house will judge it", idea.brief.check],
+     ["What could sink it", idea.brief.risks]]
+      .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, brief); });
+    if (due) html("p", "small shelf-thin", `This brief predates the worth test · the idea leaves the shelf ${clock(idea.brief_due)} unless a resident renews it.`, item);
+  } else if (due) {
+    html("p", "small shelf-thin", `No research brief yet · leaves the shelf ${clock(idea.brief_due)} unless a resident researches it.`, item);
+  }
+  recordId(item,idea.id);
+  const links = (Array.isArray(idea.sources) ? idea.sources : []).map(safeHttpUrl).filter(Boolean);
+  if (links.length) {
+    const row = html("div", "shelf-sources", undefined, item);
+    links.forEach(href => {
+      const a = html("a", "shelf-source-link", href, row);
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    });
+  }
 }
 function shelf() {
   const box = $("shelf");
   if (!box) return;
+  // Finished projects live on the Gallery view; without that box they stay here, folded.
+  const gallery = $("finished"), finishedBox = gallery && gallery !== box ? gallery : null;
   box.replaceChildren();
+  if (finishedBox) finishedBox.replaceChildren();
   const dataShelf = frame && frame.shelf;
   if (!dataShelf || !dataShelf.enabled) {
     html("p", "empty-note", "The idea shelf is not activated at this moment.", box);
+    if (finishedBox) html("p", "empty-note", "No finished projects at this moment.", finishedBox);
     return;
   }
   const residentName = id => frame.residents.find(r => r.id === id)?.name || "Owner unrecorded";
-  html("p", "shelf-policy", dataShelf.policy ? "Work selection rules recorded" : "Project selection awaits ratification.", box);
-  if(dataShelf.policy)recordId(box,dataShelf.policy,"Selection rule ID");
-  if (dataShelf.explorer && (dataShelf.explorer.resident || dataShelf.explorer.agent)) {
-    const exp = dataShelf.explorer;
-    const parts = [residentName(exp.resident), kinds[exp.agent]?.name || exp.agent].filter(Boolean).join(" · ");
-    const until = exp.until ? ` · until ${typeof exp.until === "number" ? clock(exp.until) : exp.until}` : "";
-    html("p", "shelf-explorer small", `Explorer: ${parts}${until}`, box);
-  }
+  const rules = () => {
+    html("p", "shelf-policy", dataShelf.policy ? "Work selection rules recorded" : "Project selection awaits ratification.", box);
+    if(dataShelf.policy)recordId(box,dataShelf.policy,"Selection rule ID");
+  };
   const rawIdeas = Array.isArray(dataShelf.ideas) ? dataShelf.ideas : [];
   const rawProjects = Array.isArray(dataShelf.projects) ? dataShelf.projects : [];
   const ideas = rawIdeas.filter(i => i.status === "shelved");
@@ -1913,41 +1989,6 @@ function shelf() {
   } else {
     html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
   }
-  renderNeeds(dataShelf, box, residentName);
-  const choosing=renderChoiceProgress(box);
-  if (dataShelf.policy) {
-    if (greatMode) {
-      if (greatActive.length >= 1 && smallActive.length >= 1) {
-        html("p", "small", "Both project slots occupied · build the active projects.", box);
-      } else if (!choosing && ((!greatActive.length && greatIdeas.length) || (!smallActive.length && smallIdeas.length))) {
-        html("p", "small", "Project slot available · council can choose from the shelf.", box);
-      }
-      const greatWanted = dataShelf.great_wanted !== undefined ? Boolean(dataShelf.great_wanted) : (!greatActive.length && greatIdeas.length < 2);
-      const explorerLine = dataShelf.explorer
-        ? "One Explorer at a time · see the recorded round above."
-        : greatWanted
-          ? "Room for a great-work Explorer round."
-          : ideas.length < 3 ? "Room for one Explorer round." : dataShelf.research ? "" : "Shelf stocked · no Explorer round needed.";
-      if (explorerLine) html("p", "small", explorerLine, box);
-    } else {
-      if (activeProjects.length >= 2) {
-        html("p", "small", "Both project slots occupied · build the active projects.", box);
-      } else if (ideas.length&&!choosing) {
-        html("p", "small", "Project slot available · council can choose from the shelf.", box);
-      }
-      html("p", "small", dataShelf.explorer
-        ? "One Explorer at a time · see the recorded round above."
-        : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", box);
-    }
-  }
-  if (dataShelf.policy && dataShelf.research && !dataShelf.explorer) {
-    const research = dataShelf.research, now = observationTime();
-    html("p", "small shelf-research", ideas.length >= (research.ceiling || 10)
-      ? `Research pauses while ${research.ceiling || 10} or more ideas wait.`
-      : ideas.length < 3 || now >= research.next
-        ? "Research continues even with a full shelf · a round may start now."
-        : `Research continues even with a full shelf · next round after ${clock(research.next)}.`, box);
-  }
   const graveyard = [
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
       title: titleFor(p,"project"), id:p.id,
@@ -1960,77 +2001,78 @@ function shelf() {
       reason: [i.losses ? `Lost ${i.losses} council choices.` : "Retired without starting a project.", ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
     }))
   ];
+  if (finishedBox) {
+    if (completedProjects.length) completedProjects.forEach(project=>renderShelfProject(project,"Finished",finishedBox,residentName));
+    else html("p", "empty-note", "No finished projects at this moment.", finishedBox);
+  }
   if (!ideas.length && !activeProjects.length && !completedProjects.length && !graveyard.length) {
     html("p", "empty-note", "No ideas or projects have been shelved at this moment.", box);
+    rules();
     return;
   }
+  // 1. In motion: what is being built now.
   if(activeProjects.length) {
-    const group=html("div","shelf-group",undefined,box);
-    html("h2","","Active projects",group);
+    const group=html("div","shelf-group shelf-motion",undefined,box);
+    html("h2","","In motion",group);
     activeProjects.forEach(project=>renderShelfProject(project,"Active",group,residentName));
   }
-  if(completedProjects.length) {
-    const completed=html("details","shelf-completed",undefined,box);
-    html("summary","",`Finished projects (${completedProjects.length})`,completed);
-    completedProjects.forEach(project=>renderShelfProject(project,"Finished",completed,residentName));
+  // 2. What residents have asked the Steward for.
+  renderNeeds(dataShelf, box, residentName);
+  // 3. What's next: the open choice, free slots, research and the ideas waiting.
+  const next=html("div","shelf-group shelf-next",undefined,box);
+  html("h2","","What’s next",next);
+  const choosing=renderChoiceProgress(next);
+  if (dataShelf.explorer && (dataShelf.explorer.resident || dataShelf.explorer.agent)) {
+    const exp = dataShelf.explorer;
+    const parts = [residentName(exp.resident), kinds[exp.agent]?.name || exp.agent].filter(Boolean).join(" · ");
+    const until = exp.until ? ` · until ${typeof exp.until === "number" ? clock(exp.until) : exp.until}` : "";
+    html("p", "shelf-explorer small", `Explorer: ${parts}${until}`, next);
+  }
+  if (dataShelf.policy) {
+    if (greatMode) {
+      if (greatActive.length >= 1 && smallActive.length >= 1) {
+        html("p", "small", "Both project slots occupied · build the active projects.", next);
+      } else if (!choosing && ((!greatActive.length && greatIdeas.length) || (!smallActive.length && smallIdeas.length))) {
+        html("p", "small", "Project slot available · council can choose from the shelf.", next);
+      }
+      const greatWanted = dataShelf.great_wanted !== undefined ? Boolean(dataShelf.great_wanted) : (!greatActive.length && greatIdeas.length < 2);
+      const explorerLine = dataShelf.explorer
+        ? "One Explorer at a time · see the recorded round above."
+        : greatWanted
+          ? "Room for a great-work Explorer round."
+          : ideas.length < 3 ? "Room for one Explorer round." : dataShelf.research ? "" : "Shelf stocked · no Explorer round needed.";
+      if (explorerLine) html("p", "small", explorerLine, next);
+    } else {
+      if (activeProjects.length >= 2) {
+        html("p", "small", "Both project slots occupied · build the active projects.", next);
+      } else if (ideas.length&&!choosing) {
+        html("p", "small", "Project slot available · council can choose from the shelf.", next);
+      }
+      html("p", "small", dataShelf.explorer
+        ? "One Explorer at a time · see the recorded round above."
+        : ideas.length < 3 ? "Room for one Explorer round." : "Shelf stocked · no Explorer round needed.", next);
+    }
+  }
+  if (dataShelf.policy && dataShelf.research && !dataShelf.explorer) {
+    const research = dataShelf.research, now = observationTime();
+    html("p", "small shelf-research", ideas.length >= (research.ceiling || 10)
+      ? `Research pauses while ${research.ceiling || 10} or more ideas wait.`
+      : ideas.length < 3 || now >= research.next
+        ? "Research continues even with a full shelf · a round may start now."
+        : `Research continues even with a full shelf · next round after ${clock(research.next)}.`, next);
   }
   if (ideas.length) {
-    const group = html("div", "shelf-group", undefined, box);
-    html("div", "eyebrow-small", "Ideas · not selected projects", group);
-    ideas.forEach(idea => {
-      const item = html("details", "shelf-item shelf-idea", undefined, group);
-      const summary = html("summary", "", undefined, item);
-      html("span", "shelf-idea-title", titleFor(idea, "idea"), summary);
-      const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
-      const lossLabel = typeof idea.losses === "number" && idea.losses > 0
-        ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
-        : null;
-      const due = typeof idea.brief_due === "number";
-      const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
-      const worthTag = idea.brief?.worth ? idea.brief.worth[0].toUpperCase() + idea.brief.worth.slice(1) : null;
-      const summaryTags = [
-        (greatMode || idea.scale) ? (idea.scale === "great" ? {text: "Great work", cls: "shelf-tag shelf-tag-great"} : {text: "Small project", cls: "shelf-tag"}) : null,
-        fieldLabel ? {text: fieldLabel, cls: "shelf-tag"} : null,
-        worthTag ? {text: worthTag, cls: "shelf-tag"} : null,
-        idea.brief ? (due ? {text: "Renew brief", cls: "shelf-tag shelf-tag-warn"} : {text: "Researched", cls: "shelf-tag"}) : (due ? {text: "Needs brief", cls: "shelf-tag shelf-tag-warn"} : null),
-      ].filter(Boolean);
-      if (summaryTags.length) {
-        const tagRow = html("span", "shelf-idea-tags", undefined, summary);
-        summaryTags.forEach(tag => html("span", tag.cls, tag.text, tagRow));
-      }
-      const briefLabel = idea.brief ? (due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
-      const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
-      if (meta) html("span", "small", meta, item);
-      if (idea.what) html("p", "", idea.what, item);
-      if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
-      if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
-      if (idea.brief) {
-        const brief = html("div", "shelf-brief", undefined, item);
-        html("div", "eyebrow-small", `Research brief · ${residentName(idea.brief.author)}`, brief);
-        const question = {useful: "Is it useful?", beautiful: "Is it beautiful?",
-          enabling: "Does it let someone do or answer something they could not yesterday?"}[idea.brief.worth];
-        if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, brief);
-        [["Why it matters outside Emberhall", idea.brief.benefit], ["Who it is for", idea.brief.audience],
-         ["What research shows about interest", idea.brief.interest], ["What already exists", idea.brief.exists],
-         ["First usable version", idea.brief.first_version], ["How the house will judge it", idea.brief.check],
-         ["What could sink it", idea.brief.risks]]
-          .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, brief); });
-        if (due) html("p", "small shelf-thin", `This brief predates the worth test · the idea leaves the shelf ${clock(idea.brief_due)} unless a resident renews it.`, item);
-      } else if (due) {
-        html("p", "small shelf-thin", `No research brief yet · leaves the shelf ${clock(idea.brief_due)} unless a resident researches it.`, item);
-      }
-      recordId(item,idea.id);
-      const links = (Array.isArray(idea.sources) ? idea.sources : []).map(safeHttpUrl).filter(Boolean);
-      if (links.length) {
-        const row = html("div", "shelf-sources", undefined, item);
-        links.forEach(href => {
-          const a = html("a", "shelf-source-link", href, row);
-          a.href = href;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-        });
-      }
-    });
+    // Ideas with a current research brief first; those about to leave the shelf after them.
+    const leaving = ideas.filter(idea => typeof idea.brief_due === "number");
+    const standing = ideas.filter(idea => typeof idea.brief_due !== "number");
+    html("div", "eyebrow-small", "Ideas · not selected projects", next);
+    standing.forEach(idea => renderShelfIdea(idea, next, greatMode, residentName));
+    if (leaving.length) {
+      if (standing.length) html("div", "eyebrow-small shelf-leaving", `Leaving the shelf unless a resident renews them · ${leaving.length}`, next);
+      leaving.forEach(idea => renderShelfIdea(idea, next, greatMode, residentName));
+    }
+  } else {
+    html("p", "empty-note", "No ideas are waiting on the shelf.", next);
   }
   if (graveyard.length) {
     const details = html("details", "shelf-graveyard", undefined, box);
@@ -2042,6 +2084,17 @@ function shelf() {
       recordId(item,entry.id);
     });
   }
+  if(completedProjects.length) {
+    if (finishedBox) {
+      const row=html("p","small shelf-finished-link",`${completedProjects.length} finished ${completedProjects.length===1?"project is":"projects are"} in the Gallery. `,box);
+      const link=html("a","","See what the house has made →",row);link.href="#gallery-view";
+    } else {
+      const completed=html("details","shelf-completed",undefined,box);
+      html("summary","",`Finished projects (${completedProjects.length})`,completed);
+      completedProjects.forEach(project=>renderShelfProject(project,"Finished",completed,residentName));
+    }
+  }
+  rules();
 }
 function councilNowSec() {
   return (typeof current !== "undefined" && current)

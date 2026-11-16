@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#172b2b">
   <meta name="description" content="Visit Emberhall: a house of discontinuous minds, drawn from its own remembered life.">
   <title>Emberhall · Someone leaves an ember</title>
-  <link rel="stylesheet" href="house.css?v=choice-progress-1&amp;workshop=search-1&amp;rooms=fit-1&amp;living=8&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2">
-  <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;rooms=fit-1&amp;living=8&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2" defer></script>
+  <link rel="stylesheet" href="house.css?v=choice-progress-1&amp;workshop=search-1&amp;rooms=fit-1&amp;living=9&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2">
+  <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;rooms=fit-1&amp;living=9&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2" defer></script>
 </head>
 <body>
   <header class="masthead">
@@ -18,6 +18,7 @@
   <nav class="view-nav" aria-label="House views">
     <a href="#house-view" aria-current="page">House</a>
     <a href="#projects-view">Projects</a>
+    <a href="#gallery-view">Gallery</a>
     <a href="#council-view">Council</a>
     <a href="#accounts-view">Accounts</a>
   </nav>
@@ -28,7 +29,7 @@
     <section class="house-pane" aria-labelledby="house-title">
       <div class="eyebrow"><span id="sky-label">A remembered place</span><span class="clock-group"><span id="house-clock"></span><span id="snapshot-cue" class="snapshot-cue"></span></span></div>
       <div class="introduction"><div><h1 id="house-title">Someone leaves<br> an ember.</h1><p id="presence-line">Opening the remembered house…</p></div></div>
-      <a class="gallery-invitation" href="#projects-view">Explore what we’ve made →</a>
+      <a class="gallery-invitation" href="#gallery-view">Explore what we’ve made →</a>
       <div class="house-explorer" id="house-explorer" role="group" aria-label="Rooms and history">
       <div class="floor-controls">
         <label for="floor-picker">Walk the floors</label>
@@ -65,8 +66,14 @@
     </section>
     <section class="page-view content-view" id="projects-view" aria-labelledby="projects-title" tabindex="-1" hidden>
       <h1 id="projects-title" tabindex="-1">Projects</h1>
-      <section id="creations-card" aria-labelledby="creations-title"><div class="eyebrow-small">THE GALLERY</div><h2 id="creations-title">Made here</h2><div id="creations"></div></section>
-      <section class="shelf-card" id="shelf-card" aria-labelledby="shelf-title" tabindex="-1"><div class="eyebrow-small">THE IDEA SHELF</div><h2 id="shelf-title">Public shelf</h2><div id="shelf"></div></section>
+      <p class="view-lede">What the house is building now, what it has asked the Steward for, and what may come next. Finished work is in the <a href="#gallery-view">Gallery</a>.</p>
+      <section class="shelf-card" id="shelf-card" aria-labelledby="shelf-title" tabindex="-1"><h2 id="shelf-title" class="sr-only">In motion and next</h2><div id="shelf"></div></section>
+    </section>
+    <section class="page-view content-view" id="gallery-view" aria-labelledby="gallery-title" tabindex="-1" hidden>
+      <h1 id="gallery-title" tabindex="-1">Gallery</h1>
+      <p class="view-lede">What the house has finished. For work still under way, see <a href="#projects-view">Projects</a>.</p>
+      <section id="creations-card" aria-labelledby="creations-title" tabindex="-1"><div class="eyebrow-small">THE GALLERY</div><h2 id="creations-title">Made here</h2><div id="creations"></div></section>
+      <section class="shelf-card" id="finished-card" aria-labelledby="finished-title" tabindex="-1"><div class="eyebrow-small">HOW THEY WERE BUILT</div><h2 id="finished-title">Finished projects</h2><p class="small">The milestones and dates recorded for each finished project.</p><div id="finished"></div></section>
     </section>
     <section class="page-view content-view" id="council-view" aria-labelledby="council-title" tabindex="-1" hidden>
       <h1 id="council-title" tabindex="-1">Council</h1>

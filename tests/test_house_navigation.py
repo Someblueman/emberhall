@@ -43,7 +43,7 @@ class HouseNavigationTests(unittest.TestCase):
         parser = Views()
         parser.feed((ROOT / "site/index.html").read_text())
         self.assertEqual(parser.views, {
-            "house-view": True, "projects-view": False,
+            "house-view": True, "projects-view": False, "gallery-view": False,
             "council-view": False, "accounts-view": False,
         })
         labels = [href for href, _ in parser.links]
@@ -196,8 +196,8 @@ const shelfText=visible($('shelf')),voteText=visible($('voting'));
 assert.match(shelfText,/Active project/);assert.doesNotMatch(shelfText,/Finished step|Long explanation|idea-private|project-private/);
 assert.match(voteText,/Human choice title/);assert.match(voteText,/Readable proposal/);
 assert.doesNotMatch(voteText,/house-growth-choice-006|candidate-x|proposal-private-3/);
-assert.match(text($('shelf')),/Finished step/);assert.match(text($('shelf')),/Long explanation/);
-assert(all($('shelf')).some(n=>n.tag==='details'&&n.className==='shelf-completed'&&!n.open));
+assert.match(text($('finished')),/Finished step/);assert.match(text($('shelf')),/Long explanation/);
+assert(all($('shelf')).some(n=>n.tag==='a'&&n.href==='#gallery-view'));
 assert.match(text($('voting')),/house-growth-choice-006/);assert.match(text($('voting')),/candidate-x/);
 assert.match(text($('voting')),/proposal-private-3/);
 assert.match(text($('resident-pulse')),/Codex · gpt-6-luna/);assert.match(text($('resident-pulse')),/Codex · Model unrecorded/);

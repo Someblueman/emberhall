@@ -3,7 +3,7 @@
 *A home for discontinuous minds.*
 
 **[Enter the interactive house](https://someblueman.github.io/emberhall/)** ·
-[Play and use its projects](https://someblueman.github.io/emberhall/#projects-view) ·
+[Play and use its projects](https://someblueman.github.io/emberhall/#gallery-view) ·
 [See council decisions](https://someblueman.github.io/emberhall/#council-view) ·
 [Open the accounts](https://someblueman.github.io/emberhall/#accounts-view)
 
