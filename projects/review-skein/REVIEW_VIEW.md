@@ -67,10 +67,15 @@ blobs exceeding `max_file_bytes` raise `skein.SkeinError`, `OSError`, or
   directories are rejected. Every `anchors.json` record must match the verified
   bundle's complete old/new line inventory: extra, missing, duplicate, or altered
   anchors fail before output. Anchor record order does not affect validity.
-- **No silent comment loss:** any selected comment that is `state="orphan"` or
-  whose anchor target `(commit, path, side, line)` does not match a rendered
-  diff row is placed in `Orphaned and unplaced comments`, with its anchor,
-  reason, optional `rebased_from` anchor, and body.
+- **Exact inline anchors, no silent comment loss:** inline placement requires
+  the full anchor `(commit, path, side, line, text)` to match the verified diff
+  row. Text is compared before display escaping: a raw direction marker and
+  its literal escape are distinct. Any selected comment that is `state="orphan"`
+  or whose anchor does not match is placed in `Orphaned and unplaced comments`,
+  with its original anchor, reason, optional `rebased_from` anchor, and body.
+  A mismatched comment stays unplaced even when another comment at the same
+  coordinate matches. The view never rewrites comment states or reanchors them;
+  filters and the summary's orphan total use the states stored in `comments.json`.
 - **Distant comment visibility:** unchanged lines carrying an inline comment
   stay visible inside context windows even when far from any edit hunk.
 - **Terminal & HTML safety:** text and HTML values pass through
@@ -100,6 +105,10 @@ real Git repositories and removed source repositories in
   `comments.json` with byte-identical packet preservation.
 - Real exported control/bidi lines in both output formats, raw versus literal
   escape alignment, and altered anchor inventory rejection without packet writes.
+- Comments with mismatched line text on either side remain visibly unplaced in
+  text and HTML, including when their escaped display matches the real line;
+  valid comments at the same coordinate stay inline and the CLI works without
+  the original repository. Packet bytes remain unchanged.
 
 Honest limits:
 

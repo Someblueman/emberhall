@@ -203,22 +203,16 @@ def _place_comments(
 ) -> tuple[list[_PlacedFile], list[tuple[skein.Comment, str]]]:
     base_commit = metadata["base"]["commit"]
     head_commit = metadata["head"]["commit"]
-    by_target: dict[tuple[str, str, str, int], list[skein.Comment]] = {}
+    by_target: dict[skein.Anchor, list[skein.Comment]] = {}
     orphans: list[tuple[skein.Comment, str]] = []
 
     for comment in selected:
         if comment.state == "orphan":
             orphans.append((comment, comment.orphan_reason or "orphaned comment"))
             continue
-        key = (
-            comment.anchor.commit,
-            comment.anchor.path,
-            comment.anchor.side,
-            comment.anchor.line,
-        )
-        by_target.setdefault(key, []).append(comment)
+        by_target.setdefault(comment.anchor, []).append(comment)
 
-    placed_keys: set[tuple[str, str, str, int]] = set()
+    placed_keys: set[skein.Anchor] = set()
     placed_files: list[_PlacedFile] = []
 
     for change, old_lines, new_lines, rows in rendered:
@@ -227,23 +221,25 @@ def _place_comments(
             old_list: list[skein.Comment] = []
             new_list: list[skein.Comment] = []
             if change.old_path is not None and row.old_number is not None:
-                old_key = (base_commit, change.old_path, "old", row.old_number)
+                old_key = skein.Anchor(base_commit, change.old_path, "old",
+                                       row.old_number, row.old_text)
                 if old_key in by_target:
                     old_list = by_target[old_key]
                     placed_keys.add(old_key)
             if change.new_path is not None and row.new_number is not None:
-                new_key = (head_commit, change.new_path, "new", row.new_number)
+                new_key = skein.Anchor(head_commit, change.new_path, "new",
+                                       row.new_number, row.new_text)
                 if new_key in by_target:
                     new_list = by_target[new_key]
                     placed_keys.add(new_key)
             row_comments.append((old_list, new_list))
         placed_files.append(_PlacedFile(change, old_lines, new_lines, rows, row_comments))
 
-    # Never silently drop an anchored comment whose target row is absent.
+    # Compare raw text before display escaping; a coordinate alone is not an anchor match.
     for key, comments_at_key in by_target.items():
         if key not in placed_keys:
             for comment in comments_at_key:
-                orphans.append((comment, "anchor target is not present in rendered packet diffs"))
+                orphans.append((comment, "anchor target or text does not match verified packet diffs"))
 
     order = {comment.identifier: index for index, comment in enumerate(selected)}
     orphans.sort(key=lambda item: order[item[0].identifier])
