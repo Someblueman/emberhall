@@ -50,6 +50,7 @@ async function main() {
   const first = page();
   const e = first.elements;
   assert.equal(e.phase2.disabled, true);
+  assert.equal(e['task-choice'].disabled, false);
   assert.ok(e['run-example'], 'the supplied software example must be runnable');
   assert.equal(e['run-example'].disabled, true);
   e['run-example'].click();
@@ -66,17 +67,32 @@ async function main() {
   await first.issue();
   const receipt = JSON.parse(e.receipt.value);
   assert.equal(e.phase2.disabled, false);
+  assert.equal(e['task-choice'].disabled, true);
   assert.equal(e['supplied-prompt'].hidden, false);
-  assert.match(e['supplied-prompt'].textContent, /Synthetic prompt S-02/);
+  assert.match(e['supplied-prompt'].textContent, /Synthetic prompt S-03/);
   assert.match(e['supplied-prompt'].textContent, /\[12,3,8,3,-2,0\]/);
   assert.equal(e['example-runner'].hidden, false);
   assert.equal(e['run-example'].disabled, false);
   e.observation.value = 'Existing manual observation';
   e['run-example'].click();
   e['run-example'].click();
-  assert.equal(e['example-result'].textContent, '[-2,0,3,3,8,12]');
+  assert.equal(e['example-result'].textContent, 'Sorted: [-2,0,3,3,8,12]. 4th smallest: 3.');
   assert.equal(e.observation.value, 'Existing manual observation');
   e.observation.value = '';
+
+  // S-04 choice selects the frequency task with its own input.
+  const second = page();
+  second.fill();
+  second.elements['task-s04'].checked = true;
+  await second.issue();
+  const secondElements = second.elements;
+  assert.equal(secondElements['task-choice'].disabled, true);
+  assert.match(secondElements['supplied-prompt'].textContent, /Synthetic prompt S-04/);
+  assert.match(secondElements['supplied-prompt'].textContent, /\[4,9,4,6,1,4\]/);
+  assert.equal(secondElements['run-example'].disabled, false);
+  secondElements['run-example'].click();
+  assert.equal(secondElements['example-result'].textContent, 'Sorted: [1,4,4,4,6,9]. Most frequent: 4.');
+
   for (const name of ['exposure', 'prediction', 'reasoning']) assert.equal(e[name].readOnly, true);
   assert.equal(e['issue-receipt'].disabled, true);
   await e['copy-receipt'].click();
@@ -142,26 +158,37 @@ async function main() {
   assert.equal(delayed.elements.phase2.disabled, true);
   assert.equal(delayed.elements['supplied-prompt'].hidden, true);
   assert.equal(delayed.elements.exposure.readOnly, true);
+  assert.equal(delayed.elements['task-choice'].disabled, true);
+  // Even a script changing a disabled radio during hashing must not change the
+  // task captured when the prediction was locked.
+  delayed.elements['task-s04'].checked = true;
   await delayed.issue();
   assert.equal(calls, 1, 'a second click must not start a competing hash');
   resolveHash();
   await pending;
   assert.equal(delayed.elements.phase2.disabled, false);
+  assert.match(delayed.elements['supplied-prompt'].textContent, /Synthetic prompt S-03/);
+  assert.equal(delayed.elements['task-choice'].disabled, true);
 
   for (const failure of [() => Promise.reject(Error('digest failed')), () => { throw Error('no WebCrypto'); }]) {
     let fail = true;
     const retry = page((...args) => fail ? failure() : webcrypto.subtle.digest(...args));
     retry.fill();
+    retry.elements['task-s04'].checked = true;
     await retry.issue();
     assert.equal(retry.elements.phase2.disabled, true);
     assert.equal(retry.elements['supplied-prompt'].hidden, true);
     assert.equal(retry.elements.receipt.value, '');
     assert.equal(retry.elements.exposure.readOnly, false);
     assert.equal(retry.elements['issue-receipt'].disabled, false);
+    assert.equal(retry.elements['task-choice'].disabled, false);
     assert.match(retry.elements['phase1-status'].textContent, /Could not compute/);
     fail = false;
+    retry.elements['task-s04'].checked = false;
     await retry.issue();
     assert.equal(retry.elements.phase2.disabled, false);
+    assert.match(retry.elements['supplied-prompt'].textContent, /Synthetic prompt S-03/);
+    assert.equal(retry.elements['task-choice'].disabled, true);
   }
 
   process.stdout.write(JSON.stringify(report));

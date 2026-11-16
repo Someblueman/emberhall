@@ -10,7 +10,9 @@
   fieldset { border: 1px solid #888; border-radius: 6px; margin: 1rem 0; padding: 1rem; }
   legend { font-weight: bold; padding: 0 .4rem; }
   label { display: block; margin-top: .8rem; font-weight: bold; }
+  label:has(input[type="radio"]) { font-weight: normal; }
   textarea, input { width: 100%; box-sizing: border-box; margin-top: .3rem; font: inherit; }
+  input[type="radio"] { width: auto; margin-top: 0; }
   textarea { min-height: 5rem; }
   button { margin-top: .8rem; font: inherit; padding: .4rem 1rem; }
   .prompt { border-left: 4px solid #444; padding: .6rem .8rem; margin-top: .8rem; background: #f6f6f4; white-space: pre-wrap; }
@@ -27,14 +29,21 @@
 <p>Records one blind trial in two phases. The receipt hash proves the
 pre-reveal text is unchanged in the exported report; it cannot prove
 honesty or correctness.</p>
-<p>The software example sorts a hidden list of numbers in ascending order,
-keeping duplicates. Predict a property of its result, then reveal the input
-and run it. No physical equipment is needed.</p>
+<p>The software example hides a list of numbers. Before running it, predict
+one value about it — the 4th smallest value (counting duplicates) in
+ascending order, or the most frequent value — then reveal the input and run
+it. No physical equipment is needed.</p>
 
 <section aria-labelledby="phase1-heading">
   <h2 id="phase1-heading">Phase 1 — before the prompt</h2>
   <fieldset id="phase1">
     <legend>Pre-reveal record</legend>
+    <fieldset id="task-choice">
+      <legend>Software task — choose before issuing the receipt</legend>
+      <label for="task-s03"><input type="radio" name="task" id="task-s03" value="s03" checked> S-03: predict the 4th smallest value (counting duplicates)</label>
+      <label for="task-s04"><input type="radio" name="task" id="task-s04" value="s04"> S-04: predict the most frequent value (counting frequency)</label>
+      <p class="hint">The prompt and answer follow your choice. The hidden input stays concealed until the receipt.</p>
+    </fieldset>
     <label for="exposure">Exposure declaration — what have you already seen about this trial?</label>
     <textarea id="exposure" required placeholder="Declare any prior exposure, or state that there is none."></textarea>
     <label for="prediction">Prediction — what do you expect to happen?</label>
@@ -59,7 +68,8 @@ and run it. No physical equipment is needed.</p>
     <p class="hint">Issue a receipt to reveal the supplied prompt. This conceals
     it in the page, not in its source; it cannot prove you were unexposed.</p>
     <div class="prompt" id="supplied-prompt" hidden></div>
-    <template id="prompt-template">Synthetic prompt S-02: Sort the numbers in ascending numeric order, keeping duplicates. Run the software example below and record what it actually outputs, separately from your prediction. Input: </template>
+    <template id="prompt-template-s03">Synthetic prompt S-03: Predict the 4th smallest value (counting duplicates) in ascending order. Run the software example below and record what it actually outputs, separately from your prediction. Input: </template>
+    <template id="prompt-template-s04">Synthetic prompt S-04: Predict the most frequent value (counting frequency) in the hidden list. Run the software example below and record what it actually outputs, separately from your prediction. Input: </template>
     <div id="example-runner" hidden>
       <button type="button" id="run-example" disabled>Run software example</button>
       <p>Computed result: <output id="example-result" aria-live="polite">Not run yet.</output></p>
@@ -95,7 +105,11 @@ and run it. No physical equipment is needed.</p>
   var issueBtn = document.getElementById('issue-receipt');
   var promptEl = document.getElementById('supplied-prompt');
   var runExampleBtn = document.getElementById('run-example');
-  var exampleInput = [12, 3, 8, 3, -2, 0];
+  var taskChoiceEl = document.getElementById('task-choice');
+  var exampleInputs = {
+    s03: [12, 3, 8, 3, -2, 0],
+    s04: [4, 9, 4, 6, 1, 4]
+  };
 
   // Random trial id; the checker only requires a non-empty string.
   var trialId = 'trial-' + Array.from(crypto.getRandomValues(new Uint8Array(6)))
@@ -104,6 +118,7 @@ and run it. No physical equipment is needed.</p>
   var phase1 = null;
   var receipt = null;
   var issuing = false;
+  var chosenTask = 's03';
 
   function showStatus(el, message, ok) {
     el.textContent = message;
@@ -141,15 +156,18 @@ and run it. No physical equipment is needed.</p>
       showStatus(phase1Status, 'Exposure, prediction and reasoning are all required before a receipt can be issued.', false);
       return;
     }
+    var task = document.getElementById('task-s04').checked ? 's04' : 's03';
     issuing = true;
     issueBtn.disabled = true;
+    taskChoiceEl.disabled = true;
     exposureEl.readOnly = predictionEl.readOnly = reasoningEl.readOnly = true;
     try {
       var hash = await sha256Hex(canonicalPreReveal(block));
       phase1 = block;
       receipt = { version: 1, trial_id: trialId, hash: hash };
       receiptEl.value = JSON.stringify(receipt, null, 2);
-      promptEl.textContent = document.getElementById('prompt-template').content.textContent + JSON.stringify(exampleInput);
+      chosenTask = task;
+      promptEl.textContent = document.getElementById('prompt-template-' + chosenTask).content.textContent + JSON.stringify(exampleInputs[chosenTask]);
       promptEl.hidden = false;
       document.getElementById('example-runner').hidden = false;
       runExampleBtn.disabled = false;
@@ -157,6 +175,7 @@ and run it. No physical equipment is needed.</p>
       showStatus(phase1Status, 'Receipt issued. Phase 1 is locked and the prompt is revealed below. Copy the receipt; it is embedded in the exported report.', true);
     } catch (error) {
       issueBtn.disabled = false;
+      taskChoiceEl.disabled = false;
       exposureEl.readOnly = predictionEl.readOnly = reasoningEl.readOnly = false;
       showStatus(phase1Status, 'Could not compute the receipt hash in this browser.', false);
     } finally {
@@ -164,11 +183,34 @@ and run it. No physical equipment is needed.</p>
     }
   });
 
+  function mostFrequent(values) {
+    var counts = {};
+    var best = values[0];
+    var bestCount = 0;
+    for (var i = 0; i < values.length; i++) {
+      var value = values[i];
+      counts[value] = (counts[value] || 0) + 1;
+      if (counts[value] > bestCount) {
+        bestCount = counts[value];
+        best = value;
+      }
+    }
+    return best;
+  }
+
   runExampleBtn.addEventListener('click', function () {
     if (!receipt) return;
-    document.getElementById('example-result').textContent = JSON.stringify(exampleInput.slice().sort(function (a, b) {
+    var input = exampleInputs[chosenTask];
+    var sorted = input.slice().sort(function (a, b) {
       return a - b;
-    }));
+    });
+    var result = 'Sorted: ' + JSON.stringify(sorted) + '. ';
+    if (chosenTask === 's04') {
+      result += 'Most frequent: ' + mostFrequent(input) + '.';
+    } else {
+      result += '4th smallest: ' + sorted[3] + '.';
+    }
+    document.getElementById('example-result').textContent = result;
   });
 
   document.getElementById('copy-receipt').addEventListener('click', async function () {
