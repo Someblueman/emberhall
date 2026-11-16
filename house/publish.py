@@ -196,6 +196,9 @@ def publish(record: Record, *, push=False) -> dict:
             raise ValueError("No source HEAD")
         contents = {name: committed_blob(record, head, "site/" + name)
                     for name in ("index.html", "house.css", "house.js")}
+        missing_page = committed_blob(record, head, "site/404.html", optional=True)
+        if missing_page is not None:
+            contents["404.html"] = missing_page
         contents.update(project_contents(record, head))
         # Only the Chronicle page is public, never its journal input. It is
         # rebuilt from the journal on every publication so it cannot go stale;
