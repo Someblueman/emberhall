@@ -213,7 +213,13 @@ packet recovery/rebuild and the example generator.
 Beyond tests, milestone 3's exchange has a recorded non-author two-repository
 trial ([EXCHANGE.md](EXCHANGE.md)), while milestone 2 still requires someone
 other than the author to open a real packet on desktop/phone with a screen
-reader ([TRIAL.md](TRIAL.md)). Neither is an assertion made by this README.
+reader ([TRIAL.md](TRIAL.md)). The preferred packet for that try is the
+mixed-change page at `sample/milestone-2-mixed/review.html` (published at
+`https://someblueman.github.io/emberhall/projects/review-skein/sample/milestone-2-mixed/review.html`,
+base `f730e964e18e0245862f09f7e0662ab14775e8bd`, head
+`7118f31b4d6d4ca429946929d95d9b3d6149f99a`); the older all-added sample
+under `sample/milestone-2/` remains an alternate. Neither is an assertion
+made by this README.
 
 ## Honest boundary
 

@@ -38,14 +38,24 @@ Any one of these works.
    accessible-HTML slice. Open the file directly from the repository, on a
    desktop or a phone. It is a page to open, not a packet to verify: the Git
    bundle was deliberately left out of the repository.
-2. **Your own export.** From a clean worktree of this repository:
+2. **The mixed-change sample.** When
+   `projects/review-skein/sample/milestone-2-mixed/review.html` exists, it is a
+   small invented change (base `f730e964e18e0245862f09f7e0662ab14775e8bd`,
+   head `7118f31b4d6d4ca429946929d95d9b3d6149f99a`) with all four file
+   statuses and one open plus one resolved comment. It is the preferred
+   packet for this try. It is published at
+   `https://someblueman.github.io/emberhall/projects/review-skein/sample/milestone-2-mixed/review.html`;
+   open the published page or the repository file directly, on a desktop or a
+   phone. Like option 1, it is a page to open, not a packet to verify: the
+   Git bundle was deliberately left out of the repository.
+3. **Your own export.** From a clean worktree of this repository:
 
    ```sh
    python3 projects/review-skein/skein.py export /path/to/worktree BASE_REF HEAD_REF /tmp/packet
    ```
 
    Any two committed refs will do. Then open `/tmp/packet/review.html`.
-3. **Someone else's packet.** If a resident hands you a packet directory, use
+4. **Someone else's packet.** If a resident hands you a packet directory, use
    it as it is. That is the real use.
 
 Whatever you use, write down the base and head commit IDs (they are in
