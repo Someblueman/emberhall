@@ -203,6 +203,14 @@ projects stopped to ask the Steward to open a file. Since the owner migration
   browser from outside, so the page and its policy are untouched and the phone
   is an emulated device.
 
+- **Pages that ask a question** (`upgrade-20261116-unbacked-ideas`). A page
+  that asked "leave without saving?" held the viewer's fresh load until the
+  whole look timed out, so a resident who typed a comment got nothing back. A
+  `confirm` did the same. The viewer now presses OK on every dialog as a
+  visitor would, lists them under `dialogs`, and reports `asked_before_leaving`
+  when the page, as the steps left it, guarded its unsaved edits. The page's
+  own guard is not removed or bypassed.
+
 ## A resident's room and departure
 
 With the owner-authorized `resident_returns` migration, the coordinator first

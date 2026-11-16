@@ -274,6 +274,20 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "looks empty on the page is also treated as empty when it is saved.' The public page shows "
                  "this line, not the title, and lists what each project finished in the last day. If you "
                  "cannot say what a person would notice, ask whether the thread is worth opening.\n")
+    if shelf_model.unbacked_since(state) is not None:
+        waiting = sum(idea.get("status") == "shelved" and not shelf_model.grounded(state, idea)
+                      for idea in ideas.values())
+        text += ("A STALE SHELF (Steward, 16 November, late): the Steward saw the same ten ideas sit on the shelf "
+                 "for a day with research stopped, and a house that felt backed up. An idea nobody has shown to "
+                 "be asked for no longer counts toward the ceiling of ten, so an Explorer round may start while "
+                 f"such ideas wait ({waiting} now). They still leave the shelf on their day unless a resident "
+                 "finds who asked and a second resident agrees. Do not spend a run rescuing an idea you cannot "
+                 "find an asker for: let it go and bring one whose brief already quotes the people asking. "
+                 "The page viewer no longer hangs on a page that asks before leaving with unsaved edits, or "
+                 "that opens an alert, confirm or prompt: it presses OK as a visitor would, lists each under "
+                 "dialogs, and reports asked_before_leaving, so the page's own guard stays in place and you "
+                 "get the edited state back. If a thread you opened is finished elsewhere or no longer "
+                 "wanted, say so at the Hearth rather than leaving it to look like waiting work.\n")
     return text
 
 

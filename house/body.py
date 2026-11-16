@@ -194,6 +194,9 @@ def shelf_view(state: dict) -> dict:
         last = shelf.get("research_at")
         view["research"] = {"last": last, "ceiling": shelf_model.SHELF_CEILING, "next": max(
             shelf_model.open_since(state), (last or 0) + shelf_model.RESEARCH_GAP_SECONDS)}
+        if shelf_model.unbacked_since(state) is not None:
+            # Only ideas shown to be asked for count toward the ceiling.
+            view["research"]["counted"] = shelf_model.shelf_load(state, shelf)
     return view
 
 

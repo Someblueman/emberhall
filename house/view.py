@@ -232,6 +232,7 @@ class Chrome:
         finally:
             os.close(high[0]); os.close(high[1])
         self.out, self.inp, self.buffer, self.events, self.last = mine_out, mine_in, b"", [], 0
+        self.dialogs = []
         self.deadline = time.monotonic() + SECONDS
         self.session = None
 
@@ -264,19 +265,38 @@ class Chrome:
                 raise ValueError("the browser stopped before the page was seen")
             self.buffer += chunk
 
-    def call(self, method: str, params: dict | None = None, root: bool = False) -> dict:
+    def send(self, method: str, params: dict | None = None, root: bool = False) -> int:
         self.last += 1
         message = {"id": self.last, "method": method, "params": params or {}}
         if self.session and not root:
             message["sessionId"] = self.session
         os.write(self.out, json.dumps(message).encode() + b"\0")
+        return self.last
+
+    def note(self, event: dict) -> None:
+        """Keep an event. A dialog stops the page until someone answers, so press its OK and write it down.
+
+        That covers alert, confirm and prompt, and the "leave without saving?" question a page asks when
+        it is reloaded with unsaved edits: unanswered, it held the reload until the whole look timed out.
+        The page's own guard is left as it is; the viewer answers as a visitor would and reports that it was asked.
+        """
+        self.events.append(event)
+        if event["method"] == "Page.javascriptDialogOpening":
+            params = event.get("params", {})
+            self.dialogs.append({"type": str(params.get("type", ""))[:20],
+                                 "message": " ".join(str(params.get("message", "")).split())[:200],
+                                 "answer": "accepted"})
+            self.send("Page.handleJavaScriptDialog", {"accept": True})
+
+    def call(self, method: str, params: dict | None = None, root: bool = False) -> dict:
+        mine = self.send(method, params, root)
         for answer in self.messages(self.deadline):
-            if answer.get("id") == self.last:
+            if answer.get("id") == mine:
                 if "error" in answer:
                     raise LookupError(f"{method}: {answer['error'].get('message', 'refused')}")
                 return answer.get("result", {})
             if "method" in answer:
-                self.events.append(answer)
+                self.note(answer)
         raise TimeoutError
 
     def wait(self, name: str, seconds: float) -> bool:
@@ -287,7 +307,7 @@ class Chrome:
             return True
         for answer in self.messages(time.monotonic() + seconds):
             if "method" in answer:
-                self.events.append(answer)
+                self.note(answer)
                 if answer["method"] == name:
                     return True
         return seen()
@@ -421,13 +441,16 @@ def look(executable: str, port: int, profile: Path, label: str, url: str, steps:
             shot.chmod(0o600)
             files.append(shot)
             covered += tall
-        errors, walk = chrome.errors(), None
+        errors, walk, guard = chrome.errors(), None, None
+        asked = len(chrome.dialogs)
         if not mobile:
             # Last, on a fresh load of the page without the steps: where real Tab presses go from the top.
             chrome.events.clear()
             chrome.call("Page.reload")
             chrome.wait("Page.loadEventFired", 8)
             chrome.pause(300)
+            # Whether leaving the page as the steps left it made it ask about unsaved changes.
+            guard = any(dialog["type"] == "beforeunload" for dialog in chrome.dialogs[asked:])
             chrome.world(frame)
             walk = []
             for _ in range(WALK):
@@ -438,7 +461,7 @@ def look(executable: str, port: int, profile: Path, label: str, url: str, steps:
                     break
                 walk.append(here)
         return {"loaded": loaded, "log": log, "facts": facts, "dom": dom, "files": files, "errors": errors,
-                "covered": round(covered), "walk": walk}
+                "covered": round(covered), "walk": walk, "dialogs": chrome.dialogs[:asked][:20], "guard": guard}
     except TimeoutError:
         raise ValueError(f"the page did not settle within {SECONDS} seconds on the {label}") from None
     except LookupError as error:
@@ -554,7 +577,7 @@ def render(workspace: Path, name: str, steps_name: str | None = None) -> dict:
     finally:
         httpd.shutdown(); httpd.server_close()
     result = {"page": name, "steps_played": len(steps), "screenshots": {}, "step_log": {}, "script_errors": {},
-              "layout": {}, "wider_than_screen": {}, "too_wide": {}, "focused_after_steps": {}}
+              "layout": {}, "wider_than_screen": {}, "too_wide": {}, "focused_after_steps": {}, "dialogs": {}}
     for label, view in seen.items():
         facts = view["facts"]
         width, height, density, _ = DEVICES[label]
@@ -571,12 +594,14 @@ def render(workspace: Path, name: str, steps_name: str | None = None) -> dict:
         result["wider_than_screen"][label] = facts["over"]
         result["too_wide"][label] = facts["wide"]
         result["focused_after_steps"][label] = facts["focused"]
+        result["dialogs"][label] = view["dialogs"]
     desktop, phone = read(seen["desktop"]["dom"]), read(seen["phone"]["dom"])
     text, small = tidy(seen["desktop"]["facts"]["text"]), tidy(seen["phone"]["facts"]["text"])
     result.update(desktop)
     result.update(title=" ".join(seen["desktop"]["facts"]["title"].split())[:200] or desktop["title"],
                   text=text[:TEXT_LIMIT], text_truncated=len(text) > TEXT_LIMIT,
                   fields=seen["desktop"]["facts"]["fields"], keyboard_walk=seen["desktop"]["walk"],
+                  asked_before_leaving=seen["desktop"]["guard"],
                   phone_text_differs=small != text)
     if small != text:
         result["phone_text"] = small[:TEXT_LIMIT]
@@ -585,7 +610,9 @@ def render(workspace: Path, name: str, steps_name: str | None = None) -> dict:
     result["note"] = (
         "Open the screenshot files to look at the page. text is what a visitor sees after your steps; fields is "
         "what each form field holds; keyboard_walk is where real Tab presses go on a fresh load of the page, without "
-        "your steps (use press steps to walk a later state). The phone is a 390 pixel wide screen: if layout_width is larger and zoom is below "
+        "your steps (use press steps to walk a later state). dialogs lists each alert, confirm or prompt the page opened "
+        "during your steps; the viewer pressed OK on each. asked_before_leaving is true when the page, as your steps "
+        "left it, asked whether to leave without saving before that fresh load. The phone is a 390 pixel wide screen: if layout_width is larger and zoom is below "
         "1, the page has no viewport line and a real phone shows it shrunk like this. This is the house's own "
         "Chrome with the network refused. It speaks nothing, so make no screen-reader claim from it.")
     return result

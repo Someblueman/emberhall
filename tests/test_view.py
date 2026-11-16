@@ -174,6 +174,33 @@ class RenderTests(MailboxCase):
         self.assertEqual(780, result["screenshots"]["phone"]["image_width"])
         self.assertEqual([], self.hits)
 
+    def test_a_page_that_asks_before_leaving_is_still_seen_and_its_questions_are_reported(self):
+        # Tern's ask of 16 November: an editor that guards unsaved edits held the viewer's fresh load until
+        # the whole look timed out, so no edited state came back at all.
+        (self.workspace / "pages/guard.html").write_text(
+            '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width">'
+            '<title>Guard</title></head><body><h1>Guard</h1><textarea id="body" aria-label="Comment"></textarea>'
+            '<button id="resolve">Resolve</button><output id="state">open</output><script>'
+            "var dirty=false;document.getElementById('body').addEventListener('input',function(){dirty=true;});"
+            "window.addEventListener('beforeunload',function(e){if(dirty){e.preventDefault();e.returnValue='';}});"
+            "document.getElementById('resolve').addEventListener('click',function(){"
+            "document.getElementById('state').textContent=confirm('Resolve this thread?')?'resolved':'open';});"
+            '</script></body></html>')
+        (self.workspace / "edit.json").write_text(json.dumps(
+            [{"fill": ["#body", "An unsaved comment"]}, {"click": "#resolve"}]))
+        result = view.render(self.workspace, "pages/guard.html", "edit.json")
+        self.assertIn({"field": "textarea#body", "holds": "An unsaved comment"}, result["fields"],
+                      "the edited state was read before the page was left")
+        self.assertIn("resolved", result["text"])
+        for label in ("phone", "desktop"):
+            self.assertEqual([{"type": "confirm", "message": "Resolve this thread?", "answer": "accepted"}],
+                             result["dialogs"][label], label)
+        self.assertIs(True, result["asked_before_leaving"], "the page's own guard spoke and is reported")
+        self.assertEqual(["textarea#body: Comment", "button#resolve: Resolve"], result["keyboard_walk"])
+        plain = view.render(self.workspace, "pages/strict.html")
+        self.assertIs(False, plain["asked_before_leaving"])
+        self.assertEqual({"phone": [], "desktop": []}, plain["dialogs"])
+
     def test_a_resident_sees_their_page_through_the_mailbox_and_nothing_leaves(self):
         argv = ["view", "pages/try.html", "--as", self.resident, "--request", "look-1", "--steps", "steps.json"]
         self.assertEqual("inspection", mailbox_jobs.lane(self.record, {

@@ -205,6 +205,50 @@ class WhoAskedTests(unittest.TestCase):
         self.assertIn("show who asked", focus_prompt(f.state | {"life": {}}, "research"))
 
 
+class UnbackedIdeasTests(WhoAskedTests):
+    """Later that day: ideas nobody has shown to be asked for no longer stop research."""
+
+    def full(self):
+        f = self.f
+        at = self.install()
+        ids = [f"i{n}" for n in range(shelf.SHELF_CEILING)]
+        for n, part in enumerate((ids[:4], ids[4:8], ids[8:])):
+            self.publish([asked_idea(key) for key in part], round_id=f"full{n}", actor=("author", "other", "v1")[n],
+                         at=f.state["at"] + shelf.RESEARCH_GAP_SECONDS)
+        return at, ids
+
+    def test_a_shelf_full_of_unbacked_ideas_stops_research_until_the_decision(self):
+        f = self.f
+        at, ids = self.full()
+        later = f.state["at"] + shelf.RESEARCH_GAP_SECONDS
+        generation = f.state["shelf"]["generation"]
+        self.assertFalse(shelf.research_open(f.state, f.state["shelf"], later, 1))
+        f.reject("", "explore-start", actor="other", at=later, round="r3", expect=generation, token="r3", seconds=100)
+        self.assertNotIn("counted", body.shelf_view(f.state)["research"])
+        self.assertNotIn("A STALE SHELF", asked_prompt(f.state, "v2"))
+        f.state["maintenance"]["migrations"][shelf.UNBACKED] = {"at": later}
+        self.assertEqual(0, shelf.shelf_load(f.state, f.state["shelf"]))
+        self.assertTrue(shelf.research_open(f.state, f.state["shelf"], later, 1))
+        self.assertEqual(0, body.shelf_view(f.state)["research"]["counted"])
+        prompt = asked_prompt(f.state, "v2")
+        self.assertIn("A STALE SHELF", prompt)
+        self.assertIn(f"({shelf.SHELF_CEILING} now)", prompt)
+        self.assertIn("asked_before_leaving", prompt)
+        f.send("explore-start", actor="other", at=later + 1, round="r3", expect=generation, token="r3", seconds=100)
+        self.assertEqual("r3", f.state["shelf"]["explorer"], "an Explorer round is under way")
+
+    def test_ideas_someone_asked_for_still_fill_the_shelf(self):
+        f = self.f
+        at, ids = self.full()
+        for key in ids:
+            f.send("idea-second", actor="v2", idea=key, verdict="keep", finding=PART)
+        later = f.state["at"] + shelf.RESEARCH_GAP_SECONDS
+        f.state["maintenance"]["migrations"][shelf.UNBACKED] = {"at": later}
+        self.assertEqual(shelf.SHELF_CEILING, shelf.shelf_load(f.state, f.state["shelf"]))
+        self.assertFalse(shelf.research_open(f.state, f.state["shelf"], later, 1))
+        self.assertEqual(shelf.SHELF_CEILING, body.shelf_view(f.state)["research"]["counted"])
+
+
 class SecondLookTests(WhoAskedTests):
     """The same evening: a project's worth brief needs a second, the Steward may drop, a need speaks plainly."""
 

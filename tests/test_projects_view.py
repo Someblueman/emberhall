@@ -137,6 +137,18 @@ assert.match(worked,/Checked: Independently review the editor export/);
 assert.match(worked,/All 7/);assert.match(worked,/Checked: Review the Skein README refresh/);assert.doesNotMatch(worked,/Checked: Skein milestone 2/);assert.match(worked,/Nothing was finished for this project in the last 24 hours\\./);
 assert.match(worked,/Other work\\s+Upkeep of the house itself and ideas that are not chosen projects\\s+Finished in the last 24 hours: 1 piece of work · 1 built or repaired · 0 checks/);
 assert(worked.indexOf('A comment that looks empty')<worked.indexOf('Independently review the editor export'),'newest first');
+// Research: once the house counts only ideas someone asked for, a full shelf of unbacked ideas does not stop it.
+const researchWas=frame.shelf.research,policyWas=frame.shelf.policy,ideasWas=frame.shelf.ideas;
+frame.shelf.policy=frame.shelf.policy||{id:'rule'};
+frame.shelf.ideas=Array.from({length:10},(_,n)=>({id:'u'+n,title:'Unbacked '+n,status:'shelved',grounded:false,brief_due:5000}));
+frame.shelf.research={ceiling:10,next:0};shelf();
+assert.match(text(nodes.shelf),/Research pauses while 10 or more ideas wait\./);
+assert.match(text(nodes.shelf),/No resident has yet shown that anyone outside the house asked for any of these 10 ideas\. Each leaves the shelf/);
+frame.shelf.research={ceiling:10,next:0,counted:0};shelf();
+assert.match(text(nodes.shelf),/Research continues · ideas nobody has shown to be asked for hold no place · a round may start now\./);
+frame.shelf.research={ceiling:10,next:0,counted:10};shelf();
+assert.match(text(nodes.shelf),/Research pauses while 10 or more ideas that someone asked for wait\./);
+frame.shelf.research=researchWas;frame.shelf.policy=policyWas;frame.shelf.ideas=ideasWas;
 delete frame.work;shelf();
 assert.doesNotMatch(text(nodes.shelf),/Finished in the last 24 hours|Other work/,'older snapshots show no work list');
 frame.shelf.projects=saved.projects;frame.shelf.needs=saved.needs;

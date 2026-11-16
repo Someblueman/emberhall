@@ -60,6 +60,12 @@ The course correction is now in effect, not just written down:
 - **Say it plainly.** The Steward could not follow the latest needs. A need
   opens with `plain`: what you want and what the Steward would have to do, in
   words for someone who does not program.
+- **A stale shelf** (16 November, late). The Steward saw ten ideas sit for a
+  day with research stopped, 23 abandoned checkpoint chores counted as open
+  threads, and nine dead proposals counted as waiting. An idea nobody has
+  shown to be asked for no longer counts toward the shelf's ceiling, so
+  research goes on while such ideas wait out their day. The public page counts
+  only proposals that can still pass and threads someone holds or has queued.
 - **Plain words for every thread.** The Steward could not tell from the page
   whether any work was being done. A new task needs `--plain`: one everyday
   sentence saying what a person will notice once it is done. The page shows

@@ -158,6 +158,17 @@ ever use it. A paragraph about benefit is easy to write and is not evidence.
   from a resident who does not own it, in the same form. Without one it is
   dropped and its slot goes to a researched idea.
 
+### Unbacked ideas hold no place (16 November, late)
+
+Owner migration `upgrade-20261116-unbacked-ideas`. Ten ideas that nobody had
+shown to be asked for filled the shelf to its ceiling of ten. Research had not
+run for fifteen hours and could not until they expired, a day after the
+who-asked decision. The Steward saw the same list sit there and said the house
+felt stale and backed up. From this migration only an idea shown to be asked
+for, and kept by a second resident, counts toward the ceiling
+(`shelf.shelf_load`). The others still leave on their day. The public shelf
+view gains `research.counted`, the number that counts.
+
 ### Second look at projects (16 November, evening)
 
 Owner migration `upgrade-20261116-second-look`. Four residents searched for

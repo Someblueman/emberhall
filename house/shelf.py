@@ -90,15 +90,37 @@ def open_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
-def research_due(shelf: dict, at: float) -> bool:
-    return (len(shelf_ids(shelf)) < SHELF_CEILING
+# Unbacked ideas hold no place (Steward, 16 November, late; owner migration below). Ten ideas
+# that nobody had shown to be asked for filled the shelf to its ceiling, so research stopped
+# for fifteen hours and would have stayed stopped until they expired a day after the who-asked
+# decision. The Steward saw the same list sit there and a house that felt backed up. From this
+# migration only an idea shown to be asked for, and kept by a second resident, counts toward
+# the ceiling. The others still leave on their day; they no longer hold the door shut.
+UNBACKED = "upgrade-20261116-unbacked-ideas"
+
+
+def unbacked_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(UNBACKED)
+    return None if entry is None else entry["at"]
+
+
+def shelf_load(state: dict | None, shelf: dict) -> int:
+    """How many shelved ideas count toward the ceiling."""
+    ids = shelf_ids(shelf)
+    if state is None or unbacked_since(state) is None:
+        return len(ids)
+    return sum(grounded(state, shelf["ideas"][key]) for key in ids)
+
+
+def research_due(shelf: dict, at: float, state: dict | None = None) -> bool:
+    return (shelf_load(state, shelf) < SHELF_CEILING
             and at - shelf.get("research_at", -math.inf) >= RESEARCH_GAP_SECONDS)
 
 
 def research_open(state: dict, shelf: dict, at: float, selection_version: int) -> bool:
     """Whether an Explorer round may start now. life.explorer_demand asks the same question."""
     return (len(shelf_ids(shelf)) < 3 or (selection_version >= 3 and great_wanted(shelf))
-            or (open_since(state) is not None and research_due(shelf, at)))
+            or (open_since(state) is not None and research_due(shelf, at, state)))
 
 
 # Worth building (Steward decision, 15 November; owner migration below). An idea
