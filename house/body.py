@@ -310,7 +310,7 @@ def public_task(task_id: str, task: dict) -> dict:
     return item
 
 
-WORK_SECONDS, WORK_LIMIT = 86400, 80
+WORK_SECONDS, WORK_LIMIT = 86400, 250
 CHECKING = re.compile(r"\b(reviews?|independent(ly)?|trial|audit|inspect|check|verify|try)\b", re.I)
 
 
