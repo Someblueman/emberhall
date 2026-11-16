@@ -16,9 +16,11 @@ nav { margin: 1rem 0; } nav li { margin: .3rem 0; }
 section { margin: 2rem 0; } h2 { font-size: 1.1rem; overflow-wrap: anywhere; }
 table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 caption { text-align: left; color: var(--muted); padding: .3rem 0; }
-th, td { border: 1px solid var(--border); vertical-align: top; }
-th.number { width: 4.5em; text-align: right; color: var(--muted); font-weight: normal;
+th, td { border: 1px solid var(--border); vertical-align: top; padding: .15rem .35rem; }
+thead th { text-align: left; }
+th.number { width: 4em; text-align: right; color: var(--muted); font-weight: normal;
   user-select: none; }
+thead th.number { font-weight: bold; color: var(--fg); }
 td.code { white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4;
   font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
 tr.insert td.new { background: var(--add); } tr.delete td.old { background: var(--del); }
@@ -31,21 +33,24 @@ a { color: inherit; } footer { color: var(--muted); margin-top: 2rem; }
   padding: .5rem 1rem; z-index: 1; }
 .skip:focus { left: 0; }
 a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
-.scroll { overflow-x: auto; }
-@media (max-width: 640px) { table { min-width: 34rem; } main { padding: .5rem; } }
+.scroll { overflow-x: auto; max-width: 100%; }
+@media (max-width: 640px) { main { padding: .5rem; } th, td { padding: .15rem .25rem; }
+  th.number { width: 2.8em; } td.code { font-size: 12px; } }
 
 .summary { border-left: 3px solid var(--border); padding: .2rem .8rem; margin: 1rem 0; }
 .orphans { border: 1px solid var(--border); padding: .75rem 1rem; margin: 1.5rem 0; }
 .comment-card { border-top: 1px solid var(--border); padding-top: .75rem; margin-top: .75rem; }
 .comment-card:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
 .comment-card h3 { font-size: 1rem; margin: 0 0 .35rem 0; overflow-wrap: anywhere; }
-.comment-meta { text-align: left; font-weight: normal; padding: .45rem .6rem;
-  background: var(--bg); color: var(--fg); overflow-wrap: anywhere; }
+.comment-label { text-align: right; font-weight: bold; font-size: .85rem; padding: .45rem .35rem;
+  color: var(--muted); background: var(--bg); }
+.comment-meta { margin-bottom: .25rem; color: var(--fg); overflow-wrap: anywhere; }
 .comment-cell { padding: .45rem .6rem; background: var(--bg); }
 .comment-body { margin: .25rem 0 0 0; white-space: pre-wrap; overflow-wrap: anywhere;
   font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .comment-extra { margin: .2rem 0 0 0; color: var(--muted); font-size: .9rem;
   overflow-wrap: anywhere; }
+@media (max-width: 640px) { .comment-label { font-size: .75rem; padding: .35rem .25rem; } }
 </style></head>
 <body><a class="skip" href="#files">Skip to changed files</a><main><h1>Skein review</h1>
 <p class="identity">Base: <code>f730e964e18e0245862f09f7e0662ab14775e8bd (f730e964e18e0245862f09f7e0662ab14775e8bd)</code><br>Head: <code>7118f31b4d6d4ca429946929d95d9b3d6149f99a (7118f31b4d6d4ca429946929d95d9b3d6149f99a)</code></p>
@@ -55,7 +60,7 @@ a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 <nav id="comments" aria-label="Comments"><h2>Comments in view (2)</h2><ol><li><a href="#comment-1">old-map</a> (resolved, anchored) — old-map.txt →  (old line 1): Invented resolved note: the obsolete map is removed; direct…</li><li><a href="#comment-2">departure</a> (open, anchored) — welcome.txt (new line 2): Invented open question: confirm the departure change from n…</li></ol></nav>
 <section id="file-1" aria-labelledby="file-1-title"><h2 id="file-1-title">renamed: notes.txt → directions.txt</h2>
 <div class="scroll"><table><caption>Old line and new line; 5 old / 5 new</caption>
-<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<thead><tr><th scope="col" class="number">Old</th><th scope="col" class="number">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
 <tbody><tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 1</th><th scope="row" class="number new-number">1</th><td class="old code">Start at the station.</td><td class="new code">Start at the station.</td></tr>
 <tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 2</th><th scope="row" class="number new-number">2</th><td class="old code">Follow the river.</td><td class="new code">Follow the river.</td></tr>
 <tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 3</th><th scope="row" class="number new-number">3</th><td class="old code">Use the marked crossing.</td><td class="new code">Use the marked crossing.</td></tr>
@@ -64,24 +69,24 @@ a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 </tbody></table></div></section>
 <section id="file-2" aria-labelledby="file-2-title"><h2 id="file-2-title">deleted: old-map.txt → </h2>
 <div class="scroll"><table><caption>Old line and new line; 2 old / 0 new</caption>
-<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<thead><tr><th scope="col" class="number">Old</th><th scope="col" class="number">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
 <tbody><tr class="delete"><th scope="row" class="number old-number"><span class="sr">Removed.</span> 1</th><th scope="row" class="number new-number"></th><td class="old code">This map describes an obsolete jetty.</td><td class="new code"></td></tr>
-<tr class="comment-row" id="comment-1"><th scope="row" colspan="2" class="comment-meta"><span class="sr">Comment.</span> <strong>old-map</strong> (resolved, anchored, old line 1)</th><td colspan="2" class="comment-cell"><pre class="comment-body">Invented resolved note: the obsolete map is removed; directions remain in the renamed file.</pre></td></tr>
+<tr class="comment-row" id="comment-1"><th scope="row" colspan="2" class="comment-label">Comment<span class="sr">.</span></th><td colspan="2" class="comment-cell"><div class="comment-meta"><strong>old-map</strong> (resolved, anchored, old line 1)</div><pre class="comment-body">Invented resolved note: the obsolete map is removed; directions remain in the renamed file.</pre></td></tr>
 <tr class="delete"><th scope="row" class="number old-number"><span class="sr">Removed.</span> 2</th><th scope="row" class="number new-number"></th><td class="old code">Use the newer route instead.</td><td class="new code"></td></tr>
 </tbody></table></div></section>
 <section id="file-3" aria-labelledby="file-3-title"><h2 id="file-3-title">added:  → schedule.txt</h2>
 <div class="scroll"><table><caption>Old line and new line; 0 old / 3 new</caption>
-<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<thead><tr><th scope="col" class="number">Old</th><th scope="col" class="number">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
 <tbody><tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">1</th><td class="old code"></td><td class="new code">Ferry at ten.</td></tr>
 <tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">2</th><td class="old code"></td><td class="new code">Wait by the lantern.</td></tr>
 <tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">3</th><td class="old code"></td><td class="new code">Bring a coat.</td></tr>
 </tbody></table></div></section>
 <section id="file-4" aria-labelledby="file-4-title"><h2 id="file-4-title">modified: welcome.txt</h2>
 <div class="scroll"><table><caption>Old line and new line; 5 old / 5 new</caption>
-<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<thead><tr><th scope="col" class="number">Old</th><th scope="col" class="number">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
 <tbody><tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 1</th><th scope="row" class="number new-number">1</th><td class="old code">Welcome to the riverside station.</td><td class="new code">Welcome to the riverside station.</td></tr>
 <tr class="replace"><th scope="row" class="number old-number"><span class="sr">Changed.</span> 2</th><th scope="row" class="number new-number">2</th><td class="old code">The board says: ferry at nine.</td><td class="new code">The board says: ferry at ten.</td></tr>
-<tr class="comment-row" id="comment-2"><th scope="row" colspan="2" class="comment-meta"><span class="sr">Comment.</span> <strong>departure</strong> (open, anchored, new line 2)</th><td colspan="2" class="comment-cell"><pre class="comment-body">Invented open question: confirm the departure change from nine to ten.</pre></td></tr>
+<tr class="comment-row" id="comment-2"><th scope="row" colspan="2" class="comment-label">Comment<span class="sr">.</span></th><td colspan="2" class="comment-cell"><div class="comment-meta"><strong>departure</strong> (open, anchored, new line 2)</div><pre class="comment-body">Invented open question: confirm the departure change from nine to ten.</pre></td></tr>
 <tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 3</th><th scope="row" class="number new-number">3</th><td class="old code">Keep the path clear.</td><td class="new code">Keep the path clear.</td></tr>
 <tr class="delete"><th scope="row" class="number old-number"><span class="sr">Removed.</span> 4</th><th scope="row" class="number new-number"></th><td class="old code">A faded notice will be removed.</td><td class="new code"></td></tr>
 <tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 5</th><th scope="row" class="number new-number">4</th><td class="old code">Meet at the lantern.</td><td class="new code">Meet at the lantern.</td></tr>
