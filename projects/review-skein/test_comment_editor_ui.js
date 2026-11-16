@@ -138,6 +138,62 @@ function exercise(envelope) {
   return page;
 }
 
+function exerciseLiveCommentFilters(envelope, anchors) {
+  // Resolution edits refresh immediately, including combined state/search filters.
+  // Body edits wait for commit or blur so typing cannot hide its own textarea.
+  for (const state of ["anchored", "orphan"]) {
+    const page = setup(envelope, anchors);
+    const find = id => page.nodes.find(n => n.id === id);
+    const position = envelope.document.comments.findIndex(c => c.state === state);
+    const body = find(`comment-${position}-body`);
+    const resolution = find(`comment-${position}-resolution`);
+    const article = find(`comment-${position}`);
+    const item = page.elements["comment-index"].children[position];
+    const status = find("comment-filter-status");
+    const resFilter = find("filter-resolution");
+    const stateFilter = find("filter-state");
+    const query = find("filter-comment-query");
+    stateFilter.value = state; stateFilter.fire("change");
+    resFilter.value = resolution.value; resFilter.fire("change");
+    query.value = "original"; query.fire("input");
+    assert.equal(article.hidden, false);
+    resolution.value = resolution.value === "open" ? "resolved" : "open";
+    resolution.fire("change");
+    assert.equal(article.hidden, true, "resolution edit refreshes active filters");
+    assert.equal(item.hidden, true);
+    assert.equal(status.textContent, "Showing 0 of 2 comments.");
+
+    resFilter.value = "all"; resFilter.fire("change");
+    body.focus();
+    body.value = "Rewritten body"; body.fire("input");
+    assert.equal(article.hidden, false, "typing keeps the active textarea visible");
+    assert.equal(item.hidden, false);
+    assert.equal(body.focused, true);
+    body.fire("change");
+    assert.equal(article.hidden, true, "committed body edit refreshes search");
+    assert.equal(item.hidden, true);
+    assert.equal(status.textContent, "Showing 0 of 2 comments.");
+
+    query.value = "rewritten"; query.fire("input");
+    assert.equal(article.hidden, false);
+    body.value = "Final text"; body.fire("input");
+    assert.equal(article.hidden, false);
+    body.fire("blur");
+    assert.equal(article.hidden, true, "blur also refreshes search");
+    assert.equal(item.hidden, true);
+    assert.equal(status.textContent, "Showing 0 of 2 comments.");
+    assert.equal(query.value, "rewritten", "edits preserve active filters");
+    assert.equal(stateFilter.value, state);
+    assert.equal(resFilter.value, "all");
+    page.elements.download.fire("click");
+    const saved = JSON.parse(page.blobs[0].text);
+    assert.equal(saved.document.comments[position].body, "Final text");
+    assert.equal(saved.document.comments[position].resolution, resolution.value);
+    assert.equal(saved.document.comments[position].state, state);
+    assert.equal(saved.document.comments.length, 2, "hidden comments remain in download");
+  }
+}
+
 function exerciseComposer(envelope, anchors) {
   const page = setup(envelope, anchors);
   assertControlsLabeled(page);
@@ -333,6 +389,8 @@ if (process.argv.length > 2) {
   exercise(envelope);
   exercise({...envelope, document: {...envelope.document, comments: []}});
   const compose = {...envelope, version: 2, packet_sha256: "c".repeat(64), anchors_sha256: "d".repeat(64)};
+  exerciseLiveCommentFilters(envelope);
+  exerciseLiveCommentFilters(compose, [anchor]);
   exerciseComposer(compose, [anchor]);
   exerciseComposer({...compose, document: {...compose.document, comments: []}}, [anchor]);
   exerciseComposer({...compose, document: {...compose.document, comments: []}}, []);

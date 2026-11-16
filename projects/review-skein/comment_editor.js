@@ -171,11 +171,16 @@ function startEditor(document, environment) {
       updateStatus();
       refreshPreview();
     });
+    // Defer body filtering until the edit is committed or focus leaves: a
+    // textarea must not disappear when its text stops matching during typing.
+    body.addEventListener("change", applyCommentFilters);
+    body.addEventListener("blur", applyCommentFilters);
     resolution.addEventListener("change", () => {
       comment.resolution = resolution.value;
       needsDownload = true;
       updateStatus();
       refreshPreview();
+      applyCommentFilters();
     });
     fields.push(body);
     renderedComments.push({comment, article, indexItem: item});
