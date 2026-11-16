@@ -120,7 +120,8 @@ main {
   outline:none;
 }
 .content-view {
-  max-width:980px;
+  max-width:1120px;
+  margin:0 auto;
   min-height:55vh;
 }
 .content-view > section {
@@ -359,6 +360,25 @@ h2 {
   grid-template-columns:1fr auto;
   gap:3px;
   font-size:12px;
+}
+#budgets {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+#budgets .account {
+  margin:0;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:color-mix(in srgb, var(--paper) 3%, transparent);
+  align-content:start;
+}
+@media (min-width:760px) {
+  #budgets {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+  }
 }
 .account small {
   grid-column:1 / -1;
@@ -957,9 +977,9 @@ footer a {
 @media (min-width:1051px) and (min-height:760px) {
   .house-explorer {
     position:sticky;
-    top:110px;
-    height:min(900px, calc(100vh - 130px));
-    height:min(900px, calc(100dvh - 130px));
+    top:96px;
+    height:min(900px, calc(100vh - 112px));
+    height:min(900px, calc(100dvh - 112px));
     display:grid;
     grid-template-rows:auto minmax(0,1fr) auto;
     gap:8px;
@@ -1039,6 +1059,16 @@ footer a {
   text-underline-offset: 3px;
 }
 
+.shelf-project-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px 14px;
+  margin:4px 0 6px;
+}
+.shelf-project-actions .room-shelf-link {
+  margin-top:0;
+}
+
 .catchup-panel{margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--line);display:grid;gap:.6rem}
 .catchup-controls{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
 .catchup-controls input{width:5.5rem;padding:.28rem .4rem;border-radius:.35rem;border:1px solid var(--line);background:var(--room);color:inherit;font:inherit}
@@ -1048,8 +1078,11 @@ footer a {
 .catchup-jump{flex:0 0 auto}
 
 /* Council records remain readable on a phone; reasons are plain text. */
+.vote-summary-banner { margin:0 0 12px; padding:9px 12px; border:1px solid var(--gold); border-radius:8px; background:color-mix(in srgb, var(--gold) 8%, transparent); color:var(--paper); }
 .vote-round { border-top:1px solid var(--line); padding:.7rem 0; }
 .vote-round summary { cursor:pointer; overflow-wrap:anywhere; }
+.vote-summary { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 8px; }
+.vote-tags { display:inline-flex; flex-wrap:wrap; gap:5px; }
 .vote-ballot { border-left:2px solid var(--gold,#d2ac70); padding-left:.7rem; margin:.8rem 0; }
 .vote-reason { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.55; }
 .vote-alternatives { margin:.6rem 0; }
@@ -1183,8 +1216,10 @@ footer a {
   .house-layout:not(.room-open) .journal-pane > section { background:var(--room); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:0; }
   .house-layout:not(.room-open) .journal-pane > .presence-section { margin:0; }
   .house-layout:not(.room-open) .journal-pane > details { grid-column:1 / -1; }
-  .house-layout.room-open .journal-pane { display:flex; flex-direction:column; }
-  .house-layout.room-open .room-card { order:-1; }
+  .house-layout.room-open .journal-pane { display:flex; flex-direction:column; gap:18px; }
+  .house-layout.room-open .journal-pane > section { margin-bottom:0; }
+  .house-layout.room-open .room-card { order:-1; background:var(--room); border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
+  .house-layout.room-open .growth-section { background:var(--room); border:1px solid var(--line); border-left:3px solid var(--gold, #bba16b); border-radius:12px; padding:14px 16px; }
   .house-layout.room-open .lately-strip { display:none; }
 }
 @media (prefers-reduced-motion:reduce) {
