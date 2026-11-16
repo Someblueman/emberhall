@@ -1701,7 +1701,7 @@ function safeHttpUrl(raw) {
 function collectionUrl(entry) {
   const href=entry.href;
   if(typeof href!=="string")return null;
-  if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*$/.test(href))return href;
+  if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*(?:[a-z0-9-]+\.html)?$/.test(href))return href;
   if(entry.category==="house-tool" && entry.action==="Open" && href==="chronicle/index.html")return href;
   if((entry.category==="house-tool" || (entry.category==="creation" && entry.action==="Read guide")) && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
   return null;
@@ -1747,7 +1747,8 @@ function renderCollection() {
   if(tools.length) {
     const details=html("details","house-tools",undefined,box);
     html("summary","",`Tools for the house (${tools.length})`,details);
-    tools.forEach(entry=>card(entry,details));
+    const toolGrid=html("div","creation-grid house-tools-grid",undefined,details);
+    tools.forEach(entry=>card(entry,toolGrid));
   }
 }
 function renderViewContext() {
@@ -1796,6 +1797,24 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
   html("strong", "", titleFor(project, "project"), item);
   const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
   html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
+  if (project.status === "active" && typeof current !== "undefined" && current && typeof catalog !== "undefined" && Array.isArray(catalog)) {
+    const entry = catalog.find(candidate => candidate && candidate.id === project.idea);
+    const sampleHref = entry ? collectionUrl(entry) : null;
+    const guideId = entry && /^[a-z0-9-]+$/.test(entry.id) ? entry.id : null;
+    if (sampleHref || guideId) {
+      const actions = html("div", "shelf-project-actions", undefined, item);
+      if (sampleHref) {
+        const sampleLink = html("a", "room-shelf-link", `${entry.action} ${entry.title} sample →`, actions);
+        sampleLink.href = sampleHref;
+      }
+      if (guideId) {
+        const guideLink = html("a", "room-shelf-link", "Read guide ↗", actions);
+        guideLink.href = `https://github.com/Someblueman/emberhall/blob/main/projects/${guideId}/README.md`;
+        guideLink.target = "_blank";
+        guideLink.rel = "noopener noreferrer";
+      }
+    }
+  }
   const details = html("details", "project-details", undefined, item);
   html("summary", "", "Milestone and details", details);
   if (Array.isArray(project.milestones) && project.milestones.length) {
@@ -2001,7 +2020,7 @@ function voting() {
   html("p", "small", "Recorded votes and reasons, not inferred opinions. Names and agent families follow the selected historical moment.", box);
   const bell = html("div", "vote-bell", undefined, box);
   html("strong", "", "The Steward’s bell", bell);
-  html("p", "small", "Rule notices start a 24-hour veto window. Project choices do not ring the bell; it is not a daily activity report.", bell);
+  html("p", "small", "Rule and wake-prompt notices start a 24-hour veto window; code renovations wait 1 hour. Project choices do not ring the bell; it is not a daily activity report.", bell);
   const noticed = proposals.filter(p => p.notice).sort((a,b) => b.notice.at-a.notice.at);
   html("p", "small", noticed.length ? `Last recorded notice: ${noticed[0].title} · ${stamp(noticed[0].notice.at)}` : "No public rule notice recorded at this moment.", bell);
   html("p", "small", record.inbox_checked_at ? `Last successful inbox check recorded: ${stamp(record.inbox_checked_at)}` : "No successful inbox check recorded at this moment.", bell);
@@ -2036,6 +2055,32 @@ function voting() {
       proposal.status, proposal.rule_status, proposal.mode,
       ...(proposal.endorsements || []).map(v => v.resident?.name)];
   }
+  function proposalSummaryTags(proposal, nowSec) {
+    const modeLabels = { rule: "Rule", "wake-prompt": "Wake prompt", floor: "Floor", renovation: "Renovation", legacy: "Legacy" };
+    const modeText = modeLabels[proposal.mode] || (proposal.mode ? String(proposal.mode) : null);
+    const tags = [];
+    if (modeText) tags.push({ text: modeText, cls: proposal.mode === "renovation" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
+    if (proposal.stale) {
+      tags.push({ text: "Stale base", cls: "shelf-tag shelf-tag-warn" });
+    } else if (proposal.status === "pending") {
+      if (proposal.notice) {
+        const until = proposal.notice.until;
+        const statusText = Number.isFinite(until) && Number.isFinite(nowSec)
+          ? (nowSec >= until ? "Window elapsed" : "Notice active")
+          : "Noticed";
+        tags.push({ text: statusText, cls: statusText === "Window elapsed" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
+      } else {
+        tags.push({ text: "Pending", cls: "shelf-tag" });
+      }
+      if (proposal.mode !== "legacy") {
+        tags.push({ text: `${(proposal.endorsements || []).length}/2 endorsements`, cls: "shelf-tag" });
+      }
+    } else {
+      const raw = String(proposal.rule_status || proposal.status || "");
+      if (raw) tags.push({ text: raw[0].toUpperCase() + raw.slice(1), cls: "shelf-tag" });
+    }
+    return tags;
+  }
   function renderLists() {
     for (const node of lists.querySelectorAll("details")) {
       if (!node.id) continue;
@@ -2044,10 +2089,25 @@ function voting() {
     }
     lists.replaceChildren();
     const query = workshopSearchText(votingState.query);
+    const nowSec = (typeof current !== "undefined" && current)
+      ? Date.now() / 1000
+      : (frame && Number.isFinite(frame.at) ? frame.at : NaN);
     const filteredChoices = [...choices].reverse().filter(choice => matches(query, choiceText(choice)));
     const filteredProposals = [...proposals].reverse().filter(proposal => matches(query, proposalText(proposal)));
     results.textContent = `${filteredChoices.length} of ${choices.length} choices · ${filteredProposals.length} of ${proposals.length} proposals match search at this moment`;
     clearSearch.disabled = !votingState.query;
+    const openChoices = choices.filter(c => c.status === "open");
+    const activePending = proposals.filter(p => p.status === "pending" && !p.stale);
+    const elapsedPending = activePending.filter(p => p.notice && Number.isFinite(p.notice.until) && Number.isFinite(nowSec) && nowSec >= p.notice.until);
+    if (!query && (openChoices.length || activePending.length)) {
+      const bannerParts = [];
+      if (openChoices.length) bannerParts.push(`${openChoices.length} open project ${openChoices.length === 1 ? "choice" : "choices"}`);
+      if (activePending.length) {
+        const elapsedNote = elapsedPending.length ? ` (${elapsedPending.length} notice elapsed)` : "";
+        bannerParts.push(`${activePending.length} pending ${activePending.length === 1 ? "proposal" : "proposals"}${elapsedNote}`);
+      }
+      html("p", "vote-summary-banner small", `Waiting on council: ${bannerParts.join(" · ")}.`, lists);
+    }
     html("h3", "", `Project choices (${filteredChoices.length}${query ? ` of ${choices.length}` : ""})`, lists);
     if (!choices.length) html("p", "empty-note", "No project ballots recorded at this moment.", lists);
     else if (!filteredChoices.length) html("p", "empty-note", "No choices match this search at this moment. Clear search to look again.", lists);
@@ -2102,7 +2162,13 @@ function voting() {
       const item = html("details", "vote-round", undefined, lists);
       item.id = `vote-rule-${proposal.id}`;
       const status = proposal.stale ? "Stale base · needs a new proposal" : proposal.rule_status || proposal.status;
-      html("summary", "", `${titleFor(proposal,"proposal")} · ${status}`, item);
+      const summary = html("summary", "vote-summary", undefined, item);
+      html("span", "vote-summary-title", `${titleFor(proposal,"proposal")} · ${status}`, summary);
+      const tags = proposalSummaryTags(proposal, nowSec);
+      if (tags.length) {
+        const tagRow = html("span", "vote-tags", undefined, summary);
+        tags.forEach(tag => html("span", tag.cls, tag.text, tagRow));
+      }
       html("p", "small", `${proposal.mode} · proposed by ${person(proposal.author)} · ${stamp(proposal.proposed_at)}`, item);
       recordId(item,proposal.id);
       html("p", "", proposal.reason, item);

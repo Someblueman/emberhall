@@ -1,0 +1,39 @@
+{
+  "anchors": "anchors.json",
+  "base": {
+    "commit": "aba06b970c1ddd2544cda6030e20cefd1aa517ec",
+    "ref": "aba06b970c1ddd2544cda6030e20cefd1aa517ec"
+  },
+  "bundle": "changes.bundle",
+  "comments": "comments.json",
+  "diff": "review.html",
+  "files": [
+    {
+      "new_lines": 59,
+      "new_path": "projects/review-skein/COMMENTS.md",
+      "old_lines": 0,
+      "old_path": null,
+      "status": "added"
+    },
+    {
+      "new_lines": 135,
+      "new_path": "projects/review-skein/comments_view.py",
+      "old_lines": 0,
+      "old_path": null,
+      "status": "added"
+    },
+    {
+      "new_lines": 176,
+      "new_path": "projects/review-skein/test_comments_view.py",
+      "old_lines": 0,
+      "old_path": null,
+      "status": "added"
+    }
+  ],
+  "format": "review-skein-packet",
+  "head": {
+    "commit": "d0bf39549b9d6a1e76c5740d834554cde6e881dc",
+    "ref": "d0bf39549b9d6a1e76c5740d834554cde6e881dc"
+  },
+  "version": 1
+}

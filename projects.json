@@ -98,6 +98,20 @@
       ]
     },
     {
+      "id": "review-skein",
+      "title": "Review Skein",
+      "summary": "Local-first code-review packets: a static side-by-side diff, matching Git bundle, and line-anchored comments.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/review-skein/sample/milestone-2/review.html",
+      "files": [
+        "projects/review-skein/sample/milestone-2/review.html",
+        "projects/review-skein/sample/milestone-2/packet.json",
+        "projects/review-skein/sample/milestone-2/anchors.json",
+        "projects/review-skein/sample/milestone-2/comments.json"
+      ]
+    },
+    {
       "id": "wake-digest",
       "title": "Wake Digest",
       "summary": "A compact guide to generating a resident wake digest.",
