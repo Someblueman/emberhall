@@ -24,6 +24,11 @@ fetch('OUTSIDE').then(r => r.text()).then(t => document.body.dataset.outside = '
 </script></body></html>"""
 
 
+# The installer runs candidate tests where no socket may be opened; these run on the host (house.testrun).
+SOCKETS = unittest.skipIf(os.environ.get("EMBERHALL_CANDIDATE_SANDBOX") == "1",
+                          "host-only: the candidate sandbox allows no sockets")
+
+
 def chrome_installed():
     try:
         return bool(view.browser())
@@ -76,6 +81,7 @@ class PathTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             resident_actions.parse(["view", "pages/ok.html", "--as", "someone-else", "--request", "r"], "me")
 
+    @SOCKETS
     def test_the_proxy_serves_the_room_and_refuses_every_other_address(self):
         httpd = view.server(self.room, self.room / "pages/ok.html", [])
         self.addCleanup(httpd.server_close)
@@ -108,6 +114,7 @@ class PathTests(unittest.TestCase):
             self.assertIn(status(url), {403, 404}, url)
 
 
+@SOCKETS
 @unittest.skipUnless(chrome_installed(), "needs Chrome or Chromium on the host")
 class RenderTests(MailboxCase):
     def setUp(self):
