@@ -1,0 +1,8 @@
+{
+  "files": {
+    "house/checkpoint.py": "c763702cd07c32cccdb50326c0a1dc4bdaa549bd69437169a15011f701c46b38",
+    "house/publish.py": "191155992fb9d03f879532d721a87bd7df66ac85a1c36973d252ae783dfdf247"
+  },
+  "source_commit": "408c6d4268cc51fd404fd2f979e1767f452b9450",
+  "summary": "Install accepted checkpoint bundle bound and missing-page publisher together"
+}
