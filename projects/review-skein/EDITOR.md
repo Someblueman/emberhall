@@ -14,13 +14,24 @@ python3 projects/review-skein/comment_editor.py compose \
   /path/to/packet /path/to/new-editor.html
 ```
 
-Choose a rendered line in the labelled selector; the preview gives its complete
-text, path, side, line number and commit. Enter a unique ID (1–100 ASCII letters,
-digits, dot, underscore or hyphen, starting with a letter or digit) and body, then
-choose **Add comment to download**. The new comment appears in the ordinary
-comment editor below, where its body and resolution can be changed. Repeat for
-more comments. Download is blocked while an unadded ID/body draft remains: add it
-first, or clear both draft fields. The packet changes only when the download is
+Choose a rendered line in the labelled selector (filtering by file path, `old`/`new`
+side, or line text/number when a packet has many lines); the preview gives available
+rendered lines within ±3 actual line numbers on that file and side, its commit,
+and any existing comments already on that line. Missing lines are omitted;
+distant hunks are never pulled in to fill the range. Context uses the packet's
+available lines even when filters narrow the selector to a single result.
+Filtering keeps the selected line when it still matches; otherwise the selector
+chooses the first matching line. With no matches, adding a comment is blocked.
+In `compose` mode, each anchored comment also offers
+**Comment on same line** to select its anchor in the composer. Enter a unique ID
+(1–100 ASCII letters, digits, dot, underscore or hyphen, starting with a letter or
+digit) and body, then choose **Add comment to download**. The new comment appears in
+the ordinary comment editor below, where its body and resolution can be changed.
+Filter existing comments by resolution (`open`/`resolved`), anchor state
+(`anchored`/`orphan`), or text search; if a hidden comment has an invalid body when
+you choose **Download edits**, the page resets those filters and focuses that field.
+Repeat for more comments. Download is blocked while an unadded ID/body draft remains:
+add it first, or clear both draft fields. The packet changes only when the download is
 applied through the CLI. There is no delete or move-anchor operation.
 
 For a page that only edits existing comments, retain the comments-file command.

@@ -323,6 +323,45 @@ class ComposerLifecycleTests(SkeinFixture):
         with self.assertRaisesRegex(skein.SkeinError, "symlink"):
             comment_editor.render_composer(self.packet)
 
+    @unittest.skipUnless(shutil.which("node"), "Node needed for multi-file composer lifecycle")
+    def test_composer_html_csp_and_multifile_apply(self):
+        self.export()
+        anchors = skein._load_anchors(self.packet)
+        first_new = next(a for a in anchors if a.path == "alpha.txt" and a.side == "new")
+        skein.add_comment(self.packet, "initial-alpha", first_new.commit,
+                          first_new.path, first_new.side, first_new.line, "First note")
+        html = comment_editor.render_composer(self.packet)
+        self.assertIn(".filter-row", html)
+        self.assertIn("[hidden]", html)
+        page = Page(html)
+        self.assertEqual(len(page.scripts), 3)
+        script = page.scripts[2]["text"]
+        self.assertNotIn("innerHTML", script)
+        digest = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
+        csp = next(attrs["content"] for tag, attrs in page.tags
+                   if attrs.get("http-equiv") == "Content-Security-Policy")
+        self.assertIn(f"script-src 'sha256-{digest}'", csp)
+        self.assertNotIn("<", page.scripts[0]["text"])
+        self.assertNotIn("<", page.scripts[1]["text"])
+        envelope_file = self.root / "env.json"
+        anchors_file = self.root / "anc.json"
+        edits_file = self.root / "edits.json"
+        envelope_file.write_text(page.scripts[0]["text"], encoding="utf-8")
+        anchors_file.write_text(page.scripts[1]["text"], encoding="utf-8")
+        subprocess.run(
+            ["node", str(ROOT / "test_comment_editor_ui.js"),
+             str(envelope_file), str(edits_file), str(anchors_file)],
+            check=True, capture_output=True,
+        )
+        changed = comment_editor.apply_edits(self.packet, edits_file)
+        self.assertEqual(changed, 2)
+        comments = skein.loads_comments((self.packet / "comments.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(comments), 3)
+        self.assertEqual(comments[0].body, "First note")
+        self.assertEqual(comments[1].anchor, anchors[-1])
+        self.assertEqual(comments[2].anchor, anchors[0])
+        self.assertEqual(comments[2].resolution, "resolved")
+
 
 if __name__ == "__main__":
     unittest.main()
