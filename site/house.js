@@ -16,7 +16,8 @@ const descriptions = {
   archive: "What hurt, what helped, and who checked. The gold seams remember repairs without erasing the crack.",
   council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
   bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time.",
-  counting: "Tally rods and route stones track how the four agent families share work, review and exploration runs, model rotation and rests."
+  counting: "Tally rods and route stones track how the four agent families share work, review and exploration runs, model rotation and rests.",
+  assay: "Independent cross-family source reviews, gate checks, integrated commits and mended scars."
 };
 let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
@@ -239,6 +240,23 @@ function furnishings(g, room, x, y, lit, residents) {
     polygon(ledger,[[x+58,y+70,24],[x+89,y+70,24],[x+89,y+95,24],[x+58,y+95,24]],"#e6d7ae");
     polygon(ledger,[[x+89,y+70,24],[x+120,y+70,24],[x+120,y+95,24],[x+89,y+95,24]],"#d2c399");
     caption(ledger,x+90,y+118,0,`${runs.length} ${runs.length===1?"run":"runs"} tallied`,"resident-label");
+  } else if(room === "assay") {
+    const reviews=(frame.runs||[]).filter(r=>r.assignment?.lane==="review"&&(!Number.isInteger(r.sequence)||r.sequence<=frame.seq));
+    const commits=(Array.isArray(data?.commits)?data.commits:[]).filter(c=>Number.isFinite(c.at)&&(!Number.isFinite(frame.at)||c.at<=frame.at));
+    const bench=el("g",{"data-interior":"assay"},g);
+    el("title",{},bench,`Assay bench · ${reviews.length} recorded ${reviews.length===1?"review":"reviews"} · ${commits.length} source ${commits.length===1?"commit":"commits"} at this moment`);
+    box(bench,x+18,y+12,144,10,50,["#a8926a","#465852","#736b52"]);
+    reviews.slice(-6).forEach((rev,i)=>{
+      const kind=kinds[rev.agent]||kinds.unrecorded,px=x+27+i*22;
+      const slate=el("g",{"data-assay-review":rev.id},bench);
+      el("title",{},slate,`${rev.id} · ${kind.name} · ${rev.outcome||rev.status||"recorded"}`);
+      box(slate,px,y+23,14,4,20,[kind.color,"#4f4b3e","#7d755c"],20);
+      polygon(slate,[[px+3,y+27.2,26],[px+11,y+27.2,26],[px+11,y+27.2,34],[px+3,y+27.2,34]],rev.outcome==="success"?"#75b4a1":"#d7a75f");
+    });
+    box(bench,x+44,y+64,90,42,22,["#b4915d","#6f5c42","#8f754d"]);
+    polygon(bench,[[x+56,y+71,23],[x+86,y+71,23],[x+86,y+97,23],[x+56,y+97,23]],"#e6d7ae");
+    polygon(bench,[[x+92,y+71,23],[x+122,y+71,23],[x+122,y+97,23],[x+92,y+97,23]],"#c8d6cc");
+    caption(bench,x+90,y+118,0,`${reviews.length} ${reviews.length===1?"review":"reviews"} · ${commits.length} source ${commits.length===1?"commit":"commits"}`,"resident-label");
   } else if(room !== "bedroom" && !residents.length) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
@@ -606,6 +624,7 @@ function roomFact(id) {
   if(id==="study"){const n=(frame.shelf?.ideas||[]).filter(idea=>!idea.status||idea.status==="shelved").length;return n?count(n,"idea on the shelf","ideas on the shelf"):"";}
   if(id==="archive")return frame.lessons?count(frame.lessons,"lesson kept","lessons kept"):"";
   if(id==="counting"){const n=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq).length;return n?count(n,"run recorded","runs recorded"):"";}
+  if(id==="assay"){const n=(frame.runs||[]).filter(r=>r.assignment?.lane==="review"&&(!Number.isInteger(r.sequence)||r.sequence<=frame.seq)).length;return n?count(n,"review","reviews"):"";}
   return "";
 }
 function clip(value,limit) {value=String(value||"");return value.length>limit?value.slice(0,limit-1).trimEnd()+"…":value;}
@@ -1305,6 +1324,89 @@ function renderCountingRoom(content) {
   const link=html("a","room-shelf-link","Open Household Accounts →",panel);
   link.href="#accounts-view";
 }
+let assayState={family:"all",outcome:"all",query:""};
+function renderAssayRoom(content) {
+  const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
+  const runsById=new Map(allRuns.map(r=>[r.id,r]));
+  const reviewRuns=allRuns.filter(r=>r.assignment?.lane==="review");
+  const commitsAt=(Array.isArray(data?.commits)?data.commits:[]).filter(c=>Number.isFinite(c.at)&&(!Number.isFinite(frame.at)||c.at<=frame.at));
+  const scarsAt=(frame.scars||[]).map(s=>({...(data?.scars?.[s.id]||{}),...s}));
+  const openScars=scarsAt.filter(s=>!s.mended),mendedScars=scarsAt.filter(s=>s.mended);
+  const panel=html("div","counting-panel assay-panel",undefined,content);
+  html("p","small",`${reviewRuns.length} recorded review ${reviewRuns.length===1?"run":"runs"} · ${commitsAt.length} source ${commitsAt.length===1?"commit":"commits"} · ${openScars.length} open / ${mendedScars.length} mended ${scarsAt.length===1?"scar":"scars"} at this moment. Individual pass/reject verdicts live in the journal.`,panel);
+  const controls=html("div","counting-controls",undefined,panel);
+  for(const [key,label,options] of [
+    ["family","Reviewer family",[["all","All reviewer families"],["codex","Codex"],["opencode","OpenCode"],["muse","Muse"],["agy","Gemini"]]],
+    ["outcome","Run outcome",[["all","All outcomes"],["success","Success"],["other","Other / failed / quota"]]]
+  ]) {
+    const wrapper=html("label","small",label,controls),select=html("select","",undefined,wrapper);
+    select.id=`assay-${key}`;
+    for(const [value,title] of options){const opt=html("option","",title,select);opt.value=value;}
+    select.value=assayState[key];
+    select.addEventListener("change",()=>{
+      assayState[key]=select.value;roomPanel();$(select.id)?.focus?.({preventScroll:true});
+    });
+  }
+  const searchRow=html("div","workshop-search",undefined,panel);
+  const searchWrap=html("label","small","Search reviews, tasks or commits",searchRow);
+  const search=html("input","",undefined,searchWrap);
+  search.id="assay-search";search.type="search";search.placeholder="resident, task, or commit title";
+  search.value=assayState.query;
+  search.addEventListener("input",()=>{
+    assayState.query=search.value;roomPanel();
+    const next=$(search.id);if(next){next.focus?.({preventScroll:true});next.setSelectionRange?.(assayState.query.length,assayState.query.length);}
+  });
+  const q=assayState.query.trim().toLowerCase();
+  const filteredReviews=reviewRuns.filter(r=>{
+    if(assayState.family!=="all"&&r.agent!==assayState.family)return false;
+    if(assayState.outcome==="success"&&r.outcome!=="success")return false;
+    if(assayState.outcome==="other"&&r.outcome==="success")return false;
+    if(!q)return true;
+    const match=/^source-review-(.+)$/.exec(r.assignment?.help_request||"");
+    const target=match?runsById.get(match[1]):null;
+    const tasks=(target?.finished_tasks||[]).map(t=>t.task).join(" ");
+    const hay=`${residentName(r.resident)} ${r.model||""} ${r.assignment?.help_request||""} ${target?residentName(target.resident):""} ${tasks}`.toLowerCase();
+    return hay.includes(q);
+  });
+  const statusLine=html("p","small",`${filteredReviews.length} of ${reviewRuns.length} review runs shown`,panel);
+  statusLine.id="assay-results";statusLine.setAttribute("role","status");
+  if(!filteredReviews.length) {
+    html("p","empty-note","No recorded review runs match these filters at this moment.",panel);
+  } else {
+    const list=html("div","counting-runs",undefined,panel);
+    filteredReviews.slice(-8).reverse().forEach(run=>{
+      const row=html("div","counting-run",undefined,list);
+      const kind=kinds[run.agent]||kinds.unrecorded;
+      const match=/^source-review-(.+)$/.exec(run.assignment?.help_request||"");
+      const target=match?runsById.get(match[1]):null;
+      const targetKind=target?(kinds[target.agent]||kinds.unrecorded):null;
+      const tasks=(target?.finished_tasks||[]).map(t=>t.task).filter(Boolean);
+      const cross=target&&target.agent&&run.agent&&target.agent!=="unrecorded"&&run.agent!=="unrecorded"?(target.agent!==run.agent?" · cross-family":" · same-family"):"";
+      const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&Array.isArray(data?.frames)&&data.frames.some(f=>f.seq===run.sequence);
+      const info=html("div","counting-run-info",undefined,row);
+      html("strong","",`${residentName(run.resident)} · ${kind.name}${target?` ← ${residentName(target.resident)} (${targetKind.name})`:""}${cross}`,info);
+      html("span","small",`${run.outcome||run.status||"recorded"}${tasks.length?` · tasks: ${tasks.join(", ")}`:run.assignment?.help_request?` · ${run.assignment.help_request}`:""}`,info);
+      if(hasFrame) {
+        const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
+        btn.type="button";btn.id=`assay-jump-${run.sequence}`;
+        btn.addEventListener("click",()=>jumpToSequence(run.sequence));
+      }
+    });
+  }
+  const matchingCommits=q?commitsAt.filter(c=>`${c.id} ${c.title}`.toLowerCase().includes(q)):commitsAt;
+  html("p","small",`Source history at this moment (${matchingCommits.length} matching of ${commitsAt.length})`,panel);
+  if(!matchingCommits.length) {
+    html("p","empty-note","No source commits match at this moment.",panel);
+  } else {
+    const commitList=html("div","counting-runs",undefined,panel);
+    matchingCommits.slice(-6).reverse().forEach(c=>{
+      const row=html("div","counting-run",undefined,commitList);
+      const info=html("div","counting-run-info",undefined,row);
+      html("strong","",`${String(c.id||"").slice(0,8)} · ${c.title||"Untitled commit"}`,info);
+      if(Number.isFinite(c.at)&&data?.timezone)html("span","small",clock(c.at,{year:"numeric"}),info);
+    });
+  }
+}
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -1386,6 +1488,7 @@ function roomPanel() {
   }
   if(room?.id==="parlor") renderCatchupPanel(content);
   if(room?.id==="counting"&&roomStatus(room)==="open") renderCountingRoom(content);
+  if(room?.id==="assay"&&roomStatus(room)==="open") renderAssayRoom(content);
   if((!room&&rooms.some(r=>r.id==="workshop"))||room?.id==="workshop") renderWorkshopTasks(content);
   const roomScars=room?visibleScars().filter(s=>s.room===room.id):[];
   // Old marks are kept, but folded away so they do not bury the room.
@@ -2206,8 +2309,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("voting-"))?activeId:null;
-  const selectionId=activeId==="workshop-search"||activeId==="voting-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-"))?activeId:null;
+  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
