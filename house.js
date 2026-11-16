@@ -1569,6 +1569,62 @@ function renderAssayRoom(content) {
   guideLink.target="_blank";
   guideLink.rel="noopener noreferrer";
 }
+let studyState={filter:"all",query:"",page:0,opened:new Set()};
+const STUDY_PAGE_SIZE=4;
+function studyReadiness(idea) {
+  // Grounding is the public journal projection, not an inference from a brief's presence.
+  if(idea.grounded===true)return "checked";
+  if(idea.grounded===false&&idea.brief?.asked?.length)return "second";
+  if(!idea.brief||idea.grounded===false||Number.isFinite(idea.brief_due))return "research";
+  return "unknown";
+}
+function renderStudyDesk(content, dataShelf) {
+  const ideas=(dataShelf.ideas||[]).filter(idea=>idea.status==="shelved");
+  const desk=html("div","study-desk",undefined,content);
+  html("h3","","Read the ideas",desk);
+  html("p","small","Ideas are proposals, not chosen work. Open one to read its research and sources. Checked means another resident kept its quoted requests; it does not mean the house selected or built it.",desk);
+  if(!ideas.length){html("p","empty-note","No ideas are waiting on the shelf at this moment.",desk);return;}
+  const controls=html("div","workshop-filters workshop-search",undefined,desk);
+  const label=html("label","small","Research status",controls),filter=html("select","",undefined,label);
+  filter.id="study-filter";label.htmlFor=filter.id;
+  const statuses=[["all","All ideas"],["checked","Checked by another resident"],["second","Waiting for a second reader"],["research","Needs research"],["unknown","Earlier record · check unknown"]];
+  statuses.forEach(([value,title])=>{const option=html("option","",title,filter);option.value=value;});
+  filter.value=studyState.filter;
+  const searchLabel=html("label","small","Find an idea",controls),search=html("input","",undefined,searchLabel);
+  search.id="study-search";searchLabel.htmlFor=search.id;search.type="search";search.placeholder="Title, purpose or resident";search.value=studyState.query;
+  search.setAttribute("aria-describedby","study-results");
+  const results=html("p","small",undefined,desk);results.id="study-results";results.setAttribute("role","status");
+  const list=html("div","study-ideas",undefined,desk);
+  function draw() {
+    const query=workshopSearchText(studyState.query);
+    const matches=ideas.filter(idea=>(studyState.filter==="all"||studyReadiness(idea)===studyState.filter)&&
+      (!query||[idea.title,idea.what,idea.why,residentName(idea.author)].some(value=>workshopSearchText(value).includes(query))));
+    const pages=Math.ceil(matches.length/STUDY_PAGE_SIZE);
+    studyState.page=Math.min(studyState.page,Math.max(0,pages-1));
+    results.textContent=`${matches.length} of ${ideas.length} ideas match at this moment${pages?` · page ${studyState.page+1} of ${pages}`:""}`;
+    list.replaceChildren();
+    if(!matches.length)html("p","empty-note","No ideas match. Clear the search or choose another research status.",list);
+    matches.slice(studyState.page*STUDY_PAGE_SIZE,(studyState.page+1)*STUDY_PAGE_SIZE).forEach(idea=>{
+      const entry=html("div","study-idea",undefined,list);
+      html("p","small",statuses.find(([value])=>value===studyReadiness(idea))[1],entry);
+      const card=renderShelfIdea(idea,entry,isGreatWorkShelf(dataShelf),residentName);
+      card.open=studyState.opened.has(idea.id);
+      card.addEventListener("toggle",()=>{if(card.open)studyState.opened.add(idea.id);else studyState.opened.delete(idea.id);});
+    });
+    if(pages>1) {
+      const nav=html("div","workshop-paging",undefined,list);
+      [-1,1].forEach(delta=>{
+        const button=html("button","quiet-button",delta<0?"Previous ideas":"Next ideas",nav);
+        button.id=delta<0?"study-previous":"study-next";button.type="button";
+        button.disabled=delta<0?studyState.page===0:studyState.page===pages-1;
+        button.addEventListener("click",()=>{studyState.page+=delta;draw();filter.focus({preventScroll:true});});
+      });
+    }
+  }
+  filter.addEventListener("change",()=>{studyState.filter=filter.value;studyState.page=0;draw();});
+  search.addEventListener("input",()=>{studyState.query=search.value;studyState.page=0;draw();});
+  draw();
+}
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -1634,6 +1690,7 @@ function roomPanel() {
         html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
       }
     }
+    if(dataShelf?.enabled&&roomStatus(room)==="open")renderStudyDesk(summary,dataShelf);
     const link=html("a","room-shelf-link","View the public shelf",summary);
     link.href="#shelf-card";
   }
@@ -2061,7 +2118,7 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
     : null;
   const due = typeof idea.brief_due === "number";
   // Since the who-asked test an idea stands only once a second resident has checked its askers.
-  const ungrounded = idea.grounded === false && !!idea.brief?.worth;
+  const ungrounded = idea.grounded === false;
   const asked = Array.isArray(idea.brief?.asked) && idea.brief.asked.length > 0;
   const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
   const worthTag = idea.brief?.worth ? idea.brief.worth[0].toUpperCase() + idea.brief.worth.slice(1) : null;
@@ -2103,6 +2160,7 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
       a.rel = "noopener noreferrer";
     });
   }
+  return item;
 }
 function shelf() {
   const box = $("shelf");
@@ -2873,8 +2931,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-"))?activeId:null;
-  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-"))?activeId:null;
+  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
