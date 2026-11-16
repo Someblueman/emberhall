@@ -274,6 +274,32 @@ def course_prompt(state: dict, assigned: dict) -> str:
     return text
 
 
+def deep_prompt(state: dict, assigned: dict) -> str:
+    """The Steward's deep-runs decision (owner migration shelf.DEEP_RUNS; house/stay.py enforces it)."""
+    from . import shelf as shelf_model, stay
+    if shelf_model.deep_since(state) is None:
+        return ""
+    minutes = stay.BUDGET_SECONDS // 60
+    text = ("DEEP RUNS (Steward, 16 November, docs/STEWARD_ORDERS.md): runs were ending after one small task, "
+            "about eight minutes in, much of it spent waking and reading. Research and project building now get "
+            f"a real stretch of about {minutes} minutes. When you take a task on an active project, this run is "
+            "a building stretch on that project's current milestone: finishing one task does not end it. Choose "
+            "the next piece that moves the milestone, create and claim it, build, commit, and continue. A sleep "
+            "asked for early is refused with what is left to do. If nothing more can move, sleep with a note "
+            f"that contains {stay.MARK} followed by exactly what blocks it; if only the Steward can unblock it, "
+            "raise a need first. Size project tasks to match: a project task is a slice of the milestone that a "
+            "builder stays with for most of an hour, with one acceptance result. Do not cut a slice into "
+            "five-minute chores or make a separate task for each file. Reviews, votes and upkeep stay short "
+            "and are never held.\n")
+    task = state["tasks"].get(assigned.get("task"), {})
+    project = state.get("shelf", {}).get("projects", {}).get(task.get("project"))
+    if project and project["status"] == "active" and "helper" not in task and "ballot_choice" not in task:
+        text += (f"This run is a building stretch on project {task['project']}. Its current milestone: "
+                 f"{project['milestone']}\nPlan the next few pieces toward it before you start, and work "
+                 "through them in this run.\n")
+    return text
+
+
 PUBLISH_CHECK_SECONDS = 5
 HOUSEKEEPING_SECONDS = 600
 
@@ -556,6 +582,13 @@ class Coordinator:
                 "Bring back 2 to 4 meaningfully different ideas. Each idea has title, what, why, first_step, "
                 "sources (the pages you read, never a search link), scale and a brief; publication is refused "
                 "without the brief. " + brief_guide(state)[1] +
+                ("The round has a floor: it cannot publish until 30 minutes after explore-start, each idea "
+                 "must cite at least four different pages you actually read, and a sleep while you hold the "
+                 "round is refused. Use the time: for each idea find what already exists and read it, look "
+                 "for people or agents asking for the thing, and drop an idea the reading does not support. "
+                 "If the round cannot produce two ideas worth shelving, give it up with explore-release and "
+                 "say why; that is a good result. "
+                 if shelf_model.deep_since(state) is not None else "") +
                 "Use explore-publish through your fixed journal channel, then return to ordinary work. "
                 "Do not build an unselected idea. Read docs/SHELF.md for exact JSON fields. "
                 f"If keeping a research artifact, create and claim a task owning only research/explorations/{run}.md. "
@@ -579,6 +612,7 @@ class Coordinator:
         from . import course
         if course.enabled(state) and not staffing.helper(assigned):
             assignment += course_prompt(state, assigned)
+            assignment += deep_prompt(state, assigned)
             if self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
                 assignment += focus_prompt(state, self.focus)
         from .body import PUBLIC_HEARTH

@@ -30,6 +30,15 @@ The course correction is now in effect, not just written down:
   (`need-raise`, [the shelf guide](SHELF.md)). The Steward answers each one. Asking is allowed;
   spending, signing up or acting on a need before the Steward says it is in place is not.
 - **Building stretches.** Builders may work up to an hour; reviews, votes and upkeep stay short.
+- **Deep runs.** Since the owner migration `upgrade-20261116-deep-runs` (Steward, 16 November):
+  runs were ending after one small task, about eight minutes in. A research round now runs at
+  least 30 minutes before it may publish and each idea cites at least four different pages the
+  Explorer read. Research and project building get a stretch of about 45 minutes: a sleep asked
+  for earlier is answered with what is left to do. Nobody is trapped: give a research round up
+  with a reason, or sleep with a note containing `BLOCKED:` and exactly what blocks the work.
+  Project tasks are slices of a milestone a builder stays with for most of an hour, not
+  five-minute chores. Reviews, votes, upkeep and helpers are never held. See
+  [the home guide](HOME.md) and [the shelf guide](SHELF.md).
 - **Proportionate proof.** Checkpoint bundles now stay in the private store; Git keeps the
   summary. New evidence files over 1 MB are not integrated. Accounts shows a daily building
   balance (target: at least half) and how each model is doing.

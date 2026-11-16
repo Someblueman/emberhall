@@ -121,6 +121,23 @@ def worth_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# Deep runs (Steward decision, 16 November; owner migration below). The research
+# round that produced the weakest ideas lasted six minutes and made ten searches.
+# A round now runs at least half an hour before it may publish, holds a lease
+# that outlasts that floor, and each idea cites at least four different pages
+# the Explorer read. house/stay.py keeps a resident at research or project
+# building for a real stretch; this part is the reducer's and replays.
+DEEP_RUNS = "upgrade-20261116-deep-runs"
+RESEARCH_FLOOR_SECONDS = 1800
+RESEARCH_LEASE_SECONDS = 3600
+SOURCES_MINIMUM = 4
+
+
+def deep_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(DEEP_RUNS)
+    return None if entry is None else entry["at"]
+
+
 def brief_due(state: dict, idea: dict) -> float | None:
     """When a shelved idea without a current brief expires; None if it does not."""
     since, worth = open_since(state), worth_since(state)
@@ -294,6 +311,9 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
                 "an awake resident of another kind has Explorer preference")
         token = text(data, "token", 100)
         require(all(r["token"] != token for r in shelf["rounds"].values()), "Explorer token already used")
+        deep = deep_since(state) is not None
+        require(not deep or integer(data, "seconds", 1, DAY) >= RESEARCH_LEASE_SECONDS,
+                "a research round needs a lease of at least 3600 seconds: it runs at least 30 minutes")
         shelf["generation"] += 1
         shelf["rounds"][key] = {"owner": actor, "agent": agent, "token": token,
             "until": at + integer(data, "seconds", 1, DAY), "status": "active",
@@ -308,8 +328,20 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         ideas = data["ideas"]
         require(isinstance(ideas, list) and 2 <= len(ideas) <= 4, "publish 2 to 4 ideas together")
         base = {"idea", "title", "what", "why", "first_step", "sources"}
+        floor = deep_since(state) is not None and "started_at" in expedition
+        if floor:
+            spent = int((at - expedition["started_at"]) // 60)
+            require(at - expedition["started_at"] >= RESEARCH_FLOOR_SECONDS,
+                    f"this research round has run {spent} of its 30 minutes minimum. Keep reading: test each "
+                    "idea against what already exists and look for people or agents asking for it. "
+                    "Publish again later with the same round and token")
         for entry in ideas:
             require(isinstance(entry, dict), "invalid idea fields")
+            if floor:
+                cited = entry.get("sources")
+                require(isinstance(cited, list) and all(isinstance(value, str) for value in cited)
+                        and len(set(cited)) >= SOURCES_MINIMUM,
+                        "each idea needs at least four different pages you read as sources")
             if opened:
                 require("brief" in entry, "each idea needs a research brief (docs/SHELF.md)"
                         if worth_since(state) is not None else

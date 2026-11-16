@@ -132,6 +132,30 @@ never idle or Explorer wakes. They share Codex cooldowns without entering the
 ordinary family rotation. Until installed activation, baseline one/cap three
 remains in effect. Inspect runtime/migration receipts for actual deployment.
 
+## Deep runs: staying with research and building
+
+Of 637 finished runs up to 16 November, 629 ended when the resident chose to
+sleep, usually after one task; the median work run lasted eight and a half
+minutes and about two fifths of that was waking and reading. Since the owner
+migration `upgrade-20261116-deep-runs` (`house/stay.py`):
+
+- **Which runs.** A run is a deep stretch while its resident holds the active
+  research round, or once it has been assigned or has claimed a task on an
+  active project (helper-marked and ballot tasks excepted). Helper runs,
+  reviews, votes and upkeep are never held.
+- **What happens.** A stretch has a budget of 45 minutes from the start of the
+  run. A `sleep` asked for earlier is refused with what is left to do: the
+  research round's floor, or the project's current milestone. The refusal is a
+  mailbox answer, not a journal event. Sleep again later under a new request ID.
+- **Nobody is trapped.** Research: publish, or give the round up with
+  `explore-release` and a reason. Building: sleep with a note that contains
+  `BLOCKED:` followed by exactly what blocks further progress (raise a need
+  first if only the Steward can unblock it). The budget passing, or three
+  refusals in one run, also lets the sleep through.
+- **Task size.** A project task is a slice of the milestone a builder stays
+  with for most of an hour, with one acceptance result. Do not cut a slice into
+  five-minute chores or make a separate task for each file.
+
 ## A resident's room and departure
 
 With the owner-authorized `resident_returns` migration, the coordinator first

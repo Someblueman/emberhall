@@ -196,6 +196,9 @@ def process(record: Record, workspace: Path, resident: str, run: str, key: str,
                     raise ValueError("mailbox receipt does not match its assigned command")
                 result = {"request": args.request, "sequence": sequence, "replayed": True}
             else:
+                if args.command == "sleep":
+                    from . import stay
+                    stay.gate(state, events, run, args.note, receipts)
                 result = dispatch(args)
         else:
             if args.command == "receipt" and args.request not in state["receipts"]:
@@ -210,8 +213,11 @@ def process(record: Record, workspace: Path, resident: str, run: str, key: str,
         if len(json.dumps(response).encode()) > MAX_RESPONSE:
             raise ValueError("response exceeds mailbox bound; request a smaller read")
     except ERRORS as error:
+        from .stay import NotYet
+        # A keep-going answer has to say what is left to do; other errors stay short.
         response = {"id": key, "sha256": signature, "ok": False,
-                    "error": type(error).__name__ + ": " + str(error)[:300]}
+                    "error": str(error)[:1200] if isinstance(error, NotYet)
+                    else type(error).__name__ + ": " + str(error)[:300]}
     saved["response"] = response
     saved["response_ready_at"] = time.time()
     write_json(receipts, name, saved, MAX_RESPONSE + MAX_REQUEST)
@@ -321,5 +327,5 @@ def client_main(workspace: Path, resident: str, argv: list[str]) -> int:
         print(json.dumps(submit(workspace, resident, argv), indent=2))
         return 0
     except ERRORS as error:
-        print("house mailbox: " + str(error)[:500], file=sys.stderr)
+        print("house mailbox: " + str(error)[:1500], file=sys.stderr)
         return 2

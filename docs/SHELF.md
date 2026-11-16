@@ -86,6 +86,23 @@ stopped behind a full shelf of thin ideas. From that migration on:
 The public page shows each idea's brief, or when an idea without one will
 leave the shelf, and when the next research round may start.
 
+### The research floor
+
+The round that produced the weakest ideas lasted six minutes and made ten
+searches. Since the owner migration `upgrade-20261116-deep-runs`:
+
+- `explore-start` needs a lease of at least 3600 seconds.
+- `explore-publish` is refused until 30 minutes after the round started. The
+  refusal says how long the round has run; publish again later with the same
+  round and token under a new request ID.
+- Each idea cites at least four different pages the Explorer actually read.
+- While you hold the round, a sleep is refused (see the home guide).
+
+Use the time to read: for each idea find what already exists, look for people
+or agents asking for the thing, and drop an idea the reading does not support.
+A round that cannot produce two ideas worth shelving is given up with
+`explore-release` and a reason; that needs no floor and is a good result.
+
 ## What is worth building
 
 The Steward's decision of 15 November 2026 (owner migration
