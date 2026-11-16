@@ -102,10 +102,98 @@ class CommentViewTests(unittest.TestCase):
             for control in ("\x1b", "\r", "\x7f", "\u202e"):
                 self.assertNotIn(control, output)
 
+    def test_path_filter_controls_are_visible_without_changing_matching(self):
+        raw_path = "src/\u202e.py"
+        records = [replace(examples()[0], anchor=replace(examples()[0].anchor, path=raw_path))]
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "comments.json"
+            original = skein.dumps_comments(records).encode()
+            source.write_bytes(original)
+            for output_format in ("text", "html"):
+                for pattern, shown, displayed in (
+                    (raw_path, 1, "src/\\u202e.py"),
+                    ("src/\u202e\x1b[31m.py", 0, "src/\\u202e\\u001b[31m.py"),
+                    ("src/\\u202e.py", 0, "src/\\u202e.py"),
+                ):
+                    out = io.StringIO()
+                    with contextlib.redirect_stdout(out):
+                        self.assertEqual(comments_view.main([
+                            str(source), "--format", output_format, "--path", pattern,
+                        ]), 0)
+                    output = out.getvalue()
+                    self.assertIn(f"Showing {shown} of 1", output)
+                    self.assertIn(f"path={displayed}", output)
+                    self.assertNotIn("\u202e", output)
+                    self.assertNotIn("\x1b", output)
+                    self.assertEqual(source.read_bytes(), original)
+
     def test_invalid_api_filter_does_not_silently_hide_comments(self):
-        for kwargs in ({"resolution": "closed"}, {"state": "missing"}, {"output_format": "json"}):
+        for kwargs in (
+            {"resolution": "closed"},
+            {"state": "missing"},
+            {"output_format": "json"},
+            {"paths": ["   "]},
+            {"paths": "alpha.txt"},
+            {"search": 123},
+        ):
             with self.assertRaises(ValueError):
                 comments_view.render_comments(examples(), **kwargs)
+
+    def test_path_and_search_filters_match_metadata_and_preserve_totals(self):
+        anchor_a = skein.Anchor("a" * 40, "src/app.py", "new", 10, "return compute()")
+        anchor_b = skein.Anchor("a" * 40, "docs/guide.md", "new", 4, "See guide.")
+        rebased = skein.Anchor("c" * 40, "legacy/old.py", "old", 3, "deprecated_call()")
+        records = [
+            skein.Comment("c-app", anchor_a, "Check edge case"),
+            skein.Comment(
+                "c-doc",
+                anchor_b,
+                "Typo in note",
+                state="orphan",
+                rebased_from=rebased,
+                orphan_reason="line rewritten",
+                resolution="resolved",
+            ),
+        ]
+        for output_format in ("text", "html"):
+            by_path = comments_view.render_comments(
+                records, output_format=output_format, paths=["./src/"],
+            )
+            self.assertIn("Showing 1 of 2", by_path)
+            self.assertIn("1 open, 1 resolved; 1 orphan", by_path)
+            self.assertIn("c-app", by_path)
+            self.assertNotIn("c-doc", by_path)
+
+            for query, expected, hidden_id in (
+                ("COMPUTE", "c-app", "c-doc"),
+                ("rewritten", "c-doc", "c-app"),
+                ("legacy/old.py", "c-doc", "c-app"),
+                ("deprecated_call", "c-doc", "c-app"),
+            ):
+                by_search = comments_view.render_comments(
+                    records, output_format=output_format, search=query,
+                )
+                self.assertIn("Showing 1 of 2", by_search)
+                self.assertIn(expected, by_search)
+                self.assertNotIn(hidden_id, by_search)
+
+        with tempfile.TemporaryDirectory() as directory:
+            comments_path = Path(directory) / "comments.json"
+            comments_path.write_text(skein.dumps_comments(records), encoding="utf-8")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                rc = comments_view.main([
+                    str(comments_path),
+                    "--path", "./src",
+                    "--search", "compute",
+                ])
+            self.assertEqual(rc, 0)
+            self.assertIn("Showing 1 of 2", out.getvalue())
+            self.assertIn("c-app", out.getvalue())
+            self.assertNotIn("c-doc", out.getvalue())
+
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(comments_view.main([str(comments_path), "--path", "./"]), 2)
 
     def test_reader_errors_produce_no_partial_output_and_preserve_bytes(self):
         valid = skein.dumps_comments(examples())

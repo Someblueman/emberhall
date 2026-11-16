@@ -10,14 +10,20 @@ Git nor a bundle to display those comments.
 ```sh
 python3 projects/review-skein/comments_view.py /path/to/packet/comments.json
 python3 projects/review-skein/comments_view.py /path/to/packet/comments.json \
-  --resolution open --state orphan
+  --resolution open --state orphan --path src/ --search error
 ```
 
-Both filters default to `all`. Resolution is `open` or `resolved`; anchor state
-is `anchored` or `orphan`. Filters combine: the example shows only open orphans.
+Both `--resolution` and `--state` default to `all`. Resolution is `open` or
+`resolved`; anchor state is `anchored` or `orphan`. `--path` filters by exact
+file path or directory prefix (repeatable), and `--search` filters
+case-insensitively across comment ID, body, anchor path, anchor line text,
+orphan reason and rebase origin. Filters combine: the example shows only open
+orphans matching `src/` and `error`.
 The first lines report shown/total counts, the selected filters, and totals for
 the entire file, so an empty result does not imply that the packet has no comments.
 Comments retain their stored order; nothing is reanchored, resolved or edited.
+Control and direction markers in filter summaries are displayed as literal
+Unicode escapes in both formats; filtering still uses the raw path values.
 Terminal and HTML output display control/direction characters as literal Unicode
 escapes, preserving ordinary Unicode prose, newlines and tabs.
 

@@ -86,7 +86,7 @@ function startEditor(document, environment) {
     const filterState = labeledControl("select", "filter-state", "Filter comments by anchor state", filterRow, "filter-field");
     addOptions(filterState, [["all", "All anchor states"], ["anchored", "anchored"], ["orphan", "orphan"]]);
     filterState.value = "all";
-    const filterQuery = labeledControl("input", "filter-comment-query", "Search comments (ID, file, or body)", filterRow, "filter-field");
+    const filterQuery = labeledControl("input", "filter-comment-query", "Search comments (ID, file, line, or body)", filterRow, "filter-field");
     filterQuery.type = "search";
     const filterStatus = node("p", "", filterBox);
     filterStatus.id = "comment-filter-status";
@@ -103,10 +103,11 @@ function startEditor(document, environment) {
       let shown = 0;
       for (const entry of renderedComments) {
         const c = entry.comment;
+        const fields = [c.id, c.anchor.path, c.anchor.text || "", c.body, c.orphan_reason || ""];
+        if (c.rebased_from) fields.push(c.rebased_from.path || "", c.rebased_from.text || "");
         const matches = (resVal === "all" || c.resolution === resVal) &&
           (stateVal === "all" || c.state === stateVal) &&
-          (!queryVal || c.id.toLowerCase().includes(queryVal) ||
-            c.anchor.path.toLowerCase().includes(queryVal) || c.body.toLowerCase().includes(queryVal));
+          (!queryVal || fields.some(value => value.toLowerCase().includes(queryVal)));
         entry.article.hidden = !matches;
         entry.indexItem.hidden = !matches;
         if (matches) shown += 1;

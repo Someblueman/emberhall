@@ -5,9 +5,49 @@ import argparse
 import html
 from pathlib import Path
 import sys
+from typing import Sequence
 import unicodedata
 
 import skein
+
+
+def _normalize_paths(paths: Sequence[str] | None) -> tuple[str, ...]:
+    if paths is None:
+        return ()
+    if isinstance(paths, (str, bytes)):
+        raise ValueError("paths must be a sequence of path strings")
+    normalized: list[str] = []
+    for raw in paths:
+        if not isinstance(raw, str) or not raw.strip():
+            raise ValueError("each path filter must be a non-empty string")
+        cleaned = raw.strip()
+        while cleaned.startswith("./"):
+            cleaned = cleaned[2:]
+        if not cleaned or not cleaned.rstrip("/"):
+            raise ValueError(f"invalid path filter: {raw!r}")
+        normalized.append(cleaned)
+    return tuple(normalized)
+
+
+def _path_matches(candidate: str, pattern: str) -> bool:
+    prefix = pattern.rstrip("/")
+    return candidate == prefix or candidate.startswith(prefix + "/")
+
+
+def _matches_search(comment: skein.Comment, query: str) -> bool:
+    if not query:
+        return True
+    needle = query.casefold()
+    fields = [
+        comment.identifier,
+        comment.body,
+        comment.anchor.path,
+        comment.anchor.text,
+        comment.orphan_reason or "",
+    ]
+    if comment.rebased_from is not None:
+        fields.extend([comment.rebased_from.path, comment.rebased_from.text])
+    return any(needle in value.casefold() for value in fields)
 
 
 def _visible(value: str) -> str:
@@ -29,22 +69,36 @@ def _anchor_text(anchor: skein.Anchor) -> str:
 def render_comments(
     comments: list[skein.Comment], *, output_format: str = "text",
     resolution: str = "all", state: str = "all",
+    paths: Sequence[str] | None = None, search: str = "",
 ) -> str:
     """Render a snapshot; filters hide rows without changing the underlying comments."""
     if output_format not in {"text", "html"}:
         raise ValueError("format must be text or html")
     if resolution not in {"all", "open", "resolved"} or state not in {"all", "anchored", "orphan"}:
         raise ValueError("unsupported comment filter")
-    selected = [comment for comment in comments
-                if (resolution == "all" or comment.resolution == resolution)
-                and (state == "all" or comment.state == state)]
+    if not isinstance(search, str):
+        raise ValueError("search must be a string")
+    path_patterns = _normalize_paths(paths)
+    search_query = search.strip()
+    selected = [
+        comment for comment in comments
+        if (resolution == "all" or comment.resolution == resolution)
+        and (state == "all" or comment.state == state)
+        and (not path_patterns or any(_path_matches(comment.anchor.path, p) for p in path_patterns))
+        and _matches_search(comment, search_query)
+    ]
+    filter_parts = [f"resolution={resolution}", f"state={state}"]
+    if path_patterns:
+        filter_parts.append(f"path={', '.join(path_patterns)}")
+    if search_query:
+        filter_parts.append(f"search={search_query!r}")
     summary = (f"Showing {len(selected)} of {len(comments)} comments. "
-               f"Filters: resolution={resolution}, state={state}.")
+               f"Filters: {', '.join(filter_parts)}.")
     totals = (f"All comments: {sum(c.resolution == 'open' for c in comments)} open, "
               f"{sum(c.resolution == 'resolved' for c in comments)} resolved; "
               f"{sum(c.state == 'orphan' for c in comments)} orphan.")
     if output_format == "text":
-        parts = ["Skein comments", summary, totals]
+        parts = ["Skein comments", _visible(summary), totals]
         for comment in selected:
             parts.extend([
                 "", f"{comment.identifier} | {comment.resolution} | {comment.state}",
@@ -94,7 +148,7 @@ pre {{ border-left: 3px solid #596774; padding: .5rem 1rem; }}
 a {{ color: #153f8c; }}
 a:focus-visible, article:target {{ outline: 3px solid #964400; outline-offset: 3px; }}
 </style></head><body><a href="#comments">Skip to comments</a><main>
-<h1>Skein comments</h1><p>{summary}</p><p>{totals}</p>
+<h1>Skein comments</h1><p>{escaped(summary)}</p><p>{totals}</p>
 <p>Read-only snapshot of comments.json. Regenerate after editing or resolving comments.
 This page neither verifies the Git bundle nor authenticates a reviewer.</p>
 <nav id="comments" aria-label="Comments"><ol>{navigation}</ol></nav>
@@ -109,6 +163,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--format", choices=("text", "html"), default="text", dest="output_format")
     parser.add_argument("--resolution", choices=("all", "open", "resolved"), default="all")
     parser.add_argument("--state", choices=("all", "anchored", "orphan"), default="all")
+    parser.add_argument("--path", action="append", dest="paths", default=None,
+                        help="filter comments by exact file path or directory prefix (repeatable)")
+    parser.add_argument("--search", default="",
+                        help="case-insensitive substring search across ID, body, path, line text, orphan reason, or rebase origin")
     arguments = parser.parse_args(argv)
     try:
         path = arguments.comments
@@ -120,7 +178,8 @@ def main(argv: list[str] | None = None) -> int:
             raise skein.SkeinError(f"comments exceed {skein.JSON_LIMIT} bytes")
         comments = skein.loads_comments(data.decode("utf-8"))
         result = render_comments(comments, output_format=arguments.output_format,
-                                 resolution=arguments.resolution, state=arguments.state)
+                                 resolution=arguments.resolution, state=arguments.state,
+                                 paths=arguments.paths, search=arguments.search)
         sys.stdout.write(result)
         sys.stdout.flush()
     except BrokenPipeError:
@@ -128,6 +187,9 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, UnicodeError, skein.SkeinError) as exc:
         print(f"comments-view: {exc}", file=sys.stderr)
         return 1
+    except ValueError as exc:
+        print(f"comments-view: {exc}", file=sys.stderr)
+        return 2
     return 0
 
 

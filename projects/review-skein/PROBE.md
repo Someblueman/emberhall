@@ -13,15 +13,18 @@ boundary below.
 
 ```sh
 python3 projects/review-skein/probe.py audit /path/to/packet
+python3 projects/review-skein/probe.py audit /path/to/standalone.html
 python3 projects/review-skein/probe.py audit /path/to/packet --json
 python3 projects/review-skein/probe.py transcript /path/to/packet --max-rows 200
 ```
 
 `audit` prints one line per finding and exits **1** when it finds an error,
-**0** when it does not, and **2** when the packet cannot be read at all.
-`transcript` prints the reading and exits 0. Both read only `review.html` and
-`packet.json` from the packet directory; `changes.bundle`, `anchors.json` and
-`comments.json` are left alone.
+**0** when it does not, and **2** when the packet or HTML file cannot be read at
+all. `transcript` prints the reading and exits 0. When given a packet directory,
+both read only `review.html` and `packet.json`; `changes.bundle`, `anchors.json`
+and `comments.json` are left alone. When given a standalone regular HTML file
+(such as saved `review_view.py --format html` or `comments_view.py --format html`
+output), both probe that file directly and record a `standalone-html` notice.
 
 ## What the audit checks
 

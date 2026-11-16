@@ -353,6 +353,46 @@ class ProbePacketTest(unittest.TestCase):
             }
             self.assertEqual(before, after)
 
+    def test_standalone_html_file_audit_and_transcript_boundaries(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            clean_html = root / "standalone.html"
+            clean_html.write_text(CLEAN_PAGE, encoding="utf-8")
+
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(probe.main(["audit", str(clean_html), "--json"]), 0)
+            report = json.loads(out.getvalue())
+            self.assertEqual(report["errors"], 0)
+            self.assertEqual([f["code"] for f in report["findings"]], ["standalone-html"])
+
+            transcript_out = io.StringIO()
+            with contextlib.redirect_stdout(transcript_out):
+                self.assertEqual(probe.main(["transcript", str(clean_html)]), 0)
+            self.assertIn("Heading 1: Skein review packet", transcript_out.getvalue())
+
+            broken_html = root / "broken.html"
+            broken_html.write_text(
+                CLEAN_PAGE.replace("</body>", "<script>alert(1)</script></body>"),
+                encoding="utf-8",
+            )
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(probe.main(["audit", str(broken_html)]), 1)
+
+            symlink_html = root / "link.html"
+            symlink_html.symlink_to(clean_html)
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(probe.main(["audit", str(symlink_html)]), 2)
+
+            import comments_view
+            rendered_comments = root / "comments.html"
+            rendered_comments.write_text(
+                comments_view.render_comments([], output_format="html"),
+                encoding="utf-8",
+            )
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(probe.main(["audit", str(rendered_comments)]), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -414,5 +414,31 @@ if (process.argv.length > 2) {
   exerciseRichComposer(richCompose, multiAnchors);
   exerciseContextGaps(compose);
   exerciseSelectionFiltering(compose, multiAnchors);
+  exerciseSearchMetadata();
+}
+
+function exerciseSearchMetadata() {
+  const anchor = {commit: "a".repeat(40), path: "src/main.py", side: "new", line: 7, text: "needle_line_text()"};
+  const prev = {commit: "c".repeat(40), path: "old/renamed.py", side: "old", line: 3, text: "prior_rebased_text()"};
+  const comments = [
+    {id: "c1", anchor, body: "Plain comment", resolution: "open", state: "anchored", rebased_from: null, orphan_reason: null},
+    {id: "c2", anchor: {...anchor, path: "docs/note.md", text: "other"}, body: "Second", resolution: "open", state: "orphan", rebased_from: prev, orphan_reason: "unique reason token"},
+  ];
+  const envelope = {format: "skein-comment-edits", version: 1, base_sha256: "b".repeat(64), document: {format: "skein-comments", version: 2, comments}};
+  const page = setup(envelope);
+  const find = id => page.nodes.find(n => n.id === id);
+  const query = find("filter-comment-query");
+  const status = find("comment-filter-status");
+  for (const [term, visibleId, hiddenId] of [
+    ["NEEDLE_LINE_TEXT", "comment-0", "comment-1"],
+    ["unique reason", "comment-1", "comment-0"],
+    ["old/renamed.py", "comment-1", "comment-0"],
+    ["prior_rebased_text", "comment-1", "comment-0"],
+  ]) {
+    query.value = term; query.fire("input");
+    assert.equal(find(visibleId).hidden, false, `expected ${visibleId} visible for ${term}`);
+    assert.equal(find(hiddenId).hidden, true, `expected ${hiddenId} hidden for ${term}`);
+    assert.equal(status.textContent, "Showing 1 of 2 comments.");
+  }
 }
 console.log("editor event/data checks passed (no browser witness)");

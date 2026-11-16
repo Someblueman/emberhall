@@ -28,7 +28,8 @@ In `compose` mode, each anchored comment also offers
 digit) and body, then choose **Add comment to download**. The new comment appears in
 the ordinary comment editor below, where its body and resolution can be changed.
 Filter existing comments by resolution (`open`/`resolved`), anchor state
-(`anchored`/`orphan`), or text search. Resolution changes refresh the visible list
+(`anchored`/`orphan`), or text search (matching comment ID, file path, line text,
+body, orphan reason or rebase origin). Resolution changes refresh the visible list
 and comment index immediately. Body edits refresh them when the edit is committed
 or the textarea loses focus, so typing never hides the field being edited. Active
 filters stay selected, and hidden comments are still included in the download.

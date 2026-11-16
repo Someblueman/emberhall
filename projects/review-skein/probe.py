@@ -478,23 +478,40 @@ def _packet_notes(directory: Path) -> list:
     return notes
 
 
-def load_packet(directory: Path):
-    """Read a packet's static review page and its manifest notes."""
-    page = directory / "review.html"
-    if not page.is_file():
+MAX_HTML_BYTES = 32 * 1024 * 1024
+
+
+def _read_html_file(page: Path) -> str:
+    if page.is_symlink() or not page.is_file():
         raise ValueError(f"{page} is not a regular file")
-    tree = parse(page.read_text(encoding="utf-8"))
-    return tree, _packet_notes(directory)
+    with page.open("rb") as stream:
+        data = stream.read(MAX_HTML_BYTES + 1)
+    if len(data) > MAX_HTML_BYTES:
+        raise ValueError(f"{page} exceeds {MAX_HTML_BYTES} bytes")
+    return data.decode("utf-8")
+
+
+def load_packet(target: Path):
+    """Read a packet's static review page or a standalone HTML file."""
+    if target.is_symlink():
+        raise ValueError(f"{target} is a symlink")
+    if target.is_file():
+        tree = parse(_read_html_file(target))
+        return tree, [Finding("standalone-html", "notice",
+                               "standalone HTML file probed without packet.json")]
+    page = target / "review.html"
+    tree = parse(_read_html_file(page))
+    return tree, _packet_notes(target)
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Probe a Skein packet offline.")
     commands = parser.add_subparsers(dest="command", required=True)
     audit_command = commands.add_parser("audit", help="report accessibility and offline findings")
-    audit_command.add_argument("packet", help="packet directory that contains review.html")
+    audit_command.add_argument("packet", help="packet directory or standalone HTML file")
     audit_command.add_argument("--json", action="store_true", help="print the findings as JSON")
     transcript_command = commands.add_parser("transcript", help="print a linear reading transcript")
-    transcript_command.add_argument("packet", help="packet directory that contains review.html")
+    transcript_command.add_argument("packet", help="packet directory or standalone HTML file")
     transcript_command.add_argument("--max-rows", type=int, default=200,
                                     help="how many table rows the transcript may print")
     arguments = parser.parse_args(argv)

@@ -15,6 +15,7 @@ first; it exercises the main workflow commands on disposable data. The pieces:
 | `comment_editor.py` | Edit bodies/resolution in a self-contained offline page | [EDITOR.md](EDITOR.md) |
 | `exchange.py` | Merge several reviewers' comments; carry them onto a revised patch | [EXCHANGE.md](EXCHANGE.md) |
 | `review_view.py` | Read the verified diff with comments inline, as text or offline HTML | [REVIEW_VIEW.md](REVIEW_VIEW.md) |
+| `archive.py` | Pack, inspect, and safely unpack verified `.tar.gz` packet archives | [ARCHIVE.md](ARCHIVE.md) |
 | `recovery.py` | Diagnose and rebuild a damaged packet; salvage drifted comments | [RECOVERY.md](RECOVERY.md) |
 | `comparison.py` | Measure this workflow against raw `git bundle`, Gerrit and Radicle | [RECOVERY.md](RECOVERY.md) |
 | `probe.py` | Audit/transcribe a packet's markup without a browser | [PROBE.md](PROBE.md) |
