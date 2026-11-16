@@ -208,7 +208,7 @@ function furnishings(g, room, x, y, lit, residents) {
       line(exhibit,[[px+9,y+31.6,24],[px+16,y+31.6,32],[px+24,y+31.6,24]],"#ead8af",2);
     });
     box(display,x+49,y+122,86,16,12,["#c5a271","#715d44","#96784e"]);
-    caption(display,x+90,y+69,0,`${completed.length} completed`,"resident-label");
+    caption(display,x+90,y+69,0,`${completed.length} completed`,"resident-label interior-caption");
   } else if(room === "chronicle") {
     const entries=frame.rooms.flatMap(place=>(place.history||[]).map(event=>({...event,roomName:place.name})))
       .filter(event=>Number.isInteger(event.sequence)&&event.sequence<=frame.seq).sort((a,b)=>a.sequence-b.sequence);
@@ -226,7 +226,7 @@ function furnishings(g, room, x, y, lit, residents) {
     polygon(reading,[[x+58,y+66,27],[x+88,y+69,25],[x+88,y+94,25],[x+58,y+91,27]],"#e6d7ae");
     polygon(reading,[[x+88,y+69,25],[x+121,y+64,27],[x+121,y+89,27],[x+88,y+94,25]],"#cbbd91");
     for(let i=0;i<4;i++)line(reading,[[x+63,y+71+i*5,28],[x+82,y+73+i*5,26]],"#a6946e",1);
-    caption(reading,x+90,y+116,0,`${entries.length} room entries`,"resident-label");
+    caption(reading,x+90,y+116,0,`${entries.length} room entries`,"resident-label interior-caption");
   } else if(room === "counting") {
     const runs=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
     const ledger=el("g",{"data-interior":"counting"},g);
@@ -246,7 +246,7 @@ function furnishings(g, room, x, y, lit, residents) {
     box(ledger,x+46,y+64,86,40,23,["#b69462","#705d43","#93784f"]);
     polygon(ledger,[[x+58,y+70,24],[x+89,y+70,24],[x+89,y+95,24],[x+58,y+95,24]],"#e6d7ae");
     polygon(ledger,[[x+89,y+70,24],[x+120,y+70,24],[x+120,y+95,24],[x+89,y+95,24]],"#d2c399");
-    caption(ledger,x+90,y+118,0,`${runs.length} ${runs.length===1?"run":"runs"} tallied`,"resident-label");
+    caption(ledger,x+90,y+118,0,`${runs.length} ${runs.length===1?"run":"runs"} tallied`,"resident-label interior-caption");
   } else if(room === "assay") {
     const reviews=(frame.runs||[]).filter(r=>r.assignment?.lane==="review"&&(!Number.isInteger(r.sequence)||r.sequence<=frame.seq));
     const commits=(Array.isArray(data?.commits)?data.commits:[]).filter(c=>Number.isFinite(c.at)&&(!Number.isFinite(frame.at)||c.at<=frame.at));
@@ -263,7 +263,7 @@ function furnishings(g, room, x, y, lit, residents) {
     box(bench,x+44,y+64,90,42,22,["#b4915d","#6f5c42","#8f754d"]);
     polygon(bench,[[x+56,y+71,23],[x+86,y+71,23],[x+86,y+97,23],[x+56,y+97,23]],"#e6d7ae");
     polygon(bench,[[x+92,y+71,23],[x+122,y+71,23],[x+122,y+97,23],[x+92,y+97,23]],"#c8d6cc");
-    caption(bench,x+90,y+118,0,`${reviews.length} ${reviews.length===1?"review":"reviews"} · ${commits.length} source ${commits.length===1?"commit":"commits"}`,"resident-label");
+    caption(bench,x+90,y+118,0,`${reviews.length} ${reviews.length===1?"review":"reviews"} · ${commits.length} source ${commits.length===1?"commit":"commits"}`,"resident-label interior-caption");
   } else if(room !== "bedroom" && !residents.length) {
     box(g,x+60,y+60,58,35,22,["#ad8e65","#786144","#8e7654"]);
   }
@@ -631,15 +631,30 @@ function garden(g,span,depth) {
   shrub(g,span+38,depth*.3);shrub(g,span+40,depth*.7,"#e58f8f");
   tree(g,-42,depth+30,1.1);shrub(g,span*.5,depth+38,"#e9c46a");tree(g,span+36,depth+34,.95);
 }
+// Threads someone holds or has queued as ready, against those left open with neither: old chores
+// nobody closed made "36 unfinished threads" read as a backlog. Null before threads recorded readiness.
+function threadCounts() {
+  const tasks=effectiveTasks();
+  if(!tasks.some(t=>t.ready===true||t.ready===false))return {active:tasks.length,idle:null};
+  const active=tasks.filter(t=>(t.status==="claimed"&&!t.expired)||t.ready===true).length;
+  return {active,idle:tasks.length-active};
+}
 // What the record says about a room, in a few words, drawn under its name.
 function roomFact(id) {
   const count=(n,one,many)=>`${n} ${n===1?one:many}`;
-  if(id==="workshop")return frame.tasks.length?count(frame.tasks.length,"thread open","threads open"):"";
+  if(id==="workshop"){
+    const threads=threadCounts();
+    if(threads.idle===null)return frame.tasks.length?count(frame.tasks.length,"thread open","threads open"):"";
+    return `${count(threads.active,"thread active","threads active")}${threads.idle?` · ${threads.idle} idle`:""}`;
+  }
   if(id==="bedroom"){const n=frame.residents.filter(r=>r.pose==="sleeping").length;return n?`${n} asleep`:"";}
   if(id==="council"){
     const open=(frame.voting?.choices||[]).filter(c=>c.status==="open").length;
     if(open)return count(open,"vote open","votes open");
-    const pending=frame.council?.pending||0;return pending?count(pending,"proposal waiting","proposals waiting"):"";
+    // Only proposals that can still pass: ones the rules have since overtaken stay in the record, not in the count.
+    const listed=frame.voting?.proposals;
+    const pending=Array.isArray(listed)?listed.filter(p=>p.status==="pending"&&!p.stale).length:frame.council?.pending||0;
+    return pending?count(pending,"proposal waiting","proposals waiting"):"";
   }
   if(id==="gallery"){const n=(frame.shelf?.projects||[]).filter(x=>x.status==="active").length;return n?count(n,"project being built","projects being built"):"";}
   if(id==="study"){const n=(frame.shelf?.ideas||[]).filter(idea=>!idea.status||idea.status==="shelved").length;return n?count(n,"idea on the shelf","ideas on the shelf"):"";}
@@ -731,10 +746,10 @@ function ago(at) {
   return `${Math.floor(diff/86400)}d ${current?"ago":"earlier"}`;
 }
 // Name tags hang over everyone who is awake: who they are and what they hold.
-function nameTags(map,placed) {
+function nameTags(map,placed,labels=[]) {
   const awake=placed.filter(item=>!["sleeping","unconfirmed"].includes(item.resident.pose));
   const latest=current?latelyEvents(1)[0]:null;
-  const where={door:"at the door",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room",study:"in the study",parlor:"in the parlor",gallery:"in the gallery",chronicle:"in the chronicle",assay:"in the assay room"};
+  const where={door:"just in, reading the record",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room",study:"in the study",parlor:"in the parlor",gallery:"in the gallery",chronicle:"in the chronicle",assay:"in the assay room"};
   const boxes=[];
   awake.forEach(item=>{
     const r=item.resident,[cx,cy]=p(item.px,item.py,0),kind=kinds[r.agent]||kinds.unrecorded;
@@ -742,7 +757,9 @@ function nameTags(map,placed) {
     const width=Math.max(r.name.length*7.6,second.length*5.9)+22;
     let top=cy-118;
     // Step a tag upward until it clears the ones already hung.
-    while(boxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+4&&Math.abs(b.top-top)<42))top-=44;
+    // ... and the room names: a tag hung over "The Door" hid the name of the room.
+    const covers=at=>labels.some(l=>Math.abs(l.x-cx)<(l.width+width)/2+4&&at<l.y+(l.fact?24:8)&&at+38>l.y-20);
+    for(let step=0;step<12&&(boxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+4&&Math.abs(b.top-top)<42)||covers(top));step++)top-=44;
     boxes.push({cx,top,width});
     const fresh=latest&&latest.actor===r.id&&observationTime()-latest.at<600;
     const tag=el("g",{class:`life-tag${fresh?" life-tag-fresh":""}${work?" life-tag-working":""}`,"pointer-events":"none","data-tag":r.id},map);
@@ -841,7 +858,7 @@ function drawHouse() {
     });
     const c=p(x+92,y+2,43);
     const roomName=room.name.length>22?room.name.slice(0,21)+"…":room.name;
-    roomLabels.push({x:c[0], y:c[1], fact:status==="open"?roomFact(room.id):"", name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
+    roomLabels.push({x:c[0], y:c[1], width:Math.max(roomName.length*10.5,14*6.6), fact:status==="open"?roomFact(room.id):"", name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
     const corners=[p(x-25,y-25,80),p(x+210,y-25,80),p(x+210,y+depth+45,-30),p(x-25,y+depth+45,-30)];
     const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
@@ -849,7 +866,7 @@ function drawHouse() {
   if(rooms.length) garden(el("g",{"pointer-events":"none"},map),span,totalDepth);
   roomLabels.forEach(r=>el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name));
   roomLabels.forEach(r=>{if(r.fact)el("text",{x:r.x,y:r.y+17,class:"room-fact","text-anchor":"middle","pointer-events":"none"},map,r.fact);});
-  nameTags(map,placed);
+  nameTags(map,placed,roomLabels);
   map.setAttribute("viewBox",selected?roomBounds[selected]||wholeBounds:wholeBounds);
 }
 function effectiveTasks() {const at=observationTime();return frame.tasks.map(t=>({...t,expired:t.status==="claimed"&&t.until<=at}));}
@@ -2190,6 +2207,13 @@ function shelf() {
     const leaving = ideas.filter(idea => typeof idea.brief_due === "number");
     const standing = ideas.filter(idea => typeof idea.brief_due !== "number");
     html("div", "eyebrow-small", "Ideas · not selected projects", next);
+    const unbacked = leaving.filter(idea => idea.grounded !== true);
+    if (unbacked.length) {
+      const first = Math.min(...unbacked.map(idea => idea.brief_due));
+      html("p", "small shelf-thin", unbacked.length === ideas.length
+        ? `No resident has yet shown that anyone outside the house asked for ${ideas.length === 1 ? "this idea" : `any of these ${ideas.length} ideas`}. Each leaves the shelf ${clock(first)} unless a resident finds who asked and a second resident agrees.`
+        : `${unbacked.length} of these ${ideas.length} ideas have nobody shown to have asked for them. They leave the shelf from ${clock(first)} unless a resident finds who asked and a second resident agrees.`, next);
+    }
     standing.forEach(idea => renderShelfIdea(idea, next, greatMode, residentName));
     if (leaving.length) {
       if (standing.length) html("div", "eyebrow-small shelf-leaving", `Leaving the shelf unless a resident renews them · ${leaving.length}`, next);
@@ -2767,7 +2791,7 @@ function render() {
   const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
   const stopped=frame.residents.filter(r=>r.pose==="unconfirmed").length;
-  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${frame.tasks.length} unfinished threads.${openNeeds().length ? ` ${openNeeds().length} ${openNeeds().length === 1 ? "need waits" : "needs wait"} for the Steward.` : ""}`;
+  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${(t=>t.idle===null?`${t.active} unfinished threads.`:`${t.active} ${t.active===1?"thread":"threads"} in hand or queued, ${t.idle} left idle.`)(threadCounts())}${openNeeds().length ? ` ${openNeeds().length} ${openNeeds().length === 1 ? "need waits" : "needs wait"} for the Steward.` : ""}`;
   renderViewContext();
   $("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
