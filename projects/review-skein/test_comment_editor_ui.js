@@ -55,7 +55,9 @@ function setup(envelope, anchors) {
 
 function assertControlsLabeled(page) {
   for (const field of page.nodes.filter(n => n.tag === "textarea" || n.tag === "select" || n.tag === "input")) {
-    assert(page.nodes.some(n => n.tag === "label" && n.htmlFor === field.id), `missing label for ${field.id}`);
+    const label = page.nodes.find(n => n.tag === "label" && n.htmlFor === field.id);
+    assert(label, `missing label for ${field.id}`);
+    assert.equal(field.attributes["aria-label"], label.textContent, `aria-label should match label for ${field.id}`);
     assert.equal(field.attributes.tabindex, undefined, "ordinary native keyboard controls");
   }
 }

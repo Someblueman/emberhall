@@ -125,13 +125,13 @@ def render_comments(
         if comment.orphan_reason is not None:
             provenance += f'<p>Orphan reason: {escaped(comment.orphan_reason)}</p>'
         if comment.rebased_from is not None:
-            provenance += (f'<h3>Rebased from</h3><pre>'
+            provenance += (f'<h3>Rebased from</h3><pre class="anchor">'
                            f'{escaped(_anchor_text(comment.rebased_from))}</pre>')
         articles.append(
             f'<article id="note-{comment.identifier}" aria-labelledby="title-{comment.identifier}">'
             f'<h2 id="title-{comment.identifier}">{comment.identifier}</h2>'
             f'<p>Status: {comment.resolution}. Anchor: {comment.state}.</p>'
-            f'<h3>Anchor</h3><pre>{escaped(_anchor_text(comment.anchor))}</pre>'
+            f'<h3>Anchor</h3><pre class="anchor">{escaped(_anchor_text(comment.anchor))}</pre>'
             f'<h3>Comment</h3><pre>{escaped(comment.body)}</pre>{provenance}</article>'
         )
     body = "\n".join(articles) or "<p>No comments match these filters.</p>"
@@ -140,13 +140,18 @@ def render_comments(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
 <title>Skein comments</title><style>
-body {{ margin: auto; max-width: 64rem; padding: 1rem; color: #20252b; background: #fff; }}
+:root {{ color-scheme: light dark; --bg: #fff; --fg: #20252b; --border: #596774;
+  --link: #153f8c; --focus: #964400; }}
+@media (prefers-color-scheme: dark) {{ :root {{ --bg: #0d1117; --fg: #e6edf3;
+  --border: #48535e; --link: #79c0ff; --focus: #f0883e; }} }}
+body {{ margin: auto; max-width: 64rem; padding: 1rem; color: var(--fg); background: var(--bg); }}
 body, pre {{ font: 1rem/1.6 system-ui, sans-serif; }}
+pre.anchor {{ font: .9rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 4; }}
 pre, a, h2 {{ white-space: pre-wrap; overflow-wrap: anywhere; }}
-article {{ border-top: 2px solid #596774; padding-block: 1rem; }}
-pre {{ border-left: 3px solid #596774; padding: .5rem 1rem; }}
-a {{ color: #153f8c; }}
-a:focus-visible, article:target {{ outline: 3px solid #964400; outline-offset: 3px; }}
+article {{ border-top: 2px solid var(--border); padding-block: 1rem; }}
+pre {{ border-left: 3px solid var(--border); padding: .5rem 1rem; }}
+a {{ color: var(--link); }}
+a:focus-visible, article:target {{ outline: 3px solid var(--focus); outline-offset: 3px; }}
 </style></head><body><a href="#comments">Skip to comments</a><main>
 <h1>Skein comments</h1><p>{escaped(summary)}</p><p>{totals}</p>
 <p>Read-only snapshot of comments.json. Regenerate after editing or resolving comments.

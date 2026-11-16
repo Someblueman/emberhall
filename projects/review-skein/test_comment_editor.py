@@ -91,6 +91,20 @@ class EditorTests(unittest.TestCase):
         self.assertEqual(controls["edits-json"][1]["tabindex"], "0")
         self.assertEqual(controls["edits-json"][1]["aria-labelledby"], "edits-export-title")
 
+    def test_page_and_compose_instructions_match_available_controls(self):
+        with tempfile.TemporaryDirectory() as directory:
+            packet, _ = self.packet(Path(directory))
+            comments_bytes = (packet / "comments.json").read_bytes()
+            (packet / "anchors.json").write_text(
+                json.dumps({"format": skein.ANCHOR_FORMAT, "version": 1, "anchors": []}),
+                encoding="utf-8",
+            )
+            page_html = comment_editor.render_editor(comments_bytes)
+            compose_html = comment_editor.render_composer(packet)
+            self.assertNotIn("add a new comment below", page_html)
+            self.assertIn("generate a compose page", page_html)
+            self.assertIn("Select a rendered line below to add a new comment", compose_html)
+
     def test_apply_validates_the_entire_batch_and_preserves_fixed_fields(self):
         with tempfile.TemporaryDirectory() as directory:
             packet, edits = self.packet(Path(directory))

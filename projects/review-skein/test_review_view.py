@@ -527,6 +527,36 @@ class ReviewViewTests(SkeinFixture):
         self.assertNotIn("orphan-search", cli.stdout)
         self.assertEqual(_snapshot(packet2), before)
 
+    def test_full_commit_identity_not_duplicated_and_anchor_card_preserves_lines(self) -> None:
+        packet, _ = self._build_rich_packet()
+        oid_packet = self.root / "oid-packet"
+        skein.export_packet(self.repository, self.base, self.head, oid_packet)
+        first_anchor = next(a for a in skein._load_anchors(oid_packet) if a.side == "new")
+        skein.add_comment(
+            oid_packet, "unplaced-note", first_anchor.commit, first_anchor.path,
+            first_anchor.side, first_anchor.line, "Check line",
+        )
+        # Make the comment an orphan so an anchor card renders in HTML.
+        comments = skein.loads_comments((oid_packet / "comments.json").read_text(encoding="utf-8"))
+        comments[0] = skein.Comment(
+            comments[0].identifier, comments[0].anchor, comments[0].body,
+            state="orphan", orphan_reason="line removed",
+        )
+        skein._atomic_comments(oid_packet, comments)
+        text = review_view.render_packet(oid_packet, output_format="text")
+        self.assertIn(f"Base: {self.base}\n", text)
+        self.assertIn(f"Head: {self.head}\n", text)
+        self.assertNotIn(f"{self.base} ({self.base})", text)
+        self.assertNotIn(f"{self.head} ({self.head})", text)
+        page = review_view.render_packet(oid_packet, output_format="html")
+        self.assertEqual([], probe.audit(probe.parse(page)))
+        self.assertIn(f"Base: <code>{self.base}</code>", page)
+        self.assertIn(f"Head: <code>{self.head}</code>", page)
+        self.assertNotIn(f"{self.base} ({self.base})", page)
+        self.assertNotIn(f"{self.head} ({self.head})", page)
+        self.assertIn(".comment-extra code", page)
+        self.assertIn("white-space: pre-wrap", page)
+
 
 if __name__ == "__main__":
     unittest.main()

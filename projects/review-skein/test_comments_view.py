@@ -14,6 +14,7 @@ import unittest
 from unittest.mock import patch
 
 import comments_view
+import probe
 import skein
 from test_skein import SkeinFixture
 
@@ -93,6 +94,11 @@ class CommentViewTests(unittest.TestCase):
         self.assertIn("Status: resolved. Anchor: orphan.", "".join(page.words))
         self.assertIn("Rebased from", "".join(page.words))
         self.assertIn("Read-only snapshot", output)
+        self.assertIn("color-scheme: light dark", output)
+        self.assertIn("prefers-color-scheme: dark", output)
+        self.assertIn('class="anchor"', output)
+        self.assertIn("ui-monospace", output)
+        self.assertEqual([], probe.audit(probe.parse(output)))
 
     def test_control_characters_are_literal_in_text_and_html(self):
         records = [replace(examples()[0], body="Escape\x1b[31m\r\x7f\u202e\n\t☃")]

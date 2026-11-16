@@ -672,6 +672,11 @@ a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 """
 
 
+def _format_ref(ref: str, commit: str) -> str:
+    """Format a ref and commit without duplicating an already-full commit ID."""
+    return commit if ref == commit else f"{ref} ({commit})"
+
+
 def _render_html(metadata: dict[str, Any], rendered: list[tuple[Change, list[str], list[str]]]) -> str:
     sections: list[str] = []
     navigation: list[str] = []
@@ -689,8 +694,8 @@ def _render_html(metadata: dict[str, Any], rendered: list[tuple[Change, list[str
     if not sections:
         navigation.append("<li>No textual changes between these commits.</li>")
     body = "".join(sections) or "<p>The two commits have identical file trees.</p>"
-    base = html.escape(f'{metadata["base"]["ref"]} ({metadata["base"]["commit"]})')
-    head = html.escape(f'{metadata["head"]["ref"]} ({metadata["head"]["commit"]})')
+    base = html.escape(_format_ref(metadata["base"]["ref"], metadata["base"]["commit"]))
+    head = html.escape(_format_ref(metadata["head"]["ref"], metadata["head"]["commit"]))
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

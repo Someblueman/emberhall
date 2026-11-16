@@ -31,6 +31,9 @@ EXTRA_STYLE = """
   font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .comment-extra { margin: .2rem 0 0 0; color: var(--muted); font-size: .9rem;
   overflow-wrap: anywhere; }
+.comment-extra code { display: block; white-space: pre-wrap; margin-top: .2rem; padding: .35rem .5rem;
+  border-left: 3px solid var(--border); color: var(--fg);
+  font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
 @media (max-width: 640px) { .comment-label { font-size: .75rem; padding: .35rem .25rem; } }
 """
 
@@ -477,8 +480,8 @@ def _render_text(
 
     lines = [
         "Skein review",
-        f'Base: {_visible(metadata["base"]["ref"])} ({metadata["base"]["commit"]})',
-        f'Head: {_visible(metadata["head"]["ref"])} ({metadata["head"]["commit"]})',
+        f'Base: {skein._format_ref(_visible(metadata["base"]["ref"]), metadata["base"]["commit"])}',
+        f'Head: {skein._format_ref(_visible(metadata["head"]["ref"]), metadata["head"]["commit"])}',
         _filter_summary_line(
             len(selected), len(all_comments), resolution, state,
             paths, search, only_commented,
@@ -720,8 +723,8 @@ def _render_html(
             f'<ol>{"".join(comment_items)}</ol></nav>\n'
         )
 
-    base_text = _visible(f'{metadata["base"]["ref"]} ({metadata["base"]["commit"]})')
-    head_text = _visible(f'{metadata["head"]["ref"]} ({metadata["head"]["commit"]})')
+    base_text = skein._format_ref(_visible(metadata["base"]["ref"]), metadata["base"]["commit"])
+    head_text = skein._format_ref(_visible(metadata["head"]["ref"]), metadata["head"]["commit"])
     showing = _filter_summary_line(
         len(selected), len(all_comments), resolution, state,
         paths, search, only_commented,

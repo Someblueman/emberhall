@@ -193,7 +193,16 @@ class ProbeEditorAuditTest(unittest.TestCase):
 
     def test_real_generated_editor_page_has_no_errors(self):
         page = comment_editor.render_editor(skein.dumps_comments([]).encode("utf-8"))
-        self.assertEqual(self.errors(page), [])
+        findings = probe.audit(probe.parse(page), editor=True)
+        self.assertEqual([f for f in findings if f.severity == "error"], [])
+        self.assertNotIn("unlabelled-section", [f.code for f in findings])
+        # Visible unlabelled landmarks still emit notices; hidden ones do not.
+        mixed = CLEAN_PAGE.replace(
+            "</main>",
+            '<section hidden><p>Hidden</p></section><section><p>Visible</p></section></main>',
+        )
+        codes = [f.code for f in probe.audit(probe.parse(mixed))]
+        self.assertEqual(codes.count("unlabelled-section"), 1)
 
     def test_missing_csp_is_reported(self):
         page = editor_page().replace("Content-Security-Policy", "X-Policy")

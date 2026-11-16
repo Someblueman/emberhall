@@ -54,6 +54,15 @@ def _render(envelope: dict, anchors: list[skein.Anchor] | None = None) -> str:
     if anchors is not None:
         addition = ('<script type="application/json" id="anchor-data">'
                     + _inert_json([anchor.to_dict() for anchor in anchors]) + "</script>")
+        intro = (
+            "Select a rendered line below to add a new comment, or edit existing comment bodies "
+            "and open/resolved status. Anchors and orphan history stay fixed."
+        )
+    else:
+        intro = (
+            "Edit existing comment bodies and open/resolved status. Anchors and orphan history stay fixed. "
+            "To add new comments against rendered lines, generate a compose page from the packet instead."
+        )
     script = Path(__file__).with_suffix(".js").read_text(encoding="utf-8")
     digest = base64.b64encode(hashlib.sha256(script.encode("utf-8")).digest()).decode("ascii")
     return f'''<!doctype html>
@@ -77,8 +86,7 @@ button {{ margin-block: .75rem; }}
 :focus-visible {{ outline: 3px solid #964400; outline-offset: 3px; }}
 </style></head><body><a href="#comments">Skip to comments</a><main>
 <h1>Edit Skein comments</h1>
-<p>Edit existing comment bodies and open/resolved status. Anchors and orphan history stay fixed.
-A packet-bound compose page also lets you select a rendered line and add a new comment below.
+<p>{intro}
 This local page does not write your packet. Download edits or show edits JSON to save a copy,
 then check and apply it with the CLI. Keep one writer at a time.
 Changes here are lost if you close or reload before saving.</p>

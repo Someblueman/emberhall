@@ -222,6 +222,11 @@ class SkeinPacketTests(SkeinFixture):
         self.assertEqual((self.base, self.head), skein.verify_packet(self.packet))
         after = self.git("for-each-ref", "--format=%(refname) %(objectname)").stdout
         self.assertEqual(before, after)
+        page = (self.packet / "review.html").read_text(encoding="utf-8")
+        self.assertIn(f"Base: <code>{self.base}</code>", page)
+        self.assertIn(f"Head: <code>{self.head}</code>", page)
+        self.assertNotIn(f"{self.base} ({self.base})", page)
+        self.assertNotIn(f"{self.head} ({self.head})", page)
 
     def test_cli_exports_verifies_and_records_an_offline_comment(self) -> None:
         stdout = io.StringIO()

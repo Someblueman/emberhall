@@ -513,6 +513,8 @@ def audit(tree: Node, notes=(), editor: bool = False) -> list:
                                         f"{', '.join(by_label[word])} all read as {word!r}"))
 
     for node in nodes:
+        if id(node) in hidden_tree:
+            continue
         if node.tag == "nav" and not accessible_name(node, first, hidden_tree):
             findings.append(Finding("unlabelled-nav", "notice", "<nav> has no accessible name"))
         if node.tag == "section" and not accessible_name(node, first, hidden_tree):

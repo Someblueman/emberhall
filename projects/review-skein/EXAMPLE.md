@@ -102,17 +102,30 @@ The result is **nine comments, two orphans (`echo`, `lantern`) and one resolved
 comment (`door`)**. Orphans retain a reason and prior anchor. This is deliberately
 a case where revision cannot automatically preserve every useful location.
 
-To edit existing comments using labelled controls, generate a self-contained page:
+To edit existing comments using labelled controls, generate a self-contained page
+(or use `compose` on the whole packet to add new anchored comments against rendered lines):
 
 ```sh
 python3 projects/review-skein/comment_editor.py page \
   "$practice/revised-packet/comments.json" "$practice/editor.html"
+python3 projects/review-skein/comment_editor.py compose \
+  "$practice/revised-packet" "$practice/compose-editor.html"
 ```
 
-Open `editor.html` locally. Follow [EDITOR.md](EDITOR.md) to download and apply
-edits; the page cannot save directly into the packet or add new comments.
-Read-only HTML is also available via `comments_view.py --format html`. An example
-or a markup audit is not a desktop, phone or screen-reader acceptance witness.
+Open `editor.html` or `compose-editor.html` locally. Follow [EDITOR.md](EDITOR.md) to
+check, download (or copy JSON) and apply edits; neither page writes directly into the
+packet. Read-only HTML is also available via `comments_view.py --format html`, and you
+can render the `merge-target` → `revised-packet` interdiff or pack a single-file
+`.tar.gz` archive for offline transfer:
+
+```sh
+python3 projects/review-skein/interdiff.py \
+  "$practice/merge-target" "$practice/revised-packet" --format html > "$practice/interdiff.html"
+python3 projects/review-skein/archive.py pack \
+  "$practice/revised-packet" "$practice/revised-packet.tar.gz"
+```
+
+An example or a markup audit is not a desktop, phone or screen-reader acceptance witness.
 
 ## Read the annotated packet, then damage and recover a copy
 

@@ -483,6 +483,34 @@ class InterdiffTests(SkeinFixture):
 
         self.assertEqual(snap_v1, _snapshot(p1))
 
+    def test_full_commit_identity_not_duplicated_and_anchor_card_preserves_lines(self) -> None:
+        self.git("checkout", "--quiet", "base")
+        base_oid = self.rev_parse("HEAD")
+        self.write("a.txt", "one\ntwo\n")
+        self.commit("v1 commit")
+        v1_oid = self.rev_parse("HEAD")
+        self.write("a.txt", "one\nthree\n")
+        self.commit("v2 commit")
+        v2_oid = self.rev_parse("HEAD")
+        p1 = self.root / "oid-p1"
+        p2 = self.root / "oid-p2"
+        skein.export_packet(self.repository, base_oid, v1_oid, p1)
+        skein.export_packet(self.repository, base_oid, v2_oid, p2)
+        text = interdiff.render_interdiff(p1, p2, output_format="text")
+        self.assertIn(f"V1 head: {v1_oid}\n", text)
+        self.assertIn(f"V2 head: {v2_oid}\n", text)
+        self.assertIn(f"Base: {base_oid} — unchanged between revisions.", text)
+        for oid in (base_oid, v1_oid, v2_oid):
+            self.assertNotIn(f"{oid} ({oid})", text)
+        page = interdiff.render_interdiff(p1, p2, output_format="html")
+        self.assertEqual([], probe.audit(probe.parse(page)))
+        self.assertIn(f"V1 head: <code>{v1_oid}</code>", page)
+        self.assertIn(f"V2 head: <code>{v2_oid}</code>", page)
+        for oid in (base_oid, v1_oid, v2_oid):
+            self.assertNotIn(f"{oid} ({oid})", page)
+        self.assertIn(".comment-extra code", page)
+        self.assertIn("white-space: pre-wrap", page)
+
 
 if __name__ == "__main__":
     unittest.main()

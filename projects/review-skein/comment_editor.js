@@ -53,6 +53,7 @@ function startEditor(document, environment) {
     caption.htmlFor = id;
     const control = node(tag, undefined, wrapper);
     control.id = id;
+    control.setAttribute("aria-label", labelText);
     return control;
   }
 

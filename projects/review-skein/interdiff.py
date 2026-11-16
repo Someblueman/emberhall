@@ -363,10 +363,10 @@ def _base_status_line(meta_v1: dict[str, Any], meta_v2: dict[str, Any]) -> str:
     r1 = _visible(meta_v1["base"]["ref"])
     r2 = _visible(meta_v2["base"]["ref"])
     if b1 == b2:
-        return f"Base: {r2} ({b2}) — unchanged between revisions."
+        return f"Base: {skein._format_ref(r2, b2)} — unchanged between revisions."
     return (
         f"Base revision changed between packets (rebased): "
-        f"V1 {r1} ({b1}) -> V2 {r2} ({b2}); V1->V2 diff includes upstream base changes."
+        f"V1 {skein._format_ref(r1, b1)} -> V2 {skein._format_ref(r2, b2)}; V1->V2 diff includes upstream base changes."
     )
 
 
@@ -510,8 +510,8 @@ def _render_text(
 
     lines = [
         "Skein revision interdiff",
-        f'V1 head: {_visible(plan.meta_v1["head"]["ref"])} ({plan.meta_v1["head"]["commit"]})',
-        f'V2 head: {_visible(plan.meta_v2["head"]["ref"])} ({plan.meta_v2["head"]["commit"]})',
+        f'V1 head: {skein._format_ref(_visible(plan.meta_v1["head"]["ref"]), plan.meta_v1["head"]["commit"])}',
+        f'V2 head: {skein._format_ref(_visible(plan.meta_v2["head"]["ref"]), plan.meta_v2["head"]["commit"])}',
         _base_status_line(plan.meta_v1, plan.meta_v2),
         review_view._filter_summary_line(
             len(plan.selected_entries), len(plan.all_entries), resolution, state,
@@ -772,8 +772,8 @@ def _render_html(
             f'<ol>{"".join(items)}</ol></nav>\n'
         )
 
-    v1_head_text = _visible(f'{plan.meta_v1["head"]["ref"]} ({plan.meta_v1["head"]["commit"]})')
-    v2_head_text = _visible(f'{plan.meta_v2["head"]["ref"]} ({plan.meta_v2["head"]["commit"]})')
+    v1_head_text = skein._format_ref(_visible(plan.meta_v1["head"]["ref"]), plan.meta_v1["head"]["commit"])
+    v2_head_text = skein._format_ref(_visible(plan.meta_v2["head"]["ref"]), plan.meta_v2["head"]["commit"])
     base_line = _base_status_line(plan.meta_v1, plan.meta_v2)
     showing = review_view._filter_summary_line(
         len(plan.selected_entries), len(plan.all_entries), resolution, state,
