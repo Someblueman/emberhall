@@ -290,6 +290,140 @@ class AnalyseTest(unittest.TestCase):
         for entry in report["files"]:
             self.assertEqual(entry["invisible"], ["src/gamma.py"])
 
+    def test_a_whole_file_test_mention_keeps_test_with_its_code(self):
+        # A changed test file is read whole: a mention far from the changed
+        # lines still links the test to the code it exercises.
+        diff = ("diff --git a/src/alpha.py b/src/alpha.py\n"
+                "--- a/src/alpha.py\n"
+                "+++ b/src/alpha.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-x = 1\n"
+                "+x = 2\n"
+                "diff --git a/tests/test_alpha.py b/tests/test_alpha.py\n"
+                "--- a/tests/test_alpha.py\n"
+                "+++ b/tests/test_alpha.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-def test_alpha():\n"
+                "+def test_alpha():\n")
+        changes = preflight.parse_diff(diff)
+        whole_texts = {"tests/test_alpha.py": ["import src.alpha", "def test_alpha():", "    pass"]}
+        report = preflight.analyse(changes, {"src/alpha.py": (10, 100), "tests/test_alpha.py": (5, 50)},
+                                   {"src/alpha.py", "tests/test_alpha.py"}, 400, None, whole_texts)
+        groups = [group["files"] for group in report["clusters"]]
+        # test and alpha in one group
+        self.assertTrue(any(set(group) == {"src/alpha.py", "tests/test_alpha.py"} for group in groups))
+        alpha = [e for e in report["files"] if e["path"] == "tests/test_alpha.py"][0]
+        self.assertIn("src/alpha.py", alpha["mentions"])
+        self.assertIn("src/alpha.py", alpha["whole_file_mentions"])
+
+    def test_a_production_file_is_not_read_whole(self):
+        diff = ("diff --git a/src/alpha.py b/src/alpha.py\n"
+                "--- a/src/alpha.py\n"
+                "+++ b/src/alpha.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-x = 1\n"
+                "+x = 2\n"
+                "diff --git a/src/beta.py b/src/beta.py\n"
+                "--- a/src/beta.py\n"
+                "+++ b/src/beta.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-y = 1\n"
+                "+y = 2\n")
+        changes = preflight.parse_diff(diff)
+        # Even if the whole production file mentions beta, it must not link.
+        whole_texts = {"src/alpha.py": ["import beta", "x = 2"]}
+        report = preflight.analyse(changes, {"src/alpha.py": (10, 100), "src/beta.py": (10, 100)},
+                                   {"src/alpha.py", "src/beta.py"}, 400, None, whole_texts)
+        alpha = [e for e in report["files"] if e["path"] == "src/alpha.py"][0]
+        self.assertEqual(alpha["mentions"], [])
+        self.assertEqual(alpha["whole_file_mentions"], [])
+        groups = [group["files"] for group in report["clusters"]]
+        self.assertIn(["src/alpha.py"], groups)
+        self.assertIn(["src/beta.py"], groups)
+
+    def test_an_ambiguous_mention_links_neither_file(self):
+        diff = ("diff --git a/src/alpha.py b/src/alpha.py\n"
+                "--- a/src/alpha.py\n"
+                "+++ b/src/alpha.py\n"
+                "@@ -1,1 +1,2 @@\n"
+                " x = 1\n"
+                "+ open('summary.json')\n"
+                "diff --git a/docs/summary.json b/docs/summary.json\n"
+                "--- a/docs/summary.json\n"
+                "+++ b/docs/summary.json\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-{ \"a\": 1 }\n"
+                "+{ \"a\": 2 }\n"
+                "diff --git a/site/summary.json b/site/summary.json\n"
+                "new file mode 100644\n"
+                "--- /dev/null\n"
+                "+++ b/site/summary.json\n"
+                "@@ -0,0 +1 @@\n"
+                "+{}\n")
+        changes = preflight.parse_diff(diff)
+        base_paths = {"src/alpha.py", "docs/summary.json"}  # site/summary.json is new
+        report = preflight.analyse(changes, {"src/alpha.py": (5, 50), "docs/summary.json": (1, 10)},
+                                   base_paths, 400)
+        alpha = [e for e in report["files"] if e["path"] == "src/alpha.py"][0]
+        self.assertEqual(alpha["mentions"], [])
+        self.assertEqual(alpha["invisible"], [])
+
+    def test_a_name_shared_by_two_files_is_not_reported_as_unseen(self):
+        diff = ("diff --git a/src/alpha.py b/src/alpha.py\n"
+                "--- a/src/alpha.py\n"
+                "+++ b/src/alpha.py\n"
+                "@@ -1,1 +1,2 @@\n"
+                " x = 1\n"
+                "+ open('summary.json')\n"
+                "diff --git a/docs/summary.json b/docs/summary.json\n"
+                "--- a/docs/summary.json\n"
+                "+++ b/docs/summary.json\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-{ \"a\": 1 }\n"
+                "+{ \"a\": 2 }\n"
+                "diff --git a/site/summary.json b/site/summary.json\n"
+                "new file mode 100644\n"
+                "--- /dev/null\n"
+                "+++ b/site/summary.json\n"
+                "@@ -0,0 +1 @@\n"
+                "+{}\n")
+        changes = preflight.parse_diff(diff)
+        base_paths = {"src/alpha.py", "docs/summary.json"}
+        report = preflight.analyse(changes, {"src/alpha.py": (5, 50), "docs/summary.json": (1, 10)},
+                                   base_paths, 400)
+        # docs/summary.json is in the change, so it must not appear as unseen.
+        for entry in report["files"]:
+            self.assertNotIn("docs/summary.json", entry["invisible"])
+        invisible_actions = [a["detail"] for a in report["actions"] if a["kind"] == "invisible"]
+        for detail in invisible_actions:
+            self.assertNotIn("docs/summary.json", detail)
+            self.assertNotIn("site/summary.json", detail)
+
+    def test_the_text_report_does_not_claim_nothing_links(self):
+        diff = ("diff --git a/src/alpha.py b/src/alpha.py\n"
+                "--- a/src/alpha.py\n"
+                "+++ b/src/alpha.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-x = 1\n"
+                "+x = 2\n"
+                "diff --git a/src/beta.py b/src/beta.py\n"
+                "--- a/src/beta.py\n"
+                "+++ b/src/beta.py\n"
+                "@@ -1,1 +1,1 @@\n"
+                "-y = 1\n"
+                "+y = 2\n")
+        changes = preflight.parse_diff(diff)
+        report = preflight.analyse(changes, {"src/alpha.py": (5, 50), "src/beta.py": (5, 50)},
+                                   {"src/alpha.py", "src/beta.py"}, 400)
+        # render_text needs the envelope build_report adds.
+        report["range"] = "test"
+        report["mode"] = "range"
+        report["base"] = "HEAD"
+        text = preflight.render_text(report)
+        self.assertNotIn("nothing links", text)
+        self.assertIn("no link was found", text)
+        self.assertIn("separate groups", text)
+
     def test_documentation_only_edits_are_flagged_when_mixed(self):
         report = self.report()
         self.assertFalse(report["flags"]["mixed_documentation_and_code"])
@@ -394,6 +528,79 @@ class CommandTest(unittest.TestCase):
         second = self.run_preflight("--json")
         self.assertEqual(first.returncode, 0, first.stderr)
         self.assertEqual(first.stdout, second.stdout)
+
+    def test_a_changed_test_read_whole_links_far_mention_in_one_group(self):
+        # The test file changes only a distant line, but its whole content
+        # names the production file, so the two end up in one group.
+        write(self.root / "src" / "alpha.py", "def f():\n    return 1\n")
+        test_path = self.root / "tests" / "test_behaviour.py"
+        body = ("# spacer\n" * 20 +
+                "import src.alpha\ndef test_result():\n    assert src.alpha.f() == 1\n")
+        write(test_path, "# hello\n" + body)
+        git(self.root, self.env, "add", "-A")
+        git(self.root, self.env, "commit", "--quiet", "-m", "base")
+        # Change only the first line of the test, far from the import.
+        write(test_path, "# hello2\n" + body)
+        write(self.root / "src" / "alpha.py", "def f():\n    return 2\n")
+        git(self.root, self.env, "add", "-A")
+        git(self.root, self.env, "commit", "--quiet", "-m", "change")
+        diff = git(self.root, self.env, "diff", "--unified=3", "HEAD~1..HEAD")
+        self.assertNotIn("import src.alpha", diff)
+        result = self.run_preflight("HEAD~1..HEAD", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        groups = [set(g["files"]) for g in report["clusters"]]
+        # Both changed files in one group thanks to whole-file read.
+        self.assertIn({"src/alpha.py", "tests/test_behaviour.py"}, groups)
+        self.assertNotIn("src/alpha.py", report["flags"]["production_files_without_tests"])
+        test_entry = [e for e in report["files"] if e["path"] == "tests/test_behaviour.py"][0]
+        self.assertIn("src/alpha.py", test_entry["mentions"])
+        self.assertIn("src/alpha.py", test_entry["whole_file_mentions"])
+
+    def test_path_mentions_resolve_across_changed_and_base_paths(self):
+        cases = [
+            ("added", "summary.json", None),
+            ("modified", "summary.json", None),
+            ("unchanged", "summary.json", None),
+            ("deleted", "summary.json", None),
+            ("unchanged", "docs/summary.json", "docs/summary.json"),
+            ("unchanged", "site/summary.json", "site/summary.json"),
+        ]
+        for state, mention, target in cases:
+            with self.subTest(state=state, mention=mention):
+                write(self.root / "src/alpha.py", "x = 1\n")
+                write(self.root / "docs/summary.json", '{"v": 1}\n')
+                other = self.root / "site/summary.json"
+                if state == "added":
+                    other.unlink(missing_ok=True)
+                else:
+                    write(other, '{}\n')
+                git(self.root, self.env, "add", "-A")
+                git(self.root, self.env, "commit", "--quiet", "--allow-empty", "-m", "base")
+
+                write(self.root / "src/alpha.py", f"x = 1\nopen({mention!r})\n")
+                write(self.root / "docs/summary.json", '{"v": 2}\n')
+                if state in {"added", "modified"}:
+                    write(other, '{"new": 1}\n')
+                elif state == "deleted":
+                    other.unlink()
+                git(self.root, self.env, "add", "-A")
+                git(self.root, self.env, "commit", "--quiet", "-m", "change")
+
+                first = self.run_preflight("HEAD~1..HEAD", "--json")
+                second = self.run_preflight("HEAD~1..HEAD", "--json")
+                self.assertEqual(first.returncode, 0, first.stderr)
+                self.assertEqual(second.returncode, 0, second.stderr)
+                self.assertEqual(first.stdout, second.stdout)
+                report = json.loads(first.stdout)
+                alpha = next(e for e in report["files"] if e["path"] == "src/alpha.py")
+                changed_target = target == "docs/summary.json"
+                self.assertEqual(alpha["mentions"], [target] if changed_target else [])
+                self.assertEqual(alpha["invisible"], [target] if target and not changed_target else [])
+                if target is None:
+                    self.assertIn(["src/alpha.py"], [g["files"] for g in report["clusters"]])
+                    self.assertFalse(any(e["invisible"] for e in report["files"]))
+                    self.assertFalse(any(a["kind"] == "invisible" for a in report["actions"]))
 
     def test_the_text_report_names_the_files(self):
         write(self.root / "src" / "alpha.py", "import beta\n" + "x = 2\n" * 20)

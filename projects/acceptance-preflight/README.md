@@ -9,8 +9,8 @@ the reading and reconstruction load a reviewer would carry:
   reader's limit;
 - how far the change spreads across directories and subsystems, and how the
   churn is concentrated;
-- which groups of files nothing links, so they could be handed over separately,
-  each with its own load;
+- which groups of files have no link found between them and the rest of the
+  change, so they could be handed over separately, each with its own load;
 - whether behaviour changes are mixed with documentation-only edits or pure
   moves;
 - whether changed production files come with a test file in the change;
@@ -54,14 +54,21 @@ rather than with a hidden number.
 | over the reader's limit | the file is longer than `--reader-limit` lines (400 by default), so it cannot be held in one window |
 | dispersion | the number of distinct top-level directories and of directories touched |
 | churn spread | the share of changed lines in the largest file, and how many files hold 80% of the churn |
-| groups nothing links | files joined by a textual mention of one another (an import, a quoted path, a file name); the connected components are the groups |
+| separate groups | files joined by a textual mention of one another (an import, a quoted path, a file name); the groups have no link found between them and the rest of the change by the current rules, so they are reported separately |
 | mixed documentation and code | some changed file has only blank or comment lines changed, or is a pure move, while another file changes code |
-| production file without a test | a changed source file with no changed test file for it: none matched by name (`test_x.py`, `x_test.py`, `x.test.js`, `x.spec.ts`, or a file under `tests/`) and no changed test file that names it (an import, a quoted path or a file name in the changed lines or their nearby context), so a differently-named test still counts |
+| production file without a test | a changed source file with no changed test file for it: none matched by name (`test_x.py`, `x_test.py`, `x.test.js`, `x.spec.ts`, or a file under `tests/`) and no changed test file that names it (an import, a quoted path or a file name anywhere in that test file), so a differently-named test still counts |
 | content a reviewer would never see | a path named in the change that exists in the tree but is not part of the change, listed once however many changed files name it; untracked files; unstaged edits outside the range |
 
 Links between files are textual mentions in the changed lines and their
-nearby context, not a dependency graph. A missing link can hide a real
-dependency, so a suggested split is a question, not an instruction.
+nearby context, not a dependency graph. A changed test file is read whole
+when looking for links, because a test names the code it exercises anywhere
+in the file. A mention that names several paths equally well names none, so
+an ambiguous name neither links files nor is reported as unseen. Matching
+considers changed paths and the base tree together: changing only one of
+two files named `summary.json` does not make that bare name unambiguous.
+An exact path can still select one file over a weaker name match. A missing
+link can hide a real dependency, so a suggested split is a question, not an
+instruction.
 
 ## What you could act on
 
@@ -109,11 +116,15 @@ the worth question this first version answers: *what will this cost the person
 - "Must be read whole" is a proxy with a stated rule, not a measurement of
   what a reader would actually do.
 - Links are textual mentions near the change, not a dependency graph. A
-  bare common file name (`index.html`, `summary.json`) can match an
-  unrelated path that happens to share the name.
+  changed test file is read whole when looking for links, because a test
+  names the code it exercises anywhere in the file; only test files are read
+  whole. A mention that names several paths equally well names none, so an
+  ambiguous bare name (`summary.json`) is not reported as unseen and does
+  not link files.
 - "Production file without a test" is a file-name convention plus test files
-  naming the file, not coverage; a test that exercises a file without naming
-  it in the changed lines or their context still looks absent.
+  naming the file anywhere in the test file, not coverage; a test that
+  exercises a file without naming it anywhere in the test file still looks
+  absent.
 - A documentation-only edit is detected from comment markers; a docstring body
   counts as code.
 - Binary files are reported as unreadable in a text diff rather than measured.

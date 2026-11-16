@@ -3,8 +3,8 @@
 
 Preflight reads a Git change and reports the reading and reconstruction load a
 reviewer would carry: the files a reader must open whole, how far the change
-spreads across directories and subsystems, which groups of files nothing links
-and could therefore be handed over separately, whether behaviour changes are
+spreads across directories and subsystems, which groups have no link found
+and could be handed over separately, whether behaviour changes are
 mixed with documentation-only edits, whether changed production files come with
 a test file, and which content in the tree would never reach a reviewer.
 
@@ -55,9 +55,10 @@ CODE_EXTENSIONS = frozenset({
 LIMITS = (
     "This counts what a reader would have to open. It does not predict how long a review takes.",
     "A whole-file read is a proxy: a new or deleted file, or a change touching a third of the file's lines.",
-    "Links between files are textual mentions, not a dependency graph; a missing link can hide a real dependency.",
-    "Production files without a test are matched by file-name convention or by a changed test file naming them, not by test coverage.",
+    "Links between files are textual mentions, not a dependency graph; a missing link can hide a real dependency. A changed test file is read whole when looking for links, because a test names the code it exercises anywhere in the file.",
+    "Production files without a test are matched by file-name convention or by a changed test file naming them anywhere in the test file, not by test coverage.",
     "Documentation-only means every changed line is blank or a comment; a docstring body counts as code.",
+    "A mention that names several paths equally well names none; an ambiguous name is not reported as unseen and does not link files.",
 )
 
 
@@ -117,6 +118,7 @@ class FileInfo:
     is_test: bool = False
     mentions: list = field(default_factory=list)
     invisible: list = field(default_factory=list)
+    whole_file_mentions: list = field(default_factory=list)
 
 
 def _strip_prefix(value: str) -> str | None:
@@ -267,30 +269,37 @@ def module_names(path: str) -> set:
     return names
 
 
-def match_path(mention: str, kind: str, paths) -> str | None:
-    """Find the repository path a mention names, if any."""
+def _score_for_mention(text: str, kind: str, path: str) -> int:
+    name = path.rsplit("/", 1)[-1]
+    stem = name.rsplit(".", 1)[0]
+    if text == path:
+        return 6
+    if path.endswith("/" + text) or text.endswith("/" + path):
+        return 5
+    if kind == "path" and text == name:
+        return 4
+    if kind == "module" and text in module_names(path):
+        return 3
+    if kind == "path" and text == stem:
+        return 2
+    return 0
+
+
+def match_candidates(mention: str, kind: str, paths) -> list:
+    """Return every path a mention could name with the strongest score."""
     text = mention.strip().strip("/")
     if not text:
-        return None
-    best = None
+        return []
     best_score = 0
+    best = []
     for path in sorted(paths):
-        name = path.rsplit("/", 1)[-1]
-        stem = name.rsplit(".", 1)[0]
-        score = 0
-        if text == path:
-            score = 6
-        elif path.endswith("/" + text) or text.endswith("/" + path):
-            score = 5
-        elif kind == "path" and text == name:
-            score = 4
-        elif kind == "module" and text in module_names(path):
-            score = 3
-        elif kind == "path" and text == stem:
-            score = 2
+        score = _score_for_mention(text, kind, path)
         if score > best_score:
-            best, best_score = path, score
-    return best
+            best_score = score
+            best = [path]
+        elif score == best_score and score > 0:
+            best.append(path)
+    return best if best_score > 0 else []
 
 
 def mentions_in(line: str) -> list:
@@ -339,23 +348,54 @@ def describe(change: FileChange, size, limit: int) -> FileInfo:
     return info
 
 
-def attach_mentions(files, base_paths) -> None:
-    """Record what each changed file mentions, and what the reader cannot see."""
-    changed = [info.change.path for info in files]
+def attach_mentions(files, base_paths, whole_texts=None) -> None:
+    """Record what each changed file mentions, and what the reader cannot see.
+
+    A mention that names several paths equally well names none, so it is
+    neither a link nor an invisible reference. Resolve against the union of
+    changed paths and the base tree before deciding whether the target is
+    changed or unseen; either set alone can hide an equally good match.
+
+    A changed test file is read whole when looking for links, because a test
+    names the code it exercises wherever that code is mentioned, often far
+    from the lines the test changes. Only test files are read whole.
+    """
+    changed = {info.change.path for info in files}
+    candidates = changed | set(base_paths)
+    whole_texts = whole_texts or {}
     for info in files:
         seen = []
-        for line in info.change.scannable_text:
+        whole_seen = []
+        # Changed lines and nearby context are always scanned.
+        scannable = info.change.scannable_text
+        # For a changed test file, the whole file is also scanned.
+        whole_lines = whole_texts.get(info.change.path, [])
+        lines_to_scan = list(scannable)
+        if info.is_test and whole_lines:
+            lines_to_scan.extend(whole_lines)
+
+        for line in lines_to_scan:
             for kind, mention in mentions_in(line):
-                target = match_path(mention, kind, changed)
-                if target and target != info.change.path:
+                matches = match_candidates(mention, kind, candidates)
+                if len(matches) != 1:
+                    continue
+                target = matches[0]
+                if target == info.change.path:
+                    continue
+                if target in changed:
                     if target not in seen:
                         seen.append(target)
-                    continue
-                other = match_path(mention, kind, base_paths)
-                if other and other != info.change.path and other not in seen:
-                    info.invisible.append(other)
+                    if info.is_test and line in whole_lines and target not in whole_seen:
+                        whole_seen.append(target)
+                else:
+                    info.invisible.append(target)
         info.mentions = sorted(seen)
         info.invisible = sorted(set(info.invisible))
+        if info.is_test and whole_lines:
+            # whole_file_mentions lists what the whole test file names.
+            info.whole_file_mentions = sorted(set(whole_seen))
+        else:
+            info.whole_file_mentions = []
 
 
 def group_clusters(files, links) -> list:
@@ -381,11 +421,11 @@ def group_clusters(files, links) -> list:
     return ordered
 
 
-def analyse(changes, sizes, base_paths, limit: int, tree=None) -> dict:
+def analyse(changes, sizes, base_paths, limit: int, tree=None, whole_texts=None) -> dict:
     """Build the report from parsed changes and the base tree's sizes."""
     untracked, unstaged = tree if tree else ([], [])
     files = [describe(change, sizes.get(change.path), limit) for change in changes]
-    attach_mentions(files, base_paths)
+    attach_mentions(files, base_paths, whole_texts)
     links = []
     for info in files:
         for target in info.mentions:
@@ -441,8 +481,8 @@ def analyse(changes, sizes, base_paths, limit: int, tree=None) -> dict:
         for group in clusters[1:]:
             names = ", ".join(info.change.path for info in group)
             actions.append({"kind": "split",
-                            "detail": f"{names} could be handed over separately: nothing links them "
-                                      f"to the rest of the change"})
+                            "detail": f"{names} could be handed over separately: no link was found "
+                                      f"between them and the rest of the change by the current rules"})
     if mixed:
         actions.append({"kind": "mixed",
                         "detail": "documentation-only edits or pure moves are mixed with code changes"})
@@ -498,6 +538,7 @@ def analyse(changes, sizes, base_paths, limit: int, tree=None) -> dict:
             "is_test": info.is_test,
             "mentions": info.mentions,
             "invisible": info.invisible,
+            "whole_file_mentions": info.whole_file_mentions,
         } for info in files],
         "dispersion": {
             "subsystems": dict(sorted(subsystems.items())),
@@ -595,6 +636,51 @@ def resolve_range(root: Path, revision: str) -> tuple:
     return "worktree", text, [text], f"{text} against the working tree"
 
 
+def _load_whole_test_texts(root: Path, mode, head_ref, changes) -> dict:
+    """Read whole test files at the head revision (or working tree).
+
+    Only changed test files are read whole, because a test names the code it
+    exercises anywhere in the file, often far from the lines the test changes.
+    """
+    whole = {}
+    for change in changes:
+        if not is_test_path(change.path):
+            continue
+        if change.status == "deleted":
+            continue
+        # Determine the text to use.
+        text = None
+        if mode == "worktree":
+            # Prefer the working tree file for worktree mode.
+            candidate = root / change.path
+            if candidate.is_file():
+                try:
+                    text = candidate.read_text(encoding="utf-8", errors="replace")
+                except OSError:
+                    text = None
+            if text is None:
+                try:
+                    text = git_output(root, "show", f"HEAD:{change.path}")
+                except Exception:
+                    text = None
+        else:  # range
+            if head_ref:
+                try:
+                    text = git_output(root, "show", f"{head_ref}:{change.path}")
+                except Exception:
+                    text = None
+            if text is None:
+                candidate = root / change.path
+                if candidate.is_file():
+                    try:
+                        text = candidate.read_text(encoding="utf-8", errors="replace")
+                    except OSError:
+                        text = None
+        if text is not None:
+            whole[change.path] = text.splitlines()
+    return whole
+
+
 def build_report(root: Path, revision: str, limit: int) -> dict:
     """Read the change with Git and build the report."""
     top = git_output(root, "rev-parse", "--show-toplevel").strip()
@@ -612,7 +698,18 @@ def build_report(root: Path, revision: str, limit: int) -> dict:
         # The diff of a worktree already contains the unstaged edits, so only
         # untracked content is outside what a reader of this change would see.
         unstaged = []
-    report = analyse(changes, sizes, base_paths, limit, (untracked, unstaged))
+    # Head reference for reading whole test files in range mode.
+    head_ref = None
+    if mode == "range":
+        text = diff_args[0] if diff_args else ""
+        if "..." in text:
+            head_ref = text.split("...", 1)[1].strip() or "HEAD"
+        elif ".." in text:
+            head_ref = text.split("..", 1)[1].strip() or "HEAD"
+        else:
+            head_ref = "HEAD"
+    whole_texts = _load_whole_test_texts(root, mode, head_ref, changes)
+    report = analyse(changes, sizes, base_paths, limit, (untracked, unstaged), whole_texts)
     report["mode"] = mode
     report["range"] = label
     report["base"] = base
@@ -634,7 +731,7 @@ def render_text(report: dict) -> str:
     lines.append(f"  over reader limit    {totals['over_reader_limit']}")
     lines.append(f"  subsystems touched   {totals['subsystems']}")
     lines.append(f"  directories touched  {totals['directories']}")
-    lines.append(f"  groups nothing links {totals['clusters']}")
+    lines.append(f"  separate groups      {totals['clusters']}")
     lines.append(f"  test files changed   {totals['test_files']}")
     lines.append("")
     lines.append(f"Reading load (a bounded reader holds {report['reader_limit']} lines)")
@@ -660,7 +757,7 @@ def render_text(report: dict) -> str:
                  f"{int(churn['largest_share'] * 100)}% in {churn['largest_file'] or '(none)'}, "
                  f"{churn['files_holding_80_percent']} file(s) hold 80%")
     lines.append("")
-    lines.append("Groups nothing links (a possible split)")
+    lines.append("Groups with no link found (a possible split)")
     for number, group in enumerate(report["clusters"], 1):
         names = ", ".join(group["files"])
         lines.append(f"  {number}. {names} - {group['changed_lines']} changed lines, "
