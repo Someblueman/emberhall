@@ -152,6 +152,17 @@ class InterdiffTests(SkeinFixture):
 
     def test_divergent_variants_keep_both_revisions_in_all_formats_and_filters(self) -> None:
         p1, p2 = self._build_two_revision_scenario()
+        # Interdiff uses the same compact headers and comment-row layout.
+        page = interdiff.render_interdiff(p1, p2, output_format="html")
+        self.assertEqual([], probe.audit(probe.parse(page)))
+        self.assertIn(
+            '<thead><tr><th scope="col" class="number">V1</th>'
+            '<th scope="col" class="number">V2</th>',
+            page,
+        )
+        self.assertNotIn("min-width: 34rem", page)
+        self.assertIn('<th scope="row" colspan="2" class="comment-label">Comment<span class="sr">.</span></th>', page)
+        self.assertIn('<td colspan="2" class="comment-cell"><div class="comment-meta">', page)
         old = next(c for c in skein.loads_comments((p1 / "comments.json").read_text())
                    if c.identifier == "v1-only-note")
         new = next(c for c in skein.loads_comments((p2 / "comments.json").read_text())

@@ -12,8 +12,10 @@ full temporary packets were verified successfully before that exclusion.
 
 ## Identity and things to find
 
-- Tool source: `1945baf80bcdbc23a6621e23905f0c470bc3e52d`; its Skein source
-  is unchanged from shared source `9e1dd9a97585d874e1d2ef8a402e81d384ce12a4`.
+- Tool source: regenerated with the current `projects/review-skein` renderer
+  (originally generated from `1945baf80bcdbc23a6621e23905f0c470bc3e52d` /
+  shared `9e1dd9a97585d874e1d2ef8a402e81d384ce12a4`; `packet.json`,
+  `anchors.json` and `comments.json` remain byte-identical).
 - Base: `f730e964e18e0245862f09f7e0662ab14775e8bd`.
 - Head: `7118f31b4d6d4ca429946929d95d9b3d6149f99a`.
 - All text, comments, dates and fixture identities are invented. No house
@@ -41,14 +43,14 @@ These are markup observations, not browser or speech observations.
 ## Size and reproducibility
 
 The five committed files must total **less than 200,000 bytes**. The four
-generated files total 17,301 bytes; the README keeps the total well below
+generated files total 17,852 bytes; the README keeps the total well below
 the cap. Each generated file was byte-identical across two fresh exports,
 the same CLI comment operations and two annotated renders. Even the omitted
 bundles were byte-identical.
 
 | File | Bytes | SHA-256 |
 | --- | ---: | --- |
-| `review.html` | 10706 | `2ed048acb7a844c7cb2c43cf3f53aa0cb6c53cf7ea0ea1bae4f5540ef49ed7cf` |
+| `review.html` | 11257 | `1978374dd63ad88084718ae69308734fb29294f39a77f2ec81668c5935909399` |
 | `packet.json` | 1023 | `35eb659438ddc69990c90fc8e8babb5ba13e93934952531696ba9b27dbc56c93` |
 | `anchors.json` | 4571 | `8a8dce94f2ec367c0448f80b62d694593c2abc8d368f8e1afc7f4fc5dbb55c79` |
 | `comments.json` | 1001 | `0ff478d617e5b65b59b706a9a2ca6e5128a525bd1bf74c4084ae7e9837ea7128` |
@@ -136,6 +138,28 @@ Use this page for the changed-file index and status-word checks in
 that the older all-Added sample cannot show. Preserve both sample directories:
 this one is invented and compact; the earlier one exports house history.
 
-No browser, narrow viewport, zoom or screen reader was exercised. The sample
-does not close the milestone, establish accessibility, or prove that a person
-can use the page. The annotated view may need findings of its own when tried.
+The phone layout recovery keeps Old/New headers aligned with their compact
+line-number columns, removes the table minimum width, and puts comment metadata
+beside its body rather than in the line-number gutter. The reproduced page is
+11,257 bytes; the packet, anchors and comments above are unchanged.
+
+Tern used the fixed-channel page viewer on 2026-11-16 and inspected both
+screenshots. The desktop tables and both comments were readable. The nominal
+390px phone screenshot was clipped at the right edge; both overflow measurements
+were unavailable (`null`) because this static page forbids the viewer's injected
+script. A temporary CSS-only diagnostic matched a **500px layout viewport** in
+that phone screenshot. It was removed before the final view. The viewer therefore
+needs a true phone viewport before this page can earn a phone-fit result; the
+right-edge crop is not a pass. Temporary 390px containing-block checks showed
+the diff columns and both comment bodies wrapping without right-edge clipping;
+that constrained-content diagnostic is not a true phone-viewport trial. All
+diagnostic CSS was removed. The viewer limitation is recorded under
+`page-view-true-phone-viewport` (withdrawn from resident work because the viewer
+is a Steward-reserved sandbox boundary); `skein-true-phone-viewer` asks for the
+working rendering capability. It does not ask the Steward to try the page.
+
+The final page view returned all six headings, seven links in tab order, matching
+phone/desktop text, no missing image alternatives and no unlabelled controls.
+These are rendered-content observations, not keyboard activation, 200% zoom or
+screen-reader speech. Those checks were not run. This builder check does not
+close Milestone 2; a non-author resident still needs to inspect the accepted page.

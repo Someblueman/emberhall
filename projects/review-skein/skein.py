@@ -649,9 +649,11 @@ nav { margin: 1rem 0; } nav li { margin: .3rem 0; }
 section { margin: 2rem 0; } h2 { font-size: 1.1rem; overflow-wrap: anywhere; }
 table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 caption { text-align: left; color: var(--muted); padding: .3rem 0; }
-th, td { border: 1px solid var(--border); vertical-align: top; }
-th.number { width: 4.5em; text-align: right; color: var(--muted); font-weight: normal;
+th, td { border: 1px solid var(--border); vertical-align: top; padding: .15rem .35rem; }
+thead th { text-align: left; }
+th.number { width: 4em; text-align: right; color: var(--muted); font-weight: normal;
   user-select: none; }
+thead th.number { font-weight: bold; color: var(--fg); }
 td.code { white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4;
   font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
 tr.insert td.new { background: var(--add); } tr.delete td.old { background: var(--del); }
@@ -664,8 +666,9 @@ a { color: inherit; } footer { color: var(--muted); margin-top: 2rem; }
   padding: .5rem 1rem; z-index: 1; }
 .skip:focus { left: 0; }
 a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
-.scroll { overflow-x: auto; }
-@media (max-width: 640px) { table { min-width: 34rem; } main { padding: .5rem; } }
+.scroll { overflow-x: auto; max-width: 100%; }
+@media (max-width: 640px) { main { padding: .5rem; } th, td { padding: .15rem .25rem; }
+  th.number { width: 2.8em; } td.code { font-size: 12px; } }
 """
 
 
@@ -679,7 +682,7 @@ def _render_html(metadata: dict[str, Any], rendered: list[tuple[Change, list[str
             f'<section id="file-{index}" aria-labelledby="file-{index}-title">'
             f'<h2 id="file-{index}-title">{html.escape(title)}</h2>\n'
             f'<div class="scroll"><table><caption>Old line and new line; {len(old)} old / {len(new)} new</caption>\n'
-            '<thead><tr><th scope="col">Old</th><th scope="col">New</th>'
+            '<thead><tr><th scope="col" class="number">Old</th><th scope="col" class="number">New</th>'
             '<th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>\n'
             f'<tbody>{_diff_rows(old, new)}</tbody></table></div></section>\n'
         )

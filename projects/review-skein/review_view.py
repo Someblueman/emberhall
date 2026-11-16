@@ -23,13 +23,15 @@ EXTRA_STYLE = """
 .comment-card { border-top: 1px solid var(--border); padding-top: .75rem; margin-top: .75rem; }
 .comment-card:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
 .comment-card h3 { font-size: 1rem; margin: 0 0 .35rem 0; overflow-wrap: anywhere; }
-.comment-meta { text-align: left; font-weight: normal; padding: .45rem .6rem;
-  background: var(--bg); color: var(--fg); overflow-wrap: anywhere; }
+.comment-label { text-align: right; font-weight: bold; font-size: .85rem; padding: .45rem .35rem;
+  color: var(--muted); background: var(--bg); }
+.comment-meta { margin-bottom: .25rem; color: var(--fg); overflow-wrap: anywhere; }
 .comment-cell { padding: .45rem .6rem; background: var(--bg); }
 .comment-body { margin: .25rem 0 0 0; white-space: pre-wrap; overflow-wrap: anywhere;
   font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .comment-extra { margin: .2rem 0 0 0; color: var(--muted); font-size: .9rem;
   overflow-wrap: anywhere; }
+@media (max-width: 640px) { .comment-label { font-size: .75rem; padding: .35rem .25rem; } }
 """
 
 
@@ -593,7 +595,6 @@ def _render_html_file_rows(
                     False,
                 ))
                 meta = (
-                    f'<span class="sr">Comment.</span> '
                     f'<strong>{html.escape(_visible(comment.identifier))}</strong> '
                     f'({html.escape(comment.resolution)}, {html.escape(comment.state)}, '
                     f'{html.escape(comment.anchor.side)} line {comment.anchor.line})'
@@ -601,8 +602,8 @@ def _render_html_file_rows(
                 details = _render_html_comment_details(comment)
                 html_rows.append(
                     f'<tr class="comment-row" id="{dom_id}">'
-                    f'<th scope="row" colspan="2" class="comment-meta">{meta}</th>'
-                    f'<td colspan="2" class="comment-cell">{details}</td></tr>\n'
+                    f'<th scope="row" colspan="2" class="comment-label">Comment<span class="sr">.</span></th>'
+                    f'<td colspan="2" class="comment-cell"><div class="comment-meta">{meta}</div>{details}</td></tr>\n'
                 )
         previous_end = end
     if previous_end < len(placed.rows) - 1:
@@ -684,7 +685,7 @@ def _render_html(
             f'<h2 id="file-{index}-title">{html.escape(title)}</h2>\n'
             f'<div class="scroll"><table><caption>Old line and new line; '
             f'{len(placed.old_lines)} old / {len(placed.new_lines)} new</caption>\n'
-            '<thead><tr><th scope="col">Old</th><th scope="col">New</th>'
+            '<thead><tr><th scope="col" class="number">Old</th><th scope="col" class="number">New</th>'
             '<th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>\n'
             f'<tbody>{tbody}</tbody></table></div></section>\n'
         )

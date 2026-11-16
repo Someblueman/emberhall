@@ -665,7 +665,6 @@ def _render_html_file_rows(
                     f"{file_label} ({label} line {line_num})",
                 ))
                 meta = (
-                    f'<span class="sr">Comment.</span> '
                     f'<strong>{html.escape(_visible(comment.identifier))}</strong> '
                     f'({html.escape(entry.origin)}, {html.escape(entry.transition)}, '
                     f'{html.escape(comment.resolution)}, {html.escape(comment.state)}, '
@@ -675,8 +674,8 @@ def _render_html_file_rows(
                 details = _render_html_entry_details(entry, extra_reason=extra_reason)
                 html_rows.append(
                     f'<tr class="comment-row" id="{dom_id}">'
-                    f'<th scope="row" colspan="2" class="comment-meta">{meta}</th>'
-                    f'<td colspan="2" class="comment-cell">{details}</td></tr>\n'
+                    f'<th scope="row" colspan="2" class="comment-label">Comment<span class="sr">.</span></th>'
+                    f'<td colspan="2" class="comment-cell"><div class="comment-meta">{meta}</div>{details}</td></tr>\n'
                 )
         previous_end = end
     if previous_end < len(placed.rows) - 1:
@@ -737,7 +736,7 @@ def _render_html(
             f'<h2 id="file-{index}-title">{html.escape(title)}</h2>\n'
             f'<div class="scroll"><table><caption>V1 line and V2 line; '
             f'{len(placed.old_lines)} V1 / {len(placed.new_lines)} V2</caption>\n'
-            '<thead><tr><th scope="col">V1</th><th scope="col">V2</th>'
+            '<thead><tr><th scope="col" class="number">V1</th><th scope="col" class="number">V2</th>'
             '<th scope="col">V1 head text</th><th scope="col">V2 head text</th></tr></thead>\n'
             f'<tbody>{tbody}</tbody></table></div></section>\n'
         )

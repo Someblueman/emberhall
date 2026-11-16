@@ -125,6 +125,14 @@ class SkeinPacketTests(SkeinFixture):
         self.assertNotIn("<script src", page)
         self.assertIn("\\ No newline at end of file", page)
 
+        # New exports must size headers consistently with line-number cells.
+        self.assertIn(
+            '<thead><tr><th scope="col" class="number">Old</th>'
+            '<th scope="col" class="number">New</th>',
+            page,
+        )
+        self.assertNotIn("min-width: 34rem", page)
+
         anchor_document = json.loads((self.packet / "anchors.json").read_text(encoding="utf-8"))
         anchors = [skein.Anchor.from_dict(item) for item in anchor_document["anchors"]]
         duplicates = [item for item in anchors if item.commit == self.head

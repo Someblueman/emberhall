@@ -292,14 +292,30 @@ class RecoveryAndComparisonTests(unittest.TestCase):
         # Also check committed sample/milestone-2 directory if present
         sample_dir = Path(__file__).resolve().parent / "sample" / "milestone-2"
         if sample_dir.is_dir():
+            sample_before = {p.name: p.read_bytes() for p in sample_dir.iterdir() if p.is_file()}
             sample_diag = recovery.diagnose_packet(sample_dir)
             self.assertEqual(sample_diag["status"], "unrecoverable")
             self.assertEqual(sample_diag["missing_members"], ["changes.bundle"])
             house_root = Path(__file__).resolve().parents[2]
             sample_repo_diag = recovery.diagnose_packet(sample_dir, repo=house_root)
             self.assertEqual(sample_repo_diag["status"], "recoverable")
-            self.assertEqual(sample_repo_diag["corrupted_members"], [])
+            # The archived page retains its dated renderer and audit hashes.
+            # Diagnosis compares derived HTML with today's renderer, so only
+            # that member differs; rebuilding must preserve the carried data.
+            self.assertEqual(sample_repo_diag["corrupted_members"], ["review.html"])
             self.assertEqual(sample_repo_diag["comments_status"], "intact_v2")
+            restored_sample = self.root / "restored-historical-sample"
+            recovery.rebuild_packet(sample_dir, restored_sample, repo=house_root)
+            metadata = json.loads(sample_before["packet.json"])
+            self.assertEqual(
+                (metadata["base"]["commit"], metadata["head"]["commit"]),
+                skein.verify_packet(restored_sample),
+            )
+            for member in ("packet.json", "anchors.json", "comments.json"):
+                self.assertEqual(sample_before[member], (restored_sample / member).read_bytes(), member)
+            self.assertNotEqual(sample_before["review.html"], (restored_sample / "review.html").read_bytes())
+            self.assertEqual(recovery.diagnose_packet(restored_sample)["corrupted_members"], [])
+            self.assertEqual(sample_before, {p.name: p.read_bytes() for p in sample_dir.iterdir() if p.is_file()})
 
     def test_detect_commit_contradiction_between_manifest_and_bundle(self) -> None:
         packet_a = self._export_sample_packet(self.root / "packet-a")

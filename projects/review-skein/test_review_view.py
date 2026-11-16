@@ -239,6 +239,16 @@ class ReviewViewTests(SkeinFixture):
         findings = probe.audit(tree)
         self.assertEqual(findings, [], f"unexpected probe findings: {findings}")
 
+        # Annotated rows keep status in the gutter and metadata beside the body.
+        self.assertIn(
+            '<thead><tr><th scope="col" class="number">Old</th>'
+            '<th scope="col" class="number">New</th>',
+            page_one,
+        )
+        self.assertNotIn("min-width: 34rem", page_one)
+        self.assertIn('<th scope="row" colspan="2" class="comment-label">Comment<span class="sr">.</span></th>', page_one)
+        self.assertIn('<td colspan="2" class="comment-cell"><div class="comment-meta">', page_one)
+
         self.assertIn("Content-Security-Policy", page_one)
         self.assertIn("default-src 'none'; style-src 'unsafe-inline'", page_one)
         self.assertNotIn("<script>alert(1)</script>", page_one)
