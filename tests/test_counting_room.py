@@ -188,8 +188,29 @@ const families = allContentNodes
     texts: walk(n).filter(c => c.textContent && c.children.length === 0).map(c => c.textContent)
   }));
 
+const pageStates = [];
+for (const action of input.actions || []) {
+  if (Number.isInteger(action.index)) {
+    vm.runInContext(`index=${action.index};frame=data.frames[index];current=false;roomPanel();`, context);
+  } else {
+    const control = findById(getEl("room-content"), action.id);
+    if (action.value !== undefined) { control.value = action.value; control.listeners.change(); }
+    else if (!control.disabled) control.listeners.click();
+  }
+  const nodes = walk(getEl("room-content"));
+  pageStates.push({
+    results: findById(getEl("room-content"), "counting-results").textContent,
+    runs: nodes.filter(n => n.className === "counting-run-info").map(n => n.children[0].textContent),
+    previousDisabled: findById(getEl("room-content"), "counting-previous").disabled,
+    nextDisabled: findById(getEl("room-content"), "counting-next").disabled,
+    pagesHidden: nodes.find(n => n.attributes["aria-label"] === "Recorded run pages").hidden,
+    focus: document.activeElement?.id,
+  });
+}
+
 let filteredResults = null;
 let focusPreserved = null;
+let refreshedResults = null;
 
 if (input.filterAgent) {
   const agentSelect = findById(roomContent, "counting-agent");
@@ -217,6 +238,7 @@ if (input.testFocusId) {
     target.focus();
     vm.runInContext("lighting = () => {}; accounts = () => {}; drawHouse = () => {}; renderViewContext = () => {}; renderCollection = () => {}; renderRecentGrowth = () => {}; renderLately = () => {}; refreshView(false);", context);
     focusPreserved = document.activeElement ? document.activeElement.id : null;
+    refreshedResults = findById(getEl("room-content"), "counting-results").textContent;
   }
 }
 
@@ -257,8 +279,10 @@ process.stdout.write(JSON.stringify({
   jumpButtons,
   runTexts,
   families,
+  pageStates,
   filteredResults,
   focusPreserved,
+  refreshedResults,
   missingJumpState,
   jumpState,
   frameUnchanged: JSON.stringify(beforeFrame) === JSON.stringify(afterFrame)
@@ -431,8 +455,8 @@ process.stdout.write(JSON.stringify({
             "testFocusId": "counting-agent",
         })
         self.assertIn({"text": "Open Household Accounts →", "href": "#accounts-view"}, res["links"])
-        self.assertEqual(res["initialResults"], "2 of 2 recorded runs match filters at this moment")
-        self.assertEqual(res["filteredResults"], "1 of 2 recorded runs match filters at this moment")
+        self.assertEqual(res["initialResults"], "2 of 2 recorded runs match filters at this moment · showing 1–2, newest first")
+        self.assertEqual(res["filteredResults"], "1 of 2 recorded runs match filters at this moment · showing 1–1, newest first")
         self.assertEqual(res["focusPreserved"], "counting-agent")
         muse_family = next(f for f in res["families"] if f["family"] == "muse")
         self.assertTrue(any("Resting until" in t for t in muse_family["texts"]))
@@ -494,7 +518,7 @@ process.stdout.write(JSON.stringify({
                 "index": 0,
                 "current": False,
                 "frameSeq": 12,
-                "results": "1 of 1 recorded runs match filters at this moment",
+                "results": "1 of 1 recorded runs match filters at this moment · showing 1–1, newest first",
             },
         )
 
@@ -520,6 +544,60 @@ process.stdout.write(JSON.stringify({
         css = HOUSE_CSS.read_text(encoding="utf-8")
         for selector in (".counting-panel", ".counting-families", ".counting-controls", ".counting-runs"):
             self.assertIn(selector, css)
+
+    def paging_data(self) -> dict:
+        data = self.sample_data(budgets=[])
+        data["frames"][1]["seq"] = 50
+        data["frames"][1]["runs"] = [
+            {"id": f"run-{n}", "resident": "resident-moss", "agent": "codex" if n % 2 else "agy",
+             "model": f"fixture-{n}", "sequence": n, "start": 1700000100 + n,
+             "end": 1700000110 + n, "last_sequence": n + 20, "usage": {}, "finished_tasks": [],
+             "status": "completed", "outcome": "success", "assignment": {"lane": "work"}}
+            for n in range(1, 18)
+        ]
+        return data
+
+    def test_pages_reach_every_run_once_and_keep_filters(self) -> None:
+        res = self.run_harness({
+            "data": self.paging_data(), "index": 1, "current": False, "selected": "counting",
+            "testFocusId": "counting-runs",
+            "actions": [{"id": "counting-next"}, {"id": "counting-next"},
+                        {"id": "counting-previous"}, {"id": "counting-agent", "value": "codex"},
+                        {"id": "counting-next"}],
+        })
+        self.assertEqual([row.split(" | ")[0].rsplit(" · ", 1)[-1] for row in res["runTexts"]],
+                         [f"fixture-{n}" for n in range(17, 9, -1)])
+        second, last, back, filtered, filtered_last = res["pageStates"]
+        self.assertEqual([row.rsplit(" · ", 1)[-1] for row in second["runs"]],
+                         [f"fixture-{n}" for n in range(9, 1, -1)])
+        self.assertEqual(len(last["runs"]), 1)
+        self.assertTrue(last["runs"][0].endswith("fixture-1"))
+        self.assertTrue(last["nextDisabled"])
+        self.assertEqual(second["runs"], back["runs"])
+        self.assertEqual(second["focus"], "counting-runs")
+        self.assertIn("showing 1–8", filtered["results"])
+        self.assertTrue(filtered["previousDisabled"])
+        self.assertEqual(filtered["focus"], "counting-agent")
+        self.assertIn("9 of 17", filtered_last["results"])
+        self.assertEqual(len(filtered_last["runs"]), 1)
+        self.assertEqual(res["refreshedResults"], filtered_last["results"])
+        self.assertEqual(res["focusPreserved"], "counting-runs")
+        self.assertTrue(res["frameUnchanged"])
+
+    def test_empty_filter_and_earlier_history_clamp_the_page(self) -> None:
+        res = self.run_harness({
+            "data": self.paging_data(), "index": 1, "current": False, "selected": "counting",
+            "actions": [{"id": "counting-next"}, {"id": "counting-next"}, {"index": 0},
+                        {"id": "counting-lane", "value": "explore"}],
+        })
+        earlier, empty = res["pageStates"][-2:]
+        self.assertIn("1 of 1", earlier["results"])
+        self.assertTrue(earlier["previousDisabled"] and earlier["nextDisabled"])
+        self.assertTrue(earlier["pagesHidden"])
+        self.assertEqual(empty["runs"], [])
+        self.assertIn("showing 0", empty["results"])
+        self.assertTrue(empty["previousDisabled"] and empty["nextDisabled"])
+        self.assertTrue(empty["pagesHidden"])
 
 
 if __name__ == "__main__":
