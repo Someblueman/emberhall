@@ -903,7 +903,7 @@ function workshopTasks(frames, moment, at) {
   });
 }
 let workshopState={filter:"all",readiness:"all",query:"",selectedId:null,pages:{}};
-let votingState={query:""};
+let votingState={query:"",status:"all",kind:"all"};
 let votingOpened=new Set();
 const WORKSHOP_PAGE_SIZE=4;
 function workshopSearchText(value) {return (value||"").trim().replace(/\s+/g," ").toLowerCase();}
@@ -1538,10 +1538,7 @@ function roomPanel() {
   }
   if(room?.id==="archive") renderLessons(content);
   if(room?.id==="hearth") renderHearth(content);
-  if(room?.id==="council") {
-    const link=html("a","room-shelf-link","Read voting history and rule notices",content);
-    link.href="#voting-card";
-  }
+  if(room?.id==="council") renderCouncilRoom(content);
   if(room?.id==="gallery") {
     const link=html("a","room-shelf-link","Explore the creations made here →",content);
     link.href="#projects-view";
@@ -1999,6 +1996,137 @@ function shelf() {
     });
   }
 }
+function councilNowSec() {
+  return (typeof current !== "undefined" && current)
+    ? Date.now() / 1000
+    : (frame && Number.isFinite(frame.at) ? frame.at : NaN);
+}
+function proposalStatusLabel(proposal) {
+  if (proposal.stale) return "Stale base · needs a new proposal";
+  if (proposal.rule_status === "approved") return "Enacted · awaiting install";
+  if (proposal.rule_status === "installed") return "Installed";
+  if (proposal.rule_status === "failed") return "Install failed";
+  return proposal.rule_status || proposal.status;
+}
+function proposalSummaryTags(proposal, nowSec) {
+  const modeLabels = { rule: "Rule", "wake-prompt": "Wake prompt", floor: "Floor", renovation: "Renovation", legacy: "Legacy" };
+  const modeText = modeLabels[proposal.mode] || (proposal.mode ? String(proposal.mode) : null);
+  const tags = [];
+  if (modeText) tags.push({ text: modeText, cls: proposal.mode === "renovation" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
+  if (proposal.stale) {
+    tags.push({ text: "Stale base", cls: "shelf-tag shelf-tag-warn" });
+  } else if (proposal.status === "pending") {
+    if (proposal.notice) {
+      const until = proposal.notice.until;
+      const statusText = Number.isFinite(until) && Number.isFinite(nowSec)
+        ? (nowSec >= until ? "Window elapsed" : "Notice active")
+        : "Noticed";
+      tags.push({ text: statusText, cls: statusText === "Window elapsed" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
+    } else {
+      tags.push({ text: "Pending", cls: "shelf-tag" });
+    }
+    if (proposal.mode !== "legacy") {
+      tags.push({ text: `${(proposal.endorsements || []).length}/2 endorsements`, cls: "shelf-tag" });
+    }
+  } else if (proposal.rule_status === "approved") {
+    tags.push({ text: "Awaiting install", cls: "shelf-tag shelf-tag-great" });
+  } else if (proposal.rule_status === "installed") {
+    tags.push({ text: "Installed", cls: "shelf-tag shelf-tag-great" });
+  } else if (proposal.rule_status === "failed") {
+    tags.push({ text: "Install failed", cls: "shelf-tag shelf-tag-warn" });
+  } else {
+    const raw = String(proposal.rule_status || proposal.status || "");
+    if (raw) tags.push({ text: raw[0].toUpperCase() + raw.slice(1), cls: "shelf-tag" });
+  }
+  return tags;
+}
+function renderProposalWording(proposal, container) {
+  if (proposal.mode === "renovation") {
+    try {
+      const desc = JSON.parse(proposal.text);
+      if (desc && typeof desc === "object" && typeof desc.summary === "string" && desc.files && typeof desc.files === "object") {
+        const box = html("div", "renovation-descriptor", undefined, container);
+        html("p", "vote-reason", desc.summary, box);
+        if (typeof desc.source_commit === "string" && desc.source_commit) {
+          const commitRow = html("p", "small renovation-commit", "Source commit: ", box);
+          html("code", "", desc.source_commit.slice(0, 12), commitRow);
+        }
+        const entries = Object.entries(desc.files);
+        if (entries.length) {
+          const list = html("ul", "renovation-files", undefined, box);
+          entries.forEach(([path, sha]) => {
+            const li = html("li", "small", undefined, list);
+            html("code", "", path, li);
+            if (typeof sha === "string" && sha) html("span", "small", ` · ${sha.slice(0, 12)}`, li);
+          });
+        }
+        return;
+      }
+    } catch {}
+  }
+  if (proposal.mode === "floor") {
+    try {
+      const desc = JSON.parse(proposal.text);
+      if (desc && typeof desc === "object" && typeof desc.name === "string") {
+        const box = html("div", "renovation-descriptor", undefined, container);
+        html("p", "small", `Floor ${desc.level ?? "?"} · ${desc.name}`, box);
+        if (desc.purpose) html("p", "vote-reason", desc.purpose, box);
+        if (desc.reason) html("p", "small", desc.reason, box);
+        return;
+      }
+    } catch {}
+  }
+  html("p", "vote-reason", proposal.text, container);
+}
+function renderCouncilRoom(content) {
+  const panel = html("div", "council-room-panel", undefined, content);
+  panel.id = "council-room-panel";
+  const record = frame.voting;
+  if (!record) {
+    const pending = frame.council?.pending || 0, enacted = frame.council?.enacted || 0;
+    html("p", "small", `${pending} pending ${pending === 1 ? "proposal" : "proposals"} · ${enacted} enacted at this moment.`, panel);
+    const link = html("a", "room-shelf-link", "Read voting history and rule notices →", panel);
+    link.href = "#voting-card";
+    return;
+  }
+  const nowSec = councilNowSec();
+  const choices = record.choices || [], proposals = record.proposals || [];
+  const openChoices = choices.filter(c => c.status === "open");
+  const waiting = proposals.filter(p => (p.status === "pending" && !p.stale) || p.rule_status === "approved");
+  const activeRules = proposals.filter(p => p.mode !== "renovation" && (p.rule_status === "active" || (p.status === "enacted" && !p.rule_status))).length;
+  const installedRenos = proposals.filter(p => p.mode === "renovation" && p.rule_status === "installed").length;
+  html("p", "small", `${openChoices.length} open project ${openChoices.length === 1 ? "choice" : "choices"} · ${waiting.length} active ${waiting.length === 1 ? "proposal" : "proposals"} · ${activeRules} active ${activeRules === 1 ? "rule" : "rules"} · ${installedRenos} installed ${installedRenos === 1 ? "renovation" : "renovations"}`, panel);
+  if (openChoices.length || waiting.length) {
+    const list = html("div", "council-room-list", undefined, panel);
+    openChoices.forEach(choice => {
+      const row = html("div", "council-room-item", undefined, list);
+      const counted = (choice.votes || []).filter(v => v.counted).length;
+      const slotLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
+      html("strong", "", `${slotLabel} · ${counted}/3 counted votes`, row);
+      const names = (choice.candidates || []).map(c => titleFor(c, "candidate")).filter(Boolean);
+      if (names.length) html("span", "small", names.join(" · "), row);
+    });
+    waiting.slice(-5).reverse().forEach(proposal => {
+      const row = html("div", "council-room-item", undefined, list);
+      html("strong", "", titleFor(proposal, "proposal"), row);
+      const tags = proposalSummaryTags(proposal, nowSec);
+      if (tags.length) {
+        const meta = html("div", "council-room-meta", undefined, row);
+        tags.forEach(tag => html("span", tag.cls, tag.text, meta));
+      }
+      if (proposal.notice && proposal.status === "pending" && Number.isFinite(proposal.notice.until)) {
+        html("span", "small", `Veto window ends ${clock(proposal.notice.until, { year: "numeric" })}`, row);
+      } else if (proposal.status === "pending" && !proposal.notice) {
+        html("span", "small", "No public notice recorded yet.", row);
+      }
+    });
+    if (waiting.length > 5) html("p", "small", `Showing 5 of ${waiting.length} active proposals.`, panel);
+  } else {
+    html("p", "empty-note", "No open project choices or pending proposals at this moment.", panel);
+  }
+  const link = html("a", "room-shelf-link", "Read voting history and rule notices →", panel);
+  link.href = "#voting-card";
+}
 function voting() {
   const box = $("voting");
   // Persist open cards across full re-renders: sync from the current DOM, leaving filtered-out ids untouched.
@@ -2027,6 +2155,17 @@ function voting() {
   html("p", "small", "These are dated journal receipts, not a live GitHub or process check.", bell);
   const bellLink = html("a", "", "Open the public bell thread ↗", bell);
   bellLink.href = "https://github.com/Someblueman/emberhall/issues/1";
+  const controls = html("div", "voting-controls", undefined, box);
+  for (const [key, label, options] of [
+    ["status", "Status", [["all", "All statuses"], ["action", "Needs action (open / pending)"], ["enacted", "Active & installed"], ["historical", "Stale, superseded or closed"]]],
+    ["kind", "Kind", [["all", "All kinds"], ["choices", "Project choices"], ["renovation", "Renovations"], ["rule", "Rules & floors"], ["wake-prompt", "Wake prompts"], ["legacy", "Legacy"]]]
+  ]) {
+    const wrapper = html("label", "small", label, controls), select = html("select", "", undefined, wrapper);
+    select.id = `voting-${key}`;
+    for (const [value, title] of options) { const opt = html("option", "", title, select); opt.value = value; }
+    select.value = votingState[key] || "all";
+    select.addEventListener?.("change", () => { votingState[key] = select.value; renderLists(); });
+  }
   const searchRow = html("div", "voting-search", undefined, box);
   const searchLabel = html("label", "small", "Find a choice or proposal", searchRow);
   const search = html("input", "", undefined, searchLabel);
@@ -2055,31 +2194,23 @@ function voting() {
       proposal.status, proposal.rule_status, proposal.mode,
       ...(proposal.endorsements || []).map(v => v.resident?.name)];
   }
-  function proposalSummaryTags(proposal, nowSec) {
-    const modeLabels = { rule: "Rule", "wake-prompt": "Wake prompt", floor: "Floor", renovation: "Renovation", legacy: "Legacy" };
-    const modeText = modeLabels[proposal.mode] || (proposal.mode ? String(proposal.mode) : null);
-    const tags = [];
-    if (modeText) tags.push({ text: modeText, cls: proposal.mode === "renovation" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
-    if (proposal.stale) {
-      tags.push({ text: "Stale base", cls: "shelf-tag shelf-tag-warn" });
-    } else if (proposal.status === "pending") {
-      if (proposal.notice) {
-        const until = proposal.notice.until;
-        const statusText = Number.isFinite(until) && Number.isFinite(nowSec)
-          ? (nowSec >= until ? "Window elapsed" : "Notice active")
-          : "Noticed";
-        tags.push({ text: statusText, cls: statusText === "Window elapsed" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
-      } else {
-        tags.push({ text: "Pending", cls: "shelf-tag" });
-      }
-      if (proposal.mode !== "legacy") {
-        tags.push({ text: `${(proposal.endorsements || []).length}/2 endorsements`, cls: "shelf-tag" });
-      }
-    } else {
-      const raw = String(proposal.rule_status || proposal.status || "");
-      if (raw) tags.push({ text: raw[0].toUpperCase() + raw.slice(1), cls: "shelf-tag" });
-    }
-    return tags;
+  function proposalBucket(proposal) {
+    if (!proposal.stale && ((proposal.status === "pending") || proposal.rule_status === "approved")) return "action";
+    if (!proposal.stale && (proposal.rule_status === "active" || proposal.rule_status === "installed" || (proposal.status === "enacted" && !proposal.rule_status))) return "enacted";
+    return "historical";
+  }
+  function proposalKindMatches(proposal, kind) {
+    if (kind === "all") return true;
+    if (kind === "choices") return false;
+    if (kind === "rule") return proposal.mode === "rule" || proposal.mode === "floor";
+    if (kind === "legacy") return !proposal.mode || proposal.mode === "legacy";
+    return proposal.mode === kind;
+  }
+  function choiceStatusMatches(choice, status) {
+    if (status === "all") return true;
+    if (status === "action") return choice.status === "open";
+    if (status === "historical") return choice.status !== "open";
+    return false;
   }
   function renderLists() {
     for (const node of lists.querySelectorAll("details")) {
@@ -2089,26 +2220,34 @@ function voting() {
     }
     lists.replaceChildren();
     const query = workshopSearchText(votingState.query);
-    const nowSec = (typeof current !== "undefined" && current)
-      ? Date.now() / 1000
-      : (frame && Number.isFinite(frame.at) ? frame.at : NaN);
-    const filteredChoices = [...choices].reverse().filter(choice => matches(query, choiceText(choice)));
-    const filteredProposals = [...proposals].reverse().filter(proposal => matches(query, proposalText(proposal)));
+    const statusFilter = votingState.status || "all";
+    const kindFilter = votingState.kind || "all";
+    const nowSec = councilNowSec();
+    const filteredChoices = [...choices].reverse().filter(choice =>
+      (kindFilter === "all" || kindFilter === "choices") &&
+      choiceStatusMatches(choice, statusFilter) &&
+      matches(query, choiceText(choice)));
+    const filteredProposals = [...proposals].reverse().filter(proposal =>
+      proposalKindMatches(proposal, kindFilter) &&
+      (statusFilter === "all" || proposalBucket(proposal) === statusFilter) &&
+      matches(query, proposalText(proposal)));
     results.textContent = `${filteredChoices.length} of ${choices.length} choices · ${filteredProposals.length} of ${proposals.length} proposals match search at this moment`;
-    clearSearch.disabled = !votingState.query;
+    clearSearch.disabled = !votingState.query && statusFilter === "all" && kindFilter === "all";
     const openChoices = choices.filter(c => c.status === "open");
     const activePending = proposals.filter(p => p.status === "pending" && !p.stale);
+    const awaitingInstall = proposals.filter(p => p.rule_status === "approved");
     const elapsedPending = activePending.filter(p => p.notice && Number.isFinite(p.notice.until) && Number.isFinite(nowSec) && nowSec >= p.notice.until);
-    if (!query && (openChoices.length || activePending.length)) {
+    if (!query && statusFilter === "all" && kindFilter === "all" && (openChoices.length || activePending.length || awaitingInstall.length)) {
       const bannerParts = [];
       if (openChoices.length) bannerParts.push(`${openChoices.length} open project ${openChoices.length === 1 ? "choice" : "choices"}`);
       if (activePending.length) {
         const elapsedNote = elapsedPending.length ? ` (${elapsedPending.length} notice elapsed)` : "";
         bannerParts.push(`${activePending.length} pending ${activePending.length === 1 ? "proposal" : "proposals"}${elapsedNote}`);
       }
+      if (awaitingInstall.length) bannerParts.push(`${awaitingInstall.length} awaiting install`);
       html("p", "vote-summary-banner small", `Waiting on council: ${bannerParts.join(" · ")}.`, lists);
     }
-    html("h3", "", `Project choices (${filteredChoices.length}${query ? ` of ${choices.length}` : ""})`, lists);
+    html("h3", "", `Project choices (${filteredChoices.length}${query || statusFilter !== "all" || kindFilter !== "all" ? ` of ${choices.length}` : ""})`, lists);
     if (!choices.length) html("p", "empty-note", "No project ballots recorded at this moment.", lists);
     else if (!filteredChoices.length) html("p", "empty-note", "No choices match this search at this moment. Clear search to look again.", lists);
     for (const choice of filteredChoices) {
@@ -2155,13 +2294,13 @@ function voting() {
         html("p", "vote-reason", vote.reason, row);
       }
     }
-    html("h3", "", `Rule proposals (${filteredProposals.length}${query ? ` of ${proposals.length}` : ""})`, lists);
+    html("h3", "", `Rule proposals (${filteredProposals.length}${query || statusFilter !== "all" || kindFilter !== "all" ? ` of ${proposals.length}` : ""})`, lists);
     html("p", "small", "Endorsements witness a trial; they are separate from project ballots. A proposal is not law until ratified or enacted.", lists);
     if (proposals.length && !filteredProposals.length) html("p", "empty-note", "No proposals match this search at this moment. Clear search to look again.", lists);
     for (const proposal of filteredProposals) {
       const item = html("details", "vote-round", undefined, lists);
       item.id = `vote-rule-${proposal.id}`;
-      const status = proposal.stale ? "Stale base · needs a new proposal" : proposal.rule_status || proposal.status;
+      const status = proposalStatusLabel(proposal);
       const summary = html("summary", "vote-summary", undefined, item);
       html("span", "vote-summary-title", `${titleFor(proposal,"proposal")} · ${status}`, summary);
       const tags = proposalSummaryTags(proposal, nowSec);
@@ -2188,13 +2327,19 @@ function voting() {
       } else html("p", "small", "No public notice recorded.", item);
       const text = html("details", "vote-alternatives", undefined, item);
       text.id = `vote-wording-${proposal.id}`;
-      html("summary", "", "Proposed wording", text);
-      html("p", "vote-reason", proposal.text, text);
+      html("summary", "", proposal.mode === "renovation" ? "Renovation details" : "Proposed wording", text);
+      renderProposalWording(proposal, text);
     }
     lists.querySelectorAll("details").forEach(node => { node.open = Boolean(node.id) && opened.has(node.id); });
   }
   search.addEventListener?.("input", () => { votingState.query = search.value; renderLists(); });
-  clearSearch.addEventListener?.("click", () => { votingState.query = ""; search.value = ""; renderLists(); search.focus?.({preventScroll:true}); });
+  clearSearch.addEventListener?.("click", () => {
+    votingState.query = ""; votingState.status = "all"; votingState.kind = "all";
+    search.value = "";
+    const s = $("voting-status"); if (s) s.value = "all";
+    const k = $("voting-kind"); if (k) k.value = "all";
+    renderLists(); search.focus?.({preventScroll:true});
+  });
   renderLists();
 }
 function snapshotCue(nowSec, observedAt, frameAt, isCurrent, timeZone) {
