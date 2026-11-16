@@ -79,7 +79,8 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
             available = [kind for kind in available if any(
                 ballot_work.eligible(state, ballot_task, resident)
                 and any(not staffing.helper({"agent": kind, "model": model}) and
-                        return_eligible(state, resident, kind, model, now) for model in providers.MODELS[kind])
+                        return_eligible(state, resident, kind, model, now)
+                        and model_available(state, kind, model, now) for model in providers.MODELS[kind])
                 for resident in state["residents"])]
     if exploring:
         different = [kind for kind in available if kind != state.get("shelf", {}).get("last_kind")]
@@ -840,8 +841,11 @@ class Coordinator:
             task_id = request["task"]
             task_generation = state["tasks"][task_id]["generation"]
         from . import course
-        if (course.enabled(state) and helper_model is None and not
-                (request.get("agent") == kind and "model" in request)):
+        # An untargeted request that names a resting model takes another open route of its kind.
+        named = (request.get("agent") == kind and "model" in request and (
+            "target_resident" in request
+            or model_available(state, kind, request["model"], max(time.time(), state["at"]))))
+        if course.enabled(state) and helper_model is None and not named:
             # Course correction: rotate ordinary routes; stronger routes for
             # Explorers and great-work builders. Explicit requests are kept.
             bound = state["tasks"].get(task_id or request.get("task"), {})
@@ -863,7 +867,8 @@ class Coordinator:
                          if resident not in authors and ballot_work.eligible(state, bound_task, resident)
                          and (previous := latest_run(state, resident)) is not None
                          and previous["agent"] == kind and not staffing.helper(previous)
-                         and return_eligible(state, resident, kind, previous["model"], at)]
+                         and return_eligible(state, resident, kind, previous["model"], at)
+                         and model_available(state, kind, previous["model"], at)]
             if not returning:
                 return None
             first = min(returning, key=lambda key: (latest_run(state, key)["ended_sequence"], key))

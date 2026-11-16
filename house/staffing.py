@@ -138,7 +138,13 @@ def select(state: dict, at: float, demand: dict) -> dict | None:
     last = max(previous, key=lambda r: r["started_sequence"], default={}).get("model")
     selected["helper_model"] = request.get("model", HELPER_MODELS[1] if last == HELPER_MODELS[0] else HELPER_MODELS[0])
     from . import ballot_work
-    from .life import return_eligible
+    from .life import model_available, return_eligible
+    if not model_available(state, "codex", selected["helper_model"], at):
+        # A helper route resting on its quota never holds the queue: take the other, or leave it to residents.
+        other = next(model for model in HELPER_MODELS if model != selected["helper_model"])
+        if "model" in request or not model_available(state, "codex", other, at):
+            return None
+        selected["helper_model"] = other
     task = state["tasks"].get(selected.get("task"), {})
     if (ballot_work.enabled(state) and "ballot_choice" in task
             and state["shelf"]["choices"][task["ballot_choice"]]["status"] == "open"):
@@ -147,7 +153,8 @@ def select(state: dict, at: float, demand: dict) -> dict | None:
                   next(model for model in HELPER_MODELS if model != selected["helper_model"])]
         eligible_models = [model for model in models if any(
             ballot_work.eligible(state, task, resident) and
-            return_eligible(state, resident, "codex", model, at) for resident in targets)]
+            return_eligible(state, resident, "codex", model, at) for resident in targets)
+            and model_available(state, "codex", model, at)]
         if not eligible_models:
             return None
         selected["helper_model"] = eligible_models[0]

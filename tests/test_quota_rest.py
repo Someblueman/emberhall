@@ -104,6 +104,33 @@ class RecordTests(unittest.TestCase):
             life.apply(state, {"actor": CONTROLLER, "at": 2000.0, "data": start})
 
 
+class WaitingTests(unittest.TestCase):
+    """The night this was installed, a wake aimed at a resident on a resting model sat first in the
+    queue. The coordinator chose its family (another route was open), could not start it, and stopped
+    looking, every tick: nothing started for ten minutes. Such a wake waits without being offered."""
+
+    def request(self):
+        return {"kind": "help", "status": "pending", "agent": "agy", "model": ARGON, "target_resident": "resident-x"}
+
+    def test_a_wake_aimed_at_a_resting_model_waits_and_is_not_offered(self):
+        state = house()
+        rest(state, "agy", ARGON, 5000)
+        with patch("house.life.return_eligible", return_value=True):
+            self.assertFalse(life.targeted_pending_eligible(state, self.request(), 2000))
+            self.assertTrue(life.targeted_pending_eligible(state, self.request(), 5000), "offered once it returns")
+            other = {**self.request(), "model": HYDROGEN}
+            self.assertTrue(life.targeted_pending_eligible(state, other, 2000), "its family's open route is unaffected")
+
+    def test_the_queue_does_not_list_it(self):
+        state = house()
+        state["life"]["requests"]["r1"] = self.request()
+        with patch("house.life.return_eligible", return_value=True):
+            self.assertEqual(["r1"], life.workload(state, 2000)["pending_help"])
+            rest(state, "agy", ARGON, 5000)
+            self.assertEqual([], life.workload(state, 2000)["pending_help"])
+            self.assertEqual(["r1"], life.workload(state, 5000)["pending_help"])
+
+
 class SharingTests(unittest.TestCase):
     def capped(self):
         state = house()

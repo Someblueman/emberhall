@@ -146,7 +146,10 @@ real start to find out again: 69 failed starts in 30 hours.
   remainder, and may hold that many runs at once. If Codex is resting too,
   nothing is moved.
 - A resident is still tied to the model it was born on. One whose model is
-  resting cannot return until that rest ends.
+  resting cannot return until that rest ends. A wake aimed at such a resident
+  stays pending and is offered again when the rest ends; it is left out of
+  `workload`'s `pending_help` meanwhile so it cannot hold up other starts. An
+  untargeted request that names a resting model takes another open route.
 
 ## Owner-gated helper staffing
 

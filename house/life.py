@@ -168,6 +168,8 @@ def targeted_pending_eligible(state: dict, request: dict, at: float) -> bool:
         return False
     if not provider_available(state, agent, at):
         return False
+    if not model_available(state, agent, model, at):
+        return False    # its exact route is resting on a quota: it waits, and must not hold up other starts
     if "review_run" in request:
         source = state.get("life", {}).get("runs", {}).get(request["review_run"], {})
         if target == source.get("resident"):
