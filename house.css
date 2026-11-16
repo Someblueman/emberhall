@@ -1325,3 +1325,11 @@ footer a {
 .shelf-brief p.shelf-asked { border-left:2px solid var(--gold); padding-left:.6rem; }
 .shelf-second { margin:.4rem 0 0; color:var(--gold); }
 .shelf-asked .shelf-source-link { white-space:nowrap; }
+
+/* What a project finished in the last day */
+.project-work { margin: .5rem 0 .25rem; }
+.project-work-count { font-weight: 600; }
+.project-work-list { margin: .25rem 0 0; padding-left: 1.1rem; }
+.project-work-list li { margin: .2rem 0; font-size: .92rem; line-height: 1.4; overflow-wrap: anywhere; }
+.project-work-list li.work-check { opacity: .78; }
+.project-work-more summary { cursor: pointer; font-size: .85rem; margin-top: .25rem; }
