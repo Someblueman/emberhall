@@ -59,9 +59,34 @@ def _visible_multiline(value: str) -> str:
     return "\n".join(_visible(line) for line in value.split("\n"))
 
 
+def _normalize_paths(paths: Sequence[str] | None) -> tuple[str, ...]:
+    if paths is None:
+        return ()
+    if isinstance(paths, (str, bytes)):
+        raise ValueError("paths must be a sequence of path strings")
+    normalized: list[str] = []
+    for raw in paths:
+        if not isinstance(raw, str) or not raw.strip():
+            raise ValueError("each path filter must be a non-empty string")
+        cleaned = raw.strip()
+        while cleaned.startswith("./"):
+            cleaned = cleaned[2:]
+        if not cleaned or not cleaned.rstrip("/"):
+            raise ValueError(f"invalid path filter: {raw!r}")
+        normalized.append(cleaned)
+    return tuple(normalized)
+
+
 def _validate_options(
-    output_format: str, resolution: str, state: str, context: int, max_file_bytes: int,
-) -> None:
+    output_format: str,
+    resolution: str,
+    state: str,
+    context: int,
+    max_file_bytes: int,
+    paths: Sequence[str] | None = None,
+    search: str = "",
+    only_commented: bool = False,
+) -> tuple[tuple[str, ...], str]:
     if output_format not in VALID_FORMATS:
         raise ValueError(f"output_format must be one of {VALID_FORMATS}: {output_format!r}")
     if resolution not in VALID_RESOLUTIONS:
@@ -72,6 +97,97 @@ def _validate_options(
         raise ValueError(f"context must be an integer >= -1: {context!r}")
     if type(max_file_bytes) is not int or max_file_bytes < 1:
         raise ValueError(f"max_file_bytes must be a positive integer: {max_file_bytes!r}")
+    if not isinstance(search, str):
+        raise ValueError(f"search must be a string: {search!r}")
+    if not isinstance(only_commented, bool):
+        raise ValueError(f"only_commented must be a boolean: {only_commented!r}")
+    return _normalize_paths(paths), search.strip()
+
+
+def _path_matches(candidate: str | None, pattern: str) -> bool:
+    if not candidate:
+        return False
+    prefix = pattern.rstrip("/")
+    return candidate == prefix or candidate.startswith(prefix + "/")
+
+
+def _file_matches_paths(change: skein.Change, patterns: Sequence[str]) -> bool:
+    if not patterns:
+        return True
+    return any(
+        _path_matches(change.old_path, pattern) or _path_matches(change.new_path, pattern)
+        for pattern in patterns
+    )
+
+
+def _comment_matches_paths(comment: skein.Comment, patterns: Sequence[str]) -> bool:
+    if not patterns:
+        return True
+    return any(_path_matches(comment.anchor.path, pattern) for pattern in patterns)
+
+
+def _comment_matches_search(comment: skein.Comment, query: str) -> bool:
+    if not query:
+        return True
+    needle = query.casefold()
+    fields = [
+        comment.identifier,
+        comment.body,
+        comment.anchor.path,
+        comment.anchor.text,
+        comment.orphan_reason or "",
+    ]
+    if comment.rebased_from is not None:
+        fields.extend((comment.rebased_from.path, comment.rebased_from.text))
+    return any(needle in value.casefold() for value in fields)
+
+
+def _file_comment_counts(placed: _PlacedFile) -> tuple[int, int]:
+    open_count = 0
+    resolved_count = 0
+    for old_c, new_c in placed.row_comments:
+        for comment in (*old_c, *new_c):
+            if comment.resolution == "resolved":
+                resolved_count += 1
+            else:
+                open_count += 1
+    return open_count, resolved_count
+
+
+def _comment_count_summary(open_count: int, resolved_count: int) -> str:
+    total = open_count + resolved_count
+    if total == 0:
+        return "0 comments"
+    noun = "comment" if total == 1 else "comments"
+    return f"{total} {noun} ({open_count} open, {resolved_count} resolved)"
+
+
+def _filter_summary_line(
+    selected_count: int,
+    all_count: int,
+    resolution: str,
+    state: str,
+    paths: Sequence[str],
+    search: str,
+    only_commented: bool,
+) -> str:
+    parts = [f"resolution={resolution}", f"state={state}"]
+    if paths:
+        parts.append("path=" + ", ".join(_visible(p) for p in paths))
+    if search:
+        parts.append(f"search={_visible(search)}")
+    if only_commented:
+        parts.append("only_commented=true")
+    return f"Showing {selected_count} of {all_count} comments. Filters: {', '.join(parts)}."
+
+
+def _preview_line(body: str, limit: int = 60) -> str:
+    for line in body.splitlines():
+        stripped = line.strip()
+        if stripped:
+            visible = _visible(stripped)
+            return visible if len(visible) <= limit else visible[: limit - 1].rstrip() + "…"
+    return ""
 
 
 def _require_regular_file(path: Path, label: str, max_bytes: int | None = None) -> bytes:
@@ -344,10 +460,14 @@ def _render_text(
     all_comments: Sequence[skein.Comment],
     selected: Sequence[skein.Comment],
     placed_files: Sequence[_PlacedFile],
+    visible_files: Sequence[_PlacedFile],
     orphans: Sequence[tuple[skein.Comment, str]],
     resolution: str,
     state: str,
     context: int,
+    paths: Sequence[str],
+    search: str,
+    only_commented: bool,
 ) -> str:
     open_count = sum(1 for c in all_comments if c.resolution == "open")
     resolved_count = sum(1 for c in all_comments if c.resolution == "resolved")
@@ -357,10 +477,25 @@ def _render_text(
         "Skein review",
         f'Base: {_visible(metadata["base"]["ref"])} ({metadata["base"]["commit"]})',
         f'Head: {_visible(metadata["head"]["ref"])} ({metadata["head"]["commit"]})',
-        f"Showing {len(selected)} of {len(all_comments)} comments. Filters: resolution={resolution}, state={state}.",
+        _filter_summary_line(
+            len(selected), len(all_comments), resolution, state,
+            paths, search, only_commented,
+        ),
         f"All comments: {open_count} open, {resolved_count} resolved; {orphan_count} orphan.",
+        f"Changed files: {len(visible_files)} of {len(placed_files)} shown.",
         "This view is derived read-only from the offline packet; Git hashes bind bytes, not people.",
     ]
+
+    if visible_files:
+        lines.append("")
+        lines.append("Changed files index:")
+        for placed in visible_files:
+            change = placed.change
+            file_open, file_resolved = _file_comment_counts(placed)
+            summary = _comment_count_summary(file_open, file_resolved)
+            lines.append(
+                f"- {_visible(change.status)}: {_visible(change.display_path)} — {summary}"
+            )
 
     if orphans:
         lines.append("")
@@ -380,7 +515,12 @@ def _render_text(
         lines.append("The two commits have identical file trees.")
         return "\n".join(lines) + "\n"
 
-    for placed in placed_files:
+    if not visible_files:
+        lines.append("")
+        lines.append("No changed files match the current filters.")
+        return "\n".join(lines) + "\n"
+
+    for placed in visible_files:
         change = placed.change
         lines.append("")
         lines.append(
@@ -408,7 +548,12 @@ def _render_html_comment_details(comment: skein.Comment, extra_reason: str | Non
     return "".join(parts)
 
 
-def _render_html_file_rows(placed: _PlacedFile, context: int, counter: list[int]) -> str:
+def _render_html_file_rows(
+    placed: _PlacedFile,
+    context: int,
+    counter: list[int],
+    jump_entries: list[tuple[str, skein.Comment, str, bool]],
+) -> str:
     ranges = _visible_ranges(placed.rows, placed.row_comments, context)
     if not placed.rows:
         return ""
@@ -421,6 +566,7 @@ def _render_html_file_rows(placed: _PlacedFile, context: int, counter: list[int]
         )
     html_rows: list[str] = []
     previous_end = -1
+    file_label = _visible(placed.change.display_path)
     for start, end in ranges:
         if start > previous_end + 1:
             skipped = start - (previous_end + 1)
@@ -440,6 +586,12 @@ def _render_html_file_rows(placed: _PlacedFile, context: int, counter: list[int]
             for comment in (*old_c, *new_c):
                 counter[0] += 1
                 dom_id = f"comment-{counter[0]}"
+                jump_entries.append((
+                    dom_id,
+                    comment,
+                    f"{file_label} ({comment.anchor.side} line {comment.anchor.line})",
+                    False,
+                ))
                 meta = (
                     f'<span class="sr">Comment.</span> '
                     f'<strong>{html.escape(_visible(comment.identifier))}</strong> '
@@ -469,10 +621,14 @@ def _render_html(
     all_comments: Sequence[skein.Comment],
     selected: Sequence[skein.Comment],
     placed_files: Sequence[_PlacedFile],
+    visible_files: Sequence[_PlacedFile],
     orphans: Sequence[tuple[skein.Comment, str]],
     resolution: str,
     state: str,
     context: int,
+    paths: Sequence[str],
+    search: str,
+    only_commented: bool,
 ) -> str:
     open_count = sum(1 for c in all_comments if c.resolution == "open")
     resolved_count = sum(1 for c in all_comments if c.resolution == "resolved")
@@ -480,6 +636,7 @@ def _render_html(
 
     counter = [0]
     navigation: list[str] = []
+    jump_entries: list[tuple[str, skein.Comment, str, bool]] = []
     orphan_html = ""
     if orphans:
         navigation.append(
@@ -489,6 +646,12 @@ def _render_html(
         for comment, reason in orphans:
             counter[0] += 1
             dom_id = f"comment-{counter[0]}"
+            jump_entries.append((
+                dom_id,
+                comment,
+                f"orphaned/unplaced: {_visible(comment.anchor.path)} ({comment.anchor.side} line {comment.anchor.line})",
+                True,
+            ))
             title = (
                 f"{_visible(comment.identifier)} — {comment.resolution}, {comment.state}"
             )
@@ -507,11 +670,15 @@ def _render_html(
         )
 
     sections: list[str] = []
-    for index, placed in enumerate(placed_files, 1):
+    for index, placed in enumerate(visible_files, 1):
         change = placed.change
         title = f"{_visible(change.status)}: {_visible(change.display_path)}"
-        navigation.append(f'<li><a href="#file-{index}">{html.escape(title)}</a></li>')
-        tbody = _render_html_file_rows(placed, context, counter)
+        file_open, file_resolved = _file_comment_counts(placed)
+        count_summary = _comment_count_summary(file_open, file_resolved)
+        navigation.append(
+            f'<li><a href="#file-{index}">{html.escape(title)}</a> — {html.escape(count_summary)}</li>'
+        )
+        tbody = _render_html_file_rows(placed, context, counter, jump_entries)
         sections.append(
             f'<section id="file-{index}" aria-labelledby="file-{index}-title">'
             f'<h2 id="file-{index}-title">{html.escape(title)}</h2>\n'
@@ -523,13 +690,43 @@ def _render_html(
         )
 
     if not sections and not orphan_html:
-        navigation.append("<li>No textual changes or comments in this view.</li>")
-    files_body = "".join(sections) or "<p>The two commits have identical file trees.</p>"
+        navigation.append("<li>No matching changed files or comments in this view.</li>")
+    if sections:
+        files_body = "".join(sections)
+    elif not placed_files:
+        files_body = "<p>The two commits have identical file trees.</p>"
+    elif orphan_html:
+        files_body = "<p>No changed files match the current filters.</p>"
+    else:
+        files_body = "<p>No changed files or comments match the current filters.</p>"
+
+    comments_nav_html = ""
+    if jump_entries:
+        comment_items = []
+        for idx, (dom_id, comment, location, is_orphan) in enumerate(jump_entries, 1):
+            preview = _preview_line(comment.body)
+            preview_part = f": {preview}" if preview else ""
+            # Avoid repeating unplaced/orphan IDs above the #orphans section so each stays unique.
+            label = f"Orphaned/unplaced #{idx}" if is_orphan else _visible(comment.identifier)
+            comment_items.append(
+                f'<li><a href="#{dom_id}">{html.escape(label)}</a>'
+                f' ({html.escape(comment.resolution)}, {html.escape(comment.state)}) — '
+                f'{html.escape(location)}{html.escape(preview_part)}</li>'
+            )
+        comments_nav_html = (
+            f'<nav id="comments" aria-label="Comments">'
+            f'<h2>Comments in view ({len(jump_entries)})</h2>'
+            f'<ol>{"".join(comment_items)}</ol></nav>\n'
+        )
 
     base_text = _visible(f'{metadata["base"]["ref"]} ({metadata["base"]["commit"]})')
     head_text = _visible(f'{metadata["head"]["ref"]} ({metadata["head"]["commit"]})')
-    showing = f"Showing {len(selected)} of {len(all_comments)} comments. Filters: resolution={resolution}, state={state}."
+    showing = _filter_summary_line(
+        len(selected), len(all_comments), resolution, state,
+        paths, search, only_commented,
+    )
     totals = f"All comments: {open_count} open, {resolved_count} resolved; {orphan_count} orphan."
+    files_line = f"Changed files: {len(visible_files)} of {len(placed_files)} shown."
 
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -538,10 +735,10 @@ def _render_html(
 <title>Skein review</title><style>{skein.STYLE}{EXTRA_STYLE}</style></head>
 <body><a class="skip" href="#files">Skip to changed files</a><main><h1>Skein review</h1>
 <p class="identity">Base: <code>{html.escape(base_text)}</code><br>Head: <code>{html.escape(head_text)}</code></p>
-<div class="summary"><p>{html.escape(showing)}<br>{html.escape(totals)}</p>
+<div class="summary"><p>{html.escape(showing)}<br>{html.escape(totals)}<br>{html.escape(files_line)}</p>
 <p>This static view is derived read-only from the offline packet; no network or JavaScript is used.</p></div>
 <nav id="files" aria-label="Changed files"><ol>{''.join(navigation)}</ol></nav>
-{orphan_html}{files_body}<footer>Review Skein packet format {html.escape(str(metadata.get("version", skein.VERSION)))}.
+{comments_nav_html}{orphan_html}{files_body}<footer>Review Skein packet format {html.escape(str(metadata.get("version", skein.VERSION)))}.
 Bundle hashes bind bytes, not people. Comments live in comments.json.</footer></main></body></html>
 '''
 
@@ -554,25 +751,39 @@ def render_packet(
     state: str = "all",
     context: int = 3,
     max_file_bytes: int = skein.DEFAULT_MAX_FILE_BYTES,
+    paths: Sequence[str] | None = None,
+    search: str = "",
+    only_commented: bool = False,
 ) -> str:
     """Verify an exported Skein packet and render diffs together with comments."""
-    _validate_options(output_format, resolution, state, context, max_file_bytes)
+    norm_paths, norm_search = _validate_options(
+        output_format, resolution, state, context, max_file_bytes,
+        paths=paths, search=search, only_commented=only_commented,
+    )
     metadata, all_comments, rendered = _load_verified_packet(packet, max_file_bytes)
     selected = [
         comment
         for comment in all_comments
         if (resolution == "all" or comment.resolution == resolution)
         and (state == "all" or comment.state == state)
+        and _comment_matches_paths(comment, norm_paths)
+        and _comment_matches_search(comment, norm_search)
     ]
     placed_files, orphans = _place_comments(metadata, selected, rendered)
+    visible_files = [
+        placed
+        for placed in placed_files
+        if _file_matches_paths(placed.change, norm_paths)
+        and (not only_commented or sum(_file_comment_counts(placed)) > 0)
+    ]
     if output_format == "text":
         return _render_text(
-            metadata, all_comments, selected, placed_files, orphans,
-            resolution, state, context,
+            metadata, all_comments, selected, placed_files, visible_files, orphans,
+            resolution, state, context, norm_paths, norm_search, only_commented,
         )
     return _render_html(
-        metadata, all_comments, selected, placed_files, orphans,
-        resolution, state, context,
+        metadata, all_comments, selected, placed_files, visible_files, orphans,
+        resolution, state, context, norm_paths, norm_search, only_commented,
     )
 
 
@@ -588,6 +799,12 @@ def _parser() -> argparse.ArgumentParser:
                         help="Filter comments by resolution status (default: all)")
     parser.add_argument("--state", choices=VALID_STATES, default="all",
                         help="Filter comments by anchor state (default: all)")
+    parser.add_argument("--path", dest="paths", action="append", default=None,
+                        help="Filter diff and comments to an exact file or directory prefix (repeatable)")
+    parser.add_argument("--search", default="",
+                        help="Filter comments by case-insensitive substring across ID, path, anchor text, or body")
+    parser.add_argument("--only-commented", action="store_true",
+                        help="Show only changed files that have matching inline comments")
     parser.add_argument("--context", type=int, default=3,
                         help="Context lines around changes and comments, or -1 for full files (default: 3)")
     parser.add_argument("--max-file-bytes", type=int, default=skein.DEFAULT_MAX_FILE_BYTES,
@@ -605,6 +822,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             state=args.state,
             context=args.context,
             max_file_bytes=args.max_file_bytes,
+            paths=args.paths,
+            search=args.search,
+            only_commented=args.only_commented,
         )
     except (OSError, UnicodeError, skein.SkeinError, ValueError) as exc:
         sys.stderr.write(f"error: {exc}\n")

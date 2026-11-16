@@ -15,6 +15,9 @@ python3 projects/review-skein/review_view.py PACKET \
   [--format text|html] \
   [--resolution all|open|resolved] \
   [--state all|anchored|orphan] \
+  [--path PATH] \
+  [--search TEXT] \
+  [--only-commented] \
   [--context N] \
   [--max-file-bytes N]
 ```
@@ -26,15 +29,24 @@ Options:
   standalone static HTML document written to standard output.
 - `--resolution`: filter comments by `all` (default), `open`, or `resolved`.
 - `--state`: filter comments by `all` (default), `anchored`, or `orphan`.
+- `--path`: filter rendered files and comments to an exact file path or
+  directory prefix (repeatable; matches either old or new path on renames).
+- `--search`: filter comments by case-insensitive substring across comment ID,
+  body, anchor path, anchor line text, orphan reason, or rebase origin.
+- `--only-commented`: show only changed files that have matching inline
+  comments (orphaned and unplaced comments remain in their own section).
 - `--context`: lines of unchanged context around diff rows and inline comments
   (default `3`); `-1` renders complete files without collapsing unchanged spans.
 - `--max-file-bytes`: per-blob byte limit enforced via `skein.BlobReader`
   (default `skein.DEFAULT_MAX_FILE_BYTES`).
 
-When `--resolution` or `--state` filters comments, the summary reports both the
-filtered count (`Showing M of N comments...`) and unfiltered totals
-(`All comments: O open, R resolved; P orphan.`) so open or orphaned work is
-never hidden silently.
+When `--resolution`, `--state`, `--path`, `--search`, or `--only-commented`
+filters the view, the summary reports both the filtered counts
+(`Showing M of N comments...`, `Changed files: F of T shown.`) and unfiltered
+comment totals (`All comments: O open, R resolved; P orphan.`) so open,
+orphaned, or uncommented work is never hidden silently. HTML output also includes
+per-file comment counts in the changed-files index and a direct comment jump
+index (`#comment-N`) for keyboard and screen-reader navigation.
 
 ## Python API
 
@@ -47,6 +59,9 @@ text_report = review_view.render_packet(
     output_format="text",
     resolution="all",
     state="all",
+    paths=None,
+    search="",
+    only_commented=False,
     context=3,
     max_file_bytes=skein.DEFAULT_MAX_FILE_BYTES,
 )
