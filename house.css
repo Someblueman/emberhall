@@ -4,6 +4,7 @@
   --paper:#eee4cb;
   --muted:#b5b9a5;
   --gold:#e1ac64;
+  --warn:#ce846b;
   --line:#87917b38;
   --room:#233632;
 }
@@ -22,6 +23,7 @@ body.day {
   --paper:#293c35;
   --muted:#586653;
   --gold:#885b32;
+  --warn:#9e442c;
   --line:#596b5633;
   --room:#f2edda;
   color-scheme:light;
@@ -333,7 +335,7 @@ h2 {
   border-left:2px solid #bba26f;
 }
 .task.expired {
-  border-color:#ce846b;
+  border-color:var(--warn);
 }
 .scar {
   padding:11px 13px;
@@ -507,8 +509,8 @@ footer a {
   color: var(--gold);
 }
 .shelf-tag-warn {
-  border-color: #ce846b;
-  color: #ce846b;
+  border-color: var(--warn);
+  color: var(--warn);
 }
 .milestone-list {
   margin: 0.35rem 0 0.2rem 1.25rem;
@@ -1114,7 +1116,7 @@ footer a {
 .workshop-group { padding:12px; border:1px solid var(--line); border-radius:9px; min-width:0; }
 .workshop-cards { display:grid; gap:8px; }
 .workshop-task { display:block; width:100%; text-align:left; padding:10px; border-left:3px solid var(--gold); }
-.workshop-task.expired { border-left-color:#ce846b; }
+.workshop-task.expired { border-left-color:var(--warn); }
 .workshop-task[aria-pressed="true"] { background:var(--room); border-color:var(--gold); }
 .workshop-task strong { display:block; font-size:13px; }
 .workshop-pages, .workshop-past { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
@@ -1177,7 +1179,9 @@ footer a {
   .house-layout:not(.room-open) .house-explorer .stage { display:block; margin:0; }
   .house-layout:not(.room-open) .house-explorer .stage svg { height:auto; max-height:min(66vh,780px); }
   .house-layout:not(.room-open) .house-explorer .map-hint, .house-layout:not(.room-open) .house-explorer .room-nav { margin:8px 0; }
-  .house-layout:not(.room-open) .journal-pane { border-left:0; padding-left:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 36px; align-items:start; }
+  .house-layout:not(.room-open) .journal-pane { border-left:0; padding-left:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px 24px; align-items:start; }
+  .house-layout:not(.room-open) .journal-pane > section { background:var(--room); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:0; }
+  .house-layout:not(.room-open) .journal-pane > .presence-section { margin:0; }
   .house-layout:not(.room-open) .journal-pane > details { grid-column:1 / -1; }
   .house-layout.room-open .journal-pane { display:flex; flex-direction:column; }
   .house-layout.room-open .room-card { order:-1; }
@@ -1232,3 +1236,10 @@ footer a {
 .counting-run-info strong { display:block; font-size:12px; overflow-wrap:anywhere; }
 .counting-jump { flex:none; padding:5px 9px; font-size:11px; background:transparent; border:1px solid var(--line); border-radius:6px; }
 .counting-jump:hover, .counting-jump:focus-visible { border-color:var(--gold); }
+
+/* The Assay Room: cross-family summary cards and scar inspection. */
+.assay-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr)); gap:8px; }
+.assay-card { padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--room); min-width:0; }
+.assay-card strong { display:block; font-size:12px; }
+.assay-scars { margin-top:4px; }
+.assay-scars > summary { cursor:pointer; font-size:12px; color:var(--gold); margin-bottom:6px; }

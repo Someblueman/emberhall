@@ -96,13 +96,20 @@ function figure(g, resident, x, y) {
   el("path",{d:`M${cx-5} ${cy-11}l-3 12m13-12l7 10`,stroke:"#3b433c","stroke-width":5,"stroke-linecap":"round"},group);
   el("path",{d:`M${cx-11} ${cy-10}Q${cx-12} ${cy-height} ${cx} ${cy-height}Q${cx+12} ${cy-height} ${cx+11} ${cy-10}Z`,fill:kind.color},group);
   // Props interpret the selected frame's room, never a live action or progress.
-  const gestures = {door:"arrival",hearth:"conversation",workshop:"plans",archive:"reading",council:"deliberation"};
+  const gestures = {door:"arrival",hearth:"conversation",workshop:"plans",archive:"reading",council:"deliberation",assay:"assaying",study:"reading",chronicle:"reading",counting:"plans"};
   const gesture = Object.prototype.hasOwnProperty.call(gestures,resident.room) ? gestures[resident.room] : "standing";
   const action = el("g",{"data-gesture":gesture},group);
   el("title",{},action,`Symbolic ${gesture} · last recorded room, not live activity`);
   const arm = path => el("path",{d:path,stroke:kind.color,"stroke-width":5,"stroke-linecap":"round","stroke-linejoin":"round",fill:"none"},action);
   const hand = (dx,dy) => el("circle",{cx:cx+dx,cy:cy+dy,r:3,fill:skin},action);
-  if(gesture === "plans" || gesture === "reading") {
+  if(gesture === "assaying") {
+    arm(`M${cx-9} ${cy-height+8}l-7 10 4 5M${cx+9} ${cy-height+8}l8 5 4-9`);
+    el("path",{d:`M${cx-20} ${cy-24}l16 3-2 17-16-3Z`,fill:"#263a35",stroke:"#d0b984","stroke-width":1.5},action);
+    el("path",{d:`M${cx-16} ${cy-18}l8 1.5m-9 3.5 8 1.5`,stroke:"#75b4a1","stroke-width":1.3,fill:"none"},action);
+    el("circle",{cx:cx+20,cy:cy-height+2,r:5,fill:"#c8d6cc",stroke:"#d0b984","stroke-width":1.6},action);
+    el("line",{x1:cx+16,y1:cy-height+6,x2:cx+13,y2:cy-height+11,stroke:"#8c6a49","stroke-width":2},action);
+    hand(-12,-11);hand(21,-height+4);
+  } else if(gesture === "plans" || gesture === "reading") {
     arm(`M${cx-9} ${cy-height+8}l-7 11 5 4M${cx+9} ${cy-height+8}l9 10-5 5`);
     if(gesture === "plans") {
       el("path",{d:`M${cx-12} ${cy-28}l29 4-3 20-29-4Z`,fill:"#dce4ce",stroke:"#536f67","stroke-width":1.5},action);
@@ -576,6 +583,20 @@ function decor(g,room,x,y,depth,lit,front) {
       chair(g,x+78,y+116);
       plant(g,x+154,far-20,true);
     }
+  } else if(room==="assay") {
+    const assayDecor=el("g",{"data-decor":"assay"},g);
+    if(!front) {
+      rug(assayDecor,x+90,y+86,50,"#3f574e","#d0b984");
+      sideArt(assayDecor,x,y+24,y+56,22,52,"#263a35","#d0b984");
+      ["#d7a75f","#75b4a1","#b797bc","#85b8d5"].forEach((fill,n)=>
+        line(assayDecor,[[x+.9,y+29+n*6,30],[x+.9,y+32+n*6,44]],fill,2.2));
+    } else {
+      chair(assayDecor,x+78,y+118,DARK);
+      box(assayDecor,x+146,y+60,16,14,18,WOOD);
+      line(assayDecor,[[x+154,y+67,18],[x+154,y+67,34]],"#d0b984",2);
+      line(assayDecor,[[x+147,y+67,32],[x+161,y+67,32]],"#d0b984",1.8);
+      plant(assayDecor,x+14,far-20);
+    }
   } else if(!front) {
     // Rooms the residents add later, and the salvage room: crates, a barrel and a coil of rope.
     crate(g,x+16,y+12,18);crate(g,x+36,y+12,16);crate(g,x+24,y+14,14,14);
@@ -709,7 +730,7 @@ function ago(at) {
 function nameTags(map,placed) {
   const awake=placed.filter(item=>!["sleeping","unconfirmed"].includes(item.resident.pose));
   const latest=current?latelyEvents(1)[0]:null;
-  const where={door:"at the door",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room"};
+  const where={door:"at the door",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room",study:"in the study",parlor:"in the parlor",gallery:"in the gallery",chronicle:"in the chronicle",assay:"in the assay room"};
   const boxes=[];
   awake.forEach(item=>{
     const r=item.resident,[cx,cy]=p(item.px,item.py,0),kind=kinds[r.agent]||kinds.unrecorded;
@@ -1332,8 +1353,32 @@ function renderAssayRoom(content) {
   const commitsAt=(Array.isArray(data?.commits)?data.commits:[]).filter(c=>Number.isFinite(c.at)&&(!Number.isFinite(frame.at)||c.at<=frame.at));
   const scarsAt=(frame.scars||[]).map(s=>({...(data?.scars?.[s.id]||{}),...s}));
   const openScars=scarsAt.filter(s=>!s.mended),mendedScars=scarsAt.filter(s=>s.mended);
+  let crossCount=0,sameCount=0,pairedCount=0,unknownCount=0;
+  for(const rev of reviewRuns) {
+    const match=/^source-review-(.+)$/.exec(rev.assignment?.help_request||"");
+    const target=match?runsById.get(match[1]):null;
+    if(target){
+      pairedCount++;
+      if(target.agent&&rev.agent&&target.agent!=="unrecorded"&&rev.agent!=="unrecorded"){
+        if(target.agent!==rev.agent)crossCount++;
+        else sameCount++;
+      }else unknownCount++;
+    }
+  }
+  const successCount=reviewRuns.filter(r=>r.outcome==="success").length;
+  const otherCount=reviewRuns.length-successCount;
   const panel=html("div","counting-panel assay-panel",undefined,content);
   html("p","small",`${reviewRuns.length} recorded review ${reviewRuns.length===1?"run":"runs"} · ${commitsAt.length} source ${commitsAt.length===1?"commit":"commits"} · ${openScars.length} open / ${mendedScars.length} mended ${scarsAt.length===1?"scar":"scars"} at this moment. Individual pass/reject verdicts live in the journal.`,panel);
+  const summaryGrid=html("div","assay-cards",undefined,panel);
+  for(const [title,detail] of [
+    ["Cross-family pairing",`${crossCount} cross-family · ${sameCount} same-family${unknownCount?` · ${unknownCount} family unrecorded`:""}${reviewRuns.length>pairedCount?` · ${reviewRuns.length-pairedCount} unpaired`:""}`],
+    ["Review run outcomes",`${successCount} success · ${otherCount} other/quota`],
+    ["Recorded scars",`${openScars.length} open · ${mendedScars.length} mended`]
+  ]) {
+    const card=html("div","assay-card",undefined,summaryGrid);
+    html("strong","",title,card);
+    html("span","small",detail,card);
+  }
   const controls=html("div","counting-controls",undefined,panel);
   for(const [key,label,options] of [
     ["family","Reviewer family",[["all","All reviewer families"],["codex","Codex"],["opencode","OpenCode"],["muse","Muse"],["agy","Gemini"]]],
@@ -1406,6 +1451,26 @@ function renderAssayRoom(content) {
       if(Number.isFinite(c.at)&&data?.timezone)html("span","small",clock(c.at,{year:"numeric"}),info);
     });
   }
+  if(scarsAt.length) {
+    const scarBox=html("details","assay-scars",undefined,panel);
+    html("summary","",`Scars at this moment (${openScars.length} open, ${mendedScars.length} mended)`,scarBox);
+    const scarList=html("div","counting-runs",undefined,scarBox);
+    scarsAt.slice(-6).reverse().forEach(s=>{
+      const row=html("div","counting-run",undefined,scarList);
+      const info=html("div","counting-run-info",undefined,row);
+      html("strong","",`${s.mended?"⌁":"!"} ${s.title||s.id}`,info);
+      html("span","small",`${s.mended?"Mended":"Open"} · ${s.room||"house"}${s.detail?` · ${s.detail}`:""}`,info);
+      if(findScarTargetIndex(s)>=0) {
+        const btn=html("button","counting-jump",`Event ${s.sequence}`,row);
+        btn.type="button";btn.id=`assay-scar-jump-${s.sequence}`;
+        btn.addEventListener("click",()=>jumpToSequence(s.sequence));
+      }
+    });
+  }
+  const guideLink=html("a","room-shelf-link","Read the Assay Auditor guide ↗",panel);
+  guideLink.href="https://github.com/Someblueman/emberhall/blob/main/projects/assay-room/README.md";
+  guideLink.target="_blank";
+  guideLink.rel="noopener noreferrer";
 }
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
@@ -1662,6 +1727,7 @@ function renderCollection() {
     return;
   }
   const completed=new Set((frame.shelf?.projects||[]).filter(project=>project.status==="done").map(project=>project.idea));
+  if(Array.isArray(frame.rooms)&&frame.rooms.some(r=>r&&r.id==="assay"&&roomStatus(r)==="open"))completed.add("assay-room");
   const known=catalog.filter(entry=>completed.has(entry.id));
   const creations=known.filter(entry=>entry.category==="creation");
   html("p","small",current?"Finished creations you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
