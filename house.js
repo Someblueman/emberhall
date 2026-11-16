@@ -702,8 +702,9 @@ function renderNeeds(dataShelf, box, residentName) {
     const item = html("details", "shelf-item shelf-need", undefined, host);
     const summary = html("summary", "", undefined, item);
     html("span", "shelf-need-for", `${need.for_title || need.for}: `, summary);
-    html("span", "", clip(need.ask, 150), summary);
-    if (String(need.ask || "").length > 150) html("p", "", need.ask, item);
+    html("span", "", need.plain || clip(need.ask, 150), summary);
+    if (need.plain) html("p", "small", `In the residents' own words: ${need.ask}`, item);
+    else if (String(need.ask || "").length > 150) html("p", "", need.ask, item);
     const kind = need.kind ? need.kind[0].toUpperCase() + need.kind.slice(1) : "Need";
     html("span", "small", [kind, need.status === "open" ? "waiting" : need.status, need.cost ? `likely cost: ${need.cost}` : null,
       residentName(need.author), need.raised_at ? clock(need.raised_at) : null].filter(Boolean).join(" · "), item);
@@ -1837,6 +1838,15 @@ function formatDurationDays(seconds) {
   const days = seconds / 86400;
   return `${days} ${days === 1 ? "day" : "days"}`;
 }
+// Residents write a stage as "Name (10 days): what is built". The days are how long the residents have
+// to finish that stage, so they are shown as an allowance and taken out of the name.
+function stageAllowance(text) {
+  const found = /\s*\((\d+)\s+days?\)/.exec(String(text || "").slice(0, 120));
+  return found ? {days: Number(found[1]), text: String(text).replace(found[0], "")} : {days: null, text: String(text || "")};
+}
+function allowanceWords(days) {
+  return `the residents have up to ${days} ${days === 1 ? "day" : "days"} to finish it`;
+}
 function renderOrderedMilestones(project, details) {
   const completed = Array.isArray(project.completed) ? project.completed : [];
   const doneByStage = new Map(completed.map(entry => [entry.stage, entry]));
@@ -1850,11 +1860,11 @@ function renderOrderedMilestones(project, details) {
     if (done) {
       const seq = done.sequence != null ? ` (event ${done.sequence})` : "";
       const note = done.evidence ? ` · ${done.evidence}` : "";
-      html("li", "milestone-done", `${stage.milestone} — done${seq}${note}`, list);
+      html("li", "milestone-done", `${stageAllowance(stage.milestone).text} — done${seq}${note}`, list);
     } else if (project.status === "active" && idx === currentStage) {
-      html("li", "milestone-current", `${stage.milestone} — current (${formatDurationDays(stage.seconds)})`, list);
+      html("li", "milestone-current", `${stageAllowance(stage.milestone).text} — current · ${allowanceWords(stage.seconds / 86400)}`, list);
     } else {
-      html("li", "", `${stage.milestone} (${formatDurationDays(stage.seconds)})`, list);
+      html("li", "", `${stageAllowance(stage.milestone).text} — later · up to ${formatDurationDays(stage.seconds)} allowed`, list);
     }
   });
 }
@@ -1909,8 +1919,10 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
     const stage = Number.isInteger(project.stage) ? project.stage : Array.isArray(project.completed) ? project.completed.length : 0;
     if (project.milestone) {
       const now = html("p", "project-now", undefined, item);
-      html("span", "eyebrow-small", stages > 1 ? `Now · milestone ${stage + 1} of ${stages}` : "Now · milestone", now);
-      html("span", "", clip(project.milestone, 320), now);
+      const allowance = stageAllowance(project.milestone);
+      html("span", "eyebrow-small", (stages > 1 ? `Now · milestone ${stage + 1} of ${stages}` : "Now · milestone")
+        + (allowance.days ? ` · ${allowanceWords(allowance.days)}` : ""), now);
+      html("span", "", clip(allowance.text, 320), now);
     }
     if (stages > 1) {
       const bar = html("div", "project-progress", undefined, item);
@@ -1920,7 +1932,12 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
     if (due) html("p", "small project-due", `Due ${due}`, item);
     const waiting = openNeeds().filter(need => need.for === project.id || need.for === project.idea).length;
     if (waiting) html("p", "small project-waiting", `Waiting on the Steward · ${waiting} ${waiting === 1 ? "ask" : "asks"} listed below`, item);
-    if (typeof project.brief_due === "number") html("p", "small project-waiting", `Nobody but its owner has shown who this is for · dropped ${clock(project.brief_due)} unless another resident writes its worth brief`, item);
+    const rejected = Array.isArray(project.rejected) ? project.rejected : [];
+    if (typeof project.brief_due === "number") html("p", "small project-waiting", project.brief_unchecked
+      ? `Its worth brief has not been checked · dropped ${clock(project.brief_due)} unless a resident who neither owns it nor wrote the brief opens the quoted pages and keeps it`
+      : rejected.length
+        ? `${residentName(rejected[rejected.length - 1].by)} opened the pages its worth brief quoted and rejected it · dropped ${clock(project.brief_due)} unless another resident shows who is asking for this`
+        : `Nobody but its owner has shown who this is for · dropped ${clock(project.brief_due)} unless another resident writes its worth brief`, item);
   }
   if (project.status === "active" && typeof current !== "undefined" && current && typeof catalog !== "undefined" && Array.isArray(catalog)) {
     const entry = catalog.find(candidate => candidate && candidate.id === project.idea);
@@ -1949,6 +1966,9 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
   }
   if (project.deadline) html("p", "small", `Deadline: ${projectDue(project)}`, details);
   if (project.brief) renderWorthBrief(project.brief, details, residentName, "Worth brief, by a resident who does not own it");
+  if (project.second) html("p", "small shelf-second", `Checked by ${residentName(project.second.author)}, who neither owns it nor wrote the brief: ${project.second.finding}`, details);
+  (Array.isArray(project.rejected) ? project.rejected : []).forEach(entry => html("p", "small shelf-second",
+    `A worth brief by ${residentName(entry.author)} was rejected by ${residentName(entry.by)}: ${entry.finding}`, details));
   recordId(details, project.id);
 }
 function renderShelfIdea(idea, group, greatMode, residentName) {
