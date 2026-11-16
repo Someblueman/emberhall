@@ -69,7 +69,26 @@ HTML is self-contained and needs no source files, network or server to open.
    writes your packet. Changes made after the last download request trigger the
    browser's ordinary leave-page prompt, where supported. There is no autosave:
    closing or reloading the page loses edits that you have not downloaded.
-4. Inspect the downloaded file if desired, then apply it:
+4. Validate and preview the downloaded changes before applying them:
+
+   ```sh
+   python3 projects/review-skein/comment_editor.py check \
+     /path/to/packet /path/to/skein-comment-edits.json
+   ```
+
+   This read-only command runs the same complete validation as `apply` and shows
+   each changed comment's anchor, old/new body and resolution, plus any additions.
+   Unchanged comments are omitted; every packet file stays untouched. `--format json`
+   returns a versioned `skein-edit-preview` object with `updated`/`added` counts and
+   a `changes` array of complete `before`/`after` comment records (`before: null`
+   for additions). Terminal text displays control and direction markers literally;
+   JSON escapes them while preserving their values. Text preview additionally
+   uses `comments_view.py` from the same Skein source folder. Invalid or stale edits fail
+   with exit 1 and no preview on stdout. A successful preview is a check of the
+   current bytes, not approval or a reservation: `apply` validates again, and a
+   packet changed since the download must get a fresh editor.
+
+   Then apply the checked download:
 
    ```sh
    python3 projects/review-skein/comment_editor.py apply \
