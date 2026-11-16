@@ -1360,7 +1360,8 @@ function renderLessons(content) {
   }
   renderPage();
 }
-let countingState={agent:"all",lane:"all"};
+let countingState={agent:"all",lane:"all",page:0};
+const COUNTING_PAGE_SIZE=8;
 // Models resting on a quota, in plain words: whether the whole family is out or only some of its
 // models, and when the provider itself said the limit returns.
 function quotaRestWords(agent,now) {
@@ -1406,10 +1407,11 @@ function renderCountingRoom(content) {
   ]) {
     const wrapper=html("label","small",label,controls),select=html("select","",undefined,wrapper);
     select.id=`counting-${key}`;
+    wrapper.setAttribute("for",select.id);
     for(const [value,title] of options){const opt=html("option","",title,select);opt.value=value;}
     select.value=countingState[key];
     select.addEventListener("change",()=>{
-      countingState[key]=select.value;roomPanel();$(select.id)?.focus?.({preventScroll:true});
+      countingState[key]=select.value;countingState.page=0;roomPanel();$(select.id)?.focus?.({preventScroll:true});
     });
   }
   const filtered=allRuns.filter(r=>{
@@ -1417,13 +1419,27 @@ function renderCountingRoom(content) {
     return (countingState.agent==="all"||r.agent===countingState.agent)&&
       (countingState.lane==="all"||lane===countingState.lane);
   });
-  const results=html("p","small",`${filtered.length} of ${allRuns.length} recorded runs match filters at this moment`,panel);
+  const results=html("p","small",undefined,panel);
   results.id="counting-results";results.setAttribute("role","status");
-  if(!filtered.length) {
-    html("p","empty-note","No recorded runs match these filters at this moment.",panel);
-  } else {
-    const list=html("div","counting-runs",undefined,panel);
-    filtered.slice(-8).reverse().forEach(run=>{
+  const list=html("div","counting-runs",undefined,panel);list.id="counting-runs";list.tabIndex=-1;
+  list.setAttribute("role","region");list.setAttribute("aria-label","Matching recorded runs");
+  const pages=html("div","workshop-pages",undefined,panel);
+  pages.setAttribute("role","group");pages.setAttribute("aria-label","Recorded run pages");
+  function turnPage(delta) {
+    countingState.page+=delta;renderPage();list.focus({preventScroll:true});list.scrollIntoView?.({block:"nearest"});
+  }
+  const previous=workshopButton(pages,"Newer runs",()=>turnPage(-1));previous.id="counting-previous";
+  const range=html("span","small",undefined,pages);
+  const next=workshopButton(pages,"Older runs",()=>turnPage(1));next.id="counting-next";
+  for(const button of [previous,next])button.setAttribute("aria-controls",list.id);
+  function renderPage() {
+    countingState.page=Math.max(0,Math.min(countingState.page,Math.ceil(filtered.length/COUNTING_PAGE_SIZE)-1));
+    const start=countingState.page*COUNTING_PAGE_SIZE;
+    const showing=filtered.length?`${start+1}–${Math.min(start+COUNTING_PAGE_SIZE,filtered.length)}`:"0";
+    results.textContent=`${filtered.length} of ${allRuns.length} recorded runs match filters at this moment · showing ${showing}, newest first`;
+    list.replaceChildren();
+    if(!filtered.length)html("p","empty-note","No recorded runs match these filters at this moment.",list);
+    filtered.slice().reverse().slice(start,start+COUNTING_PAGE_SIZE).forEach(run=>{
       const row=html("div","counting-run",undefined,list);
       const kind=kinds[run.agent]||kinds.unrecorded,lane=run.assignment?.lane||"unrecorded";
       const finishes=(run.finished_tasks||[]).map(t=>t.task).filter(Boolean);
@@ -1438,7 +1454,11 @@ function renderCountingRoom(content) {
         btn.addEventListener("click",()=>jumpToSequence(run.sequence));
       }
     });
+    previous.disabled=countingState.page===0;next.disabled=start+COUNTING_PAGE_SIZE>=filtered.length;
+    range.textContent=filtered.length?`${showing} of ${filtered.length}`:"0 runs";
+    pages.hidden=filtered.length<=COUNTING_PAGE_SIZE;
   }
+  renderPage();
   const link=html("a","room-shelf-link","Open Household Accounts →",panel);
   link.href="#accounts-view";
 }
