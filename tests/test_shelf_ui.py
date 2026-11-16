@@ -15,6 +15,8 @@ class Element {
   constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
   appendChild(node){this.children.push(node);}
   replaceChildren(){this.children=[];}
+  setAttribute(key,value){this[key]=value;}
+  addEventListener(){}
 }
 const root=new Element('section'), document={getElementById:()=>root,createElement:tag=>new Element(tag)};
 const text=node=>[node.textContent,...node.children.map(text)].join(' ');
@@ -70,6 +72,8 @@ class Element {
   constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
   appendChild(node){this.children.push(node);}
   replaceChildren(){this.children=[];}
+  setAttribute(key,value){this[key]=value;}
+  addEventListener(){}
 }
 const nodes={};
 const get=id=>(nodes[id]||(nodes[id]=new Element('div')));
@@ -116,6 +120,8 @@ class Element {
   constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
   appendChild(node){this.children.push(node);}
   replaceChildren(){this.children=[];}
+  setAttribute(key,value){this[key]=value;}
+  addEventListener(){}
 }
 const nodes={};
 const get=id=>(nodes[id]||(nodes[id]=new Element('div')));
