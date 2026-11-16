@@ -64,6 +64,9 @@ HTML is self-contained and needs no source files, network or server to open.
 2. Edit a body or choose **resolved**. Choose **open** to reopen. The status
    announces how many comments changed. Empty, whitespace-only, over-20000-character
    and NUL-containing bodies block either export. An orphan stays orphaned when resolved.
+   Both editing and composition use the CLI's Unicode whitespace definition for
+   empty bodies and count Unicode characters for the length limit. Validation
+   preserves accepted text; it does not trim it or normalize Unicode.
 3. Choose **Download edits** and confirm your browser saved `skein-comment-edits.json`.
    This is a download request, not proof the browser saved a file. The page never
    writes your packet. If downloads are unavailable, choose **Show edits JSON**:

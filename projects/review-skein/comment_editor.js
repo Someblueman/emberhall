@@ -46,6 +46,13 @@ function startEditor(document, environment) {
     return a.commit === b.commit && a.path === b.path && a.side === b.side && a.line === b.line && a.text === b.text;
   }
 
+  function validBody(value) {
+    // Match Python str.strip() in the durable Comment validator. JS trim()
+    // omits U+001C–001F/U+0085 and additionally strips U+FEFF.
+    const hasContent = /[^\t-\r\x1c-\x20\x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/u.test(value);
+    return hasContent && Array.from(value).length <= 20000 && !value.includes("\0");
+  }
+
   function labeledControl(tag, id, labelText, parent, className) {
     const wrapper = className ? node("div", undefined, parent) : parent;
     if (className) wrapper.className = className;
@@ -176,8 +183,7 @@ function startEditor(document, environment) {
     resolution.value = comment.resolution;
     body.addEventListener("input", () => {
       const value = body.value;
-      const valid = value.trim().length > 0 && Array.from(value).length <= 20000 && !value.includes("\0");
-      body.setCustomValidity(valid ? "" : "Enter nonempty text of at most 20000 characters, without NUL.");
+      body.setCustomValidity(validBody(value) ? "" : "Enter nonempty text of at most 20000 characters, without NUL.");
       comment.body = value;
       editsChanged();
       refreshPreview();
@@ -336,7 +342,7 @@ function startEditor(document, environment) {
         const unique = !data.document.comments.some(comment => comment.id === identifier.value);
         identifier.setCustomValidity(/^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(identifier.value) && unique ? "" :
           "Enter a unique safe comment ID starting with a letter or digit (up to 100 characters).");
-        body.setCustomValidity(body.value.trim() && Array.from(body.value).length <= 20000 && !body.value.includes("\0") ? "" :
+        body.setCustomValidity(validBody(body.value) ? "" :
           "Enter nonempty text of at most 20000 characters, without NUL.");
         for (const control of [line, identifier, body]) {
           if (!control.reportValidity()) { control.focus(); return; }

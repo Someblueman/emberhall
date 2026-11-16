@@ -448,7 +448,31 @@ function exerciseSelectionFiltering(envelope, anchors) {
   assert(find("new-anchor-preview").textContent.includes("alpha.py | new line 1"));
 }
 
-if (process.argv.length > 2) {
+if (process.argv[2] === "--body-cases") {
+  const {envelope, anchors, cases} = JSON.parse(fs.readFileSync(0, "utf8"));
+  const results = cases.map(body => {
+    const page = setup(envelope, anchors);
+    const find = id => page.nodes.find(n => n.id === id);
+    if (anchors) {
+      find("new-id").value = "unicode-body"; find("new-id").fire("input");
+      find("new-body").value = body; find("new-body").fire("input");
+      page.nodes.find(n => n.tag === "form").fire("submit");
+    } else {
+      find("comment-0-body").value = body; find("comment-0-body").fire("input");
+    }
+    page.elements["export-json"].fire("click");
+    page.elements.download.fire("click");
+    const copied = page.elements["edits-json"].textContent;
+    if (!page.blobs.length) {
+      assert.equal(copied, "", "blocked bodies cannot be copied either");
+      assert.equal(page.elements["edits-export"].hidden, true);
+      return null;
+    }
+    assert.equal(copied, page.blobs[0].text, "both exports preserve exact body bytes");
+    return JSON.parse(copied);
+  });
+  process.stdout.write(JSON.stringify(results));
+} else if (process.argv.length > 2) {
   const envelope = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
   const page = process.argv[4] ? exerciseComposer(envelope, JSON.parse(fs.readFileSync(process.argv[4], "utf8"))) : exercise(envelope);
   fs.writeFileSync(process.argv[3], page.copiedJSON);
@@ -514,4 +538,4 @@ function exerciseSearchMetadata() {
     assert.equal(status.textContent, "Showing 1 of 2 comments.");
   }
 }
-console.log("editor event/data checks passed (no browser witness)");
+if (process.argv[2] !== "--body-cases") console.log("editor event/data checks passed (no browser witness)");

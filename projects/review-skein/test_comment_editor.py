@@ -202,6 +202,55 @@ class EditorTests(unittest.TestCase):
 
 
 class EditorLifecycleTests(SkeinFixture):
+    @unittest.skipUnless(shutil.which("node"), "Node needed for Unicode body validation parity")
+    def test_unicode_body_events_export_check_and_apply_match_comment_contract(self):
+        self.export()
+        anchor = skein._load_anchors(self.packet)[0]
+        skein.add_comment(self.packet, "existing", anchor.commit, anchor.path,
+                          anchor.side, anchor.line, "Original")
+        original = (self.packet / "comments.json").read_bytes()
+        members = {p.name: p.read_bytes() for p in self.packet.iterdir()}
+        whitespace = [chr(i) for i in range(sys.maxunicode + 1) if chr(i).isspace()]
+        cases = ["", *whitespace, "".join(whitespace), "\ufeff", "\u200b", "\u180e",
+                 "\x84", "\x86", "\x1b", "\u200aX\x85", "café 🧵", "\0", "X\0Y",
+                 "🧵" * 20000, "🧵" * 20001]
+        cli = [sys.executable, str(ROOT / "comment_editor.py")]
+        edits = self.root / "unicode-edits.json"
+        for compose in (False, True):
+            (self.packet / "comments.json").write_bytes(original)
+            page = Page(comment_editor.render_composer(self.packet) if compose
+                        else comment_editor.render_editor(original))
+            payload = {"envelope": json.loads(page.scripts[0]["text"]), "cases": cases,
+                       "anchors": json.loads(page.scripts[1]["text"]) if compose else None}
+            result = subprocess.run(
+                ["node", str(ROOT / "test_comment_editor_ui.js"), "--body-cases"],
+                input=json.dumps(payload), check=True, capture_output=True, text=True)
+            exports = json.loads(result.stdout)
+            self.assertEqual(len(exports), len(cases))
+            for body, exported in zip(cases, exports):
+                with self.subTest(compose=compose, body=ascii(body[:20]), length=len(body)):
+                    try:
+                        skein.Comment("unicode-body", anchor, body)
+                        valid = True
+                    except skein.SkeinError:
+                        valid = False
+                    self.assertEqual(exported is not None, valid)
+                    if not valid:
+                        continue
+                    (self.packet / "comments.json").write_bytes(original)
+                    edits.write_text(json.dumps(exported), encoding="utf-8")
+                    subprocess.run([*cli, "check", str(self.packet), str(edits)],
+                                   check=True, capture_output=True)
+                    self.assertEqual((self.packet / "comments.json").read_bytes(), original)
+                    subprocess.run([*cli, "apply", str(self.packet), str(edits)],
+                                   check=True, capture_output=True)
+                    comments = skein.loads_comments((self.packet / "comments.json").read_text())
+                    self.assertEqual(comments[-1].body, body)
+                    self.assertEqual(len(comments), 2 if compose else 1)
+                    for name, raw in members.items():
+                        if name != "comments.json":
+                            self.assertEqual((self.packet / name).read_bytes(), raw)
+
     @unittest.skipUnless(shutil.which("node"), "Node needed for generated-page edit lifecycle")
     def test_real_packet_cli_page_node_copied_export_apply(self):
         self.export()
