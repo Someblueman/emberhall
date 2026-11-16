@@ -385,6 +385,138 @@ class ReviewViewTests(SkeinFixture):
             self.assertEqual(sym_run.returncode, 1)
             self.assertEqual(sym_run.stdout, "")
 
+    def test_html_and_text_expose_file_comment_counts_and_comment_jump_index(self) -> None:
+        packet, _ = self._build_rich_packet()
+        before = _snapshot(packet)
+
+        page = review_view.render_packet(packet, output_format="html", context=1)
+        tree = probe.parse(page)
+        self.assertEqual([], probe.audit(tree))
+
+        # File index summarizes open/resolved counts per file.
+        self.assertIn("modified: long.py</a> — 4 comments (3 open, 1 resolved)", page)
+        self.assertIn("added:  → added.txt</a> — 0 comments", page)
+        self.assertIn("added:  → café-☃.txt</a> — 1 comment (1 open, 0 resolved)", page)
+
+        # Comment jump index links directly to #comment-1..#comment-7 with no broken fragments.
+        self.assertIn('<nav id="comments" aria-label="Comments">', page)
+        self.assertIn("Comments in view (7)", page)
+        for index in range(1, 8):
+            self.assertIn(f'href="#comment-{index}"', page)
+            self.assertIn(f'id="comment-{index}"', page)
+        self.assertNotIn('id="comment-8"', page)
+
+        # Text output includes a changed-files summary with per-file comment counts.
+        text = review_view.render_packet(packet, output_format="text", context=1)
+        self.assertIn("Changed files: 5 of 5 shown.", text)
+        self.assertIn("- modified: long.py — 4 comments (3 open, 1 resolved)", text)
+        self.assertIn("- added:  → added.txt — 0 comments", text)
+        self.assertEqual(_snapshot(packet), before)
+
+    def test_path_search_and_only_commented_filters_preserve_totals(self) -> None:
+        packet, _ = self._build_rich_packet()
+        # Add a nested file to test directory-prefix path filtering.
+        self.git("checkout", "--quiet", "rich-head")
+        self.write("nested/mod.py", "def ok():\n    return 1\n")
+        self.commit("add nested file")
+        head2 = self.rev_parse("HEAD")
+        packet2 = self.root / "nested-packet"
+        skein.export_packet(self.repository, "base", head2, packet2)
+        skein.add_comment(packet2, "nested-note", head2, "nested/mod.py", "new", 2, "Check nested return")
+        skein.add_comment(packet2, "long-note", head2, "long.py", "new", 2, "Check top line")
+        skein.add_comment(packet2, "old-renamed", self.base, "old-name.txt", "old", 1, "Before rename")
+        skein.update_comment(packet2, "long-note", resolution="resolved")
+        orphan = skein.Comment(
+            "orphan-search",
+            skein.Anchor(head2, "nested/gone.py", "new", 3, "gone"),
+            "Needle phrase in orphan body",
+            state="orphan",
+            rebased_from=skein.Anchor(self.base, "nested/gone.py", "new", 3, "gone"),
+            orphan_reason="removed during cleanup",
+            resolution="open",
+        )
+        current = skein.loads_comments((packet2 / "comments.json").read_text(encoding="utf-8"))
+        current.append(orphan)
+        skein._atomic_comments(packet2, current)
+        before = _snapshot(packet2)
+
+        # Directory prefix and exact path filtering match without substring leakage (a.py != ba.py).
+        nested_only = review_view.render_packet(
+            packet2, output_format="text", paths=["nested"],
+        )
+        self.assertIn("Showing 2 of 4 comments.", nested_only)
+        self.assertIn("All comments: 3 open, 1 resolved; 1 orphan.", nested_only)
+        self.assertIn("Changed files: 1 of 6 shown.", nested_only)
+        self.assertIn("added:  → nested/mod.py", nested_only)
+        self.assertIn("nested-note", nested_only)
+        self.assertIn("orphan-search", nested_only)
+        self.assertNotIn("long-note", nested_only)
+        self.assertNotIn("modified: long.py", nested_only)
+
+        # Renamed file matches on either old_path or new_path.
+        renamed_view = review_view.render_packet(
+            packet2, output_format="text", paths=["old-name.txt"],
+        )
+        self.assertIn("old-name.txt → renamed.txt", renamed_view)
+        self.assertIn("old-renamed", renamed_view)
+        self.assertIn("Changed files: 1 of 6 shown.", renamed_view)
+
+        # Case-insensitive search across body, identifier, path, and orphan reason.
+        searched = review_view.render_packet(
+            packet2, output_format="html", search="NEEDLE PHRASE", only_commented=True,
+        )
+        self.assertEqual([], probe.audit(probe.parse(searched)))
+        self.assertIn("Showing 1 of 4 comments.", searched)
+        self.assertIn("All comments: 3 open, 1 resolved; 1 orphan.", searched)
+        self.assertIn("Changed files: 0 of 6 shown.", searched)
+        self.assertIn("orphan-search", searched)
+        self.assertNotIn("long-note", searched)
+        self.assertNotIn("nested-note", searched)
+
+        # --only-commented keeps files with matching inline comments and hides uncommented files.
+        commented_html = review_view.render_packet(
+            packet2, output_format="html", resolution="open", only_commented=True,
+        )
+        self.assertEqual([], probe.audit(probe.parse(commented_html)))
+        self.assertIn("Changed files: 2 of 6 shown.", commented_html)
+        self.assertIn("nested/mod.py", commented_html)
+        self.assertIn("old-name.txt → renamed.txt", commented_html)
+        self.assertNotIn("long.py", commented_html)
+        self.assertNotIn("added.txt", commented_html)
+
+        # Invalid filter inputs fail clearly.
+        for bad_kwargs in (
+            {"paths": "nested/mod.py"},
+            {"paths": [""]},
+            {"paths": ["   "]},
+            {"search": 123},
+            {"only_commented": "yes"},
+        ):
+            with self.subTest(bad_kwargs=bad_kwargs):
+                with self.assertRaises(ValueError):
+                    review_view.render_packet(packet2, **bad_kwargs)
+
+        # CLI flags --path, --search, --only-commented work together read-only.
+        cli = subprocess.run(
+            [
+                sys.executable, str(TOOLS / "review_view.py"), str(packet2),
+                "--format", "html", "--path", "nested", "--search", "check nested",
+                "--only-commented",
+            ],
+            cwd=self.root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(0, cli.returncode, cli.stderr)
+        self.assertEqual([], probe.audit(probe.parse(cli.stdout)))
+        self.assertIn("Showing 1 of 4 comments.", cli.stdout)
+        self.assertIn("Changed files: 1 of 6 shown.", cli.stdout)
+        self.assertIn("nested-note", cli.stdout)
+        self.assertNotIn("orphan-search", cli.stdout)
+        self.assertEqual(_snapshot(packet2), before)
+
 
 if __name__ == "__main__":
     unittest.main()
