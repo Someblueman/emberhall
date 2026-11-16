@@ -108,7 +108,11 @@
         "projects/review-skein/sample/milestone-2/review.html",
         "projects/review-skein/sample/milestone-2/packet.json",
         "projects/review-skein/sample/milestone-2/anchors.json",
-        "projects/review-skein/sample/milestone-2/comments.json"
+        "projects/review-skein/sample/milestone-2/comments.json",
+        "projects/review-skein/sample/milestone-2-mixed/review.html",
+        "projects/review-skein/sample/milestone-2-mixed/packet.json",
+        "projects/review-skein/sample/milestone-2-mixed/anchors.json",
+        "projects/review-skein/sample/milestone-2-mixed/comments.json"
       ]
     },
     {
