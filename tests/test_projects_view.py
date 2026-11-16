@@ -124,15 +124,17 @@ frame.work=[
   {id:'w1',title:'Keep editor Unicode body validation aligned with the applying CLI',plain:'A comment that looks empty is treated as empty when saved.',project:'p-u',owner:'r1',at:900,check:false},
   {id:'w2',title:'Independently review the editor export',project:'p-u',owner:'r1',at:800,check:true},
   {id:'w3',title:'Third',project:'p-u',owner:'r1',at:700,check:false},{id:'w4',title:'Fourth',project:'p-u',owner:'r1',at:600,check:false},
-  {id:'w5',title:'Fifth and folded',project:'p-u',owner:'r1',at:500,check:true},
+  {id:'w5',title:'Fresh non-author trial, fifth and folded',project:'p-u',owner:'r1',at:500,check:true},
+  {id:'w7',title:'Review the Skein README refresh',owner:'r1',at:450,check:true},
+  {id:'w8',title:'Skein milestone 2: ship a real review page',project:'p-u',owner:'r1',at:440,check:true},
   {id:'w6',title:'Repair the salvage room panel',owner:'r1',at:950,check:false}].sort((a,b)=>a.at-b.at);
 shelf();
 const worked=text(nodes.shelf);
-assert.match(worked,/Finished in the last 24 hours: 5 pieces of work · 3 built or repaired · 2 checks of someone else’s work/);
+assert.match(worked,/Finished in the last 24 hours: 7 pieces of work · 4 built or repaired · 3 checks of someone else’s work/);
 assert.match(worked,/A comment that looks empty is treated as empty when saved\\. · Juniper/);
 assert.doesNotMatch(worked,/Keep editor Unicode body validation/,'the plain line replaces the title');
 assert.match(worked,/Checked: Independently review the editor export/);
-assert.match(worked,/All 5/);assert.match(worked,/Nothing was finished for this project in the last 24 hours\\./);
+assert.match(worked,/All 7/);assert.match(worked,/Checked: Review the Skein README refresh/);assert.doesNotMatch(worked,/Checked: Skein milestone 2/);assert.match(worked,/Nothing was finished for this project in the last 24 hours\\./);
 assert.match(worked,/Other work\\s+Upkeep of the house itself and ideas that are not chosen projects\\s+Finished in the last 24 hours: 1 piece of work · 1 built or repaired · 0 checks/);
 assert(worked.indexOf('A comment that looks empty')<worked.indexOf('Independently review the editor export'),'newest first');
 delete frame.work;shelf();

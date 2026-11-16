@@ -1910,8 +1910,35 @@ function renderWorthBrief(brief, parent, residentName, heading) {
   return box;
 }
 // What the house finished in the last day, in the residents' plain words where they gave them.
+// The house marks checks loosely, by words that also occur in project names such as "Review Skein" and
+// "Trial Bench". Here a check must also lead with checking, and "NAME milestone N: ..." is building.
+const WORK_CHECK_LEAD = /^(?:[\p{L}’'-]+:\s*)?(?:fresh\s+|post-repair\s+|offline\s+)?(?:independent(?:ly)?|non-author|reviews?|try|audit|inspect|verify)\b/iu;
+const WORK_CHECK_ANY = /\bnon-author\b|\b(?:independent|offline|evidence)\s+(?:trial|audit)\b/i;
+function projectNames(project) {
+  const names = [];
+  if (typeof project.idea === "string") names.push(project.idea.replace(/-/g, " "), project.idea);
+  if (typeof project.title === "string") names.push(project.title.split(/[:—–]/)[0].trim());
+  return [...new Set(names.map(name => name.toLowerCase()).filter(name => name.length > 2))];
+}
+function mentions(names, text) {
+  const words = ` ${String(text || "").toLowerCase().replace(/[^\p{L}\p{N}-]+/gu, " ")} `;
+  return names.some(name => words.includes(` ${name} `) || words.includes(` ${name}-`) || words.includes(`-${name} `) || words.includes(`-${name}-`));
+}
+function workIsCheck(entry, names) {
+  const title = String(entry.title || "").trim(), lower = title.toLowerCase();
+  if (!entry.check || names.some(name => lower.startsWith(`${name} milestone `))) return false;
+  return WORK_CHECK_LEAD.test(title) || WORK_CHECK_ANY.test(title);
+}
+// Work recorded under a project, or recorded under none and naming it: reviews seldom carry the project.
+function workBelongs(entry, project) {
+  if (entry.project) return entry.project === project.id;
+  return mentions(projectNames(project), `${entry.title || ""} ${entry.id || ""}`);
+}
 function recentWork(match) {
-  return (frame && Array.isArray(frame.work) ? frame.work : []).filter(match).slice().reverse();
+  const active = (frame && frame.shelf && Array.isArray(frame.shelf.projects) ? frame.shelf.projects : []).filter(project => project.status === "active");
+  const names = active.flatMap(projectNames);
+  return (frame && Array.isArray(frame.work) ? frame.work : []).filter(match)
+    .map(entry => ({...entry, check: workIsCheck(entry, names)})).reverse();
 }
 function renderRecentWork(items, parent, residentName, heading, none) {
   if (!frame || !Array.isArray(frame.work)) return;
@@ -1948,7 +1975,7 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
       const bar = html("div", "project-progress", undefined, item);
       project.milestones.forEach((_, idx) => html("span", idx < stage ? "done" : idx === stage ? "current" : "", undefined, bar));
     }
-    renderRecentWork(recentWork(entry => entry.project === project.id), item, residentName,
+    renderRecentWork(recentWork(entry => workBelongs(entry, project)), item, residentName,
       "Finished in the last 24 hours", "Nothing was finished for this project in the last 24 hours.");
     const due = projectDue(project);
     if (due) html("p", "small project-due", `Due ${due}`, item);
@@ -2105,7 +2132,7 @@ function shelf() {
     const group=html("div","shelf-group shelf-motion",undefined,box);
     html("h2","","In motion",group);
     activeProjects.forEach(project=>renderShelfProject(project,"Active",group,residentName));
-    const active=new Set(activeProjects.map(project=>project.id)),other=recentWork(entry=>!active.has(entry.project));
+    const other=recentWork(entry=>!activeProjects.some(project=>workBelongs(entry,project)));
     if(other.length){
       const aside=html("article","shelf-item",undefined,group);
       html("strong","","Other work",aside);
