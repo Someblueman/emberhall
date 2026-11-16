@@ -1319,3 +1319,9 @@ footer a {
 .introduction p.about-line { font-size:15px; line-height:1.5; color:var(--paper); max-width:78ch; margin:0 0 10px; }
 @media (max-width:700px) { .introduction p.about-line { font-size:14px; max-width:none; } }
 @media (min-width:1051px) { .house-layout:not(.room-open) .introduction p.about-line { max-width:90ch; } }
+
+/* Who asked: quoted askers and the second resident's check */
+.shelf-asked-head { margin-top:.5rem; }
+.shelf-brief p.shelf-asked { border-left:2px solid var(--gold); padding-left:.6rem; }
+.shelf-second { margin:.4rem 0 0; color:var(--gold); }
+.shelf-asked .shelf-source-link { white-space:nowrap; }
