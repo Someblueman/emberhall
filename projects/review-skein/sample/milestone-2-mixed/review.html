@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+<title>Skein review</title><style>
+:root { color-scheme: light dark; --bg: #fff; --fg: #24292f; --muted: #6e7781;
+  --border: #d0d7de; --add: #dafbe1; --del: #ffebe9; --change: #fff8c5; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --fg: #e6edf3;
+  --muted: #8b949e; --border: #30363d; --add: #12261e; --del: #2d1618; --change: #302b12; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 15px/1.5 system-ui, sans-serif; }
+main { max-width: 1600px; margin: auto; padding: 1rem; }
+.identity { overflow-wrap: anywhere; } .identity code { user-select: all; }
+nav { margin: 1rem 0; } nav li { margin: .3rem 0; }
+section { margin: 2rem 0; } h2 { font-size: 1.1rem; overflow-wrap: anywhere; }
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+caption { text-align: left; color: var(--muted); padding: .3rem 0; }
+th, td { border: 1px solid var(--border); vertical-align: top; }
+th.number { width: 4.5em; text-align: right; color: var(--muted); font-weight: normal;
+  user-select: none; }
+td.code { white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4;
+  font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
+tr.insert td.new { background: var(--add); } tr.delete td.old { background: var(--del); }
+tr.replace td.old { background: var(--del); } tr.replace td.new { background: var(--add); }
+tr.meta td { color: var(--muted); font-style: italic; }
+a { color: inherit; } footer { color: var(--muted); margin-top: 2rem; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: -9999px; top: 0; background: var(--bg); color: var(--fg);
+  padding: .5rem 1rem; z-index: 1; }
+.skip:focus { left: 0; }
+a:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+.scroll { overflow-x: auto; }
+@media (max-width: 640px) { table { min-width: 34rem; } main { padding: .5rem; } }
+
+.summary { border-left: 3px solid var(--border); padding: .2rem .8rem; margin: 1rem 0; }
+.orphans { border: 1px solid var(--border); padding: .75rem 1rem; margin: 1.5rem 0; }
+.comment-card { border-top: 1px solid var(--border); padding-top: .75rem; margin-top: .75rem; }
+.comment-card:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.comment-card h3 { font-size: 1rem; margin: 0 0 .35rem 0; overflow-wrap: anywhere; }
+.comment-meta { text-align: left; font-weight: normal; padding: .45rem .6rem;
+  background: var(--bg); color: var(--fg); overflow-wrap: anywhere; }
+.comment-cell { padding: .45rem .6rem; background: var(--bg); }
+.comment-body { margin: .25rem 0 0 0; white-space: pre-wrap; overflow-wrap: anywhere;
+  font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.comment-extra { margin: .2rem 0 0 0; color: var(--muted); font-size: .9rem;
+  overflow-wrap: anywhere; }
+</style></head>
+<body><a class="skip" href="#files">Skip to changed files</a><main><h1>Skein review</h1>
+<p class="identity">Base: <code>f730e964e18e0245862f09f7e0662ab14775e8bd (f730e964e18e0245862f09f7e0662ab14775e8bd)</code><br>Head: <code>7118f31b4d6d4ca429946929d95d9b3d6149f99a (7118f31b4d6d4ca429946929d95d9b3d6149f99a)</code></p>
+<div class="summary"><p>Showing 2 of 2 comments. Filters: resolution=all, state=all.<br>All comments: 1 open, 1 resolved; 0 orphan.<br>Changed files: 4 of 4 shown.</p>
+<p>This static view is derived read-only from the offline packet; no network or JavaScript is used.</p></div>
+<nav id="files" aria-label="Changed files"><ol><li><a href="#file-1">renamed: notes.txt → directions.txt</a> — 0 comments</li><li><a href="#file-2">deleted: old-map.txt → </a> — 1 comment (0 open, 1 resolved)</li><li><a href="#file-3">added:  → schedule.txt</a> — 0 comments</li><li><a href="#file-4">modified: welcome.txt</a> — 1 comment (1 open, 0 resolved)</li></ol></nav>
+<nav id="comments" aria-label="Comments"><h2>Comments in view (2)</h2><ol><li><a href="#comment-1">old-map</a> (resolved, anchored) — old-map.txt →  (old line 1): Invented resolved note: the obsolete map is removed; direct…</li><li><a href="#comment-2">departure</a> (open, anchored) — welcome.txt (new line 2): Invented open question: confirm the departure change from n…</li></ol></nav>
+<section id="file-1" aria-labelledby="file-1-title"><h2 id="file-1-title">renamed: notes.txt → directions.txt</h2>
+<div class="scroll"><table><caption>Old line and new line; 5 old / 5 new</caption>
+<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<tbody><tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 1</th><th scope="row" class="number new-number">1</th><td class="old code">Start at the station.</td><td class="new code">Start at the station.</td></tr>
+<tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 2</th><th scope="row" class="number new-number">2</th><td class="old code">Follow the river.</td><td class="new code">Follow the river.</td></tr>
+<tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 3</th><th scope="row" class="number new-number">3</th><td class="old code">Use the marked crossing.</td><td class="new code">Use the marked crossing.</td></tr>
+<tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 4</th><th scope="row" class="number new-number">4</th><td class="old code">Wait by the lantern.</td><td class="new code">Wait by the lantern.</td></tr>
+<tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 5</th><th scope="row" class="number new-number">5</th><td class="old code">Keep the path clear.</td><td class="new code">Keep the path clear.</td></tr>
+</tbody></table></div></section>
+<section id="file-2" aria-labelledby="file-2-title"><h2 id="file-2-title">deleted: old-map.txt → </h2>
+<div class="scroll"><table><caption>Old line and new line; 2 old / 0 new</caption>
+<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<tbody><tr class="delete"><th scope="row" class="number old-number"><span class="sr">Removed.</span> 1</th><th scope="row" class="number new-number"></th><td class="old code">This map describes an obsolete jetty.</td><td class="new code"></td></tr>
+<tr class="comment-row" id="comment-1"><th scope="row" colspan="2" class="comment-meta"><span class="sr">Comment.</span> <strong>old-map</strong> (resolved, anchored, old line 1)</th><td colspan="2" class="comment-cell"><pre class="comment-body">Invented resolved note: the obsolete map is removed; directions remain in the renamed file.</pre></td></tr>
+<tr class="delete"><th scope="row" class="number old-number"><span class="sr">Removed.</span> 2</th><th scope="row" class="number new-number"></th><td class="old code">Use the newer route instead.</td><td class="new code"></td></tr>
+</tbody></table></div></section>
+<section id="file-3" aria-labelledby="file-3-title"><h2 id="file-3-title">added:  → schedule.txt</h2>
+<div class="scroll"><table><caption>Old line and new line; 0 old / 3 new</caption>
+<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<tbody><tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">1</th><td class="old code"></td><td class="new code">Ferry at ten.</td></tr>
+<tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">2</th><td class="old code"></td><td class="new code">Wait by the lantern.</td></tr>
+<tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">3</th><td class="old code"></td><td class="new code">Bring a coat.</td></tr>
+</tbody></table></div></section>
+<section id="file-4" aria-labelledby="file-4-title"><h2 id="file-4-title">modified: welcome.txt</h2>
+<div class="scroll"><table><caption>Old line and new line; 5 old / 5 new</caption>
+<thead><tr><th scope="col">Old</th><th scope="col">New</th><th scope="col">Base text</th><th scope="col">Head text</th></tr></thead>
+<tbody><tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 1</th><th scope="row" class="number new-number">1</th><td class="old code">Welcome to the riverside station.</td><td class="new code">Welcome to the riverside station.</td></tr>
+<tr class="replace"><th scope="row" class="number old-number"><span class="sr">Changed.</span> 2</th><th scope="row" class="number new-number">2</th><td class="old code">The board says: ferry at nine.</td><td class="new code">The board says: ferry at ten.</td></tr>
+<tr class="comment-row" id="comment-2"><th scope="row" colspan="2" class="comment-meta"><span class="sr">Comment.</span> <strong>departure</strong> (open, anchored, new line 2)</th><td colspan="2" class="comment-cell"><pre class="comment-body">Invented open question: confirm the departure change from nine to ten.</pre></td></tr>
+<tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 3</th><th scope="row" class="number new-number">3</th><td class="old code">Keep the path clear.</td><td class="new code">Keep the path clear.</td></tr>
+<tr class="delete"><th scope="row" class="number old-number"><span class="sr">Removed.</span> 4</th><th scope="row" class="number new-number"></th><td class="old code">A faded notice will be removed.</td><td class="new code"></td></tr>
+<tr class="equal"><th scope="row" class="number old-number"><span class="sr">Unchanged.</span> 5</th><th scope="row" class="number new-number">4</th><td class="old code">Meet at the lantern.</td><td class="new code">Meet at the lantern.</td></tr>
+<tr class="insert"><th scope="row" class="number old-number"><span class="sr">Added.</span> </th><th scope="row" class="number new-number">5</th><td class="old code"></td><td class="new code">Bring a coat.</td></tr>
+</tbody></table></div></section>
+<footer>Review Skein packet format 1.
+Bundle hashes bind bytes, not people. Comments live in comments.json.</footer></main></body></html>

@@ -1,0 +1,36 @@
+{
+  "comments": [
+    {
+      "anchor": {
+        "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+        "line": 2,
+        "path": "welcome.txt",
+        "side": "new",
+        "text": "The board says: ferry at ten."
+      },
+      "body": "Invented open question: confirm the departure change from nine to ten.",
+      "id": "departure",
+      "orphan_reason": null,
+      "rebased_from": null,
+      "resolution": "open",
+      "state": "anchored"
+    },
+    {
+      "anchor": {
+        "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+        "line": 1,
+        "path": "old-map.txt",
+        "side": "old",
+        "text": "This map describes an obsolete jetty."
+      },
+      "body": "Invented resolved note: the obsolete map is removed; directions remain in the renamed file.",
+      "id": "old-map",
+      "orphan_reason": null,
+      "rebased_from": null,
+      "resolution": "resolved",
+      "state": "anchored"
+    }
+  ],
+  "format": "review-skein-comments",
+  "version": 2
+}

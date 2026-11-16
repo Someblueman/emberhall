@@ -1,0 +1,46 @@
+{
+  "anchors": "anchors.json",
+  "base": {
+    "commit": "f730e964e18e0245862f09f7e0662ab14775e8bd",
+    "ref": "f730e964e18e0245862f09f7e0662ab14775e8bd"
+  },
+  "bundle": "changes.bundle",
+  "comments": "comments.json",
+  "diff": "review.html",
+  "files": [
+    {
+      "new_lines": 5,
+      "new_path": "directions.txt",
+      "old_lines": 5,
+      "old_path": "notes.txt",
+      "status": "renamed"
+    },
+    {
+      "new_lines": 0,
+      "new_path": null,
+      "old_lines": 2,
+      "old_path": "old-map.txt",
+      "status": "deleted"
+    },
+    {
+      "new_lines": 3,
+      "new_path": "schedule.txt",
+      "old_lines": 0,
+      "old_path": null,
+      "status": "added"
+    },
+    {
+      "new_lines": 5,
+      "new_path": "welcome.txt",
+      "old_lines": 5,
+      "old_path": "welcome.txt",
+      "status": "modified"
+    }
+  ],
+  "format": "review-skein-packet",
+  "head": {
+    "commit": "7118f31b4d6d4ca429946929d95d9b3d6149f99a",
+    "ref": "7118f31b4d6d4ca429946929d95d9b3d6149f99a"
+  },
+  "version": 1
+}
