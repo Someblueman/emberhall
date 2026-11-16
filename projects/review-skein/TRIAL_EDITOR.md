@@ -36,14 +36,22 @@ cannot perform browser zoom or return a saved browser download. Speech, 200 %
 zoom, clipboard transfer and a saved-file download witness stay `NOT RUN` unless
 actually observed through a separate capable tool.
 
-An edited-state attempt on the rebuilt viewer currently can time out: the
-viewer reloads for its final fresh-load keyboard walk while this editor guards
-unsaved changes. Three attempts with different packet/action sizes timed out;
-the reload/confirmation interaction is a suspected cause, not a proven diagnosis.
-House need `skein-viewer-unsaved-dialog` records that limit. Until the tool is
-repaired, affected composition/edit/export checks are `BLOCKED`, not passes.
-Keep the editor's protection; do not remove it to obtain a successful trial.
-Initial rendering and non-editing key checks can still be reported separately.
+Edited-state attempts once timed out on this editor (16 November, before the
+viewer repair): a `fill` that armed the editor's unsaved-changes question made
+the view fail instead of returning the edited page, and a minimal dirty-flag
+page reproduced the same failure, so the cause was the question, not this
+editor. The viewer has since been repaired (house need
+`skein-viewer-unsaved-dialog`, granted 16 November): it answers a page's
+questions as a visitor would and reports `asked_before_leaving`. In the first
+editor try after the repair, every edited-state look — composing, editing
+bodies, resolving, and showing the edits JSON — returned with
+`asked_before_leaving: true` and the typed values present in `fields`; the
+`dialogs` lists were empty for the unsaved-changes question, so read that
+signal from `asked_before_leaving`. Keep the editor's protection; do not remove
+it to obtain a successful trial. In that same try, setting a resolution worked
+by `fill`, while arrow keys alone did not change the native resolution menu in
+two attempts; treat arrow-key operation of that menu as still to be observed,
+not assumed from a changed value.
 
 Use a new request ID per look:
 
