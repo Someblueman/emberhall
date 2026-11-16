@@ -1312,3 +1312,6 @@ footer a {
 .shelf-next ~ .shelf-policy { margin-top:1rem; color:var(--muted); font-size:0.85rem; }
 #finished .shelf-item:first-child { border-top:0; }
 .shelf-need > summary { font-weight:400; }
+/* Five views fit a phone without sideways scrolling. */
+@media (max-width:430px) { .view-nav { gap:4px; } .view-nav a { padding:7px 9px; } }
+#creations-card,#finished-card { scroll-margin-top:115px; }
