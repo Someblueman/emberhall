@@ -110,6 +110,7 @@ def build_assay_report(events: list[dict[str, Any]]) -> dict[str, Any]:
     deliveries: dict[str, dict[str, Any]] = {}
     raw_verdicts: list[dict[str, Any]] = []
     nonterminal_statuses: dict[str, str] = {}
+    run_scars: dict[str, str] = {}
 
     for index, event in enumerate(events, 1):
         seq = event.get("sequence", index)
@@ -117,13 +118,17 @@ def build_assay_report(events: list[dict[str, Any]]) -> dict[str, Any]:
         actor = str(event.get("actor") or "")
         op = str(event.get("op") or "")
         data = event.get("data") if isinstance(event.get("data"), dict) else {}
+        watch = (_parse_prefixed_json(data.get("text"), "house-watch-v1 ")
+                 if op == "say" and actor == "watch-keeper" else None)
 
         if op in {"arrive", "rename"} and actor:
             entry = residents.setdefault(actor, {"name": actor, "agent": "unrecorded"})
             if isinstance(data.get("name"), str) and data["name"].strip():
                 entry["name"] = data["name"].strip()
 
-        elif op == "life":
+        elif op == "life" or watch is not None:
+            if watch is not None:
+                data = watch
             kind = data.get("kind")
             if kind == "identity" and actor:
                 entry = residents.setdefault(actor, {"name": actor, "agent": "unrecorded"})
@@ -132,7 +137,7 @@ def build_assay_report(events: list[dict[str, Any]]) -> dict[str, Any]:
             elif kind in {"start", "run-start"}:
                 run_id = str(data.get("run") or "")
                 resident = str(data.get("resident") or "")
-                agent = str(data.get("agent") or "unrecorded")
+                agent = str(data.get("agent") or ("codex" if data.get("executable") == "codex" else "unrecorded"))
                 if resident:
                     res = residents.setdefault(resident, {"name": resident, "agent": agent})
                     if agent and agent != "unrecorded":
@@ -151,10 +156,16 @@ def build_assay_report(events: list[dict[str, Any]]) -> dict[str, Any]:
                         "started_at": at,
                         "started_sequence": seq,
                     }
-            elif kind in {"finish", "run-finish"}:
+            elif kind in {"finish", "run-finish", "recovered-interruption", "execution-result"}:
                 run_id = str(data.get("run") or "")
                 if run_id in runs:
-                    runs[run_id]["outcome"] = str(data.get("outcome") or "ended")
+                    outcome = ("unconfirmed" if kind == "recovered-interruption"
+                               else str(data.get("outcome") or "unconfirmed"))
+                    runs[run_id]["outcome"] = outcome
+                    if outcome in {"failed", "interrupted", "unconfirmed"}:
+                        # Like the house body, preserve the first scar even if
+                        # a later receipt confirms a different process outcome.
+                        run_scars.setdefault(run_id, outcome)
                     resident = runs[run_id].get("resident") or ""
                     if active_run_by_resident.get(resident) == run_id:
                         active_run_by_resident.pop(resident, None)
@@ -282,6 +293,35 @@ def build_assay_report(events: list[dict[str, Any]]) -> dict[str, Any]:
         })
 
     integrated = [v for v in verdicts if v["status"] == "integrated"]
+    by_family: dict[str, dict[str, int]] = {}
+    for v in verdicts:
+        author_fam = v["author_agent"]
+        reviewer_fam = v["reviewer_agent"]
+        if author_fam not in ("", "unrecorded"):
+            entry = by_family.setdefault(author_fam, {
+                "authored_verdicts": 0,
+                "reviewed_verdicts": 0,
+                "cross_family_reviews": 0,
+                "rejections_issued": 0,
+            })
+            entry["authored_verdicts"] += 1
+        if reviewer_fam not in ("", "unrecorded"):
+            entry = by_family.setdefault(reviewer_fam, {
+                "authored_verdicts": 0,
+                "reviewed_verdicts": 0,
+                "cross_family_reviews": 0,
+                "rejections_issued": 0,
+            })
+            entry["reviewed_verdicts"] += 1
+            if v["cross_family"]:
+                entry["cross_family_reviews"] += 1
+            if v["status"] != "integrated":
+                entry["rejections_issued"] += 1
+
+    failed_runs = sum(outcome == "failed" for outcome in run_scars.values())
+    interrupted_runs = sum(outcome == "interrupted" for outcome in run_scars.values())
+    unconfirmed_runs = sum(outcome == "unconfirmed" for outcome in run_scars.values())
+
     summary = {
         "total_verdicts": len(verdicts),
         "integrated": len(integrated),
@@ -289,22 +329,45 @@ def build_assay_report(events: list[dict[str, Any]]) -> dict[str, Any]:
         "conflict": sum(1 for v in verdicts if v["status"] == "conflict"),
         "tests_failed": sum(1 for v in verdicts if v["status"] == "tests-failed"),
         "delivered": sum(1 for v in integrated if v["delivered"]),
+        "undelivered_integrated": sum(1 for v in integrated if not v["delivered"]),
         "cross_family_integrated": sum(1 for v in integrated if v["cross_family"]),
         "same_family_integrated": sum(
             1 for v in integrated if not v["cross_family"] and v["author_agent"] != "unrecorded" and v["reviewer_agent"] != "unrecorded"
         ),
+        "unrecorded_family_integrated": sum(
+            1 for v in integrated if "unrecorded" in (v["author_agent"], v["reviewer_agent"])
+        ),
         "pending_reviews": len(pending_reviews),
+        "failed_runs": failed_runs,
+        "interrupted_runs": interrupted_runs,
+        "unconfirmed_runs": unconfirmed_runs,
     }
-    return {"summary": summary, "verdicts": verdicts, "pending_reviews": pending_reviews}
+    return {
+        "summary": summary,
+        "by_family": dict(sorted(by_family.items())),
+        "verdicts": verdicts,
+        "pending_reviews": pending_reviews,
+    }
 
 
-def filter_report(report: dict[str, Any], status: str = "all", limit: int = 20) -> dict[str, Any]:
+def filter_report(
+    report: dict[str, Any],
+    status: str = "all",
+    limit: int = 20,
+    family: str | None = None,
+) -> dict[str, Any]:
     verdicts = report["verdicts"]
     pending = report["pending_reviews"]
+    if family:
+        verdicts = [v for v in verdicts if v["author_agent"] == family or v["reviewer_agent"] == family]
+        pending = [p for p in pending if p["author_agent"] == family]
     if status == "pending":
         verdicts = []
     elif status == "integrated":
         verdicts = [v for v in verdicts if v["status"] == "integrated"]
+        pending = []
+    elif status == "undelivered":
+        verdicts = [v for v in verdicts if v["status"] == "integrated" and not v["delivered"]]
         pending = []
     elif status == "rejected":
         verdicts = [v for v in verdicts if v["status"] in {"rejected", "conflict", "tests-failed"}]
@@ -312,7 +375,12 @@ def filter_report(report: dict[str, Any], status: str = "all", limit: int = 20) 
     if limit > 0:
         verdicts = verdicts[-limit:]
         pending = pending[-limit:]
-    return {"summary": report["summary"], "verdicts": verdicts, "pending_reviews": pending}
+    return {
+        "summary": report["summary"],
+        "by_family": report.get("by_family", {}),
+        "verdicts": verdicts,
+        "pending_reviews": pending,
+    }
 
 
 def _fmt_time(ts: object) -> str:
@@ -328,9 +396,21 @@ def format_text(report: dict[str, Any]) -> str:
         f"Verdicts: {s['total_verdicts']} total ({s['integrated']} integrated, {s['rejected']} rejected, "
         f"{s['conflict']} conflict, {s['tests_failed']} tests-failed)",
         f"Delivered: {s['delivered']}/{s['integrated']} integrated · "
+        f"Undelivered integrated: {s.get('undelivered_integrated', 0)} · "
         f"Cross-family integrated: {s['cross_family_integrated']}/{s['integrated']} · "
+        f"Family unrecorded integrated: {s['unrecorded_family_integrated']} · "
         f"Pending reviews: {s['pending_reviews']}",
+        f"Run scars: {s.get('failed_runs', 0)} failed, {s.get('interrupted_runs', 0)} interrupted, "
+        f"{s.get('unconfirmed_runs', 0)} unconfirmed",
     ]
+    by_family = report.get("by_family") or {}
+    if by_family:
+        parts = [
+            f"{fam} (authored={counts['authored_verdicts']}, reviewed={counts['reviewed_verdicts']}, "
+            f"cross={counts['cross_family_reviews']}, rejected={counts['rejections_issued']})"
+            for fam, counts in sorted(by_family.items())
+        ]
+        lines.append("Family cross-review: " + "; ".join(parts))
     if report["pending_reviews"]:
         lines.append("\nPending reviews:")
         for item in report["pending_reviews"]:
@@ -362,7 +442,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, default=Path("."), help="Git repo containing refs/heads/house-ledger")
     parser.add_argument("--events-file", type=Path, help="Read journal events from a JSON or JSONL file instead of Git")
-    parser.add_argument("--status", choices=("all", "pending", "integrated", "rejected"), default="all")
+    parser.add_argument("--status", choices=("all", "pending", "integrated", "undelivered", "rejected"), default="all")
+    parser.add_argument("--family", help="Filter verdicts and pending reviews by agent family (e.g. codex, opencode, muse, agy)")
     parser.add_argument("--limit", type=int, default=20, help="Maximum entries per section (0 for all)")
     parser.add_argument("--json", action="store_true", help="Print JSON output")
     args = parser.parse_args(argv)
@@ -373,7 +454,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"assay: {error}", file=sys.stderr)
         return 2
 
-    filtered = filter_report(build_assay_report(events), status=args.status, limit=args.limit)
+    filtered = filter_report(build_assay_report(events), status=args.status, limit=args.limit, family=args.family)
     if args.json:
         print(json.dumps(filtered, indent=2, sort_keys=True))
     else:

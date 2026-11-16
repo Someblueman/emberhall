@@ -108,6 +108,36 @@ def sample_events() -> list[dict]:
 
 
 class AssayToolTests(unittest.TestCase):
+    def test_run_scars_require_result_receipts_and_keep_the_first_recorded_scar(self):
+        for legacy in (False, True):
+            def event(kind, **fields):
+                data = {"kind": kind, "run": "recovered", **fields}
+                return {"actor": "watch-keeper", "op": "say" if legacy else "life",
+                        "data": {"text": "house-watch-v1 " + json.dumps(data)} if legacy else data}
+
+            start = event("start" if legacy else "run-start", resident="author", agent="codex")
+            recovered = event("recovered-interruption", outcome="success")
+            for receipts, expected in (
+                ([], (0, 0, 0)),
+                ([recovered], (0, 0, 1)),
+                ([recovered, recovered], (0, 0, 1)),
+                ([recovered, event("run-finish", outcome="success")], (0, 0, 1)),
+                ([event("execution-result", outcome="failed"), recovered], (1, 0, 0)),
+                ([event("finish", outcome="interrupted")], (0, 1, 0)),
+                ([event("execution-result", outcome="success")], (0, 0, 0)),
+                ([event("run-finish")], (0, 0, 1)),
+            ):
+                with self.subTest(legacy=legacy, receipts=receipts):
+                    summary = assay.build_assay_report([start, *receipts])["summary"]
+                    self.assertEqual(tuple(summary[k] for k in
+                                           ("failed_runs", "interrupted_runs", "unconfirmed_runs")), expected)
+
+    def test_unknown_family_is_visible_in_integrated_summary(self):
+        report = assay.build_assay_report(sample_events())
+        self.assertEqual(report["summary"]["unrecorded_family_integrated"], 1)
+        self.assertEqual(report["summary"]["same_family_integrated"], 0)
+        self.assertIn("Family unrecorded integrated: 1", assay.format_text(report))
+
     def test_nonterminal_receipts_keep_review_pending_until_terminal_verdict(self):
         events = sample_events()
         # The third request has no terminal result. Checking without publishing
@@ -203,6 +233,70 @@ class AssayToolTests(unittest.TestCase):
             )
             self.assertIn("run-work-3", proc_text.stdout)
             self.assertIn("Pending reviews", proc_text.stdout)
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    def test_undelivered_and_family_filters_plus_family_breakdown_and_run_scars(self):
+        events = sample_events() + [
+            {
+                "sequence": 23, "at": 1105.0, "actor": "watch-keeper", "op": "life",
+                "data": {"kind": "run-start", "run": "run-rev-2", "resident": "resident-c", "agent": "muse", "model": "muse-ember-1.0"},
+            },
+            {
+                "sequence": 24, "at": 1106.0, "actor": "watch-keeper", "op": "life",
+                "data": {"kind": "run-finish", "run": "run-rev-2", "outcome": "interrupted"},
+            },
+            {
+                "sequence": 25, "at": 1110.0, "actor": "resident-c", "op": "say",
+                "data": {"text": 'house-integration-v1 {"actor": "resident-c", "run": "run-work-3", "base": "4444", "contribution": "5555", "candidate_head": "6666", "status": "integrated", "test_scope": "project", "test_exit": 0}'},
+            },
+            {
+                "sequence": 26, "at": 1120.0, "actor": "watch-keeper", "op": "life",
+                "data": {"kind": "run-start", "run": "run-work-4", "resident": "resident-a", "agent": "agy", "model": "gemini-4"},
+            },
+            {
+                "sequence": 27, "at": 1125.0, "actor": "watch-keeper", "op": "life",
+                "data": {"kind": "run-finish", "run": "run-work-4", "outcome": "failed"},
+            },
+        ]
+        report = assay.build_assay_report(events)
+        summary = report["summary"]
+        self.assertEqual(summary["integrated"], 2)
+        self.assertEqual(summary["delivered"], 1)
+        self.assertEqual(summary["undelivered_integrated"], 1)
+        self.assertEqual(summary["interrupted_runs"], 1)
+        self.assertEqual(summary["failed_runs"], 1)
+
+        by_family = report["by_family"]
+        self.assertEqual(by_family["codex"]["authored_verdicts"], 1)
+        self.assertEqual(by_family["codex"]["reviewed_verdicts"], 1)
+        self.assertEqual(by_family["codex"]["rejections_issued"], 1)
+        self.assertEqual(by_family["muse"]["reviewed_verdicts"], 2)
+        self.assertEqual(by_family["muse"]["cross_family_reviews"], 2)
+
+        undelivered = assay.filter_report(report, status="undelivered")
+        self.assertEqual([v["candidate_head"] for v in undelivered["verdicts"]], ["6666"])
+        self.assertEqual(undelivered["pending_reviews"], [])
+
+        agy_only = assay.filter_report(report, family="agy")
+        self.assertEqual([v["run"] for v in agy_only["verdicts"]], ["run-work-1", "run-work-3"])
+
+        text = assay.format_text(report)
+        self.assertIn("Undelivered integrated: 1", text)
+        self.assertIn("Family cross-review:", text)
+
+        with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as tmp:
+            for ev in events:
+                tmp.write(json.dumps(ev) + "\n")
+            tmp_path = Path(tmp.name)
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(ASSAY_DIR / "assay.py"), "--events-file", str(tmp_path), "--status", "undelivered", "--family", "muse", "--json"],
+                capture_output=True, text=True, check=True,
+            )
+            payload = json.loads(proc.stdout)
+            self.assertEqual(len(payload["verdicts"]), 1)
+            self.assertEqual(payload["verdicts"][0]["candidate_head"], "6666")
         finally:
             tmp_path.unlink(missing_ok=True)
 

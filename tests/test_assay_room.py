@@ -344,6 +344,135 @@ process.stdout.write(JSON.stringify({
         self.assertTrue(readme.is_file())
         self.assertIn("The Assay Room", doc.read_text())
 
+    def test_assay_room_decor_gestures_nametags_summary_cards_and_gallery_registration(self):
+        script = r'''
+const fs = require("node:fs"), vm = require("node:vm"), assert = require("node:assert/strict");
+class Element {
+  constructor(tag, ns = null) {
+    this.tag = tag; this.ns = ns; this.children = []; this.attrs = {}; this.textContent = "";
+    this.className = ""; this.id = ""; this.href = ""; this.listeners = {}; this.style = {};
+  }
+  appendChild(n) { this.children.push(n); return n; }
+  replaceChildren(...nodes) { this.children = [...nodes]; }
+  setAttribute(k, v) { this.attrs[k] = String(v); }
+  addEventListener(ev, fn) { this.listeners[ev] = fn; }
+  focus() {}
+}
+const all = n => [n, ...n.children.flatMap(all)];
+const text = n => [n.textContent, ...n.children.map(text)].filter(Boolean).join(" ");
+const elements = new Map();
+const getEl = id => { if (!elements.has(id)) { const n = new Element("div"); n.id = id; elements.set(id, n); } return elements.get(id); };
+const document = {
+  body: new Element("body"), activeElement: null,
+  getElementById: id => all(getEl("room-content")).find(n => n.id === id) || all(getEl("creations")).find(n => n.id === id) || getEl(id),
+  createElement: t => new Element(t),
+  createElementNS: (ns, t) => new Element(t, ns),
+  querySelector: () => null,
+  querySelectorAll: () => []
+};
+const ctx = vm.createContext({ assert, document, URL, Intl, Date, Math, Number, String, Boolean, Array, Object, Map, Set, RegExp, Error });
+const source = fs.readFileSync(process.argv[1], "utf8");
+const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+assert(source.endsWith(tail));
+vm.runInContext(source.slice(0, -tail.length), ctx);
+
+const manifest = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const assayEntry = manifest.projects.find(p => p.id === "assay-room");
+assert(assayEntry, "Expected assay-room entry in site/projects.json");
+assert.equal(ctx.collectionUrl(assayEntry), assayEntry.href);
+
+// Assay room decor & gesture & nameTag
+const decorRoot = new Element("g");
+ctx.__decorRoot = decorRoot;
+vm.runInContext("decor(__decorRoot, 'assay', 0, 0, 160, true, false);", ctx);
+assert(all(decorRoot).some(n => n.attrs["data-decor"] === "assay"), "Expected dedicated data-decor='assay'");
+
+for (const [room, expectedGesture, expectedWhere] of [
+  ["assay", "assaying", "in the assay room"],
+  ["study", "reading", "in the study"],
+  ["chronicle", "reading", "in the chronicle"],
+  ["counting", "plans", "in the counting room"],
+  ["parlor", "standing", "in the parlor"],
+  ["gallery", "standing", "in the gallery"],
+]) {
+  const fig = new Element("g"), map = new Element("svg");
+  ctx.__fig = fig; ctx.__map = map;
+  vm.runInContext(`
+    data = { timezone: "UTC", observed_at: 2000, commits: [], scars: {}, frames: [{ seq: 1, at: 1000, event: { op: "wake", actor: "r1" }, residents: [] }] };
+    index = 0; current = true;
+    frame = { seq: 10, at: 2000, tasks: [], rooms: [], residents: [{ id: "r1", name: "Yarrow", agent: "agy", room: ${JSON.stringify(room)}, pose: "standing", presence: "recorded awake" }] };
+    figure(__fig, frame.residents[0], 40, 90);
+    nameTags(__map, [{ resident: frame.residents[0], px: 40, py: 90 }]);
+  `, ctx);
+  assert.equal(all(fig).find(n => n.attrs["data-gesture"]).attrs["data-gesture"], expectedGesture);
+  assert(text(map).includes(expectedWhere), `Expected '${expectedWhere}' in nameTag for room ${room}, got: ${text(map)}`);
+}
+
+// Summary cards, scar list, and Assay Auditor link inside renderAssayRoom + collection historical gating
+vm.runInContext(`
+  catalog = ${JSON.stringify(manifest.projects)};
+  data = {
+    timezone: "UTC", observed_at: 2000,
+    commits: [{ id: "abcd1234", at: 1500, title: "Polish house" }],
+    scars: { "run:w1": { id: "run:w1", room: "workshop", kind: "failure", title: "Failed run", detail: "err", sequence: 3, at: 1200 } },
+    frames: [{ seq: 3, at: 1200 }, { seq: 5, at: 1500 }]
+  };
+  current = true;
+  frame = {
+    seq: 5, at: 1600,
+    rooms: [{ id: "assay", name: "The Assay Room", status: "open" }],
+    residents: [{ id: "r1", name: "Yarrow" }, { id: "r2", name: "Sorrel" }],
+    runs: [
+      { id: "w1", resident: "r1", agent: "agy", sequence: 2, outcome: "success", assignment: { lane: "work" }, finished_tasks: [{ task: "t1", sequence: 2 }] },
+      { id: "rev1", resident: "r2", agent: "codex", sequence: 5, outcome: "success", assignment: { lane: "review", help_request: "source-review-w1" }, finished_tasks: [] }
+    ],
+    scars: [{ id: "run:w1", mended: false }],
+    shelf: { projects: [] }
+  };
+  renderAssayRoom(document.getElementById("room-content"));
+  renderCollection();
+`, ctx);
+const panel = getEl("room-content");
+assert(all(panel).some(n => n.className === "assay-cards"), "Expected .assay-cards summary strip");
+assert.match(text(panel), /1 cross-family/);
+vm.runInContext(`
+  frame.runs.push(
+    { id: "unknown", agent: "unrecorded", sequence: 2 },
+    { id: "rev2", agent: "codex", sequence: 5, assignment: { lane: "review", help_request: "source-review-unknown" } },
+    { id: "rev3", agent: "unrecorded", sequence: 5, assignment: { lane: "review", help_request: "source-review-w1" } },
+    { id: "rev4", agent: "codex", sequence: 5, assignment: { lane: "review", help_request: "source-review-missing" } }
+  );
+  document.getElementById("room-content").replaceChildren();
+  renderAssayRoom(document.getElementById("room-content"));
+`, ctx);
+const pairCard = all(panel).find(n => n.className === "assay-card");
+assert.match(text(pairCard), /1 cross-family · 0 same-family · 2 family unrecorded · 1 unpaired/);
+assert(all(panel).some(n => n.tag === "a" && n.href === assayEntry.href), "Expected link to Assay Auditor guide");
+const creations = getEl("creations");
+assert(all(creations).some(n => n.tag === "a" && n.href === assayEntry.href), "Expected assay-room in gallery tools when assay room is open");
+
+// Before assay room opens, assay-room stays absent from gallery tools
+vm.runInContext(`
+  frame.rooms = [{ id: "assay", name: "The Assay Room", status: "construction" }];
+  renderCollection();
+`, ctx);
+assert(!all(creations).some(n => n.tag === "a" && n.href === assayEntry.href), "Expected assay-room hidden while under construction");
+'''
+        proc = subprocess.run(
+            ["node", "-e", script, str(HOUSE_JS), str(ROOT / "site" / "projects.json")],
+            capture_output=True, text=True, timeout=15,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_daylight_warn_and_desktop_layout_styles(self):
+        css = (ROOT / "site" / "house.css").read_text()
+        self.assertIn("--warn:", css)
+        self.assertIn(".assay-cards", css)
+        self.assertIn("var(--warn)", css)
+        html = (ROOT / "site" / "index.html").read_text()
+        self.assertEqual(html.count("?v=choice-progress-1"), 2)
+        self.assertEqual(html.count("&amp;assay=2"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

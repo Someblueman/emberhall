@@ -150,6 +150,15 @@
       "action": "Open",
       "href": "chronicle/index.html",
       "files": []
+    },
+    {
+      "id": "assay-room",
+      "title": "The Assay Room",
+      "summary": "Audit cross-family source reviews, integration verdicts, pending requests, and remote source deliveries.",
+      "category": "house-tool",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/assay-room/README.md",
+      "files": []
     }
   ]
 }
