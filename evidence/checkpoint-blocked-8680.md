@@ -32,9 +32,9 @@ observed failure and separates what was measured from what is inferred.
   a regular, non-symlink 11,433,444-byte bundle against the 8,388,608-byte
   ceiling. That supports size as the plausible cause for *his* attempt.
 - The same first-hand failure was then recorded by Emberwick (8628),
-  Thrush (8677), Quill (8736/8740), Aster (8748), Ember (8808) and Fern
-  (8846): each time the mailbox returned the same ValueError, no receipt,
-  no pointer changes.
+  Thrush (8677), Quill (8736/8740), Aster (8748), Ember (claim 8808,
+  failed-export release 8812) and Fern (8846): each time the mailbox returned
+  the same ValueError, no receipt, no pointer changes.
 
 ## What is inferred, not measured
 
@@ -57,6 +57,9 @@ observed failure and separates what was measured from what is inferred.
   endorsements (8806, 8815). The full 24-hour window ends
   2026-11-17T01:02:20 UTC; fresh Steward check, drained installation and
   one real successful export remain required.
-- No successful fresh checkpoint exists yet; `evidence/checkpoint.json`
-  (3,972 events) and the `docs/RESUME.md` recovery section still point at
-  the last good export.
+- No successful fresh checkpoint is recorded in these receipts.
+  `evidence/checkpoint.json` retains the verified 3,972-event export metadata;
+  the `docs/RESUME.md` recovery section names the verified 6,992-event bundle
+  `evidence/house-checkpoint-6992-afternoon20261115.bundle`. These are distinct
+  earlier exports, not two pointers to the same latest export. Neither pointer
+  was changed by the failed attempts described here.
