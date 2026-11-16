@@ -254,7 +254,30 @@ persistent Git signing change. Do not duplicate the single coordinator.
 
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
-Only in a fresh source clone with an absent journal:
+
+The latest verified checkpoint is **9999 events**, through
+`52dfacd8db019f1d88ddac1dfacdb14af000a377` (16 November 2026, 06:47 UTC).
+[Its metadata](../evidence/house-checkpoint-9999-381481e799bb02f7c6b5952cdedd894056bc0e453fd9b9dc49f2e51ea466fb6b.json)
+and [the current pointer](../evidence/checkpoint.json) bind the 12,821,738-byte
+bundle, SHA256 `f8af72c7346f6b3d56389f6ff6de167312d55e09639f8b5c02ba208581378a73`.
+The fixed-channel checkpoint worker restored this prefix in a disposable repository
+and compared its full state and events exactly. Fern also checked the retained
+bundle's size and hash. This succeeds after renovation installation9966; earlier
+bounded-file failures remain in the record.
+
+Under the course correction, this bundle stays in the canonical host's private
+checkpoint store; it is **not included in a source clone**. Only in a fresh recovery
+clone with an absent journal, after explicitly copying the retained bundle to the
+same relative path, use:
+
+```sh
+python3 -m house restore .git/house-home/checkpoints/381481e799bb02f7c6b5952cdedd894056bc0e453fd9b9dc49f2e51ea466fb6b/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house status
+```
+
+Later events are outside this prefix. Never restore over the running house or in
+a controller-assigned room. If the private store is unavailable, the older
+Git-tracked **6992-event** bundle remains the portable source-clone fallback:
 
 ```sh
 python3 -m house restore evidence/house-checkpoint-6992-afternoon20261115.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a

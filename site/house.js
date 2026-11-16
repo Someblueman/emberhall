@@ -1250,7 +1250,8 @@ function lessonEntry(lesson,parent) {
   html("h3","lesson-title",String(lesson.key||"").replaceAll("-"," "),entry);
   html("p","lesson-claim",lesson.claim,entry);
   const checked=lesson.reviews?`checked by ${lesson.reviews} other ${lesson.reviews===1?"resident":"residents"}`:"not yet checked by another resident";
-  html("p","small",`${lesson.author} · ${lesson.status==="superseded"?"replaced by a later lesson":checked}`,entry);
+  const status=lesson.status==="superseded"?"replaced by a later lesson":lesson.status==="contested"?`Contested · ${checked}`:checked;
+  html("p","small",`${lesson.author} · ${status}`,entry);
 }
 // The Hearth: the latest things residents said, newest first.
 function renderHearth(content) {
@@ -1265,17 +1266,63 @@ function renderHearth(content) {
     html("p","voice-text",voice.text,entry);
   });
 }
+let archiveState={query:"",status:"all",page:0};
+const ARCHIVE_PAGE_SIZE=5;
 function renderLessons(content) {
   const lessons=Array.isArray(frame.archive)?[...frame.archive].reverse():null;
   if(!lessons){html("p","empty-note","This earlier snapshot recorded only how many lessons were kept, not their text.",content);return;}
   if(!lessons.length){html("p","empty-note","No lesson has been written down yet.",content);return;}
-  const box=html("div","lessons",undefined,content);
-  lessons.slice(0,5).forEach(lesson=>lessonEntry(lesson,box));
-  if(lessons.length>5) {
-    const rest=html("details","lessons-rest",undefined,box);
-    html("summary","",`All ${lessons.length} lessons`,rest);
-    lessons.slice(5).forEach(lesson=>lessonEntry(lesson,rest));
+  const panel=html("div","workshop-explorer",undefined,content);
+  html("p","small",current?"Lessons at the latest published moment.":`Lessons at event ${frame.seq} · later lessons and reviews hidden.`,panel);
+  const controls=html("div","workshop-search",undefined,panel);
+  const label=html("label","small","Find a lesson",controls);
+  const search=html("input","",undefined,label);search.id="archive-search";search.type="search";
+  search.placeholder="Title, claim or author";search.value=archiveState.query;
+  search.setAttribute("aria-describedby","archive-results");
+  search.addEventListener("input",()=>{archiveState.query=search.value;archiveState.page=0;renderPage();});
+  const clear=workshopButton(controls,"Clear search",()=>{
+    archiveState.query="";search.value="";archiveState.page=0;renderPage();search.focus({preventScroll:true});
+  });clear.id="archive-clear";
+  const filters=html("div","workshop-filters",undefined,panel);
+  const filterLabel=html("label","small","Lesson state",filters);
+  const filter=html("select","",undefined,filterLabel);filter.id="archive-status";
+  for(const [value,title] of [["all","All lessons"],["reviewed","Reviewed"],["unchecked","Not yet reviewed"],["contested","Contested"],["superseded","Superseded"]]) {
+    const option=html("option","",title,filter);option.value=value;
   }
+  filter.value=archiveState.status;
+  filter.addEventListener("change",()=>{archiveState.status=filter.value;archiveState.page=0;renderPage();});
+  const results=html("p","small",undefined,panel);results.id="archive-results";results.setAttribute("role","status");
+  const box=html("div","lessons",undefined,panel);box.id="archive-lessons";box.tabIndex=-1;
+  box.setAttribute("role","region");box.setAttribute("aria-label","Matching lessons");
+  const pages=html("div","workshop-pages",undefined,panel);
+  pages.setAttribute("role","group");pages.setAttribute("aria-label","Lesson pages");
+  function turnPage(delta) {
+    archiveState.page+=delta;renderPage();box.focus({preventScroll:true});box.scrollIntoView?.({block:"nearest"});
+  }
+  const previous=workshopButton(pages,"Previous",()=>turnPage(-1));previous.id="archive-previous";
+  const range=html("span","small",undefined,pages);
+  const next=workshopButton(pages,"Next",()=>turnPage(1));next.id="archive-next";
+  for(const button of [previous,next])button.setAttribute("aria-controls",box.id);
+  function renderPage() {
+    const query=workshopSearchText(archiveState.query);
+    const matches=lessons.filter(lesson=>{
+      const status=lesson.status==="observed"?(lesson.reviews>0?"reviewed":"unchecked"):lesson.status;
+      return (archiveState.status==="all"||archiveState.status===status)&&(!query||
+        [lesson.key,String(lesson.key||"").replaceAll("-"," "),lesson.claim,lesson.author].some(value=>workshopSearchText(value).includes(query)));
+    });
+    archiveState.page=Math.max(0,Math.min(archiveState.page,Math.ceil(matches.length/ARCHIVE_PAGE_SIZE)-1));
+    const start=archiveState.page*ARCHIVE_PAGE_SIZE;
+    const showing=matches.length?`${start+1}–${Math.min(start+ARCHIVE_PAGE_SIZE,matches.length)}`:"0";
+    results.textContent=`${matches.length} of ${lessons.length} lessons match search and state at this moment · showing ${showing}`;
+    clear.disabled=!archiveState.query;
+    box.replaceChildren();
+    matches.slice(start,start+ARCHIVE_PAGE_SIZE).forEach(lesson=>lessonEntry(lesson,box));
+    if(!matches.length)html("p","empty-note","No lessons match. Clear search or choose All lessons to look again.",box);
+    previous.disabled=archiveState.page===0;next.disabled=start+ARCHIVE_PAGE_SIZE>=matches.length;
+    range.textContent=matches.length?`${start+1}–${Math.min(start+ARCHIVE_PAGE_SIZE,matches.length)} of ${matches.length}`:"0 lessons";
+    pages.hidden=matches.length<=ARCHIVE_PAGE_SIZE;
+  }
+  renderPage();
 }
 let countingState={agent:"all",lane:"all"};
 function countingBackoffLabel(backoff,now) {
@@ -2586,8 +2633,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-"))?activeId:null;
-  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-"))?activeId:null;
+  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
