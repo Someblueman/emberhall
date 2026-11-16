@@ -67,6 +67,8 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("task")
             cmd.add_argument("--title", required=True)
             cmd.add_argument("--description", required=True)
+            cmd.add_argument("--plain", default=argparse.SUPPRESS,
+                             help="one everyday sentence for the Steward: what a person will notice once this is done")
             cmd.add_argument("--ready", action="store_true", default=argparse.SUPPRESS,
                              help="bounded independent work ready for a supervised resident")
             cmd.add_argument("--project", default=argparse.SUPPRESS, help="active shelf project ID")

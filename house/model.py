@@ -10,6 +10,8 @@ import unicodedata
 from .governance import ballot, canonical, digest, verify_signature
 
 
+PLAIN_MINIMUM, PLAIN_MAXIMUM = 30, 200
+
 def require(condition: bool, reason: str) -> None:
     if not condition:
         raise ValueError(reason)
@@ -147,9 +149,25 @@ def apply_event(previous: dict | None, event: dict) -> dict:
                 from .ballot_work import association
                 require(resident["awake"], "sleeping residents cannot attach ballot work")
                 association(state, data)
+            # Plain words (Steward, 16 November): the Steward follows the house by reading what
+            # its work is called and could not tell what "Keep editor Unicode body validation
+            # aligned with the applying CLI" was. A new thread says, in one everyday sentence,
+            # what a person will notice once it is done.
+            from .shelf import SECOND_LOOK
+            if SECOND_LOOK in state.get("maintenance", {}).get("migrations", {}):
+                plain = string(data, "plain", PLAIN_MAXIMUM) if "plain" in data else ""
+                require(PLAIN_MINIMUM <= len(plain.strip()),
+                        f"a task needs --plain: one everyday sentence of {PLAIN_MINIMUM} to {PLAIN_MAXIMUM} "
+                        "characters, for a reader who does not program, saying what a person will notice "
+                        "once this is done (for a check: what you are making sure of). No file names, "
+                        "function names or abbreviations")
+            else:
+                require("plain" not in data, "plain task descriptions are not enabled yet")
             state["tasks"][task_id] = {"title": string(data, "title", 500),
                 "description": string(data, "description"), "status": "open",
                 "generation": 0, "owner": None, "until": 0, "token": None, "used_tokens": []}
+            if "plain" in data:
+                state["tasks"][task_id]["plain"] = data["plain"]
             if "ready" in data:
                 state["tasks"][task_id]["ready"] = data["ready"]
             if "project" in data:

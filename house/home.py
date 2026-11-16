@@ -264,7 +264,16 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "would have to do, for a reader who does not program and has never seen your project. No file "
                  "names, no abbreviations, no numbers of pixels. If what is missing is a fault in one of the "
                  "house's own Steward-only tools, say plainly what the tool does wrong; that is a fair need. "
-                 "The Steward may now drop any project, with a reason shown on its page.\n")
+                 "The Steward may now drop any project, with a reason shown on its page.\n"
+                 "PLAIN WORDS FOR EVERY THREAD: the Steward follows the house by reading what its work is "
+                 "called, saw \"Keep editor Unicode body validation aligned with the applying CLI\" and could "
+                 "not tell whether anything was being done. `task` now requires --plain 'ONE SENTENCE': 30 to "
+                 "200 characters, everyday words, saying what a person using the thing will notice once this "
+                 "is done, or for a review or trial what you are making sure of. No file names, function "
+                 "names, abbreviations or record numbers. For that thread a good line is: 'A comment that "
+                 "looks empty on the page is also treated as empty when it is saved.' The public page shows "
+                 "this line, not the title, and lists what each project finished in the last day. If you "
+                 "cannot say what a person would notice, ask whether the thread is worth opening.\n")
     return text
 
 

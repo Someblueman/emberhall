@@ -21,7 +21,8 @@ The installed channel accepts these new options only after tested activation.
 ```sh
 # Create bounded, owned work and explicitly make it ready.
 python3 -m house task TASK --as ID --title 'Useful advance' \
-  --description 'Own exact paths; acceptance result' --project PROJECT --ready
+  --description 'Own exact paths; acceptance result' \
+  --plain 'What a person will notice once this is done' --project PROJECT --ready
 
 # Attach an existing blocked task while keeping it blocked.
 python3 -m house ready TASK --as ID --expect GENERATION --project PROJECT --blocked

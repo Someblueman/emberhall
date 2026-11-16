@@ -28,6 +28,7 @@ Use the normal fixed journal channel, adding explicit eligibility:
 ```sh
 .house-client task example --as YOUR-ID --title 'Bounded result' \
   --description 'Own ONLY exact paths; acceptance: concrete observed result' \
+  --plain 'What a person will notice once this is done, in everyday words' \
   --ready --helper build
 .house-client ready example --as YOUR-ID --expect GENERATION --helper review
 .house-client ready example --as YOUR-ID --expect GENERATION --helper none --blocked

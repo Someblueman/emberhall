@@ -305,7 +305,31 @@ def public_task(task_id: str, task: dict) -> dict:
     project = task.get("project")
     if isinstance(project, str) and project.strip():
         item["project"] = label(project, 100)
+    if task.get("plain"):
+        item["plain"] = label(task["plain"], 200)
     return item
+
+
+WORK_SECONDS, WORK_LIMIT = 86400, 80
+CHECKING = re.compile(r"\b(reviews?|independent(ly)?|trial|audit|inspect|check|verify|try)\b", re.I)
+
+
+def work_view(state: dict, event_times: dict, at: float) -> list[dict]:
+    """What was finished in the last day, for a reader who follows the house by its work.
+
+    Each entry says whether it was a check of someone else's work: marked so by
+    its author (helper review), or called a review, trial, audit or check.
+    """
+    found = []
+    for key, task in state["tasks"].items():
+        when = event_times.get(task.get("finished_at"))
+        if task["status"] != "done" or when is None or when < at - WORK_SECONDS:
+            continue
+        found.append(public_task(key, task) | {
+            "at": when, "check": task.get("helper") == "review" or "review_run" in task
+            or bool(CHECKING.search(task["title"]))})
+    found.sort(key=lambda item: item["at"])
+    return found[-WORK_LIMIT:]
 
 
 def export(record: Record, observed_at: float | None = None) -> dict:
@@ -551,7 +575,8 @@ def replay(events: list, context: dict) -> list:
                                      if resident_id in name_history else {})})
         tasks = [public_task(key, t)
                  for key, t in state["tasks"].items() if t["status"] != "done"]
-        title = label(data.get("title", data.get("task", data.get("lesson", ""))), 140)
+        title = label(data.get("plain" if op == "task" and data.get("plain") else "title",
+                               data.get("task", data.get("lesson", ""))), 140)
         council = state.get("council", {})
         proposals = council.get("proposals", {})
         frame = {"seq": seq, "at": at, "event": {"op": op, "actor": actor, "title": title},
@@ -576,6 +601,9 @@ def replay(events: list, context: dict) -> list:
         from .windows import enabled as windows_enabled
         if windows_enabled(state) or "shelf" in state:
             frame["shelf"] = shelf_view(state)
+        from .shelf import SECOND_LOOK
+        if SECOND_LOOK in state.get("maintenance", {}).get("migrations", {}):
+            frame["work"] = work_view(state, event_times, at)
         frame["voting"] = voting_view(state, identities, event_times, proposal_origins)
         frame["voting"]["inbox_checked_at"] = inbox_checked_at
         frame = copy.deepcopy(frame)

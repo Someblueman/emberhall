@@ -651,7 +651,7 @@ function roomFact(id) {
 function clip(value,limit) {value=String(value||"");return value.length>limit?value.slice(0,limit-1).trimEnd()+"…":value;}
 function heldWork(id) {
   const task=effectiveTasks().find(t=>t.owner===id&&t.status==="claimed"&&!t.expired);
-  return task?task.title:null;
+  return task?task.plain||task.title:null;
 }
 // The most recent thing a resident did, skipping the house's own bookkeeping.
 const QUIET_OPS=new Set(["life","renew","owner-admissions","owner-migrate","council-sync"]);
@@ -670,7 +670,7 @@ function taskTitleAt(id,i) {
   if(!id)return "";
   for(const moment of [data.frames[i],data.frames[i-1],frame]) {
     const task=moment?.tasks?.find(t=>t.id===id);
-    if(task)return task.title;
+    if(task)return task.plain||task.title;
   }
   return id.replaceAll("-"," ");
 }
@@ -876,7 +876,7 @@ function workshopTasks(frames, moment, at) {
     const tasks=new Map((f.tasks||[]).map(t=>[t.id,t]));
     for(const t of tasks.values()) {
       const old=records.get(t.id);
-      records.set(t.id,{id:t.id,title:t.title,owner:t.owner,status:t.status,until:t.until,
+      records.set(t.id,{id:t.id,title:t.plain||t.title,owner:t.owner,status:t.status,until:t.until,
         generation:t.generation,ready:t.ready,project:t.project,events:old?.events||[]});
     }
     const event=f.event||{},op=event.op;
@@ -896,7 +896,7 @@ function workshopTasks(frames, moment, at) {
   // An older/partial snapshot can expose state without any individual history.
   for(const t of moment.tasks||[]) {
     const old=records.get(t.id);
-    records.set(t.id,{id:t.id,title:t.title,owner:t.owner,status:t.status,until:t.until,
+    records.set(t.id,{id:t.id,title:t.plain||t.title,owner:t.owner,status:t.status,until:t.until,
       generation:t.generation,ready:t.ready,project:t.project,events:old?.events||[]});
   }
   const visible=new Set((moment.tasks||[]).map(t=>t.id));
@@ -1153,7 +1153,7 @@ function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
       const taskId=f.event.title;
       const prev=frames[i-1];
       const meta=prev?.tasks?.find(t=>t.id===taskId);
-      const title=meta?.title||taskId;
+      const title=meta?.plain||meta?.title||taskId;
       if(taskId&&!reported.has(taskId)){
         reported.add(taskId);
         tasks.push({title,seq:f.seq});
@@ -1909,6 +1909,26 @@ function renderWorthBrief(brief, parent, residentName, heading) {
     .forEach(([name, value]) => { if (value) html("p", "small", `${name}: ${value}`, box); });
   return box;
 }
+// What the house finished in the last day, in the residents' plain words where they gave them.
+function recentWork(match) {
+  return (frame && Array.isArray(frame.work) ? frame.work : []).filter(match).slice().reverse();
+}
+function renderRecentWork(items, parent, residentName, heading, none) {
+  if (!frame || !Array.isArray(frame.work)) return;
+  const box = html("div", "project-work", undefined, parent);
+  if (!items.length) { html("p", "small", none, box); return; }
+  const checks = items.filter(item => item.check).length, made = items.length - checks;
+  html("p", "small project-work-count", `${heading}: ${items.length} ${items.length === 1 ? "piece" : "pieces"} of work · ${made} built or repaired · ${checks} ${checks === 1 ? "check" : "checks"} of someone else’s work`, box);
+  const line = (item, host) => html("li", item.check ? "work-check" : "", `${item.check ? "Checked: " : ""}${item.plain || item.title} · ${residentName(item.owner)} · ${ago(item.at)}`, host);
+  const list = html("ul", "project-work-list", undefined, box);
+  items.slice(0, 4).forEach(item => line(item, list));
+  if (items.length > 4) {
+    const more = html("details", "project-work-more", undefined, box);
+    html("summary", "", `All ${items.length}`, more);
+    const rest = html("ul", "project-work-list", undefined, more);
+    items.slice(4).forEach(item => line(item, rest));
+  }
+}
 function renderShelfProject(project, statusLabel, parent, residentName) {
   const item = html("article", "shelf-item", undefined, parent);
   html("strong", "", titleFor(project, "project"), item);
@@ -1928,6 +1948,8 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
       const bar = html("div", "project-progress", undefined, item);
       project.milestones.forEach((_, idx) => html("span", idx < stage ? "done" : idx === stage ? "current" : "", undefined, bar));
     }
+    renderRecentWork(recentWork(entry => entry.project === project.id), item, residentName,
+      "Finished in the last 24 hours", "Nothing was finished for this project in the last 24 hours.");
     const due = projectDue(project);
     if (due) html("p", "small project-due", `Due ${due}`, item);
     const waiting = openNeeds().filter(need => need.for === project.id || need.for === project.idea).length;
@@ -2083,6 +2105,13 @@ function shelf() {
     const group=html("div","shelf-group shelf-motion",undefined,box);
     html("h2","","In motion",group);
     activeProjects.forEach(project=>renderShelfProject(project,"Active",group,residentName));
+    const active=new Set(activeProjects.map(project=>project.id)),other=recentWork(entry=>!active.has(entry.project));
+    if(other.length){
+      const aside=html("article","shelf-item",undefined,group);
+      html("strong","","Other work",aside);
+      html("span","small","Upkeep of the house itself and ideas that are not chosen projects",aside);
+      renderRecentWork(other,aside,residentName,"Finished in the last 24 hours","");
+    }
   }
   // 2. What residents have asked the Steward for.
   renderNeeds(dataShelf, box, residentName);

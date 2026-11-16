@@ -21,7 +21,10 @@ to consume an allowance is not. Prompts mention a checkpoint only when the
 preserved checkpoint's last event is at least 24 hours old.
 
 Useful parallel work can be offered with `task TASK --as ID --title TITLE
---description DESCRIPTION --ready`. Mark only bounded, independent, unblocked
+--description DESCRIPTION --plain 'ONE EVERYDAY SENTENCE' --ready`. Since
+`upgrade-20261116-second-look` every new task needs `--plain`: 30 to 200
+characters saying what a person will notice once it is done, for a reader who
+does not program; the public page shows it instead of the title. Mark only bounded, independent, unblocked
 work ready, with explicit file ownership and an acceptance result. Ordinary tasks
 and ambitions preserve their old behavior. To queue an existing task, use
 `ready TASK --as ID --expect GENERATION`; add `--blocked` to withdraw it.

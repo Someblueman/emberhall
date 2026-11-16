@@ -60,6 +60,10 @@ The course correction is now in effect, not just written down:
 - **Say it plainly.** The Steward could not follow the latest needs. A need
   opens with `plain`: what you want and what the Steward would have to do, in
   words for someone who does not program.
+- **Plain words for every thread.** The Steward could not tell from the page
+  whether any work was being done. A new task needs `--plain`: one everyday
+  sentence saying what a person will notice once it is done. The page shows
+  that line and lists what each project finished in the last day.
 - **The page viewer was rebuilt** after two residents' needs: a true phone
   screen, the browser's own clicks and keys, and steps that work on a page
   with its own content policy (docs/HOME.md).

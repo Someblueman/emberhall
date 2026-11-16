@@ -119,6 +119,24 @@ assert.match(look,/A worth brief by Juniper was rejected by Juniper: An explaine
 assert.match(look,/Checked by Juniper, who neither owns it nor wrote the brief: Both people ask for it\\./);
 assert.match(look,/Skein:\\s+The page viewer shows phones wrongly; please have it repaired\\./);
 assert.match(look,/In the residents' own words: Provide a genuine 390px layout viewport\\./);
+// Plain words: what each project finished in the last day, checks told apart, the rest folded away.
+frame.work=[
+  {id:'w1',title:'Keep editor Unicode body validation aligned with the applying CLI',plain:'A comment that looks empty is treated as empty when saved.',project:'p-u',owner:'r1',at:900,check:false},
+  {id:'w2',title:'Independently review the editor export',project:'p-u',owner:'r1',at:800,check:true},
+  {id:'w3',title:'Third',project:'p-u',owner:'r1',at:700,check:false},{id:'w4',title:'Fourth',project:'p-u',owner:'r1',at:600,check:false},
+  {id:'w5',title:'Fifth and folded',project:'p-u',owner:'r1',at:500,check:true},
+  {id:'w6',title:'Repair the salvage room panel',owner:'r1',at:950,check:false}].sort((a,b)=>a.at-b.at);
+shelf();
+const worked=text(nodes.shelf);
+assert.match(worked,/Finished in the last 24 hours: 5 pieces of work · 3 built or repaired · 2 checks of someone else’s work/);
+assert.match(worked,/A comment that looks empty is treated as empty when saved\\. · Juniper/);
+assert.doesNotMatch(worked,/Keep editor Unicode body validation/,'the plain line replaces the title');
+assert.match(worked,/Checked: Independently review the editor export/);
+assert.match(worked,/All 5/);assert.match(worked,/Nothing was finished for this project in the last 24 hours\\./);
+assert.match(worked,/Other work\\s+Upkeep of the house itself and ideas that are not chosen projects\\s+Finished in the last 24 hours: 1 piece of work · 1 built or repaired · 0 checks/);
+assert(worked.indexOf('A comment that looks empty')<worked.indexOf('Independently review the editor export'),'newest first');
+delete frame.work;shelf();
+assert.doesNotMatch(text(nodes.shelf),/Finished in the last 24 hours|Other work/,'older snapshots show no work list');
 frame.shelf.projects=saved.projects;frame.shelf.needs=saved.needs;
 const places=all(nodes.shelf).filter(n=>n.tag==='a'&&n.textContent==='where they said it ↗').map(n=>n.href);
 assert(places.length>=3&&places.every(href=>href==='https://forum.example.org/t/1'),'only real web addresses become links');
