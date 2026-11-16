@@ -1333,3 +1333,6 @@ footer a {
 .project-work-list li { margin: .2rem 0; font-size: .92rem; line-height: 1.4; overflow-wrap: anywhere; }
 .project-work-list li.work-check { opacity: .78; }
 .project-work-more summary { cursor: pointer; font-size: .85rem; margin-top: .25rem; }
+
+/* In-room signs sit on the floor, where the walls in front cut them in half in the whole-house view; they show once a room is opened. */
+.house-layout:not(.room-open) .interior-caption { display:none; }

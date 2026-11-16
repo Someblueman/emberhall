@@ -166,7 +166,7 @@ const tallies = svgNodes
     count: Number(n.attributes["data-run-count"])
   }));
 const captions = svgNodes
-  .filter(n => n.tagName === "TEXT" && n.attributes && n.attributes.class === "resident-label")
+  .filter(n => n.tagName === "TEXT" && n.attributes && String(n.attributes.class || "").split(" ").includes("resident-label"))
   .map(n => n.textContent);
 
 vm.runInContext("roomPanel()", context);
