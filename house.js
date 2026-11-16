@@ -863,6 +863,8 @@ function workshopTasks(frames, moment, at) {
   });
 }
 let workshopState={filter:"all",readiness:"all",query:"",selectedId:null,pages:{}};
+let votingState={query:""};
+let votingOpened=new Set();
 const WORKSHOP_PAGE_SIZE=4;
 function workshopSearchText(value) {return (value||"").trim().replace(/\s+/g," ").toLowerCase();}
 function workshopOrder(a,b) {return (b.finishedSeq||b.events.at(-1)?.seq||0)-(a.finishedSeq||a.events.at(-1)?.seq||0);}
@@ -1765,7 +1767,13 @@ function shelf() {
 }
 function voting() {
   const box = $("voting");
-  const opened = new Set([...box.querySelectorAll("details[open]")].map(node => node.id));
+  // Persist open cards across full re-renders: sync from the current DOM, leaving filtered-out ids untouched.
+  for (const node of box.querySelectorAll("details")) {
+    if (!node.id) continue;
+    if (node.open) votingOpened.add(node.id);
+    else votingOpened.delete(node.id);
+  }
+  const opened = votingOpened;
   box.replaceChildren();
   const record = frame.voting;
   if (!record) {
@@ -1785,82 +1793,128 @@ function voting() {
   html("p", "small", "These are dated journal receipts, not a live GitHub or process check.", bell);
   const bellLink = html("a", "", "Open the public bell thread ↗", bell);
   bellLink.href = "https://github.com/Someblueman/emberhall/issues/1";
-  html("h3", "", `Project choices (${choices.length})`, box);
-  if (!choices.length) html("p", "empty-note", "No project ballots recorded at this moment.", box);
-  for (const choice of [...choices].reverse()) {
-    const title = id => {
-      if(id===null)return "None of these";
-      const candidate=choice.candidates.find(c=>c.id===id);
-      if(!candidate)return "Unknown candidate";
-      if(typeof candidate.title==="string"&&candidate.title.trim())return candidate.title;
-      return `Untitled candidate ${choice.candidates.indexOf(candidate)+1}`;
-    };
-    const counted = choice.votes.filter(v => v.counted).length;
-    const outcome = choice.status === "open" ? `Open · ${counted}/3 counted votes` : choice.status === "rejected" ? "Shortlist rejected" : `Selected: ${title(choice.winner)}`;
-    const choiceLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
-    const item = html("details", "vote-round", undefined, box);
-    item.id = `vote-choice-${choice.id}`;
-    html("summary", "", `${choiceLabel} · ${outcome}`, item);
-    recordId(item,choice.id);
-    html("p", "small", `Opened by ${person(choice.owner)} at event ${choice.opened_sequence}${choice.closed_sequence ? ` · closed at event ${choice.closed_sequence}` : ""}.`, item);
-    const ruleText = choice.selection_version >= 2
-      ? `Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available.${choice.slot === "great" ? " Great works carry 2–8 ordered milestones." : ""}`
-      : "Historical selection rule: three counted votes, plurality with the recorded tie-break. Authors’ votes for their own ideas do not count.";
-    html("p", "small", ruleText, item);
-    const alternatives = html("details", "vote-alternatives", undefined, item);
-    alternatives.id = `vote-candidates-${choice.id}`;
-    html("summary", "", `Frozen alternatives (${choice.candidates.length})`, alternatives);
-    choice.candidates.forEach(c => {
-      const candidate=html("div","vote-candidate",undefined,alternatives);
-      html("strong", "", `${title(c.id)} · by ${person(c.author)}`, candidate);
-      if (Array.isArray(c.stages) && c.stages.length) {
-        html("p", "small", `${c.stages.length} ordered milestones${Number.isFinite(c.seconds)?` · ${formatDurationDays(c.seconds)} total`:""}`, candidate);
-        const list = html("ol", "milestone-list", undefined, candidate);
-        c.stages.forEach(stage => {
-          html("li", "", `${stage.milestone}${Number.isFinite(stage.seconds)?` · ${formatDurationDays(stage.seconds)}`:""}`, list);
-        });
-      } else {
-        html("p", "small", `${c.milestone||"Milestone unrecorded"}${Number.isFinite(c.seconds)?` · ${c.seconds / 86400} day milestone`:""}`, candidate);
-      }
-      recordId(candidate,c.id,"Candidate record ID");
-    });
-    for (const vote of choice.votes) {
-      const row = html("div", "vote-ballot", undefined, item);
-      html("strong", "", `${person(vote.resident)} → ${title(vote.idea)}`, row);
-      html("p", "small", `${vote.counted ? "Counted" : "Not counted: author voting for own idea"} · event ${vote.sequence} · ${stamp(vote.at)}`, row);
-      html("p", "vote-reason", vote.reason, row);
+  const searchRow = html("div", "voting-search", undefined, box);
+  const searchLabel = html("label", "small", "Find a choice or proposal", searchRow);
+  const search = html("input", "", undefined, searchLabel);
+  search.id = "voting-search";
+  search.type = "search";
+  search.placeholder = "Title, author, candidate or record id";
+  search.value = votingState.query;
+  search.setAttribute?.("aria-describedby", "voting-results");
+  const clearSearch = html("button", "workshop-button", "Clear search", searchRow);
+  clearSearch.type = "button";
+  clearSearch.id = "voting-clear";
+  const results = html("p", "small", undefined, box);
+  results.id = "voting-results";
+  results.setAttribute?.("role", "status");
+  const lists = html("div", "voting-lists", undefined, box);
+  lists.id = "voting-lists";
+  const matches = (query, values) => !query || values.some(value => workshopSearchText(value).includes(query));
+  function choiceText(choice) {
+    return [choice.id, choice.owner?.name, choice.winner, choice.status,
+      ...(choice.candidates || []).flatMap(c => [c.id, c.title, c.author?.name, c.milestone,
+        ...(c.stages || []).map(s => s.milestone)]),
+      ...(choice.votes || []).flatMap(v => [v.resident?.name, v.reason])];
+  }
+  function proposalText(proposal) {
+    return [proposal.id, proposal.title, proposal.author?.name, proposal.reason,
+      proposal.status, proposal.rule_status, proposal.mode,
+      ...(proposal.endorsements || []).map(v => v.resident?.name)];
+  }
+  function renderLists() {
+    for (const node of lists.querySelectorAll("details")) {
+      if (!node.id) continue;
+      if (node.open) opened.add(node.id);
+      else opened.delete(node.id);
     }
+    lists.replaceChildren();
+    const query = workshopSearchText(votingState.query);
+    const filteredChoices = [...choices].reverse().filter(choice => matches(query, choiceText(choice)));
+    const filteredProposals = [...proposals].reverse().filter(proposal => matches(query, proposalText(proposal)));
+    results.textContent = `${filteredChoices.length} of ${choices.length} choices · ${filteredProposals.length} of ${proposals.length} proposals match search at this moment`;
+    clearSearch.disabled = !votingState.query;
+    html("h3", "", `Project choices (${filteredChoices.length}${query ? ` of ${choices.length}` : ""})`, lists);
+    if (!choices.length) html("p", "empty-note", "No project ballots recorded at this moment.", lists);
+    else if (!filteredChoices.length) html("p", "empty-note", "No choices match this search at this moment. Clear search to look again.", lists);
+    for (const choice of filteredChoices) {
+      const title = id => {
+        if(id===null)return "None of these";
+        const candidate=choice.candidates.find(c=>c.id===id);
+        if(!candidate)return "Unknown candidate";
+        if(typeof candidate.title==="string"&&candidate.title.trim())return candidate.title;
+        return `Untitled candidate ${choice.candidates.indexOf(candidate)+1}`;
+      };
+      const counted = choice.votes.filter(v => v.counted).length;
+      const outcome = choice.status === "open" ? `Open · ${counted}/3 counted votes` : choice.status === "rejected" ? "Shortlist rejected" : `Selected: ${title(choice.winner)}`;
+      const choiceLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
+      const item = html("details", "vote-round", undefined, lists);
+      item.id = `vote-choice-${choice.id}`;
+      html("summary", "", `${choiceLabel} · ${outcome}`, item);
+      recordId(item,choice.id);
+      html("p", "small", `Opened by ${person(choice.owner)} at event ${choice.opened_sequence}${choice.closed_sequence ? ` · closed at event ${choice.closed_sequence}` : ""}.`, item);
+      const ruleText = choice.selection_version >= 2
+        ? `Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available.${choice.slot === "great" ? " Great works carry 2–8 ordered milestones." : ""}`
+        : "Historical selection rule: three counted votes, plurality with the recorded tie-break. Authors’ votes for their own ideas do not count.";
+      html("p", "small", ruleText, item);
+      const alternatives = html("details", "vote-alternatives", undefined, item);
+      alternatives.id = `vote-candidates-${choice.id}`;
+      html("summary", "", `Frozen alternatives (${choice.candidates.length})`, alternatives);
+      choice.candidates.forEach(c => {
+        const candidate=html("div","vote-candidate",undefined,alternatives);
+        html("strong", "", `${title(c.id)} · by ${person(c.author)}`, candidate);
+        if (Array.isArray(c.stages) && c.stages.length) {
+          html("p", "small", `${c.stages.length} ordered milestones${Number.isFinite(c.seconds)?` · ${formatDurationDays(c.seconds)} total`:""}`, candidate);
+          const list = html("ol", "milestone-list", undefined, candidate);
+          c.stages.forEach(stage => {
+            html("li", "", `${stage.milestone}${Number.isFinite(stage.seconds)?` · ${formatDurationDays(stage.seconds)}`:""}`, list);
+          });
+        } else {
+          html("p", "small", `${c.milestone||"Milestone unrecorded"}${Number.isFinite(c.seconds)?` · ${c.seconds / 86400} day milestone`:""}`, candidate);
+        }
+        recordId(candidate,c.id,"Candidate record ID");
+      });
+      for (const vote of choice.votes) {
+        const row = html("div", "vote-ballot", undefined, item);
+        html("strong", "", `${person(vote.resident)} → ${title(vote.idea)}`, row);
+        html("p", "small", `${vote.counted ? "Counted" : "Not counted: author voting for own idea"} · event ${vote.sequence} · ${stamp(vote.at)}`, row);
+        html("p", "vote-reason", vote.reason, row);
+      }
+    }
+    html("h3", "", `Rule proposals (${filteredProposals.length}${query ? ` of ${proposals.length}` : ""})`, lists);
+    html("p", "small", "Endorsements witness a trial; they are separate from project ballots. A proposal is not law until ratified or enacted.", lists);
+    if (proposals.length && !filteredProposals.length) html("p", "empty-note", "No proposals match this search at this moment. Clear search to look again.", lists);
+    for (const proposal of filteredProposals) {
+      const item = html("details", "vote-round", undefined, lists);
+      item.id = `vote-rule-${proposal.id}`;
+      const status = proposal.stale ? "Stale base · needs a new proposal" : proposal.rule_status || proposal.status;
+      html("summary", "", `${titleFor(proposal,"proposal")} · ${status}`, item);
+      html("p", "small", `${proposal.mode} · proposed by ${person(proposal.author)} · ${stamp(proposal.proposed_at)}`, item);
+      recordId(item,proposal.id);
+      html("p", "", proposal.reason, item);
+      if (proposal.ratification === "direct-owner") html("p", "small", "Direct owner decision; no council vote or notice is claimed.", item);
+      html("p", "small", proposal.trial ? `Trial: ${proposal.trial.task} · ${proposal.trial.evidence}` : "No trial recorded.", item);
+      html("p", "small", `${proposal.endorsements.length} independent endorsements recorded${proposal.mode !== "legacy" ? " (two required for council enactment)" : ""}.`, item);
+      proposal.endorsements.forEach(v => {
+        const row = html("div", "vote-ballot", undefined, item);
+        html("strong", "", `${person(v.resident)} · endorsed · ${stamp(v.at)}`, row);
+        html("p", "vote-reason", v.reason, row);
+      });
+      if (proposal.notice) {
+        const link = html("a", "", `Public notice · ${stamp(proposal.notice.at)} ↗`, item);
+        const href = safeHttpUrl(proposal.notice.url);
+        if (href) { link.href = href; link.rel = "noopener noreferrer"; }
+        html("p", "small", `Veto window ends ${stamp(proposal.notice.until)}. Elapsed time alone does not enact a rule; current base, trial, endorsements and fresh veto check still apply.`, item);
+      } else html("p", "small", "No public notice recorded.", item);
+      const text = html("details", "vote-alternatives", undefined, item);
+      text.id = `vote-wording-${proposal.id}`;
+      html("summary", "", "Proposed wording", text);
+      html("p", "vote-reason", proposal.text, text);
+    }
+    lists.querySelectorAll("details").forEach(node => { node.open = Boolean(node.id) && opened.has(node.id); });
   }
-  html("h3", "", `Rule proposals (${proposals.length})`, box);
-  html("p", "small", "Endorsements witness a trial; they are separate from project ballots. A proposal is not law until ratified or enacted.", box);
-  for (const proposal of [...proposals].reverse()) {
-    const item = html("details", "vote-round", undefined, box);
-    item.id = `vote-rule-${proposal.id}`;
-    const status = proposal.stale ? "Stale base · needs a new proposal" : proposal.rule_status || proposal.status;
-    html("summary", "", `${titleFor(proposal,"proposal")} · ${status}`, item);
-    html("p", "small", `${proposal.mode} · proposed by ${person(proposal.author)} · ${stamp(proposal.proposed_at)}`, item);
-    recordId(item,proposal.id);
-    html("p", "", proposal.reason, item);
-    if (proposal.ratification === "direct-owner") html("p", "small", "Direct owner decision; no council vote or notice is claimed.", item);
-    html("p", "small", proposal.trial ? `Trial: ${proposal.trial.task} · ${proposal.trial.evidence}` : "No trial recorded.", item);
-    html("p", "small", `${proposal.endorsements.length} independent endorsements recorded${proposal.mode !== "legacy" ? " (two required for council enactment)" : ""}.`, item);
-    proposal.endorsements.forEach(v => {
-      const row = html("div", "vote-ballot", undefined, item);
-      html("strong", "", `${person(v.resident)} · endorsed · ${stamp(v.at)}`, row);
-      html("p", "vote-reason", v.reason, row);
-    });
-    if (proposal.notice) {
-      const link = html("a", "", `Public notice · ${stamp(proposal.notice.at)} ↗`, item);
-      const href = safeHttpUrl(proposal.notice.url);
-      if (href) { link.href = href; link.rel = "noopener noreferrer"; }
-      html("p", "small", `Veto window ends ${stamp(proposal.notice.until)}. Elapsed time alone does not enact a rule; current base, trial, endorsements and fresh veto check still apply.`, item);
-    } else html("p", "small", "No public notice recorded.", item);
-    const text = html("details", "vote-alternatives", undefined, item);
-    text.id = `vote-wording-${proposal.id}`;
-    html("summary", "", "Proposed wording", text);
-    html("p", "vote-reason", proposal.text, text);
-  }
-  box.querySelectorAll("details").forEach(node => { node.open = Boolean(node.id)&&opened.has(node.id); });
+  search.addEventListener?.("input", () => { votingState.query = search.value; renderLists(); });
+  clearSearch.addEventListener?.("click", () => { votingState.query = ""; search.value = ""; renderLists(); search.focus?.({preventScroll:true}); });
+  renderLists();
 }
 function snapshotCue(nowSec, observedAt, frameAt, isCurrent, timeZone) {
   const validTime = ts => Number.isFinite(ts) && ts > 0 && Number.isFinite(new Date(ts * 1000).getTime());
@@ -2106,15 +2160,16 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-"))?activeId:null;
-  const searchSelection=activeId==="workshop-search"?{start:document.activeElement.selectionStart,
+  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("voting-"))?activeId:null;
+  const selectionId=activeId==="workshop-search"||activeId==="voting-search"?activeId:null;
+  const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
   else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();renderLately();}
   const replacement=$("catchup-seq");
   if(replacement&&draft!==null)replacement.value=draft;
   if(focusId)$(focusId)?.focus({preventScroll:true});
-  if(searchSelection)$("workshop-search")?.setSelectionRange?.(searchSelection.start,searchSelection.end,searchSelection.direction);
+  if(searchSelection)$(searchSelection.id)?.setSelectionRange?.(searchSelection.start,searchSelection.end,searchSelection.direction);
 }
 async function refresh() {
   if(refreshing)return;
