@@ -479,9 +479,36 @@ footer a {
 }
 .shelf-item {
   padding: 0.55rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--line);
   display: grid;
   gap: 0.2rem;
+}
+.shelf-idea > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+}
+.shelf-idea-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.shelf-tag {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.08rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+.shelf-tag-great {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.shelf-tag-warn {
+  border-color: #ce846b;
+  color: #ce846b;
 }
 .milestone-list {
   margin: 0.35rem 0 0.2rem 1.25rem;
@@ -507,7 +534,7 @@ footer a {
   margin: 0.3rem 0 0.1rem;
   padding: 0.5rem 0.65rem;
   border-left: 2px solid var(--gold);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--paper) 4%, transparent);
   border-radius: 0 6px 6px 0;
 }
 .shelf-brief p {
@@ -1010,16 +1037,16 @@ footer a {
   text-underline-offset: 3px;
 }
 
-.catchup-panel{margin-top:.85rem;padding-top:.85rem;border-top:1px solid rgba(255,255,255,.12);display:grid;gap:.6rem}
+.catchup-panel{margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--line);display:grid;gap:.6rem}
 .catchup-controls{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
-.catchup-controls input{width:5.5rem;padding:.28rem .4rem;border-radius:.35rem;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.22);color:inherit;font:inherit}
+.catchup-controls input{width:5.5rem;padding:.28rem .4rem;border-radius:.35rem;border:1px solid var(--line);background:var(--room);color:inherit;font:inherit}
 .catchup-heading{margin:.35rem 0 .15rem;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;opacity:.82}
 .catchup-list{display:grid;gap:.35rem}
 .catchup-item{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.88rem}
 .catchup-jump{flex:0 0 auto}
 
 /* Council records remain readable on a phone; reasons are plain text. */
-.vote-round { border-top:1px solid rgba(255,255,255,.12); padding:.7rem 0; }
+.vote-round { border-top:1px solid var(--line); padding:.7rem 0; }
 .vote-round summary { cursor:pointer; overflow-wrap:anywhere; }
 .vote-ballot { border-left:2px solid var(--gold,#d2ac70); padding-left:.7rem; margin:.8rem 0; }
 .vote-reason { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.55; }
@@ -1093,13 +1120,23 @@ footer a {
 .workshop-pages, .workshop-past { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
 @media(min-width:1600px) { .workshop-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
+.balance-summary{margin:0 0 8px}
+.balance-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px;font-size:11px;color:var(--muted)}
+.balance-legend-item{display:inline-flex;align-items:center;gap:6px}
+.balance-swatch{display:inline-block;width:10px;height:10px;border-radius:3px}
+.balance-swatch.seg-building{background:#d9913b}
+.balance-swatch.seg-record{background:#8a9a9b}
+.balance-swatch.seg-foundations{background:#5c6f7e}
+.balance-swatch.seg-other{background:#b8b2a7}
 .balance-day{display:grid;gap:4px;margin:10px 0}
-.balance-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line,#ccc)}
+.balance-bar-wrap{position:relative;padding:2px 0}
+.balance-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
 .balance-bar span{display:block;height:100%}
 .balance-bar .seg-building{background:#d9913b}
 .balance-bar .seg-record{background:#8a9a9b}
 .balance-bar .seg-foundations{background:#5c6f7e}
 .balance-bar .seg-other{background:#b8b2a7}
+.balance-target{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--paper);opacity:.7;pointer-events:none}
 
 /* The living house: the drawing leads, and what the record knows hangs on it. */
 .room-fact { font:600 11.5px system-ui,sans-serif; fill:#f0c77b; paint-order:stroke; stroke:#1c2c29e6; stroke-width:3.5px; stroke-linejoin:round; letter-spacing:.3px; }
