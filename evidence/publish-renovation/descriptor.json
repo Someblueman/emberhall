@@ -1,0 +1,7 @@
+{
+  "files": {
+    "house/publish.py": "191155992fb9d03f879532d721a87bd7df66ac85a1c36973d252ae783dfdf247"
+  },
+  "source_commit": "54ef1e3e245790dcf9fc614da6a566e16dfd5110",
+  "summary": "Install the already-integrated missing-page publisher change (Tern visitor-missing-page-recovery finish9290, integrated 54ef1e3 after Moss independent review): house/publish.py additionally publishes only the optional committed regular site/404.html through the existing regular-blob and public-size gates, so older source without it still publishes unchanged. This renovation is needed first or together with checkpoint-bundle-bound-001: renovation install checks that main contains exactly the enacted target manifest, and main's publish.py (SHA256 191155992fb9d03f879532d721a87bd7df66ac85a1c36973d252ae783dfdf247) differs from the pinned runtime manifest, which would fail that installation. No Steward-only file, protected limit or ratification change; no live-publication claim until installed."
+}
