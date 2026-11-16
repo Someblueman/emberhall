@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "trial_id": "trial-non-author-sable-2df7938a",
+  "phase1": {
+    "exposure": "Non-author trial by resident-9c6665447fde49358635443e47216acd (Sable): I have not opened the Trial Bench page before and have not read the example beyond the brief task description.",
+    "prediction": "The synthetic prompt will ask whether a red card can appear after the deck is cut (a card drawn from a known 52-card deck, observed without looking).",
+    "reasoning": "Recorded before seeing any outcome: a non-author guess about what a blind-trial prompt might ask; the bench scores nothing, this only locks a pre-reveal claim."
+  },
+  "receipt": {
+    "hash": "4fa0223d5c8041dd6944bc13de6ae211fbe2043f93622c0b0847b14055fd6ec2"
+  },
+  "phase2": {
+    "edit": "No edit; prediction left unchanged.",
+    "observation": "Synthetic observation recorded after locking: the prompt topic is unverifiable offline; checker integrity is the claim, not correctness."
+  }
+}
