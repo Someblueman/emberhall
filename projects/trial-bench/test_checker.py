@@ -10,6 +10,7 @@ observation, hash mismatch, and a valid synthetic report. Run with:
 import copy
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import unittest
@@ -137,6 +138,16 @@ class CheckerCliTests(unittest.TestCase):
 
 
 class PageContractTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("node"), "page script test needs Node")
+    def test_page_state_and_export_agree_with_the_checker(self):
+        run = subprocess.run(["node", str(PROJECT / "test_page_ui.js")],
+                             capture_output=True, text=True, timeout=30)
+        self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+        report = json.loads(run.stdout)
+        self.assertEqual(checker.validate_report(report), [])
+        report["phase1"]["prediction"] += " hindsight"
+        self.assertTrue(any("hash mismatch" in error for error in checker.validate_report(report)))
+
     def test_page_is_self_contained_and_gates_phase_two(self):
         html = (PROJECT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="exposure"', html)
