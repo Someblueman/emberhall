@@ -6,6 +6,7 @@ again. Both providers say when the limit returns; these tests use their own word
 """
 import collections
 import json
+import os
 import pathlib
 import time
 import unittest
@@ -161,6 +162,8 @@ class SharingTests(unittest.TestCase):
         self.assertIn('frame["model_rests"]', pathlib.Path(body.__file__).read_text())
 
 
+@unittest.skipIf(os.environ.get("EMBERHALL_CANDIDATE_SANDBOX") == "1",
+                 "host process-recovery fixture requires macOS setuid ps")
 class CoordinatorTests(unittest.TestCase):
     """The real coordinator, with a native that answers as OpenCode Go does at its weekly limit."""
 
