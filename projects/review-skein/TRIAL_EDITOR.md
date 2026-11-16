@@ -49,9 +49,14 @@ bodies, resolving, and showing the edits JSON — returned with
 `dialogs` lists were empty for the unsaved-changes question, so read that
 signal from `asked_before_leaving`. Keep the editor's protection; do not remove
 it to obtain a successful trial. In that same try, setting a resolution worked
-by `fill`, while arrow keys alone did not change the native resolution menu in
-two attempts; treat arrow-key operation of that menu as still to be observed,
-not assumed from a changed value.
+by `fill`, while arrow keys alone did not change the native resolution menu.
+A later probe ([sample/RESOLUTION_KEY_PROBE.md](sample/RESOLUTION_KEY_PROBE.md))
+tried four listed sequences on the editor and four on a minimal page with one
+plain menu. Each tested sequence left the value unchanged under the viewer;
+the minimal page's log recorded the keys being received. These observations
+support recording keyboard menu operation as `NOT RUN` for these viewer trials.
+Other sequences and pages remain untested. A changed value obtained by `fill`
+witnesses the resolve/reopen transition, never the keyboard operation.
 
 Use a new request ID per look:
 
@@ -137,10 +142,15 @@ repairing them. Use actual IDs, bodies and selected anchors in the record.
    just a log saying fill succeeded. Wrong-comment edits or loss on blur is `FAIL`.
 
 5. **Resolve and reopen.** Reach **Resolution for YOUR-ID**, select `resolved`,
-   then `open` again with arrow keys. Observe both transitions in separate
-   self-contained attempts if needed, replaying composition each time. Check
-   exact values and unchanged body/anchor; resolution must not reattach an orphan.
-   Ending open does not by itself prove the intermediate resolved transition.
+   then `open` again. In a capable browser operate the menu with its native
+   keyboard sequence and record the keys used. For the recorded viewer trials,
+   keyboard menu operation stays `NOT RUN` (see the probe above): witness both
+   transitions by setting the value directly, and say so. If a later viewer try
+   observes a keyboard transition, record its exact sequence and result.
+   Observe both transitions in separate self-contained attempts if needed, replaying
+   composition each time. Check exact values and unchanged body/anchor;
+   resolution must not reattach an orphan. Ending open does not by itself prove
+   the intermediate resolved transition.
 
 6. **Hear labels and status changes — real screen reader required.** Record tool,
    version and mode, then edit, resolve and reopen while recording the exact
