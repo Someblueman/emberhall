@@ -83,6 +83,13 @@ class EditorTests(unittest.TestCase):
         self.assertNotIn("innerHTML", script)
         self.assertIn(("html", {"lang": "en"}), page.tags)
         self.assertIn("noscript", [tag for tag, attrs in page.tags])
+        controls = {attrs.get("id"): (tag, attrs) for tag, attrs in page.tags if "id" in attrs}
+        self.assertEqual(controls["export-json"][0], "button")
+        self.assertIn("disabled", controls["export-json"][1])
+        self.assertIn("hidden", controls["edits-export"][1])
+        self.assertEqual(controls["edits-json"][0], "pre")
+        self.assertEqual(controls["edits-json"][1]["tabindex"], "0")
+        self.assertEqual(controls["edits-json"][1]["aria-labelledby"], "edits-export-title")
 
     def test_apply_validates_the_entire_batch_and_preserves_fixed_fields(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -182,7 +189,7 @@ class EditorTests(unittest.TestCase):
 
 class EditorLifecycleTests(SkeinFixture):
     @unittest.skipUnless(shutil.which("node"), "Node needed for generated-page edit lifecycle")
-    def test_real_packet_cli_page_node_download_apply(self):
+    def test_real_packet_cli_page_node_copied_export_apply(self):
         self.export()
         anchor = next(a for a in skein._load_anchors(self.packet) if a.side == "new")
         skein.add_comment(self.packet, "reviewer-1", anchor.commit, anchor.path, anchor.side, anchor.line, "Original question")
@@ -196,6 +203,12 @@ class EditorLifecycleTests(SkeinFixture):
         envelope.write_text(Page(page.read_text()).scripts[0]["text"])
         edits = self.root / "download.json"
         subprocess.run(["node", str(ROOT / "test_comment_editor_ui.js"), str(envelope), str(edits)], check=True, capture_output=True)
+        original = {p.name: p.read_bytes() for p in self.packet.iterdir()}
+        checked = json.loads(subprocess.run(
+            [*cli, "check", str(self.packet), str(edits), "--format", "json"],
+            check=True, capture_output=True, text=True).stdout)
+        self.assertEqual((checked["updated"], checked["added"]), (1, 0))
+        self.assertEqual({p.name: p.read_bytes() for p in self.packet.iterdir()}, original)
         result = subprocess.run([*cli, "apply", str(self.packet), str(edits)], check=True, capture_output=True, text=True)
         self.assertIn("1 comment", result.stdout)
         comment = skein.loads_comments((self.packet / "comments.json").read_text())[0]
@@ -224,7 +237,7 @@ class ComposerLifecycleTests(SkeinFixture):
         return page, json.loads(page.scripts[0]["text"])
 
     @unittest.skipUnless(shutil.which("node"), "Node needed for generated-page compose lifecycle")
-    def test_real_packet_compose_node_add_download_apply(self):
+    def test_real_packet_compose_node_add_copied_export_apply(self):
         self.export()
         members = {p.name: p.read_bytes() for p in self.packet.iterdir()}
         output = self.root / "compose.html"
@@ -245,6 +258,11 @@ class ComposerLifecycleTests(SkeinFixture):
         edits = self.root / "download.json"
         subprocess.run(["node", str(ROOT / "test_comment_editor_ui.js"), str(envelope), str(edits), str(anchors)],
                        check=True, capture_output=True)
+        checked = json.loads(subprocess.run(
+            [*cli, "check", str(self.packet), str(edits), "--format", "json"],
+            check=True, capture_output=True, text=True).stdout)
+        self.assertEqual((checked["updated"], checked["added"]), (0, 2))
+        self.assertEqual({p.name: p.read_bytes() for p in self.packet.iterdir()}, members)
         result = subprocess.run([*cli, "apply", str(self.packet), str(edits)], check=True, capture_output=True, text=True)
         self.assertIn("2 comment", result.stdout)
         comments = skein.loads_comments((self.packet / "comments.json").read_text())

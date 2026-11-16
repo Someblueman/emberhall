@@ -79,14 +79,25 @@ button {{ margin-block: .75rem; }}
 <h1>Edit Skein comments</h1>
 <p>Edit existing comment bodies and open/resolved status. Anchors and orphan history stay fixed.
 A packet-bound compose page also lets you select a rendered line and add a new comment below.
-This local page does not write your packet. Download edits, then apply them with the CLI.
-Keep one writer at a time. Changes here are lost if you close or reload before downloading.</p>
+This local page does not write your packet. Download edits or show edits JSON to save a copy,
+then check and apply it with the CLI. Keep one writer at a time.
+Changes here are lost if you close or reload before saving.</p>
 <p>Open the packet's review.html separately to read the code diff. This page does not verify
 the bundle or authenticate anyone.</p>
 <noscript>This editor needs JavaScript. Use skein.py comment, edit-comment, resolve-comment or
 reopen-comment instead; this page has made no changes.</noscript>
 <p id="editor-status" role="status" aria-live="polite">Loading comments…</p>
 <button id="download" type="button" disabled>Download edits</button>
+<button id="export-json" type="button" disabled>Show edits JSON</button>
+<section id="edits-export" aria-labelledby="edits-export-title" hidden>
+<p id="edits-export-title"><strong>Edits JSON</strong></p>
+<p>Select the complete text below, then use your browser's Copy command and paste into
+a plain-text file named skein-comment-edits.json.
+Save as UTF-8, then run comment_editor.py check before apply. Showing this text does not save it.
+Further comment or draft edits clear this export; show it again after your last change.</p>
+<button id="select-json" type="button">Select edits JSON</button>
+<pre id="edits-json" tabindex="0" aria-labelledby="edits-export-title"></pre>
+</section>
 <nav aria-label="Comments"><ol id="comment-index"></ol></nav>
 <section id="composer" aria-label="Add an anchored comment"></section>
 <section id="comments" tabindex="-1" aria-label="Comment editor"></section>

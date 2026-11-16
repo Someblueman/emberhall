@@ -29,23 +29,28 @@ class Element {
 }
 
 function setup(envelope, anchors) {
-  const elements = Object.fromEntries(["editor-data", "editor-status", "download", "comments", "comment-index", "composer"]
+  const elements = Object.fromEntries(["editor-data", "editor-status", "download", "comments", "comment-index", "composer",
+    "export-json", "edits-export", "edits-json", "select-json"]
     .map(id => [id, new Element("div")]));
+  elements["edits-export"].hidden = true;
   elements["editor-data"].textContent = JSON.stringify(envelope);
   if (anchors) {
     elements["anchor-data"] = new Element("script");
     elements["anchor-data"].textContent = JSON.stringify(anchors);
   }
-  const document = {body: new Element("body"), getElementById: id => elements[id], createElement: tag => new Element(tag)};
+  const selection = {ranges: [], removeAllRanges() { this.ranges = []; }, addRange(range) { this.ranges.push(range); }};
+  const document = {body: new Element("body"), getElementById: id => elements[id], createElement: tag => new Element(tag),
+    createRange: () => ({selectNodeContents(element) { this.element = element; }})};
   const blobs = []; const revoked = []; const timers = []; const listeners = {};
   const environment = {
     Blob: class { constructor(parts, options) { this.text = parts.join(""); this.type = options.type; } },
     URL: {createObjectURL: blob => { blobs.push(blob); return "blob:test"; }, revokeObjectURL: url => revoked.push(url)},
     setTimeout: callback => timers.push(callback), addEventListener: (name, callback) => { listeners[name] = callback; },
+    getSelection: () => selection,
   };
   startEditor(document, environment);
   const all = element => [element, ...element.children.flatMap(all)];
-  return {elements, get nodes() { return Object.values(elements).flatMap(all); }, blobs, timers, revoked, listeners};
+  return {elements, get nodes() { return Object.values(elements).flatMap(all); }, blobs, timers, revoked, listeners, selection};
 }
 
 function assertControlsLabeled(page) {
@@ -64,7 +69,10 @@ function exercise(envelope) {
   assertControlsLabeled(page);
   if (!bodies.length) {
     assert(page.nodes.some(n => n.textContent.includes("No comments yet")));
+    page.elements["export-json"].fire("click");
+    page.copiedJSON = page.elements["edits-json"].textContent;
     page.elements.download.fire("click");
+    assert.equal(page.copiedJSON, page.blobs[0].text);
     assert.deepEqual(JSON.parse(page.blobs[0].text), envelope);
     return page;
   }
@@ -117,7 +125,10 @@ function exercise(envelope) {
   let prevented = false;
   page.listeners.beforeunload({preventDefault() { prevented = true; }});
   assert(prevented);
+  page.elements["export-json"].fire("click");
+  page.copiedJSON = page.elements["edits-json"].textContent;
   page.elements.download.fire("click");
+  assert.equal(page.copiedJSON, page.blobs[0].text);
   assert.equal(page.blobs[0].type, "application/json");
   const saved = JSON.parse(page.blobs[0].text);
   assert.equal(saved.document.comments[0].resolution, "resolved");
@@ -194,12 +205,67 @@ function exerciseLiveCommentFilters(envelope, anchors) {
   }
 }
 
+function exerciseVisibleExport(envelope, anchors) {
+  const page = setup(envelope, anchors);
+  const show = page.elements["export-json"];
+  const panel = page.elements["edits-export"];
+  const output = page.elements["edits-json"];
+  const find = id => page.nodes.find(n => n.id === id);
+  assert.equal(show.disabled, false);
+  assert.equal(panel.hidden, true);
+  const body = find("comment-0-body");
+  body.value = 'Copied café ☃ <script> & "quoted"'; body.fire("input");
+  show.fire("click");
+  assert.equal(panel.hidden, false);
+  assert.equal(output.focused, true);
+  assert.equal(JSON.parse(output.textContent).document.comments[0].body, body.value);
+  page.elements["select-json"].fire("click");
+  assert.equal(page.selection.ranges.length, 1);
+  assert.equal(page.selection.ranges[0].element, output, "select only JSON, not the surrounding page");
+  page.elements["select-json"].fire("click");
+  assert.equal(page.selection.ranges.length, 1, "replace the previous selection");
+  let warned = false;
+  page.listeners.beforeunload({preventDefault() { warned = true; }});
+  assert(warned, "displaying JSON cannot prove it was saved");
+  page.elements.download.fire("click");
+  assert.equal(output.textContent, page.blobs[0].text, "copy and download have identical bytes");
+  // Filtering changes visibility, not the export. Invalid hidden bodies block both routes.
+  find("filter-state").value = "orphan"; find("filter-state").fire("change");
+  assert.equal(panel.hidden, false);
+  body.value = " "; body.fire("input");
+  assert.equal(panel.hidden, true); assert.equal(output.textContent, "");
+  show.fire("click");
+  assert.equal(panel.hidden, true); assert.equal(find("comment-0").hidden, false);
+  assert.equal(find("filter-state").value, "all");
+  assert(page.elements["editor-status"].textContent.includes("Export blocked"));
+  body.value = "Valid again"; body.fire("input"); show.fire("click");
+  const resolution = find("comment-0-resolution");
+  resolution.value = "resolved"; resolution.fire("change");
+  assert.equal(output.textContent, ""); assert.equal(panel.hidden, true);
+  show.fire("click");
+  assert.equal(JSON.parse(output.textContent).document.comments[0].resolution, "resolved");
+  if (anchors) {
+    for (const id of ["new-id", "new-body"]) {
+      find(id).value = "Draft"; find(id).fire("input");
+      assert.equal(output.textContent, ""); assert.equal(panel.hidden, true);
+      show.fire("click");
+      assert.equal(panel.hidden, true);
+      assert(page.elements["editor-status"].textContent.includes("drafted comment"));
+      find(id).value = ""; find(id).fire("input"); show.fire("click");
+      assert.equal(panel.hidden, false);
+    }
+  }
+}
+
 function exerciseComposer(envelope, anchors) {
   const page = setup(envelope, anchors);
   assertControlsLabeled(page);
   if (!anchors.length) {
     assert(page.nodes.some(n => n.textContent.includes("no rendered lines")));
+    page.elements["export-json"].fire("click");
+    page.copiedJSON = page.elements["edits-json"].textContent;
     page.elements.download.fire("click");
+    assert.equal(page.copiedJSON, page.blobs[0].text);
     return page;
   }
   const find = id => page.nodes.find(n => n.id === id);
@@ -265,7 +331,10 @@ function exerciseComposer(envelope, anchors) {
   let prevented = false;
   page.listeners.beforeunload({preventDefault() { prevented = true; }});
   assert(prevented);
+  page.elements["export-json"].fire("click");
+  page.copiedJSON = page.elements["edits-json"].textContent;
   page.elements.download.fire("click");
+  assert.equal(page.copiedJSON, page.blobs[0].text);
   const saved = JSON.parse(page.blobs[0].text);
   assert.equal(saved.version, 2);
   assert.equal(saved.document.comments.length, envelope.document.comments.length + 2);
@@ -380,7 +449,7 @@ function exerciseSelectionFiltering(envelope, anchors) {
 if (process.argv.length > 2) {
   const envelope = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
   const page = process.argv[4] ? exerciseComposer(envelope, JSON.parse(fs.readFileSync(process.argv[4], "utf8"))) : exercise(envelope);
-  fs.writeFileSync(process.argv[3], page.blobs[0].text);
+  fs.writeFileSync(process.argv[3], page.copiedJSON);
 } else {
   const anchor = {commit: "a".repeat(40), path: "café.py", side: "new", line: 2, text: "<code>"};
   const record = {id: "reader-1", anchor, body: "Original", resolution: "open", state: "anchored", rebased_from: null, orphan_reason: null};
@@ -391,6 +460,8 @@ if (process.argv.length > 2) {
   const compose = {...envelope, version: 2, packet_sha256: "c".repeat(64), anchors_sha256: "d".repeat(64)};
   exerciseLiveCommentFilters(envelope);
   exerciseLiveCommentFilters(compose, [anchor]);
+  exerciseVisibleExport(envelope);
+  exerciseVisibleExport(compose, [anchor]);
   exerciseComposer(compose, [anchor]);
   exerciseComposer({...compose, document: {...compose.document, comments: []}}, [anchor]);
   exerciseComposer({...compose, document: {...compose.document, comments: []}}, []);

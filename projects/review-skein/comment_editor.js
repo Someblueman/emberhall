@@ -6,6 +6,9 @@ function startEditor(document, environment) {
   const data = JSON.parse(document.getElementById("editor-data").textContent);
   const status = document.getElementById("editor-status");
   const download = document.getElementById("download");
+  const showJSON = document.getElementById("export-json");
+  const exportPanel = document.getElementById("edits-export");
+  const exportText = document.getElementById("edits-json");
   const container = document.getElementById("comments");
   const index = document.getElementById("comment-index");
   const originals = data.document.comments.map(c => ({body: c.body, resolution: c.resolution}));
@@ -67,8 +70,15 @@ function startEditor(document, environment) {
 
   function updateStatus() {
     status.textContent = `${data.document.comments.length} comments. ${changedCount()} changed. ` +
-      (needsDownload ? "Changes not downloaded. Download edits, then apply with the CLI." :
-        "No new changes to download. The packet is unchanged until you apply edits with the CLI.");
+      (needsDownload ? "Changes need saving. Download edits or show edits JSON to save a copy, then apply with the CLI." :
+        "No new changes to export. The packet is unchanged until you apply edits with the CLI.");
+  }
+
+  function editsChanged() {
+    exportText.textContent = "";
+    exportPanel.hidden = true;
+    needsDownload = true;
+    updateStatus();
   }
 
   const anchorData = document.getElementById("anchor-data");
@@ -168,8 +178,7 @@ function startEditor(document, environment) {
       const valid = value.trim().length > 0 && Array.from(value).length <= 20000 && !value.includes("\0");
       body.setCustomValidity(valid ? "" : "Enter nonempty text of at most 20000 characters, without NUL.");
       comment.body = value;
-      needsDownload = true;
-      updateStatus();
+      editsChanged();
       refreshPreview();
     });
     // Defer body filtering until the edit is committed or focus leaves: a
@@ -178,8 +187,7 @@ function startEditor(document, environment) {
     body.addEventListener("blur", applyCommentFilters);
     resolution.addEventListener("change", () => {
       comment.resolution = resolution.value;
-      needsDownload = true;
-      updateStatus();
+      editsChanged();
       refreshPreview();
       applyCommentFilters();
     });
@@ -309,7 +317,7 @@ function startEditor(document, environment) {
       add.type = "submit";
       draftPending = () => identifier.value.length > 0 || body.value.length > 0;
       for (const control of [identifier, body]) {
-        control.addEventListener("input", () => { control.setCustomValidity(""); needsDownload = true; });
+        control.addEventListener("input", () => { control.setCustomValidity(""); editsChanged(); });
       }
       jumpToAnchor = (anchorIndex, anchor) => {
         filterFile.value = anchor.path;
@@ -338,8 +346,7 @@ function startEditor(document, environment) {
         renderComment(comment, data.document.comments.length - 1);
         identifier.value = "";
         body.value = "";
-        needsDownload = true;
-        updateStatus();
+        editsChanged();
         applyCommentFilters();
         refreshPreview();
         identifier.focus();
@@ -354,21 +361,45 @@ function startEditor(document, environment) {
   refreshPreview();
   if (!data.document.comments.length && !anchorData) node("p", "No comments yet. Add one with skein.py comment, or generate a compose page from a packet.", container);
 
-  download.disabled = false;
-  download.addEventListener("click", () => {
+  function validatedJSON(action) {
     if (draftPending()) {
-      status.textContent = "Download blocked: add the drafted comment first, or clear its ID and body.";
-      return;
+      status.textContent = `${action} blocked: add the drafted comment first, or clear its ID and body.`;
+      return null;
     }
     for (const field of fields) {
       if (!field.reportValidity()) {
         resetCommentFilters();
         field.focus();
-        status.textContent = "Download blocked: correct the invalid comment body.";
-        return;
+        status.textContent = `${action} blocked: correct the invalid comment body.`;
+        return null;
       }
     }
-    const blob = new environment.Blob([JSON.stringify(data, null, 2) + "\n"], {type: "application/json"});
+    return JSON.stringify(data, null, 2) + "\n";
+  }
+  showJSON.disabled = false;
+  showJSON.addEventListener("click", () => {
+    const text = validatedJSON("Export");
+    if (text === null) return;
+    exportText.textContent = text;
+    exportPanel.hidden = false;
+    status.textContent = `${changedCount()} changed comments. Edits JSON ready to copy. ` +
+      "Save the complete text as UTF-8 JSON, then check and apply it with the CLI. Showing it does not save it.";
+    exportText.focus();
+  });
+  document.getElementById("select-json").addEventListener("click", () => {
+    exportText.focus();
+    const range = document.createRange();
+    range.selectNodeContents(exportText);
+    const selection = environment.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    status.textContent = "Edits JSON selected. Use your browser's Copy command, then save the complete text as UTF-8 JSON. Copying does not apply it to the packet.";
+  });
+  download.disabled = false;
+  download.addEventListener("click", () => {
+    const text = validatedJSON("Download");
+    if (text === null) return;
+    const blob = new environment.Blob([text], {type: "application/json"});
     const url = environment.URL.createObjectURL(blob);
     const link = node("a", "", document.body);
     link.href = url;

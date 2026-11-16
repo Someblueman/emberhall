@@ -34,9 +34,9 @@ and comment index immediately. Body edits refresh them when the edit is committe
 or the textarea loses focus, so typing never hides the field being edited. Active
 filters stay selected, and hidden comments are still included in the download.
 If a hidden comment has an invalid body when
-you choose **Download edits**, the page resets those filters and focuses that field.
-Repeat for more comments. Download is blocked while an unadded ID/body draft remains:
-add it first, or clear both draft fields. The packet changes only when the download is
+you choose **Download edits** or **Show edits JSON**, the page resets those filters and focuses that field.
+Repeat for more comments. Both exports are blocked while an unadded ID/body draft remains:
+add it first, or clear both draft fields. The packet changes only when the saved edits are
 applied through the CLI. There is no delete or move-anchor operation.
 
 For a page that only edits existing comments, retain the comments-file command.
@@ -63,13 +63,21 @@ HTML is self-contained and needs no source files, network or server to open.
    from resolution, including orphan reason and rebase history.
 2. Edit a body or choose **resolved**. Choose **open** to reopen. The status
    announces how many comments changed. Empty, whitespace-only, over-20000-character
-   and NUL-containing bodies block download. An orphan stays orphaned when resolved.
+   and NUL-containing bodies block either export. An orphan stays orphaned when resolved.
 3. Choose **Download edits** and confirm your browser saved `skein-comment-edits.json`.
    This is a download request, not proof the browser saved a file. The page never
-   writes your packet. Changes made after the last download request trigger the
+   writes your packet. If downloads are unavailable, choose **Show edits JSON**:
+   choose **Select edits JSON**, use your browser's Copy command, and paste into a plain-text file named
+   `skein-comment-edits.json`, saved as UTF-8. It contains the same envelope and
+   bytes as Download edits, including hidden comments. No clipboard API is needed.
+   Showing JSON does not save it or clear the leave-page warning; verify your saved
+   file with `check` below before closing. Editing a comment body or resolution,
+   adding a comment, or changing either draft field clears the displayed export.
+   Show it again after your final change. Filters alone do not change its contents.
+   Changes made after the last download request trigger the
    browser's ordinary leave-page prompt, where supported. There is no autosave:
-   closing or reloading the page loses edits that you have not downloaded.
-4. Validate and preview the downloaded changes before applying them:
+   closing or reloading the page loses edits that you have not saved.
+4. Validate and preview the downloaded or manually saved changes before applying them:
 
    ```sh
    python3 projects/review-skein/comment_editor.py check \
@@ -136,8 +144,8 @@ instructions. The static diff and read-only comment viewer still need no script.
 
 Run `python3 -m unittest discover -s projects/review-skein -v`. The Python tests
 exercise a fresh real-Git packet and the CLI boundary; Node tests exercise editor
-events and download data without a browser. They include a real Git compose ->
-Node form events/download -> CLI apply lifecycle and stale/tampered-anchor/duplicate-ID
+events and export data without a browser. They include real Git page/compose ->
+Node form events/copied JSON (byte-equal to the download) -> CLI check/apply lifecycles and stale/tampered-anchor/duplicate-ID
 rejection without partial writes. Those checks do not establish actual rendering, browser download handling, keyboard focus or screen-reader speech.
 The independent non-author desktop/phone and screen-reader try required by
 milestone 2 stays open; this editor must be included in that try before claiming
