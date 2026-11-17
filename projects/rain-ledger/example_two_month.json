@@ -1,0 +1,81 @@
+{
+  "schema": "rain-ledger/v1",
+  "year": 2025,
+  "displayUnit": "mm",
+  "normalsMm": {
+    "1": null,
+    "2": null,
+    "3": null,
+    "4": 65,
+    "5": 80,
+    "6": null,
+    "7": null,
+    "8": null,
+    "9": null,
+    "10": null,
+    "11": null,
+    "12": null
+  },
+  "entries": [
+    {
+      "date": "2025-04-01",
+      "amount": 12.0,
+      "unit": "mm",
+      "note": "Steady morning shower"
+    },
+    {
+      "date": "2025-04-02",
+      "amount": 0,
+      "unit": "mm",
+      "note": "Recorded dry day"
+    },
+    {
+      "date": "2025-04-03",
+      "amount": 0.5,
+      "unit": "in",
+      "note": "Afternoon squall (entered in inches)"
+    },
+    {
+      "date": "2025-04-08",
+      "amount": 4.2,
+      "unit": "mm",
+      "note": "Light drizzle"
+    },
+    {
+      "date": "2025-04-15",
+      "amount": 0,
+      "unit": "mm",
+      "note": "Recorded dry day"
+    },
+    {
+      "date": "2025-04-21",
+      "amount": 18.6,
+      "unit": "mm",
+      "note": "Spring front"
+    },
+    {
+      "date": "2025-05-02",
+      "amount": 0.25,
+      "unit": "in",
+      "note": "Early May rain"
+    },
+    {
+      "date": "2025-05-05",
+      "amount": 25.4,
+      "unit": "mm",
+      "note": "Heavy downpour (1.00 in)"
+    },
+    {
+      "date": "2025-05-10",
+      "amount": 0,
+      "unit": "in",
+      "note": "Recorded dry day"
+    },
+    {
+      "date": "2025-05-18",
+      "amount": 9.5,
+      "unit": "mm",
+      "note": "Evening rain"
+    }
+  ]
+}
