@@ -13,11 +13,11 @@
       <p class="subtitle">Offline single-gauge year log. Recorded zeros are distinct from missed-day gaps. No gauge accuracy or climate claim.</p>
     </div>
     <div class="header-controls no-print">
-      <label>
+      <label for="year-input">
         Year
         <input type="number" id="year-input" min="1900" max="2100" step="1" value="2025">
       </label>
-      <label>
+      <label for="display-unit-select">
         Totals Unit
         <select id="display-unit-select">
           <option value="mm">mm</option>
@@ -34,22 +34,22 @@
     <section class="card no-print" aria-labelledby="entry-heading">
       <h2 id="entry-heading">Record or Update Daily Reading</h2>
       <form id="reading-form" class="reading-form">
-        <label>
+        <label for="reading-date">
           Date (YYYY-MM-DD)
           <input type="date" id="reading-date" required>
         </label>
-        <label>
+        <label for="reading-amount">
           Amount
           <input type="number" id="reading-amount" min="0" step="any" placeholder="0.0" required>
         </label>
-        <label>
+        <label for="reading-unit">
           Entry Unit
           <select id="reading-unit">
             <option value="mm">mm</option>
             <option value="in">in</option>
           </select>
         </label>
-        <label class="note-field">
+        <label class="note-field" for="reading-note">
           Note (optional)
           <input type="text" id="reading-note" maxlength="140" placeholder="e.g. Recorded dry day, morning shower">
         </label>
@@ -92,7 +92,7 @@
       <div class="io-actions">
         <button type="button" id="export-json-btn">Export JSON</button>
         <button type="button" id="export-csv-btn">Export CSV</button>
-        <label class="file-btn">
+        <label class="file-btn" for="import-file-input">
           Import JSON / CSV
           <input type="file" id="import-file-input" accept=".json,.csv,application/json,text/csv" hidden>
         </label>
