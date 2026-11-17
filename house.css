@@ -1339,3 +1339,20 @@ footer a {
 
 /* In-room signs sit on the floor, where the walls in front cut them in half in the whole-house view; they show once a room is opened. */
 .house-layout:not(.room-open) .interior-caption { display:none; }
+
+/* The Salvage Room's invented archive: six decisions, no real file operations. */
+.salvage-bench { border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:12px; min-width:0; }
+.salvage-bench h3 { font:normal 1.45rem/1.2 Georgia,serif; margin:0 0 10px; }
+.salvage-progress { color:var(--gold); font-size:.9rem; }
+.salvage-strip { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:5px; }
+.salvage-file,.salvage-choice { background:var(--room); color:var(--paper); border:1px solid var(--line); border-radius:7px; cursor:pointer; min-height:44px; }
+.salvage-file[aria-pressed="true"],.salvage-choice[aria-pressed="true"] { outline:2px solid var(--gold); outline-offset:1px; }
+.salvage-file.checked { color:var(--gold); }
+.salvage-detail { padding:12px 0; }
+.salvage-target { overflow-wrap:anywhere; margin:4px 0; font-size:1rem; }
+.salvage-choices { display:grid; gap:8px; }
+.salvage-choice { text-align:left; padding:10px; overflow-wrap:anywhere; min-width:0; }
+.salvage-choice strong,.salvage-choice span { display:block; }
+.salvage-result { border-left:3px solid var(--gold); padding-left:10px; line-height:1.5; }
+.salvage-controls { display:flex; flex-wrap:wrap; gap:8px; }
+.salvage-bench a { overflow-wrap:anywhere; }
