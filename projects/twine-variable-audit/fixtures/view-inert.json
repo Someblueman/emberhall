@@ -1,0 +1,14 @@
+[
+  {
+    "fill": [
+      "#story-input",
+      "<tw-storydata name=\"&lt;img src=x onerror=alert(1)&gt;\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\"><tw-passagedata pid=\"1\" name=\"Start\">&lt;svg onload=alert(1)&gt;&lt;/svg&gt;\n$literal</tw-passagedata></tw-storydata><script>document.title=\"unsafe\";alert(\"unsafe\")</script>"
+    ]
+  },
+  {
+    "click": "#audit"
+  },
+  {
+    "click": "#unchecked button"
+  }
+]

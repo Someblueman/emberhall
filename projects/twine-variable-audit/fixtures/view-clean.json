@@ -1,0 +1,11 @@
+[
+  {
+    "fill": [
+      "#story-input",
+      "<!doctype html><html><head><meta charset=\"utf-8\"><title>Both paths prepare</title></head><body>\n<tw-storydata name=\"Both paths prepare\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"33333333-3333-4333-8333-333333333333\">\n<tw-passagedata pid=\"5\" name=\"StoryInit\" tags=\"\">&lt;&lt;set $visits to 0&gt;&gt;</tw-passagedata>\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">[[Choose the bridge|Bridge]]\n[[Choose the boat|Boat]]</tw-passagedata>\n<tw-passagedata pid=\"2\" name=\"Bridge\" tags=\"\">&lt;&lt;set $ready to true&gt;&gt;\n[[Shore]]</tw-passagedata>\n<tw-passagedata pid=\"3\" name=\"Boat\" tags=\"\">&lt;&lt;set $ready to false&gt;&gt;\n[[Shore]]</tw-passagedata>\n<tw-passagedata pid=\"4\" name=\"Shore\" tags=\"\">&lt;&lt;if $ready&gt;&gt;The bridge is clear.&lt;&lt;else&gt;&gt;The boat has arrived.&lt;&lt;/if&gt;&gt;\n&lt;&lt;set $visits to $visits + 1&gt;&gt;\n&lt;&lt;if $visits lt 2&gt;&gt;[[Shore]]&lt;&lt;else&gt;&gt;Safe at last.&lt;&lt;/if&gt;&gt;</tw-passagedata>\n</tw-storydata></body></html>\n"
+    ]
+  },
+  {
+    "click": "#audit"
+  }
+]
