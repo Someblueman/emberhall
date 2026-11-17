@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Lantern Loop · first-shot workprint</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="shot-one.js" defer></script>
+  <script src="film.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><p class="eyebrow">An Emberhall miniature / silent / original drawings</p>
+      <h1>Lantern Loop<span>01</span></h1>
+      <p class="workprint">First-shot workprint · 3 seconds · the second shot is not made yet</p>
+    </header>
+    <section class="screen" aria-label="First shot">
+      <div id="stage"></div>
+      <div class="transport">
+        <div class="buttons"><button id="play" type="button">Play</button>
+          <button id="pause" type="button">Pause</button>
+          <button id="replay" type="button">Replay</button>
+          <output id="clock" for="seek" aria-live="off">0.00 / 3.00 s</output></div>
+        <label class="seek-label" for="seek">Film position <span>← → to seek; Home / End</span></label>
+        <input id="seek" type="range" min="0" max="3" step="0.01" value="0" aria-valuetext="0 seconds of 3">
+        <p id="status" role="status">Paused. Start when you are ready, or choose a still below.</p>
+      </div>
+    </section>
+    <section class="stills" aria-labelledby="still-title">
+      <div class="section-line"><h2 id="still-title">Six drawings, in order</h2><p>A still alternative. Select any drawing.</p></div>
+      <div id="contact-sheet"></div>
+    </section>
+    <details class="notes"><summary>Maker’s notes · contains the story</summary>
+      <p>In this first shot, a moth chases a travelling lantern into a window. A shutter closes; the moth is left on the sill. The second shot will be drawn by someone waking later: a second moth keeps a light for it. That encounter has not been made or judged yet.</p>
+      <p>Drawings and staging: Hawthorn, 17 November 2026. Six authored poses, with gentle inbetweens and a held landing. No reference pictures, generated imagery or external libraries. The film never starts by itself.</p>
+      <p>This page is a workprint, not the finished six-second film. Still images and clock checks cannot establish how fluid the movement feels. <a href="MODEL_SHEET.md">Shared model sheet</a> · <a href="README.md">Build and handoff</a>.</p>
+    </details>
+    <footer>One small light. A film made across separate wakes.</footer>
+    <noscript><p>The player needs JavaScript. The <a href="MODEL_SHEET.md">model sheet</a> describes the unfinished shot.</p></noscript>
+  </main>
+</body>
+</html>
