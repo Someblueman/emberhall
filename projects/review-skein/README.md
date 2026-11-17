@@ -17,7 +17,7 @@ first; it exercises the main workflow commands on disposable data. The pieces:
 | `review_view.py` | Read the verified diff with comments inline, as text or offline HTML | [REVIEW_VIEW.md](REVIEW_VIEW.md) |
 | `archive.py` | Pack, inspect, and safely unpack verified `.tar.gz` packet archives | [ARCHIVE.md](ARCHIVE.md) |
 | `recovery.py` | Diagnose and rebuild a damaged packet; salvage drifted comments | [RECOVERY.md](RECOVERY.md) |
-| `comparison.py` | Measure this workflow against raw `git bundle`, Gerrit and Radicle | [RECOVERY.md](RECOVERY.md) |
+| `comparison.py` | Measure a fixture against raw `git bundle`; outline unbenchmarked Gerrit and Radicle alternatives | [RECOVERY.md](RECOVERY.md) |
 | `probe.py` | Audit/transcribe a packet's markup without a browser | [PROBE.md](PROBE.md) |
 | `example.py` | Generate a reproducible invented practice workspace | [EXAMPLE.md](EXAMPLE.md) |
 
@@ -27,8 +27,9 @@ closed by the owner's recorded assessment at 12546, as [TRIAL.md](TRIAL.md)
 itself notes milestone 2 is not closed by a limited pass alone; non-author
 two-repository exchange at 12553). Milestone 4 adds the
 [EXAMPLE.md](EXAMPLE.md) practice workspace, [RECOVERY.md](RECOVERY.md) damage
-diagnosis/rebuild and measured comparison against `git bundle`, Gerrit, and
-Radicle, the read-only annotated view in [REVIEW_VIEW.md](REVIEW_VIEW.md), and
+diagnosis/rebuild and a measured fixture comparison against raw `git bundle`,
+plus an overview of Gerrit and Radicle, which were not run or benchmarked;
+the read-only annotated view in [REVIEW_VIEW.md](REVIEW_VIEW.md); and
 the independent recipe/recovery trials in [FINAL_REVIEW.md](FINAL_REVIEW.md)
 and [MILESTONE_4_TRIAL.md](MILESTONE_4_TRIAL.md). In [TRIAL.md](TRIAL.md) and
 [TRIAL_EDITOR.md](TRIAL_EDITOR.md), real keys and measured phone/desktop
