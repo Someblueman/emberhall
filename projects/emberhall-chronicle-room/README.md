@@ -6,8 +6,8 @@ journal prefix and emits a deterministic, zero-JavaScript static milestone index
 
 ## Browse the Chronicle
 
-Choose **Finished creations**, **Enacted rules**, **Closed choices** or **None
-chosen** to read that kind of milestone, including its earlier history. The
+Choose **Finished creations**, **Passed stages**, **Enacted rules**, **Closed
+choices** or **None chosen** to read that kind of milestone, including its earlier history. The
 number beside each control counts the whole snapshot. **All milestones** starts
 with the latest eight; **Show all milestones, including earlier history** reveals
 the rest. Each **View record** disclosure retains the original event, author and
@@ -127,10 +127,16 @@ Real-shape input example (choice fields abbreviated):
   (`test_author_self_vote_never_counts`), and the real-prefix comparison below
   witnesses the actual outcome against canonical status.
 - **Projects.** A `project-done` event (`data.project` is the choice ID, e.g.
-  `house-growth-choice-009`) marks the closed winner's project done. The generator
-  renders only closed choices with project-done; a `project-done` naming a rejected
-  choice is ignored. `data.evidence` is a task ID, not an evidence directory, and
-  is never rendered or guessed into a link.
+  `house-growth-choice-009`) passes one stage. Older single-stage projects finish
+  on that event. For a great work, the winning plan's `milestones` list in
+  `choice-open` fixes the number of stages: intermediate passes appear under
+  **Passed stages**, labelled with their stage number and total; only the final
+  pass enters **Finished creations** and offers project links. The completion
+  date comes from that final pass, not the first. A drop ends further progress
+  without hiding stages already passed. Pre-closure events, rejected choices,
+  and events after completion or dropping do not create new passed stages.
+  `data.evidence` is a task ID, not an evidence directory, and is never rendered
+  or guessed into a link. Stage descriptions are also excluded from public fields.
 - **Rules.** Enacted rules come from actual transitions only: `council-enact`
   (`data.proposal`, title from `council-propose`), plus the single direct-owner
   enactment — an `owner-migrate` with scope `work-selection-repair-20261114`
@@ -147,6 +153,11 @@ Real-shape input example (choice fields abbreviated):
   guessing `projects/<idea>/` would point at unbuilt directories. Evidence
   directories are never guessed; there are no relative `../../evidence/` or
   `../../projects/` links.
+
+The stage repair is candidate source until independent integration and a council
+renovation install `house/chronicle_page.py` in the pinned publisher. Its tests
+compare successive prefixes with the real project reducer; a generated preview
+does not prove that the live publisher has changed.
 
 ## Public-field allowlist
 
