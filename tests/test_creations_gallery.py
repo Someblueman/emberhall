@@ -11,8 +11,9 @@ class CreationsGalleryTests(unittest.TestCase):
         script = r'''
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 class Element {
- constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+ constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.listeners={};}
  appendChild(n){this.children.push(n);} replaceChildren(){this.children=[];}
+ setAttribute(k,v){this[k]=v;} addEventListener(k,fn){this.listeners[k]=fn;}
 }
 const root=new Element('div'),document={getElementById:()=>root,querySelector:()=>root,createElement:t=>new Element(t)};
 const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children.map(text)].join(' ');
@@ -29,7 +30,7 @@ assert.equal(collectionUrl({...tool,href:'https://github.com@evil.test/README.md
 catalog=[creation,tool];frame={shelf:{projects:[{idea:'garden',status:'done'},{idea:'lens',status:'done'}]}};current=true;
 renderCollection();assert.match(text(root),/Play <img src=x>/);assert.match(text(root),/Read guide Lens/);
 assert.equal(all(root).filter(n=>n.tag==='img').length,0);
-assert.equal(all(root).find(n=>n.tag==='details').open,undefined);
+assert.equal(all(root).find(n=>n.tag==='details').open,false);
 assert.equal(all(root).find(n=>n.tag==='a').href,'projects/garden/');
 current=false;frame={shelf:{projects:[{idea:'garden',status:'active'}]}};renderCollection();
 assert.equal(all(root).filter(n=>n.tag==='a').length,0);assert.match(text(root),/No published creations/);

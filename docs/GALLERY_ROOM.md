@@ -22,9 +22,24 @@ empty states and retain the full Gallery link.
 No new room was needed: showing and trying finished work already belongs to the
 Gallery. Its pictures come from the shipped creations, not new decorative art.
 
+## Find something in the full Gallery
+
+The full Gallery searches finished works by title or description. “What would
+you like to do?” narrows the results to Play, Make or explore, or Read a guide.
+The count includes matching house tools; their disclosure opens when a search
+or activity filter finds them. Show everything clears both controls and returns
+focus to the search. The Chronicle's direct browser link says Open.
+Preview pictures keep a bounded height even when a search leaves just one card,
+so its launch link is not pushed down by an enlarged picture.
+
+Search, activity, the house-tool disclosure and keyboard focus survive ordinary
+snapshot refreshes. Earlier moments still include only work completed by then,
+and never show present-day preview pictures. Search does not change the small
+display inside the Gallery room or the separate recorded milestone list.
+
 ## Checks
 
-`python3 -m unittest tests.test_gallery_room tests.test_creations_gallery`
+`python3 -m unittest tests.test_gallery_search tests.test_gallery_room tests.test_creations_gallery`
 exercises the actual renderer, browsing and focus, catalog replacement, historical
 isolation, room state, safe links, text handling and the existing model-generated
 previews. The fixed-channel page viewer is the separate interaction check.

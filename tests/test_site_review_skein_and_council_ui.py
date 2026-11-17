@@ -36,6 +36,7 @@ class Element {
   appendChild(node) { this.children.push(node); return node; }
   replaceChildren() { this.children = []; }
   setAttribute(k, v) { this.attrs[k] = String(v); if (k === "id") this.id = String(v); }
+  addEventListener() {}
 }
 const nodes = {};
 const document = {
