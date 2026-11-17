@@ -154,3 +154,78 @@ test('compact imports cannot accept a project too large to export', () => {
   assert.ok(compact.length < 200000); assert.ok(JSON.stringify(p, null, 2).length > 200000);
   assert.throws(() => m.parseJSON(compact), /Formatted JSON exceeds/);
 });
+
+test('timelineData derives track rows, deltas, negative releases, conflicts and all-blocked span', () => {
+  const initial = m.initial();
+  const baseTl = m.timelineData(initial);
+  assert.equal(baseTl.minTime, 0);
+  assert.equal(baseTl.maxTime, 22);
+  assert.equal(baseTl.baselineFinish, 22);
+  assert.equal(baseTl.scenarioFinish, 22);
+  assert.equal(baseTl.deltaFinish, 0);
+  assert.deepEqual(baseTl.rows.map(r => r.id), [
+    'print', 'pack', 'unlock', 'projector', 'tables', 'room-ready', 'welcome'
+  ]);
+
+  const delayed = m.editStep(initial, 'tables', { duration: 14 });
+  const delayedTl = m.timelineData(delayed);
+  assert.equal(delayedTl.minTime, 0);
+  assert.equal(delayedTl.maxTime, 26);
+  assert.equal(delayedTl.baselineFinish, 22);
+  assert.equal(delayedTl.scenarioFinish, 26);
+  assert.equal(delayedTl.deltaFinish, 4);
+  const byId = Object.fromEntries(delayedTl.rows.map(r => [r.id, r]));
+  assert.equal(byId.tables.scenario.deltaStart, 0);
+  assert.equal(byId.tables.scenario.deltaEnd, 4);
+  assert.equal(byId['room-ready'].scenario.deltaStart, 4);
+  assert.equal(byId.welcome.scenario.deltaEnd, 4);
+  assert.equal(byId.print.scenario.deltaEnd, 0);
+
+  const negative = m.editStep(initial, 'print', { release: -10 });
+  assert.equal(m.timelineData(negative).minTime, -10);
+
+  const conflict = m.editStep(initial, 'projector', { resource: 'crew' });
+  const conflictTl = m.timelineData(conflict);
+  assert.equal(conflictTl.scenarioConflicts.length, 1);
+  const cById = Object.fromEntries(conflictTl.rows.map(r => [r.id, r]));
+  assert.equal(cById.projector.scenario.conflicting, true);
+  assert.equal(cById.tables.scenario.conflicting, true);
+  assert.equal(cById.unlock.scenario.conflicting, false);
+
+  let blocked = copy(initial);
+  for (const plan of [blocked.baseline, blocked.scenario]) {
+    for (const r of plan.resources) r.available = false;
+  }
+  const blockedTl = m.timelineData(blocked);
+  assert.equal(blockedTl.minTime, 0);
+  assert.equal(blockedTl.maxTime, 1);
+  assert.equal(blockedTl.baselineFinish, null);
+  assert.equal(blockedTl.scenarioFinish, null);
+  assert.equal(blockedTl.deltaFinish, null);
+});
+
+test('previewSvg produces deterministic, XML-safe standalone SVG matching timeline state', () => {
+  const delayed = m.editStep(m.initial(), 'tables', { duration: 14 });
+  const svgA = m.previewSvg(delayed);
+  const reversed = copy(delayed);
+  reversed.scenario.steps.reverse();
+  reversed.baseline.steps.reverse();
+  const svgB = m.previewSvg(reversed);
+  assert.equal(svgA, svgB);
+  assert.ok(svgA.startsWith('<svg '));
+  assert.ok(svgA.endsWith('</svg>\n'));
+  assert.match(svgA, /xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+  assert.match(svgA, /The print-and-make workshop/);
+  assert.match(svgA, /Arrange tables/);
+  assert.match(svgA, /22 min/);
+  assert.match(svgA, /26 min/);
+  assert.doesNotMatch(svgA, /NaN|Infinity|undefined/);
+
+  const xss = m.initial();
+  xss.title = 'Stage <A & "B">';
+  xss.scenario.steps[0].label = 'Cue <1> & "2"';
+  const xssSvg = m.previewSvg(xss);
+  assert.doesNotMatch(xssSvg, /<A|<1>/);
+  assert.match(xssSvg, /Stage &lt;A &amp; &quot;B&quot;&gt;/);
+  assert.match(xssSvg, /Cue &lt;1&gt; &amp; &quot;2&quot;/);
+});

@@ -14,27 +14,41 @@ you copy it somewhere; the separate download button requests a JSON file.
 
 ## Try it
 
-1. Read the baseline and its explanations. Room preparation and paper preparation
-   run in parallel; welcoming the group waits for both.
+1. Read the **Original & rehearsal timeline** at the top of the page. Room
+   preparation and paper preparation run in parallel; welcoming the group waits
+   for both. Click any cue row in the timeline to select it in the editor.
 2. Choose a step, edit its fields, and click **Apply to scenario**. Blank
    prerequisites mean an independent start; otherwise use comma-separated IDs.
    Uncheck a scenario resource to explore an unavailable resource. A resource ID
    absent from the resource list is reported as unknown and blocks its step.
-3. Compare both plans and the per-ID start/finish changes. Cycles, missing IDs,
-   blocked steps and resource overlaps appear beside the affected plan.
+3. Compare both plans in the live timeline and per-ID start/finish changes.
+   Cycles, missing IDs, blocked steps and resource overlaps appear beside the
+   affected plan and highlight shifted or overlapping bars.
 4. **Export JSON to text** includes both plans. **Import JSON from text** replaces
    both only after validating the entire document. A rejected import leaves the
    working project and displayed explanations intact; its diagnostic persists
    through ordinary edits until another transfer action. Text in the transfer
    box is a draft, independent of the displayed project.
-5. **Reset scenario from baseline** deliberately replaces the scenario with a
-   fresh clone. Export first if you want to retain an earlier rehearsal.
+5. **Reset scenario from baseline** replaces the scenario with a fresh clone.
+   **Undo last change** restores up to 30 prior scenario edits, resource toggles,
+   resets or imports within the current tab. Export before closing or reloading.
 
 The baseline is read-only through the editing controls. Import can replace the
 entire document, including the baseline. The editor modifies existing steps;
 adding/removing steps, changing their labels/tracks or changing resource names
-uses JSON import. No implicit saving, undo stack, extra scenarios or resource
-optimizer is present.
+uses JSON import. No implicit saving, extra scenarios or resource optimizer is
+present.
+
+## Gallery preview
+
+`gallery-preview.svg` is generated directly by `model.js` (`previewSvg`) from
+the initial workshop compared against a rehearsal where `Arrange tables` takes
+14 minutes (`22 min` original vs `26 min` rehearsal). Regenerate from the
+repository root:
+
+```sh
+node projects/cue-rehearsal/make-gallery-preview.js > projects/cue-rehearsal/gallery-preview.svg
+```
 
 ## Time and resource semantics
 
@@ -111,34 +125,28 @@ python3 -m unittest discover -s projects/cue-rehearsal -v
 node --check projects/cue-rehearsal/model.js
 node --check projects/cue-rehearsal/app.js
 node --check projects/cue-rehearsal/model.test.js
+node --check projects/cue-rehearsal/make-gallery-preview.js
 python3 -c 'import ast; ast.parse(open("projects/cue-rehearsal/test_project.py").read())'
 python3 -m json.tool projects/cue-rehearsal/example.json > /dev/null
 git diff --check -- projects/cue-rehearsal
 ```
 
-`model.js` is the sole calculation and import/edit implementation. The browser
-loads it before `app.js`; the Node tests require those same source bytes. The
-small Python unittest launcher invokes the Node suite so the house's existing
-project gate actually runs it. Missing Node is an explicit skip. Static wiring
+`model.js` is the sole calculation, timeline-derivation, SVG-preview and
+import/edit implementation. The browser loads it before `app.js`; the Node tests
+require those same source bytes. The small Python unittest launcher invokes the
+Node suite and checks byte equality between `gallery-preview.svg` and
+`make-gallery-preview.js`. Missing Node is an explicit skip. Static wiring
 checks do not establish DOM behavior.
 
-The builder executed the commands above successfully (exit 0): 11 Node cases,
-2 Python cases (the Node suite is rerun by one of them), JavaScript/Python/JSON
-syntax and whitespace checks. The hand-derived baseline is unlock 0–5,
-tables 5–15, projector 5–13, room-ready 15–19; print 0–6, pack 6–13;
-welcome 19–22. Tests also check a delayed branch, slack, release control,
-independent-track stability, cycle/downstream distinction, missing references,
-resource blocks, endpoint/containment/identical/partial conflicts, order
-invariance, maximum admitted chain, clone retention and atomic malformed import.
-These are numerical and data-boundary observations.
-
-**No actual browser interaction or visual-quality check was available to this
-builder.** Computer Use inventory reported “The browser access host is
-unavailable”; requesting native Chrome returned “Computer Use was not approved
-to use Google Chrome”. No replacement browser automation or permission bypass
-was used. Download behavior, DOM import preservation, keyboard use and the
-rendered layout still need an actual browser witness. Unit tests and static
-inspection do not substitute for that observation.
+The original build executed 11 Node cases and 2 Python cases without a browser
+host. The timeline update adds 2 Node cases (`timelineData` and `previewSvg`),
+1 Python case (exact `gallery-preview.svg` byte match), and house browser viewer
+verification on 390px phone and 1280px desktop screens across initial load and
+interactive steps (click timeline cue, edit duration to 14, apply, uncheck
+resource, undo, reset, undo) with zero script errors, zero unlabelled controls,
+and zero horizontal overflow. Note that the house browser viewer does not speak
+or test screen readers, and file download dialogs remain outside its offline
+checks.
 
 ## Independent trial still required
 
