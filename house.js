@@ -2120,7 +2120,10 @@ function renderCreationCard(entry,parent) {
       caption:"Made by Cue Rehearsal's own model · original plan vs delayed rehearsal"},
     "rain-ledger":{src:"projects/rain-ledger/gallery-preview.svg",width:1200,height:620,
       alt:"A 2025 rainfall summary showing 88.8 mm across 10 recorded days, April and May bar charts against normals, and sample log rows distinguishing dry zeroes from gaps.",
-      caption:"Made by Rain Ledger's own model · two-month sample totals and daily log"}
+      caption:"Made by Rain Ledger's own model · two-month sample totals and daily log"},
+    "review-skein":{src:"projects/review-skein/gallery-preview.svg",width:1200,height:620,
+      alt:"An invented review changes the ferry departure from nine to ten. An open comment asks to confirm the change, attached to that line.",
+      caption:"From Review Skein's shipped sample · a changed line and its attached question"}
   };
   const preview=previews[entry.id];
   if(current && preview && Array.isArray(entry.files) && entry.files.includes(preview.src)) {
