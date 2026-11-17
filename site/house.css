@@ -1114,6 +1114,12 @@ footer a {
 .creation-preview img { display:block; width:100%; height:auto; border-radius:6px; }
 .creation-preview figcaption { margin-top:8px; line-height:1.4; }
 .creation-action { color:var(--gold); border-top:1px solid var(--line); padding-top:12px; margin-top:auto; }
+/* Keep the room's single display useful beside the house map and on a phone. */
+.gallery-room { margin-top:18px; min-width:0; }
+.gallery-room > h3 { font:normal 24px/1.2 Georgia,serif; }
+.gallery-room .creation-preview img { max-height:240px; object-fit:contain; }
+.gallery-room .workshop-pages { flex-wrap:wrap; }
+.gallery-room-display:focus { outline:2px solid var(--gold); outline-offset:4px; }
 .house-tools { margin-top:22px; }
 .house-tools .creation-card { margin-top:12px; }
 
