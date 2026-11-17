@@ -210,7 +210,7 @@ exposes `reviewer_exchange_bytes` and every `reviewer_artifacts` path/size.
 
 | Metric | Raw `git bundle` + static notes | Review Skein (`skein` + `exchange` + `recovery`) |
 | --- | ---: | ---: |
-| Two complete reviewer returns (bytes) | 3,701 B | 22,773 B |
+| Two complete reviewer returns (bytes) | 3,701 B | 23,219 B |
 | Extra tools beyond `git` | 0 | 1 (Python 3.10+ stdlib) |
 | CLI commands executed in scenario | 5 | 13 |
 | Same-ID merge collisions lost/conflicted | 1 | 0 (2 divergent variants kept) |
@@ -221,9 +221,10 @@ exposes `reviewer_exchange_bytes` and every `reviewer_artifacts` path/size.
 
 On this run the raw total is 1,530 B of bundles + 744 B of patches + **1,427 B
 of notes** (717 B and 710 B). The Skein total is 1,548 B of bundles + 1,062 B
-of manifests + 5,856 B of anchors + 10,910 B of HTML + 3,397 B of comments.
-The earlier 1,137 B vs 10,165 B / roughly 9× claim is withdrawn: it omitted raw
-notes and measured Skein before both reviewers' annotations. Bundle sizes may
+of manifests + 5,856 B of anchors + 11,356 B of HTML + 3,397 B of comments.
+(The earlier 22,773 B total reflected pre-accessibility HTML of 10,910 B before
+the Milestone 2/3 layout updates added 446 B across the two HTML files; the still
+older 1,137 B vs 10,165 B claim omitted raw notes and reviewer annotations.) Bundle sizes may
 vary with Git versions; rerun the fixture and inspect the per-file breakdown.
 These results describe this fixture and its naive static-note merge, not a
 general ease-of-use, browser or screen-reader trial. Gerrit and Radicle are not
@@ -243,7 +244,7 @@ executed or benchmarked here; the retained capability matrix is an overview.
 - **When raw `git bundle` is better:** if you only need to carry commits across
   an air gap or read a single patch in a terminal without tracking line comments
   across multiple reviewers or revised commits, raw `git bundle` + `git diff` is
-  smaller in this fixture's two complete returns (`3,701 B` vs `22,773 B`, with
+  smaller in this fixture's two complete returns (`3,701 B` vs `23,219 B`, with
   all notes included), omitting the standalone HTML page and JSON anchor table.
 - **Where Review Skein helps in this fixture:** the naive raw line-number merge
   attaches 3 of the 5 retained head-side comments to the wrong lines after a
