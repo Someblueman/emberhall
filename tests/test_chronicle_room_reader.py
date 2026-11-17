@@ -79,6 +79,47 @@ assert.equal(get('chronicle-room').value,'all');assert.match(text(root),/0 of 0 
 assert.doesNotMatch(text(root),/Room 9|not executable/);
 ''')
 
+    def test_building_trail_uses_viewed_tasks_and_returns_to_exact_story(self):
+        self.run_js(r'''
+rooms.push({id:'workshop',name:'Workshop',status:'open',floor:1});
+rooms[1].history[0].task='build-study';rooms[1].history[1].task='absent';
+frame.tasks=[{id:'build-study',plain:'Make a place to read.',title:'internal',status:'done'}];
+data.frames=[frame,{seq:99,rooms,tasks:[{id:'absent',title:'FUTURE SECRET',status:'done'}]}];
+index=0;current=false;const beforeTrail=JSON.stringify(data);draw();
+change('chronicle-room','study');change('chronicle-order','oldest');
+assert.match(text(root),/Building work: Make a place to read.*Finished · acceptance and delivery unknown/);
+assert.match(text(root),/State at this viewed moment/);assert.match(text(root),/details are absent/);
+assert.match(text(root),/No building task was recorded/);assert.doesNotMatch(text(root),/FUTURE SECRET/);
+const reason=all(root).find(n=>n.tag==='details');reason.open=true;reason.listeners.toggle();
+const follow=get('chronicle-work-study-2');follow.listeners.click();
+assert.equal(visitedRoom,'workshop');assert.equal(selectedFloor,1);
+assert.equal(workshopState.selectedId,'build-study');assert.equal(frame.seq,8);assert.equal(current,false);
+assert.equal(chronicleWorkTrail.target,follow.id);
+root.replaceChildren();renderChronicleReturn(root);assert(get('workshop-room-story'));
+// Following an earlier task handoff must not lose the original story, filter or page.
+frame={seq:1,rooms:[]};chronicleState.room='all';chronicleState.page=0;chronicleState.opened.clear();
+chronicleWorkTrail.current=true; // A newer publication must not turn the old story into Latest.
+render=draw;get('workshop-room-story').listeners.click();
+assert.equal(frame.seq,8);assert.equal(index,0);assert.equal(current,false);
+assert.equal(visitedRoom,'chronicle');assert.equal(selectedFloor,0);
+assert.equal(chronicleState.room,'study');assert.equal(chronicleState.order,'oldest');
+assert.equal(document.activeElement.id,follow.id);assert.equal(JSON.stringify(data),beforeTrail);
+assert.equal(all(root).find(n=>n.tag==='details').open,true);
+rooms[1].history[5].task='build-study';draw();change('chronicle-room','all');
+change('chronicle-order','oldest');get('chronicle-next').listeners.click();
+get('chronicle-work-study-8').listeners.click();root.replaceChildren();renderChronicleReturn(root);
+get('workshop-room-story').listeners.click();assert.equal(chronicleState.page,1);
+assert.equal(document.activeElement.id,'chronicle-work-study-8');
+workshopState.selectedId='different';root.replaceChildren();renderChronicleReturn(root);
+assert(!get('workshop-room-story'));
+workshopState.selectedId='build-study';data.frames=[];renderChronicleReturn(root);
+assert.match(text(root),/original moment is absent/);assert(!get('workshop-room-story'));
+// Missing/closed Workshop and hostile titles never create links or executable markup.
+data.frames=[frame];chronicleState.page=0;rooms.at(-1).status='closed';frame.tasks[0].plain='<script>literal</script>';draw();
+assert.match(text(root),/Workshop is not open/);assert(!get('chronicle-work-study-2'));
+assert.match(text(root),/<script>literal<\/script>/);assert(!all(root).some(n=>n.tag==='script'));
+''')
+
     def test_room_gate_and_refresh_preserve_filters_page_and_focus(self):
         self.run_js(r'''
 for(const id of ['room-content','room-kicker','room-title','room-description','room-context']){
