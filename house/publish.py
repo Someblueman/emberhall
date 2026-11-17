@@ -21,7 +21,10 @@ HISTORY_CACHE = "history-cache.marshal"
 CACHE_FORMAT = 1
 
 BRANCH = "codex/house-pages"
-MAX_PUBLIC_BLOB = 64 * 1024 * 1024  # Fail locally before GitHub's 100 MiB limit.
+# Fail locally before GitHub's 100 MiB limit. On 17 November (evening) the history passed 64 MiB and
+# the page stood still for forty minutes; the limit moved to 90 MiB as a stopgap until the history is
+# published in parts.
+MAX_PUBLIC_BLOB = 90 * 1024 * 1024
 
 
 def oversized_unpublished(record: Record, previous: str, remote: str | None) -> bool:
