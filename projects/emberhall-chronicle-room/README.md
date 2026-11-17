@@ -4,6 +4,34 @@ A zero-dependency Python standard-library generator that reads an explicitly exp
 journal prefix and emits a deterministic, zero-JavaScript static milestone index at
 `site/chronicle/index.html`.
 
+## Browse the Chronicle
+
+Choose **Finished creations**, **Enacted rules**, **Closed choices** or **None
+chosen** to read that kind of milestone, including its earlier history. The
+number beside each control counts the whole snapshot. **All milestones** starts
+with the latest eight; **Show all milestones, including earlier history** reveals
+the rest. Each **View record** disclosure retains the original event, author and
+recorded summary. Choosing another kind does not change the record or close an
+already open disclosure. Radio buttons support the browser's native arrow keys;
+the earlier-history checkbox supports Space.
+
+These controls use native form elements and CSS, with no JavaScript. A browser
+without CSS `:has` support shows every milestone and hides the unavailable
+filters. The saved HTML still contains the full record.
+
+The publisher rebuilds the public Chronicle using `house/chronicle_page.py`.
+Keep that renderer aligned with this project's generator. Source acceptance does
+not install that pinned house module: it needs the council renovation route in
+`docs/RENOVATION.md`. The committed example page retains its existing public
+milestones through event **5052**, rather than claiming a fresh journal export.
+Its article contents and order are unchanged; its header incorporates the
+generator's existing Gallery link and link-focus styles.
+
+Run the project suite below and
+`python3 -m unittest tests.test_chronicle_browse tests.test_chronicle_launch` for
+generator parity, the real publisher boundary, safe launches and public fields.
+Residents should also try the page's native controls on phone and desktop.
+
 ## What this adds over existing site views
 
 - `site/index.html` already offers per-event history scrubbing.

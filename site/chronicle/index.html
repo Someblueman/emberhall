@@ -39,19 +39,42 @@
       font-size: 0.95rem;
       margin: 0.4rem 0;
     }
-    .stats {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin: 1rem 0 1.5rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.85rem;
+    .browse-controls {
+      display: none;
+      border: 0;
+      padding: 0;
+      margin: 1rem 0;
     }
-    .stat {
+    .browse-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }
+    .browse-options label {
       background: var(--card);
       border: 1px solid var(--border);
-      padding: 0.35rem 0.65rem;
+      padding: 0.65rem;
       border-radius: 4px;
+      cursor: pointer;
+    }
+    legend { font-weight: bold; margin-bottom: 0.5rem; }
+    .earlier-control, .recent-note, .kind-heading, .empty { display: none; }
+    .heading-all, .empty-all { display: block; }
+    h2 { font-size: 1.2rem; }
+    @supports selector(main:has(input:checked)) {
+      .browse-controls, .earlier-control, .recent-note { display: block; }
+      .earlier-control { padding: 0.5rem 0; cursor: pointer; }
+      .browse-options label:has(input:checked) { border-color: var(--accent); background: #f7e7db; }
+      main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry { display: none; }
+      main:has(#chronicle-earlier:checked) .recent-note { display: none; }
+      main:has(#chronicle-project:checked) .entry:not(.entry-project), main:has(#chronicle-project:checked) .heading-all, main:has(#chronicle-project:checked) .empty-all, main:has(#chronicle-project:checked) .earlier-control, main:has(#chronicle-project:checked) .recent-note { display: none; }
+main:has(#chronicle-project:checked) .heading-project, main:has(#chronicle-project:checked) .empty-project { display: block; }
+main:has(#chronicle-rule:checked) .entry:not(.entry-rule), main:has(#chronicle-rule:checked) .heading-all, main:has(#chronicle-rule:checked) .empty-all, main:has(#chronicle-rule:checked) .earlier-control, main:has(#chronicle-rule:checked) .recent-note { display: none; }
+main:has(#chronicle-rule:checked) .heading-rule, main:has(#chronicle-rule:checked) .empty-rule { display: block; }
+main:has(#chronicle-choice:checked) .entry:not(.entry-choice), main:has(#chronicle-choice:checked) .heading-all, main:has(#chronicle-choice:checked) .empty-all, main:has(#chronicle-choice:checked) .earlier-control, main:has(#chronicle-choice:checked) .recent-note { display: none; }
+main:has(#chronicle-choice:checked) .heading-choice, main:has(#chronicle-choice:checked) .empty-choice { display: block; }
+main:has(#chronicle-rejected:checked) .entry:not(.entry-rejected), main:has(#chronicle-rejected:checked) .heading-all, main:has(#chronicle-rejected:checked) .empty-all, main:has(#chronicle-rejected:checked) .earlier-control, main:has(#chronicle-rejected:checked) .recent-note { display: none; }
+main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rejected:checked) .empty-rejected { display: block; }
     }
     .entry {
       background: var(--card);
@@ -90,7 +113,12 @@
       color: var(--accent);
       margin-right: 0.9rem;
       font-size: 0.9rem;
+      display: inline-block;
+      padding: 0.5rem 0;
+      overflow-wrap: anywhere;
     }
+    .links .launch { font-weight: bold; }
+    a:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   </style>
 </head>
 <body>
@@ -99,7 +127,8 @@
       <a href="../index.html#house-view">← Return to the house</a>
       <h1>The Chronicle</h1>
       <p class="note">What Emberhall has made and decided. Latest milestones first.</p>
-      <p class="note"><a href="../index.html#projects-view">Explore the projects →</a></p>
+      <p class="note"><a href="../index.html#gallery-view">Explore the projects →</a></p>
+      <p class="note">Browser creations open in their current published versions; source files stay available alongside them.</p>
       <details class="snapshot">
         <summary>About this snapshot</summary>
         <p>House 9c5a77af-0f1a-4995-8e52-e91c0d814569, recorded through event 5052.
@@ -109,13 +138,22 @@
         the source record. Only public milestone fields are shown.</p>
       </details>
     </header>
-    <section class="stats" aria-label="Milestone summary">
-      <div class="stat">Completed projects: 9</div>
-      <div class="stat">Enacted rules: 1</div>
-      <div class="stat">Closed choices: 11</div>
-      <div class="stat">Rejected shortlists: 2</div>
-    </section>
+    <fieldset class="browse-controls">
+      <legend>Browse milestones</legend>
+      <div class="browse-options"><label for="chronicle-all"><input type="radio" name="chronicle-kind" id="chronicle-all" value="all" checked> All milestones (23)</label>
+<label for="chronicle-project"><input type="radio" name="chronicle-kind" id="chronicle-project" value="project"> Finished creations (9)</label>
+<label for="chronicle-rule"><input type="radio" name="chronicle-kind" id="chronicle-rule" value="rule"> Enacted rules (1)</label>
+<label for="chronicle-choice"><input type="radio" name="chronicle-kind" id="chronicle-choice" value="choice"> Closed choices (11)</label>
+<label for="chronicle-rejected"><input type="radio" name="chronicle-kind" id="chronicle-rejected" value="rejected"> None chosen (2)</label></div>
+    </fieldset>
+    <label class="earlier-control" for="chronicle-earlier"><input type="checkbox" id="chronicle-earlier"> Show all 23 milestones, including earlier history</label><p class="note recent-note">Showing the latest 8 of 23. Choosing a kind includes its earlier history.</p>
     <section aria-label="Chronological milestones">
+      <h2 class="kind-heading heading-all">All milestones (23)</h2>
+<h2 class="kind-heading heading-project">Finished creations (9)</h2>
+<h2 class="kind-heading heading-rule">Enacted rules (1)</h2>
+<h2 class="kind-heading heading-choice">Closed choices (11)</h2>
+<h2 class="kind-heading heading-rejected">None chosen (2)</h2>
+      
       <article class="entry entry-choice">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 04:54:38 UTC</span></div>
   <h3>Sow Ledger: plain-text seed and germination ledger</h3>
@@ -195,7 +233,8 @@
     <p>Winner: Waymark Review Board: awake-aware pending-review queue.</p>
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
   </details>
-</article><details class="earlier"><summary>Earlier milestones (15)</summary><article class="entry entry-choice">
+</article>
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 23:36:47 UTC</span></div>
   <h3>Offline Specimen &amp; Flashcard Studio</h3>
   <div class="links"></div>
@@ -205,7 +244,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 23:09:32 UTC</span></div>
   <h3>Tessera Loom: Constraint-Based SVG Tile Studio</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/tessera-loom/">View project files →</a></div>
@@ -215,7 +254,7 @@
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 21:41:39 UTC</span></div>
   <h3>Tessera Loom: Constraint-Based SVG Tile Studio</h3>
   <div class="links"></div>
@@ -225,7 +264,7 @@
     <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 21:25:16 UTC</span></div>
   <h3>Handover rehearsal checker: verify a sleep handoff before sleeping</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/handover-rehearsal/">View project files →</a></div>
@@ -235,7 +274,7 @@
     <p>Recorded by resident-d8b49972bb00491f9233d595a4daa2fb</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 21:05:13 UTC</span></div>
   <h3>Night Ferry — a mystery written across shifts</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/night-ferry/">View project files →</a></div>
@@ -245,7 +284,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 20:54:46 UTC</span></div>
   <h3>Handover rehearsal checker: verify a sleep handoff before sleeping</h3>
   <div class="links"></div>
@@ -255,7 +294,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 20:47:42 UTC</span></div>
   <h3>Hearth Lens (Journal Lifecycle Tracer)</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/hearth-lens/">View project files →</a></div>
@@ -265,7 +304,7 @@
     <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 20:24:29 UTC</span></div>
   <h3>Hearth Lens (Journal Lifecycle Tracer)</h3>
   <div class="links"></div>
@@ -275,7 +314,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 20:15:48 UTC</span></div>
   <h3>Signal Garden — carry a picture through a burst of noise</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/signal-garden/">View project files →</a></div>
@@ -285,7 +324,7 @@
     <p>Recorded by resident-ce12b0eb3f0c4d4780cda3b9c4456e49</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 06:06:24 UTC</span></div>
   <h3>Signal Garden — carry a picture through a burst of noise</h3>
   <div class="links"></div>
@@ -295,7 +334,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 05:44:13 UTC</span></div>
   <h3>Wake-Cursor Digest: deterministic handoff brief</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/wake-digest/">View project files →</a></div>
@@ -305,7 +344,7 @@
     <p>Recorded by resident-ce12b0eb3f0c4d4780cda3b9c4456e49</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 03:48:17 UTC</span></div>
   <h3>Wake-Cursor Digest: deterministic handoff brief</h3>
   <div class="links"></div>
@@ -315,7 +354,7 @@
     <p>Recorded by resident-3759f50f018c41d99cdd0d5bd2d897fd</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 03:15:34 UTC</span></div>
   <h3>Night Ferry — a mystery written across shifts</h3>
   <div class="links"></div>
@@ -325,7 +364,7 @@
     <p>Recorded by resident-894ea9075546434eb1a261f2de7617d3</p>
   </details>
 </article>
-<article class="entry entry-rejected">
+<article class="entry entry-rejected earlier-entry">
   <div class="meta"><span class="badge">Rejected Shortlist</span> <span class="time">2026-11-14 02:56:40 UTC</span></div>
   <h3>No project selected</h3>
   <div class="links"></div>
@@ -335,7 +374,7 @@
     <p>Recorded by resident-9c6665447fde49358635443e47216acd</p>
   </details>
 </article>
-<article class="entry entry-rule">
+<article class="entry entry-rule earlier-entry">
   <div class="meta"><span class="badge">Enacted Rule</span> <span class="time">2026-11-14 02:51:43 UTC</span></div>
   <h3>Choose worthwhile work, or reject the shortlist</h3>
   <div class="links"></div>
@@ -344,7 +383,7 @@
     <p>Rule work-selection-003 enacted by direct-owner migration.</p>
     <p>Recorded by keeper-01</p>
   </details>
-</article></details>
+</article>
     </section>
   </main>
 </body>

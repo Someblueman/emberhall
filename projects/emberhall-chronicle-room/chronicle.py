@@ -449,7 +449,7 @@ def render_html(
 
     actions = _browser_actions(catalog)
     rows_html: list[str] = []
-    for item in reversed(milestones):
+    for position, item in enumerate(reversed(milestones)):
         title = item["title"]
         if item["category_key"] == "choice":
             title = title.partition(" — ")[2] or title
@@ -465,7 +465,7 @@ def render_html(
             links_html = (f'<a class="launch" href="{html.escape(href)}">'
                           f'{action} {html.escape(title)} →</a> ' + links_html)
         rows_html.append(
-            f'<article class="entry entry-{html.escape(item["category_key"])}">\n'
+            f'<article class="entry entry-{html.escape(item["category_key"])}{" earlier-entry" if position >= 8 else ""}">\n'
             f'  <div class="meta"><span class="badge">{html.escape(item["category"])}</span> '
             f'<span class="time">{html.escape(item["timestamp"])}</span></div>\n'
             f'  <h3>{html.escape(title)}</h3>\n'
@@ -478,14 +478,39 @@ def render_html(
             f'</article>'
         )
 
-    entries_block = "\n".join(rows_html[:8]) if rows_html else (
-        '<p class="empty">No milestones recorded in this snapshot.</p>'
-    )
-    if len(rows_html) > 8:
-        entries_block += (
-            f'<details class="earlier"><summary>Earlier milestones ({len(rows_html) - 8})</summary>'
-            + "\n".join(rows_html[8:]) + '</details>'
-        )
+    kinds = [("all", "All milestones", len(milestones)),
+             ("project", "Finished creations", counts["project"]),
+             ("rule", "Enacted rules", counts["rule"]),
+             ("choice", "Closed choices", counts["choice"]),
+             ("rejected", "None chosen", counts["rejected"])]
+    controls = "\n".join(
+        f'<label for="chronicle-{key}"><input type="radio" name="chronicle-kind" '
+        f'id="chronicle-{key}" value="{key}"{" checked" if key == "all" else ""}> '
+        f'{label} ({count})</label>' for key, label, count in kinds)
+    headings = "\n".join(
+        f'<h2 class="kind-heading heading-{key}">{label} ({count})</h2>'
+        for key, label, count in kinds)
+    empty_labels = {"all": "milestones", "rejected": "rejected shortlists"}
+    empty_states = "\n".join(
+        f'<p class="empty empty-{key}">No {empty_labels.get(key, label.lower())} recorded in this snapshot.</p>'
+        for key, label, count in kinds if not count)
+    entries_block = "\n".join(rows_html)
+    # Without :has support, show the entire record and no inert controls.
+    browse_css = "\n".join(
+        f'main:has(#chronicle-{key}:checked) .entry:not(.entry-{key}), '
+        f'main:has(#chronicle-{key}:checked) .heading-all, '
+        f'main:has(#chronicle-{key}:checked) .empty-all, '
+        f'main:has(#chronicle-{key}:checked) .earlier-control, '
+        f'main:has(#chronicle-{key}:checked) .recent-note {{ display: none; }}\n'
+        f'main:has(#chronicle-{key}:checked) .heading-{key}, '
+        f'main:has(#chronicle-{key}:checked) .empty-{key} {{ display: block; }}'
+        for key, _, _ in kinds if key != "all")
+    earlier_control = (
+        f'<label class="earlier-control" for="chronicle-earlier">'
+        f'<input type="checkbox" id="chronicle-earlier"> '
+        f'Show all {len(milestones)} milestones, including earlier history</label>'
+        f'<p class="note recent-note">Showing the latest 8 of {len(milestones)}. '
+        'Choosing a kind includes its earlier history.</p>' if len(milestones) > 8 else "")
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -528,19 +553,35 @@ def render_html(
       font-size: 0.95rem;
       margin: 0.4rem 0;
     }}
-    .stats {{
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin: 1rem 0 1.5rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.85rem;
+    .browse-controls {{
+      display: none;
+      border: 0;
+      padding: 0;
+      margin: 1rem 0;
     }}
-    .stat {{
+    .browse-options {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }}
+    .browse-options label {{
       background: var(--card);
       border: 1px solid var(--border);
-      padding: 0.35rem 0.65rem;
+      padding: 0.65rem;
       border-radius: 4px;
+      cursor: pointer;
+    }}
+    legend {{ font-weight: bold; margin-bottom: 0.5rem; }}
+    .earlier-control, .recent-note, .kind-heading, .empty {{ display: none; }}
+    .heading-all, .empty-all {{ display: block; }}
+    h2 {{ font-size: 1.2rem; }}
+    @supports selector(main:has(input:checked)) {{
+      .browse-controls, .earlier-control, .recent-note {{ display: block; }}
+      .earlier-control {{ padding: 0.5rem 0; cursor: pointer; }}
+      .browse-options label:has(input:checked) {{ border-color: var(--accent); background: #f7e7db; }}
+      main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry {{ display: none; }}
+      main:has(#chronicle-earlier:checked) .recent-note {{ display: none; }}
+      {browse_css}
     }}
     .entry {{
       background: var(--card);
@@ -584,7 +625,7 @@ def render_html(
       overflow-wrap: anywhere;
     }}
     .links .launch {{ font-weight: bold; }}
-    a:focus-visible, summary:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 3px; }}
+    a:focus-visible, summary:focus-visible, input:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 3px; }}
   </style>
 </head>
 <body>
@@ -604,13 +645,14 @@ def render_html(
         the source record. Only public milestone fields are shown.</p>
       </details>
     </header>
-    <section class="stats" aria-label="Milestone summary">
-      <div class="stat">Completed projects: {counts["project"]}</div>
-      <div class="stat">Enacted rules: {counts["rule"]}</div>
-      <div class="stat">Closed choices: {counts["choice"]}</div>
-      <div class="stat">Rejected shortlists: {counts["rejected"]}</div>
-    </section>
+    <fieldset class="browse-controls">
+      <legend>Browse milestones</legend>
+      <div class="browse-options">{controls}</div>
+    </fieldset>
+    {earlier_control}
     <section aria-label="Chronological milestones">
+      {headings}
+      {empty_states}
       {entries_block}
     </section>
   </main>
