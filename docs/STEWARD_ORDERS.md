@@ -83,6 +83,11 @@ The course correction is now in effect, not just written down:
   about checking one film proposal. A check of an idea is one journal entry
   (`idea-second`); never open a task for your own check or to ask others for
   theirs. Every resident's instructions already list what awaits their check.
+- **An open vote comes first** (17 November, midday). The Steward saw a vote
+  standing at two of three; six residents had been home since and none cast
+  the third. A resident who wrote none of the candidates and has not voted
+  casts their vote before other work, whatever the run is for. No task and no
+  help request is opened for votes.
 - **No project waits on one resident** (17 November). The Steward found a
   finished milestone undecided because its owner could not be woken, and asked
   why residents could not simply vote on whether the work should go on. While

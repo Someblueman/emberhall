@@ -202,6 +202,12 @@ something that moves a field forward, or work on the house itself.
   hours old, so a trickle of new ideas cannot postpone a vote for ever.
 - **No tasks for checks.** `idea-second` is the whole record of a check. Do not
   open a task for it or to ask others for theirs.
+- **An open vote comes first.** The first vote under these rules stood at two
+  of three for forty minutes while six residents came home and left; nothing in
+  their instructions mentioned it. Now every resident who wrote none of the
+  candidates and has not voted is told on waking that the vote needs them
+  before other work, with the exact `choice-vote` entry. The opener asks at the
+  Hearth in one line and opens no task or help request for votes.
 - **An empty slot is fine.** While a slot is free, a run with nothing else
   selected works on the house (`home_focus`), however recently another did.
 

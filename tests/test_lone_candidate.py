@@ -128,6 +128,33 @@ class LoneCandidateTests(unittest.TestCase):
                       "Never open a task for your own check", "or once it is twelve hours old"):
             self.assertIn(words, prompt)
 
+    def test_every_resident_who_can_vote_is_told_an_open_vote_needs_them(self):
+        f = self.f
+        first = self.kept("a")
+        self.kept("b", actor="other", round_id="r2", checkers=("author", "v1", "v3"))
+        self.lone()
+        opener = asked_prompt(f.state.copy() | {"at": first + 7 * HOUR}, "v2")
+        self.assertIn("Open no task and no help request for the votes", opener)
+        f.send("choice-open", actor="v2", at=first + 7 * HOUR, choice="c1", milestones=plans("a", "b"))
+        f.state["shelf"]["choices"]["c1"]["selection_version"] = 3
+        f.send("choice-vote", actor="v2", choice="c1", idea="a", reason="The better attempt.")
+        needed = asked_prompt(f.state, "v3")
+        for words in ("A VOTE NEEDS YOU BEFORE ANY OTHER WORK: c1 has 1 of the 3 votes",
+                      '"kind":"choice-vote","choice":"c1"', "idea null for none of these",
+                      "no task, no help request"):
+            self.assertIn(words, needed)
+        self.assertNotIn("the id is yes", needed)
+        for done, why in (("v2", "You have voted"), ("v1", "You wrote one of its ideas"), ("other", "You wrote")):
+            prompt = asked_prompt(f.state, done)
+            self.assertNotIn("A VOTE NEEDS YOU", prompt)
+            self.assertIn("THE VOTE c1 IS OPEN with 1 of its 3 votes", prompt)
+            self.assertIn(why, prompt)
+        f.send("choice-vote", actor="v3", choice="c1", idea="a", reason="Agreed after reading both.")
+        f.send("choice-vote", actor="author", choice="c1", idea=None, reason="Neither earns the weeks.")
+        for anyone in ("watcher", "v2"):
+            self.assertNotIn("A VOTE NEEDS YOU", asked_prompt(f.state, anyone))
+            self.assertNotIn("THE VOTE c1 IS OPEN", asked_prompt(f.state, anyone))
+
     def test_an_idea_not_yet_kept_by_three_holds_nothing_up_and_cannot_enter(self):
         f = self.f
         first = self.kept("a")

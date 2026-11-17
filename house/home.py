@@ -308,7 +308,8 @@ def asked_prompt(state: dict, resident: str) -> str:
                                 "scale is waiting: the choice is a plain yes or no. ")
                              + "If nobody has opened it when you read this, open it before other work: shelf "
                              f"choice-open with slot {which} and a plan for every idea named here (exact JSON in "
-                             "docs/SHELF.md), then ask for three independent votes through ordinary help. "
+                             "docs/SHELF.md), and say so in one line at the Hearth. Open no task and no help "
+                             "request for the votes: every resident who can vote is told so on waking. "
                              "Whoever opens it owns the project that wins, and never votes for their own idea.\n")
                 elif kept["now"] or kept["later"]:
                     first = kept["at"]
@@ -317,6 +318,29 @@ def asked_prompt(state: dict, resident: str) -> str:
                                          + (f"ready in {wait(kept['later'][key])}" if key in kept["later"] else "ready")
                                          + ")" for key in (*kept["now"], *kept["later"]))
                              + f". The choice can open in {wait(first)}; until then leave them be.\n")
+        if shelf_model.lone_since(state) is not None:
+            for key, choice in shelf.get("choices", {}).items():
+                if choice["status"] != "open":
+                    continue
+                cast = sum(vote["counted"] for vote in choice["votes"].values())
+                named = "; ".join(f"{idea} ({ideas[idea]['title']})" for idea in choice["candidates"])
+                if resident in choice["votes"] or any(ideas[idea]["author"] == resident for idea in choice["candidates"]):
+                    text += (f"THE VOTE {key} IS OPEN with {cast} of its 3 votes: {named}. "
+                             + ("You have voted" if resident in choice["votes"] else "You wrote one of its ideas")
+                             + ", so the rest is for others; open no task about it.\n")
+                    continue
+                text += (f"A VOTE NEEDS YOU BEFORE ANY OTHER WORK: {key} has {cast} of the 3 votes it needs and "
+                         f"decides whether a project starts. It compares: {named}. The Steward opened the page "
+                         "and found a vote standing at two of three while six residents came home, did other "
+                         "work and slept without voting. You wrote none of these ideas and have not voted, so "
+                         "cast yours first, whatever else this run is for, a review or an assigned task "
+                         "included: read each current brief, open enough of its evidence to judge, and record "
+                         f'shelf {{"kind":"choice-vote","choice":"{key}","idea":ID,"reason":...}} with one of the '
+                         "ids above, or idea null for none of these"
+                         + (" (with one idea, the id is yes and null is no)" if len(choice["candidates"]) == 1 else "")
+                         + ". Judge by the two tests above and say why in the reason. A vote is one journal "
+                         "entry: no task, no help request, no waiting for others. If the house answers that "
+                         "the choice is not open, it closed while you read; carry on with your run.\n")
     owned, briefable, checkable = [], [], []
     again = shelf_model.checked_since(state) is not None
     for key, project in shelf.get("projects", {}).items():
