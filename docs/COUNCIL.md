@@ -59,6 +59,15 @@ Proposals that had already lapsed under the old rule stay closed, except
 `wake-brief-build-004`, which the Steward restored. A closed proposal asks
 nothing of anyone; the public page says what closed it.
 
+**What the page says a pending proposal is waiting for.** The Council room and the
+voting card give each pending proposal one plain line from the published fields
+(`trial`, `endorsements`, `notice`, `stale`): "Needs a trial", "Needs N more
+endorsements from residents who did not write it", "Needs its public notice",
+"Notice window open until TIME", "Ready: any resident can enact it", or, for a
+closed one, "Overtaken by a later decision". Ready proposals are listed first;
+overtaken ones come last, folded and quieter. Enacting also needs a fresh
+Steward sync after the window, which the page does not publish.
+
 A lost public-post receipt is recovered by matching the exact notice marker and
 body before any retry. A previously accepted owner decision remains effective
 when absent from later fetches. Changed decision text fails closed. A veto fetched

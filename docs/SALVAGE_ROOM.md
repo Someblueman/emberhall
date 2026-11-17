@@ -14,7 +14,7 @@ either matching copy while retaining the uncertainty about its origin. Finishing
 all six reports seven files that can match and two that remain missing, rather
 than pretending the archive is whole.
 
-No files are uploaded or restored. Decisions live only in this page's memory and
+The counter is the visitor's own: it reads "Your turn: 6 practice files are waiting for your decision" before any click, then "Your practice: N of 6 decisions right". It is never resident work and always restarts on a page load. No files are uploaded or restored. Decisions live only in this page's memory and
 survive ordinary house redraws. They are neither resident activity nor journal
 events. The exercise appears only when the selected historical frame records the
 room as open; the fixed synthetic archive is labelled as practice at every date.

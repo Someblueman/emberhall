@@ -86,7 +86,8 @@ data=fixture;index=data.frames.length-1;frame=data.frames[index];current=true;ro
 $('workshop-filter').change('done');searchFor('founding boundary');
 assert.equal(cards().length,1);assert.equal(cards()[0].id,'workshop-task-witness-review');
 cards()[0].click();assert.equal(events().length,3);
-assert.match(text($('workshop-detail')),/Finished · acceptance and delivery unknown/);
+assert.match(text($('workshop-detail')),/Finished/);
+assert.doesNotMatch(text($('workshop-detail')),/acceptance and delivery unknown/);
 ''', fixture)
 
 

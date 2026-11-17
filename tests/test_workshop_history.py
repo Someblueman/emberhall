@@ -90,7 +90,10 @@ const end=fixture.earlier_frames.at(-1);
 assert.deepEqual(workshopTasks(fixture.frames,end,end.at),workshopTasks(fixture.earlier_frames,end,end.at));
 data=fixture;frame=fixture.frames.at(-1);index=fixture.frames.length-1;current=false;roomPanel();
 assert.match(text(panel()),/0 unfinished · 1 finished/);cards()[0].click();
-assert.match(text($('workshop-detail')),/acceptance and delivery unknown/);
+assert.match(text($('workshop-detail')),/Finished/);
+assert.doesNotMatch(text($('workshop-detail')),/acceptance and delivery unknown/);
+assert.match(text($('workshop-detail')),/No review of this task is recorded on this page/);
+assert.equal(workshopStatus(workshopTasks(data.frames,frame,frame.at).find(t=>t.id==='work')),'Finished');
 assert.doesNotMatch(text(panel()),/PRIVATE-RESULT|a.txt|Immutable fixture/);
 ''', fixture)
 

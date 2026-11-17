@@ -550,6 +550,73 @@ vm.runInContext(`
   renderCollection();
 `, ctx);
 assert(!all(creations).some(n => n.tag === "a" && n.href === assayEntry.href), "Expected assay-room hidden while under construction");
+
+// Scars are history: each says whether anything it names is still unfinished, and only that one gets a "!".
+vm.runInContext(`
+  const scar = (id, kind, title, detail, extra = {}) => ({ id, room: "workshop", kind, title, detail, sequence: 5, at: 1500, mended: false, ...extra });
+  const task = (id, owner = "r1") => ({ id, status: "claimed", owner, until: 9999, generation: 1 });
+  data = {
+    timezone: "UTC", observed_at: 2000, commits: [],
+    scars: Object.fromEntries([
+      scar("run:a", "failure", "Run failed", "No unfinished claim at this receipt"),
+      scar("run:b", "interrupted", "Interrupted after finish", "t-done"),
+      scar("run:c", "interrupted", "Interrupted with open task", "t-open"),
+      scar("run:d", "failure", "Run named a stranger", "t-ghost"),
+      scar("lease:t-open:1", "expired", "A lease ran out", "Open task title", { task: "t-open" }),
+      scar("repair:l1", "repair", "Repaired lesson", "Check twice", { mended: true })
+    ].map(s => [s.id, s])),
+    frames: [
+      { seq: 3, at: 1200, event: { op: "task", actor: "r1", title: "x" }, tasks: [task("t-done"), task("t-open")], scars: [] },
+      { seq: 5, at: 1500, event: { op: "finish", actor: "r1", title: "t-done" }, tasks: [task("t-open")], scars: [] }
+    ]
+  };
+  current = false;
+  frame = {
+    ...data.frames[1],
+    rooms: [{ id: "assay", name: "The Assay Room", status: "open" }],
+    residents: [{ id: "r1", name: "Yarrow" }, { id: "r2", name: "Mallow" }],
+    runs: [
+      { id: "w1", resident: "r1", agent: "agy", sequence: 4, outcome: "success", assignment: { lane: "work" }, finished_tasks: [{ task: "t-done", sequence: 5 }] },
+      { id: "rv1", resident: "r2", agent: "codex", sequence: 5, outcome: "success", assignment: { lane: "review", help_request: "source-review-w1" }, finished_tasks: [] },
+      { id: "rv2", resident: "r2", agent: "codex", sequence: 5, outcome: "quota", assignment: { lane: "review", help_request: "source-review-w1" }, finished_tasks: [] },
+      { id: "rv3", resident: "r2", agent: "codex", sequence: 5, outcome: "interrupted", assignment: { lane: "review", help_request: "source-review-w1" }, finished_tasks: [] },
+      { id: "rv4", resident: "r2", agent: "codex", sequence: 5, outcome: "unconfirmed", status: "launched", assignment: { lane: "review", help_request: "source-review-w1" }, finished_tasks: [] }
+    ],
+    scars: Object.keys(data.scars).map(id => ({ id, mended: id === "repair:l1" }))
+  };
+  document.getElementById("room-content").replaceChildren();
+  renderAssayRoom(document.getElementById("room-content"));
+`, ctx);
+const room = getEl("room-content");
+const cardsText = all(room).filter(n => n.className === "assay-card").map(text);
+assert(cardsText.some(t => /Review run outcomes.*1 succeeded · 3 did not: 1 hit a usage limit, 1 interrupted, 1 still running/.test(t)), cardsText.join("\n"));
+assert(!cardsText.some(t => /other or unfinished|\bopen\b/.test(t)), "No scar or run may be called open or unfinished by default");
+assert(cardsText.some(t => /Scars \(past receipts\).*3 need attention · 1 left nothing unfinished · 1 finished later · 1 repaired or mended/.test(t)), cardsText.join("\n"));
+assert.match(text(room), /3 of 6 scars still need attention/);
+const scarRows = all(room).filter(n => n.className === "counting-run").map(text);
+const rowFor = title => scarRows.find(t => t.includes(title)) || assert.fail(`no scar row for ${title}`);
+assert.match(rowFor("Run failed"), /Nothing was left unfinished/);
+assert.match(rowFor("Interrupted after finish"), /Finished later/);
+assert.match(rowFor("Interrupted with open task"), /Still unfinished/);
+assert.match(rowFor("Run named a stranger"), /Not confirmed finished/);
+assert.match(rowFor("A lease ran out"), /Still unfinished/);
+assert.match(rowFor("Repaired lesson"), /Repaired/);
+const strongs = all(room).filter(n => n.tag === "strong").map(n => n.textContent);
+assert(strongs.includes("Run failed") && strongs.includes("Interrupted after finish"), "History scars carry no alarm mark");
+assert(strongs.includes("! Interrupted with open task") && strongs.includes("! A lease ran out"), "Unfinished scars keep the mark");
+assert(strongs.includes("⌁ Repaired lesson"));
+const outcomeOptions = all(room).filter(n => n.tag === "option").map(n => n.textContent);
+assert(outcomeOptions.includes("Did not succeed") && !outcomeOptions.includes("Other or unfinished"));
+
+// A finished task says who reviewed it when the record has that, and only "Finished" when it does not.
+const finished = vm.runInContext("workshopTasks(data.frames, frame, frame.at).find(t => t.id === 't-done')", ctx);
+assert.equal(ctx.workshopStatus(finished), "Finished · reviewed by Mallow");
+vm.runInContext("frame.runs.forEach(r => { if (r.id === 'rv1') r.resident = 'r1'; });", ctx);
+const selfReviewed = vm.runInContext("workshopTasks(data.frames, frame, frame.at).find(t => t.id === 't-done')", ctx);
+assert.equal(ctx.workshopStatus(selfReviewed), "Finished", "A resident reviewing their own run is not shown as a review");
+vm.runInContext("frame.runs = [];", ctx);
+const unreviewed = vm.runInContext("workshopTasks(data.frames, frame, frame.at).find(t => t.id === 't-done')", ctx);
+assert.equal(ctx.workshopStatus(unreviewed), "Finished");
 '''
         proc = subprocess.run(
             ["node", "-e", script, str(HOUSE_JS), str(ROOT / "site" / "projects.json")],

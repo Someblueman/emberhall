@@ -211,6 +211,14 @@ assert.match(vis, /Review Skein/);
 assert.match(vis, /Combined checkpoint and 404 renovation/);
 assert.match(vis, /2\/2 endorsements/);
 assert.match(vis, /Window elapsed/i);
+// Each proposal says what it waits for; the one that can be enacted says so and comes first.
+assert.match(vis, /Ready: any resident can enact it/);
+assert(vis.indexOf("Ready: any resident can enact it") < vis.indexOf("Enacted: waiting to be installed"));
+assert.match(vis, /Overtaken by a later decision · 1/);
+const folded = all(panel).find(n => n.tag === "details" && /Overtaken by a later decision/.test(n.children[0]?.textContent || ""));
+assert(folded && !folded.open, "Overtaken proposals are folded away");
+assert.match(text(folded), /Old stale proposal/);
+assert.match(folded.children.find(n => n.className?.includes("council-room-list")).children[0].className, /council-quiet/);
 assert.match(vis, /Body great-work projection/);
 assert.match(vis, /Awaiting install/i);
 assert.match(vis, /1 active rule/i);
@@ -225,6 +233,36 @@ frame.voting = null;
 roomPanel();
 assert.doesNotMatch(text(nodes["room-content"]), /undefined|NaN/);
 assert(all(nodes["room-content"]).some(n => n.tag === "a" && n.href === "#voting-card"));
+""")
+
+    def test_pending_proposal_says_what_it_waits_for(self):
+        self.run_renderer(r"""
+data = { timezone: "UTC", frames: [] };
+const person = { name: "Aster", agent: "codex", id: "resident-aster" };
+const endorse = n => Array.from({ length: n }, (_, i) => ({ resident: person, reason: "ok", at: i }));
+const trial = { task: "t", evidence: "ran it" };
+const waitLine = (proposal, now = 1000) => proposalWaitingLine({ status: "pending", stale: false, mode: "rule", ...proposal }, now);
+assert.equal(waitLine({ trial: null, endorsements: [] }).text, "Needs a trial");
+assert.equal(waitLine({ trial, endorsements: [] }).text, "Needs 2 more endorsements from residents who did not write it");
+assert.equal(waitLine({ trial, endorsements: endorse(1) }).text, "Needs 1 more endorsement from residents who did not write it");
+assert.equal(waitLine({ trial, endorsements: endorse(2), notice: null }).text, "Needs its public notice");
+assert.match(waitLine({ trial, endorsements: endorse(2), notice: { at: 0, until: 5000 } }).text, /^Notice window open until /);
+const ready = waitLine({ trial, endorsements: endorse(2), notice: { at: 0, until: 500 } });
+assert.equal(ready.text, "Ready: any resident can enact it");assert.equal(ready.key, "ready");
+assert.equal(waitLine({ stale: true, closure: { how: "replaced", by: "x" } }).text, "Overtaken by a later decision");
+assert.equal(waitLine({ status: "enacted", rule_status: "approved" }).text, "Enacted: waiting to be installed");
+assert.equal(waitLine({ status: "enacted", rule_status: "active" }), null);
+// The same wording leads each proposal's heading in the voting card, which lists overtaken ones last.
+frame = { seq: 5, at: 1000, residents: [], rooms: [], tasks: [], ambitions: [], runs: [], scars: [],
+  voting: { choices: [], proposals: [
+    { id: "p-old", title: "Old", mode: "rule", author: person, status: "pending", stale: true, closure: { how: "lapsed", by: null }, trial: null, endorsements: [], notice: null, text: "t", reason: "r" },
+    { id: "p-new", title: "New", mode: "rule", author: person, status: "pending", stale: false, trial: null, endorsements: [], notice: null, text: "t", reason: "r" },
+  ] } };
+current = false;
+voting();
+const titles = all(nodes.voting).filter(n => n.className === "vote-summary-title").map(n => n.textContent);
+assert.equal(titles.join("|"), "New · Needs a trial|Old · Closed · the rules changed before it was enacted");
+assert(all(nodes.voting).some(n => n.tag === "details" && n.id === "vote-rule-p-old" && /council-quiet/.test(n.className)));
 """)
 
     def test_council_view_status_and_kind_filters_clear_and_focus(self):

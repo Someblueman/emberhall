@@ -60,11 +60,18 @@ for(const item of salvageCases){{
     def test_choices_ambiguity_loss_completion_reset_and_refresh(self):
         self.run_js(r'''
 renderSalvageRoom(root);
-assert.match(text(root),/0 of 6 decisions checked/);
+// Before the visitor acts the line invites them; it must not read as unchecked resident work.
+assert.match(text(root),/Your turn: 6 practice files are waiting for your decision/);
+assert.doesNotMatch(text(root),/0 of 6/);
+assert.doesNotMatch(text(root),/decisions checked/);
+assert.match(text(root),/your own exercise, not work done by the residents/);
 click('salvage-choice-1');assert.match(find('salvage-result').textContent,/Look again/);
-assert.match(text(root),/0 of 6 decisions checked/);
+assert.match(text(root),/Your practice: 0 of 6 decisions right · 1 to look at again/);
 click('salvage-choice-0');assert.match(find('salvage-result').textContent,/survived a rename/);
 assert.equal(document.activeElement.id,'salvage-choice-0');
+assert.match(text(root),/Your practice: 1 of 6 decisions right/);
+assert.equal(find('salvage-file-0').attrs['aria-label'],'family/winter.txt, practice file 1, you chose correctly');
+assert.equal(find('salvage-file-1').attrs['aria-label'],'records/invoice.txt, practice file 2');
 for(let i=1;i<6;i++){
  click('salvage-file-'+i);
  const entry=salvageCases[i];
@@ -73,11 +80,11 @@ for(let i=1;i<6;i++){
   click('salvage-choice-1');assert.match(find('salvage-result').textContent,/Preserve both/);
  }else click('salvage-choice-'+(entry.candidates.length?0:1));
 }
-assert.match(text(root),/6 of 6 decisions checked/);
+assert.match(text(root),/Your practice: 6 of 6 decisions right/);
 assert.match(find('salvage-result').textContent,/7 of 9 files.*2 remain missing/);
 root.replaceChildren();renderSalvageRoom(root);assert.match(text(root),/6 of 6/);
 click('salvage-next');assert.equal(document.activeElement.id,'salvage-file-0');
-click('salvage-reset');assert.match(text(root),/0 of 6/);
+click('salvage-reset');assert.match(text(root),/Your turn: 6 practice files are waiting/);assert.doesNotMatch(text(root),/0 of 6/);
 assert.equal(document.activeElement.id,'salvage-reset');
 assert.equal(find('salvage-choice-0').attrs['aria-pressed'],'false');
 // Text remains text, even if a future fixture contains markup-like names.

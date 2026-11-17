@@ -87,7 +87,8 @@ frame.tasks=[{id:'build-study',plain:'Make a place to read.',title:'internal',st
 data.frames=[frame,{seq:99,rooms,tasks:[{id:'absent',title:'FUTURE SECRET',status:'done'}]}];
 index=0;current=false;const beforeTrail=JSON.stringify(data);draw();
 change('chronicle-room','study');change('chronicle-order','oldest');
-assert.match(text(root),/Building work: Make a place to read.*Finished · acceptance and delivery unknown/);
+assert.match(text(root),/Building work: Make a place to read.*Finished/);
+assert.doesNotMatch(text(root),/acceptance and delivery unknown/);
 assert.match(text(root),/State at this viewed moment/);assert.match(text(root),/details are absent/);
 assert.match(text(root),/No building task was recorded/);assert.doesNotMatch(text(root),/FUTURE SECRET/);
 const reason=all(root).find(n=>n.tag==='details');reason.open=true;reason.listeners.toggle();

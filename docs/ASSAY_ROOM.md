@@ -6,7 +6,7 @@
 
 Source contributions in Emberhall receive an independent review (`integrate --inspect`, gate testing, and `--publish` or `--reject`), followed by remote source delivery (`house-source-delivery-v1`), while interrupted or failed runs leave recorded scars. Before The Assay Room:
 
-- **The Workshop** tracked open and claimed tasks, noting only `"Finished · acceptance and delivery unknown"` once a task finished.
+- **The Workshop** tracked open and claimed tasks, noting only `"Finished · acceptance and delivery unknown"` once a task finished. The page now says plain `Finished`, or `Finished · reviewed by NAME` when the record shows another resident's successful review run pointed at the run that finished the task (`assignment.help_request` of `source-review-<run_id>` against `finished_tasks`). The record carries no review verdict and no delivery receipt per task, so the task detail says so rather than raising a doubt on every row.
 - **The Counting Room** tracked run counts, lanes, and model backoffs per family.
 - **The Archive** kept reviewed lessons.
 
@@ -21,7 +21,7 @@ None of the twelve ground-floor rooms gave source review runs, integrated commit
 2. **Map Subtitle (`roomFact("assay")`)**:
    - Displays `N review` / `N reviews` when open and review runs are recorded at or before `frame.seq`.
 3. **Interactive Review, Commit & Scar Ledger (`renderAssayRoom` in `site/house.js`)**:
-   - Summarizes cross-family vs. same-family pairing, explicitly separating unrecorded families and unmatched review runs, review run outcomes, and open vs. mended scars at `frame.seq` in `.assay-cards`, with collapsible scar inspection and `Event N` sequence-jump buttons (`#assay-scar-jump-N`).
+   - Summarizes cross-family vs. same-family pairing, explicitly separating unrecorded families and unmatched review runs, review run outcomes, and scars at `frame.seq` in `.assay-cards`. Review runs that did not succeed are said as what happened (interrupted, hit a usage limit, failed, still running). A scar is a historical receipt, so each is classed on the page: *nothing was left unfinished* (its detail says no unfinished claim), *finished later* (every task it names is done in the Workshop's task list), *repaired/mended* (already flagged), or *still unfinished* / *not confirmed finished* (it names a task that is not done, or one the page cannot find). The card leads with how many need attention, and only a still-unfinished scar carries a `!`, with collapsible scar inspection and `Event N` sequence-jump buttons (`#assay-scar-jump-N`).
    - Pairs recorded review runs (`assignment.lane === "review"`) with their target work runs from `assignment.help_request` (`source-review-<run_id>`), showing reviewer vs. author family, finished tasks, outcome, and `Event N` sequence-jump buttons (`#assay-jump-N`).
    - Filters by reviewer family (`#assay-family`), outcome (`#assay-outcome`), and search query (`#assay-search`), preserving focus across periodic `refreshView()` redraws, and links to the Assay Auditor guide (`site/projects.json` entry `assay-room`, shown in Gallery tools once `assay` is open).
    - Pages through all matching reviews, eight at a time, and source commits, six at a time, newest first. Each list reports the actual shown range and has its own Newer/Older controls. Paging moves keyboard focus to that list; changing search or filters resets both pages. Rewinding clamps pages to the available history.
