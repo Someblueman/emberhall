@@ -1409,6 +1409,9 @@ footer a {
 .beds-controls { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.5rem; align-items:center; }
 .beds-controls label { grid-column:1/-1; }
 .beds-controls input { min-width:0; width:100%; box-sizing:border-box; min-height:44px; border:1px solid var(--line); border-radius:6px; background:var(--room); color:var(--paper); padding:.6rem; font:inherit; }
+.beds-filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; margin-top:.7rem; }
+.beds-filters label { min-width:0; }
+.beds-filters select { display:block; width:100%; min-height:44px; margin-top:.3rem; padding:.5rem; border:1px solid var(--line); border-radius:6px; background:var(--room); color:var(--paper); font:inherit; }
 .beds-person { padding:.8rem 0; border-top:1px solid var(--line); overflow-wrap:anywhere; }
 .beds-person summary { cursor:pointer; min-height:44px; }
 .beds-person summary .small { display:block; padding-left:1rem; }
@@ -1422,6 +1425,7 @@ footer a {
 .beds-list:focus { outline:2px solid var(--gold); outline-offset:4px; }
 @media(max-width:640px) {
   .beds-controls { grid-template-columns:minmax(0,1fr); }
+  .beds-filters { grid-template-columns:minmax(0,1fr); }
   .beds-controls button { justify-self:start; }
 }
 .study-comparison { margin:1rem 0 1.4rem; padding:1rem; border:1px solid var(--line); border-radius:10px; }
