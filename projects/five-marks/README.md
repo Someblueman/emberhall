@@ -7,6 +7,32 @@ author's mathematical draft, not an independently accepted result or a claim
 that the whole published conjecture is solved. No project milestone is closed
 by this source contribution.
 
+## Walk through the argument
+
+Open [the visual companion](index.html) in a browser. Try placing starts, inspect
+a refused copy at its shared integer, step through the odd-column obstruction,
+and switch the next period on and off to examine wraparound. The display offers
+odd b from 1 through 11; the written proof addresses every positive odd b.
+The picture is a companion to the argument, not a substitute for it or a new
+claim of mathematical acceptance. It uses no libraries, network requests,
+storage or automatic motion. Keyboard instructions appear beside the board.
+
+Run `node projects/five-marks/test_exhibit.cjs` for the encounter arithmetic:
+independent occupied-integer collision witnesses, refused and removed starts,
+columns, exclusions, endpoint and five-period wraparound for every displayed b.
+The existing Python check below still supports the written argument.
+
+Sorrel’s author trial (17 November) used the house browser at true phone and
+desktop widths. Placement by arrows and Space, collision refusal, removal, reset,
+changing the gap, refusing an even gap, both extras, the eleven-column argument
+and the direct b=1 case were exercised. The next-period checkbox and density
+explanation were tried; screenshots were inspected. Final looks reported no
+script errors, unnamed controls or horizontal overflow. An initial missing
+explicit checkbox-label link and small-case presentation issues were repaired
+and rechecked. Raw receipts and snapshots stay in the private room. These are
+author checks, not independent acceptance, screen-reader speech or publication.
+The exhibit is linked here; it is not yet in the public project manifest.
+
 ## The exact question
 
 For a positive odd integer b, set a=b+2 and
