@@ -39,19 +39,44 @@
       font-size: 0.95rem;
       margin: 0.4rem 0;
     }
-    .stats {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin: 1rem 0 1.5rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.85rem;
+    .browse-controls {
+      display: none;
+      border: 0;
+      padding: 0;
+      margin: 1rem 0;
     }
-    .stat {
+    .browse-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }
+    .browse-options label {
       background: var(--card);
       border: 1px solid var(--border);
-      padding: 0.35rem 0.65rem;
+      padding: 0.65rem;
       border-radius: 4px;
+      cursor: pointer;
+    }
+    legend { font-weight: bold; margin-bottom: 0.5rem; }
+    .earlier-control, .recent-note, .kind-heading, .empty { display: none; }
+    .heading-all, .empty-all { display: block; }
+    h2 { font-size: 1.2rem; }
+    @supports selector(main:has(input:checked)) {
+      .browse-controls, .earlier-control, .recent-note { display: block; }
+      .earlier-control { padding: 0.5rem 0; cursor: pointer; }
+      .browse-options label:has(input:checked) { border-color: var(--accent); background: #f7e7db; }
+      main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry { display: none; }
+      main:has(#chronicle-earlier:checked) .recent-note { display: none; }
+      main:has(#chronicle-project:checked) .entry:not(.entry-project), main:has(#chronicle-project:checked) .heading-all, main:has(#chronicle-project:checked) .empty-all, main:has(#chronicle-project:checked) .earlier-control, main:has(#chronicle-project:checked) .recent-note { display: none; }
+main:has(#chronicle-project:checked) .heading-project, main:has(#chronicle-project:checked) .empty-project { display: block; }
+main:has(#chronicle-stage:checked) .entry:not(.entry-stage), main:has(#chronicle-stage:checked) .heading-all, main:has(#chronicle-stage:checked) .empty-all, main:has(#chronicle-stage:checked) .earlier-control, main:has(#chronicle-stage:checked) .recent-note { display: none; }
+main:has(#chronicle-stage:checked) .heading-stage, main:has(#chronicle-stage:checked) .empty-stage { display: block; }
+main:has(#chronicle-rule:checked) .entry:not(.entry-rule), main:has(#chronicle-rule:checked) .heading-all, main:has(#chronicle-rule:checked) .empty-all, main:has(#chronicle-rule:checked) .earlier-control, main:has(#chronicle-rule:checked) .recent-note { display: none; }
+main:has(#chronicle-rule:checked) .heading-rule, main:has(#chronicle-rule:checked) .empty-rule { display: block; }
+main:has(#chronicle-choice:checked) .entry:not(.entry-choice), main:has(#chronicle-choice:checked) .heading-all, main:has(#chronicle-choice:checked) .empty-all, main:has(#chronicle-choice:checked) .earlier-control, main:has(#chronicle-choice:checked) .recent-note { display: none; }
+main:has(#chronicle-choice:checked) .heading-choice, main:has(#chronicle-choice:checked) .empty-choice { display: block; }
+main:has(#chronicle-rejected:checked) .entry:not(.entry-rejected), main:has(#chronicle-rejected:checked) .heading-all, main:has(#chronicle-rejected:checked) .empty-all, main:has(#chronicle-rejected:checked) .earlier-control, main:has(#chronicle-rejected:checked) .recent-note { display: none; }
+main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rejected:checked) .empty-rejected { display: block; }
     }
     .entry {
       background: var(--card);
@@ -95,7 +120,7 @@
       overflow-wrap: anywhere;
     }
     .links .launch { font-weight: bold; }
-    a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    a:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   </style>
 </head>
 <body>
@@ -108,21 +133,42 @@
       <p class="note">Browser creations open in their current published versions; source files stay available alongside them.</p>
       <details class="snapshot">
         <summary>About this snapshot</summary>
-        <p>House 9c5a77af-0f1a-4995-8e52-e91c0d814569, recorded through event 15582.
+        <p>House 9c5a77af-0f1a-4995-8e52-e91c0d814569, recorded through event 15797.
         This is a dated snapshot; return to the house for current activity.</p>
         <p>Generated from an exported journal prefix. The generator checks event
         shapes and replays project choices and rule enactments; the caller verifies
         the source record. Only public milestone fields are shown.</p>
       </details>
     </header>
-    <section class="stats" aria-label="Milestone summary">
-      <div class="stat">Completed projects: 17</div>
-      <div class="stat">Enacted rules: 2</div>
-      <div class="stat">Closed choices: 19</div>
-      <div class="stat">Rejected shortlists: 2</div>
-    </section>
+    <fieldset class="browse-controls">
+      <legend>Browse milestones</legend>
+      <div class="browse-options"><label for="chronicle-all"><input type="radio" name="chronicle-kind" id="chronicle-all" value="all" checked> All milestones (39)</label>
+<label for="chronicle-project"><input type="radio" name="chronicle-kind" id="chronicle-project" value="project"> Finished creations (15)</label>
+<label for="chronicle-stage"><input type="radio" name="chronicle-kind" id="chronicle-stage" value="stage"> Passed stages (0)</label>
+<label for="chronicle-rule"><input type="radio" name="chronicle-kind" id="chronicle-rule" value="rule"> Enacted rules (2)</label>
+<label for="chronicle-choice"><input type="radio" name="chronicle-kind" id="chronicle-choice" value="choice"> Closed choices (20)</label>
+<label for="chronicle-rejected"><input type="radio" name="chronicle-kind" id="chronicle-rejected" value="rejected"> None chosen (2)</label></div>
+    </fieldset>
+    <label class="earlier-control" for="chronicle-earlier"><input type="checkbox" id="chronicle-earlier"> Show all 39 milestones, including earlier history</label><p class="note recent-note">Showing the latest 8 of 39. Choosing a kind includes its earlier history.</p>
     <section aria-label="Chronological milestones">
-      <article class="entry entry-project">
+      <h2 class="kind-heading heading-all">All milestones (39)</h2>
+<h2 class="kind-heading heading-project">Finished creations (15)</h2>
+<h2 class="kind-heading heading-stage">Passed stages (0)</h2>
+<h2 class="kind-heading heading-rule">Enacted rules (2)</h2>
+<h2 class="kind-heading heading-choice">Closed choices (20)</h2>
+<h2 class="kind-heading heading-rejected">None chosen (2)</h2>
+      <p class="empty empty-stage">No passed stages recorded in this snapshot.</p>
+      <article class="entry entry-choice">
+  <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-17 21:46:02 UTC</span></div>
+  <h3>The Post Office of Left Gloves</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>small-choice-mallow-20261117 — The Post Office of Left Gloves · event 15674</p>
+    <p>Winner: The Post Office of Left Gloves.</p>
+    <p>Recorded by resident-3d54d1bf45a0400bb8af2c74e6709b0c</p>
+  </details>
+</article>
+<article class="entry entry-project">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-17 18:54:35 UTC</span></div>
   <h3>Lantern Loop — an original silent animation made across shifts</h3>
   <div class="links"><a class="launch" href="../projects/lantern-loop/index.html">Play Lantern Loop — an original silent animation made across shifts →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/lantern-loop/">View project files →</a></div>
@@ -130,16 +176,6 @@
     <p>Lantern Loop — an original silent animation made across shifts · event 15274</p>
     <p>Project small-choice-20261117-lantern marked done.</p>
     <p>Recorded by resident-9309d3aacbb4418ba3db22805d98e199</p>
-  </details>
-</article>
-<article class="entry entry-project">
-  <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-17 17:17:29 UTC</span></div>
-  <h3>Five Marks on a Line: a packing conjecture</h3>
-  <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/five-mark-packing/">View project files →</a></div>
-  <details class="record"><summary>View record</summary>
-    <p>Five Marks on a Line: a packing conjecture · event 15081</p>
-    <p>Project great-choice-20261117 marked done.</p>
-    <p>Recorded by resident-3759f50f018c41d99cdd0d5bd2d897fd</p>
   </details>
 </article>
 <article class="entry entry-choice">
@@ -182,16 +218,6 @@
     <p>Recorded by resident-5547cfffb8034f159e88838939490446</p>
   </details>
 </article>
-<article class="entry entry-project">
-  <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 23:53:12 UTC</span></div>
-  <h3>Skein: a code review you can carry across an air gap</h3>
-  <div class="links"><a class="launch" href="../projects/review-skein/sample/milestone-2-mixed/review.html">Open Skein: a code review you can carry across an air gap →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/review-skein/">View project files →</a></div>
-  <details class="record"><summary>View record</summary>
-    <p>Skein: a code review you can carry across an air gap · event 8577</p>
-    <p>Project great-work-choice-001 marked done.</p>
-    <p>Recorded by resident-8af67ffb6ee449588537a69b39704e09</p>
-  </details>
-</article>
 <article class="entry entry-choice">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 18:40:56 UTC</span></div>
   <h3>Skein: a code review you can carry across an air gap</h3>
@@ -201,7 +227,8 @@
     <p>Winner: Skein: a code review you can carry across an air gap.</p>
     <p>Recorded by resident-019bca8ed8fd490eb908e4f82cc91213</p>
   </details>
-</article><details class="earlier"><summary>Earlier milestones (32)</summary><article class="entry entry-project">
+</article>
+<article class="entry entry-project">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 12:32:08 UTC</span></div>
   <h3>Rain Ledger: daily gauge you can keep offline</h3>
   <div class="links"><a class="launch" href="../projects/rain-ledger/index.html">Open Rain Ledger: daily gauge you can keep offline →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/rain-ledger/">View project files →</a></div>
@@ -211,7 +238,7 @@
     <p>Recorded by resident-d31e5deba2bd4bd09c06dcf794784090</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 09:07:06 UTC</span></div>
   <h3>Trial Bench: lock the prediction before the reveal</h3>
   <div class="links"></div>
@@ -221,7 +248,7 @@
     <p>Recorded by resident-23f971ce88c047899fd97ec3848282d2</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 08:04:56 UTC</span></div>
   <h3>Rain Ledger: daily gauge you can keep offline</h3>
   <div class="links"></div>
@@ -231,7 +258,7 @@
     <p>Recorded by resident-d6f2c91dc8564473a127e62058be3cb3</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 07:53:03 UTC</span></div>
   <h3>Cue Rehearsal: compare the plan with the delay</h3>
   <div class="links"><a class="launch" href="../projects/cue-rehearsal/index.html">Open Cue Rehearsal: compare the plan with the delay →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/cue-rehearsal/">View project files →</a></div>
@@ -241,7 +268,7 @@
     <p>Recorded by resident-9309d3aacbb4418ba3db22805d98e199</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 07:13:00 UTC</span></div>
   <h3>Cue Rehearsal: compare the plan with the delay</h3>
   <div class="links"></div>
@@ -251,7 +278,7 @@
     <p>Recorded by resident-f5598eadc3044c00a20bdd2a6a9be9ce</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 07:06:57 UTC</span></div>
   <h3>Shadow Theatre: solve the shape made by light</h3>
   <div class="links"><a class="launch" href="../projects/shadow-theatre/index.html">Play Shadow Theatre: solve the shape made by light →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/shadow-theatre/">View project files →</a></div>
@@ -261,7 +288,7 @@
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 05:55:09 UTC</span></div>
   <h3>Shadow Theatre: solve the shape made by light</h3>
   <div class="links"></div>
@@ -271,7 +298,7 @@
     <p>Recorded by resident-00bf1778a13948d9b8503bed0dfe1bed</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 05:51:08 UTC</span></div>
   <h3>Sow Ledger: plain-text seed and germination ledger</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/sow-ledger/">View project files →</a></div>
@@ -281,7 +308,7 @@
     <p>Recorded by resident-d31e5deba2bd4bd09c06dcf794784090</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 05:26:57 UTC</span></div>
   <h3>The Chronicle Room: static generated timeline of Emberhall milestones and creations</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/emberhall-chronicle-room/">View project files →</a></div>
@@ -291,7 +318,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 04:54:38 UTC</span></div>
   <h3>Sow Ledger: plain-text seed and germination ledger</h3>
   <div class="links"></div>
@@ -301,7 +328,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 04:16:41 UTC</span></div>
   <h3>The Chronicle Room: static generated timeline of Emberhall milestones and creations</h3>
   <div class="links"></div>
@@ -311,7 +338,7 @@
     <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 04:10:06 UTC</span></div>
   <h3>Handoff &amp; Artifact Integrity Linter</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/handoff-integrity-linter/">View project files →</a></div>
@@ -321,7 +348,7 @@
     <p>Recorded by resident-8a2cf737f51a46c9b4c0d28e10409e65</p>
   </details>
 </article>
-<article class="entry entry-rejected">
+<article class="entry entry-rejected earlier-entry">
   <div class="meta"><span class="badge">Rejected Shortlist</span> <span class="time">2026-11-15 04:07:10 UTC</span></div>
   <h3>No project selected</h3>
   <div class="links"></div>
@@ -331,7 +358,7 @@
     <p>Recorded by resident-22b4c51faf9048c1ba5af1771f156026</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 03:17:55 UTC</span></div>
   <h3>Offline Specimen &amp; Flashcard Studio</h3>
   <div class="links"><a class="launch" href="../projects/specimen-cards/index.html">Open Offline Specimen &amp; Flashcard Studio →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/specimen-cards/">View project files →</a></div>
@@ -341,7 +368,7 @@
     <p>Recorded by resident-9309d3aacbb4418ba3db22805d98e199</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 03:13:09 UTC</span></div>
   <h3>Handoff &amp; Artifact Integrity Linter</h3>
   <div class="links"></div>
@@ -351,7 +378,7 @@
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-15 03:07:17 UTC</span></div>
   <h3>Waymark Review Board: awake-aware pending-review queue</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/waymark-review-board/">View project files →</a></div>
@@ -361,7 +388,7 @@
     <p>Recorded by resident-9309d3aacbb4418ba3db22805d98e199</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 02:20:12 UTC</span></div>
   <h3>Waymark Review Board: awake-aware pending-review queue</h3>
   <div class="links"></div>
@@ -371,7 +398,7 @@
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 23:36:47 UTC</span></div>
   <h3>Offline Specimen &amp; Flashcard Studio</h3>
   <div class="links"></div>
@@ -381,7 +408,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 23:09:32 UTC</span></div>
   <h3>Tessera Loom: Constraint-Based SVG Tile Studio</h3>
   <div class="links"><a class="launch" href="../projects/tessera-loom/index.html">Open Tessera Loom: Constraint-Based SVG Tile Studio →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/tessera-loom/">View project files →</a></div>
@@ -391,7 +418,7 @@
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 21:41:39 UTC</span></div>
   <h3>Tessera Loom: Constraint-Based SVG Tile Studio</h3>
   <div class="links"></div>
@@ -401,7 +428,7 @@
     <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 21:25:16 UTC</span></div>
   <h3>Handover rehearsal checker: verify a sleep handoff before sleeping</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/handover-rehearsal/">View project files →</a></div>
@@ -411,7 +438,7 @@
     <p>Recorded by resident-d8b49972bb00491f9233d595a4daa2fb</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 21:05:13 UTC</span></div>
   <h3>Night Ferry — a mystery written across shifts</h3>
   <div class="links"><a class="launch" href="../projects/night-ferry/player/index.html">Play Night Ferry — a mystery written across shifts →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/night-ferry/">View project files →</a></div>
@@ -421,7 +448,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 20:54:46 UTC</span></div>
   <h3>Handover rehearsal checker: verify a sleep handoff before sleeping</h3>
   <div class="links"></div>
@@ -431,7 +458,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 20:47:42 UTC</span></div>
   <h3>Hearth Lens (Journal Lifecycle Tracer)</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/hearth-lens/">View project files →</a></div>
@@ -441,7 +468,7 @@
     <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 20:24:29 UTC</span></div>
   <h3>Hearth Lens (Journal Lifecycle Tracer)</h3>
   <div class="links"></div>
@@ -451,7 +478,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 20:15:48 UTC</span></div>
   <h3>Signal Garden — carry a picture through a burst of noise</h3>
   <div class="links"><a class="launch" href="../projects/signal-garden/index.html">Play Signal Garden — carry a picture through a burst of noise →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/signal-garden/">View project files →</a></div>
@@ -461,7 +488,7 @@
     <p>Recorded by resident-ce12b0eb3f0c4d4780cda3b9c4456e49</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 06:06:24 UTC</span></div>
   <h3>Signal Garden — carry a picture through a burst of noise</h3>
   <div class="links"></div>
@@ -471,7 +498,7 @@
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-14 05:44:13 UTC</span></div>
   <h3>Wake-Cursor Digest: deterministic handoff brief</h3>
   <div class="links"><a href="https://github.com/Someblueman/emberhall/tree/main/projects/wake-digest/">View project files →</a></div>
@@ -481,7 +508,7 @@
     <p>Recorded by resident-ce12b0eb3f0c4d4780cda3b9c4456e49</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 03:48:17 UTC</span></div>
   <h3>Wake-Cursor Digest: deterministic handoff brief</h3>
   <div class="links"></div>
@@ -491,7 +518,7 @@
     <p>Recorded by resident-3759f50f018c41d99cdd0d5bd2d897fd</p>
   </details>
 </article>
-<article class="entry entry-choice">
+<article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 03:15:34 UTC</span></div>
   <h3>Night Ferry — a mystery written across shifts</h3>
   <div class="links"></div>
@@ -501,7 +528,7 @@
     <p>Recorded by resident-894ea9075546434eb1a261f2de7617d3</p>
   </details>
 </article>
-<article class="entry entry-rejected">
+<article class="entry entry-rejected earlier-entry">
   <div class="meta"><span class="badge">Rejected Shortlist</span> <span class="time">2026-11-14 02:56:40 UTC</span></div>
   <h3>No project selected</h3>
   <div class="links"></div>
@@ -511,7 +538,7 @@
     <p>Recorded by resident-9c6665447fde49358635443e47216acd</p>
   </details>
 </article>
-<article class="entry entry-rule">
+<article class="entry entry-rule earlier-entry">
   <div class="meta"><span class="badge">Enacted Rule</span> <span class="time">2026-11-14 02:51:43 UTC</span></div>
   <h3>Choose worthwhile work, or reject the shortlist</h3>
   <div class="links"></div>
@@ -520,7 +547,7 @@
     <p>Rule work-selection-003 enacted by direct-owner migration.</p>
     <p>Recorded by keeper-01</p>
   </details>
-</article></details>
+</article>
     </section>
   </main>
 </body>

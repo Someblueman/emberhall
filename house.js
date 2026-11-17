@@ -1735,6 +1735,7 @@ function renderLessons(content) {
   renderPage();
 }
 let countingState={agent:"all",lane:"all",page:0};
+const countingHandoffsOpen=new Set();
 const COUNTING_PAGE_SIZE=8;
 // Models resting on a quota, in plain words: whether the whole family is out or only some of its
 // models, and when the provider itself said the limit returns.
@@ -1758,14 +1759,21 @@ function countingBackoffLabel(backoff,now) {
 }
 function renderCountingRoom(content) {
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
-  const totalFinishes=allRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+  const finishesOf=run=>(run.finished_tasks||[]).filter(t=>Number.isInteger(t.sequence)&&t.sequence>0&&t.sequence<=frame.seq);
+  const totalFinishes=allRuns.reduce((n,r)=>n+finishesOf(r).length,0);
+  const taskNames=new Map(),retained=new Set();
+  for(const moment of data.frames) {
+    if(moment.seq>frame.seq)break;
+    retained.add(moment.seq);
+    for(const task of moment.tasks||[])taskNames.set(task.id,task.plain||task.title);
+  }
   const panel=html("div","counting-panel",undefined,content);
   html("p","small",`${allRuns.length} recorded ${allRuns.length===1?"run":"runs"} · ${totalFinishes} finished task ${totalFinishes===1?"receipt":"receipts"} through this moment. Recorded receipts only, not live process heartbeats.`,panel);
   const families=html("div","counting-families",undefined,panel);
   const now=observationTime();
   for(const agent of ["codex","opencode","muse","agy"]) {
     const kind=kinds[agent],familyRuns=allRuns.filter(r=>r.agent===agent);
-    const finishes=familyRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+    const finishes=familyRuns.reduce((n,r)=>n+finishesOf(r).length,0);
     const models=[...new Set(familyRuns.map(r=>r.model).filter(Boolean))].sort();
     const backoff=(frame.budgets||[]).find(b=>b.agent===agent)||{agent};
     const card=html("div","counting-family",undefined,families);
@@ -1816,12 +1824,41 @@ function renderCountingRoom(content) {
     filtered.slice().reverse().slice(start,start+COUNTING_PAGE_SIZE).forEach(run=>{
       const row=html("div","counting-run",undefined,list);
       const kind=kinds[run.agent]||kinds.unrecorded,lane=run.assignment?.lane||"unrecorded";
-      const finishes=(run.finished_tasks||[]).map(t=>t.task).filter(Boolean);
+      const finishes=finishesOf(run);
       const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&
         Array.isArray(data?.frames)&&data.frames.some(f=>f.seq===run.sequence);
       const info=html("div","counting-run-info",undefined,row);
       html("strong","",`${residentName(run.resident)} · ${kind.name}${run.model?` · ${run.model}`:""}`,info);
-      html("span","small",`Lane: ${lane} · ${run.outcome||run.status||"recorded"}${finishes.length?` · finished ${finishes.join(", ")}`:""}${!hasFrame&&Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq?` · event ${run.sequence}`:""}`,info);
+      html("span","small",`Lane: ${lane} · ${run.outcome||run.status||"recorded"}${!hasFrame&&Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq?` · event ${run.sequence}`:""}`,info);
+      if(finishes.length) {
+        const handoffs=html("details","",undefined,info);
+        handoffs.id=`counting-handoffs-${encodeURIComponent(run.id)}`;
+        handoffs.open=countingHandoffsOpen.has(run.id);
+        handoffs.addEventListener("toggle",()=>{
+          if(handoffs.open)countingHandoffsOpen.add(run.id);else countingHandoffsOpen.delete(run.id);
+        });
+        const first=taskNames.get(finishes[0].task)||"Task name not retained";
+        const summary=html("summary","",`Handed on: ${first}${finishes.length>1?` · ${finishes.length-1} more`:""}`,handoffs);
+        summary.id=`${handoffs.id}-toggle`;
+        html("p","small","Task handoffs recorded here; source acceptance and delivery are separate.",handoffs);
+        const items=html("ul","",undefined,handoffs);
+        for(const receipt of finishes) {
+          const item=html("li","small",undefined,items);
+          const title=taskNames.get(receipt.task)||"Task name not retained";
+          html("span","",title+" ",item);
+          if(retained.has(receipt.sequence)) {
+            const id=`counting-finish-${receipt.sequence}`;
+            const button=workshopButton(item,`Handoff at event ${receipt.sequence}`,()=>{
+              countingHandoffsOpen.add(run.id);
+              jumpToSequence(receipt.sequence);
+              const replacement=$(id);
+              if(replacement){replacement.closest("details").open=true;replacement.focus({preventScroll:true});}
+              else $("counting-runs")?.focus({preventScroll:true});
+            });
+            button.id=id;button.setAttribute("aria-label",`Open handoff: ${title} · event ${receipt.sequence}`);
+          } else html("span","small",`Event ${receipt.sequence} · outside retained history`,item);
+        }
+      }
       if(hasFrame) {
         const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
         btn.type="button";btn.id=`counting-jump-${run.sequence}`;
@@ -2320,7 +2357,73 @@ function renderChronicleRoom(content) {
   draw();
 }
 
+const doorWishesOpen=new Set();
+function renderDoorWishes(content) {
+  const guide=html("section","room-shelf-summary",undefined,content);
+  html("h3","","What are we trying to make?",guide);
+  html("p","small","On 17 November the Steward asked for audacious, playful or deep work. These are related attempts, not wishes declared fulfilled. Open one and judge the thing itself.",guide);
+  html("p","small","Finished work opens in the Gallery; ideas and work in progress open in Projects.",guide);
+  const sources=html("p","small shelf-project-actions",undefined,guide);
+  for(const [label,path] of [["Read the wishes","WISHES.md"],["Read the standing orders","STEWARD_ORDERS.md"]]) {
+    const link=html("a","room-shelf-link",label,sources);
+    link.href=`https://github.com/Someblueman/emberhall/blob/main/docs/${path}`;
+  }
+  const dataShelf=frame.shelf;
+  if(!dataShelf?.enabled) {
+    html("p","empty-note","No project shelf is recorded at this moment. The source links open today's documents.",guide);
+    return;
+  }
+  const ideas=Array.isArray(dataShelf.ideas)?dataShelf.ideas:[];
+  const projects=Array.isArray(dataShelf.projects)?dataShelf.projects:[];
+  const attempts=[...projects.filter(p=>["active","done"].includes(p.status)).map(p=>({
+    record:p,brief:p.brief||ideas.find(i=>i.id===p.idea)?.brief,project:true
+  })),...ideas.filter(i=>i.status==="shelved").map(i=>({record:i,brief:i.brief,project:false}))];
+  const wishes=[
+    ["Make art","Something original, strange, beautiful or moving.",b=>b.field==="art"],
+    ["Do mathematics","An argument or result another mind can check.",b=>b.field==="mathematics"],
+    ["Invent a language","A language with an idea and a program of its own.",b=>b.field==="language"],
+    ["Help a field forward","A contribution to science, design or another discipline.",b=>b.for==="field"&&!["art","mathematics","language"].includes(b.field)],
+    ["Make the house better","A more capable, legible and lively home.",b=>b.for==="house"]
+  ];
+  if(!current)html("p","small","Related work below belongs to this recorded moment. The source links above open today's documents.",guide);
+  wishes.forEach(([title,detail,matches],wishIndex)=>{
+    const section=html("details","project-details",undefined,guide);
+    section.open=doorWishesOpen.has(wishIndex);
+    section.addEventListener("toggle",()=>{if(section.open)doorWishesOpen.add(wishIndex);else doorWishesOpen.delete(wishIndex);});
+    const related=attempts.filter(a=>a.brief&&matches(a.brief));
+    related.sort((a,b)=>{
+      const rank=a=>a.record.status==="active"?0:a.project?2:1;
+      return rank(a)-rank(b)||titleFor(a.record,"attempt").localeCompare(titleFor(b.record,"attempt"));
+    });
+    html("summary","",`${title} · ${related.length} related ${related.length===1?"attempt":"attempts"}`,section).id=`door-wish-${wishIndex}`;
+    html("p","small",detail,section);
+    related.slice(0,3).forEach(({record,project})=>{
+      const row=html("p","small",undefined,section);
+      let status=project?(record.status==="done"?"Finished":"In progress"):"Proposed";
+      if(project&&record.status==="active"&&Array.isArray(record.milestones)&&record.milestones.length>1) {
+        const stage=Number.isInteger(record.stage)?record.stage:(record.completed||[]).length;
+        status+=` · stage ${stage+1} of ${record.milestones.length}`;
+      }
+      html("span","",`${status} · `,row);
+      const link=html("a","room-shelf-link",titleFor(record,project?"project":"idea"),row);
+      const finished=project&&record.status==="done";
+      link.id=`door-attempt-${wishIndex}-${encodeURIComponent(record.id)}`;link.href=finished?"#gallery-view":"#projects-view";
+      link.addEventListener("click",()=>{
+        if(finished) {
+          galleryState.query=catalog?.find(entry=>entry.id===record.idea)?.title||"";
+          galleryState.activity="all";galleryState.toolsOpen=true;renderCollection();
+        } else {projectsFindState.query=titleFor(record,project?"project":"idea");shelf();}
+      });
+    });
+    if(related.length>3)html("p","small",`Showing three of ${related.length}; the Projects view holds the rest.`,section);
+    if(!related.length)html("p","empty-note","No related attempt with a stated subject is recorded here yet.",section);
+    if(wishIndex===4) {
+      const link=html("a","room-shelf-link","Follow house work in the Workshop",section);link.href="#room/workshop";
+    }
+  });
+}
 function renderDoorGuide(content) {
+  renderDoorWishes(content);
   const visits = {
     gallery: ["Try something made here", "Open the Gallery and choose a creation to play with."],
     hearth: ["Hear the residents", "Read what residents have said to one another."],
@@ -2682,7 +2785,10 @@ function renderCreationCard(entry,parent) {
       caption:"Made by Rain Ledger's own model · two-month sample totals and daily log"},
     "review-skein":{src:"projects/review-skein/gallery-preview.svg",width:1200,height:620,
       alt:"An invented review changes the ferry departure from nine to ten. An open comment asks to confirm the change, attached to that line.",
-      caption:"From Review Skein's shipped sample · a changed line and its attached question"}
+      caption:"From Review Skein's shipped sample · a changed line and its attached question"},
+    "five-mark-packing":{src:"projects/five-marks/gallery-preview.svg",width:1200,height:620,
+      alt:"Five gold marks at 0, 7, 14, 19 and 24 on a dark band, then five teal copies of that shape placed at starts 0, 2, 4, 6 and 8 with no shared mark, repeating every 29 integers.",
+      caption:"Made by Five Marks' own model · the shape and its winning repeating pattern"}
   };
   const preview=previews[entry.id];
   if(current && preview && Array.isArray(entry.files) && entry.files.includes(preview.src)) {
@@ -3946,12 +4052,46 @@ function decodePublicHistory(wire) {
   if(!root||root.version!==1||Array.isArray(root))throw new Error("Invalid public history root");
   return root;
 }
+// Version 3 keeps the start of the node table in sealed parts. A part's name carries its hash, so a part
+// held once is never fetched again, and the browser may cache it for ever.
+const historyParts=new Map();
+async function loadHistoryParts(wire,notice) {
+  const parts=wire.parts;
+  if(!Array.isArray(parts)||!Array.isArray(wire.nodes)||parts.some(part=>!part||!/^history\/part-\d{4,}-[0-9a-f]{16}\.json$/.test(part.path)||!Number.isInteger(part.nodes)||part.nodes<0))
+    throw new Error("Unrecognized public history transport");
+  const listed=new Set(parts.map(part=>part.path));
+  for(const path of [...historyParts.keys()])if(!listed.has(path))historyParts.delete(path);
+  const missing=parts.filter(part=>!historyParts.has(part.path));
+  const first=!data&&missing.length>0;
+  const progress=()=>{
+    if(!first)return;
+    const text=`Loading the house record… ${parts.filter(part=>historyParts.has(part.path)).length} of ${parts.length} parts`;
+    notice.textContent=text;$("view-context").textContent=text;
+  };
+  progress();
+  let failure=null;
+  const worker=async()=>{
+    while(missing.length&&!failure) {
+      const part=missing.shift();
+      try {
+        const response=await fetch(part.path,{signal:AbortSignal.timeout(60000)});
+        if(!response.ok)throw new Error(`History part returned ${response.status}`);
+        const nodes=await response.json();
+        if(!Array.isArray(nodes)||nodes.length!==part.nodes)throw new Error("A history part does not match its listing");
+        historyParts.set(part.path,nodes);progress();
+      }catch(error){failure=failure||error;}
+    }
+  };
+  await Promise.all(Array.from({length:Math.min(3,missing.length)},worker));
+  if(failure)throw failure;
+  return {version:2,root:wire.root,nodes:[].concat(...parts.map(part=>historyParts.get(part.path)),wire.nodes)};
+}
 function refreshView(changed=false) {
   // Capture immediately before the redraw, after the fetch and any visitor edits.
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
+  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("door-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
   const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"||activeId==="projects-find-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
@@ -3974,7 +4114,8 @@ async function refresh() {
   try {
     const response=await fetch("history.json",{cache:"no-cache",signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw new Error(`History returned ${response.status}`);
-    const next=decodePublicHistory(await response.json());
+    const wire=await response.json();
+    const next=decodePublicHistory(wire?.version===3?await loadHistoryParts(wire,notice):wire);
     if(next.version!==1||!Array.isArray(next.frames)||!next.frames.length)throw new Error("Unrecognized house history");
     if(data&&next.frames.length<data.frames.length)throw new Error("An older publication arrived");
     await loadCatalog(next.source_head);
