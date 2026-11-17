@@ -582,6 +582,14 @@ class RecoveryAndComparisonTests(unittest.TestCase):
             report = comparison.measure_workflows()
         raw_metrics = report["measured"]["raw_git_bundle"]
         skein_metrics = report["measured"]["skein"]
+        self.assertEqual(raw_metrics["cli_commands"], 5)
+        self.assertEqual(skein_metrics["cli_commands"], 13)
+        operation_basis = report["scenario"]["operation_basis"]
+        limits = report["scenario"]["comparison_limits"]
+        self.assertIn("13 direct Python API calls", operation_basis)
+        self.assertIn("not CLI command counts or human effort", operation_basis)
+        self.assertIn("raw note writing/merging", operation_basis)
+        self.assertIn("Gerrit and Radicle were not run or benchmarked", limits)
 
         # Count both complete reviewer returns at the same pre-merge revision.
         for workflow, metrics, members in (
@@ -648,10 +656,16 @@ class RecoveryAndComparisonTests(unittest.TestCase):
         rc_md, out_md, _ = self._run_comparison_cli("measure", "--format", "markdown")
         self.assertEqual(rc_md, 0)
         self.assertIn("| Metric |", out_md)
+        self.assertIn("| Selected tool operations | 5 | 13 |", out_md)
+        self.assertNotIn("CLI commands executed", out_md)
+        self.assertIn(operation_basis, out_md)
+        self.assertIn(limits, out_md)
 
         rc_txt, out_txt, _ = self._run_comparison_cli("measure", "--format", "text")
         self.assertEqual(rc_txt, 0)
         self.assertIn("recovery_byte_exact=True", out_txt)
+        self.assertIn(operation_basis, out_txt)
+        self.assertIn(limits, out_txt)
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Skein milestone 4: reproducible workflow comparison against git bundle, Gerrit and Radicle.
+"""Skein milestone 4: measure a local fixture against raw git bundle.
 
 Executes a two-repository, two-reviewer and revised-patch review scenario using
 both raw git bundle + static line-number notes and Skein's export/merge/revise/recovery
-tools, measuring artifact sizes, command counts, ID collisions and post-rebase
-anchor accuracy alongside an honest capability matrix for Gerrit and Radicle.
+tools, measuring artifact sizes, selected tool operations, ID collisions and
+post-rebase anchors. Gerrit and Radicle appear only in an unbenchmarked overview.
 """
 from __future__ import annotations
 
@@ -361,6 +361,20 @@ def measure_workflows() -> dict[str, Any]:
 
     return {
         "scenario": {
+            "operation_basis": (
+                "Selected tool operations, not CLI command counts or human effort. "
+                "The existing cli_commands JSON fields retain their names: raw counts five "
+                "Git subprocesses (bundle, diff, clone, verify, range-diff); Skein counts "
+                "13 direct Python API calls (export, eight comment writes, verify, merge, "
+                "revise, rebuild). Excludes fixture setup and revision commits, file copies, "
+                "raw note writing/merging, reading and nested tool calls. The totals do not "
+                "measure equivalent work."
+            ),
+            "comparison_limits": (
+                "This is a scripted local fixture with a naive static-note baseline, "
+                "not a novice or general ease-of-use trial. Gerrit and Radicle were not "
+                "run or benchmarked; their capability matrix is an overview."
+            ),
             "byte_basis": (
                 "Sum of two complete reviewer returns at feature v1, after annotations and "
                 "before merge: each raw return contains changes.bundle, review.patch and "
@@ -369,7 +383,8 @@ def measure_workflows() -> dict[str, Any]:
                 "outputs, transport and filesystem overhead."
             ),
             "description": (
-                "Two air-gapped reviewers annotate base..feature (1 shared comment resolved by "
+                "Two local reviewer copies model disconnected exchange of base..feature "
+                "(1 shared comment resolved by "
                 "Reviewer 1, 4 distinct line comments, 1 colliding same-ID comment pair), then "
                 "author commits feature-v2 (1 unchanged line, 1 line shifted by +3, 1 rewritten "
                 "line, 1 duplicate line shifted) and recovers a packet missing review.html and anchors.json."
@@ -425,6 +440,8 @@ def render_comparison(report: dict[str, Any], *, output_format: str = "text") ->
             "",
             f"Scenario: {report['scenario']['description']}",
             f"Byte basis: {report['scenario']['byte_basis']}",
+            f"Operation basis: {report['scenario']['operation_basis']}",
+            f"Limits: {report['scenario']['comparison_limits']}",
             "",
             "## Measured two-reviewer + revised-patch run",
             "",
@@ -432,7 +449,7 @@ def render_comparison(report: dict[str, Any], *, output_format: str = "text") ->
             "| --- | ---: | ---: |",
             f"| Two complete reviewer returns (bytes) | {raw['reviewer_exchange_bytes']} B | {sk['reviewer_exchange_bytes']} B |",
             f"| Extra tools beyond `git` | {raw['extra_tools_beyond_git']} | {sk['extra_tools_beyond_git']} (Python 3.10+ stdlib) |",
-            f"| CLI commands executed in scenario | {raw['cli_commands']} | {sk['cli_commands']} |",
+            f"| Selected tool operations | {raw['cli_commands']} | {sk['cli_commands']} |",
             f"| Same-ID merge collisions lost/conflicted | {raw['id_collision_conflicts']} | {sk['id_collision_conflicts']} ({sk['divergent_variants_preserved']} variants kept) |",
             f"| Accurately anchored comments on `feature-v2` | {raw['accurately_anchored_after_revise']} | {sk['accurately_anchored_after_revise']} |",
             f"| Explicit orphans with `rebased_from` provenance | {raw['explicit_orphans_with_provenance']} | {sk['explicit_orphans_with_provenance']} |",
@@ -470,6 +487,8 @@ def render_comparison(report: dict[str, Any], *, output_format: str = "text") ->
         "Skein workflow comparison",
         f"Scenario: {report['scenario']['description']}",
         f"Byte basis: {report['scenario']['byte_basis']}",
+        f"Operation basis: {report['scenario']['operation_basis']}",
+        f"Limits: {report['scenario']['comparison_limits']}",
         "",
         f"Raw git bundle + static notes: {raw['reviewer_exchange_bytes']} B, "
         f"{raw['id_collision_conflicts']} ID collision(s), "

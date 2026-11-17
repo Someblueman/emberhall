@@ -48,6 +48,13 @@ class OutsideRecipeAndDocSyncTests(unittest.TestCase):
         skein_total = f"{sk['reviewer_exchange_bytes']:,} B"
         self.assertIn(f"| Two complete reviewer returns (bytes) | {raw_total} | {skein_total} |", text)
         self.assertNotIn("| 3,701 B | 22,773 B |", text)
+        self.assertIn(
+            f"| Selected tool operations | {raw['cli_commands']} | {sk['cli_commands']} |",
+            text,
+        )
+        self.assertNotIn("CLI commands executed", text)
+        self.assertIn("not CLI command counts or human effort", normalized)
+        self.assertIn("neither is run or benchmarked", normalized)
 
         html_bytes = sum(v for k, v in sk["reviewer_artifacts"].items() if k.endswith("/review.html"))
         anchors_bytes = sum(v for k, v in sk["reviewer_artifacts"].items() if k.endswith("/anchors.json"))
