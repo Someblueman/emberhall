@@ -1287,6 +1287,21 @@ function jumpToSequence(seq) {
   if(target<0)return;
   index=target;current=target===data.frames.length-1;render();
 }
+// Completion receipts identify real progress even while a great work stays active.
+function projectProgressChanges(previous, project, sequence) {
+  const title=titleFor(project,"project"),id=project.id||title,stages=project.milestones;
+  const completed=Array.isArray(project.completed)?project.completed:[];
+  const earlier=Array.isArray(previous?.completed)?previous.completed:[];
+  const receipts=completed.filter(entry=>entry.sequence===sequence&&
+    Number.isInteger(entry.stage)&&entry.stage>=0&&Array.isArray(stages)&&entry.stage<stages.length&&
+    !earlier.some(old=>old.stage===entry.stage&&old.sequence===entry.sequence));
+  if(receipts.length)return receipts.map(entry=>({id,title,status:project.status,seq:sequence,
+    verb:`${project.status==="done"?"Final stage":"Stage"} ${entry.stage+1} of ${stages.length} completed`,
+    milestone:entry.milestone||stages[entry.stage].milestone}));
+  if(previous?.status===project.status)return [];
+  const verb={active:"Project started",done:"Milestone completed",dropped:"Project dropped"}[project.status];
+  return verb?[{id,title,status:project.status,seq:sequence,verb}]:[];
+}
 function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
   const visible=frames.slice(0,endIndex+1);
   if(!visible.length)return{startSeq:0,endSeq:0,count:0,isDefault:true,tasks:[],rooms:[],projects:[]};
@@ -1298,7 +1313,6 @@ function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
   const startSeq=visible[startIdx].seq;
   const baseline=startIdx>0?visible[startIdx-1]:null;
   const seenRooms=new Map((baseline?.rooms||[]).map(r=>[r.id,`${r.status||"open"}:${r.name||""}`]));
-  const seenProjects=new Map((baseline?.shelf?.projects||[]).map(p=>[p.id||p.title,p.status]));
   const tasks=[],rooms=[],projects=[];
   const reported=new Set();
   for(let i=startIdx;i<visible.length;i++){
@@ -1314,7 +1328,11 @@ function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
       }
     }
     (f.rooms||[]).forEach(r=>{const sig=`${r.status||"open"}:${r.name||""}`;if(seenRooms.get(r.id)!==sig){seenRooms.set(r.id,sig);rooms.push({name:r.name||r.id,status:r.status||"open",seq:f.seq});}});
-    (f.shelf?.projects||[]).forEach(p=>{const k=p.id||p.title;if(seenProjects.get(k)!==p.status&&(p.status==="active"||p.status==="done")){seenProjects.set(k,p.status);projects.push({title:p.title||k,status:p.status,seq:f.seq});}});
+    const priorProjects=new Map((frames[i-1]?.shelf?.projects||[]).map(p=>[p.id||p.title,p]));
+    for(const project of f.shelf?.projects||[]) {
+      if(project.status!=="active"&&project.status!=="done")continue;
+      projects.push(...projectProgressChanges(priorProjects.get(project.id||project.title),project,f.seq));
+    }
   }
   return{startSeq,endSeq,count:visible.length-startIdx,isDefault,tasks,rooms,projects};
 }
@@ -1333,13 +1351,12 @@ function recentGrowth(frames, endIndex, endAt) {
       // Legacy rooms first appearing in a projection are not new construction.
       if(!old&&!room.planned_at&&!room.opened_at&&status!=="construction")continue;
       const verb={construction:"Building began",open:"Room opened",closed:"Room closed"}[status];
-      if(verb)changes.push({kind:"room",title:room.name,verb,seq:next.seq,at:next.at});
+      if(verb)changes.push({kind:"room",id:room.id,title:room.name,verb,seq:next.seq,at:next.at});
     }
-    const projects=new Map((previous.shelf?.projects||[]).map(project=>[project.id,project.status]));
+    const projects=new Map((previous.shelf?.projects||[]).map(project=>[project.id,project]));
     for(const project of next.shelf?.projects||[]) {
-      if(projects.get(project.id)===project.status)continue;
-      const verb={active:"Project started",done:"Milestone completed",dropped:"Project dropped"}[project.status];
-      if(verb)changes.push({kind:"project",title:titleFor(project,"project"),verb,seq:next.seq,at:next.at});
+      for(const change of projectProgressChanges(projects.get(project.id),project,next.seq))
+        changes.push({...change,kind:"project",at:next.at});
     }
   }
   return changes.reverse();
@@ -1380,7 +1397,11 @@ function renderRecentGrowth() {
     changes.slice(0,5).forEach(change=>{
       const item=html("li","",undefined,list);
       const button=html("button","growth-event",`${change.verb}: ${change.title}`,item);
-      button.addEventListener("click",()=>jumpToSequence(change.seq));
+      button.id=`growth-event-${change.kind}-${change.seq}-${encodeURIComponent(change.id)}`;
+      button.addEventListener("click",()=>{
+        jumpToSequence(change.seq);
+        $(button.id)?.focus?.({preventScroll:true});
+      });
       html("span","small",clock(change.at),item);
     });
     if(changes.length>5)html("p","small",`Showing the latest 5 of ${changes.length} room and project changes.`,box);
@@ -1396,13 +1417,13 @@ function renderCatchupPanel(content) {
   label.htmlFor="catchup-seq";
   const input=html("input","",undefined,controls);
   input.id="catchup-seq";input.type="number";input.min=String(data.frames[0]?.seq||1);input.max=String(digest.endSeq);input.value=String(digest.startSeq);input.defaultValue=input.value;
-  const apply=html("button","","Update",controls);
+  const apply=html("button","quiet-button","Update",controls);
   apply.id="catchup-apply";
   apply.addEventListener("click",()=>{const v=Number.parseInt(input.value,10);catchupStartSeq=Number.isFinite(v)?v:null;catchupPages=[0,0,0];roomPanel();$("catchup-seq")?.focus({preventScroll:true});});
-  const reset=html("button","","Latest 50",controls);
+  const reset=html("button","quiet-button","Latest 50",controls);
   reset.id="catchup-reset";
   reset.addEventListener("click",()=>{catchupStartSeq=null;catchupPages=[0,0,0];roomPanel();$("catchup-seq")?.focus({preventScroll:true});});
-  const sections=[["Completed tasks",digest.tasks,t=>t.title],["Room changes",digest.rooms,r=>`${r.name} (${r.status})`],["Project choices",digest.projects,p=>`${p.title} (${p.status})`] ];
+  const sections=[["Completed tasks",digest.tasks,t=>t.title],["Room changes",digest.rooms,r=>`${r.name} (${r.status})`],["Project progress",digest.projects,p=>`${p.verb}: ${p.title}`] ];
   let any=false;
   sections.forEach(([heading,items,fmt],section)=>{
     if(!items.length)return;
@@ -1427,8 +1448,9 @@ function renderCatchupPanel(content) {
       list.replaceChildren();
       items.slice(start,start+CATCHUP_PAGE_SIZE).forEach((item,offset)=>{
         const row=html("div","catchup-item",undefined,list);
-        html("span","",`${fmt(item)} · event ${item.seq}`,row);
-        const btn=html("button","catchup-jump","Jump",row);
+        const description=html(item.milestone?"div":"span","",`${fmt(item)} · event ${item.seq}`,row);
+        if(item.milestone)html("p","small",item.milestone,description);
+        const btn=html("button","quiet-button catchup-jump","Jump",row);
         // Several rooms or projects can change in the same event.
         btn.id=`catchup-jump-${section}-${item.seq}${section===0?"":`-${start+offset}`}`;
         btn.setAttribute("aria-label",`View ${fmt(item)} at event ${item.seq}`);
@@ -1449,7 +1471,7 @@ function renderCatchupPanel(content) {
     }
     draw();
   });
-  if(!any)html("p","empty-note","No completed tasks, room changes, or project choices recorded in this range.",panel);
+  if(!any)html("p","empty-note","No completed tasks, room changes, or project progress recorded in this range.",panel);
 }
 // The Archive's lessons, newest first: what a resident learned and who checked it.
 function lessonReviewWords(lesson) {
