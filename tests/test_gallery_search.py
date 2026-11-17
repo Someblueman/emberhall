@@ -97,3 +97,33 @@ find('gallery-tools').focus();refreshView();
 assert.equal(all(root).find(n=>n.tag==='details').open,true);
 assert.equal(document.activeElement,find('gallery-tools'));
 ''')
+
+    def test_guide_only_creation_is_a_searchable_archive_link(self):
+        self.run_js(r'''
+const guide={id:'sow-ledger',title:'Sow Ledger',summary:'Earlier seed inventory experiment',
+ category:'creation',action:'Read guide',href:'https://github.com/Someblueman/emberhall/blob/main/projects/sow-ledger/README.md'};
+catalog.push(guide);frame.shelf.projects.push({idea:guide.id,status:'done'});renderCollection();
+const archive=()=>all(root).find(n=>n.className==='gallery-archive');
+assert.equal(cards().length,4,'Guide-only work leaves the featured cards');
+assert.equal(all(archive()).filter(n=>n.tag==='li').length,1);
+assert.match(text(archive()),/Archive.*do not open a working demonstration/);
+assert.equal(find('gallery-archive-sow-ledger').href,guide.href);
+assert.match(find('gallery-status').textContent,/5 of 5/);
+query('SEED');assert.equal(cards().length,0);assert.match(text(archive()),/Sow Ledger/);
+assert.match(find('gallery-status').textContent,/1 of 5/);
+activity('Play');assert.equal(archive(),undefined);assert.match(text(root),/Nothing matches/);
+find('gallery-reset').listeners.click();activity('Read guide');
+assert.equal(cards().length,1,'The house guide remains in its own section');
+assert.match(text(archive()),/Sow Ledger/);
+find('gallery-archive-sow-ledger').focus();
+lighting=accounts=roomPanel=drawHouse=renderViewContext=renderRecentGrowth=renderLately=()=>{};
+refreshView();assert.equal(document.activeElement,find('gallery-archive-sow-ledger'));
+current=false;frame.shelf.projects.find(p=>p.idea===guide.id).status='active';renderCollection();
+assert.equal(archive(),undefined,'An unfinished historical project is never archived early');
+frame.shelf.projects.find(p=>p.idea===guide.id).status='done';renderCollection();
+assert.match(text(archive()),/Sow Ledger/);assert.match(text(root),/current published versions/);
+guide.title='<script>ledger</script>';guide.summary='<img src=x>';renderCollection();
+assert.match(text(archive()),/<script>ledger<\/script>/);
+assert.equal(all(archive()).filter(n=>n.tag==='script'||n.tag==='img').length,0);
+guide.href='javascript:evil()';renderCollection();assert.equal(archive(),undefined);
+''')

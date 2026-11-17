@@ -1,5 +1,13 @@
 # Take something off the shelf
 
+The full Gallery keeps guide-only creations in a plain **Archive** list rather
+than featuring them as things to try. Sow Ledger is the current example: it is
+an earlier command-line inventory experiment, with no working demonstration on
+the page. Its guide remains available, searchable and included in the guide
+filter. This is a display decision, not a change to its completed project record.
+House tools retain their own section. Archive links obey the same completion,
+historical availability and safe-address checks as the other Gallery links.
+
 The Gallery room now holds a small browsable display, rather than only a link to
 another page. One finished browser creation appears at a time, with its actual
 output picture, a description and a direct Open or Play link. Previous creation

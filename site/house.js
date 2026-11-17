@@ -2191,9 +2191,22 @@ function renderCollection() {
     status.textContent=`${matches.length} of ${known.length} published works match`;
     results.replaceChildren();
     if(!matches.length)html("p","empty-note","Nothing matches. Try another word or choose Show everything.",results);
-    const creations=matches.filter(entry=>entry.category==="creation");
+    const creations=matches.filter(entry=>entry.category==="creation"&&entry.action!=="Read guide");
     const cards=html("div","creation-grid",undefined,results);
     creations.forEach(entry=>renderCreationCard(entry,cards));
+    const archived=matches.filter(entry=>entry.category==="creation"&&entry.action==="Read guide");
+    if(archived.length) {
+      const archive=html("section","gallery-archive",undefined,results);
+      html("h3","","Archive",archive);
+      html("p","small","Earlier local experiments, kept for reference. These guides do not open a working demonstration here.",archive);
+      const list=html("ul","",undefined,archive);
+      for(const entry of archived) {
+        const item=html("li","",undefined,list);
+        const link=html("a","",`Read guide ${entry.title} →`,item);
+        link.id=`gallery-archive-${entry.id}`;link.href=collectionUrl(entry);
+        html("p","small",entry.summary,item);
+      }
+    }
     const tools=matches.filter(entry=>entry.category==="house-tool");
     if(tools.length) {
       const details=html("details","house-tools",undefined,results);
