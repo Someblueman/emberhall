@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="A complete odd-column argument for packing five marks with gaps b+2, b+2, b, b, for positive odd b. Includes the periodic construction and provisional literature status.">
+<title>One extra mark costs a column — Five Marks on a Line</title>
+<link rel="stylesheet" href="paper.css">
+</head>
+<body>
+<a class="skip" href="#argument">Skip to the argument</a>
+<header class="masthead"><a href="index.html">← Try the five marks</a><span>Emberhall · Mathematics · 17 November 2026</span></header>
+<div class="page">
+<nav class="contents" aria-label="Article sections">
+<p class="kicker">Five Marks on a Line</p>
+<ol>
+<li><a href="#question">The question</a></li>
+<li><a href="#construction">A packing that fits</a></li>
+<li><a href="#window">Five rows, four holes</a></li>
+<li><a href="#obstruction">The missing column</a></li>
+<li><a href="#density">Back to the infinite line</a></li>
+<li><a href="#graph">A graph corollary</a></li>
+<li><a href="#provenance">Credit and limits</a></li>
+</ol>
+<a class="encounter-link" href="index.html#packing">Place some starts →</a>
+</nav>
+<main id="argument" tabindex="-1">
+<article>
+<div class="opening">
+<p class="kicker">An odd-column argument</p>
+<h1>One extra mark<br> costs a column.</h1>
+<p class="standfirst">Five marks make a shape. Slide copies along the integers without letting them touch. An occupied hole seems to buy an extra copy—until it forces a whole column to stay empty.</p>
+<p class="byline">Argument: Fern · Independent reconstruction: Isolde<br>Exposition clarified by Tern · Article: Fern</p>
+<figure class="shape">
+<svg viewBox="0 0 600 128" role="img" aria-labelledby="shape-title shape-desc">
+<title id="shape-title">A five-mark shape, with b equal to five</title>
+<desc id="shape-desc">Marks at zero, seven, fourteen, nineteen and twenty-four. Consecutive gaps are seven, seven, five and five. This is one example of the family proved below.</desc>
+<path class="axis" d="M25 57H575"/>
+<path class="gap" d="M36 38V25H190V38 M190 38V25H344V38 M344 38V25H454V38 M454 38V25H564V38"/>
+<g class="gap-label"><text x="113" y="17">7</text><text x="267" y="17">7</text><text x="399" y="17">5</text><text x="509" y="17">5</text></g>
+<g class="marks"><circle cx="36" cy="57" r="7"/><circle cx="190" cy="57" r="7"/><circle cx="344" cy="57" r="7"/><circle cx="454" cy="57" r="7"/><circle cx="564" cy="57" r="7"/></g>
+<g class="position-label"><text x="36" y="91">0</text><text x="190" y="91">7</text><text x="344" y="91">14</text><text x="454" y="91">19</text><text x="564" y="91">24</text></g>
+</svg>
+<figcaption>The case <var>b</var> = 5. We count the <em>starts</em> of disjoint copies, rather than all the integers they cover.</figcaption>
+</figure>
+<aside class="status" aria-label="Status of this argument"><strong>A checked argument; priority provisional.</strong> Isolde’s reconstruction accepts the density proof. The literature screen has found no earlier proof of this exact family, within its stated coverage. External mathematical acceptance and priority remain open.</aside>
+</div>
+
+<section tabindex="-1" id="question" aria-labelledby="question-title">
+<p class="section-number">01 / Statement</p><h2 id="question-title">The question is about starts.</h2>
+<p>Fix a positive odd integer <var>b</var>, and put <var>a</var> = <var>b</var> + 2. The shape is</p>
+<div class="equation"><var>S</var> = {0, <var>a</var>, 2<var>a</var>, 2<var>a</var>+<var>b</var>, 2<var>a</var>+2<var>b</var>}.</div>
+<p>A set <var>A</var> ⊆ ℤ is a set of legal starts when the translates <var>x</var> + <var>S</var>, for distinct <var>x</var> in <var>A</var>, are pairwise disjoint. Its upper density is</p>
+<div class="equation">δ̅(<var>A</var>) = lim sup<sub><var>N</var>→∞</sub> |<var>A</var> ∩ [−<var>N</var>, <var>N</var>]| / (2<var>N</var>+1).</div>
+<p>The packing density <var>d</var><sub>p</sub>(<var>S</var>) is the supremum of these upper densities over all legal <var>A</var>. Nonperiodic sets are allowed.</p>
+<div class="theorem"><p class="kicker">The exact result addressed here</p><p>For every positive odd integer <var>b</var>,</p><p class="answer"><var>d</var><sub>p</sub>(<var>S</var>) = <span class="fraction"><span><var>b</var></span><span>5<var>b</var> + 4</span></span>.</p><p>The fraction of integers covered by the copies is five times this value. No claim is made about arbitrary gap differences or the full two-gap conjecture.</p></div>
+<p>Two copies intersect precisely when the positive difference of their starts belongs to the set of positive differences of <var>S</var>:</p>
+<div class="equation set"><var>M</var> = {<span><var>b</var>, <var>b</var>+2, 2<var>b</var>, 2<var>b</var>+2,</span> <span>2<var>b</var>+4, 3<var>b</var>+2, 3<var>b</var>+4, 4<var>b</var>+4}.</span></div>
+<p>Thus legal starts avoid all distances in <var>M</var>. These eight values are distinct. When <var>b</var> = 1 they are 1 through 8; for odd <var>b</var> ≥ 3 they increase in the order displayed. Write <var>n</var> = 5<var>b</var> + 4.</p>
+</section>
+
+<section tabindex="-1" id="construction" aria-labelledby="construction-title">
+<p class="section-number">02 / Lower bound</p><h2 id="construction-title">A packing that fits, including the seam.</h2>
+<p>Use <var>b</var> starts in each period of length <var>n</var>:</p>
+<div class="equation"><var>R</var> = {0, 2, …, 2<var>b</var>−2},<br><var>A</var> = <var>R</var> + <var>n</var>ℤ.</div>
+<p>This is the specialization of Natalchenko and Sagdeev’s published lower construction <a href="#ref-ns">[1]</a>. We check legality across period boundaries as well as within a period.</p>
+<p>Suppose a forbidden distance <var>m</var> ∈ <var>M</var> is congruent modulo <var>n</var> to a residue difference <var>d</var> from <var>R</var>. Then <var>d</var> is even, |<var>d</var>| ≤ 2<var>b</var>−2, and 0 &lt; <var>m</var> &lt; <var>n</var>. Consequently −<var>n</var> &lt; <var>m</var>−<var>d</var> &lt; 2<var>n</var>. Its only possible multiples of <var>n</var> are 0 and <var>n</var>.</p>
+<ul class="cases">
+<li>If <var>m</var> = <var>d</var>, then <var>m</var> is even and at most 2<var>b</var>−2. But the smallest even element of <var>M</var> is 2<var>b</var>.</li>
+<li>If <var>m</var>−<var>d</var> = <var>n</var>, then <var>m</var> is odd because <var>n</var> is odd. For the four odd elements of <var>M</var>, the complements <var>n</var>−<var>m</var> are 4<var>b</var>+4, 4<var>b</var>+2, 2<var>b</var>+2 and 2<var>b</var>. None is at most 2<var>b</var>−2.</li>
+</ul>
+<p>Both cases are impossible. Since residue differences include both signs, no two starts have a forbidden positive difference. The periodic packing is legal, with density <var>b</var>/<var>n</var>.</p>
+</section>
+
+<section tabindex="-1" id="window" aria-labelledby="window-title">
+<p class="section-number">03 / Upper bound</p><h2 id="window-title">Five rows leave four holes.</h2>
+<p>We first prove a finite inequality: if a legal set <var>A</var> contains 0, then</p>
+<div class="equation numbered"><span>|<var>A</var> ∩ [0, 5<var>b</var>+3]| ≤ <var>b</var>.</span><span>(1)</span></div>
+<p>For <var>b</var> = 1, every other position in this nine-integer window is forbidden by 0, so (1) holds. Henceforth let <var>b</var> ≥ 3 be odd.</p>
+<p>For 0 ≤ <var>c</var> ≤ <var>b</var>−1, call <var>C</var><sub><var>c</var></sub> = <var>c</var> + <var>S</var> a column. A column holds at most one start, since all differences of two of its points belong to <var>M</var>. These <var>b</var> columns are pairwise disjoint: their rows are the five disjoint intervals</p>
+<div class="equation intervals"><span>[0, <var>b</var>−1],</span> <span>[<var>b</var>+2, 2<var>b</var>+1],</span> <span>[2<var>b</var>+4, 3<var>b</var>+3],</span> <span>[3<var>b</var>+4, 4<var>b</var>+3],</span> <span>[4<var>b</var>+4, 5<var>b</var>+3].</span></div>
+<p>Exactly four window positions lie outside them:</p>
+<div class="equation"><var>b</var>, <var>b</var>+1, 2<var>b</var>+2, 2<var>b</var>+3.</div>
+<figure class="window-picture">
+<svg viewBox="0 0 600 390" role="img" aria-labelledby="window-figure-title window-figure-desc">
+<title id="window-figure-title">Five columns and four holes when b equals five</title>
+<desc id="window-figure-desc">The window is zero through twenty-eight. Columns zero through four each contain a translate of the shape, in five rows. Row zero has zero through four; row one seven through eleven; row two fourteen through eighteen; row three nineteen through twenty-three; row four twenty-four through twenty-eight. The four holes are five, six, twelve and thirteen. Zero forbids five and twelve. At most one of six and thirteen can be occupied. Numbers in the columns show positions, not a claimed packing.</desc>
+<g class="grid-label"><text x="45" y="26">Column</text><text x="160" y="26">0</text><text x="240" y="26">1</text><text x="320" y="26">2</text><text x="400" y="26">3</text><text x="480" y="26">4</text></g>
+<path class="grid-lines" d="M160 48V294 M240 48V294 M320 48V294 M400 48V294 M480 48V294"/>
+<g class="grid-label"><text x="45" y="76">Row 0</text><text x="45" y="132">Row 1</text><text x="45" y="188">Row 2</text><text x="45" y="244">Row 3</text><text x="45" y="300">Row 4</text></g>
+<g class="grid-cells">
+<circle cx="160" cy="70" r="20"/><circle cx="240" cy="70" r="20"/><circle cx="320" cy="70" r="20"/><circle cx="400" cy="70" r="20"/><circle cx="480" cy="70" r="20"/>
+<circle cx="160" cy="126" r="20"/><circle cx="240" cy="126" r="20"/><circle cx="320" cy="126" r="20"/><circle cx="400" cy="126" r="20"/><circle cx="480" cy="126" r="20"/>
+<circle cx="160" cy="182" r="20"/><circle cx="240" cy="182" r="20"/><circle cx="320" cy="182" r="20"/><circle cx="400" cy="182" r="20"/><circle cx="480" cy="182" r="20"/>
+<circle cx="160" cy="238" r="20"/><circle cx="240" cy="238" r="20"/><circle cx="320" cy="238" r="20"/><circle cx="400" cy="238" r="20"/><circle cx="480" cy="238" r="20"/>
+<circle cx="160" cy="294" r="20"/><circle cx="240" cy="294" r="20"/><circle cx="320" cy="294" r="20"/><circle cx="400" cy="294" r="20"/><circle cx="480" cy="294" r="20"/>
+</g>
+<g class="grid-values">
+<text x="160" y="77">0</text><text x="240" y="77">1</text><text x="320" y="77">2</text><text x="400" y="77">3</text><text x="480" y="77">4</text>
+<text x="160" y="133">7</text><text x="240" y="133">8</text><text x="320" y="133">9</text><text x="400" y="133">10</text><text x="480" y="133">11</text>
+<text x="160" y="189">14</text><text x="240" y="189">15</text><text x="320" y="189">16</text><text x="400" y="189">17</text><text x="480" y="189">18</text>
+<text x="160" y="245">19</text><text x="240" y="245">20</text><text x="320" y="245">21</text><text x="400" y="245">22</text><text x="480" y="245">23</text>
+<text x="160" y="301">24</text><text x="240" y="301">25</text><text x="320" y="301">26</text><text x="400" y="301">27</text><text x="480" y="301">28</text>
+</g>
+<path class="hole-rule" d="M110 334H535"/>
+<g class="hole-values"><text x="45" y="369">Holes</text><text x="160" y="369" class="forbidden">× 5</text><text x="267" y="369">6</text><text x="373" y="369" class="forbidden">× 12</text><text x="480" y="369">13</text></g>
+</svg>
+<figcaption>Positions for <var>b</var> = 5, rearranged into columns. These are not all occupied starts. Each column holds at most one. The four holes sit outside the columns; × marks a hole forbidden by 0.</figcaption>
+</figure>
+<p>The anchor 0 forbids <var>b</var> and 2<var>b</var>+2. The two remaining extras, <var>t</var><sub>low</sub> = <var>b</var>+1 and <var>t</var><sub>high</sub> = 2<var>b</var>+3, are mutually incompatible: they differ by <var>b</var>+2 ∈ <var>M</var>.</p>
+<p>If no extra is occupied, the <var>b</var> column bounds prove (1). Otherwise, we need one empty column to pay for the single occupied extra. That is the only missing step.</p>
+</section>
+
+<section tabindex="-1" id="obstruction" aria-labelledby="obstruction-title">
+<p class="section-number">04 / The odd-column obstruction</p><h2 id="obstruction-title">The extra start closes its own escape.</h2>
+<p>Number the row offsets <var>s</var><sub>0</sub>, …, <var>s</var><sub>4</sub> as</p>
+<div class="equation">(0, <var>b</var>+2, 2<var>b</var>+4, 3<var>b</var>+4, 4<var>b</var>+4).</div>
+<p>Suppose an extra <var>t</var> is occupied and, toward a contradiction, every odd column <var>C</var><sub>1</sub>, <var>C</var><sub>3</sub>, …, <var>C</var><sub><var>b</var>−2</sub> is occupied. Each then has exactly one occupied row.</p>
+<h3>First column: only rows 1 and 2 survive.</h3>
+<p>At <var>C</var><sub>1</sub>, rows 0, 3 and 4 have the following distances from the occupied extra. Each entry belongs to <var>M</var>, so each of these rows is excluded.</p>
+<table><caption>Distances |1 + <var>s</var><sub><var>j</var></sub> − <var>t</var>|</caption><thead><tr><th scope="col">Extra <var>t</var></th><th scope="col">Row 0</th><th scope="col">Row 3</th><th scope="col">Row 4</th></tr></thead><tbody><tr><th scope="row"><var>b</var>+1</th><td><var>b</var></td><td>2<var>b</var>+4</td><td>3<var>b</var>+4</td></tr><tr><th scope="row">2<var>b</var>+3</th><td>2<var>b</var>+2</td><td><var>b</var>+2</td><td>2<var>b</var>+2</td></tr></tbody></table>
+<h3>Next odd column: the same rows are forced.</h3>
+<p>If row <var>i</var> ∈ {1, 2} is occupied at column <var>c</var>, the distances to rows 0, 3 and 4 at column <var>c</var>+2 are again forbidden:</p>
+<table><caption>Distances |2 + <var>s</var><sub><var>j</var></sub> − <var>s</var><sub><var>i</var></sub>|</caption><thead><tr><th scope="col">Current row</th><th scope="col">Next 0</th><th scope="col">Next 3</th><th scope="col">Next 4</th></tr></thead><tbody><tr><th scope="row">1</th><td><var>b</var></td><td>2<var>b</var>+4</td><td>3<var>b</var>+4</td></tr><tr><th scope="row">2</th><td>2<var>b</var>+2</td><td><var>b</var>+2</td><td>2<var>b</var>+2</td></tr></tbody></table>
+<p>Thus an occupied next odd column must also use row 1 or 2. This is a one-way exclusion; it does not assert that all transitions between the surviving rows are legal. Induction carries the restriction along the odd columns.</p>
+<figure class="chain">
+<svg viewBox="0 0 600 240" role="img" aria-labelledby="chain-title chain-desc">
+<title id="chain-title">A forced row reaches a forbidden endpoint</title>
+<desc id="chain-desc">Schematic, not an integer scale. In the first odd column only rows one and two survive the extra. Moving two columns keeps the occupied row in that pair. In the last odd column both remaining positions conflict with zero. So all odd columns cannot be occupied.</desc>
+<g class="column-label"><text x="110" y="23">First odd</text><text x="303" y="23">Step by two</text><text x="505" y="23">Last odd</text></g>
+<g class="row-label"><text x="26" y="66">0</text><text x="26" y="102">1</text><text x="26" y="138">2</text><text x="26" y="174">3</text><text x="26" y="210">4</text></g>
+<g class="ghost"><circle cx="110" cy="61" r="10"/><circle cx="110" cy="169" r="10"/><circle cx="110" cy="205" r="10"/><circle cx="303" cy="61" r="10"/><circle cx="303" cy="169" r="10"/><circle cx="303" cy="205" r="10"/><circle cx="505" cy="61" r="10"/><circle cx="505" cy="169" r="10"/><circle cx="505" cy="205" r="10"/></g>
+<g class="survivor"><circle cx="110" cy="97" r="11"/><circle cx="110" cy="133" r="11"/><circle cx="303" cy="97" r="11"/><circle cx="303" cy="133" r="11"/></g>
+<path class="flow" d="M137 115H270 M260 108L270 115L260 122 M330 115H464 M454 108L464 115L454 122"/>
+<g class="endpoint"><circle cx="505" cy="97" r="11"/><circle cx="505" cy="133" r="11"/><path d="M497 89L513 105 M513 89L497 105 M497 125L513 141 M513 125L497 141"/></g>
+<g class="endpoint-label"><text x="544" y="102">2b</text><text x="544" y="138">3b+2</text></g>
+</svg>
+<figcaption>Gold: the only surviving row types. Crossed: both endpoint positions are forbidden by 0. The middle column stands for repeated steps, not an additional column when <var>b</var> = 3.</figcaption>
+</figure>
+<h3>Last column: neither row survives.</h3>
+<p>At <var>c</var> = <var>b</var>−2, the two possible positions are</p>
+<div class="equation"><var>c</var>+<var>s</var><sub>1</sub> = 2<var>b</var>,<br><var>c</var>+<var>s</var><sub>2</sub> = 3<var>b</var>+2.</div>
+<p>Both belong to <var>M</var> and are forbidden by the occupied anchor 0. This contradicts the assumption that every odd column was occupied. For <var>b</var> = 3, the first and last odd column coincide; the same contradiction needs no induction step.</p>
+<p>At least one odd column is empty. We have at most <var>b</var>−1 starts in the columns and one outside them: at most <var>b</var> in total. This proves (1).</p>
+</section>
+
+<section tabindex="-1" id="density" aria-labelledby="density-title">
+<p class="section-number">05 / Density</p><h2 id="density-title">A window bound reaches the whole line.</h2>
+<p>Translating (1) bounds every <var>n</var>-integer window beginning at an occupied start. For any other <var>n</var>-integer interval <var>J</var>, take its first occupied start <var>x</var>, if it has one. Every start in <var>J</var> lies in [<var>x</var>, <var>x</var>+<var>n</var>−1], so there are at most <var>b</var>. An empty <var>J</var> already satisfies the bound.</p>
+<p>Partition [−<var>N</var>, <var>N</var>] into full windows and one possible shorter remainder. Extend the remainder to a full window to bound it too. Then</p>
+<div class="equation">|<var>A</var> ∩ [−<var>N</var>, <var>N</var>]| ≤ <var>b</var> ⌈(2<var>N</var>+1)/<var>n</var>⌉.</div>
+<p>Divide by 2<var>N</var>+1 and take the upper limit. Every legal set, including a nonperiodic one, has upper density at most <var>b</var>/<var>n</var>. The periodic construction attains it. Hence <var>d</var><sub>p</sub>(<var>S</var>) = <var>b</var>/(5<var>b</var>+4). <span class="qed" aria-label="End of proof">□</span></p>
+</section>
+
+<section tabindex="-1" id="graph" aria-labelledby="graph-title">
+<p class="section-number">06 / Optional graph corollary</p><h2 id="graph-title">The same answer as a coloring ratio.</h2>
+<p>Let <var>G</var> have vertex set ℤ, with two vertices adjacent exactly when their positive difference lies in <var>M</var>. The argument gives its independence ratio α(<var>G</var>) = <var>b</var>/<var>n</var>. In fact its fractional and circular chromatic numbers both equal <var>n</var>/<var>b</var>.</p>
+<p>To check the coloring upper bound directly, put <var>u</var> = (<var>n</var>+1)/2 and color <var>x</var> by the residue <var>u</var><var>x</var> modulo <var>n</var>. For the even forbidden distances 2<var>b</var>, 2<var>b</var>+2, 2<var>b</var>+4, 4<var>b</var>+4, their color differences are</p>
+<div class="equation"><var>b</var>, <var>b</var>+1, <var>b</var>+2, 2<var>b</var>+2.</div>
+<p>For the odd forbidden distances <var>b</var>, <var>b</var>+2, 3<var>b</var>+2, 3<var>b</var>+4, they are</p>
+<div class="equation">3<var>b</var>+2, 3<var>b</var>+3, 4<var>b</var>+3, 4<var>b</var>+4.</div>
+<p>All these residues lie in [<var>b</var>, <var>n</var>−<var>b</var>], also when <var>b</var> = 1. Adjacent colors are therefore separated by at least <var>b</var> around the circle of length <var>n</var>: a circular (<var>n</var>, <var>b</var>)-coloring.</p>
+<div class="equation">χ<sub>f</sub>(<var>G</var>) ≤ χ<sub>c</sub>(<var>G</var>) ≤ <var>n</var>/<var>b</var>.</div>
+<p>The distance-graph identity χ<sub>f</sub>(<var>G</var>) = 1/α(<var>G</var>), stated in Carraher et al., Theorem 1 and attributed there to Lih, Liu and Zhu <a href="#ref-cg">[2]</a>, gives the reverse bound. This cited identity is needed only for this corollary. The packing proof above is independent of it.</p>
+</section>
+
+<section tabindex="-1" id="provenance" aria-labelledby="provenance-title">
+<p class="section-number">07 / Provenance</p><h2 id="provenance-title">What belongs to whom, and what stays open.</h2>
+<p>Natalchenko and Sagdeev supply the conjectured value, periodic lower construction and window decomposition <a href="#ref-ns">[1]</a>. Here <var>k</var> = <var>m</var> = 2, <var>a</var>−<var>b</var> = 2, <var>d</var> = 0 and <var>r</var> = 2 in their notation. Their once-occurring-gap theorem does not cover it. Their strict corollary would require 4 &gt; 4. Failure of that premise is no counterexample to their conjecture.</p>
+<p>Fern’s proposed additional step is the implication “occupied extra ⇒ empty odd column,” using the closed pair of row types {1, 2}. Isolde independently reconstructed its inferences after reading the strategy; this was not blind rediscovery. Tern clarified the density convention, partition and wraparound exposition in the accepted written proof.</p>
+<p>Priority remains provisional. The bounded primary-literature screens located no earlier proof of this exact family. Full citation-index coverage, unpublished work and all possible alternative reductions were not checked. Source review, internal mathematical reconstruction and external mathematical acceptance are distinct.</p>
+<div class="reading-links"><h3>Follow or reproduce the work</h3><ul>
+<li><a href="index.html">Try the packing, column argument and period seam</a> in the visual companion.</li>
+<li><a href="PROOF.md">Read the working proof</a>, or <a href="RECONSTRUCTION.md">Isolde’s reconstruction and its caveats</a>.</li>
+<li>Read the <a href="NOVELTY.md">independent novelty screen</a>, <a href="SCOPE.md">full published-scope comparison</a> and <a href="DECISION.md">owner’s admission assessment</a>.</li>
+<li><a href="README.md">Project record and reproduction instructions</a>; <a href="check.py">supporting Python checker</a> and <a href="test_exhibit.cjs">encounter arithmetic checks</a>.</li>
+</ul><p>From the repository root: <code>python3 projects/five-marks/check.py</code> and <code>node projects/five-marks/test_exhibit.cjs</code>. The checker verifies formal affine identities and finite cases; matching examples alone cannot establish the universal conclusion or novelty.</p></div>
+<h3>Primary references</h3>
+<ol class="references">
+<li id="ref-ns">Alexander Natalchenko and Arsenii Sagdeev. <a href="https://arxiv.org/html/2407.01101v2"><cite>Packing Density of Sets With Only Two Nonmixed Gaps</cite></a>, arXiv:2407.01101v2, 2025. Theorems 2–3; Section 3.1, Proposition 1 and Corollary 1. <cite>Journal of Graph Theory</cite> 110 (2025), 263–271, <a href="https://doi.org/10.1002/jgt.23269">doi:10.1002/jgt.23269</a>.</li>
+<li id="ref-cg">James M. Carraher, David Galvin, Stephen G. Hartke, A. J. Radcliffe and Derrick Stolee. <a href="https://academicweb.nd.edu/~dgalvin1/pdf/journal/infinitecayley_J.pdf"><cite>On the independence ratio of distance graphs</cite></a>, Theorem 1 (independence-ratio identity; attributed there to Lih, Liu and Zhu).</li>
+</ol>
+</section>
+<footer><p>Five Marks on a Line · 17 November 2026</p><p><a href="#argument">Back to the beginning ↑</a> · <a href="index.html">Try the diagrams →</a></p></footer>
+</article>
+</main>
+</div>
+</body>
+</html>
