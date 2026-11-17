@@ -122,3 +122,46 @@ frame.hearth=[{name:'No receipt',text:'Kept words',at:1}];show();
 assert.equal(articles().length,1);assert.match(text(root),/Kept words/);
 assert(!all(root).some(n=>(n.id||'').startsWith('hearth-visit-')));
 ''')
+
+    def test_return_restores_original_conversation_after_nested_visits_and_refresh(self):
+        self.run_renderer(r'''
+const before=JSON.stringify(data);let chosen=null;
+choose=room=>{chosen=room;};render=()=>{frame=data.frames[index];show();};
+show();get('hearth-visit-13').listeners.click();assert(!get('hearth-return'));
+search('Message');get('hearth-older').listeners.click();
+get('hearth-visit-8').listeners.click();
+assert.equal(frame.seq,8);assert.equal(hearthState.page,0);
+assert.doesNotMatch(text(root),/Message 9|Message 13/);
+assert.match(text(get('hearth-return')),/Back to conversation/);
+get('hearth-visit-6').listeners.click();assert.equal(frame.seq,6);
+assert.equal(hearthTrail.sequence,13);assert.equal(hearthTrail.state.page,1);
+search('Message 1'); // Edits made during the detour do not replace the saved search.
+get('hearth-return').focus();refreshView(true);
+assert.equal(document.activeElement,get('hearth-return'));
+get('hearth-return').listeners.click();
+assert.equal(frame.seq,13);assert.equal(index,12);assert.equal(current,true);
+assert.equal(chosen,'hearth');assert.equal(hearthState.page,1);assert.equal(hearthState.query,'Message');
+assert.equal(document.activeElement,get('hearth-visit-8'));assert(get('hearth-visit-8').scrolled);
+assert(!get('hearth-return'));assert.equal(hearthTrail,null);assert.equal(JSON.stringify(data),before);
+// A later publication must not silently move the original latest conversation forward.
+get('hearth-visit-8').listeners.click();data.frames.push({seq:99,at:1099,hearth:[voice(99)]});
+show();get('hearth-return').listeners.click();assert.equal(frame.seq,13);assert.equal(current,false);
+assert.doesNotMatch(text(root),/Message 99/);
+// A historical origin stays historical even if it is the last frame in a replacement publication.
+get('hearth-visit-8').listeners.click();data.frames.pop();show();get('hearth-return').listeners.click();
+assert.equal(current,false);assert.equal(hearthState.page,1);
+''')
+
+    def test_return_handles_missing_origin_and_legacy_destination(self):
+        self.run_renderer(r'''
+render=()=>{frame=data.frames[index];show();};choose=()=>{};
+show();get('hearth-visit-12').listeners.click();
+// The return remains available when an older destination has no public words.
+delete frame.hearth;data.frames=data.frames.slice(11);show();
+assert(get('hearth-return'));assert.match(text(root),/not what they said/);
+get('hearth-return').listeners.click();assert.equal(frame.seq,13);
+assert.equal(document.activeElement,get('hearth-visit-12'));
+get('hearth-visit-12').listeners.click();data.frames=data.frames.filter(f=>f.seq!==13);show();
+assert(!get('hearth-return'));assert.match(text(root),/original moment is absent/);
+assert.equal(frame.seq,12);assert.equal(current,false);
+''')

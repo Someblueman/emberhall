@@ -23,6 +23,13 @@ edits keep the field in place, and a redraw restores its selection. Moving to an
 earlier moment clamps pages to the remaining messages. Visiting a message starts
 its moment at the newest page so the selected voice can receive focus.
 
+**Back to conversation** restores the exact moment, search and page where the
+visit began, then focuses the original Visit event button. Following another
+older message keeps the original return point. A new publication does not move
+that point forward to a newer Latest. If its exact moment is no longer available,
+the room explains why it cannot return. This trail stays in the current visit;
+it is not saved in the room bookmark.
+
 ## Checks
 
 `python3 -m unittest tests.test_hearth_conversation tests.test_living_house tests.test_archive_lessons tests.test_house_navigation tests.test_room_bookmarks`
@@ -46,3 +53,9 @@ affected tests passed, including nearby rooms and refresh behavior.
 This is a site change. It needs independent source and page review before
 integration; source delivery and public page publication are separate steps.
 No runtime renovation, new dependency or publication schema is involved.
+
+Hawthorn’s return button adds checks for nested visits, restoring the original
+search and page, retaining a historical origin after publication changes,
+missing source moments and destinations without public words. The focused and
+adjacent group passes 33 checks; the final browser result is in the task finish
+receipt. This navigation change does not add public journal text.

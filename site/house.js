@@ -1438,7 +1438,26 @@ function lessonEntry(lesson,parent) {
   return entry;
 }
 let hearthState={query:"",page:0};
+let hearthTrail=null;
 const HEARTH_PAGE_SIZE=4;
+function renderHearthReturn(content) {
+  const trail=hearthTrail;
+  if(!trail)return;
+  const sourceIndex=data.frames.findIndex(moment=>moment.seq===trail.sequence);
+  if(sourceIndex<0) {
+    html("p","small","The conversation’s original moment is absent from this publication; it cannot be restored.",content);
+    return;
+  }
+  const back=workshopButton(content,"Back to conversation",()=>{
+    index=sourceIndex;frame=data.frames[index];
+    current=trail.current&&index===data.frames.length-1;
+    hearthState={...trail.state};hearthTrail=null;
+    selectedFloor=frame.rooms?.find(room=>room.id==="hearth")?.floor??0;
+    choose("hearth");render();workshopFocus(trail.target,true);
+  });
+  back.id="hearth-return";
+  html("p","small",`Return to your search and page at event ${trail.sequence}.`,content);
+}
 // Reunite only words already exposed in public snapshots, through this moment.
 function hearthConversation(frames,moment) {
   const voices=new Map();
@@ -1454,6 +1473,7 @@ function hearthConversation(frames,moment) {
 }
 // The Hearth: find a voice and follow it back to the moment it spoke.
 function renderHearth(content) {
+  renderHearthReturn(content);
   if(!Array.isArray(frame.hearth)){html("p","empty-note","This earlier snapshot recorded that residents spoke, not what they said.",content);return;}
   const voices=hearthConversation(data?.frames,frame);
   if(!voices.length){html("p","empty-note","Residents’ words are kept in the house’s private journal. This page shows that they spoke, not what they said.",content);return;}
@@ -1498,6 +1518,9 @@ function renderHearth(content) {
       html("p","voice-text",voice.text,entry);
       if(visitable.has(voice.seq)) {
         const visit=workshopButton(entry,`Visit event ${voice.seq} →`,()=>{
+          // Further visits stay anchored to the conversation where this trip began.
+          if(voice.seq!==frame.seq&&(!hearthTrail||hearthTrail.sequence===frame.seq))
+            hearthTrail={sequence:frame.seq,current,state:{...hearthState},target:visit.id};
           hearthState.page=0;jumpToSequence(voice.seq);
           const target=$(`hearth-message-${voice.seq}`)||document.querySelector?.(".room-card");
           target?.focus({preventScroll:true});target?.scrollIntoView?.({block:"nearest"});
