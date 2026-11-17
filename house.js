@@ -4033,7 +4033,7 @@ function bindControls() {
 function decodePublicHistory(wire) {
   // Published v1 snapshots remain readable while the publisher migrates to v2.
   if(wire?.version===1)return wire;
-  if(wire?.version!==2||!Array.isArray(wire.nodes))throw new Error("Unrecognized public history transport");
+  if(wire?.version!==2&&wire?.version!==4||!Array.isArray(wire.nodes))throw new Error("Unrecognized public history transport");
   const nodes=[];
   function value(item) {
     if(item!==null&&typeof item==="object") {
@@ -4044,7 +4044,14 @@ function decodePublicHistory(wire) {
     return item;
   }
   for(const node of wire.nodes) {
-    if(Array.isArray(node))nodes.push(node.map(value));
+    if(Array.isArray(node)&&node.length===1&&Array.isArray(node[0])) {
+      // Version 4 concat: an array holding one inline array of earlier list nodes, joined into one flat list.
+      const refs=node[0];
+      if(wire.version!==4||!refs.length||refs.some(ref=>!Number.isInteger(ref)||ref<0||ref>=nodes.length||!Array.isArray(nodes[ref])))
+        throw new Error("Invalid public history concatenation");
+      nodes.push(refs.flatMap(ref=>nodes[ref]));
+    }
+    else if(Array.isArray(node))nodes.push(node.map(value));
     else if(node!==null&&typeof node==="object")nodes.push(Object.fromEntries(Object.entries(node).map(([key,item])=>[key,value(item)])));
     else throw new Error("Invalid public history node");
   }
@@ -4052,7 +4059,7 @@ function decodePublicHistory(wire) {
   if(!root||root.version!==1||Array.isArray(root))throw new Error("Invalid public history root");
   return root;
 }
-// Version 3 keeps the start of the node table in sealed parts. A part's name carries its hash, so a part
+// Versions 3 and 4 keep the start of the node table in sealed parts. A part's name carries its hash, so a part
 // held once is never fetched again, and the browser may cache it for ever.
 const historyParts=new Map();
 async function loadHistoryParts(wire,notice) {
@@ -4084,7 +4091,7 @@ async function loadHistoryParts(wire,notice) {
   };
   await Promise.all(Array.from({length:Math.min(3,missing.length)},worker));
   if(failure)throw failure;
-  return {version:2,root:wire.root,nodes:[].concat(...parts.map(part=>historyParts.get(part.path)),wire.nodes)};
+  return {version:wire.version===4?4:2,root:wire.root,nodes:[].concat(...parts.map(part=>historyParts.get(part.path)),wire.nodes)};
 }
 function refreshView(changed=false) {
   // Capture immediately before the redraw, after the fetch and any visitor edits.
@@ -4115,7 +4122,7 @@ async function refresh() {
     const response=await fetch("history.json",{cache:"no-cache",signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw new Error(`History returned ${response.status}`);
     const wire=await response.json();
-    const next=decodePublicHistory(wire?.version===3?await loadHistoryParts(wire,notice):wire);
+    const next=decodePublicHistory(wire?.version===3||wire?.version===4?await loadHistoryParts(wire,notice):wire);
     if(next.version!==1||!Array.isArray(next.frames)||!next.frames.length)throw new Error("Unrecognized house history");
     if(data&&next.frames.length<data.frames.length)throw new Error("An older publication arrived");
     await loadCatalog(next.source_head);
