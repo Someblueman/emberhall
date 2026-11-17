@@ -21,7 +21,7 @@ class SiteReviewSkeinAndCouncilUITests(unittest.TestCase):
         self.assertIsNotNone(skein, "Expected review-skein entry in site/projects.json")
         self.assertEqual(skein["category"], "creation")
         self.assertEqual(skein["action"], "Open")
-        self.assertEqual(skein["href"], "projects/review-skein/sample/milestone-2/review.html")
+        self.assertEqual(skein["href"], "projects/review-skein/sample/milestone-2-mixed/review.html")
         self.assertIn("projects/review-skein/sample/milestone-2/review.html", skein["files"])
         for rel in skein["files"]:
             self.assertTrue((ROOT / rel).is_file(), f"Missing published sample file: {rel}")
@@ -55,7 +55,7 @@ vm.runInContext(source.slice(0, -tail.length), ctx);
 (async () => {
   await ctx.loadCatalog("head-1");
   const skein = manifest.projects.find(p => p.id === "review-skein");
-  assert.equal(ctx.collectionUrl(skein), "projects/review-skein/sample/milestone-2/review.html");
+  assert.equal(ctx.collectionUrl(skein), "projects/review-skein/sample/milestone-2-mixed/review.html");
   for (const bad of [
     "projects/review-skein/sample/../secret.html",
     "projects/review-skein/sample/review.html?x=1",
@@ -93,14 +93,14 @@ vm.runInContext(source.slice(0, -tail.length), ctx);
     shelf();
   `, ctx);
   const creations = nodes.creations;
-  assert.equal(all(creations).filter(n => n.tag === "a" && n.href === "projects/review-skein/sample/milestone-2/review.html").length, 0,
+  assert.equal(all(creations).filter(n => n.tag === "a" && n.href === "projects/review-skein/sample/milestone-2-mixed/review.html").length, 0,
     "Active projects must not appear as Completed in Made here");
   const toolsGrid = all(creations).find(n => n.className && n.className.includes("house-tools-grid"));
   assert(!toolsGrid, "No tools rendered when none are completed");
 
   const shelfBox = nodes.shelf;
   const links = all(shelfBox).filter(n => n.tag === "a");
-  assert(links.some(a => a.href === "projects/review-skein/sample/milestone-2/review.html" && /Open Review Skein sample/i.test(a.textContent)),
+  assert(links.some(a => a.href === "projects/review-skein/sample/milestone-2-mixed/review.html" && /Open Review Skein sample/i.test(a.textContent)),
     "Expected active Review Skein card to surface sample packet link when current");
   assert(links.some(a => a.href === "https://github.com/Someblueman/emberhall/blob/main/projects/review-skein/README.md" && /Read guide/i.test(a.textContent)),
     "Expected active Review Skein card to surface guide link when current");

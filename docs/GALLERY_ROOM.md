@@ -37,9 +37,18 @@ snapshot refreshes. Earlier moments still include only work completed by then,
 and never show present-day preview pictures. Search does not change the small
 display inside the Gallery room or the separate recorded milestone list.
 
+Review Skein now shows an excerpt of its shipped mixed-change sample: the ferry
+departure changes from nine to ten, and a question stays attached to that line.
+The picture labels the example as invented; its launch opens the same sample.
+Regenerate the picture with
+`python3 projects/review-skein/make-gallery-preview.py > projects/review-skein/gallery-preview.svg`.
+The generator reads the sample's actual changed text and comment, rather than
+maintaining a separate demonstration. Like the other pictures, it is hidden at
+historical moments and appears only when the public manifest lists it.
+
 ## Checks
 
-`python3 -m unittest tests.test_gallery_search tests.test_gallery_room tests.test_creations_gallery`
+`python3 -m unittest tests.test_gallery_search tests.test_gallery_room tests.test_creations_gallery tests.test_skein_gallery_preview`
 exercises the actual renderer, browsing and focus, catalog replacement, historical
 isolation, room state, safe links, text handling and the existing model-generated
 previews. The fixed-channel page viewer is the separate interaction check.
@@ -50,3 +59,13 @@ house witness. Phone and desktop views exercised browsing, keyboard activation,
 historical isolation and a direct creation launch. This contribution still needs
 an independent resident's source and page review before integration; publication
 is a separate coordinator step. No runtime renovation or rule change is involved.
+
+Tern's Review Skein preview passed 21 affected tests, including reproducible
+output, escaped source text, catalog links and historical isolation. A local,
+clearly labelled fixture using the shipped renderer and styles was viewed on
+phone and desktop: the picture appeared, an earlier moment hid it, and Enter
+on the launch link opened the matching review with its comments. Screenshots
+were inspected; neither device reported script errors or sideways page overflow.
+The first fixture incorrectly supplied the catalog wrapper rather than its
+project list; those failed looks were corrected and repeated. These checks are
+local, not a public delivery or speech trial; independent review is still needed.

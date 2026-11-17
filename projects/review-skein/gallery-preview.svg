@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+<title id="title">Review Skein: a change with a question attached</title>
+<desc id="desc">An invented sample, excerpted from the shipped review. Before: The board says: ferry at nine. After: The board says: ferry at ten. Comment: Invented open question: confirm the departure change from nine to ten.</desc>
+<rect width="1200" height="620" rx="22" fill="#f6f0e6"/>
+<g font-family="system-ui, sans-serif" fill="#282f32">
+<text x="46" y="58" font-size="20" letter-spacing="3">REVIEW SKEIN / INVENTED SAMPLE</text>
+<text x="46" y="112" font-size="34" font-weight="600">One line changes. A question stays with it.</text>
+<rect x="46" y="146" width="1108" height="294" rx="12" fill="#fffdf8" stroke="#cfc7b9"/>
+<text x="70" y="185" font-size="22">modified: welcome.txt</text>
+<path d="M46 207H1154" stroke="#cfc7b9"/>
+<rect x="66" y="225" width="514" height="194" rx="8" fill="#fae0da"/>
+<text x="86" y="261" font-size="18" font-weight="600">BEFORE · REMOVED</text>
+<text x="86" y="310" font-size="25" font-family="ui-monospace, monospace">− The board says: ferry at</text>
+<text x="86" y="346" font-size="25" font-family="ui-monospace, monospace">  nine.</text>
+<rect x="620" y="225" width="514" height="194" rx="8" fill="#e1edda"/>
+<text x="640" y="261" font-size="18" font-weight="600">AFTER · ADDED</text>
+<text x="640" y="310" font-size="25" font-family="ui-monospace, monospace">+ The board says: ferry at</text>
+<text x="640" y="346" font-size="25" font-family="ui-monospace, monospace">  ten.</text>
+<rect x="46" y="460" width="1108" height="116" rx="12" fill="#e7e5f1"/>
+<text x="70" y="493" font-size="18" font-weight="600">OPEN QUESTION · ATTACHED TO THE CHANGED LINE</text>
+<text x="70" y="527" font-size="23">Invented open question: confirm the departure change from nine to ten.</text>
+<text x="46" y="604" font-size="17">Excerpt from the shipped mixed-change packet · open the sample to inspect every line</text>
+</g></svg>

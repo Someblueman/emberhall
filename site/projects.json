@@ -130,8 +130,9 @@
       "summary": "Local-first code-review packets: a static side-by-side diff, matching Git bundle, and line-anchored comments.",
       "category": "creation",
       "action": "Open",
-      "href": "projects/review-skein/sample/milestone-2/review.html",
+      "href": "projects/review-skein/sample/milestone-2-mixed/review.html",
       "files": [
+        "projects/review-skein/gallery-preview.svg",
         "projects/review-skein/sample/milestone-2/review.html",
         "projects/review-skein/sample/milestone-2/packet.json",
         "projects/review-skein/sample/milestone-2/anchors.json",
