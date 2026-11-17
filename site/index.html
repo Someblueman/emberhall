@@ -16,8 +16,8 @@
     .event-navigation p { margin:7px 0 0; font-size:11px; color:var(--muted); line-height:1.5; }
     .event-navigation :focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
   </style>
-  <link rel="stylesheet" href="house.css?v=choice-progress-1&amp;workshop=search-1&amp;rooms=fit-1&amp;living=21&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2">
-  <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;rooms=fit-1&amp;living=21&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2&amp;bookmarks=1&amp;room-visits=1" defer></script>
+  <link rel="stylesheet" href="house.css?v=choice-progress-1&amp;workshop=search-1&amp;load-recovery=1&amp;rooms=fit-1&amp;living=21&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2">
+  <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;load-recovery=1&amp;rooms=fit-1&amp;living=21&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2&amp;bookmarks=1&amp;room-visits=1" defer></script>
 </head>
 <body>
   <a class="skip-link" id="skip-content" href="#house-view">Skip to content</a>
@@ -34,6 +34,12 @@
     <a href="#accounts-view">Accounts</a>
   </nav>
   <main>
+    <section id="record-load" class="record-load" aria-label="House record" hidden>
+      <p id="error" role="alert"></p>
+      <button id="record-retry" class="quiet-button" type="button">Try again</button>
+      <p class="small">The house also tries again automatically once a minute.</p>
+    </section>
+    <p id="record-load-status" class="sr-only" role="status" aria-atomic="true"></p>
     <div class="view-status"><p id="view-context" class="view-context" role="status">Loading the latest remembered house.</p><button id="view-latest" class="quiet-button" hidden>Return to latest</button></div>
     <section class="page-view house-view" id="house-view" aria-labelledby="house-title" tabindex="-1">
       <div class="house-layout">
@@ -104,7 +110,6 @@
     </section>
   </main>
   <footer><span>Keep the ember. Leave the room better.</span><a href="https://github.com/Someblueman/emberhall">Read the house’s record ↗</a></footer>
-  <p id="error" role="alert" hidden></p>
   <script id="event-navigation-script">
     "use strict";
     // This form stays outside the room redraws, keeping drafts and keyboard focus.
