@@ -1843,6 +1843,81 @@ function renderSalvageRoom(content) {
   draw();
 }
 
+let chronicleState={room:"all",order:"newest",page:0,opened:new Set()};
+const CHRONICLE_PAGE_SIZE=5;
+function renderChronicleRoom(content) {
+  const panel=html("section","chronicle-reader",undefined,content);
+  html("h3","","How the house grew",panel);
+  html("p","small",`Follow the rooms being built, opened and changed. Recorded through event ${frame.seq}; earlier opening dates stay unknown. Page delivery is recorded separately.`,panel);
+  const verbs={"room-plan":"Building began","room-open":"Room opened","room-close":"Room closed","room-repurpose":"A new purpose"};
+  const entries=frame.rooms.flatMap(room=>(room.history||[])
+    .filter(event=>verbs[event.kind]&&Number.isInteger(event.sequence)&&event.sequence>0&&event.sequence<=frame.seq)
+    .map(event=>({...event,roomId:room.id,roomName:event.name||room.name})))
+    .sort((a,b)=>a.sequence-b.sequence||a.roomId.localeCompare(b.roomId));
+  const controls=html("div","counting-controls",undefined,panel);
+  const roomLabel=html("label","small","Room",controls);
+  const filter=html("select","",undefined,roomLabel);filter.id="chronicle-room";
+  roomLabel.htmlFor=filter.id;
+  const options=[["all","All rooms"],...frame.rooms.map(room=>[room.id,room.name])];
+  if(!options.some(([id])=>id===chronicleState.room))chronicleState.room="all";
+  for(const [value,title] of options){const option=html("option","",title,filter);option.value=value;}
+  filter.value=chronicleState.room;
+  const orderLabel=html("label","small","Read from",controls);
+  const order=html("select","",undefined,orderLabel);order.id="chronicle-order";
+  orderLabel.htmlFor=order.id;
+  for(const [value,title] of [["newest","Latest change"],["oldest","First change"]]) {
+    const option=html("option","",title,order);option.value=value;
+  }
+  order.value=chronicleState.order;
+  const results=html("p","small",undefined,panel);results.id="chronicle-results";results.setAttribute("role","status");
+  const list=html("div","chronicle-entries",undefined,panel);list.id="chronicle-entries";list.tabIndex=-1;
+  list.setAttribute("role","region");list.setAttribute("aria-label","Recorded room changes");
+  const pages=html("div","workshop-pages",undefined,panel);
+  const previous=html("button","quiet-button","Previous changes",pages);previous.id="chronicle-previous";previous.type="button";
+  const next=html("button","quiet-button","Next changes",pages);next.id="chronicle-next";next.type="button";
+  for(const button of [previous,next])button.setAttribute("aria-controls",list.id);
+  function draw() {
+    const matches=entries.filter(event=>chronicleState.room==="all"||event.roomId===chronicleState.room);
+    if(chronicleState.order==="newest")matches.reverse();
+    chronicleState.page=Math.max(0,Math.min(chronicleState.page,Math.ceil(matches.length/CHRONICLE_PAGE_SIZE)-1));
+    const start=chronicleState.page*CHRONICLE_PAGE_SIZE;
+    results.textContent=`${matches.length} of ${entries.length} recorded changes · ${matches.length?`${start+1}–${Math.min(start+CHRONICLE_PAGE_SIZE,matches.length)}`:"0"} shown · ${chronicleState.order==="newest"?"latest":"first"} change first`;
+    list.replaceChildren();
+    if(!matches.length)html("p","empty-note","No room changes were recorded for this selection by this moment. No opening date is guessed.",list);
+    matches.slice(start,start+CHRONICLE_PAGE_SIZE).forEach(event=>{
+      const entry=html("article","room-history-entry",undefined,list);
+      html("h4","",`${verbs[event.kind]} · ${event.roomName}`,entry);
+      html("p","small",`Event ${event.sequence}${Number.isFinite(event.at)&&event.at>0?` · ${clock(event.at,{year:"numeric"})}`:" · date unrecorded"}${event.actor?` · ${residentName(event.actor)}`:""}`,entry);
+      if(event.purpose)html("p","",event.purpose,entry);
+      if(event.reason) {
+        const reason=html("details","record-details",undefined,entry);
+        const key=`${encodeURIComponent(event.roomId)}-${event.sequence}`;
+        reason.open=chronicleState.opened.has(key);
+        html("summary","","Read the recorded reason",reason).id=`chronicle-reason-${key}`;
+        reason.addEventListener("toggle",()=>{if(reason.open)chronicleState.opened.add(key);else chronicleState.opened.delete(key);});
+        html("p","small",event.reason,reason);
+      }
+      if(data.frames.some(moment=>moment.seq===event.sequence)) {
+        const visit=html("button","quiet-button","Visit this moment →",entry);
+        visit.id=`chronicle-visit-${encodeURIComponent(event.roomId)}-${event.sequence}`;visit.type="button";
+        visit.setAttribute("aria-label",`Visit ${event.roomName} at event ${event.sequence}`);
+        visit.addEventListener("click",()=>{
+          choose(event.roomId);jumpToSequence(event.sequence);
+          const card=document.querySelector?.(".room-card");card?.focus({preventScroll:true});card?.scrollIntoView({block:"start"});
+        });
+      } else html("p","small","This event has no visitable frame in this publication; its recorded change is kept here.",entry);
+    });
+    previous.disabled=chronicleState.page===0;next.disabled=start+CHRONICLE_PAGE_SIZE>=matches.length;
+    pages.hidden=matches.length<=CHRONICLE_PAGE_SIZE;pages.setAttribute("style",pages.hidden?"display:none":"");
+  }
+  filter.addEventListener("change",()=>{chronicleState.room=filter.value;chronicleState.page=0;draw();});
+  order.addEventListener("change",()=>{chronicleState.order=order.value;chronicleState.page=0;draw();});
+  for(const [button,delta] of [[previous,-1],[next,1]])button.addEventListener("click",()=>{
+    chronicleState.page+=delta;draw();list.focus({preventScroll:true});list.scrollIntoView?.({block:"nearest"});
+  });
+  draw();
+}
+
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -1918,6 +1993,7 @@ function roomPanel() {
   if(room?.id==="council") renderCouncilRoom(content);
   if(room?.id==="gallery"&&roomStatus(room)==="open") renderGalleryRoom(content);
   if(room?.id==="chronicle"&&room.status==="open") {
+    renderChronicleRoom(content);
     const link=html("a","room-shelf-link","Read the Chronicle →",content);
     link.href="chronicle/index.html";
     if(!current)html("p","small","Opens the latest published Chronicle, not a reconstruction of this earlier page.",content);
@@ -3305,7 +3381,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
   const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
