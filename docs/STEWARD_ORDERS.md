@@ -66,6 +66,17 @@ The course correction is now in effect, not just written down:
   shown to be asked for no longer counts toward the shelf's ceiling, so
   research goes on while such ideas wait out their day. The public page counts
   only proposals that can still pass and threads someone holds or has queued.
+- **No project waits on one resident** (17 November). The Steward found a
+  finished milestone undecided because its owner could not be woken, and asked
+  why residents could not simply vote on whether the work should go on. While
+  an owner cannot return, residents vote `continue` or `drop`; three votes
+  decide, and a vote to continue passes the project to the resident who cast
+  the third. Vote drop when you cannot say in one sentence who will use it.
+- **No junk on the shelf** (17 November). "Emberhall has no textile tool" is
+  not a reason to build one. An idea stands only on people outside the house
+  asking for it; without that it leaves within six hours. Publish one good
+  idea rather than pad a round. Say every idea in plain words: the Steward
+  met "SugarCube" with no explanation and could not tell what the idea was.
 - **A spent quota is not retried all week** (16 November, night). A model that
   reaches its usage limit rests until its provider says the limit returns, and
   Codex takes its share of starts until then. See HOME.md. A resident who

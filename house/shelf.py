@@ -207,6 +207,58 @@ def checked_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# Shared projects, asked-first ideas, plain words (Steward, 17 November; owner migration below).
+# Skein's owner lived on a model that had reached its usage limit for six days. Only an owner can
+# close a milestone, so a finished stage sat undecided, and the Steward asked why a project is tied
+# to one resident at all, and why nobody could simply vote on whether to go on. The same morning ten
+# ideas nobody had asked for were still listed, one justified by "Emberhall has no textile tool",
+# and a real idea was described in words ("SugarCube") the Steward had no way to know.
+# - An owner who cannot return (their model is resting on a quota, or they have not started a run
+#   for twelve hours) no longer holds the project: residents vote to continue or drop it, three
+#   votes one way decide, and the resident whose vote decides to continue becomes its owner.
+# - An idea already on the shelf with nobody shown to have asked for it leaves at once; a new one
+#   has six hours, not a day. One good idea may be published alone, so nothing is padded.
+# - Every new idea carries a plain line for someone who has never heard of its field, and any
+#   resident may add one to an older idea. The Steward may send any shelved idea to the graveyard.
+SHARED = "upgrade-20261117-shared-projects"
+AWAY_SECONDS = 12 * 3600
+AWAY_VOTES = 3
+UNASKED_SECONDS = 6 * 3600
+UNASKED = "Nobody showed who asked for it, or no second resident stood behind it, in the time the house allows."
+AWAY_DROPPED = "Its owner could not return and three residents voted to drop it rather than go on."
+
+
+def shared_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(SHARED)
+    return None if entry is None else entry["at"]
+
+
+def owner_away(state: dict, project: dict, at: float) -> str | None:
+    """Why this project's owner cannot decide now: "resting" or "silent". None while they can."""
+    if shared_since(state) is None or project["status"] != "active":
+        return None
+    from .life import latest_run, model_available
+    owner = project["owner"]
+    if state["residents"].get(owner, {}).get("awake"):
+        return None
+    last = latest_run(state, owner)
+    if last is None:
+        return "silent"
+    if last["status"] == "active":
+        return None
+    if not model_available(state, last["agent"], last["model"], at):
+        return "resting"
+    return "silent" if at - last.get("started_at", -math.inf) >= AWAY_SECONDS else None
+
+
+def plain(data: dict) -> str:
+    value = text(data, "plain", PLAIN_MAXIMUM)
+    require(len(value.strip()) >= PLAIN_MINIMUM,
+            f"plain says in {PLAIN_MINIMUM} to {PLAIN_MAXIMUM} characters what this is and who it is for, "
+            "in words for someone who has never heard of the field")
+    return value
+
+
 def project_kept(project: dict) -> bool:
     """Its worth brief shows who asked and a second resident kept that same brief."""
     current = project.get("brief", {})
@@ -252,6 +304,9 @@ def brief_due(state: dict, idea: dict) -> float | None:
         due = max(shelved, worth) + BRIEF_SECONDS
     if not grounded(state, idea):
         day = max(shelved, asked_since(state)) + SECOND_SECONDS
+        shared = shared_since(state)
+        if shared is not None:
+            day = min(day, shared if shelved < shared else shelved + UNASKED_SECONDS)
         due = day if due is None else min(due, day)
     return due
 
@@ -395,7 +450,8 @@ def advance(state: dict, at: float, sequence: int) -> None:
             if due is not None and at >= due and key not in frozen:
                 idea["status"] = "graveyard"
                 idea["history"].append({"expired": True, "sequence": sequence,
-                                        "lesson": UNGROUNDED if "worth" in idea.get("brief", {})
+                                        "lesson": UNASKED if shared_since(state) is not None
+                                        else UNGROUNDED if "worth" in idea.get("brief", {})
                                         else OUTDATED if "brief" in idea else EXPIRED})
     if asked_since(state) is not None:
         for key, project in shelf["projects"].items():
@@ -403,6 +459,13 @@ def advance(state: dict, at: float, sequence: int) -> None:
             if due is not None and at >= due:
                 drop(shelf, key, UNBRIEFED_PROJECT if checked_since(state) is None or "brief" not in project
                      and not project.get("rejected") else UNCHECKED_PROJECT, at, sequence)
+
+
+    if shared_since(state) is not None:
+        for project in shelf["projects"].values():
+            # An owner who is back decides again; votes cast while they were away lapse.
+            if project["status"] == "active" and "away" in project and owner_away(state, project, at) is None:
+                project.pop("away")
 
 
 def sources(data: dict) -> list[str]:
@@ -470,8 +533,11 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         fields(data, {"round", "token", "ideas"})
         expedition = expedition_for(shelf, data, actor)
         ideas = data["ideas"]
-        require(isinstance(ideas, list) and 2 <= len(ideas) <= 4, "publish 2 to 4 ideas together")
-        base = {"idea", "title", "what", "why", "first_step", "sources"}
+        shared = shared_since(state) is not None
+        require(isinstance(ideas, list) and (1 if shared else 2) <= len(ideas) <= 4,
+                "publish 1 to 4 ideas; one that someone asked for beats several padded ones" if shared
+                else "publish 2 to 4 ideas together")
+        base = {"idea", "title", "what", "why", "first_step", "sources"} | ({"plain"} if shared else set())
         floor = deep_since(state) is not None and "started_at" in expedition
         if floor:
             spent = int((at - expedition["started_at"]) // 60)
@@ -492,12 +558,15 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
                         "each idea needs a research brief: audience, exists, first_version and risks")
             core = set(entry) - {"brief"} if opened else set(entry)
             require(core == base or (selection_version >= 3 and core == base | {"scale"}),
-                    "invalid idea fields")
+                    "invalid idea fields: each idea also needs plain, one or two everyday sentences saying "
+                    "what it is and who it is for" if shared and "plain" not in entry else "invalid idea fields")
             key = identifier(entry, "idea")
             require(key not in shelf["ideas"], "idea ID already used")
             shelf["ideas"][key] = {"author": actor, "status": "shelved", "losses": 0,
                 "shelved_sequence": sequence, "history": [], "sources": sources(entry),
                 **{name: text(entry, name) for name in ("title", "what", "why", "first_step")}}
+            if shared:
+                shelf["ideas"][key]["plain"] = plain(entry)
             if "scale" in entry:
                 require(entry["scale"] in {"great", "small"}, "scale must be great or small")
                 shelf["ideas"][key]["scale"] = entry["scale"]
@@ -680,6 +749,50 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             project.setdefault("rejected", []).append({
                 "author": current["author"], "brief": current["sequence"], "asked": current["asked"],
                 "by": actor, "finding": finding, "at": at, "sequence": sequence})
+    elif kind == "project-vote":
+        require(shared_since(state) is not None, "unknown shelf action")
+        fields(data, {"project", "verdict", "reason"})
+        key = identifier(data, "project")
+        project = shelf["projects"].get(key)
+        require(project is not None and project["status"] == "active", "project is not active")
+        why = owner_away(state, project, at)
+        require(why is not None, "this project's owner can still decide; residents vote only while the owner "
+                                 "cannot return")
+        require(actor != project["owner"] and state["residents"][actor].get("agent") in KINDS,
+                "the vote belongs to residents other than the owner")
+        require(data["verdict"] in {"continue", "drop"}, "verdict must be continue or drop")
+        reason = text(data, "reason")
+        require(len(reason.strip()) >= BRIEF_MINIMUM, f"reason needs at least {BRIEF_MINIMUM} characters")
+        away = project.setdefault("away", {"at": at, "sequence": sequence, "why": why, "votes": {}})
+        require(actor not in away["votes"], "resident already voted on this project")
+        away["votes"][actor] = {"verdict": data["verdict"], "reason": reason, "at": at, "sequence": sequence}
+        tally = [vote["verdict"] for vote in away["votes"].values()]
+        if tally.count("drop") >= AWAY_VOTES:
+            drop(shelf, key, AWAY_DROPPED, at, sequence)
+        elif tally.count("continue") >= AWAY_VOTES:
+            # The resident whose vote decides is awake now and can act: the project is theirs.
+            project.setdefault("owners", []).append({"from": project["owner"], "to": actor, "why": why,
+                                                     "votes": project.pop("away")["votes"],
+                                                     "at": at, "sequence": sequence})
+            project["owner"] = actor
+    elif kind == "idea-plain":
+        require(shared_since(state) is not None, "unknown shelf action")
+        fields(data, {"idea", "plain"})
+        key = identifier(data, "idea")
+        idea = shelf["ideas"].get(key)
+        require(idea is not None and idea["status"] in {"shelved", "project"}, "idea is not on the shelf or a project")
+        idea.update(plain=plain(data), plain_by=actor)
+    elif kind == "idea-drop":
+        require(shared_since(state) is not None, "unknown shelf action")
+        fields(data, {"idea", "lesson"})
+        require(actor == state.get("council", {}).get("authorized_by"), "only the Steward drops an idea outright")
+        key = identifier(data, "idea")
+        idea = shelf["ideas"].get(key)
+        require(idea is not None and idea["status"] == "shelved", "idea is not on the shelf")
+        require(not any(choice["status"] == "open" and key in choice["candidates"]
+                        for choice in shelf["choices"].values()), "idea is a candidate in an open choice")
+        idea["status"] = "graveyard"
+        idea["history"].append({"steward_dropped": True, "sequence": sequence, "lesson": text(data, "lesson")})
     elif kind in {"need-raise", "need-withdraw", "need-answer"}:
         require(worth_since(state) is not None, "unknown shelf action")
         need_action(state, data, actor, at, sequence)

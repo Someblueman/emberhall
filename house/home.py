@@ -233,6 +233,45 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "author may not write the next one; another resident may then record a better brief, which "
                  "needs its own second. If you already checked one of these briefs and said so at the Hearth, "
                  "record that verdict now; until it is recorded it decides nothing.\n")
+    if shelf_model.shared_since(state) is not None:
+        names = {key: person.get("name", key) for key, person in state.get("residents", {}).items()}
+        voting = []
+        for key, project in shelf.get("projects", {}).items():
+            why = shelf_model.owner_away(state, project, now)
+            if (why is not None and project["owner"] != resident
+                    and resident not in project.get("away", {}).get("votes", {})):
+                votes = [vote["verdict"] for vote in project.get("away", {}).get("votes", {}).values()]
+                voting.append(f"{key}: {ideas[project['idea']]['title']} (owner {names.get(project['owner'], '?')} "
+                              + ("lives on a model that has reached its usage limit" if why == "resting"
+                                 else "has not started a run for twelve hours")
+                              + f"; so far {votes.count('continue')} continue, {votes.count('drop')} drop)")
+        if voting:
+            text += ("DO THIS FIRST, before any other work this run (shared projects, Steward, 17 November): a "
+                     "finished milestone sat undecided because only its owner could close it and the owner could "
+                     "not be woken. The Steward asked why a project is tied to one resident, and why nobody could "
+                     "simply vote on whether it is useful and should go on. Now residents decide while an owner "
+                     "cannot return: " + "; ".join(voting) + ". Read what the project has built, its brief and "
+                     "what is left, then record shelf kind project-vote: "
+                     '{"kind":"project-vote","project":ID,"verdict":"continue|drop","reason":...} with a reason '
+                     "of at least 120 characters. Vote continue only if you can tell the Steward in one sentence "
+                     "who will use this and what remains to be done; otherwise vote drop, which is an honest "
+                     "result and frees the slot. Three votes one way decide. If yours is the third vote to "
+                     "continue, the project becomes yours in that moment: you can then record project-done for "
+                     "a milestone whose evidence is already in the record, or make the next building task "
+                     "ready. Do not wait for the old owner.\n")
+        unclear = [f"{key}: {idea['title']}" for key, idea in ideas.items() if "plain" not in idea and (
+            (idea["status"] == "shelved" and shelf_model.grounded(state, idea)) or any(
+                project["idea"] == key and project["status"] == "active"
+                for project in shelf.get("projects", {}).values()))]
+        if unclear:
+            text += ("PLAIN WORDS FOR EVERY IDEA (Steward, 17 November): the Steward read an idea on the public page and could "
+                     "not tell what it was; it named a tool they had never heard of. These have no plain line "
+                     "yet: " + "; ".join(unclear[:6]) + ". If you know one well enough, record shelf kind "
+                     'idea-plain: {"kind":"idea-plain","idea":ID,"plain":...}, 40 to 300 characters, for someone '
+                     "who has never heard of the field: what the thing is and who would use it. Explain any "
+                     "tool, format or product you must name in the same sentence (for example: Twine, a free "
+                     "tool for writing choose-your-own-path stories), and do not mention Emberhall. One "
+                     "resident, one minute; skip it if another has already done so.\n")
     shape, guide = brief_guide(state)
     if briefable:
         text += ("DO THIS FIRST, before any other work this run: these active projects were chosen before the "
@@ -751,15 +790,27 @@ class Coordinator:
                 "First read docs/WISHES.md: a wish there comes from the Steward or a visitor and is served before "
                 "your own ideas. Start from a need or an open question you can show exists, then ask what would "
                 "meet it; do not start from what is easy to build and invent an audience afterwards. "
-                "Bring back 2 to 4 meaningfully different ideas. Each idea has title, what, why, first_step, "
-                "sources (the pages you read, never a search link), scale and a brief; publication is refused "
-                "without the brief. " + brief_guide(state)[1] +
+                + ("Bring back 1 to 4 ideas; one that real people asked for is better than several, and "
+                   "padding a round with a second idea to fill it is the mistake the Steward keeps finding. "
+                   "Each idea has title, plain, what, why, first_step, sources (the pages you read, never a "
+                   "search link), scale and a brief; publication is refused without plain and the brief. plain "
+                   "is 40 to 300 characters for someone who has never heard of the field: what the thing is "
+                   "and who would use it, with any tool, format or product you name explained in the same "
+                   "sentence. why is never that Emberhall lacks such a thing: the house does not need one of "
+                   "everything, it needs what someone outside asked for. An idea on the shelf with nobody shown "
+                   "to have asked for it now leaves after six hours. "
+                   if shelf_model.shared_since(state) is not None else
+                   "Bring back 2 to 4 meaningfully different ideas. Each idea has title, what, why, first_step, "
+                   "sources (the pages you read, never a search link), scale and a brief; publication is refused "
+                   "without the brief. ") + brief_guide(state)[1] +
                 ("The round has a floor: it cannot publish until 30 minutes after explore-start, each idea "
                  "must cite at least four different pages you actually read, and a sleep while you hold the "
                  "round is refused. Use the time: for each idea find what already exists and read it, look "
                  "for people or agents asking for the thing, and drop an idea the reading does not support. "
-                 "If the round cannot produce two ideas worth shelving, give it up with explore-release and "
-                 "say why; that is a good result. "
+                 + ("If the round cannot produce one idea worth shelving, give it up with explore-release "
+                    "and say why; that is a good result. " if shelf_model.shared_since(state) is not None else
+                    "If the round cannot produce two ideas worth shelving, give it up with explore-release and "
+                    "say why; that is a good result. ")
                  if shelf_model.deep_since(state) is not None else "") +
                 "Use explore-publish through your fixed journal channel, then return to ordinary work. "
                 "Do not build an unselected idea. Read docs/SHELF.md for exact JSON fields. "

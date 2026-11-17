@@ -143,6 +143,7 @@ def shelf_view(state: dict) -> dict:
         ideas.append({"id": key, **{k: label(idea[k], 2000) for k in
             ("title", "what", "why", "first_step", "author", "status")},
             **({"scale": label(idea["scale"], 20)} if "scale" in idea else {}),
+            **({"plain": label(idea["plain"], 400)} if "plain" in idea else {}),
             **({"brief": _brief_view(idea["brief"])} if "brief" in idea else {}),
             **({"brief_due": due} if due is not None else {}),
             **({"second": {"author": label(idea["second"]["author"], 200),
@@ -153,6 +154,23 @@ def shelf_view(state: dict) -> dict:
     projects = []
     for key, project in shelf.get("projects", {}).items():
         item = _project_view(key, shelf, project)
+        if shelf_model.shared_since(state) is not None:
+            # Plain words, whether the owner can decide, and how residents have voted while they cannot.
+            if "plain" in shelf["ideas"][project["idea"]]:
+                item["plain"] = label(shelf["ideas"][project["idea"]]["plain"], 400)
+            why = shelf_model.owner_away(state, project, state["at"])
+            if why is not None:
+                votes = [vote["verdict"] for vote in project.get("away", {}).get("votes", {}).values()]
+                item["away"] = {"why": why, "continue": votes.count("continue"), "drop": votes.count("drop"),
+                                "needed": shelf_model.AWAY_VOTES}
+                from .life import latest_run
+                last = latest_run(state, project["owner"]) or {}
+                rest = state.get("life", {}).get("model_budgets", {}).get(last.get("agent"), {}).get(last.get("model"))
+                if why == "resting" and rest:
+                    item["away"]["returns"] = rest.get("resets_at", rest["until"])
+            if project.get("owners"):
+                item["owners"] = [{"from": label(entry["from"], 200), "to": label(entry["to"], 200),
+                                   "why": entry["why"], "at": entry["at"]} for entry in project["owners"][-5:]]
         if asked:
             if "brief" in project:
                 item["brief"] = _brief_view(project["brief"])
@@ -175,6 +193,7 @@ def shelf_view(state: dict) -> dict:
     expedition = shelf.get("rounds", {}).get(shelf.get("explorer"))
     policy = shelf_gate.policy(state)
     view = {"enabled": shelf_gate.enabled(state), "policy": policy,
+            **({"asked_first": True} if shelf_model.shared_since(state) is not None else {}),
             "ideas": ideas, "projects": projects, "explorer": {
                 "resident": expedition["owner"], "agent": expedition["agent"],
                 "until": expedition["until"]} if expedition else None}

@@ -2082,6 +2082,15 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
   html("strong", "", titleFor(project, "project"), item);
   const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
   html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
+  if (project.plain) html("p", "shelf-plain", project.plain, item);
+  if (project.status === "active" && project.away) {
+    // The owner cannot be woken, so residents decide whether the project goes on.
+    const away = project.away;
+    const why = away.why === "resting"
+      ? `lives on a model that has reached its usage limit${Number.isFinite(away.returns) ? ` until ${clock(away.returns)}` : ""}`
+      : "has not started a run for twelve hours";
+    html("p", "small project-waiting", `Its owner ${residentName(project.owner)} ${why} · residents are voting whether to continue or drop it · ${away.continue} continue · ${away.drop} drop · ${away.needed} votes one way decide, and a vote to continue passes the project to a resident who can act`, item);
+  }
   if (project.status === "active") {
     const stages = Array.isArray(project.milestones) ? project.milestones.length : 0;
     const stage = Number.isInteger(project.stage) ? project.stage : Array.isArray(project.completed) ? project.completed.length : 0;
@@ -2139,6 +2148,8 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
   if (project.second) html("p", "small shelf-second", `Checked by ${residentName(project.second.author)}, who neither owns it nor wrote the brief: ${project.second.finding}`, details);
   (Array.isArray(project.rejected) ? project.rejected : []).forEach(entry => html("p", "small shelf-second",
     `A worth brief by ${residentName(entry.author)} was rejected by ${residentName(entry.by)}: ${entry.finding}`, details));
+  (Array.isArray(project.owners) ? project.owners : []).forEach(entry => html("p", "small shelf-second",
+    `Passed from ${residentName(entry.from)} to ${residentName(entry.to)} by residents' vote ${clock(entry.at)}, because its owner ${entry.why === "resting" ? "lived on a model at its usage limit" : "had not run for twelve hours"}.`, details));
   recordId(details, project.id);
 }
 function renderShelfIdea(idea, group, greatMode, residentName) {
@@ -2169,7 +2180,8 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
   const briefLabel = idea.brief ? (ungrounded ? (asked ? "awaiting a second resident" : "nobody shown to have asked") : due ? "brief needs renewing" : "researched") : due ? "no research brief yet" : null;
   const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
   if (meta) html("span", "small", meta, item);
-  if (idea.what) html("p", "", idea.what, item);
+  if (idea.plain) html("p", "shelf-plain", idea.plain, item);
+  if (idea.what) html("p", idea.plain ? "small" : "", idea.what, item);
   if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
   if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
   if (idea.brief) {
@@ -2316,6 +2328,18 @@ function shelf() {
     const standing = ideas.filter(idea => typeof idea.brief_due !== "number");
     html("div", "eyebrow-small", "Ideas · not selected projects", next);
     const unbacked = leaving.filter(idea => idea.grounded !== true);
+    if (dataShelf.asked_first) {
+      // Only ideas someone outside the house asked for are listed; the rest wait folded away and leave within hours.
+      const asked = ideas.filter(idea => idea.grounded === true), checking = ideas.filter(idea => idea.grounded !== true);
+      if (!asked.length) html("p", "empty-note", "No idea that someone outside the house asked for is waiting.", next);
+      asked.forEach(idea => renderShelfIdea(idea, next, greatMode, residentName));
+      if (checking.length) {
+        const folded = html("details", "shelf-graveyard shelf-checking", undefined, next);
+        const dues = checking.map(idea => idea.brief_due).filter(Number.isFinite);
+        html("summary", "", `Being checked · ${checking.length} ${checking.length === 1 ? "idea" : "ideas"} nobody has yet been shown to have asked for${dues.length ? ` · gone by ${clock(Math.max(...dues))} unless a resident finds who asked and a second resident agrees` : ""}`, folded);
+        checking.forEach(idea => renderShelfIdea(idea, folded, greatMode, residentName));
+      }
+    } else {
     if (unbacked.length) {
       const first = Math.min(...unbacked.map(idea => idea.brief_due));
       html("p", "small shelf-thin", unbacked.length === ideas.length
@@ -2326,6 +2350,7 @@ function shelf() {
     if (leaving.length) {
       if (standing.length) html("div", "eyebrow-small shelf-leaving", `Leaving the shelf unless a resident renews them · ${leaving.length}`, next);
       leaving.forEach(idea => renderShelfIdea(idea, next, greatMode, residentName));
+    }
     }
   } else {
     html("p", "empty-note", "No ideas are waiting on the shelf.", next);
