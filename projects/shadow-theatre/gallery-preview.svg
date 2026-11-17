@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img">
+<title>Shadow Theatre stage: a point light casts two dark shadow bands from three props onto a pale screen, matching the amber target brackets.</title>
+<rect width="1200" height="760" fill="#1d1a26"/>
+<polygon points="123.0,380.0 1006.3,93.8 1006.3,666.2" fill="#f2c14e" opacity="0.10"/>
+<polygon points="123.0,380.0 1006.3,609.0 1006.3,437.2" fill="#12101a" opacity="0.72"/>
+<polygon points="123.0,380.0 1006.3,265.5 1006.3,93.8" fill="#12101a" opacity="0.72"/>
+<polygon points="123.0,380.0 1006.3,93.8 1006.3,93.8" fill="#12101a" opacity="0.72"/>
+<line x1="123.0" y1="380.0" x2="1006.3" y2="609.0" stroke="#e8b64c" stroke-width="1.6" opacity="0.55"/>
+<line x1="123.0" y1="380.0" x2="1006.3" y2="437.2" stroke="#e8b64c" stroke-width="1.6" opacity="0.55"/>
+<line x1="123.0" y1="380.0" x2="1006.3" y2="265.5" stroke="#e8b64c" stroke-width="1.6" opacity="0.55"/>
+<line x1="123.0" y1="380.0" x2="1006.3" y2="93.8" stroke="#e8b64c" stroke-width="1.6" opacity="0.55"/>
+<line x1="123.0" y1="380.0" x2="1006.3" y2="93.8" stroke="#e8b64c" stroke-width="1.6" opacity="0.55"/>
+<line x1="123.0" y1="380.0" x2="741.3" y2="59.4" stroke="#e8b64c" stroke-width="1.6" opacity="0.55"/>
+<rect x="1006.3" y="93.8" width="16" height="572.4" fill="#e8dfc8"/>
+<rect x="1006.3" y="437.2" width="16" height="171.8" fill="#17131f"/>
+<rect x="1006.3" y="93.8" width="16" height="171.7" fill="#17131f"/>
+<rect x="1032.3" y="437.2" width="10" height="171.8" fill="none" stroke="#e8b64c" stroke-width="3"/>
+<rect x="1032.3" y="93.8" width="10" height="171.7" fill="none" stroke="#e8b64c" stroke-width="3"/>
+<line x1="87.7" y1="689.1" x2="1112.3" y2="689.1" stroke="#4a4258" stroke-width="2"/>
+<line x1="564.7" y1="689.1" x2="564.7" y2="494.5" stroke="#4a4258" stroke-width="3"/>
+<rect x="558.7" y="408.6" width="12" height="85.9" fill="#050409"/>
+<line x1="564.7" y1="689.1" x2="564.7" y2="322.8" stroke="#4a4258" stroke-width="3"/>
+<rect x="558.7" y="236.9" width="12" height="85.9" fill="#050409"/>
+<line x1="564.7" y1="689.1" x2="564.7" y2="236.9" stroke="#4a4258" stroke-width="3"/>
+<rect x="558.7" y="151.0" width="12" height="85.9" fill="#050409"/>
+<circle cx="123.0" cy="380.0" r="26" fill="#f2c14e" opacity="0.18"/>
+<circle cx="123.0" cy="380.0" r="11" fill="#ffd97a"/>
+<text x="123.0" y="432.0" text-anchor="middle" font-family="Georgia, serif" font-size="21" letter-spacing="3" fill="#cfc4a5">LIGHT</text>
+<text x="1014.3" y="77.8" text-anchor="middle" font-family="Georgia, serif" font-size="21" letter-spacing="3" fill="#cfc4a5">SCREEN</text>
+<text x="564.7" y="723.1" text-anchor="middle" font-family="Georgia, serif" font-size="21" letter-spacing="3" fill="#cfc4a5">PROPS</text>
+</svg>
