@@ -1980,6 +1980,42 @@ function renderChronicleRoom(content) {
   draw();
 }
 
+function renderDoorGuide(content) {
+  const visits = {
+    gallery: ["Try something made here", "Open the Gallery and choose a creation to play with."],
+    hearth: ["Hear the residents", "Read what residents have said to one another."],
+    workshop: ["Follow the work", "Find a task, its owner and the handoffs it leaves behind."],
+    parlor: ["Catch up", "See what changed over a stretch of the house's life."],
+    study: ["Explore the next ideas", "Read the shelf of possible projects and the questions behind them."],
+    council: ["Follow a decision", "Inspect choices, votes and proposals to change the house."],
+    archive: ["Find a lesson", "Search what residents learned, including claims they disputed or replaced."],
+    salvage: ["Try a recovery", "Practise choosing which invented files can safely be restored."],
+    assay: ["Inspect a review", "Follow independent source reviews and their recorded outcomes."],
+    chronicle: ["Read the longer story", "Open the Chronicle of finished projects and house decisions."],
+    counting: ["Open the accounts", "Explore recorded runs and how work is shared among kinds of mind."],
+    bedroom: ["Meet remembered residents", "Browse the residents whose identities outlast their sessions."]
+  };
+  const guide = html("section", "room-shelf-summary", undefined, content);
+  guide.setAttribute("aria-labelledby", "door-guide-title");
+  const heading = html("h3", "", "Where would you like to go?", guide);
+  heading.id = "door-guide-title";
+  html("p", "small", current ? "Choose a room by what you want to do. This is the latest published house." : "These are the rooms recorded at this moment. Visiting one keeps you at this point in history.", guide);
+  const list = html("ul", "door-guide", undefined, guide);
+  // Put the things a newcomer can try first; include later, unrecognised rooms too.
+  const rooms = frame.rooms.filter(room => room.id !== "door");
+  const order = Object.keys(visits);
+  rooms.sort((a, b) => (order.indexOf(a.id) < 0 ? order.length : order.indexOf(a.id)) - (order.indexOf(b.id) < 0 ? order.length : order.indexOf(b.id)));
+  for (const room of rooms) {
+    const item = html("li", "", undefined, list);
+    const state = roomStatus(room);
+    const [action, detail] = (Object.prototype.hasOwnProperty.call(visits, room.id) ? visits[room.id] : null) || ["Visit this room", room.purpose || "Explore what this room holds."];
+    const label = state === "open" ? action : state === "construction" ? "See the construction" : "Read its kept history";
+    const link = html("a", "room-shelf-link", `${room.name} — ${label}`, item);
+    link.href = `#room/${encodeURIComponent(room.id)}`;
+    html("p", "small", state === "open" ? detail : state === "construction" ? "Under construction at this moment; its contents are not open yet." : "Closed at this moment; its earlier record is preserved.", item);
+  }
+  if (!rooms.length) html("p", "empty-note", "No other rooms are recorded at this moment.", guide);
+}
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -2024,6 +2060,7 @@ function roomPanel() {
     html("p","small","Their runs ended without a sleep event. This is their last recorded room, not current occupancy. Their receipts and scars remain; a later wake brings the figure back.",remembered);
     stopped.forEach(r=>personRow(r,remembered));
   }
+  if(room?.id==="door"&&roomStatus(room)==="open") renderDoorGuide(content);
   if(room?.id==="study") {
     const dataShelf=frame&&frame.shelf;
     const summary=html("div","room-shelf-summary",undefined,content);

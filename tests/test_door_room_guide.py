@@ -1,0 +1,84 @@
+"""The Door offers real room visits without losing the selected history."""
+from pathlib import Path
+import shutil
+import subprocess
+import unittest
+
+
+@unittest.skipUnless(shutil.which("node"), "Node runs the shipped renderer")
+class DoorGuideTests(unittest.TestCase):
+    def test_recorded_rooms_status_text_safety_and_navigation(self):
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+ constructor(tag,id=''){this.tag=tag;this.id=id;this.children=[];this.attrs={};this.listeners={};this.dataset={};this.style={};this.textContent='';this.classList={toggle(){}};}
+ appendChild(n){this.children.push(n);return n;} replaceChildren(){this.children=[];}
+ setAttribute(k,v){this.attrs[k]=String(v);} removeAttribute(k){delete this.attrs[k];}
+ addEventListener(k,fn){this.listeners[k]=fn;}
+ focus(){document.activeElement=this;} scrollIntoView(){}
+}
+const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children.map(text)].join(' '),nodes={};
+const get=id=>nodes[id]||(nodes[id]=new Element('div',id));
+const card=new Element('section');
+const document={activeElement:null,body:new Element('body'),getElementById:get,
+ createElement:t=>new Element(t),createElementNS:(_,t)=>new Element(t),
+ querySelector:s=>s==='.room-card'?card:null,querySelectorAll:()=>[]};
+const listeners={},addresses=['#room/door'];let cursor=0;
+const window={innerHeight:900,location:{hash:addresses[0]},addEventListener:(k,fn)=>listeners[k]=fn,
+ history:{pushState(a,b,hash){addresses.splice(++cursor);addresses.push(hash);window.location.hash=hash;}}};
+const ctx=vm.createContext({assert,document,window,Date,URL,Intl});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
+const run=s=>vm.runInContext(s,ctx),links=()=>all(get('room-content')).filter(n=>n.tag==='a');
+run(`
+drawHouse=()=>{};dormControls=()=>{};accounts=()=>{};shelf=()=>{};voting=()=>{};
+renderCollection=()=>{};renderResidentPulse=()=>{};renderRecentGrowth=()=>{};renderLately=()=>{};lighting=()=>{};
+const base={at:1000,event:{op:'say',actor:'r'},floors:[{level:0,name:'Ground floor'},{level:1,name:'Upstairs'}],residents:[],tasks:[],scars:[],ambitions:[],runs:[]};
+const door={id:'door',name:'The Door',status:'open'},hearth={id:'hearth',name:'The Hearth',status:'open'};
+data={timezone:'UTC',observed_at:1000,journal_head:'head',commits:[],frames:[
+ {...base,seq:1,rooms:[door,hearth]},
+ {...base,seq:2,rooms:[door,hearth,{id:'gallery',name:'The Gallery',status:'open'},
+ {id:'sun room',name:'Sun room',floor:1,status:'open',purpose:'Look at the sky'},
+ {id:'assay',name:'The Assay Room',status:'construction'},
+ {id:'salvage',name:'The Salvage Room',status:'closed'},
+ {id:'__proto__',name:'<script>untrusted</script>',status:'open',purpose:'<img src=x>'}]}]};
+index=1;current=true;bindControls();render();
+`);
+assert.match(text(get('room-content')),/Where would you like to go/);
+assert.match(text(get('room-content')),/latest published/);
+assert(links().find(n=>n.href==='#room/gallery').textContent.includes('Try something made here'));
+assert(links().find(n=>n.href==='#room/assay').textContent.includes('See the construction'));
+assert(links().find(n=>n.href==='#room/salvage').textContent.includes('Read its kept history'));
+assert.doesNotMatch(text(get('room-content')),/Practise choosing/); // closed room offers no activity
+assert.match(text(get('room-content')),/<script>untrusted<\/script>/);
+assert(!all(get('room-content')).some(n=>['script','img'].includes(n.tag)));
+assert(links().some(n=>n.href==='#room/sun%20room'));
+const before=run('JSON.stringify(frame)');run('roomPanel()');assert.equal(run('JSON.stringify(frame)'),before);
+// Follow the actual room address through the shipped hash handler, then browser Back.
+const target=links().find(n=>n.href==='#room/sun%20room').href;
+window.history.pushState(null,'',target);listeners.hashchange();
+assert.equal(run('selected'),'sun room');assert.equal(run('selectedFloor'),1);
+assert.equal(document.activeElement,card);
+window.location.hash=addresses[--cursor];listeners.hashchange();
+assert.equal(run('selected'),'door');assert.equal(run('selectedFloor'),0);
+run("$('previous').listeners.click()");
+assert.equal(run('current'),false);assert.equal(run('frame.seq'),1);
+assert.match(text(get('room-content')),/Visiting one keeps you at this point in history/);
+assert(!links().some(n=>n.href==='#room/gallery'));
+window.location.hash='#room/hearth';listeners.hashchange();
+assert.equal(run('frame.seq'),1);assert.equal(run('current'),false);
+// A closed Door does not offer an open directory, and an empty one explains the absence.
+run("selected='door';frame={...frame,rooms:[{...door,status:'closed'}]};roomPanel()");
+assert.doesNotMatch(text(get('room-content')),/Where would you like to go/);
+run("frame={...frame,rooms:[door]};roomPanel()");
+assert.match(text(get('room-content')),/No other rooms are recorded/);
+'''
+        result = subprocess.run(
+            ["node", "-e", script, str(Path(__file__).parents[1] / "site/house.js")],
+            capture_output=True, text=True, timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main()
