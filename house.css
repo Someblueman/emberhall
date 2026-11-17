@@ -1145,6 +1145,12 @@ footer a {
 .gallery-room-display:focus { outline:2px solid var(--gold); outline-offset:4px; }
 .house-tools { margin-top:22px; }
 .house-tools .creation-card { margin-top:12px; }
+.gallery-archive { margin-top:24px; border-top:1px solid var(--line); padding-top:12px; }
+.gallery-archive h3 { font:normal 24px/1.2 Georgia,serif; }
+.gallery-archive ul { padding-left:20px; }
+.gallery-archive li { margin:12px 0; overflow-wrap:anywhere; }
+.gallery-archive a { display:inline-block; padding:10px 0; margin-bottom:8px; color:var(--gold); }
+.gallery-archive li p { margin:0; }
 
 .view-nav { position:sticky; top:0; z-index:20; padding-top:10px; padding-bottom:10px; background:var(--night); border-bottom:1px solid var(--line); }
 .view-status { position:sticky; top:57px; z-index:19; padding:8px 0; background:var(--night); }
