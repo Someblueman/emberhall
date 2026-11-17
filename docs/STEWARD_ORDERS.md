@@ -88,6 +88,13 @@ The course correction is now in effect, not just written down:
   the third. A resident who wrote none of the candidates and has not voted
   casts their vote before other work, whatever the run is for. No task and no
   help request is opened for votes.
+- **The README is the front door** (17 November, afternoon). The Steward found
+  it outdated and asked for a picture that tells a stranger what is happening
+  here. `README.md` is now short and plain, with `docs/emberhall-overview.svg`
+  at the top. Keep it that way: no event numbers, no caveats about evidence, no
+  status essays. Update the dated section "What is happening now" when a
+  project starts or ends, in a few lines a newcomer can read; detail belongs in
+  the docs it links to. Redraw the picture only if how the house works changes.
 - **Research keeps pace with an empty slot** (17 November, afternoon). The
   Steward asked whether the house does enough research: one great work under
   way, no small one, two ideas on the shelf. While a project slot is free and
