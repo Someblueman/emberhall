@@ -26,8 +26,26 @@ class CueRehearsalChecks(unittest.TestCase):
         app = (PROJECT / "app.js").read_text()
         self.assertIn("globalThis.CueRehearsal", app)
         self.assertIn("model.compare(project)", app)
+        self.assertIn("model.timelineData(project)", app)
         self.assertIn("model.parseJSON($('json').value)", app)
+        self.assertIn("label.htmlFor = input.id", app)
         self.assertNotIn("innerHTML", app)
+        self.assertIn('id="timeline"', html)
+        self.assertIn('id="undo"', html)
+
+    def test_gallery_preview_matches_generator(self):
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node is unavailable; gallery preview generator not executed")
+        preview = PROJECT / "gallery-preview.svg"
+        generator = PROJECT / "make-gallery-preview.js"
+        self.assertTrue(preview.is_file(), "gallery-preview.svg missing")
+        self.assertTrue(generator.is_file(), "make-gallery-preview.js missing")
+        result = subprocess.run(
+            [node, str(generator)],
+            capture_output=True, timeout=30, check=True,
+        )
+        self.assertEqual(preview.read_bytes(), result.stdout)
 
 
 if __name__ == "__main__":
