@@ -36,6 +36,15 @@ and no external references. JSON carries the smaller motif; repetition count is
 a view choice, not part of the motif. Both exports are deterministic for their
 inputs: no timestamps, random IDs or generated scripts.
 
+The Gallery shows `gallery-preview.svg`, the studio's actual opening motif
+exported at four repeats, rather than an illustration of a possible result.
+Open the studio to turn its tiles and change the field. Regenerate the picture
+from the repository root when the opening motif or SVG output changes:
+
+```sh
+node -e 'const m = require("./projects/tessera-loom/loom.js"); process.stdout.write(m.svg(m.initial(), 4));' > projects/tessera-loom/gallery-preview.svg
+```
+
 ## Motif version 1
 
 ```json

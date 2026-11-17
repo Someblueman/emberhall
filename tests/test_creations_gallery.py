@@ -47,6 +47,20 @@ assert.match(text(root),/current published versions/);
  assert.equal(catalog.length,manifest.projects.length,'Every committed project must survive the URL filter');
  current=true;frame={shelf:{projects:manifest.projects.map(p=>({idea:p.id,status:'done'}))}};
  renderCollection();
+ assert.equal(all(root).find(n=>n.tag==='h3').textContent,'Tessera Loom','Show the real drawing first');
+ const preview=all(root).find(n=>n.tag==='img');
+ assert.equal(preview.src,'projects/tessera-loom/gallery-preview.svg');
+ assert.match(preview.alt,/Blue quarter-circle arcs/);
+ assert.equal(preview.width,preview.height);
+ assert.equal(manifest.projects.find(p=>p.id==='tessera-loom').files.includes(preview.src),true);
+ catalog=[{...creation,id:'tessera-loom',files:['https://evil.test/gallery-preview.svg']}];
+ frame={shelf:{projects:[{idea:'tessera-loom',status:'done'}]}};renderCollection();
+ assert.equal(all(root).filter(n=>n.tag==='img').length,0,'Never request an unlisted preview');
+ catalog=manifest.projects;current=false;
+ frame={shelf:{projects:manifest.projects.filter(p=>p.id!=='tessera-loom').map(p=>({idea:p.id,status:'done'}))}};
+ renderCollection();assert.equal(all(root).filter(n=>n.tag==='img').length,0,'No future output in historical views');
+ current=true;
+ frame={shelf:{projects:manifest.projects.map(p=>({idea:p.id,status:'done'}))}};renderCollection();
  const sow=manifest.projects.find(p=>p.id==='sow-ledger');
  assert.equal(all(root).find(n=>n.tag==='a'&&n.href===sow.href).textContent,'Read guide Sow Ledger →');
  for(const href of ['https://evil.test/README.md','https://github.com/Other/repo/blob/main/projects/sow-ledger/README.md','https://github.com/Someblueman/emberhall/blob/main/projects/../README.md'])
@@ -59,3 +73,10 @@ assert.match(text(root),/current published versions/);
         source = Path(__file__).parents[1] / 'site/house.js'
         result = subprocess.run(['node', '-e', script, str(source), str(source.with_name('projects.json'))], capture_output=True, text=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_preview_is_the_studios_real_default_export(self):
+        root = Path(__file__).parents[1]
+        result = subprocess.run(
+            ['node', '-e', 'const m=require("./projects/tessera-loom/loom.js"); process.stdout.write(m.svg(m.initial(),4));'],
+            cwd=root, capture_output=True, timeout=15, check=True)
+        self.assertEqual((root / 'projects/tessera-loom/gallery-preview.svg').read_bytes(), result.stdout)
