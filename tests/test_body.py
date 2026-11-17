@@ -147,3 +147,33 @@ class BodyTests(HouseCase):
         self.assertEqual(after["scars"][0]["lesson_status"], "contested")
         self.assertEqual(after["scars"][0]["room"], "archive")
         self.assertEqual(before["scars"][0]["id"], after["scars"][0]["id"])
+
+    def test_archive_creation_identity_survives_disputes_and_supersession_without_private_fields(self):
+        ids = []
+        for actor, lesson, claim in (("alice", "private-first", "Flush each line"),
+                                     ("bob", "private-second", "Flush only on close"),
+                                     ("alice", "private-third", "Never flush")):
+            self.record.append("learn", actor, {"lesson": lesson, "key": "same-subject",
+                               "claim": claim, "evidence": "PRIVATE-EVIDENCE"})
+            ids.append(self.record.read()[0]["sequence"])
+        before = export(self.record)
+        self.record.append("supersede", "alice", {"old": "private-first", "new": "private-second",
+                           "evidence": "PRIVATE-SUPERSESSION"})
+        after = export(self.record)
+        self.assertEqual(after["frames"][:len(before["frames"])], before["frames"])
+        archive = after["frames"][-1]["archive"]
+        self.assertEqual([lesson["id"] for lesson in archive], ids)
+        self.assertEqual([lesson["key"] for lesson in archive], ["same-subject"] * 3)
+        self.assertEqual([lesson["status"] for lesson in archive],
+                         ["superseded", "contested", "contested"])
+        self.assertEqual(before["frames"][ids[0] - 1]["archive"][0]["status"], "observed")
+        for lesson in archive:
+            self.assertEqual(set(lesson), {"id", "key", "claim", "author", "status", "reviews"})
+        self.assertNotIn("private-", json.dumps(archive))
+        self.assertNotIn("PRIVATE-", json.dumps(archive))
+        # The same identities must be produced by incremental publication replay.
+        from house.body import replay, replay_context
+        events = self.record.read()[1]
+        context = replay_context()
+        incremental = replay(events[:ids[1]], context) + replay(events, context)
+        self.assertEqual(incremental, after["frames"])
