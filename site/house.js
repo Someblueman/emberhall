@@ -1656,7 +1656,7 @@ function renderAssayRoom(content) {
   guideLink.target="_blank";
   guideLink.rel="noopener noreferrer";
 }
-let studyState={filter:"all",query:"",page:0,opened:new Set()};
+let studyState={filter:"all",query:"",page:0,opened:new Set(),compare:[]};
 const STUDY_PAGE_SIZE=4;
 function studyReadiness(idea) {
   // Grounding is the public journal projection, not an inference from a brief's presence.
@@ -1667,14 +1667,18 @@ function studyReadiness(idea) {
 }
 function renderStudyDesk(content, dataShelf) {
   const ideas=(dataShelf.ideas||[]).filter(idea=>idea.status==="shelved");
+  studyState.compare=studyState.compare.filter(id=>ideas.some(idea=>idea.id===id));
   const desk=html("div","study-desk",undefined,content);
   html("h3","","Read the ideas",desk);
-  html("p","small","Ideas are proposals, not chosen work. Open one to read its research and sources. Checked means another resident kept its quoted requests; it does not mean the house selected or built it.",desk);
+  html("p","small","Ideas are proposals, not chosen work. Open one to read its research and sources, or choose two to compare. Evidence checked is the recorded shelf assessment; it does not mean an idea has been selected or built.",desk);
   if(!ideas.length){html("p","empty-note","No ideas are waiting on the shelf at this moment.",desk);return;}
+  const comparison=html("section","study-comparison",undefined,desk);
+  comparison.id="study-comparison";comparison.tabIndex=-1;
+  comparison.setAttribute("aria-label","Idea comparison");
   const controls=html("div","workshop-filters workshop-search",undefined,desk);
   const label=html("label","small","Research status",controls),filter=html("select","",undefined,label);
   filter.id="study-filter";label.htmlFor=filter.id;
-  const statuses=[["all","All ideas"],["checked","Checked by another resident"],["second","Waiting for a second reader"],["research","Needs research"],["unknown","Earlier record · check unknown"]];
+  const statuses=[["all","All ideas"],["checked","Evidence checked"],["second","Needs more readers"],["research","Needs research"],["unknown","Earlier record · check unknown"]];
   statuses.forEach(([value,title])=>{const option=html("option","",title,filter);option.value=value;});
   filter.value=studyState.filter;
   const searchLabel=html("label","small","Find an idea",controls),search=html("input","",undefined,searchLabel);
@@ -1682,7 +1686,64 @@ function renderStudyDesk(content, dataShelf) {
   search.setAttribute("aria-describedby","study-results");
   const results=html("p","small",undefined,desk);results.id="study-results";results.setAttribute("role","status");
   const list=html("div","study-ideas",undefined,desk);
+  function drawComparison() {
+    comparison.replaceChildren();
+    html("h4","","Compare two ideas",comparison);
+    const chosen=studyState.compare.map(id=>ideas.find(idea=>idea.id===id));
+    const status=html("p","small",`${chosen.length} of 2 chosen. ${chosen.length===2?"Read their promises and evidence below.":"Use Compare beside an idea to add it here."} Choices stay while you search or turn pages.`,comparison);
+    status.setAttribute("role","status");
+    if(!chosen.length)return;
+    const clear=workshopButton(comparison,"Clear comparison",()=>{
+      studyState.compare=[];draw();search.focus({preventScroll:true});
+    });clear.id="study-compare-clear";
+    const table=html("table","study-compare-table",undefined,comparison);
+    html("caption","small","Only ideas and evidence recorded at this moment. These are proposals, not verified results.",table);
+    const head=html("tr","",undefined,html("thead","",undefined,table));
+    html("td","",undefined,head);
+    chosen.forEach(idea=>{
+      const cell=html("th","",undefined,head);cell.setAttribute("scope","col");
+      html("span","",titleFor(idea,"idea"),cell);
+      const remove=workshopButton(cell,"Remove",()=>{
+        studyState.compare=studyState.compare.filter(id=>id!==idea.id);draw();comparison.focus({preventScroll:true});
+      });
+      remove.id=`study-compare-remove-${encodeURIComponent(idea.id)}`;
+      remove.setAttribute("aria-label",`Remove ${titleFor(idea,"idea")} from comparison`);
+    });
+    if(chosen.length===1)return;
+    const body=html("tbody","",undefined,table);
+    const rows=[
+      ["The promise",idea=>idea.plain||idea.what],
+      ["Who it is for",idea=>idea.brief?.audience||idea.brief?.for],
+      ["Its reach",idea=>idea.brief?.reach],
+      ["Why give it the time",idea=>idea.brief?.rather||idea.why],
+      ["First usable version",idea=>idea.brief?.first_version||idea.first_step],
+      ["How to judge it",idea=>idea.brief?.check],
+      ["What could sink it",idea=>idea.brief?.risks]
+    ];
+    rows.forEach(([label,value])=>{
+      const row=html("tr","",undefined,body),heading=html("th","",label,row);heading.setAttribute("scope","row");
+      chosen.forEach(idea=>{
+        const cell=html("td","",value(idea)||"Not recorded in this snapshot.",row);
+        cell.setAttribute("data-idea",titleFor(idea,"idea"));
+      });
+    });
+    const row=html("tr","",undefined,body),heading=html("th","","Evidence to open",row);heading.setAttribute("scope","row");
+    chosen.forEach(idea=>{
+      const cell=html("td","",undefined,row);cell.setAttribute("data-idea",titleFor(idea,"idea"));
+      const evidence=Array.isArray(idea.brief?.asked)?idea.brief.asked:[];
+      evidence.forEach(entry=>{
+        const line=html("p","small",`${entry.who}: “${entry.said}” `,cell);
+        const href=safeHttpUrl(entry.where);
+        if(href){const link=html("a","shelf-source-link","Open quoted evidence ↗",line);link.href=href;link.target="_blank";link.rel="noopener noreferrer";}
+        else if(idea.brief?.for==="house")html("span","small",` (${entry.where})`,line);
+      });
+      const links=[...new Set((idea.sources||[]).map(safeHttpUrl).filter(Boolean))];
+      links.forEach((href,i)=>{const link=html("a","shelf-source-link",`Research source ${i+1} ↗`,html("p","small",undefined,cell));link.href=href;link.target="_blank";link.rel="noopener noreferrer";});
+      if(!evidence.length&&!links.length)html("p","small","No evidence recorded in this snapshot.",cell);
+    });
+  }
   function draw() {
+    drawComparison();
     const query=workshopSearchText(studyState.query);
     const matches=ideas.filter(idea=>(studyState.filter==="all"||studyReadiness(idea)===studyState.filter)&&
       (!query||[idea.title,idea.what,idea.why,residentName(idea.author)].some(value=>workshopSearchText(value).includes(query))));
@@ -1694,6 +1755,16 @@ function renderStudyDesk(content, dataShelf) {
     matches.slice(studyState.page*STUDY_PAGE_SIZE,(studyState.page+1)*STUDY_PAGE_SIZE).forEach(idea=>{
       const entry=html("div","study-idea",undefined,list);
       html("p","small",statuses.find(([value])=>value===studyReadiness(idea))[1],entry);
+      const chosen=studyState.compare.includes(idea.id);
+      const compare=workshopButton(entry,chosen?"Remove from comparison":"Compare",()=>{
+        studyState.compare=chosen?studyState.compare.filter(id=>id!==idea.id):[...studyState.compare,idea.id];
+        draw();
+        if(studyState.compare.length===2){comparison.focus({preventScroll:true});comparison.scrollIntoView?.({block:"nearest"});}
+        else $(compare.id)?.focus({preventScroll:true});
+      });
+      compare.id=`study-compare-add-${encodeURIComponent(idea.id)}`;compare.disabled=!chosen&&studyState.compare.length===2;
+      compare.setAttribute("aria-label",`${chosen?"Remove":"Compare"} ${titleFor(idea,"idea")}${chosen?" from comparison":""}`);
+      compare.setAttribute("aria-pressed",String(chosen));compare.setAttribute("aria-controls",comparison.id);
       const card=renderShelfIdea(idea,entry,isGreatWorkShelf(dataShelf),residentName);
       card.open=studyState.opened.has(idea.id);
       card.addEventListener("toggle",()=>{if(card.open)studyState.opened.add(idea.id);else studyState.opened.delete(idea.id);});
