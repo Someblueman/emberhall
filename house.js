@@ -1424,13 +1424,16 @@ function renderCatchupPanel(content) {
   if(!any)html("p","empty-note","No completed tasks, room changes, or project choices recorded in this range.",panel);
 }
 // The Archive's lessons, newest first: what a resident learned and who checked it.
+function lessonReviewWords(lesson) {
+  const checked=lesson.reviews?`checked by ${lesson.reviews} other ${lesson.reviews===1?"resident":"residents"}`:"not yet checked by another resident";
+  return lesson.status==="superseded"?"replaced by a later lesson":lesson.status==="contested"?`Contested · ${checked}`:checked;
+}
 function lessonEntry(lesson,parent) {
   const entry=html("article",`lesson${lesson.status==="superseded"?" lesson-superseded":""}`,undefined,parent);
   html("h3","lesson-title",String(lesson.key||"").replaceAll("-"," "),entry);
   html("p","lesson-claim",lesson.claim,entry);
-  const checked=lesson.reviews?`checked by ${lesson.reviews} other ${lesson.reviews===1?"resident":"residents"}`:"not yet checked by another resident";
-  const status=lesson.status==="superseded"?"replaced by a later lesson":lesson.status==="contested"?`Contested · ${checked}`:checked;
-  html("p","small",`${lesson.author} · ${status}`,entry);
+  html("p","small",`${lesson.author} · ${lessonReviewWords(lesson)}`,entry);
+  return entry;
 }
 let hearthState={query:"",page:0};
 const HEARTH_PAGE_SIZE=4;
@@ -1507,10 +1510,17 @@ function renderHearth(content) {
   }
   draw();
 }
-let archiveState={query:"",status:"all",page:0};
+let archiveState={query:"",status:"all",page:0,compare:[],legacyMoment:null};
 const ARCHIVE_PAGE_SIZE=5;
 function renderLessons(content) {
-  const lessons=Array.isArray(frame.archive)?[...frame.archive].reverse():null;
+  // A legacy position is safe only while the exact public snapshot stays unchanged.
+  const legacyMoment=frame.archive?.some(lesson=>lesson.id===undefined)?JSON.stringify([frame.seq,frame.archive]):null;
+  if(archiveState.legacyMoment!==legacyMoment)
+    archiveState.compare=archiveState.compare.filter(id=>!id.startsWith("legacy-"));
+  archiveState.legacyMoment=legacyMoment;
+  const lessons=Array.isArray(frame.archive)?frame.archive.map((lesson,index)=>({...lesson,
+    selectionId:lesson.id===undefined?`legacy-${frame.seq}-${index}`:`lesson-${lesson.id}`})).reverse():null;
+  archiveState.compare=archiveState.compare.filter(id=>lessons?.some(lesson=>lesson.selectionId===id));
   if(!lessons){html("p","empty-note","This earlier snapshot recorded only how many lessons were kept, not their text.",content);return;}
   if(!lessons.length){html("p","empty-note","No lesson has been written down yet.",content);return;}
   const panel=html("div","workshop-explorer",undefined,content);
@@ -1518,6 +1528,7 @@ function renderLessons(content) {
   const controls=html("div","workshop-search",undefined,panel);
   const label=html("label","small","Find a lesson",controls);
   const search=html("input","",undefined,label);search.id="archive-search";search.type="search";
+  label.setAttribute("for",search.id);
   search.placeholder="Title, claim or author";search.value=archiveState.query;
   search.setAttribute("aria-describedby","archive-results");
   search.addEventListener("input",()=>{archiveState.query=search.value;archiveState.page=0;renderPage();});
@@ -1527,11 +1538,15 @@ function renderLessons(content) {
   const filters=html("div","workshop-filters",undefined,panel);
   const filterLabel=html("label","small","Lesson state",filters);
   const filter=html("select","",undefined,filterLabel);filter.id="archive-status";
+  filterLabel.setAttribute("for",filter.id);
   for(const [value,title] of [["all","All lessons"],["reviewed","Reviewed"],["unchecked","Not yet reviewed"],["contested","Contested"],["superseded","Superseded"]]) {
     const option=html("option","",title,filter);option.value=value;
   }
   filter.value=archiveState.status;
   filter.addEventListener("change",()=>{archiveState.status=filter.value;archiveState.page=0;renderPage();});
+  const comparison=html("section","study-comparison",undefined,panel);
+  comparison.id="archive-comparison";comparison.tabIndex=-1;
+  comparison.setAttribute("aria-label","Lesson comparison");
   const results=html("p","small",undefined,panel);results.id="archive-results";results.setAttribute("role","status");
   const box=html("div","lessons",undefined,panel);box.id="archive-lessons";box.tabIndex=-1;
   box.setAttribute("role","region");box.setAttribute("aria-label","Matching lessons");
@@ -1544,7 +1559,47 @@ function renderLessons(content) {
   const range=html("span","small",undefined,pages);
   const next=workshopButton(pages,"Next",()=>turnPage(1));next.id="archive-next";
   for(const button of [previous,next])button.setAttribute("aria-controls",box.id);
+  function lessonTitle(lesson) {
+    return `${String(lesson.key||"").replaceAll("-"," ")} · ${lesson.author}`;
+  }
+  function drawComparison() {
+    comparison.replaceChildren();
+    html("h3","","Compare two lessons",comparison);
+    const chosen=archiveState.compare.map(id=>lessons.find(lesson=>lesson.selectionId===id));
+    const status=html("p","small",`${chosen.length} of 2 chosen. Choose Compare beside a lesson; choices stay while you search or turn pages.`,comparison);
+    status.setAttribute("role","status");
+    if(lessons.some(lesson=>lesson.id===undefined))
+      html("p","small","In this older snapshot, comparison choices apply only to this moment.",comparison);
+    if(!chosen.length)return;
+    html("p","small","These public summaries omit the supporting evidence. Side by side does not establish agreement or a replacement relationship; a review count is not proof that a claim is true.",comparison);
+    const clear=workshopButton(comparison,"Clear comparison",()=>{
+      archiveState.compare=[];renderPage();comparison.focus({preventScroll:true});
+    });clear.id="archive-compare-clear";
+    const table=html("table","study-compare-table",undefined,comparison);
+    html("caption","small",`Lessons at event ${frame.seq}; later claims and reviews are hidden.`,table);
+    const head=html("tr","",undefined,html("thead","",undefined,table));
+    html("td","",undefined,head);
+    chosen.forEach(lesson=>{
+      const cell=html("th","",undefined,head);cell.setAttribute("scope","col");
+      const title=lessonTitle(lesson);
+      html("span","",title,cell);
+      const remove=workshopButton(cell,"Remove",()=>{
+        archiveState.compare=archiveState.compare.filter(id=>id!==lesson.selectionId);
+        renderPage();comparison.focus({preventScroll:true});
+      });remove.id=`archive-compare-remove-${encodeURIComponent(lesson.selectionId)}`;
+      remove.setAttribute("aria-label",`Remove ${title}: ${lesson.claim} from comparison`);
+    });
+    const body=html("tbody","",undefined,table);
+    for(const [label,value] of [["The claim",lesson=>lesson.claim],["Written by",lesson=>lesson.author],["Review state",lessonReviewWords]]) {
+      const row=html("tr","",undefined,body),heading=html("th","",label,row);heading.setAttribute("scope","row");
+      chosen.forEach(lesson=>{
+        const cell=html("td","",value(lesson),row);
+        cell.setAttribute("data-idea",lessonTitle(lesson));
+      });
+    }
+  }
   function renderPage() {
+    drawComparison();
     const query=workshopSearchText(archiveState.query);
     const matches=lessons.filter(lesson=>{
       const status=lesson.status==="observed"?(lesson.reviews>0?"reviewed":"unchecked"):lesson.status;
@@ -1557,7 +1612,18 @@ function renderLessons(content) {
     results.textContent=`${matches.length} of ${lessons.length} lessons match search and state at this moment · showing ${showing}`;
     clear.disabled=!archiveState.query;
     box.replaceChildren();
-    matches.slice(start,start+ARCHIVE_PAGE_SIZE).forEach(lesson=>lessonEntry(lesson,box));
+    matches.slice(start,start+ARCHIVE_PAGE_SIZE).forEach(lesson=>{
+      const entry=lessonEntry(lesson,box),chosen=archiveState.compare.includes(lesson.selectionId);
+      const compare=workshopButton(entry,chosen?"Remove from comparison":"Compare",()=>{
+        archiveState.compare=chosen?archiveState.compare.filter(id=>id!==lesson.selectionId):[...archiveState.compare,lesson.selectionId];
+        renderPage();
+        if(archiveState.compare.length===2){comparison.focus({preventScroll:true});comparison.scrollIntoView?.({block:"nearest"});}
+        else $(compare.id)?.focus({preventScroll:true});
+      });
+      compare.id=`archive-compare-${encodeURIComponent(lesson.selectionId)}`;compare.disabled=!chosen&&archiveState.compare.length===2;
+      compare.setAttribute("aria-label",`${chosen?"Remove":"Compare"} ${lessonTitle(lesson)}: ${lesson.claim}${chosen?" from comparison":""}`);
+      compare.setAttribute("aria-pressed",String(chosen));compare.setAttribute("aria-controls",comparison.id);
+    });
     if(!matches.length)html("p","empty-note","No lessons match. Clear search or choose All lessons to look again.",box);
     previous.disabled=archiveState.page===0;next.disabled=start+ARCHIVE_PAGE_SIZE>=matches.length;
     range.textContent=matches.length?`${start+1}–${Math.min(start+ARCHIVE_PAGE_SIZE,matches.length)} of ${matches.length}`:"0 lessons";
