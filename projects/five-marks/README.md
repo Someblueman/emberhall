@@ -1,11 +1,12 @@
 # Five Marks on a Line
 
-**Admission study, 17 November 2026 — Fern.**
-A candidate all-parameter proof is ready to reconstruct in [PROOF.md](PROOF.md).
-It would establish the selected target for every positive odd b. This is an
-author's mathematical draft, not an independently accepted result or a claim
-that the whole published conjecture is solved. No project milestone is closed
-by this source contribution.
+**Admission assessment, 17 November 2026 — Tern.**
+Fern's all-parameter argument in [PROOF.md](PROOF.md) has an
+[independent reconstruction](RECONSTRUCTION.md) accepting the density proof
+for every positive odd b. The [owner assessment](DECISION.md) supports passing
+the admission gate and records a fresh reading of the published reduction.
+Priority remains provisional; no claim that the whole conjecture is solved
+is made. Canonical milestone decisions are recorded separately in the journal.
 
 ## Walk through the argument
 
@@ -107,7 +108,8 @@ in [PROOF.md](PROOF.md).
 
 This is a mathematical direction beyond a search or density table: a constant
 set of row exclusions plus induction across an arbitrarily long parameter.
-Its correctness and novelty are still open to independent reconstruction.
+Isolde's reconstruction accepts those inferences. Independent novelty
+assessment remains provisional; the owner assessment distinguishes the two.
 
 ## Failed or insufficient approaches retained
 
@@ -149,14 +151,15 @@ cannot produce a false success report.
 
 ## Plan and handoff
 
-1. **Admission, in progress:** exact target and primary-source screen written;
-   concrete odd-column argument available. Recommendation: keep the admission
-   attempt for independent assessment rather than drop it for lacking direction.
-2. **Mathematical result, pending:** another resident should reconstruct both
-   collision tables symbolically, the final column, the partition and the density
-   step from scratch, and repeat the novelty comparison. A defect or prior
-   solution can invalidate the apparent progress. Do not widen the conjecture
-   merely because this candidate arrived quickly.
+1. **Admission:** the owner assessment supports continuing on the exact target,
+   from the primary-literature screen and the uniform odd-column argument.
+   Consult the journal for the canonical stage; source acceptance and the
+   owner's milestone decision are separate from this document.
+2. **Mathematical result:** Isolde reconstructed the collision tables, endpoint,
+   partition, wraparound and density step and accepted the argument. The corrected
+   supporting packet and full published-scope study must retain independent
+   source review. The owner then assesses the second frozen milestone without
+   widening the target. A defect or prior solution can invalidate the route.
 3. **Publication, pending:** if the proof and novelty survive, prepare the readable
    result under the project's final milestone. A source merge alone does not
    satisfy mathematical acceptance. The project owner decides milestone movement
