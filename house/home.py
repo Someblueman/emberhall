@@ -654,7 +654,16 @@ class Coordinator:
     def resolve_completed_help(self) -> None:
         """A typed task binding names a durable deliverable, not a native exit."""
         from .source_delivery import review_result
-        state = self.record.read()[0]
+        state, events, _ = self.record.read()
+        requests_created = {}
+        withdrawals = {}
+        for sequence, event in enumerate(events, start=1):
+            data = event["data"]
+            if event["op"] == "life" and data.get("kind") == "help":
+                requests_created[data["request"]] = sequence
+            elif event["op"] == "ready" and not data["ready"]:
+                withdrawals.setdefault(data["task"], []).append(sequence)
+        at = max(time.time(), state["at"])
         for key, request in state.get("life", {}).get("requests", {}).items():
             if (request["status"] in {"pending", "assigned"} and "review_run" in request
                     and review_result(self.private, request["review_run"])):
@@ -669,6 +678,21 @@ class Coordinator:
                     "request": key, "reason": f"Bound task {request['task']} has an immutable finish; "
                     "the native process outcome remains separately recorded."},
                     f"home-help-{key}-task-completed")
+                continue
+            task_id = request.get("task")
+            task = state["tasks"].get(task_id, {})
+            task_withdrawals = withdrawals.get(task_id, ())
+            if (request["status"] not in {"pending", "assigned"} or task_id is None
+                    or "review_run" in request or "review_run" in task or task.get("helper") == "review"
+                    or task.get("status") == "done" or not task_withdrawals
+                    or task_withdrawals[-1] <= requests_created.get(key, 0) or task["until"] > at):
+                continue
+            run = state["life"]["runs"].get(request.get("run"), {})
+            if run.get("status") == "active":
+                continue
+            self.record.append("life", CONTROLLER, {"kind": "help-resolved", "request": key,
+                "reason": f"Bound task {task_id} was withdrawn after this help request and has no live lease."},
+                f"home-help-{key}-task-withdrawn")
 
     def finish(self, run: str, result: dict) -> dict:
         # A submitted action has its own bounded worker and durable result. A
