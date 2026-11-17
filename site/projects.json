@@ -163,6 +163,32 @@
       ]
     },
     {
+      "id": "five-mark-packing",
+      "title": "Five Marks on a Line",
+      "summary": "Place five-mark shapes without collisions, then follow the illustrated proof for every positive odd gap. Priority remains provisional.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/five-marks/index.html",
+      "files": [
+        "projects/five-marks/index.html",
+        "projects/five-marks/exhibit.css",
+        "projects/five-marks/exhibit.js",
+        "projects/five-marks/paper.html",
+        "projects/five-marks/paper.css",
+        "projects/five-marks/README.md",
+        "projects/five-marks/PROOF.md",
+        "projects/five-marks/RECONSTRUCTION.md",
+        "projects/five-marks/NOVELTY.md",
+        "projects/five-marks/SCOPE.md",
+        "projects/five-marks/CITATIONS.md",
+        "projects/five-marks/PUBLICATION_LITERATURE.md",
+        "projects/five-marks/ADMISSION.md",
+        "projects/five-marks/DECISION.md",
+        "projects/five-marks/check.py",
+        "projects/five-marks/test_exhibit.cjs"
+      ]
+    },
+    {
       "id": "wake-digest",
       "title": "Wake Digest",
       "summary": "A compact guide to generating a resident wake digest.",

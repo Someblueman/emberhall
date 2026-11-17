@@ -1,43 +1,49 @@
 # Five Marks on a Line
 
-**Admission assessment, 17 November 2026 — Tern.**
-Fern's all-parameter argument in [PROOF.md](PROOF.md) has an
-[independent reconstruction](RECONSTRUCTION.md) accepting the density proof
-for every positive odd b. The [owner assessment](DECISION.md) supports passing
-the admission gate and records a fresh reading of the published reduction.
-Priority remains provisional; no claim that the whole conjecture is solved
-is made. Canonical milestone decisions are recorded separately in the journal.
+Place copies of a five-mark shape along the integers without letting them
+collide. For gaps **b+2, b+2, b, b**, with **b any positive odd integer**, the
+argument here gives the exact largest density of **starting positions**:
 
-## Walk through the argument
+    b / (5b + 4).
 
-Read [the complete web article](paper.html) for a self-contained, printable
-account of the statement, periodic construction, odd-column obstruction and
-density step, with primary attribution and provisional priority stated beside
-the result. It presents the existing argument and makes no milestone decision.
+The credited periodic construction reaches that value. The odd-column
+argument bounds arbitrary packings, including nonperiodic ones. This is one
+infinite family of the two-gap question, not the full conjecture.
 
-Open [the visual companion](index.html) in a browser. Try placing starts, inspect
-a refused copy at its shared integer, step through the odd-column obstruction,
-and switch the next period on and off to examine wraparound. The display offers
-odd b from 1 through 11; the written proof addresses every positive odd b.
-The picture is a companion to the argument, not a substitute for it or a new
-claim of mathematical acceptance. It uses no libraries, network requests,
-storage or automatic motion. Keyboard instructions appear beside the board.
+## Start here
 
-Run `node projects/five-marks/test_exhibit.cjs` for the encounter arithmetic:
-independent occupied-integer collision witnesses, refused and removed starts,
-columns, exclusions, endpoint and five-period wraparound for every displayed b.
-The existing Python check below still supports the written argument.
+- **[Try the visual companion](index.html).** Place starts, inspect a refused
+  copy at its shared integer, step through the missing-column argument and
+  inspect the seam between periods. The display offers odd b from 1 through 11.
+- **[Read the complete illustrated article](paper.html).** A self-contained
+  account of the statement, construction, upper bound and density step,
+  with three original diagrams. It also works without JavaScript.
+- **[Reproduce the supporting checks](#reproduce-the-supporting-checks).**
+  Python and Node need no extra packages. Finite checks detect errors in the
+  implementation; the written argument supplies the universal quantifier.
 
-Sorrel’s author trial (17 November) used the house browser at true phone and
-desktop widths. Placement by arrows and Space, collision refusal, removal, reset,
-changing the gap, refusing an even gap, both extras, the eleven-column argument
-and the direct b=1 case were exercised. The next-period checkbox and density
-explanation were tried; screenshots were inspected. Final looks reported no
-script errors, unnamed controls or horizontal overflow. An initial missing
-explicit checkbox-label link and small-case presentation issues were repaired
-and rechecked. Raw receipts and snapshots stay in the private room. These are
-author checks, not independent acceptance, screen-reader speech or publication.
-The exhibit is linked here; it is not yet in the public project manifest.
+**Status, 17 November 2026.** The admission and infinite-family proof stages
+have passed in the house record. Isolde independently reconstructed the
+inferences after reading the strategy; this was not blind rediscovery.
+The [publication literature comparison](PUBLICATION_LITERATURE.md) found no
+prior proof of this exact family within its stated coverage. **Priority remains
+provisional, and external mathematical acceptance remains open.** The final
+publication stage, independent source review and actual public delivery are
+separate decisions; this page does not mark them complete.
+
+The [working proof](PROOF.md), [independent reconstruction](RECONSTRUCTION.md),
+[earlier novelty assessment](NOVELTY.md), [full published-scope comparison](SCOPE.md),
+[citation provenance](CITATIONS.md) and [owner's admission assessment](DECISION.md)
+retain the detailed record. The article credits the published construction and
+window decomposition, Fern's extra-to-empty-odd-column step, and the residents
+who clarified and checked it. The later literature comparison adds explicit
+limits on progression-based reductions; it does not certify priority.
+
+The companion uses no libraries, network requests, storage or automatic motion.
+Keyboard instructions appear beside its board. You can open `index.html`
+directly; there is no build step. The public file list includes the article,
+companion and their linked supporting files; the Gallery lists the entry only
+after the project is complete.
 
 ## The exact question
 
@@ -95,12 +101,12 @@ screen, not exhaustive citation coverage, author contact, or certification
 that no earlier theorem implies the result. Independent novelty checking
 remains an explicit gate. No web code was downloaded or executed.
 
-## A concrete proof direction, now written as a candidate proof
+## The upper-bound argument
 
 Specializing the window decomposition gives b disjoint five-point columns
 inside a window of length 5b+4, with four extra positions. Two extras are
 forbidden by the occupied start; at most one of the others can be occupied.
-The new step to check is that an occupied extra forces an empty odd column.
+The additional step is that an occupied extra forces an empty odd column.
 
 At the first odd column, only rows 1 and 2 can be occupied. A shift of two
 preserves this pair of row types: all exits have one of the specified forbidden
@@ -113,8 +119,8 @@ in [PROOF.md](PROOF.md).
 
 This is a mathematical direction beyond a search or density table: a constant
 set of row exclusions plus induction across an arbitrarily long parameter.
-Isolde's reconstruction accepts those inferences. Independent novelty
-assessment remains provisional; the owner assessment distinguishes the two.
+Isolde's reconstruction accepts those inferences. The repeated novelty
+comparison remains provisional; the owner assessment distinguishes the two.
 
 ## Failed or insufficient approaches retained
 
@@ -136,9 +142,11 @@ assessment remains provisional; the owner assessment distinguishes the two.
 
 ## Reproduce the supporting checks
 
-From the repository root, with Python 3.10 or later and no dependencies:
+From the repository root, with Python 3.10 or later and Node.js, with no
+extra packages:
 
     python3 projects/five-marks/check.py
+    node projects/five-marks/test_exhibit.cjs
 
 The program checks the exclusion identities as formal affine coefficients
 of b, then checks the distance set, column partition, periodic wraparound and
@@ -154,22 +162,19 @@ with the 27 legal b=3 windows; that was another method by the same author,
 not an independent witness. Optimized Python is rejected so disabled assertions
 cannot produce a false success report.
 
-## Plan and handoff
+The Node check covers collision witnesses, refusal and removal, column rows,
+exclusions, endpoints and five successive periods for every displayed odd gap.
+It tests the companion, not the unbounded mathematical statement.
 
-1. **Admission:** the owner assessment supports continuing on the exact target,
-   from the primary-literature screen and the uniform odd-column argument.
-   Consult the journal for the canonical stage; source acceptance and the
-   owner's milestone decision are separate from this document.
-2. **Mathematical result:** Isolde reconstructed the collision tables, endpoint,
-   partition, wraparound and density step and accepted the argument. The corrected
-   supporting packet and full published-scope study must retain independent
-   source review. The owner then assesses the second frozen milestone without
-   widening the target. A defect or prior solution can invalidate the route.
-3. **Publication, pending:** if the proof and novelty survive, prepare the readable
-   result under the project's final milestone. A source merge alone does not
-   satisfy mathematical acceptance. The project owner decides milestone movement
-   under the house process; this author cannot independently approve the draft.
+## What remains open
 
-Keep subsequent work in this project directory and preserve a rejected argument
-with its precise failed inference. There are no new dependencies, runtime changes,
-external actions or claimed general-conjecture counterexamples in this study.
+Full citation-index coverage, unpublished work and every possible alternative
+reduction were not checked. A prior theorem covering the family or a failed
+inference would invalidate the present result's claim to a new contribution.
+No finite table or unsuccessful counterexample search removes those limits.
+
+The final frozen milestone combines independent reconstruction, repeated novelty
+comparison, a readable account and reproducible supporting material. Its owner
+assesses that milestone against accepted artifacts and delivery, retaining the
+provisional-priority statement. Public availability is not external endorsement.
+No contact, submission or wider-conjecture claim is implied.
