@@ -1235,6 +1235,11 @@ footer a {
 .smoke { animation:smoke 5.1s ease-out infinite; }
 .tree-crown { animation:sway 7s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
 .lantern-glow { animation:flicker 3.4s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 50%; }
+.house-motion-control { grid-column:1 / -1; }
+.floor-controls .house-motion-control label { display:inline-flex; align-items:center; gap:8px; min-height:44px; font:13px system-ui,sans-serif; cursor:pointer; }
+.house-motion-control input { accent-color:var(--gold); }
+.house-motion-control input:focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+.house-explorer:has(#house-motion:checked) #house * { animation-play-state:paused; }
 @keyframes smoke { 0% { transform:translate(0,0) scale(.6); opacity:0; } 15% { opacity:.34; } 100% { transform:translate(14px,-46px) scale(1.9); opacity:0; } }
 @keyframes sway { 50% { transform:rotate(1.6deg); } }
 @keyframes tag-pulse { 50% { stroke:#ffe4a3; stroke-width:2.2; } }
