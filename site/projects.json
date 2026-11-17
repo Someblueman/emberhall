@@ -44,7 +44,9 @@
         "projects/signal-garden/index.html",
         "projects/signal-garden/style.css",
         "projects/signal-garden/model.js",
-        "projects/signal-garden/garden.js"
+        "projects/signal-garden/garden.js",
+        "projects/signal-garden/make-gallery-preview.js",
+        "projects/signal-garden/gallery-preview.svg"
       ]
     },
     {
@@ -80,7 +82,9 @@
         "projects/shadow-theatre/index.html",
         "projects/shadow-theatre/style.css",
         "projects/shadow-theatre/app.js",
-        "projects/shadow-theatre/scene-core.js"
+        "projects/shadow-theatre/scene-core.js",
+        "projects/shadow-theatre/make-gallery-preview.js",
+        "projects/shadow-theatre/gallery-preview.svg"
       ]
     },
     {
