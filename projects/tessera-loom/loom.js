@@ -109,7 +109,12 @@
       get('size-label').textContent = `${motif.size} × ${motif.size}`;
       get('palette').value = motif.palette;
       const repeats = Number(get('repeats').value);
-      get('preview').innerHTML = svg(motif, repeats);
+      const drawing = svg(motif, repeats);
+      get('preview').innerHTML = drawing;
+      // An image keeps the exported SVG's title identity out of the page DOM.
+      get('pocket-preview').src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(drawing)}`;
+      get('pocket-preview').alt = `Live pattern: ${motif.size * repeats} by ${motif.size * repeats} tiles`;
+      get('pocket-summary').textContent = `${motif.size} × ${motif.size} motif · ${repeats} × ${repeats} repeats`;
       get('summary').textContent = `${motif.size} × ${motif.size} motif · ${repeats} × ${repeats} repeats · ${motif.size * repeats} × ${motif.size * repeats} tiles`;
       if (focusTile) editor.children[selected].focus();
     }
