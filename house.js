@@ -2019,6 +2019,9 @@ async function loadCatalog(sourceHead) {
     catalog=null;catalogSource=null;
   }
 }
+function collectionAction(entry) {
+  return entry.action==="Read guide"?"Read guide":entry.action==="Play"?"Play":"Open";
+}
 function renderCreationCard(entry,parent) {
   const article=html("article","creation-card",undefined,parent);
   html("h3","",entry.title,article);
@@ -2059,7 +2062,7 @@ function renderCreationCard(entry,parent) {
   }
   html("p","",entry.summary,article);
   html("span","small","Completed",article);
-  const action=entry.category==="house-tool"||entry.action==="Read guide"?"Read guide":entry.action==="Play"?"Play":"Open";
+  const action=collectionAction(entry);
   const link=html("a","creation-action",`${action} ${entry.title} →`,article);
   link.href=collectionUrl(entry);
 }
@@ -2068,6 +2071,7 @@ function completedCatalog() {
   if(Array.isArray(frame.rooms)&&frame.rooms.some(r=>r&&r.id==="assay"&&roomStatus(r)==="open"))completed.add("assay-room");
   return (catalog||[]).filter(entry=>completed.has(entry.id)&&collectionUrl(entry));
 }
+let galleryState={query:"",activity:"all",toolsOpen:false};
 function renderCollection() {
   const box=$("creations");if(!box)return;
   box.replaceChildren();
@@ -2076,18 +2080,58 @@ function renderCollection() {
     return;
   }
   const known=completedCatalog();
-  const creations=known.filter(entry=>entry.category==="creation");
   html("p","small",current?"Finished creations you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
-  if(!creations.length)html("p","empty-note","No published creations were completed by this moment.",box);
-  const cards=html("div","creation-grid",undefined,box);
-  creations.forEach(entry=>renderCreationCard(entry,cards));
-  const tools=known.filter(entry=>entry.category==="house-tool");
-  if(tools.length) {
-    const details=html("details","house-tools",undefined,box);
-    html("summary","",`Tools for the house (${tools.length})`,details);
-    const toolGrid=html("div","creation-grid house-tools-grid",undefined,details);
-    tools.forEach(entry=>renderCreationCard(entry,toolGrid));
+  if(!known.length) {
+    html("p","empty-note","No published creations were completed by this moment.",box);
+    return;
   }
+  const controls=html("div","gallery-controls",undefined,box);
+  const label=html("label","small","Find something to try",controls);
+  label.setAttribute("for","gallery-search");
+  const search=html("input","",undefined,label);
+  search.id="gallery-search";search.type="search";search.placeholder="Title or description";
+  search.value=galleryState.query;search.setAttribute("aria-controls","gallery-results");
+  const activityLabel=html("label","small","What would you like to do?",controls);
+  activityLabel.setAttribute("for","gallery-activity");
+  const activity=html("select","",undefined,activityLabel);activity.id="gallery-activity";
+  activity.setAttribute("aria-controls","gallery-results");
+  for(const [value,title] of [["all","Anything"],["Play","Play"],["Open","Make or explore"],["Read guide","Read a guide"]]) {
+    const option=html("option","",title,activity);option.value=value;
+  }
+  activity.value=galleryState.activity;
+  const reset=html("button","quiet-button","Show everything",controls);
+  reset.id="gallery-reset";reset.type="button";
+  const status=html("p","small",undefined,box);status.id="gallery-status";
+  status.setAttribute("role","status");
+  const results=html("div","",undefined,box);results.id="gallery-results";
+  search.addEventListener("input",()=>{galleryState.query=search.value;draw();});
+  activity.addEventListener("change",()=>{galleryState.activity=activity.value;draw();});
+  reset.addEventListener("click",()=>{
+    galleryState.query="";galleryState.activity="all";search.value="";activity.value="all";
+    draw();search.focus({preventScroll:true});
+  });
+  function draw() {
+    const query=workshopSearchText(galleryState.query);
+    const matches=known.filter(entry=>(galleryState.activity==="all"||collectionAction(entry)===galleryState.activity)&&
+      (!query||[entry.title,entry.summary].some(value=>workshopSearchText(value).includes(query))));
+    status.textContent=`${matches.length} of ${known.length} published works match`;
+    results.replaceChildren();
+    if(!matches.length)html("p","empty-note","Nothing matches. Try another word or choose Show everything.",results);
+    const creations=matches.filter(entry=>entry.category==="creation");
+    const cards=html("div","creation-grid",undefined,results);
+    creations.forEach(entry=>renderCreationCard(entry,cards));
+    const tools=matches.filter(entry=>entry.category==="house-tool");
+    if(tools.length) {
+      const details=html("details","house-tools",undefined,results);
+      details.open=Boolean(query||galleryState.activity!=="all"||galleryState.toolsOpen);
+      const summary=html("summary","",`Tools for the house (${tools.length})`,details);
+      summary.id="gallery-tools";
+      details.addEventListener("toggle",()=>{galleryState.toolsOpen=details.open;});
+      const toolGrid=html("div","creation-grid house-tools-grid",undefined,details);
+      tools.forEach(entry=>renderCreationCard(entry,toolGrid));
+    }
+  }
+  draw();
 }
 // A small working display inside the room, using the same cards as the full Gallery.
 let galleryRoomChoice=null;
@@ -3183,8 +3227,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-room-"))?activeId:null;
-  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
+  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
