@@ -4,8 +4,9 @@ When a review packet travels across an air gap — on a USB stick, in an archive
 or attached to a message — files can be truncated, omitted to save space, or
 left with temporary artifacts after an interrupted write. `recovery.py`
 diagnoses and rebuilds damaged packets without touching the original directory,
-and `comparison.py` measures how Skein's zero-service workflow compares against
-raw `git bundle`, Gerrit and Radicle.
+and `comparison.py` measures a local Skein fixture against raw `git bundle`.
+Gerrit and Radicle appear only in a capability overview; neither is run or
+benchmarked by the fixture.
 
 ## Why four of the five packet files are replaceable
 
@@ -172,7 +173,7 @@ python3 projects/review-skein/recovery.py clean-temp /path/to/packet
 python3 projects/review-skein/recovery.py clean-temp /path/to/packet --apply
 ```
 
-## Measured comparison: Skein vs `git bundle`, Gerrit and Radicle
+## Measured fixture: Skein vs raw `git bundle`
 
 Milestone 4 asks whether zero-service packet exchange is genuinely easier than
 raw `git bundle`, Gerrit or Radicle for this case. Run the live measurement on a
@@ -212,12 +213,23 @@ exposes `reviewer_exchange_bytes` and every `reviewer_artifacts` path/size.
 | --- | ---: | ---: |
 | Two complete reviewer returns (bytes) | 3,701 B | 23,219 B |
 | Extra tools beyond `git` | 0 | 1 (Python 3.10+ stdlib) |
-| CLI commands executed in scenario | 5 | 13 |
+| Selected tool operations | 5 | 13 |
 | Same-ID merge collisions lost/conflicted | 1 | 0 (2 divergent variants kept) |
 | Accurately anchored comments on `feature-v2` | 3 | 5 |
 | Explicit orphans with `rebased_from` provenance | 0 | 2 |
 | **Silent mis-anchored comments on `feature-v2`** | **3** | **0** |
 | Byte-exact rebuild of deleted `review.html` + `anchors.json` | n/a | `True` |
+
+The operation totals are selected calls, not CLI command counts or human effort.
+Raw counts five Git subprocesses: bundle creation, diff, clone, bundle verification
+and range-diff. Skein counts thirteen direct Python API calls: export, eight
+comment writes (including resolution), verify, merge, revise and rebuild.
+Fixture setup and revision commits, file copies, raw note writing/merging,
+reading and nested tool calls are excluded. These are different amounts of
+work, so the totals cannot establish which workflow is easier. JSON retains
+the existing `cli_commands` field names for readers of earlier reports; its
+`scenario.operation_basis` explains their meaning. Every output format includes
+that basis and the comparison limits.
 
 On this run the raw total is 1,530 B of bundles + 744 B of patches + **1,427 B
 of notes** (717 B and 710 B). The Skein total is 1,548 B of bundles + 1,062 B
