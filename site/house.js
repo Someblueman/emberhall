@@ -884,6 +884,9 @@ function taskProjectLabel(t) {
   if(match&&typeof match.title==="string"&&match.title.trim()!== "")return `Project: ${match.title}`;
   return `Project: ${projectId}`;
 }
+function workshopProjectKey(t) {
+  return typeof t.project==="string"&&t.project.trim()!==""?`project:${t.project}`:"house";
+}
 // Public frames expose unfinished tasks; finishes remove them. Creation events carry
 // a human title, so use the state transition rather than treating that title as an ID.
 function workshopTasks(frames, moment, at) {
@@ -923,7 +926,7 @@ function workshopTasks(frames, moment, at) {
     return {...t,state};
   });
 }
-let workshopState={filter:"all",readiness:"all",query:"",selectedId:null,pages:{}};
+let workshopState={filter:"all",readiness:"all",project:"all",query:"",selectedId:null,pages:{}};
 let votingState={query:"",status:"all",kind:"all"};
 let votingOpened=new Set();
 const WORKSHOP_PAGE_SIZE=4;
@@ -961,12 +964,21 @@ function renderWorkshopTasks(content) {
     });back.id="workshop-present";
   }
   const filters=html("div","workshop-filters",undefined,box);
+  // Build options from the viewed task history, never from later project records.
+  const projects=new Map(tasks.filter(t=>workshopProjectKey(t)!=="house")
+    .map(t=>[workshopProjectKey(t),taskProjectLabel(t)]));
+  const projectOptions=[["all","All projects and house work"],["house","Ordinary house work"],
+    ...[...projects].sort((a,b)=>a[1].localeCompare(b[1]))];
+  if(workshopState.project!=="all"&&workshopState.project!=="house"&&!projects.has(workshopState.project))
+    projectOptions.push([workshopState.project,"Selected project not recorded at this moment"]);
   for(const [key,label,options] of [
     ["filter","Work",[["all","All work"],["unfinished","Unfinished"],["claimed","Recorded claims"],["unassigned","Unassigned"],["expired","Expired leases"],["done","Finished"]]],
-    ["readiness","Queue",[["all","Any readiness"],["ready","Declared ready"],["not-queued","Not queued"],["unknown","Readiness unknown"]]]
+    ["readiness","Queue",[["all","Any readiness"],["ready","Declared ready"],["not-queued","Not queued"],["unknown","Readiness unknown"]]],
+    ["project","Project",projectOptions]
   ]) {
     const wrapper=html("label","small",label,filters),select=html("select","",undefined,wrapper);
     select.id=`workshop-${key}`;
+    wrapper.setAttribute("for",select.id);
     for(const [value,title] of options){const option=html("option","",title,select);option.value=value;}
     select.value=workshopState[key];
     select.addEventListener("change",()=>{
@@ -1003,7 +1015,7 @@ function renderWorkshopTasks(content) {
     }
     if(!chosen.events.length)html("p","small","Individual handoffs are not exposed in this snapshot.",detail);
     workshopButton(detail,"Find task card",()=>{
-      workshopState.filter=chosen.state;workshopState.readiness="all";workshopState.query="";
+      workshopState.filter=chosen.state;workshopState.readiness="all";workshopState.project="all";workshopState.query="";
       const position=tasks.filter(t=>t.state===chosen.state).sort(workshopOrder).findIndex(t=>t.id===chosen.id);
       workshopState.pages[chosen.state]=Math.floor(position/WORKSHOP_PAGE_SIZE);
       workshopRedraw(`workshop-task-${chosen.id}`,true);
@@ -1020,13 +1032,14 @@ function renderWorkshopTasks(content) {
       const ready=t.ready===true?"ready":t.ready===false?"not-queued":"unknown";
       return (workshopState.filter==="all"||(workshopState.filter==="unfinished"?t.state!=="done":t.state===workshopState.filter))&&
         (workshopState.readiness==="all"||ready===workshopState.readiness)&&
+        (workshopState.project==="all"||workshopProjectKey(t)===workshopState.project)&&
         (!query||[t.title,names.get(t.owner),...t.events.flatMap(e=>[names.get(e.actorId),e.actor!==e.actorId?e.actor:null])]
           .some(value=>workshopSearchText(value).includes(query)));
     });
     clear.disabled=!workshopState.query;
     results.textContent=`${filtered.length} of ${tasks.length} tasks match search and filters at this moment`;
     board.replaceChildren();
-    if(!filtered.length)html("p","empty-note","No work matches this search and these filters at this moment. Clear search or change Work and Queue to look again.",board);
+    if(!filtered.length)html("p","empty-note","No work matches this search and these filters at this moment. Clear search or change Work and Queue or Project to look again.",board);
     for(const [key,title] of [["claimed","Recorded claims"],["unassigned","Unassigned"],["expired","Expired leases"],["done","Recent finishes"],["unknown","State unknown"]]) {
       const group=filtered.filter(t=>t.state===key).sort(workshopOrder);
       if(!group.length)continue;
