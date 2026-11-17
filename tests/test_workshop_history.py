@@ -103,13 +103,16 @@ assert.doesNotMatch(text(panel()),/PRIVATE-RESULT|a.txt|Immutable fixture/);
             "-c", "user.email=test@local", "commit", "-m", "UI publication fixture")
         publish(self.record)
         page = git(self.repo, "show", BRANCH + ":index.html")
+        self.assertEqual(page, (ROOT / "site/index.html").read_text().rstrip())
 
         class Assets(HTMLParser):
             paths = []
 
             def handle_starttag(self, tag, attrs):
                 attrs = dict(attrs)
-                if tag == "script" or (tag == "link" and attrs.get("rel") == "stylesheet"):
+                # Inline scripts travel in the page, not as separate assets.
+                if ((tag == "script" and "src" in attrs)
+                        or (tag == "link" and attrs.get("rel") == "stylesheet")):
                     self.paths.append(urlsplit(attrs.get("src", attrs.get("href", ""))).path)
 
         parser = Assets()
