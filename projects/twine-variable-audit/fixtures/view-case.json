@@ -1,0 +1,14 @@
+[
+  {
+    "fill": [
+      "#story-input",
+      "<!doctype html><html><head><meta charset=\"utf-8\"><title>Two spellings</title></head><body>\n<tw-storydata name=\"Two spellings\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"11111111-1111-4111-8111-111111111111\">\n<tw-passagedata pid=\"2\" name=\"StoryInit\" tags=\"\">&lt;&lt;set $Job to &quot;bank&quot;&gt;&gt;</tw-passagedata>\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">The town has a vacancy.\n[[Walk to the bank|Bank]]</tw-passagedata>\n<tw-passagedata pid=\"3\" name=\"Bank\" tags=\"\">&lt;&lt;if $job is &quot;bank&quot;&gt;&gt;\nYou can apply here.\n&lt;&lt;else&gt;&gt;\nThe job option never appears.\n&lt;&lt;/if&gt;&gt;</tw-passagedata>\n</tw-storydata></body></html>\n"
+    ]
+  },
+  {
+    "click": "#audit"
+  },
+  {
+    "click": "#findings article button"
+  }
+]

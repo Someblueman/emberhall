@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Twine Variable Audit — find the wrong turn</title>
+<style>
+:root{color-scheme:light;--ink:#23372e;--muted:#536157;--paper:#f4f2e9;--accent:#245c46;--line:#ccd0bf;--warn:#85420f}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 24px 70px}header{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:26px}.eyebrow{font-size:.76rem;letter-spacing:.17em;text-transform:uppercase;color:var(--accent);font-weight:750}h1{font:clamp(2.2rem,6vw,4rem)/1.06 Georgia,serif;letter-spacing:-.04em;margin:12px 0 18px}h2{font:1.7rem/1.2 Georgia,serif;margin:0 0 15px}h3{font-size:1.05rem;margin:10px 0}.intro{font-size:1.15rem;max-width:700px}.quiet{color:var(--muted);font-size:.9rem}.columns{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:start}.card{background:#fffef8;border:1px solid var(--line);border-radius:12px;padding:24px;margin:0 0 24px;min-width:0}label{display:block;font-weight:650;margin-bottom:8px}textarea,select,input{font:inherit;max-width:100%;border:1px solid #829486;border-radius:5px;background:white;color:var(--ink)}textarea{width:100%;min-height:235px;resize:vertical;padding:12px;font:13px/1.5 ui-monospace,monospace}select{padding:9px;min-width:0;width:100%}input[type=file]{width:100%;padding:8px;font-size:.85rem}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}button{border:1px solid var(--accent);border-radius:5px;padding:10px 16px;background:var(--accent);color:white;font:650 .95rem/1.4 system-ui;cursor:pointer;min-height:44px;max-width:100%;overflow-wrap:anywhere}button.secondary{color:var(--accent);background:transparent}button:hover{filter:brightness(.92)}:focus-visible{outline:3px solid #c34e15;outline-offset:4px}a{color:var(--accent)}#status{padding:12px 0;font-weight:650;overflow-wrap:anywhere}#status.partial{color:var(--warn)}.finding{border-top:1px solid var(--line);padding:17px 0;overflow-wrap:anywhere}.finding:first-child{border-top:0}.tag{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--warn);font-weight:800}code{font: .9em ui-monospace,monospace;background:#eceee4;padding:2px 4px;overflow-wrap:anywhere}.route{margin:12px 0;padding-left:24px}.route li{margin:5px 0}.route button{padding:5px 10px;background:transparent;color:var(--accent);font-size:.9rem}details{margin:12px 0}summary h2{display:inline;font-size:1.7rem}#editor>summary{margin-bottom:15px}summary{cursor:pointer;font-weight:650;padding:6px 0}#source{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.65 ui-monospace,monospace;max-height:440px;overflow:auto;background:#edf0e6;border-radius:6px;padding:14px;margin-bottom:0}#source mark{display:block;background:#ffe5af;color:#30230a}#source span{display:block}#source-title{overflow-wrap:anywhere}#source-note{margin:0}ul{padding-left:23px}footer{border-top:1px solid var(--line);padding-top:20px} [hidden]{display:none!important}@media(max-width:700px){main{padding:24px 16px 50px}.columns{grid-template-columns:1fr;gap:0}.card{padding:18px}h1{max-width:350px}.intro{font-size:1.05rem}textarea{min-height:210px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="eyebrow">A small safety net for storywriters</div><h1>Find the wrong turn.</h1><p class="intro">A variable spelled two ways. A flag read before it was set. Find a possible mistake in your Twine story, then follow the route that reaches it.</p><p class="quiet">SugarCube 2.37 only · works offline · your story stays in this browser</p></header>
+<div class="columns">
+<details id="editor" class="card" open><summary><h2 id="input-title">1. Bring your story</h2></summary><p>Paste the contents of your published story’s HTML file, or open the file below. The story is read as text. Its scripts and pictures never run here.</p>
+<label for="story-file">Open a local story file</label><input id="story-file" type="file" accept=".html,.htm,text/html" aria-describedby="size-note">
+<p id="size-note" class="quiet">Up to two million characters when pasted; local files up to two million bytes. Nothing is uploaded or saved.</p>
+<label for="story-input">Published story HTML</label><textarea id="story-input" spellcheck="false" autocapitalize="off" aria-describedby="input-help"></textarea><p id="input-help" class="quiet">Use Twine’s “Publish to File”, then open that file in a text editor to copy it. This checks a fresh playthrough, without saved games or backtracking.</p>
+<div class="row"><button id="audit">Check story</button><button id="clear" class="secondary">Clear</button></div>
+<details><summary>Try a small example first</summary><label for="example">Example story</label><select id="example"><option value="case">One name, two spellings</option><option value="branch">A flag set on only one route</option><option value="clean">A clean loop with two branches</option><option value="unsupported">A feature this checker cannot read</option></select><div class="row"><button id="load-example" class="secondary">Load example</button></div><p class="quiet">These are tiny, authored story-data fixtures, not full playable games.</p></details>
+</details>
+<aside class="card" aria-labelledby="scope-title"><h2 id="scope-title">Know the boundary</h2><p>This is a limited check, not a promise that a story is correct. It follows literal passage links and simple assignments and conditions.</p><p>It does not guess what custom code does. Skipped features, unreachable passages and route limits appear under <strong>What stayed unchecked</strong>. A partly checked story is never shown as clear.</p><details><summary>What can it understand?</summary><p>StoryInit; simple story and temporary variables; one assignment per set macro; if, elseif and else; print and naked variable reads; scalar arithmetic and comparisons; literal passage links. Temporary variables reset on each passage.</p><p>Tests for undefined values, short-circuit conditions, quoted strings, comments, nowiki and escaped examples are handled. Printed strings that could expand markup, templates, object properties, functions, link setters, inputs, special hooks and other macros are unchecked.</p><p>Loops stop when the same passage and story values recur, or after a limit. Limits are 2,000 distinct states, 48 passage visits per route and 100,000 steps. Passage and expression limits also apply. Unsupported story-level scripts, styles and hooks prevent route analysis.</p></details><p class="quiet">A name comparison is a suggestion, never an automatic correction. Two names may be intentional.</p></aside>
+</div>
+<section class="card" aria-labelledby="report-title"><h2 id="report-title" tabindex="-1">2. Read the report</h2><div id="status" role="status" aria-live="polite">Your report will appear here.</div><div id="report" hidden><p id="counts" class="quiet"></p><div id="findings"></div><h3>What stayed unchecked</h3><div id="unchecked"></div></div></section>
+<section id="source-panel" class="card" aria-labelledby="source-title" hidden><h2 id="source-title" tabindex="-1">Passage source</h2><p id="source-note" class="quiet"></p><pre id="source" tabindex="0" aria-label="Passage text with line numbers"></pre><div class="row"><button id="back-report" class="secondary">Back to report</button></div></section>
+<footer class="quiet">Made in Emberhall. No network, account, story execution or automatic edits. Keep using SugarCube’s test mode and real playtests alongside this check.</footer>
+</main>
+<script>/* A deliberately small TwineScript interpreter. Story text is never JavaScript. */
+(function (root) {
+  'use strict';
+  const aliases = {is:'===', isnot:'!==', eq:'==', neq:'!=', gt:'>', gte:'>=', lt:'<', lte:'<=', and:'&&', or:'||', not:'!'};
+  const precedence = {'||':1, '&&':2, '===':3, '!==':3, '==':3, '!=':3, '>':4, '<':4, '>=':4, '<=':4, '+':5, '-':5, '*':6, '/':6, '%':6};
+  function parse(source) {
+    const tokens = []; let i = 0;
+    while (i < source.length) {
+      if (/\s/.test(source[i])) { i++; continue; }
+      const rest = source.slice(i); let m;
+      if ((m = /^(?:\$|_)[A-Za-z_$][A-Za-z0-9_$]*/.exec(rest))) tokens.push({type:'var', value:m[0]});
+      else if ((m = /^(?:\d+(?:\.\d*)?|\.\d+)/.exec(rest))) tokens.push({type:'literal', value:Number(m[0])});
+      else if (rest[0] === '"' || rest[0] === "'") {
+        const quote = source[i++]; let value = '', closed = false;
+        while (i < source.length) {
+          let c = source[i++];
+          if (c === quote) { closed = true; break; }
+          if (c === '\n' || c === '\r') throw Error('Unescaped newline in string');
+          if (c === '\\') {
+            c = source[i++];
+            const escapes = {n:'\n', r:'\r', t:'\t', '\\':'\\', '"':'"', "'":"'"};
+            if (!Object.hasOwn(escapes, c)) throw Error('Unsupported string escape');
+            c = escapes[c];
+          }
+          value += c;
+        }
+        if (!closed) throw Error('Unclosed string');
+        tokens.push({type:'literal', value}); continue;
+      } else if (rest.startsWith('++') || rest.startsWith('--')) {
+        throw Error('Variable increment/decrement is unchecked');
+      } else if ((m = /^(===|!==|==|!=|>=|<=|&&|\|\||[()+*/%!<>-])/.exec(rest))) tokens.push({type:'op', value:m[0]});
+      else if ((m = /^[A-Za-z]+/.exec(rest))) {
+        const word = m[0];
+        if (Object.hasOwn(aliases, word)) tokens.push({type:'op', value:aliases[word], raw:word});
+        else if (word === 'def' || word === 'ndef') {
+          // SugarCube 2.37.3 substitutes these tokens without parentheses. Keeping
+          // the comparison here lets the normal precedence parser group it;
+          // treating def as one unary atom changes mixed conditions' meaning.
+          tokens.push({type:'literal', value:'undefined'}, {type:'op', value:word === 'def' ? '!==' : '==='}, {type:'guard', value:'typeof'});
+        } else if (word === 'typeof') tokens.push({type:'guard', value:word});
+        else if (['true','false','null','undefined'].includes(word)) tokens.push({type:'literal', value:({true:true,false:false,null:null,undefined:undefined})[word]});
+        else throw Error('Unsupported expression word: ' + word);
+      } else throw Error('Unsupported expression near ' + rest.slice(0, 30));
+      i += m[0].length;
+      if (tokens.length > 256) throw Error('Expression is too long');
+    }
+    if (tokens.some((t,i) => t.raw === 'is' && tokens[i+1]?.raw === 'not')) throw Error('The ambiguous legacy is not operator is unchecked');
+    let pos = 0;
+    function atom() {
+      const t = tokens[pos++]; if (!t) throw Error('Missing expression');
+      if (t.type === 'literal' || t.type === 'var') return t;
+      if (t.type === 'guard') {
+        const v = tokens[pos++];
+        if (!v || v.type !== 'var') throw Error(t.value + ' requires a simple variable');
+        return {type:'guard', value:t.value, variable:v.value};
+      }
+      if (['!','-','+'].includes(t.value)) return {type:'unary', op:t.value, arg:atom()};
+      if (t.value === '(') {
+        const value = expr(1);
+        if (tokens[pos++]?.value !== ')') throw Error('Missing closing parenthesis');
+        return value;
+      }
+      throw Error('Unexpected operator');
+    }
+    function expr(min) {
+      let left = atom();
+      while ((precedence[tokens[pos]?.value] || 0) >= min) {
+        const op = tokens[pos++].value;
+        left = {type:'binary', op, left, right:expr(precedence[op] + 1)};
+      }
+      return left;
+    }
+    const ast = expr(1);
+    if (pos !== tokens.length) throw Error('Unsupported expression suffix');
+    return ast;
+  }
+  function evaluate(ast, env, read) {
+    if (ast.type === 'literal') return ast.value;
+    if (ast.type === 'var') { read(ast.value); return env[ast.value]; }
+    if (ast.type === 'guard') return typeof env[ast.variable];
+    if (ast.type === 'unary') {
+      const x = evaluate(ast.arg, env, read);
+      return ast.op === '!' ? !x : ast.op === '-' ? -x : +x;
+    }
+    // Equality with undefined (and loose equality with null) is a deliberate guard.
+    const guard = ['===','!==','==','!='].includes(ast.op) && [ast.left,ast.right].some(n => n.type === 'literal' && (n.value === undefined || (n.value === null && ['==','!='].includes(ast.op))));
+    const operand = n => guard && n.type === 'var' ? env[n.value] : evaluate(n, env, read);
+    const a = operand(ast.left);
+    if (ast.op === '&&') return a && evaluate(ast.right, env, read);
+    if (ast.op === '||') return a || evaluate(ast.right, env, read);
+    const b = operand(ast.right);
+    switch (ast.op) {
+      case '===': return a === b;
+      case '!==': return a !== b;
+      case '==': return a == b; // SugarCube eq is the JavaScript loose-equality operator.
+      case '!=': return a != b;
+      case '>': return a > b;
+      case '<': return a < b;
+      case '>=': return a >= b;
+      case '<=': return a <= b;
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return a / b;
+      case '%': return a % b;
+      default: throw Error('Unsupported operator');
+    }
+  }
+  function variables(ast) {
+    if (ast.type === 'var') return [ast.value];
+    if (ast.type === 'guard') return [ast.variable];
+    return ['arg','left','right'].flatMap(k => ast[k] ? variables(ast[k]) : []);
+  }
+  const api = {parse, evaluate, variables};
+  if (typeof module !== 'undefined') module.exports = api;
+  root.TwineExpression = api;
+})(globalThis);
+
+/* Parse the serialized story as a small data language, without a DOM or runtime. */
+(function (root) {
+  'use strict';
+  const E = typeof module !== 'undefined' ? require('./expression.js') : root.TwineExpression;
+  const LIMITS = {input:2000000, passages:500, passage:60000, tokens:1500, nesting:32};
+  function decode(text) {
+    return text.replace(/&([^;\s&]+);/g, (whole, entity) => {
+      const named = {amp:'&', lt:'<', gt:'>', quot:'"', apos:"'", '#39':"'", nbsp:'\u00a0'};
+      if (Object.hasOwn(named, entity)) return named[entity];
+      if (/^#(?:[0-9]+|x[0-9a-f]+)$/i.test(entity)) {
+        const n = entity[1].toLowerCase() === 'x' ? parseInt(entity.slice(2),16) : Number(entity.slice(1));
+        if (n > 0 && n <= 0x10ffff && !(n >= 0xd800 && n <= 0xdfff)) return String.fromCodePoint(n);
+      }
+      throw Error('Unsupported or invalid HTML entity: ' + whole);
+    });
+  }
+  function attributes(source) {
+    const attrs = Object.create(null);
+    // Published Twine uses quoted attributes. Reject ambiguous hand-written HTML.
+    const re = /\s+([a-z][a-z0-9-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'))?/ig;
+    let m, end = 0;
+    while ((m = re.exec(source))) {
+      if (source.slice(end,m.index).trim()) throw Error('Malformed attributes');
+      const key = m[1].toLowerCase();
+      if (Object.hasOwn(attrs,key)) throw Error('Duplicate attribute: ' + key);
+      attrs[key] = decode(m[2] ?? m[3] ?? ''); end = re.lastIndex;
+    }
+    if (source.slice(end).trim()) throw Error('Malformed attributes');
+    return attrs;
+  }
+  function extract(html) {
+    if (typeof html !== 'string' || html.length > LIMITS.input) throw Error('Story exceeds the two-million-character input limit');
+    const containers = [...html.matchAll(/<tw-storydata\b([^>]*)>([\s\S]*?)<\/tw-storydata\s*>/gi)];
+    if (containers.length !== 1 || (html.match(/<tw-storydata\b/gi) || []).length !== 1) throw Error('Expected exactly one complete tw-storydata element');
+    const attrs = attributes(containers[0][1]);
+    if (attrs.format !== 'SugarCube' || !/^2\.37(?:\.\d+)?$/.test(attrs['format-version'] || '')) throw Error('This first version checks published Twine 2 SugarCube 2.37.x stories only');
+    const body = containers[0][2], passages = new Map(), ids = new Map(), unchecked = [];
+    const re = /<tw-passagedata\b([^>]*)>([\s\S]*?)<\/tw-passagedata\s*>/gi;
+    let m, remainder = body;
+    while ((m = re.exec(body))) {
+      if (passages.size >= LIMITS.passages) throw Error('More than 500 passages');
+      const a = attributes(m[1]);
+      if (!a.name || !a.pid || passages.has(a.name) || ids.has(a.pid)) throw Error('Passage names and identifiers must be present and unique');
+      if (m[2].includes('<')) throw Error('Passage text must be HTML-escaped in the published file');
+      const text = decode(m[2]).replace(/\r\n?/g,'\n');
+      if (text.length > LIMITS.passage) throw Error('Passage exceeds 60,000 characters: ' + a.name);
+      const p = {name:a.name, pid:a.pid, tags:(a.tags || '').split(/\s+/).filter(Boolean), text};
+      passages.set(p.name,p); ids.set(p.pid,p.name);
+      remainder = remainder.replace(m[0], '');
+    }
+    // Story JavaScript and init/widget hooks can affect every reachable passage.
+    let globalBarrier = false;
+    remainder = remainder.replace(/<(script|style)\b([^>]*)>([\s\S]*?)<\/\1\s*>/gi, (all,tag,a,content) => {
+      if (content.trim()) {
+        const script = tag.toLowerCase() === 'script';
+        unchecked.push({passage:script ? 'Story JavaScript' : 'Story stylesheet', line:1, reason:script ? 'Story JavaScript may change variables or navigation; routes were not analysed.' : 'Story styling may hide passage links; routes were not analysed.'});
+        globalBarrier = true;
+      }
+      return '';
+    }).replace(/<tw-tag\b[^>]*>\s*<\/tw-tag\s*>/gi,'');
+    if (remainder.trim()) throw Error('Unrecognised or malformed story-data elements');
+    const start = ids.get(attrs.startnode);
+    if (!start) throw Error('The story needs an explicit startnode matching a passage identifier');
+    const special = /^(?:Passage(?:Header|Footer|Ready|Done)|Story(?:Interface|Caption|Menu|Banner|Subtitle|Author|DisplayTitle|Share|Settings|Stylesheet|JavaScript)|Widget)$/;
+    for (const p of passages.values()) {
+      if (p.tags.some(t => ['init','widget','script'].includes(t)) || special.test(p.name)) {
+        unchecked.push({passage:p.name,line:1,reason:'Special passage or init/widget/script hook is unsupported; routes were not analysed.'});
+        globalBarrier = true;
+      }
+    }
+    if (start === 'StoryInit') throw Error('StoryInit cannot also be the start passage');
+    return {name:attrs.name || 'Untitled story', start, passages, unchecked, globalBarrier};
+  }
+  function compile(passage) {
+    const text = passage.text, tokens = [], notes = [], names = [];
+    let i = 0;
+    const lineAt = offset => text.slice(0,offset).split('\n').length;
+    function add(type, value, at = i) {
+      tokens.push({type,value,line:lineAt(at)});
+      if (tokens.length > LIMITS.tokens) throw Error('Passage token limit exceeded');
+    }
+    function unsupported(reason, at = i) {
+      notes.push({passage:passage.name,line:lineAt(at),reason}); add('blocked',reason,at);
+    }
+    function ast(source, line) {
+      const value = E.parse(source);
+      names.push(...E.variables(value).map(name => ({name,passage:passage.name,line})));
+      return value;
+    }
+    while (i < text.length) {
+      const rest = text.slice(i); let m;
+      const masks = [['"""','"""'],['{{{','}}}'],['<nowiki>','</nowiki>'],['/%','%/'],['/*','*/'],['<!--','-->']];
+      const mask = masks.find(([open]) => rest.startsWith(open));
+      if (mask) {
+        const end = text.indexOf(mask[1],i + mask[0].length);
+        if (end < 0) { unsupported('Unclosed literal or comment'); break; }
+        i = end + mask[1].length; continue;
+      }
+      if (rest.startsWith('$$')) { i += 2; continue; }
+      if (rest.startsWith('<<')) {
+        // Find >> outside quoted strings (e.g. <<set $message to ">>">>).
+        let j = i + 2, quote = null;
+        for (; j < text.length; j++) {
+          const c = text[j];
+          if (quote) { if (c === '\\') j++; else if (c === quote) quote = null; }
+          else if (c === '"' || c === "'") quote = c;
+          else if (text.startsWith('>>',j)) break;
+        }
+        if (j === text.length) { unsupported('Unclosed macro'); break; }
+        const raw = text.slice(i+2,j), body = raw.trim(), at = i, line = lineAt(i);
+        if (/^\s/.test(raw)) { unsupported('Whitespace before the macro name is unchecked',at); i = j + 2; continue; }
+        // Match macro names separately; punctuation print forms have no word boundary.
+        const head = /^(\/if|[A-Za-z]+|[=-])(?=\s|$)/.exec(body);
+        const kind = head?.[1], arg = head ? body.slice(head[0].length).trim() : '';
+        try {
+          if (kind === 'set') {
+            const assignment = /^((?:\$|_)[A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=(?!=)|\bto\b)\s*([\s\S]+)$/.exec(arg);
+            if (!assignment) throw Error('Only one simple-variable assignment per set macro is supported');
+            const name = assignment[1], value = ast(assignment[2],line);
+            names.push({name,passage:passage.name,line}); add('set',{name,value},at);
+          } else if (kind === 'if' || kind === 'elseif') add(kind,ast(arg,line),at);
+          else if (['else','endif','/if'].includes(kind) && !arg) add(kind === '/if' ? 'endif' : kind,null,at);
+          else if (['print','=','-'].includes(kind)) add('read',ast(arg,line),at);
+          else unsupported('Unsupported macro: <<' + body.slice(0,70) + '>>',at);
+        } catch (error) { unsupported(error.message,at); }
+        i = j + 2; continue;
+      }
+      if (text[i] === '|' && (i === 0 || text[i-1] === '\n')) { unsupported('Table markup and its styling are unchecked'); break; }
+      if (/^\?[A-Za-z_$]/.test(rest)) { unsupported('Template expansion is unchecked'); break; }
+      if (/^(?:https?|ftp|mailto):/i.test(rest)) { unsupported('Automatic external link markup is unchecked'); break; }
+      if (rest.startsWith('[[')) {
+        const end = text.indexOf(']]',i+2);
+        if (end < 0) { unsupported('Unclosed passage link'); break; }
+        const body = text.slice(i+2,end), parts = body.split(/\||->|<-/);
+        let target = parts.length === 1 ? parts[0] : body.includes('<-') ? parts[0] : parts[1];
+        if (parts.length > 2 || /[\[\]$<>"'`]|(?:^|\W)_[A-Za-z]/.test(parts.join('')) || /^[a-z][a-z0-9+.-]*:/i.test(target)) {
+          unsupported('Dynamic, setter, external or expression link is unchecked');
+        } else add('link',target.trim());
+        i = end+2; continue;
+      }
+      if (text[i] === '<' || text[i] === '\\' || rest.startsWith('@@') || rest.startsWith('[img[')) {
+        unsupported('HTML, escape, image or custom markup is unchecked'); break;
+      }
+      if ((m = /^(?:\$|_)[A-Za-z_$][A-Za-z0-9_$]*/.exec(rest))) {
+        if (/^(?:\.[A-Za-z_$]|\[|\()/.test(text.slice(i+m[0].length))) unsupported('Property, index or method access is unchecked');
+        else { const line = lineAt(i); names.push({name:m[0],passage:passage.name,line}); add('read',{type:'var',value:m[0]}); }
+        i += m[0].length; continue;
+      }
+      i++;
+    }
+    let pos = 0;
+    function block(depth) {
+      if (depth > LIMITS.nesting) throw Error('Conditional nesting limit exceeded');
+      const nodes = [];
+      while (pos < tokens.length && !['elseif','else','endif'].includes(tokens[pos].type)) {
+        const t = tokens[pos++];
+        if (t.type !== 'if') { nodes.push(t); continue; }
+        const branches = [{condition:t.value,line:t.line,nodes:block(depth+1)}];
+        while (tokens[pos]?.type === 'elseif') {
+          const b = tokens[pos++]; branches.push({condition:b.value,line:b.line,nodes:block(depth+1)});
+        }
+        if (tokens[pos]?.type === 'else') {
+          const b = tokens[pos++]; branches.push({condition:null,line:b.line,nodes:block(depth+1)});
+        }
+        if (tokens[pos++]?.type !== 'endif') throw Error('Missing or misplaced closing if');
+        nodes.push({type:'if',branches,line:t.line});
+      }
+      return nodes;
+    }
+    try {
+      const nodes = block(0);
+      if (pos !== tokens.length) throw Error('Unexpected else, elseif or endif');
+      return {...passage,nodes,notes,names};
+    } catch (error) {
+      return {...passage,nodes:[{type:'blocked',value:error.message,line:1}],notes:[...notes,{passage:passage.name,line:1,reason:error.message}],names};
+    }
+  }
+  const api = {extract,compile,LIMITS};
+  if (typeof module !== 'undefined') module.exports = api;
+  root.TwineStory = api;
+})(globalThis);
+
+/* Bounded concrete route exploration: no guessed branch can become a witness. */
+(function (root) {
+  'use strict';
+  const S = typeof module !== 'undefined' ? require('./story.js') : root.TwineStory;
+  const E = typeof module !== 'undefined' ? require('./expression.js') : root.TwineExpression;
+  const DEFAULTS = {states:2000, depth:48, steps:100000, findings:500};
+  function audit(html, limits = DEFAULTS) {
+    limits = {...DEFAULTS,...limits};
+    const story = S.extract(html), compiled = new Map();
+    const unchecked = [...story.unchecked], findings = [], findingKeys = new Set(), noteKeys = new Set();
+    const names = new Map(), occurrences = new Map(); let steps = 0, stopped = false;
+    function note(passage,line,reason) {
+      const key = JSON.stringify([passage,line,reason]);
+      if (!noteKeys.has(key)) { noteKeys.add(key); unchecked.push({passage,line,reason}); }
+    }
+    for (const p of story.passages.values()) {
+      let code;
+      try { code = S.compile(p); }
+      catch (error) { code = {...p,nodes:[{type:'blocked',line:1,value:error.message}],notes:[{passage:p.name,line:1,reason:error.message}],names:[]}; }
+      compiled.set(p.name,code);
+      for (const n of code.notes) note(n.passage,n.line,n.reason);
+      for (const n of code.names) {
+        const key = n.name.toLowerCase();
+        if (!names.has(key)) names.set(key,new Map());
+        const group = names.get(key);
+        if (!group.has(n.name)) group.set(n.name,n);
+      }
+      for (const token of flatten(code.nodes)) {
+        if (token.type === 'link' && !compiled.has(token.value) && !story.passages.has(token.value)) note(p.name,token.line,'Missing link target: ' + token.value);
+      }
+    }
+    for (const group of names.values()) {
+      if (group.size < 2) continue;
+      if (findings.length >= limits.findings) { note('Story',1,'Finding limit reached; remaining analysis is unchecked.'); stopped = true; break; }
+      findings.push({kind:'case', names:[...group.keys()], locations:[...group.values()], passage:[...group.values()][0].passage,line:[...group.values()][0].line});
+    }
+    function execute(passage,env,path,prior = []) {
+      function observe(name,line) {
+        const key = JSON.stringify([name,passage.name,line]);
+        if (!occurrences.has(key)) occurrences.set(key,[...path]);
+      }
+      const links = [], decisions = [];
+      function read(name,line) {
+        observe(name,line);
+        if (env[name] !== undefined) return;
+        const key = JSON.stringify([passage.name,line,name]);
+        if (findingKeys.has(key)) return;
+        if (findings.length >= limits.findings) { note(passage.name,line,'Finding limit reached; remaining analysis is unchecked.'); stopped = true; return; }
+        findingKeys.add(key);
+        findings.push({kind:'unset',name,passage:passage.name,line,path:[...path],decisions:[...prior,...decisions]});
+      }
+      function value(ast,line) { return E.evaluate(ast,env,name => read(name,line)); }
+      function run(nodes) {
+        for (const node of nodes) {
+          if (stopped) return false;
+          if (++steps > limits.steps) { note(passage.name,node.line,'Execution step limit reached; remaining routes are unchecked.'); stopped = true; return false; }
+          if (node.type === 'blocked') return false;
+          if (node.type === 'set') {
+            const v = value(node.value.value,node.line);
+            if (typeof v === 'number' && !Number.isFinite(v)) { note(passage.name,node.line,'Non-finite arithmetic result is unchecked.'); return false; }
+            if (typeof v === 'string' && v.length > 10000) { note(passage.name,node.line,'Computed string length limit reached.'); return false; }
+            observe(node.value.name,node.line);
+            env[node.value.name] = v;
+          } else if (node.type === 'read') {
+            const output = value(node.value,node.line);
+            if (typeof output === 'string' && /[<\[$_?{]|@@|(?:https?|ftp|mailto):/.test(output)) {
+              note(passage.name,node.line,'Printed string may expand more story markup; the remaining route is unchecked.');
+              return false;
+            }
+          }
+          else if (node.type === 'link') links.push({target:node.value,line:node.line});
+          else if (node.type === 'if') {
+            for (const branch of node.branches) {
+              const matches = branch.condition === null || Boolean(value(branch.condition,branch.line));
+              decisions.push({passage:passage.name,line:branch.line,taken:matches});
+              if (matches) { if (!run(branch.nodes)) return false; break; }
+            }
+          }
+        }
+        return true;
+      }
+      return run(passage.nodes) ? {links,env,decisions} : null;
+    }
+    let initial = Object.create(null), initialOK = !story.globalBarrier, initialDecisions = [];
+    if (initialOK && compiled.has('StoryInit')) {
+      const init = execute(compiled.get('StoryInit'),initial,['StoryInit']);
+      initialOK = Boolean(init);
+      initialDecisions = init?.decisions || [];
+      if (init?.links.length) { note('StoryInit',1,'Links in StoryInit are unsupported; routes were not analysed.'); initialOK = false; }
+    }
+    const queue = initialOK ? [{passage:story.start,env:initial,path:[story.start],decisions:initialDecisions}] : [];
+    const seen = new Set(), visited = new Set(), scheduled = new Set(); let index = 0;
+    function stateKey(item) {
+      return JSON.stringify([item.passage,Object.keys(item.env).filter(k => k.startsWith('$')).sort().map(k => [k,typeof item.env[k],Object.is(item.env[k],-0) ? '-0' : String(item.env[k])])]);
+    }
+    if (queue.length) scheduled.add(stateKey(queue[0]));
+    while (index < queue.length && !stopped) {
+      const item = queue[index++];
+      for (const key of Object.keys(item.env)) if (key.startsWith('_')) delete item.env[key];
+      const key = stateKey(item);
+      if (seen.has(key)) continue;
+      if (seen.size >= limits.states) { note(item.passage,1,'State limit reached; remaining routes are unchecked.'); break; }
+      seen.add(key); visited.add(item.passage);
+      const p = compiled.get(item.passage);
+      const result = execute(p,item.env,item.path,item.decisions);
+      if (!result) continue;
+      for (const link of result.links) {
+        if (!compiled.has(link.target)) continue;
+        if (link.target === 'StoryInit') { note(p.name,link.line,'A link into the StoryInit code passage is unchecked.'); continue; }
+        const nextKey = stateKey({passage:link.target,env:result.env});
+        if (scheduled.has(nextKey)) continue;
+        if (item.path.length >= limits.depth) { note(p.name,link.line,'Route depth limit reached; later visits are unchecked.'); continue; }
+        if (queue.length >= limits.states) { note(p.name,link.line,'State limit reached; remaining choices are unchecked.'); continue; }
+        scheduled.add(nextKey);
+        queue.push({passage:link.target,env:Object.assign(Object.create(null),result.env),path:[...item.path,link.target],decisions:[...item.decisions,...result.decisions]});
+      }
+    }
+    for (const p of story.passages.values()) {
+      if (p.name !== 'StoryInit' && !visited.has(p.name)) note(p.name,1,'Passage was not reached by a supported route.');
+    }
+    for (const f of findings) {
+      if (f.kind === 'case') for (const location of f.locations) location.path = occurrences.get(JSON.stringify([location.name,location.passage,location.line])) || null;
+    }
+    return {name:story.name,start:story.start,findings,unchecked,passages:[...story.passages.values()],states:seen.size,steps,limits,complete:unchecked.length === 0};
+  }
+  function flatten(nodes) {
+    return nodes.flatMap(n => n.type === 'if' ? [n,...n.branches.flatMap(b => flatten(b.nodes))] : [n]);
+  }
+  const api = {audit,DEFAULTS};
+  if (typeof module !== 'undefined') module.exports = api;
+  root.TwineAudit = api;
+})(globalThis);
+
+const TWINE_EXAMPLES = {"case":"\u003c!doctype html>\u003chtml>\u003chead>\u003cmeta charset=\"utf-8\">\u003ctitle>Two spellings\u003c/title>\u003c/head>\u003cbody>\n\u003ctw-storydata name=\"Two spellings\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"11111111-1111-4111-8111-111111111111\">\n\u003ctw-passagedata pid=\"2\" name=\"StoryInit\" tags=\"\">&lt;&lt;set $Job to &quot;bank&quot;&gt;&gt;\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"1\" name=\"Start\" tags=\"\">The town has a vacancy.\n[[Walk to the bank|Bank]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"3\" name=\"Bank\" tags=\"\">&lt;&lt;if $job is &quot;bank&quot;&gt;&gt;\nYou can apply here.\n&lt;&lt;else&gt;&gt;\nThe job option never appears.\n&lt;&lt;/if&gt;&gt;\u003c/tw-passagedata>\n\u003c/tw-storydata>\u003c/body>\u003c/html>\n","branch":"\u003c!doctype html>\u003chtml>\u003chead>\u003cmeta charset=\"utf-8\">\u003ctitle>One route forgets\u003c/title>\u003c/head>\u003cbody>\n\u003ctw-storydata name=\"One route forgets\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"22222222-2222-4222-8222-222222222222\">\n\u003ctw-passagedata pid=\"1\" name=\"Start\" tags=\"\">Two ways to the gate.\n[[Take the key|Key]]\n[[Take the garden path|Garden]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"2\" name=\"Key\" tags=\"\">&lt;&lt;set $hasKey to true&gt;&gt;\n[[Gate]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"3\" name=\"Garden\" tags=\"\">The flowers are lovely.\n[[Gate]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"4\" name=\"Gate\" tags=\"\">&lt;&lt;if $hasKey&gt;&gt;\nThe gate opens.\n&lt;&lt;else&gt;&gt;\nYou wait outside.\n&lt;&lt;/if&gt;&gt;\u003c/tw-passagedata>\n\u003c/tw-storydata>\u003c/body>\u003c/html>\n","clean":"\u003c!doctype html>\u003chtml>\u003chead>\u003cmeta charset=\"utf-8\">\u003ctitle>Both paths prepare\u003c/title>\u003c/head>\u003cbody>\n\u003ctw-storydata name=\"Both paths prepare\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"33333333-3333-4333-8333-333333333333\">\n\u003ctw-passagedata pid=\"5\" name=\"StoryInit\" tags=\"\">&lt;&lt;set $visits to 0&gt;&gt;\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"1\" name=\"Start\" tags=\"\">[[Choose the bridge|Bridge]]\n[[Choose the boat|Boat]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"2\" name=\"Bridge\" tags=\"\">&lt;&lt;set $ready to true&gt;&gt;\n[[Shore]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"3\" name=\"Boat\" tags=\"\">&lt;&lt;set $ready to false&gt;&gt;\n[[Shore]]\u003c/tw-passagedata>\n\u003ctw-passagedata pid=\"4\" name=\"Shore\" tags=\"\">&lt;&lt;if $ready&gt;&gt;The bridge is clear.&lt;&lt;else&gt;&gt;The boat has arrived.&lt;&lt;/if&gt;&gt;\n&lt;&lt;set $visits to $visits + 1&gt;&gt;\n&lt;&lt;if $visits lt 2&gt;&gt;[[Shore]]&lt;&lt;else&gt;&gt;Safe at last.&lt;&lt;/if&gt;&gt;\u003c/tw-passagedata>\n\u003c/tw-storydata>\u003c/body>\u003c/html>\n","unsupported":"\u003c!doctype html>\u003chtml>\u003chead>\u003cmeta charset=\"utf-8\">\u003ctitle>Custom behaviour\u003c/title>\u003c/head>\u003cbody>\n\u003ctw-storydata name=\"Custom behaviour\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"44444444-4444-4444-8444-444444444444\">\n\u003ctw-passagedata pid=\"1\" name=\"Start\" tags=\"\">This example asks a function to choose a destination.\n&lt;&lt;set $destination to chooseDestination()&gt;&gt;\n[[$destination]]\u003c/tw-passagedata>\n\u003c/tw-storydata>\u003c/body>\u003c/html>\n"};
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  let result = null, fileVersion = 0, lastSourceTrigger = null;
+  function el(tag,text,cls) {
+    const node = document.createElement(tag); if (text !== undefined) node.textContent = text;
+    if (cls) node.className = cls; return node;
+  }
+  function status(text,partial = false) { $('status').textContent = text; $('status').className = partial ? 'partial' : ''; }
+  function clearReport() { result = null; $('report').hidden = true; $('source-panel').hidden = true; }
+  function changed() { fileVersion++; clearReport(); status('Story changed. Check it to see a fresh report.'); }
+  function showSource(name,line = 1) {
+    const p = result?.passages.find(p => p.name === name); if (!p) return;
+    $('source-panel').hidden = false; $('source-title').textContent = name;
+    $('source-note').textContent = 'Line ' + line + ' in the decoded passage text. Highlighted text is displayed as source, never rendered.';
+    const source = $('source'); source.replaceChildren();
+    p.text.split('\n').forEach((text,i) => source.append(el(i+1 === line ? 'mark' : 'span',String(i+1).padStart(3,' ') + '  ' + text)));
+    $('source-title').focus();
+    source.querySelector('mark')?.scrollIntoView({block:'nearest'});
+  }
+  function sourceButton(name,line,label) {
+    const b = el('button',label || name + ' · line ' + line,'secondary');
+    b.type = 'button'; b.addEventListener('click',() => { lastSourceTrigger = b; showSource(name,line); }); return b;
+  }
+  function render() {
+    $('report').hidden = false; $('findings').replaceChildren(); $('unchecked').replaceChildren();
+    const unset = result.findings.filter(f => f.kind === 'unset').length;
+    const cases = result.findings.filter(f => f.kind === 'case').length;
+    status((result.complete ? 'Supported routes checked' : 'Partly checked') + ' · ' + unset + ' possible unset read' + (unset === 1 ? '' : 's') + ' · ' + cases + ' name comparison' + (cases === 1 ? '' : 's'),!result.complete);
+    $('counts').textContent = result.name + ' · ' + result.states + ' distinct passage states explored. Start: ' + result.start + '. Findings are suggestions to inspect, not automatic fixes.';
+    if (!result.findings.length) $('findings').append(el('p',result.complete ? 'No variable findings on the supported routes. This does not check every SugarCube feature.' : 'No variable findings in the part checked. Read the unchecked list before drawing a conclusion.'));
+    for (const f of result.findings) {
+      const article = el('article',undefined,'finding');
+      article.append(el('div',f.kind === 'case' ? 'Possible spelling mismatch' : 'Possible read before a value was set','tag'));
+      if (f.kind === 'case') {
+        article.append(el('h3',f.names.join(' / ')),el('p','These names differ only in letter case. This compares source spellings, including unvisited branches; it does not say they must be the same variable.'));
+        for (const location of f.locations) {
+          article.append(sourceButton(location.passage,location.line,location.name + ' in ' + location.passage + ' · line ' + location.line));
+          if (location.path) {
+            const details = el('details'); details.append(el('summary','A route to ' + location.name + ' here'));
+            const route = el('ol',undefined,'route');
+            location.path.forEach((name,i) => { const li = el('li'); li.append(sourceButton(name,i === location.path.length-1 ? location.line : 1)); route.append(li); });
+            details.append(route); article.append(details);
+          } else article.append(el('p','No supported execution of this occurrence was reached; this spelling is compared as source text only.','quiet'));
+        }
+      } else {
+        article.append(el('h3',f.name + ' in ' + f.passage + ' · line ' + f.line),el('p','No defined value was found on this supported route. Check whether that is intentional.'));
+        article.append(sourceButton(f.passage,f.line,'Show this line'));
+        const list = el('ol',undefined,'route');
+        f.path.forEach((name,i) => { const li = el('li'); li.append(sourceButton(name,i === f.path.length-1 ? f.line : 1)); list.append(li); });
+        article.append(el('h3','One route to the read'),list);
+        if (f.decisions.length) {
+          const details = el('details'); details.append(el('summary','Conditions along this route'));
+          for (const d of f.decisions) details.append(el('p',d.passage + ' · line ' + d.line + ': ' + (d.taken ? 'branch taken' : 'condition false')));
+          article.append(details);
+        }
+      }
+      $('findings').append(article);
+    }
+    if (!result.unchecked.length) $('unchecked').append(el('p','No skipped syntax or exhausted limits were found within this checker’s documented scope.'));
+    if (result.unchecked.length > 200) $('unchecked').append(el('p','Showing the first 200 of ' + result.unchecked.length + ' unchecked items. This story is only partly checked.'));
+    for (const item of result.unchecked.slice(0,200)) {
+      const p = el('p',item.reason + ' ');
+      if (result.passages.some(x => x.name === item.passage)) p.append(sourceButton(item.passage,item.line));
+      else p.append(el('strong',item.passage));
+      $('unchecked').append(p);
+    }
+  }
+  $('back-report').addEventListener('click',() => { if (lastSourceTrigger?.isConnected) lastSourceTrigger.focus(); else $('report-title').focus(); });
+  $('story-input').addEventListener('input',changed);
+  $('audit').addEventListener('click',() => {
+    clearReport();
+    try { result = TwineAudit.audit($('story-input').value); render(); $('editor').open = false; }
+    catch (error) { status('Not checked: ' + error.message,true); }
+    $('report-title').focus();
+  });
+  $('clear').addEventListener('click',() => { $('story-input').value = ''; $('story-file').value = ''; changed(); status('Story cleared. Your report will appear here.'); $('editor').open = true; $('story-input').focus(); });
+  $('load-example').addEventListener('click',() => { $('story-input').value = TWINE_EXAMPLES[$('example').value]; $('story-file').value = ''; changed(); status('Example loaded. Choose “Check story” to see its report.'); $('editor').open = true; $('story-input').focus(); });
+  $('story-file').addEventListener('change',async () => {
+    const file = $('story-file').files[0]; if (!file) return;
+    changed(); const version = fileVersion;
+    $('story-input').value = '';
+    if (file.size > 2000000) { status('Not checked: local file exceeds two million bytes.',true); return; }
+    try {
+      const text = await file.text();
+      if (version !== fileVersion) return;
+      $('story-input').value = text; status('File loaded as text. Choose “Check story” to see its report.');
+    } catch { if (version === fileVersion) status('Could not read the local file. Paste its HTML instead.',true); }
+  });
+})();
+</script>
+</body></html>

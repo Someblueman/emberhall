@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>Unsupported value updates</title>
+<tw-storydata name="Unsupported value updates" startnode="1" format="SugarCube" format-version="2.37.3">
+<tw-passagedata pid="1" name="Start">Each choice uses an unsupported update expression.
+[[Predecrement]] [[Preincrement]] [[CompactMinus]] [[CompactPlus]] [[Postdecrement]] [[Postincrement]]</tw-passagedata>
+<tw-passagedata pid="2" name="Predecrement">&lt;&lt;set $x to 1&gt;&gt;&lt;&lt;if --$x&gt;&gt;$missing&lt;&lt;/if&gt;&gt;</tw-passagedata>
+<tw-passagedata pid="3" name="Preincrement">&lt;&lt;set $y to -1&gt;&gt;&lt;&lt;if ++$y&gt;&gt;$phantom&lt;&lt;/if&gt;&gt;</tw-passagedata>
+<tw-passagedata pid="4" name="CompactMinus">&lt;&lt;set $n to 1&gt;&gt;&lt;&lt;if $n---1&gt;&gt;$imagined&lt;&lt;/if&gt;&gt;</tw-passagedata>
+<tw-passagedata pid="5" name="CompactPlus">&lt;&lt;set $m to -1&gt;&gt;&lt;&lt;if $m+++1&gt;&gt;$invented&lt;&lt;/if&gt;&gt;</tw-passagedata>
+<tw-passagedata pid="6" name="Postdecrement">&lt;&lt;set $count to 1&gt;&gt;&lt;&lt;set $value to $count--&gt;&gt;$downstream</tw-passagedata>
+<tw-passagedata pid="7" name="Postincrement">&lt;&lt;set $other to -1&gt;&gt;&lt;&lt;print $other++&gt;&gt;$later</tw-passagedata>
+</tw-storydata>
