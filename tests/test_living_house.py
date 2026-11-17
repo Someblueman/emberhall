@@ -38,10 +38,9 @@ run(`frame.archive=[{key:'old-lesson',claim:'Old.',author:'Ash',status:'supersed
 const text=made.map(node=>node.textContent).filter(Boolean);
 assert.deepEqual(text.slice(0,3),['check twice','Check twice.','Bay · checked by 2 other residents']);
 assert(text.includes('Ash · replaced by a later lesson'));
-// The Hearth shows what was said, newest first.
-made.length=0;
-run(`frame.hearth=[{name:'Ash',text:'First.',at:1001,seq:1},{name:'Bay',text:'Second.',at:1005,seq:5}];renderHearth({appendChild(){}});`);
-assert.deepEqual(made.map(node=>node.textContent).filter(Boolean).filter(t=>!t.startsWith(' · ')),['Bay','Second.','Ash','First.']);
+// Public conversation deduplicates repeated snapshot messages, newest first.
+assert.deepEqual(run(`hearthConversation([{seq:5,hearth:[{seq:1,text:'First.'},{seq:5,text:'Second.'}]}],
+  {seq:5,hearth:[{seq:5,text:'Second.'}]}).map(v=>v.text)`),['Second.','First.']);
 '''
 
 
