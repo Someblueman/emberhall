@@ -8,6 +8,7 @@
   <title>Night Ferry · a case player</title>
   <link rel="stylesheet" href="style.css">
   <script src="fixture/fixture.js" defer></script>
+  <script src="reach-model.js" defer></script>
   <script src="player.js" defer></script>
 </head>
 <body>
@@ -25,6 +26,8 @@
         <p class="case-sub" id="case-sub">A local page. No network, no accounts, no build step.</p>
         <p class="source-note" id="source-note" role="status">Looking for <code>../case/truth-sheet.json</code>.</p>
       </div>
+
+      <section id="reach-stage" class="reach-stage" aria-label="Crossing reach and evidence bridge" hidden></section>
 
       <div class="toolbar" aria-label="Load a case">
         <label class="button quiet" for="load-files">Load case files…</label>
@@ -75,9 +78,9 @@
         <p class="card-note" id="answer-note">Your explanation is kept as written at submit time. Judge it yourself below; this page does not mark prose.</p>
         <div class="self-check" role="group" aria-labelledby="self-check-title">
           <p id="self-check-title" class="self-check-title">How fair was the deduction?</p>
-          <label><input type="radio" name="selfcheck" value="supported"> Fairly supported by both accounts</label>
-          <label><input type="radio" name="selfcheck" value="ambiguous"> Ambiguous, but deducible</label>
-          <label><input type="radio" name="selfcheck" value="trivial"> Too easy or stated outright</label>
+          <label for="selfcheck-supported"><input id="selfcheck-supported" type="radio" name="selfcheck" value="supported"> Fairly supported by both accounts</label>
+          <label for="selfcheck-ambiguous"><input id="selfcheck-ambiguous" type="radio" name="selfcheck" value="ambiguous"> Ambiguous, but deducible</label>
+          <label for="selfcheck-trivial"><input id="selfcheck-trivial" type="radio" name="selfcheck" value="trivial"> Too easy or stated outright</label>
         </div>
         <p class="cited" id="cited-summary"></p>
         <div class="submit-row">

@@ -16,8 +16,10 @@ loads data into the player; do not open or preview its contents yourself.
 
 - `README.md` — opening instructions, behavior and verification limits.
 - `index.html` — page structure, no inline script.
-- `player.js` — case loading, validation, account tabs, notebook, answer gate,
+- `player.js` — case loading, validation, auto-opened first account, live reach view, notebook, answer gate,
   plain-text route record.
+- `reach-model.js` — pure spoiler-free SVG reach map, evidence bridge, and Gallery preview builder.
+- `player.test.js` — Node unit and VM integration tests (`node --test`).
 - `style.css` — local styles; no webfonts or external assets.
 - `fixture/fixture.js` — a clearly labelled **placeholder** fixture. It is not
   story content; every string begins with `FIXTURE` and it uses the real schema

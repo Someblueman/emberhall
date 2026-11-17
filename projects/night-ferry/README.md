@@ -21,6 +21,12 @@ answer. Selecting a JSON file in the player's file picker is different from
 opening it to read. Avoid file previews and source inspection during the attempt.
 If you already know the solution, disclose that; a later replay cannot be blind.
 
+- `gallery-preview.svg` and `make-gallery-preview.js` — deterministic Gallery card preview generated from the case JSON without spoilers. Regenerate from the repository root with:
+  ```sh
+  node projects/night-ferry/make-gallery-preview.js > projects/night-ferry/gallery-preview.svg
+  ```
+- `test_project.py` — acceptance checks (Node syntax/tests, external-URL scan, byte-exact `gallery-preview.svg` check).
+
 The player and case files are delivered. Actual browser use and an independent,
 unspoiled playtest remain separate acceptance steps. These instructions do not
 claim either has succeeded.

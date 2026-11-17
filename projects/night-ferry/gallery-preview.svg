@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-labelledby="nf-preview-title">
+<title id="nf-preview-title">Night Ferry: river reach with three signal beacons and two witness accounts</title>
+<rect width="800" height="420" fill="#102020"/>
+<rect x="14" y="14" width="772" height="392" rx="14" fill="#172b2b" stroke="#364a44" stroke-width="1.5"/>
+<text x="32" y="42" fill="#e1ac64" font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" letter-spacing="1.4">NIGHT FERRY · TWO ACCOUNTS, ONE CROSSING</text>
+<text x="32" y="70" fill="#eee4cb" font-family="Georgia,serif" font-size="24">Night Ferry: A Light Left Burning</text>
+<text x="768" y="42" fill="#b5b9a5" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" text-anchor="end">22:00 – 22:18</text>
+<rect x="24" y="92" width="752" height="132" rx="10" fill="#102020" stroke="#364a44" stroke-width="1"/><path d="M 38 178 C 210 184, 320 134, 440 150 S 630 166, 756 140" fill="none" stroke="#1e3c3c" stroke-width="26" stroke-linecap="round"/><path d="M 118 174 C 250 170, 340 146, 430 148" fill="none" stroke="#e1ac64" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="5,5"/><path d="M 438 148 Q 530 126 610 128" fill="none" stroke="#87917b" stroke-opacity="0.6" stroke-width="1.6" stroke-dasharray="4,5"/><path d="M 438 148 Q 530 178 610 188" fill="none" stroke="#87917b" stroke-opacity="0.6" stroke-width="1.6" stroke-dasharray="4,5"/><line x1="406" y1="108" x2="406" y2="208" stroke="#e1ac64" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="3,4"/><text x="406" y="216" fill="#93a094" font-family="ui-sans-serif,system-ui,sans-serif" font-size="9.5" text-anchor="middle">channel bend · unseen from north desk</text><circle cx="96" cy="168" r="16" fill="#f7f4e8" fill-opacity="0.16"/><circle cx="96" cy="168" r="6" fill="#fffdf5" stroke="#b5b9a5" stroke-width="1.5"/><text x="40" y="124" fill="#eee4cb" font-family="Georgia,serif" font-size="14">North Landing</text><text x="40" y="140" fill="#b5b9a5" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11">22:00 departure · steady white</text><polygon points="214,168 244,162 256,167 244,173" fill="#eee4cb" fill-opacity="0.88"/><text x="235" y="155" fill="#e1ac64" font-family="Georgia,serif" font-style="italic" font-size="11.5" text-anchor="middle">Moth</text><circle cx="628" cy="128" r="14" fill="#e1ac64" fill-opacity="0.18"/><circle cx="628" cy="128" r="5.5" fill="#e1ac64" stroke="#855a24" stroke-width="1.5"/><text x="648" y="125" fill="#eee4cb" font-family="Georgia,serif" font-size="13">South Pier</text><text x="648" y="139" fill="#e1ac64" font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">steady amber</text><circle cx="628" cy="188" r="14" fill="#f7f4e8" fill-opacity="0.16"/><circle cx="628" cy="188" r="5.5" fill="#fffdf5" stroke="#b5b9a5" stroke-width="1.5"/><text x="648" y="182" fill="#eee4cb" font-family="Georgia,serif" font-size="13">Orchard Float</text><rect x="648" y="190" width="12" height="4" rx="2" fill="#fffdf5"/><rect x="664" y="190" width="12" height="4" rx="2" fill="#fffdf5"/><rect x="680" y="190" width="28" height="4" rx="2" fill="#2c4440"/><text x="714" y="196" fill="#b5b9a5" font-family="ui-sans-serif,system-ui,sans-serif" font-size="10.5">2 flashes</text>
+<rect x="24" y="246" width="368" height="140" rx="10" fill="#1d2f2d" stroke="#3a4c46" stroke-width="1.2"/>
+<text x="42" y="272" fill="#e1ac64" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" letter-spacing="1.2">SHORE ACCOUNT</text>
+<text x="42" y="300" fill="#eee4cb" font-family="Georgia,serif" font-size="20">The North Desk</text>
+<text x="42" y="320" fill="#b5b9a5" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5">Sees boarding at North Landing and all</text>
+<text x="42" y="336" fill="#b5b9a5" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5">3 beacons; cannot see past the bend.</text>
+<rect x="42" y="350" width="44" height="24" rx="5" fill="#102020" stroke="#e1ac64" stroke-width="1.1"/>
+<text x="64" y="366" fill="#e1ac64" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">F1</text>
+<rect x="96" y="350" width="44" height="24" rx="5" fill="#102020" stroke="#e1ac64" stroke-width="1.1"/>
+<text x="118" y="366" fill="#e1ac64" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">F2</text>
+<rect x="150" y="350" width="44" height="24" rx="5" fill="#102020" stroke="#e1ac64" stroke-width="1.1"/>
+<text x="172" y="366" fill="#e1ac64" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">F3</text>
+<rect x="408" y="246" width="368" height="140" rx="10" fill="#1d2f2d" stroke="#3a4c46" stroke-width="1.2"/>
+<text x="426" y="272" fill="#a9d8b0" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11" letter-spacing="1.2">ENGINE ACCOUNT</text>
+<text x="426" y="300" fill="#eee4cb" font-family="Georgia,serif" font-size="20">Below the Waterline</text>
+<text x="426" y="320" fill="#b5b9a5" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5">Logs one stop and a double-flash shore</text>
+<text x="426" y="336" fill="#b5b9a5" font-family="ui-sans-serif,system-ui,sans-serif" font-size="11.5">signal; knows no place name.</text>
+<rect x="426" y="350" width="44" height="24" rx="5" fill="#102020" stroke="#a9d8b0" stroke-width="1.1"/>
+<text x="448" y="366" fill="#a9d8b0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">F4</text>
+<rect x="480" y="350" width="44" height="24" rx="5" fill="#102020" stroke="#a9d8b0" stroke-width="1.1"/>
+<text x="502" y="366" fill="#a9d8b0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">F5</text>
+<rect x="534" y="350" width="44" height="24" rx="5" fill="#102020" stroke="#a9d8b0" stroke-width="1.1"/>
+<text x="556" y="366" fill="#a9d8b0" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">F6</text>
+</svg>
