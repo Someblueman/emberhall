@@ -192,8 +192,14 @@
 
     renderTabs();
     renderNotebook();
-    renderScene(null);
     log('loaded ' + source);
+    var firstScene = state.truth.scenes[0] && state.truth.scenes[0].id;
+    if (firstScene && state.scenes.has(firstScene)) {
+      openScene(firstScene);
+    } else {
+      renderScene(null);
+      renderReach();
+    }
     return true;
   }
 
@@ -345,11 +351,30 @@
     });
   }
 
+  function renderReach() {
+    var stage = $('reach-stage');
+    if (!stage) return;
+    if (!state.truth || !window.NightFerryReach) {
+      stage.hidden = true;
+      stage.textContent = '';
+      return;
+    }
+    var vmState = window.NightFerryReach.buildReachViewModel(
+      state.truth,
+      state.scenes,
+      state.activeScene,
+      state.evidence
+    );
+    stage.innerHTML = window.NightFerryReach.liveReachSvg(vmState);
+    stage.hidden = false;
+  }
+
   function openScene(id) {
     if (!state.scenes.has(id)) return;
     state.activeScene = id;
     syncTabs();
     renderScene(id);
+    renderReach();
     var title = state.scenes.get(id).title;
     log('opened ' + id + ' (“' + title + '”)');
   }
@@ -407,9 +432,11 @@
       var label = el('label');
       var box = document.createElement('input');
       box.type = 'checkbox';
+      box.id = 'stmt-' + sceneId + '-' + index;
       box.dataset.key = key;
       box.checked = state.evidence.has(key);
       box.addEventListener('change', function () { toggleEvidence(key, box.checked); });
+      label.htmlFor = box.id;
       label.appendChild(box);
       label.appendChild(el('span', 'fact-chip', statement.fact));
       label.appendChild(el('span', 'statement-text', statement.text));
@@ -428,6 +455,7 @@
       log((checked ? 'cited ' : 'uncited ') + statement.fact + ' in ' + parts[0]);
     }
     syncEvidenceBoxes();
+    renderReach();
   }
 
   function renderNotebook() {
@@ -459,9 +487,11 @@
           var label = el('label');
           var box = document.createElement('input');
           box.type = 'checkbox';
+          box.id = 'nb-' + sceneId + '-' + index;
           box.dataset.key = key;
           box.checked = state.evidence.has(key);
           box.addEventListener('change', function () { toggleEvidence(key, box.checked); });
+          label.htmlFor = box.id;
           label.appendChild(box);
           label.appendChild(el('span', 'scene-tag', sceneId));
           label.appendChild(el('span', 'statement-text', statement.text));
