@@ -413,6 +413,12 @@ process.stdout.write(JSON.stringify({
         self.assertIn("14 of 14 source commits match · showing 1–6", steps[7]["text"])
         self.assertIn("0 of 0 review runs", steps[8]["text"])
         self.assertIn("assay-reviews-previous", steps[8]["disabled"])
+        rewound = self.run_harness({"data": data, "index": 1, "current": False, "selected": "assay", "steps": [
+            {"id": "assay-reviews-next", "action": "click"},
+            {"id": "assay-reviews-next", "action": "click"}, {"frame": 0},
+        ]})["interactions"][-1]
+        self.assertIn("0 of 0 review runs", rewound["text"])
+        self.assertIn("assay-reviews-previous", rewound["disabled"])
         refreshed = self.run_harness({"data": data, "index": 1, "current": False, "selected": "assay", "steps": [
             {"id": "assay-search", "action": "input", "value": "repair the lantern", "selection": [2, 6, "backward"]},
             {"id": "assay-search", "action": "refresh"},
