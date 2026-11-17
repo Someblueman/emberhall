@@ -21,6 +21,19 @@
       <div><p class="eyebrow">YOUR WORKING COPY</p><h2 id="project-title"></h2><p id="origin"></p></div>
       <p>Earliest start = the latest of a step’s release minute and its prerequisite finishes. Resources can block or conflict; they never move a step automatically. <strong>Touching intervals do not overlap.</strong></p>
     </section>
+    <section class="timeline-card" aria-labelledby="timeline-title">
+      <div class="timeline-head">
+        <div><p class="eyebrow">AT A GLANCE</p><h2 id="timeline-title">Original &amp; rehearsal timeline</h2></div>
+        <p id="timeline-summary" class="timeline-summary" role="status"></p>
+      </div>
+      <div class="timeline-legend" aria-hidden="true">
+        <span><i class="swatch swatch-base"></i> Original</span>
+        <span><i class="swatch swatch-ok"></i> Rehearsal (unchanged)</span>
+        <span><i class="swatch swatch-changed"></i> Shifted or overlap</span>
+        <span><i class="swatch swatch-blocked"></i> Blocked</span>
+      </div>
+      <div id="timeline" class="timeline" role="region" aria-label="Cue timeline"></div>
+    </section>
     <section class="workbench" aria-labelledby="edit-title">
       <div class="editor">
         <p class="eyebrow">TRY A CHANGE</p><h2 id="edit-title">Rehearse one cue</h2>
@@ -41,7 +54,10 @@
         <p class="eyebrow">WHO / WHAT IS AVAILABLE</p><h2>Scenario resources</h2>
         <p>Uncheck a resource to block its steps and their dependants. An unknown resource ID also blocks a step.</p>
         <div id="resource-controls"></div>
-        <button id="reset" type="button" class="secondary">Reset scenario from baseline</button>
+        <div class="resource-actions">
+          <button id="reset" type="button" class="secondary">Reset scenario from baseline</button>
+          <button id="undo" type="button" class="secondary" disabled>Undo last change</button>
+        </div>
         <p id="edit-message" class="message" role="status" aria-live="polite">Both plans begin with the same authored workshop.</p>
       </div>
     </section>

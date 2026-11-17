@@ -185,7 +185,140 @@
     ] };
     return resetScenario({ version: 1, title: 'The print-and-make workshop', origin: 'Minute 0 · preparation begins', baseline, scenario: clone(baseline) });
   }
-  const api = { validate, calculate, compare, parseJSON, toJSON, editStep, setResource, resetScenario, initial };
+  function timelineData(project) {
+    const comparison = compare(project);
+    const bSteps = new Map(project.baseline.steps.map(s => [s.id, s]));
+    const sSteps = new Map(project.scenario.steps.map(s => [s.id, s]));
+    const bEntries = new Map(comparison.baseline.entries.map(e => [e.id, e]));
+    const sEntries = new Map(comparison.scenario.entries.map(e => [e.id, e]));
+    const bConflictIds = new Set(comparison.baseline.conflicts.flatMap(c => c.steps));
+    const sConflictIds = new Set(comparison.scenario.conflicts.flatMap(c => c.steps));
+    const ids = [...new Set([...bSteps.keys(), ...sSteps.keys()])];
+    const rows = ids.map(key => {
+      const refStep = sSteps.get(key) || bSteps.get(key);
+      const b = bEntries.get(key) || null;
+      const s = sEntries.get(key) || null;
+      const baseline = b ? {
+        start: b.start, end: b.end, blocked: b.start === null, conflicting: bConflictIds.has(key)
+      } : null;
+      const scenario = s ? {
+        start: s.start, end: s.end, blocked: s.start === null, conflicting: sConflictIds.has(key),
+        deltaStart: (b && b.start !== null && s.start !== null) ? s.start - b.start : null,
+        deltaEnd: (b && b.end !== null && s.end !== null) ? s.end - b.end : null
+      } : null;
+      return { id: key, label: refStep.label, track: refStep.track, resource: refStep.resource, baseline, scenario };
+    }).sort((a, b) => {
+      const trackCmp = a.track.localeCompare(b.track, 'en');
+      if (trackCmp !== 0) return trackCmp;
+      const aStart = a.baseline && a.baseline.start !== null ? a.baseline.start
+        : (a.scenario && a.scenario.start !== null ? a.scenario.start : Infinity);
+      const bStart = b.baseline && b.baseline.start !== null ? b.baseline.start
+        : (b.scenario && b.scenario.start !== null ? b.scenario.start : Infinity);
+      if (aStart !== bStart) return aStart - bStart;
+      return a.id.localeCompare(b.id, 'en');
+    });
+    const times = [];
+    for (const row of rows) {
+      for (const side of [row.baseline, row.scenario]) {
+        if (side && !side.blocked) times.push(side.start, side.end);
+      }
+    }
+    let minTime = times.length ? Math.min(...times) : 0;
+    let maxTime = times.length ? Math.max(...times) : 1;
+    if (minTime === maxTime) maxTime = minTime + 1;
+    const bFin = comparison.baseline.finish, sFin = comparison.scenario.finish;
+    const deltaFinish = (bFin !== null && sFin !== null) ? sFin - bFin : null;
+    return {
+      title: project.title, origin: project.origin, minTime, maxTime,
+      baselineFinish: bFin, scenarioFinish: sFin, deltaFinish,
+      baselineConflicts: comparison.baseline.conflicts,
+      scenarioConflicts: comparison.scenario.conflicts,
+      rows
+    };
+  }
+  function escapeXml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+  function clipText(value, maxLen) {
+    const str = String(value);
+    return str.length > maxLen ? `${str.slice(0, maxLen - 1)}…` : str;
+  }
+  function previewSvg(project) {
+    const tl = timelineData(project);
+    const width = 960, chartX = 290, chartW = 500, rightX = 806;
+    const headerH = 114, rowH = 44, footerH = 54;
+    const height = headerH + Math.max(1, tl.rows.length) * rowH + footerH;
+    const span = tl.maxTime - tl.minTime;
+    const xAt = t => chartX + ((t - tl.minTime) / span) * chartW;
+    const ticks = [];
+    const tickCount = 5;
+    for (let i = 0; i <= tickCount; i++) {
+      const t = Math.round(tl.minTime + (span * i) / tickCount);
+      if (!ticks.length || ticks[ticks.length - 1].t !== t) ticks.push({ t, x: xAt(t) });
+    }
+    const bFinText = tl.baselineFinish === null ? 'blocked' : `${tl.baselineFinish} min`;
+    const sFinText = tl.scenarioFinish === null ? 'blocked' : `${tl.scenarioFinish} min`;
+    const deltaText = tl.deltaFinish === null ? 'unfinished'
+      : (tl.deltaFinish === 0 ? 'no finish change' : `${tl.deltaFinish > 0 ? '+' : ''}${tl.deltaFinish} min finish`);
+    const lines = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${escapeXml(tl.title)} timeline comparison">`,
+      `<rect width="${width}" height="${height}" fill="#f5f1e7"/>`,
+      `<rect x="16" y="16" width="${width - 32}" height="${height - 32}" rx="6" fill="#fcfaf4" stroke="#c9d0c4" stroke-width="1.5"/>`,
+      `<text x="36" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="1.6" fill="#245f57">CUE REHEARSAL · ORIGINAL VS REHEARSAL</text>`,
+      `<text x="36" y="76" font-family="Georgia, serif" font-size="24" fill="#183334">${escapeXml(clipText(tl.title, 44))}</text>`,
+      `<text x="36" y="98" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#526967">Original ${escapeXml(bFinText)} → Rehearsal ${escapeXml(sFinText)} (${escapeXml(deltaText)})</text>`
+    ];
+    for (const conflict of tl.scenarioConflicts) {
+      const cx = xAt(conflict.start), cw = Math.max(4, xAt(conflict.end) - cx);
+      lines.push(`<rect x="${cx.toFixed(1)}" y="${headerH - 4}" width="${cw.toFixed(1)}" height="${tl.rows.length * rowH + 4}" fill="#a43e24" fill-opacity="0.12"/>`);
+    }
+    for (const tick of ticks) {
+      lines.push(`<line x1="${tick.x.toFixed(1)}" y1="${headerH - 6}" x2="${tick.x.toFixed(1)}" y2="${headerH + tl.rows.length * rowH}" stroke="#dfe1d7" stroke-width="1"/>`);
+      lines.push(`<text x="${tick.x.toFixed(1)}" y="${headerH - 12}" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#526967">${tick.t}m</text>`);
+    }
+    tl.rows.forEach((row, idx) => {
+      const y = headerH + idx * rowH;
+      if (idx > 0) lines.push(`<line x1="36" y1="${y}" x2="${width - 36}" y2="${y}" stroke="#eceee6" stroke-width="1"/>`);
+      lines.push(`<text x="36" y="${y + 20}" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#183334">${escapeXml(clipText(row.label, 25))}</text>`);
+      lines.push(`<text x="36" y="${y + 36}" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#526967">${escapeXml(clipText(row.track, 14))} · ${escapeXml(row.resource)}</text>`);
+      if (row.baseline && !row.baseline.blocked) {
+        const bx = xAt(row.baseline.start), bw = Math.max(4, xAt(row.baseline.end) - bx);
+        lines.push(`<rect x="${bx.toFixed(1)}" y="${y + 9}" width="${bw.toFixed(1)}" height="9" rx="2" fill="#245f57" fill-opacity="0.38"/>`);
+      }
+      let summary = 'absent';
+      if (row.scenario) {
+        if (row.scenario.blocked) {
+          lines.push(`<rect x="${chartX}" y="${y + 22}" width="84" height="14" rx="3" fill="#fcfaf4" stroke="#a43e24" stroke-dasharray="3 2" stroke-width="1.5"/>`);
+          lines.push(`<text x="${chartX + 42}" y="${y + 33}" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#a43e24">BLOCKED</text>`);
+          summary = 'BLOCKED';
+        } else {
+          const sx = xAt(row.scenario.start), sw = Math.max(4, xAt(row.scenario.end) - sx);
+          const changed = (row.scenario.deltaStart !== null && row.scenario.deltaStart !== 0) ||
+            (row.scenario.deltaEnd !== null && row.scenario.deltaEnd !== 0);
+          const fill = (changed || row.scenario.conflicting) ? '#a43e24' : '#245f57';
+          lines.push(`<rect x="${sx.toFixed(1)}" y="${y + 22}" width="${sw.toFixed(1)}" height="13" rx="2.5" fill="${fill}"/>`);
+          const dEnd = row.scenario.deltaEnd;
+          const dNote = row.scenario.conflicting ? ' (overlap)' : (dEnd !== null && dEnd !== 0 ? ` (${dEnd > 0 ? '+' : ''}${dEnd}m)` : '');
+          summary = `${row.scenario.start} → ${row.scenario.end}${dNote}`;
+        }
+      }
+      const summaryFill = (row.scenario && (row.scenario.blocked || row.scenario.conflicting || (row.scenario.deltaEnd && row.scenario.deltaEnd > 0)))
+        ? '#a43e24' : '#183334';
+      lines.push(`<text x="${rightX}" y="${y + 29}" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" fill="${summaryFill}">${escapeXml(summary)}</text>`);
+    });
+    const legY = headerH + tl.rows.length * rowH + 28;
+    lines.push(`<rect x="36" y="${legY - 10}" width="18" height="8" rx="2" fill="#245f57" fill-opacity="0.38"/>`);
+    lines.push(`<text x="60" y="${legY - 2}" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#526967">Original</text>`);
+    lines.push(`<rect x="132" y="${legY - 11}" width="18" height="10" rx="2" fill="#245f57"/>`);
+    lines.push(`<text x="156" y="${legY - 2}" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#526967">Unchanged</text>`);
+    lines.push(`<rect x="242" y="${legY - 11}" width="18" height="10" rx="2" fill="#a43e24"/>`);
+    lines.push(`<text x="266" y="${legY - 2}" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#526967">Shifted or overlap</text>`);
+    lines.push('</svg>\n');
+    return lines.join('\n');
+  }
+  const api = { validate, calculate, compare, parseJSON, toJSON, editStep, setResource, resetScenario, initial, timelineData, previewSvg };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.CueRehearsal = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this));
