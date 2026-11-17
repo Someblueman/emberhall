@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><title>The brass key</title></head><body>
+<tw-storydata name="The brass key" startnode="1" format="SugarCube" format-version="2.37.3" ifid="cccccccc-cccc-4ccc-8ccc-cccccccccccc">
+<tw-passagedata pid="1" name="Start" tags="">Two stairs lead down.
+[[Search the cellar|Cellar]]
+[[Cross the gallery|Gallery]]</tw-passagedata>
+<tw-passagedata pid="2" name="Cellar" tags="">&lt;&lt;set $brassKey to true&gt;&gt;
+You pocket a brass key.
+[[On to the vault|Vault]]</tw-passagedata>
+<tw-passagedata pid="3" name="Gallery" tags="">Portraits watch you pass.
+[[On to the vault|Vault]]</tw-passagedata>
+<tw-passagedata pid="4" name="Vault" tags="">&lt;&lt;if $brassKey&gt;&gt;The key turns.&lt;&lt;else&gt;&gt;Locked fast.&lt;&lt;/if&gt;&gt;</tw-passagedata>
+</tw-storydata></body></html>
