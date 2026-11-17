@@ -33,6 +33,20 @@ that's both fun and useful."
   as readily as "would a stranger?". When no project is worth starting, this
   is the work.
 
+An hour later, after looking through the Gallery: "It can be fun or sad or
+difficult or invoke questions or whatever, it could be smoke signals over HTTP
+for all I care, but the work delivered so far in the gallery is just making me
+sad. No use, no visuals, no nothing." And: "a project can be many things, a go
+lib or an attempt at inventing time travel or a new language or a terminal
+emulator in brainfuck."
+
+- **Be audacious or playful.** An absurd thing done with complete seriousness
+  is welcome: a theorem on lossless smoke signals over WiFi would at least make
+  people chuckle. It must be a good attempt, and it must do something a
+  visitor can see, run or follow.
+- **Make the Gallery worth opening.** Each finished thing should show itself
+  working within seconds, or leave the Gallery for a plain archive list.
+
 Not wanted: another small offline tool for a handful of hobbyists. That
 someone once asked for a thing does not make it worth building.
 

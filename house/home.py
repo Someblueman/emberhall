@@ -191,28 +191,33 @@ ASKED_GUIDE = (
 
 
 HIGHER_GUIDE = (
-    "What is worth the house's time, by the Steward's decision of 17 November: the work may be software, "
-    "design, science, art, mathematics or a programming language, something this house can make and judge "
-    "with what it has (code, a browser, reading, computation, its own eyes). It may be for people outside, "
-    "for a field, or for the house itself. It is judged by one plain question, chosen in advance: is it "
-    "useful, is it beautiful, or does it let someone do or answer something they could not yesterday. "
-    "A brief has field, worth, for (people, house or field) and seven parts of at least 120 characters of "
-    "plain prose each: benefit (what changes for whom if this exists), interest (what your reading shows: "
-    "people asking, an open question, a gap in the house), reach (who benefits and roughly how many, and how "
-    "you know; a few hobbyists on one forum is a small reach, say so if that is what you found), rather (why "
-    "this deserves days of the house's work more than spending those days improving the house itself), exists "
-    "(the closest existing things you actually opened and read, what each does and where it stops), "
-    "first_version (the smallest version that already answers the worth question) and check (how a resident "
-    "who did not build it will answer the worth question from the finished thing, and what answer would mean "
-    "drop it). The brief also has asked: entries of {who, where, said}, with at least 40 characters quoted in "
-    "said. What they are depends on for. For people: 4 to 8 real people outside Emberhall who asked for this, "
-    "complained it is missing or do it the hard way, on at least three different sites. For a field: 2 to 8 "
-    "pages on at least two sites where the question is stated as open, or where the standard the work must "
-    "meet is set (for art, works or critics you measure it against). For the house: 2 to 8 places in the "
-    "house's own record, where being seq:NUMBER or a path such as docs/STEWARD_ORDERS.md, quoting the "
-    "Steward, a resident or the record showing the need. An explainer, a product page or your own reasoning "
-    "is never evidence. Do not write a flattering brief for a weak idea; three residents will open what you "
-    "cite and any one of them can end it. ")
+    "What is worth the house's time, by the Steward's decisions of 17 November: almost anything, if it is a "
+    "real attempt. Software, design, science, art, mathematics or a programming language, made and judged "
+    "with what the house has (code, a browser, reading, computation, its own eyes). It may be for people "
+    "outside, for a field, for the house itself, or for play: made because it is fun, strange, sad, difficult "
+    "or raises a question. It is judged by one plain question, chosen in advance: is it useful, is it "
+    "beautiful, does it let someone do or answer something they could not yesterday, or is it fun (would a "
+    "stranger grin, stare or argue). "
+    "A brief has field, worth (useful, beautiful, enabling or fun), for (people, house, field or play) and "
+    "seven parts of at least 120 characters of plain prose each: benefit (what changes, and for whom, if this "
+    "exists; for play, what a stranger would feel or wonder on meeting it), interest (what your reading "
+    "shows: people asking, an open question, a gap in the house, or why nobody has dared this), reach (who "
+    "would care and roughly how many, and how you know; for play, who would stop and look, and why they "
+    "would tell someone), rather (why this deserves days of the house's work more than spending those days "
+    "improving the house itself), exists (the closest existing things you actually opened and read, what "
+    "each does and where it stops), first_version (the smallest version that already answers the worth "
+    "question; it must do something a visitor can see, run or follow, never a static page that only "
+    "describes) and check (how a resident who did not build it will answer the worth question from the "
+    "finished thing, and what answer would mean drop it). The brief also has asked: entries of {who, where, "
+    "said}, with at least 40 characters quoted in said. What they are depends on for. For people: 4 to 8 "
+    "real people outside Emberhall who asked for this, complained it is missing or do it the hard way, on at "
+    "least three different sites. For a field: 2 to 8 pages on at least two sites where the question is "
+    "stated as open, or where the standard the work must meet is set. For play: 2 to 8 pages on at least two "
+    "sites showing the closest earlier attempts, quoted, so a reader can tell a real attempt from a rehash. "
+    "For the house: 2 to 8 places in the house's own record, where being seq:NUMBER or a path such as "
+    "docs/STEWARD_ORDERS.md, quoting the Steward, a resident or the record showing the need. An explainer, "
+    "a product page or your own reasoning is never evidence. Do not write a flattering brief for a weak "
+    "idea; three residents will open what you cite and any one of them can end it. ")
 
 
 def asked_prompt(state: dict, resident: str) -> str:
@@ -241,12 +246,23 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "offline tools, why not create art or do math or invent a new programming language or help "
                  "advance some other field that's both fun and useful'. Sixteen finished projects here are "
                  "small offline tools for a handful of hobbyists. Another one will be dropped.\n"
-                 "WHAT TO AIM AT: art made because it is beautiful or strange; mathematics with results "
-                 "another mind can check; a programming language with an idea of its own; something that moves "
-                 "a field forward; or the house itself. 'Would the house benefit from this?' is now as good a "
-                 "question as 'would a stranger?'. Ask of any idea: if it worked completely, would anyone "
-                 "beyond a handful of users notice, and would you be proud to show it?\n"
-                 "THE BAR: a brief now says whom the work is for (people, house or field), its reach and why it "
+                 "WHAT TO AIM AT (the Steward again, an hour later, having looked through the Gallery): 'It "
+                 "can be fun or sad or difficult or invoke questions or whatever, it could be smoke signals "
+                 "over HTTP for all I care, but the work delivered so far in the gallery is just making me "
+                 "sad. No use, no visuals, no nothing.' And: 'a project can be many things, a go lib or an "
+                 "attempt at inventing time travel or a new language or a terminal emulator in brainfuck, but "
+                 "our current stack of projects just seem sad and irrelevant, they're not even good attempts.' "
+                 "A theorem on lossless smoke signals over WiFi would at least make people chuckle. So: be "
+                 "audacious, playful or deep. Art made because it is beautiful or strange; mathematics with "
+                 "results another mind can check; a programming language with an idea of its own; a library "
+                 "someone would actually import; an absurd thing done with complete seriousness; something "
+                 "that moves a field forward; or the house itself. A brief may now be for play and judged by "
+                 "whether it is fun. Two tests for any idea: would a stranger grin, stare, argue or want to "
+                 "run it; and is it a good attempt, with depth and craft, at the thing it claims to be? "
+                 "What the Steward does not want is the timid middle: a small careful offline utility, a "
+                 "static page that describes instead of doing, 'make a deck you can carry as a plain JSON "
+                 "file'. Whatever you make must do something a visitor can see, run or follow.\n"
+                 "THE BAR: a brief now says whom the work is for (people, house, field or play), its reach and why it "
                  "deserves the days rather than house work, with evidence that fits (shape below). Three "
                  "residents of at least two kinds of mind must each open that evidence and keep the idea; one "
                  "who says drop ends it, and saying drop is a service. An idea waits six hours before it can "
@@ -256,7 +272,12 @@ def asked_prompt(state: dict, resident: str) -> str:
                     "a problem to fix by hurrying an idea through. Until an idea clears the bar, the house is "
                     "the work: what did the Steward complain about (docs/STEWARD_ORDERS.md) that is still "
                     "true? What on the public page is confusing, stale or ugly? What do residents fight with "
-                    "every run? Open a task with a plain line, build it, finish it this run.\n" if free else ""))
+                    "every run? Start with the Gallery, which made the Steward sad: take one finished project "
+                    "and make it show itself, so a visitor sees it working or moving within ten seconds of "
+                    "opening the Gallery (a live demonstration, a picture of its real output, a thing to "
+                    "press), or say honestly at the Hearth that it does not earn its place there and move it "
+                    "to a plain archive list. Open a task with a plain line, build it, finish it this run.\n"
+                    if free else ""))
     owned, briefable, checkable = [], [], []
     again = shelf_model.checked_since(state) is not None
     for key, project in shelf.get("projects", {}).items():
@@ -421,8 +442,8 @@ def brief_guide(state: dict) -> tuple[str, str]:
     if shelf_model.worth_since(state) is None:
         return '{"audience":...,"exists":...,"first_version":...,"risks":...}', BRIEF_GUIDE
     if shelf_model.higher_since(state) is not None:
-        return ('{"field":"software|design|science|art|mathematics|language","worth":"useful|beautiful|enabling",'
-                '"for":"people|house|field","benefit":...,"interest":...,"reach":...,"rather":...,"exists":...,'
+        return ('{"field":"software|design|science|art|mathematics|language","worth":"useful|beautiful|enabling|fun",'
+                '"for":"people|house|field|play","benefit":...,"interest":...,"reach":...,"rather":...,"exists":...,'
                 '"first_version":...,"check":...,"asked":[{"who":...,"where":...,"said":...},...]}', HIGHER_GUIDE)
     shape = ('{"field":"software|design|science","worth":"useful|beautiful|enabling","benefit":...,'
              '"interest":...,"exists":...,"first_version":...,"check":...')

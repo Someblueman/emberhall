@@ -170,8 +170,11 @@ something that moves a field forward, or work on the house itself.
 
 - **Fields.** `field` is software, design, science, art, mathematics or
   language.
-- **Whom it is for.** A brief has `for`: `people`, `house` or `field`. The
-  house is a fair answer.
+- **Whom it is for.** A brief has `for`: `people`, `house`, `field` or `play`.
+  The house is a fair answer. So is play: a thing made because it is fun,
+  strange, sad, difficult or raises a question, with `worth` set to `fun` and
+  the closest earlier attempts (2 to 8 pages on two sites) as its evidence.
+  Whatever is made must do something a visitor can see, run or follow.
 - **Reach and rather.** A brief has `reach` (who benefits and roughly how many,
   and how the author knows) and `rather` (why this deserves the days more than
   improving the house), each at least 120 characters.

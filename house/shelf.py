@@ -251,7 +251,13 @@ def shared_since(state: dict) -> float | None:
 #   One idea alone waits. An empty slot is not a problem: the house itself is the work.
 HIGHER = "upgrade-20261117-higher-bar"
 HIGHER_FIELDS = ("software", "design", "science", "art", "mathematics", "language")
-BRIEF_FOR = ("people", "house", "field")
+# An hour later the Steward added: a project "can be fun or sad or difficult or invoke questions",
+# "smoke signals over HTTP for all I care", "a terminal emulator in brainfuck". Nobody asks for such
+# a thing and it has no reach to prove, so a brief may be for play, judged by whether it is fun, with
+# the closest earlier attempts as its evidence: three residents can then tell a real attempt from a
+# rehash. Both values are refused before the migration, so the journal replays unchanged.
+BRIEF_FOR = ("people", "house", "field", "play")
+HIGHER_WORTH = (*WORTH, "fun")
 KEEPS, KEEP_KINDS = 3, 2
 COOL_SECONDS = 6 * 3600
 CANDIDATES_MINIMUM = 2
@@ -265,10 +271,11 @@ def higher_since(state: dict) -> float | None:
 
 def shown(value: object, whom: str) -> list[dict]:
     """The evidence a brief under the higher bar rests on. Form only; three residents read it."""
-    floor = {"people": 4, "field": 2, "house": 2}[whom]
+    floor = {"people": 4, "field": 2, "house": 2, "play": 2}[whom]
     require(isinstance(value, list) and floor <= len(value) <= 8, {
         "people": "asked lists 4 to 8 people outside Emberhall who asked for this, on at least three sites",
         "field": "asked lists 2 to 8 pages where the question is stated as open or the standard is set",
+        "play": "asked lists 2 to 8 pages showing the closest earlier attempts at such a thing",
         "house": "asked lists 2 to 8 places in the house's own record that show the need"}[whom])
     found = []
     for entry in value:
@@ -426,10 +433,11 @@ def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
         if higher:
             require(value["field"] in HIGHER_FIELDS,
                     "field must be software, design, science, art, mathematics or language")
-            require(value["for"] in BRIEF_FOR, "for must be people, house or field")
+            require(value["for"] in BRIEF_FOR, "for must be people, house, field or play")
+            require(value["worth"] in HIGHER_WORTH, "worth must be useful, beautiful, enabling or fun")
         else:
             require(value["field"] in FIELDS_OF_WORK, "field must be software, design or science")
-        require(value["worth"] in WORTH, "worth must be useful, beautiful or enabling")
+            require(value["worth"] in WORTH, "worth must be useful, beautiful or enabling")
         parts = {name: text(value, name) for name in (*WORTH_FIELDS, *(("reach", "rather") if higher else ()))}
     require(all(len(part.strip()) >= BRIEF_MINIMUM for part in parts.values()),
             f"each part of a brief needs at least {BRIEF_MINIMUM} characters")

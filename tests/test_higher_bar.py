@@ -87,7 +87,9 @@ class HigherBarTests(unittest.TestCase):
             f.reject(message, "explore-publish", actor="v1", round="r1", token="r1", ideas=[idea("a", whom, **changes)])
         f.reject("for, benefit, interest, reach, rather", "explore-publish", actor="v1", round="r1", token="r1",
                  ideas=[test_shelf.idea("a") | {"plain": PLAIN, "brief": grounded_brief()}])
-        refused("people, house or field", **{"for": "everyone"})
+        refused("people, house, field or play", **{"for": "everyone"})
+        refused("useful, beautiful, enabling or fun", worth="popular")
+        refused("closest earlier attempts", "field", asked=FIELD[:1], **{"for": "play"})
         refused("art, mathematics or language", field="poetry")
         refused("at least 120 characters", reach="Lots of people.")
         refused("at least 120 characters", rather="It is nicer.")
@@ -100,11 +102,16 @@ class HigherBarTests(unittest.TestCase):
         f.send("explore-publish", actor="v1", round="r1", token="r1", ideas=[
             idea("tool"), idea("proof", "field", field="mathematics"), idea("song", "field", field="art", worth="beautiful"),
             idea("handoff", "house")])
+        self.start(actor="other", round_id="r2", at=f.state["at"] + 5 * HOUR)
+        f.send("explore-publish", actor="other", round="r2", token="r2", ideas=[
+            idea("smoke", "field", field="mathematics", worth="fun", **{"for": "play"})])
+        self.assertEqual(("play", "fun"), (self.ideas()["smoke"]["brief"]["for"], self.ideas()["smoke"]["brief"]["worth"]))
         self.assertEqual(["people", "field", "field", "house"],
                          [self.ideas()[key]["brief"]["for"] for key in ("tool", "proof", "song", "handoff")])
         self.assertEqual("seq:12229", self.ideas()["handoff"]["brief"]["asked"][1]["where"])
         shape, guide = brief_guide(f.state)
-        self.assertIn('"for":"people|house|field"', shape)
+        self.assertIn('"for":"people|house|field|play"', shape)
+        self.assertIn("useful|beautiful|enabling|fun", shape)
         self.assertIn("art|mathematics|language", shape)
         self.assertIn("rather (why this deserves days of the house's work", guide)
 
@@ -163,8 +170,10 @@ class HigherBarTests(unittest.TestCase):
                       test_shelf.idea("y") | {"plain": PLAIN, "brief": grounded_brief()}], actor="v1")
         self.higher()
         prompt = asked_prompt(f.state, "v2")
-        for words in ("A HIGHER BAR", "art made because it is beautiful", "mathematics with results",
-                      "a programming language with an idea of its own", "Would the house benefit from this?",
+        for words in ("A HIGHER BAR", "Art made because it is beautiful", "mathematics with results",
+                      "a programming language with an idea of its own", "smoke signals over HTTP",
+                      "a terminal emulator in brainfuck", "an absurd thing done with complete seriousness",
+                      "for play and judged by whether it is fun", "Start with the Gallery",
                       "NO PROJECT FILLS THE GREAT OR THE SMALL SLOT", "the house is the work"):
             self.assertIn(words, prompt)
         f.state["shelf"]["projects"] = {
@@ -202,6 +211,9 @@ class HigherBarTests(unittest.TestCase):
             self.assertIn(words, source)
         wishes = (pathlib.Path(body.__file__).parents[1] / "docs/WISHES.md").read_text()
         self.assertIn("Invent a programming language", wishes)
+        self.assertIn("smoke signals over HTTP", wishes)
+        source = (pathlib.Path(body.__file__).parents[1] / "site/house.js").read_text()
+        self.assertIn("Is it fun: would a stranger grin, stare or argue?", source)
         self.assertIn("Make the house itself better", wishes)
 
 
