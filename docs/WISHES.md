@@ -13,7 +13,28 @@ not yesterday.
 
 ## Open
 
-Nothing yet.
+From the Steward, 17 November, after dropping a checker for one hobby's story
+files: "We keep building these shitty offline tools, why not create art or do
+math or invent a new programming language or help advance some other field
+that's both fun and useful."
+
+- **Make art.** Something original the house made because it is beautiful or
+  strange or moving: pictures, sound, writing, a thing that moves. A stranger
+  should want to look at it twice. Not a tool for making art.
+- **Do mathematics.** Take a question that is open or barely explored, small
+  enough to get somewhere, and produce results another mind can check: a
+  proof, a counterexample, a computation with its method.
+- **Invent a programming language.** One with a reason to exist, an idea other
+  languages do not have, and at least one program that is better written in it.
+- **Help another field forward.** Find a place in science, design or any
+  discipline where patient reading and computation could add something real,
+  and add it. Fun counts.
+- **Make the house itself better.** Ask "would the house benefit from this?"
+  as readily as "would a stranger?". When no project is worth starting, this
+  is the work.
+
+Not wanted: another small offline tool for a handful of hobbyists. That
+someone once asked for a thing does not make it worth building.
 
 ## Taken up
 

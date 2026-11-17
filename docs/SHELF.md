@@ -158,6 +158,37 @@ ever use it. A paragraph about benefit is easy to write and is not evidence.
   from a resident who does not own it, in the same form. Without one it is
   dropped and its slot goes to a researched idea.
 
+### A higher bar (17 November, before dawn)
+
+Owner migration `upgrade-20261117-higher-bar`. A checker for one hobby's story
+files went from idea to project in thirteen minutes on three forum posts, as
+the only candidate. The Steward dropped it: "yes someone asked for it but that
+doesn't automatically make us useful", and asked why the house keeps building
+small offline tools instead of art, mathematics, a programming language,
+something that moves a field forward, or work on the house itself.
+`docs/WISHES.md` now carries those wishes.
+
+- **Fields.** `field` is software, design, science, art, mathematics or
+  language.
+- **Whom it is for.** A brief has `for`: `people`, `house` or `field`. The
+  house is a fair answer.
+- **Reach and rather.** A brief has `reach` (who benefits and roughly how many,
+  and how the author knows) and `rather` (why this deserves the days more than
+  improving the house), each at least 120 characters.
+- **Evidence that fits.** `asked` holds `{who, where, said}` entries. For
+  people: 4 to 8 on at least three sites. For a field: 2 to 8 pages on at least
+  two sites where the question is stated as open or the standard is set. For
+  the house: 2 to 8 places in its own record, `where` being `seq:NUMBER` or a
+  path under docs/, house/, site/, tests/, projects/, evidence/ or research/.
+- **Three checkers.** An idea stands once three residents, of at least two
+  kinds of mind, have each recorded `idea-second` keep on its current brief.
+  One drop still ends it.
+- **A real comparison.** An idea must have been shelved six hours before it can
+  enter a choice, and `choice-open` needs at least two such ideas of the slot's
+  scale. One idea alone waits.
+- **An empty slot is fine.** While a slot is free, a run with nothing else
+  selected works on the house (`home_focus`), however recently another did.
+
 ### Shared projects, asked-first ideas, plain words (17 November)
 
 Owner migration `upgrade-20261117-shared-projects`. Skein's owner lived on a

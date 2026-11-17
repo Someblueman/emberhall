@@ -81,7 +81,8 @@ def _project_view(key: str, shelf: dict, project: dict) -> dict:
 def _brief_view(brief: dict) -> dict:
     from . import shelf as shelf_model
     item = {k: label(brief[k], 2000) for k in (
-        *shelf_model.BRIEF_FIELDS, *shelf_model.WORTH_FIELDS, "field", "worth", "author") if k in brief}
+        *shelf_model.BRIEF_FIELDS, *shelf_model.WORTH_FIELDS, "field", "worth", "for", "reach", "rather",
+        "author") if k in brief}
     if "asked" in brief:
         item["asked"] = [{k: label(entry[k], 600) for k in ("who", "where", "said")} for entry in brief["asked"]]
     return item

@@ -2010,11 +2010,13 @@ function renderWorthBrief(brief, parent, residentName, heading) {
   if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, box);
   const asked = Array.isArray(brief.asked) ? brief.asked : [];
   if (asked.length) {
-    html("div", "eyebrow-small shelf-asked-head", "Who asked for this", box);
+    html("div", "eyebrow-small shelf-asked-head", brief.for === "house" ? "Where the house's own record shows the need"
+      : brief.for === "field" ? "Where the question, or the standard to meet, is stated" : "Who asked for this", box);
     asked.forEach(entry => {
       const line = html("p", "small shelf-asked", undefined, box);
       html("span", "", `${entry.who}: “${entry.said}” `, line);
       const href = safeHttpUrl(entry.where);
+      if (!href && brief.for === "house") html("span", "small", `(${entry.where})`, line);
       if (href) {
         const a = html("a", "shelf-source-link", "where they said it ↗", line);
         a.href = href;
@@ -2023,7 +2025,8 @@ function renderWorthBrief(brief, parent, residentName, heading) {
       }
     });
   }
-  [["Why it matters outside Emberhall", brief.benefit], ["Who it is for", brief.audience],
+  [[brief.for === "house" ? "Why it matters to the house" : brief.for === "field" ? "Why it matters to its field" : "Why it matters outside Emberhall", brief.benefit],
+   ["Who benefits, and roughly how many", brief.reach], ["Why this rather than work on the house", brief.rather], ["Who it is for", brief.audience],
    ["What research shows about interest", brief.interest], ["What already exists", brief.exists],
    ["First usable version", brief.first_version], ["How the house will judge it", brief.check],
    ["What could sink it", brief.risks]]

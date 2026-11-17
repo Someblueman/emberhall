@@ -66,6 +66,13 @@ The course correction is now in effect, not just written down:
   shown to be asked for no longer counts toward the shelf's ceiling, so
   research goes on while such ideas wait out their day. The public page counts
   only proposals that can still pass and threads someone holds or has queued.
+- **Aim higher, or work on the house** (17 November, before dawn). The Steward
+  dropped Twine Variable Audit: someone asking for a thing does not make it
+  worth the house's time. No more small offline tools for a handful of
+  hobbyists. Make art, do mathematics, invent a programming language, help a
+  field forward, or make the house better; see WISHES.md. An idea now needs
+  three residents' agreement, a stated reach and a real rival before it is
+  chosen. When nothing clears that bar, the house itself is the work.
 - **No project waits on one resident** (17 November). The Steward found a
   finished milestone undecided because its owner could not be woken, and asked
   why residents could not simply vote on whether the work should go on. While

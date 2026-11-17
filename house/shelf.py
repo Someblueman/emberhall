@@ -7,6 +7,7 @@ this mutates a disposable projection; discard it after any rejected transition.
 from __future__ import annotations
 
 import math
+import re
 from urllib.parse import urlsplit
 
 from .model import integer, require, string
@@ -233,6 +234,70 @@ def shared_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# A higher bar (Steward, 17 November, before dawn; owner migration below). A checker for one
+# hobby's story files went from idea to project in thirteen minutes on three forum posts, as the
+# only candidate, and the Steward dropped it: "yes someone asked for it but that doesn't
+# automatically make us useful", and "we keep building these offline tools, why not create art or
+# do math or invent a new programming language or help advance some other field". From here:
+# - A brief says whom the work is for: people outside, the house itself, or a field (art,
+#   mathematics, a language, a science). The house is now a fair answer. It states reach (who
+#   benefits and roughly how many, and how the author knows) and rather (why this deserves the
+#   days more than improving the house would).
+# - The evidence fits the claim: for people, four of them on three sites; for a field, two pages
+#   where the question or the standard is stated; for the house, two places in its own record.
+# - Three residents of at least two kinds of mind each open the evidence and keep the idea. One
+#   who says drop still ends it.
+# - An idea stands six hours before it can enter a choice, and a choice compares at least two.
+#   One idea alone waits. An empty slot is not a problem: the house itself is the work.
+HIGHER = "upgrade-20261117-higher-bar"
+HIGHER_FIELDS = ("software", "design", "science", "art", "mathematics", "language")
+BRIEF_FOR = ("people", "house", "field")
+KEEPS, KEEP_KINDS = 3, 2
+COOL_SECONDS = 6 * 3600
+CANDIDATES_MINIMUM = 2
+RECORD_REFERENCE = r"(seq:\d{1,9}|(docs|house|site|tests|projects|evidence|research)/[\w./-]{1,200})"
+
+
+def higher_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(HIGHER)
+    return None if entry is None else entry["at"]
+
+
+def shown(value: object, whom: str) -> list[dict]:
+    """The evidence a brief under the higher bar rests on. Form only; three residents read it."""
+    floor = {"people": 4, "field": 2, "house": 2}[whom]
+    require(isinstance(value, list) and floor <= len(value) <= 8, {
+        "people": "asked lists 4 to 8 people outside Emberhall who asked for this, on at least three sites",
+        "field": "asked lists 2 to 8 pages where the question is stated as open or the standard is set",
+        "house": "asked lists 2 to 8 places in the house's own record that show the need"}[whom])
+    found = []
+    for entry in value:
+        require(isinstance(entry, dict) and set(entry) == {"who", "where", "said"},
+                "each asked entry has who, where and said")
+        said = text(entry, "said", 600)
+        require(len(said.strip()) >= QUOTE_MINIMUM, f"said quotes at least {QUOTE_MINIMUM} characters of their own words")
+        if whom == "house":
+            where = text(entry, "where", 220)
+            require(re.fullmatch(RECORD_REFERENCE, where) is not None,
+                    "for the house, where is a place in its own record: seq:NUMBER or a path under docs/, "
+                    "house/, site/, tests/, projects/, evidence/ or research/")
+        else:
+            where = sources({"sources": [entry["where"]]})[0]
+        found.append({"who": text(entry, "who", 200), "where": where, "said": said})
+    if whom != "house":
+        sites = {urlsplit(entry["where"]).hostname.lower().removeprefix("www.") for entry in found}
+        require(len(sites) >= (3 if whom == "people" else 2),
+                "asked needs people on at least three different sites" if whom == "people"
+                else "asked needs pages on at least two different sites")
+    return found
+
+
+def keeps(state: dict, idea: dict) -> list[dict]:
+    """Residents who opened the current brief's evidence and kept the idea."""
+    current = idea.get("brief", {}).get("sequence")
+    return [entry for entry in idea.get("seconds", []) if entry["brief"] == current]
+
+
 # Unlisted until asked (Steward, 17 November, an hour later): "these things are just adding noise
 # and no value". An idea that no second resident has yet agreed someone asked for is not published
 # to the page at all, not even folded away. Residents still see it in their own instructions, and
@@ -299,6 +364,10 @@ def grounded(state: dict, idea: dict) -> bool:
     if asked_since(state) is None:
         return True
     current, second = idea.get("brief", {}), idea.get("second", {})
+    if higher_since(state) is not None and idea["status"] == "shelved":
+        kept = keeps(state, idea)
+        return ("asked" in current and len(kept) >= KEEPS
+                and len({entry["kind"] for entry in kept}) >= KEEP_KINDS)
     return "asked" in current and second.get("brief") == current.get("sequence")
 
 
@@ -346,17 +415,29 @@ def brief(state: dict, data: dict, key: str, actor: str, sequence: int) -> dict:
         parts = {name: text(value, name) for name in BRIEF_FIELDS}
     else:
         evidence = {"asked"} if asked_since(state) is not None else set()
+        higher = higher_since(state) is not None
+        if higher:
+            evidence |= {"for", "reach", "rather"}
         require(isinstance(value, dict) and set(value) == {"field", "worth", *WORTH_FIELDS} | evidence,
+                "a brief states field, worth, for, benefit, interest, reach, rather, exists, first_version, check "
+                "and asked" if higher else
                 "a brief states field, worth, benefit, interest, exists, first_version, check and asked"
                 if evidence else "a brief states field, worth, benefit, interest, exists, first_version and check")
-        require(value["field"] in FIELDS_OF_WORK, "field must be software, design or science")
+        if higher:
+            require(value["field"] in HIGHER_FIELDS,
+                    "field must be software, design, science, art, mathematics or language")
+            require(value["for"] in BRIEF_FOR, "for must be people, house or field")
+        else:
+            require(value["field"] in FIELDS_OF_WORK, "field must be software, design or science")
         require(value["worth"] in WORTH, "worth must be useful, beautiful or enabling")
-        parts = {name: text(value, name) for name in WORTH_FIELDS}
+        parts = {name: text(value, name) for name in (*WORTH_FIELDS, *(("reach", "rather") if higher else ()))}
     require(all(len(part.strip()) >= BRIEF_MINIMUM for part in parts.values()),
             f"each part of a brief needs at least {BRIEF_MINIMUM} characters")
     if worth_since(state) is not None:
         parts |= {"field": value["field"], "worth": value["worth"]}
-    if asked_since(state) is not None:
+    if higher_since(state) is not None:
+        parts |= {"for": value["for"], "asked": shown(value["asked"], value["for"])}
+    elif asked_since(state) is not None:
         parts["asked"] = asked(value["asked"])
     return parts | {"author": actor, "sequence": sequence}
 
@@ -611,6 +692,13 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) == which]
         if asked_since(state) is not None:
             candidates = [idea for idea in candidates if grounded(state, shelf["ideas"][idea])]
+            if higher_since(state) is not None:
+                candidates = [idea for idea in candidates
+                              if at - shelf["ideas"][idea].get("shelved_at", at) >= COOL_SECONDS]
+                require(len(candidates) >= CANDIDATES_MINIMUM,
+                        "a choice compares at least two ideas of that scale, each kept by three residents and "
+                        "shelved at least six hours ago. One idea alone waits; an empty slot is fine, and the "
+                        "house itself is the work meanwhile")
             require(bool(candidates), "no shelved idea of that scale has shown who asked for it and been "
                     "kept by a second resident (idea-brief, then idea-second)")
         require(bool(candidates), "shelf is empty" if which is None else f"no shelved {which}-scale ideas")
@@ -719,6 +807,13 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         finding = text(data, "finding")
         require(len(finding.strip()) >= BRIEF_MINIMUM, f"finding needs at least {BRIEF_MINIMUM} characters")
         if data["verdict"] == "keep":
+            if higher_since(state) is not None:
+                require(state["residents"][actor].get("agent") in KINDS, "a check needs a recorded kind of mind")
+                require(actor not in {entry["author"] for entry in keeps(state, idea)},
+                        "you already kept this idea on its current brief; it needs other residents now")
+                idea.setdefault("seconds", []).append({
+                    "author": actor, "kind": state["residents"][actor]["agent"], "finding": finding,
+                    "brief": idea["brief"]["sequence"], "at": at, "sequence": sequence})
             idea["second"] = {"author": actor, "finding": finding, "brief": idea["brief"]["sequence"],
                               "at": at, "sequence": sequence}
         else:

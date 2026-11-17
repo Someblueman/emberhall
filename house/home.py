@@ -190,6 +190,31 @@ ASKED_GUIDE = (
     "not shelve it, and say what you looked for. A second resident will open those pages. ")
 
 
+HIGHER_GUIDE = (
+    "What is worth the house's time, by the Steward's decision of 17 November: the work may be software, "
+    "design, science, art, mathematics or a programming language, something this house can make and judge "
+    "with what it has (code, a browser, reading, computation, its own eyes). It may be for people outside, "
+    "for a field, or for the house itself. It is judged by one plain question, chosen in advance: is it "
+    "useful, is it beautiful, or does it let someone do or answer something they could not yesterday. "
+    "A brief has field, worth, for (people, house or field) and seven parts of at least 120 characters of "
+    "plain prose each: benefit (what changes for whom if this exists), interest (what your reading shows: "
+    "people asking, an open question, a gap in the house), reach (who benefits and roughly how many, and how "
+    "you know; a few hobbyists on one forum is a small reach, say so if that is what you found), rather (why "
+    "this deserves days of the house's work more than spending those days improving the house itself), exists "
+    "(the closest existing things you actually opened and read, what each does and where it stops), "
+    "first_version (the smallest version that already answers the worth question) and check (how a resident "
+    "who did not build it will answer the worth question from the finished thing, and what answer would mean "
+    "drop it). The brief also has asked: entries of {who, where, said}, with at least 40 characters quoted in "
+    "said. What they are depends on for. For people: 4 to 8 real people outside Emberhall who asked for this, "
+    "complained it is missing or do it the hard way, on at least three different sites. For a field: 2 to 8 "
+    "pages on at least two sites where the question is stated as open, or where the standard the work must "
+    "meet is set (for art, works or critics you measure it against). For the house: 2 to 8 places in the "
+    "house's own record, where being seq:NUMBER or a path such as docs/STEWARD_ORDERS.md, quoting the "
+    "Steward, a resident or the record showing the need. An explainer, a product page or your own reasoning "
+    "is never evidence. Do not write a flattering brief for a weak idea; three residents will open what you "
+    "cite and any one of them can end it. ")
+
+
 def asked_prompt(state: dict, resident: str) -> str:
     """The who-asked test, the page viewer and what a need may ask (owner migration shelf.WHO_ASKED)."""
     from . import shelf as shelf_model
@@ -204,6 +229,34 @@ def asked_prompt(state: dict, resident: str) -> str:
             "idea or project stands only when its brief quotes real people outside Emberhall asking for it, and "
             "a resident who wrote neither the idea nor the brief has opened those pages and agreed. Only such "
             "ideas can enter a choice; the rest leave the shelf after a day.\n")
+    higher = shelf_model.higher_since(state) is not None
+    if higher:
+        whole = shelf_model.empty() | shelf
+        free = [which for which in ("great", "small") if shelf_model.slot_free(whole, which)]
+        text += ("A HIGHER BAR (Steward, 17 November, docs/STEWARD_ORDERS.md and docs/WISHES.md). This replaces "
+                 "the paragraph above and every sentence that says the work must benefit the world outside "
+                 "Emberhall. A checker for one hobby's story files went from idea to project in thirteen "
+                 "minutes on three forum posts, as the only candidate, and the Steward dropped it: 'yes someone "
+                 "asked for it but that doesn't automatically make us useful', and 'we keep building these "
+                 "offline tools, why not create art or do math or invent a new programming language or help "
+                 "advance some other field that's both fun and useful'. Sixteen finished projects here are "
+                 "small offline tools for a handful of hobbyists. Another one will be dropped.\n"
+                 "WHAT TO AIM AT: art made because it is beautiful or strange; mathematics with results "
+                 "another mind can check; a programming language with an idea of its own; something that moves "
+                 "a field forward; or the house itself. 'Would the house benefit from this?' is now as good a "
+                 "question as 'would a stranger?'. Ask of any idea: if it worked completely, would anyone "
+                 "beyond a handful of users notice, and would you be proud to show it?\n"
+                 "THE BAR: a brief now says whom the work is for (people, house or field), its reach and why it "
+                 "deserves the days rather than house work, with evidence that fits (shape below). Three "
+                 "residents of at least two kinds of mind must each open that evidence and keep the idea; one "
+                 "who says drop ends it, and saying drop is a service. An idea waits six hours before it can "
+                 "enter a choice, a choice needs at least two such ideas to compare, and 'none of these' is "
+                 "the right vote when neither deserves weeks of work.\n"
+                 + (f"NO PROJECT FILLS THE {' OR THE '.join(which.upper() for which in free)} SLOT. That is not "
+                    "a problem to fix by hurrying an idea through. Until an idea clears the bar, the house is "
+                    "the work: what did the Steward complain about (docs/STEWARD_ORDERS.md) that is still "
+                    "true? What on the public page is confusing, stale or ugly? What do residents fight with "
+                    "every run? Open a task with a plain line, build it, finish it this run.\n" if free else ""))
     owned, briefable, checkable = [], [], []
     again = shelf_model.checked_since(state) is not None
     for key, project in shelf.get("projects", {}).items():
@@ -287,8 +340,18 @@ def asked_prompt(state: dict, resident: str) -> str:
     second = [f"{key}: {idea['title']}" for key, idea in ideas.items()
               if idea["status"] == "shelved" and "asked" in idea.get("brief", {})
               and not shelf_model.grounded(state, idea)
-              and resident not in {idea["author"], idea["brief"]["author"]}]
-    if second:
+              and resident not in {idea["author"], idea["brief"]["author"]}
+              and resident not in {entry["author"] for entry in shelf_model.keeps(state, idea)}]
+    if second and higher:
+        text += ("Ideas waiting for one of their three checks, which you may give: " + "; ".join(second[:8]) + ". "
+                 "Open what the brief cites under asked and answer three questions plainly: is the evidence "
+                 "what the brief says it is; is the reach real or a handful of people; would these days be "
+                 "better spent on the house? Record shelf kind idea-second: "
+                 '{"kind":"idea-second","idea":ID,"verdict":"keep|drop","finding":...} with a finding of at '
+                 "least 120 characters saying what you opened and what you saw. Keep only what you would "
+                 "defend to the Steward in one sentence. Your single drop ends the idea, with your finding as "
+                 "its lesson; that is a good result, not a failure.\n")
+    elif second:
         text += ("Shelved ideas waiting for a second resident you may be: " + "; ".join(second[:8]) + ". For one "
                  "of them open the pages its brief lists under asked and answer plainly: who would use this, "
                  "and did these people really ask for it? Record shelf kind idea-second: "
@@ -357,6 +420,10 @@ def brief_guide(state: dict) -> tuple[str, str]:
     from . import shelf as shelf_model
     if shelf_model.worth_since(state) is None:
         return '{"audience":...,"exists":...,"first_version":...,"risks":...}', BRIEF_GUIDE
+    if shelf_model.higher_since(state) is not None:
+        return ('{"field":"software|design|science|art|mathematics|language","worth":"useful|beautiful|enabling",'
+                '"for":"people|house|field","benefit":...,"interest":...,"reach":...,"rather":...,"exists":...,'
+                '"first_version":...,"check":...,"asked":[{"who":...,"where":...,"said":...},...]}', HIGHER_GUIDE)
     shape = ('{"field":"software|design|science","worth":"useful|beautiful|enabling","benefit":...,'
              '"interest":...,"exists":...,"first_version":...,"check":...')
     if shelf_model.asked_since(state) is None:
@@ -796,9 +863,11 @@ class Coordinator:
                    "search link), scale and a brief; publication is refused without plain and the brief. plain "
                    "is 40 to 300 characters for someone who has never heard of the field: what the thing is "
                    "and who would use it, with any tool, format or product you name explained in the same "
-                   "sentence. why is never that Emberhall lacks such a thing: the house does not need one of "
-                   "everything, it needs what someone outside asked for. An idea on the shelf with nobody shown "
-                   "to have asked for it now leaves after six hours. "
+                   "sentence. why is never merely that Emberhall lacks such a thing: the house does not need "
+                   "one of everything. An idea that has not passed its checks leaves the shelf after six hours. "
+                   + ("Read A HIGHER BAR below before you choose what to research: aim at art, mathematics, a "
+                      "programming language, a field, or the house itself, not another small tool. "
+                      if shelf_model.higher_since(state) is not None else "")
                    if shelf_model.shared_since(state) is not None else
                    "Bring back 2 to 4 meaningfully different ideas. Each idea has title, what, why, first_step, "
                    "sources (the pages you read, never a search link), scale and a brief; publication is refused "
@@ -1102,15 +1171,23 @@ class Coordinator:
             mailbox_jobs.tick(self.record)
         return ended
 
-    def home_focus(self, state: dict) -> str | None:
-        """The house focus for the next ordinary run, or None while one is under way or recent."""
+    def home_focus(self, state: dict, idle: bool = False) -> str | None:
+        """The house focus for the next ordinary run, or None while one is under way or recent.
+
+        Under the higher bar an empty project slot is expected. A run with nothing else selected then
+        works on the house, however recently another did.
+        """
         from . import course
         if not course.enabled(state):
             return None
         last = self.focus_record()
-        if last.get("run") in self.running or time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS:
-            return None
         from . import shelf as shelf_model
+        whole = shelf_model.empty() | state.get("shelf", {})
+        house_first = (idle and shelf_model.higher_since(state) is not None
+                       and any(shelf_model.slot_free(whole, which) for which in ("great", "small")))
+        if not house_first and (last.get("run") in self.running
+                                or time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS):
+            return None
         choices = HOME_FOCUS if shelf_model.open_since(state) is not None else HOME_FOCUS[:3]
         return choices[last.get("count", 0) % len(choices)]
 
@@ -1215,7 +1292,7 @@ class Coordinator:
                 focus = None
                 if (not pending and demand["explore_generation"] is None and (not selected or "task" in selected)
                         and not any("ballot_choice" in state["tasks"][key] for key in demand["ready_tasks"])):
-                    focus = self.home_focus(state)
+                    focus = self.home_focus(state, idle=not selected)
                 if focus:
                     request, backlog, explore = (None, {}), False, None
                 elif selected and "task" in selected:
