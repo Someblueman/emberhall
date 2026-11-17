@@ -1717,7 +1717,7 @@ function renderAssayRoom(content) {
     ["outcome","Run outcome",[["all","All outcomes"],["success","Success"],["other","Other or unfinished"]]]
   ]) {
     const wrapper=html("label","small",label,controls),select=html("select","",undefined,wrapper);
-    select.id=`assay-${key}`;
+    select.id=`assay-${key}`;wrapper.setAttribute("for",select.id);
     for(const [value,title] of options){const opt=html("option","",title,select);opt.value=value;}
     select.value=assayState[key];
     select.addEventListener("change",()=>{
@@ -1727,7 +1727,7 @@ function renderAssayRoom(content) {
   const searchRow=html("div","workshop-search",undefined,panel);
   const searchWrap=html("label","small","Search reviews, tasks or commits",searchRow);
   const search=html("input","",undefined,searchWrap);
-  search.id="assay-search";search.type="search";search.placeholder="Resident, task name, or commit";
+  search.id="assay-search";searchWrap.setAttribute("for",search.id);search.type="search";search.placeholder="Resident, task name, or commit";
   search.value=assayState.query;search.setAttribute("aria-describedby","assay-results");
   search.addEventListener("input",()=>{
     assayState.query=search.value;assayState.reviews=0;assayState.commits=0;draw();
