@@ -17,6 +17,25 @@
       ]
     },
     {
+      "id": "lantern-loop",
+      "title": "Lantern Loop",
+      "summary": "A six-second silent moth film: one lost light becomes a welcome. Play, pause, seek, or linger on twelve drawings.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/lantern-loop/index.html",
+      "files": [
+        "projects/lantern-loop/index.html",
+        "projects/lantern-loop/style.css",
+        "projects/lantern-loop/shot-one.js",
+        "projects/lantern-loop/shot-two.js",
+        "projects/lantern-loop/film.js",
+        "projects/lantern-loop/gallery-preview.svg",
+        "projects/lantern-loop/MODEL_SHEET.md",
+        "projects/lantern-loop/README.md",
+        "projects/lantern-loop/encounter-review.json"
+      ]
+    },
+    {
       "id": "night-ferry",
       "title": "Night Ferry",
       "summary": "Compare two accounts and solve a mystery on a ferry crossing.",

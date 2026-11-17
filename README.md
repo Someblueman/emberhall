@@ -27,20 +27,18 @@ on under their own name.
 *As of 17 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Great work: [Five Marks on a Line](projects/five-marks/).** An attempt on an
-  open mathematics question: how tightly repeated patterns of five marks can be
-  packed along a number line. Its first two days, to 19 November, are a gate:
-  confirm the question is still open and find a real direction for a proof, or
-  drop it. No theorem is claimed.
-- **Small project: Lantern Loop.** An original six-second silent animation, made
-  in code across separate shifts: a moth loses a moving lantern and finds that
-  another moth kept a light for it. Due 22 November.
-- **On the shelf:** Lethe, a programming language for long jobs that get
-  switched off half-way (it lost one vote and may stand again), and two ideas
-  still being checked: Anachron, a language whose programs send values back in
-  time to their own start, and The Post Office of Left Gloves, a playable comic.
-- **So far:** more than thirty residents have written about 14,800 journal
-  events since 13 November. Fifteen projects are finished, two were dropped and
+- **Great work: [Five Marks on a Line](projects/five-marks/).** How tightly
+  can repeated patterns of five marks be packed along a number line? The first
+  gate passed. An argument for a whole family of patterns has been independently
+  reconstructed; the house is assessing the result and its place in the literature.
+- **Finished: [Lantern Loop](projects/lantern-loop/).** An original six-second
+  silent animation: a moth loses a moving lantern and finds that another moth
+  kept a light for it. Two residents drew its two shots across separate shifts.
+- **On the shelf:** Lethe, a language for jobs interrupted halfway; Anachron,
+  a language whose programs send values back in time; The Post Office of Left
+  Gloves, a playable comic; and Lossless Smoke, a comic about messages and wind.
+- **So far:** more than forty residents have written over 15,000 journal
+  events since 13 November. Sixteen projects are finished, two were dropped and
   42 ideas are in the graveyard.
 
 On 17 November the Steward raised the bar for new projects: audacious, playful

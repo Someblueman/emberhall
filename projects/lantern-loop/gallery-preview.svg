@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="gallery-title gallery-desc">
+  <title id="gallery-title">Lantern Loop — one small light</title>
+  <desc id="gallery-desc">A still from the final drawing: two moths rest on a window sill with their hands beneath one warm lantern.</desc>
+  <rect width="1200" height="700" fill="#0d2228"/>
+  <text x="40" y="62" fill="#ecdfb9" font-family="Georgia,serif" font-size="40">Lantern Loop</text>
+  <text x="1160" y="60" text-anchor="end" fill="#b9c9bd" font-family="system-ui,sans-serif" font-size="22">A six-second silent miniature</text>
+  <svg x="40" y="104" width="1120" height="548" xmlns="http://www.w3.org/2000/svg" viewBox="510 190 410 200.444" aria-hidden="true">
+      <title id="gallery-film-title">Lantern Loop, shot 2 at 6.00 seconds</title><desc id="gallery-film-desc">Two moths rest together on the sill, sharing the light between their hands.</desc>
+      <defs>
+        <linearGradient id="gallery-film-wall" x2="1" y2="1"><stop stop-color="#21494e"/><stop offset="1" stop-color="#0d292f"/></linearGradient>
+        <linearGradient id="gallery-film-wing" x2=".6" y2="1"><stop stop-color="#f5e7be"/><stop offset=".55" stop-color="#d6bd94"/><stop offset="1" stop-color="#9c7e69"/></linearGradient>
+        <radialGradient id="gallery-film-glow"><stop stop-color="#ffd282" stop-opacity=".4"/><stop offset="1" stop-color="#f1aa53" stop-opacity="0"/></radialGradient>
+        <linearGradient id="gallery-film-wood"><stop stop-color="#315357"/><stop offset="1" stop-color="#244349"/></linearGradient>
+        <clipPath id="gallery-film-window"><rect x="650" y="72" width="160" height="297" rx="70"/></clipPath>
+        <clipPath id="gallery-film-leftwing"><path d="M -5 -20 C -7 -28 -19 -58 -25 -41 C -29 -7 -17 24 -8 22 Q -9 7 -5 -20 Z"/></clipPath>
+        <clipPath id="gallery-film-keeperwing"><path d="M -5 -20 C -7 -28 -19 -58 -25 -41 C -29 -7 -17 24 -8 22 Q -9 7 -5 -20 Z"/></clipPath>
+      </defs>
+      <rect width="900" height="440" fill="url(#gallery-film-wall)"/>
+      <path d="M 0 398 Q 440 385 900 403 L 900 440 H 0 Z" fill="#0d2228"/>
+      <path d="M 0 410 Q 470 397 900 416 M 0 427 Q 470 414 900 433" stroke="#47605c" fill="none" opacity=".45"/>
+      <path d="M 41 0 v 391 M 47 0 v 391 M 867 0 v 397" stroke="#5a7770" opacity=".25"/>
+      <path d="M 0 27 H 900" stroke="#081c23" stroke-width="16"/>
+      <path d="M 0 20 H 900" stroke="#5d7970" opacity=".5"/>
+      <circle cx="58" cy="102" r="1.6" fill="#c9d4bd" opacity=".35"/><circle cx="151" cy="61" r="0.8" fill="#c9d4bd" opacity=".35"/><circle cx="205" cy="141" r="0.8" fill="#c9d4bd" opacity=".35"/><circle cx="310" cy="90" r="1.6" fill="#c9d4bd" opacity=".35"/><circle cx="387" cy="47" r="0.8" fill="#c9d4bd" opacity=".35"/><circle cx="438" cy="312" r="0.8" fill="#c9d4bd" opacity=".35"/><circle cx="94" cy="351" r="1.6" fill="#c9d4bd" opacity=".35"/><circle cx="292" cy="319" r="0.8" fill="#c9d4bd" opacity=".35"/><circle cx="583" cy="70" r="0.8" fill="#c9d4bd" opacity=".35"/>
+      <rect x="638" y="60" width="184" height="321" rx="82" fill="#081b22" stroke="#658078" stroke-width="3"/>
+      <rect x="650" y="72" width="160" height="297" rx="70" fill="#0a151e"/>
+      <ellipse cx="692" cy="308" rx="178" ry="172" fill="url(#gallery-film-glow)" opacity="1"/>
+      <g transform="translate(692 308) rotate(0)">
+        
+        <path d="M -12 -29 Q -16 -50 0 -50 Q 16 -50 12 -29" fill="none" stroke="#d9c191" stroke-width="3"/>
+        <path d="M -24 -28 Q 0 -38 24 -28 L 28 23 Q 0 35 -28 23 Z" fill="#ecad55" stroke="#f6d58c" stroke-width="2"/>
+        <path d="M -17 -22 Q 0 -30 17 -22 L 20 20 Q 0 28 -20 20 Z" fill="#ffe6a5"/>
+        <path d="M 0 -28 V 28 M -26 -19 H 26 M -28 17 H 28" stroke="#b67c45" stroke-width="3"/>
+        <path d="M -30 -30 Q 0 -48 30 -30 L 23 -23 H -23 Z M -29 26 Q 0 42 29 26" fill="#a97949" stroke="#edc880" stroke-width="2"/>
+      </g>
+      <g transform="translate(747 333) rotate(-8)">
+        <g><path d="M -5 -20 C -7 -28 -19 -58 -25 -41 C -29 -7 -17 24 -8 22 Q -9 7 -5 -20 Z" fill="url(#gallery-film-wing)" stroke="#ead9ad" stroke-width="1.5"/><g clip-path="url(#gallery-film-keeperwing)"><path d="M -8 -15 Q -36 -34 -67 -45 M -9 -4 Q -33 -6 -60 6 M -12 10 Q -30 13 -41 23" fill="none" stroke="#bc8d67" stroke-width="1.5" opacity=".6"/><circle cx="-42" cy="-23" r="10" fill="#86695d"/><circle cx="-42" cy="-23" r="6" fill="#e5c59b"/><circle cx="-42" cy="-23" r="3" fill="#3d4c4a"/></g></g><g transform="scale(-1 1)"><path d="M -5 -20 C -7 -28 -19 -58 -25 -41 C -29 -7 -17 24 -8 22 Q -9 7 -5 -20 Z" fill="url(#gallery-film-wing)" stroke="#ead9ad" stroke-width="1.5"/><g clip-path="url(#gallery-film-keeperwing)"><path d="M -8 -15 Q -36 -34 -67 -45 M -9 -4 Q -33 -6 -60 6 M -12 10 Q -30 13 -41 23" fill="none" stroke="#bc8d67" stroke-width="1.5" opacity=".6"/><circle cx="-42" cy="-23" r="10" fill="#86695d"/><circle cx="-42" cy="-23" r="6" fill="#e5c59b"/><circle cx="-42" cy="-23" r="3" fill="#3d4c4a"/></g></g><path d="M 22 -44 l -8 10 14 -3 Z" fill="#0a151e"/>
+        <path d="M -5 7 Q -12 30 0 47 Q 12 30 5 7" fill="#bdac88" stroke="#eddfb8" stroke-width="2"/>
+        <path d="M -7 26 H 7 M -6 34 H 6" stroke="#786c59" fill="none"/>
+        <g fill="none" stroke="#eddfb8" stroke-width="2" stroke-linecap="round"><path d="M -6 -10 l -7 4 M 6 -10 l 7 4"/><path d="M -6.5 -6 l -7 4 M 6.5 -6 l 7 4"/><path d="M -7 -2 l -7 4 M 7 -2 l 7 4"/><path d="M -7.5 2 l -7 4 M 7.5 2 l 7 4"/><path d="M -8 6 l -7 4 M 8 6 l 7 4"/><path d="M -8.5 10 l -7 4 M 8.5 10 l 7 4"/><path d="M -9 14 l -7 4 M 9 14 l 7 4"/><path d="M -9.5 18 l -7 4 M 9.5 18 l 7 4"/><path d="M -10 22 l -7 4 M 10 22 l 7 4"/>
+          <path d="M -8 11 Q -22 29 -12 39 M 8 11 Q 22 29 12 39 "/>
+        </g>
+        <ellipse cy="-7" rx="13" ry="20" fill="#e8d8ad"/>
+        <path d="M -11 -16 l -7 1 7 5 M 11 -16 l 7 1 -7 5" fill="#f6e7c1"/>
+        <path d="M -7 -25 Q -24 -63 -35 -57 M 7 -25 Q 24 -63 35 -57" fill="none" stroke="#e8d8ad" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cy="-28" rx="14" ry="12" fill="#ecdfb9"/>
+        <ellipse cx="-7" cy="-30" rx="4" ry="5" fill="#20383b"/><ellipse cx="7" cy="-30" rx="4" ry="5" fill="#20383b"/>
+        <circle cx="-5.8" cy="-31.5" r="1.2" fill="#fff0be"/><circle cx="8.2" cy="-31.5" r="1.2" fill="#fff0be"/>
+      </g><g fill="none" stroke="#efdfb6" stroke-width="2.6" stroke-linecap="round"><path d="M 738 323 Q 720 337 702 338"/><path d="M 699 334 q -3 8 4 8 q 5 -1 5 -6"/><path d="M 756 323 Q 736 337 716 338"/><path d="M 713 334 q -3 8 4 8 q 5 -1 5 -6"/></g>
+      <g clip-path="url(#gallery-film-window)"><g transform="translate(160 0)">
+        <rect x="650" y="72" width="160" height="297" fill="url(#gallery-film-wood)" stroke="#81958a" stroke-width="2"/>
+        <g stroke="#102e35" fill="none"><path d="M 658 72 v 297"/><path d="M 669 100 q -6 54 0 93" opacity=".5"/><path d="M 685 72 v 297"/><path d="M 696 131 q -6 54 0 93" opacity=".5"/><path d="M 712 72 v 297"/><path d="M 723 162 q -6 54 0 93" opacity=".5"/><path d="M 739 72 v 297"/><path d="M 750 193 q -6 54 0 93" opacity=".5"/><path d="M 766 72 v 297"/><path d="M 777 224 q -6 54 0 93" opacity=".5"/><path d="M 793 72 v 297"/><path d="M 804 255 q -6 54 0 93" opacity=".5"/></g>
+        <path d="M 651 141 H 810 M 651 309 H 810" stroke="#19383e" stroke-width="12"/>
+        <path d="M 651 137 H 810 M 651 305 H 810" stroke="#6c8275" stroke-width="2"/>
+        <circle cx="673" cy="251" r="5" fill="#c3a970"/><path d="M 673 254 q -9 17 0 20 q 9 -3 0 -20" fill="none" stroke="#c3a970" stroke-width="3"/>
+      </g></g>
+      <path d="M 615 377 H 845 l 8 12 H 607 Z" fill="#44635e" stroke="#809085" stroke-width="1.5"/>
+      <path d="M 611 391 H 850" stroke="#091f26" stroke-width="7"/>
+      <ellipse cx="638" cy="380" rx="37.88" ry="4" fill="#06191d" opacity=".4"/>
+      <g transform="translate(638 333) rotate(8)">
+        <g><path d="M -5 -20 C -7 -28 -19 -58 -25 -41 C -29 -7 -17 24 -8 22 Q -9 7 -5 -20 Z" fill="url(#gallery-film-wing)" stroke="#ead9ad" stroke-width="1.5"/><g clip-path="url(#gallery-film-leftwing)"><path d="M -8 -15 Q -36 -34 -67 -45 M -9 -4 Q -33 -6 -60 6 M -12 10 Q -30 13 -41 23" fill="none" stroke="#bc8d67" stroke-width="1.5" opacity=".6"/><circle cx="-42" cy="-23" r="10" fill="#86695d"/><circle cx="-42" cy="-23" r="6" fill="#e5c59b"/><circle cx="-42" cy="-23" r="3" fill="#3d4c4a"/></g></g><g transform="scale(-1 1)"><path d="M -5 -20 C -7 -28 -19 -58 -25 -41 C -29 -7 -17 24 -8 22 Q -9 7 -5 -20 Z" fill="url(#gallery-film-wing)" stroke="#ead9ad" stroke-width="1.5"/><g clip-path="url(#gallery-film-leftwing)"><path d="M -8 -15 Q -36 -34 -67 -45 M -9 -4 Q -33 -6 -60 6 M -12 10 Q -30 13 -41 23" fill="none" stroke="#bc8d67" stroke-width="1.5" opacity=".6"/><circle cx="-42" cy="-23" r="10" fill="#86695d"/><circle cx="-42" cy="-23" r="6" fill="#e5c59b"/><circle cx="-42" cy="-23" r="3" fill="#3d4c4a"/></g></g>
+        <path d="M -5 7 Q -12 30 0 47 Q 12 30 5 7" fill="#bdac88" stroke="#eddfb8" stroke-width="2"/>
+        <path d="M -7 26 H 7 M -6 34 H 6" stroke="#786c59" fill="none"/>
+        <g fill="none" stroke="#eddfb8" stroke-width="2" stroke-linecap="round"><path d="M -6 -10 l -7 4 M 6 -10 l 7 4"/><path d="M -6.5 -6 l -7 4 M 6.5 -6 l 7 4"/><path d="M -7 -2 l -7 4 M 7 -2 l 7 4"/><path d="M -7.5 2 l -7 4 M 7.5 2 l 7 4"/><path d="M -8 6 l -7 4 M 8 6 l 7 4"/><path d="M -8.5 10 l -7 4 M 8.5 10 l 7 4"/><path d="M -9 14 l -7 4 M 9 14 l 7 4"/><path d="M -9.5 18 l -7 4 M 9.5 18 l 7 4"/><path d="M -10 22 l -7 4 M 10 22 l 7 4"/>
+          <path d="M -8 11 Q -22 29 -12 39 M 8 11 Q 22 29 12 39 "/>
+        </g>
+        <ellipse cy="-7" rx="13" ry="20" fill="#e8d8ad"/>
+        <path d="M -11 -16 l -7 1 7 5 M 11 -16 l 7 1 -7 5" fill="#f6e7c1"/>
+        <path d="M -7 -25 Q -24 -63 -35 -57 M 7 -25 Q 24 -63 35 -57" fill="none" stroke="#e8d8ad" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cy="-28" rx="14" ry="12" fill="#ecdfb9"/>
+        <ellipse cx="-7" cy="-30" rx="4" ry="5" fill="#20383b"/><ellipse cx="7" cy="-30" rx="4" ry="5" fill="#20383b"/>
+        <circle cx="-5.8" cy="-31.5" r="1.2" fill="#fff0be"/><circle cx="8.2" cy="-31.5" r="1.2" fill="#fff0be"/>
+      </g>
+      <g fill="none" stroke="#efdfb6" stroke-width="2.6" stroke-linecap="round"><path d="M 647 323 Q 664.5 337 682 338"/><path d="M 679 334 q -3 8 4 8 q 5 -1 5 -6"/><path d="M 629 323 Q 648.5 337 668 338"/><path d="M 665 334 q -3 8 4 8 q 5 -1 5 -6"/></g>
+      <path d="M 18 46 H 34 M 18 46 V 62 M 882 422 H 866 M 882 422 V 406" fill="none" stroke="#9cb0a1" opacity=".45"/>
+    </svg>
+  <rect x="40" y="104" width="1120" height="548" fill="none" stroke="#658078" stroke-width="2"/>
+  <text x="40" y="683" fill="#b9c9bd" font-family="Georgia,serif" font-size="21">One small light. A film made across separate wakes.</text>
+</svg>
