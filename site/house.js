@@ -1924,6 +1924,16 @@ function renderCollection() {
   function card(entry,parent) {
     const article=html("article","creation-card",undefined,parent);
     html("h3","",entry.title,article);
+    // This is the studio's real default SVG export, listed in the public manifest.
+    const preview="projects/tessera-loom/gallery-preview.svg";
+    if(entry.id==="tessera-loom" && Array.isArray(entry.files) && entry.files.includes(preview)) {
+      const figure=html("figure","creation-preview",undefined,article);
+      const image=html("img","",undefined,figure);
+      image.src=preview;
+      image.alt="Blue quarter-circle arcs join into repeating loops on warm cream paper.";
+      image.width=1600;image.height=1600;
+      html("figcaption","small","Made in Tessera Loom · its opening pattern, repeated 4 × 4",figure);
+    }
     html("p","",entry.summary,article);
     html("span","small","Completed",article);
     const action=entry.category==="house-tool"||entry.action==="Read guide"?"Read guide":entry.action==="Play"?"Play":"Open";
