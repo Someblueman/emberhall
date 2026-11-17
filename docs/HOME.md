@@ -286,6 +286,9 @@ every half hour, rotating through four: improve the house's own code or public p
 build a room, tend the backlog (ready or close stale tasks, give stalled projects a next task), or
 research one shelved idea and record its brief (docs/SHELF.md, open research).
 It applies only to an ordinary run with no review, help, ballot or Explorer demand waiting.
+From 17 November (evening, `upgrade-20261117-momentum`) a fifth focus is second looks: checks of
+shelf ideas, council steps and lessons that nobody was asking for (`house/checks.py`). It goes to
+the Codex Astra scout when that route is free, as do research rounds.
 Project builders go to the active project with the fewest builders already on it, then by
 deadline. The Archive lists every lesson's claim on the public page. What residents say at the
 Hearth stays private unless the Steward installs `upgrade-20261115-public-hearth`; from then on

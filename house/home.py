@@ -83,6 +83,9 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
                         and model_available(state, kind, model, now) for model in providers.MODELS[kind])
                 for resident in state["residents"])]
     if exploring:
+        from . import course
+        if providers.SCOUT[0] in available and course.scout(state, now):
+            return providers.SCOUT[0]   # the Steward's Astra resident drives research while it can
         different = [kind for kind in available if kind != state.get("shelf", {}).get("last_kind")]
         available = different or available
     if preferred in available:
@@ -151,6 +154,9 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
 
 
 HOME_FOCUS = ("improve", "room", "tend", "research")
+# Second looks (Steward, 17 November, evening): after the momentum migration every fifth house run
+# is given to checks nobody was asking for, and goes to the Astra scout when it is free.
+CHECKS_FOCUS = "checks"
 # What a research brief must say; the reducer (house/shelf.py) checks the four parts exist.
 BRIEF_GUIDE = (
     "A brief has four parts, each at least 120 characters of plain prose: audience (one specific kind of person "
@@ -265,10 +271,13 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "THE BAR: a brief now says whom the work is for (people, house, field or play), its reach and why it "
                  "deserves the days rather than house work, with evidence that fits (shape below). Three "
                  "residents of at least two kinds of mind must each open that evidence and keep the idea; one "
-                 "who says drop ends it, and saying drop is a service. An idea waits six hours before it can "
+                 "who says drop ends it, and saying drop is a service. "
+                 + ("A kept small idea waits one hour (since 17 November, evening; a great one still waits "
+                    "six) before it can " if shelf_model.momentum_since(state) is not None else
+                    "An idea waits six hours before it can ")
                  + ("enter a choice. Every kept idea of the slot's scale that has waited enters together, so "
                     "the choice compares them; one alone gets a plain yes or no once no other kept idea of "
-                    "its scale is still inside its six hours, or once it is twelve hours old. 'None of these' "
+                    "its scale is still inside its wait, or once it is twelve hours old. 'None of these' "
                     "is the right vote when nothing deserves the weeks.\n"
                     "NO TASKS FOR CHECKS: the Steward opened the page and found eight tasks about checking "
                     "one film proposal ('Independent check A', 'a second fresh check', 'a third fresh "
@@ -309,9 +318,9 @@ def asked_prompt(state: dict, resident: str) -> str:
                 if kept["open"]:
                     text += (f"A {which.upper()} CHOICE CAN OPEN NOW, and the Steward is waiting to see a project "
                              f"start: {named(kept['now'])}. "
-                             + ("These have each been kept by three residents and waited six hours. "
+                             + ("These have each been kept by three residents and waited their time. "
                                 if len(kept["now"]) > 1 else
-                                "It has been kept by three residents, waited six hours, and no rival of its "
+                                "It has been kept by three residents, waited its time, and no rival of its "
                                 "scale is waiting: the choice is a plain yes or no. ")
                              + "If nobody has opened it when you read this, open it before other work: shelf "
                              f"choice-open with slot {which} and a plan for every idea named here (exact JSON in "
@@ -538,9 +547,13 @@ def focus_prompt(state: dict, focus: str) -> str:
         rooms = state.get("life", {}).get("rooms", {})
         names = ", ".join(f"{room['name']} ({room['status']})" for room in rooms.values())
         return head + (
-            "the house's rooms (docs/BUILDING.md). Rooms now: " + names + ". Room growth is on, and no room has "
-            "been planned for a long time. If a room is under construction, continue it. Otherwise decide whether "
-            "work the house already does has no place of its own, and if so build that room in this run: create "
+            "the house's rooms (docs/BUILDING.md). Rooms now: " + names + ". Room growth is on" + (
+                f"; the last room opened {max(0, round((state['at'] - newest) / 86400))} day(s) ago"
+                if (newest := max((room.get("opened_at") or 0 for room in rooms.values()), default=0)) else "")
+            + ". If a room is under construction, continue it. Otherwise decide whether "
+            "work the house already does has no place of its own (name what you looked at: for example a "
+            "visitor cannot yet see the Steward's standing orders and wishes and what the house did about "
+            "each), and if so build that room in this run: create "
             "and claim a task, record life kind room-plan (room, expect 0, name, purpose, reason, floor 0, task), "
             "build what the room holds (a page, a tool or a view of the record that people can use), finish the "
             "task with its artifacts, then record room-open with evidence. A room must hold something real; do "
@@ -964,12 +977,24 @@ class Coordinator:
                 "hours while fewer than ten ideas are shelved. That decision takes precedence over the older rule "
                 "sentence that nobody researches at three or more ideas. "
                 + ("".join(
-                    f"The {which} project slot is EMPTY and fewer than two kept {which} ideas are waiting for it, so "
-                    "since 17 November rounds follow one another without the four-hour gap until that changes. "
-                    f"Bring {'a great' if which == 'great' else 'a small'} idea (scale \"{which}\"): "
+                    (f"The house keeps a bench of {shelf_model.BENCH[which]} kept {which} ideas so the next "
+                     "project can start the hour the last one ends, and the bench is short, so rounds follow one "
+                     "another without the four-hour gap until it is full. "
+                     if shelf_model.momentum_since(state) is not None else
+                     f"The {which} project slot is EMPTY and fewer than two kept {which} ideas are waiting for it, so "
+                     "since 17 November rounds follow one another without the four-hour gap until that changes. ")
+                    + f"Bring {'a great' if which == 'great' else 'a small'} idea (scale \"{which}\"): "
                     + ("weeks of work in stages. " if which == "great" else
                        "something one or two residents can finish in days and a visitor can see, run or follow. ")
                     for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
+                ("YOU ARE THE HOUSE'S SCOUT: the Steward asked that one resident on this route drive research "
+                 "for a while and take the house's second looks. You build nothing and own no project. Be bold "
+                 "in what you bring back: the Steward wants audacious, playful or deep ideas and is tired of "
+                 "cautious ones, so do not talk yourself out of a strange idea because it is strange. When your "
+                 "round is published, or if research is closed when you arrive, spend what is left of the run "
+                 "on second looks: check shelf ideas you did not write (idea-second, above) and the lessons "
+                 "listed for you, then sleep. "
+                 if assigned.get("model") == providers.SCOUT[1] and staffing.momentum(state) else "") +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
                 "After waking, read the current shelf, its graveyard (so you do not bring back what already "
                 "failed) and the active rules. Before research use shelf explore-start with current expect "
@@ -1028,8 +1053,15 @@ class Coordinator:
             assignment += course_prompt(state, assigned)
             assignment += deep_prompt(state, assigned)
             assignment += asked_prompt(state, resident)
+            from . import checks
+            second = self.focus == CHECKS_FOCUS and "task" not in assigned and not help_request
+            journal = self.record.read()[1] if checks.enabled(state) or second else None   # lesson ages
+            if not second:
+                assignment += checks.offer(state, resident, journal)
             if self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
                 assignment += focus_prompt(state, self.focus)
+            elif second:
+                assignment += checks.focus(state, resident, journal)
         from .body import PUBLIC_HEARTH
         if PUBLIC_HEARTH in state.get("maintenance", {}).get("migrations", {}):
             assignment += ("What you say with `say` is shown publicly at the Hearth on the house's page (local paths "
@@ -1094,6 +1126,10 @@ class Coordinator:
             model = course.route(state, kind, at=max(time.time(), state["at"]),
                                  strong=explore_generation is not None
                                  or course.great_project(state, bound) is not None)
+            if ((explore_generation is not None or focus == CHECKS_FOCUS) and help_id is None
+                    and task_id is None and kind == providers.SCOUT[0]
+                    and course.scout(state, max(time.time(), state["at"]))):
+                model = providers.SCOUT[1]
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         authors = set()
@@ -1311,6 +1347,8 @@ class Coordinator:
                                 or time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS):
             return None
         choices = HOME_FOCUS if shelf_model.open_since(state) is not None else HOME_FOCUS[:3]
+        if staffing.momentum(state):
+            choices = (*choices, CHECKS_FOCUS)
         return choices[last.get("count", 0) % len(choices)]
 
     def focus_record(self) -> dict:
@@ -1438,6 +1476,9 @@ class Coordinator:
                                        reviewing="review_run" in request[1], ballot_task=ballot_task)
                 if kind is None:
                     break
+                from . import course
+                if focus == CHECKS_FOCUS and course.scout(state, at):
+                    kind = providers.SCOUT[0]
                 run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True,
                                  focus=focus, **task_args)
                 if focus:

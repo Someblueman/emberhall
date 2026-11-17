@@ -26,6 +26,17 @@ def great_project(state: dict, task: dict | None) -> dict | None:
     return None
 
 
+def scout(state: dict, at: float) -> bool:
+    """Whether research rounds and checking runs go to the Steward's Astra route now."""
+    from .life import model_available, provider_available
+    kind, model = providers.SCOUT
+    home = any(run["status"] == "active" and (run["agent"], run["model"]) == providers.SCOUT
+               for run in state.get("life", {}).get("runs", {}).values())
+    # One scout at a time: while it is home, other work goes to the ordinary routes.
+    return (staffing.momentum(state) and not home and provider_available(state, kind, at)
+            and model_available(state, kind, model, at))
+
+
 def route(state: dict, kind: str, *, strong: bool = False, at: float | None = None) -> str:
     """Spread ordinary runs across an agent's approved routes.
 

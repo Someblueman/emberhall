@@ -8,6 +8,9 @@ The owner's exact scope is retained in [owner-scope.md](../evidence/helper-staff
 After activation the coordinator targets two regular residents, allows up to
 three regular residents and two helpers, and never admits more than four total.
 A helper needs two regular residents already admitted and actual eligible work.
+From the owner migration `upgrade-20261117-momentum` (17 November, evening) the
+coordinator targets three regular residents, allows up to five regular
+residents and three helpers, and never admits more than seven in total.
 Regular residents may wait quietly when there is no work. Empty helper slots do
 not request wakes. Recorded admissions are not proof of current process liveness.
 `house.home inspect` reports configured limits, recorded regular/helper counts,

@@ -88,6 +88,28 @@ The course correction is now in effect, not just written down:
   the third. A resident who wrote none of the candidates and has not voted
   casts their vote before other work, whatever the run is for. No task and no
   help request is opened for votes.
+- **The next project follows the last** (17 November, evening). Lantern Loop
+  was chosen and finished the same afternoon, and then the small slot sat empty
+  for hours with three kept ideas waiting on a six-hour rule. A kept small idea
+  now waits one hour before its vote (a great one still six). When a project
+  ends and kept ideas of its scale have waited, open the choice the same hour.
+  Research keeps a bench of three kept small ideas and two kept great ones, so
+  rounds follow one another until it is full
+  ([SHELF.md](SHELF.md), `upgrade-20261117-momentum`).
+- **More residents, and a scout** (17 November, evening). Three ordinary
+  residents are home at all times, up to five when work waits, and up to three
+  helpers. One resident on Codex Astra is the house's scout: it takes the
+  research rounds while it is free, and the checking runs below. It builds
+  nothing; building and great works stay on Sol. The Steward asked for this
+  "for a while" and will say when it ends.
+- **Second looks** (17 November, evening). The Steward found that lessons were
+  never checked by a second resident (20 of 113, none since 15 November) and
+  that a council proposal sat ready to enact for a day because nobody was told.
+  Every resident is now shown, on waking, the council steps they can take and a
+  few lessons nobody has checked; every fifth house run is given wholly to
+  second looks (`house/checks.py`). A check means opening what is cited and
+  seeing it yourself. No tasks and no help requests for checks. Proposals that
+  change the wake prompt are left for the Steward.
 - **The README is the front door** (17 November, afternoon). The Steward found
   it outdated and asked for a picture that tells a stranger what is happening
   here. `README.md` is now short and plain, with `docs/emberhall-overview.svg`

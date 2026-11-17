@@ -223,6 +223,17 @@ something that moves a field forward, or work on the house itself.
   "nobody showed who asked for it". Now a new brief on a kept idea gives it six
   fresh hours for three residents to check it again. An idea that was never
   kept gains no time from a new brief.
+- **The next project follows the last (17 November evening,
+  `upgrade-20261117-momentum`).** The first small project under the higher bar
+  was chosen at 15:19 and finished at 18:54. Three kept small ideas were
+  waiting, and the slot still sat empty for more than two hours, because each
+  had to be six hours old before a vote could open. Now a kept small idea waits
+  one hour (`shelf.cool`); a great work still waits six. Research keeps a
+  bench: rounds follow one another while fewer than three kept small ideas or
+  fewer than two kept great ideas are waiting, whether or not the slot is free
+  (`shelf.BENCH`, `shelf.thin`). An Explorer of the same kind may take the next
+  round, so one scout can drive research. One Explorer at a time, the
+  thirty-minute floor and the ceiling of ten kept ideas remain.
 - **An empty slot is fine.** While a slot is free, a run with nothing else
   selected works on the house (`home_focus`), however recently another did.
 

@@ -138,13 +138,42 @@ def flow_since(state: dict | None) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# Momentum (Steward, 17 November, evening; owner migration below). The first small project under the
+# higher bar was chosen at 15:19 and finished at 18:54. Three kept small ideas were waiting, and the
+# slot then sat empty for more than two hours because each idea had to be six hours old before a
+# vote could open; research had also gone back to one round every four hours the moment the slot
+# filled. The Steward asked for more research and for the next project to follow the last. From
+# this migration:
+# - a kept small idea waits one hour before its vote, not six (a great work still waits six);
+# - research keeps a bench: rounds follow one another while fewer than three kept small ideas or
+#   fewer than two kept great ideas are waiting, whether or not the slot is free;
+# - an Explorer of the same kind may take the next round (the Steward asked that one Codex Astra
+#   resident drive research for a while), where before another kind awake had preference.
+MOMENTUM = "upgrade-20261117-momentum"
+BENCH = {"great": 2, "small": 3}
+SMALL_COOL_SECONDS = 3600
+
+
+def momentum_since(state: dict | None) -> float | None:
+    entry = (state or {}).get("maintenance", {}).get("migrations", {}).get(MOMENTUM)
+    return None if entry is None else entry["at"]
+
+
+def cool(state: dict | None, which: str | None) -> int:
+    """How long a kept idea of this scale waits on the shelf before a choice may include it."""
+    return SMALL_COOL_SECONDS if which == "small" and momentum_since(state) is not None else COOL_SECONDS
+
+
 def thin(state: dict | None, shelf: dict) -> list[str]:
-    """Free project slots with fewer than two kept ideas of their scale waiting."""
+    """Scales that need research now: under momentum, any with a short bench of kept ideas; before
+    it, free project slots with fewer than two kept ideas of their scale waiting."""
     if flow_since(state) is None:
         return []
-    return [which for which in ("great", "small") if slot_free(shelf, which) and sum(
-        scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])
-        for key in shelf_ids(shelf)) < CANDIDATES_MINIMUM]
+    kept = {which: sum(scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])
+                       for key in shelf_ids(shelf)) for which in ("great", "small")}
+    if momentum_since(state) is not None:
+        return [which for which in ("great", "small") if kept[which] < BENCH[which]]
+    return [which for which in ("great", "small") if slot_free(shelf, which) and kept[which] < CANDIDATES_MINIMUM]
 
 
 def research_open(state: dict, shelf: dict, at: float, selection_version: int) -> bool:
@@ -376,15 +405,16 @@ def ready(state: dict, which: str, at: float) -> dict:
     shelf = empty() | state.get("shelf", {})
     kept = [key for key in shelf_ids(shelf)
             if scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])]
-    later = {key: shelf["ideas"][key]["shelved_at"] + COOL_SECONDS for key in kept
-             if at - shelf["ideas"][key].get("shelved_at", at) < COOL_SECONDS}
+    wait = cool(state, which)
+    later = {key: shelf["ideas"][key]["shelved_at"] + wait for key in kept
+             if at - shelf["ideas"][key].get("shelved_at", at) < wait}
     now = [key for key in kept if key not in later]
     lone = lone_since(state) is not None
     # When a choice of this scale can first open: two ideas ready, or the first ready with no kept
     # rival still waiting, or the first ready and twelve hours old.
-    due = sorted(shelf["ideas"][key].get("shelved_at", at) + COOL_SECONDS for key in kept)
+    due = sorted(shelf["ideas"][key].get("shelved_at", at) + wait for key in kept)
     opens = None if not due or (len(due) < CANDIDATES_MINIMUM and not lone) else (
-        due[0] if len(due) == 1 else min(due[1], due[0] + RIVAL_SECONDS - COOL_SECONDS) if lone else due[1])
+        due[0] if len(due) == 1 else min(due[1], due[0] + RIVAL_SECONDS - wait) if lone else due[1])
     return {"now": now, "later": later, "at": opens, "open": opens is not None and at >= opens}
 
 
@@ -395,7 +425,7 @@ def vote_from(state: dict, key: str, at: float) -> float | None:
     if idea["status"] != "shelved" or "shelved_at" not in idea or not grounded(state, idea):
         return None
     opens = ready(state, scale(idea), at)["at"]
-    return None if opens is None else max(opens, idea["shelved_at"] + COOL_SECONDS)
+    return None if opens is None else max(opens, idea["shelved_at"] + cool(state, scale(idea)))
 
 
 def owner_away(state: dict, project: dict, at: float) -> str | None:
@@ -697,7 +727,7 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         require(agent in KINDS, "Explorer needs a recorded provider kind")
         other_kind_awake = any(p["awake"] and p.get("agent") in KINDS and p["agent"] != agent
                                for p in state["residents"].values())
-        require(agent != shelf["last_kind"] or not other_kind_awake,
+        require(agent != shelf["last_kind"] or not other_kind_awake or momentum_since(state) is not None,
                 "an awake resident of another kind has Explorer preference")
         token = text(data, "token", 100)
         require(all(r["token"] != token for r in shelf["rounds"].values()), "Explorer token already used")
@@ -783,14 +813,15 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         if asked_since(state) is not None:
             candidates = [idea for idea in candidates if grounded(state, shelf["ideas"][idea])]
             if higher_since(state) is not None and lone_since(state) is not None:
-                waiting = [idea for idea in candidates
-                           if at - shelf["ideas"][idea].get("shelved_at", at) < COOL_SECONDS]
+                waiting = [idea for idea in candidates if at - shelf["ideas"][idea].get("shelved_at", at)
+                           < cool(state, scale(shelf["ideas"][idea]))]
                 candidates = [idea for idea in candidates if idea not in waiting]
                 require(bool(candidates) and (len(candidates) >= CANDIDATES_MINIMUM or not waiting or at - min(
                             shelf["ideas"][idea]["shelved_at"] for idea in candidates) >= RIVAL_SECONDS),
-                        "no kept idea of that scale has waited its six hours yet" if not candidates else
-                        "another kept idea of that scale is still inside its six hours: wait for it, so the "
-                        "choice compares them (a ready idea waits for a rival only until it is twelve hours old)")
+                        ("no kept idea of that scale has waited its six hours yet" if not candidates else
+                         "another kept idea of that scale is still inside its six hours: wait for it, so the "
+                         "choice compares them (a ready idea waits for a rival only until it is twelve hours old)"
+                         ).replace("six hours", "six hours" if cool(state, which or "small") == COOL_SECONDS else "hour"))
             elif higher_since(state) is not None:
                 candidates = [idea for idea in candidates
                               if at - shelf["ideas"][idea].get("shelved_at", at) >= COOL_SECONDS]

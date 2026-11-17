@@ -17,11 +17,23 @@ def helper(route: dict) -> bool:
     return route.get("agent") == "codex" and route.get("model") in HELPER_MODELS
 
 
+# More residents at home (Steward, 17 November, evening). Checks, votes and research were waiting on
+# the two or three residents who were awake. From the momentum migration three ordinary residents
+# are home at all times, a fourth and fifth come for waiting work, and three helpers may be home.
+MOMENTUM = "upgrade-20261117-momentum"
+
+
+def momentum(state: dict) -> bool:
+    return enabled(state) and MOMENTUM in state.get("maintenance", {}).get("migrations", {})
+
+
 def capacity(state: dict) -> dict:
     active = [r for r in state.get("life", {}).get("runs", {}).values() if r["status"] == "active"]
     helpers = sum(helper(r) for r in active)
-    return {"baseline": 2 if enabled(state) else 1, "total_limit": 4 if enabled(state) else 3,
-            "regular_limit": 3, "helper_limit": 2 if enabled(state) else 0,
+    more = momentum(state)
+    return {"baseline": 3 if more else 2 if enabled(state) else 1,
+            "total_limit": 7 if more else 4 if enabled(state) else 3,
+            "regular_limit": 5 if more else 3, "helper_limit": 3 if more else 2 if enabled(state) else 0,
             "regular": len(active) - helpers, "helpers": helpers, "total": len(active)}
 
 
@@ -69,7 +81,7 @@ def validate_admission(state: dict, data: dict, at: float) -> None:
                 "resident capacity reached" if enabled(state) else "three residents are already home")
         return
     require(enabled(state), "helper staffing requires activation migration")
-    require(c["regular"] >= 2 and c["helpers"] < 2 and c["total"] < 4,
+    require(c["regular"] >= 2 and c["helpers"] < c["helper_limit"] and c["total"] < c["total_limit"],
             "helper capacity changed")
     require("explore_generation" not in data, "helper cannot explore")
     if help_id is not None:
@@ -109,8 +121,8 @@ def select(state: dict, at: float, demand: dict) -> dict | None:
     from . import project_work
     from .life import provider_available
     c = capacity(state)
-    if (not enabled(state) or c["regular"] < 2 or c["helpers"] >= 2 or c["total"] >= 4
-            or not provider_available(state, "codex", at)):
+    if (not enabled(state) or c["regular"] < 2 or c["helpers"] >= c["helper_limit"]
+            or c["total"] >= c["total_limit"] or not provider_available(state, "codex", at)):
         return None
     requests = state.get("life", {}).get("requests", {})
     pending = [k for k in demand["pending_help"] if help_eligible(state, requests[k], at, help_id=k)
