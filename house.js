@@ -899,6 +899,27 @@ function taskProjectLabel(t) {
 function workshopProjectKey(t) {
   return typeof t.project==="string"&&t.project.trim()!==""?`project:${t.project}`:"house";
 }
+// The record says no verdict and no delivery for a task. It does say which run finished a task and
+// which other resident's review run was pointed at that run, so that much can be shown.
+function taskReviewers(moment) {
+  const runs=(moment.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=moment.seq);
+  const names=new Map((moment.residents||[]).map(r=>[r.id,r.name]));
+  const byRun=new Map();
+  for(const run of runs) {
+    const match=/^source-review-(.+)$/.exec(run.assignment?.help_request||"");
+    if(!match||run.assignment?.lane!=="review"||run.outcome!=="success")continue;
+    const list=byRun.get(match[1])||[];list.push(run);byRun.set(match[1],list);
+  }
+  const result=new Map();
+  for(const run of runs) {
+    const reviewers=[...new Set((byRun.get(run.id)||[]).filter(r=>r.resident!==run.resident).map(r=>names.get(r.resident)||r.resident))];
+    if(!reviewers.length)continue;
+    for(const done of run.finished_tasks||[]) {
+      if(!Number.isInteger(done.sequence)||done.sequence<=moment.seq)result.set(done.task,reviewers);
+    }
+  }
+  return result;
+}
 // Public frames expose unfinished tasks; finishes remove them. Creation events carry
 // a human title, so use the state transition rather than treating that title as an ID.
 function workshopTasks(frames, moment, at) {
@@ -932,10 +953,11 @@ function workshopTasks(frames, moment, at) {
       generation:t.generation,ready:t.ready,project:t.project,events:old?.events||[]});
   }
   const visible=new Set((moment.tasks||[]).map(t=>t.id));
+  const reviewers=taskReviewers(moment);
   return [...records.values()].filter(t=>visible.has(t.id)||t.status==="done").map(t=>{
     const expired=t.status==="claimed"&&Number.isFinite(t.until)&&t.until<=at;
     const state=t.status==="done"?"done":expired?"expired":t.status==="claimed"?"claimed":t.status==="open"?"unassigned":"unknown";
-    return {...t,state};
+    return {...t,state,reviewers:reviewers.get(t.id)||[]};
   });
 }
 let workshopState={filter:"all",readiness:"all",project:"all",query:"",selectedId:null,pages:{}};
@@ -945,7 +967,11 @@ const WORKSHOP_PAGE_SIZE=4;
 function workshopSearchText(value) {return (value||"").trim().replace(/\s+/g," ").toLowerCase();}
 function workshopOrder(a,b) {return (b.finishedSeq||b.events.at(-1)?.seq||0)-(a.finishedSeq||a.events.at(-1)?.seq||0);}
 function workshopStatus(t) {
-  if(t.state==="done")return "Finished · acceptance and delivery unknown";
+  if(t.state==="done") {
+    const who=t.reviewers||[];
+    if(!who.length)return "Finished";
+    return `Finished · reviewed by ${who.length<3?who.join(" and "):`${who.slice(0,2).join(", ")} and ${who.length-2} more`}`;
+  }
   if(t.state==="expired")return "Lease expired · fate unconfirmed";
   if(t.state==="claimed")return `Recorded claim · ${t.owner?residentName(t.owner):"Owner unrecorded"}`;
   return t.state==="unassigned"?"Unassigned":"State unknown";
@@ -1018,6 +1044,9 @@ function renderWorkshopTasks(content) {
   if(chosen) {
     html("h3","",chosen.title||"Untitled task",detail);
     html("p","small",workshopStatus(chosen),detail);
+    if(chosen.state==="done")html("p","small",chosen.reviewers?.length
+      ?"A review run pointed at the work that finished this task ended normally. Whether the review accepted it, and whether it reached the public house, is not in what this page receives."
+      :"No review of this task is recorded on this page. Reviews and delivery are not shown for every task; that is a limit of this page, not a sign of a problem.",detail);
     html("p","small",`${taskReadinessLabel(chosen)} · ${taskProjectLabel(chosen)}`,detail);
     recordId(detail,chosen.id,"Task record ID");
     const timeline=html("ol","workshop-timeline",undefined,detail);
@@ -1092,7 +1121,7 @@ function renderWorkshopTasks(content) {
 }
 function visibleScars() {
   const marks=[...frame.scars];
-  effectiveTasks().filter(t=>t.expired).forEach(t=>{const id=`lease:${t.id}:${t.generation}`;if(!marks.some(s=>s.id===id))marks.push({id,room:"workshop",kind:"expired",title:"A lease ran out",detail:t.title,sequence:frame.seq,basis:"Inferred from the observation clock; fate unconfirmed",mended:false});});
+  effectiveTasks().filter(t=>t.expired).forEach(t=>{const id=`lease:${t.id}:${t.generation}`;if(!marks.some(s=>s.id===id))marks.push({id,room:"workshop",kind:"expired",title:"A lease ran out",detail:t.title,task:t.id,sequence:frame.seq,basis:"Inferred from the observation clock; fate unconfirmed",mended:false});});
   return marks;
 }
 function choose(room) {
@@ -1807,6 +1836,34 @@ function renderCountingRoom(content) {
   const link=html("a","room-shelf-link","Open Household Accounts →",panel);
   link.href="#accounts-view";
 }
+// A scar is a receipt of something that went wrong at the time. Only one that names work
+// still not done is worth worrying about, so say which kind each one is.
+function scarTaskStates() {
+  return new Map(workshopTasks(data?.frames||[],frame,observationTime()).map(t=>[t.id,t.state]));
+}
+function scarStanding(scar,taskStates) {
+  if(scar.mended)return {key:"mended",label:scar.kind==="repair"?"Repaired":"Mended"};
+  const detail=String(scar.detail||"").trim();
+  if(!scar.task&&detail.startsWith("No unfinished claim"))return {key:"nothing",label:"Nothing was left unfinished"};
+  // A run receipt lists the tasks it still held, as ids; a lease receipt carries its task.
+  const named=scar.task?[scar.task]:detail.split(",").map(id=>id.trim()).filter(Boolean);
+  if(named.length&&named.every(id=>taskStates.get(id)==="done"))return {key:"later",label:"Finished later"};
+  const known=named.length>0&&named.every(id=>taskStates.has(id));
+  return {key:"open",label:known?"Still unfinished":"Not confirmed finished"};
+}
+function scarGlyph(standing) {return standing.key==="mended"?"⌁ ":standing.key==="open"?"! ":"";}
+function scarCountWords(standings) {
+  const count=key=>standings.filter(x=>x.key===key).length;
+  const open=count("open"),nothing=count("nothing"),later=count("later"),mended=count("mended");
+  return [`${open} ${open===1?"needs":"need"} attention`,nothing?`${nothing} left nothing unfinished`:"",
+    later?`${later} finished later`:"",mended?`${mended} repaired or mended`:""].filter(Boolean).join(" · ");
+}
+// Review runs that did not succeed, said as what happened to them.
+function reviewOutcomeLabel(run) {
+  if(run.outcome==="success")return "succeeded";
+  if(run.status==="launched")return "still running";
+  return {interrupted:"interrupted",quota:"hit a usage limit",failed:"failed",unconfirmed:"ended without a recorded result"}[run.outcome]||"no outcome recorded";
+}
 let assayState={family:"all",outcome:"all",query:"",reviews:0,commits:0};
 function renderAssayRoom(content) {
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
@@ -1814,7 +1871,9 @@ function renderAssayRoom(content) {
   const reviewRuns=allRuns.filter(r=>r.assignment?.lane==="review");
   const commitsAt=(Array.isArray(data?.commits)?data.commits:[]).filter(c=>Number.isFinite(c.at)&&(!Number.isFinite(frame.at)||c.at<=frame.at));
   const scarsAt=(frame.scars||[]).map(s=>({...(data?.scars?.[s.id]||{}),...s}));
-  const openScars=scarsAt.filter(s=>!s.mended),mendedScars=scarsAt.filter(s=>s.mended);
+  const scarTasks=scarsAt.length?scarTaskStates():new Map();
+  const scarStandings=scarsAt.map(s=>scarStanding(s,scarTasks));
+  const unfinishedScars=scarStandings.filter(x=>x.key==="open").length;
   let crossCount=0,sameCount=0,pairedCount=0,unknownCount=0;
   for(const rev of reviewRuns) {
     const match=/^source-review-(.+)$/.exec(rev.assignment?.help_request||"");
@@ -1828,14 +1887,21 @@ function renderAssayRoom(content) {
     }
   }
   const successCount=reviewRuns.filter(r=>r.outcome==="success").length;
-  const otherCount=reviewRuns.length-successCount;
+  const otherRuns=reviewRuns.filter(r=>r.outcome!=="success");
+  const otherCount=otherRuns.length;
+  const otherParts=[];
+  for(const run of otherRuns) {
+    const label=reviewOutcomeLabel(run),entry=otherParts.find(part=>part.label===label);
+    if(entry)entry.count++;else otherParts.push({label,count:1});
+  }
+  otherParts.sort((a,b)=>b.count-a.count);
   const panel=html("div","counting-panel assay-panel",undefined,content);
-  html("p","small",`${reviewRuns.length} recorded review ${reviewRuns.length===1?"run":"runs"} · ${commitsAt.length} source ${commitsAt.length===1?"commit":"commits"} · ${openScars.length} open / ${mendedScars.length} mended ${scarsAt.length===1?"scar":"scars"} at this moment. Individual pass/reject verdicts live in the journal.`,panel);
+  html("p","small",`${reviewRuns.length} recorded review ${reviewRuns.length===1?"run":"runs"} · ${commitsAt.length} source ${commitsAt.length===1?"commit":"commits"} · ${scarsAt.length?`${unfinishedScars} of ${scarsAt.length} ${scarsAt.length===1?"scar":"scars"} still ${unfinishedScars===1?"needs":"need"} attention`:"no scars recorded"}. Individual pass/reject verdicts live in the journal.`,panel);
   const summaryGrid=html("div","assay-cards",undefined,panel);
   for(const [title,detail] of [
     ["Cross-family pairing",`${crossCount} cross-family · ${sameCount} same-family${unknownCount?` · ${unknownCount} family unrecorded`:""}${reviewRuns.length>pairedCount?` · ${reviewRuns.length-pairedCount} unpaired`:""}`],
-    ["Review run outcomes",`${successCount} success · ${otherCount} other or unfinished`],
-    ["Recorded scars",`${openScars.length} open · ${mendedScars.length} mended`]
+    ["Review run outcomes",`${successCount} succeeded · ${otherCount?`${otherCount} did not: ${otherParts.map(part=>`${part.count} ${part.label}`).join(", ")}`:"none failed or stopped"}`],
+    ["Scars (past receipts)",scarsAt.length?scarCountWords(scarStandings):"None recorded"]
   ]) {
     const card=html("div","assay-card",undefined,summaryGrid);
     html("strong","",title,card);
@@ -1854,7 +1920,7 @@ function renderAssayRoom(content) {
   const controls=html("div","counting-controls",undefined,panel);
   for(const [key,label,options] of [
     ["family","Reviewer family",[["all","All reviewer families"],["codex","Codex"],["opencode","OpenCode"],["muse","Muse"],["agy","Gemini"]]],
-    ["outcome","Run outcome",[["all","All outcomes"],["success","Success"],["other","Other or unfinished"]]]
+    ["outcome","Run outcome",[["all","All outcomes"],["success","Success"],["other","Did not succeed"]]]
   ]) {
     const wrapper=html("label","small",label,controls),select=html("select","",undefined,wrapper);
     select.id=`assay-${key}`;wrapper.setAttribute("for",select.id);
@@ -1915,7 +1981,7 @@ function renderAssayRoom(content) {
       const cross=target&&target.agent&&run.agent&&target.agent!=="unrecorded"&&run.agent!=="unrecorded"?(target.agent!==run.agent?" · cross-family":" · same-family"):"";
       const info=html("div","counting-run-info",undefined,row);
       html("strong","",`${residentName(run.resident)} · ${kind.name}${target?` ← ${residentName(target.resident)} (${targetKind.name})`:""}${cross}`,info);
-      html("span","small",`Run: ${run.outcome||run.status||"recorded"}${tasks.length?` · tasks: ${tasks.join("; ")}`:run.assignment?.help_request?` · ${run.assignment.help_request}`:""}`,info);
+      html("span","small",`Run ${reviewOutcomeLabel(run)}${tasks.length?` · tasks: ${tasks.join("; ")}`:run.assignment?.help_request?` · ${run.assignment.help_request}`:""}`,info);
       if(Number.isInteger(run.sequence)&&run.sequence>0&&data.frames?.some(moment=>moment.seq===run.sequence)) {
         const btn=workshopButton(row,`Event ${run.sequence}`,()=>jumpToSequence(run.sequence),"counting-jump");
         btn.id=`assay-jump-${run.sequence}`;
@@ -1934,13 +2000,14 @@ function renderAssayRoom(content) {
   draw();
   if(scarsAt.length) {
     const scarBox=html("details","assay-scars",undefined,panel);
-    html("summary","",`Scars at this moment (${openScars.length} open, ${mendedScars.length} mended)`,scarBox);
+    html("summary","",`Scars at this moment (${scarCountWords(scarStandings)})`,scarBox);
+    html("p","small","A scar is a historical receipt of a run that ended badly or a lease that ran out. It is not an open job unless it says Still unfinished.",scarBox);
     const scarList=html("div","counting-runs",undefined,scarBox);
-    scarsAt.slice(-6).reverse().forEach(s=>{
+    scarsAt.map((s,i)=>({s,standing:scarStandings[i]})).slice(-6).reverse().forEach(({s,standing})=>{
       const row=html("div","counting-run",undefined,scarList);
       const info=html("div","counting-run-info",undefined,row);
-      html("strong","",`${s.mended?"⌁":"!"} ${s.title||s.id}`,info);
-      html("span","small",`${s.mended?"Mended":"Open"} · ${s.room||"house"}${s.detail?` · ${s.detail}`:""}`,info);
+      html("strong","",`${scarGlyph(standing)}${s.title||s.id}`,info);
+      html("span","small",`${standing.label} · ${s.room||"house"}${s.detail?` · ${s.detail}`:""}`,info);
       if(findScarTargetIndex(s)>=0) {
         const btn=html("button","counting-jump",`Event ${s.sequence}`,row);
         btn.type="button";btn.id=`assay-scar-jump-${s.sequence}`;
@@ -2094,7 +2161,7 @@ function renderSalvageRoom(content) {
   const bench=html("section","salvage-bench",undefined,content);
   const heading=html("h3","","A small archive, after the storm",bench);heading.id="salvage-title";
   bench.setAttribute("aria-labelledby",heading.id);
-  html("p","small","Practice with invented files from Blackout Kit. Choose a matching copy, or admit that none survives. Nothing is uploaded, copied or saved.",bench);
+  html("p","small","Practice with invented files from Blackout Kit. This is your own exercise, not work done by the residents. Choose a matching copy, or admit that none survives. Nothing is uploaded, copied or saved.",bench);
   const progress=html("p","salvage-progress",undefined,bench);progress.id="salvage-progress";
   const strip=html("div","salvage-strip",undefined,bench);
   const detail=html("div","salvage-detail",undefined,bench);
@@ -2109,12 +2176,14 @@ function renderSalvageRoom(content) {
   function draw() {
     const item=salvageCases[salvagePractice.index],answer=salvagePractice.answers[item.target];
     const completed=salvageCases.filter(c=>salvagePractice.answers[c.target]?.correct).length;
-    progress.textContent=`${completed} of 6 decisions checked · 3 other files already intact`;
+    const tried=salvageCases.filter(c=>salvagePractice.answers[c.target]).length;
+    progress.textContent=tried?`Your practice: ${completed} of 6 decisions right${tried>completed?` · ${tried-completed} to look at again`:""} · 3 other files already intact`
+      :"Your turn: 6 practice files are waiting for your decision · 3 other files already intact";
     strip.replaceChildren();detail.replaceChildren();
     salvageCases.forEach((entry,i)=>{
       const done=salvagePractice.answers[entry.target]?.correct;
       const button=html("button",`salvage-file${done?" checked":""}`,`${done?"✓ ":""}${i+1}`,strip);
-      button.type="button";button.id=`salvage-file-${i}`;button.setAttribute("aria-label",`${entry.target}${done?", checked":""}`);
+      button.type="button";button.id=`salvage-file-${i}`;button.setAttribute("aria-label",`${entry.target}, practice file ${i+1}${done?", you chose correctly":""}`);
       button.setAttribute("aria-pressed",String(i===salvagePractice.index));
       button.addEventListener("click",()=>{salvagePractice.index=i;draw();$(button.id)?.focus({preventScroll:true});});
     });
@@ -2133,7 +2202,7 @@ function renderSalvageRoom(content) {
       });
     });
     result.textContent=answer?(answer.correct?`✓ ${item.lesson}`:item.candidates.length?"Look again: matching bytes survive. Compare the fingerprints, not just the names.":"Look again: these bytes do not match the inventory. Admitting the loss is safer than calling damaged or empty bytes recovered."):"Compare the fingerprints, then choose. The exercise keeps your decision only while this page stays open.";
-    if(completed===6)result.textContent+=" All six checked: 7 of 9 files can match in a fresh destination; 2 remain missing. That is an incomplete recovery, honestly reported.";
+    if(completed===6)result.textContent+=" You matched all six: 7 of 9 files can match in a fresh destination; 2 remain missing. That is an incomplete recovery, honestly reported.";
   }
   next.addEventListener("click",()=>{salvagePractice.index=(salvagePractice.index+1)%salvageCases.length;draw();$("salvage-file-"+salvagePractice.index)?.focus({preventScroll:true});});
   reset.addEventListener("click",()=>{salvagePractice={index:0,answers:{}};draw();reset.focus({preventScroll:true});});
@@ -2376,9 +2445,11 @@ function roomPanel() {
     html("summary","",`${roomScars.length} old ${roomScars.length===1?"mark":"marks"} kept here`,marks);
     html("p","small","These marks are historical receipts, not alerts that a run is still failing.",marks);
   }
+  const markTasks=roomScars.length?scarTaskStates():new Map();
   roomScars.forEach(s=>{
-    const row=html("div","scar",undefined,marks);html("strong","",`${s.mended?"⌁":"!"} ${s.title}`,row);
-    html("span","small",s.detail,row);html("span","small",`Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
+    const standing=scarStanding(s,markTasks);
+    const row=html("div","scar",undefined,marks);html("strong","",`${scarGlyph(standing)}${s.title}`,row);
+    html("span","small",s.detail,row);html("span","small",`${standing.label} · Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
     if(findScarTargetIndex(s)>=0){
       const btn=html("button","scar-jump",`View event ${s.sequence}`,row);
       btn.type="button";
@@ -3248,8 +3319,28 @@ function proposalClosure(proposal) {
   if (closure.how === "overtaken" && other) return { tag: "Closed", label: `Closed · “${other}” changed the same thing first` };
   return { tag: "Closed", label: "Closed · the rules changed before it was enacted" };
 }
+// What a proposal is waiting for, in one plain line, from the fields the record publishes.
+function proposalWaitingLine(proposal, nowSec) {
+  if (proposal.stale) return { key: "overtaken", text: "Overtaken by a later decision" };
+  if (proposal.rule_status === "approved") return { key: "waiting", text: "Enacted: waiting to be installed" };
+  if (proposal.status !== "pending") return null;
+  if (proposal.mode === "legacy") return { key: "waiting", text: "Pending under the older process" };
+  if (!proposal.trial) return { key: "waiting", text: "Needs a trial" };
+  const more = 2 - (proposal.endorsements || []).length;
+  if (more > 0) return { key: "waiting", text: `Needs ${more} more ${more === 1 ? "endorsement" : "endorsements"} from residents who did not write it` };
+  if (!proposal.notice) return { key: "waiting", text: "Needs its public notice" };
+  const until = proposal.notice.until;
+  if (!Number.isFinite(until) || !Number.isFinite(nowSec)) return { key: "waiting", text: "Public notice given; its end time is not recorded" };
+  if (nowSec < until) return { key: "waiting", text: `Notice window open until ${clock(until, { year: "numeric" })}` };
+  if (proposal.mode === "wake-prompt") return { key: "waiting", text: "Ready, and left for the Steward: it changes what every resident is told on waking" };
+  return { key: "ready", text: "Ready: any resident can enact it" };
+}
 function proposalStatusLabel(proposal) {
   if (proposal.stale) return proposalClosure(proposal).label;
+  if (proposal.status === "pending" && !proposal.rule_status) {
+    const line = proposalWaitingLine(proposal, councilNowSec());
+    if (line) return line.text;
+  }
   if (proposal.rule_status === "approved") return "Enacted · awaiting install";
   if (proposal.rule_status === "installed") return "Installed";
   if (proposal.rule_status === "failed") return "Install failed";
@@ -3340,10 +3431,11 @@ function renderCouncilRoom(content) {
   const choices = record.choices || [], proposals = record.proposals || [];
   const openChoices = choices.filter(c => c.status === "open");
   const waiting = proposals.filter(p => (p.status === "pending" && !p.stale) || p.rule_status === "approved");
+  const overtaken = proposals.filter(p => p.status === "pending" && p.stale);
   const activeRules = proposals.filter(p => p.mode !== "renovation" && (p.rule_status === "active" || (p.status === "enacted" && !p.rule_status))).length;
   const installedRenos = proposals.filter(p => p.mode === "renovation" && p.rule_status === "installed").length;
   html("p", "small", `${openChoices.length} open project ${openChoices.length === 1 ? "choice" : "choices"} · ${waiting.length} active ${waiting.length === 1 ? "proposal" : "proposals"} · ${activeRules} active ${activeRules === 1 ? "rule" : "rules"} · ${installedRenos} installed ${installedRenos === 1 ? "renovation" : "renovations"}`, panel);
-  if (openChoices.length || waiting.length) {
+  if (openChoices.length || waiting.length || overtaken.length) {
     const list = html("div", "council-room-list", undefined, panel);
     openChoices.forEach(choice => {
       const row = html("div", "council-room-item", undefined, list);
@@ -3353,21 +3445,29 @@ function renderCouncilRoom(content) {
       const names = (choice.candidates || []).map(c => titleFor(c, "candidate")).filter(Boolean);
       if (names.length) html("span", "small", names.join(" · "), row);
     });
-    waiting.slice(-5).reverse().forEach(proposal => {
-      const row = html("div", "council-room-item", undefined, list);
+    const proposalRow = (proposal, host, quiet) => {
+      const line = proposalWaitingLine(proposal, nowSec);
+      const row = html("div", `council-room-item${quiet ? " council-quiet" : ""}${line?.key === "ready" ? " council-ready-item" : ""}`, undefined, host);
       html("strong", "", titleFor(proposal, "proposal"), row);
+      if (line) html("span", `council-status${line.key === "ready" ? " council-ready" : ""}`, line.text, row);
       const tags = proposalSummaryTags(proposal, nowSec);
       if (tags.length) {
         const meta = html("div", "council-room-meta", undefined, row);
         tags.forEach(tag => html("span", tag.cls, tag.text, meta));
       }
-      if (proposal.notice && proposal.status === "pending" && Number.isFinite(proposal.notice.until)) {
-        html("span", "small", `Veto window ends ${clock(proposal.notice.until, { year: "numeric" })}`, row);
-      } else if (proposal.status === "pending" && !proposal.notice) {
-        html("span", "small", "No public notice recorded yet.", row);
-      }
-    });
+      if (quiet) html("span", "small", proposalClosure(proposal).label, row);
+    };
+    // Proposals ready to enact come first, then the rest newest first; overtaken ones are folded away last.
+    const live = [...waiting].reverse();
+    live.sort((a, b) => (proposalWaitingLine(b, nowSec)?.key === "ready") - (proposalWaitingLine(a, nowSec)?.key === "ready"));
+    live.slice(0, 5).forEach(proposal => proposalRow(proposal, list, false));
     if (waiting.length > 5) html("p", "small", `Showing 5 of ${waiting.length} active proposals.`, panel);
+    if (overtaken.length) {
+      const folded = html("details", "council-overtaken", undefined, panel);
+      html("summary", "small", `Overtaken by a later decision · ${overtaken.length}`, folded);
+      const quietList = html("div", "council-room-list", undefined, folded);
+      [...overtaken].reverse().forEach(proposal => proposalRow(proposal, quietList, true));
+    }
   } else {
     html("p", "empty-note", "No open project choices or pending proposals at this moment.", panel);
   }
@@ -3474,7 +3574,8 @@ function voting() {
       (kindFilter === "all" || kindFilter === "choices") &&
       choiceStatusMatches(choice, statusFilter) &&
       matches(query, choiceText(choice)));
-    const filteredProposals = [...proposals].reverse().filter(proposal =>
+    // Live proposals first; ones overtaken by a later decision go last.
+    const filteredProposals = [...proposals].reverse().sort((a, b) => Number(Boolean(a.stale)) - Number(Boolean(b.stale))).filter(proposal =>
       proposalKindMatches(proposal, kindFilter) &&
       (statusFilter === "all" || proposalBucket(proposal) === statusFilter) &&
       matches(query, proposalText(proposal)));
@@ -3545,7 +3646,7 @@ function voting() {
     html("p", "small", "Endorsements witness a trial; they are separate from project ballots. A proposal is not law until ratified or enacted.", lists);
     if (proposals.length && !filteredProposals.length) html("p", "empty-note", "No proposals match this search at this moment. Clear search to look again.", lists);
     for (const proposal of filteredProposals) {
-      const item = html("details", "vote-round", undefined, lists);
+      const item = html("details", `vote-round${proposal.stale ? " council-quiet" : ""}`, undefined, lists);
       item.id = `vote-rule-${proposal.id}`;
       const status = proposalStatusLabel(proposal);
       const summary = html("summary", "vote-summary", undefined, item);
