@@ -1667,7 +1667,7 @@ function renderCountingRoom(content) {
   const link=html("a","room-shelf-link","Open Household Accounts →",panel);
   link.href="#accounts-view";
 }
-let assayState={family:"all",outcome:"all",query:""};
+let assayState={family:"all",outcome:"all",query:"",reviews:0,commits:0};
 function renderAssayRoom(content) {
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
   const runsById=new Map(allRuns.map(r=>[r.id,r]));
@@ -1694,85 +1694,104 @@ function renderAssayRoom(content) {
   const summaryGrid=html("div","assay-cards",undefined,panel);
   for(const [title,detail] of [
     ["Cross-family pairing",`${crossCount} cross-family · ${sameCount} same-family${unknownCount?` · ${unknownCount} family unrecorded`:""}${reviewRuns.length>pairedCount?` · ${reviewRuns.length-pairedCount} unpaired`:""}`],
-    ["Review run outcomes",`${successCount} success · ${otherCount} other/quota`],
+    ["Review run outcomes",`${successCount} success · ${otherCount} other or unfinished`],
     ["Recorded scars",`${openScars.length} open · ${mendedScars.length} mended`]
   ]) {
     const card=html("div","assay-card",undefined,summaryGrid);
     html("strong","",title,card);
     html("span","small",detail,card);
   }
+  html("p","small","A successful run may accept or reject source. These are process outcomes, not source verdicts or delivery receipts.",panel);
+  const taskNames=new Map();
+  for(const moment of [...(data.frames||[]),frame]) {
+    if(moment.seq>frame.seq)continue;
+    for(const task of moment.tasks||[])taskNames.set(task.id,task);
+  }
+  const targetOf=run=>runsById.get(/^source-review-(.+)$/.exec(run.assignment?.help_request||"")?.[1]);
+  const tasksOf=run=>(targetOf(run)?.finished_tasks||[])
+    .filter(task=>!Number.isInteger(task.sequence)||task.sequence<=frame.seq)
+    .map(task=>({id:task.task,...taskNames.get(task.task)}));
   const controls=html("div","counting-controls",undefined,panel);
   for(const [key,label,options] of [
     ["family","Reviewer family",[["all","All reviewer families"],["codex","Codex"],["opencode","OpenCode"],["muse","Muse"],["agy","Gemini"]]],
-    ["outcome","Run outcome",[["all","All outcomes"],["success","Success"],["other","Other / failed / quota"]]]
+    ["outcome","Run outcome",[["all","All outcomes"],["success","Success"],["other","Other or unfinished"]]]
   ]) {
     const wrapper=html("label","small",label,controls),select=html("select","",undefined,wrapper);
-    select.id=`assay-${key}`;
+    select.id=`assay-${key}`;wrapper.setAttribute("for",select.id);
     for(const [value,title] of options){const opt=html("option","",title,select);opt.value=value;}
     select.value=assayState[key];
     select.addEventListener("change",()=>{
-      assayState[key]=select.value;roomPanel();$(select.id)?.focus?.({preventScroll:true});
+      assayState[key]=select.value;assayState.reviews=0;assayState.commits=0;draw();
     });
   }
   const searchRow=html("div","workshop-search",undefined,panel);
   const searchWrap=html("label","small","Search reviews, tasks or commits",searchRow);
   const search=html("input","",undefined,searchWrap);
-  search.id="assay-search";search.type="search";search.placeholder="resident, task, or commit title";
-  search.value=assayState.query;
+  search.id="assay-search";searchWrap.setAttribute("for",search.id);search.type="search";search.placeholder="Resident, task name, or commit";
+  search.value=assayState.query;search.setAttribute("aria-describedby","assay-results");
   search.addEventListener("input",()=>{
-    assayState.query=search.value;roomPanel();
-    const next=$(search.id);if(next){next.focus?.({preventScroll:true});next.setSelectionRange?.(assayState.query.length,assayState.query.length);}
+    assayState.query=search.value;assayState.reviews=0;assayState.commits=0;draw();
   });
-  const q=assayState.query.trim().toLowerCase();
-  const filteredReviews=reviewRuns.filter(r=>{
-    if(assayState.family!=="all"&&r.agent!==assayState.family)return false;
-    if(assayState.outcome==="success"&&r.outcome!=="success")return false;
-    if(assayState.outcome==="other"&&r.outcome==="success")return false;
-    if(!q)return true;
-    const match=/^source-review-(.+)$/.exec(r.assignment?.help_request||"");
-    const target=match?runsById.get(match[1]):null;
-    const tasks=(target?.finished_tasks||[]).map(t=>t.task).join(" ");
-    const hay=`${residentName(r.resident)} ${r.model||""} ${r.assignment?.help_request||""} ${target?residentName(target.resident):""} ${tasks}`.toLowerCase();
-    return hay.includes(q);
-  });
-  const statusLine=html("p","small",`${filteredReviews.length} of ${reviewRuns.length} review runs shown`,panel);
-  statusLine.id="assay-results";statusLine.setAttribute("role","status");
-  if(!filteredReviews.length) {
-    html("p","empty-note","No recorded review runs match these filters at this moment.",panel);
-  } else {
-    const list=html("div","counting-runs",undefined,panel);
-    filteredReviews.slice(-8).reverse().forEach(run=>{
+  const clear=workshopButton(searchRow,"Clear search",()=>{
+    assayState.query="";search.value="";assayState.reviews=0;assayState.commits=0;draw();search.focus({preventScroll:true});
+  });clear.id="assay-clear";
+  const results=html("div","",undefined,panel);
+  function pageList(key,label,items,total,size,renderRow) {
+    assayState[key]=Math.max(0,Math.min(assayState[key],Math.ceil(items.length/size)-1));
+    const start=assayState[key]*size;
+    const status=html("p","small",`${items.length} of ${total} ${label} match · showing ${items.length?`${start+1}–${Math.min(start+size,items.length)}`:"0"} · newest first`,results);
+    status.id=key==="reviews"?"assay-results":"assay-commits-results";status.setAttribute("role","status");
+    const list=html("div","counting-runs",undefined,results);list.id=`assay-${key}`;list.tabIndex=-1;
+    list.setAttribute("role","region");list.setAttribute("aria-label",label);
+    if(!items.length)html("p","empty-note",`No ${label} match at this moment. Clear search or change the filters to look again.`,list);
+    items.slice(start,start+size).forEach(item=>renderRow(item,list));
+    const pages=html("div","workshop-pages",undefined,results);
+    pages.hidden=items.length<=size;pages.setAttribute("style",pages.hidden?"display:none":"");
+    pages.setAttribute("role","group");pages.setAttribute("aria-label",`${label} pages`);
+    for(const [delta,direction] of [[-1,"previous"],[1,"next"]]) {
+      const button=workshopButton(pages,`${delta<0?"Newer":"Older"} ${label}`,()=>{
+        assayState[key]+=delta;draw();const next=$(`assay-${key}`);next?.focus({preventScroll:true});next?.scrollIntoView?.({block:"nearest"});
+      });
+      button.id=`assay-${key}-${direction}`;button.disabled=delta<0?start===0:start+size>=items.length;
+      button.setAttribute("aria-controls",list.id);
+    }
+  }
+  function draw() {
+    results.replaceChildren();clear.disabled=!assayState.query;
+    const q=workshopSearchText(assayState.query);
+    const filteredReviews=reviewRuns.filter(run=>{
+      if(assayState.family!=="all"&&run.agent!==assayState.family)return false;
+      if(assayState.outcome==="success"&&run.outcome!=="success")return false;
+      if(assayState.outcome==="other"&&run.outcome==="success")return false;
+      const target=targetOf(run);
+      return !q||workshopSearchText([run.id,residentName(run.resident),run.model,run.assignment?.help_request,
+        target?residentName(target.resident):"",...tasksOf(run).flatMap(task=>[task.id,task.title,task.plain])].filter(Boolean).join(" ")).includes(q);
+    }).sort((a,b)=>(b.sequence||0)-(a.sequence||0));
+    pageList("reviews","review runs",filteredReviews,reviewRuns.length,8,(run,list)=>{
       const row=html("div","counting-run",undefined,list);
-      const kind=kinds[run.agent]||kinds.unrecorded;
-      const match=/^source-review-(.+)$/.exec(run.assignment?.help_request||"");
-      const target=match?runsById.get(match[1]):null;
+      const kind=kinds[run.agent]||kinds.unrecorded,target=targetOf(run);
       const targetKind=target?(kinds[target.agent]||kinds.unrecorded):null;
-      const tasks=(target?.finished_tasks||[]).map(t=>t.task).filter(Boolean);
+      const tasks=tasksOf(run).map(task=>task.plain||task.title||task.id);
       const cross=target&&target.agent&&run.agent&&target.agent!=="unrecorded"&&run.agent!=="unrecorded"?(target.agent!==run.agent?" · cross-family":" · same-family"):"";
-      const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&Array.isArray(data?.frames)&&data.frames.some(f=>f.seq===run.sequence);
       const info=html("div","counting-run-info",undefined,row);
       html("strong","",`${residentName(run.resident)} · ${kind.name}${target?` ← ${residentName(target.resident)} (${targetKind.name})`:""}${cross}`,info);
-      html("span","small",`${run.outcome||run.status||"recorded"}${tasks.length?` · tasks: ${tasks.join(", ")}`:run.assignment?.help_request?` · ${run.assignment.help_request}`:""}`,info);
-      if(hasFrame) {
-        const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
-        btn.type="button";btn.id=`assay-jump-${run.sequence}`;
-        btn.addEventListener("click",()=>jumpToSequence(run.sequence));
+      html("span","small",`Run: ${run.outcome||run.status||"recorded"}${tasks.length?` · tasks: ${tasks.join("; ")}`:run.assignment?.help_request?` · ${run.assignment.help_request}`:""}`,info);
+      if(Number.isInteger(run.sequence)&&run.sequence>0&&data.frames?.some(moment=>moment.seq===run.sequence)) {
+        const btn=workshopButton(row,`Event ${run.sequence}`,()=>jumpToSequence(run.sequence),"counting-jump");
+        btn.id=`assay-jump-${run.sequence}`;
       }
     });
-  }
-  const matchingCommits=q?commitsAt.filter(c=>`${c.id} ${c.title}`.toLowerCase().includes(q)):commitsAt;
-  html("p","small",`Source history at this moment (${matchingCommits.length} matching of ${commitsAt.length})`,panel);
-  if(!matchingCommits.length) {
-    html("p","empty-note","No source commits match at this moment.",panel);
-  } else {
-    const commitList=html("div","counting-runs",undefined,panel);
-    matchingCommits.slice(-6).reverse().forEach(c=>{
-      const row=html("div","counting-run",undefined,commitList);
-      const info=html("div","counting-run-info",undefined,row);
-      html("strong","",`${String(c.id||"").slice(0,8)} · ${c.title||"Untitled commit"}`,info);
-      if(Number.isFinite(c.at)&&data?.timezone)html("span","small",clock(c.at,{year:"numeric"}),info);
+    const matchingCommits=commitsAt.filter(commit=>!q||workshopSearchText(`${commit.id} ${commit.title}`).includes(q))
+      .sort((a,b)=>b.at-a.at);
+    html("h3","","Source history",results);
+    html("p","small","The search applies here too. Reviewer family and run outcome filters apply only to review runs. Git ancestry does not establish source acceptance.",results);
+    pageList("commits","source commits",matchingCommits,commitsAt.length,6,(commit,list)=>{
+      const row=html("div","counting-run",undefined,list),info=html("div","counting-run-info",undefined,row);
+      html("strong","",`${String(commit.id||"").slice(0,8)} · ${commit.title||"Untitled commit"}`,info);
+      if(Number.isFinite(commit.at)&&data?.timezone)html("span","small",clock(commit.at,{year:"numeric"}),info);
     });
   }
+  draw();
   if(scarsAt.length) {
     const scarBox=html("details","assay-scars",undefined,panel);
     html("summary","",`Scars at this moment (${openScars.length} open, ${mendedScars.length} mended)`,scarBox);

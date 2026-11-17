@@ -66,7 +66,7 @@ function makeNode(tag, ns = null) {
     addEventListener(ev, fn) { this.listeners[ev] = fn; },
     focus() { document.activeElement = this; },
     scrollIntoView() {},
-    setSelectionRange() {},
+    setSelectionRange(start, end, direction) { Object.assign(this, {selectionStart:start, selectionEnd:end, selectionDirection:direction}); },
     closest() { return null; },
     contains() { return false; },
     querySelector() { return null; },
@@ -153,6 +153,7 @@ vm.runInContext(`
   frame.scars = (frame.scars || []).map(s => ({...(data.scars?.[s.id] || {}), ...s}));
 `, context);
 
+const beforeData = vm.runInContext("JSON.stringify(data)", context);
 const beforeFrame = JSON.parse(vm.runInContext("JSON.stringify(frame)", context));
 const fact = vm.runInContext("roomFact('assay')", context);
 
@@ -196,6 +197,24 @@ if (familySel) {
   refreshFocusId = document.activeElement ? document.activeElement.id : null;
 }
 
+const interactions = [];
+for (const step of input.steps || []) {
+  if (step.frame !== undefined) vm.runInContext(`frame = data.frames[${step.frame}]; roomPanel();`, context);
+  else {
+    const node = findById(getEl("room-content"), step.id);
+    if (!node) throw new Error("Missing control " + step.id);
+    if (step.action === "input" || step.action === "change") node.value = step.value;
+    if (step.selection) { node.focus(); node.setSelectionRange(...step.selection); }
+    if (step.action === "refresh") {
+      vm.runInContext("refreshView(false)", context);
+    } else if (step.action) node.listeners[step.action]();
+  }
+  const panel = getEl("room-content"), nodes = walk(panel), active = document.activeElement;
+  interactions.push({ text:textOf(panel), focus:active?.id, selection:[active?.selectionStart,active?.selectionEnd,active?.selectionDirection],
+    jumps:nodes.map(n=>n.id).filter(id=>id.startsWith("assay-jump-")), reviews:textOf(findById(panel,"assay-reviews")), commits:textOf(findById(panel,"assay-commits")),
+    disabled:nodes.filter(n=>n.disabled).map(n=>n.id), query:findById(panel,"assay-search").value });
+}
+
 const afterFrame = JSON.parse(vm.runInContext("JSON.stringify(frame)", context));
 function textOf(n) {
   return [n.textContent, ...(n.children || []).map(textOf)].filter(Boolean).join(" | ");
@@ -203,6 +222,8 @@ function textOf(n) {
 
 process.stdout.write(JSON.stringify({
   fact,
+  interactions,
+  dataMutated: beforeData !== vm.runInContext("JSON.stringify(data)", context),
   mutated: JSON.stringify(beforeFrame) !== JSON.stringify(afterFrame),
   svgMarkers: svgNodes.map(n => n.attributes).filter(a => a["data-interior"] || a["data-assay-review"]),
   svgText: svgNodes.map(n => n.textContent).filter(Boolean),
@@ -336,6 +357,78 @@ process.stdout.write(JSON.stringify({
         self.assertFalse(hostile_out["hasScriptTag"])
         self.assertIn("<script>alert(1)</script>", hostile_out["panelText"])
         self.assertIn("<script>evil</script>", hostile_out["panelText"])
+
+    def test_review_and_commit_pages_search_filters_and_historical_bounds(self):
+        frame = {
+            "seq": 50, "at": 2000, "rooms": [{"id": "assay", "name": "The Assay Room", "status": "open"}],
+            "residents": [{"id": "author", "name": "Rowan"}, {"id": "reviewer", "name": "Tern"}],
+            "tasks": [], "runs": [{"id": "work", "agent": "agy", "resident": "author", "sequence": 1, "usage": {},
+                "finished_tasks": [{"task": "repair-name", "sequence": 2}, {"task": "future-task", "sequence": 99}]}],
+            "scars": [], "budgets": [], "archive": [], "hearth": [], "council": {},
+        }
+        for i in range(19):
+            frame["runs"].append({"id": f"review-{i}", "resident": f"reviewer-{i}", "agent": "codex" if i % 2 else "muse",
+                "sequence": i + 3, "usage": {}, "outcome": "success" if i % 2 else "failed",
+                "assignment": {"lane": "review", "help_request": "source-review-work"}})
+        earlier = json.loads(json.dumps(frame))
+        earlier.update(seq=2, runs=frame["runs"][:1], tasks=[{"id": "repair-name", "title": "Repair the lantern", "plain": "The lamp remembers its colour."}])
+        future = {"seq": 99, "tasks": [{"id": "repair-name", "title": "FUTURE SECRET"}]}
+        data = {"timezone": "UTC", "scars": {}, "frames": [earlier, frame, future],
+                "commits": [{"id": f"commit-{i}", "at": 1000+i, "title": f"Change {i}"} for i in range(14)] +
+                           [{"id": "hidden", "at": 9999, "title": "FUTURE COMMIT"}]}
+        out = self.run_harness({"data": data, "index": 1, "current": False, "selected": "assay", "steps": [
+            {"id": "assay-reviews-next", "action": "click"},
+            {"id": "assay-commits-next", "action": "click"},
+            {"id": "assay-reviews-next", "action": "click"},
+            {"id": "assay-reviews-previous", "action": "click"},
+            {"id": "assay-search", "action": "input", "value": "  LAMP   REMEMBERS  ", "selection": [2, 6, "backward"]},
+            {"id": "assay-family", "action": "change", "value": "codex"},
+            {"id": "assay-outcome", "action": "change", "value": "other"},
+            {"id": "assay-clear", "action": "click"},
+            {"frame": 0},
+        ]})
+        steps = out["interactions"]
+        self.assertFalse(out["dataMutated"])
+        self.assertEqual(steps[0]["jumps"], [])  # Missing publication frames are never guessed.
+        self.assertIn("reviewer-10", steps[0]["reviews"])
+        self.assertNotIn("reviewer-18", steps[0]["reviews"])
+        self.assertIn("reviewer-0", steps[2]["reviews"])
+        self.assertNotIn("reviewer-3", steps[2]["reviews"])
+        self.assertIn("showing 9–16", steps[0]["text"])
+        self.assertEqual(steps[0]["focus"], "assay-reviews")
+        self.assertIn("Change 13", steps[0]["commits"])
+        self.assertIn("Change 7", steps[1]["commits"])
+        self.assertNotIn("Change 13", steps[1]["commits"])
+        self.assertIn("showing 17–19", steps[2]["text"])
+        self.assertIn("assay-reviews-next", steps[2]["disabled"])
+        self.assertIn("showing 9–16", steps[3]["text"])
+        self.assertIn("19 of 19 review runs match · showing 1–8", steps[4]["text"])
+        self.assertEqual(steps[4]["focus"], "assay-search")
+        self.assertEqual(steps[4]["selection"], [2, 6, "backward"])
+        self.assertIn("9 of 19 review runs", steps[5]["text"])
+        self.assertIn("0 of 19 review runs", steps[6]["text"])
+        self.assertIn("Clear search or change the filters", steps[6]["text"])
+        self.assertEqual(steps[7]["query"], "")
+        self.assertEqual(steps[7]["focus"], "assay-search")
+        self.assertIn("14 of 14 source commits match · showing 1–6", steps[7]["text"])
+        self.assertIn("0 of 0 review runs", steps[8]["text"])
+        self.assertIn("assay-reviews-previous", steps[8]["disabled"])
+        rewound = self.run_harness({"data": data, "index": 1, "current": False, "selected": "assay", "steps": [
+            {"id": "assay-reviews-next", "action": "click"},
+            {"id": "assay-reviews-next", "action": "click"}, {"frame": 0},
+        ]})["interactions"][-1]
+        self.assertIn("0 of 0 review runs", rewound["text"])
+        self.assertIn("assay-reviews-previous", rewound["disabled"])
+        refreshed = self.run_harness({"data": data, "index": 1, "current": False, "selected": "assay", "steps": [
+            {"id": "assay-search", "action": "input", "value": "repair the lantern", "selection": [2, 6, "backward"]},
+            {"id": "assay-search", "action": "refresh"},
+        ]})
+        self.assertIn("19 of 19 review runs", refreshed["interactions"][0]["text"])
+        self.assertEqual(refreshed["interactions"][1]["selection"], [2, 6, "backward"])
+        self.assertEqual(refreshed["interactions"][1]["focus"], "assay-search")
+        for step in steps:
+            self.assertNotIn("FUTURE", step["text"])
+            self.assertNotIn("future-task", step["text"])
 
     def test_assay_room_docs_and_cli_smoke(self):
         doc = ROOT / "docs" / "ASSAY_ROOM.md"
