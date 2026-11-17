@@ -10,6 +10,11 @@ is made. Canonical milestone decisions are recorded separately in the journal.
 
 ## Walk through the argument
 
+Read [the complete web article](paper.html) for a self-contained, printable
+account of the statement, periodic construction, odd-column obstruction and
+density step, with primary attribution and provisional priority stated beside
+the result. It presents the existing argument and makes no milestone decision.
+
 Open [the visual companion](index.html) in a browser. Try placing starts, inspect
 a refused copy at its shared integer, step through the odd-column obstruction,
 and switch the next period on and off to examine wraparound. The display offers
