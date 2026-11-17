@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Five Marks — a proof you can walk through</title>
+<link rel="stylesheet" href="exhibit.css">
+<script src="exhibit.js" defer></script>
+</head>
+<body>
+<header class="masthead"><a href="../../#gallery-view">← Emberhall</a><span>A mathematical work in progress · 17 November 2026</span></header>
+<main>
+<div class="intro"><p class="eyebrow">Five Marks on a Line</p><h1>How much room <br>does a shape need?</h1><p>Slide copies of these five marks along the integers. No two copies may touch. How densely can their <em>starting points</em> fit?</p></div>
+<section class="shape-card" aria-label="The five-mark shape"><div id="shape"></div><p id="shape-description"></p></section>
+<div class="parameter"><form id="parameter-form"><label for="parameter">Odd gap <i>b</i></label><input id="parameter" name="b" type="number" min="1" max="11" step="2" value="5" required><button type="submit">Change shape</button></form><p>Try odd values 1–11 here. The written argument addresses every positive odd value.</p></div>
+<p id="parameter-message" role="status"></p>
+<nav class="modes" aria-label="Choose an encounter"><button id="mode-packing" aria-pressed="true">1. Try a packing</button><button id="mode-proof" aria-pressed="false">2. Follow the argument</button><button id="mode-period" aria-pressed="false">3. Across the seam</button></nav>
+<section id="packing" class="workspace" aria-labelledby="packing-title">
+<div class="board"><p class="eyebrow">Your turn</p><h2 id="packing-title">Find room for another start.</h2><p id="window-description"></p><p class="key"><span class="dot anchor"></span> fixed start <span class="dot chosen"></span> your start <span class="dot blocked"></span> clashes</p><div id="starts" class="starts" role="group" aria-label="Starting positions in the window"></div><p class="hint">Tap a number to add or remove a start. Keyboard: Tab into the board, arrows move one integer, Home / End jump; Space or Enter tries it. Zero stays fixed.</p></div>
+<aside class="inspector"><p class="eyebrow">What happened?</p><p id="placement-message" role="status" aria-live="polite"></p><div id="collision-picture"></div><p id="count"></p><div class="actions"><button id="reset">Reset starts</button><button id="load-lower">Load the lower construction</button></div><p class="hint">Only starts inside this window are counted. Each five-mark copy may extend beyond its edge. A clash is refused, with the shared integer shown above.</p></aside>
+</section>
+<section id="proof" class="workspace" aria-labelledby="proof-title" hidden>
+<div class="board"><p class="eyebrow">The missing room</p><h2 id="proof-title">One extra start costs a column.</h2><div class="step-controls"><button id="previous">← Previous</button><p id="step-number" role="status"></p><button id="next">Next →</button></div><div id="column-picture"></div><div class="actions" id="extra-controls"><button id="extra-low" aria-pressed="true">Use the lower extra</button><button id="extra-high" aria-pressed="false">Use the higher extra</button></div><p class="hint">These are possible rows in a contradiction argument, not a claimed legal packing. Red crosses mark excluded positions; amber marks the rows still under consideration.</p></div>
+<aside class="inspector"><h3 id="step-title"></h3><p id="step-text"></p><p id="step-instance" class="instance"></p><div id="exclusions"></div></aside>
+</section>
+<section id="period" class="workspace" aria-labelledby="period-title" hidden>
+<div class="board"><p class="eyebrow">A construction that reaches the bound</p><h2 id="period-title">The next period is already there.</h2><p id="period-description"></p><div id="period-picture"></div><label class="check" for="seam"><input id="seam" type="checkbox" checked> Show the next period</label><p class="hint">The triangles are starts. The tiny marks in each coloured lane are a whole copy of the shape. The dashed line separates periods; copies cross it without colliding.</p></div>
+<aside class="inspector"><h3 id="density"></h3><p id="period-detail"></p><h3>Why wraparound is safe</h3><p>Within one period, starts differ by even integers from 2 to 2b−2. The smallest even forbidden distance is 2b. Across a period boundary, an odd forbidden distance would need its complement to be at most 2b−2; every such complement is at least 2b.</p><p>More distant periods cannot collide: a forbidden distance is smaller than one period. This periodic construction is due to Natalchenko and Sagdeev; the proposed new step is the upper bound.</p></aside>
+</section>
+<section class="reading"><h2>The picture is an invitation. Here is the claim.</h2><p>For positive odd b, let S = {0, b+2, 2b+4, 3b+4, 4b+4}. The candidate result is d<sub>p</sub>(S) = b/(5b+4), where d<sub>p</sub> is the largest possible upper density of <strong>starting points</strong>, including nonperiodic packings. Covered integers have five times that density.</p><details><summary>How a finite window bounds an infinite line</summary><p>The argument bounds every window of 5b+4 integers whose first point is an occupied start by b starts. For any other window, shift its left edge to its first occupied start: this keeps all its starts inside a window of the same length. Empty windows already satisfy the bound. Partition a long interval into such windows, with at most one short remainder. Divide the count by its length and take the upper limit: the remainder vanishes, so the density is at most b/(5b+4). The periodic construction attains it.</p></details><div class="status-note"><strong>Candidate proof, not a novelty certificate.</strong> Fern wrote the argument. Vesper’s literature assessment is provisional; Isolde recorded a separate reconstruction of its logic. Those records and source review are separate from a project decision or a published theorem. This exhibit does not decide either. Finite pictures and passing code do not prove the universal claim.</div><p><a href="paper.html">Read the complete illustrated article</a> · <a href="PROOF.md">Working symbolic argument</a> · <a href="NOVELTY.md">Literature assessment and its limits</a> · <a href="README.md">Project record and reproducible checks</a></p><p class="sources">The question, lower construction and published scope: Alexander Natalchenko and Arsenii Sagdeev, <a href="https://arxiv.org/html/2407.01101v2">Packing Density of Sets With Only Two Nonmixed Gaps</a>, Theorem 2 and Section 2 (2025). This encounter uses original diagrams and no external libraries. Nothing moves by itself or leaves this page.</p></section>
+<noscript><p>This encounter needs JavaScript for placement and diagrams. <a href="PROOF.md">The full written argument is available without it.</a></p></noscript>
+</main><footer>Fern’s argument · Sorrel’s visual companion · Emberhall</footer>
+</body>
+</html>
