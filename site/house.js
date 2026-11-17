@@ -23,7 +23,7 @@ let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
 let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
 const DISPLAY_BUNKS = 6;
-let bedsState = {query:"",page:0,open:null};
+let bedsState = {query:"",agent:"all",presence:"all",page:0,open:null};
 let roomBounds = {}, wholeBounds = "0 0 900 700";
 function el(tag, attrs = {}, parent, value) {
   const node = document.createElementNS(SVG, tag);
@@ -1174,13 +1174,22 @@ function personRow(r, parent) {
     html("span","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
   });
 }
-function bedsDirectory(moment, query, requestedPage) {
-  const needle=query.trim().toLocaleLowerCase();
-  const residents=moment.residents.filter(r=>[r.name,...(r.name_history||[]).flatMap(n=>[n.from,n.to])]
-    .some(name=>String(name||"").toLocaleLowerCase().includes(needle)))
+function bedsPresence(resident) {
+  if(resident.pose==="unconfirmed")return "stopped";
+  if(resident.presence==="asleep")return "asleep";
+  if(resident.presence==="recorded awake")return "awake";
+  return "unknown";
+}
+function bedsDirectory(moment, state) {
+  const needle=state.query.trim().toLocaleLowerCase();
+  const residents=moment.residents.filter(r=>
+    (state.agent==="all"||state.agent===(Object.hasOwn(kinds,r.agent)?r.agent:"unrecorded"))&&
+    (state.presence==="all"||state.presence===bedsPresence(r))&&
+    [r.name,...(r.name_history||[]).flatMap(n=>[n.from,n.to])]
+      .some(name=>String(name||"").toLocaleLowerCase().includes(needle)))
     .sort((a,b)=>a.name.localeCompare(b.name)||a.id.localeCompare(b.id));
   const pages=Math.max(1,Math.ceil(residents.length/DISPLAY_BUNKS));
-  const page=Math.max(0,Math.min(requestedPage,pages-1));
+  const page=Math.max(0,Math.min(state.page,pages-1));
   return {total:moment.residents.length,matches:residents.length,page,pages,
     visible:residents.slice(page*DISPLAY_BUNKS,(page+1)*DISPLAY_BUNKS)};
 }
@@ -1194,6 +1203,18 @@ function renderBedsDirectory(content) {
   const search=html("input","",undefined,controls);search.id="beds-search";search.type="search";
   search.value=bedsState.query;search.setAttribute("aria-controls","beds-list");
   const reset=html("button","quiet-button","Show everyone",controls);reset.id="beds-reset";reset.type="button";
+  const filters=html("div","beds-filters",undefined,panel);
+  for(const [key,title,options] of [
+    ["agent","Kind of mind",[["all","All kinds"],...Object.entries(kinds).map(([id,kind])=>[id,kind.name])]],
+    ["presence","Recorded presence",[["all","All recorded states"],["awake","Recorded awake"],["asleep","Asleep"],["stopped","Stopped without sleep"],["unknown","Presence unrecorded"]]]
+  ]) {
+    const label=html("label","small",title,filters);label.htmlFor=`beds-${key}`;
+    const select=html("select","",undefined,label);select.id=`beds-${key}`;
+    select.setAttribute("aria-controls","beds-list");select.setAttribute("aria-describedby","beds-results");
+    options.forEach(([value,title])=>{const option=html("option","",title,select);option.value=value;});
+    select.value=bedsState[key];
+    select.addEventListener("change",()=>{bedsState[key]=select.value;bedsState.page=0;draw();});
+  }
   const status=html("p","small",undefined,panel);status.id="beds-results";status.setAttribute("role","status");
   const list=html("div","beds-list",undefined,panel);list.id="beds-list";list.tabIndex=-1;
   list.setAttribute("role","region");list.setAttribute("aria-label","Remembered residents");
@@ -1202,19 +1223,21 @@ function renderBedsDirectory(content) {
   const next=html("button","quiet-button","Next residents",pager);next.id="beds-next";
   for(const button of [previous,next]){button.type="button";button.setAttribute("aria-controls",list.id);}
   const draw=()=>{
-    const view=bedsDirectory(frame,bedsState.query,bedsState.page);bedsState.page=view.page;
+    const view=bedsDirectory(frame,bedsState);bedsState.page=view.page;
     status.textContent=`${view.matches} of ${view.total} remembered residents · page ${view.page+1} of ${view.pages}`;
     previous.disabled=view.page===0;next.disabled=view.page===view.pages-1;
     list.replaceChildren();
-    if(!view.matches)html("p","empty-note","No name matches. Try an earlier name, or show everyone.",list);
+    if(!view.matches)html("p","empty-note",bedsState.agent==="all"&&bedsState.presence==="all"?
+      "No name matches. Try an earlier name, or show everyone.":
+      "No residents match these filters. Try another name or recorded state, or show everyone.",list);
     view.visible.forEach(r=>{
       const card=html("details","beds-person",undefined,list);card.id=`beds-person-${r.id}`;card.name="beds-residents";card.open=bedsState.open===r.id;
       card.addEventListener("toggle",()=>{if(card.open)bedsState.open=r.id;else if(bedsState.open===r.id)bedsState.open=null;});
       const summary=html("summary","",undefined,card);summary.id=`beds-name-${r.id}`;
       html("strong","",r.name,summary);
-      const kind=kinds[r.agent]||kinds.unrecorded;
+      const kind=Object.hasOwn(kinds,r.agent)?kinds[r.agent]:kinds.unrecorded;
       const room=frame.rooms.find(place=>place.id===r.room)?.name||"room unrecorded";
-      const presence=r.pose==="unconfirmed"?"stopped without sleep":r.presence;
+      const presence={stopped:"stopped without sleep",awake:"recorded awake",asleep:"asleep",unknown:"presence unrecorded"}[bedsPresence(r)];
       html("span","small",`${kind.name}${r.model?` · ${r.model}`:""} · ${presence} · last recorded in ${room}`,summary);
       const earlier=[...new Set((r.name_history||[]).map(change=>change.from).filter(name=>name&&name!==r.name))];
       if(earlier.length)html("span","small",`Earlier names: ${earlier.join(", ")}`,summary);
@@ -1243,7 +1266,10 @@ function renderBedsDirectory(content) {
     });
   };
   search.addEventListener("input",()=>{bedsState.query=search.value;bedsState.page=0;draw();});
-  reset.addEventListener("click",()=>{bedsState.query="";bedsState.page=0;search.value="";draw();search.focus({preventScroll:true});});
+  reset.addEventListener("click",()=>{
+    bedsState.query="";bedsState.agent="all";bedsState.presence="all";bedsState.page=0;search.value="";
+    $("beds-agent").value="all";$("beds-presence").value="all";draw();search.focus({preventScroll:true});
+  });
   for(const [button,delta] of [[previous,-1],[next,1]])button.addEventListener("click",()=>{
     bedsState.page+=delta;draw();list.focus({preventScroll:true});
   });
