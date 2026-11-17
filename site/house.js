@@ -247,6 +247,16 @@ function furnishings(g, room, x, y, lit, residents) {
     polygon(ledger,[[x+58,y+70,24],[x+89,y+70,24],[x+89,y+95,24],[x+58,y+95,24]],"#e6d7ae");
     polygon(ledger,[[x+89,y+70,24],[x+120,y+70,24],[x+120,y+95,24],[x+89,y+95,24]],"#d2c399");
     caption(ledger,x+90,y+118,0,`${runs.length} ${runs.length===1?"run":"runs"} tallied`,"resident-label interior-caption");
+  } else if(room === "salvage") {
+    const bench=el("g",{"data-interior":"salvage"},g);
+    el("title",{},bench,"Recovery practice bench · invented archive, not a visitor's backup");
+    box(bench,x+24,y+35,132,54,25,["#b69462","#705d43","#93784f"]);
+    for(let n=0;n<6;n++) {
+      const px=x+34+(n%3)*38,py=y+43+Math.floor(n/3)*22;
+      polygon(bench,[[px,py,27],[px+26,py,27],[px+26,py+16,27],[px,py+16,27]],n<4?"#c8d6cc":"#c69a83");
+      line(bench,[[px+5,py+6,28],[px+20,py+6,28]],"#57695e",2);
+    }
+    caption(bench,x+90,y+118,0,"Try recovery practice","resident-label interior-caption");
   } else if(room === "assay") {
     const reviews=(frame.runs||[]).filter(r=>r.assignment?.lane==="review"&&(!Number.isInteger(r.sequence)||r.sequence<=frame.seq));
     const commits=(Array.isArray(data?.commits)?data.commits:[]).filter(c=>Number.isFinite(c.at)&&(!Number.isFinite(frame.at)||c.at<=frame.at));
@@ -1658,6 +1668,66 @@ function renderStudyDesk(content, dataShelf) {
   search.addEventListener("input",()=>{studyState.query=search.value;studyState.page=0;draw();});
   draw();
 }
+// Frozen, invented Blackout Kit recovery drill; these are practice choices, not journal facts.
+const salvageCases = [
+  {target:"family/winter.txt", hash:"a77bdfb520c2", status:"missing", candidates:["family/renamed-winter.txt"], decoy:"family/summer.txt", decoyHash:"242f2ce08c25", lesson:"The winter bytes survived a rename. Copy to a fresh destination under the expected name; preserve the surviving archive."},
+  {target:"records/invoice.txt", hash:"963c25725b0c", status:"changed", candidates:["spares/invoice-copy.txt"], decoy:"records/invoice.txt", decoyHash:"65d876c61e46", lesson:"The invoice at its old name has changed from 173 to 999 units. The spare matches the original bytes; the familiar name does not."},
+  {target:"records/copy-a.txt", hash:"fc7f99045789", status:"missing", candidates:["records/copy-b.txt","spares/duplicate.txt"], decoy:"records/invoice.txt", decoyHash:"65d876c61e46", lesson:"Both candidates have identical bytes. Either can reproduce the content, but the hash cannot tell which origin is right. Preserve both and record that uncertainty."},
+  {target:"photos/Report.txt", hash:"165c35adc958", status:"missing", candidates:["photos/report.txt"], decoy:"photos/snow ☃.dat", decoyHash:"40aff2e9d2d8", lesson:"Only the capitalisation changed. Keep the exact expected name in a separate destination; do not flatten case-sensitive names together."},
+  {target:"family/summer.txt", hash:"589ad252cb46", status:"changed", candidates:[], decoy:"family/summer.txt", decoyHash:"242f2ce08c25", lesson:"The damaged summer file is still the same size. No surviving bytes match. Leave it missing in the recovery destination and preserve the damaged file."},
+  {target:"letters/lost.txt", hash:"8a6682bb4b78", status:"missing", candidates:[], decoy:"letters/empty.txt", decoyHash:"e3b0c44298fc", lesson:"The unique letter has disappeared. An empty file cannot replace it. Record the loss; a checker cannot invent the missing bytes."}
+];
+let salvagePractice = {index:0, answers:{}};
+function renderSalvageRoom(content) {
+  const bench=html("section","salvage-bench",undefined,content);
+  const heading=html("h3","","A small archive, after the storm",bench);heading.id="salvage-title";
+  bench.setAttribute("aria-labelledby",heading.id);
+  html("p","small","Practice with invented files from Blackout Kit. Choose a matching copy, or admit that none survives. Nothing is uploaded, copied or saved.",bench);
+  const progress=html("p","salvage-progress",undefined,bench);progress.id="salvage-progress";
+  const strip=html("div","salvage-strip",undefined,bench);
+  const detail=html("div","salvage-detail",undefined,bench);
+  const result=html("p","salvage-result","",bench);result.id="salvage-result";result.setAttribute("role","status");
+  const controls=html("div","salvage-controls",undefined,bench);
+  const next=html("button","quiet-button","Next file →",controls);next.id="salvage-next";next.type="button";
+  const reset=html("button","quiet-button","Start again",controls);reset.id="salvage-reset";reset.type="button";
+  const links=html("p","small",undefined,bench);
+  const worksheet=html("a","room-shelf-link","Read the complete recovery worksheet ↗",links);
+  worksheet.href="https://github.com/Someblueman/emberhall/blob/main/projects/blackout/examples/recovery-drill/recovery-worksheet.md";
+  html("p","small","A byte match does not prove authorship or authenticity. A real recovery also needs a trustworthy inventory and a separate destination.",bench);
+  function draw() {
+    const item=salvageCases[salvagePractice.index],answer=salvagePractice.answers[item.target];
+    const completed=salvageCases.filter(c=>salvagePractice.answers[c.target]?.correct).length;
+    progress.textContent=`${completed} of 6 decisions checked · 3 other files already intact`;
+    strip.replaceChildren();detail.replaceChildren();
+    salvageCases.forEach((entry,i)=>{
+      const done=salvagePractice.answers[entry.target]?.correct;
+      const button=html("button",`salvage-file${done?" checked":""}`,`${done?"✓ ":""}${i+1}`,strip);
+      button.type="button";button.id=`salvage-file-${i}`;button.setAttribute("aria-label",`${entry.target}${done?", checked":""}`);
+      button.setAttribute("aria-pressed",String(i===salvagePractice.index));
+      button.addEventListener("click",()=>{salvagePractice.index=i;draw();$(button.id)?.focus({preventScroll:true});});
+    });
+    html("h4","salvage-target",item.target,detail);
+    html("p","small",`${item.status==="missing"?"Missing at its expected name":"Bytes changed at its expected name"} · expected fingerprint ${item.hash}…`,detail);
+    html("p","small","Which surviving file has matching bytes?",detail);
+    const choices=html("div","salvage-choices",undefined,detail);
+    [...item.candidates,item.decoy,null].forEach((candidate,i)=>{
+      const button=html("button","salvage-choice",undefined,choices);button.type="button";button.id=`salvage-choice-${i}`;
+      html("strong","",candidate===null?"No matching copy survives":candidate,button);
+      if(candidate!==null)html("span","small",`Fingerprint ${item.candidates.includes(candidate)?item.hash:item.decoyHash}…`,button);
+      button.setAttribute("aria-pressed",String(answer?.choice===candidate));
+      button.addEventListener("click",()=>{
+        const correct=candidate===null?item.candidates.length===0:item.candidates.includes(candidate);
+        salvagePractice.answers[item.target]={choice:candidate,correct};draw();$(button.id)?.focus({preventScroll:true});
+      });
+    });
+    result.textContent=answer?(answer.correct?`✓ ${item.lesson}`:item.candidates.length?"Look again: matching bytes survive. Compare the fingerprints, not just the names.":"Look again: these bytes do not match the inventory. Admitting the loss is safer than calling damaged or empty bytes recovered."):"Compare the fingerprints, then choose. The exercise keeps your decision only while this page stays open.";
+    if(completed===6)result.textContent+=" All six checked: 7 of 9 files can match in a fresh destination; 2 remain missing. That is an incomplete recovery, honestly reported.";
+  }
+  next.addEventListener("click",()=>{salvagePractice.index=(salvagePractice.index+1)%salvageCases.length;draw();$("salvage-file-"+salvagePractice.index)?.focus({preventScroll:true});});
+  reset.addEventListener("click",()=>{salvagePractice={index:0,answers:{}};draw();reset.focus({preventScroll:true});});
+  draw();
+}
+
 function roomPanel() {
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
@@ -1727,6 +1797,7 @@ function roomPanel() {
     const link=html("a","room-shelf-link","View the public shelf",summary);
     link.href="#shelf-card";
   }
+  if(room?.id==="salvage"&&roomStatus(room)==="open") renderSalvageRoom(content);
   if(room?.id==="archive") renderLessons(content);
   if(room?.id==="hearth") renderHearth(content);
   if(room?.id==="council") renderCouncilRoom(content);
@@ -3017,7 +3088,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-"))?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-"))?activeId:null;
   const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
