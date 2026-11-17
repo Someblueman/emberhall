@@ -21,8 +21,8 @@ mirroring house/maintenance.py). ``council-authorize`` and
 ``council-wake-authorize`` delegate process authority and are ignored. Only an
 explicit public-field allowlist is rendered; raw message fields (summary,
 source, reason, text, evidence) are never read or emitted. Project links appear
-only on recorded completed projects, pointing at real ``projects/<idea>/``
-directories via GitHub; closed choices have no project link until completion,
+only on recorded completed projects: source directories via GitHub and, when
+a public catalogue supplies a shipped entry page, a direct browser action; closed choices have no project link until completion,
 and evidence task IDs are never guessed into evidence directories.
 """
 
@@ -359,6 +359,7 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "timestamp": _format_timestamp(ev.get("at")),
             "actor": _safe_actor(ev.get("actor")),
             "title": winner_title,
+            "idea": winner,
             "summary": f"Project {choice_id} marked done.",
             "links": [(f"projects/{winner}/", _project_url(winner))],
         })
@@ -403,10 +404,36 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return selected
 
 
+def _browser_actions(catalog: dict[str, Any] | None) -> dict[str, tuple[str, str]]:
+    """Use only catalogue routes whose entry page is in the public file list."""
+    if not isinstance(catalog, dict) or type(catalog.get("version")) is not int or catalog["version"] != 1:
+        return {}
+    projects = catalog.get("projects")
+    if not isinstance(projects, list):
+        return {}
+    actions = {}
+    for entry in projects:
+        if not isinstance(entry, dict):
+            continue
+        idea = entry.get("id")
+        href = entry.get("href")
+        action = entry.get("action")
+        if (not isinstance(idea, str) or not re.fullmatch(r"[a-z0-9-]+", idea)
+                or entry.get("category") != "creation" or action not in ("Open", "Play")
+                or not isinstance(href, str)
+                or not re.fullmatch(r"projects/" + re.escape(idea) + r"/(?:[a-z0-9-]+/)*(?:[a-z0-9-]+\.html)?", href)):
+            continue
+        target = href + "index.html" if href.endswith("/") else href
+        if isinstance(entry.get("files"), list) and target in entry["files"]:
+            actions[idea] = (action, "../" + target)
+    return actions
+
+
 def render_html(
     milestones: list[dict[str, Any]],
     through: int | None = None,
     house_id: str | None = None,
+    catalog: dict[str, Any] | None = None,
 ) -> str:
     """Render deterministic, zero-JS static HTML for the Chronicle Room."""
     counts = {
@@ -420,6 +447,7 @@ def render_html(
     )
     house_label = html.escape(house_id) if house_id else "Emberhall"
 
+    actions = _browser_actions(catalog)
     rows_html: list[str] = []
     for item in reversed(milestones):
         title = item["title"]
@@ -431,6 +459,11 @@ def render_html(
             f'<a href="{html.escape(href)}">View project files →</a>'
             for _, href in item["links"]
         )
+        launch = actions.get(item.get("idea")) if item["category_key"] == "project" else None
+        if launch:
+            action, href = launch
+            links_html = (f'<a class="launch" href="{html.escape(href)}">'
+                          f'{action} {html.escape(title)} →</a> ' + links_html)
         rows_html.append(
             f'<article class="entry entry-{html.escape(item["category_key"])}">\n'
             f'  <div class="meta"><span class="badge">{html.escape(item["category"])}</span> '
@@ -546,7 +579,12 @@ def render_html(
       color: var(--accent);
       margin-right: 0.9rem;
       font-size: 0.9rem;
+      display: inline-block;
+      padding: 0.5rem 0;
+      overflow-wrap: anywhere;
     }}
+    .links .launch {{ font-weight: bold; }}
+    a:focus-visible, summary:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 3px; }}
   </style>
 </head>
 <body>
@@ -555,7 +593,8 @@ def render_html(
       <a href="../index.html#house-view">← Return to the house</a>
       <h1>The Chronicle</h1>
       <p class="note">What Emberhall has made and decided. Latest milestones first.</p>
-      <p class="note"><a href="../index.html#projects-view">Explore the projects →</a></p>
+      <p class="note"><a href="../index.html#gallery-view">Explore the projects →</a></p>
+      <p class="note">Browser creations open in their current published versions; source files stay available alongside them.</p>
       <details class="snapshot">
         <summary>About this snapshot</summary>
         <p>House {house_label}, recorded through event {html.escape(through_label)}.
@@ -580,11 +619,12 @@ def render_html(
 """
 
 
-def generate(input_path: Path, output_dir: Path) -> Path:
+def generate(input_path: Path, output_dir: Path, catalog_path: Path | None = None) -> Path:
     """Read exported journal prefix and write site/chronicle/index.html."""
     events, through, house_id = load_export(input_path)
     milestones = select_milestones(events)
-    html_text = render_html(milestones, through=through, house_id=house_id)
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8")) if catalog_path else None
+    html_text = render_html(milestones, through=through, house_id=house_id, catalog=catalog)
     output_dir.mkdir(parents=True, exist_ok=True)
     out_file = output_dir / "index.html"
     out_file.write_text(html_text, encoding="utf-8")
@@ -597,8 +637,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--input", required=True, type=Path, help="Path to exported journal JSON")
     parser.add_argument("--output-dir", required=True, type=Path, help="Output directory (e.g. site/chronicle)")
+    parser.add_argument("--catalog", type=Path, help="Public project catalogue, for direct browser launch links")
     args = parser.parse_args(argv)
-    out_file = generate(args.input, args.output_dir)
+    out_file = generate(args.input, args.output_dir, args.catalog)
     print(f"Wrote {out_file} ({out_file.stat().st_size} bytes)")
     return 0
 
