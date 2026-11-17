@@ -1117,6 +1117,15 @@ function backToRooms() {
   if(first&&typeof first.focus==="function")first.focus({preventScroll:true});
   if(typeof nav.scrollIntoView==="function")nav.scrollIntoView({block:"nearest",behavior:"instant"});
 }
+function skipToContent(event) {
+  const view=document.querySelector(".page-view:not([hidden])");
+  const target=view?.id==="house-view"&&linkedRoom()!==null
+    ?document.querySelector(".room-card"):view;
+  if(!target)return;
+  event.preventDefault();
+  target.focus({preventScroll:true});
+  target.scrollIntoView({block:"start"});
+}
 function showViewForHash(hash, focusTarget=false) {
   const targetId=String(hash||"").replace(/^#/,"");
   const roomRoute=targetId.startsWith("room/");
@@ -3096,6 +3105,7 @@ function render() {
   known.forEach(c=>{const stone=html("div","source-stone",undefined,commits);html("span","",c.id.slice(0,9),stone);html("div","",c.title,stone);});
 }
 function bindControls() {
+  $("skip-content")?.addEventListener("click",skipToContent);
   window.addEventListener("hashchange",()=>showViewForHash(window.location.hash,true));
   showViewForHash(window.location.hash,Boolean(window.location.hash));
   $("floor-picker").addEventListener("change",e=>{
