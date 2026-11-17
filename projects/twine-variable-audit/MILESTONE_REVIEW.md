@@ -52,3 +52,25 @@ Stories were pasted, so the file picker was not witnessed. The viewer speaks
 nothing, so no screen-reader claim; zoom was not tried. No defect was found
 in the five cases above, so no repair task is queued from this trial. The
 project owner decides the milestone outcome from this result.
+
+## Addendum — extended probes (task twine-variable-audit-trial-extended-probes)
+
+Three more fresh stories, same delivered page hash, viewer requests
+`493e0210a4734bcfa0c53533dfa54ec4-view-guard-clean`, `-view-temp-reset` and
+`-view-missing-target`, each at 390 and 1280 widths with no script errors,
+overflow or unlabelled controls:
+
+- `guard-clean.html` — `(def $signal) and $signal gt 0` read before and after
+  setting `$signal`. Supported routes checked, 0 findings: the grouped guard
+  invented no warning, matching the repaired precedence.
+- `temp-reset.html` — `_note` set and read in Start, read again in Quay.
+  Exactly one unset read, Quay line 1, via Start → Quay; the same-passage
+  read in Start was not flagged. Show this line opened the Quay source.
+  Correct: temporary variables reset each passage, so this is a real bug a
+  writer could ship.
+- `missing-target.html` — a link to a passage that does not exist. Partly
+  checked, 0 findings, "Missing link target: OldStair" at Start line 2 under
+  What stayed unchecked, with a button to that line. Never shown as clear.
+
+I opened the phone screenshots for the temp-reset finding and the
+missing-target report. No defect found in these probes either.

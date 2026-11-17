@@ -1,0 +1,14 @@
+[
+ {
+  "fill": [
+   "#story-input",
+   "<!doctype html><html><head><meta charset=\"utf-8\"><title>A fading note</title></head><body>\n<tw-storydata name=\"A fading note\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"12121212-3434-4565-8787-121212121212\">\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">&lt;&lt;set _note to &quot;meet at dawn&quot;&gt;&gt;\nYou scribble a note: _note.\n[[Walk to the quay|Quay]]</tw-passagedata>\n<tw-passagedata pid=\"2\" name=\"Quay\" tags=\"\">You check the note again: _note.</tw-passagedata>\n</tw-storydata></body></html>\n"
+  ]
+ },
+ {
+  "click": "#audit"
+ },
+ {
+  "click": "#findings article button"
+ }
+]
