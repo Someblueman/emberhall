@@ -1,9 +1,10 @@
 # An odd-column argument for five marks
 
-Fern, 17 November 2026. **Candidate proof; no independent acceptance yet.**
-The argument below is for every positive odd integer, not an extrapolation
-from the accompanying program. Novelty remains subject to a fresh independent
-literature comparison. See [the admission record](README.md) for sources and limits.
+Fern, 17 November 2026; exposition clarified by Tern after Isolde's
+[independent reconstruction](RECONSTRUCTION.md). **The reconstruction accepts
+the density argument; priority remains provisional.** The argument below
+addresses every positive odd integer. See [the owner assessment](DECISION.md)
+for the distinction between mathematical checking and the literature screen.
 
 ## Statement
 
@@ -15,10 +16,12 @@ The proposed conclusion is
 
     d_p(S) = b / (5b+4).
 
-Here d_p counts translation starts: A is S-packing when the distinct translates
-x+S, x in A, are disjoint; its upper density is the limsup of
-|A intersect [-N,N]|/(2N+1). The fraction of covered integers would instead
-be five times this density. No restriction to periodic A is made in the upper bound.
+Here A is S-packing when the distinct translates x+S, x in A, are disjoint.
+Its upper density is the limsup of |A intersect [-N,N]|/(2N+1), and d_p(S)
+is the supremum of these upper densities over all S-packing A subset Z.
+Thus d_p counts translation starts. The fraction of covered integers would
+instead be five times this density. The upper bound allows arbitrary A,
+including nonperiodic sets. The lower construction below attains the supremum.
 
 Two translates intersect exactly when their starts differ by an element of
 
@@ -26,19 +29,21 @@ Two translates intersect exactly when their starts differ by an element of
 
 These are the positive differences of S. A is therefore S-packing exactly
 when every positive difference of two distinct elements of A avoids M.
-Repeated values in this displayed list for small b are harmless.
+There are eight distinct values for every positive odd b. For b=1 they
+are {1,...,8}; for odd b>=3 they increase strictly in the displayed order.
 
 ## Lower bound, with wraparound
 
 Let n = 5b+4, R = {0,2,...,2b-2}, and A = R + nZ. There are b distinct
-residues because 2b-2 < n. A positive forbidden distance is less than n.
-Every difference of two residues has magnitude less than n, so a congruence
-to such a distance m can only take the integer values m or m-n.
-For an even forbidden distance, equality modulo n to a difference of R
-would require its value to lie in [2,2b-2]: adding or subtracting n changes
-parity. But the smallest even element of M is 2b.
-For an odd forbidden distance m, equality requires n-m to be an even
-integer at most 2b-2. The four values of n-m are
+residues because 2b-2 < n. Suppose a forbidden distance m is congruent
+modulo n to a difference d of residues in R. We have 0<m<n and
+|d|<=2b-2<n. Therefore -n<m-d<2n, so the only possible multiples of n
+are 0 and n: either d=m or d=m-n. The integer d is even and n is odd.
+
+If d=m, then m is even and at most 2b-2. But the smallest even element
+of M is 2b, a contradiction. If d=m-n, then m is odd and n-m=-d is
+an even integer at most 2b-2. For the four odd forbidden distances,
+the values of n-m are
 
     4b+4, 4b+2, 2b+2, 2b.
 
@@ -131,9 +136,9 @@ it to length n. Consequently
     |A intersect [-N,N]| <= b * ceil((2N+1)/n).
 
 Divide by 2N+1 and take the limsup. The upper density is at most b/n.
-Together with the periodic lower construction this proves the proposed
-equality, provided the argument survives independent reconstruction and
-novelty review.
+Together with the periodic lower construction this proves the stated
+equality. This logical conclusion is separate from the question of whether
+an earlier result already proves it.
 
 ## Equivalent graph answer
 
@@ -161,13 +166,13 @@ chi_f(G) <= chi_c(G) <= n/b; the independence-ratio identity
 chi_f(G)=1/alpha(G) gives the reverse bound from the candidate proof.
 Carraher et al., Theorem 1, states that identity for these distance graphs.
 This is a corollary of the same candidate argument, not a separate
-independently accepted result. In particular an ordinary coloring alone
+result with a separate novelty claim. In particular an ordinary coloring alone
 would not prove the required fractional bound.
 
 ## What the new step would be
 
 The published window decomposition specializes to the columns above.
-The extra claim established here is that an occupied extra position
+The extra implication established here is that an occupied extra position
 forces an empty **odd** column by the closed row set {1,2} under a step
 of two. This would establish the stronger inequality |T| <= |I| in this
 family directly; it does not use the strict corollary whose hypothesis
@@ -176,3 +181,18 @@ partition, the two six-entry exclusion tables, the endpoint and the
 anchored-window-to-density argument. The program checks finite instances
 of those obligations and exhausts small windows; it is not the proof
 of their universal quantifiers.
+
+## Sources and attribution
+
+- Natalchenko and Sagdeev, [Packing Density of Sets With Only Two Nonmixed
+  Gaps, v2](https://arxiv.org/html/2407.01101v2), Theorem 2 and Section 3.1:
+  the conjectured value, lower construction and window decomposition.
+- Carraher, Galvin, Hartke, Radcliffe and Stolee, [On the independence ratio
+  of distance graphs](https://academicweb.nd.edu/~dgalvin1/pdf/journal/infinitecayley_J.pdf),
+  Theorem 1, attributed there to Lih, Liu and Zhu: the external identity
+  used only in the graph corollary.
+- Fern authored the odd-column argument. Isolde reconstructed its identities,
+  endpoint, wraparound and density step independently of their detailed
+  derivations; her method and caveats are in RECONSTRUCTION.md. Tern's changes
+  above make those presentational obligations explicit and add no stronger
+  mathematical conclusion.
