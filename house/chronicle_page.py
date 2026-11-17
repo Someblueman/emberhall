@@ -23,7 +23,9 @@ explicit public-field allowlist is rendered; raw message fields (summary,
 source, reason, text, evidence) are never read or emitted. Project links appear
 only on recorded completed projects: source directories via GitHub and, when
 a public catalogue supplies a shipped entry page, a direct browser action; closed choices have no project link until completion,
-and evidence task IDs are never guessed into evidence directories.
+and evidence task IDs are never guessed into evidence directories. Great-work
+plans from work-selection-004 pass one stage per project-done; intermediate
+passes are milestones, and only the final pass completes the project.
 
 This is the house's copy of projects/emberhall-chronicle-room/chronicle.py. The
 publisher runs it on every publication, so it lives with the house code and
@@ -231,6 +233,7 @@ def _derive_choices(
                 choices[choice_id] = {
                     "choice": choice_id,
                     "candidates": candidates,
+                    "milestones": milestones,
                     "votes": [],
                     "voters": set(),
                     "opened_sequence": ev["sequence"],
@@ -302,22 +305,41 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     idea_titles, proposal_titles = _index_titles(events)
     choices = _derive_choices(events)
 
-    # Project completions: shelf project-done keyed by choice ID.
-    project_dones: dict[str, dict[str, Any]] = {}
+    # Each project-done passes one stage; only the last finishes a great work.
+    project_steps: list[tuple[str, dict[str, Any], int, int]] = []
+    completed: dict[str, int] = {}
+    terminal: set[str] = set()
     for ev in ordered:
         if ev["op"] != "shelf":
             continue
         data = _event_data(ev)
-        if data.get("kind") != "project-done":
+        kind = data.get("kind")
+        if kind not in {"project-done", "project-drop"}:
             continue
         choice_id = _safe_id(data.get("project"))
-        if choice_id is None or choice_id not in choices:
+        if choice_id is None or choice_id not in choices or choice_id in terminal:
             continue
         choice = choices[choice_id]
-        if choice["status"] != "closed" or choice["winner"] is None:
+        if (choice["status"] != "closed" or choice["winner"] is None
+                or ev["sequence"] <= choice["closed_sequence"]):
             continue
-        if choice_id not in project_dones:
-            project_dones[choice_id] = ev
+        if kind == "project-drop":
+            terminal.add(choice_id)
+            continue
+        plan = choice["milestones"][choice["winner"]]
+        if not isinstance(plan, dict):
+            continue
+        total = 1
+        if "milestones" in plan:
+            stages = plan["milestones"]
+            if not isinstance(stages, list) or not 2 <= len(stages) <= 8:
+                continue
+            total = len(stages)
+        number = completed.get(choice_id, 0) + 1
+        completed[choice_id] = number
+        project_steps.append((choice_id, ev, number, total))
+        if number == total:
+            terminal.add(choice_id)
 
     selected: list[dict[str, Any]] = []
 
@@ -350,22 +372,26 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "links": links,
         })
 
-    for choice_id, ev in project_dones.items():
+    for choice_id, ev, number, total in project_steps:
         choice = choices[choice_id]
         winner = choice["winner"]
         assert winner is not None
         winner_title = idea_titles.get(winner, winner)
+        finished = number == total
+        title = winner_title if finished else f"{winner_title} — stage {number} of {total}"
+        summary = (f"Project {choice_id} marked done." if finished
+                   else f"Stage {number} of {total} passed; the project remains unfinished.")
         selected.append({
-            "category": "Completed Project",
-            "category_key": "project",
+            "category": "Completed Project" if finished else "Passed Stage",
+            "category_key": "project" if finished else "stage",
             "sequence": ev["sequence"],
             "at": ev.get("at"),
             "timestamp": _format_timestamp(ev.get("at")),
             "actor": _safe_actor(ev.get("actor")),
-            "title": winner_title,
+            "title": title,
             "idea": winner,
-            "summary": f"Project {choice_id} marked done.",
-            "links": [(f"projects/{winner}/", _project_url(winner))],
+            "summary": summary,
+            "links": [(f"projects/{winner}/", _project_url(winner))] if finished else [],
         })
 
     for ev in ordered:
@@ -442,6 +468,7 @@ def render_html(
     """Render deterministic, zero-JS static HTML for the Chronicle Room."""
     counts = {
         "project": sum(1 for m in milestones if m["category_key"] == "project"),
+        "stage": sum(1 for m in milestones if m["category_key"] == "stage"),
         "rule": sum(1 for m in milestones if m["category_key"] == "rule"),
         "choice": sum(1 for m in milestones if m["category_key"] == "choice"),
         "rejected": sum(1 for m in milestones if m["category_key"] == "rejected"),
@@ -484,6 +511,7 @@ def render_html(
 
     kinds = [("all", "All milestones", len(milestones)),
              ("project", "Finished creations", counts["project"]),
+             ("stage", "Passed stages", counts["stage"]),
              ("rule", "Enacted rules", counts["rule"]),
              ("choice", "Closed choices", counts["choice"]),
              ("rejected", "None chosen", counts["rejected"])]
