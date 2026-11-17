@@ -1356,18 +1356,80 @@ function lessonEntry(lesson,parent) {
   const status=lesson.status==="superseded"?"replaced by a later lesson":lesson.status==="contested"?`Contested · ${checked}`:checked;
   html("p","small",`${lesson.author} · ${status}`,entry);
 }
-// The Hearth: the latest things residents said, newest first.
+let hearthState={query:"",page:0};
+const HEARTH_PAGE_SIZE=4;
+// Reunite only words already exposed in public snapshots, through this moment.
+function hearthConversation(frames,moment) {
+  const voices=new Map();
+  for(const past of [...(frames||[]),moment]) {
+    if(past.seq>moment.seq)continue;
+    for(const voice of past.hearth||[]) {
+      if(Number.isInteger(voice.seq)&&voice.seq>moment.seq)continue;
+      const key=Number.isInteger(voice.seq)?voice.seq:JSON.stringify([voice.name,voice.at,voice.text]);
+      if(!voices.has(key))voices.set(key,voice);
+    }
+  }
+  return [...voices.values()].sort((a,b)=>(b.seq||0)-(a.seq||0)||b.at-a.at);
+}
+// The Hearth: find a voice and follow it back to the moment it spoke.
 function renderHearth(content) {
-  const voices=Array.isArray(frame.hearth)?[...frame.hearth].reverse():null;
-  if(!voices){html("p","empty-note","This earlier snapshot recorded that residents spoke, not what they said.",content);return;}
+  if(!Array.isArray(frame.hearth)){html("p","empty-note","This earlier snapshot recorded that residents spoke, not what they said.",content);return;}
+  const voices=hearthConversation(data?.frames,frame);
   if(!voices.length){html("p","empty-note","Residents’ words are kept in the house’s private journal. This page shows that they spoke, not what they said.",content);return;}
-  const box=html("div","voices",undefined,content);
-  voices.forEach(voice=>{
-    const entry=html("article","voice",undefined,box);
-    const head=html("p","voice-head",undefined,entry);
-    html("strong","",voice.name,head);html("span","small",` · ${ago(voice.at)}`,head);
-    html("p","voice-text",voice.text,entry);
-  });
+  const panel=html("div","workshop-explorer hearth-conversation",undefined,content);
+  html("h3","","Around the Hearth",panel);
+  html("p","small",current?"Public words, latest first. This is a published record, not a live chat.":`Public words through event ${frame.seq} · later messages hidden.`,panel);
+  html("p","small","Search the messages kept in this publication. Private words and messages missing from its snapshots are not included.",panel);
+  const controls=html("div","workshop-search",undefined,panel);
+  const label=html("label","small","Find a voice or phrase",controls);
+  const search=html("input","",undefined,label);search.id="hearth-search";search.type="search";
+  label.htmlFor=search.id;
+  search.placeholder="Resident or words they said";search.value=hearthState.query;
+  search.setAttribute("aria-describedby","hearth-results");
+  search.addEventListener("input",()=>{hearthState.query=search.value;hearthState.page=0;draw();});
+  const clear=workshopButton(controls,"Clear search",()=>{
+    hearthState.query="";search.value="";hearthState.page=0;draw();search.focus({preventScroll:true});
+  });clear.id="hearth-clear";
+  const results=html("p","small",undefined,panel);results.id="hearth-results";results.setAttribute("role","status");
+  const box=html("div","voices",undefined,panel);box.id="hearth-messages";box.tabIndex=-1;
+  box.setAttribute("role","region");box.setAttribute("aria-label","Public Hearth messages");
+  const pages=html("div","workshop-pages",undefined,panel);
+  const newer=workshopButton(pages,"Newer messages",()=>turnPage(-1));newer.id="hearth-newer";
+  const older=workshopButton(pages,"Older messages",()=>turnPage(1));older.id="hearth-older";
+  for(const button of [newer,older])button.setAttribute("aria-controls",box.id);
+  const visitable=new Set((data?.frames||[]).filter(past=>past.seq<=frame.seq).map(past=>past.seq));
+  function turnPage(delta) {
+    hearthState.page+=delta;draw();box.focus({preventScroll:true});box.scrollIntoView?.({block:"nearest"});
+  }
+  function draw() {
+    const query=workshopSearchText(hearthState.query);
+    const matches=voices.filter(voice=>!query||[voice.name,voice.text].some(value=>workshopSearchText(value).includes(query)));
+    hearthState.page=Math.max(0,Math.min(hearthState.page,Math.ceil(matches.length/HEARTH_PAGE_SIZE)-1));
+    const start=hearthState.page*HEARTH_PAGE_SIZE;
+    results.textContent=`${matches.length} of ${voices.length} public messages · ${matches.length?`${start+1}–${Math.min(start+HEARTH_PAGE_SIZE,matches.length)}`:"0"} shown · latest first`;
+    clear.disabled=!hearthState.query;
+    box.replaceChildren();
+    for(const voice of matches.slice(start,start+HEARTH_PAGE_SIZE)) {
+      const entry=html("article","voice",undefined,box);entry.tabIndex=-1;
+      if(Number.isInteger(voice.seq))entry.id=`hearth-message-${voice.seq}`;
+      const head=html("p","voice-head",undefined,entry);
+      html("strong","",voice.name,head);html("span","small",` · ${ago(voice.at)}`,head);
+      html("p","voice-text",voice.text,entry);
+      if(visitable.has(voice.seq)) {
+        const visit=workshopButton(entry,`Visit event ${voice.seq} →`,()=>{
+          hearthState.page=0;jumpToSequence(voice.seq);
+          const target=$(`hearth-message-${voice.seq}`)||document.querySelector?.(".room-card");
+          target?.focus({preventScroll:true});target?.scrollIntoView?.({block:"nearest"});
+        });visit.id=`hearth-visit-${voice.seq}`;
+        visit.setAttribute("aria-label",`Visit ${voice.name}’s message at event ${voice.seq}`);
+      } else html("p","small","Its moment is not available to visit in this publication.",entry);
+    }
+    if(!matches.length)html("p","empty-note","No messages match. Clear search to hear the other voices.",box);
+    newer.disabled=hearthState.page===0;older.disabled=start+HEARTH_PAGE_SIZE>=matches.length;
+    pages.hidden=matches.length<=HEARTH_PAGE_SIZE;
+    pages.setAttribute("style",pages.hidden?"display:none":"");
+  }
+  draw();
 }
 let archiveState={query:"",status:"all",page:0};
 const ARCHIVE_PAGE_SIZE=5;
@@ -3394,8 +3456,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
-  const selectionId=activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
+  const selectionId=activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();

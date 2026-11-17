@@ -1305,6 +1305,13 @@ footer a {
 .voice { padding:10px 12px; border:1px solid var(--line); border-radius:12px 12px 12px 3px; background:var(--room); }
 .voice-head { margin:0 0 4px; font-size:13px; }
 .voice-text { margin:0; font-size:13.5px; line-height:1.5; overflow-wrap:anywhere; }
+.hearth-conversation { margin-top:16px; }
+.hearth-conversation h3 { margin:0; }
+.hearth-conversation #hearth-results { margin:10px 0; }
+.hearth-conversation .voice-head { overflow-wrap:anywhere; }
+.hearth-conversation .voice-text { white-space:pre-wrap; }
+.hearth-conversation .voice button { margin-top:10px; }
+.hearth-conversation .voice:focus-visible { outline-offset:3px; }
 
 /* The Counting Room: per-family run tallies, lane filters, and link to Household Accounts. */
 .counting-panel { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); display:grid; gap:10px; }
