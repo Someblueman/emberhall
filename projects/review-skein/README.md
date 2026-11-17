@@ -21,23 +21,19 @@ first; it exercises the main workflow commands on disposable data. The pieces:
 | `probe.py` | Audit/transcribe a packet's markup without a browser | [PROBE.md](PROBE.md) |
 | `example.py` | Generate a reproducible invented practice workspace | [EXAMPLE.md](EXAMPLE.md) |
 
-Milestones 1–4 are built and independently reviewed: packet/anchors;
-accessible markup plus comment view/edit; multi-reviewer exchange with a
-non-author two-repository trial recorded in [EXCHANGE.md](EXCHANGE.md); and
-packet recovery with an honest workflow comparison in
-[RECOVERY.md](RECOVERY.md), plus the read-only annotated view in
-[REVIEW_VIEW.md](REVIEW_VIEW.md). An independent non-author try under
-[TRIAL.md](TRIAL.md) recorded a limited pass on 16 November (steps 1–7 passed;
-zoom and screen-reader speech were `NOT RUN`); the project owner assesses
-milestone 2 from that result, and milestone 2 is not closed here. The rebuilt
-house viewer can test real keys and measured phone/desktop layouts, including
-pages with their own content policy. A limited rendered-content and interaction
-inspection needs actual observed results; markup tests and `probe.py` do not
-substitute for it. Browser zoom and screen-reader speech remain `NOT RUN` under
-the viewer. Edited-state viewer attempts once timed out on the comment
-editor's unsaved-changes question; since the viewer repair, composing and
-editing through it have been observed returning the typed state, as recorded
-in [TRIAL_EDITOR.md](TRIAL_EDITOR.md).
+Milestones 1–3 are built, reviewed, and closed in the project record (packet and
+anchors at 8577; limited milestone 2 phone/desktop reading and editing pass
+closed by the owner's recorded assessment at 12546, as [TRIAL.md](TRIAL.md)
+itself notes milestone 2 is not closed by a limited pass alone; non-author
+two-repository exchange at 12553). Milestone 4 adds the
+[EXAMPLE.md](EXAMPLE.md) practice workspace, [RECOVERY.md](RECOVERY.md) damage
+diagnosis/rebuild and measured comparison against `git bundle`, Gerrit, and
+Radicle, the read-only annotated view in [REVIEW_VIEW.md](REVIEW_VIEW.md), and
+the independent recipe/recovery trials in [FINAL_REVIEW.md](FINAL_REVIEW.md)
+and [MILESTONE_4_TRIAL.md](MILESTONE_4_TRIAL.md). In [TRIAL.md](TRIAL.md) and
+[TRIAL_EDITOR.md](TRIAL_EDITOR.md), real keys and measured phone/desktop
+layouts passed under the house viewer, while browser zoom and screen-reader
+speech remain `NOT RUN` and uncertified.
 
 ## Export and read a packet
 
@@ -236,6 +232,98 @@ base `f730e964e18e0245862f09f7e0662ab14775e8bd`, head
 `7118f31b4d6d4ca429946929d95d9b3d6149f99a`); the older all-added sample
 under `sample/milestone-2/` remains an alternate. Neither is an assertion
 made by this README.
+
+## Outside-user recipe (your own repository)
+
+Run from the Skein source checkout with Python 3.10+ and Git 2.29+. Start with a
+clean repository whose committed branches are `main` (base) and `feature` (patch).
+Substitute your own refs if needed. Choose a new review workspace outside that
+repository; paths may contain spaces. The bundle includes reachable history:
+inspect what you intend to share before transferring it.
+
+Create the workspace, export an untouched author baseline, and give the reviewer
+a separate copy. In a real exchange, carry that entire copy to the other machine;
+the local copy below rehearses the same packet boundary without network access.
+Open the reviewer's `review.html` locally after verifying it.
+
+```sh
+repo="/absolute/path/to/your/repository"
+review="/absolute/path/to/new/review-workspace"
+mkdir "$review"
+python3 projects/review-skein/skein.py export "$repo" main feature "$review/original"
+cp -R "$review/original" "$review/reviewer"
+python3 projects/review-skein/skein.py verify "$review/reviewer"
+git clone --branch skein-head "$review/reviewer/changes.bundle" "$review/clone"
+```
+
+This walkthrough uses the **CLI comment path** throughout. Read the patch and
+choose an existing new-side path and line from `anchors.json`; `app.py` line 3
+below is an example to replace for your patch. The cloned branch supplies the
+full head commit ID. Choose a unique comment ID and write your actual question.
+The command saves directly to the reviewer's `comments.json`; verify and read it
+before returning all five packet files to the author.
+
+```sh
+head_commit=$(git -C "$review/clone" rev-parse HEAD)
+python3 projects/review-skein/skein.py comment "$review/reviewer" \
+  --id rev-1 --commit "$head_commit" --path app.py --side new --line 3 \
+  --body "Should empty names raise ValueError?"
+python3 projects/review-skein/skein.py verify "$review/reviewer"
+python3 projects/review-skein/comments_view.py "$review/reviewer/comments.json"
+```
+
+For the alternative browser composer, follow the complete [EDITOR.md workflow](EDITOR.md):
+create the page, add comments, download or copy/save its JSON, check it, then apply
+it to the matching packet. Generating a compose page alone does not save a comment.
+That browser/download path is separate from this CLI walkthrough.
+
+Back with the author, make a new merge target from the untouched original before
+merging the returned reviewer copy. A second reviewer can return another copy;
+[EXCHANGE.md](EXCHANGE.md) explains shared-base and divergent-ID handling.
+
+```sh
+cp -R "$review/original" "$review/merged"
+python3 projects/review-skein/exchange.py merge "$review/merged" "$review/reviewer"
+```
+
+Now make and commit your revised patch on `feature`, keeping `main` unchanged and
+the worktree clean. Carry the returned comment onto a new packet and inspect it.
+A uniquely moved line is reanchored; changed or ambiguous text becomes an explicit
+orphan rather than silently landing on another line.
+
+```sh
+python3 projects/review-skein/exchange.py revise "$repo" main feature "$review/revised" --from "$review/merged"
+python3 projects/review-skein/skein.py verify "$review/revised"
+python3 projects/review-skein/review_view.py "$review/revised"
+```
+
+To rehearse recovery, damage only a disposable copy. The diagnosis below is
+**expected to exit 1**, saying `status=recoverable`; inspect that result before
+continuing, especially if your shell stops on nonzero exits.
+
+```sh
+cp -R "$review/revised" "$review/damaged"
+rm "$review/damaged/review.html"
+python3 projects/review-skein/recovery.py diagnose "$review/damaged"
+```
+
+Rebuild into another new directory. Both comparisons should print nothing:
+the page is reconstructed byte for byte and the returned comments are preserved.
+The damaged copy remains untouched by recovery.
+
+```sh
+python3 projects/review-skein/recovery.py rebuild "$review/damaged" "$review/rebuilt"
+python3 projects/review-skein/skein.py verify "$review/rebuilt"
+cmp "$review/rebuilt/review.html" "$review/revised/review.html"
+cmp "$review/rebuilt/comments.json" "$review/revised/comments.json"
+```
+
+When only commits need to travel and you do not need reanchored comments, raw
+`git bundle` is smaller in the measured fixture ([RECOVERY.md](RECOVERY.md)).
+This recipe's actual CLI blocks are exercised on a fresh invented repository by
+`test_outside_recipe.py`; that is not a novice, browser-download or general
+usability comparison. Final milestone acceptance remains the project owner's
+decision after independent review.
 
 ## Honest boundary
 
