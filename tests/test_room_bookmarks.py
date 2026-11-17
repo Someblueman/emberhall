@@ -15,12 +15,12 @@ class Element {
  appendChild(n){this.children.push(n);return n;} replaceChildren(){this.children=[];}
  setAttribute(k,v){this.attrs[k]=String(v);} removeAttribute(k){delete this.attrs[k];}
  addEventListener(k,fn){this.listeners[k]=fn;}
- focus(){document.activeElement=this;} scrollIntoView(){}
+ focus(){document.activeElement=this;} scrollIntoView(){this.scrolled=true;}
  querySelectorAll(s){return all(this).filter(n=>s==='button'?n.tag==='button':n.tag==='details'&&(s!=='details[open]'||n.open));}
 }
 const all=n=>[n,...n.children.flatMap(all)],nodes={};
-const get=id=>nodes[id]||(nodes[id]=new Element('div',id));
-const card=new Element('section','card');
+const get=id=>Object.values(nodes).flatMap(all).find(n=>n.id===id)||(nodes[id]=new Element('div',id));
+const card=nodes['room-card']=new Element('section','room-card');
 const views=['house-view','projects-view','gallery-view','council-view','accounts-view'].map(get);
 const links=views.map(v=>Object.assign(new Element('a'),{hash:'#'+v.id}));
 const document={body:new Element('body'),activeElement:null,getElementById:get,
@@ -48,7 +48,19 @@ assert.equal($('house-view').hidden,false);assert.equal(links[0].attrs['aria-cur
 `);
 assert(all(get('room-content')).some(n=>n.tag==='a'&&n.href==='#room/sun%20room'));
 run(`choose('hearth');choose('hearth');`);
+assert.equal(document.activeElement,card,'Opening a room moves focus out of the replaced drawing');
+assert.equal(card.scrolled,true,'The room contents are brought into view');
 assert.deepEqual(addresses,['#room/sun%20room','#room/hearth']); // no duplicate visit
+run(`
+const trialDoorway=$('room-link-hearth');trialDoorway.focus();refreshView(true);
+assert.notEqual($('room-link-hearth'),trialDoorway,'A new publication replaces the doorway');
+assert.equal(document.activeElement,$('room-link-hearth'),'Refresh restores the same doorway');
+choose('hearth');refreshView();assert.equal(document.activeElement,card);
+const first=$('room-link-hearth');const other=document.createElement('button');
+other.dataset.room='other';$('room-nav').children.unshift(other);
+backToRooms();assert.equal(document.activeElement,first,'Return finds the selected room, not the first button');
+assert.equal(window.location.hash,'#room/hearth','Returning focus keeps the room bookmark');
+`);
 window.location.hash=addresses[--cursor];listeners.hashchange();
 assert.equal(run('selected'),'sun room');assert.equal(document.activeElement,card);
 window.location.hash=addresses[++cursor];listeners.hashchange();

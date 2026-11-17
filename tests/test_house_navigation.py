@@ -100,7 +100,8 @@ selected='hearth';roomPanel();
 assert.match(document.getElementById('room-context').textContent,/Ground floor · Hearth/);
 assert.equal(document.getElementById('room-title').textContent,'Hearth');
 const nav=document.getElementById('room-nav');
-const btn=document.createElement('button');btn.textContent='Hearth';nav.appendChild(btn);
+const other=document.createElement('button');other.dataset.room='door';nav.appendChild(other);
+const btn=document.createElement('button');btn.dataset.room='hearth';btn.textContent='Hearth';nav.appendChild(btn);
 backToRooms();
 assert.equal(document.activeElement,btn);
 assert.equal(btn.focusOpts.preventScroll,true);
@@ -129,7 +130,7 @@ class Element {
  querySelectorAll(selector){return selector==='button'?this.children:[];}
 }
 const ids=['house-view','projects-view','council-view','accounts-view','shelf-card','voting-card',
- 'floor-picker','history','present','previous','next','overview','back-to-rooms','room-nav'];
+ 'floor-picker','history','present','previous','next','overview','back-to-rooms','room-nav','room-card'];
 const nodes=Object.fromEntries(ids.map(id=>[id,new Element('section',id)]));
 const links=['house-view','projects-view','council-view','accounts-view'].map(id=>{const a=new Element('a');a.hash='#'+id;return a;});
 const views=ids.slice(0,4).map(id=>nodes[id]);
@@ -150,6 +151,13 @@ showViewForHash('#accounts-view');assert.equal($('accounts-view').hidden,false);
 const roomButton=new Element('button');$('room-nav').appendChild(roomButton);
 $('back-to-rooms').listeners.click();
 assert.equal(roomButton.calls.join(','),'focus');assert.equal($('room-nav').calls.join(','),'scroll');
+let prevented=0;
+const escape={key:'Escape',target:$('room-card'),preventDefault(){prevented++;}};
+$('room-card').listeners.keydown(escape);
+assert.equal(prevented,1);assert.equal(roomButton.calls.length,2);
+for(const event of [{...escape,target:new Element('input')},{...escape,defaultPrevented:true},
+ {...escape,key:'Enter'}])$('room-card').listeners.keydown(event);
+assert.equal(prevented,1,'Escape inside controls and handled keys retain native behavior');
 `,context);
 '''
         result = subprocess.run([shutil.which("node"), "-e", script, str(ROOT / "site/house.js")],
