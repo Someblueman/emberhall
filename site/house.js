@@ -1706,6 +1706,7 @@ function renderLessons(content) {
   renderPage();
 }
 let countingState={agent:"all",lane:"all",page:0};
+const countingHandoffsOpen=new Set();
 const COUNTING_PAGE_SIZE=8;
 // Models resting on a quota, in plain words: whether the whole family is out or only some of its
 // models, and when the provider itself said the limit returns.
@@ -1729,14 +1730,21 @@ function countingBackoffLabel(backoff,now) {
 }
 function renderCountingRoom(content) {
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
-  const totalFinishes=allRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+  const finishesOf=run=>(run.finished_tasks||[]).filter(t=>Number.isInteger(t.sequence)&&t.sequence>0&&t.sequence<=frame.seq);
+  const totalFinishes=allRuns.reduce((n,r)=>n+finishesOf(r).length,0);
+  const taskNames=new Map(),retained=new Set();
+  for(const moment of data.frames) {
+    if(moment.seq>frame.seq)break;
+    retained.add(moment.seq);
+    for(const task of moment.tasks||[])taskNames.set(task.id,task.plain||task.title);
+  }
   const panel=html("div","counting-panel",undefined,content);
   html("p","small",`${allRuns.length} recorded ${allRuns.length===1?"run":"runs"} · ${totalFinishes} finished task ${totalFinishes===1?"receipt":"receipts"} through this moment. Recorded receipts only, not live process heartbeats.`,panel);
   const families=html("div","counting-families",undefined,panel);
   const now=observationTime();
   for(const agent of ["codex","opencode","muse","agy"]) {
     const kind=kinds[agent],familyRuns=allRuns.filter(r=>r.agent===agent);
-    const finishes=familyRuns.reduce((n,r)=>n+(r.finished_tasks||[]).length,0);
+    const finishes=familyRuns.reduce((n,r)=>n+finishesOf(r).length,0);
     const models=[...new Set(familyRuns.map(r=>r.model).filter(Boolean))].sort();
     const backoff=(frame.budgets||[]).find(b=>b.agent===agent)||{agent};
     const card=html("div","counting-family",undefined,families);
@@ -1787,12 +1795,41 @@ function renderCountingRoom(content) {
     filtered.slice().reverse().slice(start,start+COUNTING_PAGE_SIZE).forEach(run=>{
       const row=html("div","counting-run",undefined,list);
       const kind=kinds[run.agent]||kinds.unrecorded,lane=run.assignment?.lane||"unrecorded";
-      const finishes=(run.finished_tasks||[]).map(t=>t.task).filter(Boolean);
+      const finishes=finishesOf(run);
       const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&
         Array.isArray(data?.frames)&&data.frames.some(f=>f.seq===run.sequence);
       const info=html("div","counting-run-info",undefined,row);
       html("strong","",`${residentName(run.resident)} · ${kind.name}${run.model?` · ${run.model}`:""}`,info);
-      html("span","small",`Lane: ${lane} · ${run.outcome||run.status||"recorded"}${finishes.length?` · finished ${finishes.join(", ")}`:""}${!hasFrame&&Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq?` · event ${run.sequence}`:""}`,info);
+      html("span","small",`Lane: ${lane} · ${run.outcome||run.status||"recorded"}${!hasFrame&&Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq?` · event ${run.sequence}`:""}`,info);
+      if(finishes.length) {
+        const handoffs=html("details","",undefined,info);
+        handoffs.id=`counting-handoffs-${encodeURIComponent(run.id)}`;
+        handoffs.open=countingHandoffsOpen.has(run.id);
+        handoffs.addEventListener("toggle",()=>{
+          if(handoffs.open)countingHandoffsOpen.add(run.id);else countingHandoffsOpen.delete(run.id);
+        });
+        const first=taskNames.get(finishes[0].task)||"Task name not retained";
+        const summary=html("summary","",`Handed on: ${first}${finishes.length>1?` · ${finishes.length-1} more`:""}`,handoffs);
+        summary.id=`${handoffs.id}-toggle`;
+        html("p","small","Task handoffs recorded here; source acceptance and delivery are separate.",handoffs);
+        const items=html("ul","",undefined,handoffs);
+        for(const receipt of finishes) {
+          const item=html("li","small",undefined,items);
+          const title=taskNames.get(receipt.task)||"Task name not retained";
+          html("span","",title+" ",item);
+          if(retained.has(receipt.sequence)) {
+            const id=`counting-finish-${receipt.sequence}`;
+            const button=workshopButton(item,`Handoff at event ${receipt.sequence}`,()=>{
+              countingHandoffsOpen.add(run.id);
+              jumpToSequence(receipt.sequence);
+              const replacement=$(id);
+              if(replacement){replacement.closest("details").open=true;replacement.focus({preventScroll:true});}
+              else $("counting-runs")?.focus({preventScroll:true});
+            });
+            button.id=id;button.setAttribute("aria-label",`Open handoff: ${title} · event ${receipt.sequence}`);
+          } else html("span","small",`Event ${receipt.sequence} · outside retained history`,item);
+        }
+      }
       if(hasFrame) {
         const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
         btn.type="button";btn.id=`counting-jump-${run.sequence}`;
