@@ -1215,6 +1215,8 @@ function buildCatchupDigest(frames, endIndex, requestedStartSeq) {
   return{startSeq,endSeq,count:visible.length-startIdx,isDefault,tasks,rooms,projects};
 }
 let catchupStartSeq=null;
+let catchupPages=[0,0,0];
+const CATCHUP_PAGE_SIZE=8;
 function recentGrowth(frames, endIndex, endAt) {
   const since=endAt-12*3600, changes=[];
   for(let i=1;i<=endIndex;i++) {
@@ -1292,10 +1294,10 @@ function renderCatchupPanel(content) {
   input.id="catchup-seq";input.type="number";input.min=String(data.frames[0]?.seq||1);input.max=String(digest.endSeq);input.value=String(digest.startSeq);input.defaultValue=input.value;
   const apply=html("button","","Update",controls);
   apply.id="catchup-apply";
-  apply.addEventListener("click",()=>{const v=Number.parseInt(input.value,10);catchupStartSeq=Number.isFinite(v)?v:null;roomPanel();});
+  apply.addEventListener("click",()=>{const v=Number.parseInt(input.value,10);catchupStartSeq=Number.isFinite(v)?v:null;catchupPages=[0,0,0];roomPanel();$("catchup-seq")?.focus({preventScroll:true});});
   const reset=html("button","","Latest 50",controls);
   reset.id="catchup-reset";
-  reset.addEventListener("click",()=>{catchupStartSeq=null;roomPanel();});
+  reset.addEventListener("click",()=>{catchupStartSeq=null;catchupPages=[0,0,0];roomPanel();$("catchup-seq")?.focus({preventScroll:true});});
   const sections=[["Completed tasks",digest.tasks,t=>t.title],["Room changes",digest.rooms,r=>`${r.name} (${r.status})`],["Project choices",digest.projects,p=>`${p.title} (${p.status})`] ];
   let any=false;
   sections.forEach(([heading,items,fmt],section)=>{
@@ -1303,13 +1305,45 @@ function renderCatchupPanel(content) {
     any=true;
     html("h3","catchup-heading",`${heading} (${items.length})`,panel);
     const list=html("div","catchup-list",undefined,panel);
-    items.slice(0,8).forEach(item=>{
-      const row=html("div","catchup-item",undefined,list);
-      html("span","",`${fmt(item)} · event ${item.seq}`,row);
-      const btn=html("button","catchup-jump","Jump",row);
-      btn.id=`catchup-jump-${section}-${item.seq}`;
-      btn.addEventListener("click",()=>jumpToSequence(item.seq));
-    });
+    list.id=`catchup-list-${section}`;list.tabIndex=-1;
+    list.setAttribute("role","region");list.setAttribute("aria-label",heading);
+    const pages=html("div","workshop-pages",undefined,panel);
+    pages.id=`catchup-pages-${section}`;
+    pages.setAttribute("role","group");pages.setAttribute("aria-label",`${heading} pages`);
+    const previous=workshopButton(pages,`Earlier ${heading.toLowerCase()}`,()=>turn(-1));
+    previous.id=`catchup-previous-${section}`;
+    const range=html("span","small",undefined,pages);
+    range.id=`catchup-range-${section}`;range.setAttribute("role","status");
+    const next=workshopButton(pages,`Later ${heading.toLowerCase()}`,()=>turn(1));
+    next.id=`catchup-next-${section}`;
+    for(const button of [previous,next])button.setAttribute("aria-controls",list.id);
+    function draw() {
+      catchupPages[section]=Math.max(0,Math.min(catchupPages[section],Math.ceil(items.length/CATCHUP_PAGE_SIZE)-1));
+      const start=catchupPages[section]*CATCHUP_PAGE_SIZE;
+      list.replaceChildren();
+      items.slice(start,start+CATCHUP_PAGE_SIZE).forEach((item,offset)=>{
+        const row=html("div","catchup-item",undefined,list);
+        html("span","",`${fmt(item)} · event ${item.seq}`,row);
+        const btn=html("button","catchup-jump","Jump",row);
+        // Several rooms or projects can change in the same event.
+        btn.id=`catchup-jump-${section}-${item.seq}${section===0?"":`-${start+offset}`}`;
+        btn.setAttribute("aria-label",`View ${fmt(item)} at event ${item.seq}`);
+        btn.addEventListener("click",()=>{
+          jumpToSequence(item.seq);
+          const target=$(`catchup-list-${section}`);
+          target?.focus({preventScroll:true});target?.scrollIntoView?.({block:"nearest"});
+        });
+      });
+      range.textContent=`${start+1}–${Math.min(start+CATCHUP_PAGE_SIZE,items.length)} of ${items.length}`;
+      previous.disabled=catchupPages[section]===0;next.disabled=start+CATCHUP_PAGE_SIZE>=items.length;
+      pages.hidden=items.length<=CATCHUP_PAGE_SIZE;
+      // The shared flex style overrides the browser's default hidden style.
+      pages.setAttribute("style",pages.hidden?"display:none":"");
+    }
+    function turn(delta) {
+      catchupPages[section]+=delta;draw();list.focus({preventScroll:true});list.scrollIntoView?.({block:"nearest"});
+    }
+    draw();
   });
   if(!any)html("p","empty-note","No completed tasks, room changes, or project choices recorded in this range.",panel);
 }
