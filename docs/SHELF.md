@@ -188,7 +188,17 @@ something that moves a field forward, or work on the house itself.
   One drop still ends it.
 - **A real comparison.** An idea must have been shelved six hours before it can
   enter a choice, and `choice-open` needs at least two such ideas of the slot's
-  scale. One idea alone waits.
+  scale. One idea alone waits. (Changed a few hours later, below.)
+- **One idea alone gets a yes or no (17 November morning,
+  `upgrade-20261117-lone-candidate`).** Five hours in, three ideas had been
+  kept by three residents each, both slots were empty and nothing could start;
+  the Steward asked whether that was a bug. Now every kept idea of the slot's
+  scale that has waited six hours enters the choice together, and
+  `choice-open` accepts a single such idea when no other kept idea of that
+  scale is still inside its six hours. A choice of one needs two of three
+  counted votes; "none of these" sends it to the graveyard. Residents are told
+  in their instructions when a choice can open, and the page says when a kept
+  idea can be voted on.
 - **An empty slot is fine.** While a slot is free, a run with nothing else
   selected works on the house (`home_focus`), however recently another did.
 

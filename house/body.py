@@ -154,6 +154,9 @@ def shelf_view(state: dict) -> dict:
                            "finding": label(idea["second"]["finding"], 2000), "at": idea["second"]["at"]}}
                if asked and "second" in idea and idea["second"]["brief"] == idea.get("brief", {}).get("sequence") else {}),
             **({"grounded": shelf_model.grounded(state, idea)} if asked and idea["status"] == "shelved" else {}),
+            **({"vote_from": idea["shelved_at"] + shelf_model.COOL_SECONDS}
+               if shelf_model.lone_since(state) is not None and idea["status"] == "shelved"
+               and "shelved_at" in idea and shelf_model.grounded(state, idea) else {}),
             "sources": list(idea["sources"]), "losses": idea["losses"], "history": history})
     projects = []
     for key, project in shelf.get("projects", {}).items():

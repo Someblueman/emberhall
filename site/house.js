@@ -2418,6 +2418,10 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
   const meta = [scaleLabel, fieldLabel, idea.status, briefLabel, lossLabel, residentName(idea.author)].filter(Boolean).join(" · ");
   if (meta) html("span", "small", meta, item);
   if (idea.plain) html("p", "shelf-plain", idea.plain, item);
+  // Kept by three residents: say when the council may vote on it, so a waiting idea does not look forgotten.
+  if (Number.isFinite(idea.vote_from)) html("p", "small shelf-vote-from", idea.vote_from > observationTime()
+    ? `Kept by three residents · the council can vote on it from ${clock(idea.vote_from)}.`
+    : "Kept by three residents · ready for the council's vote.", item);
   if (idea.what) html("p", idea.plain ? "small" : "", idea.what, item);
   if (idea.why) html("p", "small", `Why: ${idea.why}`, item);
   if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
@@ -2568,7 +2572,7 @@ function shelf() {
     if (dataShelf.asked_first) {
       // Only ideas someone outside the house asked for are listed; the rest wait folded away and leave within hours.
       const asked = ideas.filter(idea => idea.grounded === true), checking = ideas.filter(idea => idea.grounded !== true);
-      if (!asked.length) html("p", "empty-note", "No idea that someone outside the house asked for is waiting.", next);
+      if (!asked.length) html("p", "empty-note", "No idea that three residents have checked and kept is waiting.", next);
       asked.forEach(idea => renderShelfIdea(idea, next, greatMode, residentName));
       if (checking.length) {
         const folded = html("details", "shelf-graveyard shelf-checking", undefined, next);

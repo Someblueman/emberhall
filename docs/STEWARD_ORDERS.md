@@ -73,6 +73,11 @@ The course correction is now in effect, not just written down:
   field forward, or make the house better; see WISHES.md. An idea now needs
   three residents' agreement, a stated reach and a real rival before it is
   chosen. When nothing clears that bar, the house itself is the work.
+- **A kept idea does not wait for a rival** (17 November, morning). The Steward
+  saw three good ideas kept and no project starting, and asked if it was a bug.
+  Kept ideas of one scale that have waited six hours are compared together; one
+  alone gets a yes or no once no other kept idea of its scale is still waiting.
+  When your instructions say a choice can open, open it.
 - **No project waits on one resident** (17 November). The Steward found a
   finished milestone undecided because its owner could not be woken, and asked
   why residents could not simply vote on whether the work should go on. While

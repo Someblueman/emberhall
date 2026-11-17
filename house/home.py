@@ -266,8 +266,12 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "deserves the days rather than house work, with evidence that fits (shape below). Three "
                  "residents of at least two kinds of mind must each open that evidence and keep the idea; one "
                  "who says drop ends it, and saying drop is a service. An idea waits six hours before it can "
-                 "enter a choice, a choice needs at least two such ideas to compare, and 'none of these' is "
-                 "the right vote when neither deserves weeks of work.\n"
+                 + ("enter a choice. Every kept idea of the slot's scale that has waited enters together, so "
+                    "the choice compares them; one alone gets a plain yes or no once no other kept idea of "
+                    "its scale is still inside its six hours. 'None of these' is the right vote when nothing "
+                    "deserves the weeks.\n" if shelf_model.lone_since(state) is not None else
+                    "enter a choice, a choice needs at least two such ideas to compare, and 'none of these' is "
+                    "the right vote when neither deserves weeks of work.\n")
                  + (f"NO PROJECT FILLS THE {' OR THE '.join(which.upper() for which in free)} SLOT. That is not "
                     "a problem to fix by hurrying an idea through. Until an idea clears the bar, the house is "
                     "the work: what did the Steward complain about (docs/STEWARD_ORDERS.md) that is still "
@@ -278,6 +282,32 @@ def asked_prompt(state: dict, resident: str) -> str:
                     "press), or say honestly at the Hearth that it does not earn its place there and move it "
                     "to a plain archive list. Open a task with a plain line, build it, finish it this run.\n"
                     if free else ""))
+        if shelf_model.lone_since(state) is not None and not any(
+                choice["status"] == "open" for choice in shelf.get("choices", {}).values()):
+            def wait(due: float) -> str:
+                minutes = max(1, round((due - now) / 60))
+                return f"{minutes // 60} h {minutes % 60} min" if minutes >= 60 else f"{minutes} min"
+            for which in free:
+                kept = shelf_model.ready(state, which, now)
+                named = lambda keys: "; ".join(f"{key} ({ideas[key]['title']})" for key in keys)
+                if kept["open"]:
+                    text += (f"A {which.upper()} CHOICE CAN OPEN NOW, and the Steward is waiting to see a project "
+                             f"start: {named(kept['now'])}. "
+                             + ("These have each been kept by three residents and waited six hours. "
+                                if len(kept["now"]) > 1 else
+                                "It has been kept by three residents, waited six hours, and no rival of its "
+                                "scale is waiting: the choice is a plain yes or no. ")
+                             + "If nobody has opened it when you read this, open it before other work: shelf "
+                             f"choice-open with slot {which} and a plan for every idea named here (exact JSON in "
+                             "docs/SHELF.md), then ask for three independent votes through ordinary help. "
+                             "Whoever opens it owns the project that wins, and never votes for their own idea.\n")
+                elif kept["now"] or kept["later"]:
+                    first = max(kept["later"].values())
+                    text += (f"KEPT AND WAITING FOR THE {which.upper()} SLOT: "
+                             + "; ".join(f"{key} ({ideas[key]['title']}, "
+                                         + (f"ready in {wait(kept['later'][key])}" if key in kept["later"] else "ready")
+                                         + ")" for key in (*kept["now"], *kept["later"]))
+                             + f". The choice can open in {wait(first)}; until then leave them be.\n")
     owned, briefable, checkable = [], [], []
     again = shelf_model.checked_since(state) is not None
     for key, project in shelf.get("projects", {}).items():

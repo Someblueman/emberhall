@@ -317,6 +317,38 @@ def unlisted_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# One idea alone no longer waits for a rival (Steward, 17 November morning: "I don't see any new
+# projects happening, is this a bug?"). Five hours after the higher bar three ideas had each been kept
+# by three residents: a conjecture, a language that expects to die, a time-travel language. Both slots
+# were empty and nothing could start. The two great ideas were only waiting out their six hours; the
+# small one, the only kept idea of its scale, would have waited for a rival that might never come.
+# Comparing is still better when there is something to compare, so: every kept idea of the slot's
+# scale that has waited six hours enters the choice; a choice may open with one such idea only when
+# no other kept idea of that scale is still inside its six hours. A choice of one is a plain yes or
+# no: it needs two of three counted votes, and "none of these" sends it to the graveyard.
+LONE = "upgrade-20261117-lone-candidate"
+
+
+def lone_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(LONE)
+    return None if entry is None else entry["at"]
+
+
+def ready(state: dict, which: str, at: float) -> dict:
+    """Kept ideas of one scale under the higher bar: which may enter a choice now, and which wait.
+
+    Returns {"now": [idea], "later": {idea: when}, "open": bool}; "open" says a choice could open."""
+    shelf = empty() | state.get("shelf", {})
+    kept = [key for key in shelf_ids(shelf)
+            if scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])]
+    later = {key: shelf["ideas"][key]["shelved_at"] + COOL_SECONDS for key in kept
+             if at - shelf["ideas"][key].get("shelved_at", at) < COOL_SECONDS}
+    now = [key for key in kept if key not in later]
+    lone = lone_since(state) is not None
+    return {"now": now, "later": later,
+            "open": len(now) >= CANDIDATES_MINIMUM or (lone and len(now) == 1 and not later)}
+
+
 def owner_away(state: dict, project: dict, at: float) -> str | None:
     """Why this project's owner cannot decide now: "resting" or "silent". None while they can."""
     if shared_since(state) is None or project["status"] != "active":
@@ -700,7 +732,15 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) == which]
         if asked_since(state) is not None:
             candidates = [idea for idea in candidates if grounded(state, shelf["ideas"][idea])]
-            if higher_since(state) is not None:
+            if higher_since(state) is not None and lone_since(state) is not None:
+                waiting = [idea for idea in candidates
+                           if at - shelf["ideas"][idea].get("shelved_at", at) < COOL_SECONDS]
+                candidates = [idea for idea in candidates if idea not in waiting]
+                require(bool(candidates) and (len(candidates) >= CANDIDATES_MINIMUM or not waiting),
+                        "no kept idea of that scale has waited its six hours yet" if not candidates else
+                        "another kept idea of that scale is still inside its six hours: wait for it, so the "
+                        "choice compares them")
+            elif higher_since(state) is not None:
                 candidates = [idea for idea in candidates
                               if at - shelf["ideas"][idea].get("shelved_at", at) >= COOL_SECONDS]
                 require(len(candidates) >= CANDIDATES_MINIMUM,
