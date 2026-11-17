@@ -52,3 +52,26 @@ class HistoryCacheTests(HouseCase):
             self.assertEqual(rebuilt, export(self.record, 1e10))
         path.write_bytes(b"not marshal")
         self.assertEqual(self.history()[0], export(self.record, 1e10))
+
+    def test_chunked_history_resumes_to_the_bytes_of_a_full_rebuild_and_old_caches_are_dropped(self):
+        with patch("house.public_history.CHUNK", 4):
+            for _ in range(3):
+                self.grow()
+            first, _, _ = publish.history(self.record, self.private, observed_at=1e10)
+            self.assertEqual(json.loads(first)["version"], 4)
+            self.assertTrue(any(len(node) == 1 and isinstance(node[0], list)
+                                for node in json.loads(first)["nodes"] if isinstance(node, list)))
+            for _ in range(3):
+                self.grow()
+            resumed, summary, parts = publish.history(self.record, self.private, observed_at=1e10)
+            self.assertEqual(summary["history_version"], 4)
+            self.assertEqual(decode(json.loads(resumed), parts), export(self.record, 1e10))
+            (self.private / publish.HISTORY_CACHE).unlink()
+            self.assertEqual(publish.history(self.record, self.private, observed_at=1e10)[0], resumed)
+            # A cache written before chunking (format 1) holds unchunked nodes and is rebuilt.
+            path = self.private / publish.HISTORY_CACHE
+            cache = marshal.loads(path.read_bytes())
+            path.write_bytes(marshal.dumps({**cache, "format": 1}))
+            with patch("house.publish.replay_context", wraps=publish.replay_context) as fresh:
+                self.assertEqual(publish.history(self.record, self.private, observed_at=1e10)[0], resumed)
+            fresh.assert_called_once()

@@ -123,10 +123,13 @@ class PublishInPartsTests(HouseCase):
 
     def test_parts_are_sealed_stable_and_decode_to_the_full_projection(self):
         self.speak(12)
-        with patch("house.publish.PART_TARGET", 800):
+        with patch("house.publish.PART_TARGET", 800), patch("house.public_history.CHUNK", 4):
             self.assertTrue(publish(self.record)["changed"])
             first_tree, wire = self.tree(), json.loads(self.shown("history.json"))
-            self.assertEqual(wire["version"], 3)
+            self.assertEqual(wire["version"], 4)
+            self.assertEqual(json.loads(self.shown("head.json"))["history_version"], 4)
+            everything = wire["nodes"] + [node for part in wire["parts"] for node in json.loads(self.shown(part["path"]))]
+            self.assertTrue(any(len(node) == 1 and isinstance(node[0], list) for node in everything if isinstance(node, list)))
             self.assertGreaterEqual(len(wire["parts"]), 3)
             self.assertEqual(sorted(path for path in first_tree if path.startswith("history/")),
                              sorted(part["path"] for part in wire["parts"]))
@@ -181,17 +184,18 @@ class PublishInPartsTests(HouseCase):
             with patch("house.publish.MAX_PUBLIC_BLOB", 700), self.assertRaises(ValueError):
                 publish(self.record)
 
-    def test_a_previous_version_two_publication_is_replaced_and_decodes_without_parts(self):
+    def test_a_previous_version_two_or_three_publication_is_replaced_and_decodes_without_parts(self):
         self.speak(3)
         publish(self.record)
         public = decode(json.loads(self.shown("history.json")), lambda path: self.shown(path))
         head = json.loads(self.shown("head.json"))
-        del head["history_version"]
         entries = {name: self.shown(name) for name in self.tree() if "/" not in name}
-        entries["history.json"] = json.dumps(encode(public), separators=(",", ":")).encode()
         ref = "refs/heads/" + BRANCH
-        for with_head in (True, False):
-            entries["head.json"] = json.dumps(head).encode()
+        for version, with_head in ((2, True), (2, False), (3, True), (3, False)):
+            old = encode(public) | ({"version": 3, "parts": []} if version == 3 else {})
+            entries["history.json"] = json.dumps(old, separators=(",", ":")).encode()
+            entries["head.json"] = json.dumps({**head, "history_version": version} if version == 3 else
+                                              {key: head[key] for key in head if key != "history_version"}).encode()
             if not with_head:
                 del entries["head.json"]
             listing = "".join("100644 blob " + self.record.git("hash-object", "-w", "--stdin", data=body).decode().strip()
@@ -202,5 +206,7 @@ class PublishInPartsTests(HouseCase):
             self.assertEqual(decode(json.loads(self.shown("history.json"))), public)
             result = publish(self.record)
             self.assertTrue(result["changed"])
-            self.assertEqual(json.loads(self.shown("history.json"))["version"], 3)
+            self.assertEqual(json.loads(self.shown("history.json"))["version"], 4)
+            again = decode(json.loads(self.shown("history.json")), lambda path: self.shown(path))
+            self.assertEqual(again["frames"], public["frames"])
             self.assertFalse(publish(self.record)["changed"])

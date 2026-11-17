@@ -29,7 +29,7 @@ scrubbing require browser verification after rollout.
 
 The node table is a long persistent prefix that only grows by appending, plus a short
 rebuilt tail. Version 3 cuts the prefix into **sealed parts** so no single file nears
-GitHub's 100 MiB limit. There is one writer format, version 3; readers still accept 2.
+GitHub's 100 MiB limit. Version 3 was the writer format until version 4 (below), which has the same shape; readers still accept 2.
 
 - `history/part-NNNN-<16 hex>.json` is a JSON array of consecutive nodes, closed once
   its serialised size reaches `PART_TARGET` (8 MiB). Compact separators, no NaN, so
@@ -43,8 +43,8 @@ GitHub's 100 MiB limit. There is one writer format, version 3; readers still acc
   also kept in `.git/house-home/history-parts/` (mode 0600) and rebuilt from the cache
   if lost. A cache without boundaries gets them computed once, without a replay. A
   rebuilt cache (changed code) may cut different parts; unreferenced parts leave the tree.
-- `head.json` carries `"history_version": 3`; a previous publication without it is
-  republished. The "did anything change" check reads head.json, never the parts.
+- `head.json` carries `"history_version"` (3 then, 4 now); a previous publication with another
+  value or none is republished. The "did anything change" check reads head.json, never the parts.
 - `decode(wire, parts)` takes a path-to-bytes mapping or a callable for version 3 and
   checks each part's hash and node count. The page keeps fetched parts in memory by
   path, fetches only new ones (three at a time, 60 s each, normal browser caching),
@@ -53,6 +53,30 @@ GitHub's 100 MiB limit. There is one writer format, version 3; readers still acc
 
 Old clients cannot read version 3 and must reload to receive the new script; an
 already-open old client retains its last snapshot and reports a load error.
+
+## Version 4: long lists as chunks
+
+Every frame carried the whole list of runs (over a thousand references) and each run start or end
+wrote a new copy of it, so the file grew quadratically. Version 4 stores a list of more than
+`CHUNK` (32) items as fixed-size chunks that an appended list shares with the shorter one.
+
+- The list is cut at multiples of `CHUNK` from its start; each chunk is an ordinary list node (equal
+  chunks are one node). A **concat node** then names the chunks in order. A concat node is an array
+  holding exactly one inline array of node indexes: `[[12, 57, 90]]`. Containers are never inline in
+  any other node, so this shape cannot be confused with data: a real list `[[]]` is `[{"ref": n}]`.
+- If there are more than `CHUNK` chunks they are grouped by `CHUNK` under concat nodes, again and
+  again, so a 15,000-item list is a small tree. A group of one is the member itself. Members of a
+  concat are list nodes or other concat nodes; a concat decodes to one plain flat list.
+- Lists of `CHUNK` items or fewer are encoded as before. The decoded projection is unchanged.
+- The publisher writes version 4 (the shape of version 3: `parts`, `root`, `nodes`) and
+  `head.json` carries `"history_version": 4`; a previous version 2 or 3 publication is republished.
+  The frame list is chunked too, and its full chunks are kept in the persistent table.
+- Readers accept versions 1, 2, 3 and 4. Concat nodes are legal only in version 4; a concat
+  naming a forward, out-of-range, non-integer or non-list node is rejected. `encode()` still writes
+  unchunked version 2 (the committed `site/history.json`); `encode(projection, chunked=True)` writes
+  version 4 without parts.
+- `CACHE_FORMAT` is 2: a cache of unchunked nodes is rebuilt in full (the code identity changes on
+  install as well).
 
 ## Publication and recovery
 

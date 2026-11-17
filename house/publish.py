@@ -18,7 +18,7 @@ from .record import Record
 from .public_history import Encoder, decode
 
 HISTORY_CACHE = "history-cache.marshal"
-CACHE_FORMAT = 1
+CACHE_FORMAT = 2  # 2: long lists are stored as chunks (wire version 4)
 
 BRANCH = "codex/house-pages"
 # Fail locally before GitHub's 100 MiB limit. On 17 November (evening) the history passed 64 MiB and
@@ -187,16 +187,17 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
         cache = {"format": CACHE_FORMAT, "code": identity, "context": replay_context(),
                  "nodes": [], "seen": {}, "frames": []}
     context = cache["context"]
-    encoder = Encoder(cache["nodes"], cache["seen"])
+    encoder = Encoder(cache["nodes"], cache["seen"], chunked=True)
     new_frames = replay(events, context)
     for frame in new_frames:
         cache["frames"].append(encoder.value(frame))
+        encoder.appended(cache["frames"])  # a full chunk of the frame list joins the persistent table now
     if not cache["frames"]:
         raise ValueError("No journal frames to publish")
     last_seq = len(cache["frames"])
     encoder.temporary()
     top = build_projection(final, head, source_head, observed_at, commits, [], context["scars"])
-    root = encoder.intern({key: encoder.intern(cache["frames"]) if key == "frames" else encoder.value(value)
+    root = encoder.intern({key: encoder.sequence(cache["frames"]) if key == "frames" else encoder.value(value)
                            for key, value in top.items()})
     persistent, had_parts = encoder.mark, "parts" in cache
     sealed = sum(part["nodes"] for part in cache.get("parts", ()))
@@ -215,7 +216,7 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
             cache["parts"].append({"path": name, "nodes": number + 1 - first, "sha256": digest})
             first, size, grown = number + 1, 0, True
     parts = {entry["path"]: part_bytes(private, cache, number) for number, entry in enumerate(cache["parts"])}
-    body = ('{"version":3,"parts":' + json.dumps(cache["parts"], separators=(",", ":")) +
+    body = ('{"version":4,"parts":' + json.dumps(cache["parts"], separators=(",", ":")) +
             ',"root":' + json.dumps(root, separators=(",", ":")) +
             ',"nodes":[' + ",".join(pieces[first:]) + "]}").encode()
     encoder.forget()
@@ -230,7 +231,7 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
         temporary.chmod(0o600)
         os.replace(temporary, path)
     return body, {"journal_head": head, "source_head": source_head, "seq": last_seq,
-                  "at": final["at"], "history_version": 3}, parts
+                  "at": final["at"], "history_version": 4}, parts
 
 
 def chronicle_body(record: Record, contents: dict[str, bytes]) -> bytes:
@@ -302,11 +303,11 @@ def publish(record: Record, *, push=False) -> dict:
         if previous:
             try:
                 old = json.loads(record.git("show", previous + ":head.json"))
-                current_wire = old.get("history_version") == 3
+                current_wire = old.get("history_version") == 4
             except ValueError:
                 old_wire = json.loads(record.git("show", previous + ":history.json"))
                 old = decode(old_wire, lambda path: record.git("show", previous + ":" + path))
-                current_wire = old_wire.get("version") == 3
+                current_wire = old_wire.get("version") == 4
             if not recovering and current_wire and (old["journal_head"], old["source_head"]) == (summary["journal_head"], summary["source_head"]):
                 if push:
                     record.git("push", "origin", ref + ":" + ref)

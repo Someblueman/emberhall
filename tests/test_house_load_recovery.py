@@ -5,7 +5,9 @@ from pathlib import Path
 import shutil
 import subprocess
 import unittest
+from unittest.mock import patch
 
+from house import public_history
 from house.public_history import encode
 
 
@@ -146,6 +148,67 @@ const paths=Object.keys(input.parts);
         result = subprocess.run(
             [shutil.which("node"), "-e", script, str(ROOT / "site/house.js")],
             input=json.dumps({"v2": wire, "v3": v3, "merged": merged, "parts": parts}),
+            capture_output=True, text=True, timeout=30,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_version_four_concat_history_decodes_to_the_same_frames_as_version_two(self):
+        projection = json.loads((ROOT / "site/history.json").read_text())
+        with patch.object(public_history, "CHUNK", 3):
+            wire = encode(projection, chunked=True)
+        nodes = wire["nodes"]
+        concats = [node for node in nodes if len(node) == 1 and isinstance(node[0], list)]
+        self.assertGreater(len(concats), 20)
+        self.assertTrue(any(nodes[ref] in concats for node in concats for ref in node[0]), "needs a nested concat")
+        size, parts, listing = len(nodes) // 3, {}, []
+        for number in range(2):
+            chunk = nodes[number * size:(number + 1) * size]
+            data = json.dumps(chunk, separators=(",", ":")).encode()
+            digest = hashlib.sha256(data).hexdigest()
+            path = f"history/part-{number:04d}-{digest[:16]}.json"
+            parts[path] = chunk
+            listing.append({"path": path, "nodes": len(chunk), "sha256": digest})
+        v4 = {"version": 4, "parts": listing, "root": wire["root"], "nodes": nodes[2 * size:]}
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const input=JSON.parse(fs.readFileSync(0,'utf8'));
+const nodes={};
+const document={activeElement:null,getElementById:id=>nodes[id]||null,querySelector:()=>null};
+for(const id of ['record-retry','record-load','record-load-status','error','presence-line','view-context','history']){
+ nodes[id]={id,hidden:id==='record-load',textContent:'',listeners:{},setAttribute(k,v){this[k]=v;},
+  addEventListener(k,fn){this.listeners[k]=fn;},focus(){},scrollIntoView(){}};
+}
+let served=input.v2;
+const fetch=async url=>({ok:true,status:200,json:async()=>url==='history.json'?served:input.parts[url]});
+const ctx=vm.createContext({document,fetch,AbortSignal});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
+const run=s=>vm.runInContext(s,ctx);
+run('refreshView=()=>{frame=data.frames[index];};bindControls=()=>{controlsReady=true;};');
+const frames=()=>run('JSON.stringify(data.frames)');
+(async()=>{
+ await ctx.refresh();const expected=frames();assert(JSON.parse(expected).length>200);
+ // The same data, chunked into concat nodes, arrives in parts and decodes to identical frames.
+ run('data=undefined;frame=undefined;historyParts.clear();');
+ served=input.v4;await ctx.refresh();
+ assert.equal(nodes['record-load'].hidden,true);assert.equal(frames(),expected);
+ assert.equal(JSON.stringify(ctx.decodePublicHistory(input.whole)),JSON.stringify(ctx.decodePublicHistory(input.v2)));
+ // Concat nodes are legal only in version 4, and only over earlier list nodes.
+ const wire=(version,concat)=>({version,root:{ref:3},nodes:[[1,2],{k:1},concat,{version:1,items:{ref:2}}]});
+ assert.deepEqual(ctx.decodePublicHistory(wire(4,[[0,0]])).items,[1,2,1,2]);
+ for(const concat of [[[0,9]],[[0,2]],[[1]],[[]],[[-1]],[[true]],[[0.5]],[['0']],[[{ref:0}]],[[[0]]],[[0],[1]]])
+  assert.throws(()=>ctx.decodePublicHistory(wire(4,concat)),/public history/,JSON.stringify(concat));
+ assert.throws(()=>ctx.decodePublicHistory(wire(2,[[0]])),/public history/);
+ assert.throws(()=>ctx.decodePublicHistory(wire(3,[[0]])),/public history/);
+ // A version 3 publication holding a concat node is refused after its parts are joined.
+ run('data=undefined;frame=undefined;historyParts.clear();');
+ served={...input.v4,version:3};await ctx.refresh();
+ assert.equal(nodes['record-load'].hidden,false);assert.equal(run('data'),undefined);
+})().catch(error=>{console.error(error);process.exitCode=1;});
+'''
+        result = subprocess.run(
+            [shutil.which("node"), "-e", script, str(ROOT / "site/house.js")],
+            input=json.dumps({"v2": encode(projection), "v4": v4, "whole": wire, "parts": parts}),
             capture_output=True, text=True, timeout=30,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
