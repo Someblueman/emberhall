@@ -829,7 +829,7 @@ function drawHouse() {
     const members=roomOccupants(frame,room.id);
     const status=roomStatus(room);
     const awake=status!=="closed"&&members.some(r=>!["sleeping","unconfirmed"].includes(r.pose));
-    const g=el("g",{class:`room-hit room-${status}${selected===room.id?" room-selected":""}`,tabindex:0,role:"button","aria-label":`${room.name}, ${status}, ${members.length} residents`,"data-room":room.id},map);
+    const g=el("g",{id:`room-map-${encodeURIComponent(room.id)}`,class:`room-hit room-${status}${selected===room.id?" room-selected":""}`,tabindex:0,role:"button","aria-label":`${room.name}, ${status}, ${members.length} residents`,"data-room":room.id},map);
     g.addEventListener("click",()=>choose(room.id));
     g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose(room.id);}});
     const colors=awake?["#bc9a65","#6c654e","#93815c"]:["#7d8068","#46564c","#61715e"];
@@ -1100,9 +1100,10 @@ function choose(room) {
   }
   selected=room;$("overview").hidden=!room;
   drawHouse(); roomPanel(); dormControls();
-  // Bring the room's details into view when they open below the drawing.
-  const card=room?document.querySelector?.(".room-card")?.getBoundingClientRect?.():null;
-  if(card&&card.top>window.innerHeight*.6)document.querySelector(".stage")?.scrollIntoView?.({block:"start"});
+  // The drawing is replaced above: move into the room instead of losing focus.
+  const card=room?document.querySelector?.(".room-card"):null;
+  card?.focus?.({preventScroll:true});
+  card?.scrollIntoView?.({block:"start"});
   document.querySelectorAll("#room-nav button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.room===room)));
 }
 function linkedRoom() {
@@ -1114,8 +1115,8 @@ function backToRooms() {
   const nav=$("room-nav");
   if(!nav)return;
   const buttons=nav.querySelectorAll?nav.querySelectorAll("button"):[];
-  const first=buttons&&buttons[0];
-  if(first&&typeof first.focus==="function")first.focus({preventScroll:true});
+  const doorway=Array.from(buttons||[]).find(button=>button.dataset?.room===selected)||buttons?.[0];
+  if(doorway&&typeof doorway.focus==="function")doorway.focus({preventScroll:true});
   if(typeof nav.scrollIntoView==="function")nav.scrollIntoView({block:"nearest",behavior:"instant"});
 }
 function skipToContent(event) {
@@ -3622,7 +3623,7 @@ function render() {
   $("event-label").textContent=`${frame.seq} / ${data.frames.length} · ${actor} · ${frame.event.op.replaceAll("-"," ")}`;
   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
-  floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
+  floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.id=`room-link-${encodeURIComponent(room.id)}`;button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
   drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
@@ -3651,6 +3652,12 @@ function bindControls() {
   $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
   $("overview").addEventListener("click",()=>choose(null));
   $("back-to-rooms")?.addEventListener("click",backToRooms);
+  $("room-card")?.addEventListener("keydown",event=>{
+    // Leave Escape to search fields, selects and other controls inside the room.
+    if(event.key==="Escape"&&!event.defaultPrevented&&event.target===$("room-card")) {
+      event.preventDefault();backToRooms();
+    }
+  });
   controlsReady=true;
 }
 function decodePublicHistory(wire) {
@@ -3680,7 +3687,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
+  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
   const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"||activeId==="projects-find-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
