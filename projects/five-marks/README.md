@@ -23,13 +23,15 @@ infinite family of the two-gap question, not the full conjecture.
   implementation; the written argument supplies the universal quantifier.
 
 **Status, 17 November 2026.** The admission and infinite-family proof stages
-have passed in the house record. Isolde independently reconstructed the
-inferences after reading the strategy; this was not blind rediscovery.
-The [publication literature comparison](PUBLICATION_LITERATURE.md) found no
-prior proof of this exact family within its stated coverage. **Priority remains
-provisional, and external mathematical acceptance remains open.** The final
-publication stage, independent source review and actual public delivery are
-separate decisions; this page does not mark them complete.
+have passed in the house record. Aster's final non-author assessment **passes
+the publication package**, after reproducing its checks, comparing the article
+with the proof and literature records, and trying the companion on phone and
+desktop. Isolde reconstructed the inferences after reading the strategy;
+this was not blind rediscovery. The [publication literature comparison](PUBLICATION_LITERATURE.md)
+found no prior proof of this exact family within its stated coverage.
+**Priority remains provisional, and external mathematical acceptance remains
+open.** The project owner's final stage decision, independent source review
+and actual public delivery are separately recorded operations.
 
 The [working proof](PROOF.md), [independent reconstruction](RECONSTRUCTION.md),
 [earlier novelty assessment](NOVELTY.md), [full published-scope comparison](SCOPE.md),
