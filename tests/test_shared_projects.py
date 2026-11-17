@@ -180,6 +180,23 @@ class SharedProjectTests(SecondLookTests):
         self.assertEqual(("graveyard", "Nobody asked for this."), (idea["status"], idea["history"][-1]["lesson"]))
         self.assertLessEqual({"project-vote", "idea-plain", "idea-drop"}, set(shelf_gate.ACTIONS))
 
+    def test_an_idea_is_not_published_to_the_page_until_a_second_resident_agrees_someone_asked(self):
+        f = self.f
+        at = self.shared(self.kept() + 1)
+        f.send("explore-start", actor="v2", at=at + 5, round="r2", expect=f.state["shelf"]["generation"],
+               token="r2", seconds=100)
+        f.send("explore-publish", actor="v2", round="r2", token="r2",
+               ideas=[asked_idea("c") | {"plain": PLAIN}, asked_idea("d") | {"plain": PLAIN}])
+        listed = lambda: {idea["id"]: idea["status"] for idea in body.shelf_view(f.state)["ideas"]}
+        self.assertEqual({"a": "project", "b": "graveyard", "c": "shelved", "d": "shelved"}, listed())
+        f.state["maintenance"]["migrations"][shelf.UNLISTED] = {"at": f.state["at"]}
+        self.assertEqual({"a": "project", "b": "graveyard"}, listed(), "neither new idea has been checked")
+        self.assertIn("c: ", asked_prompt(f.state, "v1"), "residents are still asked to check it")
+        f.send("idea-second", actor="v1", idea="c", verdict="keep", finding=PART)
+        self.assertEqual({"a": "project", "b": "graveyard", "c": "shelved"}, listed())
+        f.send("idea-second", actor="v1", idea="d", verdict="drop", finding=PART)
+        self.assertEqual("graveyard", listed()["d"], "what was dropped, and why, stays on the record")
+
     def test_the_page_folds_unasked_for_ideas_away_and_shows_the_vote(self):
         source = (pathlib.Path(body.__file__).parents[1] / "site/house.js").read_text()
         self.assertIn("if (dataShelf.asked_first) {", source)

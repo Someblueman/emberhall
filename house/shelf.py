@@ -233,6 +233,18 @@ def shared_since(state: dict) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# Unlisted until asked (Steward, 17 November, an hour later): "these things are just adding noise
+# and no value". An idea that no second resident has yet agreed someone asked for is not published
+# to the page at all, not even folded away. Residents still see it in their own instructions, and
+# it still has six hours to pass; a visitor only ever sees ideas that did.
+UNLISTED = "upgrade-20261117-unlisted-until-asked"
+
+
+def unlisted_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(UNLISTED)
+    return None if entry is None else entry["at"]
+
+
 def owner_away(state: dict, project: dict, at: float) -> str | None:
     """Why this project's owner cannot decide now: "resting" or "silent". None while they can."""
     if shared_since(state) is None or project["status"] != "active":

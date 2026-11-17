@@ -177,8 +177,10 @@ tell what a real idea was because it named a tool without explaining it.
   returns first.
 - **Unasked-for ideas do not wait on the shelf.** An idea already shelved with
   nobody shown to have asked for it leaves at the migration. A new one has six
-  hours, not a day, to get a second resident's agreement. The public page lists
-  only ideas that passed and folds the rest away.
+  hours, not a day, to get a second resident's agreement. Since owner migration
+  `upgrade-20261117-unlisted-until-asked` (the same night) such an idea is not
+  published to the page at all until it passes; residents see it only in their
+  own instructions.
 - **One good idea is enough.** `explore-publish` takes 1 to 4 ideas. A round
   with nothing worth shelving is released.
 - **Plain words.** Each published idea has `plain`: 40 to 300 characters for

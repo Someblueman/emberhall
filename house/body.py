@@ -129,7 +129,10 @@ def shelf_view(state: dict) -> dict:
     shelf = state.get("shelf", {})
     asked = shelf_model.asked_since(state) is not None
     ideas = []
+    unlisted = shelf_model.unlisted_since(state) is not None
     for key, idea in shelf.get("ideas", {}).items():
+        if unlisted and idea["status"] == "shelved" and not shelf_model.grounded(state, idea):
+            continue    # nobody has yet been shown to have asked for it: not on the page until that is checked
         history = []
         for entry in idea["history"]:
             public = {k: label(v, 2000) if isinstance(v, str) else v
