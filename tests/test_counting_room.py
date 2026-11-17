@@ -61,13 +61,13 @@ function makeNode(tag, ns = null) {
     setAttribute(k, v) { this.attributes[k] = String(v); },
     getAttribute(k) { return this.attributes[k]; },
     removeAttribute(k) { delete this.attributes[k]; },
-    appendChild(child) { this.children.push(child); return child; },
+    appendChild(child) { this.children.push(child); child.parentElement = this; return child; },
     replaceChildren(...nodes) { this.children = [...nodes]; },
     addEventListener(ev, fn) { this.listeners[ev] = fn; },
     focus() { document.activeElement = this; },
     scrollIntoView() {},
     setSelectionRange() {},
-    closest() { return null; },
+    closest(tag) { let n = this; while (n && n.tagName !== tag.toUpperCase()) n = n.parentElement; return n || null; },
     contains() { return false; },
     querySelector() { return null; },
     querySelectorAll() { return []; }
@@ -181,6 +181,8 @@ const jumpButtons = allContentNodes
 const runTexts = allContentNodes
   .filter(n => n.className === "counting-run")
   .map(n => walk(n).filter(c => c.textContent && c.children.length === 0).map(c => c.textContent).join(" | "));
+const handoffButtons = allContentNodes.filter(n => n.id.startsWith("counting-finish-"))
+  .map(n => ({id:n.id, label:n.attributes["aria-label"]}));
 const families = allContentNodes
   .filter(n => n.attributes && n.attributes["data-family"])
   .map(n => ({
@@ -211,6 +213,7 @@ for (const action of input.actions || []) {
 let filteredResults = null;
 let focusPreserved = null;
 let refreshedResults = null;
+let refreshedHandoffOpen = null;
 
 if (input.filterAgent) {
   const agentSelect = findById(roomContent, "counting-agent");
@@ -235,10 +238,13 @@ if (input.filterLane) {
 if (input.testFocusId) {
   const target = findById(getEl("room-content"), input.testFocusId);
   if (target) {
+    const handoffs = target.closest("details");
+    if (handoffs) { handoffs.open = true; handoffs.listeners.toggle(); }
     target.focus();
     vm.runInContext("lighting = () => {}; accounts = () => {}; drawHouse = () => {}; renderViewContext = () => {}; renderCollection = () => {}; renderRecentGrowth = () => {}; renderLately = () => {}; refreshView(false);", context);
     focusPreserved = document.activeElement ? document.activeElement.id : null;
     refreshedResults = findById(getEl("room-content"), "counting-results").textContent;
+    refreshedHandoffOpen = document.activeElement?.closest("details")?.open;
   }
 }
 
@@ -266,6 +272,18 @@ if (Number.isInteger(input.jumpSeq)) {
   }
 }
 
+let finishJumpState = null;
+if (Number.isInteger(input.finishJumpSeq)) {
+  const btn = findById(getEl("room-content"), `counting-finish-${input.finishJumpSeq}`);
+  btn.focus();btn.listeners.click();
+  finishJumpState = {
+    seq: vm.runInContext("frame.seq", context),
+    focus: document.activeElement?.id,
+    open: document.activeElement?.closest("details")?.open,
+    texts: walk(getEl("room-content")).map(n => n.textContent).join(" | ")
+  };
+}
+
 const afterFrame = JSON.parse(vm.runInContext("JSON.stringify(frame)", context));
 
 process.stdout.write(JSON.stringify({
@@ -278,11 +296,14 @@ process.stdout.write(JSON.stringify({
   initialResults,
   jumpButtons,
   runTexts,
+  handoffButtons,
+  finishJumpState,
   families,
   pageStates,
   filteredResults,
   focusPreserved,
   refreshedResults,
+  refreshedHandoffOpen,
   missingJumpState,
   jumpState,
   frameUnchanged: JSON.stringify(beforeFrame) === JSON.stringify(afterFrame)
@@ -521,6 +542,70 @@ process.stdout.write(JSON.stringify({
                 "results": "1 of 1 recorded runs match filters at this moment · showing 1–1, newest first",
             },
         )
+
+    def handoff_data(self) -> dict:
+        data = self.sample_data()
+        last = data["frames"][-1]
+        before = json.loads(json.dumps(last))
+        before["seq"] = 18
+        before["tasks"] = [{"id": "counting-room", "title": "Technical title",
+                            "plain": "See what each visit finished <literally>.", "status": "claimed"}]
+        before["runs"] = json.loads(json.dumps(last["runs"][:2]))
+        before["runs"][1]["finished_tasks"] = []
+        finished = json.loads(json.dumps(before))
+        finished["seq"] = 19
+        finished["tasks"] = []  # Production removes tasks on finish.
+        finished["event"] = {"op": "finish", "actor": "resident-curlew", "title": "counting-room"}
+        finished["runs"][1]["finished_tasks"] = [{"task": "counting-room", "sequence": 19}]
+        data["frames"][1:1] = [before, finished]
+        return data
+
+    def test_handoffs_recover_plain_names_and_jump_with_open_keyboard_focus(self) -> None:
+        res = self.run_harness({"data": self.handoff_data(), "index": 3, "current": True,
+                                "selected": "counting", "finishJumpSeq": 19})
+        self.assertEqual(res["handoffButtons"], [{"id": "counting-finish-19",
+            "label": "Open handoff: See what each visit finished <literally>. · event 19"}])
+        self.assertIn("Handed on: See what each visit finished <literally>.", " ".join(res["runTexts"]))
+        self.assertNotIn("Technical title", " ".join(res["runTexts"]))
+        jump = res["finishJumpState"]
+        self.assertEqual((jump["seq"], jump["focus"], jump["open"]), (19, "counting-finish-19", True))
+        self.assertIn("source acceptance and delivery are separate", jump["texts"])
+
+    def test_handoffs_hide_future_and_invalid_receipts_and_names(self) -> None:
+        data = self.handoff_data()
+        data["frames"][-1]["tasks"] = [{"id": "counting-room", "plain": "FUTURE NAME"}]
+        run = data["frames"][2]["runs"][1]
+        run["finished_tasks"] += [{"task": "future-task", "sequence": 20},
+                                  {"task": "bad", "sequence": "19"}, {"task": "bad", "sequence": 0}]
+        res = self.run_harness({"data": data, "index": 2, "current": False, "selected": "counting"})
+        texts = " ".join(res["runTexts"])
+        self.assertNotIn("FUTURE NAME", texts)
+        self.assertNotIn("future-task", texts)
+        self.assertEqual(len(res["handoffButtons"]), 1)
+        agy = next(f for f in res["families"] if f["family"] == "agy")
+        self.assertIn("1 task finish", " ".join(agy["texts"]))
+
+    def test_unretained_handoff_has_a_label_but_no_dead_control(self) -> None:
+        data = self.handoff_data()
+        del data["frames"][2]  # Completion event missing from this partial history.
+        data["frames"][-1]["runs"][1]["finished_tasks"].append({"task": "unknown", "sequence": 17})
+        res = self.run_harness({"data": data, "index": 2, "current": True, "selected": "counting"})
+        self.assertEqual(res["handoffButtons"], [])
+        texts = " ".join(res["runTexts"])
+        self.assertIn("See what each visit finished <literally>.", texts)
+        self.assertIn("Event 19 · outside retained history", texts)
+        self.assertIn("Task name not retained", texts)
+        self.assertIn("1 more", texts)
+
+    def test_handoff_disclosure_and_focus_survive_refresh_but_not_future_history(self) -> None:
+        data = self.handoff_data()
+        res = self.run_harness({"data": data, "index": 3, "current": True, "selected": "counting",
+                               "testFocusId": "counting-finish-19"})
+        self.assertEqual(res["focusPreserved"], "counting-finish-19")
+        self.assertTrue(res["refreshedHandoffOpen"])
+        earlier = self.run_harness({"data": data, "index": 1, "current": False, "selected": "counting"})
+        self.assertEqual(earlier["handoffButtons"], [])
+        self.assertNotIn("Handed on:", " ".join(earlier["runTexts"]))
 
     def test_construction_and_closed_counting_room_hide_open_controls(self) -> None:
         for status in ("construction", "closed"):
