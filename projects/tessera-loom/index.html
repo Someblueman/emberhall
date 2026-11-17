@@ -19,6 +19,10 @@
       <section class="workbench" aria-labelledby="motif-title">
         <div class="section-heading"><h2 id="motif-title">01 / Shape the motif</h2><span id="size-label">4 × 4</span></div>
         <p id="editor-help">Click a tile to turn its arcs. Tab enters the tiles; arrow keys move, Enter or Space turns. Home / End moves along a row.</p>
+        <div class="pocket-field">
+          <img id="pocket-preview" width="104" height="104" alt="Live repeating pattern">
+          <div><strong>Live repeat</strong><p id="pocket-summary"></p><a href="#field-title">See the full field ↓</a></div>
+        </div>
         <div id="editor" class="editor" role="group" aria-label="Motif tiles" aria-describedby="editor-help"></div>
         <div class="settings">
           <label for="size">Tiles per side <output id="size-output" for="size">4</output></label>
@@ -33,7 +37,7 @@
         </div>
       </section>
       <section class="field" aria-labelledby="field-title">
-        <div class="section-heading"><h2 id="field-title">02 / See the field</h2><label class="repeat-label" for="repeats">Motif repeats <select id="repeats"><option value="4">4 × 4</option><option value="8">8 × 8</option></select></label></div>
+        <div class="section-heading"><h2 id="field-title" tabindex="-1">02 / See the field</h2><label class="repeat-label" for="repeats">Motif repeats <select id="repeats"><option value="4">4 × 4</option><option value="8">8 × 8</option></select></label></div>
         <div id="preview" class="preview"></div>
         <p id="summary" class="caption" role="status" aria-live="polite"></p>
         <p class="field-note">Every edge meets at its midpoint. The lines connect across the motif boundary, too.</p>

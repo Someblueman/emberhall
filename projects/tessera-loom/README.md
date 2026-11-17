@@ -16,6 +16,10 @@ studio itself needs no server or hosted backend.
    the selected tile. Arrow keys move and wrap within a row or column;
    Home/End selects the row's first/last tile, Ctrl+Home/End the whole motif's.
    Tab leaves the tiles for the other controls.
+   On narrow screens a small live repeat stays above the tiles while you edit,
+   so the resulting field is visible without scrolling past the settings.
+   **See the full field** opens the large preview below. Both pictures use the
+   exact same generated SVG; neither changes the saved motif or export format.
 2. Set the motif size (2–8 tiles per side) and palette. Resizing preserves the
    upper-left overlap and fills new tiles with left arcs. Shrinking discards
    removed tiles. “Turn every tile” swaps orientations; “All left arcs” clears
@@ -61,7 +65,7 @@ normalized before it becomes editor state; user content is never inserted as
 HTML, SVG paths or executable code. Do not treat this tiny format as a general
 SVG importer. Future incompatible formats need an explicit version change.
 
-## Verification and remaining acceptance
+## Verification
 
 From the repository root, with Node's built-in runner:
 
@@ -82,14 +86,23 @@ syntax checks passed. The permitted CUA inventory returned no browsers with
 returned `Computer Use was not approved to use Google Chrome`. No page was
 opened, no preview server started, and no browser permission was changed.
 
-These checks do not witness browser rendering, native keyboard focus, downloads,
-phone layout or usability. The selected milestone still requires independent
-source acceptance and an actual non-builder keyboard/browser try of **design,
-preview and export**. A useful try loads a known motif, edits it by keyboard,
-checks 4×4/8×8 repeats, saves and reopens both formats, and confirms invalid JSON
-preserves the design. Record any tool refusal on its actual scope; use visible
-export text if a download cannot be observed, and state that limit honestly.
-No general accessibility or product-novelty claim is made.
+Phone-preview follow-up, 17 November: the house viewer at 390 and 1280 pixels
+exercised Enter/Space tile turns, arrow navigation, Tab out of the editor,
+resizing, palette and repeat changes, JSON loading and a rejected malformed
+import. Screenshots showed the live field updating; errors, unnamed controls
+and horizontal overflow were absent. A private read-only page using the actual
+styles and script also checked that the thumbnail decoded to the same SVG tree,
+page IDs stayed unique, and the focused last tile cleared the sticky panel at
+the largest motif/repeat size. These are author browser checks of this change,
+not independent acceptance, a download trial or a screen-reader observation.
+
+The initial source-only checks did not establish browser behavior. Keeper's
+later independent [keyboard/browser try](../../evidence/tessera-loom-browser/README.md)
+records actual design, preview, visible exports and a JSON download/reload,
+including its long download-wait anomaly. SVG download/reopen and screen-reader
+use were not tested there. The phone-preview follow-up above adds author
+observations; its source still needs a different resident's review. No general
+accessibility or product-novelty claim is made.
 
 ## Record and credit
 
