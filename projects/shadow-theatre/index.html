@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Shadow Theatre — Finite-Screen SVG Puzzle Exhibit</title>
+  <title>Shadow Theatre — move the light, shape the shadow</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <h1>Shadow Theatre</h1>
-    <p class="subtitle">Finite-screen 2D point-light shadow projection (no refraction, mirrors, penumbra, or 3D; no automatic motion).</p>
+    <p class="subtitle">Move the light. Shape the shadow. Match the green marks on the screen.</p>
   </header>
 
   <main>
@@ -25,29 +25,44 @@
 
     <section class="exhibit-grid">
       <div class="stage-panel">
-        <svg id="stage" viewBox="-10 -10 125 120" role="img" aria-label="Shadow Theatre SVG Stage" tabindex="0"></svg>
+        <div id="challenge-info">
+          <h2 id="mode-title">1. Single Gate</h2>
+          <p id="mode-desc"></p>
+          <p id="status-badge" class="status" role="status"></p>
+        </div>
+        <svg id="stage" viewBox="-10 -10 125 120" role="img" aria-label="Shadow Theatre stage: yellow light, vertical props, red shadows and green target marks" aria-describedby="stage-help" tabindex="0"></svg>
+        <p id="stage-help" class="keyboard-hint">Red is your shadow; green is the goal. Choose an object, then move it one step at a time.</p>
+        <div class="object-buttons" role="group" aria-label="Choose an object to move">
+          <button type="button" data-object="light">Light</button>
+          <button type="button" data-object="prop-0">Prop 1</button>
+          <button type="button" data-object="prop-1" hidden>Prop 2</button>
+          <button type="button" data-object="prop-2" hidden>Prop 3</button>
+        </div>
+        <div class="move-buttons" role="group" aria-label="Move the selected object">
+          <button type="button" id="move-left" data-move="ArrowLeft">← Left</button>
+          <button type="button" id="move-up" data-move="ArrowUp">↑ Up</button>
+          <button type="button" id="move-right" data-move="ArrowRight">Right →</button>
+          <button type="button" id="shrink-prop" data-move="[">Shorter</button>
+          <button type="button" id="move-down" data-move="ArrowDown">↓ Down</button>
+          <button type="button" id="grow-prop" data-move="]">Taller</button>
+        </div>
+        <p id="moving-object" class="notice" role="status"></p>
         <p class="keyboard-hint">
           Keyboard: <code>0</code> Light, <code>1</code>–<code>3</code> Props,
-          <code>Arrow Keys</code> move, <code>[</code> / <code>]</code> resize prop, <code>R</code> reset.
+          arrows move (Shift moves five steps), <code>[</code> / <code>]</code> resize, <code>R</code> reset.
         </p>
       </div>
 
       <aside class="inspector-panel">
-        <div id="challenge-info" class="card">
-          <h2 id="mode-title">1. Single Gate</h2>
-          <p id="mode-desc"></p>
-          <p id="target-display" class="mono"></p>
-          <p id="status-badge" class="status"></p>
-        </div>
-
         <div class="card">
-          <h3>Text Interval Output</h3>
+          <h3>Shadows in numbers</h3>
+          <p id="target-display" class="mono"></p>
           <pre id="interval-output" class="mono" aria-live="polite"></pre>
           <p id="error-output" class="error" role="alert"></p>
         </div>
 
         <div class="card">
-          <h3>Selected Element</h3>
+          <h3>Exact position</h3>
           <div id="selection-controls"></div>
           <div id="sandbox-actions" class="sandbox-actions" hidden>
             <button type="button" id="add-prop-btn">+ Add Prop (max 3)</button>
@@ -66,6 +81,11 @@
         </div>
       </aside>
     </section>
+    <details class="model-note">
+      <summary>How this little theatre works</summary>
+      <p>One point of light shines past straight props onto a flat screen. The red bands are the parts of that screen in shadow. The green marks sit beside them so you can compare the edges. Light must stay to the left of every prop, and props to the left of the screen; Reset brings the puzzle back if you move outside those limits.</p>
+      <p>This is a two-dimensional geometric model, with no mirrors, refraction or soft shadow edges. Nothing moves automatically.</p>
+    </details>
   </main>
 
   <script src="scene-core.js"></script>

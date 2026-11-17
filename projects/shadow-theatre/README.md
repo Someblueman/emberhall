@@ -2,6 +2,22 @@
 
 An offline, dependency-free SVG puzzle exhibit implementing a finite-screen 2D point-light shadow-projection model.
 
+## Play at the stage
+
+Match the red shadow to the green marks. The challenge and its match result
+sit above the stage, including on a phone. Choose **Light** or a numbered
+**Prop**, then use the direction buttons to move it one coordinate unit.
+**Shorter** and **Taller** resize the selected prop; they are disabled for the
+light. Only props present in the scene have a selection button. The selected
+object and challenge buttons expose their pressed state.
+
+Keyboard shortcuts still work: 0 selects the light, 1–3 select props, arrows
+move, Shift plus an arrow moves five units, brackets resize, and R resets.
+Exact coordinates remain editable in explicitly labelled number fields.
+Coordinates grow rightward and downward. The sandbox alone exposes Add Prop
+and Remove Prop. Moving outside the model's domain produces a diagnostic;
+Reset restores the current challenge. Nothing moves automatically.
+
 ## Model & Domain
 
 - **Point light**: $(x_L, y_L)$ with $x_L < x_{\text{screen}}$.
@@ -48,5 +64,5 @@ A rejected import is atomic: the current scene, title, target, diagram, interval
 
 ## Known Limits
 
-- The tests exercise `scene-core.js` directly; `app.js` is only syntax-checked and statically inspected, not run against a DOM. A browser re-check of the import path is still required for acceptance.
+- The automated tests exercise `scene-core.js` directly; `app.js` is syntax-checked and statically inspected. Browser interaction is checked separately with the house viewer; its screenshots and keyboard traces do not establish screen-reader speech or general usability.
 - The Python mirror and the JavaScript core are two implementations of one model. They are kept in agreement by review, not by an automated cross-language conformance test.
