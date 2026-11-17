@@ -11,12 +11,12 @@
 </head>
 <body>
 <main>
-<header><p class="eyebrow">A small offline studio</p><h1>Specimen Cards</h1><p class="lede">Make a deck you can carry as a plain JSON file. Write a prompt on the front and its answer on the back, then review what is due.</p></header>
-<p id="status" class="status screen-only" role="status" aria-live="polite">Ready. Export a deck to keep a portable copy.</p>
+<header><p class="eyebrow">A small offline studio</p><h1>Specimen Cards</h1><p class="lede">Flip and grade a sample specimen deck right away, add or edit your own cards, print paired faces, or carry your deck as a plain JSON file.</p></header>
+<p id="status" class="status screen-only" role="status" aria-live="polite">Sample deck loaded (4 cards). Flip a card to review, edit, or clear to start your own.</p>
 <div class="grid screen-only">
-<section aria-labelledby="edit-heading"><h2 id="edit-heading">Make or edit a card</h2><form id="card-form"><input id="card-id" type="hidden"><label for="front">Front</label><textarea id="front" required maxlength="4000"></textarea><label for="back">Back</label><textarea id="back" required maxlength="4000"></textarea><div class="actions"><button id="save-card" type="submit">Add card</button><button id="cancel-edit" class="secondary hidden" type="button">Cancel edit</button></div></form><h3>Your deck</h3><ul id="card-list" class="card-list"></ul><p id="empty-deck" class="hint">No cards yet. Create one above or import a deck.</p></section>
-<section aria-labelledby="review-heading"><h2 id="review-heading">Review</h2><p id="queue-summary" class="hint"></p><div id="review-card" class="review-card" aria-live="polite"><p class="hint">No card selected.</p></div><div id="review-actions" class="actions hidden"><button data-grade="again">Again</button><button data-grade="hard">Hard</button><button data-grade="good">Good</button><button data-grade="easy">Easy</button></div><p class="hint">Due cards are ordered by due time, then card ID. Reveal the back before grading.</p></section>
-<section aria-labelledby="save-heading"><h2 id="save-heading">Carry your deck</h2><p>There is no account or automatic save. Export creates a portable version 1 JSON file.</p><div class="actions"><button id="export">Export JSON</button><button id="print" class="secondary">Print cards</button></div><label for="import-file">Import a version 1 JSON deck</label><input id="import-file" type="file" accept="application/json,.json"><p class="hint">A bad file is rejected and leaves your current deck unchanged.</p></section>
+<section aria-labelledby="review-heading"><h2 id="review-heading">Review</h2><p id="queue-summary" class="hint"></p><div id="review-card" class="review-card" aria-live="polite"><p class="hint">No card selected.</p></div><div id="review-actions" class="actions hidden"><button type="button" data-grade="again">Again</button><button type="button" data-grade="hard">Hard</button><button type="button" data-grade="good">Good</button><button type="button" data-grade="easy">Easy</button></div><p class="hint">Due cards are ordered by due time, then card ID. Reveal the back before grading.</p></section>
+<section aria-labelledby="edit-heading"><h2 id="edit-heading">Make or edit a card</h2><form id="card-form"><input id="card-id" type="hidden"><label for="front">Front</label><textarea id="front" required maxlength="4000"></textarea><label for="back">Back</label><textarea id="back" required maxlength="4000"></textarea><div class="actions"><button id="save-card" type="submit">Add card</button><button id="cancel-edit" class="secondary hidden" type="button">Cancel edit</button></div></form><h3>Your deck</h3><ul id="card-list" class="card-list"></ul><p id="empty-deck" class="hint">No cards yet. Create one above, load the sample deck, or import a file.</p></section>
+<section aria-labelledby="save-heading"><h2 id="save-heading">Carry your deck</h2><p>There is no account or automatic save. Export creates a portable version 1 JSON file.</p><div class="actions"><button id="export" type="button">Export JSON</button><button id="print" class="secondary" type="button">Print cards</button><button id="load-sample" class="secondary" type="button">Load sample deck</button><button id="clear-deck" class="secondary" type="button">Clear deck</button></div><label for="import-file">Import a version 1 JSON deck</label><input id="import-file" type="file" accept="application/json,.json"><p class="hint">A bad file is rejected and leaves your current deck unchanged.</p></section>
 </div>
 <section id="print-deck" class="hidden" aria-label="Printable card faces"><div id="print-grid" class="print-grid"></div><p class="print-empty">Each card prints as a 5 × 3.5 inch pair: front and back side by side. Cut at the centre and attach or fold. Printer scaling and physical alignment vary; check print preview.</p></section>
 <footer class="screen-only"><p class="hint">Card text is displayed as plain text. Nothing is sent over the network.</p></footer>
@@ -101,14 +101,23 @@ const SpecimenCards = (() => {
     return {...card, state: {box, due, reviews: history.length, lastReviewed: now,
       lastGrade: gradeName, history}};
   }
-  return {FORMAT, VERSION, createCard, validate, parse, serialize, queue, grade};
+  const SAMPLE_ITEMS = [
+    ["field-note-001", "Which part of a plant takes in most water?", "The roots absorb most of the water and dissolved minerals."],
+    ["field-note-002", "What is a specimen label for?", "It records identifying details such as name, place, date, and collector."],
+    ["field-note-003", "Why press a plant specimen flat between blotters?", "Drying under even pressure preserves leaf shape, venation, and flower parts for long-term comparison."],
+    ["field-note-004", "What should be written in pencil rather than ink on a wet-field tag?", "Collection number, date, and locality: graphite stays legible if rain or dampness smears ink."]
+  ];
+  function sampleDeck() {
+    return validate({format: FORMAT, version: VERSION, cards: SAMPLE_ITEMS.map(([id, front, back]) => createCard(id, front, back, 0))});
+  }
+  return {FORMAT, VERSION, createCard, sampleDeck, validate, parse, serialize, queue, grade};
 })();
 if (typeof module !== "undefined" && module.exports) module.exports = SpecimenCards;
 
 if (typeof document !== "undefined") (() => {
   const $ = id => document.getElementById(id);
   const model = SpecimenCards;
-  let deck = {format: model.FORMAT, version: model.VERSION, cards: []};
+  let deck = model.sampleDeck();
   let activeId = null, revealed = false;
   const status = message => { $("status").textContent = message; };
   const node = (tag, text, className) => { const item = document.createElement(tag); if (text !== undefined) item.textContent = text; if (className) item.className = className; return item; };
@@ -137,7 +146,7 @@ if (typeof document !== "undefined") (() => {
     if (!activeId) { area.append(node("p", deck.cards.length ? "Nothing is due right now." : "Add or import a card to begin.", "hint")); return; }
     const card = deck.cards.find(item => item.id === activeId);
     area.append(node("p", revealed ? "Back" : "Front", "label"), node("p", revealed ? card.back : card.front, "face"));
-    if (!revealed) { actions.classList.add("hidden"); const reveal = node("button", "Reveal back"); reveal.type = "button"; reveal.addEventListener("click", () => { revealed = true; render(); }); area.append(reveal); }
+    if (!revealed) { actions.classList.add("hidden"); const reveal = node("button", "Reveal back"); reveal.id = "reveal-back"; reveal.type = "button"; reveal.addEventListener("click", () => { revealed = true; render(); document.querySelector("#review-actions button")?.focus?.(); }); area.append(reveal); }
   }
   $("card-form").addEventListener("submit", event => {
     event.preventDefault();
@@ -179,6 +188,17 @@ if (typeof document !== "undefined") (() => {
       grid.append(pair);
     }
     $("print-deck").classList.remove("hidden"); window.print(); $("print-deck").classList.add("hidden");
+  });
+  $("load-sample").addEventListener("click", () => {
+    if (!window.confirm("Replace the current deck with the sample? Your cards, review progress, and unfinished form will be lost. Export your deck first to keep it. Cancel to keep working.")) return;
+    deck = model.sampleDeck(); activeId = null; revealed = false; clearForm(); render();
+    status(`Sample deck loaded (${deck.cards.length} cards). Export to keep a portable copy.`);
+  });
+  $("clear-deck").addEventListener("click", () => {
+    if (!window.confirm("Clear the current deck? Your cards, review progress, and unfinished form will be lost. Export your deck first to keep it. Cancel to keep working.")) return;
+    deck = {format: model.FORMAT, version: model.VERSION, cards: []};
+    activeId = null; revealed = false; clearForm(); render();
+    status("Deck cleared. Add a card or load the sample deck.");
   });
   render();
 })();

@@ -2,8 +2,14 @@
 
 Specimen Cards is a single-file, offline card editor and review queue. Open
 `index.html` directly in a current browser; it needs no server, account,
-dependencies, network access, or browser storage. Export the JSON deck to keep
-your work. Editing this page's in-memory deck is not an automatic save.
+dependencies, network access, or browser storage. It opens with a built-in
+four-card botanical sample deck ready to flip and grade immediately; use
+**Clear deck** to start from an empty deck, **Load sample deck** to restore the
+sample, or export the JSON deck to keep your work. Editing this page's in-memory
+deck is not an automatic save. Both replacement controls ask for confirmation:
+Cancel preserves the current cards, review position and unfinished form. Confirming
+permanently replaces them in this page, so export first to keep the deck and
+review history; export does not include unfinished form text.
 
 ## Durable deck format
 
@@ -39,7 +45,8 @@ node --test projects/specimen-cards/specimen.test.js
 ```
 
 The tests extract and execute the model from the actual inline page script. They
-cover full review-state export/reimport, due ordering and grading, invalid
+cover the built-in sample deck, initial review/reveal/grade and clear/reload
+flows, full review-state export/reimport, due ordering and grading, invalid
 imports, state preservation at the import boundary, and hostile card text. They
 do not establish actual browser usability, physical size accuracy, or learning
 results.
@@ -47,8 +54,11 @@ results.
 ## Manual browser and print procedure
 
 1. Open `projects/specimen-cards/index.html` from disk in a current browser.
-2. Use Tab to reach the Front and Back fields. Enter a prompt and answer, then
-   activate **Add card**. Create another card and edit its front or back.
+   Verify the first sample card is due in **Review**, activate **Reveal back**,
+   and grade it with **Good**; the due count drops from 4 to 3.
+2. Activate **Clear deck**, then use Tab to reach the Front and Back fields.
+   Enter a prompt and answer, then activate **Add card**. Create another card
+   and edit its front or back, or use **Load sample deck** to restore the sample.
 3. In **Carry your deck**, import `example-deck.json`; review a due card by
    activating **Reveal back**, then one of Again, Hard, Good, or Easy. The due
    count and selected card should update.
