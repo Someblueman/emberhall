@@ -26,6 +26,7 @@
     ],
   };
 
+  let loadedSampleOnStart = false;
   let ledger = loadInitialLedger();
 
   const yearInput = document.getElementById('year-input');
@@ -56,7 +57,8 @@
     } catch (_err) {
       // Ignore corrupt localStorage and start fresh
     }
-    return M.createLedger(2025, { displayUnit: 'mm' });
+    loadedSampleOnStart = true;
+    return M.importJson(JSON.stringify(EXAMPLE_TWO_MONTH));
   }
 
   function persistLedger() {
@@ -331,4 +333,7 @@
   });
 
   render();
+  if (loadedSampleOnStart) {
+    showStatus('Sample 2-month ledger loaded (10 readings across April–May 2025). Add readings, change year, or Clear Year to start fresh.', false);
+  }
 })();

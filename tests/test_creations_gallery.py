@@ -55,14 +55,17 @@ assert.match(text(root),/current published versions/);
  assert.equal(manifest.projects.find(p=>p.id==='tessera-loom').files.includes(preview.src),true);
  const shown=all(root).filter(n=>n.tag==='img');
  assert.equal(shown.map(n=>n.src).join('|'),
-  'projects/tessera-loom/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg',
-  'Every listed real-output preview shows in the present view');
+  'projects/tessera-loom/gallery-preview.svg|projects/night-ferry/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/specimen-cards/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg|projects/cue-rehearsal/gallery-preview.svg|projects/rain-ledger/gallery-preview.svg',
+  'Every listed real-output browser creation preview shows in the present view');
  for(const image of shown){
   assert.match(image.alt,/.{40,}/,'Previews carry real alternative text');
   assert.ok(image.width>0&&image.height>0,'Previews declare their dimensions');
   const owner=manifest.projects.find(p=>p.files.includes(image.src));
   assert.ok(owner,'Every shown preview is listed in the public manifest');
  }
+ const rain=manifest.projects.find(p=>p.id==='rain-ledger');
+ assert.ok(rain,'rain-ledger must be registered in site/projects.json');
+ assert.equal(all(root).find(n=>n.tag==='a'&&n.href===rain.href).textContent,'Open Rain Ledger →');
  catalog=[{...creation,id:'tessera-loom',files:['https://evil.test/gallery-preview.svg']}];
  frame={shelf:{projects:[{idea:'tessera-loom',status:'done'}]}};renderCollection();
  assert.equal(all(root).filter(n=>n.tag==='img').length,0,'Never request an unlisted preview');
@@ -95,9 +98,61 @@ assert.match(text(root),/current published versions/);
 
     def test_shadow_and_signal_previews_are_model_generated(self):
         root = Path(__file__).parents[1]
-        for project in ('shadow-theatre', 'signal-garden'):
+        for project in ('shadow-theatre', 'signal-garden', 'specimen-cards', 'rain-ledger'):
             with self.subTest(project=project):
                 result = subprocess.run(
                     ['node', '-e', f'process.stdout.write(require("./projects/{project}/make-gallery-preview.js").svg());'],
                     cwd=root, capture_output=True, timeout=15, check=True)
                 self.assertEqual((root / f'projects/{project}/gallery-preview.svg').read_bytes(), result.stdout)
+        for project in ('night-ferry', 'cue-rehearsal'):
+            with self.subTest(project=project):
+                result = subprocess.run(
+                    ['node', f'./projects/{project}/make-gallery-preview.js'],
+                    cwd=root, capture_output=True, timeout=15, check=True)
+                self.assertEqual((root / f'projects/{project}/gallery-preview.svg').read_bytes(), result.stdout)
+
+    def test_gallery_room_links_to_gallery_and_labels_are_bound(self):
+        root = Path(__file__).parents[1]
+        html = (root / 'site/index.html').read_text()
+        self.assertIn('<label class="notes-toggle" for="presence-notes">', html)
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+ constructor(tag){this.tag=tag;this.children=[];this.attrs={};this.style={};this.dataset={};this.textContent='';this.listeners={};this.classList={toggle(){}};}
+ appendChild(n){this.children.push(n);return n;} replaceChildren(){this.children=[];}
+ setAttribute(k,v){this.attrs[k]=String(v);} addEventListener(k,fn){this.listeners[k]=fn;}
+}
+const nodes={};
+const get=id=>(nodes[id]||(nodes[id]=new Element('div')));
+const document={getElementById:get,querySelector:()=>null,createElement:t=>new Element(t)};
+const all=n=>[n,...n.children.flatMap(all)];
+const ctx=vm.createContext({assert,document,all,URL,Intl,Date,Math,Number,String,Set,Object,Array});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
+vm.runInContext(`
+data={timezone:'UTC',observed_at:1000,name:'Emberhall',journal_head:'abc',commits:[],frames:[{seq:1,at:1000,event:{op:'wake',actor:'r1'},
+  rooms:[{id:'gallery',name:'Gallery',status:'open',floor:0}],
+  residents:[{id:'r1',name:'Yarrow',pose:'standing',room:'gallery'}],
+  tasks:[{id:'t1',title:'T1',status:'open',generation:0}],
+  ambitions:[],runs:[],budgets:[],scars:[],shelf:{projects:[]}}]};
+index=0;frame=data.frames[0];current=true;selected='gallery';
+roomPanel();
+const galleryLinks=all(document.getElementById('room-content')).filter(n=>n.tag==='a');
+assert(galleryLinks.some(n=>n.href==='#gallery-view'),'Gallery room must link to #gallery-view');
+assert(!galleryLinks.some(n=>n.href==='#projects-view'),'Gallery room must not link to #projects-view');
+document.getElementById('history').max=1;document.getElementById('floor-picker').value='0';
+drawHouse=dormControls=accounts=shelf=voting=renderCollection=renderResidentPulse=renderRecentGrowth=renderLately=lighting=()=>{};
+render();
+assert.match(document.getElementById('presence-line').textContent,/1 unfinished thread\\./);
+assert.doesNotMatch(document.getElementById('presence-line').textContent,/1 unfinished threads/);
+frame.tasks.push({id:'t2',title:'T2',status:'open',generation:0});
+render();
+assert.match(document.getElementById('presence-line').textContent,/2 unfinished threads\\./);
+const wsBox=document.createElement('div');
+renderWorkshopTasks(wsBox);
+const searchLabel=all(wsBox).find(n=>n.tag==='label'&&n.textContent==='Find work');
+assert.equal(searchLabel.attrs.for,'workshop-search');
+`,ctx);
+'''
+        result = subprocess.run(['node', '-e', script, str(root / 'site/house.js')], capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

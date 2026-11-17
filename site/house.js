@@ -998,6 +998,7 @@ function renderWorkshopTasks(content) {
   const searchRow=html("div","workshop-search",undefined,box);
   const searchLabel=html("label","small","Find work",searchRow);
   const search=html("input","",undefined,searchLabel);search.id="workshop-search";search.type="search";
+  searchLabel.setAttribute("for",search.id);
   search.placeholder="Task title or resident name";search.value=workshopState.query;
   search.setAttribute("aria-describedby","workshop-results");
   search.addEventListener("input",()=>{
@@ -1803,7 +1804,7 @@ function roomPanel() {
   if(room?.id==="council") renderCouncilRoom(content);
   if(room?.id==="gallery") {
     const link=html("a","room-shelf-link","Explore the creations made here →",content);
-    link.href="#projects-view";
+    link.href="#gallery-view";
   }
   if(room?.id==="chronicle"&&room.status==="open") {
     const link=html("a","room-shelf-link","Read the Chronicle →",content);
@@ -2002,12 +2003,24 @@ function renderCollection() {
       "tessera-loom":{src:"projects/tessera-loom/gallery-preview.svg",width:1600,height:1600,
         alt:"Blue quarter-circle arcs join into repeating loops on warm cream paper.",
         caption:"Made in Tessera Loom · its opening pattern, repeated 4 × 4"},
+      "night-ferry":{src:"projects/night-ferry/gallery-preview.svg",width:800,height:420,
+        alt:"A night river reach map with North Landing, South Pier, and Orchard Float beacons beside cards for the North Desk and Below the Waterline witness accounts.",
+        caption:"Generated from Night Ferry's case data · the crossing and its two accounts"},
       "signal-garden":{src:"projects/signal-garden/gallery-preview.svg",width:1200,height:560,
         alt:"Three 4 by 4 pixel tiles: the original, the same tile damaged after a four-bit burst with wrong pixels ringed in red, and the tile recovered whole when its bits are woven between rows.",
         caption:"Made by Signal Garden's own model · one burst, two ways of sending"},
+      "specimen-cards":{src:"projects/specimen-cards/gallery-preview.svg",width:1200,height:620,
+        alt:"A botanical flashcard showing its front question and revealed back beside four grading buttons and the four-card sample due queue.",
+        caption:"Made by Specimen Cards' own model · botanical sample deck ready to review"},
       "shadow-theatre":{src:"projects/shadow-theatre/gallery-preview.svg",width:1200,height:760,
         alt:"A dark stage where one lamp shines past three props, casting two shadow bands on a pale screen that match the amber target brackets beside it.",
-        caption:"Made by Shadow Theatre's own model · the Clipped Horizon stage, solved"}
+        caption:"Made by Shadow Theatre's own model · the Clipped Horizon stage, solved"},
+      "cue-rehearsal":{src:"projects/cue-rehearsal/gallery-preview.svg",width:960,height:476,
+        alt:"A workshop timeline comparing the original 22-minute plan against a 26-minute rehearsal where Arrange tables shifts four minutes later in terracotta.",
+        caption:"Made by Cue Rehearsal's own model · original plan vs delayed rehearsal"},
+      "rain-ledger":{src:"projects/rain-ledger/gallery-preview.svg",width:1200,height:620,
+        alt:"A 2025 rainfall summary showing 88.8 mm across 10 recorded days, April and May bar charts against normals, and sample log rows distinguishing dry zeroes from gaps.",
+        caption:"Made by Rain Ledger's own model · two-month sample totals and daily log"}
     };
     const preview=previews[entry.id];
     if(current && preview && Array.isArray(entry.files) && entry.files.includes(preview.src)) {
@@ -3023,7 +3036,7 @@ function render() {
   const awake=frame.residents.filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
   const sleepers=frame.residents.filter(r=>r.pose==="sleeping").length;
   const stopped=frame.residents.filter(r=>r.pose==="unconfirmed").length;
-  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${(t=>t.idle===null?`${t.active} unfinished threads.`:`${t.active} ${t.active===1?"thread":"threads"} in hand or queued, ${t.idle} left idle.`)(threadCounts())}${openNeeds().length ? ` ${openNeeds().length} ${openNeeds().length === 1 ? "need waits" : "needs wait"} for the Steward.` : ""}`;
+  $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${(t=>t.idle===null?`${t.active} unfinished ${t.active===1?"thread":"threads"}.`:`${t.active} ${t.active===1?"thread":"threads"} in hand or queued, ${t.idle} left idle.`)(threadCounts())}${openNeeds().length ? ` ${openNeeds().length} ${openNeeds().length === 1 ? "need waits" : "needs wait"} for the Steward.` : ""}`;
   renderViewContext();
   $("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
