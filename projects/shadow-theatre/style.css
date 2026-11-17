@@ -55,13 +55,37 @@ button {
   padding: 0.45rem 0.85rem;
   cursor: pointer;
   font-size: 0.9rem;
+  min-height: 44px;
 }
 
 button:hover,
-button.active {
+button.active,
+button[aria-pressed="true"] {
   background: #364152;
   border-color: #6b8afd;
 }
+
+button:focus-visible, summary:focus-visible {
+  outline: 2px solid #a7b8ff;
+  outline-offset: 3px;
+}
+
+button:disabled { opacity: 0.45; cursor: default; }
+[hidden] { display: none !important; }
+
+.object-buttons, .move-buttons {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.object-buttons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.move-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.object-buttons button, .move-buttons button { padding: 0.45rem 0.25rem; }
+#challenge-info h2 { margin: 0; font-size: 1.1rem; }
+#mode-desc { margin: 0.4rem 0; }
+#status-badge { margin-bottom: 0.75rem; }
+.model-note { margin-top: 1rem; color: #b8bec7; font-size: 0.9rem; }
+.model-note summary { cursor: pointer; }
 
 .exhibit-grid {
   display: grid;
