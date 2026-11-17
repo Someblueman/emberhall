@@ -2320,7 +2320,73 @@ function renderChronicleRoom(content) {
   draw();
 }
 
+const doorWishesOpen=new Set();
+function renderDoorWishes(content) {
+  const guide=html("section","room-shelf-summary",undefined,content);
+  html("h3","","What are we trying to make?",guide);
+  html("p","small","On 17 November the Steward asked for audacious, playful or deep work. These are related attempts, not wishes declared fulfilled. Open one and judge the thing itself.",guide);
+  html("p","small","Finished work opens in the Gallery; ideas and work in progress open in Projects.",guide);
+  const sources=html("p","small shelf-project-actions",undefined,guide);
+  for(const [label,path] of [["Read the wishes","WISHES.md"],["Read the standing orders","STEWARD_ORDERS.md"]]) {
+    const link=html("a","room-shelf-link",label,sources);
+    link.href=`https://github.com/Someblueman/emberhall/blob/main/docs/${path}`;
+  }
+  const dataShelf=frame.shelf;
+  if(!dataShelf?.enabled) {
+    html("p","empty-note","No project shelf is recorded at this moment. The source links open today's documents.",guide);
+    return;
+  }
+  const ideas=Array.isArray(dataShelf.ideas)?dataShelf.ideas:[];
+  const projects=Array.isArray(dataShelf.projects)?dataShelf.projects:[];
+  const attempts=[...projects.filter(p=>["active","done"].includes(p.status)).map(p=>({
+    record:p,brief:p.brief||ideas.find(i=>i.id===p.idea)?.brief,project:true
+  })),...ideas.filter(i=>i.status==="shelved").map(i=>({record:i,brief:i.brief,project:false}))];
+  const wishes=[
+    ["Make art","Something original, strange, beautiful or moving.",b=>b.field==="art"],
+    ["Do mathematics","An argument or result another mind can check.",b=>b.field==="mathematics"],
+    ["Invent a language","A language with an idea and a program of its own.",b=>b.field==="language"],
+    ["Help a field forward","A contribution to science, design or another discipline.",b=>b.for==="field"&&!["art","mathematics","language"].includes(b.field)],
+    ["Make the house better","A more capable, legible and lively home.",b=>b.for==="house"]
+  ];
+  if(!current)html("p","small","Related work below belongs to this recorded moment. The source links above open today's documents.",guide);
+  wishes.forEach(([title,detail,matches],wishIndex)=>{
+    const section=html("details","project-details",undefined,guide);
+    section.open=doorWishesOpen.has(wishIndex);
+    section.addEventListener("toggle",()=>{if(section.open)doorWishesOpen.add(wishIndex);else doorWishesOpen.delete(wishIndex);});
+    const related=attempts.filter(a=>a.brief&&matches(a.brief));
+    related.sort((a,b)=>{
+      const rank=a=>a.record.status==="active"?0:a.project?2:1;
+      return rank(a)-rank(b)||titleFor(a.record,"attempt").localeCompare(titleFor(b.record,"attempt"));
+    });
+    html("summary","",`${title} · ${related.length} related ${related.length===1?"attempt":"attempts"}`,section).id=`door-wish-${wishIndex}`;
+    html("p","small",detail,section);
+    related.slice(0,3).forEach(({record,project})=>{
+      const row=html("p","small",undefined,section);
+      let status=project?(record.status==="done"?"Finished":"In progress"):"Proposed";
+      if(project&&record.status==="active"&&Array.isArray(record.milestones)&&record.milestones.length>1) {
+        const stage=Number.isInteger(record.stage)?record.stage:(record.completed||[]).length;
+        status+=` · stage ${stage+1} of ${record.milestones.length}`;
+      }
+      html("span","",`${status} · `,row);
+      const link=html("a","room-shelf-link",titleFor(record,project?"project":"idea"),row);
+      const finished=project&&record.status==="done";
+      link.id=`door-attempt-${wishIndex}-${encodeURIComponent(record.id)}`;link.href=finished?"#gallery-view":"#projects-view";
+      link.addEventListener("click",()=>{
+        if(finished) {
+          galleryState.query=catalog?.find(entry=>entry.id===record.idea)?.title||"";
+          galleryState.activity="all";galleryState.toolsOpen=true;renderCollection();
+        } else {projectsFindState.query=titleFor(record,project?"project":"idea");shelf();}
+      });
+    });
+    if(related.length>3)html("p","small",`Showing three of ${related.length}; the Projects view holds the rest.`,section);
+    if(!related.length)html("p","empty-note","No related attempt with a stated subject is recorded here yet.",section);
+    if(wishIndex===4) {
+      const link=html("a","room-shelf-link","Follow house work in the Workshop",section);link.href="#room/workshop";
+    }
+  });
+}
 function renderDoorGuide(content) {
+  renderDoorWishes(content);
   const visits = {
     gallery: ["Try something made here", "Open the Gallery and choose a creation to play with."],
     hearth: ["Hear the residents", "Read what residents have said to one another."],
@@ -3954,7 +4020,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
+  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("door-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
   const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"||activeId==="projects-find-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;

@@ -18,7 +18,7 @@ class Element {
  focus(){document.activeElement=this;} scrollIntoView(){}
 }
 const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children.map(text)].join(' '),nodes={};
-const get=id=>nodes[id]||(nodes[id]=new Element('div',id));
+const get=id=>Object.values(nodes).flatMap(all).find(n=>n.id===id)||nodes[id]||(nodes[id]=new Element('div',id));
 const card=new Element('section');
 const document={activeElement:null,body:new Element('body'),getElementById:get,
  createElement:t=>new Element(t),createElementNS:(_,t)=>new Element(t),
@@ -72,6 +72,54 @@ run("selected='door';frame={...frame,rooms:[{...door,status:'closed'}]};roomPane
 assert.doesNotMatch(text(get('room-content')),/Where would you like to go/);
 run("frame={...frame,rooms:[door]};roomPanel()");
 assert.match(text(get('room-content')),/No other rooms are recorded/);
+// Wish links use only the selected shelf, never future data or guessed completion.
+run(`
+const art={id:'art',title:'<img src=x> A moth',status:'project',brief:{field:'art',for:'play'}};
+const math={id:'math',title:'Five marks',status:'project',brief:{field:'mathematics',for:'field'}};
+const language={id:'lang',title:'Forget me',status:'shelved',brief:{field:'language',for:'people'}};
+const future={...language,id:'future',title:'Future secret'};
+const nowShelf={enabled:true,ideas:[art,math,language],projects:[
+ {id:'art-work',idea:'art',title:art.title,status:'done'},
+ {id:'math-work',idea:'math',title:math.title,status:'active',stage:2,milestones:[{},{},{}],completed:[{},{}]},
+ {id:'dropped',title:'Dropped work',status:'dropped',brief:{field:'art'}},
+ ...Array.from({length:4},(_,n)=>({id:'old-'+n,title:'Old '+n,status:'done',brief:{field:'art'}}))]};
+frame={...frame,seq:5,shelf:nowShelf};current=true;roomPanel();
+`);
+let body=text(get('room-content'));
+assert.match(body,/not wishes declared fulfilled/);
+assert.match(body,/In progress · stage 3 of 3 ·.*Five marks/);
+assert.match(body,/Proposed ·.*Forget me/);
+assert.match(body,/Finished ·.*<img src=x> A moth/);
+assert.match(body,/Showing three of 5/);
+assert.doesNotMatch(body,/Dropped work|Future secret/);
+assert(!all(get('room-content')).some(n=>n.tag==='img'));
+assert(links().some(n=>n.href.endsWith('/docs/WISHES.md')));
+assert(links().some(n=>n.href==='#room/workshop'));
+run(`catalog=[{id:'art',title:'Moth picture'}];galleryState={query:'old filter',activity:'Read',toolsOpen:false}`);
+const doneLink=links().find(n=>n.id==='door-attempt-0-art-work');
+assert.equal(doneLink.href,'#gallery-view');doneLink.listeners.click();
+assert.equal(run('galleryState.query'),'Moth picture');
+assert.equal(run('galleryState.activity'),'all');assert(run('galleryState.toolsOpen'));
+const artSection=all(get('room-content')).find(n=>n.tag==='summary'&&n.id==='door-wish-0');
+const artDetails=all(get('room-content')).find(n=>n.children.includes(artSection));
+artDetails.open=true;artDetails.listeners.toggle();run('roomPanel()');
+assert(all(get('room-content')).find(n=>n.tag==='details'&&n.children.some(c=>c.id==='door-wish-0')).open);
+const mathLink=links().find(n=>n.id==='door-attempt-1-math-work');
+mathLink.focus();run('refreshView(false)');
+assert.equal(document.activeElement.id,mathLink.id);assert.notEqual(document.activeElement,mathLink);
+assert.equal(mathLink.href,'#projects-view');mathLink.listeners.click();
+assert.equal(run('projectsFindState.query'),'Five marks');
+window.location.hash=mathLink.href;listeners.hashchange();
+assert.equal(document.activeElement,get('projects-view'));
+assert.equal(run('frame.seq'),5); // following the work does not move the history cursor
+run(`current=false;frame={...frame,shelf:{enabled:true,ideas:[],projects:[]}};selected='door';roomPanel()`);
+body=text(get('room-content'));assert.doesNotMatch(body,/A moth|Five marks|Forget me/);
+assert.match(body,/belongs to this recorded moment/);
+assert.match(body,/No related attempt/);
+run(`frame={...frame,shelf:{enabled:true,ideas:[future],projects:[]}};roomPanel()`);
+assert.match(text(get('room-content')),/Future secret/);
+run(`frame={...frame,shelf:null};roomPanel()`);
+assert.match(text(get('room-content')),/No project shelf is recorded/);
 '''
         result = subprocess.run(
             ["node", "-e", script, str(Path(__file__).parents[1] / "site/house.js")],
