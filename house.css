@@ -1137,6 +1137,20 @@ footer a {
 .creation-preview { margin:0; }
 .creation-preview img { display:block; width:100%; height:auto; border-radius:6px; }
 .creation-preview figcaption { margin-top:8px; line-height:1.4; }
+.creation-picture-open { display:block; width:100%; padding:0; border:0; border-radius:6px; background:var(--night); color:var(--gold); font:inherit; text-align:left; cursor:zoom-in; }
+.creation-picture-open:focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+.creation-picture-hint { display:block; padding:10px; font-size:13px; }
+.creation-picture { box-sizing:border-box; width:min(1100px,calc(100% - 24px)); max-width:calc(100% - 24px); max-height:calc(100dvh - 24px); padding:20px; border:1px solid var(--gold); border-radius:12px; background:var(--night); color:var(--paper); overflow:auto; }
+.creation-picture::backdrop { background:rgb(0 0 0 / .8); }
+.creation-picture-head,.creation-picture-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.creation-picture h2 { margin:0; font:normal 28px/1.2 Georgia,serif; overflow-wrap:anywhere; }
+.creation-picture-controls { justify-content:flex-start; margin-top:16px; }
+.creation-picture button,.creation-picture a { min-height:44px; }
+.creation-picture a { display:inline-flex; align-items:center; color:var(--gold); }
+.creation-picture :focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
+.creation-picture-scroll { max-height:58dvh; overflow:auto; overscroll-behavior:contain; background:#ece5d6; border-radius:4px; }
+.creation-picture-scroll img { display:block; width:100%; height:auto; max-height:58dvh; object-fit:contain; }
+.creation-picture-scroll.original-size img { width:auto; max-width:none; max-height:none; }
 .creation-action { color:var(--gold); border-top:1px solid var(--line); padding-top:12px; margin-top:auto; }
 /* Keep the room's single display useful beside the house map and on a phone. */
 .gallery-room { margin-top:18px; min-width:0; }

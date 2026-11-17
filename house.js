@@ -2512,6 +2512,49 @@ async function loadCatalog(sourceHead) {
 function collectionAction(entry) {
   return entry.action==="Read guide"?"Read guide":entry.action==="Play"?"Play":"Open";
 }
+let creationPicture=null;
+function reconcileCreationPicture() {
+  if(!creationPicture)return;
+  const {dialog,id,src}=creationPicture;
+  if(current&&completedCatalog().some(entry=>entry.id===id&&Array.isArray(entry.files)&&entry.files.includes(src)))return;
+  creationPicture.restore=false;
+  dialog.close();dialog.replaceChildren();
+}
+function openCreationPicture(entry,preview,opener) {
+  if(creationPicture||!current||!collectionUrl(entry))return;
+  const dialog=html("dialog","creation-picture",undefined,document.body);
+  dialog.id="gallery-picture";
+  dialog.setAttribute("aria-labelledby","gallery-picture-title");
+  const state={dialog,id:entry.id,src:preview.src,restore:true};creationPicture=state;
+  const head=html("div","creation-picture-head",undefined,dialog);
+  const title=html("h2","",entry.title,head);title.id="gallery-picture-title";
+  const close=html("button","quiet-button","Close picture",head);
+  close.id="gallery-picture-close";close.type="button";close.autofocus=true;
+  close.addEventListener("click",()=>dialog.close());
+  const controls=html("div","creation-picture-controls",undefined,dialog);
+  const size=html("button","quiet-button","Show original size",controls);
+  size.id="gallery-picture-size";size.type="button";size.setAttribute("aria-pressed","false");
+  size.setAttribute("aria-controls","gallery-picture-scroll");
+  const link=html("a","",`${collectionAction(entry)} ${entry.title} →`,controls);link.href=collectionUrl(entry);
+  html("p","small","Fit the whole picture, or show its original size and scroll to explore the details.",dialog);
+  const scroll=html("div","creation-picture-scroll",undefined,dialog);
+  scroll.id="gallery-picture-scroll";scroll.tabIndex=0;
+  scroll.setAttribute("role","region");scroll.setAttribute("aria-label",`${entry.title} picture; scroll to explore`);
+  const image=html("img","",undefined,scroll);
+  image.src=preview.src;image.alt=preview.alt;image.width=preview.width;image.height=preview.height;
+  html("p","small",preview.caption,dialog);
+  size.addEventListener("click",()=>{
+    const original=size.getAttribute("aria-pressed")!=="true";
+    size.setAttribute("aria-pressed",String(original));
+    size.textContent=original?"Fit picture to screen":"Show original size";
+    scroll.classList.toggle("original-size",original);scroll.scrollLeft=0;scroll.scrollTop=0;
+  });
+  dialog.addEventListener("close",()=>{
+    dialog.remove();if(creationPicture===state)creationPicture=null;
+    if(state.restore&&current)$(opener.id)?.focus({preventScroll:true});
+  });
+  dialog.showModal();
+}
 function renderCreationCard(entry,parent) {
   const article=html("article","creation-card",undefined,parent);
   html("h3","",entry.title,article);
@@ -2550,11 +2593,17 @@ function renderCreationCard(entry,parent) {
   const preview=previews[entry.id];
   if(current && preview && Array.isArray(entry.files) && entry.files.includes(preview.src)) {
     const figure=html("figure","creation-preview",undefined,article);
-    const image=html("img","",undefined,figure);
+    const enlarge=html("button","creation-picture-open",undefined,figure);
+    enlarge.id=`gallery-picture-${parent.id==="gallery-room-display"?"room":"card"}-${entry.id}`;
+    enlarge.type="button";enlarge.setAttribute("aria-label",`Look closely at ${entry.title}`);
+    enlarge.setAttribute("aria-haspopup","dialog");
+    enlarge.addEventListener("click",()=>openCreationPicture(entry,preview,enlarge));
+    const image=html("img","",undefined,enlarge);
     image.src=preview.src;
     image.alt=preview.alt;
     image.width=preview.width;image.height=preview.height;
     html("figcaption","small",preview.caption,figure);
+    html("span","creation-picture-hint","Look closely ↗",enlarge);
   }
   html("p","",entry.summary,article);
   html("span","small","Completed",article);
@@ -2569,6 +2618,7 @@ function completedCatalog() {
 }
 let galleryState={query:"",activity:"all",toolsOpen:false};
 function renderCollection() {
+  reconcileCreationPicture();
   const box=$("creations");if(!box)return;
   box.replaceChildren();
   if(!catalog) {
@@ -2645,6 +2695,7 @@ function renderCollection() {
 // A small working display inside the room, using the same cards as the full Gallery.
 let galleryRoomChoice=null;
 function renderGalleryRoom(content) {
+  reconcileCreationPicture();
   const panel=html("section","gallery-room",undefined,content);
   panel.setAttribute("aria-label","Try a creation");
   html("h3","","Take something off the shelf",panel);
