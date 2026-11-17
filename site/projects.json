@@ -185,7 +185,9 @@
         "projects/five-marks/ADMISSION.md",
         "projects/five-marks/DECISION.md",
         "projects/five-marks/check.py",
-        "projects/five-marks/test_exhibit.cjs"
+        "projects/five-marks/test_exhibit.cjs",
+        "projects/five-marks/make-gallery-preview.js",
+        "projects/five-marks/gallery-preview.svg"
       ]
     },
     {

@@ -56,7 +56,7 @@ assert.match(text(root),/current published versions/);
  assert.equal(manifest.projects.find(p=>p.id==='tessera-loom').files.includes(preview.src),true);
  const shown=all(root).filter(n=>n.tag==='img');
  assert.equal(shown.map(n=>n.src).join('|'),
-  'projects/tessera-loom/gallery-preview.svg|projects/lantern-loop/gallery-preview.svg|projects/night-ferry/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/specimen-cards/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg|projects/cue-rehearsal/gallery-preview.svg|projects/rain-ledger/gallery-preview.svg|projects/review-skein/gallery-preview.svg',
+  'projects/tessera-loom/gallery-preview.svg|projects/lantern-loop/gallery-preview.svg|projects/night-ferry/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/specimen-cards/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg|projects/cue-rehearsal/gallery-preview.svg|projects/rain-ledger/gallery-preview.svg|projects/review-skein/gallery-preview.svg|projects/five-marks/gallery-preview.svg',
   'Every listed real-output browser creation preview shows in the present view');
  for(const image of shown){
   assert.match(image.alt,/.{40,}/,'Previews carry real alternative text');
@@ -99,7 +99,7 @@ assert.match(text(root),/current published versions/);
 
     def test_shadow_and_signal_previews_are_model_generated(self):
         root = Path(__file__).parents[1]
-        for project in ('shadow-theatre', 'signal-garden', 'specimen-cards', 'rain-ledger'):
+        for project in ('shadow-theatre', 'signal-garden', 'specimen-cards', 'rain-ledger', 'five-marks'):
             with self.subTest(project=project):
                 result = subprocess.run(
                     ['node', '-e', f'process.stdout.write(require("./projects/{project}/make-gallery-preview.js").svg());'],
