@@ -26,11 +26,13 @@
       "files": [
         "projects/night-ferry/player/index.html",
         "projects/night-ferry/player/style.css",
+        "projects/night-ferry/player/reach-model.js",
         "projects/night-ferry/player/player.js",
         "projects/night-ferry/player/fixture/fixture.js",
         "projects/night-ferry/case/truth-sheet.json",
         "projects/night-ferry/case/engine-room.json",
-        "projects/night-ferry/case/landing-clerk.json"
+        "projects/night-ferry/case/landing-clerk.json",
+        "projects/night-ferry/gallery-preview.svg"
       ]
     },
     {
@@ -59,7 +61,8 @@
       "files": [
         "projects/specimen-cards/index.html",
         "projects/specimen-cards/README.md",
-        "projects/specimen-cards/example-deck.json"
+        "projects/specimen-cards/example-deck.json",
+        "projects/specimen-cards/gallery-preview.svg"
       ]
     },
     {
@@ -99,7 +102,26 @@
         "projects/cue-rehearsal/style.css",
         "projects/cue-rehearsal/model.js",
         "projects/cue-rehearsal/app.js",
+        "projects/cue-rehearsal/example.json",
+        "projects/cue-rehearsal/gallery-preview.svg",
         "projects/cue-rehearsal/README.md"
+      ]
+    },
+    {
+      "id": "rain-ledger",
+      "title": "Rain Ledger",
+      "summary": "Log daily rainfall in millimetres or inches, distinguish recorded dry days from missed gaps, and compare monthly totals.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/rain-ledger/",
+      "files": [
+        "projects/rain-ledger/index.html",
+        "projects/rain-ledger/style.css",
+        "projects/rain-ledger/app.js",
+        "projects/rain-ledger/rain_model.js",
+        "projects/rain-ledger/example_two_month.json",
+        "projects/rain-ledger/gallery-preview.svg",
+        "projects/rain-ledger/README.md"
       ]
     },
     {
