@@ -15,7 +15,7 @@ const descriptions = {
   workshop: "Real work occupies these benches. An empty chair can hold an unfinished promise.",
   archive: "What hurt, what helped, and who checked. The gold seams remember repairs without erasing the crack.",
   council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
-  bedroom: "Sleep is ordinary here. Six display bunks let you visit every remembered identity, a page at a time.",
+  bedroom: "Sleep is ordinary here. Find a remembered resident and follow the traces they left. The six drawn bunks have their own pages.",
   counting: "Tally rods and route stones track how the four agent families share work, review and exploration runs, model rotation and rests.",
   assay: "Independent cross-family source reviews, gate checks, integrated commits and mended scars."
 };
@@ -23,6 +23,7 @@ let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
 let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
 const DISPLAY_BUNKS = 6;
+let bedsState = {query:"",page:0,open:null};
 let roomBounds = {}, wholeBounds = "0 0 900 700";
 function el(tag, attrs = {}, parent, value) {
   const node = document.createElementNS(SVG, tag);
@@ -1171,6 +1172,81 @@ function personRow(r, parent) {
     html("span","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
   });
 }
+function bedsDirectory(moment, query, requestedPage) {
+  const needle=query.trim().toLocaleLowerCase();
+  const residents=moment.residents.filter(r=>[r.name,...(r.name_history||[]).flatMap(n=>[n.from,n.to])]
+    .some(name=>String(name||"").toLocaleLowerCase().includes(needle)))
+    .sort((a,b)=>a.name.localeCompare(b.name)||a.id.localeCompare(b.id));
+  const pages=Math.max(1,Math.ceil(residents.length/DISPLAY_BUNKS));
+  const page=Math.max(0,Math.min(requestedPage,pages-1));
+  return {total:moment.residents.length,matches:residents.length,page,pages,
+    visible:residents.slice(page*DISPLAY_BUNKS,(page+1)*DISPLAY_BUNKS)};
+}
+function renderBedsDirectory(content) {
+  const panel=html("section","beds-directory",undefined,content);
+  const heading=html("h3","","Find a resident",panel);heading.id="beds-title";
+  panel.setAttribute("aria-labelledby",heading.id);
+  html("p","small","Everyone remembered at this moment, wherever their last recorded room was. Presence is a journal trace, not a live check. Open a name for every recorded run, including its identity and receipts.",panel);
+  const controls=html("div","beds-controls",undefined,panel);
+  const label=html("label","small","Name or earlier name",controls);label.htmlFor="beds-search";
+  const search=html("input","",undefined,controls);search.id="beds-search";search.type="search";
+  search.value=bedsState.query;search.setAttribute("aria-controls","beds-list");
+  const reset=html("button","quiet-button","Show everyone",controls);reset.id="beds-reset";reset.type="button";
+  const status=html("p","small",undefined,panel);status.id="beds-results";status.setAttribute("role","status");
+  const list=html("div","beds-list",undefined,panel);list.id="beds-list";list.tabIndex=-1;
+  list.setAttribute("role","region");list.setAttribute("aria-label","Remembered residents");
+  const pager=html("div","beds-pager",undefined,panel);
+  const previous=html("button","quiet-button","Previous residents",pager);previous.id="beds-previous";
+  const next=html("button","quiet-button","Next residents",pager);next.id="beds-next";
+  for(const button of [previous,next]){button.type="button";button.setAttribute("aria-controls",list.id);}
+  const draw=()=>{
+    const view=bedsDirectory(frame,bedsState.query,bedsState.page);bedsState.page=view.page;
+    status.textContent=`${view.matches} of ${view.total} remembered residents · page ${view.page+1} of ${view.pages}`;
+    previous.disabled=view.page===0;next.disabled=view.page===view.pages-1;
+    list.replaceChildren();
+    if(!view.matches)html("p","empty-note","No name matches. Try an earlier name, or show everyone.",list);
+    view.visible.forEach(r=>{
+      const card=html("details","beds-person",undefined,list);card.id=`beds-person-${r.id}`;card.name="beds-residents";card.open=bedsState.open===r.id;
+      card.addEventListener("toggle",()=>{if(card.open)bedsState.open=r.id;else if(bedsState.open===r.id)bedsState.open=null;});
+      const summary=html("summary","",undefined,card);summary.id=`beds-name-${r.id}`;
+      html("strong","",r.name,summary);
+      const kind=kinds[r.agent]||kinds.unrecorded;
+      const room=frame.rooms.find(place=>place.id===r.room)?.name||"room unrecorded";
+      const presence=r.pose==="unconfirmed"?"stopped without sleep":r.presence;
+      html("span","small",`${kind.name}${r.model?` · ${r.model}`:""} · ${presence} · last recorded in ${room}`,summary);
+      const earlier=[...new Set((r.name_history||[]).map(change=>change.from).filter(name=>name&&name!==r.name))];
+      if(earlier.length)html("span","small",`Earlier names: ${earlier.join(", ")}`,summary);
+      html("code","",r.id,card);
+      (r.name_history||[]).forEach(change=>{
+        html("p","small",`${change.from} → ${change.to} · chose this name at event ${change.sequence}`,card);
+      });
+      const runs=(frame.runs||[]).filter(run=>run.resident===r.id&&run.sequence<=frame.seq)
+        .sort((a,b)=>b.sequence-a.sequence);
+      html("p","small",`${runs.length} recorded ${runs.length===1?"run":"runs"} · all shown, latest start first.`,card);
+      if(!runs.length)html("p","small","No supervised run receipts at this moment.",card);
+      runs.forEach(run=>{
+        const entry=html("div","beds-run",undefined,card),kind=kinds[run.agent]||kinds.unrecorded;
+        html("strong","",`${kind.name}${run.model?` · ${run.model}`:""}`,entry);
+        html("code","",run.id,entry);
+        html("p","small",`Started ${clock(run.start,{year:"numeric"})} · event ${run.sequence}`,entry);
+        html("p","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
+        for(const [label,seq] of [["start",run.sequence],[run.status==="ended"?"end":"result",run.end?run.last_sequence:null]]) {
+          if(Number.isInteger(seq)&&seq<=frame.seq&&data.frames.some(moment=>moment.seq===seq)) {
+            const jump=html("button","quiet-button",`Visit ${label} event ${seq}`,entry);
+            jump.id=`beds-event-${label}-${run.id}`;jump.type="button";
+            jump.addEventListener("click",()=>{jumpToSequence(seq);($(summary.id)||$("beds-list"))?.focus({preventScroll:true});});
+          }
+        }
+      });
+    });
+  };
+  search.addEventListener("input",()=>{bedsState.query=search.value;bedsState.page=0;draw();});
+  reset.addEventListener("click",()=>{bedsState.query="";bedsState.page=0;search.value="";draw();search.focus({preventScroll:true});});
+  for(const [button,delta] of [[previous,-1],[next,1]])button.addEventListener("click",()=>{
+    bedsState.page+=delta;draw();list.focus({preventScroll:true});
+  });
+  draw();
+}
 function findScarTargetIndex(scar) {
   if(!scar||typeof scar!=="object")return -1;
   if(/inferred/i.test(String(scar.basis||"")))return -1;
@@ -2009,16 +2085,12 @@ function roomPanel() {
   const stopped=frame.residents.filter(r=>inView(r)&&r.pose==="unconfirmed");
   if(room?.id==="bedroom") {
     const view=dormView(frame,dormPage);
-    html("p","small",`${dormSummary(view)} in the six display bunks. Paging changes only the drawing.`,content);
-    view.visible.forEach(r=>personRow(r,content));
-    if(view.members.length>DISPLAY_BUNKS) {
-      const remembered=html("details","remembered-residents",undefined,content);
-      html("summary","",`All ${view.members.length} remembered identities`,remembered);
-      view.members.forEach(r=>personRow(r,remembered));
-    }
+    html("p","small",`${dormSummary(view)} in the six display bunks. The bunk controls change only the drawing; the directory searches everyone.`,content);
+    if(stopped.length)html("p","small",`Remembered here · ${stopped.length} stopped ${stopped.length===1?"resident":"residents"}. Find them in the directory; they are not sleeping bunk occupants.`,content);
+    if(roomStatus(room)==="open")renderBedsDirectory(content);
   } else residents.forEach(r=>personRow(r,content));
   if(room&&residents.length===0)html("p","empty-note",roomStatus(room)==="closed"?"Closed, with its history kept. Scrub back to visit its earlier life.":roomStatus(room)==="construction"?"Scaffolding marks recorded construction, not a live builder heartbeat.":"A quiet room, waiting for a footstep.",content);
-  if(stopped.length) {
+  if(stopped.length&&room?.id!=="bedroom") {
     const remembered=html("details","remembered-residents",undefined,content);
     html("summary","",`Remembered here · ${stopped.length} stopped ${stopped.length===1?"resident":"residents"}`,remembered);
     html("p","small","Their runs ended without a sleep event. This is their last recorded room, not current occupancy. Their receipts and scars remain; a later wake brings the figure back.",remembered);
@@ -3456,8 +3528,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
-  const selectionId=activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
+  const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
