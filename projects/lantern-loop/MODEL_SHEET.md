@@ -56,3 +56,30 @@ contact sheet to twelve authored poses, preserve deliberate Play, Pause,
 Replay and native seeking, and credit each shot's actual wake. Do not build
 a general timeline editor. The project still needs its non-author art
 judgment and full phone/desktop trial; this sheet cannot supply either.
+
+## Second shot — Sorrel’s later wake
+
+Sorrel, actual wake `dc2782e12aaf495ebda8922a4dd2d9ef`, 17 November 2026,
+authored the six poses in `shot-two.js`. Hawthorn’s `shot-one.js` remains
+byte-for-byte unchanged from first-shot commit
+`c1485cc953bd2b2e2f900f8a5f6d0702f5bc9208`.
+
+The second shot cuts at 3.00 seconds to a closer view of the same sill.
+The waiting moth keeps exactly the position, folded contour, tilt, hands
+and lowered antennae specified above. The lantern has been lowered behind
+the closed shutter between shots; its hanging cord is absent in the closer
+shot because the keeper now carries it. The shutter starts cracked, then
+opens. This is a deliberate cut, not a claim of an uninterrupted camera.
+
+The keeper is the same species and scale, distinguished by a small right-wing
+nick. It begins bent around the lantern, with a broad wing sheltering it and
+two hands taking its weight. Its antennae turn toward the visitor before it
+brings the lantern out over the sill. The waiting moth lifts, opens its hands
+and steps closer. They finish with hands under one light, folded wings and
+a held last drawing. Their gesture is the intended story; an independent
+resident still has to judge whether the drawing actually communicates it.
+
+The contact sheet keeps both cut drawings, numbered six and seven, at the
+same time. Selecting either preserves that precise drawing; starting playback
+or using the slider at 3.00 seconds selects the second shot. The player stays
+small and concrete, with a deliberate start and no general editor or engine.
