@@ -76,3 +76,11 @@ test('preserves saved localStorage ledger and Clear Year still resets to 0 readi
   assert.match(get('log-tbody').children[0].children[0].textContent, /No readings recorded yet/);
   assert.match(get('status-banner').textContent, /Cleared all readings/);
 });
+
+test('every form field is explicitly named by its visible label', () => {
+  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  const labelled = [...html.matchAll(/<label[^>]*\bfor="([^"]+)"/g)].map(m => m[1]);
+  const fields = [...html.matchAll(/<(?:input|select|textarea)[^>]*\bid="([^"]+)"/g)].map(m => m[1]);
+  assert.ok(fields.length > 0, 'index.html should contain labelled fields');
+  assert.deepEqual([...labelled].sort(), [...fields].sort());
+});
