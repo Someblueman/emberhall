@@ -1,9 +1,13 @@
 """Public snapshots use an independent index and preserve the source checkout."""
+import hashlib
 import json
+from unittest.mock import patch
 
+from house import publish as publisher
+from house.body import export
 from house.home_work import git
 from house.publish import BRANCH, publish
-from house.public_history import decode
+from house.public_history import decode, encode
 from tests.support import HouseCase
 
 
@@ -93,3 +97,110 @@ class PublishTests(HouseCase):
         with self.assertRaises(ValueError):
             publish(self.record, push=True)
         self.assertEqual(git(remote, 'rev-parse', ref), fixed['commit'])
+
+
+class PublishInPartsTests(HouseCase):
+    def setUp(self):
+        super().setUp()
+        (self.repo / "site").mkdir()
+        for name in ("index.html", "house.js", "house.css"):
+            (self.repo / "site" / name).write_text("committed " + name)
+        git(self.repo, "add", ".")
+        git(self.repo, "-c", "commit.gpgsign=false", "-c", "user.name=Test", "-c", "user.email=test@local",
+            "commit", "-m", "Public fixture")
+        self.private = self.record.common / "house-home"
+
+    def tree(self):
+        return {path: blob for _, _, blob, path in (line.replace("\t", " ").split(" ", 3)
+                for line in git(self.repo, "ls-tree", "-r", BRANCH).splitlines())}
+
+    def shown(self, path):
+        return self.record.git("show", BRANCH + ":" + path)
+
+    def speak(self, count, start=0):
+        for number in range(start, start + count):
+            self.record.append("say", "alice", {"text": f"A distinct public remark number {number}"})
+
+    def test_parts_are_sealed_stable_and_decode_to_the_full_projection(self):
+        self.speak(12)
+        with patch("house.publish.PART_TARGET", 800):
+            self.assertTrue(publish(self.record)["changed"])
+            first_tree, wire = self.tree(), json.loads(self.shown("history.json"))
+            self.assertEqual(wire["version"], 3)
+            self.assertGreaterEqual(len(wire["parts"]), 3)
+            self.assertEqual(sorted(path for path in first_tree if path.startswith("history/")),
+                             sorted(part["path"] for part in wire["parts"]))
+            for number, part in enumerate(wire["parts"]):
+                data = self.shown(part["path"])
+                self.assertEqual(part["sha256"], hashlib.sha256(data).hexdigest())
+                self.assertEqual(part["path"], f"history/part-{number:04d}-{part['sha256'][:16]}.json")
+                self.assertEqual(part["nodes"], len(json.loads(data)))
+                self.assertGreaterEqual(len(data), 800)
+                self.assertEqual(data, json.dumps(json.loads(data), separators=(",", ":")).encode())
+            head = json.loads(self.shown("head.json"))
+            public = decode(wire, lambda path: self.shown(path))
+            self.assertEqual(public, export(self.record, public["observed_at"]))
+            self.assertEqual(head["journal_head"], public["journal_head"])
+            # A later publication keeps every earlier part, byte for byte, and only appends.
+            self.speak(12, 12)
+            self.assertTrue(publish(self.record)["changed"])
+            second_tree, later = self.tree(), json.loads(self.shown("history.json"))
+            self.assertGreater(len(later["parts"]), len(wire["parts"]))
+            self.assertEqual(later["parts"][:len(wire["parts"])], wire["parts"])
+            for part in wire["parts"]:
+                self.assertEqual(second_tree[part["path"]], first_tree[part["path"]])
+            self.assertEqual(decode(later, lambda path: self.shown(path)),
+                             export(self.record, decode(later, lambda path: self.shown(path))["observed_at"]))
+            # Lost private part files are rebuilt from the cache with the same bytes.
+            for file in (self.private / publisher.PARTS_DIR).iterdir():
+                file.unlink()
+            self.speak(1, 24)
+            publish(self.record)
+            for part in later["parts"]:
+                self.assertEqual(self.tree()[part["path"]], second_tree[part["path"]])
+            files = list((self.private / publisher.PARTS_DIR).iterdir())
+            self.assertEqual(len(files), len(json.loads(self.shown("history.json"))["parts"]))
+            self.assertTrue(all(file.stat().st_mode & 0o777 == 0o600 for file in files))
+            # An unchanged record is not published again.
+            self.assertFalse(publish(self.record)["changed"])
+
+    def test_a_cache_without_parts_gets_boundaries_once_and_an_oversized_part_is_refused(self):
+        import marshal
+        self.speak(12)
+        with patch("house.publish.PART_TARGET", 800):
+            publish(self.record)
+            cache_path = self.private / publisher.HISTORY_CACHE
+            cache = marshal.loads(cache_path.read_bytes())
+            names = [part["path"] for part in cache["parts"]]
+            del cache["parts"]
+            cache_path.write_bytes(marshal.dumps(cache))
+            with patch("house.publish.replay_context", side_effect=AssertionError("full replay")):
+                publisher.history(self.record, self.private)
+            self.assertEqual([part["path"] for part in marshal.loads(cache_path.read_bytes())["parts"]], names)
+            self.speak(1, 99)
+            with patch("house.publish.MAX_PUBLIC_BLOB", 700), self.assertRaises(ValueError):
+                publish(self.record)
+
+    def test_a_previous_version_two_publication_is_replaced_and_decodes_without_parts(self):
+        self.speak(3)
+        publish(self.record)
+        public = decode(json.loads(self.shown("history.json")), lambda path: self.shown(path))
+        head = json.loads(self.shown("head.json"))
+        del head["history_version"]
+        entries = {name: self.shown(name) for name in self.tree() if "/" not in name}
+        entries["history.json"] = json.dumps(encode(public), separators=(",", ":")).encode()
+        ref = "refs/heads/" + BRANCH
+        for with_head in (True, False):
+            entries["head.json"] = json.dumps(head).encode()
+            if not with_head:
+                del entries["head.json"]
+            listing = "".join("100644 blob " + self.record.git("hash-object", "-w", "--stdin", data=body).decode().strip()
+                              + "\t" + name + "\n" for name, body in entries.items())
+            tree = self.record.git("mktree", data=listing.encode()).decode().strip()
+            old = self.record.git("commit-tree", tree, data=b"version two").decode().strip()
+            self.record.git("update-ref", ref, old)
+            self.assertEqual(decode(json.loads(self.shown("history.json"))), public)
+            result = publish(self.record)
+            self.assertTrue(result["changed"])
+            self.assertEqual(json.loads(self.shown("history.json"))["version"], 3)
+            self.assertFalse(publish(self.record)["changed"])

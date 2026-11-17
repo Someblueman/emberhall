@@ -22,9 +22,11 @@ CACHE_FORMAT = 1
 
 BRANCH = "codex/house-pages"
 # Fail locally before GitHub's 100 MiB limit. On 17 November (evening) the history passed 64 MiB and
-# the page stood still for forty minutes; the limit moved to 90 MiB as a stopgap until the history is
-# published in parts.
-MAX_PUBLIC_BLOB = 90 * 1024 * 1024
+# the page stood still for forty minutes; it is now published in sealed parts, so nothing nears this.
+MAX_PUBLIC_BLOB = 64 * 1024 * 1024
+# A sealed part of the node table is closed once its JSON reaches this size and never changes again.
+PART_TARGET = 8 * 1024 * 1024
+PARTS_DIR = "history-parts"
 
 
 def oversized_unpublished(record: Record, previous: str, remote: str | None) -> bool:
@@ -129,8 +131,38 @@ def code_identity() -> str:
     return digest.hexdigest()
 
 
-def history(record: Record, private: Path, observed_at: float | None = None) -> tuple[bytes, dict]:
-    """The public history.json, replaying only events newer than the private cache.
+def part_bytes(private: Path, cache: dict, index: int) -> bytes:
+    """A sealed part's exact bytes: from the private folder, else rebuilt from the cached nodes."""
+    entry, folder = cache["parts"][index], private / PARTS_DIR
+    file = folder / entry["path"].rsplit("/", 1)[-1]
+    try:
+        data = file.read_bytes()
+    except OSError:
+        data = b""
+    if hashlib.sha256(data).hexdigest() != entry["sha256"]:
+        start = sum(part["nodes"] for part in cache["parts"][:index])
+        data = json.dumps(cache["nodes"][start:start + entry["nodes"]], separators=(",", ":"),
+                          allow_nan=False).encode()
+        if hashlib.sha256(data).hexdigest() != entry["sha256"]:
+            raise ValueError("History cache no longer matches its sealed part")
+        write_private(file, data)
+    return data
+
+
+def write_private(path: Path, data: bytes) -> None:
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_bytes(data)
+    temporary.chmod(0o600)
+    os.replace(temporary, path)
+
+
+def history(record: Record, private: Path, observed_at: float | None = None) -> tuple[bytes, dict, dict[str, bytes]]:
+    """The public history.json and its sealed parts, replaying only events newer than the private cache.
+
+    The persistent prefix of the node table is cut into parts of about PART_TARGET bytes. A part ends
+    where the cache says (its node count is kept), so old parts keep their bytes and names and only
+    new parts are added at the end. Everything after the last part stays in history.json.
 
     Frames depend only on the events up to them, so the cache keeps the replay
     context and the already encoded frames. It is used only for the exact same
@@ -166,17 +198,39 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
     top = build_projection(final, head, source_head, observed_at, commits, [], context["scars"])
     root = encoder.intern({key: encoder.intern(cache["frames"]) if key == "frames" else encoder.value(value)
                            for key, value in top.items()})
-    body = json.dumps({"version": 2, "root": root, "nodes": encoder.nodes},
-                      separators=(",", ":"), allow_nan=False).encode()
+    persistent, had_parts = encoder.mark, "parts" in cache
+    sealed = sum(part["nodes"] for part in cache.get("parts", ()))
+    if "parts" not in cache or sealed > persistent:
+        cache["parts"], sealed = [], 0
+    pieces = [json.dumps(node, separators=(",", ":"), allow_nan=False) for node in encoder.nodes[sealed:]]
+    first = size = 0
+    grown = False
+    for number in range(persistent - sealed):
+        size += len(pieces[number]) + 1
+        if size >= PART_TARGET:
+            data = ("[" + ",".join(pieces[first:number + 1]) + "]").encode()
+            digest = hashlib.sha256(data).hexdigest()
+            name = f"history/part-{len(cache['parts']):04d}-{digest[:16]}.json"
+            write_private(private / PARTS_DIR / name.rsplit("/", 1)[-1], data)
+            cache["parts"].append({"path": name, "nodes": number + 1 - first, "sha256": digest})
+            first, size, grown = number + 1, 0, True
+    parts = {entry["path"]: part_bytes(private, cache, number) for number, entry in enumerate(cache["parts"])}
+    body = ('{"version":3,"parts":' + json.dumps(cache["parts"], separators=(",", ":")) +
+            ',"root":' + json.dumps(root, separators=(",", ":")) +
+            ',"nodes":[' + ",".join(pieces[first:]) + "]}").encode()
     encoder.forget()
-    if new_frames or cache.get("head") != head:
+    if grown or not had_parts:
+        for stale in (private / PARTS_DIR).glob("part-*"):
+            if "history/" + stale.name not in parts:
+                stale.unlink(missing_ok=True)
+    if new_frames or grown or not had_parts or cache.get("head") != head:
         cache["head"] = head
         temporary = path.with_name(path.name + ".tmp")
         temporary.write_bytes(marshal.dumps(cache))
         temporary.chmod(0o600)
         os.replace(temporary, path)
     return body, {"journal_head": head, "source_head": source_head, "seq": last_seq,
-                  "at": final["at"]}
+                  "at": final["at"], "history_version": 3}, parts
 
 
 def chronicle_body(record: Record, contents: dict[str, bytes]) -> bytes:
@@ -194,7 +248,7 @@ def publish(record: Record, *, push=False) -> dict:
     private.mkdir(mode=0o700, exist_ok=True)
     with (private / "publisher.lock").open("a+b") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        history_body, summary = history(record, private)
+        history_body, summary, parts = history(record, private)
         head = summary["source_head"]
         if not head:
             raise ValueError("No source HEAD")
@@ -214,6 +268,7 @@ def publish(record: Record, *, push=False) -> dict:
             except (OSError, ValueError, KeyError, TypeError):
                 pass
             contents["chronicle/index.html"] = chronicle
+        contents.update(parts)
         contents["history.json"] = history_body
         # Visitors poll this tiny file and fetch the history only when it changes.
         contents["head.json"] = json.dumps(summary, separators=(",", ":"), sort_keys=True).encode()
@@ -247,10 +302,11 @@ def publish(record: Record, *, push=False) -> dict:
         if previous:
             try:
                 old = json.loads(record.git("show", previous + ":head.json"))
-                current_wire = True
+                current_wire = old.get("history_version") == 3
             except ValueError:
                 old_wire = json.loads(record.git("show", previous + ":history.json"))
-                old, current_wire = decode(old_wire), old_wire.get("version") == 2
+                old = decode(old_wire, lambda path: record.git("show", previous + ":" + path))
+                current_wire = old_wire.get("version") == 3
             if not recovering and current_wire and (old["journal_head"], old["source_head"]) == (summary["journal_head"], summary["source_head"]):
                 if push:
                     record.git("push", "origin", ref + ":" + ref)

@@ -8,7 +8,9 @@ analytics or external data service are required.
 ## Visit and refresh
 
 `site/index.html`, `house.js`, `house.css` and `history.json` are a complete static
-site. The integrator owns hosting and publication. For a local visit:
+site. (The published house splits its history into `history/part-*.json` files beside
+`history.json`; `house.body` still writes one self-contained version-2 file. See
+`docs/PUBLIC_HISTORY.md`.) The integrator owns hosting and publication. For a local visit:
 
 ```sh
 python3 -m house.body --repo . --output site/history.json

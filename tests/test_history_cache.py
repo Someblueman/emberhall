@@ -16,8 +16,8 @@ class HistoryCacheTests(HouseCase):
         self.private.mkdir(exist_ok=True)
 
     def history(self, at=1e10):
-        body, summary = publish.history(self.record, self.private, observed_at=at)
-        return decode(json.loads(body)), summary
+        body, summary, parts = publish.history(self.record, self.private, observed_at=at)
+        return decode(json.loads(body), parts), summary
 
     def grow(self):
         if "garden" not in self.record.read()[0].get("life", {}).get("rooms", {}):

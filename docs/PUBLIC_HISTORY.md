@@ -22,17 +22,44 @@ without mutating a shared scar, resident, task or room object. Future renderers
 must preserve this property. This is a transport change, not a journal schema.
 
 The reader also accepts existing version-1 public snapshots, so the new client
-can ship before the pinned publisher changes. There is one writer format,
-version 2. Old clients cannot read it and must reload to receive the new script;
-an already-open old client retains its last snapshot and reports a load error.
-A fresh page and historical scrubbing require browser verification after rollout.
+can ship before the pinned publisher changes. A fresh page and historical
+scrubbing require browser verification after rollout.
+
+## Version 3: the history in parts
+
+The node table is a long persistent prefix that only grows by appending, plus a short
+rebuilt tail. Version 3 cuts the prefix into **sealed parts** so no single file nears
+GitHub's 100 MiB limit. There is one writer format, version 3; readers still accept 2.
+
+- `history/part-NNNN-<16 hex>.json` is a JSON array of consecutive nodes, closed once
+  its serialised size reaches `PART_TARGET` (8 MiB). Compact separators, no NaN, so
+  the bytes are reproducible. The name holds the position and the first 16 hex digits
+  of the content's SHA-256, so a part can be cached for ever.
+- `history.json` is `{"version": 3, "parts": [{"path", "nodes", "sha256"}, ...],
+  "root", "nodes"}`. Node references keep their global indexes: the table is the
+  parts' nodes in order, then the file's own `nodes` (the unsealed rest and the tail).
+- The private cache records where each part ends and its name and hash, so later
+  publications re-emit old parts unchanged and only add parts at the end. Part bytes are
+  also kept in `.git/house-home/history-parts/` (mode 0600) and rebuilt from the cache
+  if lost. A cache without boundaries gets them computed once, without a replay. A
+  rebuilt cache (changed code) may cut different parts; unreferenced parts leave the tree.
+- `head.json` carries `"history_version": 3`; a previous publication without it is
+  republished. The "did anything change" check reads head.json, never the parts.
+- `decode(wire, parts)` takes a path-to-bytes mapping or a callable for version 3 and
+  checks each part's hash and node count. The page keeps fetched parts in memory by
+  path, fetches only new ones (three at a time, 60 s each, normal browser caching),
+  checks their node counts and decodes as before. A failed part shows the usual
+  "Try again" notice; a retry reuses the parts already held.
+
+Old clients cannot read version 3 and must reload to receive the new script; an
+already-open old client retains its last snapshot and reports a load error.
 
 ## Publication and recovery
 
-Every generated public blob is checked against a 64 MiB budget before refs change.
-This deliberately leaves room below the observed GitHub 100 MiB rejection. It is
-not a promise of unbounded history size: further growth must pass the budget or
-receive another transport improvement without silently dropping old events.
+Every generated public blob (each part included) is checked against a 64 MiB budget
+before refs change. This leaves room below the observed GitHub 100 MiB rejection;
+with parts of about 8 MiB the history itself no longer approaches it. Total size
+still grows, and the repository and each visitor's first load grow with it.
 
 Under the existing kernel publisher lock, the publisher verifies the remote
 Pages head is an ancestor of its local head. Unknown or divergent remote history

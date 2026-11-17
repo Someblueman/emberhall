@@ -1,6 +1,7 @@
 """Lossless public-history transport; shared containers form a backward-only DAG."""
 from __future__ import annotations
 
+import hashlib
 import json
 
 
@@ -46,10 +47,34 @@ def encode(projection: dict) -> dict:
     return {"version": 2, "root": root, "nodes": encoder.nodes}
 
 
-def decode(wire: dict) -> dict:
+def join_parts(wire: dict, parts) -> dict:
+    """Version 3 as version 2: the sealed parts' nodes, then the file's own, with global indexes."""
+    listing = wire.get("parts")
+    if not isinstance(listing, list) or not isinstance(wire.get("nodes"), list):
+        raise ValueError("Unrecognized public history transport")
+    load = parts if callable(parts) else (parts or {}).__getitem__
+    nodes = []
+    for entry in listing:
+        try:
+            data = load(entry["path"])
+            if hashlib.sha256(data).hexdigest() != entry["sha256"]:
+                raise ValueError("Public history part does not match its listing")
+            chunk = json.loads(data)
+            if not isinstance(chunk, list) or len(chunk) != entry["nodes"]:
+                raise ValueError("Public history part has the wrong node count")
+        except (KeyError, TypeError, OSError) as error:
+            raise ValueError("Public history part is missing or malformed") from error
+        nodes += chunk
+    return {"version": 2, "root": wire.get("root"), "nodes": nodes + wire["nodes"]}
+
+
+def decode(wire: dict, parts=None) -> dict:
+    """Decode a snapshot. Version 3 needs `parts`: a path -> bytes mapping or a callable returning bytes."""
     # Version 1 is the already published format, retained for old snapshots.
     if wire.get("version") == 1:
         return wire
+    if wire.get("version") == 3:
+        wire = join_parts(wire, parts)
     if wire.get("version") != 2 or not isinstance(wire.get("nodes"), list):
         raise ValueError("Unrecognized public history transport")
     nodes = []

@@ -3986,6 +3986,40 @@ function decodePublicHistory(wire) {
   if(!root||root.version!==1||Array.isArray(root))throw new Error("Invalid public history root");
   return root;
 }
+// Version 3 keeps the start of the node table in sealed parts. A part's name carries its hash, so a part
+// held once is never fetched again, and the browser may cache it for ever.
+const historyParts=new Map();
+async function loadHistoryParts(wire,notice) {
+  const parts=wire.parts;
+  if(!Array.isArray(parts)||!Array.isArray(wire.nodes)||parts.some(part=>!part||!/^history\/part-\d{4,}-[0-9a-f]{16}\.json$/.test(part.path)||!Number.isInteger(part.nodes)||part.nodes<0))
+    throw new Error("Unrecognized public history transport");
+  const listed=new Set(parts.map(part=>part.path));
+  for(const path of [...historyParts.keys()])if(!listed.has(path))historyParts.delete(path);
+  const missing=parts.filter(part=>!historyParts.has(part.path));
+  const first=!data&&missing.length>0;
+  const progress=()=>{
+    if(!first)return;
+    const text=`Loading the house record… ${parts.filter(part=>historyParts.has(part.path)).length} of ${parts.length} parts`;
+    notice.textContent=text;$("view-context").textContent=text;
+  };
+  progress();
+  let failure=null;
+  const worker=async()=>{
+    while(missing.length&&!failure) {
+      const part=missing.shift();
+      try {
+        const response=await fetch(part.path,{signal:AbortSignal.timeout(60000)});
+        if(!response.ok)throw new Error(`History part returned ${response.status}`);
+        const nodes=await response.json();
+        if(!Array.isArray(nodes)||nodes.length!==part.nodes)throw new Error("A history part does not match its listing");
+        historyParts.set(part.path,nodes);progress();
+      }catch(error){failure=failure||error;}
+    }
+  };
+  await Promise.all(Array.from({length:Math.min(3,missing.length)},worker));
+  if(failure)throw failure;
+  return {version:2,root:wire.root,nodes:[].concat(...parts.map(part=>historyParts.get(part.path)),wire.nodes)};
+}
 function refreshView(changed=false) {
   // Capture immediately before the redraw, after the fetch and any visitor edits.
   const input=$("catchup-seq");
@@ -4014,7 +4048,8 @@ async function refresh() {
   try {
     const response=await fetch("history.json",{cache:"no-cache",signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw new Error(`History returned ${response.status}`);
-    const next=decodePublicHistory(await response.json());
+    const wire=await response.json();
+    const next=decodePublicHistory(wire?.version===3?await loadHistoryParts(wire,notice):wire);
     if(next.version!==1||!Array.isArray(next.frames)||!next.frames.length)throw new Error("Unrecognized house history");
     if(data&&next.frames.length<data.frames.length)throw new Error("An older publication arrived");
     await loadCatalog(next.source_head);
