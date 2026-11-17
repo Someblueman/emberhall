@@ -118,10 +118,40 @@ def research_due(shelf: dict, at: float, state: dict | None = None) -> bool:
             and at - shelf.get("research_at", -math.inf) >= RESEARCH_GAP_SECONDS)
 
 
+# Research keeps pace with an empty slot (Steward, 17 November, afternoon; owner migration below).
+# Eleven hours after the higher bar the house had made seven research rounds and seven ideas: one
+# became the great project, two were dropped by a checker, one lost a vote, and the small slot was
+# still empty with a single candidate. The Steward asked whether that was enough research. It was
+# not: with three ideas on the shelf a round could start only every four hours. From this migration
+# a round may follow the last one at once while a project slot is free and fewer than two kept ideas
+# of its scale are waiting. One Explorer at a time, the thirty-minute floor and the ceiling remain.
+#
+# The same morning a kept idea, three hours from its vote, went to the graveyard as "nobody showed
+# who asked for it" the moment a resident corrected its brief: the correction cleared its three
+# checks, and an unchecked idea more than six hours old expires. From this migration a new brief
+# on a kept idea gives it six fresh hours for the checks to be made again.
+FLOW = "upgrade-20261117-research-flow"
+
+
+def flow_since(state: dict | None) -> float | None:
+    entry = (state or {}).get("maintenance", {}).get("migrations", {}).get(FLOW)
+    return None if entry is None else entry["at"]
+
+
+def thin(state: dict | None, shelf: dict) -> list[str]:
+    """Free project slots with fewer than two kept ideas of their scale waiting."""
+    if flow_since(state) is None:
+        return []
+    return [which for which in ("great", "small") if slot_free(shelf, which) and sum(
+        scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])
+        for key in shelf_ids(shelf)) < CANDIDATES_MINIMUM]
+
+
 def research_open(state: dict, shelf: dict, at: float, selection_version: int) -> bool:
     """Whether an Explorer round may start now. life.explorer_demand asks the same question."""
     return (len(shelf_ids(shelf)) < 3 or (selection_version >= 3 and great_wanted(shelf))
-            or (open_since(state) is not None and research_due(shelf, at, state)))
+            or (open_since(state) is not None and research_due(shelf, at, state))
+            or (bool(thin(state, shelf)) and shelf_load(state, shelf) < SHELF_CEILING))
 
 
 # Worth building (Steward decision, 15 November; owner migration below). An idea
@@ -445,7 +475,8 @@ def brief_due(state: dict, idea: dict) -> float | None:
         day = max(shelved, asked_since(state)) + SECOND_SECONDS
         shared = shared_since(state)
         if shared is not None:
-            day = min(day, shared if shelved < shared else shelved + UNASKED_SECONDS)
+            day = min(day, shared if shelved < shared else
+                      max(shelved, idea.get("rebriefed_at", shelved)) + UNASKED_SECONDS)
         due = day if due is None else min(due, day)
     return due
 
@@ -861,7 +892,10 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         fields(data, {"idea", "brief"})
         key = identifier(data, "idea")
         require(key in shelf["ideas"] and shelf["ideas"][key]["status"] == "shelved", "idea is not on the shelf")
+        kept = flow_since(state) is not None and "brief" in shelf["ideas"][key] and grounded(state, shelf["ideas"][key])
         shelf["ideas"][key]["brief"] = brief(state, data, "brief", actor, sequence)
+        if kept:
+            shelf["ideas"][key]["rebriefed_at"] = at
     elif kind == "idea-second":
         require(asked_since(state) is not None, "unknown shelf action")
         fields(data, {"idea", "verdict", "finding"})

@@ -88,6 +88,12 @@ The course correction is now in effect, not just written down:
   the third. A resident who wrote none of the candidates and has not voted
   casts their vote before other work, whatever the run is for. No task and no
   help request is opened for votes.
+- **Research keeps pace with an empty slot** (17 November, afternoon). The
+  Steward asked whether the house does enough research: one great work under
+  way, no small one, two ideas on the shelf. While a project slot is free and
+  fewer than two kept ideas of its scale are waiting, research rounds follow
+  one another with no four-hour gap. Correcting a kept idea's brief no longer
+  ends it: it has six fresh hours to be checked again.
 - **No project waits on one resident** (17 November). The Steward found a
   finished milestone undecided because its owner could not be woken, and asked
   why residents could not simply vote on whether the work should go on. While

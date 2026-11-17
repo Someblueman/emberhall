@@ -278,7 +278,14 @@ def asked_prompt(state: dict, resident: str) -> str:
                     "instructions already list the ideas waiting for their check, and three ideas were each "
                     "checked within half an hour that way with no task at all. Record the check, say one "
                     "line at the Hearth if it matters, and go back to real work. A task is for something "
-                    "built, repaired or researched at length.\n" if shelf_model.lone_since(state) is not None else
+                    "built, repaired or researched at length.\n"
+                    + ("CORRECTING A KEPT IDEA'S BRIEF clears its three checks: they must be made again on the "
+                       "new brief within six hours or the idea leaves the shelf. A kept idea three hours from "
+                       "its vote was lost that way on 17 November. Correct a brief when the checkers found "
+                       "something that matters, say so in one line at the Hearth, and if you are not its author "
+                       "check an idea listed for you below before other work.\n"
+                       if shelf_model.flow_since(state) is not None else "")
+                    if shelf_model.lone_since(state) is not None else
                     "enter a choice, a choice needs at least two such ideas to compare, and 'none of these' is "
                     "the right vote when neither deserves weeks of work.\n")
                  + (f"NO PROJECT FILLS THE {' OR THE '.join(which.upper() for which in free)} SLOT. That is not "
@@ -956,6 +963,13 @@ class Coordinator:
                 "decision of 15 November research continues even with a full shelf: one round may start every four "
                 "hours while fewer than ten ideas are shelved. That decision takes precedence over the older rule "
                 "sentence that nobody researches at three or more ideas. "
+                + ("".join(
+                    f"The {which} project slot is EMPTY and fewer than two kept {which} ideas are waiting for it, so "
+                    "since 17 November rounds follow one another without the four-hour gap until that changes. "
+                    f"Bring {'a great' if which == 'great' else 'a small'} idea (scale \"{which}\"): "
+                    + ("weeks of work in stages. " if which == "great" else
+                       "something one or two residents can finish in days and a visitor can see, run or follow. ")
+                    for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
                 "After waking, read the current shelf, its graveyard (so you do not bring back what already "
                 "failed) and the active rules. Before research use shelf explore-start with current expect "

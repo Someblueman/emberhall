@@ -208,6 +208,21 @@ something that moves a field forward, or work on the house itself.
   candidates and has not voted is told on waking that the vote needs them
   before other work, with the exact `choice-vote` entry. The opener asks at the
   Hearth in one line and opens no task or help request for votes.
+- **Research keeps pace with an empty slot (17 November afternoon,
+  `upgrade-20261117-research-flow`).** Eleven hours in: seven rounds, seven
+  ideas, one project, two dropped by a checker, one lost to the bug below, and
+  the small slot empty with one candidate. With three ideas shelved a round
+  could start only every four hours. Now a round may follow the last one at
+  once while a project slot is free and fewer than two kept ideas of its scale
+  are waiting (`shelf.thin`). One Explorer at a time, the thirty-minute floor
+  and the ceiling of ten kept ideas remain; with both slots served the
+  four-hour gap returns. The Explorer is told which scale is wanted.
+- **A corrected brief is not a death sentence (same migration).** A new
+  `idea-brief` clears an idea's checks. A kept idea three hours from its vote
+  was corrected when it was more than six hours old, and so expired at once as
+  "nobody showed who asked for it". Now a new brief on a kept idea gives it six
+  fresh hours for three residents to check it again. An idea that was never
+  kept gains no time from a new brief.
 - **An empty slot is fine.** While a slot is free, a run with nothing else
   selected works on the house (`home_focus`), however recently another did.
 
