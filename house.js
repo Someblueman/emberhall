@@ -22,6 +22,7 @@ const descriptions = {
 let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
 let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
+let recoveryReady = false;
 const DISPLAY_BUNKS = 6;
 let bedsState = {query:"",agent:"all",presence:"all",page:0,open:null};
 let roomBounds = {}, wholeBounds = "0 0 900 700";
@@ -3863,6 +3864,12 @@ function refreshView(changed=false) {
 async function refresh() {
   if(refreshing)return;
   refreshing=true;
+  const retry=$("record-retry"), recovery=$("record-load"), notice=$("record-load-status");
+  if(!recoveryReady){retry.addEventListener("click",refresh);recoveryReady=true;}
+  retry.setAttribute("aria-disabled","true");retry.textContent="Trying…";
+  recovery.setAttribute("aria-busy","true");
+  notice.textContent=!data?"Loading the house record…":!recovery.hidden?"Checking for a newer house record…":"";
+  if(!data)$("view-context").textContent="Loading the latest remembered house.";
   try {
     const response=await fetch("history.json",{cache:"no-cache",signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw new Error(`History returned ${response.status}`);
@@ -3875,19 +3882,32 @@ async function refresh() {
     if(nextIndex<0)throw new Error("The selected moment is missing from this publication");
     next.frames.forEach(moment=>{moment.scars=moment.scars.map(s=>({...next.scars[s.id],...s}));});
     const changed=!data||next.journal_head!==data.journal_head||next.source_head!==data.source_head;
-    $("error").hidden=true;
     if(changed){
       data=next;index=nextIndex;
       $("history").max=data.frames.length;$("history").disabled=false;
       if(!controlsReady)bindControls();
       refreshView(true);
     }else if(current)refreshView();
+    const recovered=!recovery.hidden;
+    recovery.hidden=true;$("error").textContent="";
+    notice.textContent=recovered?"The house record is available again.":"";
+    // The retry button is disappearing; leave its keyboard visitor in the loaded view.
+    if(document.activeElement===retry) {
+      const view=document.querySelector?.(".page-view:not([hidden])");
+      view?.focus({preventScroll:true});view?.scrollIntoView({block:"start"});
+    }
   }catch(error){
-    $("error").hidden=false;
-    $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here; we’ll try again shortly.":"The house record is unavailable. We’ll try again shortly.";
-    if(!data)$("presence-line").textContent="The record is unavailable; no activity is invented.";
+    recovery.hidden=false;notice.textContent="";
+    $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here.":"The house record could not be loaded. You can try again now.";
+    if(!data){
+      $("presence-line").textContent="The record is unavailable; no activity is invented.";
+      $("view-context").textContent="The house record has not loaded.";
+    }
     else if(current)refreshView();
-  }finally{refreshing=false;}
+  }finally{
+    refreshing=false;recovery.setAttribute("aria-busy","false");
+    retry.setAttribute("aria-disabled","false");retry.textContent="Try again";
+  }
 }
 let watching=false;
 // Poll the tiny head.json; fetch the full history only when the record moved.

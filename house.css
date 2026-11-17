@@ -465,11 +465,20 @@ footer a {
   white-space:nowrap;
   border:0;
 }
-#error {
-  margin:25px;
-  padding:20px;
-  background:#663d32;
-  color:#fff;
+.record-load {
+  margin:0 0 20px;
+  padding:16px;
+  border:1px solid var(--gold);
+  border-radius:8px;
+  background:var(--room);
+}
+.record-load[hidden] { display:none; }
+.record-load p { margin:0 0 12px; }
+.record-load .small { margin:10px 0 0; }
+.record-load [aria-disabled="true"] { opacity:.7; cursor:wait; }
+.record-load :focus-visible {
+  outline:2px solid var(--gold);
+  outline-offset:3px;
 }
 .room-hit {
   cursor:pointer;
