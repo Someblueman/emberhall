@@ -255,15 +255,16 @@ persistent Git signing change. Do not duplicate the single coordinator.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-The latest verified checkpoint is **9999 events**, through
-`52dfacd8db019f1d88ddac1dfacdb14af000a377` (16 November 2026, 06:47 UTC).
-[Its metadata](../evidence/house-checkpoint-9999-381481e799bb02f7c6b5952cdedd894056bc0e453fd9b9dc49f2e51ea466fb6b.json)
-and [the current pointer](../evidence/checkpoint.json) bind the 12,821,738-byte
-bundle, SHA256 `f8af72c7346f6b3d56389f6ff6de167312d55e09639f8b5c02ba208581378a73`.
+The latest verified checkpoint is **13422 events**, through
+`ab212c1b450e4f11701e226754f88924f08ebe1d` (17 November 2026, 06:50 UTC).
+[Its metadata](../evidence/house-checkpoint-13422-3781434a1a169cdd969b51960ff74241731c44c4bab89d549d629bc1be7441aa.json)
+and [the current pointer](../evidence/checkpoint.json) bind the 16,821,369-byte
+bundle, SHA256 `fb387bcb09a199c2da12f2864c6e428d220ddecb6b9d06baa6b647b9e39b3086`.
 The fixed-channel checkpoint worker restored this prefix in a disposable repository
-and compared its full state and events exactly. Fern also checked the retained
-bundle's size and hash. This succeeds after renovation installation9966; earlier
-bounded-file failures remain in the record.
+and compared its full state and events exactly. Fern checked that the delivered
+metadata hash and prefix fields match the compact accepted receipt. The bundle is
+retained in the canonical host's private store; it is not present in this source
+room. This verifies a retained local recovery point, not a remote backup.
 
 Under the course correction, this bundle stays in the canonical host's private
 checkpoint store; it is **not included in a source clone**. Only in a fresh recovery
@@ -271,7 +272,7 @@ clone with an absent journal, after explicitly copying the retained bundle to th
 same relative path, use:
 
 ```sh
-python3 -m house restore .git/house-home/checkpoints/381481e799bb02f7c6b5952cdedd894056bc0e453fd9b9dc49f2e51ea466fb6b/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore .git/house-home/checkpoints/3781434a1a169cdd969b51960ff74241731c44c4bab89d549d629bc1be7441aa/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
