@@ -1,0 +1,11 @@
+[
+ {
+  "fill": [
+   "#story-input",
+   "<!doctype html><html><head><meta charset=\"utf-8\"><title>Signal flags</title></head><body>\n<tw-storydata name=\"Signal flags\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"ffffffff-ffff-4fff-8fff-ffffffffffff\">\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">&lt;&lt;if (def $signal) and $signal gt 0&gt;&gt;Flags are flying.&lt;&lt;else&gt;&gt;No flags today.&lt;&lt;/if&gt;&gt;\n[[Raise the flags|Raised]]</tw-passagedata>\n<tw-passagedata pid=\"2\" name=\"Raised\" tags=\"\">&lt;&lt;set $signal to 3&gt;&gt;\n&lt;&lt;if (def $signal) and $signal gt 0&gt;&gt;Now the harbour can see them.&lt;&lt;/if&gt;&gt;</tw-passagedata>\n</tw-storydata></body></html>\n"
+  ]
+ },
+ {
+  "click": "#audit"
+ }
+]

@@ -1,0 +1,11 @@
+[
+ {
+  "fill": [
+   "#story-input",
+   "<!doctype html><html><head><meta charset=\"utf-8\"><title>Broken export</title></head><body>\n<tw-storydata name=\"Broken export\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee\">\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">This passage was cut off mid-export and its closing tag never arrived.\n</tw-storydata></body></html>\n"
+  ]
+ },
+ {
+  "click": "#audit"
+ }
+]

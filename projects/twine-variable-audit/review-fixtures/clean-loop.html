@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Lantern rounds</title></head><body>
+<tw-storydata name="Lantern rounds" startnode="1" format="SugarCube" format-version="2.37.3" ifid="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa">
+<tw-passagedata pid="9" name="StoryInit" tags="">&lt;&lt;set $rounds to 0&gt;&gt;</tw-passagedata>
+<tw-passagedata pid="1" name="Start" tags="">Night watch begins.
+[[Oil the lamp|OilLamp]]
+[[Trim the wick|TrimWick]]</tw-passagedata>
+<tw-passagedata pid="2" name="OilLamp" tags="">&lt;&lt;set $lampReady to &quot;oiled&quot;&gt;&gt;
+[[Climb to the lantern|LanternRoom]]</tw-passagedata>
+<tw-passagedata pid="3" name="TrimWick" tags="">&lt;&lt;set $lampReady to &quot;trimmed&quot;&gt;&gt;
+[[Climb to the lantern|LanternRoom]]</tw-passagedata>
+<tw-passagedata pid="4" name="LanternRoom" tags="">&lt;&lt;if $lampReady is &quot;oiled&quot;&gt;&gt;The flame burns steady.&lt;&lt;else&gt;&gt;The flame burns bright.&lt;&lt;/if&gt;&gt;
+&lt;&lt;set $rounds to $rounds + 1&gt;&gt;
+&lt;&lt;if $rounds lt 2&gt;&gt;[[Begin another round|Start]]&lt;&lt;else&gt;&gt;Dawn at last.&lt;&lt;/if&gt;&gt;</tw-passagedata>
+</tw-storydata></body></html>

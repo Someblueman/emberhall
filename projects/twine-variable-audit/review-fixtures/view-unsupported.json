@@ -1,0 +1,11 @@
+[
+ {
+  "fill": [
+   "#story-input",
+   "<!doctype html><html><head><meta charset=\"utf-8\"><title>Changing tide</title></head><body>\n<tw-storydata name=\"Changing tide\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"dddddddd-dddd-4ddd-8ddd-dddddddddddd\">\n<tw-passagedata pid=\"5\" name=\"StoryInit\" tags=\"\">&lt;&lt;set $tide to 1&gt;&gt;</tw-passagedata>\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">&lt;&lt;set $tide to either(1, 2)&gt;&gt;\nThe tide marker reads $tide.\n[[Walk the shore|Shore]]</tw-passagedata>\n<tw-passagedata pid=\"2\" name=\"Shore\" tags=\"\">&lt;&lt;if $tide is 2&gt;&gt;The causeway is drowned.&lt;&lt;else&gt;&gt;You may cross.&lt;&lt;/if&gt;&gt;</tw-passagedata>\n</tw-storydata></body></html>\n"
+  ]
+ },
+ {
+  "click": "#audit"
+ }
+]

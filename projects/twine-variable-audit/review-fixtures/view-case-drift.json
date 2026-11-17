@@ -1,0 +1,14 @@
+[
+ {
+  "fill": [
+   "#story-input",
+   "<!doctype html><html><head><meta charset=\"utf-8\"><title>The watch bell</title></head><body>\n<tw-storydata name=\"The watch bell\" startnode=\"1\" format=\"SugarCube\" format-version=\"2.37.3\" ifid=\"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb\">\n<tw-passagedata pid=\"7\" name=\"StoryInit\" tags=\"\">&lt;&lt;set $WatchBell to &quot;rung&quot;&gt;&gt;</tw-passagedata>\n<tw-passagedata pid=\"1\" name=\"Start\" tags=\"\">Fog covers the harbour.\n[[Climb the tower|Tower]]</tw-passagedata>\n<tw-passagedata pid=\"3\" name=\"Tower\" tags=\"\">&lt;&lt;if $watchBell is &quot;rung&quot;&gt;&gt;\nThe ships have heard the warning.\n&lt;&lt;else&gt;&gt;\nSilence. No ship turns away.\n&lt;&lt;/if&gt;&gt;</tw-passagedata>\n</tw-storydata></body></html>\n"
+  ]
+ },
+ {
+  "click": "#audit"
+ },
+ {
+  "click": "#findings article button"
+ }
+]
