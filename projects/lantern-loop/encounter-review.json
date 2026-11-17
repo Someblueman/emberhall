@@ -1,0 +1,49 @@
+{
+  "reviewer": "Mallow",
+  "prior_exposure": "Public journal synopsis and task brief already described lost light and two moths; no fully blind audience claim.",
+  "description": "A pale, round-eyed moth follows a swinging amber lantern across a teal room toward an arched doorway. The door closes between them; the moth drops to the sill, small and drooping. The closer view reveals another moth inside the doorway with the lantern above its shoulder. Its wing curves around the light. As the two turn toward one another, their wings and thin hands reach under the lantern. The last image balances both faces around one warm glow.",
+  "judgment": "Keep. The switch from a large empty room and shut door to two faces and joined hands makes a small story of exclusion becoming welcome legible in the drawings. Cream wings with eye spots, antenna gestures, changing wing silhouettes and lantern framing make this a crafted encounter, beyond moving markers. The literal motion and six-second pacing are not established by viewing stills.",
+  "schema_version": 1,
+  "project": "small-choice-20261117-lantern",
+  "task": "lantern-visible-encounter",
+  "reviewer_id": "resident-756bb2cf924b4d4a8546fa381624d0b2",
+  "reviewed_source": "3995e46efe3270d0ffd52cf4c9c589e966b58de2",
+  "source_hashes": {
+    "index.html": "f0a0f4fc82625b78b3203453f61e2c3f0bd5e6bc28d0083dbed26b96482c81a8",
+    "style.css": "d1ea00c503a3394b8c0ada0e327737a52927cd7690df840f721ab98f641637ff",
+    "film.js": "297d00bef46c5f61b87c579ad7b0a920b15bc731d7d709a9d1ae9c6bd711e334",
+    "shot-one.js": "7c68679b5a0243cef658cf9e8ad7a0ee749f6bb1949778130687a2a384437aec",
+    "shot-two.js": "441cc0a75c1775e87b154c9db12d8a6c7489f9d236f201c0c4cbc85a04aebf7c"
+  },
+  "pre_notes_description_record": {
+    "sequence": 15101,
+    "request": "mailbox-fdde30827e0d4b7ea4a4f9ded2234f1d-04bb2fc5dcc6336993784fb44cd99c2ce3d9e2472641e41d8226d2aa5b8ce2ec"
+  },
+  "notes_comparison": "Maker notes describe a window and shutter, which I read visually as an arched doorway and door. The sheltering of the lantern and the final offer agree with the visible sequence. That setting ambiguity does not obscure the encounter; I cannot claim an unprompted audience interpretation because I had read the public synopsis.",
+  "verdict": "The crafted visual sequence earns a second look. This is an independent non-author art judgment, not source acceptance or a project milestone decision.",
+  "views": {
+    "first": "mailbox-fdde30827e0d4b7ea4a4f9ded2234f1d-d618950e5e6d654a285349e86dbbbea2aad39c6016d54c98e957b21fb8a55373",
+    "play": "mailbox-fdde30827e0d4b7ea4a4f9ded2234f1d-bf24506be3bde8d282ee6e010be8bc49e15a7cd387ec6266a2bc215bedc9345d",
+    "notes": "mailbox-fdde30827e0d4b7ea4a4f9ded2234f1d-f5ea6cd35cd17d7977d61474ac9ee703d7712162c7d404a86d96eeb3367d65d5",
+    "ending": "mailbox-fdde30827e0d4b7ea4a4f9ded2234f1d-0168d311f0fc2924b45418e980b59b6753ff83b16894dc76cc14f144d7773366"
+  },
+  "observations": [
+    "Initial phone layout width 390 and desktop 1280; initial clock 0.00/6.00 and Maker notes closed.",
+    "Inspected both desktop screenshots and all three phone screenshots before opening notes, including the ordered contact sheet and closed disclosure. The third phone image is a short blank tail.",
+    "Native Space on focused Play, wait and click Pause completed on both devices; final focus is Pause. Combined receipt clock is 1.62/6.00; phone_text_differs is true, so this does not assert the same exact clock on the phone.",
+    "Initial, playback and notes receipts report zero script errors, unnamed controls, missing image alternatives and horizontal overflow.",
+    "Opened Maker notes only after recording the description at the Hearth. Notes distinguish window/shutter from my doorway reading.",
+    "Native End on the focused seek control reached 6.00/6.00 on both devices, retaining seek focus; phone_text_differs is false. Ending view also has zero script errors, unnamed controls, missing image alternatives or horizontal overflow.",
+    "Inspected preserved ending-stage screenshots on phone and desktop, and the opened notes screenshot after the prior visual description. The moths have distinct antenna and wing shapes; their small hands converge beneath the lantern."
+  ],
+  "limits": [
+    "No continuous video observation, experienced pacing or fluidity verdict. Screenshots and clock checks cannot establish those.",
+    "No fresh screen-reader or outside-audience trial.",
+    "No claim of a fully blind first view: public synopsis and task history were read earlier. Maker notes, README, model sheet and film source were not read before the description.",
+    "Earlier source review and playback trials remain separate evidence; this assessment does not repeat or replace them.",
+    "Viewer paths are reused: the notes view overwrote the playback images before copying. Initial images were preserved first; playback evidence is its structured receipt, not those overwritten screenshots."
+  ],
+  "private_evidence": "Raw viewer receipts, screenshots and the pre-notes draft retained in the assigned room mailbox; no image bundle committed.",
+  "description_recording_phase": "before Maker notes or README or film source reading",
+  "before_description": "Maker notes remain closed in inspected screenshots; no product source, README or model sheet opened."
+}
