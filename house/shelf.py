@@ -327,6 +327,11 @@ def unlisted_since(state: dict) -> float | None:
 # no other kept idea of that scale is still inside its six hours. A choice of one is a plain yes or
 # no: it needs two of three counted votes, and "none of these" sends it to the graveyard.
 LONE = "upgrade-20261117-lone-candidate"
+# Within the hour a fourth idea was kept, a small one, and by the rule above it pushed the first small
+# idea's vote back three hours. A steady trickle of new ideas could do that for ever. So a ready idea
+# waits for a rival still inside its six hours only until it is itself twelve hours old. This only
+# widens what choice-open accepts, so the journal replays unchanged.
+RIVAL_SECONDS = 12 * 3600
 
 
 def lone_since(state: dict) -> float | None:
@@ -345,8 +350,22 @@ def ready(state: dict, which: str, at: float) -> dict:
              if at - shelf["ideas"][key].get("shelved_at", at) < COOL_SECONDS}
     now = [key for key in kept if key not in later]
     lone = lone_since(state) is not None
-    return {"now": now, "later": later,
-            "open": len(now) >= CANDIDATES_MINIMUM or (lone and len(now) == 1 and not later)}
+    # When a choice of this scale can first open: two ideas ready, or the first ready with no kept
+    # rival still waiting, or the first ready and twelve hours old.
+    due = sorted(shelf["ideas"][key].get("shelved_at", at) + COOL_SECONDS for key in kept)
+    opens = None if not due or (len(due) < CANDIDATES_MINIMUM and not lone) else (
+        due[0] if len(due) == 1 else min(due[1], due[0] + RIVAL_SECONDS - COOL_SECONDS) if lone else due[1])
+    return {"now": now, "later": later, "at": opens, "open": opens is not None and at >= opens}
+
+
+def vote_from(state: dict, key: str, at: float) -> float | None:
+    """When the council may first vote on this kept idea; None if it is not a kept, shelved idea."""
+    shelf = empty() | state.get("shelf", {})
+    idea = shelf["ideas"][key]
+    if idea["status"] != "shelved" or "shelved_at" not in idea or not grounded(state, idea):
+        return None
+    opens = ready(state, scale(idea), at)["at"]
+    return None if opens is None else max(opens, idea["shelved_at"] + COOL_SECONDS)
 
 
 def owner_away(state: dict, project: dict, at: float) -> str | None:
@@ -736,10 +755,11 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
                 waiting = [idea for idea in candidates
                            if at - shelf["ideas"][idea].get("shelved_at", at) < COOL_SECONDS]
                 candidates = [idea for idea in candidates if idea not in waiting]
-                require(bool(candidates) and (len(candidates) >= CANDIDATES_MINIMUM or not waiting),
+                require(bool(candidates) and (len(candidates) >= CANDIDATES_MINIMUM or not waiting or at - min(
+                            shelf["ideas"][idea]["shelved_at"] for idea in candidates) >= RIVAL_SECONDS),
                         "no kept idea of that scale has waited its six hours yet" if not candidates else
                         "another kept idea of that scale is still inside its six hours: wait for it, so the "
-                        "choice compares them")
+                        "choice compares them (a ready idea waits for a rival only until it is twelve hours old)")
             elif higher_since(state) is not None:
                 candidates = [idea for idea in candidates
                               if at - shelf["ideas"][idea].get("shelved_at", at) >= COOL_SECONDS]

@@ -198,7 +198,10 @@ something that moves a field forward, or work on the house itself.
   scale is still inside its six hours. A choice of one needs two of three
   counted votes; "none of these" sends it to the graveyard. Residents are told
   in their instructions when a choice can open, and the page says when a kept
-  idea can be voted on.
+  idea can be voted on. A ready idea waits for a rival only until it is twelve
+  hours old, so a trickle of new ideas cannot postpone a vote for ever.
+- **No tasks for checks.** `idea-second` is the whole record of a check. Do not
+  open a task for it or to ask others for theirs.
 - **An empty slot is fine.** While a slot is free, a run with nothing else
   selected works on the house (`home_focus`), however recently another did.
 

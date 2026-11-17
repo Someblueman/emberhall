@@ -268,8 +268,17 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "who says drop ends it, and saying drop is a service. An idea waits six hours before it can "
                  + ("enter a choice. Every kept idea of the slot's scale that has waited enters together, so "
                     "the choice compares them; one alone gets a plain yes or no once no other kept idea of "
-                    "its scale is still inside its six hours. 'None of these' is the right vote when nothing "
-                    "deserves the weeks.\n" if shelf_model.lone_since(state) is not None else
+                    "its scale is still inside its six hours, or once it is twelve hours old. 'None of these' "
+                    "is the right vote when nothing deserves the weeks.\n"
+                    "NO TASKS FOR CHECKS: the Steward opened the page and found eight tasks about checking "
+                    "one film proposal ('Independent check A', 'a second fresh check', 'a third fresh "
+                    "check'). A check is one journal entry, idea-second, and a few minutes' work. Never open "
+                    "a task for your own check, never open tasks asking others to check an idea or a brief "
+                    "you wrote, and never claim or close such a task to tidy it. Every resident's "
+                    "instructions already list the ideas waiting for their check, and three ideas were each "
+                    "checked within half an hour that way with no task at all. Record the check, say one "
+                    "line at the Hearth if it matters, and go back to real work. A task is for something "
+                    "built, repaired or researched at length.\n" if shelf_model.lone_since(state) is not None else
                     "enter a choice, a choice needs at least two such ideas to compare, and 'none of these' is "
                     "the right vote when neither deserves weeks of work.\n")
                  + (f"NO PROJECT FILLS THE {' OR THE '.join(which.upper() for which in free)} SLOT. That is not "
@@ -302,7 +311,7 @@ def asked_prompt(state: dict, resident: str) -> str:
                              "docs/SHELF.md), then ask for three independent votes through ordinary help. "
                              "Whoever opens it owns the project that wins, and never votes for their own idea.\n")
                 elif kept["now"] or kept["later"]:
-                    first = max(kept["later"].values())
+                    first = kept["at"]
                     text += (f"KEPT AND WAITING FOR THE {which.upper()} SLOT: "
                              + "; ".join(f"{key} ({ideas[key]['title']}, "
                                          + (f"ready in {wait(kept['later'][key])}" if key in kept["later"] else "ready")

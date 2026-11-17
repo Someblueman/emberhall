@@ -77,7 +77,12 @@ The course correction is now in effect, not just written down:
   saw three good ideas kept and no project starting, and asked if it was a bug.
   Kept ideas of one scale that have waited six hours are compared together; one
   alone gets a yes or no once no other kept idea of its scale is still waiting.
-  When your instructions say a choice can open, open it.
+  When your instructions say a choice can open, open it. A ready idea waits for
+  a rival only until it is twelve hours old.
+- **No tasks for checks** (17 November, morning). The Steward found eight tasks
+  about checking one film proposal. A check of an idea is one journal entry
+  (`idea-second`); never open a task for your own check or to ask others for
+  theirs. Every resident's instructions already list what awaits their check.
 - **No project waits on one resident** (17 November). The Steward found a
   finished milestone undecided because its owner could not be woken, and asked
   why residents could not simply vote on whether the work should go on. While

@@ -100,6 +100,34 @@ class LoneCandidateTests(unittest.TestCase):
         f.send("choice-open", actor="other", at=second + 6 * HOUR, choice="c1", milestones=plans("a", "b"))
         self.assertEqual(["a", "b"], f.state["shelf"]["choices"]["c1"]["candidates"])
 
+    def test_a_ready_idea_waits_for_a_rival_only_until_it_is_twelve_hours_old(self):
+        f = self.f
+        first = self.kept("a")
+        self.lone()
+        second = self.kept("b", actor="other", round_id="r2", at=first + 5 * HOUR, checkers=("author", "v3", "v1"))
+        third = self.kept("c", actor="v1", round_id="r3", at=first + 10 * HOUR, checkers=("author", "v3", "v2"))
+        self.assertEqual(second + 6 * HOUR, shelf.ready(f.state, "small", f.state["at"])["at"],
+                         "two ready ideas open the choice; the third does not hold it up")
+        self.assertEqual(third + 6 * HOUR, shelf.vote_from(f.state, "c", f.state["at"]))
+        self.assertEqual(second + 6 * HOUR, shelf.vote_from(f.state, "a", f.state["at"]))
+        f.send("idea-second", actor="v2", idea="b", verdict="drop", finding=test_higher_bar.PART)
+        self.assertEqual(first + 12 * HOUR, shelf.ready(f.state, "small", f.state["at"])["at"],
+                         "the one ready idea waits for its rival only until it is twelve hours old")
+        f.reject("only until it is twelve hours old", "choice-open", actor="other", at=first + 11 * HOUR,
+                 choice="c1", milestones=plans("a"))
+        f.send("choice-open", actor="other", at=first + 12 * HOUR, choice="c1", milestones=plans("a"))
+        self.assertEqual(["a"], f.state["shelf"]["choices"]["c1"]["candidates"])
+
+    def test_residents_are_told_not_to_open_tasks_for_checks(self):
+        f = self.f
+        self.kept("a")
+        self.assertNotIn("NO TASKS FOR CHECKS", asked_prompt(f.state, "v2"))
+        self.lone()
+        prompt = asked_prompt(f.state, "v2")
+        for words in ("NO TASKS FOR CHECKS", "eight tasks about checking one film proposal",
+                      "Never open a task for your own check", "or once it is twelve hours old"):
+            self.assertIn(words, prompt)
+
     def test_an_idea_not_yet_kept_by_three_holds_nothing_up_and_cannot_enter(self):
         f = self.f
         first = self.kept("a")
@@ -116,6 +144,7 @@ class LoneCandidateTests(unittest.TestCase):
             self.assertIn(words, source)
         self.assertIn("upgrade-20261117-lone-candidate", (root / "docs/SHELF.md").read_text())
         self.assertIn("A kept idea does not wait for a rival", (root / "docs/STEWARD_ORDERS.md").read_text())
+        self.assertIn("No tasks for checks", (root / "docs/STEWARD_ORDERS.md").read_text())
 
 
 if __name__ == "__main__":
