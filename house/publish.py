@@ -176,13 +176,14 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
                   "at": final["at"]}
 
 
-def chronicle_body(record: Record) -> bytes:
+def chronicle_body(record: Record, contents: dict[str, bytes]) -> bytes:
     """The Chronicle Room page for the journal as it stands now."""
     from . import chronicle_page
     state, events, _ = record.read()
     numbered = [event | {"sequence": sequence} for sequence, event in enumerate(events, 1)]
     return chronicle_page.render_html(chronicle_page.select_milestones(numbered), through=len(numbered),
-                                      house_id=state.get("house_id")).encode()
+                                      house_id=state.get("house_id"),
+                                      catalog=json.loads(contents.get("projects.json", b"null"))).encode()
 
 
 def publish(record: Record, *, push=False) -> dict:
@@ -206,7 +207,7 @@ def publish(record: Record, *, push=False) -> dict:
         chronicle = committed_blob(record, head, "site/chronicle/index.html", optional=True)
         if chronicle is not None:
             try:
-                chronicle = chronicle_body(record)
+                chronicle = chronicle_body(record, contents)
             except (OSError, ValueError, KeyError, TypeError):
                 pass
             contents["chronicle/index.html"] = chronicle
