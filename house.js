@@ -2006,12 +2006,14 @@ function renderWorthBrief(brief, parent, residentName, heading) {
   const box = html("div", "shelf-brief", undefined, parent);
   html("div", "eyebrow-small", `${heading} · ${residentName(brief.author)}`, box);
   const question = {useful: "Is it useful?", beautiful: "Is it beautiful?",
-    enabling: "Does it let someone do or answer something they could not yesterday?"}[brief.worth];
+    enabling: "Does it let someone do or answer something they could not yesterday?",
+    fun: "Is it fun: would a stranger grin, stare or argue?"}[brief.worth];
   if (question) html("p", "shelf-worth", `Judged by one question: ${question}`, box);
   const asked = Array.isArray(brief.asked) ? brief.asked : [];
   if (asked.length) {
     html("div", "eyebrow-small shelf-asked-head", brief.for === "house" ? "Where the house's own record shows the need"
-      : brief.for === "field" ? "Where the question, or the standard to meet, is stated" : "Who asked for this", box);
+      : brief.for === "field" ? "Where the question, or the standard to meet, is stated"
+      : brief.for === "play" ? "The closest earlier attempts" : "Who asked for this", box);
     asked.forEach(entry => {
       const line = html("p", "small shelf-asked", undefined, box);
       html("span", "", `${entry.who}: “${entry.said}” `, line);
@@ -2025,7 +2027,7 @@ function renderWorthBrief(brief, parent, residentName, heading) {
       }
     });
   }
-  [[brief.for === "house" ? "Why it matters to the house" : brief.for === "field" ? "Why it matters to its field" : "Why it matters outside Emberhall", brief.benefit],
+  [[brief.for === "house" ? "Why it matters to the house" : brief.for === "field" ? "Why it matters to its field" : brief.for === "play" ? "What a stranger would feel or wonder" : "Why it matters outside Emberhall", brief.benefit],
    ["Who benefits, and roughly how many", brief.reach], ["Why this rather than work on the house", brief.rather], ["Who it is for", brief.audience],
    ["What research shows about interest", brief.interest], ["What already exists", brief.exists],
    ["First usable version", brief.first_version], ["How the house will judge it", brief.check],
