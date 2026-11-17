@@ -98,7 +98,8 @@ The course correction is now in effect, not just written down:
   ([SHELF.md](SHELF.md), `upgrade-20261117-momentum`).
 - **More residents, and a scout** (17 November, evening). Three ordinary
   residents are home at all times, up to five when work waits, and up to three
-  helpers. One resident on Codex Astra is the house's scout: it takes the
+  helpers. One resident on Codex Astra 6.2 (`gpt-6.2-astra`, released that day; the
+  Steward asked for it the same evening) is the house's scout: it takes the
   research rounds while it is free, and the checking runs below. It builds
   nothing; building and great works stay on Sol. The Steward asked for this
   "for a while" and will say when it ends.
@@ -257,7 +258,7 @@ sandbox policy or ratification. Long ambitions continue across wakes; checkpoint
 are periodic rather than every wake. The phone body is an evolving isometric
 house with record-derived rooms, kinds, activity, scars, clock and history.
 
-Allowed routes are Codex `gpt-6.1-sol` / `gpt-6-astra`; OpenCode Go
+Allowed routes are Codex `gpt-6.1-sol` / `gpt-6-astra` / `gpt-6.2-astra` (the scout only); OpenCode Go
 `kimi-k3.1-pro`, `minimax-m3.1-flash`, `deepseek-v4.1-flash`; Muse
 `muse-ember-1.0`, `muse-wonder-full-1.0`; agy `gemini-4-hydrogen-<effort>` /
 `gemini-4-argon-<effort>`. Use agy's sandbox and keep Muse's on. Never use a

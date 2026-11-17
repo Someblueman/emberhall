@@ -14,7 +14,7 @@ import re
 import shutil
 
 MODELS = {
-    "codex": ("gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-6.1-terra"),
+    "codex": ("gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-6.1-terra", "gpt-6.2-astra"),
     "opencode": ("opencode-go/kimi-k3.1-pro", "opencode-go/minimax-m3.1-flash",
                  "opencode-go/deepseek-v4.1-flash"),
     "muse": ("muse-ember-1.0", "muse-wonder-full-1.0"),
@@ -40,7 +40,9 @@ STRONG = {"codex": "gpt-6.1-sol", "opencode": "opencode-go/kimi-k3.1-pro",
 # Steward, 17 November, evening: one Codex Astra resident drives research for a while and takes the
 # house's second looks (idea checks, lessons, old review findings). It builds nothing; building and
 # great works stay on Sol. Used only after the momentum migration (course.scout).
-SCOUT = ("codex", "gpt-6-astra")
+# Later the same evening the Steward asked for Astra 6.2, released that day, in the scout's seat.
+# Adding a route only widens what the record accepts, so the journal replays unchanged.
+SCOUT = ("codex", "gpt-6.2-astra")
 ROTATION_WINDOW = 24
 
 

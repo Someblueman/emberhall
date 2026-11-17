@@ -99,18 +99,19 @@ class MomentumTests(unittest.TestCase):
     def test_one_astra_scout_takes_research_and_checking_runs(self):
         state = {"at": 10.0, "maintenance": {"migrations": {staffing.SCOPE: {"at": 1}}},
                  "life": {"runs": {}, "budgets": {}}, "shelf": {"last_kind": "codex"}, "residents": {}, "tasks": {}}
-        self.assertEqual(("codex", "gpt-6-astra"), providers.SCOUT)
+        self.assertEqual(("codex", "gpt-6.2-astra"), providers.SCOUT)
+        providers.validate_model(*providers.SCOUT)
         self.assertFalse(course.scout(state, 10.0))
         self.assertNotEqual("codex", choose_provider(state, 10.0, exploring=True),
                             "before the change another kind takes the next round")
         state["maintenance"]["migrations"][staffing.MOMENTUM] = {"at": 2}
         self.assertTrue(course.scout(state, 10.0))
         self.assertEqual("codex", choose_provider(state, 10.0, exploring=True))
-        state["life"]["runs"]["r"] = {"status": "active", "agent": "codex", "model": "gpt-6-astra",
+        state["life"]["runs"]["r"] = {"status": "active", "agent": "codex", "model": "gpt-6.2-astra",
                                       "resident": "s", "started_sequence": 1}
         self.assertFalse(course.scout(state, 10.0), "one scout at a time")
         state["life"]["runs"]["r"]["status"] = "completed"
-        state["life"]["model_budgets"] = {"codex": {"gpt-6-astra": {"until": 99.0}}}
+        state["life"]["model_budgets"] = {"codex": {"gpt-6.2-astra": {"until": 99.0}}}
         self.assertFalse(course.scout(state, 10.0), "a resting route is passed over")
         self.assertEqual("gpt-6.1-sol", providers.STRONG["codex"], "building stays on Sol")
         self.assertNotIn(CHECKS_FOCUS, HOME_FOCUS)
