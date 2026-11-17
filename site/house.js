@@ -2610,7 +2610,10 @@ function renderCreationCard(entry,parent) {
       caption:"Made by Rain Ledger's own model · two-month sample totals and daily log"},
     "review-skein":{src:"projects/review-skein/gallery-preview.svg",width:1200,height:620,
       alt:"An invented review changes the ferry departure from nine to ten. An open comment asks to confirm the change, attached to that line.",
-      caption:"From Review Skein's shipped sample · a changed line and its attached question"}
+      caption:"From Review Skein's shipped sample · a changed line and its attached question"},
+    "five-mark-packing":{src:"projects/five-marks/gallery-preview.svg",width:1200,height:620,
+      alt:"Five gold marks at 0, 7, 14, 19 and 24 on a dark band, then five teal copies of that shape placed at starts 0, 2, 4, 6 and 8 with no shared mark, repeating every 29 integers.",
+      caption:"Made by Five Marks' own model · the shape and its winning repeating pattern"}
   };
   const preview=previews[entry.id];
   if(current && preview && Array.isArray(entry.files) && entry.files.includes(preview.src)) {
