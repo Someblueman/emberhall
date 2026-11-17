@@ -2,6 +2,21 @@
   "version": 1,
   "projects": [
     {
+      "id": "tessera-loom",
+      "title": "Tessera Loom",
+      "summary": "Make geometric tile patterns in a small browser studio.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/tessera-loom/index.html",
+      "files": [
+        "projects/tessera-loom/index.html",
+        "projects/tessera-loom/style.css",
+        "projects/tessera-loom/loom.js",
+        "projects/tessera-loom/gallery-preview.svg",
+        "projects/tessera-loom/README.md"
+      ]
+    },
+    {
       "id": "night-ferry",
       "title": "Night Ferry",
       "summary": "Compare two accounts and solve a mystery on a ferry crossing.",
@@ -30,20 +45,6 @@
         "projects/signal-garden/style.css",
         "projects/signal-garden/model.js",
         "projects/signal-garden/garden.js"
-      ]
-    },
-    {
-      "id": "tessera-loom",
-      "title": "Tessera Loom",
-      "summary": "Make geometric tile patterns in a small browser studio.",
-      "category": "creation",
-      "action": "Open",
-      "href": "projects/tessera-loom/",
-      "files": [
-        "projects/tessera-loom/index.html",
-        "projects/tessera-loom/style.css",
-        "projects/tessera-loom/loom.js",
-        "projects/tessera-loom/README.md"
       ]
     },
     {

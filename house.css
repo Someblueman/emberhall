@@ -1110,6 +1110,9 @@ footer a {
 .creation-card h3,.creation-card p { margin:0; }
 .creation-card h3 { font:normal 25px/1.2 Georgia,serif; }
 .creation-card p { color:var(--muted); font-size:14px; }
+.creation-preview { margin:0; }
+.creation-preview img { display:block; width:100%; height:auto; border-radius:6px; }
+.creation-preview figcaption { margin-top:8px; line-height:1.4; }
 .creation-action { color:var(--gold); border-top:1px solid var(--line); padding-top:12px; margin-top:auto; }
 .house-tools { margin-top:22px; }
 .house-tools .creation-card { margin-top:12px; }
