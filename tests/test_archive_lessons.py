@@ -31,7 +31,7 @@ const articles=()=>all(root).filter(n=>n.tag==='article');
 const show=()=>{root.replaceChildren();renderLessons(root);};
 const search=value=>{get('archive-search').value=value;get('archive-search').listeners.input();};
 const filter=value=>{get('archive-status').value=value;get('archive-status').listeners.change();};
-const lesson=(key,status='observed',reviews=0,author='Fern',claim='Keep the record.')=>({key,status,reviews,author,claim});
+const lesson=(key,status='observed',reviews=0,author='Fern',claim='Keep the record.')=>({id:key,key,status,reviews,author,claim});
 frame={seq:90,archive:Array.from({length:12},(_,i)=>lesson('lesson-'+i))};
 current=true;
 `,ctx);
@@ -110,6 +110,47 @@ frame={seq:1};show();assert.equal(articles().length,0);assert.match(text(root),/
 frame.archive=[];show();assert.match(text(root),/No lesson has been written/);
 ''')
 
+    def test_compare_across_pages_search_and_states_then_remove_and_clear(self):
+        self.run_renderer(r'''
+const compare=key=>get('archive-compare-lesson-'+encodeURIComponent(key)).listeners.click();
+frame.archive[11].status='contested';frame.archive[11].reviews=1;
+frame.archive[0].status='superseded';show();
+compare('lesson-11');assert.equal(get('archive-compare-lesson-lesson-11').attrs['aria-pressed'],'true');
+assert.equal(document.activeElement,get('archive-compare-lesson-lesson-11'));
+get('archive-next').listeners.click();get('archive-next').listeners.click();compare('lesson-0');
+const comparison=get('archive-comparison');
+assert.equal(document.activeElement,comparison);assert.match(text(comparison),/2 of 2 chosen/);
+assert.match(text(comparison),/Contested.*checked by 1 other resident/);
+assert.match(text(comparison),/replaced by a later lesson/);
+assert.match(text(comparison),/does not establish.*replacement/);
+assert(get('archive-compare-lesson-lesson-1').disabled);
+search('absent');assert.equal(articles().length,0);
+assert.match(text(comparison),/lesson 11/);assert.match(text(comparison),/lesson 0/);
+filter('unchecked');assert.match(text(comparison),/2 of 2 chosen/);
+get('archive-compare-remove-lesson-lesson-11').listeners.click();
+assert.match(text(comparison),/1 of 2 chosen/);assert.equal(document.activeElement,comparison);
+get('archive-compare-clear').listeners.click();assert.match(text(comparison),/0 of 2 chosen/);
+assert.equal(document.activeElement,comparison);assert.equal(archiveState.query,'absent');
+assert.equal(archiveState.status,'unchecked');
+''')
+
+    def test_comparison_tracks_selected_moment_and_literal_text_on_refresh(self):
+        self.run_renderer(r'''
+frame.archive=[lesson('older','contested',0,'<img src=x>','<script>literal</script>'),lesson('later')];
+show();get('archive-compare-lesson-older').listeners.click();get('archive-compare-lesson-later').listeners.click();
+let comparison=get('archive-comparison');
+assert.match(text(comparison),/<script>literal<\/script>/);assert.match(text(comparison),/<img src=x>/);
+assert(!all(comparison).some(n=>['script','img','svg'].includes(n.tag)));
+roomPanel=show;lighting=accounts=drawHouse=renderViewContext=renderCollection=renderRecentGrowth=renderLately=()=>{};
+get('archive-compare-remove-lesson-older').focus();refreshView();
+assert.equal(document.activeElement,get('archive-compare-remove-lesson-older'));
+frame={seq:2,archive:[lesson('older','observed',1,'Fern','Earlier claim.')]};current=false;show();
+comparison=get('archive-comparison');assert.match(text(comparison),/1 of 2 chosen/);
+assert.match(text(comparison),/Earlier claim/);assert.equal(get('archive-compare-remove-lesson-later'),null);assert.doesNotMatch(text(comparison),/literal|Contested/);
+frame={seq:1};show();assert.equal(archiveState.compare.length,0);
+frame={seq:0,archive:[]};show();assert.equal(archiveState.compare.length,0);
+''')
+
     def test_untrusted_text_stays_text(self):
         self.run_renderer(r'''
 frame.archive=[lesson('<script>alert(1)</script>','contested',0,'<img src=x>','<svg onload=evil()>')];show();
@@ -119,4 +160,49 @@ assert(!all(root).some(n=>['script','img','svg'].includes(n.tag)));
 assert.equal(get('archive-search').attrs['aria-describedby'],'archive-results');
 assert.equal(get('archive-results').attrs.role,'status');
 assert.equal(get('archive-next').attrs['aria-controls'],'archive-lessons');
+''')
+
+    def test_same_subject_claims_have_distinct_selections_and_keep_identity_on_refresh(self):
+        self.run_renderer(r'''
+frame.archive=[{...lesson('shared','contested',1,'Alder','Flush each line.'),id:4},
+  {...lesson('shared','contested',0,'Bay','Flush only on close.'),id:6},
+  {...lesson('shared','superseded',2,'Cedar','Never flush.'),id:8}];
+const before=JSON.stringify(frame);show();
+get('archive-compare-lesson-4').listeners.click();
+assert.equal(get('archive-compare-lesson-6').attrs['aria-pressed'],'false');
+get('archive-compare-lesson-6').listeners.click();
+let comparison=get('archive-comparison');
+assert.match(text(comparison),/Flush each line/);assert.match(text(comparison),/Flush only on close/);
+assert.match(text(comparison),/shared · Alder/);assert.match(text(comparison),/shared · Bay/);
+assert.doesNotMatch(text(comparison),/Never flush/);
+assert.match(get('archive-compare-remove-lesson-4').attrs['aria-label'],/Flush each line/);
+assert.match(get('archive-compare-remove-lesson-6').attrs['aria-label'],/Flush only on close/);
+get('archive-compare-remove-lesson-4').listeners.click();
+assert.equal(get('archive-compare-lesson-6').attrs['aria-pressed'],'true');
+get('archive-compare-lesson-8').listeners.click();
+assert.match(text(comparison),/Never flush/);assert.match(text(comparison),/replaced by a later lesson/);
+assert.equal(JSON.stringify(frame),before);
+frame={seq:91,archive:[{...frame.archive[2]}, {...frame.archive[0]}, {...frame.archive[1],reviews:2}]};show();
+comparison=get('archive-comparison');assert.match(text(comparison),/2 of 2 chosen/);
+assert.match(text(comparison),/checked by 2 other residents/);assert.doesNotMatch(text(comparison),/Flush each line/);
+frame={seq:5,archive:[{...lesson('shared','observed',1,'Alder','Earlier claim.'),id:4}]};show();
+assert.equal(archiveState.compare.length,0);assert.doesNotMatch(text(get('archive-comparison')),/Never flush|close/);
+''')
+
+    def test_legacy_same_subject_choices_are_local_to_exact_snapshot(self):
+        self.run_renderer(r'''
+const left=lesson('shared','contested',1,'Alder','First claim.');delete left.id;
+const right=lesson('shared','contested',0,'Bay','Second claim.');delete right.id;
+frame={seq:20,archive:[left,right]};show();
+get('archive-compare-legacy-20-0').listeners.click();get('archive-compare-legacy-20-1').listeners.click();
+assert.match(text(get('archive-comparison')),/First claim/);assert.match(text(get('archive-comparison')),/Second claim/);
+search('Alder');filter('contested');assert.equal(articles().length,1);
+assert.match(text(get('archive-comparison')),/2 of 2 chosen/);
+frame=JSON.parse(JSON.stringify(frame));show();assert.equal(archiveState.compare.length,2);
+frame.archive.reverse();show();assert.equal(archiveState.compare.length,0,'Reordered legacy data cannot inherit a choice');
+search('');get('archive-compare-legacy-20-0').listeners.click();
+frame={seq:21,archive:[right,left]};show();assert.equal(archiveState.compare.length,0);
+search('');filter('all');get('archive-compare-legacy-21-0').listeners.click();
+frame.archive=[{...right,id:6},{...left,id:4}];show();assert.equal(archiveState.compare.length,0);
+assert.doesNotMatch(text(get('archive-comparison')),/older snapshot/);
 ''')

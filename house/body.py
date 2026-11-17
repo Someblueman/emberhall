@@ -426,6 +426,9 @@ def replay(events: list, context: dict) -> list:
     hearth = context.setdefault("hearth", [])
     frames = []
     start = context["replayed"]
+    # Creation events give public identity without exposing private lesson IDs.
+    lesson_sequences = {event["data"]["lesson"]: seq
+                        for seq, event in enumerate(events, 1) if event["op"] == "learn"}
     for seq, event in enumerate(events[start:], start + 1):
         at, actor, op, data = event["at"], event["actor"], event["op"], event["data"]
         for task_id, task in (state["tasks"].items() if state else []):
@@ -619,10 +622,11 @@ def replay(events: list, context: dict) -> list:
             # The latest things residents said at the hearth (the coordinator's own notes are left out).
             "hearth": list(hearth),
             # The Archive's shelves: each lesson's claim, never its evidence text.
-            "archive": [{"key": label(lesson["key"], 100), "claim": label(lesson["claim"], 900),
+            "archive": [{"id": lesson_sequences[lesson_id],
+                         "key": label(lesson["key"], 100), "claim": label(lesson["claim"], 900),
                          "author": label(state["residents"].get(lesson["author"], {}).get("name", lesson["author"]), 100),
                          "status": label(lesson["status"], 20), "reviews": len(lesson["reviews"])}
-                        for lesson in state["lessons"].values()],
+                        for lesson_id, lesson in state["lessons"].items()],
             "council": {"pending": sum(p["status"] == "pending" for p in state["proposals"].values()) +
                                      sum(p.get("status") == "pending" for p in proposals.values()),
                         "enacted": sum(p["status"] in {"ratified", "enacted"} for p in state["proposals"].values()) +
