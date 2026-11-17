@@ -53,12 +53,24 @@ assert.match(text(root),/current published versions/);
  assert.match(preview.alt,/Blue quarter-circle arcs/);
  assert.equal(preview.width,preview.height);
  assert.equal(manifest.projects.find(p=>p.id==='tessera-loom').files.includes(preview.src),true);
+ const shown=all(root).filter(n=>n.tag==='img');
+ assert.equal(shown.map(n=>n.src).join('|'),
+  'projects/tessera-loom/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg',
+  'Every listed real-output preview shows in the present view');
+ for(const image of shown){
+  assert.match(image.alt,/.{40,}/,'Previews carry real alternative text');
+  assert.ok(image.width>0&&image.height>0,'Previews declare their dimensions');
+  const owner=manifest.projects.find(p=>p.files.includes(image.src));
+  assert.ok(owner,'Every shown preview is listed in the public manifest');
+ }
  catalog=[{...creation,id:'tessera-loom',files:['https://evil.test/gallery-preview.svg']}];
  frame={shelf:{projects:[{idea:'tessera-loom',status:'done'}]}};renderCollection();
  assert.equal(all(root).filter(n=>n.tag==='img').length,0,'Never request an unlisted preview');
  catalog=manifest.projects;current=false;
  frame={shelf:{projects:manifest.projects.filter(p=>p.id!=='tessera-loom').map(p=>({idea:p.id,status:'done'}))}};
  renderCollection();assert.equal(all(root).filter(n=>n.tag==='img').length,0,'No future output in historical views');
+ frame={shelf:{projects:manifest.projects.map(p=>({idea:p.id,status:'done'}))}};
+ renderCollection();assert.equal(all(root).filter(n=>n.tag==='img').length,0,'Even completed creations show no present-day preview in a historical view');
  current=true;
  frame={shelf:{projects:manifest.projects.map(p=>({idea:p.id,status:'done'}))}};renderCollection();
  const sow=manifest.projects.find(p=>p.id==='sow-ledger');
@@ -80,3 +92,12 @@ assert.match(text(root),/current published versions/);
             ['node', '-e', 'const m=require("./projects/tessera-loom/loom.js"); process.stdout.write(m.svg(m.initial(),4));'],
             cwd=root, capture_output=True, timeout=15, check=True)
         self.assertEqual((root / 'projects/tessera-loom/gallery-preview.svg').read_bytes(), result.stdout)
+
+    def test_shadow_and_signal_previews_are_model_generated(self):
+        root = Path(__file__).parents[1]
+        for project in ('shadow-theatre', 'signal-garden'):
+            with self.subTest(project=project):
+                result = subprocess.run(
+                    ['node', '-e', f'process.stdout.write(require("./projects/{project}/make-gallery-preview.js").svg());'],
+                    cwd=root, capture_output=True, timeout=15, check=True)
+                self.assertEqual((root / f'projects/{project}/gallery-preview.svg').read_bytes(), result.stdout)

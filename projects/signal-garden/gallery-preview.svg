@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img">
+<title>Signal Garden triptych: the opening 4 by 4 tile, the same tile after a four-bit burst sent in a row with 2 pixels wrong ringed in red, and the tile recovered whole when the bits are woven.</title>
+<rect width="1200" height="560" fill="#f7f1df"/>
+<rect x="80" y="90" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="152" y="90" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="224" y="90" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="296" y="90" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="80" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="152" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="224" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="296" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="80" y="234" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="152" y="234" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="224" y="234" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="296" y="234" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="80" y="306" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="152" y="306" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="224" y="306" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="296" y="306" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<text x="220" y="424" text-anchor="middle" font-family="Georgia, serif" font-size="24" letter-spacing="2" fill="#22301f">ORIGINAL</text>
+<text x="220" y="456" text-anchor="middle" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#6b6242">the opening tile</text>
+<rect x="460" y="90" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="464" y="94" width="56" height="56" rx="4" fill="none" stroke="#c0392b" stroke-width="5"/>
+<rect x="532" y="90" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="536" y="94" width="56" height="56" rx="4" fill="none" stroke="#c0392b" stroke-width="5"/>
+<rect x="604" y="90" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="676" y="90" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="460" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="532" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="604" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="676" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="460" y="234" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="532" y="234" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="604" y="234" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="676" y="234" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="460" y="306" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="532" y="306" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="604" y="306" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="676" y="306" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<text x="600" y="424" text-anchor="middle" font-family="Georgia, serif" font-size="24" letter-spacing="2" fill="#22301f">SENT IN A ROW</text>
+<text x="600" y="456" text-anchor="middle" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#6b6242">2 pixels wrong</text>
+<rect x="840" y="90" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="912" y="90" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="984" y="90" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="1056" y="90" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="840" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="912" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="984" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="1056" y="162" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="840" y="234" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="912" y="234" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="984" y="234" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="1056" y="234" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="840" y="306" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="912" y="306" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="984" y="306" width="64" height="64" rx="6" fill="#22301f" stroke="#cbbf9d" stroke-width="2"/>
+<rect x="1056" y="306" width="64" height="64" rx="6" fill="#fffdf4" stroke="#cbbf9d" stroke-width="2"/>
+<text x="980" y="424" text-anchor="middle" font-family="Georgia, serif" font-size="24" letter-spacing="2" fill="#22301f">WOVEN BETWEEN ROWS</text>
+<text x="980" y="456" text-anchor="middle" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#6b6242">recovered whole</text>
+<text x="80" y="500" font-family="Georgia, serif" font-size="19" font-style="italic" fill="#6b6242">the same four flipped bits in both sendings (positions 2 to 5 of 28)</text>
+<rect x="80.0" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="117.1" y="514" width="29.1" height="22" rx="4" fill="#c0392b"/>
+<rect x="154.3" y="514" width="29.1" height="22" rx="4" fill="#c0392b"/>
+<rect x="191.4" y="514" width="29.1" height="22" rx="4" fill="#c0392b"/>
+<rect x="228.6" y="514" width="29.1" height="22" rx="4" fill="#c0392b"/>
+<rect x="265.7" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="302.9" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="340.0" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="377.1" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="414.3" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="451.4" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="488.6" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="525.7" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="562.9" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="600.0" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="637.1" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="674.3" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="711.4" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="748.6" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="785.7" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="822.9" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="860.0" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="897.1" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="934.3" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="971.4" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="1008.6" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="1045.7" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+<rect x="1082.9" y="514" width="29.1" height="22" rx="4" fill="#d8cfb4"/>
+</svg>

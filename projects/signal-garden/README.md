@@ -34,6 +34,12 @@ There is no overall parity bit or double-error classification. Displayed injecte
 error counts and “matches original” verdicts use simulator knowledge unavailable
 to a real receiver. `model.js` is a teaching implementation, not a production codec.
 
+`make-gallery-preview.js` draws the Gallery card picture (`gallery-preview.svg`)
+by running `model.js` on the opening tile from `garden.js` under one four-bit
+burst: original, damaged consecutive recovery, whole interleaved recovery.
+Regenerate with `node make-gallery-preview.js` in this directory; the committed
+SVG must match byte for byte.
+
 ## Checks and browser evidence
 
 Run from the repository root with Node's built-in test runner:

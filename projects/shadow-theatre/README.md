@@ -16,6 +16,7 @@ An offline, dependency-free SVG puzzle exhibit implementing a finite-screen 2D p
 - `scene-core.js`: the whole model — projection, interval union, target matching, challenge validation, import/export boundary. No DOM access, so `node` runs the same bytes the page runs.
 - `app.js`: DOM glue only. It renders the view that `scene-core.js` derives and calls the tested import/export functions.
 - `shadow_model.py`: an independent Python mirror kept for the older model tests. **The browser does not run it.** If the two ever disagree, `scene-core.js` is what visitors see.
+- `make-gallery-preview.js` and `gallery-preview.svg`: the Gallery card picture. The generator renders the shipped Clipped Horizon challenge using `scene-core.js` itself, so the picture is the model's real computed stage. Regenerate with `node make-gallery-preview.js` in this directory; the committed SVG must match byte for byte.
 
 ## Import / Export Contract
 
