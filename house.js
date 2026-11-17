@@ -2735,6 +2735,7 @@ function renderRecentWork(items, parent, residentName, heading, none) {
 }
 function renderShelfProject(project, statusLabel, parent, residentName) {
   const item = html("article", "shelf-item", undefined, parent);
+  item.setAttribute?.("data-find", workshopSearchText([titleFor(project,"project"),project.plain||""].filter(Boolean).join(" ")));
   html("strong", "", titleFor(project, "project"), item);
   const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
   html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
@@ -2810,6 +2811,7 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
 }
 function renderShelfIdea(idea, group, greatMode, residentName) {
   const item = html("details", "shelf-item shelf-idea", undefined, group);
+  item.setAttribute?.("data-find", workshopSearchText([titleFor(idea,"idea"),idea.plain||"",idea.what||""].filter(Boolean).join(" ")));
   const summary = html("summary", "", undefined, item);
   html("span", "shelf-idea-title", titleFor(idea, "idea"), summary);
   const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
@@ -2867,6 +2869,7 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
   }
   return item;
 }
+let projectsFindState={query:""};
 function shelf() {
   const box = $("shelf");
   if (!box) return;
@@ -2920,6 +2923,32 @@ function shelf() {
     html("p", "empty-note", "No ideas or projects have been shelved at this moment.", box);
     rules();
     return;
+  }
+  const findControls=html("div","projects-find-controls",undefined,box);
+  const findLabel=html("label","small","Find a project or idea",findControls);
+  findLabel.setAttribute?.("for","projects-find-search");
+  const findSearch=html("input","",undefined,findLabel);
+  findSearch.id="projects-find-search";findSearch.type="search";findSearch.placeholder="Title or description";
+  findSearch.value=projectsFindState.query;findSearch.setAttribute?.("aria-describedby","projects-find-status");
+  const findReset=html("button","quiet-button","Show everything",findControls);
+  findReset.id="projects-find-reset";findReset.type="button";
+  const findStatus=html("p","small",undefined,box);findStatus.id="projects-find-status";
+  findStatus.setAttribute?.("role","status");
+  const findEmpty=html("p","empty-note","Nothing matches. Try another word or choose Show everything.",box);
+  findSearch.addEventListener?.("input",()=>{projectsFindState.query=findSearch.value;applyProjectsFind(box);});
+  findReset.addEventListener?.("click",()=>{projectsFindState.query="";findSearch.value="";applyProjectsFind(box);findSearch.focus?.({preventScroll:true});});
+  function applyProjectsFind(host) {
+    const query=workshopSearchText(projectsFindState.query);
+    const items=[...(host.querySelectorAll?.(".shelf-motion .shelf-item, .shelf-next .shelf-idea")||[])].filter(node=>typeof node.getAttribute?.("data-find")==="string");
+    let matches=0;
+    for(const item of items) {
+      const show=!query||item.getAttribute("data-find").includes(query);
+      item.classList?.toggle?.("projects-find-hidden",!show);
+      if(show)matches++;
+    }
+    findControls.classList?.toggle?.("projects-find-hidden",items.length===0);
+    findStatus.textContent=query?`${matches} of ${items.length} projects and ideas match`:`Showing all ${items.length} projects and ideas.`;
+    findEmpty.classList?.toggle?.("projects-find-hidden",!(items.length&&matches===0));
   }
   // 1. In motion: what is being built now.
   if(activeProjects.length) {
@@ -3035,6 +3064,7 @@ function shelf() {
       completedProjects.forEach(project=>renderShelfProject(project,"Finished",completed,residentName));
     }
   }
+  applyProjectsFind(box);
   rules();
 }
 function councilNowSec() {
@@ -3650,8 +3680,8 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-"))?activeId:null;
-  const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"?activeId:null;
+  const focusId=activeId&&(activeId.startsWith("beds-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
+  const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"||activeId==="projects-find-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
