@@ -1012,6 +1012,7 @@ function renderWorkshopTasks(content) {
   // Detail precedes the bounded board, so a selection is useful even on a phone.
   const detail=html("div","workshop-detail",undefined,box);detail.id="workshop-detail";detail.tabIndex=-1;
   detail.setAttribute("role","region");detail.setAttribute("aria-label","Selected task history");
+  renderChronicleReturn(detail);
   const chosen=tasks.find(t=>t.id===workshopState.selectedId);
   if(chosen) {
     html("h3","",chosen.title||"Untitled task",detail);
@@ -2068,7 +2069,24 @@ function renderSalvageRoom(content) {
 }
 
 let chronicleState={room:"all",order:"newest",page:0,opened:new Set()};
+let chronicleWorkTrail=null;
 const CHRONICLE_PAGE_SIZE=5;
+function renderChronicleReturn(detail) {
+  const trail=chronicleWorkTrail;
+  if(!trail||trail.task!==workshopState.selectedId)return;
+  const sourceIndex=data.frames.findIndex(moment=>moment.seq===trail.sequence);
+  const room=data.frames[sourceIndex]?.rooms?.find(room=>room.id==="chronicle"&&roomStatus(room)==="open");
+  if(!room){html("p","small","The room story's original moment is absent from this publication.",detail);return;}
+  const back=workshopButton(detail,"Back to the room’s story",()=>{
+    index=sourceIndex;frame=data.frames[index];
+    current=trail.current&&index===data.frames.length-1;
+    chronicleState={...trail.state,opened:new Set(trail.state.opened)};
+    selectedFloor=room.floor??0;choose("chronicle");
+    // Update the clock and other views as well as the room card.
+    render();workshopFocus(trail.target,true);
+  });
+  back.id="workshop-room-story";
+}
 function renderChronicleRoom(content) {
   const panel=html("section","chronicle-reader",undefined,content);
   html("h3","","How the house grew",panel);
@@ -2078,6 +2096,8 @@ function renderChronicleRoom(content) {
     .filter(event=>verbs[event.kind]&&Number.isInteger(event.sequence)&&event.sequence>0&&event.sequence<=frame.seq)
     .map(event=>({...event,roomId:room.id,roomName:event.name||room.name})))
     .sort((a,b)=>a.sequence-b.sequence||a.roomId.localeCompare(b.roomId));
+  const tasks=workshopTasks(data.frames,frame,observationTime());
+  const workshop=frame.rooms.find(room=>room.id==="workshop"&&roomStatus(room)==="open");
   const controls=html("div","counting-controls",undefined,panel);
   const roomLabel=html("label","small","Room",controls);
   const filter=html("select","",undefined,roomLabel);filter.id="chronicle-room";
@@ -2113,6 +2133,23 @@ function renderChronicleRoom(content) {
       html("h4","",`${verbs[event.kind]} · ${event.roomName}`,entry);
       html("p","small",`Event ${event.sequence}${Number.isFinite(event.at)&&event.at>0?` · ${clock(event.at,{year:"numeric"})}`:" · date unrecorded"}${event.actor?` · ${residentName(event.actor)}`:""}`,entry);
       if(event.purpose)html("p","",event.purpose,entry);
+      if(event.task) {
+        const task=tasks.find(task=>task.id===event.task);
+        if(task) {
+          html("p","small",`Building work: ${task.title||"Untitled task"}`,entry);
+          html("p","small",`${workshopStatus(task)}. State at this viewed moment, not necessarily at the room change.`,entry);
+          if(workshop) {
+            const follow=workshopButton(entry,"Follow the building work →",()=>{
+              chronicleWorkTrail={task:task.id,sequence:frame.seq,current,target:follow.id,
+                state:{...chronicleState,opened:new Set(chronicleState.opened)}};
+              workshopState.selectedId=task.id;
+              selectedFloor=workshop.floor??0;choose("workshop");workshopFocus("workshop-detail",true);
+            },"quiet-button");
+            follow.id=`chronicle-work-${encodeURIComponent(event.roomId)}-${event.sequence}`;
+            follow.setAttribute("aria-label",`Follow building work for ${event.roomName}: ${task.title||"Untitled task"}`);
+          } else html("p","small","The Workshop is not open at this moment; its work cannot be visited here.",entry);
+        } else html("p","small","The building task is named in this change, but its details are absent from this published moment.",entry);
+      } else html("p","small","No building task was recorded on this change.",entry);
       if(event.reason) {
         const reason=html("details","record-details",undefined,entry);
         const key=`${encodeURIComponent(event.roomId)}-${event.sequence}`;
