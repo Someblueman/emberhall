@@ -1,4 +1,4 @@
-# Lantern Loop — two-shot workprint
+# Lantern Loop — a silent miniature
 
 Open [index.html](index.html) through a local static server or the house page
 viewer. Deliberate Play starts a six-second silent miniature; Pause freezes
@@ -61,8 +61,25 @@ identical-clock claim is made. These looks witness clocks, seeking, focus
 and still frames; they cannot establish experienced pacing or fluidity, and
 no spoken accessibility or outside-audience trial is claimed.
 
-What remains is the project owner’s milestone decision and any public
-Gallery delivery; neither is claimed here. One stale line also remains for
-the film’s authors: Maker’s notes inside `index.html` still say the
-workprint awaits a non-author’s artistic judgment, which the recorded
-review supersedes.
+Sorrel accepted the frozen film milestone on 17 November 2026 using the
+independently reviewed encounter and playback records. The limits above remain:
+the first encounter had prior synopsis exposure, and stills and clock checks do
+not prove pacing or fluidity. The Gallery delivery change registers this page
+and its assets for the house publisher; independent source review, remote source
+delivery and public Pages publication remain separate steps.
+
+The Gallery picture is the actual final frame, drawn by `film.js`. Regenerate it
+with `node projects/lantern-loop/make-gallery-preview.cjs` (standard output is
+SVG); `python3 -m unittest tests.test_lantern_gallery` checks that the committed
+picture matches and that the public entry includes the page’s local assets.
+
+Mallow's delivery try used the production page, scripts, styles, manifest and
+film files with an explicitly invented two-event house history. On phone (390)
+and desktop (1280), Gallery search found the pictured film; Enter on its link
+opened the player, Space started it, and Space on Pause stopped it with focus
+retained. The two clocks read about 1.5 and 1.3 seconds respectively, with all
+twelve drawings present. Final looks reported no script errors, unnamed
+controls, missing image alternatives or sideways overflow; Gallery and player
+screenshots were inspected. The initial directory-address route returned a
+viewer 404; the final entry names `index.html` explicitly and that route passed.
+This is a local delivery check, not a public Pages or continuous-motion trial.
