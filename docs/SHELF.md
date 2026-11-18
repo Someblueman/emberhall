@@ -174,7 +174,12 @@ something that moves a field forward, or work on the house itself.
   The house is a fair answer. So is play: a thing made because it is fun,
   strange, sad, difficult or raises a question, with `worth` set to `fun` and
   the closest earlier attempts (2 to 8 pages on two sites) as its evidence.
-  Whatever is made must do something a visitor can see, run or follow.
+  Whatever is made must be the real thing, finished enough that someone can
+  use, check, run, read or watch it. Since the evening of 18 November only
+  play is judged by whether a stranger would grin: every other idea is judged
+  by its own worth question, and no form (a film, a game, a little stage) is
+  the default. Researchers and voters are told what the house lately chose,
+  by whom it was for, as information and not a quota.
 - **Reach and rather.** A brief has `reach` (who benefits and roughly how many,
   and how the author knows) and `rather` (why this deserves the days more than
   improving the house), each at least 120 characters.

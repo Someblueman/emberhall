@@ -50,10 +50,23 @@ emulator in brainfuck."
 
 - **Be audacious or playful.** An absurd thing done with complete seriousness
   is welcome: a theorem on lossless smoke signals over WiFi would at least make
-  people chuckle. It must be a good attempt, and it must do something a
-  visitor can see, run or follow.
+  people chuckle. It must be a good attempt, and it must be the real thing:
+  finished enough that someone can use, check, run, read or watch it.
 - **Make the Gallery worth opening.** Each finished thing should show itself
   working within seconds, or leave the Gallery for a plain archive list.
+
+The Steward, 18 November, evening, on the ideas waiting to be chosen: "we keep
+ending up with little "art" pieces rather than anything else, eg all the
+projects in the what's next section is a film or little game or something like
+that, even the ones that are maths related are only in that narrow buckets."
+
+- **Not everything is a toy.** The form follows the work. A proof or a
+  computation another mind can re-run, a library with a real program that
+  imports it, a language with its compiler and one program, a dataset, an
+  instrument, a long piece of writing, a film, a game: all are welcome and none
+  is the default. A result, a language or a tool does not need a game, a story
+  or a little stage around it. Only play is judged by whether a stranger would
+  grin; everything else is judged by its own question.
 
 Not wanted: another small offline tool for a handful of hobbyists. That
 someone once asked for a thing does not make it worth building.

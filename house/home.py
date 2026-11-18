@@ -175,6 +175,44 @@ def field_mix(state: dict, last: int = 20) -> str:
     return text
 
 
+# The Steward, 18 November, evening: every waiting idea was a film or a little game, the mathematics included.
+# Until then every idea was asked whether a stranger would grin and told it must do something a visitor can see.
+NOT_A_TOY = (
+    "NOT EVERYTHING IS A TOY (the Steward, 18 November, evening, on the ideas waiting to be chosen): 'we keep "
+    "ending up with little \"art\" pieces rather than anything else, eg all the projects in the what's next "
+    "section is a film or little game or something like that, even the ones that are maths related are only "
+    "in that narrow buckets'. What happened: every idea was asked whether a stranger would grin or want to run it, and "
+    "told it must do something a visitor can see. So a play idea won all four votes in which it met an idea "
+    "for a field, seven of the nine choices since 17 November went to play, and the mathematics arrived "
+    "dressed as puzzles for a visitor. The grin is the test for play only. The form follows the work: a proof "
+    "or a computation another mind can re-run, a library with a real program that imports it, a language "
+    "with its compiler and one program, a dataset, an instrument, a long piece of writing, a film, a game. "
+    "All of these are welcome and none is the default. Do not wrap a result, a language or a tool in a game, "
+    "a story or a little stage to make it likeable; if you wrote such a brief, rewrite it as the plain thing "
+    "(idea-brief). When you vote, judge each idea by its own worth question and by how much it would matter "
+    "if it worked. This is not a quota and play is still welcome.\n")
+
+
+def chosen_mix(state: dict, last: int = 9) -> str:
+    """Tell a researcher or voter what the house has lately chosen to build, by whom it was for."""
+    from . import shelf as shelf_model
+    if shelf_model.higher_since(state) is None:
+        return ""
+    shelf = state.get("shelf", {})
+    ideas = shelf.get("ideas", {})
+    won = [(ideas.get(choice.get("winner")) or {}).get("brief", {}).get("for")
+           for choice in sorted(shelf.get("choices", {}).values(), key=lambda item: item.get("closed_sequence") or 0)
+           if choice.get("status") == "closed" and choice.get("winner")]
+    won = [whom for whom in won if whom in shelf_model.BRIEF_FOR][-last:]
+    if not won:
+        return ""
+    seen = ", ".join(f"{whom} {won.count(whom)}" for whom in sorted(set(won), key=lambda whom: -won.count(whom)))
+    missing = ", ".join(whom for whom in shelf_model.BRIEF_FOR if whom not in won)
+    return (f"For your information, the last {len(won)} projects the house chose were for: {seen}"
+            + (f"; none were for {missing}" if missing else "")
+            + ". This is not a quota. It is what a stranger opening the Gallery will find a lot of, and little of. ")
+
+
 # Second looks (Steward, 17 November, evening): after the momentum migration every fifth house run
 # is given to checks nobody was asking for. Whoever the rotation wakes takes it.
 CHECKS_FOCUS = "checks"
@@ -224,7 +262,8 @@ HIGHER_GUIDE = (
     "outside, for a field, for the house itself, or for play: made because it is fun, strange, sad, difficult "
     "or raises a question. It is judged by one plain question, chosen in advance: is it useful, is it "
     "beautiful, does it let someone do or answer something they could not yesterday, or is it fun (would a "
-    "stranger grin, stare or argue). "
+    "stranger grin, stare or argue). The grin is the test for fun only: a result, a library or a language "
+    "is not judged by whether it amuses. "
     "A brief has field, worth (useful, beautiful, enabling or fun), for (people, house, field or play) and "
     "seven parts of at least 120 characters of plain prose each: benefit (what changes, and for whom, if this "
     "exists; for play, what a stranger would feel or wonder on meeting it), interest (what your reading "
@@ -233,8 +272,10 @@ HIGHER_GUIDE = (
     "would tell someone), rather (why this deserves days of the house's work more than spending those days "
     "improving the house itself), exists (the closest existing things you actually opened and read, what "
     "each does and where it stops), first_version (the smallest version that already answers the worth "
-    "question; it must do something a visitor can see, run or follow, never a static page that only "
-    "describes) and check (how a resident who did not build it will answer the worth question from the "
+    "question; it must be the real thing in small, such as a first result with the computation that "
+    "another mind can re-run, a library with one real program that imports it, a language that runs one "
+    "program, a scene someone can watch or play, and never a page that only describes; say what form the "
+    "finished work takes, and do not dress a result, a language or a tool as a game or a story) and check (how a resident who did not build it will answer the worth question from the "
     "finished thing, and what answer would mean drop it). The brief also has asked: entries of {who, where, "
     "said}, with at least 40 characters quoted in said. What they are depends on for. For people: 4 to 8 "
     "real people outside Emberhall who asked for this, complained it is missing or do it the hard way, on at "
@@ -285,11 +326,15 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "results another mind can check; a programming language with an idea of its own; a library "
                  "someone would actually import; an absurd thing done with complete seriousness; something "
                  "that moves a field forward; or the house itself. A brief may now be for play and judged by "
-                 "whether it is fun. Two tests for any idea: would a stranger grin, stare, argue or want to "
-                 "run it; and is it a good attempt, with depth and craft, at the thing it claims to be? "
+                 "whether it is fun. Two tests for any idea: does it answer its own worth question (a useful "
+                 "thing gets used, a result holds and another mind can check it, a language runs a program "
+                 "better written in it, a beautiful thing is looked at twice, a fun thing makes a stranger "
+                 "grin); and is it a good attempt, with depth and craft, at the thing it claims to be? "
                  "What the Steward does not want is the timid middle: a small careful offline utility, a "
                  "static page that describes instead of doing, 'make a deck you can carry as a plain JSON "
-                 "file'. Whatever you make must do something a visitor can see, run or follow.\n"
+                 "file'. Whatever you make must be the real thing, finished enough that someone can use, "
+                 "check, run, read or watch it.\n"
+                 + NOT_A_TOY +
                  "THE BAR: a brief now says whom the work is for (people, house, field or play), its reach and why it "
                  "deserves the days rather than house work, with evidence that fits (shape below). Three "
                  "residents of at least two kinds of mind must each open that evidence and keep the idea; one "
@@ -376,7 +421,9 @@ def asked_prompt(state: dict, resident: str) -> str:
                          f'shelf {{"kind":"choice-vote","choice":"{key}","idea":ID,"reason":...}} with one of the '
                          "ids above, or idea null for none of these"
                          + (" (with one idea, the id is yes and null is no)" if len(choice["candidates"]) == 1 else "")
-                         + ". Judge by the two tests above and say why in the reason. A vote is one journal "
+                         + ". Judge by the two tests above: each idea by its own worth question and by how much "
+                         "it would matter if it worked, not by which you would most like to play with. "
+                         + chosen_mix(state) + "Say why in the reason. A vote is one journal "
                          "entry: no task, no help request, no waiting for others. If the house answers that "
                          "the choice is not open, it closed while you read; carry on with your run.\n")
     owned, briefable, checkable = [], [], []
@@ -1076,9 +1123,10 @@ class Coordinator:
                         >= shelf_model.SHELF_CEILING else "") if which == "house" else
                        f"Bring {'a great' if which == 'great' else 'a small'} idea (scale \"{which}\"): "
                        + ("weeks of work in stages. " if which == "great" else
-                          "something one or two residents can finish in days and a visitor can see, run or follow. "))
+                          "something one or two residents can finish in days and someone can use, check, run, "
+                          "read or watch. "))
                     for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
-                field_mix(state) +
+                field_mix(state) + chosen_mix(state) +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
                 "After waking, read the current shelf, its graveyard (so you do not bring back what already "
                 "failed) and the active rules. Before research use shelf explore-start with current expect "

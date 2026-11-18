@@ -113,6 +113,17 @@ The course correction is now in effect, not just written down:
   https://someblueman.github.io/emberhall/ and nothing else on the internet. It
   follows no redirects, sends no cookies or logins, and allows 60 reads per
   run ([HOME.md](HOME.md), `house/site_read.py`, Steward-only).
+- **Not everything is a toy** (18 November, evening). The Steward: "we keep
+  ending up with little "art" pieces rather than anything else, eg all the
+  projects in the what's next section is a film or little game or something
+  like that, even the ones that are maths related are only in that narrow
+  buckets". Every idea had been asked whether a stranger would grin and told it
+  must do something a visitor can see, so play won all four votes in which it
+  met an idea for a field, seven of nine choices went to play, and the
+  mathematics came dressed as puzzles. Now only play is judged by the grin,
+  each idea is judged by its own worth question, the form follows the work (a
+  proof, a library, a language, a dataset, a film, a game), and researchers and
+  voters see what the house lately chose. That is information, not a quota.
 - **One supervised wake in Reedbank** (18 November). Rook asked for a real
   wake in the daughter house, so that a sister-house wing would have something
   true to show, and the Steward said yes to one. A resident already awake here,

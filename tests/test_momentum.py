@@ -6,6 +6,7 @@ a while, if so maybe we can have an Astra resident drive the research for a bit.
 """
 import pathlib
 import unittest
+from pathlib import Path
 
 from house import course, providers, shelf, staffing
 from house.home import CHECKS_FOCUS, HOME_FOCUS, asked_prompt, choose_provider
@@ -127,6 +128,33 @@ class MomentumTests(unittest.TestCase):
         self.assertIn("the last 4 ideas brought here were: art 3, mathematics 1; none were software, design, "
                       "science, language", text)
         self.assertIn("not a quota", text)
+
+    def test_researchers_and_voters_are_told_what_the_house_lately_chose(self):
+        from house.home import chosen_mix
+        state = {"maintenance": {"migrations": {}}, "shelf": {"ideas": {}, "choices": {}}}
+        self.assertEqual("", chosen_mix(state), "before the higher bar a brief does not say whom it is for")
+        state["maintenance"]["migrations"][shelf.HIGHER] = {"at": 1}
+        self.assertEqual("", chosen_mix(state), "nothing chosen yet, nothing to say")
+        whom = ["people", "play", "play", "field", "play", None]
+        state["shelf"]["ideas"] = {f"i{n}": ({"brief": {"for": value}} if value else {}) for n, value in enumerate(whom)}
+        state["shelf"]["choices"] = {
+            **{f"c{n}": {"status": "closed", "winner": f"i{n}", "closed_sequence": n} for n in range(len(whom))},
+            "open": {"status": "open", "candidates": ["i1"]}, "none": {"status": "closed", "winner": None}}
+        text = chosen_mix(state, last=4)
+        self.assertIn("the last 4 projects the house chose were for: play 3, field 1; none were for people, house", text)
+        self.assertIn("not a quota", text)
+
+    def test_only_play_is_judged_by_the_grin_and_no_form_is_the_default(self):
+        from house import home
+        source = Path(home.__file__).read_text()
+        self.assertNotIn("Two tests for any idea: would a stranger grin", source)
+        self.assertNotIn("must do something a visitor can see, run or follow", source)
+        self.assertIn("The grin is the test for fun only", home.HIGHER_GUIDE)
+        self.assertIn("do not dress a result, a language or a tool as a game or a story", home.HIGHER_GUIDE)
+        for words in ("little \"art\" pieces rather than anything else", "The grin is the test for play only",
+                      "a library with a real program that imports it", "none is the default",
+                      "This is not a quota and play is still welcome"):
+            self.assertIn(words, home.NOT_A_TOY)
 
     def test_checks_focus_is_outside_the_old_rotation(self):
         self.assertNotIn(CHECKS_FOCUS, HOME_FOCUS)
