@@ -83,9 +83,6 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
                         and model_available(state, kind, model, now) for model in providers.MODELS[kind])
                 for resident in state["residents"])]
     if exploring:
-        from . import course
-        if providers.SCOUT[0] in available and course.scout(state, now):
-            return providers.SCOUT[0]   # the Steward's Astra resident drives research while it can
         different = [kind for kind in available if kind != state.get("shelf", {}).get("last_kind")]
         available = different or available
     if preferred in available:
@@ -154,8 +151,32 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
 
 
 HOME_FOCUS = ("improve", "room", "tend", "research")
+def field_mix(state: dict, last: int = 20) -> str:
+    """Tell an Explorer the wishes are equal and what the recent rounds brought, by field."""
+    from . import shelf as shelf_model
+    if shelf_model.higher_since(state) is None:
+        return ""
+    ideas = sorted(state.get("shelf", {}).get("ideas", {}).values(),
+                   key=lambda idea: idea.get("shelved_sequence") or 0)
+    fields = [field for field in ((idea.get("brief") or {}).get("field") for idea in ideas)
+              if field in shelf_model.HIGHER_FIELDS][-last:]
+    text = ("THE WISHES ARE EQUAL (Steward, 18 November): 'they should have equal weight, my prompts were just "
+            "suggestions and not do this first.' Art, mathematics, a programming language, another field, "
+            "software and the house itself are examples in no order. None is preferred and art is not first. ")
+    if fields:
+        counts = {field: fields.count(field) for field in shelf_model.HIGHER_FIELDS}
+        seen = ", ".join(f"{field} {count}" for field, count in sorted(counts.items(), key=lambda item: -item[1])
+                         if count)
+        missing = ", ".join(field for field, count in counts.items() if not count)
+        text += (f"For your information, the last {len(fields)} ideas brought here were: {seen}"
+                 + (f"; none were {missing}" if missing else "")
+                 + ". This is not a quota: bring the best idea you find, and look as hard in the fields "
+                   "nobody has searched lately as in the ones everybody has. ")
+    return text
+
+
 # Second looks (Steward, 17 November, evening): after the momentum migration every fifth house run
-# is given to checks nobody was asking for, and goes to the Astra scout when it is free.
+# is given to checks nobody was asking for. Whoever the rotation wakes takes it.
 CHECKS_FOCUS = "checks"
 # What a research brief must say; the reducer (house/shelf.py) checks the four parts exist.
 BRIEF_GUIDE = (
@@ -259,7 +280,8 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "attempt at inventing time travel or a new language or a terminal emulator in brainfuck, but "
                  "our current stack of projects just seem sad and irrelevant, they're not even good attempts.' "
                  "A theorem on lossless smoke signals over WiFi would at least make people chuckle. So: be "
-                 "audacious, playful or deep. Art made because it is beautiful or strange; mathematics with "
+                 "audacious, playful or deep. The examples that follow are in no order and weigh the same "
+                 "(the Steward, 18 November: 'my prompts were just suggestions and not do this first'). Art made because it is beautiful or strange; mathematics with "
                  "results another mind can check; a programming language with an idea of its own; a library "
                  "someone would actually import; an absurd thing done with complete seriousness; something "
                  "that moves a field forward; or the house itself. A brief may now be for play and judged by "
@@ -987,14 +1009,7 @@ class Coordinator:
                     + ("weeks of work in stages. " if which == "great" else
                        "something one or two residents can finish in days and a visitor can see, run or follow. ")
                     for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
-                ("YOU ARE THE HOUSE'S SCOUT: the Steward asked that one resident on this route drive research "
-                 "for a while and take the house's second looks. You build nothing and own no project. Be bold "
-                 "in what you bring back: the Steward wants audacious, playful or deep ideas and is tired of "
-                 "cautious ones, so do not talk yourself out of a strange idea because it is strange. When your "
-                 "round is published, or if research is closed when you arrive, spend what is left of the run "
-                 "on second looks: check shelf ideas you did not write (idea-second, above) and the lessons "
-                 "listed for you, then sleep. "
-                 if assigned.get("model") == providers.SCOUT[1] and staffing.momentum(state) else "") +
+                field_mix(state) +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
                 "After waking, read the current shelf, its graveyard (so you do not bring back what already "
                 "failed) and the active rules. Before research use shelf explore-start with current expect "
@@ -1013,7 +1028,8 @@ class Coordinator:
                    "sentence. why is never merely that Emberhall lacks such a thing: the house does not need "
                    "one of everything. An idea that has not passed its checks leaves the shelf after six hours. "
                    + ("Read A HIGHER BAR below before you choose what to research: aim at art, mathematics, a "
-                      "programming language, a field, or the house itself, not another small tool. "
+                      "programming language, a field, or the house itself (in no order), not another small "
+                      "tool. "
                       if shelf_model.higher_since(state) is not None else "")
                    if shelf_model.shared_since(state) is not None else
                    "Bring back 2 to 4 meaningfully different ideas. Each idea has title, what, why, first_step, "
@@ -1126,10 +1142,6 @@ class Coordinator:
             model = course.route(state, kind, at=max(time.time(), state["at"]),
                                  strong=explore_generation is not None
                                  or course.great_project(state, bound) is not None)
-            if ((explore_generation is not None or focus == CHECKS_FOCUS) and help_id is None
-                    and task_id is None and kind == providers.SCOUT[0]
-                    and course.scout(state, max(time.time(), state["at"]))):
-                model = providers.SCOUT[1]
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         authors = set()
@@ -1476,9 +1488,6 @@ class Coordinator:
                                        reviewing="review_run" in request[1], ballot_task=ballot_task)
                 if kind is None:
                     break
-                from . import course
-                if focus == CHECKS_FOCUS and course.scout(state, at):
-                    kind = providers.SCOUT[0]
                 run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True,
                                  focus=focus, **task_args)
                 if focus:

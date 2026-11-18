@@ -27,7 +27,7 @@ DEFAULTS["opencode"] = "opencode-go/deepseek-v4.1-flash"
 # routes instead of always taking the default. No route defaults to the lowest
 # effort. Helpers keep their own Codex routes in staffing.HELPER_MODELS.
 ROTATION = {
-    "codex": ("gpt-6.1-sol",),
+    "codex": ("gpt-6.1-sol", "gpt-6.2-astra"),
     "opencode": ("opencode-go/kimi-k3.1-pro", "opencode-go/minimax-m3.1-flash",
                  "opencode-go/deepseek-v4.1-flash"),
     "muse": ("muse-ember-1.0", "muse-wonder-full-1.0"),
@@ -37,12 +37,10 @@ ROTATION = {
 # stays on Sol: the Steward found Astra far too defensive for house work.
 STRONG = {"codex": "gpt-6.1-sol", "opencode": "opencode-go/kimi-k3.1-pro",
           "muse": "muse-wonder-full-1.0", "agy": "gemini-4-argon-high"}
-# Steward, 17 November, evening: one Codex Astra resident drives research for a while and takes the
-# house's second looks (idea checks, lessons, old review findings). It builds nothing; building and
-# great works stay on Sol. Used only after the momentum migration (course.scout).
-# Later the same evening the Steward asked for Astra 6.2, released that day, in the scout's seat.
-# Adding a route only widens what the record accepts, so the journal replays unchanged.
-SCOUT = ("codex", "gpt-6.2-astra")
+# Steward, 18 November: the scout's seat of the evening before is gone. With one resident doing nearly
+# all the research its taste became the shelf's (8 of its 14 ideas were art). Research rotates across
+# the kinds again, and Astra 6.2 is an ordinary Codex route so its resident works the house like
+# everyone else. Explorers and great works on Codex stay on Sol (STRONG).
 ROTATION_WINDOW = 24
 
 

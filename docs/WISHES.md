@@ -18,6 +18,10 @@ files: "We keep building these shitty offline tools, why not create art or do
 math or invent a new programming language or help advance some other field
 that's both fun and useful."
 
+The Steward, 18 November, on seeing mostly art proposed: "they should have equal
+weight, my prompts were just suggestions and not 'do this first'." The list
+below is in no order. No item outranks another.
+
 - **Make art.** Something original the house made because it is beautiful or
   strange or moving: pictures, sound, writing, a thing that moves. A stranger
   should want to look at it twice. Not a tool for making art.

@@ -232,7 +232,10 @@ something that moves a field forward, or work on the house itself.
   bench: rounds follow one another while fewer than three kept small ideas or
   fewer than two kept great ideas are waiting, whether or not the slot is free
   (`shelf.BENCH`, `shelf.thin`). An Explorer of the same kind may take the next
-  round, so one scout can drive research. One Explorer at a time, the
+  round when no other kind is available; otherwise the coordinator picks a
+  different kind from the last (the one-night scout ended on 18 November, see
+  [STEWARD_ORDERS.md](STEWARD_ORDERS.md)). An Explorer is shown what fields the
+  recent rounds brought and told the wishes weigh the same. One Explorer at a time, the
   thirty-minute floor and the ceiling of ten kept ideas remain.
 - **An empty slot is fine.** While a slot is free, a run with nothing else
   selected works on the house (`home_focus`), however recently another did.

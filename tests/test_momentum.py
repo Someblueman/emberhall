@@ -96,24 +96,39 @@ class MomentumTests(unittest.TestCase):
                                              ("baseline", "regular_limit", "helper_limit", "total_limit")))
         self.assertEqual(shelf.MOMENTUM, staffing.MOMENTUM)
 
-    def test_one_astra_scout_takes_research_and_checking_runs(self):
-        state = {"at": 10.0, "maintenance": {"migrations": {staffing.SCOPE: {"at": 1}}},
+    def test_research_rotates_and_astra_is_an_ordinary_route(self):
+        # 18 November: the one-night scout is gone. The next round goes to a different kind from the last.
+        state = {"at": 10.0, "maintenance": {"migrations": {staffing.SCOPE: {"at": 1}, staffing.MOMENTUM: {"at": 2}}},
                  "life": {"runs": {}, "budgets": {}}, "shelf": {"last_kind": "codex"}, "residents": {}, "tasks": {}}
-        self.assertEqual(("codex", "gpt-6.2-astra"), providers.SCOUT)
-        providers.validate_model(*providers.SCOUT)
-        self.assertFalse(course.scout(state, 10.0))
-        self.assertNotEqual("codex", choose_provider(state, 10.0, exploring=True),
-                            "before the change another kind takes the next round")
-        state["maintenance"]["migrations"][staffing.MOMENTUM] = {"at": 2}
-        self.assertTrue(course.scout(state, 10.0))
-        self.assertEqual("codex", choose_provider(state, 10.0, exploring=True))
-        state["life"]["runs"]["r"] = {"status": "active", "agent": "codex", "model": "gpt-6.2-astra",
+        self.assertFalse(hasattr(providers, "SCOUT"))
+        self.assertFalse(hasattr(course, "scout"))
+        self.assertNotEqual("codex", choose_provider(state, 10.0, exploring=True))
+        self.assertEqual(("gpt-6.1-sol", "gpt-6.2-astra"), providers.ROTATION["codex"])
+        self.assertEqual("gpt-6.1-sol", course.route(state, "codex", at=10.0))
+        state["life"]["runs"]["r"] = {"status": "completed", "agent": "codex", "model": "gpt-6.1-sol",
                                       "resident": "s", "started_sequence": 1}
-        self.assertFalse(course.scout(state, 10.0), "one scout at a time")
-        state["life"]["runs"]["r"]["status"] = "completed"
-        state["life"]["model_budgets"] = {"codex": {"gpt-6.2-astra": {"until": 99.0}}}
-        self.assertFalse(course.scout(state, 10.0), "a resting route is passed over")
-        self.assertEqual("gpt-6.1-sol", providers.STRONG["codex"], "building stays on Sol")
+        self.assertEqual("gpt-6.2-astra", course.route(state, "codex", at=10.0), "the routes take turns")
+        self.assertEqual("gpt-6.1-sol", course.route(state, "codex", strong=True, at=10.0))
+        self.assertEqual("gpt-6.1-sol", providers.STRONG["codex"], "Explorers and great works stay on Sol")
+
+    def test_an_explorer_is_told_the_wishes_are_equal_and_what_recent_rounds_brought(self):
+        from house.home import field_mix
+        state = {"maintenance": {"migrations": {}}, "shelf": {"ideas": {}}}
+        self.assertEqual("", field_mix(state), "before the higher bar there are no such fields")
+        state["maintenance"]["migrations"][shelf.HIGHER] = {"at": 1}
+        text = field_mix(state)
+        self.assertIn("in no order", text)
+        self.assertNotIn("the last", text)
+        state["shelf"]["ideas"] = {
+            f"i{n}": {"shelved_sequence": n, "brief": {"field": field}}
+            for n, field in enumerate(["software"] + ["art"] * 3 + ["mathematics"] + [None], start=1)}
+        state["shelf"]["ideas"]["old"] = {"shelved_sequence": 0}
+        text = field_mix(state, last=4)
+        self.assertIn("the last 4 ideas brought here were: art 3, mathematics 1; none were software, design, "
+                      "science, language", text)
+        self.assertIn("not a quota", text)
+
+    def test_checks_focus_is_outside_the_old_rotation(self):
         self.assertNotIn(CHECKS_FOCUS, HOME_FOCUS)
 
     def test_every_fifth_house_run_is_given_to_second_looks(self):

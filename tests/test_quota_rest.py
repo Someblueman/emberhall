@@ -177,7 +177,8 @@ class SharingTests(unittest.TestCase):
 
     def test_if_codex_is_resting_too_nothing_is_moved(self):
         state = self.capped()
-        rest(state, "codex", providers.ROTATION["codex"][0], 9000)
+        for model in providers.ROTATION["codex"]:   # Codex rests only when every one of its routes does
+            rest(state, "codex", model, 9000)
         self.assertEqual({kind: 1.0 for kind in home.KINDS}, home.provider_shares(state, 2000))
         self.assertIn(home.choose_provider(state, 2000), {"muse", "agy"})
 
