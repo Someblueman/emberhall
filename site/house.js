@@ -1433,9 +1433,50 @@ function renderChoiceProgress(box) {
   }
   return choices.length>0;
 }
+const GROWTH_PAGE_SIZE=5;
+let growthMoment=null,growthPage=0;
+function renderGrowthPages(box,changes) {
+  const list=html("ul","growth-list",undefined,box);
+  list.id="growth-list";list.tabIndex=-1;
+  list.setAttribute("aria-label","Recorded room and project changes");
+  const lastPage=Math.ceil(changes.length/GROWTH_PAGE_SIZE)-1;
+  growthPage=Math.min(growthPage,lastPage);
+  let newer,earlier,range;
+  function draw() {
+    const start=growthPage*GROWTH_PAGE_SIZE,end=Math.min(start+GROWTH_PAGE_SIZE,changes.length);
+    list.replaceChildren();
+    for(const change of changes.slice(start,end)) {
+      const item=html("li","",undefined,list);
+      const button=workshopButton(item,`${change.verb}: ${change.title}`,()=>{
+        jumpToSequence(change.seq);
+        ($(button.id)||$("growth-list"))?.focus({preventScroll:true});
+      },"growth-event");
+      button.id=`growth-event-${change.kind}-${change.seq}-${encodeURIComponent(change.id)}`;
+      html("span","small",clock(change.at),item);
+    }
+    if(range) {
+      range.textContent=`Changes ${start+1}–${end} of ${changes.length}`;
+      newer.disabled=growthPage===0;earlier.disabled=growthPage===lastPage;
+    }
+  }
+  if(lastPage>0) {
+    const pages=html("div","workshop-pages",undefined,box);
+    const turn=delta=>{growthPage+=delta;draw();list.focus();};
+    newer=workshopButton(pages,"Newer changes",()=>turn(-1));
+    newer.id="growth-newer";
+    range=html("span","small",undefined,pages);range.setAttribute("role","status");
+    earlier=workshopButton(pages,"Earlier changes",()=>turn(1));
+    earlier.id="growth-earlier";
+    for(const button of [newer,earlier])button.setAttribute("aria-controls",list.id);
+  }
+  draw();
+}
 function renderRecentGrowth() {
   const box=$("recent-growth");
   if(!box)return;
+  const focusId=document.activeElement?.id;
+  const moment=current?"latest":frame.seq;
+  if(moment!==growthMoment){growthMoment=moment;growthPage=0;}
   box.replaceChildren();
   const endAt=current?data.observed_at:frame.at;
   const changes=recentGrowth(data.frames,index,endAt);
@@ -1454,22 +1495,16 @@ function renderRecentGrowth() {
     const link=html("a","growth-building","No selected project is active. See the shelf and council choices →",box);
     link.href="#shelf-card";
   }
-  if(!changes.length)html("p","growth-empty","No room or project milestone changed in this window. Task activity alone does not count as growth.",box);
+  if(changes.length)renderGrowthPages(box,changes);
   else {
-    const list=html("ul","growth-list",undefined,box);
-    changes.slice(0,5).forEach(change=>{
-      const item=html("li","",undefined,list);
-      const button=html("button","growth-event",`${change.verb}: ${change.title}`,item);
-      button.id=`growth-event-${change.kind}-${change.seq}-${encodeURIComponent(change.id)}`;
-      button.addEventListener("click",()=>{
-        jumpToSequence(change.seq);
-        $(button.id)?.focus?.({preventScroll:true});
-      });
-      html("span","small",clock(change.at),item);
-    });
-    if(changes.length>5)html("p","small",`Showing the latest 5 of ${changes.length} room and project changes.`,box);
+    growthPage=0;
+    html("p","growth-empty","No room or project milestone changed in this window. Task activity alone does not count as growth.",box);
   }
   const link=html("a","","Explore what we’ve made →",box);link.href="#projects-view";
+  if(focusId?.startsWith("growth-")){
+    const target=$(focusId);
+    (target && !target.disabled?target:$("growth-list")||link).focus({preventScroll:true});
+  }
 }
 function renderCatchupPanel(content) {
   const panel=html("div","catchup-panel",undefined,content);
