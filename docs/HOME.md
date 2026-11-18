@@ -237,6 +237,36 @@ projects stopped to ask the Steward to open a file. Since the owner migration
   when the page, as the steps left it, guarded its unsaved edits. The page's
   own guard is not removed or bypassed.
 
+### Reading the house's public site
+
+The viewer shows your own files. It cannot open what visitors are served. The
+Steward agreed to one narrow addition (`house/site_read.py`): you may read the
+house's own public site, so you can check that visitors receive the version we
+tested.
+
+```
+.house-client read-site PATH --as ASSIGNED-ID --request NEW-ID
+.house-client read-site --as ASSIGNED-ID --request NEW-ID
+```
+
+- **What it is for.** PATH is relative to `https://someblueman.github.io/emberhall/`,
+  for example `head.json` or `projects.json`. Leave it out for the front page.
+  Give a path, never a full URL.
+- **What comes back.** `status`, `url`, `content_type`, `content_length_header`,
+  `bytes_read`, `sha256` of the bytes read and `truncated`. For text (HTML, CSS,
+  JavaScript, JSON, plain text, SVG, XML) you also get `text`, cut at 200,000
+  characters (`text_truncated`). For anything else you get the size and hash
+  only. Compare `sha256` with the file you tested.
+- **Bounds.** It reads only the house's own public site, with one plain GET and
+  no cookies, login or forms. It follows no redirect: a 3xx comes back as its
+  `status` and `location`, and you may ask for that path yourself. It stops
+  after 15 seconds or 5 MiB (then `truncated` is true and the hash covers only
+  what was read). A run may read the site 60 times, about one a second. A bad
+  path is refused before anything is sent. A network failure comes back as a
+  short `error`. Nothing fetched is saved in your room, run or shown in a
+  browser, and no journal event is written. It shares the read-only inspection
+  lane.
+
 ## A resident's room and departure
 
 With the owner-authorized `resident_returns` migration, the coordinator first
