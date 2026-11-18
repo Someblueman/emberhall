@@ -1411,6 +1411,16 @@ footer a {
 .shelf-need-for { font-weight:600; }
 .shelf-leaving { margin-top:1.1rem; color:var(--warn); }
 .shelf-graveyard { margin-top:1.4rem; }
+.shelf-dead-note { margin:0.5rem 0 0.2rem; color:var(--muted); }
+.shelf-dead { display:block; padding:0.45rem 0; }
+.shelf-dead > summary { display:flex; flex-wrap:wrap; align-items:baseline; gap:0.15rem 0.6rem; cursor:pointer; font-weight:400; }
+.shelf-dead > summary > strong { font-weight:600; }
+.shelf-dead-how { color:var(--muted); font-size:0.85rem; white-space:nowrap; }
+.shelf-dead[open] { padding-bottom:0.8rem; }
+.shelf-dead > p, .shelf-dead-votes { margin:0.45rem 0 0 1rem; max-width:62ch; line-height:1.5; }
+.shelf-dead-plain { font-family:Georgia,serif; }
+.shelf-dead-votes > summary { cursor:pointer; color:var(--muted); }
+.shelf-dead-votes > p { margin:0.4rem 0 0; }
 .shelf-finished-link { margin:1.2rem 0 0.4rem; }
 .shelf-next ~ .shelf-policy { margin-top:1rem; color:var(--muted); font-size:0.85rem; }
 #finished .shelf-item:first-child { border-top:0; }

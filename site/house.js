@@ -3661,19 +3661,32 @@ function shelf() {
   } else {
     html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
   }
+  // The graveyard is a list to scan: one line each (title and how it ended), newest first; the reasons open on request.
+  const deadHow = idea => {
+    const last = (idea.history || [])[(idea.history || []).length - 1] || {};
+    if (last.seconded_out) return "Declined on a second look";
+    if (last.dropped_project) return "Its project was dropped";
+    if (last.rejected) return "Voted down";
+    if (last.expired) return "Nobody kept it in time";
+    return idea.losses ? `Lost ${idea.losses} ${Number(idea.losses) === 1 ? "vote" : "votes"}` : "Retired before a vote";
+  };
+  const deadWhen = idea => Math.max(0, ...(idea.history || []).map(h => Number(h.sequence) || 0));
   const graveyard = [
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
       title: titleFor(p,"project"), id:p.id,
-      status: p.status || "retired",
+      how: "Project dropped", kind: WORK_SIZES[p.slot === "great" || p.slot === "house" ? p.slot : "small"],
       plain: p.plain || "",
-      reason: p.lesson || ""
+      reasons: p.lesson ? [p.lesson] : [], voters: [],
+      when: Number(p.closed_at) || 0, project: true
     })),
     ...rawIdeas.filter(i => i.status === "graveyard" && !rawProjects.some(p => p.idea === i.id && p.status === "dropped")).map(i => ({
       title: titleFor(i,"idea"), id:i.id,
-      status: i.status || "retired",
-      plain: [i.plain,i.what].filter(Boolean).join(" "),
-      reason: [i.losses ? `Lost ${i.losses} council choices.` : "Retired without starting a project.", ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
-    }))
+      how: deadHow(i), kind: WORK_SIZES[ideaScale(i)],
+      plain: i.plain || i.what || "",
+      reasons: (i.history || []).map(h => h.lesson).filter(Boolean),
+      voters: (i.history || []).flatMap(h => h.reasons || []),
+      when: deadWhen(i), project: false
+    })).sort((a, b) => b.when - a.when)
   ];
   if (finishedBox) {
     if (completedProjects.length) completedProjects.forEach(project=>renderShelfProject(project,"Finished",finishedBox,residentName));
@@ -3823,11 +3836,21 @@ function shelf() {
     const details = html("details", "shelf-graveyard", undefined, box);
     details.id="projects-retired";
     html("summary", "", `Graveyard (${graveyard.length})`, details);
+    html("p", "small shelf-dead-note", "What the house let go, newest first. Open one to read why.", details);
     graveyard.forEach(entry => {
-      const item = html("div", "shelf-item shelf-dead", undefined, details);
-      item.setAttribute("data-find",workshopSearchText([entry.title,entry.plain,entry.reason].filter(Boolean).join(" ")));
-      html("strong", "", entry.title, item);
-      html("span", "small", entry.reason ? `${entry.status} · ${entry.reason}` : entry.status, item);
+      const item = html("details", "shelf-item shelf-dead", undefined, details);
+      item.setAttribute("data-find",workshopSearchText([entry.title,entry.plain,entry.how,...entry.reasons,...entry.voters].filter(Boolean).join(" ")));
+      const head = html("summary", "", undefined, item);
+      html("strong", "", entry.title, head);
+      html("span", "shelf-dead-how", `${entry.kind} · ${entry.how}`, head);
+      if (entry.plain) html("p", "shelf-dead-plain", entry.plain, item);
+      entry.reasons.forEach(reason => html("p", "small", reason, item));
+      if (entry.voters.length) {
+        const said = html("details", "shelf-dead-votes", undefined, item);
+        html("summary", "small", `What the ${entry.voters.length} ${entry.voters.length === 1 ? "voter" : "voters"} said`, said);
+        entry.voters.forEach(reason => html("p", "small", reason, said));
+      }
+      if (!entry.plain && !entry.reasons.length && !entry.voters.length) html("p", "small", "No reason was recorded.", item);
       recordId(item,entry.id);
     });
   }

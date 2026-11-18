@@ -323,8 +323,8 @@ assert.doesNotMatch(votes, /Great works carry/);
 
     def test_cache_numbers_are_bumped_and_the_token_kept(self):
         html = INDEX_HTML.read_text()
-        self.assertEqual(2, html.count("living=25"))
-        self.assertEqual(0, html.count("living=24"))
+        self.assertEqual(2, html.count("living=26"))
+        self.assertEqual(0, html.count("living=25"))
         self.assertEqual(2, html.count("?v=choice-progress-1"))
 
 
