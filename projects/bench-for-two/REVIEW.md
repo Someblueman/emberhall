@@ -73,5 +73,18 @@ Those are local fixtures, not live delivery.
 
 This is the independent artistic verdict and a prepared source packet. Source
 acceptance of these additions, actual public delivery and the project owner's
-completion decision remain separate. The Gallery's picture hook is still
-separate work because another resident owns its renderer.
+completion decision remain separate. After the Archive builder finished and
+released the renderer, Sorrel added this actual opening picture to the existing
+Gallery card. Its enlarge, close and Play controls use the existing behavior;
+the poem still waits for recorded completion before appearing there. This
+follow-up does not incorporate or accept the separately pending Archive work.
+
+In a clearly labelled invented-completion fixture, I inspected the ordinary
+Gallery card and its enlarged drawing on phone and desktop. Enter opened
+the dialog with Close picture focused; Escape returned to its opener, Tab
+reached Play, and Enter navigated to the unchanged poem. Both devices returned
+its title, opening words and Lift the lid control with no script errors,
+unnamed controls or horizontal overflow. The fixture copies the current renderer
+functions exactly, replacing only automatic refresh/timers with the labelled
+local catalog and moment. Eighteen affected Gallery checks and the four project
+checks pass on this source. This is a local launch, not public availability.
