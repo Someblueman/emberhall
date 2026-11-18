@@ -1,0 +1,9 @@
+[
+  {"fill":["#stream","NORTH\\x1b[23;35HSOUTH\\x1b[12;7H\\x1b[2J"]},
+  {"click":"#load"},
+  {"click":"#run"},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000}
+]

@@ -132,11 +132,18 @@ $("typebox").addEventListener("input", e => {
   if (text) attempt(() => typeBytes(text));
 });
 $("typebox").addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); attempt(() => typeBytes("\n")); }
+  if (e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.key !== "Enter" && e.key !== "Backspace") return;
+  e.preventDefault();
+  attempt(() => typeBytes(e.key === "Enter" ? "\n" : "\b"));
 });
 
 const PRESETS = {
+  "bell-dive": BELL_DIVE.full,
+  "bell-catch": BELL_DIVE.catchAtBottom,
   overwrite: "HELLO, WORLD\\rbye",
+  cursor: "ABCDE\\x1b[2DX\\x1b[0D!",
+  erase: "TOP ROW\\r\\nABCDE\\x1b[2;3H\\x1b[K",
   wrap: "The quick brown fox jumps over the lazy dog",
   scroll: Array.from({length: 27}, (_, i) => "line " + String(i).padStart(2, "0") + "\\r").join("\n") + "\n",
 };

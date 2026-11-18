@@ -1,0 +1,5 @@
+[
+  {"click":"#preset-cursor"},
+  {"click":"#run"},
+  {"wait":2000}
+]

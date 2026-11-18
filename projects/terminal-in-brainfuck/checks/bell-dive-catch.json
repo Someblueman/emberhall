@@ -1,0 +1,11 @@
+[
+  {"click":"#preset-bell-catch"},
+  {"click":"#run"},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000}
+]

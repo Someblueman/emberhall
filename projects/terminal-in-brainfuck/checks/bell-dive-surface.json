@@ -1,0 +1,13 @@
+[
+  {"click":"#preset-bell-dive"},
+  {"click":"#run"},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000},
+  {"wait":2000}
+]

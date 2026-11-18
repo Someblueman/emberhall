@@ -49,7 +49,7 @@
 </head>
 <body>
 <main>
-<div class="eyebrow">An unreasonable machine · first working slice</div>
+<div class="eyebrow">An unreasonable machine · cursor and erasure workbench</div>
 <h1>The tape is the terminal.</h1>
 <p class="intro">Forty columns, twenty-four rows. Every letter, wrap and scroll is worked out by eight Brainfuck commands on a tape. The browser just runs them and draws their pictures.</p>
 <div class="workbench">
@@ -65,8 +65,9 @@
 <p class="readout" id="position"></p>
 <p class="readout" id="status" role="status" aria-live="polite"></p>
 <div class="controls"><button id="clear">Start a blank screen for typing</button></div>
-<label for="typebox">Append live ASCII text (Enter sends a line feed)</label>
-<input id="typebox" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Try a word, then Enter, then another word">
+<label for="typebox">Type on the terminal</label>
+<input id="typebox" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Try ABCD, then Backspace, then !">
+<p>Enter sends a line feed. Backspace moves left so your next letter can overwrite the old one.</p>
 <p class="hint">Live text follows any queued bytes. Start blank to type from scratch. After Enter, the new word starts in the same column: a line feed goes down; a carriage return goes left.</p>
 </section>
 <section aria-labelledby="inside-title">
@@ -84,24 +85,34 @@
 <div class="controls">
 <button id="load">Reset and load</button>
 <button id="preset-overwrite">Overwrite</button>
+<button id="preset-cursor">Move without erasing</button>
+<button id="preset-erase">Erase a line tail</button>
 <button id="preset-wrap">Wrap</button>
 <button id="preset-scroll">Scroll</button>
 </div>
 <p class="hint">Start with <strong>Overwrite</strong>, press Run, and watch <code>byeLO, WORLD</code> remain. Presets load and reset; press Run to play. Nothing here is a shell.</p>
+<h2>Bell No. 3 · an authored stream</h2>
+<p>A diving bell goes down empty. Load the dive and press Run, or stop at the sea floor to see what the jaws caught.</p>
+<div class="controls">
+<button id="preset-bell-dive">Load the whole dive</button>
+<button id="preset-bell-catch">Load to the catch</button>
+</div>
+<p class="hint">Try a different catch. In the whole dive, change the lone <code>*</code> to <code>?</code>, press <strong>Reset and load</strong>, then Run. Watch which mark surfaces.</p>
 </section>
 </div>
 <details>
 <summary>The rules of this small machine</summary>
-<p>ASCII bytes 32–126 print. <code>\r</code> returns left without erasing; <code>\n</code> (or an editor newline) goes down without returning left. At column 40 a printed letter wraps immediately. At the bottom, the tape scrolls the picture. Other bytes are ignored, except zero, which ends the program.</p>
-<p>Use <code>\\</code> for a literal backslash, <code>\t</code> for an ignored tab, or <code>\xHH</code> for an exact hexadecimal byte. For example, <code>A\xFFB</code> displays AB; <code>A\x00B</code> halts after A. Unicode is rejected, not truncated into different bytes. Pausing or running out of queued bytes is not the same as End input.</p>
+<p>ASCII bytes 32–126 print. <code>\r</code> returns left without erasing; <code>\n</code> (or an editor newline) goes down without returning left. At column 40 a printed letter wraps immediately. At the bottom, the tape scrolls the picture. Backspace moves left without erasing; tab goes to the next eight-column stop. Zero ends the program.</p>
+<p>Use <code>\\</code> for a literal backslash, <code>\t</code> for a tab, or <code>\xHH</code> for an exact hexadecimal byte. For example, <code>A\xFFB</code> displays AB; <code>A\x00B</code> halts after A. Unicode is rejected, not truncated into different bytes. Pausing or running out of queued bytes is not the same as End input.</p>
 <p>The machine has 3,100 wrapping eight-bit cells. Cells 0–4 hold the input byte, physical cursor row, column, top row and emitted row. Physical screen rows start at cell 64, spaced 126 cells apart. Each has six helper cells, then forty triples: two helpers and one character. Try cell 64 to see the first physical row; scrolling rotates which row comes first.</p>
-<p>This slice has no backspace, cursor escape codes, colours, shell or external programs. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated generator</a>, or the <a href="terminal.bf">plain eight-command program</a>. The page uses no network services.</p>
+<p>Try <strong>Move without erasing</strong>: ABCDE becomes ABC!E. <strong>Erase a line tail</strong> keeps AB on the second row and leaves the cursor in its third column. CSI cursor and erase sequences now run on the tape; see the <a href="CONTROL_CONTRACT.md">exact control rules</a>. Colours, a shell and external programs remain later or outside work. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated generator</a>, or the <a href="terminal.bf">plain eight-command program</a>. The page uses no network services.</p>
 </details>
-<p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Emberhall, 2026.</p>
+<p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Cursor and erasure: Aster. Emberhall, 2026.</p>
 </main>
 <script src="program.js"></script>
 <script src="vm.js"></script>
 <script src="input.js"></script>
+<script src="bell-dive.js"></script>
 <script src="terminal.js"></script>
 </body>
 </html>
