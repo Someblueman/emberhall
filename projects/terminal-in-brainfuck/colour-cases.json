@@ -1,0 +1,163 @@
+{
+  "format": "terminal-colour-cases-v1",
+  "cases": [
+    {
+      "name": "palette-and-resets",
+      "chunks": ["\u001b[31mR", "\u001b[44mB", "\u001b[1m!", "\u001b[22m.", "\u001b[39mD", "\u001b[49mN", "\u001b[mZ"],
+      "checkpoints": [
+        {"name": "red", "after_chunks": 1, "rows": [[0, "R"]], "attribute_spans": [[0, 1, 1]], "cursor": [0, 1], "blank_attribute": 7},
+        {"name": "all-seven-letters", "after_chunks": 7, "rows": [[0, "RB!.DNZ"]], "attribute_spans": [[0, 1, 1], [1, 1, 33], [2, 1, 97], [3, 1, 33], [4, 1, 39]], "cursor": [0, 7], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "two-parameters",
+      "chunks": ["\u001b[31;44mX", "\u001b[1;32mY", "\u001b[0;34mZ", "\u001b[;mQ"],
+      "checkpoints": [
+        {"name": "left-to-right", "after_chunks": 3, "rows": [[0, "XYZ"]], "attribute_spans": [[0, 1, 33], [1, 1, 98], [2, 1, 4]], "cursor": [0, 3], "blank_attribute": 7},
+        {"name": "empty-resets", "after_chunks": 4, "rows": [[0, "XYZQ"]], "attribute_spans": [[0, 1, 33], [1, 1, 98], [2, 1, 4]], "cursor": [0, 4], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "overwrite-keeps-neighbours",
+      "chunks": ["\u001b[31mRED", "\u001b[2D", "\u001b[32m!"],
+      "checkpoints": [
+        {"name": "moved-without-repainting", "after_chunks": 2, "rows": [[0, "RED"]], "attribute_spans": [[0, 3, 1]], "cursor": [0, 1], "blank_attribute": 7},
+        {"name": "green-between-red", "after_chunks": 3, "rows": [[0, "R!D"]], "attribute_spans": [[0, 1, 1], [1, 1, 2], [2, 1, 1]], "cursor": [0, 2], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "erase-tail",
+      "chunks": ["\u001b[31mABCD", "\u001b[2D\u001b[44m", "\u001b[K"],
+      "checkpoints": [
+        {"name": "before-erase", "after_chunks": 2, "rows": [[0, "ABCD"]], "attribute_spans": [[0, 4, 1]], "cursor": [0, 2], "blank_attribute": 7},
+        {"name": "blue-spaces", "after_chunks": 3, "rows": [[0, "AB"]], "attribute_spans": [[0, 2, 1], [2, 38, 33]], "cursor": [0, 2], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "erase-start-inclusive",
+      "chunks": ["\u001b[31mABCD", "\u001b[2D\u001b[44m", "\u001b[1K"],
+      "checkpoints": [
+        {"name": "cursor-cell-erased", "after_chunks": 3, "rows": [[0, "   D"]], "attribute_spans": [[0, 3, 33], [3, 1, 1]], "cursor": [0, 2], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "erase-line-only",
+      "chunks": ["\u001b[31mTOP\u001b[2;1HROW", "\u001b[43m\u001b[2K"],
+      "checkpoints": [
+        {"name": "top-untouched", "after_chunks": 2, "rows": [[0, "TOP"]], "attribute_spans": [[0, 3, 1], [40, 40, 25]], "cursor": [1, 3], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "erase-display",
+      "chunks": ["\u001b[31mTOP\u001b[3;1HBOT", "\u001b[3;5H\u001b[43m\u001b[2J"],
+      "checkpoints": [
+        {"name": "blank-with-yellow-background", "after_chunks": 2, "rows": [], "attribute_spans": [], "cursor": [2, 4], "blank_attribute": 25}
+      ]
+    },
+    {
+      "name": "erase-display-tail",
+      "chunks": ["\u001b[31mTOP\u001b[2;1HMID\u001b[3;1HBOT", "\u001b[2;2H\u001b[44m\u001b[J"],
+      "checkpoints": [
+        {"name": "inclusive-tail", "after_chunks": 2, "rows": [[0, "TOP"], [1, "M"]], "attribute_spans": [[0, 3, 1], [40, 1, 1], [41, 919, 33]], "cursor": [1, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "erase-display-start",
+      "chunks": ["\u001b[31mTOP\u001b[2;1HMID\u001b[3;1HBOT", "\u001b[2;2H\u001b[44m\u001b[1J"],
+      "checkpoints": [
+        {"name": "inclusive-prefix", "after_chunks": 2, "rows": [[1, "  D"], [2, "BOT"]], "attribute_spans": [[0, 42, 33], [42, 1, 1], [80, 3, 1]], "cursor": [1, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "scroll-moves-ink",
+      "chunks": ["\u001b[31mTOP\u001b[2;1HOLD", "\u001b[34m\u001b[24;1HLAST", "\n"],
+      "checkpoints": [
+        {"name": "before-scroll", "after_chunks": 2, "rows": [[0, "TOP"], [1, "OLD"], [23, "LAST"]], "attribute_spans": [[0, 3, 1], [40, 3, 1], [920, 4, 4]], "cursor": [23, 4], "blank_attribute": 7},
+        {"name": "old-second-row-now-first", "after_chunks": 3, "rows": [[0, "OLD"], [22, "LAST"]], "attribute_spans": [[0, 3, 1], [880, 4, 4], [920, 40, 4]], "cursor": [23, 4], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "wrap-scroll",
+      "chunks": ["\u001b[31m\u001b[24;40H", "X", "Y"],
+      "checkpoints": [
+        {"name": "corner-before-write", "after_chunks": 1, "rows": [], "attribute_spans": [], "cursor": [23, 39], "blank_attribute": 7},
+        {"name": "x-moved-up", "after_chunks": 2, "rows": [[22, "                                       X"]], "attribute_spans": [[919, 1, 1], [920, 40, 1]], "cursor": [23, 0], "blank_attribute": 7},
+        {"name": "y-on-new-row", "after_chunks": 3, "rows": [[22, "                                       X"], [23, "Y"]], "attribute_spans": [[919, 1, 1], [920, 40, 1]], "cursor": [23, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "partial-sgr",
+      "chunks": ["\u001b[", "3", "1", "m", "X"],
+      "checkpoints": [
+        {"name": "escape-bracket", "after_chunks": 1, "rows": [], "attribute_spans": [], "cursor": [0, 0], "blank_attribute": 7},
+        {"name": "first-digit", "after_chunks": 2, "rows": [], "attribute_spans": [], "cursor": [0, 0], "blank_attribute": 7},
+        {"name": "second-digit", "after_chunks": 3, "rows": [], "attribute_spans": [], "cursor": [0, 0], "blank_attribute": 7},
+        {"name": "attribute-only", "after_chunks": 4, "rows": [], "attribute_spans": [], "cursor": [0, 0], "blank_attribute": 7},
+        {"name": "first-red-mark", "after_chunks": 5, "rows": [[0, "X"]], "attribute_spans": [[0, 1, 1]], "cursor": [0, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "atomic-rejection",
+      "chunks": ["\u001b[32mG", "\u001b[31;99mX", "\u001b[31;44;1mY", "\u001b[99931mZ", "\u001b[?31mQ"],
+      "checkpoints": [
+        {"name": "no-half-applied-red", "after_chunks": 2, "rows": [[0, "GX"]], "attribute_spans": [[0, 2, 2]], "cursor": [0, 2], "blank_attribute": 7},
+        {"name": "all-rejected-forms-consumed", "after_chunks": 5, "rows": [[0, "GXYZQ"]], "attribute_spans": [[0, 5, 2]], "cursor": [0, 5], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "cancel-and-restart",
+      "chunks": ["\u001b[31;\u0018X", "\u001b[44\u001b[32mY", "\u001b[1;\u001aZ"],
+      "checkpoints": [
+        {"name": "cancel-before-colour", "after_chunks": 1, "rows": [[0, "X"]], "attribute_spans": [], "cursor": [0, 1], "blank_attribute": 7},
+        {"name": "fresh-escape-wins", "after_chunks": 3, "rows": [[0, "XYZ"]], "attribute_spans": [[1, 2, 2]], "cursor": [0, 3], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "nul-does-not-apply-sgr",
+      "chunks": ["\u001b[34mB", "\u001b[31", "\u0000mRED"],
+      "checkpoints": [
+        {"name": "before-nul", "after_chunks": 2, "rows": [[0, "B"]], "attribute_spans": [[0, 1, 4]], "cursor": [0, 1], "blank_attribute": 7},
+        {"name": "unread-tail", "after_chunks": 3, "rows": [[0, "B"]], "attribute_spans": [[0, 1, 4]], "cursor": [0, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "zero-attribute-is-data",
+      "chunks": ["\u001b[30;40mX", "\u001b[K"],
+      "checkpoints": [
+        {"name": "black-on-black-mark", "after_chunks": 1, "rows": [[0, "X"]], "attribute_spans": [[0, 1, 0]], "cursor": [0, 1], "blank_attribute": 7},
+        {"name": "zero-valued-erased-spaces", "after_chunks": 2, "rows": [[0, "X"]], "attribute_spans": [[0, 40, 0]], "cursor": [0, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "backspace-tab-carriage-return",
+      "chunks": ["\u001b[31mAB", "\b\u001b[32m!", "\t\u001b[34mC", "\r\u001b[37mZ"],
+      "checkpoints": [
+        {"name": "movement-does-not-repaint", "after_chunks": 3, "rows": [[0, "A!      C"]], "attribute_spans": [[0, 1, 1], [1, 1, 2], [8, 1, 4]], "cursor": [0, 9], "blank_attribute": 7},
+        {"name": "return-overwrite", "after_chunks": 4, "rows": [[0, "Z!      C"]], "attribute_spans": [[1, 1, 2], [8, 1, 4]], "cursor": [0, 1], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "all-palette-indices",
+      "chunks": ["\u001b[30m0\u001b[31m1\u001b[32m2\u001b[33m3\u001b[34m4\u001b[35m5\u001b[36m6\u001b[37m7", "\u001b[2;1H\u001b[1m\u001b[30m0\u001b[31m1\u001b[32m2\u001b[33m3\u001b[34m4\u001b[35m5\u001b[36m6\u001b[37m7", "\u001b[3;1H\u001b[0m\u001b[40m0\u001b[41m1\u001b[42m2\u001b[43m3\u001b[44m4\u001b[45m5\u001b[46m6\u001b[47m7"],
+      "checkpoints": [
+        {"name": "eight-normal-and-bright-inks", "after_chunks": 2, "rows": [[0, "01234567"], [1, "01234567"]], "attribute_spans": [[0, 1, 0], [1, 1, 1], [2, 1, 2], [3, 1, 3], [4, 1, 4], [5, 1, 5], [6, 1, 6], [7, 1, 7], [40, 1, 64], [41, 1, 65], [42, 1, 66], [43, 1, 67], [44, 1, 68], [45, 1, 69], [46, 1, 70], [47, 1, 71]], "cursor": [1, 8], "blank_attribute": 7},
+        {"name": "eight-backgrounds", "after_chunks": 3, "rows": [[0, "01234567"], [1, "01234567"], [2, "01234567"]], "attribute_spans": [[0, 1, 0], [1, 1, 1], [2, 1, 2], [3, 1, 3], [4, 1, 4], [5, 1, 5], [6, 1, 6], [7, 1, 7], [40, 1, 64], [41, 1, 65], [42, 1, 66], [43, 1, 67], [44, 1, 68], [45, 1, 69], [46, 1, 70], [47, 1, 71], [80, 1, 7], [81, 1, 15], [82, 1, 23], [83, 1, 31], [84, 1, 39], [85, 1, 47], [86, 1, 55], [87, 1, 63]], "cursor": [2, 8], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "defaults-keep-other-components",
+      "chunks": ["\u001b[1;31mR", "\u001b[44mB", "\u001b[39mD", "\u001b[49mN", "\u001b[0mZ"],
+      "checkpoints": [
+        {"name": "foreground-default-keeps-bright-blue", "after_chunks": 3, "rows": [[0, "RBD"]], "attribute_spans": [[0, 1, 65], [1, 1, 97], [2, 1, 103]], "cursor": [0, 3], "blank_attribute": 7},
+        {"name": "background-default-keeps-bright-white", "after_chunks": 5, "rows": [[0, "RBDNZ"]], "attribute_spans": [[0, 1, 65], [1, 1, 97], [2, 1, 103], [3, 1, 71]], "cursor": [0, 5], "blank_attribute": 7}
+      ]
+    },
+    {
+      "name": "unsupported-and-interrupted-sgr",
+      "chunks": ["\u001b[31mR", "\u001b[90mX", "\u001b[3\t1mY", "\u001b[999999999999999999999999999999mZ"],
+      "checkpoints": [
+        {"name": "all-retain-red", "after_chunks": 4, "rows": [[0, "RXYZ"]], "attribute_spans": [[0, 4, 1]], "cursor": [0, 4], "blank_attribute": 7}
+      ]
+    }
+  ]
+}
