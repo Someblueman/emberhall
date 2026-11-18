@@ -161,8 +161,8 @@ class IntegrationDiagnosticsTests(HouseCase):
         self.candidate("one", PASSING)
         real_run = test_sandbox.run
 
-        def tamper(command, cwd, *, stdout, timeout):
-            completed = real_run(command, cwd, stdout=stdout, timeout=timeout)
+        def tamper(command, cwd, *, stdout, timeout, **more):
+            completed = real_run(command, cwd, stdout=stdout, timeout=timeout, **more)
             (Path(cwd) / "document.txt").write_text("tampered after tests\n")
             return completed
 
