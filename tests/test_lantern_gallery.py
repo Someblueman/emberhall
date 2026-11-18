@@ -18,8 +18,11 @@ class LocalLinks(HTMLParser):
     def __init__(self):
         super().__init__()
         self.links = []
+        self.videos = []
 
     def handle_starttag(self, tag, attrs):
+        if tag == "video":
+            self.videos.append(dict(attrs))
         for key, value in attrs:
             if key in {"href", "src"} and value and not value.startswith("#"):
                 self.links.append(value)
@@ -27,6 +30,33 @@ class LocalLinks(HTMLParser):
 
 @unittest.skipUnless(shutil.which("node"), "Node draws the actual film")
 class LanternGalleryTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("ffprobe"), "FFprobe reads the shipped movie")
+    def test_native_film_contains_six_seconds_of_silent_drawings(self):
+        info = json.loads(subprocess.check_output(
+            ["ffprobe", "-v", "error", "-show_entries",
+             "format=duration:stream=codec_type,codec_name,width,height,nb_frames,r_frame_rate",
+             "-of", "json", str(PROJECT / "lantern-loop.mp4")], timeout=15))
+        self.assertEqual(float(info["format"]["duration"]), 6)
+        self.assertEqual(info["streams"], [{
+            "codec_type": "video", "codec_name": "h264", "width": 900, "height": 440,
+            "nb_frames": "144", "r_frame_rate": "24/1",
+        }])
+
+    def test_native_players_are_labelled_local_and_do_not_autoplay(self):
+        for path, movie in [(PROJECT / "index.html", "lantern-loop.mp4"),
+                            (ROOT / "site/index.html", "projects/lantern-loop/lantern-loop.mp4")]:
+            with self.subTest(page=path):
+                parser = LocalLinks()
+                parser.feed(path.read_text())
+                videos = [video for video in parser.videos if video.get("src") == movie]
+                self.assertEqual(len(videos), 1)
+                video = videos[0]
+                self.assertIn("controls", video)
+                self.assertIn("playsinline", video)
+                self.assertNotIn("autoplay", video)
+                self.assertTrue(video.get("aria-label"))
+        self.assertIn("media-src 'self'", (PROJECT / "index.html").read_text())
+
     def test_preview_matches_the_final_film_frame_with_valid_resources(self):
         generated = subprocess.check_output(
             ["node", str(PROJECT / "make-gallery-preview.cjs")], cwd=ROOT, timeout=15)
