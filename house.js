@@ -3892,6 +3892,30 @@ function renderProposalWording(proposal, container) {
   }
   html("p", "vote-reason", proposal.text, container);
 }
+function openCouncilRecord(kind,id) {
+  const records=kind==="choice"?frame.voting?.choices:kind==="proposal"?frame.voting?.proposals:null;
+  // A stale room link may outlive its frame. Never resolve it against later history.
+  if(!records?.some(record=>record.id===id))return false;
+  votingState={query:"",status:"all",kind:"all"};
+  voting();
+  const targetId=`vote-${kind==="choice"?"choice":"rule"}-${id}`;
+  const target=$(targetId);
+  if(!target)return false;
+  target.open=true;votingOpened.add(targetId);
+  if(typeof window!=="undefined"&&window.location?.hash!=="#council-view")
+    window.history?.pushState(null,"","#council-view");
+  showViewForHash("#council-view");
+  target.focus({preventScroll:true});target.scrollIntoView?.({block:"start"});
+  return true;
+}
+function councilRecordLink(parent,kind,record) {
+  const label=kind==="choice"?"Read the votes →":"Read the proposal and evidence →";
+  const link=html("a","room-shelf-link",label,parent);
+  link.id=`council-${kind}-${record.id}`;link.href="#council-view";
+  const title=kind==="choice"?(record.candidates||[]).map(c=>titleFor(c,"candidate")).join(" or "):titleFor(record,"proposal");
+  link.setAttribute("aria-label",`${label.replace(" →","")}: ${title}`);
+  link.addEventListener("click",event=>{event.preventDefault();openCouncilRecord(kind,record.id);});
+}
 function renderCouncilRoom(content) {
   const panel = html("div", "council-room-panel", undefined, content);
   panel.id = "council-room-panel";
@@ -3920,6 +3944,7 @@ function renderCouncilRoom(content) {
       html("strong", "", `${slotLabel} · ${counted}/3 counted votes`, row);
       const names = (choice.candidates || []).map(c => titleFor(c, "candidate")).filter(Boolean);
       if (names.length) html("span", "small", names.join(" · "), row);
+      councilRecordLink(row,"choice",choice);
     });
     const proposalRow = (proposal, host, quiet) => {
       const line = proposalWaitingLine(proposal, nowSec);
@@ -3932,6 +3957,7 @@ function renderCouncilRoom(content) {
         tags.forEach(tag => html("span", tag.cls, tag.text, meta));
       }
       if (quiet) html("span", "small", proposalClosure(proposal).label, row);
+      councilRecordLink(row,"proposal",proposal);
     };
     // Proposals ready to enact come first, then the rest newest first; overtaken ones are folded away last.
     const live = [...waiting].reverse();
@@ -4087,6 +4113,8 @@ function voting() {
       const choiceLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
       const item = html("details", "vote-round", undefined, lists);
       item.id = `vote-choice-${choice.id}`;
+      item.setAttribute("tabindex","-1");
+      item.setAttribute("style","scroll-margin-top:120px");
       html("summary", "", `${choiceLabel} · ${outcome}`, item);
       recordId(item,choice.id);
       html("p", "small", `Opened by ${person(choice.owner)} at event ${choice.opened_sequence}${choice.closed_sequence ? ` · closed at event ${choice.closed_sequence}` : ""}.`, item);
@@ -4124,6 +4152,8 @@ function voting() {
     for (const proposal of filteredProposals) {
       const item = html("details", `vote-round${proposal.stale ? " council-quiet" : ""}`, undefined, lists);
       item.id = `vote-rule-${proposal.id}`;
+      item.setAttribute("tabindex","-1");
+      item.setAttribute("style","scroll-margin-top:120px");
       const status = proposalStatusLabel(proposal);
       const summary = html("summary", "vote-summary", undefined, item);
       html("span", "vote-summary-title", `${titleFor(proposal,"proposal")} · ${status}`, summary);
@@ -4468,7 +4498,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("door-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
+  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("door-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("vote-")||activeId.startsWith("council-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
   const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"||activeId==="projects-find-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
