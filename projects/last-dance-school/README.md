@@ -66,10 +66,10 @@ a replay frame cannot advance as the living model or alter its choices.
 
 Run `python3 -m unittest discover -s projects/last-dance-school -v`, or
 `node --test projects/last-dance-school/dance.test.js`. The adapter runs the same
-11 Node checks, including `village/story.test.js`: every three-gesture phrase,
+12 Node checks, including `village/story.test.js`: every three-gesture phrase,
 both original teachers and both sizes for the clearing; all phrases and both
 teachers down the two village branches; numeric differences in the default
-bodies; independent mutable memories; missed and late lessons; live changes to
+bodies; independent mutable memories; invalid and inherited-property pupil names; missed and late lessons; live changes to
 teachers before handoff; choice deadlines; actual gift inheritance; isolated
 spectator replay, cleared teachers and final performance slots. These checks
 cannot judge sustained animation, emotional connection or fun.
@@ -99,6 +99,11 @@ the first gesture, Space changed it, and Tab reached the second gesture.
 The successful looks reported no script errors, unnamed controls or horizontal
 overflow at either size. Both devices' main screenshots were personally opened
 for each look; the inputs, responses and copied screenshots remain private.
+
+A final model review also caught a new lookup accepting inherited object keys
+as pupil names. Its refusal was restored after a failing regression check;
+the original valid-pupil checks remain unchanged. No browser repeat was needed
+for that invalid internal-input guard.
 
 No author trial supplies the independent artistic verdict. No uninterrupted
 full-performance, speech output, physical touch, zoom, changed motion

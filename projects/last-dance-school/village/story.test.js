@@ -108,3 +108,11 @@ test('the whole arc has live performers, reachable chapters and an explicit dura
   assert.deepEqual(V.chapters.map(([beat])=>beat),[24,32,40,48,56,64,72,80]);
   assert.equal(D.beats.slice(0,-1).reduce((n,b)=>n+b.seconds,0),696);
 });
+
+
+test('only named pupils may learn; inherited keys cannot become pupils', () => {
+  const source = [D.gesture('bow')];
+  for (const pupil of ['constructor','toString','__proto__','not-a-pupil',null,undefined,{toString:()=> 'ada'}]) {
+    assert.throws(()=>D.learn(source,pupil,[0]),/Unknown pupil/);
+  }
+});

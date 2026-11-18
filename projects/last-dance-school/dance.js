@@ -52,9 +52,10 @@
     return {kind, tilt: big ? 24 : 12, reach: big ? 1.25 : 0.85, foot: big ? 18 : 10};
   }
   function learn(source, pupil, slots) {
-    const style = {ada: [6, .8, .7], pip: [-5, 1.22, 1.3], rue: [4, .82, .75],
-      lio: [7, .94, .82], bea: [10, 1.25, 1.18]}[pupil];
-    if (!style) throw new Error('Unknown pupil');
+    const styles = {ada: [6, .8, .7], pip: [-5, 1.22, 1.3], rue: [4, .82, .75],
+      lio: [7, .94, .82], bea: [10, 1.25, 1.18]};
+    if (typeof pupil !== 'string' || !Object.hasOwn(styles, pupil)) throw new Error('Unknown pupil');
+    const style = styles[pupil];
     return source.filter((_, i) => slots.includes(i)).map(g => ({
       kind: g.kind,
       tilt: g.tilt + style[0], reach: g.reach * style[1], foot: g.foot * style[2]
