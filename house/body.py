@@ -153,6 +153,11 @@ def shelf_view(state: dict) -> dict:
             **({"second": {"author": label(idea["second"]["author"], 200),
                            "finding": label(idea["second"]["finding"], 2000), "at": idea["second"]["at"]}}
                if asked and "second" in idea and idea["second"]["brief"] == idea.get("brief", {}).get("sequence") else {}),
+            **({"keeps": [{"author": label(entry["author"], 200),
+                            "kind": label(entry.get("kind", "unrecorded"), 20),
+                            "finding": label(entry["finding"], 2000), "at": entry["at"]}
+                           for entry in shelf_model.keeps(state, idea)]}
+               if asked and shelf_model.keeps(state, idea) else {}),
             **({"grounded": shelf_model.grounded(state, idea)} if asked and idea["status"] == "shelved" else {}),
             **({"vote_from": shelf_model.vote_from(state, key, state["at"])}
                if shelf_model.lone_since(state) is not None

@@ -216,6 +216,20 @@ class HigherBarTests(unittest.TestCase):
         self.assertIn("Is it fun: would a stranger grin, stare or argue?", source)
         self.assertIn("Make the house itself better", wishes)
 
+    def test_the_page_shows_every_resident_who_kept_an_idea(self):
+        f = self.f
+        self.higher()
+        self.start()
+        f.send("explore-publish", actor="v1", round="r1", token="r1", ideas=[idea("a", "house")])
+        for actor in ("author", "v3", "other"):
+            self.keep(actor, "a")
+        shown = next(i for i in body.shelf_view(f.state)["ideas"] if i["id"] == "a")
+        self.assertEqual(["author", "v3", "other"], [keep["author"] for keep in shown["keeps"]])
+        self.assertEqual(["codex", "codex", "muse"], [keep["kind"] for keep in shown["keeps"]])
+        self.assertEqual([PART.strip()] * 3, [keep["finding"] for keep in shown["keeps"]])
+        source = (pathlib.Path(body.__file__).parents[1] / "site/house.js").read_text()
+        self.assertIn("Opened the evidence and kept by", source)
+
 
 if __name__ == "__main__":
     unittest.main()
