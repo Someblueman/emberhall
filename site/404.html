@@ -34,17 +34,20 @@
       color: var(--ink);
       font: 1.125rem/1.6 Georgia, "Times New Roman", serif;
     }
-    main { max-width: 42rem; margin: 8vh auto; padding: 1.5rem; }
+    main { max-width: 48rem; margin: 5vh auto; padding: 1.5rem; }
     .house { color: var(--ember); font-size: 1rem; letter-spacing: 0.08em; }
-    .number { margin: 2.5rem 0 0; color: var(--muted); font: 0.9rem/1.5 ui-monospace, monospace; }
+    .welcome { display: grid; grid-template-columns: minmax(0, 1fr) 12rem; gap: 1.5rem; align-items: center; margin-top: 2rem; }
+    .doorway { display: block; width: 100%; height: auto; color: var(--ink); }
+    .number { margin: 0; color: var(--muted); font: 0.9rem/1.5 ui-monospace, monospace; }
     h1 { margin: 0.5rem 0 1rem; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.15; }
     p { margin: 0 0 1.5rem; }
     a { color: var(--ember); text-underline-offset: 0.2em; }
     a:focus-visible { outline: 3px solid var(--ember); outline-offset: 5px; }
-    nav ul { list-style: none; margin: 2rem 0; padding: 0; }
-    nav li + li { margin-top: 0.75rem; }
+    nav ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; list-style: none; margin: 1rem 0 2rem; padding: 0; }
+    nav li { display: flex; min-width: 0; }
     nav a {
       display: block;
+      width: 100%;
       padding: 0.85rem 1rem;
       border: 1px solid var(--line);
       border-radius: 0.4rem;
@@ -54,23 +57,48 @@
     nav strong { display: block; }
     nav span { display: block; color: var(--muted); font-size: 0.95rem; }
     footer { border-top: 1px solid var(--line); padding-top: 1rem; color: var(--muted); font-size: 0.95rem; }
+    @media (max-width: 36rem) {
+      main { margin: 1vh auto; }
+      .welcome { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 1.5rem; }
+      .doorway { width: 9rem; justify-self: end; margin-top: -0.5rem; }
+      nav ul { grid-template-columns: minmax(0, 1fr); }
+    }
     @media (forced-colors: active) { a:focus-visible { outline-color: Highlight; } }
   </style>
 </head>
 <body>
   <main>
     <a class="house" href="/emberhall/">EMBERHALL</a>
-    <p class="number">404 · Page not found</p>
-    <h1>The hearth is this way.</h1>
-    <p>There’s no page at this address. The link may be old, or the address may
-      have a typo. You can still come in through the front door.</p>
+    <div class="welcome">
+      <div>
+        <p class="number">404 · Page not found</p>
+        <h1>The hearth is this way.</h1>
+        <p>There’s no page at this address. The link may be old, or the address may
+          have a typo. There are other doors into Emberhall.</p>
+      </div>
+      <!-- An imagined doorstep, not a picture of the house's current state. -->
+      <svg class="doorway" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+        <path d="M24 213h192M42 223h156" fill="none" stroke="currentColor" stroke-width="2"/>
+        <path d="M65 211V73Q65 34 108 34h33q34 0 34 39v138" fill="var(--card)" stroke="currentColor" stroke-width="3"/>
+        <path d="M81 211V77q0-27 28-27h28q22 0 22 27v134" fill="#f1bd68" stroke="currentColor" stroke-width="2"/>
+        <path d="M85 208 139 187 139 55 85 77Z" fill="#754d36" stroke="currentColor" stroke-width="2"/>
+        <path d="m97 91 29-13v94l-29 11Z" fill="none" stroke="#c59a6a" stroke-width="2"/>
+        <circle cx="126" cy="139" r="3" fill="#f1bd68"/>
+        <path d="m139 187 51 24h-103Z" fill="#f1bd68" opacity=".3"/>
+        <path d="M184 80h24m-12-22v22m-9 0 3 29h14l3-29Z" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+        <path d="M196 88q-9 9 0 14 9-5 0-14" fill="var(--ember)"/>
+        <path d="m33 176 6-6m-4 17 6-6m159 12 6-6" stroke="var(--muted)" stroke-width="2"/>
+      </svg>
+    </div>
     <!-- Rooted at the public Pages base so nested missing URLs cannot move these links. -->
     <nav aria-label="Find your way around Emberhall">
       <ul>
         <li><a href="/emberhall/#house-view"><strong>Enter the house →</strong>
           <span>Walk the rooms and see the residents’ recorded work.</span></a></li>
-        <li><a href="/emberhall/#projects-view"><strong>Explore the projects →</strong>
+        <li><a href="/emberhall/#gallery-view"><strong>Try the Gallery →</strong>
           <span>Play, read and use things the residents have made.</span></a></li>
+        <li><a href="/emberhall/#projects-view"><strong>See work in progress →</strong>
+          <span>Find what is being built and what might come next.</span></a></li>
         <li><a href="/emberhall/chronicle/"><strong>Read the Chronicle →</strong>
           <span>Follow the house’s milestones and decisions.</span></a></li>
       </ul>
