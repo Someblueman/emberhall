@@ -5,13 +5,64 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
 
 ERROR_KEYWORDS = ("error", "fail", "failed", "denied", "blocked", "scar", "reject", "timeout", "crash")
 CORRECTION_OPS = {"supersede", "rename", "owner-migrate", "owner-admissions"}
+GOVERNANCE_OPS = {
+    "migration",
+    "renovation-install",
+    "renovation-failed",
+    "steward",
+    "owner-key",
+    "owner-rules",
+    "council-propose",
+    "council-trial",
+    "council-endorse",
+    "council-notice",
+    "council-enact",
+    "council-sync",
+}
+LESSON_OPS = {"learn", "review"}
 TASK_OPS = {"task", "ready", "claim", "release", "finish"}
+TELEMETRY_RE = re.compile(r"^(house-[a-z0-9-]+-v\d+) (.+)$")
+TELEMETRY_HIGHLIGHT = frozenset({"house-integration-v1", "house-source-delivery-v1"})
+SUMMARY_KEYS = (
+    "task",
+    "project",
+    "proposal",
+    "lesson",
+    "kind",
+    "choice",
+    "idea",
+    "round",
+    "verdict",
+    "need",
+    "answer",
+    "outcome",
+    "exit_code",
+    "through",
+    "key",
+    "scope",
+)
+DETAIL_KEYS = ("text", "note", "result", "reason", "title", "finding", "claim", "evidence", "plain", "ask", "milestone")
+TELEMETRY_KEYS = (
+    "run",
+    "status",
+    "outcome",
+    "exit_code",
+    "test_exit",
+    "commit",
+    "candidate_head",
+    "remote_main",
+    "help_request",
+    "agent",
+    "model",
+    "reason",
+)
 
 
 def load_inputs(paths: list[str]) -> list[Any]:
@@ -128,9 +179,50 @@ def _extract_events_and_meta(payloads: list[Any]) -> tuple[list[dict[str, Any]],
     return sorted_events, meta
 
 
-def _has_error_signal(ev: dict[str, Any]) -> bool:
+def _clip(value: str, limit: int = 240) -> str:
+    value = value.strip()
+    return value if len(value) <= limit else value[: limit - 3] + "..."
+
+
+def _parse_telemetry(ev: dict[str, Any]) -> tuple[str, dict[str, Any]] | None:
+    """Return (report_type, payload) for structured house-* telemetry in `say`, else None."""
+    if ev.get("op") != "say":
+        return None
+    text = (ev.get("data") or {}).get("text")
+    if not isinstance(text, str):
+        return None
+    match = TELEMETRY_RE.match(text)
+    if not match:
+        return None
+    try:
+        parsed = json.loads(match.group(2))
+    except ValueError:
+        return None
+    return (match.group(1), parsed) if isinstance(parsed, dict) else None
+
+
+def _has_error_signal(ev: dict[str, Any], telemetry: tuple[str, dict[str, Any]] | None = None) -> bool:
+    if telemetry is not None:
+        report_type, report = telemetry
+        if report_type == "house-home-result-v1":
+            return report.get("outcome") not in (None, "success") or report.get("exit_code") not in (None, 0)
+        if report_type == "house-integration-v1":
+            return report.get("status") not in (None, "integrated") or report.get("test_exit") not in (None, 0)
+        return (
+            bool(report.get("error"))
+            or report.get("outcome") in ("failed", "interrupted", "error")
+            or report.get("status") in ("failed", "rejected", "error")
+        )
     op = ev.get("op")
     data = ev.get("data") or {}
+    if op == "renovation-failed":
+        return True
+    if op == "shelf" and (
+        data.get("kind") == "project-drop"
+        or data.get("verdict") == "drop"
+        or (data.get("kind") == "need-answer" and data.get("answer") == "declined")
+    ):
+        return True
     if op == "life" and data.get("kind") == "run-finish":
         if data.get("outcome") not in (None, "success") or data.get("exit_code") not in (None, 0):
             return True
@@ -142,7 +234,7 @@ def _has_error_signal(ev: dict[str, Any]) -> bool:
     return any(kw in text_blob for kw in ERROR_KEYWORDS)
 
 
-def _summarize_event(ev: dict[str, Any]) -> dict[str, Any]:
+def _summarize_event(ev: dict[str, Any], telemetry: tuple[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     data = ev.get("data") or {}
     summary: dict[str, Any] = {
         "sequence": ev["sequence"],
@@ -150,13 +242,29 @@ def _summarize_event(ev: dict[str, Any]) -> dict[str, Any]:
         "op": ev.get("op", "unknown"),
         "id": ev.get("id"),
     }
-    for key in ("task", "kind", "choice", "idea", "round", "outcome", "exit_code", "through", "key", "scope"):
+    if telemetry is not None:
+        report_type, report = telemetry
+        summary["report_type"] = report_type
+        parts = []
+        for key in TELEMETRY_KEYS:
+            if key in report and report[key] is not None:
+                val = report[key]
+                if isinstance(val, (str, int, float, bool)):
+                    summary[key] = val
+                    if key != "reason":
+                        parts.append(f"{key}={val}")
+        reason = report.get("reason")
+        detail = report_type + (": " + ", ".join(parts) if parts else "")
+        if isinstance(reason, str) and reason.strip():
+            detail += f" ({reason.strip()})"
+        summary["detail"] = _clip(detail)
+        return summary
+    for key in SUMMARY_KEYS:
         if key in data:
             summary[key] = data[key]
-    for text_key in ("text", "note", "result", "reason", "title"):
-        if text_key in data and isinstance(data[text_key], str):
-            val = data[text_key].strip()
-            summary["detail"] = val if len(val) <= 240 else val[:237] + "..."
+    for text_key in DETAIL_KEYS:
+        if text_key in data and isinstance(data[text_key], str) and data[text_key].strip():
+            summary["detail"] = _clip(data[text_key])
             break
     return summary
 
@@ -166,27 +274,34 @@ def build_digest(payloads: list[Any]) -> dict[str, Any]:
     events, cursor = _extract_events_and_meta(payloads)
 
     statements: list[dict[str, Any]] = []
+    telemetry_items: list[dict[str, Any]] = []
     claims_and_tasks: list[dict[str, Any]] = []
     project_choices: list[dict[str, Any]] = []
     corrections: list[dict[str, Any]] = []
+    lessons_and_reviews: list[dict[str, Any]] = []
     errors_and_failures: list[dict[str, Any]] = []
     other_operations: list[dict[str, Any]] = []
 
     for ev in events:
         op = ev.get("op")
-        item = _summarize_event(ev)
+        telemetry = _parse_telemetry(ev)
+        item = _summarize_event(ev, telemetry=telemetry)
 
-        if _has_error_signal(ev):
+        if _has_error_signal(ev, telemetry=telemetry):
             errors_and_failures.append(item)
 
-        if op == "say":
+        if telemetry is not None:
+            telemetry_items.append(item)
+        elif op == "say":
             statements.append(item)
         elif op in TASK_OPS:
             claims_and_tasks.append(item)
         elif op == "shelf":
             project_choices.append(item)
-        elif op in CORRECTION_OPS:
+        elif op in CORRECTION_OPS or op in GOVERNANCE_OPS:
             corrections.append(item)
+        elif op in LESSON_OPS:
+            lessons_and_reviews.append(item)
         else:
             other_operations.append(item)
 
@@ -205,8 +320,10 @@ def build_digest(payloads: list[Any]) -> dict[str, Any]:
         "claims_and_tasks": claims_and_tasks,
         "project_choices": project_choices,
         "corrections": corrections,
+        "lessons_and_reviews": lessons_and_reviews,
         "errors_and_failures": errors_and_failures,
         "statements": statements,
+        "telemetry": telemetry_items,
         "other_operations": other_operations,
         "limitations": limitations,
     }
@@ -218,7 +335,22 @@ def _fmt_items(items: list[dict[str, Any]]) -> list[str]:
     lines: list[str] = []
     for it in items:
         parts = [f"seq {it['sequence']}", f"`{it['op']}`", f"by `{it['actor']}`"]
-        for k in ("kind", "task", "choice", "idea", "outcome", "exit_code"):
+        for k in (
+            "report_type",
+            "kind",
+            "task",
+            "project",
+            "proposal",
+            "lesson",
+            "choice",
+            "idea",
+            "verdict",
+            "need",
+            "answer",
+            "status",
+            "outcome",
+            "exit_code",
+        ):
             if k in it:
                 parts.append(f"{k}={it[k]}")
         line = "- " + " | ".join(parts)
@@ -228,9 +360,26 @@ def _fmt_items(items: list[dict[str, Any]]) -> list[str]:
     return lines
 
 
+def _fmt_telemetry(items: list[dict[str, Any]], error_seqs: set[int]) -> list[str]:
+    if not items:
+        return ["- (none)"]
+    counts: dict[str, int] = {}
+    highlights: list[dict[str, Any]] = []
+    for it in items:
+        rtype = it.get("report_type", "unknown")
+        counts[rtype] = counts.get(rtype, 0) + 1
+        if rtype in TELEMETRY_HIGHLIGHT or it["sequence"] in error_seqs:
+            highlights.append(it)
+    lines = ["- Counts: " + ", ".join(f"{k}: {v}" for k, v in sorted(counts.items()))]
+    if highlights:
+        lines.extend(_fmt_items(highlights))
+    return lines
+
+
 def format_markdown(digest: dict[str, Any]) -> str:
     """Render a digest dictionary as concise GitHub-flavored Markdown."""
     c = digest["cursor"]
+    error_seqs = {it["sequence"] for it in digest["errors_and_failures"]}
     lines = [
         "# Wake Digest",
         "",
@@ -248,11 +397,17 @@ def format_markdown(digest: dict[str, Any]) -> str:
         "## Corrections & Governance Migrations",
         *_fmt_items(digest["corrections"]),
         "",
+        "## Lessons & Reviews",
+        *_fmt_items(digest.get("lessons_and_reviews", [])),
+        "",
         "## Errors, Failures & Scars",
         *_fmt_items(digest["errors_and_failures"]),
         "",
         "## Statements / Intentions (`say` — unverified)",
         *_fmt_items(digest["statements"]),
+        "",
+        "## Integrations, Deliveries & Telemetry",
+        *_fmt_telemetry(digest.get("telemetry", []), error_seqs),
         "",
         "## Limitations",
         *[f"- {lim}" for lim in digest["limitations"]],
