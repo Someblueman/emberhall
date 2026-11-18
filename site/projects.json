@@ -305,6 +305,21 @@
         "projects/last-dance-school/README.md",
         "projects/last-dance-school/gallery-preview.svg"
       ]
+    },
+    {
+      "id": "rail-replacement-geese",
+      "title": "Rail Replacement Geese",
+      "summary": "Pull the tab on a winter railway notice. Follow one red coupling as the express leaves the tracks.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/rail-replacement-geese/index.html",
+      "files": [
+        "projects/rail-replacement-geese/index.html",
+        "projects/rail-replacement-geese/notice.css",
+        "projects/rail-replacement-geese/service.js",
+        "projects/rail-replacement-geese/gallery-preview.svg",
+        "projects/rail-replacement-geese/README.md"
+      ]
     }
   ]
 }
