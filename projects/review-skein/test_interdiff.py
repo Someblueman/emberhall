@@ -511,6 +511,92 @@ class InterdiffTests(SkeinFixture):
         self.assertIn(".comment-extra code", page)
         self.assertIn("white-space: pre-wrap", page)
 
+    def test_divergent_unsuffixed_id_does_not_mislabel_non_divergent_sibling(self) -> None:
+        self.export()
+        p2 = self.root / "packet-copy"
+        shutil.copytree(self.packet, p2)
+        skein.add_comment(self.packet, "thread", self.head, "alpha.txt", "new", 1,
+                          "Original unsuffixed thread")
+        base_comment = skein.loads_comments((self.packet / "comments.json").read_text())[0]
+        older = [
+            base_comment,
+            replace(base_comment, identifier="thread--divergent-deadbeef",
+                    anchor=skein.Anchor(self.head, "alpha.txt", "new", 3, "\tTabbed"),
+                    body="Old sibling body"),
+        ]
+        newer = [
+            replace(base_comment,
+                    anchor=skein.Anchor(self.head, "alpha.txt", "new", 2, "<danger> & value")),
+            replace(older[1], body="Revised sibling body", resolution="resolved"),
+        ]
+        (self.packet / "comments.json").write_text(skein.dumps_comments(older))
+        (p2 / "comments.json").write_text(skein.dumps_comments(newer))
+
+        report = exchange.compare_packets(self.packet, p2)
+        self.assertEqual(["thread"], report["divergent"])
+        self.assertEqual(["thread--divergent-deadbeef"], report["resolved_or_edited"])
+
+        json_data = json.loads(interdiff.render_interdiff(self.packet, p2, output_format="json"))
+        self.assertEqual(3, len(json_data["comments"]))
+        sibling_entries = [e for e in json_data["comments"]
+                           if e["comment"]["id"] == "thread--divergent-deadbeef"]
+        self.assertEqual(1, len(sibling_entries))
+        self.assertEqual("V2", sibling_entries[0]["origin"])
+        self.assertEqual("resolved/edited", sibling_entries[0]["transition"])
+        self.assertEqual("Revised sibling body", sibling_entries[0]["comment"]["body"])
+
+        for fmt in ("text", "html"):
+            out = interdiff.render_interdiff(self.packet, p2, output_format=fmt)
+            self.assertIn("Revised sibling body", out)
+            self.assertNotIn("Old sibling body", out)
+            if fmt == "html":
+                self.assertEqual([], probe.audit(probe.parse(out)))
+
+        # Across two revisions with inline placement, a reanchored sibling keeps its own transition.
+        rev1, rev2 = self._build_two_revision_scenario()
+        v1_note = next(c for c in skein.loads_comments((rev1 / "comments.json").read_text())
+                       if c.identifier == "v1-only-note")
+        v2_note = next(c for c in skein.loads_comments((rev2 / "comments.json").read_text())
+                       if c.identifier == "new-v2-note")
+        rev_older = [
+            replace(v1_note, identifier="thread",
+                    anchor=skein.Anchor(v1_note.anchor.commit, "notes.txt", "new", 1, "first line"),
+                    body="V1 unsuffixed thread"),
+            replace(v1_note, identifier="thread--divergent-deadbeef",
+                    anchor=skein.Anchor(v1_note.anchor.commit, "notes.txt", "new", 2, "second line"),
+                    body="V1 sibling body"),
+        ]
+        rev_newer = [
+            replace(v2_note, identifier="thread",
+                    anchor=skein.Anchor(v2_note.anchor.commit, "notes.txt", "new", 1, "first line"),
+                    body="V2 unsuffixed thread"),
+            replace(v2_note, identifier="thread--divergent-deadbeef",
+                    anchor=skein.Anchor(v2_note.anchor.commit, "notes.txt", "new", 2, "second line revised"),
+                    rebased_from=rev_older[1].anchor,
+                    body="V2 reanchored sibling body"),
+        ]
+        (rev1 / "comments.json").write_text(skein.dumps_comments(rev_older))
+        (rev2 / "comments.json").write_text(skein.dumps_comments(rev_newer))
+
+        rev_report = exchange.compare_packets(rev1, rev2)
+        self.assertEqual(["thread"], rev_report["divergent"])
+        self.assertEqual(["thread--divergent-deadbeef"], rev_report["reanchored"])
+
+        rev_json = json.loads(interdiff.render_interdiff(rev1, rev2, output_format="json"))
+        self.assertEqual(["thread"], rev_json["placements"]["inline_v1_divergent"])
+        self.assertEqual(["thread", "thread--divergent-deadbeef"], rev_json["placements"]["inline_v2"])
+        rev_sibling = [e for e in rev_json["comments"]
+                       if e["comment"]["id"] == "thread--divergent-deadbeef"]
+        self.assertEqual(1, len(rev_sibling))
+        self.assertEqual("V2", rev_sibling[0]["origin"])
+        self.assertEqual("reanchored", rev_sibling[0]["transition"])
+        for fmt in ("text", "html"):
+            out = interdiff.render_interdiff(rev1, rev2, output_format=fmt)
+            self.assertIn("V2 reanchored sibling body", out)
+            self.assertNotIn("V1 sibling body", out)
+            if fmt == "html":
+                self.assertEqual([], probe.audit(probe.parse(out)))
+
 
 if __name__ == "__main__":
     unittest.main()

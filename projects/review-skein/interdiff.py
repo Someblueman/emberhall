@@ -311,10 +311,12 @@ def _build_plan(
         if comment.identifier in only_first_set:
             all_entries.append(_CommentEntry(comment, "V1-only", "only in V1"))
         elif (comment.identifier in divergent
-              or exchange.base_comment_id(comment.identifier) in divergent):
-            # compare_packets reports differing variant sets by logical ID. Keep
-            # every distinct older record, even when its exact ID also exists in
-            # V2; an identical shared record is already represented by V2.
+              or (comment.identifier not in labels
+                  and exchange.base_comment_id(comment.identifier) in divergent)):
+            # compare_packets puts a logical base ID in divergent only when
+            # V1 and V2 have differing variant-ID sets; when they share the same
+            # variant-ID set, each exact ID has its own entry in labels and only
+            # exact IDs present in divergent should emit a V1 (divergent) record.
             if comment != second_by_id.get(comment.identifier):
                 all_entries.append(_CommentEntry(comment, "V1", "divergent"))
 
