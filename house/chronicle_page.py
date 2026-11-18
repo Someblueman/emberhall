@@ -44,11 +44,18 @@ from typing import Any
 
 GITHUB_BASE = "https://github.com/Someblueman/emberhall/tree/main"
 SAFE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
-# Direct-owner enactment: house/maintenance.py enact_selection_repair enacts
-# this exact rule on an owner-migrate with this scope (mirrors the verifier).
+# Direct-owner enactments: house/maintenance.py enacts these exact rules on
+# owner-migrate events with these scopes; other migrations are runtime work.
 OWNER_SELECTION_SCOPE = "work-selection-repair-20261114"
 OWNER_SELECTION_RULE_ID = "work-selection-003"
 OWNER_SELECTION_TITLE = "Choose worthwhile work, or reject the shortlist"
+OWNER_MIGRATION_RULES = {
+    OWNER_SELECTION_SCOPE: (OWNER_SELECTION_RULE_ID, OWNER_SELECTION_TITLE),
+    "course-correction-20261115": (
+        "work-selection-004",
+        "Choose worthwhile work: one great work and one small project",
+    ),
+}
 
 
 def _is_verified_event(event: Any) -> bool:
@@ -232,6 +239,7 @@ def _derive_choices(
             if choice_id not in choices and candidates:
                 choices[choice_id] = {
                     "choice": choice_id,
+                    "slot": data.get("slot") if data.get("slot") in ("great", "small") else None,
                     "candidates": candidates,
                     "milestones": milestones,
                     "votes": [],
@@ -307,6 +315,7 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
     # Each project-done passes one stage; only the last finishes a great work.
     project_steps: list[tuple[str, dict[str, Any], int, int]] = []
+    dropped_projects: list[tuple[str, dict[str, Any]]] = []
     completed: dict[str, int] = {}
     terminal: set[str] = set()
     for ev in ordered:
@@ -325,6 +334,7 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         if kind == "project-drop":
             terminal.add(choice_id)
+            dropped_projects.append((choice_id, ev))
             continue
         plan = choice["milestones"][choice["winner"]]
         if not isinstance(plan, dict):
@@ -360,6 +370,8 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
         # yet, and guessing projects/<idea>/ would point at unbuilt directories.
         # Links appear only on recorded completed projects below.
         links: list[tuple[str, str]] = []
+        slot_prefix = "Great-work slot · " if choice.get("slot") == "great" else ""
+        base_summary = f"Winner: {winner_title}." if winner else "No candidate earned two of three votes."
         selected.append({
             "category": category,
             "category_key": category_key,
@@ -368,7 +380,7 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "timestamp": _format_timestamp(choice["closed_at"]),
             "actor": _safe_actor(choice["closed_actor"]),
             "title": title,
-            "summary": f"Winner: {winner_title}." if winner else "No candidate earned two of three votes.",
+            "summary": slot_prefix + base_summary,
             "links": links,
         })
 
@@ -394,6 +406,23 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "links": [(f"projects/{winner}/", _project_url(winner))] if finished else [],
         })
 
+    for choice_id, ev in dropped_projects:
+        winner = choices[choice_id]["winner"]
+        assert winner is not None
+        winner_title = idea_titles.get(winner, winner)
+        selected.append({
+            "category": "Stopped Project",
+            "category_key": "dropped",
+            "sequence": ev["sequence"],
+            "at": ev.get("at"),
+            "timestamp": _format_timestamp(ev.get("at")),
+            "actor": _safe_actor(ev.get("actor")),
+            "title": winner_title,
+            "summary": f"Project {choice_id} stopped before completion.",
+            "links": [],
+        })
+
+    rooms: dict[str, dict[str, Any]] = {}
     for ev in ordered:
         if ev["op"] == "council-enact":
             data = _event_data(ev)
@@ -413,11 +442,11 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "links": [],
             })
         elif ev["op"] == "owner-migrate":
-            # Direct-owner enactment (house/maintenance.py enact_selection_repair):
-            # only this exact scope enacts a rule; other migrations are runtime work.
             data = _event_data(ev)
-            if data.get("scope") != OWNER_SELECTION_SCOPE:
+            rule = OWNER_MIGRATION_RULES.get(data.get("scope"))
+            if rule is None:
                 continue
+            rule_id, rule_title = rule
             selected.append({
                 "category": "Enacted Rule",
                 "category_key": "rule",
@@ -425,10 +454,44 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "at": ev.get("at"),
                 "timestamp": _format_timestamp(ev.get("at")),
                 "actor": _safe_actor(ev.get("actor")),
-                "title": OWNER_SELECTION_TITLE,
-                "summary": f"Rule {OWNER_SELECTION_RULE_ID} enacted by direct-owner migration.",
+                "title": rule_title,
+                "summary": f"Rule {rule_id} enacted by direct-owner migration.",
                 "links": [],
             })
+        elif ev["op"] == "life":
+            data = _event_data(ev)
+            kind = data.get("kind")
+            room_id = _safe_id(data.get("room"))
+            if room_id is None:
+                continue
+            if kind in {"room-plan", "room-repurpose"}:
+                prior = rooms.get(room_id, {})
+                raw_floor = data.get("floor") if kind == "room-plan" else prior.get("floor", 0)
+                floor = raw_floor if type(raw_floor) is int and 0 <= raw_floor <= 99 else 0
+                rooms[room_id] = {
+                    "name": _safe_title(data.get("name"), room_id),
+                    "floor": floor,
+                    "builder": ev.get("actor"),
+                    "status": "construction",
+                }
+            elif kind == "room-close" and room_id in rooms:
+                rooms[room_id]["status"] = "closed"
+            elif kind == "room-open":
+                room = rooms.get(room_id)
+                if room is None or room["status"] != "construction" or room["builder"] != ev.get("actor"):
+                    continue
+                room["status"] = "open"
+                selected.append({
+                    "category": "Opened Room",
+                    "category_key": "room",
+                    "sequence": ev["sequence"],
+                    "at": ev.get("at"),
+                    "timestamp": _format_timestamp(ev.get("at")),
+                    "actor": _safe_actor(ev.get("actor")),
+                    "title": room["name"],
+                    "summary": f"Room {room_id} opened on floor {room['floor']}.",
+                    "links": [],
+                })
 
     selected.sort(key=lambda item: (item["sequence"], float(item["at"] or 0.0), item["title"]))
     return selected
@@ -469,6 +532,8 @@ def render_html(
     counts = {
         "project": sum(1 for m in milestones if m["category_key"] == "project"),
         "stage": sum(1 for m in milestones if m["category_key"] == "stage"),
+        "dropped": sum(1 for m in milestones if m["category_key"] == "dropped"),
+        "room": sum(1 for m in milestones if m["category_key"] == "room"),
         "rule": sum(1 for m in milestones if m["category_key"] == "rule"),
         "choice": sum(1 for m in milestones if m["category_key"] == "choice"),
         "rejected": sum(1 for m in milestones if m["category_key"] == "rejected"),
@@ -512,6 +577,8 @@ def render_html(
     kinds = [("all", "All milestones", len(milestones)),
              ("project", "Finished creations", counts["project"]),
              ("stage", "Passed stages", counts["stage"]),
+             ("dropped", "Stopped projects", counts["dropped"]),
+             ("room", "Opened rooms", counts["room"]),
              ("rule", "Enacted rules", counts["rule"]),
              ("choice", "Closed choices", counts["choice"]),
              ("rejected", "None chosen", counts["rejected"])]
@@ -549,15 +616,29 @@ def render_html(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>Emberhall Chronicle Room</title>
   <style>
     :root {{
+      color-scheme: light dark;
       --bg: #f6f2ea;
       --card: #fffdf9;
       --ink: #221f1a;
       --muted: #665e52;
       --border: #dfd6c7;
       --accent: #9b3d1e;
+      --accent-wash: #f7e7db;
+    }}
+    @media (prefers-color-scheme: dark) {{
+      :root {{
+        --bg: #171c22;
+        --card: #202731;
+        --ink: #f4eee3;
+        --muted: #c4bbad;
+        --border: #4b5058;
+        --accent: #ffb387;
+        --accent-wash: #2f251f;
+      }}
     }}
     body {{
       margin: 0;
@@ -575,6 +656,10 @@ def render_html(
       border-bottom: 2px solid var(--border);
       padding-bottom: 1rem;
       margin-bottom: 1.5rem;
+    }}
+    header a, .site-footer a {{
+      color: var(--accent);
+      text-underline-offset: 0.2em;
     }}
     h1 {{
       margin: 0 0 0.4rem;
@@ -610,7 +695,7 @@ def render_html(
     @supports selector(main:has(input:checked)) {{
       .browse-controls, .earlier-control, .recent-note {{ display: block; }}
       .earlier-control {{ padding: 0.5rem 0; cursor: pointer; }}
-      .browse-options label:has(input:checked) {{ border-color: var(--accent); background: #f7e7db; }}
+      .browse-options label:has(input:checked) {{ border-color: var(--accent); background: var(--accent-wash); }}
       main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry {{ display: none; }}
       main:has(#chronicle-earlier:checked) .recent-note {{ display: none; }}
       {browse_css}
@@ -657,7 +742,20 @@ def render_html(
       overflow-wrap: anywhere;
     }}
     .links .launch {{ font-weight: bold; }}
+    .site-footer {{
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.2rem;
+    }}
     a:focus-visible, summary:focus-visible, input:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 3px; }}
+    @media (forced-colors: active) {{
+      a:focus-visible, summary:focus-visible, input:focus-visible {{ outline-color: Highlight; }}
+    }}
   </style>
 </head>
 <body>
@@ -687,6 +785,12 @@ def render_html(
       {empty_states}
       {entries_block}
     </section>
+    <footer class="site-footer" aria-label="Emberhall rooms">
+      <a href="../index.html#house-view">House</a>
+      <a href="../index.html#projects-view">Projects</a>
+      <a href="../index.html#gallery-view">Gallery</a>
+      <a href="../index.html#council-view">Council</a>
+    </footer>
   </main>
 </body>
 </html>
