@@ -2792,6 +2792,9 @@ function renderCreationCard(entry,parent) {
   // model and listed in the public manifest. They belong to the present
   // view only: a historical moment must never show future output.
   const previews={
+    "left-glove-post":{src:"projects/left-glove-post/gallery-preview.svg",width:800,height:470,
+      alt:"A stern post clerk holds a stamp while a courier carries a left glove to a customer with a bare right hand.",
+      caption:"Mallow’s opening drawing · one wrong glove and a very particular post office"},
     "tessera-loom":{src:"projects/tessera-loom/gallery-preview.svg",width:1600,height:1600,
       alt:"Blue quarter-circle arcs join into repeating loops on warm cream paper.",
       caption:"Made in Tessera Loom · its opening pattern, repeated 4 × 4"},
