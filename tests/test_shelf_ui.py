@@ -64,6 +64,54 @@ assert.match(text(root),/not activated/);
                                 capture_output=True, text=True, timeout=15)
         self.assertEqual(0, result.returncode, result.stderr)
 
+    def test_other_work_shows_without_active_projects_and_find_matches_field_scale_owner(self):
+        source = Path(__file__).parents[1] / 'site/house.js'
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.classList={add(){},remove(){},toggle(){},contains(){return false;}};}
+  appendChild(node){this.children.push(node);return node;}
+  replaceChildren(){this.children=[];}
+  setAttribute(key,value){this[key]=value;}
+  addEventListener(){}
+}
+const root=new Element('section'), document={getElementById:()=>root,createElement:tag=>new Element(tag)};
+const text=node=>[node.textContent,...node.children.map(text)].join(' ');
+const all=node=>[node,...node.children.flatMap(all)];
+const context=vm.createContext({assert,document,URL,root,text,all});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
+vm.runInContext(`
+data={timezone:'UTC'};
+frame={
+  at:1000,
+  residents:[{id:'r1',name:'Rowan'},{id:'r2',name:'Mallow'}],
+  work:[{id:'upkeep-1',title:'Improve Study filters',plain:'Visitors can filter Study ideas by scale.',owner:'r1',at:900}],
+  shelf:{
+    enabled:true,
+    policy:'work-selection-004',
+    ideas:[
+      {id:'i-art',title:'Bell Choir',status:'shelved',scale:'great',author:'r2',brief:{field:'art'},sources:[]}
+    ],
+    projects:[]
+  }
+};
+shelf();
+const out=text(root);
+assert.match(out,/In motion/);
+assert.match(out,/Other work/);
+assert.match(out,/Visitors can filter Study ideas by scale/);
+const ideaNode=all(root).find(n=>String(n.className||'').includes('shelf-idea'));
+const findText=ideaNode['data-find'];
+assert.match(findText,/great work/);
+assert.match(findText,/art/);
+assert.match(findText,/mallow/);
+`,context);
+'''
+        result = subprocess.run([shutil.which('node'), '-e', script, str(source)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(0, result.returncode, result.stderr)
+
     def test_study_room_renders_only_when_recorded_and_links_to_shelf(self):
         source = Path(__file__).parents[1] / 'site/house.js'
         script = r'''

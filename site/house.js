@@ -2260,7 +2260,7 @@ function renderAssayRoom(content) {
   guideLink.target="_blank";
   guideLink.rel="noopener noreferrer";
 }
-let studyState={filter:"all",query:"",page:0,opened:new Set(),compare:[]};
+let studyState={filter:"all",scale:"all",query:"",page:0,opened:new Set(),compare:[]};
 const STUDY_PAGE_SIZE=4;
 function studyReadiness(idea) {
   // Grounding is the public journal projection, not an inference from a brief's presence.
@@ -2285,9 +2285,17 @@ function renderStudyDesk(content, dataShelf) {
   const statuses=[["all","All ideas"],["checked","Evidence checked"],["second","Needs more readers"],["research","Needs research"],["unknown","Earlier record · check unknown"]];
   statuses.forEach(([value,title])=>{const option=html("option","",title,filter);option.value=value;});
   filter.value=studyState.filter;
+  const scaleLabel=html("label","small","Scale",controls),scale=html("select","",undefined,scaleLabel);
+  scale.id="study-scale";scaleLabel.htmlFor=scale.id;
+  [["all","All scales"],["great","Great work"],["small","Small project"]].forEach(([value,title])=>{
+    const option=html("option","",title,scale);option.value=value;
+  });
+  scale.value=studyState.scale;
   const searchLabel=html("label","small","Find an idea",controls),search=html("input","",undefined,searchLabel);
-  search.id="study-search";searchLabel.htmlFor=search.id;search.type="search";search.placeholder="Title, purpose or resident";search.value=studyState.query;
+  search.id="study-search";searchLabel.htmlFor=search.id;search.type="search";search.placeholder="Title, plain summary, field or resident";search.value=studyState.query;
   search.setAttribute("aria-describedby","study-results");
+  const reset=html("button","quiet-button","Show everything",controls);
+  reset.id="study-reset";reset.type="button";
   const results=html("p","small",undefined,desk);results.id="study-results";results.setAttribute("role","status");
   const list=html("div","study-ideas",undefined,desk);
   function drawComparison() {
@@ -2307,6 +2315,11 @@ function renderStudyDesk(content, dataShelf) {
     chosen.forEach(idea=>{
       const cell=html("th","",undefined,head);cell.setAttribute("scope","col");
       html("span","",titleFor(idea,"idea"),cell);
+      const scaleText=idea.scale==="great"?"Great work":idea.scale==="small"?"Small project":null;
+      const keepsText=Array.isArray(idea.keeps)&&idea.keeps.length?`kept by ${idea.keeps.length}`:null;
+      const readyText=Number.isFinite(idea.vote_from)&&idea.vote_from<=observationTime()?"ready to vote":null;
+      const meta=[scaleText,idea.brief?.field,keepsText,readyText].filter(Boolean).join(" · ");
+      if(meta)html("span","small",meta,cell);
       const remove=workshopButton(cell,"Remove",()=>{
         studyState.compare=studyState.compare.filter(id=>id!==idea.id);draw();comparison.focus({preventScroll:true});
       });
@@ -2350,12 +2363,16 @@ function renderStudyDesk(content, dataShelf) {
     drawComparison();
     const query=workshopSearchText(studyState.query);
     const matches=ideas.filter(idea=>(studyState.filter==="all"||studyReadiness(idea)===studyState.filter)&&
-      (!query||[idea.title,idea.what,idea.why,residentName(idea.author)].some(value=>workshopSearchText(value).includes(query))));
+      (studyState.scale==="all"||ideaScale(idea)===studyState.scale)&&
+      (!query||[idea.title,idea.plain,idea.what,idea.why,idea.brief?.field,idea.brief?.for,
+        idea.scale==="great"?"great work":idea.scale==="small"?"small project":"",residentName(idea.author)]
+        .some(value=>workshopSearchText(value).includes(query))));
     const pages=Math.ceil(matches.length/STUDY_PAGE_SIZE);
     studyState.page=Math.min(studyState.page,Math.max(0,pages-1));
+    reset.disabled=studyState.filter==="all"&&studyState.scale==="all"&&!studyState.query;
     results.textContent=`${matches.length} of ${ideas.length} ideas match at this moment${pages?` · page ${studyState.page+1} of ${pages}`:""}`;
     list.replaceChildren();
-    if(!matches.length)html("p","empty-note","No ideas match. Clear the search or choose another research status.",list);
+    if(!matches.length)html("p","empty-note","No ideas match. Clear the search or choose another filter.",list);
     matches.slice(studyState.page*STUDY_PAGE_SIZE,(studyState.page+1)*STUDY_PAGE_SIZE).forEach(idea=>{
       const entry=html("div","study-idea",undefined,list);
       html("p","small",statuses.find(([value])=>value===studyReadiness(idea))[1],entry);
@@ -2384,7 +2401,13 @@ function renderStudyDesk(content, dataShelf) {
     }
   }
   filter.addEventListener("change",()=>{studyState.filter=filter.value;studyState.page=0;draw();});
+  scale.addEventListener("change",()=>{studyState.scale=scale.value;studyState.page=0;draw();});
   search.addEventListener("input",()=>{studyState.query=search.value;studyState.page=0;draw();});
+  reset.addEventListener("click",()=>{
+    studyState.filter="all";studyState.scale="all";studyState.query="";studyState.page=0;
+    filter.value="all";scale.value="all";search.value="";
+    draw();search.focus({preventScroll:true});
+  });
   draw();
 }
 // Frozen, invented Blackout Kit recovery drill; these are practice choices, not journal facts.
@@ -3374,7 +3397,9 @@ function renderRecentWork(items, parent, residentName, heading, none) {
 }
 function renderShelfProject(project, statusLabel, parent, residentName) {
   const item = html("article", "shelf-item", undefined, parent);
-  item.setAttribute?.("data-find", workshopSearchText([titleFor(project,"project"),project.plain||""].filter(Boolean).join(" ")));
+  item.setAttribute?.("data-find", workshopSearchText([titleFor(project,"project"),project.plain||"",
+    project.slot==="great"?"great work":project.slot==="small"?"small project":"",
+    project.brief?.field||"",residentName(project.owner)].filter(Boolean).join(" ")));
   html("strong", "", titleFor(project, "project"), item);
   const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
   html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
@@ -3450,7 +3475,9 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
 }
 function renderShelfIdea(idea, group, greatMode, residentName) {
   const item = html("details", "shelf-item shelf-idea", undefined, group);
-  item.setAttribute?.("data-find", workshopSearchText([titleFor(idea,"idea"),idea.plain||"",idea.what||""].filter(Boolean).join(" ")));
+  item.setAttribute?.("data-find", workshopSearchText([titleFor(idea,"idea"),idea.plain||"",idea.what||"",
+    idea.brief?.field||"",idea.scale==="great"?"great work":idea.scale==="small"?"small project":"",
+    residentName(idea.author)].filter(Boolean).join(" ")));
   const summary = html("summary", "", undefined, item);
   html("span", "shelf-idea-title", titleFor(idea, "idea"), summary);
   const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
@@ -3600,12 +3627,12 @@ function shelf() {
       if(query)retired.open=found;
     }
   }
-  // 1. In motion: what is being built now.
-  if(activeProjects.length) {
+  // 1. In motion: what is being built now, and recent house upkeep when no project is active.
+  const other=recentWork(entry=>!activeProjects.some(project=>workBelongs(entry,project)));
+  if(activeProjects.length||other.length) {
     const group=html("div","shelf-group shelf-motion",undefined,box);
     html("h2","","In motion",group);
     activeProjects.forEach(project=>renderShelfProject(project,"Active",group,residentName));
-    const other=recentWork(entry=>!activeProjects.some(project=>workBelongs(entry,project)));
     if(other.length){
       const aside=html("article","shelf-item",undefined,group);
       html("strong","","Other work",aside);
