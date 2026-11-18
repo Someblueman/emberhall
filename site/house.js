@@ -1597,8 +1597,9 @@ function renderHearth(content) {
       html("p","voice-text",voice.text,entry);
       if(visitable.has(voice.seq)) {
         const visit=workshopButton(entry,`Visit event ${voice.seq} →`,()=>{
-          // Further visits stay anchored to the conversation where this trip began.
-          if(voice.seq!==frame.seq&&(!hearthTrail||hearthTrail.sequence===frame.seq))
+          // Keep a nested trip's origin while published; a lost origin permits a fresh trip.
+          if(voice.seq!==frame.seq&&(!hearthTrail||hearthTrail.sequence===frame.seq||
+              !data.frames.some(moment=>moment.seq===hearthTrail.sequence)))
             hearthTrail={sequence:frame.seq,current,state:{...hearthState},target:visit.id};
           hearthState.page=0;jumpToSequence(voice.seq);
           const target=$(`hearth-message-${voice.seq}`)||document.querySelector?.(".room-card");
