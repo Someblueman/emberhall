@@ -95,3 +95,20 @@ assert.doesNotMatch(text(root),/Checked means another resident|Checked by anothe
 change('study-filter','unknown','change');
 assert.match(text(find('study-ideas')||root),/Earlier idea/);
 ''')
+
+    def test_comparison_header_shows_scale_field_and_keeps(self):
+        self.run_js(r'''
+ideas[0].scale='great';
+ideas[0].brief={...brief,field:'mathematics'};
+ideas[0].keeps=[{author:'r1',kind:'codex',finding:'Checked'},{author:'r2',kind:'muse',finding:'Checked'}];
+ideas[1].scale='small';
+ideas[1].brief={...brief,field:'art'};
+renderStudyDesk(root,shelfData);
+find('study-compare-add-checked').listeners.click();
+find('study-compare-add-second').listeners.click();
+const panel=find('study-comparison');
+assert.equal(all(panel).filter(n=>n.scope==='row').length,8);
+const cols=all(panel).filter(n=>n.scope==='col');
+assert.match(text(cols[0]),/Great work.*mathematics.*kept by 2/);
+assert.match(text(cols[1]),/Small project.*art/);
+''')

@@ -122,3 +122,38 @@ study.status='open';frame.shelf={enabled:false};roomPanel();
 assert.match(text(nodes['room-content']),/not activated/);
 frame.rooms=[];roomPanel();assert.doesNotMatch(text(nodes['room-content']),/Read the ideas/);
 ''')
+
+    def test_search_plain_field_scale_filter_and_reset(self):
+        self.run_js(r'''
+ideas[0].plain='Compose two magic tricks that share one card deal.';
+ideas[0].scale='great';
+ideas[0].brief={...brief,field:'language',for:'play'};
+ideas[1].scale='small';
+ideas[1].brief={...brief,field:'art',for:'play'};
+renderStudyDesk(root,shelfData);
+assert.equal(find('study-scale').value,'all');
+assert(find('study-reset').disabled);
+change('study-scale','great','change');
+assert.match(text(root),/1 of 6 ideas match/);
+assert.match(text(root),/Checked idea/);
+assert.doesNotMatch(text(root),/Second reader idea/);
+assert(!find('study-reset').disabled);
+change('study-scale','small','change');
+assert.match(text(root),/5 of 6 ideas match/);
+assert.doesNotMatch(text(root),/Checked idea/);
+change('study-scale','all','change');
+change('study-search','magic tricks','input');
+assert.match(text(root),/1 of 6 ideas match/);
+assert.match(text(root),/Checked idea/);
+change('study-search','language','input');
+assert.match(text(root),/1 of 6 ideas match/);
+change('study-search','great work','input');
+assert.match(text(root),/1 of 6 ideas match/);
+find('study-reset').listeners.click();
+assert.equal(find('study-scale').value,'all');
+assert.equal(find('study-filter').value,'all');
+assert.equal(find('study-search').value,'');
+assert(find('study-reset').disabled);
+assert.equal(document.activeElement.id,'study-search');
+assert.match(text(root),/6 of 6 ideas match/);
+''')
