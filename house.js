@@ -3013,6 +3013,9 @@ function creationPreview(entry) {
   // Shipped output belongs to the present view only, and must be listed
   // in the public manifest before either the card or picture viewer uses it.
   const previews={
+    "rail-replacement-geese":{src:"projects/rail-replacement-geese/gallery-preview.svg",width:760,height:385,
+      alt:"A rust-red dining car and two green coaches stand on a timber trestle above the frozen mere.",
+      caption:"Linnet’s winter railway notice · the express before you pull the tab"},
     "last-dance-school":{src:"projects/last-dance-school/gallery-preview.svg",width:900,height:600,
       alt:"Lio and Bea raise differently sized sleeves on one narrow plank between two lit village doors; Lio wears a blue thread.",
       caption:"Mallow’s performed reunion · two remembered dances on one narrow plank"},

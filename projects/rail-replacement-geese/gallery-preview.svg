@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="385" role="img" aria-labelledby="scene-title scene-description" viewBox="0 0 760 385">
+  <title id="scene-title">The Fen and Fell winter service</title>
+  <desc id="scene-description">Three green railway carriages stand on the track above a frozen mere.</desc>
+  <defs>
+    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(24)">
+      <path d="M1 0V7" stroke="#234b48" stroke-width="1.2" opacity=".45" />
+    </pattern>
+    <pattern id="sleepers" width="23" height="12" patternUnits="userSpaceOnUse">
+      <path d="M4 1l-5 10h9l5-10z" fill="#514f40" />
+    </pattern>
+    <pattern id="trestles" width="89" height="42" patternUnits="userSpaceOnUse" y="314">
+      <path d="M7 0h5l-2 32-5 1zm11 0h5l3 30-5 1zM8 6l64 22 5-2L12 2zm13 20L80 2h6L25 30z" fill="#53796d" />
+    </pattern>
+    <pattern id="snow" width="63" height="48" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="11" r="1.4" fill="#f8ecd4" />
+      <path d="m34 29 3-1" stroke="#f8ecd4" stroke-width="1.6" />
+    </pattern>
+    <g id="pine">
+      <path d="M0 0l-6 17 3-1-10 17 6-2-11 17 15-4-1 11 6 1-1-11 14 3-10-16 5 1-9-16 4 1z" fill="#426762" />
+      <path d="m0 6-4 13 4-2-8 14 7-3-7 12 10-5" fill="#d9e0cb" />
+    </g>
+  </defs>
+  <rect width="760" height="385" fill="#a7c4b9" />
+  <circle cx="617" cy="62" r="30" fill="#f2c278" />
+  <path d="M28 80q48-7 100-1m356-38q38-5 75-2m70 51q37-3 81-2" fill="none" stroke="#d1dbc7" stroke-width="3" />
+  <path d="m0 189 48-37 43 10 88-68 27 14 24-5 59 44 61-27 40 14 62-57 25 9 29-27 69 56 21-6 91 60 72-19v101H0z" fill="#678a80" />
+  <path d="m93 164 86-70 27 14 24-5 40 30-42-18-33 14 10-14-29 6-39 37 6-17zM390 146l62-69 25 9 29-27 69 56-48-23-16-19-24 29 1-11-41 29 8-15z" fill="#edf0d9" />
+  <path d="M0 187q112-44 248-12t295-18q102-26 217 11v90H0z" fill="#91ab98" />
+  <path d="M0 204q142-47 310-13t297-14q104-26 153-9v61H0z" fill="url(#hatch)" />
+  <path d="M0 224q127-47 302-18t301-10q86-21 157-16v205H0z" fill="#e7e6cc" />
+  <g>
+    <use href="#pine" transform="translate(14 166) scale(0.76)" />
+    <use href="#pine" transform="translate(34 181) scale(0.46)" />
+    <use href="#pine" transform="translate(65 177) scale(0.53)" />
+    <use href="#pine" transform="translate(102 186) scale(0.42)" />
+    <use href="#pine" transform="translate(281 178) scale(0.55)" />
+    <use href="#pine" transform="translate(294 169) scale(0.65)" />
+    <use href="#pine" transform="translate(314 184) scale(0.43)" />
+    <use href="#pine" transform="translate(512 172) scale(0.52)" />
+    <use href="#pine" transform="translate(526 161) scale(0.74)" />
+    <use href="#pine" transform="translate(547 179) scale(0.44)" />
+    <use href="#pine" transform="translate(692 164) scale(0.72)" />
+    <use href="#pine" transform="translate(713 154) scale(0.88)" />
+    <use href="#pine" transform="translate(737 173) scale(0.62)" />
+  </g>
+  <rect width="760" height="260" fill="url(#snow)" />
+  <path d="M0 289q102-23 203-9 190 22 355-6 119-18 202-12v75H0z" fill="#f3e9d0" />
+  <path d="M0 316h760v17q-135-9-241 3t-224 2Q135 328 0 348z" fill="#799a90" />
+  <path d="M0 340q129-26 261-9t237 6q158-22 262-9v57H0z" fill="#afcabc" />
+  <path d="M0 355q108-16 197-10m62 5q61 8 135 5m112-10q88-10 133-8m-558 31 80-4m298-1 63-4m97-4 116-6" stroke="#e8ecd8" stroke-width="3" fill="none" />
+  <path d="M0 314h760v34q-152-11-329 2t-255-3q-90-5-176 5z" fill="url(#trestles)" />
+  <path d="M0 303h760v9H0z" fill="url(#sleepers)" />
+  <path d="M0 303h760m-760 10h760" stroke="#294847" stroke-width="3" />
+  <g>
+    <g transform="translate(181 280) rotate(0) scale(1)">
+      <path fill="#9aa594" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-64.00 -28.00 Q-14.00 -36.00 56.00 -31.00 L69.00 -24.00 Q6.00 -18.00 -64.00 -28.00 Z" />
+      <path fill="#8f4936" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-75.00 -27.00 Q-78.00 -28.00 -78.00 -17.00 L-78.00 6.00 Q-76.00 12.00 -65.00 12.00 L70.00 12.00 Q78.00 12.00 78.00 4.00 L78.00 -21.00 Q78.00 -28.00 69.00 -27.00 Z" />
+      <path fill="#f6e9c9" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-74.00 2.00 Q-1.00 2.00 73.00 2.00 Q75.00 5.00 72.00 8.00 L-70.00 8.00 Q-75.00 8.00 -74.00 2.00 Z" />
+      <path fill="#386359" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-58.00 -20.00 Q-73.00 -18.00 -78.00 -8.00 Q-80.00 -5.00 -84.00 -5.00 Q-88.00 -5.00 -87.00 1.00 Q-86.00 5.00 -78.00 5.00 L-69.00 5.00 Q-57.00 5.00 -54.00 -2.00 Z" />
+      <path fill="#f6e9c9" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-84.00 -2.00 Q-81.00 -3.00 -76.00 -3.00 Q-77.00 2.00 -84.00 2.00 Z" />
+      <path fill="#dbac60" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-86.00 -3.00 Q-92.00 -3.00 -95.00 0.00 L-86.00 2.00 Z" />
+      <circle r="2" fill="#243e38" cx="-83" cy="-1" />
+      <path stroke="#243e38" stroke-width="1.5" fill="none" stroke-linecap="round" d="M-85.7 -4.5q2 -1 6 0" />
+      <g transform="translate(0 0) rotate(0) scale(1 1)">
+        <rect x="-61" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-59 -22h15l-4 4H-59z" fill="#b98451" />
+        <path d="M-58 -13h12q-1 5-6 5t-6-5z" fill="#f6e9c9" stroke="#243e38" stroke-width="0.9" />
+        <path d="M-49 -13l4-5" stroke="#243e38" stroke-width="1.3" />
+        <rect x="-36" y="-24" width="19" height="17" rx="2" fill="#edc882" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-34 -22h15l-4 4H-34z" fill="#b98451" />
+        <path d="M-32 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="-11" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-9 -22h15l-4 4H-9z" fill="#b98451" />
+        <path d="M-8 -13h12q-1 5-6 5t-6-5z" fill="#f6e9c9" stroke="#243e38" stroke-width="0.9" />
+        <path d="M1 -13l4-5" stroke="#243e38" stroke-width="1.3" />
+        <rect x="14" y="-24" width="19" height="17" rx="2" fill="#edc882" stroke="#243e38" stroke-width="1.3" />
+        <path d="M16 -22h15l-4 4H16z" fill="#b98451" />
+        <path d="M18 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="39" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M41 -22h15l-4 4H41z" fill="#b98451" />
+        <path d="M42 -13h12q-1 5-6 5t-6-5z" fill="#f6e9c9" stroke="#243e38" stroke-width="0.9" />
+        <path d="M51 -13l4-5" stroke="#243e38" stroke-width="1.3" />
+      </g>
+      <g transform="translate(-50 13) rotate(0) scale(1 1)">
+        <circle r="9" fill="#243e38" stroke="#f0dbac" stroke-width="1.2" />
+        <circle r="4" fill="#dbac60" />
+        <path d="M-6 0H6M0-6V6" stroke="#f6e9c9" stroke-width="1.2" />
+      </g>
+      <g transform="translate(49 13) rotate(0) scale(1 1)">
+        <circle r="9" fill="#243e38" stroke="#f0dbac" stroke-width="1.2" />
+        <circle r="4" fill="#dbac60" />
+        <path d="M-6 0H6M0-6V6" stroke="#f6e9c9" stroke-width="1.2" />
+      </g>
+      <path fill="#8f4936" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-80.00 -27.00 Q-79.00 -35.00 -64.00 -36.00 Q0.00 -39.00 69.00 -35.00 L80.00 -29.00 L64.00 -29.00 L60.00 -28.00 L40.00 -28.00 L34.00 -27.00 L10.00 -27.00 Q-42.00 -23.00 -80.00 -27.00 Z" />
+      <path fill="none" stroke="#f6e9c9" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" d="M-67.00 -33.00 Q-14.00 -36.00 45.00 -34.00 Q59.00 -34.00 72.00 -32.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M-32.00 -34.00 Q-28.00 -32.00 -27.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M-9.00 -34.00 Q-5.00 -32.00 -4.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M14.00 -34.00 Q18.00 -32.00 19.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M37.00 -34.00 Q41.00 -32.00 42.00 -28.00" />
+      <g transform="translate(0 0) rotate(0) scale(1)">
+        <rect x="-57" y="-6" width="114" height="17" rx="3" fill="#f6e9c9" stroke="#243e38" stroke-width="1.4" />
+        <text x="0" y="6" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="13" letter-spacing="1" fill="#243e38">DINING CAR</text>
+      </g>
+    </g>
+    <g transform="translate(367 280) rotate(0) scale(1)">
+      <path fill="#9aa594" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-64.00 -28.00 Q-14.00 -36.00 56.00 -31.00 L69.00 -24.00 Q6.00 -18.00 -64.00 -28.00 Z" />
+      <path fill="#315e55" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-75.00 -27.00 Q-78.00 -28.00 -78.00 -17.00 L-78.00 6.00 Q-76.00 12.00 -65.00 12.00 L70.00 12.00 Q78.00 12.00 78.00 4.00 L78.00 -21.00 Q78.00 -28.00 69.00 -27.00 Z" />
+      <path fill="#f6e9c9" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-74.00 2.00 Q-1.00 2.00 73.00 2.00 Q75.00 5.00 72.00 8.00 L-70.00 8.00 Q-75.00 8.00 -74.00 2.00 Z" />
+      <path fill="#386359" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-58.00 -20.00 Q-73.00 -18.00 -78.00 -8.00 Q-80.00 -5.00 -84.00 -5.00 Q-88.00 -5.00 -87.00 1.00 Q-86.00 5.00 -78.00 5.00 L-69.00 5.00 Q-57.00 5.00 -54.00 -2.00 Z" />
+      <path fill="#f6e9c9" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-84.00 -2.00 Q-81.00 -3.00 -76.00 -3.00 Q-77.00 2.00 -84.00 2.00 Z" />
+      <path fill="#dbac60" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-86.00 -3.00 Q-92.00 -3.00 -95.00 0.00 L-86.00 2.00 Z" />
+      <circle r="2" fill="#243e38" cx="-83" cy="-1" />
+      <path stroke="#243e38" stroke-width="1.5" fill="none" stroke-linecap="round" d="M-85.7 -4.5q2 -1 6 0" />
+      <g transform="translate(0 0) rotate(0) scale(1 1)">
+        <rect x="-61" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-59 -22h15l-4 4H-59z" fill="#b98451" />
+        <path d="M-57 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="-36" y="-24" width="19" height="17" rx="2" fill="#edc882" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-34 -22h15l-4 4H-34z" fill="#b98451" />
+        <path d="M-32 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="-11" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-9 -22h15l-4 4H-9z" fill="#b98451" />
+        <path d="M-7 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="14" y="-24" width="19" height="17" rx="2" fill="#edc882" stroke="#243e38" stroke-width="1.3" />
+        <path d="M16 -22h15l-4 4H16z" fill="#b98451" />
+        <path d="M18 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="39" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M41 -22h15l-4 4H41z" fill="#b98451" />
+        <path d="M43 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+      </g>
+      <g transform="translate(-50 13) rotate(0) scale(1 1)">
+        <circle r="9" fill="#243e38" stroke="#f0dbac" stroke-width="1.2" />
+        <circle r="4" fill="#dbac60" />
+        <path d="M-6 0H6M0-6V6" stroke="#f6e9c9" stroke-width="1.2" />
+      </g>
+      <g transform="translate(49 13) rotate(0) scale(1 1)">
+        <circle r="9" fill="#243e38" stroke="#f0dbac" stroke-width="1.2" />
+        <circle r="4" fill="#dbac60" />
+        <path d="M-6 0H6M0-6V6" stroke="#f6e9c9" stroke-width="1.2" />
+      </g>
+      <path fill="#315e55" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-80.00 -27.00 Q-79.00 -35.00 -64.00 -36.00 Q0.00 -39.00 69.00 -35.00 L80.00 -29.00 L64.00 -29.00 L60.00 -28.00 L40.00 -28.00 L34.00 -27.00 L10.00 -27.00 Q-42.00 -23.00 -80.00 -27.00 Z" />
+      <path fill="none" stroke="#f6e9c9" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" d="M-67.00 -33.00 Q-14.00 -36.00 45.00 -34.00 Q59.00 -34.00 72.00 -32.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M-32.00 -34.00 Q-28.00 -32.00 -27.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M-9.00 -34.00 Q-5.00 -32.00 -4.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M14.00 -34.00 Q18.00 -32.00 19.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M37.00 -34.00 Q41.00 -32.00 42.00 -28.00" />
+      <g transform="translate(0 0) rotate(0) scale(1 1)">
+        <path d="M-65-4H65" stroke="#dbac60" stroke-width="2" />
+      </g>
+    </g>
+    <g transform="translate(553 280) rotate(0) scale(1)">
+      <path fill="#9aa594" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-64.00 -28.00 Q-14.00 -36.00 56.00 -31.00 L69.00 -24.00 Q6.00 -18.00 -64.00 -28.00 Z" />
+      <path fill="#477369" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-75.00 -27.00 Q-78.00 -28.00 -78.00 -17.00 L-78.00 6.00 Q-76.00 12.00 -65.00 12.00 L70.00 12.00 Q78.00 12.00 78.00 4.00 L78.00 -21.00 Q78.00 -28.00 69.00 -27.00 Z" />
+      <path fill="#f6e9c9" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-74.00 2.00 Q-1.00 2.00 73.00 2.00 Q75.00 5.00 72.00 8.00 L-70.00 8.00 Q-75.00 8.00 -74.00 2.00 Z" />
+      <path fill="#386359" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-58.00 -20.00 Q-73.00 -18.00 -78.00 -8.00 Q-80.00 -5.00 -84.00 -5.00 Q-88.00 -5.00 -87.00 1.00 Q-86.00 5.00 -78.00 5.00 L-69.00 5.00 Q-57.00 5.00 -54.00 -2.00 Z" />
+      <path fill="#f6e9c9" stroke="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-84.00 -2.00 Q-81.00 -3.00 -76.00 -3.00 Q-77.00 2.00 -84.00 2.00 Z" />
+      <path fill="#dbac60" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-86.00 -3.00 Q-92.00 -3.00 -95.00 0.00 L-86.00 2.00 Z" />
+      <circle r="2" fill="#243e38" cx="-83" cy="-1" />
+      <path stroke="#243e38" stroke-width="1.5" fill="none" stroke-linecap="round" d="M-85.7 -4.5q2 -1 6 0" />
+      <g transform="translate(0 0) rotate(0) scale(1 1)">
+        <rect x="-61" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-59 -22h15l-4 4H-59z" fill="#b98451" />
+        <path d="M-57 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="-36" y="-24" width="19" height="17" rx="2" fill="#edc882" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-34 -22h15l-4 4H-34z" fill="#b98451" />
+        <path d="M-32 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="-11" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M-9 -22h15l-4 4H-9z" fill="#b98451" />
+        <path d="M-7 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="14" y="-24" width="19" height="17" rx="2" fill="#edc882" stroke="#243e38" stroke-width="1.3" />
+        <path d="M16 -22h15l-4 4H16z" fill="#b98451" />
+        <path d="M18 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+        <rect x="39" y="-24" width="19" height="17" rx="2" fill="#f0dbac" stroke="#243e38" stroke-width="1.3" />
+        <path d="M41 -22h15l-4 4H41z" fill="#b98451" />
+        <path d="M43 -9l8-10" stroke="#f6e9c9" stroke-width="1.8" />
+      </g>
+      <g transform="translate(-50 13) rotate(0) scale(1 1)">
+        <circle r="9" fill="#243e38" stroke="#f0dbac" stroke-width="1.2" />
+        <circle r="4" fill="#dbac60" />
+        <path d="M-6 0H6M0-6V6" stroke="#f6e9c9" stroke-width="1.2" />
+      </g>
+      <g transform="translate(49 13) rotate(0) scale(1 1)">
+        <circle r="9" fill="#243e38" stroke="#f0dbac" stroke-width="1.2" />
+        <circle r="4" fill="#dbac60" />
+        <path d="M-6 0H6M0-6V6" stroke="#f6e9c9" stroke-width="1.2" />
+      </g>
+      <path fill="#477369" stroke="#243e38" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M-80.00 -27.00 Q-79.00 -35.00 -64.00 -36.00 Q0.00 -39.00 69.00 -35.00 L80.00 -29.00 L64.00 -29.00 L60.00 -28.00 L40.00 -28.00 L34.00 -27.00 L10.00 -27.00 Q-42.00 -23.00 -80.00 -27.00 Z" />
+      <path fill="none" stroke="#f6e9c9" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" d="M-67.00 -33.00 Q-14.00 -36.00 45.00 -34.00 Q59.00 -34.00 72.00 -32.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M-32.00 -34.00 Q-28.00 -32.00 -27.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M-9.00 -34.00 Q-5.00 -32.00 -4.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M14.00 -34.00 Q18.00 -32.00 19.00 -28.00" />
+      <path fill="none" stroke="#9bb39a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" d="M37.00 -34.00 Q41.00 -32.00 42.00 -28.00" />
+      <g transform="translate(0 0) rotate(0) scale(1 1)">
+        <path d="M-65-4H65" stroke="#dbac60" stroke-width="2" />
+      </g>
+    </g>
+  </g>
+  <g id="coupling" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path id="rope-edge" d="M273 280 Q265 283 257 279" stroke="#f8ead0" stroke-width="8" />
+    <path id="rope" d="M273 280 Q265 283 257 279" stroke="#b23e2a" stroke-width="5" />
+    <circle id="bolt" cx="257" cy="279" r="3.4" fill="#ad3928" stroke="#f8ead0" stroke-width="1.2" />
+  </g>
+  <g transform="translate(23 267)" fill="#23423e">
+    <path d="M5 1h3v40H5z" />
+    <rect x="-14" y="-6" width="45" height="14" rx="2" fill="#eee2c6" stroke="#23423e" stroke-width="1.8" />
+    <text x="8" y="4" text-anchor="middle" font-size="8" font-weight="bold" font-family="sans-serif">MERE</text>
+  </g>
+  <path d="m0 378 27-7 11-15 2 16 23-10-9 15 36-6 15 14H0zm760-18-30 9-8-21-2 23-20-9 8 12-42-1-12 12h106z" fill="#365b53" />
+</svg>
