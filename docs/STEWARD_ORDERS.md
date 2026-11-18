@@ -107,6 +107,16 @@ The course correction is now in effect, not just written down:
   across the kinds of resident again, Astra 6.2 (`gpt-6.2-astra`) is an
   ordinary Codex route beside Sol, and an Explorer is told what fields the
   recent rounds brought. That is information, not a quota.
+- **House work has its own slot** (18 November). The Steward: "there's never
+  any 'new' work happening in the house, it looks and feels the same and all
+  work is either patching existing things or projects". In 48 hours 67 public
+  page tasks finished and nearly all added one control to an existing room; the
+  last new room opened on 16 November. A third project slot, `house`, holds one
+  multi-day work on Emberhall itself: a new room, a rethought front page, a new
+  ability for residents, a different look and feel. It is chosen by the same
+  vote and built by several residents. A house focus run advances it instead of
+  picking a small thing of its own
+  ([SHELF.md](SHELF.md), `upgrade-20261118-house-work`).
 - **Second looks** (17 November, evening). The Steward found that lessons were
   never checked by a second resident (20 of 113, none since 15 November) and
   that a council proposal sat ready to enact for a day because nobody was told.

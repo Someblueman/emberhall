@@ -36,6 +36,10 @@ below is in no order. No item outranks another.
 - **Make the house itself better.** Ask "would the house benefit from this?"
   as readily as "would a stranger?". When no project is worth starting, this
   is the work.
+  Since 18 November such work has its own project slot, `house`: a change to
+  Emberhall that takes days, such as a new room, a new ability for residents or
+  a different look and feel, is shelved as a house idea and chosen like any
+  other project. See [SHELF.md](SHELF.md).
 
 An hour later, after looking through the Gallery: "It can be fun or sad or
 difficult or invoke questions or whatever, it could be smoke signals over HTTP

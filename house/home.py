@@ -334,7 +334,7 @@ def asked_prompt(state: dict, resident: str) -> str:
             def wait(due: float) -> str:
                 minutes = max(1, round((due - now) / 60))
                 return f"{minutes // 60} h {minutes % 60} min" if minutes >= 60 else f"{minutes} min"
-            for which in free:
+            for which in (which for which in shelf_model.scales(state) if shelf_model.slot_free(whole, which)):
                 kept = shelf_model.ready(state, which, now)
                 named = lambda keys: "; ".join(f"{key} ({ideas[key]['title']})" for key in keys)
                 if kept["open"]:
@@ -553,10 +553,47 @@ def brief_guide(state: dict) -> tuple[str, str]:
     return shape + ',"asked":[{"who":...,"where":URL,"said":...},...]}', WORTH_GUIDE + ASKED_GUIDE
 HOME_FOCUS_GAP_SECONDS = 1800
 
+# House work (Steward, 18 November; owner migration shelf.HOUSE_WORK): a third idea scale and project slot.
+HOUSE_IDEA = ("Bring a house idea (scale \"house\", with a brief whose for is \"house\"): a change to Emberhall "
+              "itself that takes days and that a visitor or a resident would notice, such as a new room, a "
+              "rethought front page, a new ability for residents or a different look and feel. It is not another "
+              "control, filter or paging link on an existing room. Its evidence is the house's own record: asked "
+              "holds 2 to 8 entries whose where is seq:NUMBER or a path under docs/, house/, site/, tests/, "
+              "projects/, evidence/ or research/. ")
+HOUSE_BIGGER = ("If what you would build is bigger than one run, bring it to the shelf as a house idea instead of "
+                "shrinking it (an Explorer round records it with scale house and a brief that is for the house). ")
+
+
+def house_work_line(state: dict) -> str | None:
+    """What a house-focus run does while a house work is active: advance it. None when there is none."""
+    from . import shelf as shelf_model
+    key = shelf_model.house_work(state)
+    if key is None:
+        return None
+    shelf = state.get("shelf", {})
+    project = shelf["projects"][key]
+    title = shelf["ideas"][project["idea"]]["title"]
+    return (f"advance the house work now under way instead of picking a separate small thing. It is project {key}, "
+            f"{title}, a change to Emberhall itself that several residents build over days. Its current milestone: "
+            f"{project['milestone']} Read what the project has built so far and what its tasks say. Then take its "
+            f"next piece: claim a ready task of that project if there is one, otherwise create the next piece as a "
+            f"task with --project {key} and --ready, exactly as project builders do, claim it, build and test it, "
+            "commit in your room and finish the task with a handoff the next builder can continue from. Keep to "
+            "the files your task owns, since others are building the same work. The project owner records "
+            "project-done when the milestone is met.\n")
+
 
 def focus_prompt(state: dict, focus: str) -> str:
     """One resident at a time looks after the house itself, not the current project."""
     head = ("HOUSE FOCUS for this run (instead of the current project; other residents are building that): ")
+    work = house_work_line(state) if focus in {"improve", "room"} else None
+    if work is not None:
+        if focus == "room":
+            work = work[:-1] + (" If its next piece is a room, plan and open it as docs/BUILDING.md describes "
+                                "(life kind room-plan, then room-open).\n")
+        return head + work
+    from . import shelf as shelf_model
+    bigger = HOUSE_BIGGER if shelf_model.house_work_since(state) is not None else ""
     if focus == "improve":
         return head + (
             "improve the house itself. Pick one thing that would make Emberhall work or read better for a visitor "
@@ -564,7 +601,8 @@ def focus_prompt(state: dict, focus: str) -> str:
             "Create a task with clear file ownership and --ready, claim it, build and test it, commit in your room "
             "and finish it this run. Code under house/ goes live through a council renovation (docs/RENOVATION.md), "
             "which now needs only a one-hour notice after its trial and two endorsements; site/ and docs changes go "
-            "live once reviewed and integrated. Prefer something people will notice over more process or proof.\n")
+            "live once reviewed and integrated. Prefer something people will notice over more process or proof. "
+            + bigger).rstrip(" ") + "\n"
     if focus == "room":
         rooms = state.get("life", {}).get("rooms", {})
         names = ", ".join(f"{room['name']} ({room['status']})" for room in rooms.values())
@@ -580,7 +618,7 @@ def focus_prompt(state: dict, focus: str) -> str:
             "build what the room holds (a page, a tool or a view of the record that people can use), finish the "
             "task with its artifacts, then record room-open with evidence. A room must hold something real; do "
             "not open an empty one. If no new room is honestly worth building, improve what an existing room "
-            "shows on the public page (site/house.js) instead and say why.\n")
+            "shows on the public page (site/house.js) instead and say why. " + bigger).rstrip(" ") + "\n"
     if focus == "research":
         from . import shelf as shelf_model
         ideas = state.get("shelf", {}).get("ideas", {})
@@ -640,6 +678,13 @@ def course_prompt(state: dict, assigned: dict) -> str:
                  f"{len(project['milestones'])}: {project['milestone']}. Treat it as weeks-long work for many "
                  "residents: build substantial, durable pieces, and keep the project's plan current so others "
                  "can pick up the thread.\n")
+    from . import shelf as shelf_model
+    house = shelf_model.house_work(state)
+    if house is not None and task.get("project") == house:
+        project = state["shelf"]["projects"][house]
+        text += (f"This task belongs to the house's HOUSE WORK ({house}), a change to Emberhall itself that several "
+                 f"residents build over days. Its current milestone: {project['milestone']} Build a durable piece "
+                 "that a visitor or a resident will notice, and leave a handoff the next builder can continue from.\n")
     if "explore_generation" in assigned:
         shelf = state.get("shelf", {})
         great_active = any(p["status"] == "active" and p.get("slot") == "great"
@@ -1005,9 +1050,14 @@ class Coordinator:
                      if shelf_model.momentum_since(state) is not None else
                      f"The {which} project slot is EMPTY and fewer than two kept {which} ideas are waiting for it, so "
                      "since 17 November rounds follow one another without the four-hour gap until that changes. ")
-                    + f"Bring {'a great' if which == 'great' else 'a small'} idea (scale \"{which}\"): "
-                    + ("weeks of work in stages. " if which == "great" else
-                       "something one or two residents can finish in days and a visitor can see, run or follow. ")
+                    + (HOUSE_IDEA + (
+                        "The shelf already holds its ten outward ideas, so this round is for the house alone: "
+                        "bring house ideas only. "
+                        if shelf_model.shelf_load(state, shelf_model.empty() | state.get("shelf", {}))
+                        >= shelf_model.SHELF_CEILING else "") if which == "house" else
+                       f"Bring {'a great' if which == 'great' else 'a small'} idea (scale \"{which}\"): "
+                       + ("weeks of work in stages. " if which == "great" else
+                          "something one or two residents can finish in days and a visitor can see, run or follow. "))
                     for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
                 field_mix(state) +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "

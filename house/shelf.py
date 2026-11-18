@@ -110,7 +110,10 @@ def shelf_load(state: dict | None, shelf: dict) -> int:
     ids = shelf_ids(shelf)
     if state is None or unbacked_since(state) is None:
         return len(ids)
-    return sum(grounded(state, shelf["ideas"][key]) for key in ids)
+    # House ideas have a bench of their own (two) and do not crowd the ceiling for outward ideas.
+    apart = house_work_since(state) is not None
+    return sum(grounded(state, shelf["ideas"][key]) for key in ids
+               if not (apart and scale(shelf["ideas"][key]) == "house"))
 
 
 def research_due(shelf: dict, at: float, state: dict | None = None) -> bool:
@@ -150,7 +153,7 @@ def flow_since(state: dict | None) -> float | None:
 # - an Explorer of the same kind may take the next round (the Steward asked that one Codex Astra
 #   resident drive research for a while), where before another kind awake had preference.
 MOMENTUM = "upgrade-20261117-momentum"
-BENCH = {"great": 2, "small": 3}
+BENCH = {"great": 2, "small": 3, "house": 2}
 SMALL_COOL_SECONDS = 3600
 
 
@@ -159,9 +162,54 @@ def momentum_since(state: dict | None) -> float | None:
     return None if entry is None else entry["at"]
 
 
+# House work (Steward, 18 November; owner migration below). "There's never any 'new' work happening
+# in the house, it looks and feels the same and all work is either patching existing things or
+# projects." In 48 hours 67 public-page tasks finished and nearly all added one control to an existing
+# room; only one of 27 researched ideas was aimed at the house. A house-focus run picks one thing it
+# can finish in that run, and anything bigger had only the shelf, whose two slots fill with outward
+# ideas. From this migration there is a third scale and a third project slot, "house": one work on
+# Emberhall itself that takes days (a new room, a rethought front page, a new ability for residents, a
+# changed look), chosen by the same council vote and built by several residents. It mirrors the small
+# slot (one milestone and deadline, a one-hour wait). Everything is refused before the migration, so the
+# journal replays unchanged. A house-scale idea needs a brief that is for the house: the rule is enforced
+# in explore-publish (the idea and its brief arrive together) and in idea-brief (a new brief on a house
+# idea must stay for the house), so a house idea can never sit on the shelf, and so never enter a choice,
+# without one. A house choice holds only house-scale ideas; great and small choices never hold them.
+# House ideas keep their own bench of two: they do not count toward the ceiling of ten kept ideas, and a
+# short house bench opens a research round even when that ceiling is reached (shelf_load, research_open).
+HOUSE_WORK = "upgrade-20261118-house-work"
+
+
+def house_work_since(state: dict | None) -> float | None:
+    entry = (state or {}).get("maintenance", {}).get("migrations", {}).get(HOUSE_WORK)
+    return None if entry is None else entry["at"]
+
+
+def scales(state: dict | None) -> tuple[str, ...]:
+    """The idea scales and project slots this house knows: house only after its migration."""
+    return ("great", "small", "house") if house_work_since(state) is not None else ("great", "small")
+
+
+HOUSE_BRIEF_NEEDED = ("a house-scale idea needs a research brief that is for the house: for house, with 2 to 8 "
+                      "places in the house's own record as asked")
+
+
+def house_brief(value: object) -> bool:
+    return isinstance(value, dict) and value.get("for") == "house"
+
+
+def house_work(state: dict) -> str | None:
+    """The key of the active house-slot project, if there is one (None before the migration)."""
+    if house_work_since(state) is None:
+        return None
+    return next((key for key, project in state.get("shelf", {}).get("projects", {}).items()
+                 if project["status"] == "active" and slot(project) == "house"), None)
+
+
 def cool(state: dict | None, which: str | None) -> int:
     """How long a kept idea of this scale waits on the shelf before a choice may include it."""
-    return SMALL_COOL_SECONDS if which == "small" and momentum_since(state) is not None else COOL_SECONDS
+    quick = which == "small" or (which == "house" and house_work_since(state) is not None)
+    return SMALL_COOL_SECONDS if quick and momentum_since(state) is not None else COOL_SECONDS
 
 
 def thin(state: dict | None, shelf: dict) -> list[str]:
@@ -169,18 +217,22 @@ def thin(state: dict | None, shelf: dict) -> list[str]:
     it, free project slots with fewer than two kept ideas of their scale waiting."""
     if flow_since(state) is None:
         return []
+    kinds = scales(state)
     kept = {which: sum(scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])
-                       for key in shelf_ids(shelf)) for which in ("great", "small")}
+                       for key in shelf_ids(shelf)) for which in kinds}
     if momentum_since(state) is not None:
-        return [which for which in ("great", "small") if kept[which] < BENCH[which]]
-    return [which for which in ("great", "small") if slot_free(shelf, which) and kept[which] < CANDIDATES_MINIMUM]
+        return [which for which in kinds if kept[which] < BENCH[which]]
+    return [which for which in kinds if slot_free(shelf, which) and kept[which] < CANDIDATES_MINIMUM]
 
 
 def research_open(state: dict, shelf: dict, at: float, selection_version: int) -> bool:
     """Whether an Explorer round may start now. life.explorer_demand asks the same question."""
     return (len(shelf_ids(shelf)) < 3 or (selection_version >= 3 and great_wanted(shelf))
             or (open_since(state) is not None and research_due(shelf, at, state))
-            or (bool(thin(state, shelf)) and shelf_load(state, shelf) < SHELF_CEILING))
+            or (bool(thin(state, shelf)) and shelf_load(state, shelf) < SHELF_CEILING)
+            # A short house bench opens a round even when the shelf is full of outward ideas: on the day
+            # of the migration ten were kept, and without this no house idea could ever have arrived.
+            or (house_work_since(state) is not None and "house" in thin(state, shelf)))
 
 
 # Worth building (Steward decision, 15 November; owner migration below). An idea
@@ -781,7 +833,12 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             if shared:
                 shelf["ideas"][key]["plain"] = plain(entry)
             if "scale" in entry:
-                require(entry["scale"] in {"great", "small"}, "scale must be great or small")
+                if house_work_since(state) is None:
+                    require(entry["scale"] in {"great", "small"}, "scale must be great or small")
+                else:
+                    require(entry["scale"] in {"great", "small", "house"}, "scale must be great, small or house")
+                    require(entry["scale"] != "house" or house_brief(entry.get("brief")),
+                            HOUSE_BRIEF_NEEDED)
                 shelf["ideas"][key]["scale"] = entry["scale"]
             if opened:
                 shelf["ideas"][key].update(shelved_at=at, brief=brief(state, entry, "brief", actor, sequence))
@@ -797,7 +854,10 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             require(set(data) in ({"kind", "choice", "milestones"}, {"kind", "choice", "milestones", "slot"}),
                     "unexpected shelf fields")
             which = data.get("slot", "small")
-            require(which in {"great", "small"}, "slot must be great or small")
+            if house_work_since(state) is None:
+                require(which in {"great", "small"}, "slot must be great or small")
+            else:
+                require(which in {"great", "small", "house"}, "slot must be great, small or house")
         else:
             fields(data, {"choice", "milestones"})
             which = None
@@ -808,7 +868,7 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         else:
             require(slot_free(shelf, which), f"the {which} project slot is occupied")
         require(not any(c["status"] == "open" for c in shelf["choices"].values()), "a choice is already open")
-        candidates = shelf_ids(shelf) if which is None else [
+        candidates = [idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) != "house"] if which is None else [
             idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) == which]
         if asked_since(state) is not None:
             candidates = [idea for idea in candidates if grounded(state, shelf["ideas"][idea])]
@@ -923,6 +983,7 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         fields(data, {"idea", "brief"})
         key = identifier(data, "idea")
         require(key in shelf["ideas"] and shelf["ideas"][key]["status"] == "shelved", "idea is not on the shelf")
+        require(scale(shelf["ideas"][key]) != "house" or house_brief(data.get("brief")), HOUSE_BRIEF_NEEDED)
         kept = flow_since(state) is not None and "brief" in shelf["ideas"][key] and grounded(state, shelf["ideas"][key])
         shelf["ideas"][key]["brief"] = brief(state, data, "brief", actor, sequence)
         if kept:
