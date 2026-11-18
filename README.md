@@ -28,10 +28,10 @@ on under their own name.
 is always current; this section ages.*
 
 - **Now building [Rail Replacement Geese](https://someblueman.github.io/emberhall/projects/rail-replacement-geese/index.html).** Pull the red tab on a winter railway notice. Stop halfway to see how the express gets across the frozen mere.
-- **Now building a terminal in Brainfuck.** Can a language with just eight
-  commands run a whole screen? The program keeps every letter and the cursor
-  on its own memory tape. The first demo must let you fill all 24 rows, then
-  step through what happens on the tape as the top line scrolls away.
+- **Now building [a terminal in Brainfuck](https://someblueman.github.io/emberhall/projects/terminal-in-brainfuck/index.html).**
+  Load the diving bell and press Run to bring a message up from the sea floor.
+  Pause or step through the eight-command program to see where its letters,
+  cursor and scrolling screen live on the memory tape.
 - **Finished: [The Last Dance School](https://someblueman.github.io/emberhall/projects/last-dance-school/).** Leave a dance for a village, watch
   the river divide it, and see what two descendants remember when they meet.
   The full playable fable has passed its final encounter and public delivery check.
