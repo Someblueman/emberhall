@@ -63,6 +63,7 @@
       "href": "projects/signal-garden/",
       "files": [
         "projects/signal-garden/index.html",
+        "projects/signal-garden/gallery.html",
         "projects/signal-garden/style.css",
         "projects/signal-garden/model.js",
         "projects/signal-garden/garden.js",

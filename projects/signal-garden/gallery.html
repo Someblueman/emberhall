@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signal Garden · Scratch the signal</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #21392f; background: #f7f1df; font: 1rem/1.4 system-ui, sans-serif; }
+    main { display: grid; align-content: center; min-height: 100vh; padding: clamp(12px, 3vw, 28px); max-width: 960px; margin: auto; }
+    h1 { margin: 0; font: 500 clamp(24px, 4vw, 38px)/1.1 Georgia, serif; }
+    p { margin: 6px 0; }
+    .work { display: grid; grid-template-columns: 1fr 1.25fr; align-items: center; gap: clamp(16px, 4vw, 36px); }
+    .pictures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    figure { margin: 0; text-align: center; }
+    figcaption { font-size: .85rem; font-weight: 650; }
+    .tile { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; aspect-ratio: 1; max-width: 96px; margin: 0 auto 5px; }
+    .pixel { display: grid; place-items: center; background: #fffaf0; border: 1px solid #a8ab97; border-radius: 2px; }
+    .ink { background: #284e41; }
+    .changed::after { content: "×"; background: #82341c; color: white; font: bold 12px/1 system-ui; border-radius: 50%; padding: 1px 2px; }
+    label { display: block; margin-top: 14px; font-weight: 700; }
+    input { display: block; width: 100%; max-width: 24rem; margin: 0; height: 36px; accent-color: #28624c; }
+    input:focus-visible { outline: 3px solid #82341c; outline-offset: 1px; }
+    #result { margin: 8px 0 0; font-weight: 600; }
+    @media (max-width: 560px) {
+      .work { grid-template-columns: 1fr; gap: 10px; }
+      .tile { max-width: 68px; }
+      label { margin-top: 8px; }
+    }
+    @media (forced-colors: active) {
+      .pixel { background: Canvas; border-color: CanvasText; forced-color-adjust: none; }
+      .ink { background: CanvasText; }
+      .changed::after { color: HighlightText; background: Highlight; }
+    }
+  </style>
+  <script src="model.js"></script>
+</head>
+<body>
+  <main>
+    <div class="work">
+      <div>
+        <h1>Scratch the signal</h1>
+        <p>Signal Garden sends this picture twice. One signal carries whole rows in order. The other takes one bit from each row in turn.</p>
+        <label for="scratch">Bits scratched in a row · <output id="length" for="scratch">4</output></label>
+        <input id="scratch" type="range" min="0" max="8" step="1" value="4">
+      </div>
+      <div class="pictures">
+        <figure><div class="tile" id="original" aria-hidden="true"></div><figcaption>Original</figcaption></figure>
+        <figure><div class="tile" id="consecutive" aria-hidden="true"></div><figcaption>Row by row</figcaption></figure>
+        <figure><div class="tile" id="interleaved" aria-hidden="true"></div><figcaption>Woven rows</figcaption></figure>
+      </div>
+    </div>
+    <p id="result" role="status"></p>
+    <noscript>Enable JavaScript to try the scratch control.</noscript>
+  </main>
+  <script>
+    const seed = [0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0];
+    const control = document.getElementById("scratch");
+    function draw(id, bits) {
+      const tile = document.getElementById(id);
+      tile.replaceChildren(...bits.map((bit, i) => {
+        const pixel = document.createElement("span");
+        pixel.classList.add("pixel");
+        if (bit) pixel.classList.add("ink");
+        if (bit !== seed[i]) pixel.classList.add("changed");
+        return pixel;
+      }));
+    }
+    function damage(changed) {
+      if (changed === 0) return "comes back whole";
+      return `has ${changed} wrong ${changed === 1 ? "pixel" : "pixels"}`;
+    }
+    function transmit() {
+      const length = Number(control.value);
+      const rows = SignalGarden.run(seed, 0, length, "consecutive");
+      const woven = SignalGarden.run(seed, 0, length, "interleaved");
+      document.getElementById("length").value = String(length);
+      draw("consecutive", rows.recovered);
+      draw("interleaved", woven.recovered);
+      document.getElementById("result").textContent = `The row-by-row picture ${damage(rows.changed)}. The woven picture ${damage(woven.changed)}.`;
+    }
+    draw("original", seed);
+    control.addEventListener("input", transmit);
+    transmit();
+  </script>
+</body>
+</html>
