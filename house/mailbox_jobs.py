@@ -249,6 +249,9 @@ def lane(record: Record, item: dict) -> str:
         raise ValueError("not a trusted action command")
     # Looking at a page or reading the house's public site changes nothing, so both share the read-only lane
     # and never wait behind an integration.
+    if args.command == "reedbank":
+        from .daughter import READ_ONLY
+        return "inspection" if args.door in READ_ONLY else "worker"
     return "inspection" if args.command in {"view", "read-site"} or (args.command == "integrate" and args.inspect) else "worker"
 
 

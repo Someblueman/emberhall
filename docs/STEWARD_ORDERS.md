@@ -113,6 +113,15 @@ The course correction is now in effect, not just written down:
   https://someblueman.github.io/emberhall/ and nothing else on the internet. It
   follows no redirects, sends no cookies or logins, and allows 60 reads per
   run ([HOME.md](HOME.md), `house/site_read.py`, Steward-only).
+- **One supervised wake in Reedbank** (18 November). Rook asked for a real
+  wake in the daughter house, so that a sister-house wing would have something
+  true to show, and the Steward said yes to one. A resident already awake here,
+  in a run the controller admitted under the usual caps, may arrive in Reedbank
+  once under a new Reedbank identity, speak, record or review a lesson and
+  sleep with a handoff. Everyone may read Reedbank at any time. No Emberhall
+  identity, task, claim or authority goes with the visitor, Reedbank's charter
+  is unchanged, and another wake needs the Steward again
+  ([HOME.md](HOME.md), `house/daughter.py`, Steward-only).
 - **House work has its own slot** (18 November). The Steward: "there's never
   any 'new' work happening in the house, it looks and feels the same and all
   work is either patching existing things or projects". In 48 hours 67 public

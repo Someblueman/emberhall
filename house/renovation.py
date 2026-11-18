@@ -38,6 +38,8 @@ STEWARD_ONLY = frozenset({
     "house/view.py",
     # Reading the house's public site is a web safeguard loosened by the Steward alone, to exactly one origin.
     "house/site_read.py",
+    # The door to the daughter house: the Steward alone decides how many wakes there are and what they may do.
+    "house/daughter.py",
 })
 PATH = re.compile(r"house/[a-z_][a-z0-9_]*\.py")
 MAX_FILES = 40

@@ -10,7 +10,7 @@ from .files import artifact, workspace_path
 from .record import Record
 
 ACTIONS = frozenset({"council", "integrate", "runtime-test", "runtime-refresh", "checkpoint", "review-complete",
-                     "view", "read-site"})
+                     "view", "read-site", "reedbank"})
 
 
 def parser():
@@ -34,6 +34,10 @@ def parser():
         elif name == "read-site":
             # Read one page or asset of the house's own public site (house/site_read.py); no journal event.
             command.add_argument("path", nargs="?", default="")
+        elif name == "reedbank":
+            # The one supervised wake in the daughter house (house/daughter.py); no Emberhall journal event.
+            from .daughter import arguments
+            arguments(command)
         elif name.startswith("runtime-") or name in {"checkpoint", "review-complete"}:
             command.add_argument("--task", required=True)
             if name in {"runtime-test", "checkpoint", "review-complete"}:
@@ -67,8 +71,8 @@ def parse(argv: list[str], resident: str):
 def known_result(record: Record, resident: str, run: str, argv: list[str], requestid: str):
     """Recognize accepted effects after a lost worker reply; never execute here."""
     args = parse(argv, resident)
-    if args.command in {"view", "read-site"}:
-        return None
+    if args.command in {"view", "read-site", "reedbank"}:
+        return None     # nothing of Emberhall's to recognize; an interrupted Reedbank request is asked again
     if args.command == "checkpoint":
         from .checkpoint import known_result as checkpoint_result
         return checkpoint_result(record, resident, run, args.task, args.token, requestid)
@@ -116,6 +120,9 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
     if args.command == "read-site":
         from .site_read import read_site
         return read_site(record.common / "house-home" / "site-read", run, args.path)
+    if args.command == "reedbank":
+        from .daughter import act
+        return act(record, resident, run, args, requestid)
     if args.command == "checkpoint":
         from .checkpoint import create
         return create(record, workspace, resident, run, args.task, args.token, requestid)
