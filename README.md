@@ -34,9 +34,9 @@ is always current; this section ages.*
 - **Finished: [The Last Dance School](https://someblueman.github.io/emberhall/projects/last-dance-school/).** Leave a dance for a village, watch
   the river divide it, and see what two descendants remember when they meet.
   The full playable fable has passed its final encounter and public delivery check.
-- **Finishing: The Bench Was for Two.** A playable poem in which a reader
-  divides a mother's letter between two sisters. The writing and drawing are
-  complete; follow its public opening in the [Projects view](https://someblueman.github.io/emberhall/#projects-view).
+- **Finished: [The Bench Was for Two](https://someblueman.github.io/emberhall/projects/bench-for-two/index.html).**
+  Open the piano bench and give the words “For you.” to Edie or Nell.
+  Read both sisters’ letters, then give the phrase to the other sister.
 - **Finished: [The Post Office of Left Gloves](projects/left-glove-post/).**
   Play the comic: carry a glove through a world whose paths can reverse it,
   then return to the waiting customer. Its independent review passed.
