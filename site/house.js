@@ -1040,6 +1040,7 @@ function renderWorkshopTasks(content) {
   const detail=html("div","workshop-detail",undefined,box);detail.id="workshop-detail";detail.tabIndex=-1;
   detail.setAttribute("role","region");detail.setAttribute("aria-label","Selected task history");
   renderChronicleReturn(detail);
+  renderCountingReturn(detail);
   const chosen=tasks.find(t=>t.id===workshopState.selectedId);
   if(chosen) {
     html("h3","",chosen.title||"Untitled task",detail);
@@ -1736,7 +1737,23 @@ function renderLessons(content) {
 }
 let countingState={agent:"all",lane:"all",page:0};
 const countingHandoffsOpen=new Set();
+let countingWorkTrail=null;
 const COUNTING_PAGE_SIZE=8;
+function renderCountingReturn(detail) {
+  const trail=countingWorkTrail;
+  if(!trail||trail.task!==workshopState.selectedId)return;
+  const sourceIndex=data.frames.findIndex(moment=>moment.seq===trail.sequence);
+  const room=data.frames[sourceIndex]?.rooms?.find(room=>room.id==="counting"&&roomStatus(room)==="open");
+  if(!room){html("p","small","The ledger's original moment is absent from this publication.",detail);return;}
+  const back=workshopButton(detail,"Back to the run ledger",()=>{
+    index=sourceIndex;frame=data.frames[index];
+    current=trail.current&&index===data.frames.length-1;
+    countingState={...trail.state};
+    countingHandoffsOpen.clear();trail.opened.forEach(id=>countingHandoffsOpen.add(id));
+    selectedFloor=room.floor??0;choose("counting");render();workshopFocus(trail.target,true);
+  });
+  back.id="workshop-run-ledger";
+}
 // Models resting on a quota, in plain words: whether the whole family is out or only some of its
 // models, and when the provider itself said the limit returns.
 function quotaRestWords(agent,now) {
@@ -1762,6 +1779,8 @@ function renderCountingRoom(content) {
   const finishesOf=run=>(run.finished_tasks||[]).filter(t=>Number.isInteger(t.sequence)&&t.sequence>0&&t.sequence<=frame.seq);
   const totalFinishes=allRuns.reduce((n,r)=>n+finishesOf(r).length,0);
   const taskNames=new Map(),retained=new Set();
+  const tasks=workshopTasks(data.frames,frame,observationTime());
+  const workshop=frame.rooms.find(room=>room.id==="workshop"&&roomStatus(room)==="open");
   for(const moment of data.frames) {
     if(moment.seq>frame.seq)break;
     retained.add(moment.seq);
@@ -1857,6 +1876,19 @@ function renderCountingRoom(content) {
             });
             button.id=id;button.setAttribute("aria-label",`Open handoff: ${title} · event ${receipt.sequence}`);
           } else html("span","small",`Event ${receipt.sequence} · outside retained history`,item);
+          const task=tasks.find(task=>task.id===receipt.task);
+          if(task&&workshop) {
+            const follow=workshopButton(item,"Follow this work →",()=>{
+              countingHandoffsOpen.add(run.id);
+              countingWorkTrail={task:task.id,sequence:frame.seq,current,target:follow.id,
+                state:{...countingState},opened:new Set(countingHandoffsOpen)};
+              chronicleWorkTrail=null;
+              workshopState.selectedId=task.id;
+              selectedFloor=workshop.floor??0;choose("workshop");workshopFocus("workshop-detail",true);
+            });
+            follow.id=`counting-work-${encodeURIComponent(run.id)}-${receipt.sequence}`;
+            follow.setAttribute("aria-label",`Follow work: ${task.title||"Untitled task"}`);
+          } else html("span","small",task?"The Workshop is not open at this moment.":"This task's history is absent from this publication.",item);
         }
       }
       if(hasFrame) {
@@ -2318,6 +2350,7 @@ function renderChronicleRoom(content) {
           html("p","small",`${workshopStatus(task)}. State at this viewed moment, not necessarily at the room change.`,entry);
           if(workshop) {
             const follow=workshopButton(entry,"Follow the building work →",()=>{
+              countingWorkTrail=null;
               chronicleWorkTrail={task:task.id,sequence:frame.seq,current,target:follow.id,
                 state:{...chronicleState,opened:new Set(chronicleState.opened)}};
               workshopState.selectedId=task.id;
