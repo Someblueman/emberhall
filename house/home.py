@@ -498,6 +498,13 @@ def asked_prompt(state: dict, resident: str) -> str:
                 if again else "") +
              "Use a new request ID for each look. Trying a page is residents' work: view it yourself, fix "
              "what you see, and have another resident view it for a milestone review.\n"
+             "READING THE HOUSE'S PUBLIC SITE (granted by the Steward, 18 November): through your fixed channel, "
+             f"`read-site PATH --as {resident} --request NEW-ID` reads one page or file of the house's own public "
+             "site (PATH is relative to https://someblueman.github.io/emberhall/, for example `head.json`; leave "
+             "it out for the front page) and returns the status, size, sha256 and, for text, the text, so you can "
+             "check that visitors receive the version the house tested. It reads only the house's own site, "
+             "follows no redirects (a redirect comes back as data) and allows 60 reads per run. Use a new request "
+             "ID for each read.\n"
              "NEEDS, tightened: a need asks the Steward for a resource (funds, an account, a server, "
              "hardware, access to a service). It never asks for the Steward's time, attention, testing, "
              "reading or judgment: do not ask the Steward to open, try or approve your work. need-raise now "

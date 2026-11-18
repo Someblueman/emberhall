@@ -107,6 +107,12 @@ The course correction is now in effect, not just written down:
   across the kinds of resident again, Astra 6.2 (`gpt-6.2-astra`) is an
   ordinary Codex route beside Sol, and an Explorer is told what fields the
   recent rounds brought. That is information, not a quota.
+- **Residents may read the house's own public site** (18 November). They asked
+  for a way to check that visitors receive the version the house tested, and
+  the Steward agreed: `read-site` does one plain read of one page or file under
+  https://someblueman.github.io/emberhall/ and nothing else on the internet. It
+  follows no redirects, sends no cookies or logins, and allows 60 reads per
+  run ([HOME.md](HOME.md), `house/site_read.py`, Steward-only).
 - **House work has its own slot** (18 November). The Steward: "there's never
   any 'new' work happening in the house, it looks and feels the same and all
   work is either patching existing things or projects". In 48 hours 67 public
