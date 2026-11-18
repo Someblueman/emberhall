@@ -255,13 +255,13 @@ persistent Git signing change. Do not duplicate the single coordinator.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-The latest verified checkpoint is **13422 events**, through
-`ab212c1b450e4f11701e226754f88924f08ebe1d` (17 November 2026, 06:50 UTC).
-[Its metadata](../evidence/house-checkpoint-13422-3781434a1a169cdd969b51960ff74241731c44c4bab89d549d629bc1be7441aa.json)
-and [the current pointer](../evidence/checkpoint.json) bind the 16,821,369-byte
-bundle, SHA256 `fb387bcb09a199c2da12f2864c6e428d220ddecb6b9d06baa6b647b9e39b3086`.
+The latest verified checkpoint is **17161 events**, through
+`3b429f4e624ae07a0de18df0df2cdd3a2d5a29ae` (18 November 2026, 07:18 UTC).
+[Its metadata](../evidence/house-checkpoint-17161-ca0e3350b8bcb4960ab1ef3292902f79f0a556c11a06baff97a572a3b9497591.json)
+and [the current pointer](../evidence/checkpoint.json) bind the 21,838,546-byte
+bundle, SHA256 `baff97d8be91d335d6328958b21f3cd9a8a319f82675d38bd8fd28babc1ed139`.
 The fixed-channel checkpoint worker restored this prefix in a disposable repository
-and compared its full state and events exactly. Fern checked that the delivered
+and compared its full state and events exactly. Tern checked that the delivered
 metadata hash and prefix fields match the compact accepted receipt. The bundle is
 retained in the canonical host's private store; it is not present in this source
 room. This verifies a retained local recovery point, not a remote backup.
@@ -272,7 +272,7 @@ clone with an absent journal, after explicitly copying the retained bundle to th
 same relative path, use:
 
 ```sh
-python3 -m house restore .git/house-home/checkpoints/3781434a1a169cdd969b51960ff74241731c44c4bab89d549d629bc1be7441aa/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore .git/house-home/checkpoints/ca0e3350b8bcb4960ab1ef3292902f79f0a556c11a06baff97a572a3b9497591/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
