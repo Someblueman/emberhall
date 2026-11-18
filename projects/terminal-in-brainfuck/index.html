@@ -15,9 +15,10 @@
   .intro { max-width:42rem; color:#bfcabb; }
   .workbench { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:1.4rem; margin:1.8rem 0; align-items:start; }
   section { min-width:0; }
-  #screen { margin:0; background:#07110e; color:#bde4a7; border:1px solid #71876a; padding:1rem; white-space:pre;
+  #screen { margin:0; background:#111820; color:#dce4ed; border:1px solid #71876a; padding:1rem; white-space:pre;
     font:clamp(9px,1.18vw,14px)/1.36 ui-monospace,Menlo,monospace; border-radius:.3rem; }
-  .cursor { background:#c2df9a; color:#0a160c; }
+  #screen span { display:inline-block; vertical-align:bottom; }
+  .cursor { outline:1px solid #ffffff; outline-offset:-1px; }
   .readout { color:#acbda6; font:12px/1.55 ui-monospace,Menlo,monospace; overflow-wrap:anywhere; }
   #status { min-height:2.8em; color:#f0ce94; }
   .controls { display:flex; flex-wrap:wrap; gap:.4rem; margin:.7rem 0; }
@@ -49,7 +50,7 @@
 </head>
 <body>
 <main>
-<div class="eyebrow">An unreasonable machine · cursor and erasure workbench</div>
+<div class="eyebrow">An unreasonable machine · colour on the tape</div>
 <h1>The tape is the terminal.</h1>
 <p class="intro">Forty columns, twenty-four rows. Every letter, wrap and scroll is worked out by eight Brainfuck commands on a tape. The browser just runs them and draws their pictures.</p>
 <div class="workbench">
@@ -74,7 +75,7 @@
 <h2 id="inside-title">02 / Stop it. Look inside.</h2>
 <p class="readout" id="machine-position"></p>
 <div class="tape-controls">
-<label for="tape-start">First tape cell<input id="tape-start" type="number" min="0" max="3068" value="0" step="1"></label>
+<label for="tape-start">First tape cell<input id="tape-start" type="number" min="0" max="5968" value="0" step="1"></label>
 <button id="follow" aria-pressed="true">Follow head</button>
 </div>
 <div id="tape" aria-label="Tape cells: address, decimal value and ASCII character"></div>
@@ -87,6 +88,9 @@
 <button id="preset-overwrite">Overwrite</button>
 <button id="preset-cursor">Move without erasing</button>
 <button id="preset-erase">Erase a line tail</button>
+<button id="preset-colour">Coloured ink</button>
+<button id="preset-colour-erase">Erase with coloured paper</button>
+<button id="preset-colour-scroll">Scroll coloured lines</button>
 <button id="preset-wrap">Wrap</button>
 <button id="preset-scroll">Scroll</button>
 </div>
@@ -104,14 +108,15 @@
 <summary>The rules of this small machine</summary>
 <p>ASCII bytes 32–126 print. <code>\r</code> returns left without erasing; <code>\n</code> (or an editor newline) goes down without returning left. At column 40 a printed letter wraps immediately. At the bottom, the tape scrolls the picture. Backspace moves left without erasing; tab goes to the next eight-column stop. Zero ends the program.</p>
 <p>Use <code>\\</code> for a literal backslash, <code>\t</code> for a tab, or <code>\xHH</code> for an exact hexadecimal byte. For example, <code>A\xFFB</code> displays AB; <code>A\x00B</code> halts after A. Unicode is rejected, not truncated into different bytes. Pausing or running out of queued bytes is not the same as End input.</p>
-<p>The machine has 3,100 wrapping eight-bit cells. Cells 0–4 hold the input byte, physical cursor row, column, top row and emitted row. Physical screen rows start at cell 64, spaced 126 cells apart. Each has six helper cells, then forty triples: two helpers and one character. Try cell 64 to see the first physical row; scrolling rotates which row comes first.</p>
-<p>Try <strong>Move without erasing</strong>: ABCDE becomes ABC!E. <strong>Erase a line tail</strong> keeps AB on the second row and leaves the cursor in its third column. CSI cursor and erase sequences now run on the tape; see the <a href="CONTROL_CONTRACT.md">exact control rules</a>. Colours, a shell and external programs remain later or outside work. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated generator</a>, or the <a href="terminal.bf">plain eight-command program</a>. The page uses no network services.</p>
+<p>The machine has 6,000 wrapping eight-bit cells. Cells 0–4 hold the input byte, physical cursor row, column, top row and emitted row. Physical screen rows start at cell 64, spaced 246 cells apart. Each has six helper cells, then forty pairs of triples: a character and its colour, each with two helpers. The stored colour is one more than its emitted value, so black-on-black remains data. Try cell 64 to see the first physical row; scrolling rotates which row comes first.</p>
+<p>Try <strong>Move without erasing</strong>: ABCDE becomes ABC!E. <strong>Erase a line tail</strong> keeps AB on the second row and leaves the cursor in its third column. CSI cursor and erase sequences now run on the tape; see the <a href="CONTROL_CONTRACT.md">exact control rules</a>. Try <strong>Coloured ink</strong> to select ink with <code>\x1b[31m</code>, or paper with <code>\x1b[37;44m</code>. Erasure uses the current colour, and scroll carries each letter’s ink with it. The <a href="COLOUR_CONTRACT.md">colour rules</a> accept at most two parameters. A shell and external programs remain outside this machine. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated generator</a>, or the <a href="terminal.bf">plain eight-command program</a>. The page uses no network services.</p>
 </details>
-<p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Cursor and erasure: Aster. Emberhall, 2026.</p>
+<p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Cursor and erasure: Aster. Colour: Hawthorn. Emberhall, 2026.</p>
 </main>
 <script src="program.js"></script>
 <script src="vm.js"></script>
 <script src="input.js"></script>
+<script src="frame.js"></script>
 <script src="bell-dive.js"></script>
 <script src="terminal.js"></script>
 </body>

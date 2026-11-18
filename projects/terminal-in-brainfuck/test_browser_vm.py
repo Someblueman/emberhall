@@ -15,6 +15,7 @@ HERE = Path(__file__).parent
 RUN = r"""
 const fs = require('node:fs');
 const {BrainfuckMachine} = require('./vm.js');
+const {decodeFrame} = require('./frame.js');
 const code = fs.readFileSync('terminal.bf', 'utf8');
 const streams = JSON.parse(fs.readFileSync(0, 'utf8'));
 const results = [];
@@ -22,15 +23,20 @@ for (const chunks of streams) {
   const frames = []; let partial = []; let vm;
   vm = new BrainfuckMachine(code, b => {
     partial.push(b);
-    if (partial.length === 964) {
-      if (partial[0] !== 255 || partial[963] !== 254) throw Error('framing');
-      frames.push([String.fromCharCode(...partial.slice(1, 961)), partial[961], partial[962],
-                   Array.from(vm.tape.slice(38, 42))]);
+    if (partial.length === 1924) {
+      const f = decodeFrame(partial);
+      frames.push([String.fromCharCode(...f.cells), f.row, f.col, f.attributes,
+                   Array.from(vm.tape.slice(38, 42)), Array.from(vm.tape.slice(56, 60))]);
+      for (let r = 0; r < 24; r++) for (let c = 0; c < 40; c++) {
+        const at = 64 + ((r + vm.tape[3]) % 24) * 246 + 8 + 6 * c;
+        if (vm.tape[at] !== f.cells[r * 40 + c] ||
+            vm.tape[at + 3] - 1 !== f.attributes[r * 40 + c]) throw Error('grid/frame mismatch');
+      }
       // At the final output instruction, visible cursor equals tape state.
-      if (vm.ptr !== 6 || vm.tape[2] !== partial[962] || vm.tape[4] !== partial[961]) throw Error('tape/frame mismatch');
+      if (vm.ptr !== 6 || vm.tape[2] !== partial[1922] || vm.tape[4] !== partial[1921]) throw Error('tape/frame mismatch');
       partial = [];
     }
-  });
+  }, 6000);
   // Queue each chunk only after an actual comma wait. Alternate literal and
   // counted execution at boundaries to catch partial-run stepping mistakes.
   let next = 0, loops = 0;
@@ -58,11 +64,15 @@ class BrowserMachineTests(unittest.TestCase):
             text=True, capture_output=True, check=True, timeout=60)
         for chunks, frames in zip(cases, json.loads(result.stdout), strict=True):
             term = model.RefTerminal()
-            expected = [[*term.frame(), list(term.parser_state())]]
+            def snapshot():
+                return [*term.frame(), list(term.parser_state()),
+                        [term.foreground, term.background, term.bright, term.attribute + 1]]
+            expected = [snapshot()]
             for byte in b"".join(chunks):
                 if byte == 0:
                     break
-                expected.append([*term.feed(byte), list(term.parser_state())])
+                term.feed(byte)
+                expected.append(snapshot())
             with self.subTest(stream=b"".join(chunks)[:40], chunk_lengths=list(map(len, chunks))[:12]):
                 self.assertEqual(len(frames), len(expected))
                 for index, (actual, reference) in enumerate(zip(frames, expected)):
@@ -91,7 +101,7 @@ class BrowserMachineTests(unittest.TestCase):
                 if rng.randrange(2):
                     data.extend(rng.choice(tokens))
                 else:
-                    params = rng.choice([b"", b";", b"0", b"2", b"9;40", b"12345", b"1;2;3", b"?"])
+                    params = rng.choice([b"", b";", b"0", b"2", b"9;40", b"12345", b"31", b"1;44", b"0;36", b"39;49", b"31;99", b"1;2;3", b"?"])
                     data.extend(b"\x1b[" + params + bytes([rng.choice(b"ABCDHfJKm")]))
             chunks = []
             while data:

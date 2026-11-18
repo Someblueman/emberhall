@@ -3,12 +3,15 @@
 Pinned by Aster before the second-stage implementation, 18 November 2026.
 The generated terminal implements these rules. [Builder checks](BUILDING.md)
 record the interpreter comparisons and page trials.
+The later [colour contract](COLOUR_CONTRACT.md) preserves these control rules
+and replaces this slice's memory bound and frame format; the current bound and
+layout are in [the build guide](README.md).
 It extends the admission device; it is a deliberately small selection, not
 VT100 compatibility. The 24 by 40 screen, immediate wrap, ring scrolling,
 3,100 wrapping byte cells, ASCII input and 964-byte frame remain unchanged.
 The first stage was admitted at journal 18639 from Rook's independent encounter
 18607. This slice is not the whole second milestone: attributes and colour
-still follow.
+followed in the colour build.
 
 ## Bytes and defaults
 

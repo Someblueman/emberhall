@@ -28,9 +28,11 @@ def bf_frames(data):
         assert out[i] == 0xFF, f"frame does not start with 0xFF at {i}"
         end = i + 1 + ROWS * COLS
         cells = out[i + 1:end].decode("ascii")
+        attributes = list(out[end:end + ROWS * COLS])
+        end += ROWS * COLS
         row, col = out[end], out[end + 1]
         assert out[end + 2] == 0xFE, "frame does not end with 0xFE"
-        frames.append((cells, row, col))
+        frames.append((cells, row, col, attributes))
         i = end + 3
     return frames
 
@@ -54,19 +56,19 @@ class TerminalTests(unittest.TestCase):
         self.check(b"HELLO, WORLD")
         last = bf_frames(b"HELLO, WORLD")[-1]
         self.assertTrue(row_text(last, 0).startswith("HELLO, WORLD"))
-        self.assertEqual(last[1:], (0, 12))
+        self.assertEqual(last[1:3], (0, 12))
 
     def test_carriage_return_overwrites_without_erasing(self):
         self.check(b"HELLO\rbye")
         last = bf_frames(b"HELLO\rbye")[-1]
         self.assertTrue(row_text(last, 0).startswith("byeLO"))
-        self.assertEqual(last[1:], (0, 3))
+        self.assertEqual(last[1:3], (0, 3))
 
     def test_line_feed_keeps_the_column(self):
         self.check(b"AB\nCD")
         last = bf_frames(b"AB\nCD")[-1]
         self.assertTrue(row_text(last, 1).startswith("  CD"))
-        self.assertEqual(last[1:], (1, 4))
+        self.assertEqual(last[1:3], (1, 4))
 
     def test_wrap_at_the_row_end(self):
         data = b"A" * COLS + b"B"
@@ -74,7 +76,7 @@ class TerminalTests(unittest.TestCase):
         last = bf_frames(data)[-1]
         self.assertEqual(row_text(last, 0), "A" * COLS)
         self.assertTrue(row_text(last, 1).startswith("B"))
-        self.assertEqual(last[1:], (1, 1))
+        self.assertEqual(last[1:3], (1, 1))
 
     def test_bottom_row_scrolls(self):
         data = b"".join(b"L%02d\r\n" % i for i in range(25))
@@ -103,7 +105,7 @@ class TerminalTests(unittest.TestCase):
         self.assertEqual(len(frames), len(data) + 1)
         last = frames[-1]
         self.assertTrue(row_text(last, 0).startswith("AB"))
-        self.assertEqual(last[1:], (0, 2))
+        self.assertEqual(last[1:3], (0, 2))
 
     def test_seeded_random_stream_matches_the_reference(self):
         rng = random.Random(20261118)
@@ -116,7 +118,7 @@ class TerminalTests(unittest.TestCase):
 
     def test_empty_stream_emits_the_initial_frame(self):
         frames = bf_frames(b"")
-        self.assertEqual(frames, [(" " * (ROWS * COLS), 0, 0)])
+        self.assertEqual(frames, [(" " * (ROWS * COLS), 0, 0, [7] * (ROWS * COLS))])
 
     def test_zero_ends_input_without_emitting_an_extra_frame(self):
         self.check(b"A\x00B\n")

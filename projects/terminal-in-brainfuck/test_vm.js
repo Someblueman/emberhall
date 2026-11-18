@@ -53,8 +53,8 @@ test("one terminal frame consumes only A from a queued AB", () => {
   let output = [], frames = 0;
   const vm = new BrainfuckMachine(code, b => {
     output.push(b);
-    if (output.length === 964) { frames++; output = []; }
-  });
+    if (output.length === 1924) { frames++; output = []; }
+  }, 6000);
   while (frames < 1) vm.run(20000, () => frames === 1);
   vm.feed([65, 66]);
   while (frames < 2) vm.run(20000, () => frames === 2);
@@ -62,7 +62,8 @@ test("one terminal frame consumes only A from a queued AB", () => {
   assert.equal(vm.queued, 1);
   assert.equal(vm.tape[2], 1);
   assert.equal(vm.tape[72], 65);
-  assert.equal(vm.tape[75], 32);
+  assert.equal(vm.tape[75], 8);
+  assert.equal(vm.tape[78], 32);
   assert.equal(vm.ptr, 6);
 });
 

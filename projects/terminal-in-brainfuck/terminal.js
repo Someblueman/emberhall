@@ -1,6 +1,11 @@
 "use strict";
 // Transport and display only: no text placement, wrap, erase or scroll rules.
-const ROWS = 24, COLS = 40, FRAME_SIZE = 964;
+const ROWS = 24, COLS = 40;
+// Fixed index palette; brightness selects the second row for foreground only.
+const PALETTE = [
+  ["#111820", "#cf5966", "#62bb87", "#d2b75b", "#668bd7", "#bb76cc", "#54bac7", "#dce4ed"],
+  ["#738090", "#ff8991", "#99efb0", "#ffe18a", "#9ebdff", "#e7a6f5", "#8ceaf3", "#ffffff"],
+];
 const $ = id => document.getElementById(id);
 let machine, frameBytes = [], lastFrame = null, framesSeen = 0;
 let running = false, timer = null, targetFrame = null, error = "";
@@ -10,12 +15,7 @@ function receive(byte) {
   frameBytes.push(byte);
   if (frameBytes.length === 1 && byte !== 255) throw new Error("Missing frame start marker");
   if (frameBytes.length !== FRAME_SIZE) return;
-  const row = frameBytes[961], col = frameBytes[962];
-  if (byte !== 254 || row >= ROWS || col >= COLS ||
-      frameBytes.slice(1, 961).some(n => n < 32 || n > 126)) {
-    throw new Error("Malformed screen frame");
-  }
-  lastFrame = {cells: frameBytes.slice(1, 961), row, col};
+  lastFrame = decodeFrame(frameBytes);
   frameBytes = [];
   framesSeen++;
 }
@@ -37,7 +37,7 @@ function attempt(action) {
 function reset(bytes) {
   stop();
   frameBytes = []; lastFrame = null; framesSeen = 0;
-  machine = new BrainfuckMachine(BF_PROGRAM, receive);
+  machine = new BrainfuckMachine(BF_PROGRAM, receive, 6000);
   machine.feed(bytes);
   // Initialisation is bounded and stops exactly on its complete empty frame.
   // No input byte is consumed until the visitor presses Run or Next frame.
@@ -75,13 +75,21 @@ function render() {
   if (lastFrame) {
     const fragment = document.createDocumentFragment();
     for (let r = 0; r < ROWS; r++) {
-      const row = String.fromCharCode(...lastFrame.cells.slice(r * COLS, (r + 1) * COLS));
-      if (r === lastFrame.row) {
-        const cursor = document.createElement("span");
-        cursor.className = "cursor";
-        cursor.textContent = row[lastFrame.col];
-        fragment.append(row.slice(0, lastFrame.col), cursor, row.slice(lastFrame.col + 1));
-      } else fragment.append(row);
+      for (let c = 0; c < COLS;) {
+        const start = r * COLS + c, attr = lastFrame.attributes[start];
+        const isCursor = r === lastFrame.row && c === lastFrame.col;
+        let end = c + 1;
+        while (!isCursor && end < COLS &&
+          !(r === lastFrame.row && end === lastFrame.col) &&
+          lastFrame.attributes[r * COLS + end] === attr) end++;
+        const span = document.createElement("span");
+        span.style.color = PALETTE[attr >> 6][attr & 7];
+        span.style.backgroundColor = PALETTE[0][(attr >> 3) & 7];
+        if (isCursor) span.className = "cursor";
+        span.textContent = String.fromCharCode(...lastFrame.cells.slice(start, r * COLS + end));
+        fragment.append(span);
+        c = end;
+      }
       if (r < ROWS - 1) fragment.append("\n");
     }
     $("screen").replaceChildren(fragment);
@@ -144,6 +152,9 @@ const PRESETS = {
   overwrite: "HELLO, WORLD\\rbye",
   cursor: "ABCDE\\x1b[2DX\\x1b[0D!",
   erase: "TOP ROW\\r\\nABCDE\\x1b[2;3H\\x1b[K",
+  colour: "\\x1b[1;36mINK ON THE TAPE\\x1b[0m\\r\\n\\x1b[31mRED \\x1b[32mGREEN \\x1b[34mBLUE\\r\\n\\x1b[37;44m WHITE ON BLUE \\x1b[0m",
+  "colour-erase": "\\x1b[31mRED stays red\\r\\n\\x1b[32mGREEN stays green\\x1b[2;7H\\x1b[33;44m\\x1b[K",
+  "colour-scroll": Array.from({length: 26}, (_, i) => `\\x1b[${31 + i % 7}mline ${String(i).padStart(2, "0")} carries its ink\\r\\n`).join("") + "\\x1b[0m",
   wrap: "The quick brown fox jumps over the lazy dog",
   scroll: Array.from({length: 27}, (_, i) => "line " + String(i).padStart(2, "0") + "\\r").join("\n") + "\n",
 };
