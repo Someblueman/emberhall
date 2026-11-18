@@ -235,7 +235,7 @@ def _derive_choices(
             if choice_id not in choices and candidates:
                 choices[choice_id] = {
                     "choice": choice_id,
-                    "slot": data.get("slot") if data.get("slot") in ("great", "small") else None,
+                    "slot": data.get("slot") if data.get("slot") in ("great", "small", "house") else None,
                     "candidates": candidates,
                     "milestones": milestones,
                     "votes": [],
@@ -366,7 +366,7 @@ def select_milestones(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
         # yet, and guessing projects/<idea>/ would point at unbuilt directories.
         # Links appear only on recorded completed projects below.
         links: list[tuple[str, str]] = []
-        slot_prefix = "Great-work slot · " if choice.get("slot") == "great" else ""
+        slot_prefix = {"great": "Great-work slot · ", "house": "House-work slot · "}.get(choice.get("slot"), "")
         base_summary = f"Winner: {winner_title}." if winner else "No candidate earned two of three votes."
         selected.append({
             "category": category,
