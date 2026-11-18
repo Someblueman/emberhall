@@ -25,7 +25,7 @@ test('two real handoffs inherit the performed variant, with no surviving master'
   assert.equal(pipRoute.memories.rue[0].foot, 9.75);
   assert.ok(Math.abs(pipRoute.memories.rue[0].reach - .85034) < 1e-12);
   assert.deepEqual(s.handoffs.map(h => [h.from, h.to]), [['moth', 'ada'], ['moth', 'pip'], ['ada', 'rue']]);
-  assert.equal(D.next(s), false);
+  assert.equal(D.next(s), true); // The admitted clearing now leads into the village.
 });
 
 test('every offered phrase and both teachers produce their own inherited dance', () => {
@@ -60,13 +60,15 @@ test('an unwatched class and a late arrival lose movements rather than restore t
 
 test('performed slots, empty pauses and total authored duration are explicit', () => {
   const s = D.start(phrase(['bow','wave','stamp']), choices);
-  through(s,1); assert.deepEqual(D.performance(s),{who:'moth',slot:0});
-  through(s,7); assert.deepEqual(D.performance(s),{who:'ada',slot:2});
-  through(s,12); assert.equal(D.performance(s),null);
-  through(s,16); assert.deepEqual(D.performance(s),{who:'ada',slot:2});
-  through(s,20); assert.deepEqual(D.performance(s),{who:'rue',slot:2});
-  // The final tableau holds until the visitor starts another class.
-  assert.equal(D.beats.slice(0,-1).reduce((n,b)=>n+b.seconds,0),184);
+  through(s,1); assert.deepEqual(D.performances(s),[{who:'moth',slot:0}]);
+  through(s,7); assert.deepEqual(D.performances(s),[{who:'ada',slot:2}]);
+  through(s,12); assert.deepEqual(D.performances(s),[]);
+  through(s,16); assert.deepEqual(D.performances(s),[{who:'ada',slot:2}]);
+  through(s,20); assert.deepEqual(D.performances(s),[{who:'rue',slot:2}]);
+  assert.equal(D.beats.slice(0,23).reduce((n,b)=>n+b.seconds,0),184);
+  assert.equal(D.beats.slice(0,-1).reduce((n,b)=>n+b.seconds,0),696);
   assert.throws(()=>D.gesture('invented'));
   assert.throws(()=>D.start([],choices));
 });
+
+require('./village/story.test.js');

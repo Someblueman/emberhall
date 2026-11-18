@@ -1,96 +1,123 @@
-# The Last Dance School — first encounter
+# The Last Dance School
 
-Moth is leaving. Give the old teacher three movements, let Ada or Pip carry
-them for a while, then watch a child try the dance in a coat that is too big.
-An original silent paper-puppet fable by Mallow, Emberhall, 2026.
+Moth is leaving. Give the old teacher three movements, then watch a dance
+travel through a village, a broken bridge and two differently remembered
+traditions. Rue grows into a teacher. Lio wears a blue thread for remembering
+which arm; Bea tests whether the floor can survive the dance. They meet again
+on a plank neither could have carried alone.
 
-Open `index.html` through a static server or the house page viewer. Everything
-is local: original vector drawing, articulated puppets, prose and choreography.
-No accounts, sound, storage, dependencies, remote assets or network requests.
-The first scene is for the chosen project `great-choice-20261118-dance-box`.
-It is an author-built candidate, not an independent artistic pass or public
-release. The later village, division and reunion have not been built.
+An original silent paper-puppet fable by Mallow, Emberhall, 2026. Open
+`index.html` through a static server or the house page viewer. Everything is
+local: drawing, articulated puppets, words and choreography. No accounts,
+sound, storage, dependencies, remote assets or network calls.
+
+The clearing's first milestone was admitted by owner Aster at journal 17265,
+using the preserved independent encounters. This extended village is a
+second-milestone **candidate**, awaiting its own independent artistic review
+and owner decision. It is not a claim of public delivery.
 
 ## Playing
 
-Press any of the three gesture buttons to cycle through bow, wave, stamp and
-turn; Ada immediately rehearses that movement alongside Moth. The checkbox makes the phrase more extravagant.
-“Begin the last class” reaches its final tableau after 184 seconds of active
-playback, then holds it. That is authored timing, not a witnessed uninterrupted
-three-minute browser run.
-“Pause the dance” freezes it; “Next still” pauses and advances one authored
-moment, with the articulated movement held at its expressive midpoint. Gesture buttons,
-checkboxes and transport buttons have their normal keyboard operation. There is no
-undocumented global keyboard handler. A request for less motion starts in
-still mode. Leaving the browser tab pauses the class; it does not silently
-skip elapsed lessons.
+Press a gesture to cycle through bow, wave, stamp and turn. Ada immediately
+tries it alongside Moth. The checkbox makes the phrase more extravagant.
+Begin the class for timed play, or use Next still. Pause freezes the current
+pose. Next scene advances through the intervening story and handoffs, then
+pauses at a chapter opening; it does not invent a fresh memory at that point.
+Teach another dance returns to rehearsal and focuses the first movement.
 
-“Who is there to see it?” changes the route before the class starts. Either
-pupil can miss Moth's lesson. Rue later learns from the selected pupil and can
-arrive one movement late. “Teach another dance” starts a fresh rehearsal with
-the visitor's gesture choices; it is an explicit new beginning, not a rescue of
-a missing phrase during the old performance. The handoff list is optional.
-The stage and characters should carry the encounter without reading it.
+The authored route has 88 moments and reaches its held final tableau after
+696 active seconds (11 minutes 36 seconds). Its admitted clearing still
+occupies the first 184 seconds. These are programmed timings, not a claim of
+having watched the whole performance uninterrupted. A request for less motion
+starts in still mode. Leaving the tab pauses timed play without skipping time.
+All controls use normal button, checkbox and disclosure keyboard operation.
 
-## The little inheritance rule
+Before beginning, “Who is there to see it?” chooses the first pupils and
+Rue's teacher. In the village, “Who stays to watch?” can change Lio's lesson,
+Lio's late arrival, Bea's lesson and whether Lio watches Bea's final offering.
+Each choice closes at its particular handoff. A missed lesson stays missing.
+A later witnessed offering can teach something new; it cannot resurrect an
+old teacher's score. Neither branch receives a purity score.
 
-`dance.js` holds the same model the page performs. A movement has a kind and
-three expressive quantities: lean, arm reach and foot lift. Ada inherits the
-kinds but makes them more careful, Pip makes them more exuberant, and Rue
-makes either version smaller and a little more crooked. These deterministic,
-authored copying rules are not machine learning, a scientific model of culture
-or actual dance preservation. They claim no new mechanism.
+“Remember a scene” is a spectator's look back. It pauses the story and shows a
+detached past performance, with its own play, pause and still controls. Return
+to the living dance resumes the present view;
+looking at young Moth gives no movement back to a later performer. The optional
+handoff list records what crossed at the time, even after that teacher leaves.
+Keep both explanations closed when judging whether the stage carries the story.
 
-At the first handoff, the two pupils copy only if they watched. At departure
-Moth's memory is cleared. At the second handoff, Rue copies only the selected
-pupil's current memory, omitting the first movement if late. An empty lesson
-stays empty. The last performance reads Rue's actual memory, including its
-alterations and omissions; there is no hidden master score or default dance
-for an empty pupil. A character holding still is a performed absence, with a
-corresponding caption. No purity score declares one dance better.
+## The performed inheritance
+
+`dance.js` holds the same mutable character memories the puppets perform.
+`village/story.js` authors the later scenes and handoffs; `village/stage.js`
+draws and stages their village. The model does not read the rehearsal controls
+after beginning. Each pupil receives separate movement objects with a kind,
+lean, arm reach and foot lift. Ada makes room for details, Pip throws more of
+the body into it, Rue makes a smaller version, and Lio and Bea carry those
+branches differently. These deterministic rules are fictional choreography,
+not machine learning, cultural science or a new preservation mechanism.
+
+Moth's memory clears at departure. Ada and Pip's clear when their generation
+leaves. Lio learns only Rue's current memory, and Bea only Pip's; the final gift
+comes only from Bea's current performed movement if Lio watches. Empty memories
+render as still bodies beside the dancer who did learn. Replay frames live in
+a separate spectator archive. Its public accessor returns a detached copy;
+a replay frame cannot advance as the living model or alter its choices.
 
 Run `python3 -m unittest discover -s projects/last-dance-school -v`, or
-`node --test projects/last-dance-school/dance.test.js`. The tests exercise all
-64 gesture sequences with both teachers and both sizes, independent mutable
-copies, actual memory removal, an unwatched class, late arrival, a changed
-intermediate teacher and the visible performance slots. They do not judge
-animation, emotional connection or fun.
+`node --test projects/last-dance-school/dance.test.js`. The adapter runs the same
+12 Node checks, including `village/story.test.js`: every three-gesture phrase,
+both original teachers and both sizes for the clearing; all phrases and both
+teachers down the two village branches; numeric differences in the default
+bodies; independent mutable memories; invalid and inherited-property pupil names; missed and late lessons; live changes to
+teachers before handoff; choice deadlines; actual gift inheritance; isolated
+spectator replay, cleared teachers and final performance slots. These checks
+cannot judge sustained animation, emotional connection or fun.
 
-## Author page trial — 18 November 2026
+## Author trials — 18 November 2026
 
-The house viewer opened the actual page at 390 and 1280 widths. With the final
-buttons, a real Space press changed the first bow to a wave; Rue’s first pose
-and the handoff list changed with it. The ordinary route showed Rue bowing at
-that same moment. A late lesson from Pip omitted the bow, and an unwatched
-lesson from Ada left Rue still at the ending. The opened handoff lists and
-all screenshots for these comparisons were inspected. They reported no script
-errors, unnamed controls or horizontal overflow. Ten seconds of timed play,
-pause, keyboard still advance, the change-dance link and reset/focus return
-were also tried on both sizes.
+The house viewer is used on the actual page at phone 390 and desktop 1280,
+with real browser clicks and keys; screenshots and responses stay private.
+During building, a lesson placed Lio in the river, the reunion plank stopped
+short of the dancers, and Bea's first bow was too close to standing still.
+Those staging defects were repaired, along with figures overlapping the chairs. A larger wave also hid its hand behind
+the head; its arm arc was repaired after the changed-phrase look.
 
-Earlier native menu key attempts did not change their values; those menus were
-replaced by the tested buttons. Initial unnamed controls were given explicit
-labels. The viewer refused two hidden step-file paths and one overlong single
-wait before corrected requests ran. These were input failures, not scene
-trials. No uninterrupted three-minute viewing, physical touchscreen, speech,
-zoom or changed motion preference was tested. Screenshots and short playback
-cannot establish continuous animation quality or an independent artistic pass.
+Actual looks covered the village, the storm with Ada catching Pip, the north
+lesson, reunion, ending and return to rehearsal. At the same reunion moment,
+the ordinary bow, altered wave, late lesson and whole missed lesson produced
+different bodies. The missing pupil stayed still beside the other dancer;
+the late pupil waved while the other bowed. The optional handoff list stayed
+closed for those comparisons.
 
-## What the first milestone still owes
+Real keys started and paused ten seconds in the new north-bank scene, then
+advanced one still and stayed there. A separate ten-second spectator replay
+started, paused and returned to the living reunion without teaching its missed
+pupil. Remembered still advance showed young Moth performing while the living
+moment stayed fixed. Ending focus reached Teach another dance; Space reset to
+the first gesture, Space changed it, and Tab reached the second gesture.
+The successful looks reported no script errors, unnamed controls or horizontal
+overflow at either size. Both devices' main screenshots were personally opened
+for each look; the inputs, responses and copied screenshots remain private.
 
-An independent resident should first play without reading the research brief
-or this explanation. Name an actual performed gesture or character moment
-that makes them grin, stare or argue, and say whether they would replay it or
-show it. Then compare two visitor dances and an interrupted route on the
-actual phone and desktop page. The child must perform the inherited variant,
-not the original teacher's score. A correct copying diagram, a canned ending
-or praise for the premise fails. One independent artistic review decides
-whether the first encounter earns the remaining weeks.
+A final model review also caught a new lookup accepting inherited object keys
+as pupil names. Its refusal was restored after a failing regression check;
+the original valid-pupil checks remain unchanged. No browser repeat was needed
+for that invalid internal-input guard.
 
-The creator's page trials do not provide that independent judgment.
-Independent source review, artistic judgment, public asset packet,
-public delivery and the project owner's stage decision are separate steps.
-Do not turn an author trial or model tests into those outcomes.
+No author trial supplies the independent artistic verdict. No uninterrupted
+full-performance, speech output, physical touch, zoom, changed motion
+preference, public browser or audience-size claim is made.
+
+## The next judgment
+
+One non-author should encounter the extended story with explanations closed,
+compare two dances and an interrupted teaching route, and name a performed
+village or reunion moment worth voluntarily replaying. Check the phone's
+expressive space, the separate traditions, the missing movement and spectator
+replay's inability to teach the living characters. Reject if more mechanism
+has replaced the artistic encounter. Only the owner can admit this milestone;
+public packaging and actual public delivery remain a later stage.
 
 ## Precedents and credits
 
