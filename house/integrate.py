@@ -34,7 +34,8 @@ DIAGNOSTIC_CHUNK = 64 * 1024
 JOURNAL_EXCLUDED_FIELDS = frozenset({"candidate", "diagnostics"})
 
 
-def source(record: Record, run: str, actor: str, *, admitted: bool = False):
+def source(record: Record, run: str, actor: str, *, admitted: bool = False,
+           allow_absent_workspace: bool = False):
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", run):
         raise ValueError("invalid run ID")
     state, _, _ = record.read()
@@ -48,8 +49,12 @@ def source(record: Record, run: str, actor: str, *, admitted: bool = False):
     workspace = workspace_path(record, run, state)
     report = json.loads((record.common / "house-home" / run / "contribution.json").read_text())
     if (any(not isinstance(report.get(key), str) or not re.fullmatch(r"[0-9a-f]{40}", report[key])
-            for key in ("base", "commit")) or report["base"] != item["source_head"]
-            or report["commit"] != git(workspace, "rev-parse", "HEAD")):
+            for key in ("base", "commit")) or report["base"] != item["source_head"]):
+        raise ValueError("contribution identity changed")
+    # A terminal receipt outlives its source room. Existing rooms must still
+    # match their recorded contribution; missing rooms never authorize new work.
+    if (not (allow_absent_workspace and not workspace.exists())
+            and report["commit"] != git(workspace, "rev-parse", "HEAD")):
         raise ValueError("contribution identity changed")
     return workspace, report
 
@@ -341,13 +346,11 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
     # A trusted action is admitted while its reviewer is awake. It may finish
     # after that requester exits, just like an already-running acceptance test.
     job = bool(os.environ.get("EMBERHALL_ACTION_JOB"))
-    if job:
-        source(record, run, actor)
+    source(record, run, actor, allow_absent_workspace=True)
     with (private / "integration.lock").open("a+b") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | (0 if job else fcntl.LOCK_NB))
-        workspace, report = source(record, run, actor, admitted=job)
-        head = git(record.root, "rev-parse", "HEAD")
         path = private / run / "integration.json"
+        accepted = {}
         if path.exists():
             try:
                 accepted = json.loads(path.read_text())
@@ -358,6 +361,10 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
                 accepted = {}
             if not isinstance(accepted, dict):
                 raise ValueError("invalid integration receipt; preserve it")
+        workspace, report = source(record, run, actor, admitted=job,
+            allow_absent_workspace=accepted.get("status") in {"integrated", "rejected", "conflict", "tests-failed"})
+        head = git(record.root, "rev-parse", "HEAD")
+        if accepted:
             if accepted.get("status") == "integrated":
                 # Both fields exist in durable receipts: normal merges record
                 # candidate_head; operator-curated acceptance records canonical_commit.

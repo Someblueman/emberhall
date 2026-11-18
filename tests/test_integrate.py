@@ -1,7 +1,10 @@
 """Independent review and conflicting real source contributions preserve work."""
 import json
 import os
+import shutil
+import subprocess
 import unittest
+from unittest.mock import patch
 from house.home_work import contribution, git, room
 from house.integrate import integrate
 from house.home import pending_contributions
@@ -53,10 +56,15 @@ class IntegrationTests(HouseCase):
         self.assertEqual((self.repo / "document.txt").read_text(), "first\n")
         self.assertEqual((second / "document.txt").read_text(), "second\n")
         self.assertEqual((first / "document.txt").read_text(), "first\n")
+        shutil.rmtree(second)
+        journal = self.record.read()[2]
+        self.assertEqual(integrate(self.record, "two", "bob", publish=True), result)
+        self.assertEqual(self.record.read()[2], journal)
 
     def test_accepted_retry_keeps_receipt_history_and_does_no_new_work(self):
-        self.candidate("one", "first\n")
+        workspace = self.candidate("one", "first\n")
         accepted = integrate(self.record, "one", "alice", publish=True)
+        shutil.rmtree(workspace)
         path = self.private / "one/integration.json"
         original = path.read_bytes()
         head = git(self.repo, "rev-parse", "HEAD")
@@ -73,6 +81,68 @@ class IntegrationTests(HouseCase):
         (self.repo / "document.txt").write_text("uncommitted next task\n")
         self.assertEqual(integrate(self.record, "one", "bob"), accepted)
         self.assertEqual((self.repo / "document.txt").read_text(), "uncommitted next task\n")
+
+    def test_failed_receipt_survives_missing_source_room(self):
+        self.assert_missing_terminal_replay("failed", "invalid\n")
+
+    def test_rejected_receipt_survives_missing_source_room(self):
+        self.assert_missing_terminal_replay("rejected", "first\n")
+
+    def assert_missing_terminal_replay(self, run, text):
+        with self.subTest(run=run):
+            workspace = self.candidate(run, text)
+            result = integrate(self.record, run, "alice",
+                               reject="Not suitable" if run == "rejected" else None)
+            self.assertEqual(result["status"], "rejected" if run == "rejected" else "tests-failed")
+            if run == "failed":
+                self.assertIn("AssertionError", result["diagnostics"]["tail"])
+            shutil.rmtree(workspace)
+            path = self.private / run / "integration.json"
+            original, journal = path.read_bytes(), self.record.read()[2]
+            head = git(self.repo, "rev-parse", "HEAD")
+            candidates = sorted(self.private.glob("integration-*"))
+            with patch.dict(os.environ, {"EMBERHALL_ACTION_JOB": "1"}):
+                self.assertEqual(integrate(self.record, run, "bob", publish=True), result)
+            self.assertEqual(path.read_bytes(), original)
+            self.assertEqual(self.record.read()[2], journal)
+            self.assertEqual(git(self.repo, "rev-parse", "HEAD"), head)
+            self.assertEqual(sorted(self.private.glob("integration-*")), candidates)
+            with self.assertRaisesRegex(ValueError, "different, awake"):
+                integrate(self.record, run, "author-" + run)
+            report_path = self.private / run / "contribution.json"
+            report = json.loads(report_path.read_text())
+            report_path.write_text(json.dumps(dict(report, commit="0" * 40)))
+            with self.assertRaisesRegex(ValueError, "receipt is inconsistent"):
+                integrate(self.record, run, "bob")
+            self.assertEqual(path.read_bytes(), original)
+
+    def test_new_and_prepared_reviews_still_require_the_source_room(self):
+        for status in (None, "prepared"):
+            with self.subTest(status=status):
+                run = status or "new"
+                workspace = self.candidate(run, "first\n")
+                path = self.private / run / "integration.json"
+                if status:
+                    path.write_text(json.dumps({"run": run, "status": status}))
+                shutil.rmtree(workspace)
+                journal = self.record.read()[2]
+                with self.assertRaises(subprocess.CalledProcessError):
+                    integrate(self.record, run, "alice", publish=True)
+                self.assertEqual(self.record.read()[2], journal)
+                self.assertEqual(git(self.repo, "rev-parse", "HEAD"), self.base)
+
+    def test_terminal_receipt_does_not_excuse_a_changed_existing_room(self):
+        workspace = self.candidate("one", "first\n")
+        result = integrate(self.record, "one", "alice", reject="Not suitable")
+        git(workspace, "-c", "commit.gpgsign=false", "-c", "user.name=Test", "-c",
+            "user.email=test@local", "commit", "--allow-empty", "-m", "Changed candidate")
+        path = self.private / "one/integration.json"
+        original, journal = path.read_bytes(), self.record.read()[2]
+        with self.assertRaisesRegex(ValueError, "identity changed"):
+            integrate(self.record, "one", "bob")
+        self.assertEqual(json.loads(path.read_text()), result)
+        self.assertEqual(path.read_bytes(), original)
+        self.assertEqual(self.record.read()[2], journal)
 
     def test_incomplete_receipt_is_preserved_and_actual_integration_recovers(self):
         self.candidate("one", "first\n")
@@ -101,6 +171,7 @@ class IntegrationTests(HouseCase):
         path = self.private / "one/integration.json"
         # Existing operator-curated receipts bind canonical_commit, not candidate_head.
         path.write_text(json.dumps(accepted))
+        shutil.rmtree(workspace)
         git(self.repo, "-c", "commit.gpgsign=false", "-c", "user.name=Test", "-c",
             "user.email=test@local", "commit", "--allow-empty", "-m", "Later work")
         self.assertEqual(integrate(self.record, "one", "bob"), accepted)
