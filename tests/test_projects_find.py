@@ -140,7 +140,7 @@ assert(empty.classList.contains('projects-find-hidden'));
 assert.equal(document.activeElement,find('projects-find-search'));
 ''')
 
-    def test_find_preserves_links_and_hides_empty_find(self):
+    def test_find_preserves_links_and_includes_a_retired_only_shelf(self):
         self.run_js(r'''
 frame.shelf.projects=[{id:'p1',title:'Night Lantern',plain:'a lamp',status:'active',owner:'r1'}];
 frame.shelf.ideas=[{id:'i1',title:'Glass Orchestra',plain:'music',status:'shelved',
@@ -156,8 +156,42 @@ projectsFindState.query='';
 frame={at:1800000000,seq:1,residents:[{id:'r1',name:'Ember'}],work:[],
  shelf:{enabled:true,policy:null,ideas:[{id:'lost',title:'Lost idea',status:'graveyard',losses:1}],projects:[]}};
 shelf();
-assert(visibleItems().length===0);
-assert(all(root).find(n=>(n.className||'').split(' ').includes('projects-find-controls')).classList.contains('projects-find-hidden'));
+assert.equal(visibleItems().length,1);
+assert(!all(root).find(n=>(n.className||'').split(' ').includes('projects-find-controls')).classList.contains('projects-find-hidden'));
+query('Lost idea');
+assert(find('projects-retired').open);
+assert.match(text(visibleItems()[0]),/Lost idea/);
+frame.shelf.ideas=[];shelf();
+assert(!all(root).some(n=>(n.className||'').split(' ').includes('projects-find-controls')));
+''')
+
+    def test_find_opens_stopped_records_by_reason_and_respects_viewed_history(self):
+        self.run_js(r'''
+frame.shelf.projects=[
+ {id:'p1',title:'Lethe',plain:'a language experiment',status:'dropped',lesson:'No extra advantage under the same assumptions.'},
+ {id:'p2',title:'Still building',status:'active',owner:'r1'}
+];
+frame.shelf.ideas=[{id:'retired',title:'<img src=x> Earlier idea',what:'a finite folding puzzle',status:'graveyard',
+ history:[{lesson:'The complete counterexample ended the search.'}]}];
+const before=JSON.stringify(frame);shelf();
+assert.equal(visibleItems().length,3);assert(!find('projects-retired').open);
+query('same assumptions');
+assert.equal(visibleItems().length,1);assert.match(text(visibleItems()[0]),/Lethe/);
+assert(find('projects-retired').open);
+query('folding puzzle');
+assert.equal(visibleItems().length,1);assert.match(text(visibleItems()[0]),/<img src=x> Earlier idea/);
+assert(!all(root).some(n=>n.tag==='img'));
+query('counterexample');assert.equal(visibleItems().length,1);
+query('Still building');
+assert.equal(visibleItems().length,1);assert(find('projects-retired').classList.contains('projects-find-hidden'));
+find('projects-find-reset').listeners.click();
+assert.equal(visibleItems().length,3);assert(!find('projects-retired').classList.contains('projects-find-hidden'));
+assert.equal(document.activeElement,find('projects-find-search'));
+assert.equal(JSON.stringify(frame),before);
+// A prior publication's shelf cannot borrow stopped work from today's frame.
+data.frames=[frame];frame={...frame,seq:0,shelf:{enabled:true,ideas:[],projects:[]}};
+projectsFindState.query='Lethe';shelf();
+assert(!text(root).includes('Lethe'));assert.equal(visibleItems().length,0);
 ''')
 
     def test_refresh_preserves_query_focus_and_selection(self):

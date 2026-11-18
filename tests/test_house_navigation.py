@@ -169,7 +169,15 @@ assert.equal(prevented,1,'Escape inside controls and handled keys retain native 
         script = r'''
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 class Element {
- constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.attrs={};this.style={};}
+ constructor(tag){
+  this.tag=tag;this.children=[];this.textContent='';this.attrs={};this.style={};this.className='';
+  this.classList={toggle:(name,force)=>{
+   const classes=new Set(this.className.split(/\s+/).filter(Boolean));
+   const present=force===undefined?!classes.has(name):Boolean(force);
+   if(present)classes.add(name);else classes.delete(name);
+   this.className=[...classes].join(' ');return present;
+  }};
+ }
  appendChild(n){this.children.push(n);} replaceChildren(){this.children=[];}
  setAttribute(k,v){this.attrs[k]=String(v);} querySelectorAll(s){return all(this).filter(n=>n.tag==='details'&&(s!=='details[open]'||n.open));}
 }

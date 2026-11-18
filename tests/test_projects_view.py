@@ -32,9 +32,10 @@ class ProjectsViewTests(unittest.TestCase):
         script = r'''
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 class Element {
-  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.attrs={};}
   appendChild(node){this.children.push(node);}
   replaceChildren(){this.children=[];}
+  setAttribute(name,value){this.attrs[name]=String(value);}
 }
 const nodes={shelf:new Element('div'),finished:new Element('div')};
 const document={getElementById:id=>nodes[id]||null,createElement:tag=>new Element(tag)};
