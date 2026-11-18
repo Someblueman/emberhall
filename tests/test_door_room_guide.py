@@ -78,8 +78,10 @@ const art={id:'art',title:'<img src=x> A moth',status:'project',brief:{field:'ar
 const math={id:'math',title:'Five marks',status:'project',brief:{field:'mathematics',for:'field'}};
 const language={id:'lang',title:'Forget me',status:'shelved',brief:{field:'language',for:'people'}};
 const future={...language,id:'future',title:'Future secret'};
-const nowShelf={enabled:true,ideas:[art,math,language],projects:[
- {id:'art-work',idea:'art',title:art.title,status:'done'},
+const terminal={id:'terminal',title:'Tape terminal',status:'project',brief:{field:'software',for:'play'}};
+const nowShelf={enabled:true,ideas:[art,math,language,terminal],projects:[
+ {id:'terminal-work',idea:'terminal',title:terminal.title,status:'active'},
+ {id:'art-work',idea:'art',title:art.title,status:'done',plain:'One moth circles the lamp.',milestone:'Draw the whole flight.'},
  {id:'math-work',idea:'math',title:math.title,status:'active',stage:2,milestones:[{},{},{}],completed:[{},{}]},
  ...Array.from({length:4},(_,n)=>({id:'stopped-'+n,title:'Stopped '+n,status:'dropped',brief:{field:'art'}})),
  {id:'dropped',title:'Dropped work',status:'dropped',brief:{field:'art'},lesson:'<img src=x> The gate found no advantage.'},
@@ -92,7 +94,14 @@ assert.match(body,/not wishes declared fulfilled/);
 assert.match(body,/In progress · stage 3 of 3 ·.*Five marks/);
 assert.match(body,/Proposed ·.*Forget me/);
 assert.match(body,/Finished ·.*<img src=x> A moth/);
-assert.match(body,/Showing three of 5/);
+assert.match(body,/Show 2 more attempts/);
+const playful=all(get('room-content')).find(n=>n.children.some(c=>c.id==='door-wish-5'));
+assert.match(text(playful),/Be audacious or playful · 2 related attempts/);
+assert.match(text(playful),/Tape terminal/);
+const uncataloged=all(playful).find(n=>n.children.some(c=>c.id==='door-record-5-art-work'));
+assert.match(text(uncataloged),/One moth circles the lamp/);
+assert.match(text(uncataloged),/Draw the whole flight/);
+assert(!links().some(n=>n.id==='door-attempt-5-art-work'));
 assert.match(body,/5 stopped attempts · read why/);
 assert.match(body,/Stopped · Dropped work/);
 assert.match(body,/<img src=x> The gate found no advantage/);
@@ -102,7 +111,7 @@ assert.equal(links().filter(n=>n.id.startsWith('door-stopped-0-')).length,3);
 assert(!all(get('room-content')).some(n=>n.tag==='img'));
 assert(links().some(n=>n.href.endsWith('/docs/WISHES.md')));
 assert(links().some(n=>n.href==='#room/workshop'));
-run(`catalog=[{id:'art',title:'Moth picture'}];galleryState={query:'old filter',activity:'Read',toolsOpen:false}`);
+run(`catalog=[{id:'art',title:'Moth picture',category:'creation',href:'projects/art/'}];galleryState={query:'old filter',activity:'Read',toolsOpen:false};roomPanel()`);
 const doneLink=links().find(n=>n.id==='door-attempt-0-art-work');
 assert.equal(doneLink.href,'#gallery-view');doneLink.listeners.click();
 assert.equal(run('galleryState.query'),'Moth picture');
@@ -130,7 +139,7 @@ window.location.hash=mathLink.href;listeners.hashchange();
 assert.equal(document.activeElement,get('projects-view'));
 assert.equal(run('frame.seq'),5); // following the work does not move the history cursor
 run(`current=false;frame={...frame,shelf:{enabled:true,ideas:[],projects:[]}};selected='door';roomPanel()`);
-body=text(get('room-content'));assert.doesNotMatch(body,/A moth|Five marks|Forget me|Dropped work|gate found no advantage/);
+body=text(get('room-content'));assert.doesNotMatch(body,/Tape terminal|A moth|Five marks|Forget me|Dropped work|gate found no advantage/);
 assert.match(body,/belongs to this recorded moment/);
 assert.match(body,/No related attempt/);
 run(`frame={...frame,shelf:{enabled:true,ideas:[future],projects:[]}};roomPanel()`);

@@ -2617,11 +2617,48 @@ function renderChronicleRoom(content) {
 }
 
 const doorWishesOpen=new Set();
+function doorDisclosure(parent,cls,id,label) {
+  const details=html("details",cls,undefined,parent);
+  details.open=doorWishesOpen.has(id);
+  details.addEventListener("toggle",()=>{
+    if(details.open)doorWishesOpen.add(id);else doorWishesOpen.delete(id);
+  });
+  html("summary","",label,details).id=id;
+  return details;
+}
+function renderDoorAttempt(parent,{record,project},wishIndex) {
+  const title=titleFor(record,project?"project":"idea");
+  const key=`${wishIndex}-${encodeURIComponent(record.id)}`;
+  const finished=project&&record.status==="done";
+  const entry=finished&&catalog?.find(candidate=>candidate.id===record.idea&&collectionUrl(candidate));
+  if(finished&&!entry) {
+    const details=doorDisclosure(parent,"record-details",`door-record-${key}`,`Finished · ${title} · read its record`);
+    if(record.plain)html("p","small",record.plain,details);
+    if(record.milestones?.length)renderOrderedMilestones(record,details);
+    else if(record.milestone)html("p","small",`Recorded milestone · ${record.milestone}`,details);
+    html("p","small","A Gallery link is unavailable in this view.",details);
+    return;
+  }
+  const row=html("p","small",undefined,parent);
+  let status=project?(finished?"Finished":"In progress"):"Proposed";
+  if(project&&record.status==="active"&&Array.isArray(record.milestones)&&record.milestones.length>1) {
+    const stage=Number.isInteger(record.stage)?record.stage:(record.completed||[]).length;
+    status+=` · stage ${stage+1} of ${record.milestones.length}`;
+  }
+  html("span","",`${status} · `,row);
+  const link=html("a","room-shelf-link",title,row);
+  link.id=`door-attempt-${key}`;link.href=finished?"#gallery-view":"#projects-view";
+  link.addEventListener("click",()=>{
+    if(finished) {
+      galleryState.query=entry.title;galleryState.activity="all";galleryState.toolsOpen=true;renderCollection();
+    } else {projectsFindState.query=title;shelf();}
+  });
+}
 function renderDoorWishes(content) {
   const guide=html("section","room-shelf-summary",undefined,content);
   html("h3","","What are we trying to make?",guide);
   html("p","small","On 17 November the Steward asked for audacious, playful or deep work. These are related attempts, not wishes declared fulfilled. Open one and judge the thing itself.",guide);
-  html("p","small","Finished work opens in the Gallery; ideas, work in progress and stopped attempts open in Projects.",guide);
+  html("p","small","Finished work opens in the Gallery when a link is available. You can read the other finished project records here. Ideas and ongoing or stopped work open in Projects.",guide);
   const sources=html("p","small shelf-project-actions",undefined,guide);
   for(const [label,path] of [["Read the wishes","WISHES.md"],["Read the standing orders","STEWARD_ORDERS.md"]]) {
     const link=html("a","room-shelf-link",label,sources);
@@ -2645,13 +2682,11 @@ function renderDoorWishes(content) {
     ["Do mathematics","An argument or result another mind can check.",b=>b.field==="mathematics"],
     ["Invent a language","A language with an idea and a program of its own.",b=>b.field==="language"],
     ["Help a field forward","A contribution to science, design or another discipline.",b=>b.for==="field"&&!["art","mathematics","language"].includes(b.field)],
-    ["Make the house better","A more capable, legible and lively home.",b=>b.for==="house"]
+    ["Make the house better","A more capable, legible and lively home.",b=>b.for==="house"],
+    ["Be audacious or playful","Work whose makers explicitly set out to make something for play.",b=>b.for==="play"]
   ];
   if(!current)html("p","small","Related work below belongs to this recorded moment. The source links above open today's documents.",guide);
   wishes.forEach(([title,detail,matches],wishIndex)=>{
-    const section=html("details","project-details",undefined,guide);
-    section.open=doorWishesOpen.has(wishIndex);
-    section.addEventListener("toggle",()=>{if(section.open)doorWishesOpen.add(wishIndex);else doorWishesOpen.delete(wishIndex);});
     const related=attempts.filter(a=>a.brief&&matches(a.brief));
     const ended=stopped.filter(a=>a.brief&&matches(a.brief));
     related.sort((a,b)=>{
@@ -2659,34 +2694,17 @@ function renderDoorWishes(content) {
       return rank(a)-rank(b)||titleFor(a.record,"attempt").localeCompare(titleFor(b.record,"attempt"));
     });
     const count=related.length+ended.length;
-    html("summary","",`${title} · ${count} related ${count===1?"attempt":"attempts"}`,section).id=`door-wish-${wishIndex}`;
+    const section=doorDisclosure(guide,"project-details",`door-wish-${wishIndex}`,`${title} · ${count} related ${count===1?"attempt":"attempts"}`);
     html("p","small",detail,section);
-    related.slice(0,3).forEach(({record,project})=>{
-      const row=html("p","small",undefined,section);
-      let status=project?(record.status==="done"?"Finished":"In progress"):"Proposed";
-      if(project&&record.status==="active"&&Array.isArray(record.milestones)&&record.milestones.length>1) {
-        const stage=Number.isInteger(record.stage)?record.stage:(record.completed||[]).length;
-        status+=` · stage ${stage+1} of ${record.milestones.length}`;
-      }
-      html("span","",`${status} · `,row);
-      const link=html("a","room-shelf-link",titleFor(record,project?"project":"idea"),row);
-      const finished=project&&record.status==="done";
-      link.id=`door-attempt-${wishIndex}-${encodeURIComponent(record.id)}`;link.href=finished?"#gallery-view":"#projects-view";
-      link.addEventListener("click",()=>{
-        if(finished) {
-          galleryState.query=catalog?.find(entry=>entry.id===record.idea)?.title||"";
-          galleryState.activity="all";galleryState.toolsOpen=true;renderCollection();
-        } else {projectsFindState.query=titleFor(record,project?"project":"idea");shelf();}
-      });
-    });
-    if(related.length>3)html("p","small",`Showing three of ${related.length}; the Projects view holds the rest.`,section);
+    related.slice(0,3).forEach(attempt=>renderDoorAttempt(section,attempt,wishIndex));
+    if(related.length>3) {
+      const remaining=related.length-3;
+      const more=doorDisclosure(section,"record-details",`door-more-${wishIndex}`,`Show ${remaining} more ${remaining===1?"attempt":"attempts"}`);
+      related.slice(3).forEach(attempt=>renderDoorAttempt(more,attempt,wishIndex));
+    }
     if(!count)html("p","empty-note","No related attempt with a stated subject is recorded here yet.",section);
     if(ended.length) {
-      const history=html("details","record-details",undefined,section);
-      const key=`stopped-${wishIndex}`;
-      history.open=doorWishesOpen.has(key);
-      history.addEventListener("toggle",()=>{if(history.open)doorWishesOpen.add(key);else doorWishesOpen.delete(key);});
-      html("summary","",`${ended.length} stopped ${ended.length===1?"attempt":"attempts"} · read why`,history).id=`door-${key}`;
+      const history=doorDisclosure(section,"record-details",`door-stopped-${wishIndex}`,`${ended.length} stopped ${ended.length===1?"attempt":"attempts"} · read why`);
       ended.slice().reverse().slice(0,3).forEach(({record})=>{
         const entry=html("div","room-history-entry",undefined,history);
         const link=html("a","room-shelf-link",`Stopped · ${titleFor(record,"project")}`,entry);
