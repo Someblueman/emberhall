@@ -26,6 +26,9 @@ BRANCH = "codex/house-pages"
 MAX_PUBLIC_BLOB = 64 * 1024 * 1024
 # A sealed part of the node table is closed once its JSON reaches this size and never changes again.
 PART_TARGET = 8 * 1024 * 1024
+# A rebuild replays this many events at a time and saves its place this often (see history()).
+REPLAY_BATCH = 100
+CHECKPOINT_SECONDS = 120
 PARTS_DIR = "history-parts"
 
 
@@ -188,10 +191,31 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
                  "nodes": [], "seen": {}, "frames": []}
     context = cache["context"]
     encoder = Encoder(cache["nodes"], cache["seen"], chunked=True)
-    new_frames = replay(events, context)
-    for frame in new_frames:
-        cache["frames"].append(encoder.value(frame))
-        encoder.appended(cache["frames"])  # a full chunk of the frame list joins the persistent table now
+
+    def save() -> None:
+        cache["head"] = head
+        temporary = path.with_name(path.name + ".tmp")
+        temporary.write_bytes(marshal.dumps(cache))
+        temporary.chmod(0o600)
+        os.replace(temporary, path)
+
+    # Replay in batches and keep the place. A full rebuild used to hold every frame in memory at once
+    # and save nothing until the end; on 18 November, with the machine short of memory, it passed the
+    # publisher's twenty-minute limit, was killed and began again from nothing, so the page stood
+    # still. Now a stopped rebuild resumes where its last checkpoint left it. The cache then names the
+    # current head while holding fewer events: the journal only grows, so its first events are the same.
+    new_frames, saved = False, time.monotonic()
+    while context["replayed"] < len(events):
+        before = context["replayed"]
+        for frame in replay(events[:before + REPLAY_BATCH], context):
+            cache["frames"].append(encoder.value(frame))
+            encoder.appended(cache["frames"])  # a full chunk of the frame list joins the persistent table now
+        new_frames = True
+        if context["replayed"] <= before:
+            raise ValueError("The history replay made no progress")
+        if context["replayed"] < len(events) and time.monotonic() - saved >= CHECKPOINT_SECONDS:
+            save()
+            saved = time.monotonic()
     if not cache["frames"]:
         raise ValueError("No journal frames to publish")
     last_seq = len(cache["frames"])
@@ -225,11 +249,7 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
             if "history/" + stale.name not in parts:
                 stale.unlink(missing_ok=True)
     if new_frames or grown or not had_parts or cache.get("head") != head:
-        cache["head"] = head
-        temporary = path.with_name(path.name + ".tmp")
-        temporary.write_bytes(marshal.dumps(cache))
-        temporary.chmod(0o600)
-        os.replace(temporary, path)
+        save()
     return body, {"journal_head": head, "source_head": source_head, "seq": last_seq,
                   "at": final["at"], "history_version": 4}, parts
 

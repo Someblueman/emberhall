@@ -75,3 +75,36 @@ class HistoryCacheTests(HouseCase):
             with patch("house.publish.replay_context", wraps=publish.replay_context) as fresh:
                 self.assertEqual(publish.history(self.record, self.private, observed_at=1e10)[0], resumed)
             fresh.assert_called_once()
+
+    def test_a_rebuild_stopped_midway_resumes_from_its_checkpoint_to_the_same_bytes(self):
+        # 18 November: a full rebuild outran the publisher's time limit, was killed and began again from
+        # nothing each time. It now saves its place, so the next attempt carries on.
+        for _ in range(4):
+            self.grow()
+        whole = publish.history(self.record, self.private, observed_at=1e10)[0]
+        total = len(self.record.read()[1])
+        path = self.private / publish.HISTORY_CACHE
+        path.unlink()
+        real, calls = publish.replay, []
+
+        def stopped(events, context):
+            calls.append(len(events))
+            if len(calls) == 3:
+                raise KeyboardInterrupt   # the publisher is killed here
+            return real(events, context)
+
+        with patch("house.publish.REPLAY_BATCH", 2), patch("house.publish.CHECKPOINT_SECONDS", 0):
+            with patch("house.publish.replay", stopped), self.assertRaises(KeyboardInterrupt):
+                publish.history(self.record, self.private, observed_at=1e10)
+            self.assertEqual([2, 4, 6], calls, "two events at a time")
+            kept = marshal.loads(path.read_bytes())
+            self.assertEqual(4, kept["context"]["replayed"])
+            self.assertLess(4, total)
+            with patch("house.publish.replay_context", wraps=publish.replay_context) as fresh, \
+                    patch("house.publish.replay", wraps=real) as resumed:
+                again = publish.history(self.record, self.private, observed_at=1e10)[0]
+            fresh.assert_not_called()
+            self.assertEqual(6, len(resumed.call_args_list[0].args[0]), "it carried on from event 4")
+        self.assertEqual(again, whole)
+        self.assertEqual(total, marshal.loads(path.read_bytes())["context"]["replayed"])
+
