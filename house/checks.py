@@ -63,6 +63,11 @@ def council(state: dict, resident: str) -> list[str]:
             continue
         if item["mode"] == "wake-prompt" or council_model.lapsed(state, name, item) is not None:
             continue
+        if item["mode"] == "renovation":
+            files = item.get("renovation", {}).get("files", {})
+            installed = state.get("maintenance", {}).get("protected_files", {})
+            if files and all(installed.get(path) == digest for path, digest in files.items()):
+                continue
         author, trial, notice = item.get("author"), item.get("trial"), item.get("notice")
         endorsed = item.get("endorsements", {})
         label = f"{name} ({item.get('title', name)})"

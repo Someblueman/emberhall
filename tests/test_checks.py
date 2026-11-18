@@ -119,6 +119,21 @@ class CouncilTests(unittest.TestCase):
         self.assertEqual(self.lines("ann", endorsed=("bob",)), [])
         self.assertEqual(self.lines("bob", endorsed=("bob",)), [])
 
+    def test_wakes_skip_a_renovation_only_when_every_proposed_file_is_installed(self):
+        files = {"house/body.py": "a" * 64, "house/digest.py": "b" * 64}
+        ready = proposal("renovation", endorsed=("bob", "cat"), notice=NOW - 2 * DAY)
+        state = house(proposals={"reading-repairs": ready | {"renovation": {"files": files}}})
+        for installed, expected in (
+            ({}, True),
+            ({"house/body.py": files["house/body.py"]}, True),
+            (files | {"house/body.py": "c" * 64}, True),
+            (files | {"house/other.py": "d" * 64}, False),
+        ):
+            with self.subTest(installed=installed):
+                state["maintenance"]["protected_files"] = installed
+                for prompt in (checks.offer, checks.focus):
+                    self.assertEqual("enact reading-repairs" in prompt(state, "dan"), expected)
+
     def test_two_endorsements_without_notice_gives_the_notice_command(self):
         lines = self.lines("ann", endorsed=("bob", "cat"))
         self.assertEqual(len(lines), 1)
