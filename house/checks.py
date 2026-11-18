@@ -11,6 +11,7 @@ from __future__ import annotations
 import shlex
 
 from . import council as council_model
+from .body import installed_by_upgrade
 
 MOMENTUM = "upgrade-20261117-momentum"
 THREE_DAYS = 72
@@ -67,6 +68,8 @@ def council(state: dict, resident: str) -> list[str]:
             files = item.get("renovation", {}).get("files", {})
             installed = state.get("maintenance", {}).get("protected_files", {})
             if files and all(installed.get(path) == digest for path, digest in files.items()):
+                continue
+            if installed_by_upgrade(state, item):
                 continue
         author, trial, notice = item.get("author"), item.get("trial"), item.get("notice")
         endorsed = item.get("endorsements", {})
