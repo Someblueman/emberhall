@@ -6,6 +6,7 @@ from unittest.mock import patch
 import uuid
 
 from house import council
+from house.__main__ import parser, run
 from house.governance import digest
 from house.model import apply_event
 from house.record import Record
@@ -239,6 +240,18 @@ class CouncilTests(unittest.TestCase):
         revision = self.state["rule_revision"]
         self.sync([])
         self.assertEqual(self.state["rule_revision"], revision)
+
+    def test_rules_summary_tracks_the_installed_renovation_window(self):
+        self.authorize()
+        args = parser().parse_args(["rules"])
+        with patch("house.__main__.Record") as record:
+            record.return_value.read.return_value = (self.state, [], "")
+            before = run(args)["governing_process"]["requirements"]
+            self.state["maintenance"] = {"migrations": {council.QUICK_RENOVATIONS: {}}}
+            after = run(args)["governing_process"]["requirements"]
+        self.assertIn("24-hour public veto window", before)
+        self.assertNotIn("code renovations", before)
+        self.assertIn("24-hour public veto window (1-hour window for code renovations)", after)
 
     def test_repealing_foundation_preserves_named_rules_and_cannot_change_process(self):
         self.authorize(); self.ready(); self.now += council.WAIT_SECONDS; self.sync(); self.enact()

@@ -206,10 +206,18 @@ def run(args: argparse.Namespace) -> object:
     if command == "rules":
         result = {"revision": state["rule_revision"], "text": state["rules"]}
         if "council" in state:
+            from .council import veto_window
+
+            rule_hours = veto_window(state, {"mode": "rule"}) // 3600
+            renovation_hours = veto_window(state, {"mode": "renovation"}) // 3600
+            notice = f"a {rule_hours}-hour public veto window"
+            if renovation_hours != rule_hours:
+                notice += f" ({renovation_hours}-hour window for code renovations)"
             result["governing_process"] = {
                 "source_sha256": state["council"]["source_sha256"],
                 "authorized_at": state["council"]["authorized_at"],
-                "requirements": "Recorded trial, two independent non-author endorsements, full 24-hour public veto window, fresh Steward check",
+                "requirements": ("Recorded trial, two independent non-author endorsements, "
+                                 f"{notice}, and a fresh Steward check"),
                 "note": "The Steward's recorded authorization supersedes the founding text's historical sealed/signature-only process. Process changes remain Steward-only; charter text and historical events are retained.",
             }
         return result
