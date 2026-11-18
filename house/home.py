@@ -1268,6 +1268,7 @@ class Coordinator:
             task_id = request["task"]
             task_generation = state["tasks"][task_id]["generation"]
         from . import course
+        rotating = False
         # An untargeted request that names a resting model takes another open route of its kind.
         named = (request.get("agent") == kind and "model" in request and (
             "target_resident" in request
@@ -1276,9 +1277,10 @@ class Coordinator:
             # Course correction: rotate ordinary routes; stronger routes for
             # Explorers and great-work builders. Explicit requests are kept.
             bound = state["tasks"].get(task_id or request.get("task"), {})
-            model = course.route(state, kind, at=max(time.time(), state["at"]),
-                                 strong=explore_generation is not None
-                                 or course.great_project(state, bound) is not None)
+            strong = explore_generation is not None or course.great_project(state, bound) is not None
+            model = course.route(state, kind, at=max(time.time(), state["at"]), strong=strong)
+            # Every Codex resident takes a turn: the longest asleep goes next, on its own route.
+            rotating = not strong and course.turns(state, kind)
         policy = active_policy(state)
         at = max(time.time(), state["at"])
         authors = set()
@@ -1299,7 +1301,7 @@ class Coordinator:
             if not returning:
                 return None
             first = min(returning, key=lambda key: (latest_run(state, key)["ended_sequence"], key))
-            model = latest_run(state, first)["model"]
+            model, rotating = latest_run(state, first)["model"], False
         # Targeted help must use its exact resident/route; never substitute an older eligible or new identity.
         if "target_resident" in request:
             target = request["target_resident"]
@@ -1313,7 +1315,12 @@ class Coordinator:
                 return None
             resident = target
         else:
-            eligible = [resident for resident in state["residents"]
+            turn = course.next_resident(state, kind, at, lambda resident: resident not in authors
+                                        and ballot_work.eligible(state, bound_task, resident)) if rotating else None
+            if turn is not None:
+                model = latest_run(state, turn)["model"]
+            eligible = [turn] if turn is not None else [
+                        resident for resident in state["residents"]
                         if resident not in authors and ballot_work.eligible(state, bound_task, resident)
                         and return_eligible(state, resident, kind, model, at)]
             if not eligible and ("review_run" in bound_task or

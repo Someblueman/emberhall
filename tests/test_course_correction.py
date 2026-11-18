@@ -40,6 +40,47 @@ class RotationTests(unittest.TestCase):
         self.assertEqual(sol, course.route(helpers, "codex"))
         self.assertEqual("muse-wonder-full-1.0", course.route(self.state([("muse", "muse-ember-1.0")]), "muse"))
 
+    def test_the_codex_resident_asleep_longest_goes_next_whatever_its_route(self):
+        # Steward, 18 November, night: "just rotate across all the codex residents when the others time out".
+        sol, astra = "gpt-6.1-sol", "gpt-6.2-astra"
+        people = {"fern": (sol, 30), "tern": (sol, 10), "rook": (astra, 20), "linnet": (astra, 40),
+                  "moss": ("gpt-6-luna", 1), "iona": ("gpt-6-astra", 2)}
+        state = {"at": 100.0, "sequence": 100, "tasks": {}, "maintenance": {"resident_returns": True, "migrations": {}},
+                 "residents": {name: {"awake": False} for name in people} | {"isolde": {"awake": False}},
+                 "life": {"budgets": {}, "runs": {name: {
+                     "resident": name, "agent": "codex", "model": model, "status": "completed",
+                     "started_sequence": ended - 1, "ended_sequence": ended} for name, (model, ended) in people.items()}}}
+        state["life"]["runs"]["isolde"] = {"resident": "isolde", "agent": "muse", "model": "muse-wonder-full-1.0",
+                                           "status": "completed", "started_sequence": 3, "ended_sequence": 4}
+        self.assertFalse(course.turns(state, "codex"), "nothing changes before the Steward's migration")
+        state["maintenance"]["migrations"][course.TURNS] = {"at": 50.0}
+        self.assertTrue(course.turns(state, "codex"))
+        self.assertFalse(any(course.turns(state, kind) for kind in ("muse", "agy", "opencode")))
+
+        def order(count):
+            picked = []
+            for _ in range(count):
+                who = course.next_resident(state, "codex", 100.0)
+                picked.append(who)
+                if who is not None:     # it runs and sleeps again: now it is the most recently ended
+                    state["sequence"] += 2
+                    state["life"]["runs"][who].update(started_sequence=state["sequence"] - 1,
+                                                      ended_sequence=state["sequence"])
+            return picked
+
+        # Helpers (Luna) and the retired Astra route are not in the ordinary rotation; Muse is another family.
+        self.assertEqual(["tern", "rook", "fern", "linnet"] * 2, order(8))
+        state["residents"]["rook"]["awake"] = True
+        self.assertEqual(["tern", "fern", "linnet"], order(3), "a resident who is awake is passed over")
+        state["tasks"]["t"] = {"owner": "tern", "status": "claimed", "until": 500.0}
+        self.assertEqual(["fern", "linnet"], order(2), "and so is one still holding a task")
+        self.assertEqual("linnet", course.next_resident(state, "codex", 100.0, lambda resident: resident != "fern"),
+                         "an author never reviews their own work")
+        state["life"]["model_budgets"] = {"codex": {sol: {"until": 900.0}}}
+        self.assertEqual(["linnet", "linnet"], order(2), "a route resting on its quota waits")
+        state["life"]["model_budgets"]["codex"][astra] = {"until": 900.0}
+        self.assertIsNone(course.next_resident(state, "codex", 100.0))
+
     def test_least_used_route_wins_and_nothing_defaults_to_lowest_effort(self):
         deepseek = "opencode-go/deepseek-v4.1-flash"
         state = self.state([("opencode", deepseek)] * 5)

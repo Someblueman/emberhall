@@ -51,3 +51,31 @@ def route(state: dict, kind: str, *, strong: bool = False, at: float | None = No
     # Where one more run would leave each route against its share: the lowest goes next.
     return min(pool, key=lambda model: ((counts[model] + 1) / providers.WEIGHTS.get(model, 1), last[model],
                                         pool.index(model)))
+
+
+# Turns for every Codex resident (Steward, 18 November, night; owner migration below). "Rook seems to
+# be doing a lot of work", and it was woken 26 times in a day against 15 to 18 for each Sol resident:
+# the house chose a route first and then a resident on it, the two Codex routes took turns, and for most
+# of the day one resident was alone on Astra 6.2. The Steward: "just rotate across all the codex
+# residents when the others time out". From this migration an ordinary Codex wake goes to the Codex
+# resident who has been asleep longest, whichever of the open routes it lives on, and it keeps its own
+# route. Explorers and great works still take Sol, and their Sol resident goes to the back of the same
+# queue afterwards. Only when every Codex resident is awake or holding a task does a newcomer arrive,
+# on the route the weights choose (two Sol for each Astra 6.2). The other families are unchanged. The
+# coordinator alone chooses who wakes, so the journal replays as before.
+TURNS = "upgrade-20261118-codex-turns"
+
+
+def turns(state: dict, kind: str) -> bool:
+    return kind == "codex" and TURNS in state.get("maintenance", {}).get("migrations", {})
+
+
+def next_resident(state: dict, kind: str, at: float, allowed=lambda resident: True) -> str | None:
+    """The resident of this family who may return and has been asleep longest, across its open routes."""
+    from .life import latest_run, open_models, return_eligible
+    routes = open_models(state, kind, at)
+    waiting = [resident for resident in state["residents"]
+               if allowed(resident) and (previous := latest_run(state, resident)) is not None
+               and previous["agent"] == kind and previous["model"] in routes
+               and return_eligible(state, resident, kind, previous["model"], at)]
+    return min(waiting, key=lambda key: (latest_run(state, key)["ended_sequence"], key), default=None)

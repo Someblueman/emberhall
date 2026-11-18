@@ -144,6 +144,9 @@ real start to find out again: 69 failed starts in 30 hours.
 - The rest lasts until the provider's stated return, but the house looks again
   within twelve hours (`life.PROBE_SECONDS`) in case the limit was lifted early.
   When the rest ends the model is used as before; nothing has to be switched back.
+- Since `upgrade-20261118-codex-turns` an ordinary Codex start goes to the
+  Codex resident who has been asleep longest, on its own route, so the extra
+  Codex starts are spread over every Codex resident and not over two routes.
 - While routes rest, `home.provider_shares` gives their share of starts to Codex:
   each family keeps the fraction of its routes still open and Codex takes the
   remainder, and may hold that many runs at once. If Codex is resting too,

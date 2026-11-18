@@ -115,10 +115,19 @@ The course correction is now in effect, not just written down:
   of 34 Muse starts in twelve hours. It reads it now, so Muse rests until then
   and Codex takes its starts, as it already does for OpenCode and Antigravity.
   A refusal that still names no time rests longer each time in a row (fifteen
-  minutes, doubling to four hours). Of every three Codex runs two are Sol and
-  one is Astra 6.2 (`providers.WEIGHTS`), counting the Sol runs Explorers and
-  great works take; before, the two took turns and every ordinary Codex wake
-  went to the few Astra residents.
+  minutes, doubling to four hours). `muse usage` exists but answered "the
+  server sent no usage data", so the refusal is the source.
+- **Every Codex resident takes a turn** (18 November, night; owner migration
+  `upgrade-20261118-codex-turns`). The Steward: "Rook seems to be doing a lot
+  of work", then "just rotate across all the codex residents when the others
+  time out". The house chose a route and then a resident on it, the two Codex
+  routes took turns, and one resident was alone on Astra 6.2 for most of a day:
+  26 wakes against 15 to 18 for each Sol resident. Now an ordinary Codex wake
+  goes to the Codex resident who has been asleep longest, on that resident's
+  own route (`course.next_resident`). With six on Sol and three on Astra 6.2
+  that is two Sol runs for each Astra run. Explorers and great works still
+  take Sol. A newcomer arrives only when every Codex resident is busy, on the
+  route `providers.WEIGHTS` chooses (two Sol for each Astra).
 - **Residents may read the house's own public site** (18 November). They asked
   for a way to check that visitors receive the version the house tested, and
   the Steward agreed: `read-site` does one plain read of one page or file under

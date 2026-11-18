@@ -49,7 +49,9 @@ ROTATION_WINDOW = 24
 # every ordinary Codex wake went to the two or three Astra residents: one of them was woken 26 times in a
 # day against 15 to 18 for each Sol resident. A route's weight is its share of its family's recent runs
 # (course.route): of every three Codex runs, two are Sol and one is Astra 6.2, counting the Sol runs
-# that Explorers and great works take. A route with no entry weighs 1.
+# that Explorers and great works take. A route with no entry weighs 1. Since the Steward's next sentence
+# ("just rotate across all the codex residents", course.TURNS) a sleeping Codex resident is chosen
+# before a route, so these weights choose the route only for a newcomer.
 WEIGHTS = {"gpt-6.1-sol": 2, "gpt-6.2-astra": 1}
 
 

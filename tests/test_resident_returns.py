@@ -200,6 +200,23 @@ print(json.dumps({'type':'turn.completed','usage':{'input_tokens':3,'output_toke
         self.assertEqual(len({self.record.read()[0]["life"]["runs"][run]["resident"]
                               for run in (first, second, third, fourth)}), 2)
 
+    def test_every_codex_resident_takes_a_turn_on_its_own_route(self):
+        # Steward, 18 November, night: "just rotate across all the codex residents".
+        from house import course
+        on = patch("house.course.enabled", lambda state: True); on.start(); self.addCleanup(on.stop)
+        route = lambda run: self.record.read()[0]["life"]["runs"][run]["model"]
+        first, sol = self.stretch()
+        second, astra = self.stretch()
+        self.assertEqual(("gpt-6.1-sol", "gpt-6.2-astra"), (route(first), route(second)))
+        self.assertNotEqual(sol, astra, "before: the other route's turn brought a newcomer while the first slept")
+        self.assertFalse(course.turns(self.record.read()[0], "codex"))
+        turns = patch("house.course.turns", lambda state, kind: kind == "codex"); turns.start(); self.addCleanup(turns.stop)
+        woken = [self.stretch() for _ in range(4)]
+        self.assertEqual([sol, astra, sol, astra], [resident for _, resident in woken], "the longest asleep goes next")
+        self.assertEqual(["gpt-6.1-sol", "gpt-6.2-astra"] * 2, [route(run) for run, _ in woken], "each keeps its route")
+        self.assertEqual(2, len({run["resident"] for run in self.record.read()[0]["life"]["runs"].values()}),
+                         "nobody new arrives while a resident is free")
+
     def test_prior_sleep_does_not_resolve_later_success_without_new_handoff(self):
         first, resident = self.stretch()
         self.record.append("life", "alice", {"kind": "help", "request": "still-needed",
