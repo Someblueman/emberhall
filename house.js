@@ -2319,7 +2319,7 @@ function renderStudyDesk(content, dataShelf) {
   filter.value=studyState.filter;
   const scaleLabel=html("label","small","Scale",controls),scale=html("select","",undefined,scaleLabel);
   scale.id="study-scale";scaleLabel.htmlFor=scale.id;
-  [["all","All scales"],["great","Great work"],["small","Small project"]].forEach(([value,title])=>{
+  [["all","All scales"],["great","Great work"],["small","Small project"],...(houseWorkOn(dataShelf)?[["house","House work"]]:[])].forEach(([value,title])=>{
     const option=html("option","",title,scale);option.value=value;
   });
   scale.value=studyState.scale;
@@ -2347,7 +2347,7 @@ function renderStudyDesk(content, dataShelf) {
     chosen.forEach(idea=>{
       const cell=html("th","",undefined,head);cell.setAttribute("scope","col");
       html("span","",titleFor(idea,"idea"),cell);
-      const scaleText=idea.scale==="great"?"Great work":idea.scale==="small"?"Small project":null;
+      const scaleText=workSizeName(idea.scale);
       const keepsText=Array.isArray(idea.keeps)&&idea.keeps.length?`kept by ${idea.keeps.length}`:null;
       const readyText=Number.isFinite(idea.vote_from)&&idea.vote_from<=observationTime()?"ready to vote":null;
       const meta=[scaleText,idea.brief?.field,keepsText,readyText].filter(Boolean).join(" · ");
@@ -2397,7 +2397,7 @@ function renderStudyDesk(content, dataShelf) {
     const matches=ideas.filter(idea=>(studyState.filter==="all"||studyReadiness(idea)===studyState.filter)&&
       (studyState.scale==="all"||ideaScale(idea)===studyState.scale)&&
       (!query||[idea.title,idea.plain,idea.what,idea.why,idea.brief?.field,idea.brief?.for,idea.brief?.audience,
-        idea.scale==="great"?"great work":idea.scale==="small"?"small project":"",residentName(idea.author)]
+        workSizeName(idea.scale)||"",residentName(idea.author)]
         .some(value=>workshopSearchText(value).includes(query))));
     const pages=Math.ceil(matches.length/STUDY_PAGE_SIZE);
     studyState.page=Math.min(studyState.page,Math.max(0,pages-1));
@@ -2810,10 +2810,13 @@ function roomPanel() {
       if(dataShelf.policy)recordId(summary,dataShelf.policy,"Selection rule ID");
       if(isGreatWorkShelf(dataShelf)) {
         const greatIdeas=ideas.filter(i=>ideaScale(i)==="great");
-        const smallIdeas=ideas.filter(i=>ideaScale(i)!=="great");
+        const smallIdeas=ideas.filter(i=>ideaScale(i)==="small");
+        const houseIdeas=ideas.filter(i=>ideaScale(i)==="house");
         const greatBusy=active.some(p=>projectSlot(p)==="great");
-        const smallBusy=active.some(p=>projectSlot(p)!=="great");
-        html("p","small",`Great slot: ${greatBusy?"busy":"free"} (${greatIdeas.length} great ${greatIdeas.length===1?"idea":"ideas"}) · Small slot: ${smallBusy?"busy":"free"} (${smallIdeas.length} small ${smallIdeas.length===1?"idea":"ideas"}) · ${done.length} finished`,summary);
+        const smallBusy=active.some(p=>projectSlot(p)==="small");
+        const houseBusy=active.some(p=>projectSlot(p)==="house");
+        const houseText=houseWorkOn(dataShelf)?` · House slot: ${houseBusy?"busy":"free"} (${houseIdeas.length} house ${houseIdeas.length===1?"idea":"ideas"})`:"";
+        html("p","small",`Great slot: ${greatBusy?"busy":"free"} (${greatIdeas.length} great ${greatIdeas.length===1?"idea":"ideas"}) · Small slot: ${smallBusy?"busy":"free"} (${smallIdeas.length} small ${smallIdeas.length===1?"idea":"ideas"})${houseText} · ${done.length} finished`,summary);
       } else {
         html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
       }
@@ -3312,11 +3315,30 @@ function renderViewContext() {
 function isGreatWorkShelf(dataShelf) {
   return Boolean(dataShelf && dataShelf.policy === "work-selection-004");
 }
+// Ideas and projects come in three sizes. Anything else is shown as a small project, as before.
+const WORK_SIZES = { great: "Great work", house: "House work", small: "Small project" };
 function ideaScale(idea) {
-  return idea && idea.scale === "great" ? "great" : "small";
+  return idea && (idea.scale === "great" || idea.scale === "house") ? idea.scale : "small";
 }
 function projectSlot(project) {
-  return project && project.slot === "great" ? "great" : "small";
+  return project && (project.slot === "great" || project.slot === "house") ? project.slot : "small";
+}
+// The name of a recorded size or slot; null when none is recorded.
+function workSizeName(value) {
+  return Object.prototype.hasOwnProperty.call(WORK_SIZES, value) ? WORK_SIZES[value] : null;
+}
+// The third slot, one change to the house itself, exists once the house-work upgrade is installed.
+// The page also shows it if the record already holds house work, so nothing recorded is hidden.
+function houseWorkOn(dataShelf, choices) {
+  if (!dataShelf) return false;
+  return Boolean(dataShelf.house_work)
+    || (dataShelf.ideas || []).some(idea => idea.scale === "house")
+    || (dataShelf.projects || []).some(project => project.slot === "house")
+    || (choices || (frame && frame.voting && frame.voting.choices) || []).some(choice => choice.slot === "house");
+}
+function choiceSlotLabel(choice) {
+  const name = workSizeName(choice && choice.slot);
+  return name ? `${name} choice` : "Project choice";
 }
 function formatDurationDays(seconds) {
   const days = seconds / 86400;
@@ -3448,10 +3470,10 @@ function renderRecentWork(items, parent, residentName, heading, none) {
 function renderShelfProject(project, statusLabel, parent, residentName) {
   const item = html("article", "shelf-item", undefined, parent);
   item.setAttribute?.("data-find", workshopSearchText([titleFor(project,"project"),project.plain||"",
-    project.slot==="great"?"great work":project.slot==="small"?"small project":"",
+    workSizeName(project.slot)||"",
     project.brief?.field||"",residentName(project.owner)].filter(Boolean).join(" ")));
   html("strong", "", titleFor(project, "project"), item);
-  const slotPrefix = project.slot ? `${project.slot === "great" ? "Great work" : "Small project"} · ` : "";
+  const slotPrefix = project.slot ? `${workSizeName(project.slot) || "Small project"} · ` : "";
   html("span", "small", `${slotPrefix}${statusLabel} · ${residentName(project.owner)}`, item);
   if (project.plain) html("p", "shelf-plain", project.plain, item);
   if (project.status === "active" && project.away) {
@@ -3526,11 +3548,11 @@ function renderShelfProject(project, statusLabel, parent, residentName) {
 function renderShelfIdea(idea, group, greatMode, residentName) {
   const item = html("details", "shelf-item shelf-idea", undefined, group);
   item.setAttribute?.("data-find", workshopSearchText([titleFor(idea,"idea"),idea.plain||"",idea.what||"",
-    idea.brief?.field||"",idea.scale==="great"?"great work":idea.scale==="small"?"small project":"",
+    idea.brief?.field||"",workSizeName(idea.scale)||"",
     residentName(idea.author)].filter(Boolean).join(" ")));
   const summary = html("summary", "", undefined, item);
   html("span", "shelf-idea-title", titleFor(idea, "idea"), summary);
-  const scaleLabel = idea.scale ? (idea.scale === "great" ? "Great work" : "Small project") : null;
+  const scaleLabel = idea.scale ? (workSizeName(idea.scale) || "Small project") : null;
   const lossLabel = typeof idea.losses === "number" && idea.losses > 0
     ? `${idea.losses} ${idea.losses === 1 ? "loss" : "losses"}`
     : null;
@@ -3541,7 +3563,8 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
   const fieldLabel = idea.brief?.field ? idea.brief.field[0].toUpperCase() + idea.brief.field.slice(1) : null;
   const worthTag = idea.brief?.worth ? idea.brief.worth[0].toUpperCase() + idea.brief.worth.slice(1) : null;
   const summaryTags = [
-    (greatMode || idea.scale) ? (idea.scale === "great" ? {text: "Great work", cls: "shelf-tag shelf-tag-great"} : {text: "Small project", cls: "shelf-tag"}) : null,
+    (greatMode || idea.scale) ? (idea.scale === "great" ? {text: "Great work", cls: "shelf-tag shelf-tag-great"}
+      : idea.scale === "house" ? {text: "House work", cls: "shelf-tag"} : {text: "Small project", cls: "shelf-tag"}) : null,
     fieldLabel ? {text: fieldLabel, cls: "shelf-tag"} : null,
     worthTag ? {text: worthTag, cls: "shelf-tag"} : null,
     idea.brief ? (ungrounded ? {text: asked ? "Awaiting a second" : "Who asked?", cls: "shelf-tag shelf-tag-warn"}
@@ -3613,12 +3636,16 @@ function shelf() {
   const activeProjects = rawProjects.filter(p => p.status === "active");
   const completedProjects = rawProjects.filter(p => p.status === "done");
   const greatMode = isGreatWorkShelf(dataShelf);
+  const houseOn = houseWorkOn(dataShelf);
   const greatActive = activeProjects.filter(p => projectSlot(p) === "great");
-  const smallActive = activeProjects.filter(p => projectSlot(p) !== "great");
+  const smallActive = activeProjects.filter(p => projectSlot(p) === "small");
+  const houseActive = activeProjects.filter(p => projectSlot(p) === "house");
   const greatIdeas = ideas.filter(i => ideaScale(i) === "great");
-  const smallIdeas = ideas.filter(i => ideaScale(i) !== "great");
+  const smallIdeas = ideas.filter(i => ideaScale(i) === "small");
+  const houseIdeas = ideas.filter(i => ideaScale(i) === "house");
+  const houseEmpty = houseOn && greatMode && !houseActive.length;
   if (greatMode) {
-    html("p", "shelf-counts", `Building now: ${greatActive.length} of 1 great work, ${smallActive.length} of 1 small project · ${ideas.length} ideas waiting (${greatIdeas.length} great, ${smallIdeas.length} small)`, box);
+    html("p", "shelf-counts", `Building now: ${greatActive.length} of 1 great work, ${smallActive.length} of 1 small project${houseOn ? `, ${houseActive.length} of 1 house work` : ""} · ${ideas.length} ideas waiting (${greatIdeas.length} great, ${smallIdeas.length} small${houseOn ? `, ${houseIdeas.length} house` : ""})`, box);
   } else {
     html("p", "shelf-counts", `Building now: ${activeProjects.length} of 2 project slots · ${ideas.length} ideas waiting`, box);
   }
@@ -3640,7 +3667,7 @@ function shelf() {
     if (completedProjects.length) completedProjects.forEach(project=>renderShelfProject(project,"Finished",finishedBox,residentName));
     else html("p", "empty-note", "No finished projects at this moment.", finishedBox);
   }
-  if (!ideas.length && !activeProjects.length && !completedProjects.length && !graveyard.length) {
+  if (!ideas.length && !activeProjects.length && !completedProjects.length && !graveyard.length && !houseEmpty) {
     html("p", "empty-note", "No ideas or projects have been shelved at this moment.", box);
     rules();
     return;
@@ -3679,10 +3706,19 @@ function shelf() {
   }
   // 1. In motion: what is being built now, and recent house upkeep when no project is active.
   const other=recentWork(entry=>!activeProjects.some(project=>workBelongs(entry,project)));
-  if(activeProjects.length||other.length) {
+  // The house slot is shown empty too, so a reader can see it exists and what it is for.
+  if(activeProjects.length||other.length||houseEmpty) {
     const group=html("div","shelf-group shelf-motion",undefined,box);
     html("h2","","In motion",group);
     activeProjects.forEach(project=>renderShelfProject(project,"Active",group,residentName));
+    if(houseEmpty){
+      const slot=html("article","shelf-item shelf-slot-empty",undefined,group);
+      html("strong","","House work",slot);
+      html("span","small","Slot open",slot);
+      const chosen=rawProjects.some(project=>projectSlot(project)==="house");
+      const choosingHouse=(frame.voting?.choices||[]).some(choice=>choice.status==="open"&&choice.slot==="house");
+      html("p","shelf-plain",`One change to the house itself at a time: a new room, a rethought front page, a new ability for residents. ${choosingHouse?"The council is choosing one now.":chosen?"Nothing is being built in this slot now.":"Nothing chosen yet."}`,slot);
+    }
     if(other.length){
       const aside=html("article","shelf-item",undefined,group);
       html("strong","","Other work",aside);
@@ -3704,9 +3740,9 @@ function shelf() {
   }
   if (dataShelf.policy) {
     if (greatMode) {
-      if (greatActive.length >= 1 && smallActive.length >= 1) {
-        html("p", "small", "Both project slots occupied · build the active projects.", next);
-      } else if (!choosing && ((!greatActive.length && greatIdeas.length) || (!smallActive.length && smallIdeas.length))) {
+      if (greatActive.length >= 1 && smallActive.length >= 1 && (!houseOn || houseActive.length >= 1)) {
+        html("p", "small", `${houseOn ? "All three" : "Both"} project slots occupied · build the active projects.`, next);
+      } else if (!choosing && ((!greatActive.length && greatIdeas.length) || (!smallActive.length && smallIdeas.length) || (houseOn && !houseActive.length && houseIdeas.length))) {
         html("p", "small", "Project slot available · council can choose from the shelf.", next);
       }
       const greatWanted = dataShelf.great_wanted !== undefined ? Boolean(dataShelf.great_wanted) : (!greatActive.length && greatIdeas.length < 2);
@@ -3804,6 +3840,11 @@ function councilNowSec() {
 // A pending proposal that can no longer proceed is closed: nothing is asked of anyone.
 function proposalClosure(proposal) {
   const closure = proposal.closure || {};
+  // The Steward's own upgrade already put these files in place: name the upgrade, not a council rule.
+  if (closure.how === "delivered" && closure.via === "upgrade") {
+    const when = Number.isFinite(closure.at) && typeof data !== "undefined" && data ? ` of ${clock(closure.at)}` : "";
+    return { tag: "Already installed", label: `Already installed by the Steward’s upgrade${when}`, upgrade: true };
+  }
   const other = typeof closure.by === "string" && closure.by
     ? ((frame && frame.voting && Array.isArray(frame.voting.proposals) ? frame.voting.proposals : [])
         .find(candidate => candidate.id === closure.by)?.title || closure.by)
@@ -3815,7 +3856,7 @@ function proposalClosure(proposal) {
 }
 // What a proposal is waiting for, in one plain line, from the fields the record publishes.
 function proposalWaitingLine(proposal, nowSec) {
-  if (proposal.stale) return { key: "overtaken", text: "Overtaken by a later decision" };
+  if (proposal.stale) return { key: "overtaken", text: proposalClosure(proposal).upgrade ? "Nothing left to do" : "Overtaken by a later decision" };
   if (proposal.rule_status === "approved") return { key: "waiting", text: "Enacted: waiting to be installed" };
   if (proposal.status !== "pending") return null;
   if (proposal.mode === "legacy") return { key: "waiting", text: "Pending under the older process" };
@@ -3850,10 +3891,12 @@ function proposalSummaryTags(proposal, nowSec) {
   } else if (proposal.status === "pending") {
     if (proposal.notice) {
       const until = proposal.notice.until;
+      // Once the public notice is over with no objection, a resident can enact it; a wake prompt is left to the Steward.
+      const over = Number.isFinite(until) && Number.isFinite(nowSec) && nowSec >= until;
       const statusText = Number.isFinite(until) && Number.isFinite(nowSec)
-        ? (nowSec >= until ? "Window elapsed" : "Notice active")
+        ? (!over ? "Notice active" : proposal.mode === "wake-prompt" ? "Left for the Steward" : "Ready to enact")
         : "Noticed";
-      tags.push({ text: statusText, cls: statusText === "Window elapsed" ? "shelf-tag shelf-tag-great" : "shelf-tag" });
+      tags.push({ text: statusText, cls: over ? "shelf-tag shelf-tag-great" : "shelf-tag" });
     } else {
       tags.push({ text: "Pending", cls: "shelf-tag" });
     }
@@ -3958,7 +4001,7 @@ function renderCouncilRoom(content) {
     openChoices.forEach(choice => {
       const row = html("div", "council-room-item", undefined, list);
       const counted = (choice.votes || []).filter(v => v.counted).length;
-      const slotLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
+      const slotLabel = choiceSlotLabel(choice);
       html("strong", "", `${slotLabel} · ${counted}/3 counted votes`, row);
       const names = (choice.candidates || []).map(c => titleFor(c, "candidate")).filter(Boolean);
       if (names.length) html("span", "small", names.join(" · "), row);
@@ -3984,7 +4027,7 @@ function renderCouncilRoom(content) {
     if (waiting.length > 5) html("p", "small", `Showing 5 of ${waiting.length} active proposals.`, panel);
     if (overtaken.length) {
       const folded = html("details", "council-overtaken", undefined, panel);
-      html("summary", "small", `Overtaken by a later decision · ${overtaken.length}`, folded);
+      html("summary", "small", `${overtaken.some(proposal => proposalClosure(proposal).upgrade) ? "Closed, overtaken or already installed" : "Overtaken by a later decision"} · ${overtaken.length}`, folded);
       const quietList = html("div", "council-room-list", undefined, folded);
       [...overtaken].reverse().forEach(proposal => proposalRow(proposal, quietList, true));
     }
@@ -4109,7 +4152,7 @@ function voting() {
       const bannerParts = [];
       if (openChoices.length) bannerParts.push(`${openChoices.length} open project ${openChoices.length === 1 ? "choice" : "choices"}`);
       if (activePending.length) {
-        const elapsedNote = elapsedPending.length ? ` (${elapsedPending.length} notice elapsed)` : "";
+        const elapsedNote = elapsedPending.length ? ` (${elapsedPending.length} with the notice period over)` : "";
         bannerParts.push(`${activePending.length} pending ${activePending.length === 1 ? "proposal" : "proposals"}${elapsedNote}`);
       }
       if (awaitingInstall.length) bannerParts.push(`${awaitingInstall.length} awaiting install`);
@@ -4128,7 +4171,7 @@ function voting() {
       };
       const counted = choice.votes.filter(v => v.counted).length;
       const outcome = choice.status === "open" ? `Open · ${counted}/3 counted votes` : choice.status === "rejected" ? "Shortlist rejected" : `Selected: ${title(choice.winner)}`;
-      const choiceLabel = choice.slot === "great" ? "Great work choice" : choice.slot === "small" ? "Small project choice" : "Project choice";
+      const choiceLabel = choiceSlotLabel(choice);
       const item = html("details", "vote-round", undefined, lists);
       item.id = `vote-choice-${choice.id}`;
       item.setAttribute("tabindex","-1");
@@ -4137,7 +4180,7 @@ function voting() {
       recordId(item,choice.id);
       html("p", "small", `Opened by ${person(choice.owner)} at event ${choice.opened_sequence}${choice.closed_sequence ? ` · closed at event ${choice.closed_sequence}` : ""}.`, item);
       const ruleText = choice.selection_version >= 2
-        ? `Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available.${choice.slot === "great" ? " Great works carry 2–8 ordered milestones." : ""}`
+        ? `Three counted votes close the round; a candidate needs two to win. Authors’ votes for their own ideas do not count. None of these is available.${choice.slot === "great" ? " Great works carry 2–8 ordered milestones." : choice.slot === "house" ? " A house work is one change to the house itself, with one milestone and one deadline." : ""}`
         : "Historical selection rule: three counted votes, plurality with the recorded tie-break. Authors’ votes for their own ideas do not count.";
       html("p", "small", ruleText, item);
       const alternatives = html("details", "vote-alternatives", undefined, item);
