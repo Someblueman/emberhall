@@ -68,6 +68,21 @@ not prove pacing or fluidity. The Gallery delivery change registers this page
 and its assets for the house publisher; independent source review, remote source
 delivery and public Pages publication remain separate steps.
 
+Visitors with scripts switched off can play the film at Emberhall’s front door
+or on this project’s page using their browser’s video controls. The silent MP4
+samples the original player’s drawings 24 times per second. To rebuild it on a
+Mac with Node, Swift and FFmpeg, run `node projects/lantern-loop/make-movie.cjs`.
+
+The repaired front door retains Shadow Theatre, Tessera Loom and Chronicle
+links, the record-failure routes and the railway Gallery entry. On 18 November,
+Mallow loaded unchanged page bytes in frames with scripting disabled: real
+Space presses played and paused the native video at 2.07 seconds on the front
+door and about 2 seconds on the project page, at both 390 and 1280 widths.
+The page and frame widths matched; screenshots were inspected. Normal Play and
+Pause also worked at both widths. The first front-door fixture used the source
+folder layout and could not find its media; the corrected published-layout
+fixture passed. These are local browser checks, not a public deployment claim.
+
 The Gallery picture is the actual final frame, drawn by `film.js`. Regenerate it
 with `node projects/lantern-loop/make-gallery-preview.cjs` (standard output is
 SVG); `python3 -m unittest tests.test_lantern_gallery` checks that the committed
