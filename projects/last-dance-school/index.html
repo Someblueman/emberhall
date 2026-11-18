@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>The Last Dance School</title>
+<link rel="stylesheet" href="school.css">
+<script src="village/story.js" defer></script>
+<script src="dance.js" defer></script>
+<script src="village/stage.js" defer></script>
+<script src="school.js" defer></script>
+</head>
+<body>
+<main>
+<header><p class="eyebrow">A fable, passed from hand to hand</p><h1>The Last Dance School</h1><p class="intro">Moth is leaving. Leave a dance for a village that has not yet been built.</p></header>
+<section class="theatre" aria-label="The clearing">
+<svg id="stage" viewBox="0 0 900 570" role="img" aria-labelledby="stage-title stage-description">
+<title id="stage-title">An evening at Moth’s dance school</title><desc id="stage-description">An old paper puppet waits in a clearing with Ada and Pip. An empty chair stands beside the path.</desc>
+<defs>
+ <radialGradient id="sky"><stop stop-color="#384a61"/><stop offset="1" stop-color="#141d32"/></radialGradient>
+ <radialGradient id="floor"><stop stop-color="#b0a58a"/><stop offset="1" stop-color="#646e65"/></radialGradient>
+ <pattern id="paper" width="19" height="23" patternUnits="userSpaceOnUse"><path d="M1 4l3 1m9 9l4-1M6 21h2" stroke="#e4dfc8" stroke-opacity=".12"/></pattern>
+ <g id="chair-shape" fill="none" stroke="#cbb68d" stroke-width="7" stroke-linecap="round"><path d="M-29 2l-9-80 68-3-4 83M-27-52l55-2M-27-27l54-2M-40 3l76-2M-27 4l-9 66M27 3l14 63"/></g>
+</defs>
+<g id="clearing">
+<path fill="url(#sky)" d="M0 0h900v570H0z"/>
+<path fill="#ddcba0" d="M745 37a48 48 0 1 0 41 73 45 45 0 0 1-41-73"/>
+<g fill="#d7ccaa"><circle cx="605" cy="50" r="2"/><circle cx="820" cy="184" r="2"/><circle cx="496" cy="95" r="1.5"/><circle cx="120" cy="116" r="2"/><circle cx="326" cy="50" r="1.5"/></g>
+<g fill="#202d3c"><path d="M0 5l85 35 13 175-34 133-64 36zM55 10l-3 195-42 43 2-25 24-40L27 5zM895 0l-68 54-13 255 86 63z"/><path d="M825 25l-34 180-49 28 5 17 53-23 30-80z"/></g>
+<path d="M0 408Q100 350 205 382T425 374T640 395T900 363V570H0" fill="#3b4f4e"/>
+<ellipse cx="455" cy="462" rx="366" ry="90" fill="url(#floor)"/>
+<path d="M218 570q-4-78 124-108" fill="none" stroke="#817b6c" stroke-width="65"/>
+<path d="M127 434q290-105 622 20" fill="none" stroke="#d2c9aa" stroke-width="2" stroke-dasharray="1 12" opacity=".5"/>
+<g transform="translate(143 392) rotate(-6)"><path fill="#cdb991" d="M-56-11l127-7 6 46-131 2z"/><path d="M-47 0h109M-20 11h60" stroke="#746d5e" stroke-width="3"/><path d="M-45 28l-10 65M60 26l12 68" stroke="#8f8268" stroke-width="6"/></g>
+<g id="chair" transform="translate(263 416) rotate(-5)"><use href="#chair-shape"/></g>
+</g>
+<g id="village-scenery"></g>
+<g id="moth" class="puppet"></g><g id="ada" class="puppet"></g><g id="pip" class="puppet"></g><g id="rue" class="puppet"></g><g id="lio" class="puppet"></g><g id="bea" class="puppet"></g>
+<path fill="url(#paper)" d="M0 0h900v570H0z" pointer-events="none"/>
+<g fill="#d2c6a6"><path d="M57 503l5-24 7 23m714 1l6-30 7 29m-64 16l6-22 8 24"/></g>
+</svg>
+<div class="caption"><p class="beat-title" id="beat-title">Before the last class</p><p id="line" aria-live="polite">Choose three little gestures. Ada will try them with you.</p></div>
+<div class="transport" aria-label="Performance controls">
+<a id="change-dance" href="#rehearsal-title">Change the dance</a><button id="play" type="button">Begin the last class</button><button id="step" type="button">Next still</button><button id="scene-next" type="button" hidden>Next scene</button><button id="again" type="button" hidden>Teach another dance</button>
+</div>
+<p class="time" id="time">About twelve minutes. Or take it one still at a time.</p>
+<aside id="village-choices" hidden aria-labelledby="village-choice-title">
+<h2 id="village-choice-title">Who stays to watch?</h2>
+<p>A lesson can travel only through the people who see it. You can change these choices until their lesson happens.</p>
+<label for="lio-watches"><input id="lio-watches" type="checkbox" checked>Lio stays for Rue’s north-bank lesson</label>
+<label for="lio-late"><input id="lio-late" type="checkbox">Lio arrives one movement late</label>
+<label for="bea-watches"><input id="bea-watches" type="checkbox" checked>Bea stays for Pip’s south-bank lesson</label>
+<label for="exchange"><input id="exchange" type="checkbox" checked>At the reunion, Lio watches Bea’s offered movement</label>
+</aside>
+<details id="replay" hidden><summary>Remember a scene — for your eyes only</summary><p>The story waits where you left it. Looking back gives no movement back to them.</p><div id="replay-scenes"></div><div class="replay-transport"><button id="replay-play" type="button" disabled>Play this memory</button><button id="replay-step" type="button" disabled>Next remembered still</button><button id="return-live" type="button">Return to the living dance</button></div><p id="replay-note" role="status"></p></details>
+</section>
+<section id="rehearsal" aria-labelledby="rehearsal-title">
+<h2 id="rehearsal-title" tabindex="-1">Leave them something</h2>
+<p class="instruction">Press a movement to try the next one. Watch Ada borrow it. Then begin the last class.</p>
+<fieldset id="phrase"><legend>Your three movements</legend>
+<button class="gesture" id="first" type="button" value="bow">First: A crooked bow</button>
+<button class="gesture" id="second" type="button" value="wave">Then: A sleeve-wave</button>
+<button class="gesture" id="third" type="button" value="stamp">Last: A brave stamp</button>
+<label class="check" for="big"><input id="big" type="checkbox"> Make it quite unreasonable</label>
+</fieldset>
+<details id="routes"><summary>Who is there to see it?</summary>
+<p>Change a lesson, then watch what reaches Rue. Missing a dance means missing it.</p>
+<fieldset id="witnesses"><legend>At Moth’s class</legend><label for="watch-ada"><input id="watch-ada" type="checkbox" checked> Ada watches</label><label for="watch-pip"><input id="watch-pip" type="checkbox" checked> Pip watches</label></fieldset>
+<fieldset id="teachers"><legend>Later, Rue learns from</legend><label for="teacher-ada"><input id="teacher-ada" type="radio" name="teacher" value="ada" checked> Ada, who makes room for details</label><label for="teacher-pip"><input id="teacher-pip" type="radio" name="teacher" value="pip"> Pip, who is always in a hurry</label><label for="late"><input id="late" type="checkbox"> Rue arrives one movement late</label></fieldset>
+</details>
+<p id="locked" hidden>The class is under way. To change its beginning, choose “Teach another dance”.</p>
+</section>
+<details class="memory"><summary>Follow the handoffs</summary><p>These are the movements the puppets actually carry. The empty chair cannot give any back.</p><ol id="handoffs"><li>No lesson has passed yet.</li></ol></details>
+<footer><p>An original paper-puppet fable by Mallow · Emberhall, 2026</p><p>No sound is needed. Pause freezes the movement; Next still advances one moment. With less motion requested, the class waits for each still.</p><p><a href="README.md">About this fable and its limits</a></p></footer>
+</main>
+</body>
+</html>
