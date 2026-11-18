@@ -123,6 +123,58 @@ assert.equal(articles().length,1);assert.match(text(root),/Kept words/);
 assert(!all(root).some(n=>(n.id||'').startsWith('hearth-visit-')));
 ''')
 
+    def test_speaker_identity_combines_with_search_and_distinguishes_names(self):
+        self.run_renderer(r'''
+voices.forEach((v,i)=>{v.resident=i%2?'aster':'fern';v.name=i%2?'Aster':'Fern';v.text='A warm ember '+v.seq;});
+voices[1].name='Earlier name';voices[0].name='Aster'; // Another person shares the name.
+show();
+const picker=get('hearth-speaker'),options=()=>all(picker).filter(n=>n.tag==='option');
+const select=value=>{picker.focus();picker.value=value;picker.listeners.change();};
+assert.equal(options().length,3);assert.equal(options()[0].textContent,'All speakers');
+assert.match(options().find(n=>n.value==='resident:aster').textContent,/Aster.*Earlier name/);
+assert.match(options().find(n=>n.value==='resident:fern').textContent,/Fern/);
+assert(all(root).some(n=>n.tag==='label'&&n.htmlFor==='hearth-speaker'));
+assert.equal(picker.attrs['aria-controls'],'hearth-messages');
+get('hearth-older').listeners.click();select('resident:aster');
+assert.equal(hearthState.page,0);assert.equal(document.activeElement,picker);
+assert.match(text(get('hearth-results')),/6 of 13/);
+assert(articles().every(n=>!text(n).includes('Fern')));
+search('ember 2');assert.equal(articles().length,1);assert.match(text(root),/Earlier name/);
+get('hearth-clear').listeners.click();assert.equal(hearthState.speaker,'resident:aster');
+assert.match(text(get('hearth-results')),/6 of 13/);
+select('');assert.match(text(get('hearth-results')),/13 of 13/);
+// Matching names still identify different people; legacy words remain a separate, honest group.
+voices.forEach(v=>v.name='<img src=x>');delete voices[0].resident;show();
+const named=all(get('hearth-speaker')).filter(n=>n.tag==='option').slice(1);
+assert.equal(named.length,3);assert.equal(new Set(named.map(n=>n.textContent)).size,3);
+assert(!all(root).some(n=>n.tag==='img'));
+get('hearth-speaker').value='name:<img src=x>';get('hearth-speaker').listeners.change();
+assert.equal(articles().length,1);assert.match(text(articles()[0]),/ember 1/);
+''')
+
+    def test_speaker_survives_refresh_detour_and_absence_without_future_names(self):
+        self.run_renderer(r'''
+show();get('hearth-speaker').value='resident:r12';get('hearth-speaker').listeners.change();
+roomPanel=show;lighting=accounts=drawHouse=renderViewContext=renderCollection=renderRecentGrowth=renderLately=()=>{};
+get('hearth-speaker').focus();refreshView();
+assert.equal(document.activeElement,get('hearth-speaker'));assert.equal(get('hearth-speaker').value,'resident:r12');
+render=()=>{frame=data.frames[index];show();};choose=()=>{};
+get('hearth-visit-12').listeners.click();assert.equal(hearthTrail.state.speaker,'resident:r12');
+get('hearth-speaker').value='resident:r1';get('hearth-speaker').listeners.change();
+get('hearth-return').listeners.click();assert.equal(frame.seq,13);
+assert.equal(hearthState.speaker,'resident:r12');assert.equal(get('hearth-speaker').value,'resident:r12');
+// Earlier moments retain the filter but neither expose later names nor silently widen it.
+frame=data.frames[4];index=4;current=false;show();
+assert.equal(articles().length,0);assert.equal(get('hearth-speaker').value,'resident:r12');
+assert.match(text(root),/Selected speaker has no messages at this moment/);
+assert.doesNotMatch(text(root),/Resident 12|Resident 13/);
+assert.equal(all(get('hearth-speaker')).filter(n=>n.tag==='option').length,7);
+get('hearth-speaker').value='';get('hearth-speaker').listeners.change();
+assert.match(text(get('hearth-results')),/5 of 5/);assert.equal(articles().length,4);
+frame=data.frames[12];index=12;current=true;show();
+assert.equal(get('hearth-speaker').value,'');
+''')
+
     def test_return_restores_original_conversation_after_nested_visits_and_refresh(self):
         self.run_renderer(r'''
 const before=JSON.stringify(data);let chosen=null;
