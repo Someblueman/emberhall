@@ -128,6 +128,19 @@ The course correction is now in effect, not just written down:
   that is two Sol runs for each Astra run. Explorers and great works still
   take Sol. A newcomer arrives only when every Codex resident is busy, on the
   route `providers.WEIGHTS` chooses (two Sol for each Astra).
+- **The terminal project's tests may open a real terminal** (18 November,
+  night). After "not everything is a web page", the house built a terminal
+  that runs a real shell, and the trusted test gate could not test it: it
+  refuses every write outside the candidate, which includes pseudo-terminal
+  devices, and it cannot launch `ps`. Tern asked for a narrow route (need
+  `native-terminal-protected-test-access`) and the Steward said to fix it.
+  For the test run of a project listed in `test_sandbox.TERMINAL_PROJECTS`
+  (today only `projects/terminal-in-brainfuck`), the gate also allows opening
+  pseudo-terminals and running `/bin/ps`. Writes elsewhere and all network
+  stay refused, and every other test run is unchanged. The cost: such a test
+  could write text onto another terminal window open on this Mac (it cannot
+  type into one). Only the Steward adds a project to that list; ask through
+  a need.
 - **Residents may read the house's own public site** (18 November). They asked
   for a way to check that visitors receive the version the house tested, and
   the Steward agreed: `read-site` does one plain read of one page or file under

@@ -52,7 +52,30 @@ def _stop_group(pgid: int, *, keep: int | None = None, guardian: int | None = No
         time.sleep(0.02)
 
 
-def run(command: list[str], cwd: Path, *, stdout, timeout: float) -> subprocess.CompletedProcess:
+# Real terminals for one project's tests (Steward, 18 November, night). The house built a terminal that
+# runs a real shell, and the trusted gate could not test it: 15 of its 40 tests failed here because
+# the profile below refuses every write outside the candidate, which includes the pseudo-terminal
+# devices, and the sandbox refuses to launch /bin/ps (it is setuid). Tern asked for a narrow route
+# (need native-terminal-protected-test-access) and the Steward said yes. For the test run of a project
+# listed here, and for nothing else, the profile also allows opening pseudo-terminals (/dev/ptmx and
+# /dev/ttysNNN) and running /bin/ps, which the system starts outside the sandbox. Writes elsewhere
+# and all network stay refused. What this gives away: such a test could write text onto another
+# terminal window this user has open (it cannot type into it), and ps reads nothing a sandboxed
+# process could not already read. A test could always leave its process group with setsid; a
+# pseudo-terminal does that too, so a project's tests must still stop what they start. Only the
+# Steward adds a project to this list.
+TERMINAL_PROJECTS = frozenset({"projects/terminal-in-brainfuck"})
+TERMINAL_WRITES = ' (literal "/dev/ptmx") (regex #"^/dev/ttys[0-9]+$")'
+TERMINAL_RULES = '(allow process-exec (literal "/bin/ps") (with no-sandbox))'
+
+
+def terminals(scope: str, command: list[str]) -> bool:
+    """Whether this acceptance command is the test run of a project that may open real terminals."""
+    return scope.startswith("projects:") and bool(command) and command[-1] in TERMINAL_PROJECTS
+
+
+def run(command: list[str], cwd: Path, *, stdout, timeout: float,
+        terminals: bool = False) -> subprocess.CompletedProcess:
     executable = Path('/usr/bin/sandbox-exec')
     if not executable.is_file():
         raise ValueError('candidate tests require the installed macOS sandbox; no unsandboxed fallback')
@@ -69,8 +92,9 @@ def run(command: list[str], cwd: Path, *, stdout, timeout: float) -> subprocess.
     try:
         profile = ('(version 1)(allow default)(deny file-write*)'
                    '(allow file-write* (subpath ' + json.dumps(str(cwd)) + ')'
-                   ' (subpath ' + json.dumps(str(scratch)) + ') (literal "/dev/null"))'
-                   '(deny network*)')
+                   ' (subpath ' + json.dumps(str(scratch)) + ') (literal "/dev/null")'
+                   + (TERMINAL_WRITES if terminals else '') + ')'
+                   + (TERMINAL_RULES if terminals else '') + '(deny network*)')
         environment = dict(os.environ, TMPDIR=str(scratch), TMP=str(scratch), TEMP=str(scratch),
                            PYTHONDONTWRITEBYTECODE='1', EMBERHALL_CANDIDATE_SANDBOX='1')
         for name in ('OPENAI_API_KEY', 'CODEX_API_KEY', 'OPENROUTER_API_KEY'):

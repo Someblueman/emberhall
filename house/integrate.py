@@ -425,7 +425,8 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
                 output.write("Acceptance scope: " + scope + "\n")
                 for command in commands:
                     output.write(json.dumps(command) + "\n"); output.flush()
-                    tested = test_sandbox.run(command, cwd=candidate, stdout=output, timeout=900)
+                    tested = test_sandbox.run(command, cwd=candidate, stdout=output, timeout=900,
+                                              terminals=test_sandbox.terminals(scope, command))
                     test_exit = tested.returncode
                     if test_exit:
                         break
