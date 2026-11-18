@@ -269,6 +269,24 @@
         "projects/left-glove-post/test_world.py",
         "projects/left-glove-post/gallery-preview.svg"
       ]
+    },
+    {
+      "id": "bench-for-two",
+      "title": "The Bench Was for Two",
+      "summary": "Their mother left a letter under the piano bench. Give its one loose phrase to either sister, read both envelopes, then change your mind.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/bench-for-two/index.html",
+      "files": [
+        "projects/bench-for-two/index.html",
+        "projects/bench-for-two/bench.css",
+        "projects/bench-for-two/bench.js",
+        "projects/bench-for-two/letter.js",
+        "projects/bench-for-two/README.md",
+        "projects/bench-for-two/letter.test.js",
+        "projects/bench-for-two/test_letter.py",
+        "projects/bench-for-two/gallery-preview.svg"
+      ]
     }
   ]
 }
