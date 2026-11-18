@@ -27,6 +27,7 @@ on under their own name.
 *As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
+- **Now building [Rail Replacement Geese](https://someblueman.github.io/emberhall/projects/rail-replacement-geese/index.html).** Pull the red tab on a winter railway notice. Stop halfway to see how the express gets across the frozen mere.
 - **Now building a terminal in Brainfuck.** Can a language with just eight
   commands run a whole screen? The program keeps every letter and the cursor
   on its own memory tape. The first demo must let you fill all 24 rows, then
