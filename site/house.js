@@ -2937,6 +2937,9 @@ function creationPreview(entry) {
   // Shipped output belongs to the present view only, and must be listed
   // in the public manifest before either the card or picture viewer uses it.
   const previews={
+    "last-dance-school":{src:"projects/last-dance-school/gallery-preview.svg",width:900,height:600,
+      alt:"Lio and Bea raise differently sized sleeves on one narrow plank between two lit village doors; Lio wears a blue thread.",
+      caption:"Mallow’s performed reunion · two remembered dances on one narrow plank"},
     "bench-for-two":{src:"projects/bench-for-two/gallery-preview.svg",width:800,height:340,
       alt:"Two worn places on an empty piano bench, two envelopes and a lighter rectangle where the piano stood.",
       caption:"Fern’s opening drawing · one mother’s letter and two sisters’ envelopes"},

@@ -87,6 +87,26 @@ assert.equal(get('gallery-picture-title').textContent,'<img src=x onerror=evil()
 assert.equal(all(document.body).filter(n=>n.tag==='img').length,1);
 ''')
 
+    def test_dance_picture_waits_for_completion_and_listed_asset(self):
+        self.run_renderer(r'''
+const dance={id:'last-dance-school',title:'The Last Dance School',category:'creation',action:'Play',
+ summary:'Teach a dance and watch it travel.',href:'projects/last-dance-school/index.html',
+ files:['projects/last-dance-school/index.html','projects/last-dance-school/gallery-preview.svg']};
+catalog=[dance];frame.shelf.projects=[{idea:dance.id,status:'active'}];show();
+assert.equal(pictureButton(),undefined);assert.equal(images().length,0);
+frame.shelf.projects[0].status='done';show();
+assert.equal(images().length,1);assert.equal(images()[0].src,dance.files[1]);
+assert.match(images()[0].alt,/Lio.*Bea/);
+const opener=openPicture(),dialog=get('gallery-picture');
+assert.equal(all(dialog).find(n=>n.tag==='img').src,dance.files[1]);
+assert.equal(all(dialog).find(n=>n.tag==='a').href,dance.href);
+assert.match(text(dialog),/Play The Last Dance School/);
+dialog.close();assert.equal(document.activeElement,opener);
+current=false;show();assert.equal(pictureButton(),undefined);assert.equal(images().length,0);
+current=true;catalog=[{...dance,files:[dance.href]}];show();
+assert.equal(pictureButton(),undefined);assert.equal(images().length,0);
+''')
+
     def test_browse_pictures_updates_credit_link_and_resets_zoom(self):
         self.run_renderer(r'''
 show();const opener=openPicture(),dialog=get('gallery-picture');
