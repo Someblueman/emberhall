@@ -1821,7 +1821,39 @@ function renderLessons(content) {
 let countingState={agent:"all",lane:"all",page:0};
 const countingHandoffsOpen=new Set();
 let countingWorkTrail=null;
+let countingHistoryTrail=null;
 const COUNTING_PAGE_SIZE=8;
+function countingHistoryOrigin() {
+  return data.frames.find(moment=>moment.seq===countingHistoryTrail?.sequence&&
+    moment.rooms?.some(room=>room.id==="counting"&&roomStatus(room)==="open"));
+}
+function visitCountingMoment(sequence,target) {
+  if(sequence===frame.seq||!data.frames.some(moment=>moment.seq===sequence))return;
+  if(!countingHistoryOrigin())countingHistoryTrail={sequence:frame.seq,current,target,
+    state:{...countingState},opened:new Set(countingHandoffsOpen)};
+  countingState.page=0;
+  jumpToSequence(sequence);
+}
+function renderCountingHistoryReturn(content) {
+  const trail=countingHistoryTrail;
+  if(!trail)return;
+  if(!countingHistoryOrigin()) {
+    html("p","small","The run ledger’s original moment is absent from this publication; it cannot be restored.",content);
+    return;
+  }
+  const back=workshopButton(content,"Back to my run ledger",()=>{
+    const source=countingHistoryOrigin();
+    if(!source){roomPanel();workshopFocus("counting-runs",true);return;}
+    index=data.frames.indexOf(source);frame=source;
+    current=trail.current&&index===data.frames.length-1;
+    countingState={...trail.state};
+    countingHandoffsOpen.clear();trail.opened.forEach(id=>countingHandoffsOpen.add(id));
+    countingHistoryTrail=null;selectedFloor=source.rooms.find(room=>room.id==="counting").floor??0;
+    choose("counting");render();workshopFocus(trail.target,true);
+  });
+  back.id="counting-history-return";
+  html("p","small",`Return to your filters, page and open handoffs at event ${trail.sequence}.`,content);
+}
 function renderCountingReturn(detail) {
   const trail=countingWorkTrail;
   if(!trail||trail.task!==workshopState.selectedId)return;
@@ -1858,6 +1890,7 @@ function countingBackoffLabel(backoff,now) {
   return "Availability unknown · no backoff recorded";
 }
 function renderCountingRoom(content) {
+  renderCountingHistoryReturn(content);
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
   const finishesOf=run=>(run.finished_tasks||[]).filter(t=>Number.isInteger(t.sequence)&&t.sequence>0&&t.sequence<=frame.seq);
   const totalFinishes=allRuns.reduce((n,r)=>n+finishesOf(r).length,0);
@@ -1952,7 +1985,7 @@ function renderCountingRoom(content) {
             const id=`counting-finish-${receipt.sequence}`;
             const button=workshopButton(item,`Handoff at event ${receipt.sequence}`,()=>{
               countingHandoffsOpen.add(run.id);
-              jumpToSequence(receipt.sequence);
+              visitCountingMoment(receipt.sequence,id);
               const replacement=$(id);
               if(replacement){replacement.closest("details").open=true;replacement.focus({preventScroll:true});}
               else $("counting-runs")?.focus({preventScroll:true});
@@ -1977,7 +2010,9 @@ function renderCountingRoom(content) {
       if(hasFrame) {
         const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
         btn.type="button";btn.id=`counting-jump-${run.sequence}`;
-        btn.addEventListener("click",()=>jumpToSequence(run.sequence));
+        btn.addEventListener("click",()=>{
+          visitCountingMoment(run.sequence,btn.id);workshopFocus($(btn.id)?btn.id:"counting-runs",true);
+        });
       }
     });
     previous.disabled=countingState.page===0;next.disabled=start+COUNTING_PAGE_SIZE>=filtered.length;
