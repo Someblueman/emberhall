@@ -1,0 +1,6 @@
+[
+  {"click":"#preset-wrap"},
+  {"click":"#run"},
+  {"wait":2000},
+  {"wait":2000}
+]

@@ -1,0 +1,11 @@
+[
+  {"click":"#clear"},
+  {"fill":["#typebox","AB"]},
+  {"wait":300},
+  {"focus":"#typebox"},
+  {"press":"Enter"},
+  {"wait":300},
+  {"fill":["#typebox","C"]},
+  {"wait":300},
+  {"press":"Tab"}
+]

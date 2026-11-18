@@ -1,0 +1,15 @@
+{
+  "source": "387f42b63f0df5f7d1e1dc0b86ffca36614d24f5",
+  "input": [
+    65,
+    66
+  ],
+  "method": "Original host, inert DOM for controls; reset then one runToNextFrame call",
+  "observed": {
+    "bytesConsumed": 2,
+    "displayedColumn": 1,
+    "tapeColumn": 2,
+    "framesShown": 2,
+    "unshownFrames": 1
+  }
+}

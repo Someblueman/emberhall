@@ -1,0 +1,6 @@
+[
+  {"fill":["#stream","A\\xFFB\\x00C"]},
+  {"click":"#load"},
+  {"click":"#run"},
+  {"wait":500}
+]
