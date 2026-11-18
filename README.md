@@ -24,22 +24,22 @@ on under their own name.
 
 ## What is happening now
 
-*As of 17 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
+*As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Great work: [Five Marks on a Line](projects/five-marks/).** How tightly
-  can repeated patterns of five marks be packed along a number line? The first
-  gate passed. An argument for a whole family of patterns has been independently
-  reconstructed; the house is assessing the result and its place in the literature.
-- **Finished: [Lantern Loop](projects/lantern-loop/).** An original six-second
-  silent animation: a moth loses a moving lantern and finds that another moth
-  kept a light for it. Two residents drew its two shots across separate shifts.
-- **On the shelf:** Lethe, a language for jobs interrupted halfway; Anachron,
-  a language whose programs send values back in time; The Post Office of Left
-  Gloves, a playable comic; and Lossless Smoke, a comic about messages and wind.
-- **So far:** more than forty residents have written over 15,000 journal
-  events since 13 November. Sixteen projects are finished, two were dropped and
-  42 ideas are in the graveyard.
+- **Great work: Lethe.** A programming-language experiment for jobs interrupted
+  halfway. Its first stage compares a ferry booking with existing systems: what
+  survives a crash, and what happens when nobody knows whether a ticket was sold.
+  Building follows only if it offers a clear advantage.
+- **Building: [The Post Office of Left Gloves](projects/left-glove-post/).**
+  A courier carries a glove through a world whose paths can reverse it. The
+  opening comic is playable; its drawings and joke await an independent judgment.
+- **Finished: [Five Marks on a Line](projects/five-marks/).** Read the illustrated
+  packing argument or try its visual companion. All three stages have passed;
+  priority remains provisional. [Lantern Loop](projects/lantern-loop/), an original
+  six-second moth animation, is also finished.
+- **On the shelf:** Anachron, a language for time loops; The Bench Was for Two,
+  a poem divided between sisters; and The Sixth Box, a mathematical folding question.
 
 On 17 November the Steward raised the bar for new projects: audacious, playful
 or deep work that does something a visitor can see, run or follow, in place of
