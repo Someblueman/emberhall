@@ -16,11 +16,13 @@ class Element {
  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.listeners={};}
  appendChild(n){this.children.push(n);} replaceChildren(){this.children=[];}
  addEventListener(k,fn){this.listeners[k]=fn;}
+ setAttribute(k,v){this[k]=v;} focus(){document.activeElement=this;}
 }
 const nodes={'recent-growth':new Element('div')};
-const document={getElementById:id=>nodes[id]||null,createElement:tag=>new Element(tag)};
 const text=n=>[n.textContent,...n.children.map(text)].join(' ');
 const all=n=>[n,...n.children.flatMap(all)];
+const document={getElementById:id=>nodes[id]||all(nodes['recent-growth']).find(n=>n.id===id)||null,
+ createElement:tag=>new Element(tag)};
 const context=vm.createContext({document,assert,nodes,text,all});
 const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
@@ -72,8 +74,28 @@ assert(!text(nodes['recent-growth']).includes('Council choosing'));
 data.frames=Array.from({length:10},(_,i)=>({seq:i+1,at:50000+i,rooms:[],shelf:{projects:
  Array.from({length:i},(_,j)=>({id:String(j),title:'Project '+j,status:'active'}))}}));
 index=9;frame=data.frames[9];data.observed_at=50010;current=true;renderRecentGrowth();
-assert.equal(all(nodes['recent-growth']).filter(node=>node.tag==='button').length,5);
-assert(text(nodes['recent-growth']).includes('latest 5 of 9'));
+const events=()=>all(nodes['recent-growth']).filter(n=>n.className==='growth-event');
+assert.equal(events().length,5);
+assert.match(text(nodes['recent-growth']),/Changes 1–5 of 9/);
+assert($('growth-newer').disabled);
+$('growth-earlier').listeners.click();
+assert.match(text(nodes['recent-growth']),/Changes 6–9 of 9/);
+assert.equal(events().length,4);assert($('growth-earlier').disabled);
+assert.equal(document.activeElement,$('growth-list'));
+events().at(-1).focus();const focusedId=document.activeElement.id;
+renderRecentGrowth();
+assert.equal(document.activeElement,$(focusedId));
+events().at(-1).listeners.click();assert.equal(jumped,2);
+$('growth-newer').listeners.click();
+assert.match(text(nodes['recent-growth']),/Changes 1–5 of 9/);
+$('growth-earlier').listeners.click();
+current=false;index=4;frame=data.frames[index];renderRecentGrowth();
+assert.equal(events().length,4);assert.equal($('growth-earlier'),null);
+current=true;index=9;frame=data.frames[index];renderRecentGrowth();
+assert.match(text(nodes['recent-growth']),/Changes 1–5 of 9/);
+$('growth-earlier').listeners.click();
+data.observed_at+=43201;renderRecentGrowth();assert.equal(events().length,0);
+data.observed_at=50010;renderRecentGrowth();assert.match(text(nodes['recent-growth']),/Changes 1–5 of 9/);
 `,context);
 '''
         result = subprocess.run(['node', '-e', script, str(ROOT/'site/house.js')],
