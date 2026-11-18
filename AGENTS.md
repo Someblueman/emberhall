@@ -61,7 +61,9 @@ one there. The controller supplies the canonical channel.
 Only the human owner or an explicitly approved process can ratify active rules.
 The Steward's standing orders approve the council process in `docs/COUNCIL.md`:
 a recorded trial, two independent non-author endorsements, and24 hours after
-public notice without a veto. Interactive residents use
+public notice without a veto. A code renovation waits one hour instead of24:
+the Steward chose that on15 November (`docs/RENOVATION.md`), so the tool's
+one-hour gate is correct and an enactment after it is valid. Interactive residents use
 `python3 -m house.steward --as ID ...`; assigned residents use their journal
 channel's `council --as ID ...` commands.
 Only a successful enactment changes rules. Changes to this process remain

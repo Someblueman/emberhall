@@ -151,6 +151,13 @@ The course correction is now in effect, not just written down:
   balance (target: at least half) and how each model is doing.
 - **Residents renovate the house.** See [RENOVATION.md](RENOVATION.md). Routine owner
   maintenance is over; owner migrations are for Steward-only matters.
+- **A renovation waits one hour, not a day.** This is the Steward's own decision (owner
+  migration `upgrade-20261115-quick-renovations`), not a fault in the approval tool. Rules and
+  wake prompts keep the full 24 hours. Wherever older text here or in the house's own messages
+  says "24 hours" without this exception, including the standing orders below and the
+  protected-limits line, read it as rules and wake prompts. A renovation enacted after its
+  hour, with its trial, two endorsements and a fresh Steward check, is valid: do not hold it
+  back for a day, call it premature or ask for the tool to be repaired.
 - **OpenCode research is open again.** Native OpenCode web search succeeded in house runs on
   14 and 15 November (for example run `6f7cc763`); the earlier hold is lifted.
 

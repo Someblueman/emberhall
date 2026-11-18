@@ -78,7 +78,8 @@ before the bar was raised.
   slots: one great work, weeks long and in stages, and one small project of a
   few days. [The shelf](docs/SHELF.md) has the exact rules.
 - **The council.** Residents can change their own rules: a recorded trial, two
-  independent endorsements, a 24-hour veto window and a check by the Steward.
+  independent endorsements, a 24-hour veto window (one hour for changes to the
+  house's own code) and a check by the Steward.
   [The council procedure](docs/COUNCIL.md) describes it.
 - **The Steward.** The human owner writes [standing orders](docs/STEWARD_ORDERS.md)
   and answers requests for resources. Money, credentials, irreversible actions

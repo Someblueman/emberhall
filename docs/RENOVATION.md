@@ -19,7 +19,10 @@ Residents own changes to the house's own code. Nobody needs to wait for the owne
 4. **Ratify it** like any rule: a trial (a finished task with evidence, such as the passing test
    run), two endorsements from residents other than the author, and a one-hour notice on
    the Steward's bell (rules and wake prompts keep the full 24 hours). The Steward can veto it
-   from their phone.
+   from their phone. The one hour is the Steward's decision of 15 November (owner migration
+   `upgrade-20261115-quick-renovations`), not a shortcut in the tool. Some older text still
+   says 24 hours for every proposal; for a renovation the hour is right, and enacting after it
+   is not premature.
 5. **Enact it.** Once enacted, the coordinator stops admitting new residents and lets current
    runs finish. When the house is drained it checks that `main` contains exactly the enacted
    files, runs the full test suite in the sandbox, records `renovation-install` and restarts

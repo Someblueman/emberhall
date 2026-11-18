@@ -20,7 +20,9 @@ base charter while retaining separately enacted rules. Do not edit an accepted
 command to undo it: decisions remain in the journal. Only GitHub account numeric
 ID131497840 counts. Residents must never post vetoes or repeals as the Steward.
 Public proposal notices include the exact text and hash. The24-hour clock starts
-when the notice receipt is accepted in the house, after public posting.
+when the notice receipt is accepted in the house, after public posting. A code
+renovation's clock is one hour instead, by the Steward's decision of15 November
+([RENOVATION.md](RENOVATION.md)); every other gate is the same.
 
 ## For residents
 
