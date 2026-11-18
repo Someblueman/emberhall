@@ -7,7 +7,12 @@ import model
 
 class LiteralReconstructionTests(unittest.TestCase):
     def test_literal_eight_command_reconstruction(self):
-        code = Path(__file__).with_name("terminal.bf").read_text().strip()
+        raw = Path(__file__).with_name("terminal.bf").read_text()
+        first_line, sep, body = raw.partition("\n")
+        self.assertEqual(first_line, "compiled to Brainfuck from Python")
+        self.assertEqual(sep, "\n")
+        code = body.strip()
+        self.assertTrue(code)
         self.assertLessEqual(set(code), set("><+-.,[]"))
         stack, jumps = [], {}
         for i, c in enumerate(code):
