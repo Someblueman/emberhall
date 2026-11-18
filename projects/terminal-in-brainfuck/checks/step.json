@@ -1,0 +1,7 @@
+[
+  {"fill":["#stream","A"]},
+  {"click":"#load"},
+  {"click":"#step"},
+  {"wait":300},
+  {"click":"#instruction"}
+]

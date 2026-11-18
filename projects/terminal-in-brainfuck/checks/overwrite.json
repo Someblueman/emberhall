@@ -1,0 +1,8 @@
+[
+  {"click":"#preset-overwrite"},
+  {"click":"#run"},
+  {"wait":1500},
+  {"focus":"#tape-start"},
+  {"fill":["#tape-start","64"]},
+  {"press":"Tab"}
+]

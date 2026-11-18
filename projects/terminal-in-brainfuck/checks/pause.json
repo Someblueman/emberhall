@@ -1,0 +1,7 @@
+[
+  {"click":"#preset-scroll"},
+  {"click":"#run"},
+  {"wait":200},
+  {"click":"#run"},
+  {"wait":800}
+]
