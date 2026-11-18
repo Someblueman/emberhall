@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="One mother's letter. Two sisters. Only one copy of the words For you. An original playable poem.">
+  <title>The Bench Was for Two</title>
+  <link rel="stylesheet" href="bench.css">
+  <script src="letter.js" defer></script>
+  <script src="bench.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><p class="eyebrow">A letter under the lid</p><h1>The Bench <br>Was for Two</h1><p class="opening">Edie played.<br>Nell turned the pages.</p></header>
+    <section class="stage" aria-label="The piano is gone. Its bench remains.">
+      <svg viewBox="0 0 800 340" role="img" aria-labelledby="bench-title bench-desc">
+        <title id="bench-title">An empty piano bench, wide enough for two</title>
+        <desc id="bench-desc">Two pale worn places in the dark wooden seat. The piano has left a clean rectangle on the wall. Two envelopes wait on the floor.</desc>
+        <defs><pattern id="grain" width="70" height="22" patternUnits="userSpaceOnUse"><path d="M0 6Q30 0 70 8M0 18Q45 9 70 20" fill="none" stroke="#c89768" stroke-width=".7" opacity=".3"/></pattern></defs>
+        <path d="M120 26H680V235H120Z" fill="#d6c8a3" opacity=".08"/>
+        <path d="M120 26V235H680" fill="none" stroke="#d6c8a3" opacity=".15"/>
+        <path d="M45 280H755M80 317L251 252M435 340L487 252M716 340L672 252" stroke="#bda278" opacity=".13"/>
+        <ellipse cx="406" cy="292" rx="242" ry="19" fill="#111c1b" opacity=".5"/>
+        <g class="bench-body" stroke="#241f19" stroke-linejoin="round">
+          <path d="M226 182L235 287L252 287L259 185M546 182L553 287L570 287L581 180" fill="#76513a" stroke-width="3"/>
+          <path d="M233 205H571V221H233Z" fill="#47382b" stroke-width="3"/>
+          <path d="M211 154L552 139L596 168L240 188Z" fill="#382e23" stroke-width="3"/>
+          <g class="closed-lid"><path d="M211 154L552 139L596 168L240 188Z" fill="#956948" stroke-width="3"/>
+          </g>
+          <path d="M240 188L596 168V189L240 209Z" fill="#62422e" stroke-width="3"/>
+          <path d="M211 154L240 188V209L211 174Z" fill="#4e3929" stroke-width="3"/>
+          <g class="closed-lid"><path d="M211 154L552 139L596 168L240 188Z" fill="url(#grain)"/>
+          <ellipse cx="309" cy="169" rx="52" ry="10" transform="rotate(-3 309 169)" fill="#ccaa79" opacity=".57" stroke="none"/>
+          <ellipse cx="493" cy="160" rx="46" ry="9" transform="rotate(-3 493 160)" fill="#ccaa79" opacity=".43" stroke="none"/>
+          </g>
+          <g class="open-lid"><path d="M211 154L552 139L574 57L228 78Z" fill="#755139" stroke-width="3"/><path d="M228 78L574 57L571 63L229 84Z" fill="#b88859"/><path d="M241 91L556 73L540 124L225 141Z" fill="none" stroke="#a27850" stroke-width="2"/><path d="M307 159L421 151L443 173L329 180Z" fill="#eee0bd" stroke="#a68b60"/><path d="M331 162L402 157M340 168L419 162" fill="none" stroke="#a19379" stroke-width="1"/></g>
+          <path d="M405 185V197M398 191H412" stroke="#d8b477" stroke-width="2"/>
+        </g>
+        <g fill="#d8c6a2" stroke="#9c8968"><path d="M181 269L265 277L260 315L177 306Z"/><path d="M181 269L220 294L265 277" fill="none"/><path d="M581 279L657 270L662 307L586 316Z"/><path d="M581 279L623 294L657 270" fill="none"/></g>
+        <text x="216" y="309" fill="#4a4438" font-size="13" font-family="Georgia" transform="rotate(6 216 309)">Edie</text>
+        <text x="616" y="309" fill="#4a4438" font-size="13" font-family="Georgia" transform="rotate(-6 616 309)">Nell</text>
+      </svg>
+      <p class="scene-note">The piano left a lighter patch on the wall.</p>
+    </section>
+    <section id="closed" class="invitation"><p>Under the seat, their mother left a letter.<br>Two names. One loose line.</p><button id="lift" class="primary">Lift the lid <span aria-hidden="true">↗</span></button></section>
+    <section id="desk" hidden aria-labelledby="desk-heading">
+      <h2 id="desk-heading" tabindex="-1">Only one copy.</h2>
+      <p class="instruction">The rest is already addressed.<br>Put the loose words into one envelope.</p>
+      <div class="slip"><p>For you.</p><span class="cut" aria-hidden="true">✂</span></div>
+      <fieldset><legend>Who gets “For you.”?</legend><div class="choices"><label for="recipient-edie"><input id="recipient-edie" type="radio" name="recipient" value="edie"> <span>Edie</span><small>who played</small></label><label for="recipient-nell"><input id="recipient-nell" type="radio" name="recipient" value="nell"> <span>Nell</span><small>who turned the pages</small></label></div></fieldset>
+      <p id="placement" role="status">The words are still on the bench.</p>
+      <button id="unfold" class="primary" disabled>Open both envelopes <span aria-hidden="true">↓</span></button>
+      <section id="letters" hidden aria-labelledby="letters-heading">
+        <h2 id="letters-heading" tabindex="-1">What each sister will read</h2>
+        <div class="letters"><article aria-labelledby="edie-name"><h3 id="edie-name">Edie</h3><div id="edie-letter" class="letter-body"></div></article><article aria-labelledby="nell-name"><h3 id="nell-name">Nell</h3><div id="nell-letter" class="letter-body"></div></article></div>
+        <div class="after"><p>You can still change your mind.</p><button id="move">Give the loose words to <span id="other-name">Nell</span></button><button id="fold" class="quiet">Fold the letters</button></div>
+      </section>
+      <div class="foot-actions"><button id="reset" class="quiet">Put everything back</button><details><summary>The found paper</summary><p class="paper-note">The names were in the margins. The loose line had no name. This is the order of the words they found.</p><ol id="paper"></ol></details></div>
+    </section>
+    <noscript><p class="no-script">This poem needs JavaScript to divide its letter. The words are also printed in <a href="README.md">the reading copy</a>.</p></noscript>
+    <footer><p>An original playable poem by Fern · Emberhall · 2026</p><details><summary>About this little work</summary><p>Words, drawing and code made for this piece. The mother and sisters are invented. One phrase is offered deliberately: its two readings must earn their place before more words are made loose.</p><p>Made after reading about cleave poems and letters that change in the act of writing. No claim to a new poetic form.</p><p><a href="https://cleavepoetry.wordpress.com/what-is-cleave-poetry/">Phuoc-Tan Diep on cleave poetry</a> · <a href="https://lizadaly.com/first-draft/">First Draft of the Revolution</a></p></details><p><a href="../../#gallery-view">Back to Emberhall</a></p></footer>
+  </main>
+</body>
+</html>
