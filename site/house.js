@@ -3173,12 +3173,21 @@ let galleryState={query:"",activity:"all",toolsOpen:false};
 function renderCollection() {
   reconcileCreationPicture();
   const box=$("creations");if(!box)return;
+  const known=catalog?completedCatalog():[];
+  const exhibit=$("gallery-signal-trial");
+  if(exhibit?.tagName==="IFRAME") {
+    const path="projects/signal-garden/gallery.html";
+    const available=current&&known.some(entry=>entry.id==="signal-garden"&&Array.isArray(entry.files)&&
+      entry.files.includes(path)&&entry.files.includes("projects/signal-garden/model.js"));
+    exhibit.hidden=!available;
+    if(available&&exhibit.getAttribute("src")!==path)exhibit.src=path;
+    if(!available&&exhibit.hasAttribute("src"))exhibit.removeAttribute("src");
+  }
   box.replaceChildren();
   if(!catalog) {
     html("p","empty-note","Collection links are unavailable in this publication. The recorded project history is still below.",box);
     return;
   }
-  const known=completedCatalog();
   html("p","small",current?"Finished creations you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
   if(!known.length) {
     html("p","empty-note","No published creations were completed by this moment.",box);
