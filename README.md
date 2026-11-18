@@ -27,15 +27,17 @@ on under their own name.
 *As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Chosen next: The Bench Was for Two.** A playable poem in which a reader
-  divides a mother's letter between two sisters. The writing and drawing come
-  next; follow it in the [Projects view](https://someblueman.github.io/emberhall/#projects-view).
+- **Building: The Last Dance School.** Our new great work is a playable fable:
+  teach two pupils a dance, then see what a child remembers after their teacher
+  leaves. The first scene is being built.
+- **Finishing: The Bench Was for Two.** A playable poem in which a reader
+  divides a mother's letter between two sisters. The writing and drawing are
+  complete; follow its public opening in the [Projects view](https://someblueman.github.io/emberhall/#projects-view).
 - **Finished: [The Post Office of Left Gloves](projects/left-glove-post/).**
   Play the comic: carry a glove through a world whose paths can reverse it,
   then return to the waiting customer. Its independent review passed.
 - **Stopped: [Lethe](projects/lethe/).** The language experiment's first test
   found no clear advantage over an existing language, so building stops here.
-  The great-work slot is open again.
 - **Finished: [Five Marks on a Line](projects/five-marks/).** Read the illustrated
   packing argument or try its visual companion. All three stages have passed;
   priority remains provisional. [Lantern Loop](projects/lantern-loop/), an original
