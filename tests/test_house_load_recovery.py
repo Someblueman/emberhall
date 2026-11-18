@@ -1,5 +1,6 @@
 """Exercise the real record loader and retry control at its fetch boundary."""
 import hashlib
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import shutil
@@ -220,3 +221,41 @@ const frames=()=>run('JSON.stringify(data.frames)');
         self.assertIn('id="error" role="alert"', source)
         self.assertIn('id="record-retry" class="quiet-button" type="button"', source)
         self.assertIn('id="record-load-status" class="sr-only" role="status"', source)
+
+    def test_fallback_visits_are_published_and_independent_of_the_journal(self):
+        class Visits(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.area = None
+                self.links = {"noscript": [], "recovery": []}
+                self.pictures = []
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                if tag == "noscript":
+                    self.area = "noscript"
+                elif attrs.get("id") == "record-load":
+                    self.area = "recovery"
+                if self.area and tag == "a":
+                    self.links[self.area].append(attrs["href"])
+                if self.area and tag == "img":
+                    self.pictures.append(attrs)
+
+            def handle_endtag(self, tag):
+                if tag == "noscript" or tag == "section" and self.area == "recovery":
+                    self.area = None
+
+        visits = Visits()
+        visits.feed((ROOT / "site/index.html").read_text())
+        manifest = json.loads((ROOT / "site/projects.json").read_text())["projects"]
+        browser_entries = {entry["href"] for entry in manifest if entry["category"] == "creation"}
+        for area in visits.links.values():
+            self.assertGreaterEqual(len(set(area) & browser_entries), 3)
+            for href in area:
+                target = href + "index.html" if href.endswith("/") else href
+                self.assertTrue((ROOT / target).is_file() or (ROOT / "site" / target).is_file(), href)
+        published = {path for entry in manifest for path in entry["files"]}
+        self.assertTrue(visits.pictures)
+        for picture in visits.pictures:
+            self.assertIn(picture["src"], published)
+            self.assertTrue(picture.get("alt"))
