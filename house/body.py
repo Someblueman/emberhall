@@ -92,35 +92,34 @@ def _brief_view(brief: dict) -> dict:
 
 
 def installed_by_upgrade(state: dict, proposal: dict, since: object = None) -> dict | None:
-    """The Steward's latest upgrade, if it already installed every file a pending renovation asks for.
+    """The first Steward upgrade after a pending renovation that installed every file it asks for.
 
-    A page-only judgement: the reducer is untouched, so replay is unchanged. Only the most recent owner
-    upgrade counts (its manifest is the house as installed now), and only one recorded after the proposal.
+    A page-only judgement: the reducer is untouched, so replay is unchanged. Any owner upgrade recorded
+    after the proposal counts, not only the newest: once its files were installed the proposal asks
+    nothing more, even if a later upgrade has changed those files again. (The first version of this
+    looked only at the newest upgrade, and stopped recognising two proposals the same afternoon.)
     """
     files = proposal.get("renovation", {}).get("files") if isinstance(proposal.get("renovation"), dict) else None
     if not isinstance(files, dict) or not files:
         return None
     since = since if isinstance(since, (int, float)) else proposal.get("proposed_at", 0)
-    latest = None
+    found = None
     for scope, entry in state.get("maintenance", {}).get("migrations", {}).items():
         if not isinstance(entry, dict) or not isinstance(entry.get("protected_files"), dict):
             continue
-        sequence = entry.get("sequence")
-        if not isinstance(sequence, int) or isinstance(sequence, bool):
+        sequence, at = entry.get("sequence"), entry.get("at")
+        if (not isinstance(sequence, int) or isinstance(sequence, bool)
+                or not isinstance(at, (int, float)) or at <= (since or 0)):
             continue
-        if latest is None or sequence > latest[1]["sequence"]:
-            latest = (scope, entry)
-    if latest is None:
+        installed = entry["protected_files"]
+        if (all(isinstance(path, str) and isinstance(digest, str) and installed.get(path) == digest
+                for path, digest in files.items())
+                and (found is None or sequence < found[1]["sequence"])):
+            found = (scope, entry)
+    if found is None:
         return None
-    scope, entry = latest
-    at = entry.get("at")
-    if not isinstance(at, (int, float)) or at <= (since or 0):
-        return None
-    installed = entry["protected_files"]
-    if all(isinstance(path, str) and isinstance(digest, str) and installed.get(path) == digest
-           for path, digest in files.items()):
-        return {"how": "delivered", "by": label(entry.get("scope", scope), 200), "via": "upgrade", "at": at}
-    return None
+    scope, entry = found
+    return {"how": "delivered", "by": label(entry.get("scope", scope), 200), "via": "upgrade", "at": entry["at"]}
 
 
 def _closure(state: dict, key: str, proposal: dict, closed: str) -> dict:

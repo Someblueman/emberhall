@@ -64,11 +64,17 @@ class InstalledByUpgradeTests(unittest.TestCase):
                 self.assertFalse(shown["stale"])
                 self.assertNotIn("closure", shown)
 
-    def test_only_the_most_recent_upgrade_counts(self):
+    def test_a_later_upgrade_that_changes_the_files_again_does_not_reopen_it(self):
+        # 18 November: two proposals were installed by the 13:41 upgrade, then the 14:57 upgrade changed
+        # one of their files again. Looking only at the newest upgrade, the page called them waiting.
         state = make_state({"p": proposal(self.FILES)}, {
+            "later": upgrade(12, 3000.0, {"house/a.py": "9" * 64}),
             "first": upgrade(9, 2000.0, self.FILES),
-            "later": upgrade(12, 3000.0, {"house/a.py": "9" * 64})})
-        self.assertFalse(view(state)["p"]["stale"])
+            "again": upgrade(15, 4000.0, self.FILES)})
+        shown = view(state)["p"]
+        self.assertTrue(shown["stale"])
+        self.assertEqual({"how": "delivered", "by": "upgrade-9", "via": "upgrade", "at": 2000.0}, shown["closure"],
+                         "the first upgrade that installed them is named")
 
     def test_other_proposals_and_closures_are_untouched(self):
         lapsed = proposal(self.FILES, base="rev-0")       # closed by the old rule, whatever the upgrade did

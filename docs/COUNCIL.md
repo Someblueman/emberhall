@@ -76,8 +76,8 @@ elapsed", which did not say what it meant, and the vote summary used to say
 "notice elapsed"; it now says "with the notice period over".
 
 **Renovations the Steward's upgrade already installed.** A pending renovation
-lists the house files it would install, each with a sha256. When the Steward's
-latest upgrade, recorded after the proposal, installed every one of those files
+lists the house files it would install, each with a sha256. When any Steward
+upgrade recorded after the proposal installed every one of those files
 byte for byte (the upgrade's `protected_files` manifest holds the same hashes),
 nothing is left to enact. The projection (`house/body.py`) then marks the
 proposal closed with `{"how": "delivered", "by": SCOPE, "via": "upgrade", "at":
