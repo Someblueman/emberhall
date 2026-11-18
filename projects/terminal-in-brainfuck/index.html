@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; base-uri 'none'">
-<title>The tape is the terminal — Brainfuck</title>
+<title>The tape is the terminal — compiled to Brainfuck from Python</title>
 <style>
   * { box-sizing:border-box; }
   body { margin:0; background:#101918; color:#e0e8da; font:17px/1.5 Georgia,serif; }
@@ -52,7 +52,7 @@
 <main>
 <div class="eyebrow">An unreasonable machine · colour on the tape</div>
 <h1>The tape is the terminal.</h1>
-<p class="intro">Forty columns, twenty-four rows. Every letter, wrap and scroll is worked out by eight Brainfuck commands on a tape. The browser just runs them and draws their pictures.</p>
+<p class="intro">Forty columns, twenty-four rows. Every letter, wrap, scroll and colour attribute is worked out on a tape compiled to Brainfuck from Python (<code>build_terminal.py</code>). The browser just runs the eight commands and draws their pictures.</p>
 <div class="workbench">
 <section aria-labelledby="screen-title">
 <h2 id="screen-title">01 / The picture the program sends</h2>
@@ -94,7 +94,7 @@
 <button id="preset-wrap">Wrap</button>
 <button id="preset-scroll">Scroll</button>
 </div>
-<p class="hint">Start with <strong>Overwrite</strong>, press Run, and watch <code>byeLO, WORLD</code> remain. Presets load and reset; press Run to play. Nothing here is a shell.</p>
+<p class="hint">Start with <strong>Overwrite</strong>, press Run, and watch <code>byeLO, WORLD</code> remain. Presets load and reset; press Run to play. This browser page runs an editable byte queue with no live shell.</p>
 <h2>Bell No. 3 · an authored stream</h2>
 <p>A diving bell goes down empty. Load the dive and press Run, or stop at the sea floor to see what the jaws caught.</p>
 <div class="controls">
@@ -109,7 +109,7 @@
 <p>ASCII bytes 32–126 print. <code>\r</code> returns left without erasing; <code>\n</code> (or an editor newline) goes down without returning left. At column 40 a printed letter wraps immediately. At the bottom, the tape scrolls the picture. Backspace moves left without erasing; tab goes to the next eight-column stop. Zero ends the program.</p>
 <p>Use <code>\\</code> for a literal backslash, <code>\t</code> for a tab, or <code>\xHH</code> for an exact hexadecimal byte. For example, <code>A\xFFB</code> displays AB; <code>A\x00B</code> halts after A. Unicode is rejected, not truncated into different bytes. Pausing or running out of queued bytes is not the same as End input.</p>
 <p>The machine has 6,000 wrapping eight-bit cells. Cells 0–4 hold the input byte, physical cursor row, column, top row and emitted row. Physical screen rows start at cell 64, spaced 246 cells apart. Each has six helper cells, then forty pairs of triples: a character and its colour, each with two helpers. The stored colour is one more than its emitted value, so black-on-black remains data. Try cell 64 to see the first physical row; scrolling rotates which row comes first.</p>
-<p>Try <strong>Move without erasing</strong>: ABCDE becomes ABC!E. <strong>Erase a line tail</strong> keeps AB on the second row and leaves the cursor in its third column. CSI cursor and erase sequences now run on the tape; see the <a href="CONTROL_CONTRACT.md">exact control rules</a>. Try <strong>Coloured ink</strong> to select ink with <code>\x1b[31m</code>, or paper with <code>\x1b[37;44m</code>. Erasure uses the current colour, and scroll carries each letter’s ink with it. The <a href="COLOUR_CONTRACT.md">colour rules</a> accept at most two parameters. A shell and external programs remain outside this machine. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated generator</a>, or the <a href="terminal.bf">plain eight-command program</a>. The page uses no network services.</p>
+<p>Try <strong>Move without erasing</strong>: ABCDE becomes ABC!E. <strong>Erase a line tail</strong> keeps AB on the second row and leaves the cursor in its third column. CSI cursor and erase sequences now run on the tape; see the <a href="CONTROL_CONTRACT.md">exact control rules</a>. Try <strong>Coloured ink</strong> to select ink with <code>\x1b[31m</code>, or paper with <code>\x1b[37;44m</code>. Erasure uses the current colour, and scroll carries each letter’s ink with it. The <a href="COLOUR_CONTRACT.md">colour rules</a> accept at most two parameters. No live OS shell runs inside this browser page. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated Python compiler</a>, or the <a href="terminal.bf">eight-command program compiled to Brainfuck from Python</a>. The page uses no network services.</p>
 </details>
 <p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Cursor and erasure: Aster. Colour: Hawthorn. Emberhall, 2026.</p>
 </main>

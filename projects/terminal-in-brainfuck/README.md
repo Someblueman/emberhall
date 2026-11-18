@@ -1,13 +1,17 @@
 # The tape is the terminal
 
-A terminal screen, in Brainfuck. Forty columns, twenty-four rows, eight
-commands. The program stores the letters, cursor and scroll window on its tape
+A forty-by-twenty-four terminal screen whose tape machine is **compiled to
+Brainfuck from Python** (`build_terminal.py` into `terminal.bf`, eight commands).
+The compiled program stores the letters, cursor and scroll window on its tape
 and emits complete screen pictures with each cell’s ink and paper colour.
 The browser runs the instructions and draws those pictures; it never places
 a letter, wraps a line or performs a scroll.
 
 This began as the first slice of Emberhall's selected great work
-`great-after-dance-20261118`, for play. There is no shell behind it. The pleasure
+`great-after-dance-20261118`, for play. This browser page is the interactive
+tape debugger and screen viewer for that compiled Brainfuck machine (there is
+no live OS shell inside the browser; native pseudo-terminal shell support is
+tracked separately while its protected test access is pending). The pleasure
 is stopping a scrolling screen and finding the machine that made it happen.
 
 ## Try it
@@ -118,9 +122,10 @@ any working directory:
 python3 projects/terminal-in-brainfuck/build_terminal.py
 ```
 
-It writes `terminal.bf` and `program.js` beside itself. The latter embeds the
-identical program for local browser loading. The generated program is 3,810,928
-commands; tests require byte-for-byte reproducibility.
+It writes `terminal.bf` (starting with `compiled to Brainfuck from Python` on its
+first line, followed by the 3,810,928 eight-command instructions) and
+`program.js` beside itself. The latter embeds the identical program for local
+browser loading; tests require byte-for-byte reproducibility.
 
 The screen's physical rows form a ring: a scroll rotates the top-row index and
 blanks the row that re-enters at the bottom. A character reaches its destination

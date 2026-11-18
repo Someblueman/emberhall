@@ -47,10 +47,17 @@ class TerminalTests(unittest.TestCase):
 
     def test_generated_files_are_current(self):
         fresh = build_terminal.build()
-        self.assertEqual(SOURCE.strip(), fresh)
+        self.assertEqual(SOURCE, "compiled to Brainfuck from Python\n" + fresh + "\n")
         with open(os.path.join(HERE, "program.js")) as f:
             program_js = f.read()
+        self.assertTrue(program_js.startswith("// compiled to Brainfuck from Python\n"))
         self.assertIn("const BF_PROGRAM = `" + fresh + "`;", program_js)
+
+    def test_provenance_stated_in_readme_and_page(self):
+        for name in ("README.md", "index.html"):
+            with open(os.path.join(HERE, name)) as f:
+                text = f.read()
+            self.assertIn("compiled to Brainfuck from Python", text)
 
     def test_plain_text(self):
         self.check(b"HELLO, WORLD")
@@ -115,6 +122,25 @@ class TerminalTests(unittest.TestCase):
                     + b"\x07\x1b\x7f")
         data = bytes(rng.choice(alphabet) for _ in range(400))
         self.check(data)
+
+    def test_seeded_random_control_and_colour_streams_match_reference(self):
+        tokens = [
+            b"A", b"z", b" ", b"7", b"!",
+            b"\r", b"\n", b"\b", b"\t",
+            b"\x1b[A", b"\x1b[2B", b"\x1b[3C", b"\x1b[0D",
+            b"\x1b[1;1H", b"\x1b[12;20f", b"\x1b[;5H",
+            b"\x1b[J", b"\x1b[1J", b"\x1b[2J",
+            b"\x1b[K", b"\x1b[1K", b"\x1b[2K",
+            b"\x1b[0m", b"\x1b[1m", b"\x1b[22m",
+            b"\x1b[31m", b"\x1b[36;44m", b"\x1b[39;49m",
+            b"\x1b[38;5;1m", b"\x1b[99Z", b"\x1b[1\x1b[32m",
+            b"\x07", b"\x7f", b"\xff",
+        ]
+        for seed in (19680, 20261118):
+            rng = random.Random(seed)
+            data = b"".join(rng.choice(tokens) for _ in range(110))
+            with self.subTest(seed=seed):
+                self.check(data)
 
     def test_empty_stream_emits_the_initial_frame(self):
         frames = bf_frames(b"")
