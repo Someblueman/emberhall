@@ -1,0 +1,94 @@
+Real pseudo-terminal run, 18 November 2026.
+Terminal compiled to Brainfuck from Python.
+
+Command passed to /bin/sh -c:
+printf "REAL SHELL\n"; printf "size: "; stty size; printf "\033[31mRED\033[0m\n"; printf "ABCDE\rxy\n"
+
+Exit status: 0
+Complete frames: 50
+Final cursor (zero based): row 4, column 0
+terminal.bf SHA256: c7e868a944fd11c296a622462b4379e2d9cf9ba2749b915183207fc715f12625
+Final frame SHA256: 0b7cf6cef186f22069822ad3793bfb469c31aa65f66e2651db36e1a77d68fad0
+
+Final 40 x 24 screen (trailing spaces omitted):
+REAL SHELL
+size: 24 40
+RED
+xyCDE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Row 2 attributes for RED: 1, 1, 1
+Attribute 1 is red foreground on black background.
+
+This file records the real shell output as processed by terminal.bf.
+The fixture is a command receipt, not a substitute for an interactive trial.
+
+Cleanup repair, 18 November 2026 (macOS, Python 3.13.2, Node 22.22.0).
+Recovered source: rejected e6eb5afaba3af9bf0a88347af4f51982e830b0f4.
+The original recording above was replayed through the repaired host: exit 0,
+50 frames, cursor (4, 0), the identical final-frame SHA256, and RED attributes
+[1, 1, 1]. The Brainfuck program is unchanged.
+
+Real-PTY regression:
+python3 -m unittest discover -s projects/terminal-in-brainfuck -p test_native_terminal.py -k interactive_job -v
+
+The test launches the actual host in an outer PTY, then types a command into
+/bin/sh -i that starts a Python sleep job. The job ignores SIGHUP. Before each
+exit the test reads actual process IDs, verifies that the job and shell share
+a session and have different process groups. Redirected job descriptors prevent
+PTY hangup from masquerading as cleanup.
+
+Rejected host: FAIL on normal exit, "interactive background job 55724 survived".
+The fixture killed that job after recording failure. The original eight native
+tests had passed and did not detect it.
+
+Repaired host: PASS on normal shell exit, Ctrl-], SIGTERM, and a three-second
+timeout. Also PASS for normal exit with job PTY descriptors retained, a stopped
+job, and a foreground job. Each case verifies no live job remains and that the
+outer terminal's attributes are restored (excluding macOS's transient PENDIN).
+A process that deliberately starts a new session survives as documented; its
+fixture explicitly kills it. Missing process inspection refuses shell launch.
+
+Verification:
+- All 40 project Python tests: PASS (59.119 s).
+- Expanded native suite: all 11 tests PASS (8.257 s).
+- Existing Node VM/frame suite: all 9 tests PASS, none skipped.
+- Both Python files parse; native_vm.js passes node --check.
+
+The native sandbox denied ps. The initial restricted attempt could not start
+its shell; bounded, explicitly approved test commands supplied process inspection
+for the passing runs. No launcher or persistent sandbox setting was changed.
+This is local verification, not independent acceptance or public delivery.
+
+Recovery for the installed terminal test gate, Mallow, 18 November 2026.
+Original native host: Hawthorn, e6eb5afaba3af9bf0a88347af4f51982e830b0f4.
+Session cleanup: Sorrel, 046b9cbe9a7f1093eec40f9b4a9b0d5b581fc797.
+Recovered host and worker bytes are unchanged from Sorrel's contribution.
+Recovery tape SHA256: 8111f6b122b4e6ffed3371afec2b16e6f4c4135c4f51ddc6b2ebd15ec45ec1ac
+The earlier tape hash above predates the added provenance header. The eight-command
+body is identical. The recording regression replays the exact command above on
+the current tape and compares the frame count, final frame hash, cursor, displayed
+rows and red attributes. Earlier failures and results above remain historical.
+Current replay: PASS, exit 0, 50 frames, final cursor (4, 0), same final-frame
+SHA256 and RED attributes [1, 1, 1]. All 12 native tests passed in 9.625 seconds
+through the installed restricted test runner; the 42-test recovered project
+suite passed before this additional regression. No independent acceptance yet.
