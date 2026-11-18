@@ -8,20 +8,20 @@ the frozen device contract and the tape layout.
 Layout (8-bit wrapping cells):
   home cells 0..62   input byte, cursor/window state, scratch
   cell 63            permanent zero guard used by the seek-home walk
-  screen from 64     24 rows x 126 cells.  Each row is a 6-cell header
+  screen from 64     24 rows x 246 cells.  Each row is a 6-cell header
                      (carry counter, carry column, guard=1, carry value,
-                     pad, guard=1) then 40 elements of
-                     (carry counter, carry value, screen byte).
-Screen bytes only ever hold 32..126, so a walk left over data cells
-(stride 3) always stops at the zero guard.
+                     pad, guard=1) then 40 pairs of triples:
+                     (carry counter, carry value, screen byte), alternating
+                     characters and attributes encoded as attribute + 1.
+Both kinds of data cell are nonzero, so the stride-3 walk stops at the guard.
 """
 
 from pathlib import Path
 
-from layout import (COL, COLS, CUR, DROW, DSP_DONE, DSP_F, DSP_F2, DSP_T,
+from layout import (ATTR, FG, COL, COLS, CUR, DROW, DSP_DONE, DSP_F, DSP_F2, DSP_T,
                     DSP_TMP, G, GUARD, H, LT_BIT, LT_EQF, LT_F, LT_F2, LT_Q,
                     LT_TG, LT_TMP, LT_TMP2, LT_W0, LT_W1, M254, M255, PROW,
-                    ROWS, SB, STRIDE, TOP, data, rcnt, rcol, rval)
+                    ROWS, SB, STRIDE, TOP, attribute, data, rcnt, rcol, rval)
 from controls import process_byte
 
 
@@ -209,10 +209,15 @@ class Builder:
         self.if_flag(G[3], lambda: self.add(DROW, -ROWS))
 
     def clear_physical_row(self, r):
+        # Bring the current attribute to this row once; copying it from home
+        # for every cell would inflate both generated source and pointer work.
+        self.copy(ATTR, rval(r), G[0])
         for c in range(COLS):
             cell = data(r, c)
             self.clear(cell)
             self.add(cell, 32)
+            self.copy(rval(r), attribute(r, c), rcnt(r))
+        self.clear(rval(r))
 
     def line_feed(self):
         self.compute_drow()
@@ -246,6 +251,12 @@ class Builder:
                     for c in range(COLS):
                         self.go(data(pr, c))
                         self.emit(".")
+                # Attributes travel in the same displayed order as characters.
+                # Decode only while emitting, then restore the nonzero guard.
+                for pr in order:
+                    for c in range(COLS):
+                        self.go(attribute(pr, c))
+                        self.emit("-.+")
             return body
 
         self.dispatch_small(TOP, [make_body(r) for r in range(ROWS)])
@@ -258,7 +269,12 @@ class Builder:
         self.emit(".")
 
     def write_printable(self):
-        """Store CUR at the physical cursor cell, via the two carries.
+        """Overwrite the character and its ink together on the tape."""
+        self.write_cell(CUR, False)
+        self.write_cell(ATTR, True)
+
+    def write_cell(self, source, is_attribute):
+        """Store one of the cell's two planes via the existing carries.
 
         The carries are raw relative snippets: the row carry walks the
         (count, column, value) triple down the row headers, the element
@@ -268,7 +284,15 @@ class Builder:
         """
         self.copy(PROW, rcnt(0), G[0])
         self.copy(COL, rcol(0), G[0])
-        self.copy(CUR, rval(0), G[0])
+        self.copy(COL, G[0], G[1])
+        self.go(G[0])
+        self.emit('[')
+        self.add(rcol(0), 1)
+        self.add(G[0], -1)
+        self.emit(']')
+        if is_attribute:
+            self.add(rcol(0), 1)
+        self.copy(source, rval(0), G[0])
         self.go(rcnt(0))
         mv = "[-" + ">" * STRIDE + "+" + "<" * STRIDE + "]"
         row_carry = ("[" + "-" + mv + ">" + mv + "<" + ">>>" + mv
@@ -288,6 +312,8 @@ class Builder:
 
 def build():
     b = Builder()
+    b.setv(FG, 7)
+    b.setv(ATTR, 8)
     # frame markers (cells start at 0; wrapping decrement gives 255/254)
     b.go(M255)
     b.emit("-")
@@ -301,7 +327,7 @@ def build():
             b.emit("+")
         elif off >= H and (off - H) % 3 == 2:
             b.go(idx)
-            b.emit("+" * 32)
+            b.emit("+" * (32 if (off - H) % 6 == 2 else 8))
     b.emit_frame()
     b.go(CUR)
     b.emit(",[")

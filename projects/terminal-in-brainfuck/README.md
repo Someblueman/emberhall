@@ -2,8 +2,9 @@
 
 A terminal screen, in Brainfuck. Forty columns, twenty-four rows, eight
 commands. The program stores the letters, cursor and scroll window on its tape
-and emits complete screen pictures. The browser runs the instructions and draws
-those pictures; it never places a letter, wraps a line or performs a scroll.
+and emits complete screen pictures with each cell’s ink and paper colour.
+The browser runs the instructions and draws those pictures; it never places
+a letter, wraps a line or performs a scroll.
 
 This began as the first slice of Emberhall's selected great work
 `great-after-dance-20261118`, for play. There is no shell behind it. The pleasure
@@ -41,7 +42,12 @@ message together. [Read the original stream](bell-dive.js).
    a new frame is being emitted; the partial-frame count says so.
 5. Turn off **Follow head**, set **First tape cell** to 64 and leave that field.
    This shows the first physical row's helper cells and character cells. At 72
-   is its first character, at 75 its second, and so on. Cell values 32 are spaces.
+   is its first character, at 75 its encoded colour, and at 78 its second
+   character. Character value 32 is a space; colour value 8 is the default.
+6. Try **Coloured ink**, **Erase with coloured paper** and **Scroll coloured
+   lines**. Change a `31` to `36` in the editor to replace red with cyan.
+   Each letter keeps the colour it had when written; erasure uses the current
+   paper colour, and scrolling carries both planes together.
 
 Press **Start a blank screen for typing** to begin with an empty queue. The
 live field appends ASCII, including paste, after any queued bytes. Enter sends a line feed
@@ -53,7 +59,7 @@ rejected with a visible message before replacing the loaded stream. There is no
 silent low-byte conversion. For example, `A\xFFB` displays AB, whereas
 `A\x00B` halts after A and leaves B unread.
 
-## Frozen device contract — admission slice
+## Current device contract
 
 | Boundary | Exact behavior |
 | --- | --- |
@@ -63,31 +69,44 @@ silent low-byte conversion. For example, `A\xFFB` displays AB, whereas
 | Line feed (10) | Move down one row, preserving column; scroll at bottom |
 | Wrapping | Immediate after writing column 39: column becomes zero, then line feed |
 | Scrolling | Discard top displayed row, shift other rows up, blank bottom row; column is preserved by LF |
-| Unsupported bytes | 1–9, 11–12, 14–31, 127–255 are ignored, but each produces a frame |
+| Controls | Backspace, tab, CSI A/B/C/D/H/f/J/K and the bounded SGR subset below; other bytes follow the pinned recovery rules |
 | End | Byte 0 halts, with no frame for that sentinel; later queued bytes are not read |
 | Input starvation | Wait at the comma instruction without modifying the tape or instruction pointer; resume when bytes arrive |
 | Explicit EOF | **End input** drains queued bytes, then supplies 0 at the next comma; it cannot be undone without reset |
-| Memory | Exactly 3,100 initially zero cells in the host; unsigned 8-bit wrap on +/−; pointer may not leave 0…3,099 |
+| Memory | Exactly 6,000 initially zero cells in the host; unsigned 8-bit wrap on +/−; pointer may not leave 0…5,999 |
 | Output | Initial blank frame, then one complete frame after every nonzero input byte, including unsupported bytes |
 
-Each frame is exactly **964 bytes**: `FF`, 960 ASCII screen bytes in displayed
-row-major order, one zero-based row byte, one zero-based column byte, `FE`.
-The cursor ranges are row 0–23 and column 0–39. Neither screen bytes nor cursor
-bytes can equal a framing marker. The host rejects malformed frames and displays
-only complete frames. It does not infer changes from input or tape contents.
+Each frame is exactly **1,924 bytes**: `FF`, 960 ASCII characters, 960
+attributes in the same displayed row-major order, a zero-based row byte, a
+zero-based column byte, and `FE`. Attribute = foreground + 8 × background +
+64 × bright. Attribute zero is valid black-on-black, not a delimiter. The host
+validates every payload range and only displays a complete frame.
 
-The backend program also runs on an ordinary eight-command interpreter with at
-least 3,100 cells and EOF=0. Brainfuck implementations with other EOF, cell-size
-or tape-bound conventions are not interchangeable. A host may pause between any
-two instructions, but must not invent EOF merely because input has not arrived.
+The backend also runs on an ordinary eight-command interpreter with at least
+6,000 wrapping byte cells and EOF=0. Other EOF, cell-size or tape-bound
+conventions are not interchangeable. Input starvation never invents EOF.
 
-The table above records the admitted first-stage contract. The current source
-extends its control-byte rules with the [pinned cursor and erasure contract](CONTROL_CONTRACT.md):
-backspace, tab, CSI A/B/C/D/H/f/J/K, saturated parameters and explicit rejection
-recovery. The two new editable presets demonstrate movement without erasure and
-line-tail erasure. Colour, attributes, Unicode terminal behavior, VT100
-compatibility, a shell, network terminals, executing programs and arbitrary
-user-supplied Brainfuck remain outside this checkpoint.
+The [cursor and erasure contract](CONTROL_CONTRACT.md) defines backspace, tab,
+CSI A/B/C/D/H/f/J/K, saturated parameters and rejection recovery. The independently
+frozen [colour contract](COLOUR_CONTRACT.md) extends it with SGR `m`: 0 resets,
+1/22 enable/disable bright foreground, 30–37/39 choose/reset foreground, and
+40–47/49 choose/reset background. At most two parameters apply left to right;
+an unsupported parameter rejects the whole SGR. Erased cells and newly blank
+scroll rows receive the current attribute. Cursor moves leave old ink alone.
+
+The renderer uses these fixed palettes in black, red, green, yellow, blue,
+magenta, cyan, white order; backgrounds always use the normal row. Brightness
+changes colour, not font weight. Some deliberately selected pairs, including
+black-on-black, hide their letters just as the emitted attributes request.
+
+| Intensity | Fixed RGB colours in index order |
+| --- | --- |
+| Normal | `#111820 #cf5966 #62bb87 #d2b75b #668bd7 #bb76cc #54bac7 #dce4ed` |
+| Bright | `#738090 #ff8991 #99efb0 #ffe18a #9ebdff #e7a6f5 #8ceaf3 #ffffff` |
+
+Unicode terminal behaviour, full ANSI/VT100 compatibility, a shell, network
+terminals, executing programs and arbitrary user-supplied Brainfuck are outside
+this device.
 
 ## Why the screen belongs to the tape
 
@@ -100,15 +119,16 @@ python3 projects/terminal-in-brainfuck/build_terminal.py
 ```
 
 It writes `terminal.bf` and `program.js` beside itself. The latter embeds the
-identical program for local browser loading. The generated program is 916,220
+identical program for local browser loading. The generated program is 3,810,928
 commands; tests require byte-for-byte reproducibility.
 
 The screen's physical rows form a ring: a scroll rotates the top-row index and
 blanks the row that re-enters at the bottom. A character reaches its destination
-through countdowns carried along the row headers and character triples. A
-stride-three walk back across always-nonzero screen bytes reaches a permanent
-zero guard, returning the generator to a known address. The generator, rather
-than the browser, emits rows in their displayed order.
+through countdowns carried along the row headers and alternating character and
+attribute triples. A stride-three walk back across always-nonzero character and
+encoded attribute bytes reaches a permanent zero guard, returning the generator
+to a known address. The generator, rather than the browser, emits rows in their
+displayed order.
 
 | Tape cells | Meaning |
 | --- | --- |
@@ -119,16 +139,22 @@ than the browser, emits rows in their displayed order.
 | 7–37 | Macro scratch space |
 | 38–41 | Parser state, two parameters, separator flag |
 | 42–55 | Transient control workspace |
-| 56–62 | Unused |
+| 56–59 | Foreground, background, bright bit, current encoded attribute |
+| 60–62 | SGR validation workspace |
 | 63 | Permanent zero guard |
-| 64–3087 | 24 physical rows, each 126 cells |
-| 3088–3099 | Unused |
+| 64–5967 | 24 physical rows, each 246 cells |
+| 5968–5999 | Unused |
 
-Within a row: six header cells, then forty `(count, carried byte, character)`
-triples. Character `(physical row r, column c)` is at
-`64 + 126*r + 8 + 3*c`. Header offsets 2 and 5 are nonzero guards; the remaining
-header cells carry the destination and byte. Scratch and carried values are
-transient: pause at a frame boundary to inspect completed terminal state.
+Within a row: six header cells, then forty pairs of triples. Each triple is
+`(count, carried byte, stored byte)`. The first holds a character; the second
+holds **attribute + 1**, so even black-on-black stays nonzero during the
+stride-three walk home. Character `(physical row r, column c)` is at
+`64 + 246*r + 8 + 6*c`; its encoded attribute is three cells later. Header
+offsets 2 and 5 are nonzero guards. Output temporarily subtracts one from an
+attribute, emits it, then restores it; a frame boundary has all values restored.
+Scratch and carried values are transient: pause at a frame boundary to inspect
+completed terminal state. Both writes and row clearing copy current tape colour;
+the browser never derives an attribute from the input.
 
 `vm.js` is a generic eight-command interpreter with no screen knowledge. Its
 fast mode combines identical pointer/arithmetic commands; literal stepping
@@ -148,7 +174,8 @@ From the repository root:
 
 ```sh
 python3 -m unittest discover -s projects/terminal-in-brainfuck -v
-node --test projects/terminal-in-brainfuck/test_vm.js
+node --test projects/terminal-in-brainfuck/test_vm.js projects/terminal-in-brainfuck/test_frame.js
+python3 projects/terminal-in-brainfuck/test_colour_cases.py --program projects/terminal-in-brainfuck/terminal.bf --tape-cells 6000
 ```
 
 - `model.py` stores a plain displayed grid and physically shifts rows. It is
@@ -161,7 +188,8 @@ node --test projects/terminal-in-brainfuck/test_vm.js
   seeded random stream. It also checks hand-derived final rows and cursor values.
 - `test_browser_vm.py` runs the real browser interpreter in Node, feeding bytes
   only at input waits and mixing counted execution with literal steps. Every
-  complete frame and the four parser cells are compared to the independent model.
+  complete frame, physical character/attribute grid, current colour and four
+  parser cells are compared to the independent model.
   Seven control streams run at every possible split, including cancellation,
   malformed parameters and NUL during a sequence. Five seeded mixed streams run in
   irregular chunks. Emitted cursor bytes are
@@ -210,7 +238,8 @@ Stage two starts with the pinned [cursor and erasure contract](CONTROL_CONTRACT.
 The cursor and erase slice passed its [six phone and desktop trials](BUILDING.md)
 and its checks against the reference model. Try **Move without erasing** or
 **Erase a line tail**, then change the bytes and step the result. Colour and
-cell attributes are the next part of this milestone.
+cell attributes now extend that same machine. See [the colour build](BUILDING.md)
+for its checks and observed phone/desktop limits.
 
 ## Precedents
 
