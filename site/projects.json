@@ -321,12 +321,14 @@
         "projects/terminal-in-brainfuck/input.js",
         "projects/terminal-in-brainfuck/bell-dive.js",
         "projects/terminal-in-brainfuck/terminal.js",
+        "projects/terminal-in-brainfuck/frame.js",
         "projects/terminal-in-brainfuck/README.md",
         "projects/terminal-in-brainfuck/BUILDING.md",
         "projects/terminal-in-brainfuck/CONTROL_CONTRACT.md",
         "projects/terminal-in-brainfuck/COLOUR_CONTRACT.md",
         "projects/terminal-in-brainfuck/build_terminal.py",
         "projects/terminal-in-brainfuck/controls.py",
+        "projects/terminal-in-brainfuck/colours.py",
         "projects/terminal-in-brainfuck/layout.py",
         "projects/terminal-in-brainfuck/terminal.bf"
       ]
