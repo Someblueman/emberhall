@@ -87,6 +87,49 @@ assert.equal(get('gallery-picture-title').textContent,'<img src=x onerror=evil()
 assert.equal(all(document.body).filter(n=>n.tag==='img').length,1);
 ''')
 
+    def test_browse_pictures_updates_credit_link_and_resets_zoom(self):
+        self.run_renderer(r'''
+show();const opener=openPicture(),dialog=get('gallery-picture');
+const position=get('gallery-picture-position'),next=get('gallery-picture-next');
+assert.equal(position.attrs.role,'status');assert.match(position.textContent,/Picture 1 of 12/);
+get('gallery-picture-size').listeners.click();
+const scroll=get('gallery-picture-scroll');scroll.scrollLeft=500;scroll.scrollTop=200;
+next.focus();next.listeners.click();
+assert.equal(document.activeElement,next);assert.equal(get('gallery-picture'),dialog);
+assert.equal(get('gallery-picture-title').textContent,'Lantern Loop');
+assert.match(position.textContent,/Picture 2 of 12 · Lantern Loop/);
+assert.match(text(dialog),/From Lantern Loop’s own final drawing/);
+assert.equal(all(dialog).find(n=>n.tag==='a').href,'projects/lantern-loop/index.html');
+assert.match(all(dialog).find(n=>n.tag==='a').textContent,/Play Lantern Loop/);
+assert.match(all(dialog).find(n=>n.tag==='img').src,/lantern-loop/);
+assert.equal(get('gallery-picture-size').attrs['aria-pressed'],'false');
+assert.doesNotMatch(scroll.className,/original-size/);
+assert.equal(scroll.scrollLeft,0);assert.equal(scroll.scrollTop,0);
+assert.match(scroll.attrs['aria-label'],/Lantern Loop picture/);
+get('gallery-picture-previous').listeners.click();
+assert.equal(get('gallery-picture-title').textContent,'Tessera Loom');
+get('gallery-picture-previous').listeners.click();
+assert.match(position.textContent,/Picture 12 of 12 · The Bench Was for Two/);
+next.listeners.click();assert.match(position.textContent,/Picture 1 of 12/);
+show();get('gallery-picture').close();assert.equal(document.activeElement,get(opener.id));
+''')
+
+    def test_browsing_rechecks_completed_manifest_and_closes_revoked_picture(self):
+        self.run_renderer(r'''
+show();openPicture();
+frame.shelf.projects.find(p=>p.idea==='lantern-loop').status='active';
+catalog=catalog.map(p=>p.id==='night-ferry'?{...p,files:[]}:p);
+catalog=catalog.map(p=>p.id==='signal-garden'?{...p,href:'javascript:evil()'}:p);
+renderCollection();assert.match(get('gallery-picture-position').textContent,/1 of 9/);
+get('gallery-picture-next').listeners.click();
+assert.equal(get('gallery-picture-title').textContent,'Specimen Cards');
+catalog=catalog.filter(p=>p.id==='specimen-cards');renderCollection();
+assert.match(get('gallery-picture-position').textContent,/Picture 1 of 1/);
+assert(get('gallery-picture-next').disabled);assert(get('gallery-picture-previous').disabled);
+catalog[0].files=[];renderCollection();assert.equal(creationPicture,null);
+assert.equal(get('gallery-picture'),null);
+''')
+
     def test_room_and_full_gallery_buttons_have_distinct_focus_targets(self):
         self.run_renderer(r'''
 show();assert.match(pictureButton().id,/room-tessera-loom$/);
