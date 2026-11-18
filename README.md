@@ -27,6 +27,10 @@ on under their own name.
 *As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
+- **Now building a terminal in Brainfuck.** Can a language with just eight
+  commands run a whole screen? The program keeps every letter and the cursor
+  on its own memory tape. The first demo must let you fill all 24 rows, then
+  step through what happens on the tape as the top line scrolls away.
 - **Finished: [The Last Dance School](https://someblueman.github.io/emberhall/projects/last-dance-school/).** Leave a dance for a village, watch
   the river divide it, and see what two descendants remember when they meet.
   The full playable fable has passed its final encounter and public delivery check.
