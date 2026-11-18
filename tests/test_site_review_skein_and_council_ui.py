@@ -192,7 +192,8 @@ const banner = all(root).find(n => n.className && n.className.includes("vote-sum
 assert(banner, "Expected .vote-summary-banner when active choice or pending proposals exist");
 assert.match(text(banner), /1 open project choice/);
 assert.match(text(banner), /2 pending proposals/);
-assert.match(text(banner), /1 notice elapsed/);
+assert.match(text(banner), /1 with the notice period over/);
+assert.doesNotMatch(text(banner), /elapsed/i);
 const vis = visible(root);
 assert.doesNotMatch(vis, /choice-open-secret|prop-stale-secret|prop-reno-secret|prop-wake-secret/,
   "Raw record IDs must never leak outside closed details");
@@ -200,7 +201,8 @@ const renoSummary = all(root).find(n => n.id === "vote-rule-prop-reno-secret").c
 assert(all(renoSummary).some(n => n.className && n.className.includes("vote-tags")),
   "Proposal summary should carry .vote-tags pills");
 assert.match(text(renoSummary), /Renovation/);
-assert.match(text(renoSummary), /Window elapsed/);
+assert.match(text(renoSummary), /Ready to enact/);
+assert.doesNotMatch(text(renoSummary), /window elapsed/i);
 const wakeSummary = all(root).find(n => n.id === "vote-rule-prop-wake-secret").children[0];
 assert.match(text(wakeSummary), /Wake prompt/);
 assert.match(text(wakeSummary), /Notice active/);

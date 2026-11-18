@@ -30,6 +30,9 @@ HEARTH_VOICES = 12
 # Residents' words stay private unless the Steward installs this scope. Only
 # speech recorded after that is published; nothing said before it ever is.
 PUBLIC_HEARTH = "upgrade-20261115-public-hearth"
+# After this owner migration the shelf has a third slot, "house", beside "great" and "small". The page
+# shows the empty slot only once it is installed, so an older record reads exactly as it did.
+HOUSE_WORK = "upgrade-20261118-house-work"
 _LOCAL_PATH = re.compile(r"(?:/Users|/private|/var|/tmp|/home|/opt|/Volumes)/[^\s\"',;)\]]*")
 _ADDRESS = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _RECEIPT = re.compile(r"\s*(?:house-[a-z0-9-]+-v[0-9]+\b|[{\[])")
@@ -86,6 +89,38 @@ def _brief_view(brief: dict) -> dict:
     if "asked" in brief:
         item["asked"] = [{k: label(entry[k], 600) for k in ("who", "where", "said")} for entry in brief["asked"]]
     return item
+
+
+def installed_by_upgrade(state: dict, proposal: dict, since: object = None) -> dict | None:
+    """The Steward's latest upgrade, if it already installed every file a pending renovation asks for.
+
+    A page-only judgement: the reducer is untouched, so replay is unchanged. Only the most recent owner
+    upgrade counts (its manifest is the house as installed now), and only one recorded after the proposal.
+    """
+    files = proposal.get("renovation", {}).get("files") if isinstance(proposal.get("renovation"), dict) else None
+    if not isinstance(files, dict) or not files:
+        return None
+    since = since if isinstance(since, (int, float)) else proposal.get("proposed_at", 0)
+    latest = None
+    for scope, entry in state.get("maintenance", {}).get("migrations", {}).items():
+        if not isinstance(entry, dict) or not isinstance(entry.get("protected_files"), dict):
+            continue
+        sequence = entry.get("sequence")
+        if not isinstance(sequence, int) or isinstance(sequence, bool):
+            continue
+        if latest is None or sequence > latest[1]["sequence"]:
+            latest = (scope, entry)
+    if latest is None:
+        return None
+    scope, entry = latest
+    at = entry.get("at")
+    if not isinstance(at, (int, float)) or at <= (since or 0):
+        return None
+    installed = entry["protected_files"]
+    if all(isinstance(path, str) and isinstance(digest, str) and installed.get(path) == digest
+           for path, digest in files.items()):
+        return {"how": "delivered", "by": label(entry.get("scope", scope), 200), "via": "upgrade", "at": at}
+    return None
 
 
 def _closure(state: dict, key: str, proposal: dict, closed: str) -> dict:
@@ -209,6 +244,8 @@ def shelf_view(state: dict) -> dict:
             "ideas": ideas, "projects": projects, "explorer": {
                 "resident": expedition["owner"], "agent": expedition["agent"],
                 "until": expedition["until"]} if expedition else None}
+    if HOUSE_WORK in state.get("maintenance", {}).get("migrations", {}):
+        view["house_work"] = True
     if policy == shelf_gate.GREAT_POLICY_ID:
         view["great_wanted"] = shelf_model.great_wanted(shelf_model.empty() | shelf)
     if shelf.get("needs"):
@@ -262,11 +299,16 @@ def voting_view(state: dict, identities: dict, event_times: dict, origins: dict 
         trial = proposal.get("trial")
         rule = state.get("council", {}).get("rules", {}).get(key, {})
         closed = lapsed(state, key, proposal) if proposal["status"] == "pending" else None
+        proposed_at = proposal.get("proposed_at", origins.get(key, {}).get("at"))
+        # A pending renovation whose every file the Steward's own upgrade has since installed asks nothing more.
+        delivered = (installed_by_upgrade(state, proposal, proposed_at)
+                     if closed is None and proposal["status"] == "pending" and "renovation" in proposal else None)
         proposals.append({"id": key, "title": label(proposal.get("title", key), 200),
             "mode": proposal.get("mode", "legacy"), "author": person(proposal.get("author", origins.get(key, {}).get("actor", "unrecorded"))),
             "status": proposal["status"], "rule_status": rule.get("status"),
-            "stale": closed is not None,
-            **({"closure": _closure(state, key, proposal, closed)} if closed is not None else {}),
+            "stale": closed is not None or delivered is not None,
+            **({"closure": _closure(state, key, proposal, closed)} if closed is not None else
+               {"closure": delivered} if delivered is not None else {}),
             "reason": label(proposal.get("reason", ""), 20000),
             "text": proposal["text"][:100000],
             "proposed_at": proposal.get("proposed_at", origins.get(key, {}).get("at")),

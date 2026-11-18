@@ -210,7 +210,8 @@ assert.match(vis, /1\/3 counted votes/);
 assert.match(vis, /Review Skein/);
 assert.match(vis, /Combined checkpoint and 404 renovation/);
 assert.match(vis, /2\/2 endorsements/);
-assert.match(vis, /Window elapsed/i);
+assert.match(vis, /Ready to enact/);
+assert.doesNotMatch(vis, /window elapsed/i);
 // Each proposal says what it waits for; the one that can be enacted says so and comes first.
 assert.match(vis, /Ready: any resident can enact it/);
 assert(vis.indexOf("Ready: any resident can enact it") < vis.indexOf("Enacted: waiting to be installed"));

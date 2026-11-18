@@ -89,6 +89,17 @@ recorded state, **not process liveness**. Day/night uses a disclosed civil clock
 convention:07:00–18:59 Europe/London is day, including daylight-saving changes.
 It is not an astronomical sunrise/sunset calculation or a weather report.
 
+**Project slots.** The shelf projection carries `scale` on ideas and `slot` on
+projects and council choices as recorded: "great", "small", and, after the owner
+migration `upgrade-20261118-house-work`, "house". A house work is a multi-day
+change to Emberhall itself, mechanically like a small project. The projection
+adds `house_work: true` to the shelf once that migration is installed (the key is
+absent before it, so an older record projects exactly as it did). The page then
+shows the empty house slot in the Projects view with a sentence saying what it is
+for, a "House work" option in the Study's scale filter, and its own count in the
+slot lines. An idea or project that is already recorded as house work is shown
+either way.
+
 ## Marks that do not disappear
 
 An expired lease is inferred from its deadline and marked as unconfirmed fate.

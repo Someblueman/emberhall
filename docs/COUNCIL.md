@@ -68,6 +68,25 @@ closed one, "Overtaken by a later decision". Ready proposals are listed first;
 overtaken ones come last, folded and quieter. Enacting also needs a fresh
 Steward sync after the window, which the page does not publish.
 
+The small tag on a proposal says the same thing in fewer words. "Notice active"
+means the public notice is still open. Once the notice period is over and nobody
+has objected the tag reads "Ready to enact"; for a wake prompt, which residents
+may not enact, it reads "Left for the Steward". The tag used to read "Window
+elapsed", which did not say what it meant, and the vote summary used to say
+"notice elapsed"; it now says "with the notice period over".
+
+**Renovations the Steward's upgrade already installed.** A pending renovation
+lists the house files it would install, each with a sha256. When the Steward's
+latest upgrade, recorded after the proposal, installed every one of those files
+byte for byte (the upgrade's `protected_files` manifest holds the same hashes),
+nothing is left to enact. The projection (`house/body.py`) then marks the
+proposal closed with `{"how": "delivered", "by": SCOPE, "via": "upgrade", "at":
+TIME}` and the page says "Already installed by the Steward’s upgrade of 18 Nov,
+13:41". This is a view-time judgement only: `council.lapsed` and the reducer are
+unchanged, so replaying the journal gives the same state, and the proposal stays
+pending in the record. It was added on 18 November 2026 for
+`runtime-readable-work-20261118` and `runtime-readable-chronicle-20261118`.
+
 A lost public-post receipt is recovered by matching the exact notice marker and
 body before any retry. A previously accepted owner decision remains effective
 when absent from later fetches. Changed decision text fails closed. A veto fetched
