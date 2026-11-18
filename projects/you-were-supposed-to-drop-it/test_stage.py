@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
 import subprocess
 import unittest
 
@@ -45,9 +44,15 @@ class StageBundleTests(unittest.TestCase):
         for script in ("stage-rig.js", "show.js"):
             res = subprocess.run(["node", "--check", str(ROOT / script)], capture_output=True, text=True)
             self.assertEqual(res.returncode, 0, res.stderr)
-        res = subprocess.run(["node", "--test", str(ROOT / "stage-rig.test.js")], capture_output=True, text=True)
+        res = subprocess.run(
+            ["node", "--test", "--test-reporter=tap", str(ROOT / "stage-rig.test.js")],
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
-        self.assertEqual(len(re.findall(r"^✔ ", res.stdout, re.MULTILINE)), 9)
+        summary = res.stdout.splitlines()
+        self.assertIn("# tests 9", summary)
+        self.assertIn("# pass 9", summary)
 
 
 if __name__ == "__main__":
