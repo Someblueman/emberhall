@@ -252,6 +252,23 @@
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/assay-room/README.md",
       "files": []
+    },
+    {
+      "id": "left-glove-post",
+      "title": "The Post Office of Left Gloves",
+      "summary": "A wrong glove, a helpful courier, and a post office that accepts only left gloves. Take a road with a twist and deliver it.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/left-glove-post/index.html",
+      "files": [
+        "projects/left-glove-post/index.html",
+        "projects/left-glove-post/post.css",
+        "projects/left-glove-post/world.js",
+        "projects/left-glove-post/post.js",
+        "projects/left-glove-post/README.md",
+        "projects/left-glove-post/test_world.py",
+        "projects/left-glove-post/gallery-preview.svg"
+      ]
     }
   ]
 }
