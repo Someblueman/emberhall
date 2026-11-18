@@ -1,0 +1,33 @@
+# Candidate notation, fully defined in SEMANTICS.md; no interpreter exists.
+# The caller supplies these immutable kept values at unique registration.
+job ferry(order: Kept<Order>, route: Kept<Text>, seats: Kept<Nat>) {
+    start {
+        fleeting bulletin = advisory_board(route)
+        show(bulletin)                    # repeatable local display only
+        book sale = ferry_sale(order, route, seats)
+        # book commits intent before one invocation; all outcomes enter settle.
+        enter settle(sale)
+    }
+
+    recover {
+        # No bulletin, its aliases, or start's lexical environment exist here.
+        # A ready record re-enters start; an intent is inspected, never resent.
+        enter settle(restore sale)
+    }
+
+    settle(sale: Outcome<Ticket>) {
+        done(ticket)       => finish show(ticket)
+        not_done(closed)   => finish show("No ticket was sold.")
+        unknown(pending)   => wait pending at settle
+    }
+}
+
+# Examples rejected by the core, not additional executable statements:
+# recover { show(bulletin) }              # forgotten identifier
+# start { fleeting x = bulletin; ... }
+# recover { show(x) }                     # alias is also forgotten
+# keep callback = fun() { bulletin }     # functions/closures unsupported
+# unknown(p) => book retry = ferry_sale(order, route, seats)
+#                                           # no booking permission while pending
+# unknown(p) => finish show("Ticket bought") # no successful finish from unknown
+# No retry is offered even after not_done: this finite example cancels instead.
