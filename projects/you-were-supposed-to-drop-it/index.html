@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>You Were Supposed to Drop It · Two-Stage Hat Act</title>
+  <link rel="stylesheet" href="stage.css">
+  <script src="stage-rig.js" defer></script>
+  <script src="show.js" defer></script>
+</head>
+<body>
+  <main class="playbill">
+    <header class="masthead">
+      <div class="bill-meta">
+        <span class="ticket-stamp">Double Bill</span>
+        <span class="act-tag">Four Puppets · Two Pits · One Bowler</span>
+      </div>
+      <h1>You Were Supposed to Drop It</h1>
+      <p class="subtitle">
+        Seat up to four cut-paper players on either stage. The rival troupe copies every wire and gap with three—bring out the fourth and try to put a bowler over one drummer’s eyes.
+      </p>
+    </header>
+
+    <section class="director-bar" aria-label="Stage direction controls">
+      <div class="lead-toggle" role="group" aria-label="Choose which troupe leads">
+        <span class="group-label">Leading stage</span>
+        <button type="button" id="lead-rook" class="pill-btn active" aria-pressed="true">Stage I leads</button>
+        <button type="button" id="lead-shrikhande" class="pill-btn" aria-pressed="false">Stage II leads</button>
+      </div>
+      <div class="mode-actions">
+        <button type="button" id="btn-start-play" class="primary-btn">Put hat in play</button>
+        <button type="button" id="btn-new-take" class="pill-btn" hidden>New take (keep marks)</button>
+        <button type="button" id="btn-reblock" class="pill-btn" hidden>Re-block cast</button>
+      </div>
+    </section>
+
+    <section class="stages-grid" aria-label="Two cut-paper stages">
+      <article class="stage-card is-leading" id="card-rook" data-rig="rook">
+        <header class="stage-head">
+          <h2>Stage I <span class="troupe-role" id="role-rook">Leading troupe</span></h2>
+          <span class="stage-pill" id="status-rook">Blocking cast</span>
+        </header>
+        <div class="stage-frame" id="frame-rook">
+          <svg id="svg-rook" class="stage-svg" viewBox="0 0 360 340" role="img" aria-labelledby="title-rook desc-rook">
+            <title id="title-rook">Stage I cut-paper proscenium</title>
+            <desc id="desc-rook">A cut-paper stage with sixteen floor marks, overhead wire rigging, cast puppets, and a pit drummer below the footlights.</desc>
+            <defs>
+              <linearGradient id="velvet-l" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5d1413"/>
+                <stop offset="70%" stop-color="#8b2520"/>
+                <stop offset="100%" stop-color="#6b1815"/>
+              </linearGradient>
+              <linearGradient id="backdrop-paper" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#efe3c8"/>
+                <stop offset="100%" stop-color="#e3d1ad"/>
+              </linearGradient>
+              <filter id="paper-shadow" x="-15%" y="-15%" width="130%" height="135%">
+                <feDropShadow dx="1.5" dy="2.5" stdDeviation="1.2" flood-color="#2c1d14" flood-opacity="0.28"/>
+              </filter>
+            </defs>
+            <rect width="360" height="340" rx="6" fill="#231915"/>
+            <rect x="20" y="18" width="320" height="232" fill="url(#backdrop-paper)"/>
+            <!-- Paper scenery flats -->
+            <path d="M20 144 L76 102 L134 138 L194 92 L266 134 L340 106 L340 250 L20 250 Z" fill="#d8c39b" opacity="0.65"/>
+            <polygon points="34,152 326,152 344,244 16,244" fill="#c79e65" stroke="#5b3f24" stroke-width="1.5"/>
+            <polygon points="42,157 318,157 332,238 28,238" fill="#d7b37c"/>
+            <!-- Floor marks & unlit faint pin sockets -->
+            <g id="marks-layer-rook"></g>
+            <!-- Single lit overhead wire layer -->
+            <g id="wire-layer-rook"></g>
+            <!-- Puppets layer -->
+            <g id="puppets-layer-rook" filter="url(#paper-shadow)"></g>
+            <!-- Footlights apron -->
+            <rect x="14" y="242" width="332" height="14" rx="3" fill="#472d1c"/>
+            <g fill="#f5cc74" stroke="#6f4c1b" stroke-width="1">
+              <circle cx="64" cy="249" r="3.5"/><circle cx="122" cy="249" r="3.5"/>
+              <circle cx="180" cy="249" r="3.5"/><circle cx="238" cy="249" r="3.5"/>
+              <circle cx="296" cy="249" r="3.5"/>
+            </g>
+            <!-- Orchestra pit & drummer -->
+            <rect x="20" y="256" width="320" height="72" rx="4" fill="#1b1411"/>
+            <g id="drummer-layer-rook"></g>
+            <!-- Proscenium velvet curtains -->
+            <path d="M0 0 H46 Q34 115 26 244 H0 Z" fill="url(#velvet-l)"/>
+            <path d="M360 0 H314 Q326 115 334 244 H360 Z" fill="url(#velvet-l)"/>
+            <path d="M0 0 H360 V28 Q315 44 270 28 Q225 46 180 28 Q135 46 90 28 Q45 44 0 28 Z" fill="#771c19" stroke="#3c0d0c" stroke-width="1.5"/>
+            <path d="M0 28 Q45 44 90 28 Q135 46 180 28 Q225 46 270 28 Q315 44 360 28" fill="none" stroke="#d9a54a" stroke-width="2"/>
+            <!-- Bowler hat layer (on top of puppets or drummer) -->
+            <g id="hat-layer-rook" filter="url(#paper-shadow)"></g>
+          </svg>
+          <div class="mark-buttons" id="buttons-rook" aria-label="Stage I floor marks"></div>
+        </div>
+        <p class="stage-caption" id="caption-rook">Three players matched. Seat Dot (D) or move any mark.</p>
+      </article>
+
+      <article class="stage-card" id="card-shrikhande" data-rig="shrikhande">
+        <header class="stage-head">
+          <h2>Stage II <span class="troupe-role" id="role-shrikhande">Rival troupe</span></h2>
+          <span class="stage-pill" id="status-shrikhande">Matching</span>
+        </header>
+        <div class="stage-frame" id="frame-shrikhande">
+          <svg id="svg-shrikhande" class="stage-svg" viewBox="0 0 360 340" role="img" aria-labelledby="title-shrikhande desc-shrikhande">
+            <title id="title-shrikhande">Stage II cut-paper proscenium</title>
+            <desc id="desc-shrikhande">The rival cut-paper stage with sixteen floor marks, overhead wire rigging, cast puppets, and a pit drummer below the footlights.</desc>
+            <defs>
+              <linearGradient id="velvet-r" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5d1413"/>
+                <stop offset="70%" stop-color="#8b2520"/>
+                <stop offset="100%" stop-color="#6b1815"/>
+              </linearGradient>
+              <linearGradient id="backdrop-paper-r" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#efe3c8"/>
+                <stop offset="100%" stop-color="#e3d1ad"/>
+              </linearGradient>
+              <filter id="paper-shadow-r" x="-15%" y="-15%" width="130%" height="135%">
+                <feDropShadow dx="1.5" dy="2.5" stdDeviation="1.2" flood-color="#2c1d14" flood-opacity="0.28"/>
+              </filter>
+            </defs>
+            <rect width="360" height="340" rx="6" fill="#231915"/>
+            <rect x="20" y="18" width="320" height="232" fill="url(#backdrop-paper-r)"/>
+            <path d="M20 134 L92 98 L158 132 L222 88 L288 128 L340 110 L340 250 L20 250 Z" fill="#d8c39b" opacity="0.65"/>
+            <polygon points="34,152 326,152 344,244 16,244" fill="#c79e65" stroke="#5b3f24" stroke-width="1.5"/>
+            <polygon points="42,157 318,157 332,238 28,238" fill="#d7b37c"/>
+            <g id="marks-layer-shrikhande"></g>
+            <g id="wire-layer-shrikhande"></g>
+            <g id="puppets-layer-shrikhande" filter="url(#paper-shadow-r)"></g>
+            <rect x="14" y="242" width="332" height="14" rx="3" fill="#472d1c"/>
+            <g fill="#f5cc74" stroke="#6f4c1b" stroke-width="1">
+              <circle cx="64" cy="249" r="3.5"/><circle cx="122" cy="249" r="3.5"/>
+              <circle cx="180" cy="249" r="3.5"/><circle cx="238" cy="249" r="3.5"/>
+              <circle cx="296" cy="249" r="3.5"/>
+            </g>
+            <rect x="20" y="256" width="320" height="72" rx="4" fill="#1b1411"/>
+            <g id="drummer-layer-shrikhande"></g>
+            <path d="M0 0 H46 Q34 115 26 244 H0 Z" fill="url(#velvet-r)"/>
+            <path d="M360 0 H314 Q326 115 334 244 H360 Z" fill="url(#velvet-r)"/>
+            <path d="M0 0 H360 V28 Q315 44 270 28 Q225 46 180 28 Q135 46 90 28 Q45 44 0 28 Z" fill="#771c19" stroke="#3c0d0c" stroke-width="1.5"/>
+            <path d="M0 28 Q45 44 90 28 Q135 46 180 28 Q225 46 270 28 Q315 44 360 28" fill="none" stroke="#d9a54a" stroke-width="2"/>
+            <g id="hat-layer-shrikhande" filter="url(#paper-shadow-r)"></g>
+          </svg>
+          <div class="mark-buttons" id="buttons-shrikhande" aria-label="Stage II floor marks"></div>
+        </div>
+        <p class="stage-caption" id="caption-shrikhande">Rival stands ready to mirror every wire and gap.</p>
+      </article>
+    </section>
+
+    <section class="console" aria-label="Cast blocking and hat play controls">
+      <div id="blocking-panel" class="panel-box">
+        <div class="panel-header">
+          <h2>1. Block the cast</h2>
+          <span class="hint" id="blocking-hint">Pick a puppet below, then tap an empty floor mark on the leading stage.</span>
+        </div>
+        <div class="cast-tray" id="cast-tray" role="group" aria-label="Cast members"></div>
+        <div class="blocking-foot">
+          <span id="fit-report" class="fit-report" aria-live="polite">Pip, Bess, and Gus are on stage. Dot waits in the wings.</span>
+          <div class="utility-btns">
+            <button type="button" id="btn-bench-dot" class="text-btn">Send Dot to wings</button>
+            <button type="button" id="btn-reset-three" class="text-btn">Reset to 3 players</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="play-panel" class="panel-box" hidden>
+        <div class="panel-header">
+          <h2>2. Direct the bowler</h2>
+          <span class="hint" id="play-hint">Choose a receiver to throw along an overhead wire, or hold a beat.</span>
+        </div>
+        <div class="throw-controls">
+          <div class="receiver-row" id="receiver-row" role="group" aria-label="Choose receiver"></div>
+          <button type="button" id="btn-hold-beat" class="pill-btn">Hold a beat</button>
+        </div>
+
+        <div class="take-playback" aria-label="Replay and still stepping">
+          <div class="playback-buttons">
+            <button type="button" id="btn-prev-still" class="pill-btn">◀ Prev still</button>
+            <button type="button" id="btn-replay-take" class="primary-btn">Replay actual take</button>
+            <button type="button" id="btn-next-still" class="pill-btn">Next still ▶</button>
+          </div>
+          <div class="beat-strip" id="beat-strip" role="group" aria-label="Recorded stills"></div>
+          <p class="beat-readout" id="beat-readout" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <details class="curtain-notes" id="curtain-notes">
+      <summary>Behind the curtain · Wiring notes &amp; mathematical credit</summary>
+      <div class="curtain-body">
+        <p>
+          Both stages hide sixteen brass marks wired as strongly regular graphs with parameters
+          <strong>srg(16, 6, 2, 2)</strong>: every mark connects to exactly 6 others, any joined pair shares 2 neighbours, and any unjoined pair shares 2 neighbours. Because every 3-mark pattern occurs equally in both rigs, the rival troupe can always match up to three performers while keeping the others planted.
+        </p>
+        <div class="curtain-columns">
+          <div>
+            <h3>Stage I: 4×4 Rook Graph</h3>
+            <p>Marks are a 4×4 grid; wires join marks in the same row or column. Contains <strong>8</strong> four-mark cliques (6 wires) and <strong>0</strong> five-wire diamonds.</p>
+          </div>
+          <div>
+            <h3>Stage II: Shrikhande Graph</h3>
+            <p>Cayley graph on ℤ₄×ℤ₄ with shifts {±(1,0), ±(0,1), ±(1,1)}. Contains <strong>48</strong> five-wire diamonds and <strong>0</strong> six-wire cliques.</p>
+          </div>
+        </div>
+        <div id="curtain-live-audit" class="curtain-audit"></div>
+        <p class="credits">
+          <strong>Credits:</strong> S. S. Shrikhande (1959) on the unique strongly regular non-isomorphic twin of L₂(4); R. C. Bose &amp; T. Shimamoto; Andries E. Brouwer’s SRG notes; Sean Gandini on staging drops in <em>Smashed</em>; <em>Passing Patterns Compendium</em> (Selfless Feast); Trkern’s playable <em>Ehrenfeucht–Fraïssé Game</em>.
+        </p>
+      </div>
+    </details>
+  </main>
+</body>
+</html>

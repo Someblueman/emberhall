@@ -347,6 +347,21 @@
         "projects/rail-replacement-geese/gallery-preview.svg",
         "projects/rail-replacement-geese/README.md"
       ]
+    },
+    {
+      "id": "you-were-supposed-to-drop-it",
+      "title": "You Were Supposed to Drop It",
+      "summary": "Seat four cut-paper puppets, pass a bowler hat between them and choose how long the pit drummer waits for the punchline.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/you-were-supposed-to-drop-it/index.html",
+      "files": [
+        "projects/you-were-supposed-to-drop-it/index.html",
+        "projects/you-were-supposed-to-drop-it/stage.css",
+        "projects/you-were-supposed-to-drop-it/stage-rig.js",
+        "projects/you-were-supposed-to-drop-it/show.js",
+        "projects/you-were-supposed-to-drop-it/gallery-preview.svg"
+      ]
     }
   ]
 }
