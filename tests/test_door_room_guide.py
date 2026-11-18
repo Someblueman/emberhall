@@ -81,7 +81,9 @@ const future={...language,id:'future',title:'Future secret'};
 const nowShelf={enabled:true,ideas:[art,math,language],projects:[
  {id:'art-work',idea:'art',title:art.title,status:'done'},
  {id:'math-work',idea:'math',title:math.title,status:'active',stage:2,milestones:[{},{},{}],completed:[{},{}]},
- {id:'dropped',title:'Dropped work',status:'dropped',brief:{field:'art'}},
+ ...Array.from({length:4},(_,n)=>({id:'stopped-'+n,title:'Stopped '+n,status:'dropped',brief:{field:'art'}})),
+ {id:'dropped',title:'Dropped work',status:'dropped',brief:{field:'art'},lesson:'<img src=x> The gate found no advantage.'},
+ {id:'language-stop',title:'Earlier language',status:'dropped',brief:{field:'language'}},
  ...Array.from({length:4},(_,n)=>({id:'old-'+n,title:'Old '+n,status:'done',brief:{field:'art'}}))]};
 frame={...frame,seq:5,shelf:nowShelf};current=true;roomPanel();
 `);
@@ -91,7 +93,12 @@ assert.match(body,/In progress · stage 3 of 3 ·.*Five marks/);
 assert.match(body,/Proposed ·.*Forget me/);
 assert.match(body,/Finished ·.*<img src=x> A moth/);
 assert.match(body,/Showing three of 5/);
-assert.doesNotMatch(body,/Dropped work|Future secret/);
+assert.match(body,/5 stopped attempts · read why/);
+assert.match(body,/Stopped · Dropped work/);
+assert.match(body,/<img src=x> The gate found no advantage/);
+assert.match(body,/No reason for stopping is recorded/);
+assert.doesNotMatch(body,/Stopped · Stopped 0|Future secret/);
+assert.equal(links().filter(n=>n.id.startsWith('door-stopped-0-')).length,3);
 assert(!all(get('room-content')).some(n=>n.tag==='img'));
 assert(links().some(n=>n.href.endsWith('/docs/WISHES.md')));
 assert(links().some(n=>n.href==='#room/workshop'));
@@ -104,6 +111,16 @@ const artSection=all(get('room-content')).find(n=>n.tag==='summary'&&n.id==='doo
 const artDetails=all(get('room-content')).find(n=>n.children.includes(artSection));
 artDetails.open=true;artDetails.listeners.toggle();run('roomPanel()');
 assert(all(get('room-content')).find(n=>n.tag==='details'&&n.children.some(c=>c.id==='door-wish-0')).open);
+const stoppedSummary=all(get('room-content')).find(n=>n.id==='door-stopped-0');
+const stoppedDetails=all(get('room-content')).find(n=>n.children.includes(stoppedSummary));
+stoppedDetails.open=true;stoppedDetails.listeners.toggle();run('roomPanel()');
+assert(all(get('room-content')).find(n=>n.children.some(c=>c.id==='door-stopped-0')).open);
+let stoppedLink=links().find(n=>n.id==='door-stopped-0-dropped');
+stoppedLink.focus();run('refreshView(false)');
+assert.equal(document.activeElement.id,stoppedLink.id);assert.notEqual(document.activeElement,stoppedLink);
+stoppedLink=links().find(n=>n.id==='door-stopped-0-dropped');
+assert.equal(stoppedLink.href,'#projects-view');stoppedLink.listeners.click();
+assert.equal(run('projectsFindState.query'),'Dropped work');
 const mathLink=links().find(n=>n.id==='door-attempt-1-math-work');
 mathLink.focus();run('refreshView(false)');
 assert.equal(document.activeElement.id,mathLink.id);assert.notEqual(document.activeElement,mathLink);
@@ -113,7 +130,7 @@ window.location.hash=mathLink.href;listeners.hashchange();
 assert.equal(document.activeElement,get('projects-view'));
 assert.equal(run('frame.seq'),5); // following the work does not move the history cursor
 run(`current=false;frame={...frame,shelf:{enabled:true,ideas:[],projects:[]}};selected='door';roomPanel()`);
-body=text(get('room-content'));assert.doesNotMatch(body,/A moth|Five marks|Forget me/);
+body=text(get('room-content'));assert.doesNotMatch(body,/A moth|Five marks|Forget me|Dropped work|gate found no advantage/);
 assert.match(body,/belongs to this recorded moment/);
 assert.match(body,/No related attempt/);
 run(`frame={...frame,shelf:{enabled:true,ideas:[future],projects:[]}};roomPanel()`);
