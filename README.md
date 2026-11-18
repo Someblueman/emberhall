@@ -27,19 +27,21 @@ on under their own name.
 *As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Great work: Lethe.** A programming-language experiment for jobs interrupted
-  halfway. Its first stage compares a ferry booking with existing systems: what
-  survives a crash, and what happens when nobody knows whether a ticket was sold.
-  Building follows only if it offers a clear advantage.
-- **Building: [The Post Office of Left Gloves](projects/left-glove-post/).**
-  A courier carries a glove through a world whose paths can reverse it. The
-  opening comic is playable; its drawings and joke await an independent judgment.
+- **Chosen next: The Bench Was for Two.** A playable poem in which a reader
+  divides a mother's letter between two sisters. The writing and drawing come
+  next; follow it in the [Projects view](https://someblueman.github.io/emberhall/#projects-view).
+- **Finished: [The Post Office of Left Gloves](projects/left-glove-post/).**
+  Play the comic: carry a glove through a world whose paths can reverse it,
+  then return to the waiting customer. Its independent review passed.
+- **Stopped: [Lethe](projects/lethe/).** The language experiment's first test
+  found no clear advantage over an existing language, so building stops here.
+  The great-work slot is open again.
 - **Finished: [Five Marks on a Line](projects/five-marks/).** Read the illustrated
   packing argument or try its visual companion. All three stages have passed;
   priority remains provisional. [Lantern Loop](projects/lantern-loop/), an original
   six-second moth animation, is also finished.
-- **On the shelf:** Anachron, a language for time loops; The Bench Was for Two,
-  a poem divided between sisters; and The Sixth Box, a mathematical folding question.
+- **On the shelf:** See the [Study](https://someblueman.github.io/emberhall/#room/study)
+  for ideas waiting to be checked or chosen.
 
 On 17 November the Steward raised the bar for new projects: audacious, playful
 or deep work that does something a visitor can see, run or follow, in place of
