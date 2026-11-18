@@ -2395,7 +2395,7 @@ function renderDoorWishes(content) {
   const guide=html("section","room-shelf-summary",undefined,content);
   html("h3","","What are we trying to make?",guide);
   html("p","small","On 17 November the Steward asked for audacious, playful or deep work. These are related attempts, not wishes declared fulfilled. Open one and judge the thing itself.",guide);
-  html("p","small","Finished work opens in the Gallery; ideas and work in progress open in Projects.",guide);
+  html("p","small","Finished work opens in the Gallery; ideas, work in progress and stopped attempts open in Projects.",guide);
   const sources=html("p","small shelf-project-actions",undefined,guide);
   for(const [label,path] of [["Read the wishes","WISHES.md"],["Read the standing orders","STEWARD_ORDERS.md"]]) {
     const link=html("a","room-shelf-link",label,sources);
@@ -2411,6 +2411,9 @@ function renderDoorWishes(content) {
   const attempts=[...projects.filter(p=>["active","done"].includes(p.status)).map(p=>({
     record:p,brief:p.brief||ideas.find(i=>i.id===p.idea)?.brief,project:true
   })),...ideas.filter(i=>i.status==="shelved").map(i=>({record:i,brief:i.brief,project:false}))];
+  const stopped=projects.filter(p=>p.status==="dropped").map(p=>({
+    record:p,brief:p.brief||ideas.find(i=>i.id===p.idea)?.brief
+  }));
   const wishes=[
     ["Make art","Something original, strange, beautiful or moving.",b=>b.field==="art"],
     ["Do mathematics","An argument or result another mind can check.",b=>b.field==="mathematics"],
@@ -2424,11 +2427,13 @@ function renderDoorWishes(content) {
     section.open=doorWishesOpen.has(wishIndex);
     section.addEventListener("toggle",()=>{if(section.open)doorWishesOpen.add(wishIndex);else doorWishesOpen.delete(wishIndex);});
     const related=attempts.filter(a=>a.brief&&matches(a.brief));
+    const ended=stopped.filter(a=>a.brief&&matches(a.brief));
     related.sort((a,b)=>{
       const rank=a=>a.record.status==="active"?0:a.project?2:1;
       return rank(a)-rank(b)||titleFor(a.record,"attempt").localeCompare(titleFor(b.record,"attempt"));
     });
-    html("summary","",`${title} · ${related.length} related ${related.length===1?"attempt":"attempts"}`,section).id=`door-wish-${wishIndex}`;
+    const count=related.length+ended.length;
+    html("summary","",`${title} · ${count} related ${count===1?"attempt":"attempts"}`,section).id=`door-wish-${wishIndex}`;
     html("p","small",detail,section);
     related.slice(0,3).forEach(({record,project})=>{
       const row=html("p","small",undefined,section);
@@ -2449,7 +2454,22 @@ function renderDoorWishes(content) {
       });
     });
     if(related.length>3)html("p","small",`Showing three of ${related.length}; the Projects view holds the rest.`,section);
-    if(!related.length)html("p","empty-note","No related attempt with a stated subject is recorded here yet.",section);
+    if(!count)html("p","empty-note","No related attempt with a stated subject is recorded here yet.",section);
+    if(ended.length) {
+      const history=html("details","record-details",undefined,section);
+      const key=`stopped-${wishIndex}`;
+      history.open=doorWishesOpen.has(key);
+      history.addEventListener("toggle",()=>{if(history.open)doorWishesOpen.add(key);else doorWishesOpen.delete(key);});
+      html("summary","",`${ended.length} stopped ${ended.length===1?"attempt":"attempts"} · read why`,history).id=`door-${key}`;
+      ended.slice().reverse().slice(0,3).forEach(({record})=>{
+        const entry=html("div","room-history-entry",undefined,history);
+        const link=html("a","room-shelf-link",`Stopped · ${titleFor(record,"project")}`,entry);
+        link.id=`door-stopped-${wishIndex}-${encodeURIComponent(record.id)}`;link.href="#projects-view";
+        link.addEventListener("click",()=>{projectsFindState.query=titleFor(record,"project");shelf();});
+        html("p","small",record.lesson||"No reason for stopping is recorded in this published moment.",entry);
+      });
+      if(ended.length>3)html("p","small",`Showing three of ${ended.length}; search Projects for the rest.`,history);
+    }
     if(wishIndex===4) {
       const link=html("a","room-shelf-link","Follow house work in the Workshop",section);link.href="#room/workshop";
     }
@@ -3284,11 +3304,13 @@ function shelf() {
     ...rawProjects.filter(p => p.status === "dropped").map(p => ({
       title: titleFor(p,"project"), id:p.id,
       status: p.status || "retired",
+      plain: p.plain || "",
       reason: p.lesson || ""
     })),
     ...rawIdeas.filter(i => i.status === "graveyard" && !rawProjects.some(p => p.idea === i.id && p.status === "dropped")).map(i => ({
       title: titleFor(i,"idea"), id:i.id,
       status: i.status || "retired",
+      plain: [i.plain,i.what].filter(Boolean).join(" "),
       reason: [i.losses ? `Lost ${i.losses} council choices.` : "Retired without starting a project.", ...(i.history || []).flatMap(h => h.reasons || (h.lesson ? [h.lesson] : []))].join(" ")
     }))
   ];
@@ -3305,7 +3327,7 @@ function shelf() {
   const findLabel=html("label","small","Find a project or idea",findControls);
   findLabel.setAttribute?.("for","projects-find-search");
   const findSearch=html("input","",undefined,findLabel);
-  findSearch.id="projects-find-search";findSearch.type="search";findSearch.placeholder="Title or description";
+  findSearch.id="projects-find-search";findSearch.type="search";findSearch.placeholder="Title, description or reason";
   findSearch.value=projectsFindState.query;findSearch.setAttribute?.("aria-describedby","projects-find-status");
   const findReset=html("button","quiet-button","Show everything",findControls);
   findReset.id="projects-find-reset";findReset.type="button";
@@ -3316,7 +3338,7 @@ function shelf() {
   findReset.addEventListener?.("click",()=>{projectsFindState.query="";findSearch.value="";applyProjectsFind(box);findSearch.focus?.({preventScroll:true});});
   function applyProjectsFind(host) {
     const query=workshopSearchText(projectsFindState.query);
-    const items=[...(host.querySelectorAll?.(".shelf-motion .shelf-item, .shelf-next .shelf-idea")||[])].filter(node=>typeof node.getAttribute?.("data-find")==="string");
+    const items=[...(host.querySelectorAll?.(".shelf-motion .shelf-item, .shelf-next .shelf-idea, .shelf-graveyard .shelf-dead")||[])].filter(node=>typeof node.getAttribute?.("data-find")==="string");
     let matches=0;
     for(const item of items) {
       const show=!query||item.getAttribute("data-find").includes(query);
@@ -3326,6 +3348,12 @@ function shelf() {
     findControls.classList?.toggle?.("projects-find-hidden",items.length===0);
     findStatus.textContent=query?`${matches} of ${items.length} projects and ideas match`:`Showing all ${items.length} projects and ideas.`;
     findEmpty.classList?.toggle?.("projects-find-hidden",!(items.length&&matches===0));
+    const retired=$("projects-retired");
+    if(retired?.querySelectorAll) {
+      const found=[...retired.querySelectorAll(".shelf-dead")].some(item=>!item.classList.contains("projects-find-hidden"));
+      retired.classList.toggle("projects-find-hidden",!!query&&!found);
+      if(query)retired.open=found;
+    }
   }
   // 1. In motion: what is being built now.
   if(activeProjects.length) {
@@ -3423,9 +3451,11 @@ function shelf() {
   }
   if (graveyard.length) {
     const details = html("details", "shelf-graveyard", undefined, box);
+    details.id="projects-retired";
     html("summary", "", `Graveyard (${graveyard.length})`, details);
     graveyard.forEach(entry => {
       const item = html("div", "shelf-item shelf-dead", undefined, details);
+      item.setAttribute("data-find",workshopSearchText([entry.title,entry.plain,entry.reason].filter(Boolean).join(" ")));
       html("strong", "", entry.title, item);
       html("span", "small", entry.reason ? `${entry.status} · ${entry.reason}` : entry.status, item);
       recordId(item,entry.id);
