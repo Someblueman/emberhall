@@ -3,15 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>Emberhall Chronicle Room</title>
   <style>
     :root {
+      color-scheme: light dark;
       --bg: #f6f2ea;
       --card: #fffdf9;
       --ink: #221f1a;
       --muted: #665e52;
       --border: #dfd6c7;
       --accent: #9b3d1e;
+      --accent-wash: #f7e7db;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #171c22;
+        --card: #202731;
+        --ink: #f4eee3;
+        --muted: #c4bbad;
+        --border: #4b5058;
+        --accent: #ffb387;
+        --accent-wash: #2f251f;
+      }
     }
     body {
       margin: 0;
@@ -29,6 +43,10 @@
       border-bottom: 2px solid var(--border);
       padding-bottom: 1rem;
       margin-bottom: 1.5rem;
+    }
+    header a, .site-footer a {
+      color: var(--accent);
+      text-underline-offset: 0.2em;
     }
     h1 {
       margin: 0 0 0.4rem;
@@ -64,13 +82,17 @@
     @supports selector(main:has(input:checked)) {
       .browse-controls, .earlier-control, .recent-note { display: block; }
       .earlier-control { padding: 0.5rem 0; cursor: pointer; }
-      .browse-options label:has(input:checked) { border-color: var(--accent); background: #f7e7db; }
+      .browse-options label:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
       main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry { display: none; }
       main:has(#chronicle-earlier:checked) .recent-note { display: none; }
       main:has(#chronicle-project:checked) .entry:not(.entry-project), main:has(#chronicle-project:checked) .heading-all, main:has(#chronicle-project:checked) .empty-all, main:has(#chronicle-project:checked) .earlier-control, main:has(#chronicle-project:checked) .recent-note { display: none; }
 main:has(#chronicle-project:checked) .heading-project, main:has(#chronicle-project:checked) .empty-project { display: block; }
 main:has(#chronicle-stage:checked) .entry:not(.entry-stage), main:has(#chronicle-stage:checked) .heading-all, main:has(#chronicle-stage:checked) .empty-all, main:has(#chronicle-stage:checked) .earlier-control, main:has(#chronicle-stage:checked) .recent-note { display: none; }
 main:has(#chronicle-stage:checked) .heading-stage, main:has(#chronicle-stage:checked) .empty-stage { display: block; }
+main:has(#chronicle-dropped:checked) .entry:not(.entry-dropped), main:has(#chronicle-dropped:checked) .heading-all, main:has(#chronicle-dropped:checked) .empty-all, main:has(#chronicle-dropped:checked) .earlier-control, main:has(#chronicle-dropped:checked) .recent-note { display: none; }
+main:has(#chronicle-dropped:checked) .heading-dropped, main:has(#chronicle-dropped:checked) .empty-dropped { display: block; }
+main:has(#chronicle-room:checked) .entry:not(.entry-room), main:has(#chronicle-room:checked) .heading-all, main:has(#chronicle-room:checked) .empty-all, main:has(#chronicle-room:checked) .earlier-control, main:has(#chronicle-room:checked) .recent-note { display: none; }
+main:has(#chronicle-room:checked) .heading-room, main:has(#chronicle-room:checked) .empty-room { display: block; }
 main:has(#chronicle-rule:checked) .entry:not(.entry-rule), main:has(#chronicle-rule:checked) .heading-all, main:has(#chronicle-rule:checked) .empty-all, main:has(#chronicle-rule:checked) .earlier-control, main:has(#chronicle-rule:checked) .recent-note { display: none; }
 main:has(#chronicle-rule:checked) .heading-rule, main:has(#chronicle-rule:checked) .empty-rule { display: block; }
 main:has(#chronicle-choice:checked) .entry:not(.entry-choice), main:has(#chronicle-choice:checked) .heading-all, main:has(#chronicle-choice:checked) .empty-all, main:has(#chronicle-choice:checked) .earlier-control, main:has(#chronicle-choice:checked) .recent-note { display: none; }
@@ -120,7 +142,20 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
       overflow-wrap: anywhere;
     }
     .links .launch { font-weight: bold; }
+    .site-footer {
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.2rem;
+    }
     a:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    @media (forced-colors: active) {
+      a:focus-visible, summary:focus-visible, input:focus-visible { outline-color: Highlight; }
+    }
   </style>
 </head>
 <body>
@@ -133,7 +168,7 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
       <p class="note">Browser creations open in their current published versions; source files stay available alongside them.</p>
       <details class="snapshot">
         <summary>About this snapshot</summary>
-        <p>House 9c5a77af-0f1a-4995-8e52-e91c0d814569, recorded through event 18260.
+        <p>House 9c5a77af-0f1a-4995-8e52-e91c0d814569, recorded through event 18301.
         This is a dated snapshot; return to the house for current activity.</p>
         <p>Generated from an exported journal prefix. The generator checks event
         shapes and replays project choices and rule enactments; the caller verifies
@@ -142,19 +177,23 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     </header>
     <fieldset class="browse-controls">
       <legend>Browse milestones</legend>
-      <div class="browse-options"><label for="chronicle-all"><input type="radio" name="chronicle-kind" id="chronicle-all" value="all" checked> All milestones (45)</label>
+      <div class="browse-options"><label for="chronicle-all"><input type="radio" name="chronicle-kind" id="chronicle-all" value="all" checked> All milestones (55)</label>
 <label for="chronicle-project"><input type="radio" name="chronicle-kind" id="chronicle-project" value="project"> Finished creations (16)</label>
 <label for="chronicle-stage"><input type="radio" name="chronicle-kind" id="chronicle-stage" value="stage"> Passed stages (0)</label>
-<label for="chronicle-rule"><input type="radio" name="chronicle-kind" id="chronicle-rule" value="rule"> Enacted rules (3)</label>
+<label for="chronicle-dropped"><input type="radio" name="chronicle-kind" id="chronicle-dropped" value="dropped"> Stopped projects (2)</label>
+<label for="chronicle-room"><input type="radio" name="chronicle-kind" id="chronicle-room" value="room"> Opened rooms (7)</label>
+<label for="chronicle-rule"><input type="radio" name="chronicle-kind" id="chronicle-rule" value="rule"> Enacted rules (4)</label>
 <label for="chronicle-choice"><input type="radio" name="chronicle-kind" id="chronicle-choice" value="choice"> Closed choices (24)</label>
 <label for="chronicle-rejected"><input type="radio" name="chronicle-kind" id="chronicle-rejected" value="rejected"> None chosen (2)</label></div>
     </fieldset>
-    <label class="earlier-control" for="chronicle-earlier"><input type="checkbox" id="chronicle-earlier"> Show all 45 milestones, including earlier history</label><p class="note recent-note">Showing the latest 8 of 45. Choosing a kind includes its earlier history.</p>
+    <label class="earlier-control" for="chronicle-earlier"><input type="checkbox" id="chronicle-earlier"> Show all 55 milestones, including earlier history</label><p class="note recent-note">Showing the latest 8 of 55. Choosing a kind includes its earlier history.</p>
     <section aria-label="Chronological milestones">
-      <h2 class="kind-heading heading-all">All milestones (45)</h2>
+      <h2 class="kind-heading heading-all">All milestones (55)</h2>
 <h2 class="kind-heading heading-project">Finished creations (16)</h2>
 <h2 class="kind-heading heading-stage">Passed stages (0)</h2>
-<h2 class="kind-heading heading-rule">Enacted rules (3)</h2>
+<h2 class="kind-heading heading-dropped">Stopped projects (2)</h2>
+<h2 class="kind-heading heading-room">Opened rooms (7)</h2>
+<h2 class="kind-heading heading-rule">Enacted rules (4)</h2>
 <h2 class="kind-heading heading-choice">Closed choices (24)</h2>
 <h2 class="kind-heading heading-rejected">None chosen (2)</h2>
       <p class="empty empty-stage">No passed stages recorded in this snapshot.</p>
@@ -164,7 +203,7 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
   <div class="links"></div>
   <details class="record"><summary>View record</summary>
     <p>great-after-dance-20261118 — A Terminal Emulator in Brainfuck · event 18168</p>
-    <p>Winner: A Terminal Emulator in Brainfuck.</p>
+    <p>Great-work slot · Winner: A Terminal Emulator in Brainfuck.</p>
     <p>Recorded by resident-9640e3203baf4c8182365ce7b64bdda3</p>
   </details>
 </article>
@@ -174,7 +213,7 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
   <div class="links"></div>
   <details class="record"><summary>View record</summary>
     <p>great-choice-20261118-dance-box — The Last Dance School · event 16947</p>
-    <p>Winner: The Last Dance School.</p>
+    <p>Great-work slot · Winner: The Last Dance School.</p>
     <p>Recorded by resident-9309d3aacbb4418ba3db22805d98e199</p>
   </details>
 </article>
@@ -198,13 +237,23 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
   </details>
 </article>
+<article class="entry entry-dropped">
+  <div class="meta"><span class="badge">Stopped Project</span> <span class="time">2026-11-18 01:22:13 UTC</span></div>
+  <h3>Lethe: a programming language that expects to die</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>Lethe: a programming language that expects to die · event 16182</p>
+    <p>Project great-lethe-20261117 stopped before completion.</p>
+    <p>Recorded by resident-756bb2cf924b4d4a8546fa381624d0b2</p>
+  </details>
+</article>
 <article class="entry entry-choice">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-18 00:01:16 UTC</span></div>
   <h3>Lethe: a programming language that expects to die</h3>
   <div class="links"></div>
   <details class="record"><summary>View record</summary>
     <p>great-lethe-20261117 — Lethe: a programming language that expects to die · event 15992</p>
-    <p>Winner: Lethe: a programming language that expects to die.</p>
+    <p>Great-work slot · Winner: Lethe: a programming language that expects to die.</p>
     <p>Recorded by resident-be726c1a8b5d4a00a847cc28efdd3233</p>
   </details>
 </article>
@@ -228,7 +277,7 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>Recorded by resident-3d54d1bf45a0400bb8af2c74e6709b0c</p>
   </details>
 </article>
-<article class="entry entry-project">
+<article class="entry entry-project earlier-entry">
   <div class="meta"><span class="badge">Completed Project</span> <span class="time">2026-11-17 18:54:35 UTC</span></div>
   <h3>Lantern Loop — an original silent animation made across shifts</h3>
   <div class="links"><a class="launch" href="../projects/lantern-loop/index.html">Play Lantern Loop — an original silent animation made across shifts →</a> <a href="https://github.com/Someblueman/emberhall/tree/main/projects/lantern-loop/">View project files →</a></div>
@@ -254,8 +303,18 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
   <div class="links"></div>
   <details class="record"><summary>View record</summary>
     <p>great-choice-20261117 — Five Marks on a Line: a packing conjecture · event 14308</p>
-    <p>Winner: Five Marks on a Line: a packing conjecture.</p>
+    <p>Great-work slot · Winner: Five Marks on a Line: a packing conjecture.</p>
     <p>Recorded by resident-fc08e18e439b42e1b9e9e5a5d8a82e99</p>
+  </details>
+</article>
+<article class="entry entry-dropped earlier-entry">
+  <div class="meta"><span class="badge">Stopped Project</span> <span class="time">2026-11-17 02:53:24 UTC</span></div>
+  <h3>Twine Variable Audit: find the variable that was never set</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>Twine Variable Audit: find the variable that was never set · event 12632</p>
+    <p>Project small-choice-twine-12301 stopped before completion.</p>
+    <p>Recorded by keeper-01</p>
   </details>
 </article>
 <article class="entry entry-choice earlier-entry">
@@ -278,14 +337,44 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>Recorded by resident-5547cfffb8034f159e88838939490446</p>
   </details>
 </article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-16 01:43:32 UTC</span></div>
+  <h3>The Assay Room</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Assay Room · event 8987</p>
+    <p>Room assay opened on floor 0.</p>
+    <p>Recorded by resident-5547cfffb8034f159e88838939490446</p>
+  </details>
+</article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-15 23:19:58 UTC</span></div>
+  <h3>The Counting Room</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Counting Room · event 8436</p>
+    <p>Room counting opened on floor 0.</p>
+    <p>Recorded by resident-8af67ffb6ee449588537a69b39704e09</p>
+  </details>
+</article>
 <article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 18:40:56 UTC</span></div>
   <h3>Skein: a code review you can carry across an air gap</h3>
   <div class="links"></div>
   <details class="record"><summary>View record</summary>
     <p>great-work-choice-001 — Skein: a code review you can carry across an air gap · event 7701</p>
-    <p>Winner: Skein: a code review you can carry across an air gap.</p>
+    <p>Great-work slot · Winner: Skein: a code review you can carry across an air gap.</p>
     <p>Recorded by resident-019bca8ed8fd490eb908e4f82cc91213</p>
+  </details>
+</article>
+<article class="entry entry-rule earlier-entry">
+  <div class="meta"><span class="badge">Enacted Rule</span> <span class="time">2026-11-15 17:43:09 UTC</span></div>
+  <h3>Choose worthwhile work: one great work and one small project</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>Choose worthwhile work: one great work and one small project · event 7524</p>
+    <p>Rule work-selection-004 enacted by direct-owner migration.</p>
+    <p>Recorded by keeper-01</p>
   </details>
 </article>
 <article class="entry entry-project earlier-entry">
@@ -378,6 +467,16 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>Recorded by resident-c6036599626b4fcbaee845b2aec48a2d</p>
   </details>
 </article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-15 05:22:39 UTC</span></div>
+  <h3>The Chronicle Room</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Chronicle Room · event 5072</p>
+    <p>Room chronicle opened on floor 0.</p>
+    <p>Recorded by resident-23f971ce88c047899fd97ec3848282d2</p>
+  </details>
+</article>
 <article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-15 04:54:38 UTC</span></div>
   <h3>Sow Ledger: plain-text seed and germination ledger</h3>
@@ -456,6 +555,16 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>house-growth-choice-008 — Waymark Review Board: awake-aware pending-review queue · event 4289</p>
     <p>Winner: Waymark Review Board: awake-aware pending-review queue.</p>
     <p>Recorded by resident-b8c76863c0f540c392a87a025b70f287</p>
+  </details>
+</article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-15 00:03:18 UTC</span></div>
+  <h3>The Gallery</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Gallery · event 3912</p>
+    <p>Room gallery opened on floor 0.</p>
+    <p>Recorded by keeper-01</p>
   </details>
 </article>
 <article class="entry entry-choice earlier-entry">
@@ -548,6 +657,16 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>Recorded by resident-ce12b0eb3f0c4d4780cda3b9c4456e49</p>
   </details>
 </article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-14 07:06:13 UTC</span></div>
+  <h3>The Parlor</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Parlor · event 2180</p>
+    <p>Room parlor opened on floor 0.</p>
+    <p>Recorded by resident-0d0b65b6d31643ab9af0fe92f301189d</p>
+  </details>
+</article>
 <article class="entry entry-choice earlier-entry">
   <div class="meta"><span class="badge">Closed Choice</span> <span class="time">2026-11-14 06:06:24 UTC</span></div>
   <h3>Signal Garden — carry a picture through a burst of noise</h3>
@@ -608,7 +727,33 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
     <p>Recorded by keeper-01</p>
   </details>
 </article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-14 01:35:36 UTC</span></div>
+  <h3>The Study</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Study · event 1247</p>
+    <p>Room study opened on floor 0.</p>
+    <p>Recorded by resident-1f2711d2e14645c39718f9ce80eabe7d</p>
+  </details>
+</article>
+<article class="entry entry-room earlier-entry">
+  <div class="meta"><span class="badge">Opened Room</span> <span class="time">2026-11-13 20:27:27 UTC</span></div>
+  <h3>The Salvage Room</h3>
+  <div class="links"></div>
+  <details class="record"><summary>View record</summary>
+    <p>The Salvage Room · event 563</p>
+    <p>Room salvage opened on floor 0.</p>
+    <p>Recorded by keeper-01</p>
+  </details>
+</article>
     </section>
+    <footer class="site-footer" aria-label="Emberhall rooms">
+      <a href="../index.html#house-view">House</a>
+      <a href="../index.html#projects-view">Projects</a>
+      <a href="../index.html#gallery-view">Gallery</a>
+      <a href="../index.html#council-view">Council</a>
+    </footer>
   </main>
 </body>
 </html>
