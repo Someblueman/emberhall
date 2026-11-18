@@ -1614,9 +1614,41 @@ function renderHearth(content) {
   }
   draw();
 }
-let archiveState={query:"",status:"all",page:0,compare:[],legacyMoment:null};
+let archiveState={query:"",status:"all",page:0,compare:[],legacyMoment:null,trailId:null,trailPage:0};
+let archiveReturn=null;
 const ARCHIVE_PAGE_SIZE=5;
+// Stable public IDs name learn events. Missing snapshots cannot establish when
+// a review or dispute happened, so these are observations, not invented events.
+function archiveLessonChanges(id,frames,moment) {
+  const snapshots=new Map((frames||[]).filter(past=>past.seq<=moment.seq).map(past=>[past.seq,past]));
+  snapshots.set(moment.seq,moment);
+  const changes=[];
+  let previous=null;
+  for(const past of [...snapshots.values()].sort((a,b)=>a.seq-b.seq)) {
+    const lesson=Array.isArray(past.archive)?past.archive.find(item=>item.id===id):null;
+    if(!lesson)continue;
+    const signature=JSON.stringify([lesson.key,lesson.claim,lesson.author,lesson.status,lesson.reviews]);
+    if(signature!==previous)changes.push({sequence:past.seq,lesson});
+    previous=signature;
+  }
+  return changes;
+}
+function renderArchiveReturn(content) {
+  const trail=archiveReturn;
+  if(!trail)return;
+  const sourceIndex=data.frames.findIndex(moment=>moment.seq===trail.sequence);
+  if(sourceIndex<0){html("p","small","Your original Archive moment is absent from this publication; it cannot be restored.",content);return;}
+  const back=workshopButton(content,"Back to my Archive search",()=>{
+    index=sourceIndex;frame=data.frames[index];
+    current=trail.current&&index===data.frames.length-1;
+    archiveState={...trail.state,compare:[...trail.state.compare]};archiveReturn=null;
+    selectedFloor=frame.rooms?.find(room=>room.id==="archive")?.floor??0;
+    choose("archive");render();workshopFocus(trail.target,true);
+  });back.id="archive-return";
+  html("p","small",`Return to your search, comparison and page at event ${trail.sequence}.`,content);
+}
 function renderLessons(content) {
+  renderArchiveReturn(content);
   // A legacy position is safe only while the exact public snapshot stays unchanged.
   const legacyMoment=frame.archive?.some(lesson=>lesson.id===undefined)?JSON.stringify([frame.seq,frame.archive]):null;
   if(archiveState.legacyMoment!==legacyMoment)
@@ -1648,6 +1680,47 @@ function renderLessons(content) {
   }
   filter.value=archiveState.status;
   filter.addEventListener("change",()=>{archiveState.status=filter.value;archiveState.page=0;renderPage();});
+  const trail=html("section","study-comparison",undefined,panel);
+  trail.id="archive-trail";trail.tabIndex=-1;trail.setAttribute("aria-label","Lesson history");
+  trail.setAttribute("style","scroll-margin:120px 0");
+  function drawTrail() {
+    trail.replaceChildren();
+    const lesson=lessons.find(item=>item.id===archiveState.trailId);
+    trail.hidden=!lesson;
+    if(!lesson)return;
+    html("h3","",`How ${String(lesson.key||"").replaceAll("-"," ")} changed`,trail);
+    html("p","small",`${lesson.author} · ${clip(lesson.claim,160)}`,trail);
+    html("p","small","Only changes visible in public snapshots, through this moment. Missing snapshots can hide earlier changes. Review counts do not identify reviewers or show their evidence; they do not prove the claim.",trail);
+    const changes=archiveLessonChanges(lesson.id,data?.frames,frame);
+    const newest=changes.map((change,i)=>({...change,first:i===0})).reverse();
+    const size=4;
+    archiveState.trailPage=Math.max(0,Math.min(archiveState.trailPage,Math.ceil(newest.length/size)-1));
+    const start=archiveState.trailPage*size;
+    for(const change of newest.slice(start,start+size)) {
+      const row=html("div","room-history-entry",undefined,trail);
+      html("strong","",`${change.first?"First available view":"Changed public summary"} · event ${change.sequence}`,row);
+      html("p","small",`${change.lesson.author} · ${lessonReviewWords(change.lesson)}`,row);
+      if(change.lesson.claim!==lesson.claim)html("p","",`Claim then: ${change.lesson.claim}`,row);
+      const visit=workshopButton(row,"Visit this moment",()=>{
+        if(!archiveReturn)archiveReturn={sequence:frame.seq,current,
+          state:{...archiveState,compare:[...archiveState.compare]},target:visit.id};
+        archiveState={...archiveState,query:"",status:"all",page:0,compare:[],trailPage:0};
+        jumpToSequence(change.sequence);workshopFocus("archive-trail",true);
+      });visit.id=`archive-visit-${lesson.id}-${change.sequence}`;
+      visit.setAttribute("style","scroll-margin:120px 0");
+      visit.setAttribute("aria-label",`Visit ${String(lesson.key||"").replaceAll("-"," ")} at event ${change.sequence}`);
+      visit.disabled=change.sequence===frame.seq;
+    }
+    const pages=html("div","workshop-pages",undefined,trail);
+    const turn=delta=>{archiveState.trailPage+=delta;drawTrail();workshopFocus(trail.id,true);};
+    const newer=workshopButton(pages,"Newer views",()=>turn(-1));newer.id="archive-trail-newer";newer.disabled=start===0;
+    html("span","small",`${start+1}–${Math.min(start+size,newest.length)} of ${newest.length} changed views · newest first`,pages).setAttribute("role","status");
+    const older=workshopButton(pages,"Older views",()=>turn(1));older.id="archive-trail-older";older.disabled=start+size>=newest.length;
+    pages.hidden=newest.length<=size;pages.setAttribute("style",pages.hidden?"display:none":"");
+    const close=workshopButton(trail,"Close lesson history",()=>{
+      archiveState.trailId=null;drawTrail();workshopFocus($(`archive-follow-${lesson.id}`)?`archive-follow-${lesson.id}`:"archive-search",true);
+    });close.id="archive-trail-close";
+  }
   const comparison=html("section","study-comparison",undefined,panel);
   comparison.id="archive-comparison";comparison.tabIndex=-1;
   comparison.setAttribute("aria-label","Lesson comparison");
@@ -1703,6 +1776,7 @@ function renderLessons(content) {
     }
   }
   function renderPage() {
+    drawTrail();
     drawComparison();
     const query=workshopSearchText(archiveState.query);
     const matches=lessons.filter(lesson=>{
@@ -1727,6 +1801,13 @@ function renderLessons(content) {
       compare.id=`archive-compare-${encodeURIComponent(lesson.selectionId)}`;compare.disabled=!chosen&&archiveState.compare.length===2;
       compare.setAttribute("aria-label",`${chosen?"Remove":"Compare"} ${lessonTitle(lesson)}: ${lesson.claim}${chosen?" from comparison":""}`);
       compare.setAttribute("aria-pressed",String(chosen));compare.setAttribute("aria-controls",comparison.id);
+      if(Number.isInteger(lesson.id)&&lesson.id>0) {
+        const follow=workshopButton(entry,"Follow changes",()=>{
+          archiveState.trailId=lesson.id;archiveState.trailPage=0;drawTrail();workshopFocus(trail.id,true);
+        });follow.id=`archive-follow-${lesson.id}`;
+        follow.setAttribute("aria-controls",trail.id);
+        follow.setAttribute("aria-label",`Follow changes to ${lessonTitle(lesson)}: ${lesson.claim}`);
+      } else html("p","small","This older summary has no stable lesson identity to follow across moments.",entry);
     });
     if(!matches.length)html("p","empty-note","No lessons match. Clear search or choose All lessons to look again.",box);
     previous.disabled=archiveState.page===0;next.disabled=start+ARCHIVE_PAGE_SIZE>=matches.length;
