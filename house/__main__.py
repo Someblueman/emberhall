@@ -24,7 +24,12 @@ def parser() -> argparse.ArgumentParser:
     init.add_argument("--name", required=True)
     init.add_argument("--rules", required=True)
     init.add_argument("--owner-public-key")
-    for name in ("status", "verify", "rules"):
+    status = sub.add_parser("status")
+    status.add_argument("--tasks", action="store_true",
+                        help="page through queued open and claimed tasks, without finished history")
+    status.add_argument("--limit", type=int, help="task page size, 1..50 (default 10)")
+    status.add_argument("--offset", type=int, help="task page offset (default 0)")
+    for name in ("verify", "rules"):
         sub.add_parser(name)
     life = sub.add_parser("life", help="record a place, ambition, identity or help request")
     life.add_argument("--as", dest="actor", required=True)
@@ -188,6 +193,12 @@ def run(args: argparse.Namespace) -> object:
     if command in {"life", "shelf"}:
         return record.append(command, args.actor, json.loads(args.data), args.request)
     if command == "status":
+        if args.tasks:
+            from .work_status import task_page
+            return task_page(state, head, limit=10 if args.limit is None else args.limit,
+                             offset=0 if args.offset is None else args.offset)
+        if args.limit is not None or args.offset is not None:
+            raise ValueError("status --limit and --offset require --tasks")
         return briefing(state)
     if command == "verify":
         return {"valid": True, "events": len(events), "head": head,
