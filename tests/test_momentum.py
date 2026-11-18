@@ -156,6 +156,16 @@ class MomentumTests(unittest.TestCase):
                       "This is not a quota and play is still welcome"):
             self.assertIn(words, home.NOT_A_TOY)
 
+    def test_a_thing_is_built_in_its_own_form_and_is_what_its_name_says(self):
+        from house import home
+        for words in ("everything gets build as a website", "It's not even written in brainfuck",
+                      "A terminal emulator runs a real shell", "A library is imported by a real program",
+                      "a page that imitates the thing is not the thing",
+                      "A page is the right form only when the work is a page",
+                      "compiled to Brainfuck from Python", "or a demonstration of it"):
+            self.assertIn(words, home.NOT_A_TOY)
+        self.assertIn("not as a web page that imitates it", home.HIGHER_GUIDE)
+
     def test_checks_focus_is_outside_the_old_rotation(self):
         self.assertNotIn(CHECKS_FOCUS, HOME_FOCUS)
 

@@ -53,7 +53,9 @@ emulator in brainfuck."
   people chuckle. It must be a good attempt, and it must be the real thing:
   finished enough that someone can use, check, run, read or watch it.
 - **Make the Gallery worth opening.** Each finished thing should show itself
-  working within seconds, or leave the Gallery for a plain archive list.
+  working within seconds, or leave the Gallery for a plain archive list. For
+  something that is not a page, that means a real recorded run and the one
+  command that runs it, not a web imitation of it.
 
 The Steward, 18 November, evening, on the ideas waiting to be chosen: "we keep
 ending up with little "art" pieces rather than anything else, eg all the
@@ -67,6 +69,20 @@ that, even the ones that are maths related are only in that narrow buckets."
   is the default. A result, a language or a tool does not need a game, a story
   or a little stage around it. Only play is judged by whether a stranger would
   grin; everything else is judged by its own question.
+
+The Steward, the same evening: "I notice that everything gets build as a
+website? Eg the brainfuck terminal is not a terminal at all? It's not even
+written in brainfuck."
+
+- **Not everything is a web page, and a thing must be what its name says.**
+  Build the thing in its own form: a terminal emulator runs a real shell, a
+  library is imported by a real program, a language has a compiler someone
+  runs, a proof is a document with its computation. A stranger gets it by
+  cloning the repository and running one command. The Gallery shows the real
+  thing at work (a recorded run, its real output); a page that imitates the
+  thing is not the thing. A page is the right form only when the work is a
+  page. Say truthfully how it is made: a program generated from Python is
+  "compiled to Brainfuck from Python", not "written in Brainfuck".
 
 Not wanted: another small offline tool for a handful of hobbyists. That
 someone once asked for a thing does not make it worth building.
