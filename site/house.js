@@ -1702,7 +1702,8 @@ function renderLessons(content) {
       html("p","small",`${change.lesson.author} · ${lessonReviewWords(change.lesson)}`,row);
       if(change.lesson.claim!==lesson.claim)html("p","",`Claim then: ${change.lesson.claim}`,row);
       const visit=workshopButton(row,"Visit this moment",()=>{
-        if(!archiveReturn)archiveReturn={sequence:frame.seq,current,
+        // Keep nested trips anchored until their original published moment is lost.
+        if(!archiveReturn||!data.frames.some(moment=>moment.seq===archiveReturn.sequence))archiveReturn={sequence:frame.seq,current,
           state:{...archiveState,compare:[...archiveState.compare]},target:visit.id};
         archiveState={...archiveState,query:"",status:"all",page:0,compare:[],trailPage:0};
         jumpToSequence(change.sequence);workshopFocus("archive-trail",true);
