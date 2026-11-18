@@ -1253,6 +1253,8 @@ footer a {
 .workshop-task[aria-pressed="true"] { background:var(--room); border-color:var(--gold); }
 .workshop-task strong { display:block; font-size:13px; }
 .workshop-pages, .workshop-past { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
+/* Author-level flex styling must still respect the renderer's hidden state. */
+.workshop-pages[hidden] { display:none; }
 @media(min-width:1600px) { .workshop-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
 .balance-summary{margin:0 0 8px}
