@@ -2051,7 +2051,7 @@ function reviewOutcomeLabel(run) {
   if(run.status==="launched")return "still running";
   return {interrupted:"interrupted",quota:"hit a usage limit",failed:"failed",unconfirmed:"ended without a recorded result"}[run.outcome]||"no outcome recorded";
 }
-let assayState={family:"all",outcome:"all",query:"",reviews:0,commits:0};
+let assayState={family:"all",outcome:"all",query:"",reviews:0,commits:0,scars:0,scarFilter:"all",scarsOpen:false};
 function renderAssayRoom(content) {
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
   const runsById=new Map(allRuns.map(r=>[r.id,r]));
@@ -2129,21 +2129,22 @@ function renderAssayRoom(content) {
     assayState.query="";search.value="";assayState.reviews=0;assayState.commits=0;draw();search.focus({preventScroll:true});
   });clear.id="assay-clear";
   const results=html("div","",undefined,panel);
-  function pageList(key,label,items,total,size,renderRow) {
+  function pageList(key,label,items,total,size,renderRow,destination=results,redraw=draw) {
     assayState[key]=Math.max(0,Math.min(assayState[key],Math.ceil(items.length/size)-1));
     const start=assayState[key]*size;
-    const status=html("p","small",`${items.length} of ${total} ${label} match · showing ${items.length?`${start+1}–${Math.min(start+size,items.length)}`:"0"} · newest first`,results);
-    status.id=key==="reviews"?"assay-results":"assay-commits-results";status.setAttribute("role","status");
-    const list=html("div","counting-runs",undefined,results);list.id=`assay-${key}`;list.tabIndex=-1;
+    const status=html("p","small",`${items.length} of ${total} ${label} match · showing ${items.length?`${start+1}–${Math.min(start+size,items.length)}`:"0"} · newest first`,destination);
+    status.id=key==="reviews"?"assay-results":`assay-${key}-results`;status.setAttribute("role","status");
+    const list=html("div","counting-runs",undefined,destination);list.id=`assay-${key}`;list.tabIndex=-1;
     list.setAttribute("role","region");list.setAttribute("aria-label",label);
-    if(!items.length)html("p","empty-note",`No ${label} match at this moment. Clear search or change the filters to look again.`,list);
+    if(!items.length)html("p","empty-note",`No ${label} match at this moment. ${key==="scars"?"Choose All scars or another filter":"Clear search or change the filters"} to look again.`,list);
     items.slice(start,start+size).forEach(item=>renderRow(item,list));
-    const pages=html("div","workshop-pages",undefined,results);
+    const pages=html("div","workshop-pages",undefined,destination);
     pages.hidden=items.length<=size;pages.setAttribute("style",pages.hidden?"display:none":"");
     pages.setAttribute("role","group");pages.setAttribute("aria-label",`${label} pages`);
     for(const [delta,direction] of [[-1,"previous"],[1,"next"]]) {
       const button=workshopButton(pages,`${delta<0?"Newer":"Older"} ${label}`,()=>{
-        assayState[key]+=delta;draw();const next=$(`assay-${key}`);next?.focus({preventScroll:true});next?.scrollIntoView?.({block:"nearest"});
+        assayState[key]+=delta;redraw();
+        const next=$(`assay-${key}`);next?.focus({preventScroll:true});next?.scrollIntoView?.({block:"nearest"});
       });
       button.id=`assay-${key}-${direction}`;button.disabled=delta<0?start===0:start+size>=items.length;
       button.setAttribute("aria-controls",list.id);
@@ -2187,20 +2188,37 @@ function renderAssayRoom(content) {
   draw();
   if(scarsAt.length) {
     const scarBox=html("details","assay-scars",undefined,panel);
-    html("summary","",`Scars at this moment (${scarCountWords(scarStandings)})`,scarBox);
+    scarBox.open=assayState.scarsOpen;
+    scarBox.addEventListener("toggle",()=>{assayState.scarsOpen=scarBox.open;});
+    html("summary","",`Scars at this moment (${scarCountWords(scarStandings)})`,scarBox).id="assay-scars-toggle";
     html("p","small","A scar is a historical receipt of a run that ended badly or a lease that ran out. It is not an open job unless it says Still unfinished.",scarBox);
-    const scarList=html("div","counting-runs",undefined,scarBox);
-    scarsAt.map((s,i)=>({s,standing:scarStandings[i]})).slice(-6).reverse().forEach(({s,standing})=>{
-      const row=html("div","counting-run",undefined,scarList);
-      const info=html("div","counting-run-info",undefined,row);
-      html("strong","",`${scarGlyph(standing)}${s.title||s.id}`,info);
-      html("span","small",`${standing.label} · ${s.room||"house"}${s.detail?` · ${s.detail}`:""}`,info);
-      if(findScarTargetIndex(s)>=0) {
-        const btn=html("button","counting-jump",`Event ${s.sequence}`,row);
-        btn.type="button";btn.id=`assay-scar-jump-${s.sequence}`;
-        btn.addEventListener("click",()=>jumpToSequence(s.sequence));
-      }
-    });
+    const scarControls=html("div","counting-controls",undefined,scarBox);
+    const wrapper=html("label","small","Which scars?",scarControls);
+    wrapper.setAttribute("for","assay-scar-filter");
+    const filter=html("select","",undefined,wrapper);filter.id="assay-scar-filter";
+    for(const [value,label] of [["all","All scars"],["attention","Unfinished or unconfirmed"],["history","Nothing left unfinished"]]) {
+      const option=html("option","",label,filter);option.value=value;
+    }
+    filter.value=assayState.scarFilter;filter.setAttribute("aria-controls","assay-scars");
+    filter.addEventListener("change",()=>{assayState.scarFilter=filter.value;assayState.scars=0;drawScars();});
+    const scarResults=html("div","",undefined,scarBox);
+    function drawScars() {
+      scarResults.replaceChildren();
+      const matching=scarsAt.map((s,i)=>({s,standing:scarStandings[i]})).reverse().filter(({standing})=>
+        assayState.scarFilter==="all"||(assayState.scarFilter==="attention") === (standing.key==="open"));
+      pageList("scars","scars",matching,scarsAt.length,6,({s,standing},scarList)=>{
+        const row=html("div","counting-run",undefined,scarList);
+        const info=html("div","counting-run-info",undefined,row);
+        html("strong","",`${scarGlyph(standing)}${s.title||s.id}`,info);
+        html("span","small",`${standing.label} · ${s.room||"house"}${s.detail?` · ${s.detail}`:""}`,info);
+        if(findScarTargetIndex(s)>=0) {
+          const btn=html("button","counting-jump",`Event ${s.sequence}`,row);
+          btn.type="button";btn.id=`assay-scar-jump-${s.sequence}`;
+          btn.addEventListener("click",()=>jumpToSequence(s.sequence));
+        }
+      },scarResults,drawScars);
+    }
+    drawScars();
   }
   const guideLink=html("a","room-shelf-link","Read the Assay Auditor guide ↗",panel);
   guideLink.href="https://github.com/Someblueman/emberhall/blob/main/projects/assay-room/README.md";
