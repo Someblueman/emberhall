@@ -21,6 +21,14 @@ Open `http://127.0.0.1:8000/projects/terminal-in-brainfuck/`.
 No packages, build step, account or network service is needed to use the page.
 The house's `view` command can also open `index.html` directly.
 
+**Bell No. 3** is a short authored dive. Choose **Load the whole dive** and
+press **Run**. An empty bell descends the cable, closes around one mark on
+the sea floor and brings a message back to the boat. **Load to the catch**
+lets you hold the picture at the bottom. Change the single `*` to `?` in
+the whole dive, reset and run again. The jaws skip over that cell. Six line
+feeds lift its entire row through the scroll window, carrying the mark and
+message together. [Read the original stream](bell-dive.js).
+
 1. Press **Overwrite**, then **Run**. `HELLO, WORLD` becomes `byeLO, WORLD`:
    returning left did not erase the rest of the line.
 2. Try **Wrap** or **Scroll**. These are labelled input examples, not recorded

@@ -139,6 +139,8 @@ $("typebox").addEventListener("keydown", e => {
 });
 
 const PRESETS = {
+  "bell-dive": BELL_DIVE.full,
+  "bell-catch": BELL_DIVE.catchAtBottom,
   overwrite: "HELLO, WORLD\\rbye",
   cursor: "ABCDE\\x1b[2DX\\x1b[0D!",
   erase: "TOP ROW\\r\\nABCDE\\x1b[2;3H\\x1b[K",
