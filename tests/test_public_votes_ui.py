@@ -11,7 +11,8 @@ class PublicVotesUITests(unittest.TestCase):
         script = r"""
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 class Element {
-  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.attrs={};}
+  setAttribute(name,value){this.attrs[name]=String(value);}
   appendChild(node){this.children.push(node);}
   replaceChildren(){this.children=[];}
   querySelectorAll(selector){return this.children.flatMap(n=>[n,...n.querySelectorAll(selector)]).filter(n=>n.tag==='details'&&(selector!=='details[open]'||n.open));}
@@ -31,6 +32,8 @@ frame={voting:{inbox_checked_at:100,choices:[{id:'round',status:'open',owner:per
   proposals:[{id:'rule',title:'Better waking',mode:'wake-prompt',author:person,status:'pending',stale:true,
     reason:'Lived experience',text:'Exact wording',trial:null,endorsements:[],notice:null}]}};
 voting();assert.match(text(root),/Juniper · OpenCode → New thing/);
+assert.equal(all(root).find(n=>n.id==='vote-choice-round').attrs.tabindex,'-1');
+assert.equal(all(root).find(n=>n.id==='vote-rule-rule').attrs.tabindex,'-1');
 assert(text(root).includes("Open · 0/3 counted"));assert.match(text(root),/Not counted: author/);
 assert.match(text(root),/Frozen alternatives/);assert.match(text(root),/Closed · the rules changed before it was enacted/);
 for(const [closure,label] of [[{how:'delivered',by:'other'},/Closed · delivered by “Combined repair”/],
@@ -72,7 +75,8 @@ assert.match(text(root),/No project ballots/);assert.match(text(root),/No succes
         script = r"""
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 class Element {
-  constructor(tag){this.tag=tag;this.children=[];this.textContent='';}
+  constructor(tag){this.tag=tag;this.children=[];this.textContent='';this.attrs={};}
+  setAttribute(name,value){this.attrs[name]=String(value);}
   appendChild(node){this.children.push(node);}
   replaceChildren(){this.children=[];}
   querySelectorAll(selector){return this.children.flatMap(n=>[n,...n.querySelectorAll(selector)]).filter(n=>n.tag==='details'&&(selector!=='details[open]'||n.open));}
@@ -93,6 +97,7 @@ frame={voting:{inbox_checked_at:100,choices:[{
 }],proposals:[]}};
 voting();
 const rendered=text(root);
+assert.equal(root.querySelectorAll('details').find(n=>n.id==='vote-choice-great-round-1').attrs.tabindex,'-1');
 assert.match(rendered,/Great work choice · Open · 0\\/3 counted votes/);
 assert.match(rendered,/2–8 ordered milestones/);
 assert.doesNotMatch(rendered,/Historical selection rule/);
