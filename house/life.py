@@ -88,6 +88,37 @@ def open_models(state: dict, agent: str, at: float) -> list[str]:
     return [model for model in ROTATION[agent] if model_available(state, agent, model, at)]
 
 
+# A limit whose return time the house cannot read (Steward, 18 November, night). Muse names a moment
+# ("resets at 2026-11-23T00:00:00Z") where the others give a wait, the house did not read it, and each
+# refusal was a fifteen-minute rest and then another lost start: 25 of 34 Muse starts in twelve hours.
+# The Steward: "If muse has run out of tokens let's fall back to more codex". providers.reset_after now
+# reads Muse's form. For any refusal that still gives no time, the route rests fifteen minutes after the
+# first and twice as long after each further one in a row, up to four hours; one finished run on that
+# route starts the count again. Codex takes the share meanwhile (home.provider_shares), exactly as for a
+# limit with a stated return. Only the coordinator's choice of "until" changes, so the journal replays
+# as before.
+UNKNOWN_REST_SECONDS = 900
+UNKNOWN_REST_LIMIT = 4 * 3600
+
+
+def refusals(state: dict, agent: str, model: str, run: str | None = None) -> int:
+    """How many of this route's latest ended runs in a row ended on its quota, not counting `run`."""
+    ended = sorted((item for key, item in state.get("life", {}).get("runs", {}).items()
+                    if key != run and item["agent"] == agent and item["model"] == model
+                    and item["status"] != "active"), key=lambda item: item["started_sequence"])
+    count = 0
+    for item in reversed(ended):
+        if item.get("outcome") != "quota":
+            break
+        count += 1
+    return count
+
+
+def unknown_rest(state: dict, agent: str, model: str, run: str | None = None) -> int:
+    """Seconds a route rests after a quota refusal that named no return time (`run` is that refusal)."""
+    return min(UNKNOWN_REST_LIMIT, UNKNOWN_REST_SECONDS * 2 ** min(refusals(state, agent, model, run), 10))
+
+
 def provider_available(state: dict, agent: str, at: float) -> bool:
     from .maintenance import retry_permit
     if not (state.get("life", {}).get("budgets", {}).get(agent, {}).get("until", 0) <= at

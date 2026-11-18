@@ -246,5 +246,104 @@ class CoordinatorTests(unittest.TestCase):
         self.assertIsNotNone(third)
 
 
+# Steward, 18 November, night. Muse had been at its limit since early afternoon and names the moment it
+# returns; the house could not read that form, so 25 of 34 Muse starts in twelve hours were lost.
+MUSE_AT = ("muse: subscription allowance unavailable: the server sent no usage data\n"
+           "run ended with Failed: API error 429 [request_id=4665cdbd]: Subscription quota exhausted. "
+           "Your usage window resets at {when}. (rate_limit_error)\n")
+
+
+def stamp(seconds_from_now):
+    import datetime
+    moment = datetime.datetime.fromtimestamp(time.time() + seconds_from_now, datetime.timezone.utc)
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class NamedMomentTests(unittest.TestCase):
+    def test_muse_names_the_moment_its_limit_returns(self):
+        said = MUSE_AT.format(when="2026-11-23T00:00:00Z")
+        at = 1795035600.0     # 18 November 2026, 21:00 in London
+        self.assertEqual(99 * 3600.0, providers.reset_after(said, at))
+        self.assertEqual(providers.reset_after(said, at),
+                         providers.reset_after(said.replace("00:00:00Z", "02:00:00+02:00"), at))
+        self.assertEqual(providers.reset_after(said, at),
+                         providers.reset_after(said.replace("00:00:00Z", "00:00:00.000Z"), at))
+        self.assertIsNone(providers.reset_after(said.replace("00:00:00Z", "00:00:00"), at), "no time zone, no trust")
+        self.assertIsNone(providers.reset_after(said.replace("2026-11-23", "2026-11-17"), at), "already past")
+        self.assertIsNone(providers.reset_after(said.replace("2026-11-23", "2027-11-23"), at), "absurdly far")
+        self.assertIsNone(providers.reset_after(said.replace("2026-11-23", "2026-13-45"), at), "not a date")
+        heard = providers.result("muse", "", MUSE_AT.format(when=stamp(3 * 86400)), 1)
+        self.assertEqual("quota", heard["outcome"])
+        self.assertAlmostEqual(3 * 86400, heard["retry_after_seconds"], delta=120)
+
+    def test_a_refusal_that_names_no_time_rests_longer_each_time_in_a_row(self):
+        state = house()
+        runs = state["life"]["runs"]
+
+        def ended(outcome, model="muse-ember-1.0", agent="muse"):
+            runs[str(len(runs))] = {"agent": agent, "model": model, "status": "completed", "outcome": outcome,
+                                    "started_sequence": len(runs) + 1}
+
+        self.assertEqual(900, life.unknown_rest(state, "muse", "muse-ember-1.0"), "the first refusal: fifteen minutes")
+        ended("quota")
+        self.assertEqual(900, life.unknown_rest(state, "muse", "muse-ember-1.0", "0"), "the refusal itself is not counted twice")
+        self.assertEqual(1800, life.unknown_rest(state, "muse", "muse-ember-1.0"))
+        ended("quota"); ended("quota", "muse-wonder-full-1.0"); ended("quota", "gpt-6.1-sol", "codex")
+        self.assertEqual(3600, life.unknown_rest(state, "muse", "muse-ember-1.0"), "other routes are not counted")
+        self.assertEqual(1800, life.unknown_rest(state, "muse", "muse-wonder-full-1.0"))
+        for _ in range(20):
+            ended("quota")
+        self.assertEqual(4 * 3600, life.unknown_rest(state, "muse", "muse-ember-1.0"), "never more than four hours")
+        runs["live"] = {"agent": "muse", "model": "muse-ember-1.0", "status": "active", "started_sequence": 90}
+        self.assertEqual(4 * 3600, life.unknown_rest(state, "muse", "muse-ember-1.0"), "a run still going says nothing")
+        ended("success")
+        self.assertEqual(900, life.unknown_rest(state, "muse", "muse-ember-1.0"), "one finished run starts the count again")
+
+
+class MuseCoordinatorTests(CoordinatorTests):
+    """The real coordinator, with a native that answers as Muse does at its limit."""
+
+    def refuse(self, text):
+        self.h.native.write_text(f"import sys\nsys.stderr.write({text!r})\nsys.exit(1)\n")
+
+    def test_muse_rests_until_the_moment_it_named_and_codex_takes_its_share(self):
+        self.enable()
+        self.refuse(MUSE_AT.format(when=stamp(4 * 86400)))
+        run = self.h.coordinator.start("muse")
+        self.h.drain()
+        state = self.h.record.read()[0]
+        first = state["life"]["runs"][run]
+        self.assertEqual("quota", first["outcome"])
+        resting = state["life"]["model_budgets"]["muse"][first["model"]]
+        now = time.time()
+        self.assertAlmostEqual(now + life.PROBE_SECONDS, resting["until"], delta=120)
+        self.assertAlmostEqual(now + 4 * 86400, resting["resets_at"], delta=120)
+        self.assertEqual(1.5, home.provider_shares(state, now)["codex"], "Codex takes the resting route's half")
+        again = self.h.coordinator.start("muse")
+        self.h.drain()
+        state = self.h.record.read()[0]
+        self.assertNotEqual(first["model"], state["life"]["runs"][again]["model"])
+        self.assertFalse(life.provider_available(state, "muse", time.time()), "both Muse routes are resting now")
+        self.assertIsNone(self.h.coordinator.start("muse"), "no more starts are spent finding out")
+        self.assertEqual(2.0, home.provider_shares(state, time.time())["codex"])
+
+    def test_a_refusal_with_no_time_is_a_fifteen_minute_rest_the_first_time(self):
+        self.enable()
+        self.refuse("run ended with Failed: API error 429: Too many requests\n")
+        run = self.h.coordinator.start("muse")
+        self.h.drain()
+        state = self.h.record.read()[0]
+        first = state["life"]["runs"][run]
+        self.assertEqual("quota", first["outcome"])
+        resting = state["life"]["model_budgets"]["muse"][first["model"]]
+        self.assertAlmostEqual(time.time() + 900, resting["until"], delta=120)
+        self.assertNotIn("resets_at", resting)
+
+
+# Only the two Muse tests above run under the Muse native; the OpenCode ones stay in CoordinatorTests.
+for _name in [name for name in dir(CoordinatorTests) if name.startswith("test_")]:
+    setattr(MuseCoordinatorTests, _name, None)
+
+
 if __name__ == "__main__":
     unittest.main()

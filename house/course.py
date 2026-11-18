@@ -29,9 +29,10 @@ def great_project(state: dict, task: dict | None) -> dict | None:
 def route(state: dict, kind: str, *, strong: bool = False, at: float | None = None) -> str:
     """Spread ordinary runs across an agent's approved routes.
 
-    The least-used route among this agent's recent non-helper runs wins; ties go
-    to the route used least recently, then to the listed order. Explorers and
-    great-work builders take the agent's stronger route.
+    The route furthest below its share of this agent's recent non-helper runs
+    wins (providers.WEIGHTS: two Sol runs for each Astra 6.2 run, otherwise equal
+    shares); ties go to the route used least recently, then to the listed order.
+    Explorers and great-work builders take the agent's stronger route.
     """
     from .life import model_available, open_models
     # A route resting on its quota is passed over; the stronger route falls back to the ordinary ones.
@@ -47,4 +48,6 @@ def route(state: dict, kind: str, *, strong: bool = False, at: float | None = No
     counts = {model: sum(run["model"] == model for run in recent) for model in pool}
     last = {model: max((run["started_sequence"] for run in runs if run["model"] == model), default=0)
             for model in pool}
-    return min(pool, key=lambda model: (counts[model], last[model], pool.index(model)))
+    # Where one more run would leave each route against its share: the lowest goes next.
+    return min(pool, key=lambda model: ((counts[model] + 1) / providers.WEIGHTS.get(model, 1), last[model],
+                                        pool.index(model)))

@@ -6,12 +6,14 @@ never an invented currency bill or remaining allowance.
 """
 from __future__ import annotations
 
+import datetime
 import json
 import math
 import os
 from pathlib import Path
 import re
 import shutil
+import time
 
 MODELS = {
     "codex": ("gpt-6.1-sol", "gpt-6-astra", "gpt-6-luna", "gpt-6.1-terra", "gpt-6.2-astra"),
@@ -42,6 +44,13 @@ STRONG = {"codex": "gpt-6.1-sol", "opencode": "opencode-go/kimi-k3.1-pro",
 # the kinds again, and Astra 6.2 is an ordinary Codex route so its resident works the house like
 # everyone else. Explorers and great works on Codex stay on Sol (STRONG).
 ROTATION_WINDOW = 24
+# Steward, 18 November, night: "let's fall back to more codex with 2/3 running sol and the last one
+# running Astra". The two Codex routes took turns, and Explorers and great works went to Sol on top, so
+# every ordinary Codex wake went to the two or three Astra residents: one of them was woken 26 times in a
+# day against 15 to 18 for each Sol resident. A route's weight is its share of its family's recent runs
+# (course.route): of every three Codex runs, two are Sol and one is Astra 6.2, counting the Sol runs
+# that Explorers and great works take. A route with no entry weighs 1.
+WEIGHTS = {"gpt-6.1-sol": 2, "gpt-6.2-astra": 1}
 
 
 def validate_model(kind, model):
@@ -104,11 +113,13 @@ def command(kind: str, model: str, workspace: Path, private: Path,
 RESET_CEILING_SECONDS = 8 * 86400
 
 
-def reset_after(failure: str) -> float | None:
+def reset_after(failure: str, now: float | None = None) -> float | None:
     """Seconds until a quota returns, when the provider's own terminal error says so.
 
     OpenCode Go reports ``"retryAfterMs": 535655000`` beside "resets in 6d 4h"; Antigravity says
-    "Resets in 143h1m4s". Anything else, or a wait longer than eight days, is treated as not said.
+    "Resets in 143h1m4s"; Muse names the moment, "Your usage window resets at 2026-11-23T00:00:00Z"
+    (read only with its time zone). Anything else, or a wait longer than eight days, is treated as
+    not said.
     """
     found = re.search(r'retryAfterMs\\*"?\s*:\s*(\d{1,12})', failure)
     seconds = int(found.group(1)) / 1000 if found else None
@@ -118,6 +129,16 @@ def reset_after(failure: str) -> float | None:
             units = {"d": 86400, "h": 3600, "m": 60, "s": 1}
             seconds = sum(int(number) * units[unit.lower()]
                           for number, unit in re.findall(r"(\d{1,4})\s*([dhms])", spoken.group(1), re.I))
+    if seconds is None:
+        moment = re.search(r"resets?\s+at\s+(\d{4}-\d\d-\d\dT\d\d:\d\d(?::\d\d)?)(?:\.\d{1,9})?(Z|[+-]\d\d:\d\d)",
+                           failure, re.I)
+        if moment:
+            try:
+                stated = datetime.datetime.fromisoformat(
+                    moment.group(1) + ("+00:00" if moment.group(2).upper() == "Z" else moment.group(2)))
+                seconds = stated.timestamp() - (time.time() if now is None else now)
+            except (ValueError, OverflowError):
+                seconds = None
     if seconds is None or not 0 < seconds <= RESET_CEILING_SECONDS:
         return None
     return max(60.0, float(seconds))

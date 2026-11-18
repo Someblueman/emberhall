@@ -19,7 +19,7 @@ import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, project_work, providers, staffing, work_metrics
 from .life import (CONTROLLER, PROBE_SECONDS, latest_run, model_available, open_models, provider_available,
-                   quota_rest, return_eligible, workload)
+                   quota_rest, return_eligible, unknown_rest, workload)
 from .record import Record
 from .wake_policy import active_policy, active_prompt
 from .watch import group_members, group_stopped, kill_group
@@ -876,6 +876,9 @@ class Coordinator:
             data["model"] = model
             if reset is not None:
                 data.update(until=min(until, now + PROBE_SECONDS), resets_at=until)
+            else:
+                # No return time given: each refusal in a row doubles the rest (life.unknown_rest).
+                data["until"] = now + unknown_rest(state, kind, model, run)
         elif outcome == "quota" and reset is not None:
             data["until"] = now + seconds      # before the migration a quota is a fifteen-minute rest
         self.record.append("life", CONTROLLER, data, request)

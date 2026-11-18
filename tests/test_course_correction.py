@@ -20,6 +20,26 @@ class RotationTests(unittest.TestCase):
         return {"life": {"runs": {str(i): {"agent": agent, "model": model, "started_sequence": i}
                                   for i, (agent, model) in enumerate(runs, 1)}}}
 
+    def test_two_codex_runs_in_three_are_sol_and_one_is_astra(self):
+        # Steward, 18 November, night: "2/3 running sol and the last one running Astra".
+        sol, astra = "gpt-6.1-sol", "gpt-6.2-astra"
+        self.assertEqual({sol: 2, astra: 1}, providers.WEIGHTS)
+        picked = []
+        for _ in range(60):
+            picked.append(course.route(self.state([("codex", model) for model in picked]), "codex"))
+        for start in range(len(picked) - providers.ROTATION_WINDOW + 1):
+            self.assertIn(picked[start:start + providers.ROTATION_WINDOW].count(astra), (7, 8, 9), start)
+        self.assertIn(picked.count(astra), (19, 20, 21), "a third of sixty")
+        self.assertNotIn([astra, astra], [picked[i:i + 2] for i in range(len(picked) - 1)], "Astra never runs twice in a row")
+        # Explorers and great works take Sol on top; those runs count toward Sol's two thirds.
+        strong = self.state([("codex", sol)] * 18 + [("codex", astra)] * 6)
+        self.assertEqual(astra, course.route(strong, "codex"))
+        self.assertEqual(sol, course.route(self.state([("codex", sol)] * 15 + [("codex", astra)] * 9), "codex"))
+        # Helpers are not counted, and the other families still share evenly.
+        helpers = self.state([("codex", "gpt-6-luna")] * 10)
+        self.assertEqual(sol, course.route(helpers, "codex"))
+        self.assertEqual("muse-wonder-full-1.0", course.route(self.state([("muse", "muse-ember-1.0")]), "muse"))
+
     def test_least_used_route_wins_and_nothing_defaults_to_lowest_effort(self):
         deepseek = "opencode-go/deepseek-v4.1-flash"
         state = self.state([("opencode", deepseek)] * 5)

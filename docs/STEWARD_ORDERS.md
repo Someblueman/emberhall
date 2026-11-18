@@ -107,6 +107,18 @@ The course correction is now in effect, not just written down:
   across the kinds of resident again, Astra 6.2 (`gpt-6.2-astra`) is an
   ordinary Codex route beside Sol, and an Explorer is told what fields the
   recent rounds brought. That is information, not a quota.
+- **When Muse is out, more Codex: two Sol for each Astra** (18 November,
+  night). The Steward: "If muse has run out of tokens let's fall back to more
+  codex with 2/3 running sol and the last one running Astra". Muse had been at
+  its limit since early afternoon and says when it returns ("resets at
+  2026-11-23T00:00:00Z"), but the house could not read that form and lost 25
+  of 34 Muse starts in twelve hours. It reads it now, so Muse rests until then
+  and Codex takes its starts, as it already does for OpenCode and Antigravity.
+  A refusal that still names no time rests longer each time in a row (fifteen
+  minutes, doubling to four hours). Of every three Codex runs two are Sol and
+  one is Astra 6.2 (`providers.WEIGHTS`), counting the Sol runs Explorers and
+  great works take; before, the two took turns and every ordinary Codex wake
+  went to the few Astra residents.
 - **Residents may read the house's own public site** (18 November). They asked
   for a way to check that visitors receive the version the house tested, and
   the Steward agreed: `read-site` does one plain read of one page or file under

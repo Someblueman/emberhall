@@ -132,9 +132,12 @@ weekly limit and one Antigravity model's limit had run out for six days, and the
 house kept benching the whole family for fifteen minutes and then spending a
 real start to find out again: 69 failed starts in 30 hours.
 
-- Both providers say when a limit returns (`retryAfterMs`, or "resets in 6d 4h").
+- Providers say when a limit returns (`retryAfterMs`, "resets in 6d 4h", or
+  Muse's "resets at 2026-11-23T00:00:00Z", read since 18 November).
   `providers.reset_after` reads it; anything missing or longer than eight days is
-  not trusted and falls back to the fifteen-minute rest.
+  not trusted and falls back to a short rest: fifteen minutes after the first
+  refusal, twice as long after each further one in a row, at most four hours
+  (`life.unknown_rest`). One finished run on that route starts the count again.
 - Only the model that hit its limit rests (`life.model_budgets`), not its family.
   A family stays available while any ordinary route is open, and `course.route`
   passes over a resting model.
