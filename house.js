@@ -1516,7 +1516,7 @@ function lessonEntry(lesson,parent) {
   html("p","small",`${lesson.author} · ${lessonReviewWords(lesson)}`,entry);
   return entry;
 }
-let hearthState={query:"",page:0};
+let hearthState={query:"",speaker:"",page:0};
 let hearthTrail=null;
 const HEARTH_PAGE_SIZE=4;
 function renderHearthReturn(content) {
@@ -1550,6 +1550,9 @@ function hearthConversation(frames,moment) {
   }
   return [...voices.values()].sort((a,b)=>(b.seq||0)-(a.seq||0)||b.at-a.at);
 }
+function hearthSpeakerKey(voice) {
+  return voice.resident?`resident:${voice.resident}`:`name:${voice.name||"Unnamed resident"}`;
+}
 // The Hearth: find a voice and follow it back to the moment it spoke.
 function renderHearth(content) {
   renderHearthReturn(content);
@@ -1570,6 +1573,35 @@ function renderHearth(content) {
   const clear=workshopButton(controls,"Clear search",()=>{
     hearthState.query="";search.value="";hearthState.page=0;draw();search.focus({preventScroll:true});
   });clear.id="hearth-clear";
+  const filters=html("div","voting-controls",undefined,panel);
+  const speakerLabel=html("label","small","Speaker",filters);speakerLabel.htmlFor="hearth-speaker";
+  const speaker=html("select","",undefined,speakerLabel);speaker.id="hearth-speaker";
+  speaker.setAttribute("aria-controls","hearth-messages");speaker.setAttribute("aria-describedby","hearth-results");
+  const everyone=html("option","","All speakers",speaker);everyone.value="";
+  // Names belong to messages at this moment; identity keeps a renamed resident together.
+  const speakers=new Map();
+  for(const voice of voices) {
+    const key=hearthSpeakerKey(voice),name=voice.name||"Unnamed resident";
+    if(!speakers.has(key))speakers.set(key,{name,names:new Set(),first:voice.seq});
+    const person=speakers.get(key);person.names.add(name);
+    if(Number.isInteger(voice.seq))person.first=voice.seq;
+  }
+  let speakerNumber=0;
+  for(const [key,person] of [...speakers].sort(([a,x],[b,y])=>x.name.localeCompare(y.name)||a.localeCompare(b))) {
+    speakerNumber++;
+    const earlier=[...person.names].filter(name=>name!==person.name);
+    const shared=[...speakers.values()].filter(other=>other.name===person.name).length>1;
+    const label=person.name+(earlier.length?` (also ${earlier.join(", ")})`:"")+
+      (shared?` · ${key.startsWith("name:")?"identity not recorded":Number.isInteger(person.first)?
+        `first message ${person.first}`:`voice ${speakerNumber}`}`:"");
+    html("option","",label,speaker).value=key;
+  }
+  if(hearthState.speaker&&!speakers.has(hearthState.speaker))
+    html("option","","Selected speaker has no messages at this moment",speaker).value=hearthState.speaker;
+  speaker.value=hearthState.speaker||"";
+  speaker.addEventListener("change",()=>{
+    hearthState.speaker=speaker.value;hearthState.page=0;draw();
+  });
   const results=html("p","small",undefined,panel);results.id="hearth-results";results.setAttribute("role","status");
   const box=html("div","voices",undefined,panel);box.id="hearth-messages";box.tabIndex=-1;
   box.setAttribute("role","region");box.setAttribute("aria-label","Public Hearth messages");
@@ -1583,7 +1615,8 @@ function renderHearth(content) {
   }
   function draw() {
     const query=workshopSearchText(hearthState.query);
-    const matches=voices.filter(voice=>!query||[voice.name,voice.text].some(value=>workshopSearchText(value).includes(query)));
+    const matches=voices.filter(voice=>(!hearthState.speaker||hearthSpeakerKey(voice)===hearthState.speaker)&&
+      (!query||[voice.name,voice.text].some(value=>workshopSearchText(value).includes(query))));
     hearthState.page=Math.max(0,Math.min(hearthState.page,Math.ceil(matches.length/HEARTH_PAGE_SIZE)-1));
     const start=hearthState.page*HEARTH_PAGE_SIZE;
     results.textContent=`${matches.length} of ${voices.length} public messages · ${matches.length?`${start+1}–${Math.min(start+HEARTH_PAGE_SIZE,matches.length)}`:"0"} shown · latest first`;
@@ -1608,7 +1641,9 @@ function renderHearth(content) {
         visit.setAttribute("aria-label",`Visit ${voice.name}’s message at event ${voice.seq}`);
       } else html("p","small","Its moment is not available to visit in this publication.",entry);
     }
-    if(!matches.length)html("p","empty-note","No messages match. Clear search to hear the other voices.",box);
+    if(!matches.length)html("p","empty-note",hearthState.speaker?
+      "No messages match this speaker and search. Choose All speakers or clear search to look again.":
+      "No messages match. Clear search to hear the other voices.",box);
     newer.disabled=hearthState.page===0;older.disabled=start+HEARTH_PAGE_SIZE>=matches.length;
     pages.hidden=matches.length<=HEARTH_PAGE_SIZE;
     pages.setAttribute("style",pages.hidden?"display:none":"");
