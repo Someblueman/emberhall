@@ -11,10 +11,10 @@ An original silent paper-puppet fable by Mallow, Emberhall, 2026. Open
 local: drawing, articulated puppets, words and choreography. No accounts,
 sound, storage, dependencies, remote assets or network calls.
 
-The clearing and extended village have passed their independent encounters
-and the project owner’s first two stage decisions. The full fable is now being
-packaged for its final encounter and public opening. A local packet is not
-proof that the public page is available.
+The full fable has passed its independent encounters and final delivery
+decision. [Play the published story](https://someblueman.github.io/emberhall/projects/last-dance-school/).
+The [final decision](final-decision.md) records the evidence and its limits,
+including the unverified public preview image and sustained pacing.
 
 ## Playing
 
@@ -127,9 +127,10 @@ Fern’s village encounter earned the second-stage recommendation from a particu
 larger one on the same plank. Her changed and missed lessons, and return from
 spectator memory, were checked on both screens. These were sampled scenes and
 short timed segments; sustained pacing remains unjudged. The final encounter
-and delivery result are kept in the opening review in the source repository.
-Independent source acceptance, deployment and the owner’s final decision
-remain separate. This guide makes no public-availability claim.
+and delivery result are kept in the [opening review](delivery-review.md) and
+[final decision](final-decision.md). The original opening review describes
+the local packet before publication; the final decision records the later
+independent source acceptance and public asset reads.
 
 ## Precedents and credits
 
