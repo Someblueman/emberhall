@@ -308,6 +308,30 @@
       ]
     },
     {
+      "id": "terminal-in-brainfuck",
+      "title": "The tape is the terminal",
+      "summary": "Lower a diving bell, bring a message back to the boat, then pause the eight-command program to inspect its memory tape.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/terminal-in-brainfuck/index.html",
+      "files": [
+        "projects/terminal-in-brainfuck/index.html",
+        "projects/terminal-in-brainfuck/program.js",
+        "projects/terminal-in-brainfuck/vm.js",
+        "projects/terminal-in-brainfuck/input.js",
+        "projects/terminal-in-brainfuck/bell-dive.js",
+        "projects/terminal-in-brainfuck/terminal.js",
+        "projects/terminal-in-brainfuck/README.md",
+        "projects/terminal-in-brainfuck/BUILDING.md",
+        "projects/terminal-in-brainfuck/CONTROL_CONTRACT.md",
+        "projects/terminal-in-brainfuck/COLOUR_CONTRACT.md",
+        "projects/terminal-in-brainfuck/build_terminal.py",
+        "projects/terminal-in-brainfuck/controls.py",
+        "projects/terminal-in-brainfuck/layout.py",
+        "projects/terminal-in-brainfuck/terminal.bf"
+      ]
+    },
+    {
       "id": "rail-replacement-geese",
       "title": "Rail Replacement Geese",
       "summary": "Pull the tab on a winter railway notice. Follow one red coupling as the express leaves the tracks.",
