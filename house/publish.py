@@ -14,6 +14,7 @@ import hashlib
 import marshal
 
 from .body import export_inputs, projection as build_projection, replay, replay_context
+from .door_summary import now_bytes
 from .record import Record
 from .public_history import Encoder, decode
 
@@ -172,6 +173,15 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
     house code and a journal that still contains the cached head; otherwise the
     history is rebuilt from the start. marshal holds plain data and cannot run code.
     """
+    body, summary, parts, _ = _history_with_cache(record, private, observed_at)
+    return body, summary, parts
+
+
+def _history_with_cache(
+    record: Record,
+    private: Path,
+    observed_at: float | None = None,
+) -> tuple[bytes, dict, dict[str, bytes], dict]:
     final, events, head, source_head, commits, observed_at = export_inputs(record, observed_at)
     identity = code_identity()
     path = private / HISTORY_CACHE
@@ -250,8 +260,17 @@ def history(record: Record, private: Path, observed_at: float | None = None) -> 
                 stale.unlink(missing_ok=True)
     if new_frames or grown or not had_parts or cache.get("head") != head:
         save()
+    snapshot = {
+        "final": final,
+        "head": head,
+        "source_head": source_head,
+        "commits": commits,
+        "observed_at": observed_at,
+        "frames": cache["frames"],
+        "nodes": cache["nodes"],
+    }
     return body, {"journal_head": head, "source_head": source_head, "seq": last_seq,
-                  "at": final["at"], "history_version": 4}, parts
+                  "at": final["at"], "history_version": 4}, parts, snapshot
 
 
 def chronicle_body(record: Record, contents: dict[str, bytes]) -> bytes:
@@ -269,7 +288,7 @@ def publish(record: Record, *, push=False) -> dict:
     private.mkdir(mode=0o700, exist_ok=True)
     with (private / "publisher.lock").open("a+b") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        history_body, summary, parts = history(record, private)
+        history_body, summary, parts, snapshot = _history_with_cache(record, private)
         head = summary["source_head"]
         if not head:
             raise ValueError("No source HEAD")
@@ -289,6 +308,20 @@ def publish(record: Record, *, push=False) -> dict:
             except (OSError, ValueError, KeyError, TypeError):
                 pass
             contents["chronicle/index.html"] = chronicle
+        # Optional Ten-Second Door summary: always rebuilt from the public journal,
+        # activated once site/house.js requests now.json or site/now.json is committed.
+        door_marker = committed_blob(record, head, "site/now.json", optional=True)
+        if door_marker is not None or b"now.json" in contents["house.js"]:
+            contents["now.json"] = now_bytes(
+                final=snapshot["final"],
+                head=snapshot["head"],
+                source_head=snapshot["source_head"],
+                observed_at=snapshot["observed_at"],
+                commits=snapshot["commits"],
+                frames=snapshot["frames"],
+                nodes=snapshot["nodes"],
+                catalog_raw=contents.get("projects.json"),
+            )
         contents.update(parts)
         contents["history.json"] = history_body
         # Visitors poll this tiny file and fetch the history only when it changes.
