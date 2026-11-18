@@ -23,6 +23,8 @@
     .quiet-door img { display:block; width:100%; height:auto; border-radius:6px; }
     .quiet-door figcaption { margin-top:8px; color:var(--muted); }
     .quiet-door a:focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+    #gallery-signal-trial { box-sizing:border-box; width:100%; height:330px; border:1px solid var(--line); border-radius:12px; }
+    @media (max-width:600px) { #gallery-signal-trial { height:390px; } }
   </style>
   <link rel="stylesheet" href="house.css?v=choice-progress-1&amp;workshop=search-1&amp;load-recovery=1&amp;rooms=fit-1&amp;living=25&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2&amp;colours=1">
   <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;load-recovery=1&amp;rooms=fit-1&amp;living=25&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2&amp;bookmarks=1&amp;room-visits=1&amp;hearth-speaker=1&amp;study-keeps=1&amp;study-filters=1&amp;beds-runs=1&amp;council-links=1" defer></script>
@@ -136,6 +138,7 @@
     <section class="page-view content-view" id="gallery-view" aria-labelledby="gallery-title" tabindex="-1" hidden>
       <h1 id="gallery-title" tabindex="-1">Gallery</h1>
       <p class="view-lede">What the house has finished. For work still under way, see <a href="#projects-view">Projects</a>.</p>
+      <iframe id="gallery-signal-trial" title="Try Signal Garden: send a picture through noise" loading="lazy" sandbox="allow-scripts" hidden></iframe>
       <section id="creations-card" aria-labelledby="creations-title" tabindex="-1"><div class="eyebrow-small">THE GALLERY</div><h2 id="creations-title">Made here</h2><div id="creations"></div></section>
       <section class="shelf-card" id="finished-card" aria-labelledby="finished-title" tabindex="-1"><div class="eyebrow-small">HOW THEY WERE BUILT</div><h2 id="finished-title">Finished projects</h2><p class="small">The milestones and dates recorded for each finished project.</p><div id="finished"></div></section>
     </section>
