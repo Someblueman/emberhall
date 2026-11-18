@@ -1,6 +1,8 @@
 /* Authored inheritance rules for a fictional dance, not a model of culture. */
 (function (root) {
   'use strict';
+  const V = typeof module !== 'undefined' ? require('./village/story.js') : root.Village;
+  const audienceArchive = new WeakMap();
   const kinds = ['bow', 'wave', 'stamp', 'turn'];
   const beats = [
     ['The clearing', 'Moth puts a chair out for a class of two. “A dance needs somewhere to go.”'],
@@ -27,36 +29,57 @@
     ['The empty chair', 'Rue looks at the chair. “Was there someone else?”'],
     ['The school', 'Nobody sits down. There is still a little dancing to do.'],
     ['A place for a crooked dance', 'The chair stays. The dance goes.']
-  ].map(([title, line]) => ({title, line, seconds: 8}));
+  ].map(([title, line]) => ({title, line, seconds: 8})).concat(V.beats);
+
+  function remember(state) {
+    audienceArchive.get(state).push(structuredClone(state));
+  }
+  function replay(state, beat) {
+    const frames = audienceArchive.get(state);
+    if (!Number.isInteger(beat) || !frames || !frames[beat]) throw new Error('That scene has not happened');
+    return structuredClone(frames[beat]);
+  }
+  function audience(state, key, watching) {
+    const deadline = {lio: 43, lioLate: 43, bea: 51, exchange: 77}[key];
+    if (!audienceArchive.has(state) || deadline === undefined || state.beat >= deadline || typeof watching !== 'boolean') return false;
+    state.audience[key] = watching;
+    audienceArchive.get(state)[state.beat] = structuredClone(state);
+    return true;
+  }
 
   function gesture(kind, big = false) {
     if (!kinds.includes(kind)) throw new Error('Unknown gesture');
     return {kind, tilt: big ? 24 : 12, reach: big ? 1.25 : 0.85, foot: big ? 18 : 10};
   }
   function learn(source, pupil, slots) {
-    if (!['ada', 'pip', 'rue'].includes(pupil)) throw new Error('Unknown pupil');
+    const style = {ada: [6, .8, .7], pip: [-5, 1.22, 1.3], rue: [4, .82, .75],
+      lio: [7, .94, .82], bea: [10, 1.25, 1.18]}[pupil];
+    if (!style) throw new Error('Unknown pupil');
     return source.filter((_, i) => slots.includes(i)).map(g => ({
       kind: g.kind,
-      tilt: g.tilt + (pupil === 'ada' ? 6 : pupil === 'pip' ? -5 : 4),
-      reach: g.reach * (pupil === 'ada' ? 0.8 : pupil === 'pip' ? 1.22 : 0.82),
-      foot: g.foot * (pupil === 'ada' ? 0.7 : pupil === 'pip' ? 1.3 : 0.75)
+      tilt: g.tilt + style[0], reach: g.reach * style[1], foot: g.foot * style[2]
     }));
   }
   function start(phrase, options) {
     if (phrase.length !== 3 || phrase.some(g => !kinds.includes(g.kind))) throw new Error('Choose three gestures');
     if (!['ada', 'pip'].includes(options.teacher)) throw new Error('Choose Rue’s teacher');
-    return {beat: 0, memories: {moth: phrase.map(g => ({...g})), ada: [], pip: [], rue: []},
+    const state = {beat: 0, memories: {moth: phrase.map(g => ({...g})), ada: [], pip: [], rue: [], lio: [], bea: []},
       watching: {ada: !!options.ada, pip: !!options.pip}, teacher: options.teacher,
-      late: !!options.late, handoffs: []};
+      late: !!options.late, handoffs: [], gift: [],
+      audience: {lio: options.lio !== false, lioLate: !!options.lioLate,
+        bea: options.bea !== false, exchange: options.exchange !== false}};
+    audienceArchive.set(state, []); remember(state);
+    return state;
   }
   function next(state) {
+    if (!audienceArchive.has(state)) throw new Error('Only the living dance can advance');
     if (state.beat >= beats.length - 1) return false;
     state.beat++;
     if (state.beat === 4) {
       for (const pupil of ['ada', 'pip']) {
         const slots = state.watching[pupil] ? [0, 1, 2] : [];
         state.memories[pupil] = learn(state.memories.moth, pupil, slots);
-        state.handoffs.push({from: 'moth', to: pupil, slots, count: state.memories[pupil].length});
+        state.handoffs.push({from: 'moth', to: pupil, slots, count: state.memories[pupil].length, movements: state.memories[pupil].map(g => g.kind)});
       }
     }
     if (state.beat === 12) state.memories.moth = []; // Nobody can restore the departed score.
@@ -64,11 +87,13 @@
       const source = state.memories[state.teacher];
       const slots = state.late ? [1, 2] : [0, 1, 2];
       state.memories.rue = learn(source, 'rue', slots);
-      state.handoffs.push({from: state.teacher, to: 'rue', slots: slots.filter(i => i < source.length), count: state.memories.rue.length});
+      state.handoffs.push({from: state.teacher, to: 'rue', slots: slots.filter(i => i < source.length), count: state.memories.rue.length, movements: state.memories.rue.map(g => g.kind)});
     }
+    V.apply(state, learn);
+    remember(state);
     return true;
   }
-  function performance(state) {
+  function firstPerformance(state) {
     const b = state.beat;
     if (b >= 1 && b <= 3) return {who: 'moth', slot: b - 1};
     if (b >= 5 && b <= 7) return {who: 'ada', slot: b - 5};
@@ -77,13 +102,17 @@
     if (b >= 18 && b <= 20) return {who: 'rue', slot: b - 18};
     return null;
   }
+  function performances(state) {
+    return state.beat >= 24 ? V.acts(state) : [firstPerformance(state)].filter(Boolean);
+  }
   function caption(state) {
+    if (state.beat >= 24) return V.caption(state, {bow: 'crooked bow', wave: 'sleeve-wave', stamp: 'brave stamp', turn: 'sideways turn'});
     const b = state.beat, names = {ada: 'Ada', pip: 'Pip'};
     if (b === 4 && (!state.watching.ada || !state.watching.pip)) {
       const absent = !state.watching.ada && !state.watching.pip ? 'Both pupils were' : `${!state.watching.ada ? 'Ada was' : 'Pip was'}`;
       return `${absent} chasing a moth instead. Moth’s dance did not reach them.`;
     }
-    const act = performance(state);
+    const act = firstPerformance(state);
     if (act && !state.memories[act.who][act.slot]) {
       return act.who === 'rue' ? 'Rue waits. Nobody taught the sleeves what to do here.' : `${names[act.who]} looks at the floor. “I missed that bit.”`;
     }
@@ -93,7 +122,7 @@
     if (b === 23) return state.memories.rue.length ? 'Rue leaves a space beside the chair. “For whoever comes next.”' : 'Rue waits beside the chair. “Perhaps tomorrow somebody will come.”';
     return beats[b].line;
   }
-  const api = {kinds, beats, gesture, learn, start, next, performance, caption};
+  const api = {kinds, beats, gesture, learn, start, next, performances, caption, replay, audience};
   if (typeof module !== 'undefined') module.exports = api;
   else root.Dance = api;
 })(typeof globalThis === 'undefined' ? this : globalThis);

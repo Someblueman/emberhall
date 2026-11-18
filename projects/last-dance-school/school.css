@@ -266,3 +266,16 @@ footer p {
   font: 15px/1.5 system-ui,sans-serif;
   min-height: 44px;
 }
+#village-choices, #replay {
+  border-top: 1px solid var(--line);
+  margin: 12px 24px 22px;
+  padding-top: 20px;
+}
+#village-choices h2 { font-size: 1.3rem; }
+#village-choices p, #replay p { font: 14px/1.6 system-ui,sans-serif; color: var(--muted); }
+#village-choices label { padding: 8px 0; font-size: .94rem; }
+#village-choices label:has(input:disabled) { color: var(--muted); }
+#replay-scenes { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+#replay button { font: 14px/1.4 system-ui,sans-serif; }
+
+.replay-transport { display: flex; flex-wrap: wrap; gap: 8px; }
