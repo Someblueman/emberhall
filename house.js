@@ -1224,6 +1224,55 @@ function bedsDirectory(moment, state) {
   return {total:moment.residents.length,matches:residents.length,page,pages,
     visible:residents.slice(page*DISPLAY_BUNKS,(page+1)*DISPLAY_BUNKS)};
 }
+const BEDS_RUN_PAGE_SIZE=6;
+const bedsRunPages=new Map();
+function renderBedsRuns(card,resident,summaryId) {
+  const runs=(frame.runs||[]).filter(run=>run.resident===resident.id&&run.sequence<=frame.seq)
+    .sort((a,b)=>b.sequence-a.sequence);
+  const status=html("p","small",undefined,card);status.id=`beds-runs-status-${resident.id}`;
+  status.setAttribute("role","status");
+  const entries=html("div","",undefined,card);entries.id=`beds-runs-${resident.id}`;entries.tabIndex=-1;
+  entries.setAttribute("role","region");entries.setAttribute("aria-label",`Run history for ${resident.name}`);
+  entries.setAttribute("aria-describedby",status.id);
+  let newer,older;
+  if(runs.length>BEDS_RUN_PAGE_SIZE) {
+    const pager=html("div","beds-pager",undefined,card);
+    for(const [label,delta,key] of [["Newer runs",-1,"newer"],["Older runs",1,"older"]]) {
+      const button=html("button","quiet-button",label,pager);button.type="button";
+      button.id=`beds-runs-${key}-${resident.id}`;button.setAttribute("aria-controls",entries.id);
+      button.addEventListener("click",()=>{
+        bedsRunPages.set(resident.id,(bedsRunPages.get(resident.id)||0)+delta);draw();
+        entries.focus({preventScroll:true});entries.scrollIntoView?.({block:"nearest"});
+      });
+      if(delta<0)newer=button;else older=button;
+    }
+  }
+  const draw=()=>{
+    const page=Math.max(0,Math.min(bedsRunPages.get(resident.id)||0,Math.ceil(runs.length/BEDS_RUN_PAGE_SIZE)-1));
+    bedsRunPages.set(resident.id,page);
+    const start=page*BEDS_RUN_PAGE_SIZE;
+    status.textContent=`${runs.length} recorded ${runs.length===1?"run":"runs"} · ${runs.length?`${start+1}–${Math.min(start+BEDS_RUN_PAGE_SIZE,runs.length)}`:"0"} shown · latest start first.`;
+    if(newer)newer.disabled=page===0;
+    if(older)older.disabled=start+BEDS_RUN_PAGE_SIZE>=runs.length;
+    entries.replaceChildren();
+    if(!runs.length)html("p","small","No supervised run receipts at this moment.",entries);
+    runs.slice(start,start+BEDS_RUN_PAGE_SIZE).forEach(run=>{
+      const entry=html("div","beds-run",undefined,entries),kind=kinds[run.agent]||kinds.unrecorded;
+      html("strong","",`${kind.name}${run.model?` · ${run.model}`:""}`,entry);
+      html("code","",run.id,entry);
+      html("p","small",`Started ${clock(run.start,{year:"numeric"})} · event ${run.sequence}`,entry);
+      html("p","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
+      for(const [label,seq] of [["start",run.sequence],[run.status==="ended"?"end":"result",run.end?run.last_sequence:null]]) {
+        if(Number.isInteger(seq)&&seq<=frame.seq&&data.frames.some(moment=>moment.seq===seq)) {
+          const jump=html("button","quiet-button",`Visit ${label} event ${seq}`,entry);
+          jump.id=`beds-event-${label}-${run.id}`;jump.type="button";
+          jump.addEventListener("click",()=>{jumpToSequence(seq);($(summaryId)||$("beds-list"))?.focus({preventScroll:true});});
+        }
+      }
+    });
+  };
+  draw();
+}
 function renderBedsDirectory(content) {
   const panel=html("section","beds-directory",undefined,content);
   const heading=html("h3","","Find a resident",panel);heading.id="beds-title";
@@ -1276,24 +1325,7 @@ function renderBedsDirectory(content) {
       (r.name_history||[]).forEach(change=>{
         html("p","small",`${change.from} → ${change.to} · chose this name at event ${change.sequence}`,card);
       });
-      const runs=(frame.runs||[]).filter(run=>run.resident===r.id&&run.sequence<=frame.seq)
-        .sort((a,b)=>b.sequence-a.sequence);
-      html("p","small",`${runs.length} recorded ${runs.length===1?"run":"runs"} · all shown, latest start first.`,card);
-      if(!runs.length)html("p","small","No supervised run receipts at this moment.",card);
-      runs.forEach(run=>{
-        const entry=html("div","beds-run",undefined,card),kind=kinds[run.agent]||kinds.unrecorded;
-        html("strong","",`${kind.name}${run.model?` · ${run.model}`:""}`,entry);
-        html("code","",run.id,entry);
-        html("p","small",`Started ${clock(run.start,{year:"numeric"})} · event ${run.sequence}`,entry);
-        html("p","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
-        for(const [label,seq] of [["start",run.sequence],[run.status==="ended"?"end":"result",run.end?run.last_sequence:null]]) {
-          if(Number.isInteger(seq)&&seq<=frame.seq&&data.frames.some(moment=>moment.seq===seq)) {
-            const jump=html("button","quiet-button",`Visit ${label} event ${seq}`,entry);
-            jump.id=`beds-event-${label}-${run.id}`;jump.type="button";
-            jump.addEventListener("click",()=>{jumpToSequence(seq);($(summary.id)||$("beds-list"))?.focus({preventScroll:true});});
-          }
-        }
-      });
+      renderBedsRuns(card,r,summary.id);
     });
   };
   search.addEventListener("input",()=>{bedsState.query=search.value;bedsState.page=0;draw();});
