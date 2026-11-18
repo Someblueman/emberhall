@@ -115,6 +115,7 @@
     const isHolding = opts.holder === puppetId;
     const isSelected = opts.selected === puppetId && !state.inPlay;
     const isWings = opts.inWings;
+    const isKnowing = opts.knowingLook === puppetId;
 
     const grp = svgEl('g', {
       transform: `translate(${x.toFixed(1)}, ${y.toFixed(1)})`,
@@ -134,15 +135,34 @@
       }));
     }
 
+    // Distinct cut-paper catching/poised hands per puppet
+    if (puppetId === 'A') {
+      grp.appendChild(svgEl('path', {
+        d: isHolding ? 'M-7 -22 L-13 -32 M7 -22 L14 -33' : 'M-7 -22 L-11 -14 M7 -22 L13 -31',
+        stroke: '#f5dfc0', 'stroke-width': '2.2', 'stroke-linecap': 'round',
+      }));
+    } else if (puppetId === 'B') {
+      grp.appendChild(svgEl('path', {
+        d: isHolding ? 'M-6 -22 L-12 -33 M6 -22 L12 -33' : 'M-6 -22 L-11 -14 M6 -22 L11 -14',
+        stroke: '#f5dfc0', 'stroke-width': '2.1', 'stroke-linecap': 'round',
+      }));
+    } else if (puppetId === 'C') {
+      grp.appendChild(svgEl('path', {
+        d: isHolding ? 'M-7 -22 L-14 -31 M7 -22 L14 -35' : 'M-7 -22 L-11 -13 M7 -22 L11 -13',
+        stroke: '#f5dfc0', 'stroke-width': '2.2', 'stroke-linecap': 'round',
+      }));
+    } else {
+      grp.appendChild(svgEl('path', {
+        d: isHolding ? 'M-7 -21 L-12 -34 M7 -21 L12 -31' : 'M-7 -21 L-12 -15 M7 -21 L12 -14',
+        stroke: '#f5dfc0', 'stroke-width': '2.1', 'stroke-linecap': 'round',
+      }));
+    }
+
     // Articulated cut-paper body silhouette per puppet
     if (puppetId === 'A') {
       grp.appendChild(svgEl('path', {
         d: 'M-8 -4 L-6 -26 L6 -26 L8 -4 L4 -4 L3 -13 L-3 -13 L-4 -4 Z',
         fill: meta.color, stroke: '#f7efd9', 'stroke-width': '1',
-      }));
-      grp.appendChild(svgEl('path', {
-        d: 'M6 -23 L13 -31',
-        stroke: '#f7efd9', 'stroke-width': '2.2', 'stroke-linecap': 'round',
       }));
     } else if (puppetId === 'B') {
       grp.appendChild(svgEl('path', {
@@ -173,11 +193,20 @@
       }));
     }
 
-    // Head
+    // Head + eyes (with knowing sidelong glance on repeat pass)
     grp.appendChild(svgEl('circle', {
       cx: 0, cy: -31, r: 5.8,
       fill: '#f5dfc0', stroke: '#221914', 'stroke-width': '1.1',
     }));
+    const gazeShift = isKnowing ? 1.5 : 0;
+    grp.appendChild(svgEl('circle', { cx: -2 + gazeShift, cy: -31.5, r: 0.9, fill: '#221914' }));
+    grp.appendChild(svgEl('circle', { cx: 2 + gazeShift, cy: -31.5, r: 0.9, fill: '#221914' }));
+    if (isKnowing) {
+      grp.appendChild(svgEl('path', {
+        d: 'M-3 -34.2 Q-1 -35.4 1 -34.2',
+        fill: 'none', stroke: '#221914', 'stroke-width': '0.9',
+      }));
+    }
 
     // Brass paper fastener pin on chest
     grp.appendChild(svgEl('circle', {
@@ -214,8 +243,12 @@
 
     const grp = svgEl('g', { transform: 'translate(180, 294)' });
 
-    // Pit shadow & snare drum
-    grp.appendChild(svgEl('ellipse', { cx: 0, cy: 20, rx: 32, ry: 7, fill: '#0e0a08' }));
+    // Pit shadow, brass music stand, & snare drum
+    grp.appendChild(svgEl('ellipse', { cx: 0, cy: 20, rx: 34, ry: 7, fill: '#0e0a08' }));
+    grp.appendChild(svgEl('path', {
+      d: 'M34 22 V-4 M27 -6 L41 -10 L41 1 L27 5 Z',
+      fill: '#f4ebd7', stroke: '#8c693a', 'stroke-width': '1.2',
+    }));
     grp.appendChild(svgEl('rect', {
       x: -22, y: 2, width: 44, height: 18, rx: 3,
       fill: '#a63429', stroke: '#f4c867', 'stroke-width': '1.5',
@@ -225,10 +258,14 @@
       fill: '#efe0be', stroke: '#4c341a', 'stroke-width': '1.2',
     }));
 
-    // Drummer torso
+    // Drummer torso & bow tie (hunched on mistimed bow)
     grp.appendChild(svgEl('path', {
-      d: 'M-15 2 L-11 -18 L11 -18 L15 2 Z',
+      d: slipped ? 'M-16 2 L-13 -14 L13 -14 L16 2 Z' : 'M-15 2 L-11 -18 L11 -18 L15 2 Z',
       fill: '#2f3d4c', stroke: '#d8c5a3', 'stroke-width': '1',
+    }));
+    grp.appendChild(svgEl('path', {
+      d: slipped ? 'M-5 -12 L0 -10 L5 -12 L5 -8 L0 -10 L-5 -8 Z' : 'M-5 -16 L0 -14 L5 -16 L5 -12 L0 -14 L-5 -12 Z',
+      fill: '#b5372f',
     }));
 
     // Head
@@ -416,6 +453,7 @@
         holder: stageSnap ? stageSnap.holder : null,
         selected: selectedPuppet,
         inWings: false,
+        knowingLook: snap ? snap.knowingLook : null,
       });
     }
 

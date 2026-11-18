@@ -340,12 +340,15 @@
     }
 
     const fromLabel = fromByRig[state.leadRig] || activeHolders.values().next().value;
-    const note = describeBeat(fromLabel, targetPuppet, outcomes);
+    const repeatPass = state.beats.some((b) => b.kind === 'throw' && b.from === fromLabel && b.to === targetPuppet);
+    const knowingLook = repeatPass ? targetPuppet : null;
+    const note = describeBeat(fromLabel, targetPuppet, outcomes, knowingLook);
     const beat = {
       index: state.beats.length,
       kind: 'throw',
       from: fromLabel,
       to: targetPuppet,
+      knowingLook,
       note,
       outcomes,
       stages: cloneStageStatus(state.stageStatus),
@@ -359,11 +362,12 @@
     };
   }
 
-  function describeBeat(from, to, outcomes) {
+  function describeBeat(from, to, outcomes, knowingLook) {
     const r = outcomes.rook;
     const s = outcomes.shrikhande;
+    const lookSuffix = knowingLook ? ` (${PUPPET_META[knowingLook].name} gives a knowing look.)` : '';
     if (r === 'caught' && s === 'caught') {
-      return `${from} → ${to}: clean wire on both stages. Both drummers wait.`;
+      return `${from} → ${to}: clean wire on both stages. Both drummers wait.${lookSuffix}`;
     }
     if (r === 'caught' && s === 'slipped') {
       return `${from} → ${to}: caught on Stage I, slipped on Stage II — bowler over the drummer's eyes!`;
@@ -420,6 +424,7 @@
       kind: beat.kind,
       from: beat.from,
       to: beat.to,
+      knowingLook: beat.knowingLook || null,
       note: beat.note,
       outcomes: { ...beat.outcomes },
       rook: { ...beat.stages.rook, litWire: beat.stages.rook.litWire ? { ...beat.stages.rook.litWire } : null },

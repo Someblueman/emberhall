@@ -146,6 +146,8 @@ test('first_step rook K4 sequence: first 6 throws work on both stages, 7th slips
   const still0 = rig.stepTake(state, 0);
   assert.equal(still0.rook.holder, 'A');
   assert.equal(still0.shrikhande.holder, 'A');
+  const stillSecondBC = rig.stepTake(state, 6);
+  assert.equal(stillSecondBC.knowingLook, 'C', 'second B->C pass marks knowingLook on C');
   const stillSlip = rig.stepTake(state, finalBeat.index);
   assert.equal(stillSlip.rook.holder, 'D');
   assert.equal(stillSlip.rook.litWire.from, 'C');

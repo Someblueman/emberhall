@@ -12,10 +12,23 @@ ROOT = Path(__file__).resolve().parent
 
 class StageBundleTests(unittest.TestCase):
     def test_no_external_urls_in_runtime_files(self) -> None:
-        for name in ("index.html", "stage.css", "stage-rig.js", "show.js"):
+        for name in ("index.html", "stage.css", "stage-rig.js", "show.js", "gallery-preview.svg"):
             text = (ROOT / name).read_text(encoding="utf-8").replace("http://www.w3.org/2000/svg", "")
             self.assertNotIn("http://", text, f"unexpected http:// in {name}")
             self.assertNotIn("https://", text, f"unexpected https:// in {name}")
+
+    def test_gallery_preview_is_deterministic(self) -> None:
+        preview = ROOT / "gallery-preview.svg"
+        self.assertTrue(preview.is_file())
+        original = preview.read_text(encoding="utf-8")
+        res = subprocess.run(
+            ["node", "-e", "process.stdout.write(require('./make-gallery-preview.js').generateSvg())"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(res.stdout, original)
 
     def test_html_assets_and_stage_ids_exist(self) -> None:
         html = (ROOT / "index.html").read_text(encoding="utf-8")
