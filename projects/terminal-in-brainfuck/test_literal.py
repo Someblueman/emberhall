@@ -17,8 +17,8 @@ class LiteralReconstructionTests(unittest.TestCase):
                 j = stack.pop()
                 jumps[i], jumps[j] = j, i
         self.assertFalse(stack)
-        data = iter(b"ABC\rZ\n!\xff\x00Q")
-        memory = bytearray(3100)
+        data = iter(b"\x1b[31;44mABC\rZ\n!\xff\x00Q")
+        memory = bytearray(6000)
         output = bytearray()
         head = pc = count = 0
         while pc < len(code):
@@ -42,11 +42,11 @@ class LiteralReconstructionTests(unittest.TestCase):
             self.assertTrue(0 <= head < len(memory))
             pc += 1
             count += 1
-            if count > 4_000_000:
+            if count > 12_000_000:
                 self.fail("literal reconstruction exceeded its instruction budget")
         expected = bytearray()
-        for cells, row, col in model.ref_frames(b"ABC\rZ\n!\xff\x00Q"):
-            expected.extend(b"\xff" + cells.encode("ascii") + bytes([row, col, 254]))
+        for cells, row, col, attributes in model.ref_frames(b"\x1b[31;44mABC\rZ\n!\xff\x00Q"):
+            expected.extend(b"\xff" + cells.encode("ascii") + bytes(attributes) + bytes([row, col, 254]))
         self.assertEqual(output, expected)
 
 

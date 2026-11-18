@@ -5,6 +5,7 @@ source. Persistent parser cells survive input waits. Workspace is disjoint from
 the generator's arithmetic, dispatch and screen-carry cells.
 """
 from layout import COL, COLS, CUR, DROW, G, PROW, ROWS, TOP
+from colours import sgr
 
 STATE, P1, P2, SEP = range(38, 42)
 OLD, COUNT, END, SAVED_ROW, SAVED_COL, LOOP, LIMIT = range(42, 49)
@@ -144,6 +145,7 @@ def execute_csi(b):
     b.if_flag(FLAG, single)
     for command in (72, 102):
         b.if_eq(CUR, command, lambda: position(b), G[6], G[0], G[1])
+    b.if_eq(CUR, 109, lambda: sgr(b, P1, P2, SEP), G[6], G[0], G[1])
     reset_parser(b)
 
 

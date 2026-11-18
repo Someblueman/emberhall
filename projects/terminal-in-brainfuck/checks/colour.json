@@ -1,0 +1,17 @@
+[
+  {
+    "click": "#preset-colour"
+  },
+  {
+    "click": "#run"
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 1000
+  }
+]

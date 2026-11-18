@@ -5,7 +5,7 @@ end-of-input reading as 0.  Runs of the same command are compiled to a
 single counted operation; that changes speed, never meaning.
 """
 
-TAPE_SIZE = 3100
+from layout import TAPE_SIZE
 _OPS = {">": 0, "<": 1, "+": 2, "-": 3, ".": 4, ",": 5, "[": 6, "]": 7}
 
 
@@ -47,7 +47,7 @@ def run_bf(source, data=b"", max_ops=500_000_000):
         if code == 0:
             ptr += args[ip]
             if ptr >= TAPE_SIZE:
-                raise ValueError("tape pointer moved beyond cell 3099")
+                raise ValueError(f"tape pointer moved beyond cell {TAPE_SIZE - 1}")
         elif code == 1:
             ptr -= args[ip]
             if ptr < 0:

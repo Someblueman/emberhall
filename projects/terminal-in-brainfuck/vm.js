@@ -1,7 +1,7 @@
 "use strict";
 // General eight-command machine. No terminal, cursor, row or frame knowledge.
 class BrainfuckMachine {
-  constructor(source, output = () => {}, tapeSize = 3100) {
+  constructor(source, output = () => {}, tapeSize = 6000) {
     this.ops = [];
     const stack = [];
     let pc = 0;

@@ -1,0 +1,80 @@
+[
+  {
+    "fill": [
+      "#stream",
+      "\\x1b[31;44mXY"
+    ]
+  },
+  {
+    "click": "#load"
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#step"
+  },
+  {
+    "wait": 200
+  },
+  {
+    "click": "#instruction"
+  },
+  {
+    "click": "#follow"
+  },
+  {
+    "fill": [
+      "#tape-start",
+      "64"
+    ]
+  },
+  {
+    "press": "Tab"
+  }
+]

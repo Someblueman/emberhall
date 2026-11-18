@@ -13,6 +13,8 @@ COLS = 40
 class RefTerminal:
     def __init__(self):
         self.grid = [[" "] * COLS for _ in range(ROWS)]
+        self.attributes = [[7] * COLS for _ in range(ROWS)]
+        self.foreground, self.background, self.bright = 7, 0, 0
         self.row = 0
         self.col = 0
         self.state = "text"
@@ -20,10 +22,16 @@ class RefTerminal:
 
     def frame(self):
         cells = "".join("".join(r) for r in self.grid)
-        return (cells, self.row, self.col)
+        return (cells, self.row, self.col, [a for row in self.attributes for a in row])
+
+    @property
+    def attribute(self):
+        return self.foreground + 8 * self.background + 64 * self.bright
 
     def _line_feed(self):
         if self.row == ROWS - 1:
+            self.attributes.pop(0)
+            self.attributes.append([self.attribute] * COLS)
             self.grid.pop(0)
             self.grid.append([" "] * COLS)
         else:
@@ -41,7 +49,19 @@ class RefTerminal:
     def _command(self, final):
         first = self.params[0]
         count = first or 1
-        if final in (72, 102):
+        if final == 109:
+            supported = {0, 1, 22, 39, 49, *range(30, 38), *range(40, 48)}
+            if all(p in supported for p in self.params):
+                for p in self.params:
+                    if p == 0:
+                        self.foreground, self.background, self.bright = 7, 0, 0
+                    elif p in (1, 22):
+                        self.bright = int(p == 1)
+                    elif 30 <= p <= 37 or p == 39:
+                        self.foreground = 7 if p == 39 else p - 30
+                    else:
+                        self.background = 0 if p == 49 else p - 40
+        elif final in (72, 102):
             self.row = min(ROWS, count) - 1
             self.col = min(COLS, (self.params[1] if len(self.params) == 2 else 0) or 1) - 1
         elif len(self.params) == 1:
@@ -63,6 +83,7 @@ class RefTerminal:
                         offset = row * COLS + col
                         if first == 2 or (first == 0 and offset >= cursor) or (first == 1 and offset <= cursor):
                             self.grid[row][col] = " "
+                            self.attributes[row][col] = self.attribute
         self._reset_parser()
 
     def feed(self, byte):
@@ -94,6 +115,7 @@ class RefTerminal:
             self.col = min(COLS - 1, (self.col // 8 + 1) * 8)
         elif 32 <= byte <= 126:
             self.grid[self.row][self.col] = chr(byte)
+            self.attributes[self.row][self.col] = self.attribute
             self.col += 1
             if self.col == COLS:
                 self.col = 0
