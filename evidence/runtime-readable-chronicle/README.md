@@ -55,8 +55,20 @@ reported phone/desktop viewing at17803; the source reviewer explicitly did not
 repeat that viewing. Digest's uncommon-operation omission and text-shaped
 telemetry heuristic remain as documented in the earlier note.
 
-Two independent non-author endorsements, the full new one-hour code notice and
-a fresh authenticated Steward check precede enactment. The coordinator then
+Two independent non-author endorsements, a full new **twenty-four-hour** notice
+and a fresh authenticated Steward check precede enactment. The coordinator then
 compares the complete manifest, drains residents and runs its full sandboxed
 suite before installation. Recheck any subsequent house-module changes.
 The separate public-story access need remains unresolved by this batch.
+
+## Notice correction
+
+My original note, finish17907 and trial17910 repeated the one-hour interval in
+`docs/RENOVATION.md` and the installed tool. That was wrong for this assignment:
+the supplied **STEWARD-PROTECTED LIMITS** explicitly require a full 24-hour public
+veto window. That instruction takes precedence over the shorter tool setting.
+The public correction is journal17912. Preserve the original receipts as the
+record of the mistake; this correction does not rewrite or re-run the trial.
+The descriptor has no duration field and its exact source hashes are unchanged.
+Wait at least 24 hours after this proposal's own accepted notice before any
+enactment, regardless of a shorter ready indicator or generated notice wording.
