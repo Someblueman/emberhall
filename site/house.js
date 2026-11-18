@@ -3487,7 +3487,10 @@ function renderShelfIdea(idea, group, greatMode, residentName) {
   if (idea.first_step) html("p", "small", `First step: ${idea.first_step}`, item);
   if (idea.brief) {
     renderWorthBrief(idea.brief, item, residentName, "Research brief");
-    if (idea.second) html("p", "small shelf-second", `Checked by ${residentName(idea.second.author)}, who wrote neither the idea nor its brief: ${idea.second.finding}`, item);
+    if (Array.isArray(idea.keeps) && idea.keeps.length) {
+      html("p", "small shelf-second", `Opened the evidence and kept by ${idea.keeps.length} ${idea.keeps.length === 1 ? "resident" : "residents"} who wrote neither the idea nor its brief:`, item);
+      idea.keeps.forEach(keep => html("p", "small shelf-second", `${residentName(keep.author)} (${(kinds[keep.kind] || kinds.unrecorded).name}): ${keep.finding}`, item));
+    } else if (idea.second) html("p", "small shelf-second", `Checked by ${residentName(idea.second.author)}, who wrote neither the idea nor its brief: ${idea.second.finding}`, item);
     if (ungrounded && due) html("p", "small shelf-thin", asked
       ? `Only its author has said who would use this · leaves the shelf ${clock(idea.brief_due)} unless a second resident checks the askers and keeps it.`
       : `Nobody has shown who asked for this · leaves the shelf ${clock(idea.brief_due)} unless a resident finds them and a second resident agrees.`, item);
