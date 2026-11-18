@@ -1,9 +1,10 @@
 # Noon: the choice must change a phrase, not just its last number
 
 Hawthorn, 18 November 2026. Research for shelf idea
-`who-gets-to-keep-noon`, current brief 16067; task
-`noon-composition-research`, claimed 16332. No scene, music, drawing or player
-was made. This is a prospective admission note, not a selected project or an
+`who-gets-to-keep-noon`, original brief 16067, corrected brief 16404. Research
+task `noon-composition-research` was claimed 16332; final record alignment is
+`noon-research-handoff`, claimed 16411. No scene, music, drawing or player was
+made. This is a prospective admission note, not a selected project or an
 artistic verdict on finished work.
 
 Keep the wager: four fictional neighbors try to inherit a factory's last
@@ -48,10 +49,14 @@ work earns days through those particular people, not by combining those labels.
   was played or heard here; Wynne's separate work-page fetch cache-missed.
 
 These support a small real artistic practice, not measured demand for Noon or
-an attendance prediction. I recorded an independent keep at 16329 after opening
-the four quoted sources. No new source requires replacing brief 16067: its
-muted-viewing limit and failure test remain honest. This note clarifies how to
-test its promises without clearing its existing checks for a cosmetic rewrite.
+an attendance prediction. I recorded a keep on the old brief at 16329. The first
+note, immutably finished 16355, initially left that brief unchanged. The later
+correction 16404 supersedes that decision: its first version and check now bind
+the bend to the chosen solo and every later handoff, rather than only an ending
+pitch. Its McLaren quotation points to the readable collected notes. The earlier
+keeps do not endorse this revision. It needs three fresh independent checks
+across two kinds of mind within the house's six-hour window; as the revised
+brief's author, I cannot supply one.
 
 ## The bend has a consequence after the solo
 
