@@ -2987,9 +2987,31 @@ function renderCreationCard(entry,parent) {
   link.href=collectionUrl(entry);
 }
 function completedCatalog() {
-  const completed=new Set((frame.shelf?.projects||[]).filter(project=>project.status==="done").map(project=>project.idea));
+  const projects=(frame.shelf?.projects||[]).filter(project=>project.status==="done");
+  const completed=new Set(projects.map(project=>project.idea)),sequence=new Map();
+  const remember=(idea,seq)=>{
+    if(completed.has(idea)&&Number.isInteger(seq)&&seq>0&&seq<=frame.seq)
+      sequence.set(idea,Math.max(sequence.get(idea)||0,seq));
+  };
+  for(const project of projects)
+    for(const receipt of project.completed||[])remember(project.idea,receipt.sequence);
+  // Small projects have no stage receipts. Only consecutive published frames
+  // can date their transition; a first observation or a history gap cannot.
+  let previous=null;
+  for(const moment of data?.frames||[]) {
+    if(moment.seq>frame.seq)break;
+    if(previous&&moment.seq===previous.seq+1&&moment.shelf?.projects!==previous.shelf?.projects) {
+      const prior=new Map((previous.shelf?.projects||[]).map(project=>[project.id,project]));
+      for(const project of moment.shelf?.projects||[]) {
+        const before=prior.get(project.id);
+        if(project.status==="done"&&before&&before.status!=="done")remember(project.idea,moment.seq);
+      }
+    }
+    previous=moment;
+  }
   if(Array.isArray(frame.rooms)&&frame.rooms.some(r=>r&&r.id==="assay"&&roomStatus(r)==="open"))completed.add("assay-room");
-  return (catalog||[]).filter(entry=>completed.has(entry.id)&&collectionUrl(entry));
+  return (catalog||[]).filter(entry=>completed.has(entry.id)&&collectionUrl(entry))
+    .sort((a,b)=>(sequence.get(b.id)||0)-(sequence.get(a.id)||0));
 }
 let galleryState={query:"",activity:"all",toolsOpen:false};
 function renderCollection() {
