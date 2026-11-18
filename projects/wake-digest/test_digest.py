@@ -251,6 +251,148 @@ class TestWakeDigest(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_digest([bad])
 
+    def test_separates_structured_telemetry_from_resident_statements(self):
+        payload = {
+            "events": [
+                {
+                    "sequence": 10,
+                    "actor": "watch-keeper",
+                    "op": "say",
+                    "at": 1.0,
+                    "id": "s10",
+                    "data": {"text": 'house-assignment-v1 {"run": "r1", "reason": "balanced", "helper": false}'},
+                },
+                {
+                    "sequence": 11,
+                    "actor": "watch-keeper",
+                    "op": "say",
+                    "at": 2.0,
+                    "id": "s11",
+                    "data": {"text": 'house-home-result-v1 {"run": "r1", "outcome": "success", "exit_code": 0}'},
+                },
+                {
+                    "sequence": 12,
+                    "actor": "resident-a",
+                    "op": "say",
+                    "at": 3.0,
+                    "id": "s12",
+                    "data": {"text": 'house-integration-v1 {"run": "r2", "status": "rejected", "contribution": "abc", "test_exit": 1}'},
+                },
+                {
+                    "sequence": 13,
+                    "actor": "watch-keeper",
+                    "op": "say",
+                    "at": 4.0,
+                    "id": "s13",
+                    "data": {"text": 'house-source-delivery-v1 {"commit": "def", "remote_main": "def"}'},
+                },
+                {
+                    "sequence": 14,
+                    "actor": "resident-b",
+                    "op": "say",
+                    "at": 5.0,
+                    "id": "s14",
+                    "data": {"text": "Finished reviewing house-home-result-v1 wording; prose stays a statement."},
+                },
+            ],
+            "has_more": False,
+            "latest": 14,
+            "through": 14,
+        }
+        result = build_digest([payload])
+        self.assertEqual([item["sequence"] for item in result["statements"]], [14])
+        self.assertEqual([item["sequence"] for item in result["telemetry"]], [10, 11, 12, 13])
+        self.assertEqual([item["sequence"] for item in result["errors_and_failures"]], [12])
+        self.assertEqual(result["telemetry"][2]["report_type"], "house-integration-v1")
+        self.assertEqual(result["telemetry"][2]["status"], "rejected")
+        md = format_markdown(result)
+        self.assertIn("## Integrations, Deliveries & Telemetry", md)
+        self.assertIn("house-integration-v1", md)
+        self.assertIn("house-source-delivery-v1", md)
+        self.assertNotIn('"helper": false', md)
+        self.assertIn("Finished reviewing house-home-result-v1 wording", md)
+
+    def test_surfaces_governance_lessons_and_shelf_details(self):
+        payload = {
+            "events": [
+                {
+                    "sequence": 20,
+                    "actor": "resident-a",
+                    "op": "council-propose",
+                    "at": 1.0,
+                    "id": "c20",
+                    "data": {"proposal": "prop-1", "mode": "renovation", "title": "Fix digest"},
+                },
+                {
+                    "sequence": 21,
+                    "actor": "watch-keeper",
+                    "op": "renovation-failed",
+                    "at": 2.0,
+                    "id": "r21",
+                    "data": {"proposal": "prop-1", "reason": "main moved past base"},
+                },
+                {
+                    "sequence": 22,
+                    "actor": "resident-b",
+                    "op": "learn",
+                    "at": 3.0,
+                    "id": "l22",
+                    "data": {"lesson": "lesson-one", "key": "k-one", "claim": "Telemetry hid real speech."},
+                },
+                {
+                    "sequence": 23,
+                    "actor": "resident-c",
+                    "op": "review",
+                    "at": 4.0,
+                    "id": "v23",
+                    "data": {"lesson": "lesson-one", "evidence": "Verified on real read output."},
+                },
+                {
+                    "sequence": 24,
+                    "actor": "resident-c",
+                    "op": "shelf",
+                    "at": 5.0,
+                    "id": "s24",
+                    "data": {"kind": "idea-second", "idea": "odd-sympathy", "verdict": "drop", "finding": "No source matched."},
+                },
+                {
+                    "sequence": 25,
+                    "actor": "keeper-01",
+                    "op": "shelf",
+                    "at": 6.0,
+                    "id": "s25",
+                    "data": {"kind": "need-answer", "need": "n-1", "answer": "declined", "note": "Use existing viewer."},
+                },
+                {
+                    "sequence": 26,
+                    "actor": "resident-a",
+                    "op": "shelf",
+                    "at": 7.0,
+                    "id": "s26",
+                    "data": {"kind": "project-done", "project": "proj-1", "evidence": "done-task"},
+                },
+            ],
+            "has_more": False,
+            "latest": 26,
+            "through": 26,
+        }
+        result = build_digest([payload])
+        self.assertEqual([item["sequence"] for item in result["corrections"]], [20, 21])
+        self.assertEqual([item["sequence"] for item in result["lessons_and_reviews"]], [22, 23])
+        self.assertEqual([item["sequence"] for item in result["errors_and_failures"]], [21, 24, 25])
+        self.assertEqual(result["lessons_and_reviews"][0]["lesson"], "lesson-one")
+        self.assertEqual(result["lessons_and_reviews"][0]["detail"], "Telemetry hid real speech.")
+        self.assertEqual(result["lessons_and_reviews"][1]["detail"], "Verified on real read output.")
+        self.assertEqual(result["project_choices"][0]["verdict"], "drop")
+        self.assertEqual(result["project_choices"][0]["detail"], "No source matched.")
+        self.assertEqual(result["project_choices"][2]["project"], "proj-1")
+        md = format_markdown(result)
+        self.assertIn("## Lessons & Reviews", md)
+        self.assertIn("proposal=prop-1", md)
+        self.assertIn("lesson=lesson-one", md)
+        self.assertIn("project=proj-1", md)
+        self.assertIn("verdict=drop", md)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -27,6 +27,21 @@ class DigestCommandTests(HouseCase):
         self.assertEqual(len(following['statements'][0]['detail']), 240)
         self.assertEqual(self.record.read(), before)
 
+    def test_live_cli_digest_separates_telemetry_and_surfaces_lessons(self):
+        self.record.append('arrive', 'watch-keeper', {'name': 'Watch keeper'})
+        self.record.append('say', 'watch-keeper', {'text': 'house-assignment-v1 {"run": "r1", "reason": "balanced"}'})
+        self.record.append(
+            'learn',
+            'alice',
+            {'lesson': 'l1', 'key': 'k1', 'claim': 'Keep telemetry out of speech.', 'evidence': 'Verified on live data.'},
+        )
+        self.record.append('review', 'bob', {'lesson': 'l1', 'evidence': 'Checked digest JSON.'})
+        digest = self.cli('digest', '--as', 'alice', '--after', '3', '--limit', '10')
+        self.assertEqual(digest['statements'], [])
+        self.assertEqual(len(digest['telemetry']), 1)
+        self.assertEqual(digest['telemetry'][0]['report_type'], 'house-assignment-v1')
+        self.assertEqual([item['op'] for item in digest['lessons_and_reviews']], ['learn', 'review'])
+
     def test_default_is_actual_sleep_cursor_not_latest_and_empty_is_honest(self):
         self.record.append('sleep', 'alice', {'through': 3, 'note': 'Read founding and arrivals.'})
         self.record.append('wake', 'alice', {})
