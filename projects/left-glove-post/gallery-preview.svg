@@ -1,0 +1,66 @@
+<!-- Opening drawing by Mallow, from source 468d84459f1bb22d1164ae09384d83930364642e. Static extraction by Sorrel; no invented scene. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="470" font-family="Georgia,serif" id="scene" viewBox="0 0 800 470" role="img" aria-labelledby="scene-title scene-desc">
+          <title id="scene-title">A glove awaits delivery</title><desc id="scene-desc">A stern post clerk, a hopeful courier and a customer with a bare right hand wait at the counter.</desc>
+          <style>[hidden]{display:none}</style>
+          <defs>
+            <pattern id="paper" width="17" height="17" patternUnits="userSpaceOnUse"><path d="M2 4h1m9 8h1" stroke="#bcab89" opacity=".24"/></pattern>
+            <g id="glove"><path d="M-19 27l-3-35q0-7 5-7 5 0 6 6l1-16q0-7 5-7 5 0 5 7v-9q0-6 5-6t5 6v10q0-6 5-6t5 6l-1 25 9-9q5-4 9 1t-1 10L16 29Z" fill="#497c91" stroke="#263b3d" stroke-width="3" stroke-linejoin="round"/><path d="M-17 21l30 1m-25 4h23" stroke="#f5e8ce" stroke-width="2"/></g>
+          </defs>
+          <path fill="#e8dcc0" d="M0 0h800v470H0z"/><path fill="url(#paper)" d="M0 0h800v470H0z"/>
+          <g id="town" fill="none" stroke="#b7a98b" stroke-width="3">
+            <path d="M0 270Q130 220 245 270T500 265T800 270M80 320Q280 250 475 315T800 305" stroke="#c6b897" stroke-width="38"/>
+            <path d="M18 151l52-40 52 40v88H18zm0 0h104m-80 88v-45h40v45M649 119l52-43 53 43v115H649zm0 0h105m-81 115v-55h39v55" fill="#dfceb0"/>
+            <path d="M37 154h23v23H37zm51 0h17v23H88zM667 132h18v24h-18zm42 0h22v24h-22z" fill="#efe4c8"/>
+            <path d="M173 110v130m-15-94h30m-15-48q-25 23 0 37 25-14 0-37Z"/>
+            <path d="M591 154v104m-12-75h24m-12-41q-20 20 0 30 20-10 0-30Z"/>
+            <path d="M320 80q80-20 160 0" stroke-dasharray="3 8"/>
+          </g>
+          <g id="office">
+            <path d="M216 83h370v202H216z" fill="#f3e8ce" stroke="#263b3d" stroke-width="4"/>
+            <path d="M204 83l26-39h340l28 39Z" fill="#b44e3b" stroke="#263b3d" stroke-width="4"/>
+            <path d="M225 90h353v27H225z" fill="#263b3d"/><text x="401" y="109" text-anchor="middle" fill="#f3e8ce" font-size="16" letter-spacing="4">LEFT GLOVES ONLY</text>
+            <path d="M247 132h87v93h-87z" fill="#d6bc8d" stroke="#263b3d" stroke-width="3"/>
+            <path d="M248 181h85m-42-49v93" stroke="#263b3d" stroke-width="2"/>
+            <g id="clerk">
+              <path d="M355 248q-9-58 34-59 42-2 42 59Z" fill="#b44e3b" stroke="#263b3d" stroke-width="3"/>
+              <path d="M381 190l9 14 10-15" fill="#f3e8ce" stroke="#263b3d" stroke-width="2"/>
+              <ellipse cx="389" cy="161" rx="27" ry="32" fill="#d7a878" stroke="#263b3d" stroke-width="3"/>
+              <path d="M361 151q-7-31 27-30 35-2 31 29Z" fill="#263b3d"/><path d="M354 150h74" stroke="#263b3d" stroke-width="8"/>
+              <circle cx="379" cy="160" r="8" fill="none" stroke="#263b3d" stroke-width="2"/><circle cx="401" cy="160" r="8" fill="none" stroke="#263b3d" stroke-width="2"/><path d="M387 160h6m-9 24h17m-16-9h9" stroke="#263b3d" stroke-width="2"/>
+              <path id="stamp-arm" d="M416 213l24 16 13-20" fill="none" stroke="#263b3d" stroke-width="12" stroke-linecap="round"/>
+              <path d="M449 200v-12m-8 14h18m-16-15h14" stroke="#b44e3b" stroke-width="6"/>
+            </g>
+            <path d="M229 239h340v22H229zm17 22v47m302-47v47" fill="#917455" stroke="#263b3d" stroke-width="4"/>
+            <g id="customer">
+              <path d="M539 323l-7 35m31-35 13 35" stroke="#263b3d" stroke-width="11" stroke-linecap="round"/>
+              <path d="M523 320l2-74q22-17 44 0l6 74Z" fill="#d5a141" stroke="#263b3d" stroke-width="3"/>
+              <ellipse cx="547" cy="217" rx="24" ry="29" fill="#a97653" stroke="#263b3d" stroke-width="3"/>
+              <path d="M523 207q-3-31 22-31 30-1 27 31l-16-15-9 12-8-13Z" fill="#263b3d"/>
+              <path d="M538 218h3m14 0h3m-18 17q8 5 15-1" stroke="#263b3d" stroke-width="2"/>
+              <path d="M528 263l-23 25-19-33" stroke="#d5a141" stroke-width="14" fill="none" stroke-linecap="round"/>
+              <path d="M568 267l22 26 15-7" stroke="#d5a141" stroke-width="14" fill="none" stroke-linecap="round"/>
+              <path d="M482 255l-4-25q0-5 4-5l4 12-1-21q2-5 5 0l2 19 2-22q3-5 5 1l-1 22 5-18q4-3 5 2l-4 27-7 12Z" fill="#a97653" stroke="#263b3d" stroke-width="2"/>
+              <path id="worn-glove" d="M482 255l-4-25q0-5 4-5l4 12-1-21q2-5 5 0l2 19 2-22q3-5 5 1l-1 22 5-18q4-3 5 2l-4 27-7 12Z" fill="#497c91" stroke="#263b3d" stroke-width="2" hidden=""/>
+            </g>
+          </g>
+          <g id="courier-position" transform="translate(316 287)">
+            <g id="courier-carried">
+              <path d="M-18 42l-11 29m43-29 13 29" stroke="#263b3d" stroke-width="12" stroke-linecap="round"/>
+              <path d="M-27 43l6-77q21-15 42 0l7 77Z" fill="#497c91" stroke="#263b3d" stroke-width="3"/>
+              <path d="M-16-30l12 32 22-31M-18 43l29-70" fill="none" stroke="#e9d8b5" stroke-width="5"/>
+              <path d="M-21-16l-18 25 20 12m42-37 17 22-17 11" fill="none" stroke="#497c91" stroke-width="13" stroke-linecap="round"/>
+              <ellipse cy="-66" rx="24" ry="28" fill="#d7a878" stroke="#263b3d" stroke-width="3"/>
+              <path d="M-24-77q0-23 24-23t24 23l10 1v7h-67v-7Z" fill="#b44e3b" stroke="#263b3d" stroke-width="3"/>
+              <path d="M-9-65h3m14 0h3m-19 18q8 6 17-1" stroke="#263b3d" stroke-width="2"/>
+              <path d="M9-24h14v17H9z" fill="#f3e8ce" stroke="#263b3d" stroke-width="2"/><path d="M12-19h7v3h-5v5" fill="none" stroke="#b44e3b" stroke-width="2"/>
+              <g id="carried-glove" transform="translate(-5 8) scale(.65)"><use href="#glove"/></g>
+            </g>
+          </g>
+          <g id="postmark" transform="translate(670 315) rotate(-13)" hidden=""><circle r="57" fill="#f3e8ce" stroke="#b44e3b" stroke-width="4"/><circle r="48" fill="none" stroke="#b44e3b" stroke-width="1.5"/><text y="-7" text-anchor="middle" fill="#b44e3b" font-size="16" letter-spacing="2">DELIVERED</text><text y="17" text-anchor="middle" fill="#b44e3b" font-size="12">RIGHT AT LAST</text></g>
+          <path d="M0 387h800" stroke="#263b3d" stroke-width="2"/>
+          <text x="55" y="415" font-size="13" fill="#263b3d" letter-spacing="2">THE PARCEL</text><text x="500" y="415" font-size="13" fill="#263b3d" letter-spacing="2">THE WAITING HAND</text>
+          <g id="parcel-close" transform="translate(292 430) scale(.7)"><use href="#glove"/></g>
+          <g transform="translate(724 430) scale(-.7 .7)" opacity=".65"><use href="#glove"/></g>
+          <text id="parcel-label" x="55" y="446" font-size="17" fill="#263b3d">Left. Quite definitely left.</text>
+          <text x="500" y="446" font-size="17" fill="#263b3d">Still the same right hand.</text>
+        </svg>
