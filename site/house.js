@@ -2364,7 +2364,7 @@ function renderStudyDesk(content, dataShelf) {
     const query=workshopSearchText(studyState.query);
     const matches=ideas.filter(idea=>(studyState.filter==="all"||studyReadiness(idea)===studyState.filter)&&
       (studyState.scale==="all"||ideaScale(idea)===studyState.scale)&&
-      (!query||[idea.title,idea.plain,idea.what,idea.why,idea.brief?.field,idea.brief?.for,
+      (!query||[idea.title,idea.plain,idea.what,idea.why,idea.brief?.field,idea.brief?.for,idea.brief?.audience,
         idea.scale==="great"?"great work":idea.scale==="small"?"small project":"",residentName(idea.author)]
         .some(value=>workshopSearchText(value).includes(query))));
     const pages=Math.ceil(matches.length/STUDY_PAGE_SIZE);

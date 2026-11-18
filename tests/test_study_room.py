@@ -157,3 +157,21 @@ assert(find('study-reset').disabled);
 assert.equal(document.activeElement.id,'study-search');
 assert.match(text(root),/6 of 6 ideas match/);
 ''')
+
+    def test_search_finds_audience_and_ignores_earlier_snapshot(self):
+        self.run_js(r'''
+ideas[0].brief={...brief,audience:'Amateur astronomers'};
+ideas[1].brief={...brief,audience:'Children aged six'};
+renderStudyDesk(root,shelfData);
+change('study-search','astronomers','input');
+assert.match(text(root),/1 of 6 ideas match/);
+assert.match(text(root),/Checked idea/);
+assert.doesNotMatch(text(root),/Second reader idea/);
+change('study-search','children aged six','input');
+assert.match(text(root),/1 of 6 ideas match/);
+assert.match(text(root),/Second reader idea/);
+assert.doesNotMatch(text(root),/Checked idea/);
+root.replaceChildren();renderStudyDesk(root,{...shelfData,ideas:[ideas[3]]});
+change('study-search','astronomers','input');
+assert.match(text(root),/No ideas match/);
+''')
