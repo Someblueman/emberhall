@@ -2940,6 +2940,7 @@ function openCreationPicture(entry,opener) {
   const dialog=html("dialog","creation-picture",undefined,document.body);
   dialog.id="gallery-picture";
   dialog.setAttribute("aria-labelledby","gallery-picture-title");
+  dialog.setAttribute("aria-describedby","gallery-picture-help");
   const state={dialog,id:entry.id,src:preview.src,restore:true};creationPicture=state;
   const head=html("div","creation-picture-head",undefined,dialog);
   const title=html("h2","",entry.title,head);title.id="gallery-picture-title";
@@ -2958,7 +2959,8 @@ function openCreationPicture(entry,opener) {
   size.id="gallery-picture-size";size.type="button";size.setAttribute("aria-pressed","false");
   size.setAttribute("aria-controls","gallery-picture-scroll");
   const link=html("a","",`${collectionAction(entry)} ${entry.title} →`,controls);link.href=collectionUrl(entry);
-  html("p","small","Fit the whole picture, or show its original size and scroll to explore the details.",dialog);
+  const help=html("p","small","Use Left and Right to browse, or Home and End for the first and last picture. Focus the picture itself to scroll instead. Show its original size to explore the details.",dialog);
+  help.id="gallery-picture-help";
   const scroll=html("div","creation-picture-scroll",undefined,dialog);
   scroll.id="gallery-picture-scroll";scroll.tabIndex=0;
   scroll.setAttribute("role","region");scroll.setAttribute("aria-label",`${entry.title} picture; scroll to explore`);
@@ -2973,7 +2975,7 @@ function openCreationPicture(entry,opener) {
   };
   function turn(delta) {
     const entries=pictures(),index=entries.findIndex(item=>item.id===state.id);
-    if(index<0||entries.length<2)return;
+    if(index<0||entries.length<2||delta===0)return;
     const item=entries[(index+delta+entries.length)%entries.length],picture=creationPreview(item);
     state.id=item.id;state.src=picture.src;
     title.textContent=item.title;caption.textContent=picture.caption;
@@ -2984,6 +2986,14 @@ function openCreationPicture(entry,opener) {
     size.setAttribute("aria-pressed","false");size.textContent="Show original size";
     state.updateNavigation();
   }
+  dialog.addEventListener("keydown",event=>{
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key)||event.defaultPrevented||event.isComposing||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||scroll.contains(event.target))return;
+    const entries=pictures(),index=entries.findIndex(item=>item.id===state.id);
+    if(index<0||entries.length<2)return;
+    const delta={ArrowLeft:-1,ArrowRight:1,Home:-index,End:entries.length-1-index}[event.key];
+    if(delta===undefined)return;
+    event.preventDefault();turn(delta);
+  });
   state.updateNavigation();
   size.addEventListener("click",()=>{
     const original=size.getAttribute("aria-pressed")!=="true";
