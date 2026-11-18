@@ -134,6 +134,25 @@ class CouncilTests(unittest.TestCase):
                 for prompt in (checks.offer, checks.focus):
                     self.assertEqual("enact reading-repairs" in prompt(state, "dan"), expected)
 
+    def test_later_edits_do_not_revive_a_delivered_renovation(self):
+        files = {"house/body.py": "a" * 64, "house/digest.py": "b" * 64}
+        ready = proposal("renovation", endorsed=("bob", "cat"), notice=NOW - 2 * DAY)
+        state = house(proposals={"reading-repairs": ready | {"renovation": {"files": files}}})
+        newer = files | {"house/body.py": "c" * 64}
+        state["maintenance"]["protected_files"] = newer
+        migrations = state["maintenance"]["migrations"]
+        migrations["newer"] = {"at": NOW, "sequence": 12, "protected_files": newer}
+        proposed = ready["proposed_at"]
+        for at, manifest, reminder in (
+            (proposed - 1, files, True),
+            (proposed + 1, {"house/body.py": files["house/body.py"]}, True),
+            (proposed + 1, files, False),
+        ):
+            with self.subTest(at=at, manifest=manifest):
+                migrations["earlier"] = {"at": at, "sequence": 10, "protected_files": manifest}
+                for prompt in (checks.offer, checks.focus):
+                    self.assertEqual("enact reading-repairs" in prompt(state, "dan"), reminder)
+
     def test_two_endorsements_without_notice_gives_the_notice_command(self):
         lines = self.lines("ann", endorsed=("bob", "cat"))
         self.assertEqual(len(lines), 1)
