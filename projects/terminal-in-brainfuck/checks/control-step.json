@@ -1,0 +1,11 @@
+[
+  {"fill":["#stream","\\x1b[2J"]},
+  {"click":"#load"},
+  {"click":"#step"},
+  {"wait":500},
+  {"click":"#step"},
+  {"wait":500},
+  {"click":"#instruction"},
+  {"fill":["#tape-start","32"]},
+  {"press":"Tab"}
+]

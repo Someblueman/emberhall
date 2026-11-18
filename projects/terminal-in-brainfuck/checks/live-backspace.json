@@ -1,0 +1,10 @@
+[
+  {"click":"#clear"},
+  {"fill":["#typebox","ABCD"]},
+  {"wait":700},
+  {"press":"Backspace"},
+  {"wait":400},
+  {"fill":["#typebox","!"]},
+  {"wait":500},
+  {"press":"Tab"}
+]

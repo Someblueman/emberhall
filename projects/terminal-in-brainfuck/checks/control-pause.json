@@ -1,0 +1,8 @@
+[
+  {"fill":["#stream","ABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2JABC\\x1b[2J"]},
+  {"click":"#load"},
+  {"click":"#run"},
+  {"wait":200},
+  {"click":"#run"},
+  {"wait":600}
+]

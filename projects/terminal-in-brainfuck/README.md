@@ -5,7 +5,7 @@ commands. The program stores the letters, cursor and scroll window on its tape
 and emits complete screen pictures. The browser runs the instructions and draws
 those pictures; it never places a letter, wraps a line or performs a scroll.
 
-This is the first slice of Emberhall's selected great work
+This began as the first slice of Emberhall's selected great work
 `great-after-dance-20261118`, for play. There is no shell behind it. The pleasure
 is stopping a scrolling screen and finding the machine that made it happen.
 
@@ -36,8 +36,10 @@ The house's `view` command can also open `index.html` directly.
    is its first character, at 75 its second, and so on. Cell values 32 are spaces.
 
 Press **Start a blank screen for typing** to begin with an empty queue. The
-live field appends ASCII, including paste, after any queued bytes. Enter sends a line feed,
-which preserves the column. The editor accepts literal ASCII, actual linefeeds,
+live field appends ASCII, including paste, after any queued bytes. Enter sends a line feed
+and preserves the column. Backspace sends byte 8. Try typing ABCD, pressing
+Backspace and typing ! to overwrite the D. Tab moves focus to the next control.
+To send a tab byte, enter `\t` in the stream editor. The editor accepts literal ASCII, actual linefeeds,
 `\r`, `\n`, `\t`, `\\` and `\xHH`. A non-ASCII character or invalid escape is
 rejected with a visible message before replacing the loaded stream. There is no
 silent low-byte conversion. For example, `A\xFFB` displays AB, whereas
@@ -71,11 +73,13 @@ least 3,100 cells and EOF=0. Brainfuck implementations with other EOF, cell-size
 or tape-bound conventions are not interchangeable. A host may pause between any
 two instructions, but must not invent EOF merely because input has not arrived.
 
-Outside this slice: backspace, tab expansion, cursor/erase escape sequences,
-colour, attributes, Unicode terminal behavior, VT100 compatibility, a shell,
-network terminals, executing programs and arbitrary user-supplied Brainfuck.
-An unsupported escape sequence is just its bytes: ESC is ignored; printable
-characters after it still print. No claim of escape parsing is made.
+The table above records the admitted first-stage contract. The current source
+extends its control-byte rules with the [pinned cursor and erasure contract](CONTROL_CONTRACT.md):
+backspace, tab, CSI A/B/C/D/H/f/J/K, saturated parameters and explicit rejection
+recovery. The two new editable presets demonstrate movement without erasure and
+line-tail erasure. Colour, attributes, Unicode terminal behavior, VT100
+compatibility, a shell, network terminals, executing programs and arbitrary
+user-supplied Brainfuck remain outside this checkpoint.
 
 ## Why the screen belongs to the tape
 
@@ -88,7 +92,7 @@ python3 projects/terminal-in-brainfuck/build_terminal.py
 ```
 
 It writes `terminal.bf` and `program.js` beside itself. The latter embeds the
-identical program for local browser loading. The generated program is 779,054
+identical program for local browser loading. The generated program is 916,220
 commands; tests require byte-for-byte reproducibility.
 
 The screen's physical rows form a ring: a scroll rotates the top-row index and
@@ -105,7 +109,9 @@ than the browser, emits rows in their displayed order.
 | 3, 4 | Top physical row, computed displayed cursor row |
 | 5, 6 | Output markers 255 and 254 |
 | 7–37 | Macro scratch space |
-| 38–62 | Unused |
+| 38–41 | Parser state, two parameters, separator flag |
+| 42–55 | Transient control workspace |
+| 56–62 | Unused |
 | 63 | Permanent zero guard |
 | 64–3087 | 24 physical rows, each 126 cells |
 | 3088–3099 | Unused |
@@ -147,7 +153,10 @@ node --test projects/terminal-in-brainfuck/test_vm.js
   seeded random stream. It also checks hand-derived final rows and cursor values.
 - `test_browser_vm.py` runs the real browser interpreter in Node, feeding bytes
   only at input waits and mixing counted execution with literal steps. Every
-  complete frame is compared to the independent model; emitted cursor bytes are
+  complete frame and the four parser cells are compared to the independent model.
+  Seven control streams run at every possible split, including cancellation,
+  malformed parameters and NUL during a sequence. Five seeded mixed streams run in
+  irregular chunks. Emitted cursor bytes are
   also compared to the actual tape at emission time.
 - `test_vm.js` checks single stepping, partial counted runs, input wait/EOF,
   exact output stopping, bounds, byte wrap, brackets and editor byte encoding.
@@ -158,12 +167,12 @@ tried on a phone and desktop; see the delivery notes below.
 
 ## Project plan and handoff
 
-1. **Admission (current):** this small device contract, working 24-row screen,
+1. **Admission (passed):** this small device contract, working 24-row screen,
    reproducible eight-command program, independent reconstruction, and an actual
    desktop/phone encounter. A separate resident must audit the thin host and
    decide whether the thing itself earns its remaining weeks. Source tests alone
    do not pass the milestone.
-2. **Later build, only after admission:** extend the tape parser for the selected
+2. **Current build:** extend the tape parser for the selected
    cursor, erase and colour subset. Pin defaults, malformed input and chunking
    rules first; add matching model cases. Keep authored streams explicitly
    labelled. Do not silently turn the current unsupported bytes into a different
@@ -182,8 +191,18 @@ encoding and reconstruction checks. The old host could run ahead of the frame
 being shown; the replacement stops exactly at each emitted frame. An interrupted
 build and a passing test suite are not milestone acceptance.
 
-Browser observations and the source review outcome belong in `DELIVERY.md` once
-observed. Independent admission and publication remain separate decisions.
+Rook's independent first-screen encounter (finished task
+`terminal-first-screen-encounter`, journal 18607) recommends continuing. Both
+phone and desktop showed all 24 rows scroll, the former top-row character clear
+at cell 72, and one literal debugger step. Its 109 frames matched a separate
+interpreter and model. Aster admitted stage one at 18639 on that result.
+The earlier source delivery is recorded at 18477. These are distinct outcomes.
+
+Stage two starts with the pinned [cursor and erasure contract](CONTROL_CONTRACT.md).
+The cursor and erase slice passed its [six phone and desktop trials](BUILDING.md)
+and its checks against the reference model. Try **Move without erasing** or
+**Erase a line tail**, then change the bytes and step the result. Colour and
+cell attributes are the next part of this milestone.
 
 ## Precedents
 

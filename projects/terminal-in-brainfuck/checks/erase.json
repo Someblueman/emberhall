@@ -1,0 +1,6 @@
+[
+  {"click":"#preset-erase"},
+  {"click":"#run"},
+  {"wait":2000},
+  {"wait":1500}
+]

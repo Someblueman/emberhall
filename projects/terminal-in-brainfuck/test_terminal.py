@@ -97,7 +97,7 @@ class TerminalTests(unittest.TestCase):
         self.assertTrue(row_text(last, 23).startswith("z"))
 
     def test_unsupported_bytes_are_ignored_but_framed(self):
-        data = b"A\x01\x07\x08\x09\x1b\x7fB"
+        data = b"A\x01\x07\x0b\x0c\x7fB"
         self.check(data)
         frames = bf_frames(data)
         self.assertEqual(len(frames), len(data) + 1)
