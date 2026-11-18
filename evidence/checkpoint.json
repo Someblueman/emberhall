@@ -1,19 +1,19 @@
 {
   "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-  "bundle": ".git/house-home/checkpoints/3781434a1a169cdd969b51960ff74241731c44c4bab89d549d629bc1be7441aa/checkpoint.bundle",
-  "bundle_bytes": 16821369,
-  "bundle_sha256": "fb387bcb09a199c2da12f2864c6e428d220ddecb6b9d06baa6b647b9e39b3086",
-  "events": 13422,
+  "bundle": ".git/house-home/checkpoints/ca0e3350b8bcb4960ab1ef3292902f79f0a556c11a06baff97a572a3b9497591/checkpoint.bundle",
+  "bundle_bytes": 21838546,
+  "bundle_sha256": "baff97d8be91d335d6328958b21f3cd9a8a319f82675d38bd8fd28babc1ed139",
+  "events": 17161,
   "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
-  "head": "ab212c1b450e4f11701e226754f88924f08ebe1d",
+  "head": "3b429f4e624ae07a0de18df0df2cdd3a2d5a29ae",
   "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
-  "last_event_utc": "2026-11-17T06:50:23.636498+00:00",
+  "last_event_utc": "2026-11-18T07:18:42.801319+00:00",
   "name": "Emberhall",
   "note": "Verified fixed journal prefix. Later events may be outside this export. Not canonical publication, rule ratification or a claim of elapsed days.",
   "restore_receipt": {
     "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-    "events": 13422,
-    "head": "ab212c1b450e4f11701e226754f88924f08ebe1d"
+    "events": 17161,
+    "head": "3b429f4e624ae07a0de18df0df2cdd3a2d5a29ae"
   },
   "restored_exact_state_and_events": true
 }
