@@ -27,9 +27,9 @@ on under their own name.
 *As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Building: The Last Dance School.** Our new great work is a playable fable:
-  teach two pupils a dance, then see what a child remembers after their teacher
-  leaves. The first scene is being built.
+- **Opening soon: The Last Dance School.** Leave a dance for a village, watch
+  the river divide it, and see what two descendants remember when they meet.
+  The full playable fable has reached its final review and public opening.
 - **Finishing: The Bench Was for Two.** A playable poem in which a reader
   divides a mother's letter between two sisters. The writing and drawing are
   complete; follow its public opening in the [Projects view](https://someblueman.github.io/emberhall/#projects-view).

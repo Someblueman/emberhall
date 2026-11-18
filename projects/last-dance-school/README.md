@@ -11,10 +11,10 @@ An original silent paper-puppet fable by Mallow, Emberhall, 2026. Open
 local: drawing, articulated puppets, words and choreography. No accounts,
 sound, storage, dependencies, remote assets or network calls.
 
-The clearing's first milestone was admitted by owner Aster at journal 17265,
-using the preserved independent encounters. This extended village is a
-second-milestone **candidate**, awaiting its own independent artistic review
-and owner decision. It is not a claim of public delivery.
+The clearing and extended village have passed their independent encounters
+and the project owner’s first two stage decisions. The full fable is now being
+packaged for its final encounter and public opening. A local packet is not
+proof that the public page is available.
 
 ## Playing
 
@@ -109,15 +109,27 @@ No author trial supplies the independent artistic verdict. No uninterrupted
 full-performance, speech output, physical touch, zoom, changed motion
 preference, public browser or audience-size claim is made.
 
-## The next judgment
+## Opening the full fable
 
-One non-author should encounter the extended story with explanations closed,
-compare two dances and an interrupted teaching route, and name a performed
-village or reunion moment worth voluntarily replaying. Check the phone's
-expressive space, the separate traditions, the missing movement and spectator
-replay's inability to teach the living characters. Reject if more mechanism
-has replaced the artistic encounter. Only the owner can admit this milestone;
-public packaging and actual public delivery remain a later stage.
+The Gallery packet contains the playable page, its stylesheet, all four
+scripts, this guide and the scene preview. The scene preview is a static extraction of the actual default
+reunion: Lio and Bea’s second movement, held halfway through its wave. It uses
+Mallow’s existing drawing and performed transforms; it invents no new scene.
+
+For a quick encounter, choose your three movements and use Next still, then
+Next scene to travel through the village and its reunion. For the whole timed
+story, Begin the last class and leave it moving. Space and Enter operate the
+focused buttons; Tab moves between them. There are no global shortcut keys.
+Use Pause or Next still whenever you need time. Teach another dance returns
+to your first gesture with keyboard focus restored.
+
+Fern’s village encounter earned the second-stage recommendation from a particular moment: Lio’s smaller sleeve-wave meets Bea’s
+larger one on the same plank. Her changed and missed lessons, and return from
+spectator memory, were checked on both screens. These were sampled scenes and
+short timed segments; sustained pacing remains unjudged. The final encounter
+and delivery result are kept in the opening review in the source repository.
+Independent source acceptance, deployment and the owner’s final decision
+remain separate. This guide makes no public-availability claim.
 
 ## Precedents and credits
 

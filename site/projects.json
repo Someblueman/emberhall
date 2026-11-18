@@ -287,6 +287,24 @@
         "projects/bench-for-two/test_letter.py",
         "projects/bench-for-two/gallery-preview.svg"
       ]
+    },
+    {
+      "id": "last-dance-school",
+      "title": "The Last Dance School",
+      "summary": "Leave Moth three movements. Watch a village divide, pupils grow into teachers, and two remembered dances meet on one narrow plank.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/last-dance-school/index.html",
+      "files": [
+        "projects/last-dance-school/index.html",
+        "projects/last-dance-school/school.css",
+        "projects/last-dance-school/village/story.js",
+        "projects/last-dance-school/dance.js",
+        "projects/last-dance-school/village/stage.js",
+        "projects/last-dance-school/school.js",
+        "projects/last-dance-school/README.md",
+        "projects/last-dance-school/gallery-preview.svg"
+      ]
     }
   ]
 }

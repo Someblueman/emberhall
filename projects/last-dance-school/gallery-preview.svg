@@ -1,0 +1,119 @@
+<!-- Mallow’s original artwork and choreography, Emberhall 2026. Exact default-route still at zero-based beat 73, phase 0.5, rendered from accepted dance.js, school.js and village/stage.js; no new pose or scenery invented. -->
+<svg viewBox="140 140 630 420" role="img" aria-labelledby="preview-title preview-desc" xmlns="http://www.w3.org/2000/svg" width="900" height="600">
+<title id="preview-title">Two remembered dances meet on a narrow plank</title><desc id="preview-desc">Lio and Bea raise differently sized sleeves above a river between two lit village doors. A blue thread hangs from Lio’s arm. The old teachers are gone.</desc>
+<defs>
+ <radialGradient id="sky"><stop stop-color="#384a61" /><stop offset="1" stop-color="#141d32" /></radialGradient>
+ <radialGradient id="floor"><stop stop-color="#b0a58a" /><stop offset="1" stop-color="#646e65" /></radialGradient>
+ <pattern id="paper" width="19" height="23" patternUnits="userSpaceOnUse"><path d="M1 4l3 1m9 9l4-1M6 21h2" stroke="#e4dfc8" stroke-opacity=".12" /></pattern>
+ <g id="chair-shape" fill="none" stroke="#cbb68d" stroke-width="7" stroke-linecap="round"><path d="M-29 2l-9-80 68-3-4 83M-27-52l55-2M-27-27l54-2M-40 3l76-2M-27 4l-9 66M27 3l14 63" /></g>
+</defs>
+<g id="clearing" display="none">
+<path fill="url(#sky)" d="M0 0h900v570H0z" />
+<path fill="#ddcba0" d="M745 37a48 48 0 1 0 41 73 45 45 0 0 1-41-73" />
+<g fill="#d7ccaa"><circle cx="605" cy="50" r="2" /><circle cx="820" cy="184" r="2" /><circle cx="496" cy="95" r="1.5" /><circle cx="120" cy="116" r="2" /><circle cx="326" cy="50" r="1.5" /></g>
+<g fill="#202d3c"><path d="M0 5l85 35 13 175-34 133-64 36zM55 10l-3 195-42 43 2-25 24-40L27 5zM895 0l-68 54-13 255 86 63z" /><path d="M825 25l-34 180-49 28 5 17 53-23 30-80z" /></g>
+<path d="M0 408Q100 350 205 382T425 374T640 395T900 363V570H0" fill="#3b4f4e" />
+<ellipse cx="455" cy="462" rx="366" ry="90" fill="url(#floor)" />
+<path d="M218 570q-4-78 124-108" fill="none" stroke="#817b6c" stroke-width="65" />
+<path d="M127 434q290-105 622 20" fill="none" stroke="#d2c9aa" stroke-width="2" stroke-dasharray="1 12" opacity=".5" />
+<g transform="translate(143 392) rotate(-6)"><path fill="#cdb991" d="M-56-11l127-7 6 46-131 2z" /><path d="M-47 0h109M-20 11h60" stroke="#746d5e" stroke-width="3" /><path d="M-45 28l-10 65M60 26l12 68" stroke="#8f8268" stroke-width="6" /></g>
+<g id="chair" transform="translate(263 416) rotate(-5)"><use href="#chair-shape" /></g>
+</g>
+<g id="village-scenery"><defs><linearGradient id="river-light" x2="0" y2="1"><stop stop-color="#8bafb2" /><stop offset="1" stop-color="#2d626e" /></linearGradient></defs>
+    <path fill="#283e52" d="M0 0h900v570H0z" />
+    <g id="village-stars" fill="#d9d3b2"><circle cx="78" cy="78" r="2" /><circle cx="690" cy="58" r="2" /><circle cx="825" cy="144" r="2" /><circle cx="517" cy="42" r="2" /></g>
+    <circle cx="724" cy="103" r="41" fill="#e1d4a8" />
+    <path fill="#6a8176" d="M0 270Q130 183 290 285T600 267T900 229V570H0z" />
+    <path fill="#3d625c" d="M0 383Q180 299 387 373L440 570H0zM506 370Q672 288 900 346V570H467z" />
+    <path id="river" fill="url(#river-light)" d="M443 282Q377 347 446 397T439 570H532Q555 489 495 421T492 282z" />
+    <g id="river-ripples" fill="none" stroke="#bdcec1" stroke-width="3" opacity=".6" transform="translate(0 4.898587196589413e-16)"><path d="M431 332h38m-16 43h35m-3 69h26m-48 45h36m-17 48h29" /></g>
+    <g id="north-house"><path d="M65 254l112-67 117 73-9 145-211 3z" fill="#8caaa5" stroke="#385361" stroke-width="4" /><path d="M46 263l126-92 143 87-23 15-119-66-105 74z" fill="#495467" /><path d="M151 312l58-3v99h-62z" fill="#354854" /><path d="M94 286h34v45H94zM233 288h34v40h-34z" fill="#f0c77e" /><path d="M80 409h205" stroke="#d2c5a0" stroke-width="8" /></g>
+    <g id="south-house"><path d="M605 254l118-63 106 75-12 133-203 7z" fill="#ba8c75" stroke="#694c53" stroke-width="4" /><path d="M580 262l143-91 131 99-25 14-109-73-124 69z" fill="#6f4d59" /><path d="M691 311h55l8 91h-62z" fill="#5c4652" /><path d="M633 284h33v45h-33zM770 290h30v39h-30z" fill="#f0c77e" /></g>
+    <g id="whole-bridge" stroke="#b9a27a" fill="none" display="none"><path d="M337 410l224-8" stroke-width="17" /><path d="M341 365l213-6M344 350v61m205-62v61" stroke-width="5" /><path d="M366 366v40m31-41v40m31-42v40m31-42v40m31-42v40m31-42v40" stroke-width="3" /></g>
+    <path id="loose-plank" d="M420 410h72v13h-72z" fill="#c7b18a" transform="translate(65 -13) rotate(-14 450 410)" display="none" />
+    <g id="broken-bridge" fill="#c4ae88" display="none"><path d="M335 401l61-4-3 17-59 4zM511 402l50-7 3 18-49 7z" /><path d="M386 414l31 45-8 4-35-47z" /></g>
+    <g id="stepping-stones" fill="#a5aaa0" stroke="#5b7471" stroke-width="2"><ellipse cx="432" cy="457" rx="15" ry="7" /><ellipse cx="468" cy="438" rx="13" ry="6" /><ellipse cx="495" cy="462" rx="14" ry="7" /></g>
+    <g id="new-plank" transform=""><path d="M330 439l320-5 2 17-320 5z" fill="#cbb189" stroke="#8d795f" stroke-width="2" /><path d="M350 444l280-4" stroke="#8d795f" stroke-width="2" /></g>
+    <g id="south-bench" stroke="#aa8b6e" stroke-width="6"><path d="M680 427h100M695 428l-4 37m76-38 7 36" /></g>
+    <g id="village-chair" transform="translate(105 431) scale(.85)"><use href="#chair-shape" /></g>
+    <g id="little-tree" transform="translate(315 376) scale(1)"><path d="M0 65L-4-16m-1 41L-30-3m27 23L25-8" stroke="#7b775d" stroke-width="7" fill="none" /><path d="M-45-10q-12-34 22-33 22-39 39-4 43-11 39 29-12 36-51 25-39 16-49-17" fill="#acb17a" /></g>
+    <g id="rain" stroke="#b1c9cd" opacity=".65" stroke-width="2" transform="translate(-9 12.5)" display="none"><path d="M110 95l-25 48m105-27-25 48m105-75-25 48m105-10-25 48m105-81-25 48m105-12-25 48m105-67-25 48m105-7-25 48m105-81-25 48m-650 46-25 48m105-27-25 48m105-75-25 48m105-10-25 48m105-81-25 48m105-12-25 48m105-67-25 48" /></g>
+    <path id="pip-scarf" d="M755 414l-10 27 33 16-7 21-38-23 10-42z" fill="#e9c77d" />
+    <path id="chair-thread" d="M165 370q-19-17-21-1 1 13 22 1 24-18 28-2-2 13-28 2m0 0 10 42" fill="none" stroke="#9ccbd6" stroke-width="3" transform="rotate(6.123233995736766e-16 166 370)" display="none" />
+    <path fill="url(#paper)" d="M0 0h900v570H0z" pointer-events="none" /></g>
+<g id="moth" class="puppet" display="none" transform="translate(166 442) scale(1.08)"><ellipse data-part="shadow" cx="0" cy="6" rx="38" ry="9" fill="#202f36" opacity=".35" />
+      <g data-part="left-leg" transform="translate(-14 -43) rotate(0)"><path d="M0 0l-5 40" stroke="#706653" stroke-width="14" stroke-linecap="round" /><path d="M-10 35l-12 9 27 1-1-10" fill="#333a43" /></g>
+      <g data-part="right-leg" transform="translate(15 -43) rotate(0)"><path d="M0 0l6 40" stroke="#706653" stroke-width="14" stroke-linecap="round" /><path d="M0 35l0 10 28-1-13-10" fill="#333a43" /></g>
+      <g data-part="body" transform="rotate(0 0 -42)">
+      <path d="M-22-100l-14 61q35 15 71-1l-15-61z" fill="#bfa673" stroke="#706653" stroke-width="2" />
+      <path d="M0-98l-3 61M-25-53l15 3" stroke="#706653" fill="none" stroke-width="2" />
+      <circle cx="6" cy="-79" r="2" fill="#706653" /><circle cx="4" cy="-61" r="2" fill="#706653" />
+      <g data-part="left-arm" transform="translate(-22 -94) rotate(5)"><path d="M0 0l-12 22 4 22" fill="none" stroke="#bfa673" stroke-width="15" stroke-linecap="round" /><ellipse cx="-8" cy="46" rx="6" ry="8" fill="#e3d4b4" /></g>
+      <g data-part="right-arm" transform="translate(22 -94) rotate(-4)"><path d="M0 0l13 22 -4 22" fill="none" stroke="#bfa673" stroke-width="15" stroke-linecap="round" /><ellipse cx="9" cy="46" rx="6" ry="8" fill="#e3d4b4" /></g>
+      <g data-part="head" transform="rotate(0 0 -104)"><path d="M-7-105v12h15v-12" fill="#e3d4b4" /><path d="M-25-137q21-20 49 1l-3 27-19 10-23-10z" fill="#e3d4b4" stroke="#706653" stroke-width="1.5" />
+      <circle cx="-10" cy="-123" r="2" fill="#333a43" /><circle cx="11" cy="-122" r="2" fill="#333a43" /><path d="M-3-114l7 1" stroke="#725b50" stroke-width="2" />
+      <path d="M-22-137q-9-10-8-21l37-2 10-18 9 18 5 13-57 2" fill="#69705d" /><path d="M-16-111q8 12 15 0 8 13 17-1" fill="#ded9c5" /></g></g>
+      <text data-part="name" y="29" text-anchor="middle" fill="#f0e4c8" font-family="Georgia,serif" font-size="17">Moth</text></g><g id="ada" class="puppet" display="none" transform="translate(166 442) scale(1.08)"><ellipse data-part="shadow" cx="0" cy="6" rx="38" ry="9" fill="#202f36" opacity=".35" />
+      <g data-part="left-leg" transform="translate(-14 -43) rotate(0)"><path d="M0 0l-5 40" stroke="#384f65" stroke-width="14" stroke-linecap="round" /><path d="M-10 35l-12 9 27 1-1-10" fill="#333a43" /></g>
+      <g data-part="right-leg" transform="translate(15 -43) rotate(0)"><path d="M0 0l6 40" stroke="#384f65" stroke-width="14" stroke-linecap="round" /><path d="M0 35l0 10 28-1-13-10" fill="#333a43" /></g>
+      <g data-part="body" transform="rotate(0 0 -42)">
+      <path d="M-22-100l-14 61q35 15 71-1l-15-61z" fill="#759da5" stroke="#384f65" stroke-width="2" />
+      <path d="M0-98l-3 61M-25-53l15 3" stroke="#384f65" fill="none" stroke-width="2" />
+      <circle cx="6" cy="-79" r="2" fill="#384f65" /><circle cx="4" cy="-61" r="2" fill="#384f65" />
+      <g data-part="left-arm" transform="translate(-22 -94) rotate(5)"><path d="M0 0l-12 22 4 22" fill="none" stroke="#759da5" stroke-width="15" stroke-linecap="round" /><ellipse cx="-8" cy="46" rx="6" ry="8" fill="#e9d9bc" /></g>
+      <g data-part="right-arm" transform="translate(22 -94) rotate(-4)"><path d="M0 0l13 22 -4 22" fill="none" stroke="#759da5" stroke-width="15" stroke-linecap="round" /><ellipse cx="9" cy="46" rx="6" ry="8" fill="#e9d9bc" /></g>
+      <g data-part="head" transform="rotate(0 0 -104)"><path d="M-7-105v12h15v-12" fill="#e9d9bc" /><path d="M-25-137q21-20 49 1l-3 27-19 10-23-10z" fill="#e9d9bc" stroke="#384f65" stroke-width="1.5" />
+      <circle cx="-10" cy="-123" r="2" fill="#333a43" /><circle cx="11" cy="-122" r="2" fill="#333a43" /><path d="M-3-114l7 1" stroke="#725b50" stroke-width="2" />
+      <path d="M-26-132l8-33 16 22 22-11 9 29-19-9-7 10-12-13z" fill="#493e40" /></g></g>
+      <text data-part="name" y="29" text-anchor="middle" fill="#f0e4c8" font-family="Georgia,serif" font-size="17">Ada</text></g><g id="pip" class="puppet" display="none" transform="translate(166 442) scale(1.08)"><ellipse data-part="shadow" cx="0" cy="6" rx="38" ry="9" fill="#202f36" opacity=".35" />
+      <g data-part="left-leg" transform="translate(-14 -43) rotate(0)"><path d="M0 0l-5 40" stroke="#6c4650" stroke-width="14" stroke-linecap="round" /><path d="M-10 35l-12 9 27 1-1-10" fill="#333a43" /></g>
+      <g data-part="right-leg" transform="translate(15 -43) rotate(0)"><path d="M0 0l6 40" stroke="#6c4650" stroke-width="14" stroke-linecap="round" /><path d="M0 35l0 10 28-1-13-10" fill="#333a43" /></g>
+      <g data-part="body" transform="rotate(0 0 -42)">
+      <path d="M-22-100l-14 61q35 15 71-1l-15-61z" fill="#bb7866" stroke="#6c4650" stroke-width="2" />
+      <path d="M0-98l-3 61M-25-53l15 3" stroke="#6c4650" fill="none" stroke-width="2" />
+      <circle cx="6" cy="-79" r="2" fill="#6c4650" /><circle cx="4" cy="-61" r="2" fill="#6c4650" />
+      <g data-part="left-arm" transform="translate(-22 -94) rotate(5)"><path d="M0 0l-12 22 4 22" fill="none" stroke="#bb7866" stroke-width="15" stroke-linecap="round" /><ellipse cx="-8" cy="46" rx="6" ry="8" fill="#d5bd9c" /></g>
+      <g data-part="right-arm" transform="translate(22 -94) rotate(-4)"><path d="M0 0l13 22 -4 22" fill="none" stroke="#bb7866" stroke-width="15" stroke-linecap="round" /><ellipse cx="9" cy="46" rx="6" ry="8" fill="#d5bd9c" /></g>
+      <g data-part="head" transform="rotate(0 0 -104)"><path d="M-7-105v12h15v-12" fill="#d5bd9c" /><path d="M-25-137q21-20 49 1l-3 27-19 10-23-10z" fill="#d5bd9c" stroke="#6c4650" stroke-width="1.5" />
+      <circle cx="-10" cy="-123" r="2" fill="#333a43" /><circle cx="11" cy="-122" r="2" fill="#333a43" /><path d="M-3-114l7 1" stroke="#725b50" stroke-width="2" />
+      <path d="M-28-131q0-33 25-26 25-9 29 22l-54 8" fill="#c6a07c" /><path d="M-14-94l35 2 17 36-22-4-11-29" fill="#e5c581" /></g></g>
+      <text data-part="name" y="29" text-anchor="middle" fill="#f0e4c8" font-family="Georgia,serif" font-size="17">Pip</text></g><g id="rue" class="puppet" display="none" transform="translate(166 489) scale(1)"><ellipse data-part="shadow" cx="0" cy="6" rx="38" ry="9" fill="#202f36" opacity=".35" />
+      <g data-part="left-leg" transform="translate(-14 -43) rotate(-75)"><path d="M0 0l-5 40" stroke="#65735b" stroke-width="14" stroke-linecap="round" /><path d="M-10 35l-12 9 27 1-1-10" fill="#333a43" /></g>
+      <g data-part="right-leg" transform="translate(15 -43) rotate(-70)"><path d="M0 0l6 40" stroke="#65735b" stroke-width="14" stroke-linecap="round" /><path d="M0 35l0 10 28-1-13-10" fill="#333a43" /></g>
+      <g data-part="body" transform="rotate(8 0 -42)">
+      <path d="M-22-100l-14 61q35 15 71-1l-15-61z" fill="#b1af7c" stroke="#65735b" stroke-width="2" />
+      <path d="M0-98l-3 61M-25-53l15 3" stroke="#65735b" fill="none" stroke-width="2" />
+      <circle cx="6" cy="-79" r="2" fill="#65735b" /><circle cx="4" cy="-61" r="2" fill="#65735b" />
+      <g data-part="left-arm" transform="translate(-22 -94) rotate(5)"><path d="M0 0l-12 31 4 22" fill="none" stroke="#b1af7c" stroke-width="15" stroke-linecap="round" /><ellipse cx="-8" cy="55" rx="6" ry="8" fill="#e8d5aa" /></g>
+      <g data-part="right-arm" transform="translate(22 -94) rotate(-4)"><path d="M0 0l13 31 -4 22" fill="none" stroke="#b1af7c" stroke-width="15" stroke-linecap="round" /><ellipse cx="9" cy="55" rx="6" ry="8" fill="#e8d5aa" /></g>
+      <g data-part="head" transform="rotate(4 0 -104)"><path d="M-7-105v12h15v-12" fill="#e8d5aa" /><path d="M-25-137q21-20 49 1l-3 27-19 10-23-10z" fill="#e8d5aa" stroke="#65735b" stroke-width="1.5" />
+      <circle cx="-10" cy="-123" r="2" fill="#333a43" /><circle cx="11" cy="-122" r="2" fill="#333a43" /><path d="M-3-114l7 1" stroke="#725b50" stroke-width="2" />
+      <path d="M-25-133q20-31 48 3l-25-5-2 13-9-12-12 9" fill="#6e6352" /></g></g>
+      <text data-part="name" y="29" text-anchor="middle" fill="#f0e4c8" font-family="Georgia,serif" font-size="17">Rue</text></g><g id="lio" class="puppet" display="inline" transform="translate(354 442) scale(1.08)"><ellipse data-part="shadow" cx="0" cy="6" rx="38" ry="9" fill="#202f36" opacity=".35" />
+      <g data-part="left-leg" transform="translate(-14 -43) rotate(0)"><path d="M0 0l-5 40" stroke="#3d5f72" stroke-width="14" stroke-linecap="round" /><path d="M-10 35l-12 9 27 1-1-10" fill="#333a43" /></g>
+      <g data-part="right-leg" transform="translate(15 -43) rotate(0)"><path d="M0 0l6 40" stroke="#3d5f72" stroke-width="14" stroke-linecap="round" /><path d="M0 35l0 10 28-1-13-10" fill="#333a43" /></g>
+      <g data-part="body" transform="rotate(-10.149999999999999 0 -42)">
+      <path d="M-22-100l-14 61q35 15 71-1l-15-61z" fill="#88a9aa" stroke="#3d5f72" stroke-width="2" />
+      <path d="M0-98l-3 61M-25-53l15 3" stroke="#3d5f72" fill="none" stroke-width="2" />
+      <circle cx="6" cy="-79" r="2" fill="#3d5f72" /><circle cx="4" cy="-61" r="2" fill="#3d5f72" />
+      <g data-part="left-arm" transform="translate(-22 -94) rotate(-20)"><path d="M0 0l-12 31 4 22" fill="none" stroke="#88a9aa" stroke-width="15" stroke-linecap="round" /><ellipse cx="-8" cy="55" rx="6" ry="8" fill="#d6bd98" /><path d="M-17 36l17 2m-8-2-10 16" stroke="#b2e1ee" stroke-width="3" fill="none" /></g>
+      <g data-part="right-arm" transform="translate(22 -94) rotate(-93.82791999999999)"><path d="M0 0l13 31 -4 22" fill="none" stroke="#88a9aa" stroke-width="15" stroke-linecap="round" /><ellipse cx="9" cy="55" rx="6" ry="8" fill="#d6bd98" /></g>
+      <g data-part="head" transform="rotate(0 0 -104)"><path d="M-7-105v12h15v-12" fill="#d6bd98" /><path d="M-25-137q21-20 49 1l-3 27-19 10-23-10z" fill="#d6bd98" stroke="#3d5f72" stroke-width="1.5" />
+      <circle cx="-10" cy="-123" r="2" fill="#333a43" /><circle cx="11" cy="-122" r="2" fill="#333a43" /><path d="M-3-114l7 1" stroke="#725b50" stroke-width="2" />
+      <path d="M-25-132l-2-20 22 7 8-15 27 25-27-4-7 12-8-13z" fill="#3b454c" /></g></g>
+      <text data-part="name" y="29" text-anchor="middle" fill="#f0e4c8" font-family="Georgia,serif" font-size="17">Lio</text></g><g id="bea" class="puppet" display="inline" transform="translate(607 442) scale(1.08)"><ellipse data-part="shadow" cx="0" cy="6" rx="38" ry="9" fill="#202f36" opacity=".35" />
+      <g data-part="left-leg" transform="translate(-14 -43) rotate(0)"><path d="M0 0l-5 40" stroke="#764959" stroke-width="14" stroke-linecap="round" /><path d="M-10 35l-12 9 27 1-1-10" fill="#333a43" /></g>
+      <g data-part="right-leg" transform="translate(15 -43) rotate(0)"><path d="M0 0l6 40" stroke="#764959" stroke-width="14" stroke-linecap="round" /><path d="M0 35l0 10 28-1-13-10" fill="#333a43" /></g>
+      <g data-part="body" transform="rotate(-5.949999999999999 0 -42)">
+      <path d="M-22-100l-14 61q35 15 71-1l-15-61z" fill="#c58c70" stroke="#764959" stroke-width="2" />
+      <path d="M0-98l-3 61M-25-53l15 3" stroke="#764959" fill="none" stroke-width="2" />
+      <circle cx="6" cy="-79" r="2" fill="#764959" /><circle cx="4" cy="-61" r="2" fill="#764959" />
+      <g data-part="left-arm" transform="translate(-22 -94) rotate(-20)"><path d="M0 0l-12 22 4 22" fill="none" stroke="#c58c70" stroke-width="15" stroke-linecap="round" /><ellipse cx="-8" cy="46" rx="6" ry="8" fill="#ead8ba" /></g>
+      <g data-part="right-arm" transform="translate(22 -94) rotate(-136.29375)"><path d="M0 0l13 22 -4 22" fill="none" stroke="#c58c70" stroke-width="15" stroke-linecap="round" /><ellipse cx="9" cy="46" rx="6" ry="8" fill="#ead8ba" /></g>
+      <g data-part="head" transform="rotate(0 0 -104)"><path d="M-7-105v12h15v-12" fill="#ead8ba" /><path d="M-25-137q21-20 49 1l-3 27-19 10-23-10z" fill="#ead8ba" stroke="#764959" stroke-width="1.5" />
+      <circle cx="-10" cy="-123" r="2" fill="#333a43" /><circle cx="11" cy="-122" r="2" fill="#333a43" /><path d="M-3-114l7 1" stroke="#725b50" stroke-width="2" />
+      <path d="M-24-130q-10-33 16-31 31-13 37 21l-17 1-9-14-10 15z" fill="#665144" /><path d="M-17-95l35 2 19 30-22 1-9-24" fill="#edc576" /></g></g>
+      <text data-part="name" y="29" text-anchor="middle" fill="#f0e4c8" font-family="Georgia,serif" font-size="17">Bea</text></g>
+<path fill="url(#paper)" d="M0 0h900v570H0z" pointer-events="none" />
+<g fill="#d2c6a6"><path d="M57 503l5-24 7 23m714 1l6-30 7 29m-64 16l6-22 8 24" /></g>
+</svg>
