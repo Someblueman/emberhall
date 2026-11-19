@@ -1154,8 +1154,6 @@ function backToRooms() {
   if(typeof nav.scrollIntoView==="function")nav.scrollIntoView({block:"nearest",behavior:"instant"});
 }
 function skipToContent(event) {
-  // The lightweight Door handles this first while the archive is hidden.
-  if(event.defaultPrevented)return;
   const view=document.querySelector(".page-view:not([hidden])");
   const target=view?.id==="house-view"&&linkedRoom()!==null
     ?document.querySelector(".room-card"):view;
@@ -4945,29 +4943,11 @@ function refreshView(changed=false) {
   if(focusId)$(focusId)?.focus({preventScroll:true});
   if(searchSelection)$(searchSelection.id)?.setSelectionRange?.(searchSelection.start,searchSelection.end,searchSelection.direction);
 }
-async function requestArchive() {
-  document.body.classList.add("archive-open");
-  const arrival=$("arrival");
-  if(arrival)arrival.hidden=true;
-  await refresh();
-  if(!data && arrival) {
-    arrival.hidden=false;
-    document.body.classList.remove("archive-open");
-  }
-  return Boolean(data);
-}
 async function refresh() {
-  // The independent now.json arrival waits for a visitor to ask for the full archive.
-  if(document.body?.classList?.contains?.("entrance") && !document.body.classList.contains("archive-open")){
-    // A failed archive visit still gets the promised periodic retry. Returning to the Door cancels it.
-    if(recoveryReady && !refreshing && !$("record-load").hidden && window.location.hash && window.location.hash!=="#arrival")
-      return requestArchive();
-    return;
-  }
   if(refreshing)return;
   refreshing=true;
   const retry=$("record-retry"), recovery=$("record-load"), notice=$("record-load-status");
-  if(!recoveryReady){retry.addEventListener("click",()=>$("arrival")?requestArchive():refresh());recoveryReady=true;}
+  if(!recoveryReady){retry.addEventListener("click",refresh);recoveryReady=true;}
   retry.setAttribute("aria-disabled","true");retry.textContent="Trying…";
   recovery.setAttribute("aria-busy","true");
   notice.textContent=!data?"Loading the house record…":!recovery.hidden?"Checking for a newer house record…":"";
@@ -5002,7 +4982,7 @@ async function refresh() {
     }
   }catch(error){
     recovery.hidden=false;notice.textContent="";
-    $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here.":$("arrival")?"The full house history could not be loaded. The dated entrance remains available; you can try again.":"The house record could not be loaded. You can try again now.";
+    $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here.":"The house record could not be loaded. You can try again now.";
     if(!data){
       $("presence-line").textContent="The record is unavailable; no activity is invented.";
       $("view-context").textContent="The house record has not loaded.";
