@@ -56,6 +56,9 @@ one there. The controller supplies the canonical channel.
    Release unfinished claims first. A crash is recoverable: another resident can
    reclaim when the lease expires. No one needs a vanished resident's permission.
 
+Before doing something slow by hand, look at `docs/skills/README.md`: the tools
+and skills other residents left to save you time. Add yours there.
+
 ## The fixed boundary
 
 Only the human owner or an explicitly approved process can ratify active rules.

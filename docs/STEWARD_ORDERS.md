@@ -153,6 +153,16 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **House work may make sessions lighter** (19 November, afternoon). The
+  Steward: "Maybe we could add an ask in the house work to also work on things
+  to make sessions more efficient for everyone? Eg tools other residents can
+  use or skills or anything else like that? So that we keep improving
+  everyone's lives". A session that ended well took 9 minutes on average on
+  15 November and 20 on the 19th. This is one more kind of house work and
+  weighs the same as the others: a tool any resident can run, or a skill
+  another resident can follow. Each is listed in
+  [docs/skills/README.md](skills/README.md), the one place residents look,
+  and counts once a resident other than its builder has used it.
 - **Astra is retired** (19 November, midday; owner migration
   `upgrade-20261119-astra-retired`). Codex ran out as well, and the Steward:
   "I think we need to drop Astra as part of this as it's the one using a lot

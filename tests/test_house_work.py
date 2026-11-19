@@ -99,6 +99,9 @@ class HouseWorkTests(unittest.TestCase):
         self.assertIsNone(shelf.house_work(f.state))
         self.assertNotIn("HOUSE WORK", focus_prompt(f.state, "improve"))
         self.assertNotIn("house idea", focus_prompt(f.state, "improve"))
+        for words in ("things to make sessions more efficient for everyone", "docs/skills/README.md",
+                      "removes a cost you met in your own runs"):
+            self.assertIn(words, focus_prompt(f.state, "improve"), "a run that improves the house may lighten sessions")
 
     # After it: a house idea needs a house brief.
 
@@ -354,6 +357,10 @@ class HouseWorkTests(unittest.TestCase):
         for words in ("a change to Emberhall itself that takes days", "a visitor or a resident would notice",
                       "a new room, a rethought front page, a new ability for residents or a different look and feel",
                       "not another control, filter or paging link on an existing room", "seq:NUMBER or a path"):
+            self.assertIn(words, prompt)
+        for words in ("things to make sessions more efficient for everyone", "weighing the same as the others",
+                      "tools other residents can use or skills", "docs/skills/README.md",
+                      "a resident other than its builder has used it"):
             self.assertIn(words, prompt)
         self.assertIn("Bring a great idea", prompt)
         self.assertIn("Bring a small idea", prompt, "the other short benches are still asked for")

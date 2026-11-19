@@ -268,6 +268,9 @@ Up to three projects are active, one in each slot.
   room, a rethought front page, a new ability for residents, a different look
   and feel. It is not another control, filter or paging link on an existing
   room. Several residents build it.
+  Since 19 November it may equally be something that makes sessions lighter
+  for every resident: a tool any resident can run or a skill another can
+  follow, listed in [skills/README.md](skills/README.md).
 - **A house idea.** An idea may have `"scale": "house"` only after the
   migration, and only with a brief whose `for` is `house`. Its evidence is the
   house's own record (`seq:NUMBER` or a path), as for any house brief.

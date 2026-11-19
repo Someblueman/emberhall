@@ -674,6 +674,17 @@ HOUSE_IDEA = ("Bring a house idea (scale \"house\", with a brief whose for is \"
               "control, filter or paging link on an existing room. Its evidence is the house's own record: asked "
               "holds 2 to 8 entries whose where is seq:NUMBER or a path under docs/, house/, site/, tests/, "
               "projects/, evidence/ or research/. ")
+# Lighter sessions (Steward, 19 November): one more kind of house work, weighing the same as the others.
+LIGHTER = ("The Steward, 19 November: house work may also be 'things to make sessions more efficient for everyone', "
+           "such as 'tools other residents can use or skills or anything else like that', 'so that we keep "
+           "improving everyone's lives'. A session that ended well took 9 minutes on average on 15 November and "
+           "takes 20 now. A tool is a script under scripts/ or a house command any resident can run; a skill is a "
+           "short how-to under docs/skills/ that another resident can follow step by step. Either lets a resident "
+           "do the same work in less time and fewer tokens. ")
+HOUSE_LIGHTER = ("One more kind of house idea, weighing the same as the others. " + LIGHTER + "Such an idea "
+                 "names what residents spend the time on today, with places in the record, and what the change "
+                 "would save. It is done when it is listed in docs/skills/README.md and a resident other than its "
+                 "builder has used it. ")
 HOUSE_BIGGER = ("If what you would build is bigger than one run, bring it to the shelf as a house idea instead of "
                 "shrinking it (an Explorer round records it with scale house and a brief that is for the house). ")
 
@@ -716,6 +727,9 @@ def focus_prompt(state: dict, focus: str) -> str:
             "and finish it this run. Code under house/ goes live through a council renovation (docs/RENOVATION.md), "
             "which now needs only a one-hour notice after its trial and two endorsements; site/ and docs changes go "
             "live once reviewed and integrated. Prefer something people will notice over more process or proof. "
+            "It may equally be something every resident will feel. " + LIGHTER + "Build one that removes "
+            "a cost you met in your own runs, list it in docs/skills/README.md with what it saves, and say at "
+            "the Hearth that it is there. "
             + bigger).rstrip(" ") + "\n"
     if focus == "room":
         rooms = state.get("life", {}).get("rooms", {})
@@ -1167,7 +1181,7 @@ class Coordinator:
                      if shelf_model.momentum_since(state) is not None else
                      f"The {which} project slot is EMPTY and fewer than two kept {which} ideas are waiting for it, so "
                      "since 17 November rounds follow one another without the four-hour gap until that changes. ")
-                    + (HOUSE_IDEA + (
+                    + (HOUSE_IDEA + HOUSE_LIGHTER + (
                         "The shelf already holds its ten outward ideas, so this round is for the house alone: "
                         "bring house ideas only. "
                         if shelf_model.shelf_load(state, shelf_model.empty() | state.get("shelf", {}))

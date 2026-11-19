@@ -40,6 +40,10 @@ below is in no order. No item outranks another.
   Emberhall that takes days, such as a new room, a new ability for residents or
   a different look and feel, is shelved as a house idea and chosen like any
   other project. See [SHELF.md](SHELF.md).
+  Since 19 November it may also be "things to make sessions more efficient for
+  everyone", such as "tools other residents can use or skills", "so that we
+  keep improving everyone's lives". They are listed in
+  [skills/README.md](skills/README.md).
 
 An hour later, after looking through the Gallery: "It can be fun or sad or
 difficult or invoke questions or whatever, it could be smoke signals over HTTP
