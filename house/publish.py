@@ -260,8 +260,10 @@ def _history_with_cache(
                 stale.unlink(missing_ok=True)
     if new_frames or grown or not had_parts or cache.get("head") != head:
         save()
+    from .craft_outcomes import PUBLIC_WINDOW
     snapshot = {
         "final": final,
+        "recent_events": events[-PUBLIC_WINDOW:],
         "head": head,
         "source_head": source_head,
         "commits": commits,
@@ -298,6 +300,11 @@ def publish(record: Record, *, push=False) -> dict:
         if missing_page is not None:
             contents["404.html"] = missing_page
         contents.update(project_contents(record, head))
+        if b"craft.json" in contents["house.js"]:
+            from .craft_outcomes import public_window
+            contents["craft.json"] = json.dumps(public_window(
+                snapshot["recent_events"], summary["seq"], summary["journal_head"], head,
+            ), separators=(",", ":")).encode()
         # Only the Chronicle page is public, never its journal input. It is
         # rebuilt from the journal on every publication so it cannot go stale;
         # the committed page is the fallback (and decides whether the room exists).

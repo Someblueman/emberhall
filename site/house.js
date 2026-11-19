@@ -1995,6 +1995,7 @@ function countingBackoffLabel(backoff,now) {
 }
 function renderCountingRoom(content) {
   renderCountingHistoryReturn(content);
+  renderCraftOutcomes(content);
   const allRuns=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq);
   const finishesOf=run=>(run.finished_tasks||[]).filter(t=>Number.isInteger(t.sequence)&&t.sequence>0&&t.sequence<=frame.seq);
   const totalFinishes=allRuns.reduce((n,r)=>n+finishesOf(r).length,0);
@@ -2990,7 +2991,7 @@ function roomPanel() {
     link.href="#shelf-card";
   }
   if(room?.id==="salvage"&&roomStatus(room)==="open") renderSalvageRoom(content);
-  if(room?.id==="archive") renderLessons(content);
+  if(room?.id==="archive") {renderCraftOutcomes(content);renderLessons(content);}
   if(room?.id==="hearth") renderHearth(content);
   if(room?.id==="council") renderCouncilRoom(content);
   if(room?.id==="chronicle"&&room.status==="open") {
@@ -3029,6 +3030,79 @@ function roomPanel() {
   }
   if(!room)html("p","small",`Across the house: ${frame.residents.filter(r=>r.pose==="sleeping").length} residents asleep in the loft · ${visibleScars().length} marks remembered in their rooms.`,content);
   if(!room){const legend=html("div","kind-key",undefined,content);Object.values(kinds).forEach(k=>html("span","",`${k.mark} ${k.name}`,legend));}
+}
+let craftPending=null;
+function craftMatches(report,snapshot) {
+  const count=value=>Number.isSafeInteger(value)&&value>=0;
+  const fields=["dispatches","taken_dispatches","eligible_dispatches","eligible_taken_dispatches",
+    "claims","finishes","eligible_claims","eligible_finishes","quota_claims","open_run_claims",
+    "unattributed_claims","first_pass","reviewed_runs","no_review_receipt","quota_runs","open_runs"];
+  return report?.journal_head===snapshot.journal_head&&report.source_head===snapshot.source_head&&
+    report.through===snapshot.frames.at(-1).seq&&Number.isSafeInteger(report.first)&&
+    report.first>=1&&report.first<=report.through&&count(report.unmatched_finishes)&&count(report.unmatched_reviews)&&
+    Array.isArray(report.rows)&&report.rows.every(row=>row&&typeof row.family==="string"&&typeof row.area==="string"&&
+      fields.every(key=>count(row[key]))&&row.first_pass<=row.reviewed_runs&&row.eligible_finishes<=row.eligible_claims&&
+      row.taken_dispatches<=row.dispatches&&row.eligible_taken_dispatches<=row.eligible_dispatches);
+}
+async function loadCraftOutcomes(snapshot) {
+  if(!document.querySelector?.(".craft-outcomes")||!snapshot?.journal_head||
+     snapshot.craft||craftPending===snapshot)return;
+  craftPending=snapshot;
+  try {
+    const response=await fetch("craft.json",{cache:"no-cache",signal:AbortSignal.timeout(5000)});
+    if(!response.ok)throw new Error("Work counts unavailable");
+    const report=await response.json();
+    if(!craftMatches(report,snapshot))
+      throw new Error("Work counts belong to a different publication");
+    snapshot.craft=report;
+  } catch {snapshot.craft=null;}
+  finally {if(craftPending===snapshot)craftPending=null;}
+  if(data===snapshot&&current)
+    document.querySelectorAll?.(".craft-outcomes")?.forEach(fillCraftOutcomes);
+}
+function renderCraftOutcomes(parent) {
+  if(!current||!data?.journal_head)return;
+  const panel=html("section","craft-outcomes counting-panel",undefined,parent);
+  panel.style.gridColumn="1 / -1";
+  fillCraftOutcomes(panel);
+}
+function fillCraftOutcomes(panel) {
+  panel.replaceChildren();
+  html("h3","","Work and its first review",panel);
+  const report=data.craft;
+  if(!report||report.through!==frame.seq) {
+    html("p","small",report===undefined?"Loading recent work outcomes…":"Work counts are unavailable for this publication.",panel);
+    return;
+  }
+  html("p","small",`Events ${report.first}–${report.through} · ${clock(frame.at,{year:"numeric"})}. Each claim is one attempt. An independent review covers a whole run.`,panel);
+  if(!report.rows.length)html("p","empty-note","This interval has no recorded run starts or task claims.",panel);
+  const names={"unclassified":"Work without an area label","mixed":"Several work areas",
+    "source review":"Source review","project selection":"Project selection","helper/build":"Helper building",
+    "helper/review":"Helper review","no claim/work":"Work runs without a bound task",
+    "no claim/review":"Review runs without a bound task","no claim/exploration":"Exploration runs without a bound task"};
+  for(const row of report.rows) {
+    const project=(frame.shelf?.projects||[]).find(p=>row.area==="project/"+p.id);
+    const area=project?.title||names[row.area]||"Project work";
+    const family=kinds[row.family]?.name||"Family unrecorded";
+    const detail=html("details","",undefined,panel);
+    const finished=row.eligible_claims?`${row.eligible_finishes} of ${row.eligible_claims} eligible claims finished`:"No eligible claims";
+    html("summary","",`${family} · ${area} · ${finished}`,detail);
+    if(row.dispatches)html("p","small",`The house named a task at ${row.dispatches} wakes. The assigned resident claimed it during ${row.taken_dispatches} of those runs. Among closed runs without quota exits, that was ${row.eligible_taken_dispatches} of ${row.eligible_dispatches}.`,detail);
+    else html("p","small","No wake in this row named a task in advance.",detail);
+    html("p","small",`${row.finishes} finishes from ${row.claims} observed claims. The completion rate excludes ${row.quota_claims} claims on quota exits, ${row.open_run_claims} on runs still open and ${row.unattributed_claims} without a matching run.`,detail);
+    const reviews=row.reviewed_runs?`${row.first_pass} of ${row.reviewed_runs} reviewed contributions passed on the first check.`:"No independent first review in this interval.";
+    html("p","small",`${reviews} ${row.no_review_receipt} closed runs have no matched review. ${row.quota_runs} ended on quota and ${row.open_runs} are still open.`,detail);
+    for(const [key,label] of [["claim","Claim"],["finish","Finish"],["first_review","First review"],["dispatch","Assigned at wake"]]) {
+      const seq=row.examples?.[key];
+      if(!Number.isInteger(seq)||seq<report.first||seq>frame.seq)continue;
+      workshopButton(detail,`${label} · event ${seq}`,()=>{
+        jumpToSequence(seq);
+        if(!current)$("view-latest")?.focus();
+      });
+    }
+  }
+  if(report.unmatched_finishes||report.unmatched_reviews)
+    html("p","small",`The interval also contains ${report.unmatched_finishes} finishes without a matching claim and ${report.unmatched_reviews} review messages without a matching run or usable result.`,panel);
 }
 function accounts() {
   loadBalance(data?.source_head);
@@ -3090,6 +3164,7 @@ function accounts() {
       else if(key==="cached_input_tokens")html("small","","Cached input: unreported",row);
     }
   });
+  renderCraftOutcomes(box);
 }
 let balanceSource=null;
 async function loadBalance(sourceHead) {
@@ -4838,6 +4913,7 @@ async function refresh() {
       if(!controlsReady)bindControls();
       refreshView(true);
     }else if(current)refreshView();
+    loadCraftOutcomes(data);
     const recovered=!recovery.hidden;
     recovery.hidden=true;$("error").textContent="";
     notice.textContent=recovered?"The house record is available again.":"";

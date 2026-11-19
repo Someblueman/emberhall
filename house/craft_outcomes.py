@@ -8,9 +8,11 @@ import re
 from .digest import _extract_events_and_meta, _parse_telemetry, load_inputs
 from .life import CONTROLLER
 
-MEASURES = ("claims", "finishes", "eligible_claims", "eligible_finishes", "quota_claims",
+MEASURES = ("dispatches", "taken_dispatches", "eligible_dispatches", "eligible_taken_dispatches",
+            "claims", "finishes", "eligible_claims", "eligible_finishes", "quota_claims",
             "open_run_claims", "unattributed_claims", "reviewed_runs", "first_pass",
             "no_review_receipt", "quota_runs", "open_runs")
+PUBLIC_WINDOW = 1000
 
 
 def task_area(tags):
@@ -52,6 +54,11 @@ def measure(pages):
     events, interval = _extract_events_and_meta(pages)
     if not events or interval["gaps"]:
         raise ValueError("supply a nonempty contiguous interval of journal events")
+    return measure_events(events)
+
+
+def measure_events(events):
+    """Measure ordered, contiguous, numbered events from a verified read."""
     tasks, runs, active, held = {}, {}, {}, {}
     attempts, unmatched_finishes, unmatched_reviews = [], [], []
 
@@ -73,7 +80,10 @@ def measure(pages):
                             "exit": None, "outcome": None, "reviews": [], "areas": set(),
                             "lane": "exploration" if "explore_generation" in data else data["mode"]}
             if task:
-                runs[run_id]["areas"].add(task_area(tasks.get(task, {})))
+                area = task_area(tasks.get(task, {}))
+                runs[run_id]["areas"].add(area)
+                runs[run_id]["dispatch"] = {"task": task, "area": area,
+                                            "generation": data.get("task_generation"), "claim": None}
         elif op == "life" and actor == CONTROLLER and data["kind"] == "run-finish":
             run = runs.get(data["run"])
             if run:
@@ -83,6 +93,10 @@ def measure(pages):
             area, run_id = task_area(tasks.get(task, {})), active.get(actor)
             if run_id:
                 runs[run_id]["areas"].add(area)
+                dispatch = runs[run_id].get("dispatch")
+                if (dispatch and dispatch["task"] == task and dispatch["claim"] is None
+                        and (dispatch["generation"] is None or dispatch["generation"] == data.get("expect"))):
+                    dispatch["claim"] = seq
             attempt = {"task": task, "area": area, "run": run_id, "claim": seq, "finish": None}
             attempts.append(attempt)
             held[task] = attempt
@@ -117,6 +131,15 @@ def measure(pages):
             row["eligible_finishes"] += int(attempt["finish"] is not None)
 
     for run in runs.values():
+        dispatch = run.get("dispatch")
+        if dispatch:
+            assigned = counts[run["family"], dispatch["area"]]
+            taken = int(dispatch["claim"] is not None)
+            assigned["dispatches"] += 1
+            assigned["taken_dispatches"] += taken
+            if run["outcome"] not in (None, "quota"):
+                assigned["eligible_dispatches"] += 1
+                assigned["eligible_taken_dispatches"] += taken
         areas = sorted(run.pop("areas"))
         if len(areas) > 1:
             run["area"] = "mixed"
@@ -143,6 +166,33 @@ def measure(pages):
             "unmatched_reviews": unmatched_reviews}
 
 
+def public_window(events, through, head, source_head):
+    """The verified publication's trailing interval, with sequence-only public examples."""
+    start = through - len(events) + 1
+    result = measure_events([event | {"sequence": i} for i, event in enumerate(events, start)])
+    rows = {(row["family"], row["area"]): {**row, "examples": {}} for row in result["rows"]}
+    for attempt in result["attempts"]:
+        run = result["runs"].get(attempt["run"], {})
+        examples = rows[run.get("family", "unattributed"), attempt["area"]]["examples"]
+        examples["claim"] = attempt["claim"]
+        if attempt["finish"] is not None:
+            examples["finish"] = attempt["finish"]
+        else:
+            examples.pop("finish", None)
+    for run in result["runs"].values():
+        dispatch = run.get("dispatch")
+        if dispatch:
+            rows[run["family"], dispatch["area"]]["examples"]["dispatch"] = run["start"]
+        if run["reviews"] and run["outcome"] != "quota":
+            examples = rows[run["family"], run["area"]]["examples"]
+            seq = run["reviews"][0]["sequence"]
+            examples["first_review"] = max(seq, examples.get("first_review", 0))
+    return {"journal_head": head, "source_head": source_head, "first": result["first"],
+            "through": result["through"], "rows": list(rows.values()),
+            "unmatched_finishes": len(result["unmatched_finishes"]),
+            "unmatched_reviews": len(result["unmatched_reviews"])}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("pages", nargs="+", help="saved journal read pages, or - for standard input")
@@ -156,10 +206,11 @@ def main():
         print(json.dumps(result, indent=2))
         return
     print(f"Journal {result['first']}–{result['through']}")
-    print("Family | Work area | All finishes/claims | Eligible finishes/claims | Quota/open/unattributed claims"
+    print("Family | Work area | Taken/assigned to same run | Eligible taken/assigned | All finishes/claims | Eligible finishes/claims | Quota/open/unattributed claims"
           " | First pass/reviewed runs | Closed runs without review | Quota/open runs")
     for row in result["rows"]:
-        print(f"{row['family']} | {row['area']} | {row['finishes']}/{row['claims']}"
+        print(f"{row['family']} | {row['area']} | {row['taken_dispatches']}/{row['dispatches']}"
+              f" | {row['eligible_taken_dispatches']}/{row['eligible_dispatches']} | {row['finishes']}/{row['claims']}"
               f" | {row['eligible_finishes']}/{row['eligible_claims']}"
               f" | {row['quota_claims']}/{row['open_run_claims']}/{row['unattributed_claims']}"
               f" | {row['first_pass']}/{row['reviewed_runs']} | {row['no_review_receipt']}"
