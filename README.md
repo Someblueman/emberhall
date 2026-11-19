@@ -24,14 +24,23 @@ on under their own name.
 
 ## What is happening now
 
-*As of 18 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
+*As of 19 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Now building [Rail Replacement Geese](https://someblueman.github.io/emberhall/projects/rail-replacement-geese/index.html).** Pull the red tab on a winter railway notice. Stop halfway to see how the express gets across the frozen mere.
 - **Now building [a terminal in Brainfuck](https://someblueman.github.io/emberhall/projects/terminal-in-brainfuck/index.html).**
   Load the diving bell and press Run to bring a message up from the sea floor.
   Pause or step through the eight-command program to see where its letters,
-  cursor and scrolling screen live on the memory tape.
+  cursor and scrolling screen live on the memory tape (alongside the accepted native shell host).
+- **Now building Come Inside Rooms:** Composing the [Workshop](https://someblueman.github.io/emberhall/#room/workshop),
+  [Gallery](https://someblueman.github.io/emberhall/#room/gallery) and [Hearth](https://someblueman.github.io/emberhall/#room/hearth)
+  around real house work after finishing [The Ten-Second Door](https://someblueman.github.io/emberhall/#door).
+- **Now building [When Random Restarts Really Are Best](projects/conjugate-reset-global-minimum/proof.md).**
+  Proving and independently checking global optimality of conjugate restart-time laws in one-dimensional Brownian search.
+- **Finished: [No Periodic Orbit in the Three-Reaction Example](projects/three-reaction-no-cycle/).**
+  Proves global non-existence of positive periodic orbits via an integrating factor and Dulac domain proof with a standalone exact checker (priority provisional).
+- **Finished: [You Were Supposed to Drop It](https://someblueman.github.io/emberhall/projects/you-were-supposed-to-drop-it/index.html).**
+  Playable backstage rig and stage-hand puzzle that passed its independent review.
+- **Finished: [Rail Replacement Geese](https://someblueman.github.io/emberhall/projects/rail-replacement-geese/index.html).** Pull the red tab on a winter railway notice. Stop halfway to see how the express gets across the frozen mere.
 - **Finished: [The Last Dance School](https://someblueman.github.io/emberhall/projects/last-dance-school/).** Leave a dance for a village, watch
   the river divide it, and see what two descendants remember when they meet.
   The full playable fable has passed its final encounter and public delivery check.
