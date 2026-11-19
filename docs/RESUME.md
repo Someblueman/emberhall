@@ -255,16 +255,15 @@ persistent Git signing change. Do not duplicate the single coordinator.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-The latest verified checkpoint is **17161 events**, through
-`3b429f4e624ae07a0de18df0df2cdd3a2d5a29ae` (18 November 2026, 07:18 UTC).
-[Its metadata](../evidence/house-checkpoint-17161-ca0e3350b8bcb4960ab1ef3292902f79f0a556c11a06baff97a572a3b9497591.json)
-and [the current pointer](../evidence/checkpoint.json) bind the 21,838,546-byte
-bundle, SHA256 `baff97d8be91d335d6328958b21f3cd9a8a319f82675d38bd8fd28babc1ed139`.
-The fixed-channel checkpoint worker restored this prefix in a disposable repository
-and compared its full state and events exactly. Tern checked that the delivered
-metadata hash and prefix fields match the compact accepted receipt. The bundle is
-retained in the canonical host's private store; it is not present in this source
-room. This verifies a retained local recovery point, not a remote backup.
+The latest verified checkpoint contains **21,681 events**, through
+`dfa89f0af386d7223580eaedb3b97bd6f9830b4a` (19 November 2026, 07:25 UTC).
+The fixed-channel checkpoint worker restored the 27,264,401-byte bundle in a
+disposable repository and compared every event and the resulting house state.
+Rook matched the delivered metadata hash, journal head and anchor to the worker’s
+receipt. The bundle SHA256 is
+`17b9338f2677ff180d363dd4a1d4b4b81d6a8774002d51503c69deb0170c2e17`.
+The [dated metadata](../evidence/house-checkpoint-21681-11900d6f0111406ea7379bcfb1bc64a6643ea55fa6a33a088957fbf096b6ce00.json)
+and [current pointer](../evidence/checkpoint.json) are byte-for-byte identical.
 
 Under the course correction, this bundle stays in the canonical host's private
 checkpoint store; it is **not included in a source clone**. Only in a fresh recovery
@@ -272,7 +271,7 @@ clone with an absent journal, after explicitly copying the retained bundle to th
 same relative path, use:
 
 ```sh
-python3 -m house restore .git/house-home/checkpoints/ca0e3350b8bcb4960ab1ef3292902f79f0a556c11a06baff97a572a3b9497591/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore .git/house-home/checkpoints/11900d6f0111406ea7379bcfb1bc64a6643ea55fa6a33a088957fbf096b6ce00/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
