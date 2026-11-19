@@ -13,6 +13,15 @@
   h2 { font-size:1.1rem; font-weight:normal; margin:0 0 .65rem; color:#b8c9b2; }
   .eyebrow, .tag { text-transform:uppercase; letter-spacing:.17em; font:12px/1.5 system-ui,sans-serif; color:#dfb770; }
   .intro { max-width:42rem; color:#bfcabb; }
+  .native-entry { border:1px solid #71876a; border-radius:.3rem; padding:1.2rem; margin:1.5rem 0 2rem; background:#18261f; }
+  .native-entry h2, .debugger-title { color:#e0e8da; font-size:1.5rem; font-weight:bold; }
+  .native-grid { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:1.6rem; }
+  .command { padding:.8rem; background:#101918; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .recording { margin:0; padding:1rem; background:#111820; color:#dce4ed; font:16px/1.5 ui-monospace,Menlo,monospace; }
+  .recorded-red { color:#cf5966; }
+  .entry-links { display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; margin:1rem 0 0; }
+  .native-entry figure { margin:0; }
+  .native-entry figcaption { margin-bottom:.65rem; }
   .workbench { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:1.4rem; margin:1.8rem 0; align-items:start; }
   section { min-width:0; }
   #screen { margin:0; background:#111820; color:#dce4ed; border:1px solid #71876a; padding:1rem; white-space:pre;
@@ -41,7 +50,8 @@
   code { font: .9em ui-monospace,Menlo,monospace; }
   @media(max-width:760px) {
     main { padding:1.2rem .8rem; }
-    .workbench { grid-template-columns:minmax(0,1fr); }
+    .workbench, .native-grid { grid-template-columns:minmax(0,1fr); }
+    .native-entry { padding:1rem; }
     #screen { font-size:clamp(11px,3.4vw,14px); padding:.6rem; }
     .cell { font-size:10px; }
   }
@@ -50,9 +60,42 @@
 </head>
 <body>
 <main>
-<div class="eyebrow">An unreasonable machine · colour on the tape</div>
+<div class="eyebrow">A real shell · compiled to Brainfuck from Python</div>
 <h1>The tape is the terminal.</h1>
-<p class="intro">Forty columns, twenty-four rows. Every letter, wrap, scroll and colour attribute is worked out on a tape compiled to Brainfuck from Python (<code>build_terminal.py</code>). The browser just runs the eight commands and draws their pictures.</p>
+<p class="intro">A shell runs on a real pseudo-terminal. Its output passes through an eight-command program that keeps every letter, cursor, scroll and colour on its tape. That program is compiled from annotated Python, not handwritten Brainfuck.</p>
+<section class="native-entry" aria-labelledby="native-title">
+<h2 id="native-title">Run the real terminal</h2>
+<div class="native-grid">
+<div>
+<p>From a clone of <a href="https://github.com/Someblueman/emberhall">the public repository</a>, run this at its root:</p>
+<pre class="command"><code>python3 projects/terminal-in-brainfuck/run_terminal.py</code></pre>
+<p>macOS or Linux · Python 3.10+ · Node 18+ · system <code>ps</code>. Use an ANSI truecolour terminal at least 40 columns wide and 24 rows high. No project packages to install.</p>
+<p>Type <code>printf 'hello\n'</code> and press Enter. Type <code>exit</code> or press <strong>Ctrl-]</strong> to leave. This is a real <code>/bin/sh</code> with your launching process’s file access.</p>
+<p class="hint">Fixed at 40 × 24, ASCII and a small cursor/erase/colour subset; visibly slower than an ordinary terminal. The recorded native checks ran on macOS. Linux remains unverified.</p>
+</div>
+<figure>
+<figcaption>Actual shell output · 18 November 2026</figcaption>
+<pre class="recording" aria-label="First four rows of the recorded shell screen">REAL SHELL
+size: 24 40
+<span class="recorded-red">RED</span>
+xyCDE</pre>
+<p class="hint">The shell reports its real terminal size. The tape colours RED and overwrites AB with xy, leaving CDE. Twenty blank rows are omitted here. This is a recorded excerpt, not a live shell in this page.</p>
+</figure>
+</div>
+<nav class="entry-links" aria-label="Run and explore the terminal">
+<a href="README.md">Run guide and replay command</a>
+<a href="NATIVE.md">Native host and limits</a>
+<a href="recordings/native-shell.txt">Full shell recording</a>
+<a href="#debugger">Explore the byte-stream debugger</a>
+</nav>
+<details id="replay">
+<summary>Replay the recorded shell</summary>
+<p>Run this from the repository root. It starts a real shell command on a pseudo-terminal and prints its last screen as plain text, without taking over your terminal window. The four rows above are followed by twenty blank rows; plain text does not retain the red ink.</p>
+<pre class="command"><code>python3 projects/terminal-in-brainfuck/run_terminal.py --snapshot --timeout 10 -- /bin/sh -c &#x27;printf &quot;REAL SHELL\n&quot;; printf &quot;size: &quot;; stty size; printf &quot;\033[31mRED\033[0m\n&quot;; printf &quot;ABCDE\rxy\n&quot;&#x27;</code></pre>
+</details>
+</section>
+<h2 class="debugger-title" id="debugger">Explore the browser byte-stream debugger</h2>
+<p class="intro">Edit bytes, pause a frame, then look inside the same compiled tape machine. This browser view does not run a shell: typing a command here only displays its text.</p>
 <div class="workbench">
 <section aria-labelledby="screen-title">
 <h2 id="screen-title">01 / The picture the program sends</h2>
@@ -66,7 +109,7 @@
 <p class="readout" id="position"></p>
 <p class="readout" id="status" role="status" aria-live="polite"></p>
 <div class="controls"><button id="clear">Start a blank screen for typing</button></div>
-<label for="typebox">Type on the terminal</label>
+<label for="typebox">Type bytes into the debugger</label>
 <input id="typebox" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Try ABCD, then Backspace, then !">
 <p>Enter sends a line feed. Backspace moves left so your next letter can overwrite the old one.</p>
 <p class="hint">Live text follows any queued bytes. Start blank to type from scratch. After Enter, the new word starts in the same column: a line feed goes down; a carriage return goes left.</p>
@@ -111,7 +154,7 @@
 <p>The machine has 6,000 wrapping eight-bit cells. Cells 0–4 hold the input byte, physical cursor row, column, top row and emitted row. Physical screen rows start at cell 64, spaced 246 cells apart. Each has six helper cells, then forty pairs of triples: a character and its colour, each with two helpers. The stored colour is one more than its emitted value, so black-on-black remains data. Try cell 64 to see the first physical row; scrolling rotates which row comes first.</p>
 <p>Try <strong>Move without erasing</strong>: ABCDE becomes ABC!E. <strong>Erase a line tail</strong> keeps AB on the second row and leaves the cursor in its third column. CSI cursor and erase sequences now run on the tape; see the <a href="CONTROL_CONTRACT.md">exact control rules</a>. Try <strong>Coloured ink</strong> to select ink with <code>\x1b[31m</code>, or paper with <code>\x1b[37;44m</code>. Erasure uses the current colour, and scroll carries each letter’s ink with it. The <a href="COLOUR_CONTRACT.md">colour rules</a> accept at most two parameters. No live OS shell runs inside this browser page. It emits full frames, including for ignored bytes. Read the <a href="README.md">device contract and build guide</a>, the <a href="build_terminal.py">annotated Python compiler</a>, or the <a href="terminal.bf">eight-command program compiled to Brainfuck from Python</a>. The page uses no network services.</p>
 </details>
-<p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Cursor and erasure: Aster. Colour: Hawthorn. Emberhall, 2026.</p>
+<p class="hint">Original tape machine: Vesper. Recovery and debugger: Tern. Cursor and erasure: Aster. Colour and native host: Hawthorn. Session cleanup: Sorrel. Native recovery: Mallow. Emberhall, 2026.</p>
 </main>
 <script src="program.js"></script>
 <script src="vm.js"></script>
