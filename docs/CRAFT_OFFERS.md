@@ -26,9 +26,9 @@ The five quota exits supply no craft outcomes. OpenCode has no eligible offer he
 
 ## How to read the counts
 
-- **Offers** count balanced ordinary project admissions with a controller assignment receipt. A launch is the evidence that the native process started. Helpers, Explorers, named help requests and ballot tasks are outside this comparison. A task without an observed project declaration is listed separately.
+- **Offers** count balanced ordinary project admissions with a controller assignment receipt. A launch is the evidence that the native process started. The task can be named directly at admission or by an earlier untargeted help request. Helpers, Explorers, source reviews, ballot tasks and requests for a particular provider, model or resident are outside this comparison. The reader reports missing request context separately. A recorded ordinary offer whose project is unknown has the area `unclassified`.
 - **Eligible offers** count launched, closed, non-quota receiving runs. The report also gives quota exits, open runs and closed admissions without a launch. An interrupted or failed run with a launch stays in the denominator. Repeated offers are opportunities in their own right. Distinct task counts collapse retries.
-- **Receiver claimed** requires the exact offered generation and the same supervised run. The report identifies the claimant by its run-start event. The same resident waking later is a different run. A readiness change, a missing claim and a claimant whose run began before the input interval are distinct outcomes.
+- **Receiver claimed** requires the exact offered generation and the same supervised run. The report identifies the claimant by its run-start event. The same resident waking later is a different run. A readiness change, a missing claim and a claimant whose run began before the input interval are distinct outcomes. An older help receipt can name a task without recording its generation. In that case the offer stays visible with `generation unrecorded`, even if a later claim names a generation.
 - **Receiver finished** requires the matching claim and its finish, by the same actor with the same lease token, during the receiving run. The task’s eventual finish and the finishing run’s start and family are displayed separately when observed. A finish by a later claimant does not supply a completion for the first receiver.
 - **First pass** counts first independent decisions on receiver contributions that included the matched finish. Its denominator is reviewed receiving runs. The next column counts matched finishes without a review. One review covers the source contribution, which can contain several tasks. It cannot establish an individual verdict on each file or task.
 
@@ -65,4 +65,23 @@ python3 -m house.craft_offers --outcomes "$sample/outcomes.json" --after 15759 "
 
 The owner can consume the family/project rows alongside the claim ledger. A comparison about assigned work uses `receiver_finished / eligible_offers`. A comparison about source review uses `first_pass / reviewed_receiver_runs` and shows `finished_without_review` beside it. The ordinary rotation decision and its evidence cutoff are described in [the routing replay](CRAFT_REPLAY.md).
 
-For the prospective shortlist reader, join the roster’s admission sequence to the offer row’s `offer` and check its task and generation. An assignment with a contradictory shortlist binding is excluded. Older messages can support this delivery history without identifying the families tied at decision time. Linnet’s first-twenty reader (finish 20629) owns prospective enrollment and filters. A different resident must judge the actual trial after the relevant council installation.
+## Join the prospective roster
+
+Use the same ordered pages and exclusive start sequence for both readers. The roster selects the first eligible distinct tasks in admission order. The delivery reader follows the matching lease and supplies completion and first-review counts for just those enrolled receiving runs.
+
+```sh
+python3 projects/kind-craft-and-routing/cohort.py --after 15759 "$sample"/page-*.json > "$sample/roster.json"
+python3 -m house.craft_offers --after 15759 --outcomes "$sample/outcomes.json" \
+    --roster "$sample/roster.json" "$sample"/page-*.json
+```
+
+`roster_join` reports matched offers, any unmatched admissions, the enrolled start numbers and outcomes for those enrolled runs. It checks the cutoffs, admission, assignment, task, generation when recorded, family, shortlist, exit and outcome. A contradictory enrolled row stops the comparison. A quota or repeated offer in the source pages can remain visible without contributing to the enrolled denominator.
+
+| Exclusive start → cutoff | Offers in both readers | Recorded prospective enrollments |
+| --- | ---: | ---: |
+| 15759 → 20559 | 28 / 28 | 0 |
+| 20549 → 20608 | 3 / 3 | 0 |
+
+For the second interval supply earlier context from 20350. The two backlog offers were 20563 and 20574. Offer **20602** was carried by untargeted help request **20571** and assignment **20603**. The request named the terminal reconstruction. The assignment did not record a generation or a shortlist. Its row records that uncertainty and grants no matched delivery. All three admissions join by their real receipts.
+
+A disposable compatibility fixture passed the output of the independent roster CLI into this reader with two correctly bound help offers. The first exited on quota. The second enrolled and supplied one matched finish without a review. That fixture checks the interface. The two historical intervals supply zero live enrollments. A different resident must judge a live trial after the relevant council installation.

@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from house.craft_offers import audit
+from house.craft_offers import audit, join_roster
 from house.life import CONTROLLER
 from house.work_metrics import ASSIGNMENT_PREFIX
 
@@ -24,7 +24,7 @@ class CraftOffers(unittest.TestCase):
                        agent=family, model="ordinary", mode="work", **task, **extra)
         self.runs[run] = dict(start=seq, family=family, resident=resident, exit=None, outcome=None, reviews=[])
         self.add("life", CONTROLLER, kind="run-launched", run=run)
-        observation = dict(run=run, reason="balanced", lane="work", helper=False)
+        observation = dict(run=run, reason="balanced", lane="work", helper=False, help_request=extra.get("help_request"))
         self.add("say", CONTROLLER, text=ASSIGNMENT_PREFIX + json.dumps(observation))
         self.events[-1]["id"] = f"home-{run}-assignment"
         return seq
@@ -142,3 +142,51 @@ class CraftOffers(unittest.TestCase):
         payload["task_generation"] = 1
         receipt["data"]["text"] = ASSIGNMENT_PREFIX + json.dumps(payload)
         self.assertEqual(self.report()["excluded_bound_starts"], {"assignment names a different task or generation": 1})
+
+
+    def test_help_needs_recorded_generation_and_respects_request_restrictions(self):
+        self.add("life", "writer", kind="help", request="ask", task="proof")
+        self.start("a", "alice", offer=False, help_request="ask")
+        receipt = self.events[-1]
+        self.finish(self.claim("a"))
+        self.close("a")
+        old, = self.report()["offers"]
+        self.assertEqual((old["binding"], old["generation"], old["disposition"], old["claim"]),
+                         ("help", None, "generation unrecorded", None))
+        obs = json.loads(receipt["data"]["text"][len(ASSIGNMENT_PREFIX):])
+        obs.update(task="proof", task_generation=0, tied_families=["codex", "agy"])
+        receipt["data"]["text"] = ASSIGNMENT_PREFIX + json.dumps(obs)
+        row, = self.report()["offers"]
+        self.assertEqual((row["generation"], row["disposition"]), (0, "receiver finished"))
+        for key in ("agent", "model", "target_resident", "review_run"):
+            with self.subTest(key=key):
+                self.events[1]["data"][key] = "reserved"
+                self.assertEqual(self.report()["excluded_bound_starts"], {"reserved route": 1})
+                del self.events[1]["data"][key]
+
+    def test_roster_enrollment_is_distinct_from_all_offers(self):
+        first = self.start("a", "alice")
+        receipt = self.events[-1]
+        obs = json.loads(receipt["data"]["text"][len(ASSIGNMENT_PREFIX):])
+        obs.update(task="proof", task_generation=0, tied_families=["codex", "agy"])
+        receipt["data"]["text"] = ASSIGNMENT_PREFIX + json.dumps(obs)
+        self.finish(self.claim("a"))
+        self.close("a")
+        report = self.report()
+        row, = report["offers"]
+        item = {k: row[k] for k in ("assignment", "task", "family", "exit", "outcome", "generation", "tied_families")}
+        item.update(start=first, disposition="enrolled")
+        roster = dict(after=report["after"], through=report["through"], offers=[item],
+                      enrolled_starts=[first], enrolled_tasks=1)
+        joined = join_roster(report, roster)
+        self.assertEqual(joined["enrolled_outcomes"][0]["receiver_finished"], 1)
+        with self.assertRaisesRegex(ValueError, "different cutoffs"):
+            join_roster(report, roster | {"after": 0})
+        with self.assertRaisesRegex(ValueError, "disagree at admission"):
+            join_roster(report, roster | {"offers": [item | {"generation": 3}]})
+        with self.assertRaisesRegex(ValueError, "lacks a closed non-quota shortlist"):
+            join_roster(report, roster | {"offers": [{k: v for k, v in item.items() if k != "generation"}]})
+        with self.assertRaisesRegex(ValueError, "duplicate roster"):
+            join_roster(report, roster | {"offers": [item, item]})
+        with self.assertRaisesRegex(ValueError, "no matching offer"):
+            join_roster(report, roster | {"offers": [item | {"start": 999}]})

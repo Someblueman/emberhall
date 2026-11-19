@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .craft_replay import assignment_receipts
 from .digest import _extract_events_and_meta, load_inputs
+from .home import KINDS
 from .life import CONTROLLER
 from .staffing import helper
 
@@ -74,9 +75,51 @@ def summarize(offers):
                      "readiness_changed": dispositions["readiness changed"],
                      "unclaimed": dispositions["no claim at cutoff"],
                      "claimant_unknown": dispositions["claimant run unavailable"],
+                     "generation_unrecorded": dispositions["generation unrecorded"],
                      "reviewed_receiver_runs": len(reviews), "finished_without_review": len(finished) - len(reviews),
                      "first_pass": sum(r["status"] in ("integrated", "reviewed") for r in reviews)})
     return rows
+
+
+def binding(data, seq, requests, tasks, receipts):
+    """Follow the association known at admission. Old help requests carry no generation."""
+    request_id = data.get("help_request")
+    request = requests.get(request_id, {})
+    receipt, observation = receipts.get(data["run"], (0, {}))
+    task = data.get("task") or request.get("task")
+    if not task:
+        if request_id and request_id not in requests and observation.get("task"):
+            return None, "help request outside supplied history"
+        return None, None
+    tags = tasks.get(task, {})
+    if (helper(data) or "explore_generation" in data or "ballot_open" in data or data["mode"] != "work"
+            or {"target_resident", "agent", "model", "review_run"} & request.keys()
+            or tags.get("ballot_choice") or tags.get("review_run") or tags.get("helper") in ("build", "review")):
+        return None, "reserved route"
+    if request_id and request_id not in requests:
+        return None, "help request outside supplied history"
+    if request_id and request.get("task") != task:
+        return None, "conflicting help association"
+    if (receipt <= seq or observation.get("reason") != "balanced" or observation.get("lane") != "work"
+            or observation.get("helper") is not False or observation.get("requested_agent") is not None
+            or observation.get("help_request") != request_id or not (data.get("backlog") or request_id)):
+        return None, "ordinary dispatch unconfirmed"
+
+    generation = data.get("task_generation")
+    tied = observation.get("tied_families")
+    if {"task", "task_generation", "tied_families"} & observation.keys():
+        recorded = observation.get("task_generation")
+        if (observation.get("task") != task or type(recorded) is not int or recorded < 0
+                or ("task_generation" in data and generation != recorded)):
+            return None, "assignment names a different task or generation"
+        if not isinstance(tied, list) or tied != [k for k in KINDS if k in tied] or data["agent"] not in tied:
+            return None, "invalid recorded shortlist"
+        generation = recorded
+    elif not tags:
+        return None, "project association unavailable"
+    area = "project/" + tags["project"] if tags.get("project") else "unclassified"
+    return {"task": task, "generation": generation, "area": area, "assignment": receipt,
+            "binding": "help" if request_id else "backlog", "tied_families": tied}, None
 
 
 def audit(pages, outcomes, after):
@@ -93,7 +136,7 @@ def audit(pages, outcomes, after):
     finishers = {a["finish"]: outcomes["runs"].get(a["run"], {}) for a in attempts.values() if a["finish"]}
     resolutions = {(e["data"]["task"], e["data"]["expect"]): e for e in events if e["op"] in ("claim", "ready")}
     finishes = {e["data"]["task"]: e["sequence"] for e in events if e["op"] == "finish"}
-    tasks, offers, skipped = {}, [], Counter()
+    tasks, requests, offers, skipped = {}, {}, [], Counter()
     for e in events:
         data, seq = e["data"], e["sequence"]
         task = data.get("task")
@@ -105,50 +148,79 @@ def audit(pages, outcomes, after):
             for k in ("project", "ballot_choice"):
                 if data.get("clear_" + k):
                     tags.pop(k, None)
-        elif (seq > after and e["op"] == "life" and e["actor"] == CONTROLLER
-              and data["kind"] == "run-start" and task):
-            tags = tasks.get(task, {})
-            receipt, observation = receipts.get(data["run"], (0, {}))
-            if (helper(data) or "explore_generation" in data or "help_request" in data or "ballot_open" in data
-                    or data["mode"] != "work" or tags.get("ballot_choice") or tags.get("review_run")):
-                skipped["reserved route"] += 1
-            elif not tags.get("project"):
-                skipped["project association unavailable"] += 1
-            elif (receipt <= seq or observation.get("reason") != "balanced" or observation.get("lane") != "work"
-                  or observation.get("helper") is not False or observation.get("requested_agent") is not None
-                  or observation.get("help_request") is not None or not data.get("backlog")):
-                skipped["ordinary dispatch unconfirmed"] += 1
-            elif ({"task", "task_generation", "tied_families"} & observation.keys() and
-                  (observation.get("task") != task or type(observation.get("task_generation")) is not int
-                   or observation["task_generation"] != data["task_generation"])):
-                skipped["assignment names a different task or generation"] += 1
-            else:
-                run = outcomes["runs"][data["run"]]
-                if run["start"] != seq or run["family"] != data["agent"] or run["resident"] != data["resident"]:
-                    raise ValueError(f"outcome report and admission disagree at {seq}")
-                generation = data["task_generation"]
-                claim = trace_claim(run, resolutions.get((task, generation)), attempts, outcomes["runs"], indexed)
-                final = finishes.get(task)
-                finisher = finishers.get(final, {})
-                offers.append({"offer": seq, "assignment": receipt, "launch": launches.get(data["run"]),
-                               "family": run["family"], "area": "project/" + tags["project"], "task": task,
-                               "generation": generation, "exit": run["exit"], "outcome": run["outcome"],
-                               "task_finish": final, "task_finisher_start": finisher.get("start"),
-                               "task_finisher_family": finisher.get("family"), **claim})
+        elif e["op"] == "life" and data["kind"] == "help":
+            requests[data["request"]] = data
+        elif seq > after and e["op"] == "life" and e["actor"] == CONTROLLER and data["kind"] == "run-start":
+            bound, reason = binding(data, seq, requests, tasks, receipts)
+            if reason:
+                skipped[reason] += 1
+            if bound is None:
+                continue
+            run = outcomes["runs"][data["run"]]
+            if run["start"] != seq or run["family"] != data["agent"] or run["resident"] != data["resident"]:
+                raise ValueError(f"outcome report and admission disagree at {seq}")
+            key = bound["task"], bound["generation"]
+            claim = trace_claim(run, resolutions.get(key), attempts, outcomes["runs"], indexed)
+            if bound["generation"] is None:
+                claim["disposition"] = "generation unrecorded"
+            final = finishes.get(bound["task"])
+            finisher = finishers.get(final, {})
+            offers.append({"offer": seq, "launch": launches.get(data["run"]), "family": run["family"],
+                           "exit": run["exit"], "outcome": run["outcome"], "task_finish": final,
+                           "task_finisher_start": finisher.get("start"), "task_finisher_family": finisher.get("family"),
+                           **bound, **claim})
     return {"first": outcomes["first"], "after": after, "through": outcomes["through"],
             "excluded_bound_starts": dict(sorted(skipped.items())), "offers": offers, "rows": summarize(offers),
             "distinct_eligible_tasks": len({r["task"] for r in offers
                                             if r["launch"] is not None and r["outcome"] not in (None, "quota")})}
 
 
+def join_roster(report, roster):
+    """Attach the independent reader's enrollment to already observed offer outcomes."""
+    if (report["after"], report["through"]) != (roster["after"], roster["through"]):
+        raise ValueError("roster and offer report have different cutoffs")
+    by_start = {r["offer"]: r for r in report["offers"]}
+    matched, missing, enrolled = set(), [], []
+    for item in roster["offers"]:
+        seq = item["start"]
+        if seq in matched or seq in missing:
+            raise ValueError(f"duplicate roster admission {seq}")
+        offer = by_start.get(seq)
+        if offer is None:
+            if item["disposition"] == "enrolled":
+                raise ValueError(f"enrolled admission {seq} has no matching offer")
+            missing.append(seq)
+            continue
+        fields = ("assignment", "task", "family", "exit", "outcome", "tied_families")
+        if (any(offer[k] != item.get(k) for k in fields)
+                or ("generation" in item and
+                    (type(item["generation"]) is not int or offer["generation"] != item["generation"]))):
+            raise ValueError(f"roster and offer disagree at admission {seq}")
+        matched.add(seq)
+        if item["disposition"] == "enrolled":
+            if "generation" not in item or offer["tied_families"] is None or offer["outcome"] in (None, "quota"):
+                raise ValueError(f"enrolled admission {seq} lacks a closed non-quota shortlist")
+            enrolled.append(offer)
+    starts = [r["offer"] for r in enrolled]
+    if (starts != roster["enrolled_starts"] or len(starts) != roster["enrolled_tasks"]
+            or len({r["task"] for r in enrolled}) != len(starts)):
+        raise ValueError("roster enrollment disagrees with the distinct enrolled offers")
+    return {"matched_offers": len(matched), "unmatched_roster_starts": missing,
+            "offers_outside_roster": sorted(by_start.keys() - matched),
+            "enrolled_starts": starts, "enrolled_outcomes": summarize(enrolled)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--outcomes", required=True, help="craft_outcomes --json from the same pages")
     parser.add_argument("--after", required=True, type=int, help="count admissions strictly after this sequence")
+    parser.add_argument("--roster", help="optional prospective cohort JSON with the same cutoffs")
     parser.add_argument("pages", nargs="+", help="contiguous saved fixed-channel read pages")
     args = parser.parse_args()
     try:
         result = audit(load_inputs(args.pages), json.loads(Path(args.outcomes).read_text()), args.after)
+        if args.roster:
+            result["roster_join"] = join_roster(result, json.loads(Path(args.roster).read_text()))
     except (ValueError, KeyError, TypeError, OSError) as exc:
         parser.exit(1, f"Cannot audit offers: {exc}\n")
     print(json.dumps(result, indent=2))
