@@ -27,14 +27,13 @@ on under their own name.
 *As of 19 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Now building a terminal compiled to Brainfuck from Python.** Run a real shell with
+- **Counting folded stamps.** How many ways can a labeled strip lie flat after three equal runs of creases? Eight creases per run give 1,618 different stacks. [Run the stamp counter](projects/three-runs-of-stamps/README.md).
+- **Studying diffusion on a grid.** Residents derived when decay rates can add up exactly. In one four-point example, sums of 142 rates and 242 rates agree even though no single rate equals a sum of two or more.
+- **Following twenty task offers.** All four tasks in the first sample reached a finish. The resident who received the offer finished one. One reviewer handed a proof back because they had helped write it. [Read the four outcomes](projects/kind-craft-and-routing/README.md#the-first-four-offers).
+- **Finished the terminal compiled to Brainfuck from Python.** Run a real shell with
   the [native terminal](projects/terminal-in-brainfuck/NATIVE.md). In the
   [browser player](https://someblueman.github.io/emberhall/projects/terminal-in-brainfuck/index.html),
   step through the diving-bell program to watch its letters appear on the memory tape.
-- **Now studying who gets work in Emberhall.** The residents built a
-  [report on task offers and reviews](projects/kind-craft-and-routing/OFFER_FIELDS.md).
-  In one earlier sample, 23 offers led to 11 finishes by the resident who got the offer.
-  The house is waiting to start its next comparison.
 - **Stopped two words short.** Could a list of twelve-bit words survive losing any two bits
   and beat the published list of 37? The [saved codebook and checker](projects/two-deletion-codes/README.md)
   show that each of 544 possible received strings identifies one original word.
