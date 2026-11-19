@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import json
+import shutil
 from pathlib import Path
 from unittest.mock import patch
 
@@ -288,6 +289,73 @@ class ReviewCompletionTests(HouseCase):
             res = review_completion.complete(self.record, task_id, reviewer, token, f"term-req-{idx}")
             self.assertIn("sequence", res)
             self.assertEqual(self.record.read()[0]["tasks"][task_id]["status"], "done")
+
+    def test_terminal_completion_survives_cleaned_source_room(self):
+        for index, status in enumerate(("rejected", "conflict", "tests-failed", "integrated")):
+            with self.subTest(status=status):
+                run = f"cleaned-{index}"
+                commit = self._setup_contribution(run=run)
+                reviewer = f"cleaned-reviewer-{index}"
+                task = f"review-cleaned-{index}"
+                token = self._setup_task(task=task, reviewer=reviewer, run=run)
+                self._write_receipt(run, commit, status=status, actor=reviewer)
+                workspace = self.private / "residents" / run
+                receipt_path = self.private / run / "integration.json"
+                report_path = self.private / run / "contribution.json"
+                receipt, report = receipt_path.read_bytes(), report_path.read_bytes()
+                shutil.rmtree(workspace)
+
+                result = review_completion.complete(self.record, task, reviewer, token, f"close-{run}")
+
+                self.assertIn("sequence", result)
+                self.assertEqual(self.record.read()[0]["tasks"][task]["status"], "done")
+                self.assertFalse(workspace.exists())
+                self.assertEqual(receipt_path.read_bytes(), receipt)
+                self.assertEqual(report_path.read_bytes(), report)
+
+    def test_cleaned_room_does_not_bypass_receipt_or_identity_checks(self):
+        commit = self._setup_contribution(run="cleaned")
+        reviewer = "cleaned-reviewer"
+        task = "review-cleaned"
+        token = self._setup_task(task=task, reviewer=reviewer, run="cleaned")
+        receipt = self._write_receipt("cleaned", commit, actor=reviewer)
+        shutil.rmtree(self.private / "residents" / "cleaned")
+        path = self.private / "cleaned" / "integration.json"
+        invalid = [
+            ({"status": "prepared"}, "not terminal"),
+            ({"status": "reviewed"}, "not terminal"),
+            ({"contribution": "0" * 40}, "contribution mismatch"),
+            ({"candidate_head": "0" * 40}, "outside current source history"),
+            ({"actor": "cleaned-author"}, "not independent"),
+            ({"run": "another-run"}, "run mismatch"),
+        ]
+        for changes, reason in invalid:
+            with self.subTest(changes=changes):
+                path.write_text(json.dumps(receipt | changes))
+                with self.assertRaisesRegex(ValueError, reason):
+                    review_completion.complete(self.record, task, reviewer, token, "invalid-cleaned")
+                self.assertEqual(self.record.read()[0]["tasks"][task]["status"], "claimed")
+        path.write_text(json.dumps(receipt))
+        report_path = self.private / "cleaned" / "contribution.json"
+        report = json.loads(report_path.read_text())
+        report_path.write_text(json.dumps(report | {"commit": "0" * 40}))
+        with self.assertRaisesRegex(ValueError, "contribution mismatch"):
+            review_completion.complete(self.record, task, reviewer, token, "changed-report")
+        path.unlink()
+        with self.assertRaisesRegex(ValueError, "absent"):
+            review_completion.complete(self.record, task, reviewer, token, "missing-cleaned")
+
+    def test_terminal_receipt_still_checks_existing_source_room(self):
+        commit = self._setup_contribution()
+        reviewer = "changed-reviewer"
+        task = "review-changed"
+        token = self._setup_task(task=task, reviewer=reviewer)
+        self._write_receipt("source-run", commit, actor=reviewer)
+        workspace = self.private / "residents" / "source-run"
+        git(workspace, "-c", "commit.gpgsign=false", "-c", "user.name=Test",
+            "-c", "user.email=test@local", "commit", "--allow-empty", "-m", "changed")
+        with self.assertRaisesRegex(ValueError, "identity changed"):
+            review_completion.complete(self.record, task, reviewer, token, "changed-room")
 
     def test_retry_token_collision_and_post_expiry_immutable_replay(self):
         commit = self._setup_contribution(run="retry-run")
