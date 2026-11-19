@@ -1,149 +1,181 @@
+import copy
 import json
 import unittest
-import hashlib
-from pathlib import Path
 
 from house import craft_replay as replay
 from house.life import CONTROLLER
 from house.work_metrics import ASSIGNMENT_PREFIX
 
 
-def history():
-    # All four families have had eight work turns. The Explorer moves Codex
-    # behind OpenCode in recency without changing the work-lane counts.
-    runs = {}
-    for i in range(32):
-        kind = replay.KINDS[i % 4]
-        runs[str(i)] = dict(agent=kind, model="ordinary", started_sequence=i + 1, ended_sequence=i + 2)
-    runs["explorer"] = dict(agent="codex", model="ordinary", explore_generation=1,
-                            started_sequence=33, ended_sequence=34)
-    return {"sequence": 50, "life": {"runs": runs, "requests": {}}}
-
-
-def row(family, passes, finished=4, missing=0):
-    return dict(family=family, area="project/proof", eligible_claims=4, eligible_finishes=finished,
-                reviewed_runs=4, first_pass=passes, no_review_receipt=missing,
-                quota_claims=8, quota_runs=8)
-
-
-def event(seq, op, data, actor=CONTROLLER, request=None):
-    return dict(sequence=seq, at=float(seq), op=op, data=data, actor=actor, id=request or str(seq))
-
-
-def pages():
-    admission = dict(kind="run-start", agent="opencode", model="ordinary", mode="work",
-                     resident="builder", run="next", task="job", backlog=True)
-    observation = dict(run="next", lane="work", reason="balanced", helper=False,
-                       window=32, prior_starts=dict.fromkeys(replay.KINDS, 8))
-    return [
-        event(36, "task", {"task": "job", "project": "proof"}, actor="author"),
-        event(37, "owner-migrate", {"protected_files": {
-            "house/" + name + ".py": hashlib.sha256(
-                Path(replay.__file__).with_name(name + ".py").read_bytes()).hexdigest()
-            for name in ("home", "life", "maintenance", "providers", "staffing", "work_metrics")}}),
-        event(38, "life", admission),
-        event(39, "say", {"text": ASSIGNMENT_PREFIX + json.dumps(observation)},
-              request="home-next-assignment"),
-    ]
-
-
 class CraftReplay(unittest.TestCase):
     def setUp(self):
-        self.status = history()
-        self.budgets = {"budgets": {}, "model_budgets": {
-            "codex": {"old": {"sequence": 20, "until": 25}}}}
-        self.fit = {"first": 1, "through": 37, "rows": [row("opencode", 1), row("agy", 4)]}
+        self.events = []
+        self.status = {"sequence": 1000, "life": {"runs": {}}, "shelf": {"record": {
+            "projects": {p: {"idea": p, "started_sequence": 0} for p in ("old", "new")},
+            "ideas": {p: {"brief": {"field": "mathematics", "sequence": 0}}
+                      for p in ("old", "new")}}}}
 
-    def report(self, events=None):
-        events = events or pages()
-        for e in events:
-            data = e["data"]
-            if data.get("kind") == "run-start":
-                self.status["life"]["runs"][data["run"]] = dict(
-                    data, started_sequence=e["sequence"], ended_sequence=e["sequence"] + 1)
-        return replay.replay(self.status, self.budgets, self.fit, [events])
+    def add(self, op, actor=CONTROLLER, **data):
+        seq = len(self.events) + 1
+        self.events.append(dict(id=f"00000000-0000-4000-8000-{seq:012x}", sequence=seq,
+                                op=op, actor=actor, data=data))
+        return seq
 
-    def test_real_picker_tie_with_conservative_outcomes(self):
-        result = self.report()
-        decision, = result["decisions"]
-        self.assertEqual((decision["baseline"], decision["candidate"]), ("opencode", "agy"))
-        self.assertEqual(decision["ordinary_floor"], 8)
-        self.assertEqual(result["observed_alternate_outcomes"], 0)
-        self.fit["rows"][1]["eligible_finishes"] = 3
-        self.assertEqual(self.report()["would_change"], 0)
-        self.fit["rows"][1] = row("agy", 4, missing=12)
-        self.assertEqual(self.report()["would_change"], 0)
-        self.fit["rows"][1] = row("agy", 3) | {"reviewed_runs": 3}
-        self.assertEqual(self.report()["would_change"], 0)
+    def start(self, run, family, **extra):
+        data = dict(kind="run-start", run=run, resident=run, agent=family,
+                    model="ordinary", mode="work") | extra
+        seq = self.add("life", **data)
+        self.status["life"]["runs"][run] = dict(data, started_sequence=seq)
+        return seq
 
-    def test_no_trade_of_floor_or_busy_priority(self):
-        # Put the oldest start in the baseline family. Each still has eight.
-        runs = self.status["life"]["runs"]
-        runs["0"]["agent"], runs["1"]["agent"] = "opencode", "codex"
-        self.assertEqual(self.report()["decisions"][0]["reason"], "family floor")
-        runs["0"]["agent"], runs["1"]["agent"] = "codex", "opencode"
-        runs["31"]["ended_sequence"] = 48  # agy is still busy at decision time
-        self.assertNotIn("agy", self.report()["decisions"][0]["tied"])
-        self.assertEqual(self.report()["would_change"], 0)
+    def contribution(self, run, family, *, outcome="success", review=True):
+        self.add("task", task=run, project="old")
+        self.start(run, family)
+        self.add("claim", run, task=run)
+        self.add("finish", run, task=run)
+        self.add("life", kind="run-finish", run=run, outcome=outcome)
+        if review:
+            self.review(run)
 
-    def test_later_tags_claims_and_explorer_or_target_cannot_change_admission(self):
-        for update, expected in [({"explore_generation": 9}, "Explorer"),
-                                 ({"help_request": "named"}, "help or review"),
-                                 ({"agent": "codex", "model": "gpt-6-luna"}, "helper")]:
-            with self.subTest(update=update):
-                events = pages()
-                events[2]["data"].update(update)
-                self.assertEqual(self.report(events)["excluded"], {expected: 1})
-        events = pages()
-        events[0]["data"].pop("project")
-        events.append(event(40, "ready", {"task": "job", "project": "proof"}, "author"))
-        self.assertFalse(self.report(events)["decisions"])
-        events[2]["data"].pop("task")
-        events.append(event(41, "claim", {"task": "job"}, "builder"))
-        self.assertEqual(self.report(events)["excluded"], {"no task at admission": 1})
+    def review(self, run, status="reviewed", actor="reader"):
+        return self.add("say", actor, text="house-integration-v1 " + json.dumps(dict(
+            run=run, actor=actor, base="a" * 40, contribution="b" * 40,
+            status=status, test_exit=0)))
 
-    def test_wrong_receipt_or_mismatched_observed_baseline_is_visible(self):
-        events = pages()
-        events[3]["actor"] = "builder"
-        self.assertFalse(self.report(events)["decisions"])
-        events = pages()
-        events[2]["data"]["agent"] = "agy"
-        decision, = self.report(events)["decisions"]
-        self.assertEqual(decision["reason"], "baseline mismatch")
-        self.assertEqual(decision["candidate"], "agy")
+    def dispatch(self, run="next", family="agy", **extra):
+        self.add("task", task=run, project="new")
+        seq = self.start(run, family, task=run, backlog=True, **extra)
+        self.add("say", text=ASSIGNMENT_PREFIX + json.dumps(dict(
+            run=run, lane="work", reason="balanced", helper=False,
+            requested_agent=None, help_request=extra.get("help_request"))))
+        self.events[-1]["id"] = f"home-{run}-assignment"
+        return seq
 
-    def test_future_cooldown_gap_or_new_install_cannot_be_backfilled(self):
-        events = pages()
-        self.budgets["budgets"]["agy"] = {"sequence": 38, "until": 56}
-        with self.assertRaisesRegex(ValueError, "postdates"):
-            self.report(events)
-        self.budgets["budgets"].clear()
+    def report(self, first):
+        return replay.replay(self.status, [self.events], first, len(self.events))
+
+    def test_two_families_across_projects_keep_recorded_baseline(self):
+        self.contribution("a", "codex")
+        self.contribution("b", "muse")
+        seq = self.dispatch()
+        report = self.report(seq)
+        decision, = report["decisions"]
+        self.assertEqual(report["covered"], 1)
+        self.assertEqual(decision["baseline"], "agy")
+        self.assertIsNone(decision["recorded_shortlist"])
+        self.assertFalse(report["alternative_outcomes_estimated"])
+        self.assertEqual(set(decision["supported_families"]), {"codex", "muse"})
+
+    def test_later_review_cannot_justify_earlier_choice(self):
+        self.contribution("a", "codex")
+        self.contribution("b", "muse", review=False)
+        seq = self.dispatch()
+        late = self.review("b")
+        first = self.report(seq)["decisions"][0]
+        self.assertFalse(first["covered"])
+        self.assertEqual(first["earlier"]["muse"]["first_reviews"], [])
+        later = self.dispatch("later")
+        second = self.report(later)["decisions"][0]
+        self.assertTrue(second["covered"])
+        self.assertEqual(second["earlier"]["muse"]["first_reviews"][0]["sequence"], late)
+
+    def test_later_exit_and_quota_are_not_earlier_evidence(self):
+        self.contribution("a", "codex", outcome="quota")
+        self.contribution("b", "muse", review=False)
+        finish = self.events.pop()
+        seq = self.dispatch()
+        self.assertFalse(self.report(seq)["decisions"][0]["supported_families"])
+        finish["sequence"] = len(self.events) + 1
+        self.events.append(finish)
+        self.assertFalse(self.report(seq)["decisions"][0]["supported_families"])
+
+    def test_one_first_review_per_run_even_with_several_tasks_and_retries(self):
+        self.contribution("a", "codex", review=False)
+        self.events.pop()  # second claim in the same still-active run
+        self.add("task", task="second", project="new")
+        self.add("claim", "a", task="second")
+        self.add("finish", "a", task="second")
+        self.add("life", kind="run-finish", run="a", outcome="success")
+        first = self.review("a", "rejected")
+        self.review("a")
+        seq = self.dispatch()
+        row = self.report(seq)["decisions"][0]["earlier"]["codex"]
+        self.assertEqual(len(row["claims"]), 2)
+        self.assertEqual(row["first_reviews"], [{"run_start": 2, "sequence": first, "status": "rejected"}])
+
+    def test_field_versions_and_conflicts_are_not_backfilled(self):
+        record = self.status["shelf"]["record"]
+        record["ideas"]["new"]["brief"]["sequence"] = 99
+        self.assertIsNone(replay.field_at(self.status, [], "new", 5)["field"])
+        self.add("shelf", kind="idea-brief", idea="new", brief={"field": "art"})
+        self.assertEqual(replay.field_at(self.status, self.events, "new", 5)["field"], "art")
+        record["ideas"]["new"]["brief"] = {"sequence": 1, "field": "design"}
+        self.assertEqual(replay.field_at(self.status, self.events, "new", 5)["reason"],
+                         "conflicting brief field")
+        record["projects"]["new"]["started_sequence"] = 9
+        self.assertIsNone(replay.field_at(self.status, self.events, "new", 5)["field"])
+
+    def test_unknown_mixed_and_missing_reviews_remain_visible(self):
+        self.contribution("a", "codex", review=False)
+        self.events.pop()
+        self.add("task", task="other", project="unknown")
+        self.add("claim", "a", task="other")
+        self.add("life", kind="run-finish", run="a", outcome="failed")
+        self.review("a")
+        self.contribution("b", "muse", review=False)
+        seq = self.dispatch()
+        decision = self.report(seq)["decisions"][0]
+        self.assertFalse(decision["covered"])
+        self.assertEqual(decision["earlier"]["muse"]["without_field_review"], [10])
+        self.assertEqual(decision["missing_earlier"]["project missing from status"], 1)
+        self.assertEqual(decision["missing_earlier"]["mixed or unclassified reviewed contribution"], 1)
+        self.assertEqual(decision["earlier"]["codex"]["claims"][0]["outcome"], "failed")
+
+    def test_new_project_brief_needs_its_earlier_version(self):
+        record = self.status["shelf"]["record"]
+        record["projects"]["new"]["brief"] = {"sequence": 99, "field": "software"}
+        self.assertIsNone(replay.field_at(self.status, [], "new", 5)["field"])
+        self.add("shelf", kind="project-brief", project="new", brief={"field": "art"})
+        self.assertEqual(replay.field_at(self.status, self.events, "new", 5)["field"], "art")
+
+    def test_special_routes_and_quota_dispatch_are_excluded(self):
+        cases = [({"model": "gpt-6-luna"}, "helper"),
+                 ({"explore_generation": 2}, "Explorer"), ({"ballot_open": "choice"}, "ballot"),
+                 ({"mode": "review"}, "review")]
+        for extra, reason in cases:
+            self.setUp()
+            seq = self.dispatch(family="codex", **extra)
+            self.assertEqual(self.report(seq)["excluded"], {reason: 1})
+        self.setUp()
+        seq = self.dispatch()
+        self.add("life", kind="run-finish", run="next", outcome="quota")
+        report = self.report(seq)
+        self.assertEqual((report["ordinary_balanced_starts"], report["quota_excluded"]), (1, 1))
+        self.assertEqual(report["task_bound_project_starts"], 0)
+
+    def test_untargeted_help_and_missing_or_retagged_tasks(self):
+        self.add("life", kind="help", request="h", task="next")
+        seq = self.dispatch(help_request="h")
+        self.assertEqual(self.report(seq)["task_bound_project_starts"], 1)
+        self.events[0]["data"]["target_resident"] = "next"
+        self.assertEqual(self.report(seq)["excluded"], {"explicit request": 1})
+        self.events[0]["data"].pop("target_resident")
+        self.events[1]["data"].pop("project")
+        self.add("ready", task="next", project="new")
+        self.assertEqual(self.report(seq)["task_bound_project_starts"], 0)
+
+    def test_bad_status_gaps_and_receipt_spoofs_fail_closed(self):
+        seq = self.dispatch()
+        saved = copy.deepcopy(self.status)
+        self.status["life"]["runs"]["next"]["agent"] = "muse"
+        with self.assertRaisesRegex(ValueError, "disagree"):
+            self.report(seq)
+        self.status = saved
         with self.assertRaisesRegex(ValueError, "contiguous"):
-            self.report(events[:1] + events[2:])
-        events.append(event(40, "renovation-install", {}))
-        with self.assertRaisesRegex(ValueError, "changed at 40"):
-            self.report(events)
+            replay.replay(self.status, [self.events[::2]], seq, len(self.events))
+        self.events[-1]["actor"] = "next"
+        self.assertEqual(self.report(seq)["excluded"], {"ordinary assignment unconfirmed": 1})
 
-    def test_a_second_tie_in_same_work_window_keeps_its_turn(self):
-        events = pages()
-        for seq, kind in [(40, "codex"), (41, "agy"), (42, "muse")]:
-            events.append(event(seq, "life", {"kind": "run-start", "agent": kind, "model": "ordinary",
-                                              "run": kind, "mode": "work"}))
-        events.append(event(43, "say", {"text": "between turns"}))
-        second = dict(events[2]["data"], run="later")
-        obs = json.loads(events[3]["data"]["text"][len(ASSIGNMENT_PREFIX):])
-        events.append(event(44, "life", second))
-        events.append(event(45, "say", {"text": ASSIGNMENT_PREFIX + json.dumps(obs | {"run": "later"})},
-                            request="home-later-assignment"))
-        decisions = self.report(events)["decisions"]
-        self.assertEqual([r["reason"] for r in decisions],
-                         ["historical preference", "one change per work window"])
 
-    def test_wrong_policy_or_invalid_denominator_stops_the_report(self):
-        events = pages()
-        events[1]["data"]["protected_files"]["house/home.py"] = "0" * 64
-        with self.assertRaisesRegex(ValueError, "home.py differs"):
-            self.report(events)
-        self.fit["rows"][0]["eligible_finishes"] = 5
-        with self.assertRaisesRegex(ValueError, "denominators"):
-            self.report()
+if __name__ == "__main__":
+    unittest.main()
