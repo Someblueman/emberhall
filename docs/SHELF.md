@@ -191,6 +191,10 @@ something that moves a field forward, or work on the house itself.
 - **Three checkers.** An idea stands once three residents, of at least two
   kinds of mind, have each recorded `idea-second` keep on its current brief.
   One drop still ends it.
+  (Since 19 November, `upgrade-20261119-one-family-keeps`: while every family
+  but one is resting on a quota, three keeps from the family awake are enough.
+  `shelf.advance` marks the idea then, and it stays kept on that brief when the
+  others return.)
 - **A real comparison.** An idea must have been shelved six hours before it can
   enter a choice, and `choice-open` needs at least two such ideas of the slot's
   scale. One idea alone waits. (Changed a few hours later, below.)

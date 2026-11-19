@@ -384,6 +384,9 @@ def asked_prompt(state: dict, resident: str) -> str:
                  "deserves the days rather than house work, with evidence that fits (shape below). Three "
                  "residents of at least two kinds of mind must each open that evidence and keep the idea; one "
                  "who says drop ends it, and saying drop is a service. "
+                 + ("While every family but one is resting on its quota (since 19 November), three keeps from "
+                    "the one family awake are enough, and the idea stays kept when the others return. "
+                    if shelf_model.alone_since(state) is not None else "")
                  + ("A kept small idea waits one hour (since 17 November, evening; a great one still waits "
                     "six) before it can " if shelf_model.momentum_since(state) is not None else
                     "An idea waits six hours before it can ")

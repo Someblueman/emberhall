@@ -142,6 +142,46 @@ class HigherBarTests(unittest.TestCase):
         self.assertEqual({"a": "shelved"}, {i["id"]: i["status"] for i in body.shelf_view(f.state)["ideas"]
                                             if i["status"] == "shelved"} or {"a": "shelved"})
 
+    def test_three_keeps_from_the_one_family_awake_are_enough_while_the_others_rest(self):
+        # 19 November: only Codex had quota left, and four researched ideas with three Codex keeps
+        # each were hidden from the page and due for the graveyard.
+        from house import providers
+        f = self.f
+        self.higher()
+        self.start()
+        f.send("explore-publish", actor="v1", round="r1", token="r1", ideas=[idea("a")])
+        f.state["residents"]["v4"] = {"awake": True, "agent": "codex"}
+        for checker in ("author", "v3", "v4"):
+            self.keep(checker, "a")
+        grounded = lambda: shelf.grounded(f.state, self.ideas()["a"])
+        listed = lambda: [i["id"] for i in body.shelf_view(f.state)["ideas"]]
+        rest = lambda *kinds: f.state.update(life={"model_budgets": {
+            kind: {model: {"until": f.state["at"] + 99 * HOUR} for model in providers.ROTATION[kind]}
+            for kind in kinds}})
+        step = lambda: shelf.advance(f.state, f.state["at"], f.state["sequence"])
+        rest("muse", "agy", "opencode")
+        step()
+        self.assertFalse(grounded(), "before the migration one family is never enough")
+        f.state["maintenance"]["migrations"][shelf.ALONE] = {"at": f.state["at"]}
+        rest("muse", "agy")
+        step()
+        self.assertFalse(grounded(), "a second family is awake and can give the third check")
+        self.assertEqual([], listed())
+        rest("muse", "agy", "opencode")
+        self.assertFalse(grounded(), "nothing changes until the house records its next event")
+        step()
+        self.assertTrue(grounded())
+        self.assertEqual(["a"], listed())
+        self.assertIsNone(shelf.brief_due(f.state, self.ideas()["a"]), "it no longer expires unchecked")
+        self.assertIn("one family awake", asked_prompt(f.state, "v2"))
+        rest()
+        step()
+        self.assertTrue(grounded(), "the others returning does not undo it")
+        rest("muse", "agy", "opencode")
+        f.send("idea-brief", actor="v2", idea="a", brief=high())
+        step()
+        self.assertFalse(grounded(), "a new brief needs its own three checks, even alone")
+
     def test_an_idea_waits_six_hours_and_a_choice_compares_at_least_two(self):
         f = self.f
         self.higher()

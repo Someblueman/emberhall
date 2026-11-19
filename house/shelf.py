@@ -529,6 +529,29 @@ def asked(value: object) -> list[dict]:
     return found
 
 
+# One family awake (Steward, 19 November, morning): "No new research and I'm not really sure what
+# actually happened over night? The house seems very static". Gemini had run out until 25 November,
+# Muse until the 23rd and OpenCode refused every start, so only Codex residents woke. Four ideas were
+# researched that night and each had three or four keeps, all from Codex. None stood: they were not on
+# the page, could not enter a vote, and were six hours from the graveyard, with the small slot empty.
+# While every family but one is resting on a quota, three keeps from the one family awake are enough.
+# The idea is marked at that moment (advance) and stays kept on that brief when the others return, so
+# a vote under way is never undone. With two families awake the rule is as it was.
+ALONE = "upgrade-20261119-one-family-keeps"
+
+
+def alone_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(ALONE)
+    return None if entry is None else entry["at"]
+
+
+def one_family(state: dict, at: float) -> bool:
+    """True while at most one family has an ordinary route that is not resting on a quota."""
+    from .life import open_models
+    from .providers import ROTATION
+    return sum(bool(open_models(state, kind, at)) for kind in ROTATION) <= 1
+
+
 def grounded(state: dict, idea: dict) -> bool:
     """A brief that shows who asked, kept by a second resident who read it."""
     if asked_since(state) is None:
@@ -537,7 +560,8 @@ def grounded(state: dict, idea: dict) -> bool:
     if higher_since(state) is not None and idea["status"] == "shelved":
         kept = keeps(state, idea)
         return ("asked" in current and len(kept) >= KEEPS
-                and len({entry["kind"] for entry in kept}) >= KEEP_KINDS)
+                and (len({entry["kind"] for entry in kept}) >= KEEP_KINDS
+                     or "alone" in idea and idea["alone"] == current["sequence"]))
     return "asked" in current and second.get("brief") == current.get("sequence")
 
 
@@ -707,6 +731,11 @@ def advance(state: dict, at: float, sequence: int) -> None:
         if project["status"] == "active" and at >= project["deadline"] + 7 * DAY:
             which = "second" if project["extended"] else "first"
             drop(shelf, key, f"no timely {which}-deadline decision", at, sequence)
+    if alone_since(state) is not None and one_family(state, at):
+        for idea in shelf["ideas"].values():
+            if (idea["status"] == "shelved" and "asked" in idea.get("brief", {})
+                    and len(keeps(state, idea)) >= KEEPS):
+                idea["alone"] = idea["brief"]["sequence"]
     if open_since(state) is not None:
         frozen = {idea for choice in shelf["choices"].values() if choice["status"] == "open"
                   for idea in choice["candidates"]}
