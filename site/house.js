@@ -340,7 +340,9 @@ function floorControls() {
   picker.replaceChildren();
   floorsAt(frame).forEach(f=>{const option=html("option","",`${f.level===0?"Ground":`Floor ${f.level}`} · ${f.name}`,picker);option.value=f.level;});
   picker.value=selectedFloor;
-  $("overview").textContent=floorsAt(frame).length>1?"Whole floor ↗":"Whole house ↗";
+  const overviewLabel=floorsAt(frame).length>1?"Whole floor ↗":"Whole house ↗";
+  $("overview").textContent=overviewLabel;
+  if($("room-overview"))$("room-overview").textContent=overviewLabel;
   $("floor-note").textContent=floor.authorization==="repealed"?`Council approval withdrawn · existing floor and history kept · new construction blocked`:
     floor.enacted_at?`Council approved ${clock(floor.enacted_at,{year:"numeric"})} · ${floor.purpose||floor.name}`:
     selectedFloor===0?"Original ground floor · earlier construction dates unrecorded":floor.purpose||"Recorded floor";
@@ -1130,7 +1132,7 @@ function choose(room) {
     const fragment=room?`#room/${encodeURIComponent(room)}`:"#house-view";
     if(window.location?.hash!==fragment)window.history?.pushState(null,"",fragment);
   }
-  selected=room;$("overview").hidden=!room;
+  selected=room;$("overview").hidden=!room;if($("room-overview"))$("room-overview").hidden=!room;
   drawHouse(); roomPanel(); dormControls();
   // The drawing is replaced above: move into the room instead of losing focus.
   const card=room?document.querySelector?.(".room-card"):null;
@@ -2869,8 +2871,14 @@ let roomCreation=null;
 function roomCreationUrl(entry) {
   // These shipped exhibits work with scripts alone. Other creations keep their
   // full-page links; do not grant same-origin access to make an embed work.
-  const paths={"tessera-loom":["projects/tessera-loom/index.html","projects/tessera-loom/loom.js"],
-    "signal-garden":["projects/signal-garden/gallery.html","projects/signal-garden/model.js"]};
+  const paths={
+    "you-were-supposed-to-drop-it":["projects/you-were-supposed-to-drop-it/index.html","projects/you-were-supposed-to-drop-it/stage-rig.js","projects/you-were-supposed-to-drop-it/show.js"],
+    "rail-replacement-geese":["projects/rail-replacement-geese/index.html","projects/rail-replacement-geese/service.js"],
+    "shadow-theatre":["projects/shadow-theatre/index.html","projects/shadow-theatre/scene-core.js","projects/shadow-theatre/app.js"],
+    "five-mark-packing":["projects/five-marks/index.html","projects/five-marks/exhibit.js"],
+    "tessera-loom":["projects/tessera-loom/index.html","projects/tessera-loom/loom.js"],
+    "signal-garden":["projects/signal-garden/gallery.html","projects/signal-garden/model.js"]
+  };
   const files=Object.prototype.hasOwnProperty.call(paths,entry.id)?paths[entry.id]:null;
   return collectionUrl(entry)&&files&&Array.isArray(entry.files)&&files.every(path=>entry.files.includes(path))?files[0]:null;
 }
@@ -3309,12 +3317,12 @@ function renderCreationCard(entry,parent) {
   const article=html("article","creation-card",undefined,parent);
   html("h3","",entry.title,article);
   const preview=creationPreview(entry);
+  const inRoom=current&&parent.id==="gallery-room-display"&&roomCreationUrl(entry);
+  const livePreview=inRoom&&selected==="gallery";
   if(preview) {
     const figure=html("figure","creation-preview",undefined,article);
     const enlarge=html("button","creation-picture-open",undefined,figure);
     enlarge.id=`gallery-picture-${parent.id==="gallery-room-display"?"room":"card"}-${entry.id}`;
-    const inRoom=parent.id==="gallery-room-display"&&roomCreationUrl(entry);
-    const livePreview=inRoom&&selected==="gallery";
     enlarge.type="button";enlarge.setAttribute("data-opens",livePreview?"creation":"picture");enlarge.setAttribute("aria-label",livePreview?`Try ${entry.title} here`:`Look closely at ${entry.title}`);
     enlarge.setAttribute("aria-haspopup","dialog");
     enlarge.addEventListener("click",()=>livePreview?openRoomCreation(entry,enlarge):openCreationPicture(entry,enlarge));
@@ -3332,6 +3340,9 @@ function renderCreationCard(entry,parent) {
         look.id=`gallery-room-look-${entry.id}`;look.setAttribute("aria-haspopup","dialog");
       }
     }
+  } else if(livePreview) {
+    const tryHere=workshopButton(article,`Try ${entry.title} here`,()=>openRoomCreation(entry,tryHere),"creation-try");
+    tryHere.id=`gallery-room-try-${entry.id}`;tryHere.setAttribute("aria-haspopup","dialog");
   }
   html("p","",entry.summary,article);
   html("span","small","Completed",article);
@@ -3464,7 +3475,7 @@ function renderGalleryRoom(content) {
   if(!catalog)html("p","empty-note","Creation links are unavailable in this publication. The full Gallery keeps the recorded project history.",panel);
   else if(!entries.length)html("p","empty-note","No browser creations were completed by this moment.",panel);
   else {
-    const within=entries.filter(entry=>current&&creationPreview(entry)&&roomCreationUrl(entry));
+    const within=entries.filter(entry=>current&&roomCreationUrl(entry));
     if(within.length) {
       const invitations=html("div","room-try-list",undefined,panel);
       invitations.setAttribute("role","group");invitations.setAttribute("aria-label","Try a creation within this room");
@@ -4674,7 +4685,7 @@ function render() {
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
   const actor=frame.residents.find(r=>r.id===frame.event.actor)?.name||frame.event.actor;
   $("event-label").textContent=`${frame.seq} / ${data.frames.length} · ${actor} · ${frame.event.op.replaceAll("-"," ")}`;
-  $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;
+  $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;if($("room-overview"))$("room-overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.id=`room-link-${encodeURIComponent(room.id)}`;button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
   drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
@@ -4703,7 +4714,9 @@ function bindControls() {
   $("view-latest")?.addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
   $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
   $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
-  $("overview").addEventListener("click",()=>choose(null));
+  const showOverview=()=>{choose(null);$("house-view")?.focus?.({preventScroll:true});$("stage")?.scrollIntoView?.({block:"nearest",behavior:"instant"});};
+  $("overview").addEventListener("click",showOverview);
+  $("room-overview")?.addEventListener("click",showOverview);
   $("back-to-rooms")?.addEventListener("click",backToRooms);
   $("room-card")?.addEventListener("keydown",event=>{
     // Leave Escape to search fields, selects and other controls inside the room.

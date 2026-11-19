@@ -120,6 +120,98 @@ assert.equal(roomCreationUrl(completedCatalog().find(entry=>entry.id==='night-fe
 assert.equal(roomCreationUrl({...signalWork,id:'__proto__'}),null);
 ''')
 
+    def test_verified_script_sandbox_creations_open_and_close_in_gallery(self):
+        self.check(r'''
+const expected={
+  'you-were-supposed-to-drop-it':'projects/you-were-supposed-to-drop-it/index.html',
+  'rail-replacement-geese':'projects/rail-replacement-geese/index.html',
+  'shadow-theatre':'projects/shadow-theatre/index.html',
+  'five-mark-packing':'projects/five-marks/index.html',
+  'tessera-loom':'projects/tessera-loom/index.html',
+  'signal-garden':'projects/signal-garden/gallery.html',
+};
+for(const [id,href] of Object.entries(expected)){
+  const entry=completedCatalog().find(item=>item.id===id);
+  assert(entry,`missing catalog entry ${id}`);
+  assert.equal(roomCreationUrl(entry),href);
+}
+for(const id of ['bench-for-two','left-glove-post','last-dance-school','lantern-loop','night-ferry']){
+  const entry=completedCatalog().find(item=>item.id===id);
+  assert.equal(roomCreationUrl(entry),null,`${id} must remain null under allow-scripts`);
+}
+frame.shelf.projects=frame.shelf.projects.map(project=>({...project,
+  completed:project.idea==='you-were-supposed-to-drop-it'?[{sequence:89}]:[]}));
+show();
+assert.equal(galleryRoomChoice,'you-were-supposed-to-drop-it');
+const tryButton=get('gallery-room-try-you-were-supposed-to-drop-it');
+assert(tryButton);
+tryButton.listeners.click();
+const dialog=get('room-creation');
+assert(dialog.open);
+const iframe=all(dialog).find(n=>n.tag==='iframe');
+assert.equal(iframe.src,'projects/you-were-supposed-to-drop-it/index.html');
+assert.equal(iframe.attrs.sandbox,'allow-scripts');
+get('room-creation-close').listeners.click();
+assert.equal(roomCreation,null);
+assert.equal(document.activeElement,get('gallery-room-try-you-were-supposed-to-drop-it'));
+''')
+
+    def test_overview_button_in_room_header_returns_to_house_overview(self):
+        html = (ROOT / 'site/index.html').read_text()
+        self.assertIn('id="room-overview"', html)
+        self.assertIn('id="back-to-rooms"', html)
+        self.assertLess(html.index('id="room-overview"'), html.index('id="back-to-rooms"'))
+        script = r'''
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+class Element {
+  constructor(tag,id=''){this.tag=tag;this.id=id;this.children=[];this.attrs={};this.listeners={};this.dataset={};this.style={};this.textContent='';this.hidden=false;this.classList={toggle(){}};}
+  appendChild(n){this.children.push(n);return n;} replaceChildren(){this.children=[];}
+  setAttribute(k,v){this.attrs[k]=String(v);} removeAttribute(k){delete this.attrs[k];}
+  addEventListener(k,fn){this.listeners[k]=fn;}
+  focus(){document.activeElement=this;} scrollIntoView(){this.scrolled=true;}
+  querySelectorAll(){return [];}
+}
+const all=n=>[n,...n.children.flatMap(all)],nodes={};
+for(const id of ['house-view','projects-view','gallery-view','council-view','accounts-view','floor-picker','floor-note','overview','room-overview','back-to-rooms','room-nav','room-card','room-content','room-kicker','room-title','room-description','room-context','history','present','previous','next','presence-line','view-context','event-label','moment-label','ambitions','record','commits','stage']){
+  nodes[id]=new Element('div',id);
+}
+const document={body:new Element('body'),activeElement:null,getElementById:id=>nodes[id]||null,
+  createElement:t=>new Element(t),querySelector:s=>s==='.room-card'?nodes['room-card']:null,querySelectorAll:()=>[]};
+const window={location:{hash:'#house-view'},addEventListener(){},history:{pushState(a,b,h){window.location.hash=h;}}};
+const ctx=vm.createContext({assert,document,window,Date,URL,Intl,Element,nodes});
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
+vm.runInContext(`
+drawHouse=()=>{};dormControls=()=>{};accounts=()=>{};shelf=()=>{};voting=()=>{};
+renderCollection=()=>{};renderResidentPulse=()=>{};renderRecentGrowth=()=>{};renderLately=()=>{};lighting=()=>{};
+data={timezone:'UTC',observed_at:1020,journal_head:'head',commits:[],
+  frames:[{seq:1,at:1001,event:{op:'say',actor:'a'},rooms:[{id:'workshop',name:'Workshop',status:'open'}],
+  floors:[{level:0,name:'Ground floor'}],residents:[],tasks:[],scars:[],ambitions:[]}]};
+index=0;bindControls();render();
+assert.equal($('room-overview').hidden,true);
+choose('workshop');
+assert.equal(selected,'workshop');
+assert.equal($('room-overview').hidden,false);
+assert.match($('room-overview').textContent,/Whole house/);
+$('room-overview').listeners.click();
+assert.equal(selected,null);
+assert.equal($('room-overview').hidden,true);
+assert.equal($('overview').hidden,true);
+assert.equal(window.location.hash,'#house-view');
+assert.equal(document.activeElement,$('house-view'));
+choose('workshop');
+const navBtn=new Element('button');navBtn.dataset.room='workshop';nodes['room-nav'].children=[navBtn];
+nodes['room-nav'].querySelectorAll=()=>[navBtn];
+backToRooms();
+assert.equal(selected,'workshop');
+assert.equal(document.activeElement,navBtn);
+`,ctx);
+'''
+        result = subprocess.run(
+            ['node', '-e', script, str(ROOT / 'site/house.js')],
+            capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

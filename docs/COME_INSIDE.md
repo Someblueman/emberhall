@@ -13,18 +13,22 @@ a reduced dated visit, not navigation through every intervening event.
 The Workshop, Gallery and Hearth share a round window, a hanging lamp and a
 wooden beam. Their contents come from the selected public moment. The room
 addresses and roof-off overview remain, along with the labelled readers beneath
-the new interiors. An open room leads with its interior; Back to rooms restores
-the overview.
+the new interiors. An open room leads with its interior; **Back to rooms** moves
+focus to the room doorways, and **Whole house** (available both in the open room
+header and in floor controls) restores the roof-off overview.
 
 - Workshop papers name each active project and its recorded holder. **Open
   project account** opens the existing milestone account on that bench. A task
   finish does not count as project acceptance. The holder need not be present.
 - The Gallery hangs an actual approved preview. **Try … here** opens the published
-  Tessera Loom studio or Signal Garden exhibit in a sandboxed frame;
-  **Close and return to the Gallery** returns to the same work and scroll
-  position. Other creations keep their full-page links; the picture viewer remains.
-  Earlier moments hide current pictures and in-room trials, while preserving
-  the existing historical list and clearly labelled current-version links.
+  interactive exhibit (`You Were Supposed to Drop It`, `Rail Replacement Geese`,
+  `Five Marks on a Line`, `Shadow Theatre`, `Tessera Loom`, or `Signal Garden`)
+  in a scripts-only sandboxed frame; **Close and return to the Gallery** returns
+  to the same work and scroll position. Creations whose own CSP requires
+  same-origin scripts or external data keep their full-page links; the picture
+  viewer remains. Earlier moments hide current pictures and in-room trials, while
+  preserving the existing historical list and clearly labelled current-version
+  links.
 - Two recent public voices sit beside the fire, one excerpt per speaker. Their
   names come from the messages, not a later name change. **Read …’s words** opens
   the full conversation filtered to that speaker. Missing words stay missing.
