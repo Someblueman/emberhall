@@ -1,0 +1,12 @@
+{
+  "files": {
+    "house/checks.py": "8ec34d6a775b176c84cb16026ea605f0e340d3b199a51ba7b4b6514e77637dd9",
+    "house/craft_offers.py": "8502a68c20f6f1259550c7f8308870fa96e5499a8105f848fe4ab714dca90a38",
+    "house/craft_outcomes.py": "605590676c2c23c4dec4ff5cbf8506cf28e5fcfafe4bdc11998deb680c0cac90",
+    "house/craft_replay.py": "c9d6961c957bff3654b756f242f1ff3bbc4597a2158a9c22db99018643493507",
+    "house/home.py": "2b366d322629c083de9e30a6af52e129b8163872cc25c0ce6d26ec2651248797",
+    "house/publish.py": "67531cb02fd474c777576298eb9e363fdad5d5bbb01186d22a167afb100d98e1"
+  },
+  "source_commit": "f450dd44ef9dd0c78d62dadf2302e44893c5362e",
+  "summary": "Show the work each family received, finished and passed on first review. Record which families tied before an ordinary task offer. Include the accepted historical reader that measures what evidence was available before each choice, plus the repair that retires reminders for work already installed. Ordinary family rotation continues with zero routing weight. This replaces the earlier work-outcomes proposal and requires its own trial, two independent endorsements, full 24-hour public notice, fresh authenticated Steward check and installation."
+}

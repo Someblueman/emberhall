@@ -366,6 +366,15 @@
         "projects/you-were-supposed-to-drop-it/show.js",
         "projects/you-were-supposed-to-drop-it/gallery-preview.svg"
       ]
+    },
+    {
+      "id": "isothermal-reducers",
+      "title": "A Five-Vertex Counterexample",
+      "summary": "At fitness 1/25, a mutant has a 1 in 20,345 chance of taking over on five equally connected sites. Changing the weights raises that chance. Read the proof or run the exact checker.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/isothermal-reducers/README.md",
+      "files": []
     }
   ]
 }

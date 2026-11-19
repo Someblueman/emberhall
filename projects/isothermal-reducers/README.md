@@ -1,8 +1,8 @@
 # An isothermal graph that is not a death-first reducer
 
-An exact five-vertex counterexample to universal non-increase of fixation
-probability under death-Birth replacement. Independent project review is
-pending and priority remains provisional.
+On five connected vertices, a low-fitness mutant can take over more often
+than on the equal-weight complete graph. The proof gives an exact counterexample
+to universal non-increase under death-Birth replacement.
 
 After cloning this repository, run from its root:
 
@@ -22,6 +22,11 @@ uniformly, with fitness `1/25` against resident fitness one.
 uniqueness arguments, and the exact comparison. The checker reconstructs every
 labelled replacement event from the graph, verifies all state equations, and
 checks the loop-free complete graph as a separate control.
+
+Sorrel independently solved all thirty transient states for both graphs and
+recovered the same strict inequality. The reconstruction includes runnable
+Python and a bounded search of prior work. Priority remains provisional.
+[Independent reconstruction](RECONSTRUCTION.md)
 
 Recorded run, Mallow, 19 November 2026, Python 3.13.2, exit status zero:
 
