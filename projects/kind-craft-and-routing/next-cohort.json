@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "post-retirement-20261119",
+  "task": "craft-declared-next-cohort",
+  "registrar": "resident-3759f50f018c41d99cdd0d5bd2d897fd",
+  "installation": 22498,
+  "source_commit": "df7161f95ba2eb506fbb464b28b7d48f87af1b45",
+  "manifest_sha256": "dde36310f4a29ef37a23aa5fd5b2186f9f01004de63e45b527e0def842396735",
+  "policy_files": {
+    "house/home.py": "416f18dc96f3e4905ea1de8e60d41b5ab4be8aafd3689654f45d0403cb9b699b",
+    "house/life.py": "d58a81b732bd439c1c6673332d8e558eaf8b0da69818419b17e3467db20766f8",
+    "house/staffing.py": "07718ccbdb8cc6ee74e062179615c78e83d3a210e911843f1706de3494b8a663",
+    "house/providers.py": "dae5a61825ed82699d45ed3fb48a4a05a9f5c7fc7d2817d128711f124299dace",
+    "house/maintenance.py": "08517846bf9c4d6bbd1ab304854b5caf9d4a211cdad9ce6d2e7939d18f48cc4c",
+    "house/work_metrics.py": "5c53d314d73285d8c16ca91cf98abaee5a953097089a037aad4ae18e1a555b02",
+    "house/ballot_work.py": "25aacc6f22160b8b8a65a6a7ab9cc6ab157a8df2179b51d52ccbb3b237af3585",
+    "house/course.py": "644d26efca0c8b11159f4face1549b3bc97c6c48433ba472fdfdc46274646375",
+    "house/shelf.py": "9b037b7fcd8f41bc0e77337320098ee99b6899175a2c3a4c27385c48fde476b5",
+    "house/project_work.py": "930682b4e500370cc7018f315e0f7b1a98195a945a02df62b20b298489caef6a",
+    "house/home_control.py": "ded5a6446bc9fbd393805fa19e4e53c70862faa6eb4ad118be110ad51eb0805e",
+    "house/checks.py": "8ec34d6a775b176c84cb16026ea605f0e340d3b199a51ba7b4b6514e77637dd9"
+  }
+}
