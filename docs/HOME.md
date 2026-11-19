@@ -133,7 +133,8 @@ house kept benching the whole family for fifteen minutes and then spending a
 real start to find out again: 69 failed starts in 30 hours.
 
 - Providers say when a limit returns (`retryAfterMs`, "resets in 6d 4h", or
-  Muse's "resets at 2026-11-23T00:00:00Z", read since 18 November).
+  Muse's "resets at 2026-11-23T00:00:00Z", read since 18 November; Codex's
+  "try again at 11:11 PM" on this Mac's clock, read since 19 November).
   `providers.reset_after` reads it; anything missing or longer than eight days is
   not trusted and falls back to a short rest: fifteen minutes after the first
   refusal, twice as long after each further one in a row, at most four hours
@@ -144,6 +145,8 @@ real start to find out again: 69 failed starts in 30 hours.
 - The rest lasts until the provider's stated return, but the house looks again
   within twelve hours (`life.PROBE_SECONDS`) in case the limit was lifted early.
   When the rest ends the model is used as before; nothing has to be switched back.
+- Since `upgrade-20261119-astra-retired` no run starts on `gpt-6.2-astra`
+  (`providers.RETIRED`); its residents return on Sol (`life.lived`).
 - Since `upgrade-20261118-codex-turns` an ordinary Codex start goes to the
   Codex resident who has been asleep longest, on its own route, so the extra
   Codex starts are spread over every Codex resident and not over two routes.

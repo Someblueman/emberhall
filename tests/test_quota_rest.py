@@ -5,6 +5,7 @@ days. The house rested the whole family for fifteen minutes and then spent a rea
 again. Both providers say when the limit returns; these tests use their own words.
 """
 import collections
+import datetime
 import json
 import os
 import pathlib
@@ -275,6 +276,21 @@ class NamedMomentTests(unittest.TestCase):
         heard = providers.result("muse", "", MUSE_AT.format(when=stamp(3 * 86400)), 1)
         self.assertEqual("quota", heard["outcome"])
         self.assertAlmostEqual(3 * 86400, heard["retry_after_seconds"], delta=120)
+
+    def test_codex_names_a_time_on_the_local_clock(self):
+        said = "You’ve hit your usage limit. Visit https://example.com/usage to purchase more credits or try again at {}."
+        noon = datetime.datetime(2026, 11, 19, 13, 11, 0).timestamp()
+        self.assertEqual(10 * 3600.0, providers.reset_after(said.format("11:11 PM"), noon))
+        self.assertEqual(23 * 3600.0, providers.reset_after(said.format("12:11 PM"), noon), "already past today: tomorrow")
+        self.assertEqual(11 * 3600.0 - 60, providers.reset_after(said.format("12:10 AM"), noon), "just after midnight")
+        self.assertEqual(60.0, providers.reset_after(said.format("1:11 pm"), noon + 30), "a minute just gone is not a day")
+        self.assertEqual(60.0, providers.reset_after(said.format("1:12 pm"), noon + 30))
+        self.assertIsNone(providers.reset_after(said.format("13:11 PM"), noon), "not a clock time")
+        self.assertIsNone(providers.reset_after(said.format("later"), noon))
+        heard = providers.result("codex", json.dumps({"type": "turn.failed", "error": {
+            "message": said.format("11:11 PM")}}), "", 1)
+        self.assertEqual("quota", heard["outcome"])
+        self.assertTrue(0 < heard["retry_after_seconds"] <= 86400)
 
     def test_a_refusal_that_names_no_time_rests_longer_each_time_in_a_row(self):
         state = house()

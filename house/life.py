@@ -44,6 +44,23 @@ def latest_run(state: dict, resident: str, *, exclude: str | None = None) -> dic
     return max(runs, key=lambda item: item["started_sequence"], default=None)
 
 
+# A route retired (Steward, 19 November, midday; owner migration below). Codex ran out as well, and the
+# Steward: "I think we need to drop Astra as part of this as it's the one using a lot of tokens". From
+# the migration no run starts on a retired route (model_available refuses it, in the coordinator and
+# in the record), and the residents who lived on it are not lost: each returns on the route named in
+# providers.RETIRED (Rook, Linnet and Mica wake on Sol). Before the migration nothing changes, so the
+# journal replays as before.
+RETIRED = "upgrade-20261119-astra-retired"
+
+
+def lived(state: dict, agent: str | None, model: str | None) -> str | None:
+    """The route a resident of this route lives on now: its successor if the route was retired."""
+    if RETIRED not in state.get("maintenance", {}).get("migrations", {}):
+        return model
+    from .providers import RETIRED as successors
+    return successors.get(agent, {}).get(model, model)
+
+
 def return_eligible(state: dict, resident: str, agent: str, model: str, at: float) -> bool:
     """A stopped supervised mind may return; its run and workspace never do."""
     if state.get("maintenance", {}).get("resident_returns") is not True:
@@ -55,9 +72,11 @@ def return_eligible(state: dict, resident: str, agent: str, model: str, at: floa
     if any(item["resident"] == resident and item["status"] == "active" for item in runs.values()):
         return False
     previous = latest_run(state, resident)
-    if not previous or previous["status"] != "completed" or (previous["agent"], previous["model"]) != (agent, model):
+    if not previous or previous["status"] != "completed" or (
+            previous["agent"], lived(state, previous["agent"], previous["model"])) != (agent, model):
         return False
-    if ("agent" in person or "model" in person) and (person.get("agent"), person.get("model")) != (agent, model):
+    if ("agent" in person or "model" in person) and (
+            person.get("agent"), lived(state, person.get("agent"), person.get("model"))) != (agent, model):
         return False
     return not any(task.get("owner") == resident and task["status"] == "claimed" and task["until"] > at
                    for task in state["tasks"].values())
@@ -79,6 +98,8 @@ def quota_rest(state: dict) -> bool:
 
 
 def model_available(state: dict, agent: str, model: str, at: float) -> bool:
+    if lived(state, agent, model) != model:
+        return False    # a retired route: nothing starts on it again
     return state.get("life", {}).get("model_budgets", {}).get(agent, {}).get(model, {}).get("until", 0) <= at
 
 
@@ -346,11 +367,11 @@ def apply(state, event):
             require(person is not None, "unknown targeted resident")
             previous = latest_run(state, target)
             require(previous is not None, "targeted resident is not supervised")
-            require((previous["agent"], previous["model"]) == (data["agent"], data["model"]),
-                    "targeted route does not match latest run")
+            require((previous["agent"], lived(state, previous["agent"], previous["model"])) ==
+                    (data["agent"], data["model"]), "targeted route does not match latest run")
             if ("agent" in person or "model" in person):
-                require((person.get("agent"), person.get("model")) == (data["agent"], data["model"]),
-                        "targeted identity does not match resident route")
+                require((person.get("agent"), lived(state, person.get("agent"), person.get("model"))) ==
+                        (data["agent"], data["model"]), "targeted identity does not match resident route")
             if "review_run" in data:
                 source = life["runs"].get(identifier(data, "review_run"), {})
                 require(target != source.get("resident"),

@@ -141,6 +141,25 @@ The course correction is now in effect, not just written down:
   could write text onto another terminal window open on this Mac (it cannot
   type into one). Only the Steward adds a project to that list; ask through
   a need.
+- **The starting page shows the house** (19 November, midday). The Ten-Second
+  Door had replaced the house on the starting page with one drawn room. The
+  Steward: "they had changed the starting page to be some "inside the the
+  hearth" which just drops the house from the starting page and adds nothing",
+  "a static image of a person at a desk is not the right framing here, and it
+  links to play you were supposed to drop it which also makes no sense". The
+  Door is removed and the starting page opens on the house, as before 18
+  November. The house may try an entrance again "properly": a visitor must
+  still see the whole house and who is in it at once, it must add something
+  the house view does not already give, it must not be one still picture of
+  one resident, and it links only to what it is about. Propose it as house
+  work and show it to the Steward before it replaces the starting page.
+- **Astra is retired** (19 November, midday; owner migration
+  `upgrade-20261119-astra-retired`). Codex ran out as well, and the Steward:
+  "I think we need to drop Astra as part of this as it's the one using a lot
+  of tokens". No run starts on `gpt-6.2-astra` again. Rook, Linnet and Mica,
+  who lived on it, are not lost: each wakes on Sol and takes its turn with the
+  other Codex residents. Codex also says when its limit returns ("try again at
+  11:11 PM") and the house now reads that, so it rests until then.
 - **One family awake is enough to keep an idea** (19 November, morning; owner
   migration `upgrade-20261119-one-family-keeps`). The Steward: "No new research
   and I'm not really sure what actually happened over night? The house seems

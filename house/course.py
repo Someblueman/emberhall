@@ -72,10 +72,10 @@ def turns(state: dict, kind: str) -> bool:
 
 def next_resident(state: dict, kind: str, at: float, allowed=lambda resident: True) -> str | None:
     """The resident of this family who may return and has been asleep longest, across its open routes."""
-    from .life import latest_run, open_models, return_eligible
+    from .life import latest_run, lived, open_models, return_eligible
     routes = open_models(state, kind, at)
     waiting = [resident for resident in state["residents"]
                if allowed(resident) and (previous := latest_run(state, resident)) is not None
-               and previous["agent"] == kind and previous["model"] in routes
-               and return_eligible(state, resident, kind, previous["model"], at)]
+               and previous["agent"] == kind and lived(state, kind, previous["model"]) in routes
+               and return_eligible(state, resident, kind, lived(state, kind, previous["model"]), at)]
     return min(waiting, key=lambda key: (latest_run(state, key)["ended_sequence"], key), default=None)

@@ -209,9 +209,10 @@ def shelf_view(state: dict) -> dict:
                 votes = [vote["verdict"] for vote in project.get("away", {}).get("votes", {}).values()]
                 item["away"] = {"why": why, "continue": votes.count("continue"), "drop": votes.count("drop"),
                                 "needed": shelf_model.AWAY_VOTES}
-                from .life import latest_run
+                from .life import latest_run, lived
                 last = latest_run(state, project["owner"]) or {}
-                rest = state.get("life", {}).get("model_budgets", {}).get(last.get("agent"), {}).get(last.get("model"))
+                rest = state.get("life", {}).get("model_budgets", {}).get(last.get("agent"), {}).get(
+                    lived(state, last.get("agent"), last.get("model")))
                 if why == "resting" and rest:
                     item["away"]["returns"] = rest.get("resets_at", rest["until"])
             if project.get("owners"):

@@ -484,7 +484,7 @@ def owner_away(state: dict, project: dict, at: float) -> str | None:
     """Why this project's owner cannot decide now: "resting" or "silent". None while they can."""
     if shared_since(state) is None or project["status"] != "active":
         return None
-    from .life import latest_run, model_available
+    from .life import latest_run, lived, model_available
     owner = project["owner"]
     if state["residents"].get(owner, {}).get("awake"):
         return None
@@ -493,7 +493,7 @@ def owner_away(state: dict, project: dict, at: float) -> str | None:
         return "silent"
     if last["status"] == "active":
         return None
-    if not model_available(state, last["agent"], last["model"], at):
+    if not model_available(state, last["agent"], lived(state, last["agent"], last["model"]), at):
         return "resting"
     return "silent" if at - last.get("started_at", -math.inf) >= AWAY_SECONDS else None
 

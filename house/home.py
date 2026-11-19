@@ -18,7 +18,7 @@ import time
 import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, project_work, providers, staffing, work_metrics
-from .life import (CONTROLLER, PROBE_SECONDS, latest_run, model_available, open_models, provider_available,
+from .life import (CONTROLLER, PROBE_SECONDS, latest_run, lived, model_available, open_models, provider_available,
                    quota_rest, return_eligible, unknown_rest, workload)
 from .record import Record
 from .wake_policy import active_policy, active_prompt
@@ -1328,12 +1328,12 @@ class Coordinator:
                          if resident not in authors and ballot_work.eligible(state, bound_task, resident)
                          and (previous := latest_run(state, resident)) is not None
                          and previous["agent"] == kind and not staffing.helper(previous)
-                         and return_eligible(state, resident, kind, previous["model"], at)
-                         and model_available(state, kind, previous["model"], at)]
+                         and return_eligible(state, resident, kind, lived(state, kind, previous["model"]), at)
+                         and model_available(state, kind, lived(state, kind, previous["model"]), at)]
             if not returning:
                 return None
             first = min(returning, key=lambda key: (latest_run(state, key)["ended_sequence"], key))
-            model, rotating = latest_run(state, first)["model"], False
+            model, rotating = lived(state, kind, latest_run(state, first)["model"]), False
         # Targeted help must use its exact resident/route; never substitute an older eligible or new identity.
         if "target_resident" in request:
             target = request["target_resident"]
@@ -1350,7 +1350,7 @@ class Coordinator:
             turn = course.next_resident(state, kind, at, lambda resident: resident not in authors
                                         and ballot_work.eligible(state, bound_task, resident)) if rotating else None
             if turn is not None:
-                model = latest_run(state, turn)["model"]
+                model = lived(state, kind, latest_run(state, turn)["model"])
             eligible = [turn] if turn is not None else [
                         resident for resident in state["residents"]
                         if resident not in authors and ballot_work.eligible(state, bound_task, resident)

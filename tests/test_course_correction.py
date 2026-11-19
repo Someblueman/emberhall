@@ -40,6 +40,42 @@ class RotationTests(unittest.TestCase):
         self.assertEqual(sol, course.route(helpers, "codex"))
         self.assertEqual("muse-wonder-full-1.0", course.route(self.state([("muse", "muse-ember-1.0")]), "muse"))
 
+    def test_astra_is_retired_and_its_residents_live_on_sol(self):
+        # Steward, 19 November, midday: "I think we need to drop Astra as part of this".
+        from house import life
+        sol, astra = "gpt-6.1-sol", "gpt-6.2-astra"
+        people = {"fern": (sol, 30), "rook": (astra, 20), "linnet": (astra, 40), "iona": ("gpt-6-astra", 2)}
+        state = {"at": 100.0, "sequence": 100, "tasks": {},
+                 "maintenance": {"resident_returns": True, "migrations": {course.TURNS: {"at": 50.0}}},
+                 "residents": {name: {"awake": False} for name in people},
+                 "life": {"budgets": {}, "runs": {name: {
+                     "resident": name, "agent": "codex", "model": model, "status": "completed",
+                     "started_sequence": ended - 1, "ended_sequence": ended} for name, (model, ended) in people.items()}}}
+        state["residents"]["linnet"].update(agent="codex", model=astra)     # it once recorded its kind
+        eligible = lambda who, model: life.return_eligible(state, who, "codex", model, 100.0)
+        self.assertTrue(life.model_available(state, "codex", astra, 100.0), "nothing changes before the migration")
+        self.assertEqual((True, False), (eligible("rook", astra), eligible("rook", sol)))
+        self.assertEqual("rook", course.next_resident(state, "codex", 100.0))
+        state["maintenance"]["migrations"][life.RETIRED] = {"at": 90.0}
+        self.assertFalse(life.model_available(state, "codex", astra, 100.0), "no run starts on Astra again")
+        self.assertTrue(life.model_available(state, "codex", sol, 100.0))
+        self.assertEqual([sol], life.open_models(state, "codex", 100.0))
+        self.assertEqual(sol, course.route(state, "codex", at=100.0))
+        self.assertEqual((sol, sol, "gpt-6-luna"), tuple(life.lived(state, "codex", model) for model in (astra, sol, "gpt-6-luna")))
+        self.assertEqual("muse-ember-1.0", life.lived(state, "muse", "muse-ember-1.0"))
+        for who in ("rook", "linnet"):
+            self.assertEqual((False, True), (eligible(who, astra), eligible(who, sol)), who)
+        self.assertEqual((True, False), (eligible("fern", sol), eligible("iona", sol)), "the older Astra is not moved")
+        picked = []
+        for _ in range(6):
+            who = course.next_resident(state, "codex", 100.0)
+            picked.append(who)
+            state["sequence"] += 2
+            state["life"]["runs"][who].update(model=life.lived(state, "codex", state["life"]["runs"][who]["model"]),
+                                              started_sequence=state["sequence"] - 1, ended_sequence=state["sequence"])
+        self.assertEqual(["rook", "fern", "linnet"] * 2, picked, "they take their turns with the Sol residents")
+        self.assertEqual({sol, "gpt-6-astra"}, {run["model"] for run in state["life"]["runs"].values()})
+
     def test_the_codex_resident_asleep_longest_goes_next_whatever_its_route(self):
         # Steward, 18 November, night: "just rotate across all the codex residents when the others time out".
         sol, astra = "gpt-6.1-sol", "gpt-6.2-astra"

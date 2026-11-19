@@ -53,6 +53,12 @@ ROTATION_WINDOW = 24
 # ("just rotate across all the codex residents", course.TURNS) a sleeping Codex resident is chosen
 # before a route, so these weights choose the route only for a newcomer.
 WEIGHTS = {"gpt-6.1-sol": 2, "gpt-6.2-astra": 1}
+# Steward, 19 November, midday, with Codex out of quota too: "I think we need to drop Astra as part of
+# this as it's the one using a lot of tokens". Since the owner migration life.RETIRED no run starts on a
+# route listed here, and a resident who lived on it returns on the route it maps to. Astra 6.2 stays in
+# MODELS and ROTATION only so that the journal before the migration replays; Sol is the one ordinary
+# Codex route from then on.
+RETIRED = {"codex": {"gpt-6.2-astra": "gpt-6.1-sol"}}
 
 
 def validate_model(kind, model):
@@ -120,8 +126,8 @@ def reset_after(failure: str, now: float | None = None) -> float | None:
 
     OpenCode Go reports ``"retryAfterMs": 535655000`` beside "resets in 6d 4h"; Antigravity says
     "Resets in 143h1m4s"; Muse names the moment, "Your usage window resets at 2026-11-23T00:00:00Z"
-    (read only with its time zone). Anything else, or a wait longer than eight days, is treated as
-    not said.
+    (read only with its time zone); Codex gives a time on the local clock, "try again at 11:11 PM".
+    Anything else, or a wait longer than eight days, is treated as not said.
     """
     found = re.search(r'retryAfterMs\\*"?\s*:\s*(\d{1,12})', failure)
     seconds = int(found.group(1)) / 1000 if found else None
@@ -141,6 +147,19 @@ def reset_after(failure: str, now: float | None = None) -> float | None:
                 seconds = stated.timestamp() - (time.time() if now is None else now)
             except (ValueError, OverflowError):
                 seconds = None
+    if seconds is None:
+        # Codex gives a time on this Mac's own clock and no date: "try again at 11:11 PM". It is the
+        # next time the clock shows that, so always less than a day away.
+        clock = re.search(r"try again at (\d{1,2}):(\d\d)\s*([AP])\.?M\b", failure, re.I)
+        if clock and 1 <= int(clock.group(1)) <= 12 and int(clock.group(2)) < 60:
+            current = datetime.datetime.fromtimestamp(time.time() if now is None else now)
+            hour = int(clock.group(1)) % 12 + (12 if clock.group(3).upper() == "P" else 0)
+            stated = current.replace(hour=hour, minute=int(clock.group(2)), second=0, microsecond=0)
+            seconds = (stated - current).total_seconds()
+            if seconds < -300:
+                seconds += 86400    # that time has passed today: it means tomorrow
+            elif seconds <= 0:
+                seconds = 60.0      # named a minute that has just gone: try again shortly, not in a day
     if seconds is None or not 0 < seconds <= RESET_CEILING_SECONDS:
         return None
     return max(60.0, float(seconds))
