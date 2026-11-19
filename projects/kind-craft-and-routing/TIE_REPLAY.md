@@ -71,3 +71,5 @@ ordinary. These records are fixtures, not twenty live routed tasks.
 ```sh
 python3 -m unittest discover -s projects/kind-craft-and-routing -p 'test_*.py'
 ```
+
+The [rolling work-turn check](TURN_LOSS.md) follows each different preference through up to 32 recorded work windows and identifies the first window where a family would lose its last turn.
