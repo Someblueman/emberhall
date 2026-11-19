@@ -7,7 +7,7 @@ from pathlib import Path
 
 from cohort import CONTROLLER, FAMILIES, read_pages
 from tie_replay import replay
-from trial import INSTALLS, PROPOSED_AT, choice_files
+from trial import REVIEWED, baseline_anchor, baseline_option
 from house.craft_replay import assignment_receipts
 from house.staffing import helper
 from house.work_metrics import WINDOW, lane
@@ -88,18 +88,10 @@ def compare(turns, index, decision, checked, stop):
     return result | {"state": "follow-up stopped at policy change" if stop else "partial follow-up"}
 
 
-def report(status, events, through):
-    ties = replay(status, events, through)
+def report(status, events, through, baseline=REVIEWED):
+    ties = replay(status, events, through, baseline)
     installed = ties["installed_at"]
-    manifest = None
-    stop = None
-    for event in events:
-        if event["sequence"] == installed:
-            manifest = choice_files(event)
-        if (manifest is not None and event["op"] in INSTALLS
-                and (None in manifest or choice_files(event) != manifest)):
-            stop = event["sequence"]
-            break
+    stop = ties["policy_stop"]
     horizon = stop - 1 if stop is not None else through
     turns = work_history(status, events, horizon)
     indices = {seq: index for index, (seq, _, _) in enumerate(turns)}
@@ -111,7 +103,7 @@ def report(status, events, through):
         if offer not in indices:
             raise ValueError(f"enrolled offer {offer} missing from work lane")
         rows.append(compare(turns, indices[offer], decision, checked, stop))
-    return {"through": through, "trial_state": ties["trial_state"], "installed_at": installed,
+    return {"baseline": baseline, "through": through, "trial_state": ties["trial_state"], "installed_at": installed,
             "policy_stop": stop, "verified_work_receipts": list(checked.values()),
             "unverified_work_starts": [seq for seq, _, _ in turns
                                        if seq >= events[0]["sequence"] and seq not in checked],
@@ -120,19 +112,20 @@ def report(status, events, through):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    baseline_option(parser)
     parser.add_argument("--status", type=Path, required=True)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("pages", nargs="+", type=Path)
     args = parser.parse_args()
     try:
-        events, through = read_pages(args.pages, PROPOSED_AT)
-        result = report(json.loads(args.status.read_text()), events, through)
+        events, through = read_pages(args.pages, baseline_anchor(args.baseline))
+        result = report(json.loads(args.status.read_text()), events, through, args.baseline)
     except (OSError, ValueError, TypeError, KeyError) as exc:
         parser.exit(2, f"Cannot check work turns: {exc}\n")
     if args.json:
         print(json.dumps(result, indent=2))
         return
-    print(f"Through {through} | {result['trial_state']} | routing weight 0")
+    print(f"Through {through} | {result['baseline']} | {result['trial_state']} | routing weight 0")
     print(f"{len(result['verified_work_receipts'])} work receipts matched their prior turns | "
           f"{len(result['unverified_work_starts'])} starts without a comparable receipt")
     print(f"{len(result['decisions'])} enrolled offers")

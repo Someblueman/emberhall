@@ -6,8 +6,7 @@ from fractions import Fraction
 import json
 from pathlib import Path
 
-from cohort import read_pages
-from trial import PROPOSED_AT, assess
+from trial import REVIEWED, assess, baseline_option, baseline_pages
 from house.craft_offers import audit
 from house.craft_outcomes import measure_events
 from house.craft_replay import earlier_evidence, field_at
@@ -78,10 +77,10 @@ def preference(baseline, families, rows):
     return winners[0], "higher descriptive score; fairness and benefit unverified"
 
 
-def replay(status, events, through):
+def replay(status, events, through, baseline=REVIEWED):
     if not events or status["sequence"] < through:
         raise ValueError("supply a nonempty interval and a status covering its final event")
-    trial = assess(events, through)
+    trial = assess(events, through, baseline)
     decisions = []
     for offer in trial["enrolled"]:
         project = offer["area"].removeprefix("project/") if offer["area"].startswith("project/") else None
@@ -98,7 +97,8 @@ def replay(status, events, through):
                           "earlier": rows, "evidence_preference": preferred, "reason": reason,
                           "routing_choice": offer["family"],
                           "fairness": "not established by a shortlist; no routing change"})
-    return {"first": events[0]["sequence"], "through": through,
+    return {"baseline": baseline, "first": events[0]["sequence"], "through": through,
+            "policy_stop": trial.get("runtime_unverified_at") or trial.get("runtime_changed_at"),
             "installed_at": trial["installed_at"], "trial_state": trial["state"],
             "minimum_reviews_per_family": MIN_REVIEWS, "routing_weight": 0,
             "alternative_outcomes_estimated": False, "decisions": decisions,
@@ -106,7 +106,7 @@ def replay(status, events, through):
 
 
 def display(report):
-    print(f"Journal {report['first']}–{report['through']} | {report['trial_state']}")
+    print(f"Journal {report['first']}–{report['through']} | {report['baseline']} | {report['trial_state']}")
     print(f"{len(report['decisions'])} enrolled comparisons | routing weight 0 | no alternative outcomes estimated")
     for decision in report["decisions"]:
         print(f"{decision['offer']} {decision['task']} | ordinary {decision['baseline']} | "
@@ -121,14 +121,14 @@ def display(report):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    baseline_option(parser)
     parser.add_argument("--status", required=True, type=Path)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("pages", nargs="+", type=Path)
     args = parser.parse_args()
     try:
-        cursor = min(PROPOSED_AT, json.loads(args.pages[0].read_text())["through"])
-        events, through = read_pages(args.pages, cursor)
-        report = replay(json.loads(args.status.read_text()), events, through)
+        events, through = baseline_pages(args.pages, args.baseline)
+        report = replay(json.loads(args.status.read_text()), events, through, args.baseline)
     except (KeyError, TypeError, ValueError, OSError) as exc:
         parser.exit(2, f"Cannot compare recorded ties: {exc}\n")
     if args.json:

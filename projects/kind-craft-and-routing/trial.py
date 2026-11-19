@@ -18,52 +18,103 @@ PROPOSED_AT = 20915
 DESCRIPTOR = ROOT / "docs" / "proposals" / (PROPOSAL + ".json")
 INSTALLS = {"renovation-install", "owner-migrate"}
 CHOICE_MODULES = ("home", "life", "staffing", "providers", "maintenance", "work_metrics", "ballot_work", "course")
+REVIEWED = "reviewed"
+ONE_FAMILY = "one-family"
+SHELF_UPGRADE = "upgrade-20261119-one-family-keeps"
+DELIVERED_AT = 21936
+DECLARED_AT = 21948
+ONE_FAMILY_MANIFEST = Path(__file__).with_name("one-family-baseline.json")
 
 
-def choice_files(install):
+def baseline_option(parser):
+    parser.add_argument("--baseline", choices=(REVIEWED, ONE_FAMILY), default=REVIEWED,
+                        help="installation to enroll from (default: reviewed)")
+
+
+def baseline_anchor(baseline):
+    return DELIVERED_AT if baseline == ONE_FAMILY else PROPOSED_AT
+
+
+def baseline_pages(paths, baseline):
+    # Earlier context and an interval ending before the declaration are both useful.
+    cursor = min(baseline_anchor(baseline), json.loads(paths[0].read_text())["through"])
+    return read_pages(paths, cursor)
+
+
+def choice_files(install, baseline=REVIEWED):
     manifest = install["data"]["protected_files"]
-    return tuple(manifest.get(f"house/{name}.py") for name in CHOICE_MODULES)
+    names = CHOICE_MODULES + (("shelf",) if baseline == ONE_FAMILY else ())
+    return tuple(manifest.get(f"house/{name}.py") for name in names)
 
 
-def installation(events, expected):
-    """Locate first complete delivery after the recorded proposal."""
-    if events[0]["sequence"] > PROPOSED_AT:
-        raise ValueError(f"include proposal {PROPOSED_AT} and consecutive pages after it")
-    if events[-1]["sequence"] < PROPOSED_AT:
+def installation(events, baseline):
+    """Find the first matching installation after the selected enrollment declaration."""
+    first = events[0]["sequence"]
+    anchor = baseline_anchor(baseline)
+    if first > anchor:
+        kind = "delivery" if baseline == ONE_FAMILY else "proposal"
+        raise ValueError(f"include {kind} {anchor} and consecutive pages after it")
+    if events[-1]["sequence"] < anchor:
         return None
-    proposal = events[PROPOSED_AT - events[0]["sequence"]]
-    data = proposal["data"]
-    if (proposal["op"] != "council-propose" or data.get("proposal") != PROPOSAL
-            or data.get("mode") != "renovation" or json.loads(data["text"]) != expected):
-        raise ValueError(f"proposal {PROPOSED_AT} differs from the reviewed descriptor")
+    entry = events[anchor - first]
+    data = entry["data"]
+    if baseline == ONE_FAMILY:
+        expected = json.loads(ONE_FAMILY_MANIFEST.read_text())
+        source = expected["source_commit"]
+        prefix, _, body = data.get("text", "").partition(" ")
+        if (entry["op"] != "say" or entry["actor"] != CONTROLLER
+                or entry["id"] != "source-delivered-" + source or prefix != "house-source-delivery-v1"
+                or json.loads(body) != {"commit": source, "remote_main": source, "repository": "Someblueman/emberhall"}):
+            raise ValueError(f"delivery {anchor} differs from the registered source")
+        after = DECLARED_AT
+        if events[-1]["sequence"] < after:
+            return None
+        declaration = events[after - first]
+        if (declaration["op"] != "task" or declaration["data"].get("task") != "craft-one-family-baseline"
+                or declaration["data"].get("project") != "house-after-rooms-20261119"):
+            raise ValueError(f"missing one-family trial declaration at {after}")
+    elif baseline == REVIEWED:
+        expected = json.loads(DESCRIPTOR.read_text())
+        after = PROPOSED_AT
+        if (entry["op"] != "council-propose" or data.get("proposal") != PROPOSAL
+                or data.get("mode") != "renovation" or json.loads(data["text"]) != expected):
+            raise ValueError(f"proposal {anchor} differs from the reviewed descriptor")
+    else:
+        raise ValueError(f"unknown baseline {baseline}")
+    active = baseline == REVIEWED
     for event in events:
-        if event["sequence"] <= PROPOSED_AT or event["op"] not in INSTALLS:
+        if event["sequence"] <= after or event["op"] not in INSTALLS:
             continue
         data = event["data"]
+        if event["op"] == "owner-migrate" and data.get("scope") == SHELF_UPGRADE:
+            active = True
         if event["op"] == "renovation-install" and event["actor"] != CONTROLLER:
             raise ValueError(f"unexpected renovation installer at {event['sequence']}")
         manifest = data.get("protected_files")
         if not isinstance(manifest, dict):
             raise ValueError(f"missing installation manifest at {event['sequence']}")
-        if all(manifest.get(k) == h for k, h in expected["files"].items()):
+        if active and all(manifest.get(k) == h for k, h in expected["files"].items()):
             return event
-        if data.get("proposal") == PROPOSAL:
+        if baseline == REVIEWED and data.get("proposal") == PROPOSAL:
             raise ValueError(f"named installation {event['sequence']} has different files")
     return None
 
 
-def assess(events, through):
+def assess(events, through, baseline=REVIEWED):
     if not events:
         raise ValueError("supply a nonempty verified journal interval")
-    expected = json.loads(DESCRIPTOR.read_text())
-    start = installation(events, expected)
-    report = {"proposal": PROPOSAL, "proposed_at": PROPOSED_AT, "first": events[0]["sequence"],
+    start = installation(events, baseline)
+    report = {"baseline": baseline, "first": events[0]["sequence"],
               "through": through, "installed_at": None, "target": TARGET, "enrolled": [],
               "state": "installation not observed", "routing_weight": 0}
+    if baseline == REVIEWED:
+        report.update(proposal=PROPOSAL, proposed_at=PROPOSED_AT)
+    else:
+        report.update(delivered_at=DELIVERED_AT, declared_at=DECLARED_AT)
     if start is None:
         return report
     after = start["sequence"]
-    baseline = choice_files(start)
+    initial_choices = choice_files(start, baseline)
     # Admissions are compared under the same recorded choice code. Later receipts can
     # still settle the first independent review of an already admitted contribution.
     changed = None
@@ -71,11 +122,11 @@ def assess(events, through):
     for event in events:
         if event["sequence"] < after or event["op"] not in INSTALLS:
             continue
-        current = choice_files(event)
+        current = choice_files(event, baseline)
         if None in current:
             unverified = event["sequence"]
             break
-        if current != baseline:
+        if current != initial_choices:
             changed = event["sequence"]
             break
     stop = unverified or changed
@@ -114,6 +165,8 @@ def assess(events, through):
 
 
 def display(report):
+    if report["baseline"] == ONE_FAMILY:
+        print(f"One-family shelf baseline | declared at {DECLARED_AT}")
     print(f"Journal {report['first']}–{report['through']} | {report['state']}")
     print(f"Installation {report['installed_at'] or 'unobserved'} | "
           f"{len(report['enrolled'])}/{TARGET} tasks | routing weight 0")
@@ -144,15 +197,13 @@ def display(report):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    baseline_option(parser)
     parser.add_argument("pages", nargs="+", type=Path, help="consecutive fixed-channel read pages")
     parser.add_argument("--json", action="store_true", help="include the receipt references and counts")
     args = parser.parse_args()
     try:
-        # The existing page reader accepts context from before its requested cursor.
-        # An interval ending before the proposal also has a useful, negative result.
-        cursor = min(PROPOSED_AT, json.loads(args.pages[0].read_text())["through"])
-        events, through = read_pages(args.pages, cursor)
-        result = assess(events, through)
+        events, through = baseline_pages(args.pages, args.baseline)
+        result = assess(events, through, args.baseline)
     except (ValueError, OSError, KeyError, TypeError) as exc:
         parser.exit(2, f"Cannot assess baseline: {exc}\n")
     if args.json:

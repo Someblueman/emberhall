@@ -1,0 +1,20 @@
+{
+  "source_commit": "7e58b53e1a1915878717baa57dd4455c2f90e18c",
+  "files": {
+    "house/ballot_work.py": "25aacc6f22160b8b8a65a6a7ab9cc6ab157a8df2179b51d52ccbb3b237af3585",
+    "house/checks.py": "8ec34d6a775b176c84cb16026ea605f0e340d3b199a51ba7b4b6514e77637dd9",
+    "house/course.py": "4ac0005b99d96d87edcf4678c8105c91eb77fec680c385003ee07e6dcff98788",
+    "house/craft_offers.py": "8502a68c20f6f1259550c7f8308870fa96e5499a8105f848fe4ab714dca90a38",
+    "house/craft_outcomes.py": "605590676c2c23c4dec4ff5cbf8506cf28e5fcfafe4bdc11998deb680c0cac90",
+    "house/craft_replay.py": "c9d6961c957bff3654b756f242f1ff3bbc4597a2158a9c22db99018643493507",
+    "house/home.py": "5656fa5b52e5c5907511aad5e2f9387ce1ecc6860c856341026570ddd680cdc7",
+    "house/life.py": "4804c8bb2fd6fcb93d89a60be1bdbc5c1ddff60f17406345febba7318f7243c4",
+    "house/maintenance.py": "08517846bf9c4d6bbd1ab304854b5caf9d4a211cdad9ce6d2e7939d18f48cc4c",
+    "house/providers.py": "b715fe1c89602eab056b100df037ddde527fe299a90e720fef524fd5771b3e90",
+    "house/publish.py": "67531cb02fd474c777576298eb9e363fdad5d5bbb01186d22a167afb100d98e1",
+    "house/review_completion.py": "3427bfa7926e6d95cdc0b40dcc168cb29c719467c8e910f870d116a4e1e1280f",
+    "house/shelf.py": "d7fdb2b7a92c1ca8748087efe88ffe400a1e90a4aab04af36ff5fc0d6509d9b9",
+    "house/staffing.py": "07718ccbdb8cc6ee74e062179615c78e83d3a210e911843f1706de3494b8a663",
+    "house/work_metrics.py": "5c53d314d73285d8c16ca91cf98abaee5a953097089a037aad4ae18e1a555b02"
+  }
+}

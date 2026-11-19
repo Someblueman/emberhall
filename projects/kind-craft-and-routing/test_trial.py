@@ -20,7 +20,7 @@ class TrialTests(unittest.TestCase):
                  text=trial.DESCRIPTOR.read_text())
 
     def add(self, op, actor="watch-keeper", **data):
-        seq = trial.PROPOSED_AT - 1 + len(self.events)
+        seq = self.events[-1]["sequence"] + 1 if self.events else trial.PROPOSED_AT - 1
         self.events.append({"sequence": seq, "id": str(seq), "actor": actor, "op": op, "data": data})
         return seq
 
@@ -139,3 +139,49 @@ class TrialTests(unittest.TestCase):
                 self.assertEqual(2, run.returncode)
                 self.assertIn(reason, run.stderr)
                 self.assertEqual("", run.stdout)
+
+    def test_new_baseline_requires_delivery_declaration_and_matching_installation(self):
+        frozen = json.loads(trial.ONE_FAMILY_MANIFEST.read_text())
+        source = frozen["source_commit"]
+        self.assertEqual(set(self.descriptor["files"]) | {"house/review_completion.py", "house/shelf.py"}
+                         | {f"house/{name}.py" for name in trial.CHOICE_MODULES}, set(frozen["files"]))
+        while self.events[-1]["sequence"] < trial.DELIVERED_AT - 1:
+            self.add("say", text="other business")
+        delivery = {"commit": source, "remote_main": source, "repository": "Someblueman/emberhall"}
+        self.add("say", text="house-source-delivery-v1 " + json.dumps(delivery))
+        entry = self.events[-1]
+        entry["id"] = "source-delivered-" + source
+        self.install(op="owner-migrate", protected_files=frozen["files"])
+        while self.events[-1]["sequence"] < trial.DECLARED_AT - 1:
+            self.add("say", text="other business")
+        self.add("task", "mica", task="craft-one-family-baseline", project="house-after-rooms-20261119")
+        self.add("council-enact", proposal="shelf-change")
+        self.install(op="owner-migrate", scope="another-upgrade", protected_files=frozen["files"])
+        self.install(proposal="code-only", protected_files=frozen["files"])
+        partial = dict(frozen["files"])
+        del partial["house/shelf.py"]
+        self.install(op="owner-migrate", scope=trial.SHELF_UPGRADE, protected_files=partial)
+        self.offer("before", "early")
+
+        def selected():
+            return trial.assess(self.events, self.events[-1]["sequence"], trial.ONE_FAMILY)
+
+        self.assertIsNone(selected()["installed_at"])
+        installed = self.install(op="owner-migrate", protected_files=frozen["files"])
+        self.offer("quota", "late", outcome="quota")
+        admitted = self.offer("after", "late", finished=True)
+        stop = self.install(proposal="shelf-change", protected_files=partial)
+        self.offer("later", "another")
+        result = selected()
+        self.assertEqual((installed, 1, [admitted], stop, 0),
+                         (result["installed_at"], result["quota_exits"], [r["offer"] for r in result["enrolled"]],
+                          result["runtime_unverified_at"], result["routing_weight"]))
+        self.assertIsNone(self.report()["installed_at"])
+        declaration = self.events[trial.DECLARED_AT - self.events[0]["sequence"]]
+        declaration["data"]["project"] = "other"
+        with self.assertRaisesRegex(ValueError, "trial declaration"):
+            selected()
+        declaration["data"]["project"] = "house-after-rooms-20261119"
+        entry["actor"] = "another resident"
+        with self.assertRaisesRegex(ValueError, "delivery"):
+            selected()

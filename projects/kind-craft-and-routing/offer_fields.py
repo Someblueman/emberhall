@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 from cohort import read_pages
-from trial import PROPOSED_AT, assess
+from trial import REVIEWED, assess, baseline_option, baseline_pages
 from house.craft_offers import audit, summarize
 from house.craft_outcomes import measure_events
 from house.craft_replay import earlier_evidence, field_at
@@ -26,7 +26,7 @@ def review_difference(left, right):
     return [str(low), str(high)]
 
 
-def compare(status, events, through, historical=False):
+def compare(status, events, through, historical=False, baseline=REVIEWED):
     if not events or status["sequence"] < through:
         raise ValueError("supply a nonempty interval and a verified status covering its final event")
     if historical:
@@ -36,10 +36,10 @@ def compare(status, events, through, historical=False):
         offers = audit([events], measure_events(events), 15759)["offers"]
         quota = sum(row["outcome"] == "quota" for row in offers)
     else:
-        baseline = assess(events, through)
-        basis = baseline["state"]
-        offers = baseline["enrolled"]
-        quota = baseline.get("quota_exits", 0)
+        trial = assess(events, through, baseline)
+        basis = trial["state"]
+        offers = trial["enrolled"]
+        quota = trial.get("quota_exits", 0)
 
     # A source review belongs to the whole run. The historical reader already
     # checks the fields of all its observed claims, including unfinished claims.
@@ -95,14 +95,15 @@ def compare(status, events, through, historical=False):
                        "first_pass_differences": [
                            {"left": a["family"], "right": b["family"], "bounds": review_difference(a, b)}
                            for a, b in combinations(ordered, 2)]})
-    return {"basis": basis, "first": events[0]["sequence"], "through": through,
+    return {"baseline": "historical" if historical else baseline,
+            "basis": basis, "first": events[0]["sequence"], "through": through,
             "status_sequence": status["sequence"], "quota_exits": quota,
             "totals": sorted(totals, key=lambda r: (r["field"], r["family"])),
             "shared_fields": shared, "offers": details}
 
 
 def display(report):
-    print(f"Journal {report['first']}–{report['through']} | {report['basis']}")
+    print(f"Journal {report['first']}–{report['through']} | {report['baseline']} | {report['basis']}")
     if report["basis"] == "installation not observed":
         print("The post-installation field comparison has no observations yet.")
         return
@@ -134,14 +135,18 @@ def display(report):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--status", required=True, type=Path, help="covering verified house status")
-    parser.add_argument("--historical", action="store_true", help="use the frozen earlier ordinary-offer sample")
+    sample = parser.add_mutually_exclusive_group()
+    sample.add_argument("--historical", action="store_true", help="use the frozen earlier ordinary-offer sample")
+    baseline_option(sample)
     parser.add_argument("--json", action="store_true", help="include the event references for each offer")
     parser.add_argument("pages", nargs="+", type=Path, help="consecutive verified journal read pages")
     args = parser.parse_args()
     try:
-        cursor = 15759 if args.historical else min(PROPOSED_AT, json.loads(args.pages[0].read_text())["through"])
-        events, through = read_pages(args.pages, cursor)
-        report = compare(json.loads(args.status.read_text()), events, through, args.historical)
+        if args.historical:
+            events, through = read_pages(args.pages, 15759)
+        else:
+            events, through = baseline_pages(args.pages, args.baseline)
+        report = compare(json.loads(args.status.read_text()), events, through, args.historical, args.baseline)
     except (KeyError, TypeError, ValueError, OSError) as exc:
         parser.exit(2, f"Cannot compare fields: {exc}\n")
     if args.json:

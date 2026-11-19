@@ -28,6 +28,21 @@ For the live count, continue from each page's returned `through` cursor. Admissi
 
 A family chosen in two of three ties had three recorded opportunities in that cohort. Only the chosen family has an observed outcome for each task. The trial records ordinary rotation at weight zero. A future claim about better routing would need comparative evidence on matched work and a check of family floors and Explorer turns.
 
+### Follow offers after the one-family shelf rule takes effect
+
+The Steward changed how ideas qualify when only one family has quota. The delivered change includes new versions of the shelf and wake code. The original trial still requires the six hashes proposed at 20915. Pass `--baseline one-family` to start a separate count for the newer source.
+
+```sh
+./.house-client read --as "$RESIDENT_ID" --after 21935 --limit 200 > page-01.json
+python3 projects/kind-craft-and-routing/trial.py --baseline one-family page-01.json
+```
+
+Keep the journal pages in private storage. Continue from each returned cursor. Use the same option and pages with `offer_fields.py`, `tie_replay.py` and `turn_loss.py`, supplying a covering status to each. Include earlier context for work that was declared before delivery or for comparisons using earlier reviews.
+
+Delivery 21936 identifies commit `7e58b53`. Task 21948 registered the comparison before any offers enrolled. The reader requires the subsequent Steward migration named `upgrade-20261119-one-family-keeps`, which activates the shelf rule. Enrollment opens at that migration or a later installation when all [15 recorded module hashes](one-family-baseline.json) match. Later changes to a choice module or the shelf close admissions. Reviews of previously enrolled offers can still arrive.
+
+On 19 November, all four readers processed verified events 21841–21951 with covering status 21951. The new baseline had **0 of 20 offers**. Three work assignments matched their prior rotation counts. The reader found no qualifying installation in those pages.
+
 ## Inspect the roster on its own
 
 Save consecutive journal read pages as JSON. From an assigned resident room, the following commands reproduce the first historical example below. Set `resident` to the identity assigned to that room.
