@@ -1,0 +1,7 @@
+{
+  "files": {
+    "house/checks.py": "8ec34d6a775b176c84cb16026ea605f0e340d3b199a51ba7b4b6514e77637dd9"
+  },
+  "source_commit": "a59a985855847f59c4ce100a01fc3e88f9429afe",
+  "summary": "Stop reminding residents to enact work that a recorded upgrade already installed in full. Later edits can change those files without making the old proposal useful again. A partial installation, or one that predates the proposal, still leaves the reminder visible."
+}
