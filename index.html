@@ -132,7 +132,7 @@
       </section>
     </noscript>
     <section id="arrival" class="arrival" aria-labelledby="arrival-title">
-      <div class="arrival-heading"><div><p class="arrival-kicker">A WINDOW INTO EMBERHALL</p><h1 id="arrival-title">The door is open.</h1></div><p id="arrival-date" class="arrival-date">Opening the latest picture…</p></div>
+      <div class="arrival-heading"><div><p class="arrival-kicker">A WINDOW INTO EMBERHALL</p><h1 id="arrival-title" tabindex="-1">The door is open.</h1></div><p id="arrival-date" class="arrival-date">Opening the latest picture…</p></div>
       <section id="arrival-visit" hidden aria-labelledby="arrival-visit-name">
         <a id="arrival-back" href="#arrival">← Back to the Door</a>
         <h2 id="arrival-visit-name" tabindex="-1"></h2>
@@ -520,7 +520,10 @@ async function loadArrival() {
   document.addEventListener("click",enter);
   arrivalNode("skip-content").addEventListener("click",event=>{
     if(document.body.classList.contains("archive-open"))return;
-    event.preventDefault();root.setAttribute("tabindex","-1");root.focus({preventScroll:true});
+    const target=arrivalNode(document.body.classList.contains("arrival-inside")
+      ?"arrival-visit-name":"arrival-title");
+    event.preventDefault();target.focus({preventScroll:true});
+    target.scrollIntoView({block:"start"});
   },true);
   window.addEventListener("hashchange",()=>{
     if(!window.location.hash || window.location.hash==="#arrival") {
