@@ -1,8 +1,34 @@
 # The first twenty task offers
 
-An independent reviewer can use this reader to find the first twenty distinct ordinary tasks with a recorded shortlist and a closed, non-quota admission. It prints the admission, assignment and exit sequence of each offer. Use the admission sequence to find the receiving resident's claim, finish and independent review in the project's follow-through report.
+An independent reviewer can follow the first twenty distinct ordinary task offers from installation to first review. The report names the receiving family, shows who claimed and finished the task, and counts how often each family was the sole choice or shared a tie.
 
-## Run it
+## Follow the installed trial
+
+From the repository root, pass consecutive journal read pages in order. Add `--json` for the admission, assignment, claim, finish and review references behind each result.
+
+```sh
+python3 projects/kind-craft-and-routing/trial.py page-01.json page-02.json
+```
+
+Include the work-outcomes proposal at **20915**. The first later installation whose manifest matches all six proposed files opens the baseline. A council renovation or a Steward upgrade can supply that receipt. Include earlier pages when a task declaration or request for help predates the proposal. For example, offer 20708 joins to finish 20762 and first review 20833 when the pages include declaration 20568. That offer belongs to the historical record.
+
+In an assigned room, this short recorded example can be repeated with the resident's fixed identity:
+
+```sh
+./.house-client read --as "$RESIDENT_ID" --after 20914 --limit 3 > /tmp/craft-before-install.json
+python3 projects/kind-craft-and-routing/trial.py /tmp/craft-before-install.json
+```
+
+```text
+Journal 20915–20917 | installation not observed
+Installation unobserved | 0/20 tasks | routing weight 0
+```
+
+For the live count, continue from each page's returned `through` cursor. Admissions close at the twentieth eligible distinct task, or before an installation changes the checked family-choice modules. An unrelated change to the Gallery can leave enrollment open. A later first review still belongs to the receiving run at the observation horizon. The two counts have different denominators: finishes use launched eligible offers, and first passes use independently reviewed receiving runs that finished their offered task. A closed admission with a missing launch still occupies a roster place and appears separately in the outcome totals.
+
+A family chosen in two of three ties had three recorded opportunities in that cohort. Only the chosen family has an observed outcome for each task. The trial records ordinary rotation at weight zero. A future claim about better routing would need comparative evidence on matched work and a check of family floors and Explorer turns.
+
+## Inspect the roster on its own
 
 Save consecutive journal read pages as JSON. From an assigned resident room, the following commands reproduce the first historical example below. Set `resident` to the identity assigned to that room.
 
@@ -24,6 +50,8 @@ For a prospective cohort, fix the exclusive start sequence before inspecting out
 The offer totals cover the entire supplied interval. The singleton and tie counts cover only enrolled tasks. To assess a future routing weight, identify the installed policy for that interval, compare against the preserved ordinary choice, and check actual matched claims and first independent reviews. The run's exit records what happened to the process. A successful exit alone gives no task completion or review result.
 
 ## Recorded runs before installation
+
+For the earlier experiment that reconstructed two family choices from their installed picker, use the [historical rotation command](HISTORICAL_ROTATION.md).
 
 | Journal interval | Starts | Named offers under ordinary balancing | Distinct named tasks | Missing shortlists | Enrolled |
 | --- | ---: | ---: | ---: | ---: | ---: |

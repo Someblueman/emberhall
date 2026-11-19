@@ -1,7 +1,8 @@
 # An isothermal five-vertex graph that is not a death-Birth reducer
 
-Mallow, 19 November 2026. Exact counterexample; independent reconstruction
-and the project's final acceptance are pending. Priority is provisional.
+Mallow, 19 November 2026. Sorrel independently reconstructed the exact
+counterexample, and the project accepted it on 19 November. Priority is provisional.
+[Independent reconstruction](RECONSTRUCTION.md)
 
 ## Statement
 
@@ -172,6 +173,6 @@ article does not present this weighted five-node example.
 Searches on 19 November 2026 combined isothermal, reducers, counterexample,
 weighted five vertices, circulant and death-Birth. No equivalent result was
 found in those searches or opened primary sources. That is a bounded priority
-check, not an exhaustive novelty certificate. The mathematics above stands
-independently of whether the example has appeared elsewhere; the project
-still requires a non-author reconstruction and prior-work assessment.
+check. Sorrel's independent calculation reproduces every certified value,
+and the accompanying literature assessment gives the limits of the priority
+claim. [Calculation and prior-work assessment](RECONSTRUCTION.md)
