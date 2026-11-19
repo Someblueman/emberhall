@@ -232,15 +232,23 @@ main {
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
+  flex-wrap:wrap;
   gap:12px;
 }
-.room-card-head > div {
+.room-card-head > div:first-child {
   min-width:0;
-  flex:1;
+  flex:1 1 220px;
 }
-#back-to-rooms {
+.room-card-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:flex-end;
   flex:none;
   margin-top:4px;
+}
+#back-to-rooms,#room-overview {
+  flex:none;
 }
 #room-context {
   grid-column:1 / -1;
@@ -661,7 +669,7 @@ footer a {
     grid-template-columns:1fr;
     gap:24px;
   }
-  #back-to-rooms {
+  #back-to-rooms,#room-overview {
     min-height:44px;
     padding:10px 14px;
   }
@@ -1357,6 +1365,8 @@ footer a {
 .room-lamp::after { content:""; position:absolute; width:38px; height:3px; background:#b9a06b; left:-5px; bottom:-8px; }
 .room-rail { position:absolute; top:58px; left:27%; right:26%; height:6px; background:#ad8a58; box-shadow:0 4px 0 #1c3028; }
 .composed-workshop .room-rail { top:auto; bottom:24px; left:24%; right:6%; height:15px; transform:skewY(-2deg); box-shadow:0 10px 0 #392c20,0 21px 0 #89704c; }
+.composed-workshop .room-lamp { top:38px; }
+.composed-workshop .room-lamp::before { height:37px; }
 .room-fireplace { position:absolute; width:170px; height:123px; border:16px solid #8c927a; border-bottom:0; bottom:0; left:calc(50% - 101px); border-radius:65px 65px 0 0; background:radial-gradient(ellipse at 50% 100%,#f4ce75 0 14%,#b66538 16% 31%,#29372b 36% 100%); box-shadow:0 -14px 0 3px #b2a47d,inset 5px 0 0 #52604e; }
 .room-landmark { position:relative; margin:14px 0 24px; text-align:center; color:#d9c89e; font:italic 17px/1.4 Georgia,serif; }
 .room-benches,.room-voices { position:relative; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:26px; align-items:start; padding:0 0 22px; }
@@ -1631,4 +1641,4 @@ footer a {
   .study-compare-table thead td { display:none; }
   .study-compare-table tbody th { padding-bottom:.2rem; border:0; color:var(--gold); }
   .study-compare-table tbody td::before { content:attr(data-idea); display:block; font-size:.85rem; font-weight:600; margin-bottom:.3rem; }
-}.composed-gallery .creation-look { min-height:44px; padding:10px 0; background:none; border:0; color:#e0d3b0; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+}
