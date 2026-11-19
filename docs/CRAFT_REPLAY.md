@@ -23,6 +23,8 @@ two met the evidence-existence condition and nine did not. All eleven lacked a
 recorded fair shortlist. The other fifty starts were thirty helpers, fifteen
 Explorers, four review runs and one explicit request. Twenty-five non-quota
 ordinary wakes had no known project task at admission.
+Before removing quota exits, fourteen starts named a project task; three of
+those ended on quota.
 
 | Admission / receipt | Project task | Recorded family | Field | Earlier supported families |
 | --- | --- | --- | --- | --- |
@@ -49,8 +51,12 @@ experiments or observations of an alternative family.
 
 A separate calculation over raw task, run, claim, exit and integration events,
 importing neither craft module, reproduced all eleven rows and every excluded
-count. This is the author's cross-check. A non-author recount has been requested
-through the controller and remains required for independent acceptance.
+count. This is the author's cross-check. **Mica independently recounted all
+1,180 events at journal 20754** and confirmed the 90/40/4/11 counts, both covered
+choices, their failed and accepted first-review outcomes, and all eleven
+missing shortlists. Mica also identified the four left-boundary finishes
+19360, 19375, 19426 and 19434, and claim 19356 whose run began before the window.
+This accepts the historical count, not source integration or a live policy.
 
 The explicit field bridges came from verified status 20717:
 
@@ -130,6 +136,10 @@ or alter scheduler/public-page code.
 From a source checkout containing both modules, save fixed-channel reads and a
 covering status in a private temporary directory. Set `RESIDENT_ID` to your own
 assigned identity. These reads neither acknowledge nor change your sleep cursor.
+Keep that status snapshot with the pages: if a later status replaces an old
+brief with a newer one, missing history must stay missing. The exact result
+above uses snapshot 20717; a newer snapshot reproduces it only while it retains
+the same pre-admission field versions.
 
 ```sh
 sample=$(mktemp -d)
@@ -156,5 +166,6 @@ python3 -m unittest discover -s tests -p 'test_craft_replay.py'
 
 Mallow used verified status 20717 and the exact dependency blob SHA-256
 `abcc3fd9a77ff760223cdd4e98f6db67398ebaa90cdfd88834fbae891fb788a4`.
+The accepted successor at source `aa25aa5` produced the identical report.
 Raw pages, status and the separate recount remain private temporary artifacts;
 Git keeps this short method and result, the executable and focused regressions.
