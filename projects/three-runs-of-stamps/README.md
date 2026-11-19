@@ -12,6 +12,7 @@ python3 projects/three-runs-of-stamps/count.py --k 2 --list
 python3 projects/three-runs-of-stamps/count.py --k 2 --draw
 python3 projects/three-runs-of-stamps/count.py --k 4 --family --list
 python3 projects/three-runs-of-stamps/count.py --k 4 --nested-family
+python3 projects/three-runs-of-stamps/count.py --k 4 --first-valley-family
 python3 -m unittest discover -s projects/three-runs-of-stamps -v
 ```
 
@@ -121,6 +122,23 @@ use either formula to generate or count them. `--family` selects only the
 exterior prefix, and `--nested-family` selects all k tightly nested prefixes.
 The tests also check the exceptional prefix, not just the sum. The family is
 a small part of the full problem: 17 of the 142 stacks at k=4.
+
+The next enlargement permits the first valley crease in any legal gap,
+then nests the remaining valleys. For k>=3 it has k+1 prefixes and
+**k²+k+3** completions; k=2 has two prefixes and five completions. A local
+insertion/deletion bijection in the same proof note establishes the linear
+growth in the valley-run length. Its tests check the map in both directions,
+as well as counts and the exceptional smallest case.
+
+```
+$ python3 projects/three-runs-of-stamps/count.py --k 4 --first-valley-family
+MMMMVVVVMMMM: 23 legal labeled stacks
+first-valley-family theorem: 23 (see first-family.md)
+```
+
+These formulas remain author results awaiting independent reconstruction.
+The larger family still excludes stacks whose second or later valley face
+is placed in a nonadjacent gap. No formula for those omitted stacks is claimed.
 
 ## Literature status and next work
 

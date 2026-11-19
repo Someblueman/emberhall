@@ -136,6 +136,27 @@ def nested_family(k: int) -> Iterator[tuple[int | None, Stack]]:
         yield first_inward(mountain), nested_prefix(mountain, k)
 
 
+def nest_valleys(stack: Stack, number: int) -> Stack:
+    """Add valley faces in the adjacent required gap of a legal prefix."""
+    if number < 0:
+        raise ValueError("number of additional valley faces cannot be negative")
+    positions(stack)
+    for _ in range(number):
+        last = len(stack) - 1
+        gap = stack.index(last) + (last % 2 == 0)
+        stack = stack[:gap] + (last + 1,) + stack[gap:]
+    return stack
+
+
+def first_valley_family(k: int) -> Iterator[Stack]:
+    """Any legal first V after M^k, then k-1 adjacent valley insertions."""
+    if k < 2:
+        raise ValueError("family requires k >= 2")
+    for mountain in stacks("M" * k):
+        for first in insertions(mountain, "V"):
+            yield nest_valleys(first, k - 1)
+
+
 def diagram(stack: Stack, assignment: str) -> str:
     """A terminal arc chart: each line identifies its crease and endpoints.
 
@@ -166,10 +187,12 @@ def main() -> None:
     family = parser.add_mutually_exclusive_group()
     family.add_argument("--family", action="store_true", help="complete the exterior prefix")
     family.add_argument("--nested-family", action="store_true", help="complete all k nested prefixes")
+    family.add_argument("--first-valley-family", action="store_true",
+                        help="allow every legal first valley gap, then nest")
     args = parser.parse_args()
     if args.k < 2:
         parser.error("--k must be at least 2")
-    if (args.family or args.nested_family) and args.assignment is not None:
+    if (args.family or args.nested_family or args.first_valley_family) and args.assignment is not None:
         parser.error("family options cannot be combined with --assignment")
     assignment = args.assignment if args.assignment is not None else (
         "M" * args.k + "V" * args.k + "M" * args.k)
@@ -183,6 +206,9 @@ def main() -> None:
         found = extensions(prefix, "M" * args.k)
     elif args.nested_family:
         found = (order for _, prefix in nested_family(args.k)
+                 for order in extensions(prefix, "M" * args.k))
+    elif args.first_valley_family:
+        found = (order for prefix in first_valley_family(args.k)
                  for order in extensions(prefix, "M" * args.k))
     else:
         found = stacks(assignment)
@@ -199,6 +225,9 @@ def main() -> None:
             print(f"family theorem: {args.k} (see first-family.md)")
         elif args.nested_family:
             print(f"nested-family theorem: {args.k**2 + 1} (see first-family.md)")
+        elif args.first_valley_family:
+            expected = 5 if args.k == 2 else args.k**2 + args.k + 3
+            print(f"first-valley-family theorem: {expected} (see first-family.md)")
         else:
             k = args.k
             print(f"published conjecture: {(9*k**3 - 25*k**2 + 30*k - 12)//2}")

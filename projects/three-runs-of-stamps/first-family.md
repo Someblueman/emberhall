@@ -219,6 +219,126 @@ have b each. This is a direct consequence of the same classification,
 not an extrapolation from samples. Four unequal-length pairs are exercised
 in the tests, including both orders of a and b.
 
+## Allowing the first valley crease to skip faces
+
+Enlarge the family by allowing the **first** valley face in any legal gap
+of Q, then placing every subsequent valley face immediately beside its
+predecessor on the required side. For k>=3 there are k+1 prefixes, with
+exactly **k²+k+3** completions. At k=2 there are just two prefixes and five
+completions. These are still restricted families, not all two-run prefixes.
+
+The following local bijection reduces the arbitrary-length claim to an
+explicit two-valley case, rather than to interpolation.
+
+### Local insertion lemma
+
+Let P be any legal prefix whose last crease is V and whose last two faces
+are adjacent in the layer order. Write these last labels as A=n-2 and
+B=n-1, where P has n faces. Let T(P) insert a new valley face C=n immediately
+beside B on the required side. If F(P,r) counts extensions by r mountains,
+then for every r>=1,
+
+```
+F(T(P), r+1) = F(P,r) + 1.
+```
+
+Normalize the drawing so the local order in P is `B,A`. In T(P) it is
+`B,C,A`. On the side containing the old V arc A--B, subsequent mountain
+arcs point right; on the other side they point left. The first mountain
+face D=n+1 is forced into the gap C,A: A--B encloses C, and the direction
+selects that half of the interval. Now the local order is `B,C,D,A`.
+
+The next mountain face E=n+2 points left from D. It can go between C,D,
+or somewhere left of B. It cannot go between B,C: the new arc D--E would
+interleave the V arc B--C. The first choice begins a trapped inward spiral,
+with exactly one completion of any remaining length.
+
+In the second case delete C and D, and subtract two from all larger labels.
+This replaces the detour B--C--D--E by B--E and leaves a completion counted
+by F(P,r). Here is why this deletion and its inverse lose nothing:
+
+- After E is left of B, B,C,D remain consecutive forever. A future rightward
+  arc cannot enter B,C or C,D from the left, since A--B would then be crossed;
+  from the right it points away. A future leftward arc from the right cannot
+  enter B,C because of B--C, or C,D because of D--E; from the left it points
+  away. This proves the consecutive-block invariant by induction.
+- Outside this block, the intervals B--E and D--E have identical membership
+  for every other endpoint. The two extra short arcs B--C and C--D have no
+  endpoint inside them. All crossing tests for remaining arcs therefore
+  agree before and after deletion.
+- The inverse simply inserts C,D beside B toward A, and adds two to the
+  mountain labels. Since the first mountain endpoint in a completion of P
+  points left from B, the inverse enters the second case. Parities and all
+  M/V inequalities are preserved by the even label shift. Later faces in
+  the old gap B,A lie beyond D, as the same direction and interval argument
+  forces. Thus the two maps are inverse on complete labeled stacks.
+
+This gives one stopped completion and a bijection for all the others.
+The assumption that A,B are adjacent is essential; the first added face is
+not generally forced without it. The tests compare the actual deletion map,
+not only its cardinality, on several prefixes and mountain-run lengths.
+
+### Which first valley placements are possible?
+
+Use the first-inward-step classification of Q again. If the mountain run
+never turned inward, its endpoint is exterior and the first V has one gap.
+If it turned inward before its last step, alternating enclosing arcs trap
+the first V in the gap immediately beside the endpoint. These are the
+adjacent placements already counted above.
+
+If the first inward step is its final step a, normalize its layer order as
+
+```
+u, a, R, v       where u=a-1 and v=a-2.
+```
+
+Here R contains labels 0 through a-3 in their outward-spiral order. The first
+V points right from a. The old arc u--v contains it; same-side arcs within
+R are nested and fill R's span. Consequently the only possible gaps are
+immediately before R and immediately after R (before v). If R is empty,
+these are one gap. This is the a=2 exception. If a>=3, they are different:
+one is adjacent to a, and the other skips every face of R. There are no
+other gaps with the necessary interval memberships.
+
+Thus exactly one additional first-valley placement exists for a>=3. After
+that first valley, all further V faces are specified, so there is exactly
+one extra prefix in the enlarged family.
+
+### The extra prefix contributes b+2
+
+Allow a>=3 mountains and b>=2 valleys. For the extra first-valley placement,
+write X=a+1 and Y=a+2. At b=2, after the specified adjacent second valley,
+the normalized prefix is
+
+```
+u, a, R, Y, X, v.
+```
+
+The first mountain face Z can enter exactly two gaps: between a and the
+first face of R, or between the last face of R and Y. Its direction is left.
+The arc a--X requires Z inside its interval, and the old nested arcs filling
+R forbid R's internal gaps. Even when R is a singleton, its two sides are
+distinct. No further gap satisfies these tests.
+
+For the next mountain face W, the direction is right. If Z was before R,
+the only options are immediately after Z or beyond v. The old same-side
+chain spanning from the first face of R to v forbids everything between
+those two regions. If Z was after R, W can be immediately after Z (before Y)
+or between X and v; the arc X--Y excludes the intervening region. All four
+options satisfy the remaining interval tests. They are distinct by Z or W's
+relative order, so the base count is exactly four.
+
+From b=2 onward the last valley crease is adjacent. Each increase of b adds
+one tightly nested V and one final M, so the local insertion lemma adds one
+completion. The extra prefix therefore has `4+(b-2)=b+2` completions.
+Together with the previous family's ab+1 this gives **(a+1)b+3**, and setting
+a=b=k gives k²+k+3. For a=2 the extra prefix does not exist, leaving 2b+1.
+
+Example: at k=3 the extra prefix is `1 4 6 5 0 3 2` and contributes five
+stacks. Alongside the earlier ten this gives fifteen of the 48 total stacks.
+`--first-valley-family` reconstructs the enlarged family from legal insertions;
+it does not use the formula to decide which stacks to emit.
+
 ## What was checked, and what remains
 
 The tests reconstruct P_k for `2 <= k <= 12`, check its legality, and enumerate
@@ -238,9 +358,9 @@ Next useful pieces, in order:
 1. Independently reconstruct the gap table and inverse, especially both
    parities, the escape-gap lemma, and the unique k+1 exception. This author
    argument is not an independently accepted milestone.
-2. Classify prefixes with a valley run that turns outward at least once,
-   including those with internal mountain endpoints. Record explicit gap
+2. Classify prefixes whose second or later valley face does not use the
+   adjacent gap, including those with internal mountain endpoints. Record explicit gap
    conditions for each class; a fitted count is not a classification.
 3. Prove those classes disjoint and exhaustive, then sum their counts. Do not
-   subtract k²+1 from the conjectured cubic and call the remainder
+   subtract k²+k+3 from the conjectured cubic and call the remainder
    a theorem. Keep the 2026 prior-art lead in the README unresolved until read.

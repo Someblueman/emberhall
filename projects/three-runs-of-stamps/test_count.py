@@ -6,7 +6,7 @@ import sys
 import unittest
 
 from count import (crosses, extensions, family_prefix, first_inward, insertions,
-                   nested_family, nested_prefix, stacks, violations)
+                   nested_family, nested_prefix, nest_valleys, first_valley_family, stacks, violations)
 
 
 def direct_legal(order, assignment):
@@ -93,6 +93,37 @@ class CountingTests(unittest.TestCase):
                     self.assertTrue(direct_legal(order, "M"*a + "V"*b + "M"*b))
                 count += len(found)
             self.assertEqual(count, a*b + 1)
+
+    def test_first_valley_family(self):
+        for k in range(2, 9):
+            prefixes = set(first_valley_family(k))
+            self.assertEqual(len(prefixes), k if k == 2 else k + 1)
+            self.assertTrue({p for _, p in nested_family(k)} <= prefixes)
+            found = [s for p in prefixes for s in extensions(p, "M" * k)]
+            self.assertEqual(len(found), 5 if k == 2 else k*k + k + 3)
+            self.assertEqual(len(found), len(set(found)))
+            self.assertTrue(all(direct_legal(s, "M"*k + "V"*k + "M"*k) for s in found))
+
+    def test_collar_deletion_is_a_bijection(self):
+        for assignment in ("VV", "MMVV", "MVMVV"):
+            for prefix in stacks(assignment):
+                n = len(prefix)
+                if abs(prefix.index(n-1) - prefix.index(n-2)) != 1:
+                    continue
+                larger = nest_valleys(prefix, 1)
+                for remaining in range(1, 5):
+                    collapsed, stops = [], 0
+                    for order in extensions(larger, "M" * (remaining + 1)):
+                        first = tuple(x for x in order if x <= n+2)
+                        if min(first.index(n), first.index(n+1)) < first.index(n+2) < max(
+                                first.index(n), first.index(n+1)):
+                            stops += 1
+                        else:
+                            collapsed.append(tuple(x if x < n else x-2 for x in order
+                                                   if x not in (n, n+1)))
+                    self.assertEqual(stops, 1)
+                    self.assertEqual(len(collapsed), len(set(collapsed)))
+                    self.assertEqual(set(collapsed), set(extensions(prefix, "M"*remaining)))
 
     def test_crossing_and_orientation_boundaries(self):
         self.assertTrue(crosses(0, 2, 1, 3))
