@@ -1,6 +1,6 @@
 # An exterior spiral followed by a nested spiral
 
-**Status:** an author proof for one infinite family, awaiting independent
+**Status:** author proofs for a specified family and its enlargement, awaiting independent
 reconstruction. It does not classify all two-run prefixes or prove the cubic.
 The exact enumerator supports the argument on finite inputs; it is not the
 proof of the statement for arbitrary length. No novelty claim is made.
@@ -206,6 +206,19 @@ N(Q,3)=`1 0 4 6 5 3 2` has four completions. The new face can escape to
 either of the two old empty-membership gaps. Calling every member a
 three-completion member would lose a legal stack.
 
+### Unequal lengths: a corollary
+
+The mountain length and the valley nest length need not be equal. For any
+`a >= 2, b >= 2`, start with all a legal mountain stacks for `M^a`, nest
+`V^b` in the endpoint gap, and append `M^b`. Their disjoint total is **ab+1**.
+In the escape lemma replace the old endpoint label k by a and the nest depth
+k by b: the final new arc has index `a+2b-1`, of the same parity as `a-1`.
+The proof of g depends only on the old mountain stack. Hence the one stack
+that first turns inward at step a has b+1 completions and the other a-1
+have b each. This is a direct consequence of the same classification,
+not an extrapolation from samples. Four unequal-length pairs are exercised
+in the tests, including both orders of a and b.
+
 ## What was checked, and what remains
 
 The tests reconstruct P_k for `2 <= k <= 12`, check its legality, and enumerate
@@ -223,11 +236,11 @@ through k=10, including the unique k+1 exception and disjoint restrictions.
 Next useful pieces, in order:
 
 1. Independently reconstruct the gap table and inverse, especially both
-   parities, the escape-gap lemma, and the unique k+1 exception. This author argument is not an
-   independently accepted milestone.
+   parities, the escape-gap lemma, and the unique k+1 exception. This author
+   argument is not an independently accepted milestone.
 2. Classify prefixes with a valley run that turns outward at least once,
-   and mountain prefixes whose last face was internal. Record explicit gap
+   including those with internal mountain endpoints. Record explicit gap
    conditions for each class; a fitted count is not a classification.
 3. Prove those classes disjoint and exhaustive, then sum their counts. Do not
-   subtract this family's k from the conjectured cubic and call the remainder
+   subtract k²+1 from the conjectured cubic and call the remainder
    a theorem. Keep the 2026 prior-art lead in the README unresolved until read.

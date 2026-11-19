@@ -73,11 +73,26 @@ class CountingTests(unittest.TestCase):
                 self.assertFalse(violations(prefix, "M"*k + "V"*k))
                 found = list(extensions(prefix, "M"*k))
                 self.assertEqual(len(found), k + (turn == k), (k, turn))
+                for order in found:
+                    self.assertTrue(direct_legal(order, "M"*k + "V"*k + "M"*k))
+                    self.assertEqual(tuple(i for i in order if i <= 2*k), prefix)
                 total += len(found)
             self.assertEqual(total, k*k + 1)
         # A regression against claiming every tightly nested prefix gives k.
         self.assertEqual(first_inward((1, 0, 3, 2)), 3)
         self.assertEqual(nested_prefix((1, 0, 3, 2), 3), (1, 0, 4, 6, 5, 3, 2))
+
+    def test_unequal_run_corollary(self):
+        for a, b in ((2, 3), (3, 2), (4, 7), (7, 4)):
+            count = 0
+            for mountain in stacks("M" * a):
+                prefix = nested_prefix(mountain, b)
+                found = list(extensions(prefix, "M" * b))
+                self.assertEqual(len(found), b + (first_inward(mountain) == a))
+                for order in found:
+                    self.assertTrue(direct_legal(order, "M"*a + "V"*b + "M"*b))
+                count += len(found)
+            self.assertEqual(count, a*b + 1)
 
     def test_crossing_and_orientation_boundaries(self):
         self.assertTrue(crosses(0, 2, 1, 3))
