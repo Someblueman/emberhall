@@ -1,9 +1,28 @@
 # Three Runs of Stamps
 
-A mathematical work in progress: count legal labeled stacks for the crease
-pattern `M^k V^k M^k`. This directory contains a standalone exact enumerator,
-small reproducible controls, and [author arguments for two nested
-prefix families](first-family.md). The general cubic is **not proved** here.
+For $k\ge2$, the crease pattern `M^k V^k M^k` has
+$(9k^3-25k^2+30k-12)/2$ legal labeled stacks in the fixed orientation.
+The [author proof](cubic.md) partitions every stack by the first adjacent
+valley after step one. An independent mathematical review of the full
+argument is pending.
+
+From a clone, reproduce the count and compare every sector with an
+unpruned enumeration. A recorded run for eight creases per block follows.
+
+```text
+$ python3 projects/three-runs-of-stamps/cubic.py 8 --verify
+M^8 V^8 M^8
+First adjacent valley after step one: 2 | 75
+First adjacent valley after step one: 3 | 98
+First adjacent valley after step one: 4 | 141
+First adjacent valley after step one: 5 | 196
+First adjacent valley after step one: 6 | 263
+First adjacent valley after step one: 7 | 342
+First adjacent valley after step one: 8 | 285
+First adjacent valley after step one: never | 218
+1618 legal labeled stacks
+Every sector agrees with unpruned enumeration.
+```
 
 From the repository root, with Python 3.10 or newer and no dependencies:
 
@@ -109,7 +128,7 @@ For the prefix with an exterior mountain spiral and tightly nested valley
 run, the [gap proof](first-family.md) gives exactly k completions.
 Allowing all k mountain stacks but keeping the valley run tightly nested
 gives a growing family with **k²+1** completions: one prefix contributes k+1,
-the others k each. This is an author argument awaiting independent review.
+the others k each. Fern's [independent reconstruction](RECONSTRUCTION.md) verifies the family.
 
 ```
 $ python3 projects/three-runs-of-stamps/count.py --k 4 --nested-family
@@ -136,17 +155,17 @@ MMMMVVVVMMMM: 23 legal labeled stacks
 first-valley-family theorem: 23 (see first-family.md)
 ```
 
-These formulas remain author results awaiting independent reconstruction.
-The larger family still excludes stacks whose second or later valley face
-is placed in a nonadjacent gap. No formula for those omitted stacks is claimed.
+The [independent reconstruction](RECONSTRUCTION.md) also verifies this larger
+family. The [full decomposition](cubic.md) counts the stacks whose second
+or later valley face is placed in a nonadjacent gap.
 
 ## Literature status and next work
 
 The [longer preprint, version 2](https://arxiv.org/html/2503.23661v2), section
 5.2, Table 2, gives the cubic as an interpolation tested through k=78.
 The published version retains the open general counting question and refers
-back to the longer version for the experimental results. Our next work is
-geometric classification, not extending that table for its own sake.
+back to the longer version for the experimental results. The component proofs
+and their parameter ranges are collected in [the full argument](cubic.md).
 
 A fresh search on 19 November 2026 found an additional lead:
 [Shintaro Sakai, *Stamp folding patterns and a boundary-based counting
@@ -159,5 +178,5 @@ The abstract alone does not settle whether any argument here overlaps it.
 Sakai's [earlier recurrence paper](https://journalofscience.org/index.php/GJSFR/article/view/102616).
 Neither abstract certifies a solution to the fixed three-run problem.
 
-The [family note](first-family.md) states the precise next proof questions.
-No site entry, public delivery or independent milestone acceptance is claimed.
+The next mathematical milestone is independent reconstruction of the full
+classification, including the fourth-stop induction and both terminal boundaries.
