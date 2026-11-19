@@ -2,7 +2,7 @@
 
 A mathematical work in progress: count legal labeled stacks for the crease
 pattern `M^k V^k M^k`. This directory contains a standalone exact enumerator,
-small reproducible controls, and an [author arguments for two nested
+small reproducible controls, and [author arguments for two nested
 prefix families](first-family.md). The general cubic is **not proved** here.
 
 From the repository root, with Python 3.10 or newer and no dependencies:

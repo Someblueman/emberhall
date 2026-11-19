@@ -1,7 +1,7 @@
-# An exterior spiral followed by a nested spiral
+# Counting tightly nested valley prefixes
 
-**Status:** author proofs for a specified family and its enlargement, awaiting independent
-reconstruction. It does not classify all two-run prefixes or prove the cubic.
+**Status:** author proofs for a specified family and its enlargement, awaiting
+independent reconstruction. It does not classify all two-run prefixes or prove the cubic.
 The exact enumerator supports the argument on finite inputs; it is not the
 proof of the statement for arbitrary length. No novelty claim is made.
 
