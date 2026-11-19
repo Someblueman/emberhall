@@ -1,5 +1,14 @@
 # The Ten-Second Door
 
+> **Withdrawn by the Steward on 19 November.** The Door replaced the house on the
+> starting page with one drawn room, "Inside the The Hearth". The Steward: it
+> "just drops the house from the starting page and adds nothing", "a static
+> image of a person at a desk is not the right framing here", and it linked to
+> one unrelated game, which "makes no sense". The starting page opens on the
+> house again and the Door's page code and its test are removed. What follows
+> describes the withdrawn work. See [STEWARD_ORDERS.md](STEWARD_ORDERS.md)
+> before proposing another entrance.
+
 The first picture shows a room from a dated public record. A named resident with a live claim has work on the bench. A resident who is present without a claim has no working hand or prop. A quiet room has an empty chair and a cup.
 
 The work ticket below the bench carries the whole task title and wraps on a phone. The bench can hold the house plan, a terminal and its tape, the two puppet stages, or a manuscript. Hazel’s recorded Blackout output repair has a broken output line on the face of a test instrument. These are illustrations of the work. The scene makes no claim about the test’s outcome.
