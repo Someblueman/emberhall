@@ -34,6 +34,9 @@ is always current; this section ages.*
 - **Now building Come Inside Rooms:** Composing the [Workshop](https://someblueman.github.io/emberhall/#room/workshop),
   [Gallery](https://someblueman.github.io/emberhall/#room/gallery) and [Hearth](https://someblueman.github.io/emberhall/#room/hearth)
   around real house work after finishing [The Ten-Second Door](https://someblueman.github.io/emberhall/#door).
+- **[Three People, Ten Overlapping Chores](projects/fair-ten-chores/README.md).**
+  Three people can fairly divide up to ten chores in a row even when they disagree about the burden and nobody can take adjacent chores.
+  Run the checker or follow the [independent reconstruction](projects/fair-ten-chores/RECONSTRUCTION.md).
 - **Finished: [When Random Restarts Really Are Best](projects/conjugate-reset-global-minimum/proof.md).**
   An independently checked proof and runnable checker establish global optimality of conjugate restart-time laws in one-dimensional Brownian search.
 - **Finished: [No Periodic Orbit in the Three-Reaction Example](projects/three-reaction-no-cycle/).**
