@@ -1152,6 +1152,8 @@ function backToRooms() {
   if(typeof nav.scrollIntoView==="function")nav.scrollIntoView({block:"nearest",behavior:"instant"});
 }
 function skipToContent(event) {
+  // The lightweight Door handles this first while the archive is hidden.
+  if(event.defaultPrevented)return;
   const view=document.querySelector(".page-view:not([hidden])");
   const target=view?.id==="house-view"&&linkedRoom()!==null
     ?document.querySelector(".room-card"):view;

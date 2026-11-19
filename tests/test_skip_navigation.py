@@ -72,6 +72,10 @@ for(const hash of ['', '#house-view', '#projects-view', '#gallery-view',
  assert.equal(selected,'hearth','Skipping does not select or clear a room');
 }
 assert.equal(prevented,13);
+// Returning to the Door leaves archive listeners installed. Respect its handler.
+document.activeElement=null;
+skipToContent({defaultPrevented:true,preventDefault(){assert.fail('Already handled');}});
+assert.equal(document.activeElement,null);
 views.forEach(v=>v.hidden=true);
 skipToContent({preventDefault(){assert.fail('Keep native fallback without a view');}});
 `,ctx);

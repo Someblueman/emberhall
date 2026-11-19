@@ -17,12 +17,13 @@ const root=process.argv[1], nodes={},listeners={},classes=new Set(["entrance"]);
 function node(id='') {return {id,hidden:false,textContent:'',children:[],listeners:{},
  setAttribute(k,v){this[k]=v;},getAttribute(k){return this[k];},
  replaceChildren(){this.children=[];},appendChild(n){this.children.push(n);},
- addEventListener(k,f){this.listeners[k]=f;},focus(){},scrollIntoView(){}};}
+ addEventListener(k,f){this.listeners[k]=f;},focus(){document.activeElement=this;},scrollIntoView(){this.scrolled=true;}};}
 for(const match of fs.readFileSync(root+'/site/index.html','utf8').matchAll(/id="([^"]+)"/g))nodes[match[1]]=node(match[1]);
 nodes['record-load'].hidden=true;
 const document={getElementById:id=>nodes[id]||null,createElement:()=>node(),activeElement:null,
  body:{classList:{add:k=>classes.add(k),contains:k=>classes.has(k),remove:k=>classes.delete(k)}},
- addEventListener:(k,f)=>listeners[k]=f,querySelector:()=>null};
+ addEventListener:(k,f)=>listeners[k]=f,
+ querySelector:s=>s==='.room-card'?nodes['room-card']:s==='.page-view:not([hidden])'?nodes['house-view']:null};
 const window={setInterval(){},location:{hash:''},history:{pushState:(a,b,hash)=>window.location.hash=hash},addEventListener(){}};
 const at=1795029000;
 const scene={version:1,seq:19215,observed_at:at,scene:{status:'occupied',
@@ -51,6 +52,17 @@ vm.runInContext(source.replace('document.addEventListener("DOMContentLoaded",loa
  assert.equal(nodes['arrival-resident'].visibility,'visible');
  assert.equal(nodes['arrival-enter'].href,'#room/workshop');
  assert.equal(nodes['arrival-changes'].children.length,1);
+ // The Door handles skipping before archive controls exist, without fetching history.
+ function skip(expected) {
+   const before=calls.length,hash=window.location.hash;
+   nodes[expected].scrolled=false;
+   const event={defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};
+   nodes['skip-content'].listeners.click(event);
+   ctx.skipToContent(event); // the listener remains after the archive has been opened
+   assert.equal(document.activeElement,nodes[expected]);assert(nodes[expected].scrolled);
+   assert.equal(calls.length,before);assert.equal(window.location.hash,hash);
+ }
+ skip('arrival-title');
  // Enter the dated room with the archive still unavailable. Only its history link fetches history.
  const click=nodes["arrival-enter"];
  listeners.click({target:{closest:()=>click},button:0,preventDefault(){}});
@@ -59,8 +71,10 @@ vm.runInContext(source.replace('document.addEventListener("DOMContentLoaded",loa
  assert.match(nodes["arrival-visit-work"].textContent,/Mallow.*Make the first screen/);
  assert.equal(nodes["arrival-visit-history"].href,"#room/workshop");
  assert.deepEqual(calls,["now.json"]);
+ skip('arrival-visit-name');
  ctx.leaveDatedRoom();
  assert.equal(nodes["arrival-visit"].hidden,true);
+ skip('arrival-title');
  const blackout={...scene,scene:{...scene.scene,work:{id:"blackout-output-repair",
    title:"Keep Blackout output failures within its documented exit contract"}}};
  ctx.drawArrival(blackout);
@@ -100,6 +114,7 @@ vm.runInContext(source.replace('document.addEventListener("DOMContentLoaded",loa
  assert.equal(await ctx.openArrivalArchive('#room/archive'),false);
  assert.equal(calls.at(-1),'history.json');assert.equal(nodes['record-load'].hidden,false);
  assert.equal(nodes.arrival.hidden,false);assert(!classes.has('archive-open'));
+ skip('arrival-title');
  assert.match(nodes.error.textContent,/could not be loaded/);
  // Returning to the Door cancels the background retry. A pending room visit can recover.
  window.location.hash="#arrival";const beforeRetry=calls.length;
@@ -120,3 +135,4 @@ vm.runInContext(source.replace('document.addEventListener("DOMContentLoaded",loa
         self.assertIn('document.addEventListener("DOMContentLoaded",loadArrival)', source)
         self.assertIn('#arrival, #record-load', source)  # no-script page retains its own entrance
         self.assertIn('aria-labelledby="arrival-picture-title arrival-picture-desc"', source)
+        self.assertIn('id="arrival-title" tabindex="-1"', source)
