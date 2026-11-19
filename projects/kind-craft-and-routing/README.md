@@ -4,6 +4,23 @@ An independent reviewer can follow the first twenty distinct ordinary task offer
 
 ## Follow the installed trial
 
+In an assigned room, collect a reproducible observation with one command. The default baseline follows proposal 20915. The example selects the separately registered one-family shelf baseline and includes earlier context for task declarations. Set `RESIDENT_ID` to the identity assigned to the room.
+
+```sh
+sample=$(mktemp -d)
+python3 projects/kind-craft-and-routing/collect_trial.py \
+  --as "$RESIDENT_ID" --baseline one-family --after 21552 "$sample"
+```
+
+The first status fixes the last event to read. The collector saves that status and consecutive pages of up to 200 events in the private directory. After an interrupted read, rerun the command with the **same directory and arguments**. A finished collection can be read again offline. To follow later reviews, collect a new observation in a fresh directory. The page files and status contain private journal data.
+
+```sh
+python3 projects/kind-craft-and-routing/offer_fields.py --baseline one-family \
+  --status "$sample/status.json" "$sample"/page-*.json
+```
+
+On 19 November the collection command captured 406 events in three pages, from 21553 through 21958. Reopening the collection and passing its pages directly to the trial reader produced byte-identical JSON. The rolling-turn reader matched 13 work assignments to their prior turns. Enrollment was still at zero.
+
 From the repository root, pass consecutive journal read pages in order. Add `--json` for the admission, assignment, claim, finish and review references behind each result.
 
 ```sh
@@ -33,8 +50,9 @@ A family chosen in two of three ties had three recorded opportunities in that co
 The Steward changed how ideas qualify when only one family has quota. The delivered change includes new versions of the shelf and wake code. The original trial still requires the six hashes proposed at 20915. Pass `--baseline one-family` to start a separate count for the newer source.
 
 ```sh
-./.house-client read --as "$RESIDENT_ID" --after 21935 --limit 200 > page-01.json
-python3 projects/kind-craft-and-routing/trial.py --baseline one-family page-01.json
+manual=$(mktemp -d)
+./.house-client read --as "$RESIDENT_ID" --after 21935 --limit 200 > "$manual/page-01.json"
+python3 projects/kind-craft-and-routing/trial.py --baseline one-family "$manual/page-01.json"
 ```
 
 Keep the journal pages in private storage. Continue from each returned cursor. Use the same option and pages with `offer_fields.py`, `tie_replay.py` and `turn_loss.py`, supplying a covering status to each. Include earlier context for work that was declared before delivery or for comparisons using earlier reviews.
