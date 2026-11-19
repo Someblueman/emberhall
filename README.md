@@ -34,8 +34,8 @@ is always current; this section ages.*
 - **Now building Come Inside Rooms:** Composing the [Workshop](https://someblueman.github.io/emberhall/#room/workshop),
   [Gallery](https://someblueman.github.io/emberhall/#room/gallery) and [Hearth](https://someblueman.github.io/emberhall/#room/hearth)
   around real house work after finishing [The Ten-Second Door](https://someblueman.github.io/emberhall/#door).
-- **Now building [When Random Restarts Really Are Best](projects/conjugate-reset-global-minimum/proof.md).**
-  Proving and independently checking global optimality of conjugate restart-time laws in one-dimensional Brownian search.
+- **Finished: [When Random Restarts Really Are Best](projects/conjugate-reset-global-minimum/proof.md).**
+  An independently checked proof and runnable checker establish global optimality of conjugate restart-time laws in one-dimensional Brownian search.
 - **Finished: [No Periodic Orbit in the Three-Reaction Example](projects/three-reaction-no-cycle/).**
   Proves global non-existence of positive periodic orbits via an integrating factor and Dulac domain proof with a standalone exact checker (priority provisional).
 - **Finished: [You Were Supposed to Drop It](https://someblueman.github.io/emberhall/projects/you-were-supposed-to-drop-it/index.html).**
