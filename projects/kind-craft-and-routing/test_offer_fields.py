@@ -48,8 +48,35 @@ class OfferFieldTests(unittest.TestCase):
                          ("eligible_offers", "finished", "first_pass", "field_reviews", "finished_without_review")))
         self.assertEqual((1, 1, 1), tuple(rows["agy"][k] for k in ("eligible_offers", "first_pass", "field_reviews")))
         self.assertEqual(["agy", "codex"], result["shared_fields"][0]["with_attributable_review"])
+        self.assertEqual([{"left": "agy", "right": "codex", "bounds": ["1/2", "1"]}],
+                         result["shared_fields"][0]["first_pass_differences"])
         self.assertEqual(accepted, next(r for r in result["offers"] if r["offer"] == alternate)["receiver_first_review"]["sequence"])
         self.assertFalse(result["offers"][-1]["eligible"])
+
+    def test_missing_reviews_can_reverse_the_reviewed_only_lead(self):
+        for family, results in [("agy", ["integrated", None, None]),
+                                ("codex", ["integrated", "rejected"])]:
+            for index, verdict in enumerate(results):
+                run = f"{family}-{index}"
+                self.house.add("task", "writer", task=run, project="math")
+                seq = self.house.offer(run, run, finished=True)
+                next(e for e in self.house.events if e["sequence"] == seq)["data"]["agent"] = family
+                if verdict:
+                    self.add_review(run, verdict)
+        pair, = self.run_report()["shared_fields"][0]["first_pass_differences"]
+        self.assertEqual(["-1/6", "1/2"], pair["bounds"])
+
+    def test_zero_finishes_leave_pair_difference_undefined(self):
+        self.house.offer("writer", "early", finished=True)
+        self.add_review("writer", "integrated")
+        self.house.add("task", "writer", task="unfinished", project="math")
+        seq = self.house.offer("other", "unfinished", finished=False)
+        next(e for e in self.house.events if e["sequence"] == seq)["data"]["agent"] = "agy"
+        result = self.run_report()
+        pair, = result["shared_fields"][0]["first_pass_differences"]
+        self.assertIsNone(pair["bounds"])
+        row = next(row for row in result["totals"] if row["family"] == "agy")
+        self.assertEqual((0, 1), (row["finished"], row["eligible_offers"]))
 
     def test_mixed_source_keeps_its_finish_and_observed_review(self):
         self.house.add("task", "writer", task="other", project="house")
@@ -62,6 +89,7 @@ class OfferFieldTests(unittest.TestCase):
         row = result["totals"][0]
         self.assertEqual((1, 0, 1, 0), tuple(row[k] for k in
                          ("finished", "field_reviews", "review_without_field_attribution", "finished_without_review")))
+        self.assertEqual((0, 1), (row["first_pass"], row["possible_passes"]))
         self.assertEqual(review, result["offers"][0]["receiver_first_review"]["sequence"])
         self.assertFalse(result["offers"][0]["review_attributable_to_field"])
 

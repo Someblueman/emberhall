@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
+from fractions import Fraction
+from itertools import combinations
 import json
 from pathlib import Path
 
@@ -11,6 +13,17 @@ from trial import PROPOSED_AT, assess
 from house.craft_offers import audit, summarize
 from house.craft_outcomes import measure_events
 from house.craft_replay import earlier_evidence, field_at
+
+
+def review_difference(left, right):
+    """Extremes of left minus right over finishes with unresolved field verdicts."""
+    if not left["finished"] or not right["finished"]:
+        return None
+    low = (Fraction(left["first_pass"], left["finished"])
+           - Fraction(right["possible_passes"], right["finished"]))
+    high = (Fraction(left["possible_passes"], left["finished"])
+            - Fraction(right["first_pass"], right["finished"]))
+    return [str(low), str(high)]
 
 
 def compare(status, events, through, historical=False):
@@ -60,18 +73,28 @@ def compare(status, events, through, historical=False):
     for row in summarize(grouped):
         field, family = row["area"], row["family"]
         count = reviewed[field, family]
-        totals.append({"field": field, "family": family, "eligible_offers": row["eligible_offers"],
-                       "distinct_eligible_tasks": row["unique_eligible_tasks"], "finished": row["receiver_finished"],
-                       "quota": row["quota"], "open": row["open"],
-                       "closed_without_launch": row["closed_without_launch"],
-                       "field_reviews": count, "first_pass": passed[field, family],
-                       "review_without_field_attribution": row["reviewed_receiver_runs"] - count,
-                       "finished_without_review": row["finished_without_review"]})
+        total = {"field": field, "family": family, "eligible_offers": row["eligible_offers"],
+                 "distinct_eligible_tasks": row["unique_eligible_tasks"], "finished": row["receiver_finished"],
+                 "quota": row["quota"], "open": row["open"],
+                 "closed_without_launch": row["closed_without_launch"],
+                 "field_reviews": count, "first_pass": passed[field, family],
+                 "review_without_field_attribution": row["reviewed_receiver_runs"] - count,
+                 "finished_without_review": row["finished_without_review"]}
+        total["possible_passes"] = (total["first_pass"] + total["finished_without_review"]
+                                    + total["review_without_field_attribution"])
+        totals.append(total)
         if field != "unclassified" and row["eligible_offers"]:
-            overlap[field].append((family, count))
-    shared = [{"field": field, "received": [family for family, _ in groups],
-               "with_attributable_review": [family for family, n in groups if n]}
-              for field, groups in sorted(overlap.items()) if len(groups) >= 2]
+            overlap[field].append(total)
+    shared = []
+    for field, groups in sorted(overlap.items()):
+        if len(groups) < 2:
+            continue
+        ordered = sorted(groups, key=lambda group: group["family"])
+        shared.append({"field": field, "received": [g["family"] for g in ordered],
+                       "with_attributable_review": [g["family"] for g in ordered if g["field_reviews"]],
+                       "first_pass_differences": [
+                           {"left": a["family"], "right": b["family"], "bounds": review_difference(a, b)}
+                           for a, b in combinations(ordered, 2)]})
     return {"basis": basis, "first": events[0]["sequence"], "through": through,
             "status_sequence": status["sequence"], "quota_exits": quota,
             "totals": sorted(totals, key=lambda r: (r["field"], r["family"])),
@@ -94,11 +117,18 @@ def display(report):
               f" | {row['finished_without_review']} awaiting or missing a review"
               f" | {row['review_without_field_attribution']} reviews without field attribution"
               + (f" | excluded {', '.join(excluded)}" if excluded else ""))
+        if row["finished"]:
+            print(f"  Possible first-pass count across receiver finishes | "
+                  f"{row['first_pass']} to {row['possible_passes']} out of {row['finished']}")
     if not report["shared_fields"]:
         print("No recorded field received eligible offers in two families.")
     for row in report["shared_fields"]:
         print(f"{row['field']} | received by {', '.join(row['received'])}"
               f" | attributable reviews for {', '.join(row['with_attributable_review']) or 'none'}")
+        for pair in row["first_pass_differences"]:
+            bounds = pair["bounds"]
+            result = " to ".join(bounds) if bounds else "undefined because a family finished no offers"
+            print(f"  First-pass fraction among finishes, {pair['left']} minus {pair['right']} | {result}")
 
 
 def main():
