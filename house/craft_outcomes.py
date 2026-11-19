@@ -168,8 +168,24 @@ def measure_events(events):
 
 def public_window(events, through, head, source_head):
     """The verified publication's trailing interval, with sequence-only public examples."""
+    from .craft_offers import audit
+
     start = through - len(events) + 1
-    result = measure_events([event | {"sequence": i} for i, event in enumerate(events, start)])
+    numbered = [event | {"sequence": i} for i, event in enumerate(events, start)]
+    result = measure_events(numbered)
+    offered = audit([numbered], result, start - 1)
+    receiving = {(row["family"], row["area"]): dict(row, examples=[])
+                 for row in offered["rows"]}
+    for offer in offered["offers"]:
+        if offer["launch"] is None or offer["outcome"] in (None, "quota"):
+            continue
+        review = offer["receiver_first_review"]
+        examples = receiving[offer["family"], offer["area"]]["examples"]
+        examples.append({"offer": offer["offer"], "assignment": offer["assignment"],
+                         "claim": offer["claim"], "finish": offer["claim_finish"],
+                         "first_review": review["sequence"] if review else None,
+                         "disposition": offer["disposition"]})
+        del examples[:-3]
     rows = {(row["family"], row["area"]): {**row, "examples": {}} for row in result["rows"]}
     for attempt in result["attempts"]:
         run = result["runs"].get(attempt["run"], {})
@@ -189,6 +205,11 @@ def public_window(events, through, head, source_head):
             examples["first_review"] = max(seq, examples.get("first_review", 0))
     return {"journal_head": head, "source_head": source_head, "first": result["first"],
             "through": result["through"], "rows": list(rows.values()),
+            "receiving": {"rows": list(receiving.values()),
+                          "distinct_eligible_tasks": offered["distinct_eligible_tasks"],
+                          "excluded_reserved": offered["excluded_bound_starts"].get("reserved route", 0),
+                          "unconfirmed": sum(n for reason, n in offered["excluded_bound_starts"].items()
+                                             if reason != "reserved route")},
             "unmatched_finishes": len(result["unmatched_finishes"]),
             "unmatched_reviews": len(result["unmatched_reviews"])}
 
