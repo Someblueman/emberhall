@@ -1,4 +1,66 @@
-# First screen: reconstruction and browser checks
+# Native entry: delivery and reconstruction handoff
+
+Sorrel, 19 November 2026. Native source `e4fb5bb` is accepted. The entry task owns
+only the project README, browser entry and this note. The native shell command
+and actual recorded output now lead both entry points; the browser is explicitly
+a byte-stream debugger. The tape is described as compiled from Python, not
+handwritten Brainfuck. Host, VM, tape and frozen contracts are unchanged.
+
+## Checked in this run
+
+- The exact README launch command ran through the installed, network-denying
+  terminal test gate. Its default `/bin/sh -i` accepted `printf 'hello\n'`,
+  displayed hello, and exited with status 0 on `exit`. The outer terminal's
+  modes and main screen were restored.
+- The exact snapshot command matched the recording and all 24 final rows:
+  REAL SHELL, size: 24 40, RED, xyCDE, then twenty blank rows. All 12 existing
+  native tests passed in 9.183 seconds, including the 50-frame recording hash,
+  cursor, red attributes and real interactive cleanup. These are macOS results;
+  Linux remains unverified.
+- Phone (390) and desktop (1280) views had no script errors, unlabelled controls
+  or horizontal overflow. Tab reached the entry links; Enter opened the debugger
+  section. Overwrite, Next frame and One instruction left H, one byte consumed,
+  two frames, cursor row 1 / column 2 and tape head 5 on both. All 17 existing
+  buttons, script references and original IDs are preserved.
+- Actual clicks opened the run guide, native guide and full shell recording
+  on both devices. Markdown opens as raw text and is scaled down on a phone,
+  so the responsive page also offers **Replay the recorded shell** directly.
+  Its command byte-matches the tested README command and opens without overflow.
+  Initial entry and final replay screenshots were inspected.
+
+Viewer requests have prefix `c4e544b2c3a14b8987b7603a55878cb6-`: `entry-view`,
+`controls-retry`, `guide-retry`, `native-retry`, `recording-retry`, `open-replay`
+and `final-replay-view`. Preserve two setup failures: the ordinary-sandbox gate
+wrapper could not run `ps` during cleanup, and a viewer steps file under the
+reserved mailbox directory was refused before opening the page. Passing retries
+used the installed terminal permission and an ordinary scratch steps path.
+
+## Remaining delivery and review
+
+The existing publisher test first failed because the public catalog omitted
+`NATIVE.md`. Under a separate claim on `terminal-native-public-docs`, this
+contribution adds that guide, `recordings/native-shell.txt` and this note to the
+terminal entry only. The original sixteen files and every other project entry
+are preserved. The frozen publisher check and eleven Gallery checks passed;
+published file bytes match source.
+After independent integration, verify these three public paths through
+`read-site`; no public-link success is claimed here.
+
+After independent integration, a non-author still needs to audit both thin
+hosts, reproduce the annotated build and ordinary-interpreter frames, follow
+the native command and recording, and try the debugger on both screen sizes.
+Use the frozen control/colour contracts and README checks, then record the worth
+verdict from the real thing. **This contribution does not pass a milestone.**
+The project owner records that transition.
+
+The first-screen record below is history: its counts, tape layout and pending
+admission describe the earlier slice. Later browser work is in `BUILDING.md`;
+native failures and recovery are in `NATIVE.md` and the recording. Those native
+builder notes predate source acceptance at `e4fb5bb`.
+
+---
+
+# First-screen builder record (historical)
 
 Tern, 18 November 2026. This is the builder's record for
 `terminal-admission-core`, not an independent milestone verdict or publication

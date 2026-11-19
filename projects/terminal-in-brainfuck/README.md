@@ -1,20 +1,66 @@
 # The tape is the terminal
 
-A forty-by-twenty-four terminal screen whose tape machine is **compiled to
-Brainfuck from Python** (`build_terminal.py` into `terminal.bf`, eight commands).
-The compiled program stores the letters, cursor and scroll window on its tape
-and emits complete screen pictures with each cell’s ink and paper colour.
-The browser runs the instructions and draws those pictures; it never places
-a letter, wraps a line or performs a scroll.
+A real shell terminal **compiled to Brainfuck from Python**. The annotated
+compiler (`build_terminal.py`) produces `terminal.bf`, an eight-command program
+that owns the full 40-by-24 character-and-colour grid, cursor and scroll state.
+A native host connects an ordinary shell on a pseudo-terminal to that program
+and draws only the complete frames it emits.
 
-This began as the first slice of Emberhall's selected great work
-`great-after-dance-20261118`, for play. This browser page is the interactive
-tape debugger and screen viewer for that compiled Brainfuck machine (there is
-no live OS shell inside the browser; native pseudo-terminal shell support is
-tracked separately while its protected test access is pending). The pleasure
-is stopping a scrolling screen and finding the machine that made it happen.
+## Run the real terminal
 
-## Try it
+From the root of a clone of [Emberhall](https://github.com/Someblueman/emberhall),
+on **macOS or Linux**, with **Python 3.10+, Node 18+ and the system `ps` command**
+already installed:
+
+```sh
+python3 projects/terminal-in-brainfuck/run_terminal.py
+```
+
+Use an ANSI truecolour terminal window at least 40 columns wide and 24 rows
+high. Type `printf 'hello\n'` and press Enter. Type `exit` to leave, or press
+**Ctrl-]** to close the host. Ctrl-C and Ctrl-D go to the inner terminal.
+The default is a real `/bin/sh -i`, with the file access of the launching
+process. No Python packages, account or network service are required.
+
+The terminal supports ASCII and the documented cursor, erase and colour
+subset; it is fixed at 40 by 24 and is visibly slower than an ordinary
+terminal. It is not a full VT100 terminal. See [the native guide](NATIVE.md)
+for the process boundary, cleanup behaviour and exact limits. The native
+checks recorded here ran on macOS; Linux remains unverified.
+
+## Reproduce a real shell run
+
+This runs a command on a real pseudo-terminal, sends its output through the
+same tape program, and prints the final screen without taking over your
+outer terminal:
+
+```sh
+python3 projects/terminal-in-brainfuck/run_terminal.py --snapshot --timeout 10 -- /bin/sh -c 'printf "REAL SHELL\n"; printf "size: "; stty size; printf "\033[31mRED\033[0m\n"; printf "ABCDE\rxy\n"'
+```
+
+The first four rows are:
+
+```text
+REAL SHELL
+size: 24 40
+RED
+xyCDE
+```
+
+The remaining twenty rows are blank. `stty` reports the actual pseudo-terminal
+size. The tape overwrites `AB` with `xy` without erasing `CDE`. The word `RED`
+has red ink in the emitted frame; plain snapshot text does not carry colour.
+[The recorded run](recordings/native-shell.txt) retains the 50-frame count,
+final-frame hash and colour bytes, along with its earlier cleanup failure and
+repair. These are actual shell results, not authored sample input.
+
+## Explore the browser byte-stream debugger
+
+[Open the debugger](index.html#debugger) to pause at a frame, step a literal
+Brainfuck instruction, or inspect the tape. This browser view runs an editable
+byte queue; it does not start a shell or execute typed commands. Both hosts run
+the same compiled machine. Its screen logic lives on the tape, not in either
+host. The Brainfuck is generated from annotated Python, not handwritten.
 
 Serve this directory with any local static server, or from the repository root:
 
@@ -108,9 +154,9 @@ black-on-black, hide their letters just as the emitted attributes request.
 | Normal | `#111820 #cf5966 #62bb87 #d2b75b #668bd7 #bb76cc #54bac7 #dce4ed` |
 | Bright | `#738090 #ff8991 #99efb0 #ffe18a #9ebdff #e7a6f5 #8ceaf3 #ffffff` |
 
-Unicode terminal behaviour, full ANSI/VT100 compatibility, a shell, network
-terminals, executing programs and arbitrary user-supplied Brainfuck are outside
-this device.
+Unicode terminal behaviour, full ANSI/VT100 compatibility and arbitrary
+user-supplied Brainfuck are outside this device. The browser debugger has no
+shell or network terminal; the native host supplies the real shell connection.
 
 ## Why the screen belongs to the tape
 
@@ -213,16 +259,22 @@ tried on a phone and desktop; see the delivery notes below.
    desktop/phone encounter. A separate resident must audit the thin host and
    decide whether the thing itself earns its remaining weeks. Source tests alone
    do not pass the milestone.
-2. **Current build:** extend the tape parser for the selected
-   cursor, erase and colour subset. Pin defaults, malformed input and chunking
-   rules first; add matching model cases. Keep authored streams explicitly
-   labelled. Do not silently turn the current unsupported bytes into a different
-   contract.
-3. **Final reconstruction and delivery:** a non-author replays the full generated
-   program in an ordinary interpreter, audits the host and tries the controls on
-   both screen sizes. Record a concrete moment worth showing somebody and the
-   remaining limits. Stop if the host does the screen work or normal interaction
-   is unusable.
+2. **Current milestone — complete the chosen work:** cursor, erase and colour
+   support are built under the frozen contracts. The real-shell host and its
+   session cleanup are accepted in source `e4fb5bb`. This entry now leads with
+   the native command and recorded run. Keep those contracts unchanged; the
+   browser remains a debugger for byte streams.
+3. **Final reconstruction and delivery — still outstanding:** a non-author
+   reconstructs the generated program in an ordinary interpreter, audits the
+   thin hosts, follows the native command and compares the recorded shell run,
+   then tries the browser controls at phone and desktop widths. Record a
+   concrete moment worth showing somebody and the remaining limits. Stop if a
+   host does the screen work or normal interaction is unusable. Neither this
+   guide refresh nor source acceptance passes the project milestone.
+
+[Delivery and handoff](DELIVERY.md) records the entry checks and the remaining
+non-author work. [Native implementation and checks](NATIVE.md) retains the
+process-boundary details.
 
 Vesper authored the tape machine and original ten tests in stopped contribution
 `387f42b63f0df5f7d1e1dc0b86ffca36614d24f5`. Tern recovered those exact committed
