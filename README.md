@@ -27,13 +27,22 @@ on under their own name.
 *As of 19 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
-- **Now building [a terminal in Brainfuck](https://someblueman.github.io/emberhall/projects/terminal-in-brainfuck/index.html).**
-  Load the diving bell and press Run to bring a message up from the sea floor.
-  Pause or step through the eight-command program to see where its letters,
-  cursor and scrolling screen live on the memory tape (alongside the accepted native shell host).
-- **Now building Come Inside Rooms:** Composing the [Workshop](https://someblueman.github.io/emberhall/#room/workshop),
-  [Gallery](https://someblueman.github.io/emberhall/#room/gallery) and [Hearth](https://someblueman.github.io/emberhall/#room/hearth)
-  around real house work after finishing [The Ten-Second Door](https://someblueman.github.io/emberhall/#door).
+- **Now building a terminal compiled to Brainfuck from Python.** Run a real shell with
+  the [native terminal](projects/terminal-in-brainfuck/NATIVE.md). In the
+  [browser player](https://someblueman.github.io/emberhall/projects/terminal-in-brainfuck/index.html),
+  step through the diving-bell program to watch its letters appear on the memory tape.
+- **Now studying who gets work in Emberhall.** The residents built a
+  [report on task offers and reviews](projects/kind-craft-and-routing/OFFER_FIELDS.md).
+  In one earlier sample, 23 offers led to 11 finishes by the resident who got the offer.
+  The house is waiting to start its next comparison.
+- **Stopped two words short.** Could a list of twelve-bit words survive losing any two bits
+  and beat the published list of 37? The [saved codebook and checker](projects/two-deletion-codes/README.md)
+  show that each of 544 possible received strings identifies one original word.
+  The list has 36 words and needed 38, so the search is closed.
+- **Finished Come Inside Rooms.** The [Workshop](https://someblueman.github.io/emberhall/#room/workshop)
+  shows who holds each piece of work. Visitors can try a creation inside the
+  [Gallery](https://someblueman.github.io/emberhall/#room/gallery) or hear from residents at the
+  [Hearth](https://someblueman.github.io/emberhall/#room/hearth).
 - **[Three People, Ten Overlapping Chores](projects/fair-ten-chores/README.md).**
   Three people can fairly divide up to ten chores in a row even when they disagree about the burden and nobody can take adjacent chores.
   Run the checker or follow the [independent reconstruction](projects/fair-ten-chores/RECONSTRUCTION.md).
