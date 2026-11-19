@@ -2791,7 +2791,118 @@ function renderDoorGuide(content) {
   }
   if (!rooms.length) html("p", "empty-note", "No other rooms are recorded at this moment.", guide);
 }
+// The same architectural landmarks make these three rooms one house. Their
+// furnishings are illustration; only the labelled work and words are records.
+function composedRoom(content, room, title) {
+  const panel=html("section",`composed-room composed-${room}`,undefined,content);
+  panel.setAttribute("aria-label",title);
+  const occupied=(frame.residents||[]).some(resident=>resident.room===room&&!["sleeping","unconfirmed"].includes(resident.pose));
+  const wall=html("div",`room-elevation${occupied?" room-lit":""}`,undefined,panel);
+  wall.setAttribute("aria-hidden","true");
+  html("div","room-window",undefined,wall);
+  html("div","room-beam",undefined,wall);
+  html("div","room-lamp",undefined,wall);
+  html("div",room==="hearth"?"room-fireplace":"room-rail",undefined,wall);
+  html("p","room-landmark",room==="workshop"?"Plans under the west window":room==="gallery"?"The long picture rail":"Words beside the fire",panel);
+  return panel;
+}
+let openBenchAccounts=new Set();
+let openRoomReaders=new Set();
+function roomPassages(panel, from) {
+  const destinations=[["workshop","To the Workshop"],["gallery","To the Gallery"],["hearth","To the Hearth"]]
+    .filter(([id])=>id!==from&&frame.rooms?.some(room=>room.id===id&&roomStatus(room)==="open"));
+  if(!destinations.length)return;
+  const nav=html("nav","room-passages",undefined,panel);
+  nav.setAttribute("aria-label","Continue through the house");
+  for(const [id,title] of destinations) {
+    const link=html("a","",`${title} →`,nav);link.href=`#room/${id}`;
+  }
+}
+function renderWorkshopInterior(content) {
+  const panel=composedRoom(content,"workshop","The Workshop benches");
+  const benches=html("div","room-benches",undefined,panel);
+  const projects=(frame.shelf?.projects||[]).filter(project=>project.status==="active");
+  const name=id=>frame.residents.find(resident=>resident.id===id)?.name||"Holder not named in this snapshot";
+  if(!projects.length)html("p","room-empty","The benches are clear. No active project is recorded at this moment.",benches);
+  for(const project of projects) {
+    const bench=html("div","room-workbench",undefined,benches);
+    html("p","bench-holder",`Project held by ${name(project.owner)}`,bench);
+    html("h3","",titleFor(project,"project"),bench);
+    html("p","bench-plan",clip(project.plain||project.milestone||"No current milestone is recorded.",190),bench);
+    const account=html("details","bench-account",undefined,bench);
+    account.open=openBenchAccounts.has(project.id);
+    account.addEventListener("toggle",()=>{
+      if(account.open)openBenchAccounts.add(project.id);else openBenchAccounts.delete(project.id);
+    });
+    const summary=html("summary","","Open project account",account);
+    summary.id=`bench-account-${encodeURIComponent(project.id)}`;
+    renderShelfProject(project,"In progress",account,name);
+  }
+  html("p","room-record-note","Project holders from this recorded moment. The accounts show which milestones are accepted.",panel);
+  roomPassages(panel,"workshop");
+}
+function renderHearthInterior(content) {
+  const panel=composedRoom(content,"hearth","Words beside the Hearth");
+  const seating=html("div","room-voices",undefined,panel),speakers=new Set();
+  const voices=Array.isArray(frame.hearth)?hearthConversation(data?.frames,frame):[];
+  for(const voice of voices) {
+    if(speakers.has(hearthSpeakerKey(voice)))continue;
+    speakers.add(hearthSpeakerKey(voice));
+    const place=html("div","room-voice",undefined,seating);
+    html("p","voice-name",voice.name||"Unnamed resident",place);
+    html("blockquote","",clip(voice.text||"",270),place);
+    const read=workshopButton(place,`Read ${voice.name||"this resident"}’s words`,()=>{
+      hearthState={query:"",speaker:hearthSpeakerKey(voice),page:0};
+      openRoomReaders.add("hearth");
+      roomPanel();workshopFocus("hearth-messages",true);
+    });
+    read.id=`room-voice-${speakers.size}`;
+    if(speakers.size===2)break;
+  }
+  if(!speakers.size)html("p","room-empty",Array.isArray(frame.hearth)?"No public words are kept for this moment.":"This snapshot does not publish the words that were spoken.",seating);
+  html("p","room-record-note","Public words from this recorded moment. Open a voice to read on.",panel);
+  roomPassages(panel,"hearth");
+}
+let roomCreation=null;
+function roomCreationUrl(entry) {
+  // These shipped exhibits work with scripts alone. Other creations keep their
+  // full-page links; do not grant same-origin access to make an embed work.
+  const paths={"tessera-loom":["projects/tessera-loom/index.html","projects/tessera-loom/loom.js"],
+    "signal-garden":["projects/signal-garden/gallery.html","projects/signal-garden/model.js"]};
+  const files=Object.prototype.hasOwnProperty.call(paths,entry.id)?paths[entry.id]:null;
+  return collectionUrl(entry)&&files&&Array.isArray(entry.files)&&files.every(path=>entry.files.includes(path))?files[0]:null;
+}
+function reconcileRoomCreation() {
+  if(!roomCreation)return;
+  if(current&&selected==="gallery"&&frame.rooms?.some(room=>room.id==="gallery"&&roomStatus(room)==="open")&&
+      completedCatalog().some(entry=>entry.id===roomCreation.id&&roomCreationUrl(entry)===roomCreation.href))return;
+  roomCreation.restore=false;roomCreation.dialog.close();
+}
+function openRoomCreation(entry,opener) {
+  const href=roomCreationUrl(entry);
+  if(roomCreation||!current||selected!=="gallery"||!href||
+      !frame.rooms?.some(room=>room.id==="gallery"&&roomStatus(room)==="open")||
+      !completedCatalog().some(item=>item.id===entry.id&&collectionUrl(item)===collectionUrl(entry)&&roomCreationUrl(item)===href))return;
+  const dialog=html("dialog","room-creation",undefined,document.body);
+  dialog.id="room-creation";dialog.setAttribute("aria-labelledby","room-creation-title");
+  const state={dialog,id:entry.id,href,restore:true,opener:opener.id,scroll:window.scrollY};roomCreation=state;
+  const header=html("div","room-creation-head",undefined,dialog);
+  const title=html("h2","",entry.title,header);title.id="room-creation-title";
+  const close=workshopButton(header,"Close and return to the Gallery",()=>dialog.close());
+  close.id="room-creation-close";close.autofocus=true;
+  const work=html("iframe","",undefined,dialog);
+  work.title=`Try ${entry.title}`;work.setAttribute("sandbox","allow-scripts");work.src=href;
+  const full=html("a","",`Open ${entry.title} on its own page →`,dialog);full.href=collectionUrl(entry);
+  dialog.addEventListener("close",()=>{
+    dialog.remove();if(roomCreation===state)roomCreation=null;
+    if(state.restore&&current&&selected==="gallery") {
+      $(state.opener)?.focus({preventScroll:true});window.scrollTo({top:state.scroll,behavior:"instant"});
+    }
+  });
+  dialog.showModal();
+}
 function roomPanel() {
+  reconcileRoomCreation();
   const room=frame.rooms.find(r=>r.id===selected);
   let content=$("room-content");content.replaceChildren();
   if(!room) {
@@ -2813,6 +2924,22 @@ function roomPanel() {
     const here=roomOccupants(frame,room.id).filter(r=>!["sleeping","unconfirmed"].includes(r.pose)).length;
     const lead=[here?`${here} awake here`:"Nobody awake here",roomStatus(room)==="open"?roomFact(room.id):""].filter(Boolean);
     html("p","room-lead",lead.join(" · "),content);
+  }
+  if(roomStatus(room||{})==="open") {
+    if(room?.id==="workshop")renderWorkshopInterior(content);
+    if(room?.id==="hearth")renderHearthInterior(content);
+    if(room?.id==="gallery")renderGalleryRoom(content);
+    if(["workshop","hearth","gallery"].includes(room?.id)) {
+      const reader=html("details","room-reading",undefined,content);
+      reader.open=openRoomReaders.has(room.id);
+      reader.addEventListener("toggle",()=>{
+        if(reader.open)openRoomReaders.add(room.id);else openRoomReaders.delete(room.id);
+      });
+      const labels={workshop:"Read all tasks and the Workshop record",hearth:"Read the full conversation and Hearth record",gallery:"Read the Gallery’s people and room record"};
+      const summary=html("summary","",labels[room.id],reader);
+      summary.id=`room-reader-${room.id}`;
+      content=reader;
+    }
   }
   const rooms=floorRooms(frame,selectedFloor);
   const inView=r=>room?r.room===room.id:rooms.some(place=>place.id===r.room);
@@ -2864,7 +2991,6 @@ function roomPanel() {
   if(room?.id==="archive") renderLessons(content);
   if(room?.id==="hearth") renderHearth(content);
   if(room?.id==="council") renderCouncilRoom(content);
-  if(room?.id==="gallery"&&roomStatus(room)==="open") renderGalleryRoom(content);
   if(room?.id==="chronicle"&&room.status==="open") {
     renderChronicleRoom(content);
     const link=html("a","room-shelf-link","Read the Chronicle →",content);
@@ -3185,15 +3311,25 @@ function renderCreationCard(entry,parent) {
     const figure=html("figure","creation-preview",undefined,article);
     const enlarge=html("button","creation-picture-open",undefined,figure);
     enlarge.id=`gallery-picture-${parent.id==="gallery-room-display"?"room":"card"}-${entry.id}`;
-    enlarge.type="button";enlarge.setAttribute("aria-label",`Look closely at ${entry.title}`);
+    const inRoom=parent.id==="gallery-room-display"&&roomCreationUrl(entry);
+    const livePreview=inRoom&&selected==="gallery";
+    enlarge.type="button";enlarge.setAttribute("data-opens",livePreview?"creation":"picture");enlarge.setAttribute("aria-label",livePreview?`Try ${entry.title} here`:`Look closely at ${entry.title}`);
     enlarge.setAttribute("aria-haspopup","dialog");
-    enlarge.addEventListener("click",()=>openCreationPicture(entry,enlarge));
+    enlarge.addEventListener("click",()=>livePreview?openRoomCreation(entry,enlarge):openCreationPicture(entry,enlarge));
     const image=html("img","",undefined,enlarge);
     image.src=preview.src;
     image.alt=preview.alt;
     image.width=preview.width;image.height=preview.height;
     html("figcaption","small",preview.caption,figure);
-    html("span","creation-picture-hint","Look closely ↗",enlarge);
+    html("span","creation-picture-hint",livePreview?"Step into this creation →":"Look closely ↗",enlarge);
+    if(inRoom) {
+      const tryHere=workshopButton(figure,`Try ${entry.title} here`,()=>openRoomCreation(entry,tryHere),"creation-try");
+      tryHere.id=`gallery-room-try-${entry.id}`;tryHere.setAttribute("aria-haspopup","dialog");
+      if(livePreview) {
+        const look=workshopButton(figure,"Look closely at the picture",()=>openCreationPicture(entry,look),"creation-look");
+        look.id=`gallery-room-look-${entry.id}`;look.setAttribute("aria-haspopup","dialog");
+      }
+    }
   }
   html("p","",entry.summary,article);
   html("span","small","Completed",article);
@@ -3317,7 +3453,8 @@ function renderCollection() {
 let galleryRoomChoice=null;
 function renderGalleryRoom(content) {
   reconcileCreationPicture();
-  const panel=html("section","gallery-room",undefined,content);
+  const panel=composedRoom(content,"gallery","Try a creation");
+  panel.className+=" gallery-room";
   panel.setAttribute("aria-label","Try a creation");
   html("h3","","Take something off the shelf",panel);
   html("p","small",current?"Real output from finished creations. Open one and try it.":"Finished by this recorded moment. Pictures are hidden; links open current published versions.",panel);
@@ -3325,6 +3462,18 @@ function renderGalleryRoom(content) {
   if(!catalog)html("p","empty-note","Creation links are unavailable in this publication. The full Gallery keeps the recorded project history.",panel);
   else if(!entries.length)html("p","empty-note","No browser creations were completed by this moment.",panel);
   else {
+    const within=entries.filter(entry=>current&&creationPreview(entry)&&roomCreationUrl(entry));
+    if(within.length) {
+      const invitations=html("div","room-try-list",undefined,panel);
+      invitations.setAttribute("role","group");invitations.setAttribute("aria-label","Try a creation within this room");
+      for(const entry of within) {
+        const invite=workshopButton(invitations,`Try ${entry.title} here`,()=>{
+          position=entries.findIndex(item=>item.id===entry.id);draw();
+          openRoomCreation(entry,$(`gallery-room-try-${entry.id}`)||invite);
+        });
+        invite.id=`gallery-room-invite-${entry.id}`;
+      }
+    }
     const display=html("div","gallery-room-display",undefined,panel);
     display.id="gallery-room-display";display.tabIndex=-1;
     const controls=html("div","workshop-pages",undefined,panel);
@@ -3351,6 +3500,7 @@ function renderGalleryRoom(content) {
   }
   const link=html("a","room-shelf-link","Explore all creations in the Gallery →",panel);
   link.href="#gallery-view";
+  roomPassages(panel,"gallery");
 }
 function renderViewContext() {
   const context=$("view-context");
@@ -4629,7 +4779,7 @@ function refreshView(changed=false) {
   const input=$("catchup-seq");
   const draft=input&&input.value!==input.defaultValue?input.value:null;
   const activeId=document.activeElement?.id;
-  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("door-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("vote-")||activeId.startsWith("council-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
+  const focusId=activeId&&(activeId==="room-card"||activeId.startsWith("bench-account-")||activeId.startsWith("room-voice-")||activeId.startsWith("room-reader-")||activeId.startsWith("room-map-")||activeId.startsWith("room-link-")||activeId.startsWith("beds-")||activeId.startsWith("door-")||activeId.startsWith("hearth-")||activeId.startsWith("chronicle-")||activeId.startsWith("salvage-")||activeId.startsWith("catchup-")||activeId.startsWith("workshop-")||activeId.startsWith("counting-")||activeId.startsWith("assay-")||activeId.startsWith("voting-")||activeId.startsWith("vote-")||activeId.startsWith("council-")||activeId.startsWith("archive-")||activeId.startsWith("study-")||activeId.startsWith("gallery-")||activeId.startsWith("projects-find-"))?activeId:null;
   const selectionId=activeId==="beds-search"||activeId==="hearth-search"||activeId==="workshop-search"||activeId==="voting-search"||activeId==="assay-search"||activeId==="archive-search"||activeId==="study-search"||activeId==="gallery-search"||activeId==="projects-find-search"?activeId:null;
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
