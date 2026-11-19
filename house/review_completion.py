@@ -96,8 +96,14 @@ def _validate_receipt_against_source(record: Record, receipt: dict, review_run: 
     # Reuse the trusted source validation: stopped run, identity, author check.
     # The trusted channel already fenced the active run; admitted reflects
     # whether the reviewer is currently in a trusted worker.
+    status = receipt.get("status")
+    _require(status in TERMINAL_STATUSES,
+             "integration receipt is not terminal (prepared/reviewed/absent)")
     admitted = bool(os.environ.get("EMBERHALL_ACTION_JOB"))
-    _workspace, report = source(record, review_run, reviewer, admitted=admitted)
+    # Like integration replay, a terminal decision can outlive its source room.
+    # Existing rooms must still match the durable contribution report.
+    _workspace, report = source(record, review_run, reviewer, admitted=admitted,
+                                allow_absent_workspace=True)
     # Exact source identity: receipt.base is shared HEAD at review (may advance
     # past contribution source_head), while contribution must match report["commit"].
     base = receipt.get("base")
@@ -109,9 +115,6 @@ def _validate_receipt_against_source(record: Record, receipt: dict, review_run: 
     _require(contribution == report["commit"],
              "integration receipt contribution mismatch")
     _require(receipt.get("run") == review_run, "integration receipt run mismatch")
-    status = receipt.get("status")
-    _require(status in TERMINAL_STATUSES,
-             "integration receipt is not terminal (prepared/reviewed/absent)")
     if status == "integrated":
         anchors = [receipt[key] for key in ("canonical_commit", "candidate_head") if key in receipt]
         _require(
