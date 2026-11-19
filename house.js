@@ -3040,6 +3040,35 @@ function roomPanel() {
   if(!room){const legend=html("div","kind-key",undefined,content);Object.values(kinds).forEach(k=>html("span","",`${k.mark} ${k.name}`,legend));}
 }
 let craftPending=null;
+let craftReturn=null;
+function restoreCraftFocus() {
+  const origin=craftReturn;craftReturn=null;
+  if(!origin||origin.source!==data?.source_head||origin.head!==data?.journal_head)return;
+  const button=document.querySelector(`.page-view:not([hidden]) [data-craft-return="${origin.control}"]`);
+  if(!button)return;
+  button.closest("details").open=true;
+  button.focus();
+}
+function craftReceivingMatches(receiving,first,through) {
+  const count=value=>Number.isSafeInteger(value)&&value>=0;
+  const fields=["offers","quota","open","closed_without_launch","eligible_offers","unique_eligible_tasks",
+    "receiver_claimed","receiver_finished","claimed_elsewhere","readiness_changed","unclaimed",
+    "claimant_unknown","generation_unrecorded","reviewed_receiver_runs","finished_without_review","first_pass"];
+  const dispositions=["receiver finished","receiver claimed","claimed elsewhere","readiness changed",
+    "no claim at cutoff","claimant run unavailable","generation unrecorded"];
+  const sequence=value=>Number.isSafeInteger(value)&&value>=first&&value<=through;
+  return receiving&&["distinct_eligible_tasks","excluded_reserved","unconfirmed"].every(key=>count(receiving[key]))&&
+    Array.isArray(receiving.rows)&&receiving.rows.every(row=>row&&typeof row.family==="string"&&typeof row.area==="string"&&
+      fields.every(key=>count(row[key]))&&row.offers===row.eligible_offers+row.quota+row.open+row.closed_without_launch&&
+      row.unique_eligible_tasks<=row.eligible_offers&&row.receiver_claimed<=row.eligible_offers&&
+      row.receiver_finished<=row.receiver_claimed&&row.reviewed_receiver_runs<=row.receiver_finished&&
+      row.first_pass<=row.reviewed_receiver_runs&&row.finished_without_review===row.receiver_finished-row.reviewed_receiver_runs&&
+      row.eligible_offers===row.receiver_claimed+row.claimed_elsewhere+row.readiness_changed+row.unclaimed+row.claimant_unknown+row.generation_unrecorded&&
+      Array.isArray(row.examples)&&row.examples.length<=3&&row.examples.every(example=>example&&
+        sequence(example.offer)&&sequence(example.assignment)&&example.assignment>example.offer&&
+        dispositions.includes(example.disposition)&&["claim","finish","first_review"].every(key=>
+          example[key]===null||sequence(example[key]))));
+}
 function craftMatches(report,snapshot) {
   const count=value=>Number.isSafeInteger(value)&&value>=0;
   const fields=["dispatches","taken_dispatches","eligible_dispatches","eligible_taken_dispatches",
@@ -3048,6 +3077,7 @@ function craftMatches(report,snapshot) {
   return report?.journal_head===snapshot.journal_head&&report.source_head===snapshot.source_head&&
     report.through===snapshot.frames.at(-1).seq&&Number.isSafeInteger(report.first)&&
     report.first>=1&&report.first<=report.through&&count(report.unmatched_finishes)&&count(report.unmatched_reviews)&&
+    (report.receiving===undefined||craftReceivingMatches(report.receiving,report.first,report.through))&&
     Array.isArray(report.rows)&&report.rows.every(row=>row&&typeof row.family==="string"&&typeof row.area==="string"&&
       fields.every(key=>count(row[key]))&&row.first_pass<=row.reviewed_runs&&row.eligible_finishes<=row.eligible_claims&&
       row.taken_dispatches<=row.dispatches&&row.eligible_taken_dispatches<=row.eligible_dispatches);
@@ -3074,6 +3104,39 @@ function renderCraftOutcomes(parent) {
   panel.style.gridColumn="1 / -1";
   fillCraftOutcomes(panel);
 }
+function renderCraftReceiving(panel,receiving,names) {
+  html("h4","","Tasks offered to a resident",panel);
+  if(!receiving) {
+    html("p","small","Offered-task outcomes are unavailable in this older publication.",panel);
+    return;
+  }
+  html("p","small",`Distinct tasks in eligible offers: ${receiving.distinct_eligible_tasks}. Repeated offers count again. Only launched, closed runs without quota exits enter the completion rate. First reviews cover the receiving run's whole contribution.`,panel);
+  if(!receiving.rows.length)html("p","empty-note","No confirmed ordinary task offers in this interval.",panel);
+  for(const row of receiving.rows) {
+    const project=(frame.shelf?.projects||[]).find(p=>row.area==="project/"+p.id);
+    const area=project?.title||names[row.area]||"Project work";
+    const detail=html("details","craft-receiving-row",undefined,panel);
+    const finished=row.eligible_offers?`${row.receiver_finished} of ${row.eligible_offers} eligible offers finished by the receiver`:"No eligible offers yet";
+    html("summary","",`${kinds[row.family]?.name||"Family unrecorded"} · ${area} · ${finished}`,detail);
+    html("p","small",`Offers: ${row.offers} · distinct eligible tasks: ${row.unique_eligible_tasks} · claimed by the receiver: ${row.receiver_claimed} · taken by someone else: ${row.claimed_elsewhere}.`,detail);
+    html("p","small",`${row.first_pass} of ${row.reviewed_receiver_runs} finished offered tasks with a review passed their first check. Receiver finishes without a matched review: ${row.finished_without_review}.`,detail);
+    html("p","small",`Outside the completion rate: quota exits ${row.quota}, open runs ${row.open}, closed runs without a launch ${row.closed_without_launch}. Within it: unclaimed ${row.unclaimed}, changed before claim ${row.readiness_changed}, unknown claimant run ${row.claimant_unknown}, unrecorded task version ${row.generation_unrecorded}.`,detail);
+    for(const example of row.examples) {
+      html("p","small",`Offer at event ${example.offer}: ${example.disposition}.`,detail);
+      for(const [key,label] of [["offer","Offered"],["claim","Claimed"],["finish","Finished"],["first_review","First review"]]) {
+        const seq=example[key];
+        if(seq===null)continue;
+        const button=workshopButton(detail,`${label} · event ${seq}`,()=>{
+          craftReturn={source:data.source_head,head:data.journal_head,control:`${example.offer}-${key}`};
+          jumpToSequence(seq);
+          if(!current)$("view-latest")?.focus();
+        });
+        button.dataset.craftReturn=`${example.offer}-${key}`;
+      }
+    }
+  }
+  html("p","small",`${receiving.excluded_reserved} bound starts used reserved routes; ${receiving.unconfirmed} could not be confirmed from this interval. Neither is counted as an ordinary offer.`,panel);
+}
 function fillCraftOutcomes(panel) {
   panel.replaceChildren();
   html("h3","","Work and its first review",panel);
@@ -3082,12 +3145,14 @@ function fillCraftOutcomes(panel) {
     html("p","small",report===undefined?"Loading recent work outcomes…":"Work counts are unavailable for this publication.",panel);
     return;
   }
-  html("p","small",`Events ${report.first}–${report.through} · ${clock(frame.at,{year:"numeric"})}. Each claim is one attempt. An independent review covers a whole run.`,panel);
+  html("p","small",`Events ${report.first}–${report.through} · ${clock(frame.at,{year:"numeric"})}. Claims count attempts; offered-task results follow the receiving run. First reviews cover whole contributions.`,panel);
   if(!report.rows.length)html("p","empty-note","This interval has no recorded run starts or task claims.",panel);
   const names={"unclassified":"Work without an area label","mixed":"Several work areas",
     "source review":"Source review","project selection":"Project selection","helper/build":"Helper building",
     "helper/review":"Helper review","no claim/work":"Work runs without a bound task",
     "no claim/review":"Review runs without a bound task","no claim/exploration":"Exploration runs without a bound task"};
+  renderCraftReceiving(panel,report.receiving,names);
+  html("h4","","Claims residents took on",panel);
   for(const row of report.rows) {
     const project=(frame.shelf?.projects||[]).find(p=>row.area==="project/"+p.id);
     const area=project?.title||names[row.area]||"Project work";
@@ -4786,7 +4851,7 @@ function bindControls() {
   });
   $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
   $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
-  $("view-latest")?.addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
+  $("view-latest")?.addEventListener("click",()=>{index=data.frames.length-1;current=true;render();restoreCraftFocus();});
   $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
   $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
   const showOverview=()=>{choose(null);$("house-view")?.focus?.({preventScroll:true});$("stage")?.scrollIntoView?.({block:"nearest",behavior:"instant"});};
