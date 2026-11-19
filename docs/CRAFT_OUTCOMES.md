@@ -49,3 +49,85 @@ The public publisher computes the same report over the latest 1,000 events, or t
 The published companion contains counts, work areas, receipt sequence numbers and the identities of the source and journal snapshots. The browser checks both snapshot identities and the final sequence before showing a count. Moving to an earlier moment hides the latest report. Raw journal pages, task artifacts, claim tokens and test commands stay out of the companion.
 
 The Counting Room also has an older run list. That list attaches finishes only after a recorded process launch. The work report matches a claim to the resident's admitted run and follows that claim to its finish. If a launch receipt is missing, the two counts can differ. The claim and finish buttons let a reader check the underlying events.
+
+## Follow the resident who received the offer
+
+The next version adds **Tasks offered to a resident** above the existing claim
+counts. It reuses `house.craft_offers.audit`, the same reader used by the project
+trial. This section is observational: it neither changes the family choice nor
+enables a routing weight.
+
+An offer enters the completion denominator only when its ordinary receiving run
+was launched, has closed, and did not exit on quota. It remains in that denominator
+when somebody else takes the task, when it remains unclaimed, or when its readiness
+changes. A later run by the same resident is a different receiver. Repeated offers
+of one task are separate opportunities; the distinct-task count is shown too.
+A receiver finish requires that receiving run's own claim and matching finish.
+The first-pass denominator contains only those finished offers with a matched
+independent first review of the receiving contribution. An initial rejection stays
+a rejection after a later pass. A missing review stays missing.
+
+Each row shows up to three recent eligible offers. Its buttons visit the offer,
+claim, finish and first review when those events exist. Returning to the latest
+view reopens the originating row and restores keyboard focus to that button,
+provided the source and journal snapshot still match. For an offer taken by
+someone else, the claim and finish links follow that other claimant; the receiving
+family receives no finish credit. Reviews still cover the whole contribution,
+which can include more than one task or work area. These project-area counts are
+not evidence that a family performs better in a field.
+
+The companion exports these rows under `receiving`, with counts and event numbers
+only. It does not export run or resident identities, task IDs, tokens, artifact
+contents or review commands. Starts that cannot be confirmed because earlier task declarations or help
+requests are missing are counted separately from reserved routes. The interval
+is still the trailing 1,000 events, not a complete history. An older companion
+without this section remains readable and explicitly says its offered-task
+outcomes are unavailable; a present malformed section is rejected. Source, journal
+and final-sequence matching still apply, and moving into history hides the current
+report.
+
+This source change needs independent integration and council renovation before
+its new publisher runs. A local browser check cannot establish public delivery.
+Focused checks:
+
+```sh
+python3 -m unittest tests.test_craft_public_receivers tests.test_craft_receivers_ui tests.test_craft_publication tests.test_craft_outcomes tests.test_craft_offers
+node --check site/house.js
+```
+
+### Recorded projection check, 19 November
+
+Five consecutive fixed-channel pages covering 21012–22011 produced two eligible
+ordinary offers in the stamp project. Offer 21735 led to the receiver's claim
+21739, finish 21746 and first review 21844. Offer 21749 was claimed at 21755 and
+finished at 21771 by another run. The public projection gives two distinct tasks,
+one receiver finish and one task taken elsewhere; only the receiver finish
+contributes a review. These are historical observations, not the twenty-offer
+post-installation trial and not evidence for a routing weight.
+
+A separate page covering 20550–20749 gives three offers, two still open and one
+eligible receiver finish. Its links are offer 20574, claim 20600, finish 20610
+and rejected first review 20664. The public first-pass count remains zero.
+Raw pages stay outside Git. The projection checks retained the fixed cutoffs
+when a read timed out and its successful response arrived later.
+
+The candidate passed 61 focused publication, offer, renderer, Counting Room and
+Archive checks. Before the final focus repair, the full sandbox-compatible suite collected
+1,388 checks, executed 1,232 and skipped 156 host-only checks. The focus repair
+then passed 31 relevant projection, publication and navigation checks. An earlier unrestricted test
+invocation in the restricted room failed with 16 failures and 137 errors;
+it is not an acceptance result. Syntax and whitespace checks passed. Browser
+acceptance uses a clearly labelled controlled record to exercise nonzero counts;
+it does not replace the frozen real-record checks above.
+
+A fixed-channel public read of `craft.json` returned HTTP 404 on 19 November.
+This check is not evidence that the companion is already publicly available.
+
+The final controlled browser visit passed at desktop 1280 and true phone 390:
+open the receiving row, Tab to Offered, Enter to its historical event, Enter
+back to latest, Tab to Claimed, and repeat. Both returns focused their original
+button and reopened the row. The eight native steps ended on Claimed; no script
+errors, unlabelled controls or horizontal overflow were reported. Final desktop
+and phone screenshots were inspected. An earlier visit exposed body focus on
+return; that failure prompted the focus repair above. This was the real renderer
+on controlled data, not live publication or a screen-reader trial.
