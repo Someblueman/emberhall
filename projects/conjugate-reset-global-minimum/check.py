@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import sys
 from collections.abc import Callable
 from fractions import Fraction
 
@@ -145,9 +146,9 @@ def time_pair(s: float, t: float) -> tuple[float, float]:
     return a, b
 
 
-def dyadic_check() -> None:
+def dyadic_check(q=9/16, label="unbounded atomic law") -> None:
     """An unbounded atomic law and the excluded critical-moment boundary."""
-    q = 9/16  # P(T=2^n)=(1-q)q^n; E[T]=infinity, E[T^.75]<infinity.
+    # P(T=2^n)=(1-q)q^n; the tested laws have infinite E[T], finite E[T^.75].
     sums = []
     for count in (128, 256, 512):
         norm, energy = [], []
@@ -174,11 +175,70 @@ def dyadic_check() -> None:
         close("critical positive diagonal", value, diagonal[0], rtol=1e-12)
     if diagonal[0] <= 0:
         raise AssertionError("critical diagonal vanished")
-    print(f"PASS unbounded atomic law: mean={sums[-1][1]/sums[-1][0]:.10f}; "
+    print(f"PASS {label}: Z={sums[-1][0]:.10f}; mean={sums[-1][1]/sums[-1][0]:.10f}; "
           f"critical diagonal={diagonal[0]:.10f}")
 
 
-def run(kernel_factor: float) -> None:
+def proof_examples(reverse_boundary: bool) -> None:
+    """Exact finite-interval certificate plus independent local-square integrals."""
+    q = Fraction
+    lo, hi = q(1, 4), q(1, 2)  # v=exp(-x/2), x from 2 log 2 to 2 log 4.
+
+    def difference(p):
+        return p(hi) - p(lo)
+
+    a = difference(lambda v: 8*(v**3/3-v**4/4))
+    b = difference(lambda v: v*v-v**4/2)
+    energy = difference(lambda v: v**4/2)
+    i1 = difference(lambda v: -q(9, 8)*v**4+q(5, 2)*v**3-q(7, 4)*v*v+v/2)
+    i2 = difference(lambda v: v*v/4-v**3/3+v**4/8)
+    bracket = -lo*(1-lo)*(1+lo)**2/2 + hi*(1-hi)*(1+hi)**2/2
+    rhs = 2*b-energy+(-1 if not reverse_boundary else 1)*bracket+i1+i2
+    if a != rhs:
+        raise AssertionError(f"finite-interval boundary sign: residual={rhs-a}")
+
+    f, g = exponential(1, 1)
+    h, gh = exponential(0.25, 1)
+    local1 = lambda x: (
+        (math.sqrt(gh(x)/h(x))*f(x)-math.sqrt(h(x)/gh(x))*g(x))**2 if x else 0
+    )
+    local2 = lambda x: (f(x)-2*h(x)*g(x)/gh(x))**2 if x else 0
+    xmin, xmax = 2*math.log(2), 2*math.log(4)
+    for name, fun, exact in (
+        ("cost", lambda x: f(x)**2*gh(x)/h(x), a),
+        ("baseline", lambda x: f(x)*g(x), b),
+        ("gradient", lambda x: f(x)**2, energy),
+        ("first square", local1, i1), ("second square", local2, i2),
+    ):
+        close("rational interval " + name, quad(fun, xmin, xmax), float(exact))
+    close("global first square", quad(local1, 0, 80)/0.5, 0.25)
+    close("global second square", quad(local2, 0, 80)/0.5, 1/12)
+    print("PASS exact finite-interval certificate: cost=67/384; wrong-sign residual=69/256")
+    print("PASS exponential local squares: I1/Z=1/4; I2/Z=1/12")
+
+    f, g = atomic((1.0, 3.0), (0.5, 0.5), 1)
+    z = (4*math.sqrt(3)-math.sqrt(2)-math.sqrt(6))/(2*SQRT_PI)
+    num = quad(lambda x: f(x)*g(x), 0, 24)
+    close("proof atomic normalization", quad(lambda x: f(x)**2, 0, 24), z)
+
+    def derivative(x, t):
+        return 2*math.sqrt(t)/SQRT_PI*math.exp(-x*x/(4*t)) - x*success(x, t, 1)
+
+    dg = lambda x: (derivative(x, 1)+derivative(x, 3))/2
+    print(f"PASS proof atomic example: Z={z:.10f}; mean={num/z:.10f}")
+    for t in (2.0, 3.0, 5.0):
+        h, gh = atomic((t,), (1.0,), 1)
+        local1 = lambda x: (
+            (math.sqrt(gh(x)/h(x))*f(x)-math.sqrt(h(x)/gh(x))*g(x))**2 if x else 0
+        )
+        local2 = lambda x: (dg(x)-derivative(x, t)*g(x)/gh(x))**2 if x else 0
+        gap = (quad(lambda x: f(x)**2*gh(x)/h(x), 0, 24)-num)/z
+        close("proof atomic local squares", (quad(local1, 0, 24)+quad(local2, 0, 24))/z,
+              gap)
+        print(f"PASS proof sharp {t:g}: gap={gap:.10f}; local squares agree")
+
+
+def run(kernel_factor: float, reverse_boundary: bool = False) -> None:
     # Exact finite-kernel algebra checks, without quadrature or roundoff.
     xs = (Fraction(1), Fraction(2), Fraction(5))
     fs = (Fraction(2, 3), Fraction(1, 2), Fraction(1, 5))
@@ -216,6 +276,7 @@ def run(kernel_factor: float) -> None:
               f(x), rtol=2e-6)
         close("far slope", (g(30 * math.sqrt(d)) - g(29 * math.sqrt(d))) / math.sqrt(d), 0)
     print("PASS renewal integrals, half-line kernel and boundary conditions")
+    proof_examples(reverse_boundary)
 
     d = 1.0
     times, weights = (1.0, 4.0), (0.25, 0.75)
@@ -318,6 +379,7 @@ def run(kernel_factor: float) -> None:
         raise AssertionError("infinite numerator diagnostic failed")
     print("PASS divergence diagnostics: too-short sharp restart; infinite sqrt moment")
     dyadic_check()
+    dyadic_check(2**(-7/8), "proof dyadic example")
     print("PASS all numerical challenges (not a proof or a priority certificate)")
 
 
@@ -325,8 +387,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kernel-factor", type=float, default=1.0,
                         help="deliberately alter spatial kernel; 2 must fail")
+    parser.add_argument("--reverse-boundary-sign", action="store_true",
+                        help="deliberately reverse the finite-interval boundary sign; must fail")
     args = parser.parse_args()
     try:
-        run(args.kernel_factor)
+        run(args.kernel_factor, args.reverse_boundary_sign)
     except (AssertionError, ArithmeticError, ValueError) as exc:
+        sys.stdout.flush()
         parser.exit(1, f"FAIL: {exc}\n")

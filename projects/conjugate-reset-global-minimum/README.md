@@ -111,6 +111,33 @@ At the excluded boundary `q=2^(-3/4)`, every diagonal energy summand is the
 same positive constant. The numerical test checks that algebra; the infinite
 sum of those constants supplies the divergence argument.
 
+## A finite-boundary sign check
+
+The checker also reconstructs the proof's worked examples: the equal mixture
+of periods `1` and `3`, exponential rates `1` and `1/4`, and the dyadic law
+with `q=2^(-7/8)`. It integrates both local nonnegative squares independently
+and compares their sum with the directly calculated cost gap.
+
+For the exponential pair at `D=1`, set `epsilon=2 log(2)` and `M=2 log(4)`.
+The substitution `v=exp(-x/2)` turns all the following integrals into rational
+polynomials between `v=1/4` and `v=1/2`. Write `N_mu`, `N_nu` for the two
+expected attempt durations and `D_mu`, `D_nu` for their success probabilities.
+
+| Term on `[epsilon,M]` | Exact value |
+| --- | ---: |
+| `A = integral D_mu² N_nu / D_nu` | `67/384` |
+| `B = integral D_mu N_mu` | `81/512` |
+| `E = integral (N_mu')²` | `15/512` |
+| First local square `I1` | `9/2048` |
+| Second local square `I2` | `109/6144` |
+| `H = [-N_mu² N_nu'/N_nu]_epsilon^M` | `69/512` |
+
+The finite-interval identity is **`A = 2B - E - H + I1 + I2`**. A plus sign
+before `H` gives an error of exactly `69/256`. The boundary term vanishes in
+the infinite-interval theorem, which is why checking only the final global
+identity would miss this manuscript error. The checker calculates the exact
+fractions and separately compares each with direct quadrature.
+
 ## Numerical limits
 
 Adaptive Simpson integration uses absolute tolerance `2e-10` and fails on
@@ -137,6 +164,12 @@ Hawthorn, 19 November 2026, Python 3.13.2, exit status 0:
 ```text
 PASS exact rational square identity and positive remainder
 PASS renewal integrals, half-line kernel and boundary conditions
+PASS exact finite-interval certificate: cost=67/384; wrong-sign residual=69/256
+PASS exponential local squares: I1/Z=1/4; I2/Z=1/12
+PASS proof atomic example: Z=0.8644794683; mean=1.9015078271
+PASS proof sharp 2: gap=0.0684924706; local squares agree
+PASS proof sharp 3: gap=0.0567611164; local squares agree
+PASS proof sharp 5: gap=0.3443986537; local squares agree
 PASS atomic normalization Z=1.1081765572; optimal mean=3.1207585056
 PASS fixed-target averaging differs from redrawing: 1.8147182379
 PASS same law: mean=3.1207585056, box remainder/Z=0.0000000000
@@ -150,7 +183,8 @@ PASS Pareto scale 0.25: mean=6.9644270852 > 6.3312507623
 PASS Pareto scale 4: mean=7.2796219664 > 6.3312507623
 PASS infinite-mean reference: Z=1.0597930475; mean=6.3312507623; E[T^.75]=4
 PASS divergence diagnostics: too-short sharp restart; infinite sqrt moment
-PASS unbounded atomic law: mean=14.3023670974; critical diagonal=0.1024183977
+PASS unbounded atomic law: Z=0.9960237309; mean=14.3023670974; critical diagonal=0.1024183977
+PASS proof dyadic example: Z=0.9685959594; mean=9.0664267447; critical diagonal=0.1024183977
 PASS all numerical challenges (not a proof or a priority certificate)
 ```
 
@@ -163,6 +197,18 @@ python3 projects/conjugate-reset-global-minimum/check.py --kernel-factor 2
 ```text
 PASS exact rational square identity and positive remainder
 FAIL: half-line kernel factor: got 0.160144076671, expected 0.080072038354661
+```
+
+The finite-boundary mutation also exits with status 1:
+
+```sh
+python3 projects/conjugate-reset-global-minimum/check.py --reverse-boundary-sign
+```
+
+```text
+PASS exact rational square identity and positive remainder
+PASS renewal integrals, half-line kernel and boundary conditions
+FAIL: finite-interval boundary sign: residual=69/256
 ```
 
 During construction, the uncorrected finite-box comparison failed for the
