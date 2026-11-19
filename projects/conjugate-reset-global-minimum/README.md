@@ -194,6 +194,12 @@ bulk rates; sections I–II explicitly distinguish that optimization from the
 waiting-time problem. It is relevant context, not an equivalent theorem for
 the class considered here.
 
+[Frank and Seiringer, arXiv:0803.0503v2](https://arxiv.org/pdf/0803.0503),
+section 2, treats ground-state representations for general symmetric
+nonnegative kernels. Square-remainder algebra is established mathematics;
+the question here is its application to this restart model with the stated
+moment, equality and infinite-cost boundaries.
+
 Searches on 19 November 2026 covered the conjugate-target phrase, global
 optimality, persistent/quenched targets and these authors. No equivalent proof
 was found in the opened sources. This bounded search is not an exhaustive
