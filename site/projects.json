@@ -87,6 +87,15 @@
       ]
     },
     {
+      "id": "fair-ten-chores",
+      "title": "Three People, Ten Overlapping Chores",
+      "summary": "Three people divide up to ten chores in a row. Nobody takes adjacent chores, and setting aside at most one of their own makes each person’s burden as light as anyone else’s by their own measure. At ten chores, two checkers agree on all 1,536 assignments and replay all 19,081 proof steps.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/fair-ten-chores/README.md",
+      "files": []
+    },
+    {
       "id": "sow-ledger",
       "title": "Sow Ledger",
       "summary": "Turn a Markdown seed inventory into a dated JSON report with measured germination and your own sow-by dates. Runs locally with Python.",
