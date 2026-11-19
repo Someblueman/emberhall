@@ -69,7 +69,9 @@ def inspect(record: Record) -> dict:
 
 
 def choose_provider(state: dict, now: float, preferred: str | None = None, *,
-                    exploring: bool = False, reviewing: bool = False, ballot_task: dict | None = None) -> str | None:
+                    exploring: bool = False, reviewing: bool = False, ballot_task: dict | None = None,
+                    tied_families: list[str] | None = None) -> str | None:
+    """Choose the established rotation winner. On a balanced pick, optionally collect its peers."""
     life = state.get("life", {})
     available = [kind for kind in KINDS if provider_available(state, kind, now)]
     if ballot_task is not None:
@@ -95,10 +97,36 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
     active = {kind: sum(run["agent"] == kind and run["status"] == "active" for run in runs) for kind in KINDS}
     # A family is busy once it holds as many runs as its share allows: one each, more for Codex
     # while it carries routes that are resting on a quota.
-    return min(available, key=lambda kind: (active[kind] >= max(1, math.ceil(share[kind])),
-        counts[kind] / share[kind] if share[kind] else math.inf,
-        max((run["started_sequence"] for run in runs if run["agent"] == kind), default=0),
-        KINDS.index(kind)))
+    priority = {kind: (active[kind] >= max(1, math.ceil(share[kind])),
+                       counts[kind] / share[kind] if share[kind] else math.inf) for kind in available}
+    best = min(priority.values())
+    tied = [kind for kind in available if priority[kind] == best]
+    if tied_families is not None:
+        tied_families.extend(tied)
+    # tied retains KINDS order, the final tie-break when last-start sequences match.
+    return min(tied, key=lambda kind: max(
+        (run["started_sequence"] for run in runs if run["agent"] == kind), default=0))
+
+
+@dataclass(frozen=True)
+class TaskParity:
+    """The task generation and family shortlist seen by tick before admission."""
+    task: str
+    generation: int
+    families: tuple[str, ...]
+
+    def applies_at_admission(self, record: Record, state: dict, sequence: int) -> bool:
+        task = state["tasks"].get(self.task, {})
+        if task.get("generation") != self.generation or task.get("status") == "done":
+            return False
+        # Ordinary help need not bind a generation on run-start. Look only at
+        # changes before that receipt, even if another claim followed it.
+        if sequence == state["sequence"] + 1:
+            return True
+        _, events, _ = record.read()
+        return not any(event["op"] in {"ready", "claim", "finish", "release"}
+                       and event["data"].get("task") == self.task
+                       for event in events[state["sequence"]:sequence - 1])
 
 
 def provider_shares(state: dict, now: float) -> dict:
@@ -1242,7 +1270,8 @@ class Coordinator:
     def start(self, kind: str, help_id: str | None = None, *, backlog: bool = False,
               explore_generation: int | None = None, scheduled: bool = False,
               task_id: str | None = None, task_generation: int | None = None,
-              helper_model: str | None = None, focus: str | None = None) -> str | None:
+              helper_model: str | None = None, focus: str | None = None,
+              task_parity: TaskParity | None = None) -> str | None:
         self.focus = focus
         self.refresh_runtime()
         self.resolve_completed_help()
@@ -1349,9 +1378,9 @@ class Coordinator:
         if model in staffing.HELPER_MODELS and task_id is not None:
             mode = "review" if state["tasks"][task_id].get("helper") == "review" else "work"
         try:
-            self.life("run-start", run, resident=resident, agent=kind, model=model,
-                      source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
-                      mode=mode, **extra)
+            admission = self.life("run-start", run, resident=resident, agent=kind, model=model,
+                                  source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
+                                  mode=mode, **extra)
         except ValueError as error:
             message = str(error)
             clean = message in {"owner paused admissions", "Explorer demand changed", "resident capacity reached",
@@ -1387,12 +1416,17 @@ class Coordinator:
                 selected_lane = mode
             reason = ("direct" if not scheduled else "requested-provider" if request.get("agent") == kind else
                       "preferred-unavailable" if request.get("agent") else "balanced")
-            self.record.append("say", CONTROLLER, {"text": work_metrics.ASSIGNMENT_PREFIX + json.dumps({
+            observation = {
                 "run": run, "lane": selected_lane, "reason": reason,
                 "helper": staffing.helper({"agent": kind, "model": model}),
                 "requested_agent": request.get("agent"), "help_request": help_id,
                 "window": work_metrics.WINDOW, "prior_starts": work_metrics.counts(state, selected_lane, KINDS)
-            }, sort_keys=True)}, f"home-{run}-assignment")
+            }
+            if task_parity is not None and task_parity.applies_at_admission(self.record, state, admission["sequence"]):
+                observation.update(task=task_parity.task, task_generation=task_parity.generation,
+                                   tied_families=task_parity.families)
+            self.record.append("say", CONTROLLER, {"text": work_metrics.ASSIGNMENT_PREFIX +
+                               json.dumps(observation, sort_keys=True)}, f"home-{run}-assignment")
             workspace = home_work.room(self.record, self.private, run, base)
             client = home_work.client(self.record, workspace, resident, self.runtime)
             request = state.get("life", {}).get("requests", {}).get(help_id)
@@ -1625,13 +1659,22 @@ class Coordinator:
                             task_args = {"task_id": candidate, "task_generation": state["tasks"][candidate]["generation"]}
                     explore = demand["explore_generation"] if help_id is None and not backlog else None
                 from . import ballot_work
-                bound = state["tasks"].get(task_args.get("task_id") or request[1].get("task"), {})
+                task = task_args.get("task_id") or request[1].get("task")
+                bound = state["tasks"].get(task, {})
                 ballot_task = bound if (ballot_work.enabled(state) and "ballot_choice" in bound
                                         and "target_resident" not in request[1]) else None
+                observe = (bound and explore is None and focus is None
+                           and {"ballot_choice", "helper", "review_run"}.isdisjoint(bound)
+                           and {"agent", "model", "target_resident", "review_run"}.isdisjoint(request[1])
+                           and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,99}", task))
+                tied = [] if observe else None
                 kind = choose_provider(state, time.time(), request[1].get("agent"), exploring=explore is not None,
-                                       reviewing="review_run" in request[1], ballot_task=ballot_task)
+                                       reviewing="review_run" in request[1], ballot_task=ballot_task,
+                                       tied_families=tied)
                 if kind is None:
                     break
+                if tied is not None:
+                    task_args["task_parity"] = TaskParity(task, bound["generation"], tuple(tied))
                 run = self.start(kind, request[0], backlog=backlog, explore_generation=explore, scheduled=True,
                                  focus=focus, **task_args)
                 if focus:
