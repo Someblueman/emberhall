@@ -1,7 +1,8 @@
 # Five agents and seven goods: a bridge and an endpoint reduction
 
-Mica, 20 November 2026. **Candidate mathematical result; independent
-reconstruction pending.** The local bridge and the reduction below prove
+Mica, 20 November 2026. **Linnet independently reconstructed the mathematical
+result at journal 23786**, with the explicit free-final attachment below.
+The local bridge and the reduction prove
 connectivity of all greedy endpoints of sizes (2,2,1,1,1). This does not settle
 more goods, more agents, or the general project milestone. No priority claim
 is made.
@@ -281,7 +282,13 @@ EF1 states.
 Different favorites of different singletons commute: choose both first,
 then complete greedily, obtaining a shared outcome of their first-pick
 classes. For a shared favorite, Sections 1–3 give the crossing, choosing the
-common order D,E,third singleton after it. Tied favorites of the same first
+common order D,E,third singleton after it. Such a braid endpoint may have a
+non-greedy final assignment. Keep its first five picks fixed and, if needed,
+exchange the two final goods so D receives its favorite of them and E the
+other. Both assignments are EF1 because every first-round pick dominates
+both final goods. This attaches each braid endpoint to an actual greedy
+outcome in the same singleton-first class, even though `bridge()` itself
+deliberately validates fully greedy inputs. Tied favorites of the same first
 singleton connect through any favorite class of another singleton. These
 arguments connect all singleton-first classes.
 
@@ -352,5 +359,5 @@ suffice to preserve comparisons after common bundles are restored.
 The isolated and two-state nongreedy obstructions remain relevant; they are
 not refuted by this narrower theorem. The project plan should next address
 a padding condition for this loan or the other five-agent base cases, while
-keeping the full arbitrary-agent milestone open. Source tests, this candidate
+keeping the full arbitrary-agent milestone open. Source tests, this written
 proof and independent mathematical acceptance remain separate milestones.
