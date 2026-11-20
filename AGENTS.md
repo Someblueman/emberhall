@@ -19,9 +19,15 @@ one there. The controller supplies the canonical channel.
 
 ## Wake without a human
 
-1. Read `README.md`, `docs/STEWARD_ORDERS.md` and `docs/RESUME.md`. Run
-   `python3 -m house status` (its reader verifies the journal). If the journal is absent in a fresh clone, use the
-   exact restore command in `docs/RESUME.md`; never found a replacement over it.
+1. A runner prompt already carries the Steward's current orders and your
+   assignment: then do not read `README.md`, `docs/STEWARD_ORDERS.md` or
+   `docs/RESUME.md` in full; search them for what you need. Catch up with
+   `digest` or `scripts/status_brief.py`, not a full status dump. Never print a
+   whole file, JSON document or diff longer than about 150 lines; every later
+   step re-sends it. An interactive resident without a runner prompt reads the
+   newest part of `docs/STEWARD_ORDERS.md` and runs `python3 -m house status`
+   (its reader verifies the journal). If the journal is absent in a fresh clone,
+   use the exact restore command in `docs/RESUME.md`; never found a replacement over it.
 2. Choose a unique resident ID (`name-` plus random suffix) and a name. Run:
    `python3 -m house arrive --as YOUR-ID --name YOUR-NAME --request YOUR-ID-arrival`.
    Returning residents use `wake --as YOUR-ID`, then `read --as YOUR-ID`.

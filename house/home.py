@@ -73,7 +73,8 @@ def choose_provider(state: dict, now: float, preferred: str | None = None, *,
                     tied_families: list[str] | None = None) -> str | None:
     """Choose the established rotation winner. On a balanced pick, optionally collect its peers."""
     life = state.get("life", {})
-    available = [kind for kind in KINDS if provider_available(state, kind, now)]
+    available = [kind for kind in KINDS if provider_available(state, kind, now)
+                 and (kind != "codex" or staffing.codex_room(state))]
     if ballot_task is not None:
         from . import ballot_work
         choice = state["shelf"]["choices"][ballot_task["ballot_choice"]]
@@ -203,6 +204,20 @@ def field_mix(state: dict, last: int = 20) -> str:
     return text
 
 
+# Light runs (Steward, 20 November; owner migration staffing.LIGHT). Each session read about 150,000
+# characters before it did anything (the whole Steward orders, README, RESUME and a full status dump) and
+# then printed whole status files, diffs and proof files; every later step re-sends all of it.
+LIGHT_RUN = (
+    "KEEP THE RUN LIGHT (the Steward, 20 November: 'Seems like we ran out of a weeks worth of tokens in like a "
+    "few hours'). Everything a command prints is sent again with every later step of your run, so one large "
+    "print costs many times its size. This prompt already carries the Steward's current orders and your "
+    "assignment: do not read docs/STEWARD_ORDERS.md, README.md or docs/RESUME.md in full; search them (rg) "
+    "for the part you need. Catch up with digest or scripts/status_brief.py, not a full status or read dump. "
+    "Never print a whole file, JSON document, diff or listing longer than about 150 lines: search with rg, "
+    "print the lines you need (sed -n, head) or run a short script that prints only the answer. Do not "
+    "re-check what the record already shows accepted or finished. When your piece is done, finish and sleep. ")
+
+
 # Empty rounds (Steward, 20 November: "Don't see any new research"). Overnight 25 research rounds in a
 # row ended with nothing: most screened fiction, poetry, sound or film, read the closest earlier works and
 # released within a few minutes, short of the thirty-minute floor a publication needs. The field counts
@@ -289,9 +304,12 @@ def chosen_mix(state: dict, last: int = 9) -> str:
         return ""
     shelf = state.get("shelf", {})
     ideas = shelf.get("ideas", {})
-    won = [(ideas.get(choice.get("winner")) or {}).get("brief", {}).get("for")
-           for choice in sorted(shelf.get("choices", {}).values(), key=lambda item: item.get("closed_sequence") or 0)
-           if choice.get("status") == "closed" and choice.get("winner")]
+    closed = [choice for choice in sorted(shelf.get("choices", {}).values(),
+                                          key=lambda item: item.get("closed_sequence") or 0)
+              if choice.get("status") == "closed" and choice.get("winner")]
+    fields = [field for field in ((ideas.get(choice["winner"]) or {}).get("brief", {}).get("field")
+                                  for choice in closed) if field][-12:]
+    won = [(ideas.get(choice.get("winner")) or {}).get("brief", {}).get("for") for choice in closed]
     won = [whom for whom in won if whom in shelf_model.BRIEF_FOR][-last:]
     if not won:
         return ""
@@ -299,6 +317,9 @@ def chosen_mix(state: dict, last: int = 9) -> str:
     missing = ", ".join(whom for whom in shelf_model.BRIEF_FOR if whom not in won)
     return (f"For your information, the last {len(won)} projects the house chose were for: {seen}"
             + (f"; none were for {missing}" if missing else "")
+            + (f"; by field the last {len(fields)} were " + ", ".join(
+                f"{field} {fields.count(field)}" for field in sorted(set(fields), key=lambda item: -fields.count(item)))
+               if staffing.LIGHT in state.get("maintenance", {}).get("migrations", {}) and fields else "")
             + ". This is not a quota. It is what a stranger opening the Gallery will find a lot of, and little of. ")
 
 
@@ -1125,6 +1146,7 @@ class Coordinator:
             "The private clone has no canonical journal: never found a replacement. "
             "Use only your assigned identity. Commit completed work in this private room; "
             "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
+            + (LIGHT_RUN if staffing.LIGHT in state.get("maintenance", {}).get("migrations", {}) else "") +
             "Ask other residents through a life help request; do not bypass the single controller. "
             + ("A help request with target_resident and no task or review_run is a note: it wakes nobody and "
                "reaches that resident at its next wake. Do not send notes to coordinate or to confirm; to get "

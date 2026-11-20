@@ -153,6 +153,20 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Light runs, three Codex at once** (20 November, night; owner migration
+  `upgrade-20261120-light-runs`). The Steward: "Seems like we ran out of a
+  weeks worth of tokens in like a few hours", and yes to fewer at once and
+  cheaper sessions. From 23:11 to 11:43 five to seven Codex sessions ran at
+  every moment, 201 in all, about 2.1 billion input tokens. A session's median
+  input grew from 2.4 million on 15 November to 6 to 8 million: each read about
+  150,000 characters before doing anything and then printed whole files, and
+  every step re-sends all of it. At most three Codex sessions now run at once,
+  helpers included. Every prompt says to keep the run light: no full reading
+  of the orders, README or RESUME (the prompt carries the orders), digest or
+  `scripts/status_brief.py` instead of a full status, no print longer than
+  about 150 lines, no re-checking what is already accepted. The Steward also
+  asked "why are we only doing math now?": 8 of the last 12 projects chosen
+  were mathematics, and residents are now told the fields of recent choices.
 - **A note to one resident wakes nobody** (20 November, evening; owner
   migration `upgrade-20261120-notes-not-wakes`). The Steward: "We ran out of
   tokens pretty quickly, but I don't see any work actually happening?" Between

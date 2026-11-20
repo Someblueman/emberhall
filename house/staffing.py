@@ -27,6 +27,22 @@ def momentum(state: dict) -> bool:
     return enabled(state) and MOMENTUM in state.get("maintenance", {}).get("migrations", {})
 
 
+# Light runs (Steward, 20 November: "Seems like we ran out of a weeks worth of tokens in like a few hours").
+# From 23:11 to 11:43 five to seven Codex sessions ran at every moment, 201 in all, about 2.1 billion input
+# tokens; a session's median input had grown from 2.4 million on 15 November to 6 to 8 million. From this
+# migration at most three Codex sessions run at once, helpers included.
+LIGHT = "upgrade-20261120-light-runs"
+CODEX_AT_ONCE = 3
+
+
+def codex_room(state: dict) -> bool:
+    """False while the Codex cap is in force and that many Codex sessions are already running."""
+    if LIGHT not in state.get("maintenance", {}).get("migrations", {}):
+        return True
+    runs = state.get("life", {}).get("runs", {}).values()
+    return sum(run["status"] == "active" and run["agent"] == "codex" for run in runs) < CODEX_AT_ONCE
+
+
 def capacity(state: dict) -> dict:
     active = [r for r in state.get("life", {}).get("runs", {}).values() if r["status"] == "active"]
     helpers = sum(helper(r) for r in active)
@@ -122,7 +138,8 @@ def select(state: dict, at: float, demand: dict) -> dict | None:
     from .life import provider_available
     c = capacity(state)
     if (not enabled(state) or c["regular"] < 2 or c["helpers"] >= c["helper_limit"]
-            or c["total"] >= c["total_limit"] or not provider_available(state, "codex", at)):
+            or c["total"] >= c["total_limit"] or not provider_available(state, "codex", at)
+            or not codex_room(state)):
         return None
     requests = state.get("life", {}).get("requests", {})
     pending = [k for k in demand["pending_help"] if help_eligible(state, requests[k], at, help_id=k)
