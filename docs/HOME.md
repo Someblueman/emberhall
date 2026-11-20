@@ -630,3 +630,8 @@ checks inside the existing sandbox. A project with no tests is reported as zero
 tests; these checks do not prove gameplay or semantic correctness. Changes
 outside `projects/NAME/` retain the full foundation suite. Receipts record the
 chosen scope and exact check commands. Human/source review remains necessary.
+
+Since `upgrade-20261120-notes-not-wakes`, a help request with `target_resident`
+and neither `task` nor `review_run` is a note (`life.note`). It never enters
+`pending_help`, so it wakes nobody; the coordinator lists it under "NOTES LEFT
+FOR YOU" in the target's next prompt and records `help-resolved` for it then.

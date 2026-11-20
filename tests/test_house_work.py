@@ -366,6 +366,30 @@ class HouseWorkTests(unittest.TestCase):
         self.assertIn("Bring a small idea", prompt, "the other short benches are still asked for")
         self.assertLess(prompt.index("Bring a small idea"), prompt.index("Bring a house idea"))
 
+    def test_a_resident_reads_its_notes_at_its_next_wake(self):
+        from house import life
+        f = self.f
+        state = f.state
+        state["life"] = {"runs": {"run1": {"agent": "codex", "model": "gpt-6.1-sol", "status": "active",
+                                           "resident": "newbie"}}, "rooms": {},
+                         "requests": {"n1": {"kind": "help", "status": "pending", "resident": "elder", "at": "100",
+                                             "reason": "Your proof file is merged; nothing to do.",
+                                             "target_resident": "newbie", "agent": "codex", "model": "gpt-6.1-sol"}}}
+        state.setdefault("residents", {})["elder"] = {"name": "Elder"}
+        state["tasks"] = {}
+        state["wake_policy"] = None
+        stub = types.SimpleNamespace(record=types.SimpleNamespace(read=lambda: (state, [], 0)), focus=None,
+                                     running={}, private=Path(tempfile.mkdtemp()))
+        with tempfile.TemporaryDirectory() as folder, patch("house.home.active_prompt", lambda state: ""):
+            before = home.Coordinator.prompt(stub, state, "run1", "newbie", Path(folder), Path(folder) / "client", None)
+            state.setdefault("maintenance", {}).setdefault("migrations", {})[life.NOTES] = {"at": 0}
+            after = home.Coordinator.prompt(stub, state, "run1", "newbie", Path(folder), Path(folder) / "client", None)
+        self.assertNotIn("NOTES LEFT FOR YOU", before)
+        self.assertIn("NOTES LEFT FOR YOU", after)
+        self.assertIn("From Elder at", after)
+        self.assertIn("Your proof file is merged; nothing to do.", after)
+        self.assertIn("is a note: it wakes nobody", after)
+
     def test_an_explorer_is_told_when_rounds_keep_coming_back_empty(self):
         f = self.f
         self.on()

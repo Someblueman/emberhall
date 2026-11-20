@@ -18,7 +18,7 @@ import time
 import uuid
 
 from . import home_work, inbox, mailbox, mailbox_jobs, project_work, providers, staffing, work_metrics
-from .life import (CONTROLLER, PROBE_SECONDS, latest_run, lived, model_available, open_models, provider_available,
+from .life import (CONTROLLER, NOTES, waiting_notes, PROBE_SECONDS, latest_run, lived, model_available, open_models, provider_available,
                    quota_rest, return_eligible, unknown_rest, workload)
 from .record import Record
 from .wake_policy import active_policy, active_prompt
@@ -1126,6 +1126,10 @@ class Coordinator:
             "Use only your assigned identity. Commit completed work in this private room; "
             "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
             "Ask other residents through a life help request; do not bypass the single controller. "
+            + ("A help request with target_resident and no task or review_run is a note: it wakes nobody and "
+               "reaches that resident at its next wake. Do not send notes to coordinate or to confirm; to get "
+               "something done now, give it a ready task. " if NOTES in
+               state.get("maintenance", {}).get("migrations", {}) else "") +
             "For bounded, independent and unblocked work, create task with --ready so spare residents "
             "can wake from the backlog. Give each task explicit file ownership and an acceptance result. "
             "Ordinary tasks and ambitions do not request more residents. Use ready TASK --expect GENERATION "
@@ -1200,6 +1204,15 @@ class Coordinator:
                 "This finite admission hint is not ownership. Read current state and claim the current generation "
                 "with a fresh token before editing; if blocked, claimed or changed, do not overwrite another resident. "
                 "Build this assigned project work before unrelated contribution reviews.\n")
+        notes = waiting_notes(state, resident)
+        if notes:
+            residents = state.get("residents", {})
+            assignment += ("NOTES LEFT FOR YOU (a note wakes nobody; these waited for this wake). Many may be "
+                           "settled already: act briefly on any that still matter, and do not spend the run "
+                           "confirming the others. " + " | ".join(
+                               f"From {residents.get(item['resident'], {}).get('name', item['resident'])} at "
+                               f"{datetime.fromtimestamp(float(item['at'])).strftime('%d %b %H:%M')}: "
+                               f"{item['reason'][:600]}" for _, item in notes[-8:]) + "\n")
         if help_request:
             assignment += "Shared request: " + help_request["reason"] + "\n"
             if staffing.enabled(state) and "task" in help_request and "task" not in assigned:
@@ -1493,6 +1506,10 @@ class Coordinator:
             client = home_work.client(self.record, workspace, resident, self.runtime)
             request = state.get("life", {}).get("requests", {}).get(help_id)
             prompt = self.prompt(state, run, resident, workspace, client, request)
+            for key, _ in waiting_notes(state, resident):
+                self.record.append("life", CONTROLLER, {"kind": "help-resolved", "request": key,
+                    "reason": f"Delivered as a note in the prompt of run {run}; a note wakes nobody."},
+                    f"home-help-{key}-note-{run}")
             (path / "prompt.txt").write_text(prompt)
             (path / "prompt.txt").chmod(0o600)
             if kind == "opencode":

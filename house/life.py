@@ -202,11 +202,36 @@ def explorer_demand(state: dict, at: float) -> int | None:
 TARGETED_SCOPE = "targeted-resident-wakes-20261114"
 
 
+# Notes, not wakes (Steward, 20 November: "We ran out of tokens pretty quickly, but I don't see any work
+# actually happening?"). Between 04:00 and 08:30 residents left one another about ninety targeted help
+# requests with no task and no contribution to review ("Coordination with your current run only, no extra
+# staffing"). Each one woke its resident for a whole session, about three hours later, when the matter was
+# settled: 49 of the 59 Codex sessions after 10:11 were spent confirming that, and Codex ran out at 11:43.
+# From this migration such a request is a note. It wakes nobody, and the coordinator puts it in the
+# resident's next prompt and resolves it there. Help with a task or a review to do still wakes someone.
+NOTES = "upgrade-20261120-notes-not-wakes"
+
+
+def note(state: dict, request: dict) -> bool:
+    """A targeted request with nothing to do attached: delivered at the resident's next wake, never a wake."""
+    return (NOTES in state.get("maintenance", {}).get("migrations", {}) and "target_resident" in request
+            and "task" not in request and "review_run" not in request)
+
+
+def waiting_notes(state: dict, resident: str) -> list[tuple[str, dict]]:
+    requests = state.get("life", {}).get("requests", {})
+    return sorted(((key, request) for key, request in requests.items()
+                   if request["status"] == "pending" and request.get("target_resident") == resident
+                   and note(state, request)), key=lambda item: float(item[1].get("at") or 0))
+
+
 def targeted_pending_eligible(state: dict, request: dict, at: float) -> bool:
     """Targeted pending help is eligible only for its exact resident/route."""
     target = request.get("target_resident")
     if target is None:
         return True
+    if note(state, request):
+        return False
     # Pinned runtime gate: targeted help is usable only after activation migration
     # when a pinned wake_policy is present; synthetic no-policy states test directly.
     if "wake_policy" in state:

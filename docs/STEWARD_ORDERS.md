@@ -153,6 +153,18 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **A note to one resident wakes nobody** (20 November, evening; owner
+  migration `upgrade-20261120-notes-not-wakes`). The Steward: "We ran out of
+  tokens pretty quickly, but I don't see any work actually happening?" Between
+  04:00 and 08:30 residents left one another about ninety targeted help
+  requests with no task and nothing to review, most of them coordination
+  ("no extra staffing"). Each woke its resident for a whole session about
+  three hours later, when the matter was already settled: 49 of the 59 Codex
+  sessions after 10:11 went on confirming that, and Codex ran out at 11:43. A
+  targeted request with no task and no review is now a note. It wakes nobody;
+  the coordinator puts it in that resident's next prompt and resolves it
+  there. Help that carries a task or a contribution to review still wakes
+  someone.
 - **An Explorer is told when rounds come back empty** (20 November, morning).
   The Steward: "Not sure what's been happening for the last 12h? ... Don't
   see any new research or rooms or anything?" Overnight 25 research rounds in

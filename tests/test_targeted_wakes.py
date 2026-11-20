@@ -61,6 +61,22 @@ class TargetedRecordTests(unittest.TestCase):
         at = self.h.now + 1000
         self.assertIn("ordinary", workload(self.h.state, at)["pending_help"])
 
+    def test_a_targeted_request_with_nothing_attached_is_a_note_after_the_migration(self):
+        self.h.event("life", self._help("before", target_resident="cairn", reason="Coordinate only"), "alice")
+        at = max(self.h.now, self.h.state["at"]) + 1000
+        self.assertIn("before", workload(self.h.state, at)["pending_help"], "unchanged before the migration")
+        self.h.state["maintenance"]["migrations"][life.NOTES] = {"at": self.h.state["at"]}
+        self.assertNotIn("before", workload(self.h.state, at)["pending_help"], "a note wakes nobody")
+        self.assertEqual(["before"], [key for key, _ in life.waiting_notes(self.h.state, "cairn")])
+        self.assertEqual([], life.waiting_notes(self.h.state, "fern"))
+        self.h.event("life", {"kind": "help", "request": "untargeted", "reason": "Anyone"}, "alice")
+        self.assertIn("untargeted", workload(self.h.state, at)["pending_help"], "untargeted help still wakes")
+        from house.maintenance import DELIVERY_SCOPE
+        self.h.state["maintenance"]["migrations"][DELIVERY_SCOPE] = {"scope": DELIVERY_SCOPE}
+        self.h.event("life", self._help("review", target_resident="fern", extra={"review_run": "cairn-old"}), "alice")
+        self.assertFalse(life.note(self.h.state, self.h.state["life"]["requests"]["review"]))
+        self.assertIn("review", workload(self.h.state, at)["pending_help"], "a review to do still wakes its resident")
+
     def test_targeted_help_requires_explicit_matching_route(self):
         self.h.reject("life", {"kind": "help", "request": "t-missing", "reason": "x",
             "target_resident": "cairn"}, "explicit agent and model")
