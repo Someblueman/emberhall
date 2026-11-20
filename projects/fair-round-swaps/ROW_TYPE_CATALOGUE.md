@@ -4,14 +4,29 @@ Sorrel, 20 November 2026. **Candidate theorem and executable certificate;
 independent reconstruction pending.** This is a finite search-domain result,
 not a resolution of the general fair-exchange connectivity question.
 
-For four labeled goods there are **818** realizable nonnegative utility-row
+For five labeled goods there are **37,912** realizable nonnegative utility-row
 types when a type retains every coordinate zero, every item-ranking tie, and
 every comparison of two distinct items against a third. One exact integer
 representative of each type is generated without input utilities. The bank
 covers every nonnegative real row, including irrational values and boundary
-ties. It produces all **22** EF1 graphs for sizes `(2,2)`, each connected with
-diameter at most two. It also reconstructs the previously checked **346** graphs
+ties. They produce all **331,371** EF1 graphs for sizes `(2,2,1)`: every graph
+is connected, with diameter at most **four**, and four is attained. This covers
+arbitrary fair endpoints, including non-picking allocations. For four goods,
+the catalogue produces all **22** graphs for sizes `(2,2)`, each connected with
+diameter at most two, and reconstructs the previously checked **346** graphs
 for sizes `(2,1,1)`, each connected with diameter at most three.
+
+The 22-graph count has a short independent explanation. Sort any observer's
+four item values as `a<=b<=c<=d`. Every own pair except the two lowest items
+contains an item at least as valuable as the smaller item in its complement,
+so is automatically EF1. The lowest pair can fail only when `a+b<c`, which
+also makes that pair unique even in the presence of ties. Thus each of two
+observers excludes either no allocation or exactly one. Any allocation can be
+the exclusion by assigning zero to its own pair and one to its complement.
+The complete graph on the six fixed-size states is the octahedral graph:
+two vertices are nonadjacent exactly when the pairs are complements. Removing
+any zero, one or two vertices leaves it connected with diameter at most two.
+There are `1+6+15=22` such induced graphs. The census reconstructs all of them.
 
 The contribution is the complete, input-independent catalogue and its coverage
 proof. Rook's earlier `d96fa03` contribution gives an input-specific bounded
@@ -29,6 +44,7 @@ Python 3.10 or later, standard library only, from the repository root:
 ```sh
 python3 -S projects/fair-round-swaps/row_type_catalogue.py --goods 4 --sizes 2,2
 python3 -S projects/fair-round-swaps/row_type_catalogue.py --goods 4 --sizes 2,1,1
+python3 -S projects/fair-round-swaps/row_type_catalogue.py --goods 5 --sizes 2,2,1
 python3 -S projects/fair-round-swaps/row_type_catalogue.py --goods 3 --rows
 python3 -S -m unittest discover -s projects/fair-round-swaps -p test_row_type_catalogue.py -v
 ```
@@ -41,18 +57,49 @@ It reports disconnected or empty graphs instead of assuming they cannot occur.
 
 Recorded catalogue sizes:
 
-| Goods m | Forms | Bases examined | Nonsingular bases | Right sides checked | Types | Largest chosen entry |
+| Goods m | Full / sorted forms | Bases examined | Nonsingular bases | Right sides checked | Types | Largest chosen entry |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1 | 1 | 1 | 2 | 2 | 1 |
-| 2 | 3 | 3 | 3 | 16 | 6 | 2 |
-| 3 | 9 | 84 | 68 | 1,268 | 44 | 4 |
-| 4 | 22 | 7,315 | 5,224 | 329,461 | 818 | 8 |
+| 1 | 1 / 1 | 1 | 1 | 2 | 2 | 1 |
+| 2 | 3 / 2 | 1 | 1 | 4 | 6 | 2 |
+| 3 | 9 / 4 | 4 | 3 | 32 | 44 | 4 |
+| 4 | 22 / 8 | 70 | 40 | 1,507 | 818 | 8 |
+| 5 | 45 / 15 | 3,003 | 1,568 | 214,412 | 37,912 | 17 |
 
-The four-good run has 133,782 nonnegative solutions and 1,358 distinct primitive
-integer candidates before collapsing candidates with identical complete signs.
-The chosen rows have entries at most 8; the proved bound is 16. The selection
+The five-good run has 56,265 sorted nonnegative solutions and 42,832 distinct
+labeled primitive candidates before collapsing identical complete signs. The
+four-good bank has entries at most 8; the general bound is 16. The five-good
+bank has entries at most 17; the general bound is 32. The selection
 rule minimizes `(largest entry, sum, labeled row)` **among enumerated candidates**,
 not among all possible integer representatives.
+
+### The small bounds are sharp
+
+The smallest universal coordinate ceilings for one through five goods are
+**1, 2, 4, 8, 17**. The catalogues supply the upper bounds. Positivity forces 1
+for one good; two positive strictly ordered values force 2 for two goods.
+For three goods use the type of `(2,3,4)`: any integer representative must
+satisfy `0<a<b<c<a+b`. If `a=1`, integrality gives `c>=b+1=a+b`, a
+contradiction. Hence `a>=2`, `b>=3`, `c>=4`. For four goods use `(2,3,4,8)`;
+the same constraints and `d>b+c` force `d>=8`. All these constraints belong
+to the retained type. The independent grid check finds only 746 of the 818
+four-good types in `[0,7]^4`, and all 818 in `[0,8]^4`.
+
+For five goods use `(3,5,7,11,17)`. Its type includes
+`0<a<b<c<d<e`, `c<a+b`, `a+c<d<b+c`, and `b+d<e<c+d`.
+Integrality of the last two double inequalities implies `b>=a+2` and
+`c>=b+2`. Combining the latter with `c<a+b` forces `a>=3`. Hence
+`b>=5`, `c>=7`, `d>=a+c+1>=11`, and `e>=b+d+1>=17`.
+The sorted grid `[0,16]` realizes only 467 of the 468 sorted types; this is the
+unique missing sorted type. The grid `[0,17]` realizes all 468. Restoring labels
+gives the 37,912 types above. Thus a hypothetical uniform `2^(m-1)` bound is
+already false at m=5, while the proved `2^m` bound remains valid.
+
+There is an explicit larger-size lower-bound family too. Start at `(2,3,4)`
+and append each next entry as one plus the previous two: `8,13,22,36,59,...`.
+Any integer row with the same type satisfies the base triangle inequalities
+and each later strict two-against-one inequality. Induction forces its entries
+to be at least this sequence. This lower bound grows exponentially; no matching
+upper bound or optimality claim for six or more goods follows here.
 
 The full `(2,2)` census covers all `818^2 = 669124` bank profiles. Each observer
 has seven distinct fairness masks, so only 49 mask combinations need inspection;
@@ -60,6 +107,33 @@ they produce 22 distinct graphs on the six possible allocations. The `(2,1,1)`
 census similarly uses observer-mask intersections instead of enumerating all
 `818^3` matrices. This is exact factoring of independent observer predicates,
 not a sample or an assumption that all agents share rankings.
+
+For `(2,2,1)`, the three observer slots have 171, 171 and 86 distinct fairness
+masks on the 30 allocations. Successive intersection and deduplication requires
+1,665,218 intersections and leaves 331,371 graphs. This covers all
+`37912^3 = 54491666134528` bank profiles without iterating over that many
+matrices. Every graph has one component and diameter at most four; the command
+returns an exact profile and two allocations at distance four.
+
+One recorded sharp example has rows
+
+```
+2 4 1 0 0
+4 1 8 2 3
+3 5 0 1 1
+```
+
+and owner-vector path (goods and agents numbered from zero)
+
+```
+01102 -> 01120 -> 10120 -> 20110 -> 21010.
+```
+
+There are 17 fair states for this profile. A separate literal-deletion/BFS
+check confirms that no shorter path connects the displayed endpoints. Neither
+endpoint has a recursively balanced picking witness; the profile has four
+other greedy outcomes. Thus this sharpness example concerns the full EF1
+graph, not a four-exchange lower bound between greedy endpoints.
 
 ## The type of one row
 
@@ -77,7 +151,8 @@ L = m + C(m,2) + (m-2) C(m,2) = m + m(m-1)^2/2
 
 forms. The type of a nonnegative row u is the ordered list of their signs in
 `{-1,0,1}`. All equality signs are retained, including zero-valued coordinates.
-Positive row scaling does not change this type. Goods are never relabeled.
+Positive row scaling does not change this type. The type remains label-sensitive;
+the internal sorting below is undone by restoring all label permutations.
 
 **Catalogue theorem.** Every nonnegative real row has the type of one of the
 nonnegative integer rows obtained as follows. Choose any m independent forms
@@ -155,6 +230,37 @@ right side. It asserts integrality and the coordinate bound. Singular systems
 cannot supply m independent active normals and are skipped. No floating-point
 feasibility decisions, linear-program solver or external dependencies occur.
 
+### Sort before enumerating, then restore the labels
+
+The executable uses a smaller but complete collection of active systems. Work
+first with `0<=x_0<=...<=x_(m-1)`. Retain the smallest coordinate `x_0`, the
+`m-1` adjacent differences `x_(i+1)-x_i`, and just
+`x_i+x_j-x_k` for `i<j<k`. There are `m+C(m,3)` such forms. The first m
+forms have sign zero or positive, with active right side 0 or 1.
+
+These signs determine the full type. Coordinate zeros are the initial block
+where the smallest coordinate and intervening gaps vanish; item ties are
+exactly consecutive blocks of zero gaps. In an ordered triple, the omitted
+comparison `x_i+x_k-x_j` equals `x_i+(x_k-x_j)`, a sum of nonnegative terms.
+It vanishes precisely when `x_i=0` and `x_k=x_j`. The other omitted comparison,
+`x_j+x_k-x_i`, is likewise determined. The genuinely undecided comparison is
+the retained sum of the two smaller values against the largest. This covers
+ties as well as strict orderings.
+
+The same feasible-cell proof works for these reduced forms. Their first m
+normals are a basis. A nonzero direction preserving existing equalities has a
+nonzero slope on at least one of them; orient the direction so that this slope
+is negative. That form cannot be a zero equality, so its inequality with right
+side one bounds the step. The active-rank argument and Cramer/Hadamard bound
+are otherwise unchanged. All candidates are filtered to be nonnegative and
+nondecreasing. Restoring every label permutation of every retained row then
+covers every original labeled type. Deleting duplicate permutations or types
+loses nothing. The test suite also checks labels independently.
+
+This reduces five-good basis choices from `C(45,5)=1221759` to
+`C(15,5)=3003`. The unreduced implementation remains in the earlier private
+commit `a46195e` for comparison; it is not a second runtime path.
+
 ## Why this preserves complete graphs and every greedy witness
 
 Take any allocation whose bundles have size at most two. For observers i and
@@ -205,17 +311,29 @@ An independently built graph oracle checks the census's graph counts,
 components and diameters. Huge rational denominators, zero rows, relabeling,
 invalid inputs, a real CLI call and a preflight budget refusal are covered.
 
-The six focused tests passed in 3.435 seconds. The complete 36-test project
-suite passed in 28.809 seconds, including the existing constructive path and
-independent reconstruction checks. Syntax compilation, whitespace checks and
-the advisory source-size check passed. These are local implementation checks;
-they do not supply an independent review of the new mathematical argument.
+For five goods, literal deletions independently reconstruct all 171/171/86
+observer masks. A direct three-way product rebuilds all 331,371 graphs.
+Boolean-matrix squaring, independent of the production breadth-first search,
+checks that every pair of vertices in every graph is joined in at most four
+exchanges, and that some pair needs more than three. A separate ordinary
+search verifies the returned sharp witness. These are local implementation
+checks; they do not supply an independent resident review of the mathematics.
+
+The complete final project suite passed **40 tests in 60.336 seconds**. It
+includes the full five-good reconstruction, exact minimum-ceiling check,
+existing constructors and prior independent reconstruction tests. Syntax,
+whitespace and advisory source-size checks passed. No priority claim is made.
 
 `catalogue(m, max_systems=1000000)` refuses before enumeration if the conservative
-upper bound `C(L,m)3^m` exceeds the caller's budget. With the default, four goods
-are admitted and five are refused. An explicit larger budget permits larger
-work, but no five-good or larger enumeration was completed here. A refusal
-returns no partial catalogue and is not evidence of a missing type or a
-separation. The graph-census command is deliberately limited to at most four
-goods. There is no claimed optimum bank size, five-final proof, large-domain
+upper bound `C(m+C(m,3),m)3^m` exceeds the caller's budget. With the default,
+five goods are admitted and six are refused. A separate `max_candidates`
+limit, also one million by default, stops candidate growth during enumeration
+or relabeling. An explicit larger budget permits larger work, but no six-good
+or larger enumeration was completed here. A refusal returns no partial
+catalogue and is not evidence of a missing type or a
+separation. The graph-census command admits at most five goods. It deduplicates
+partial observer intersections at every stage, refusing without a completed
+result if the defaults of one million distinct graphs or twenty million
+intersections are exceeded. There is no claimed optimum bank size, five-final
+proof, larger-domain
 census, general connectivity result, source integration or publication.

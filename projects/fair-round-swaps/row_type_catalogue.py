@@ -1,7 +1,7 @@
 """Complete finite row types for singleton/pair EF1; standard library only.
 
 Coverage rests on ROW_TYPE_CATALOGUE.md, not on a sampled utility grid.
-The default budget admits four goods and refuses five before enumeration.
+The default budget admits five goods and refuses six before enumeration.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict, dataclass
 from fractions import Fraction
-from itertools import combinations, product
+from itertools import combinations, permutations, product
 import json
 from math import comb, gcd
 from typing import Sequence
@@ -90,26 +90,32 @@ class RowCatalogue:
         return result
 
 
-def catalogue(m: int, *, max_systems: int = 1_000_000) -> RowCatalogue:
-    """Enumerate every realizable type, or refuse the entire run before starting.
+def catalogue(m: int, *, max_systems: int = 1_000_000,
+              max_candidates: int = 1_000_000) -> RowCatalogue:
+    """Enumerate every realizable type; a budget refusal returns no partial bank.
 
-    Enumerate independent sets of m forms with right sides -1, 0, 1 (only
-    0, 1 for coordinate forms). Clear the determinant, reject negative rows,
-    divide by the coordinate gcd, and keep one row for each complete sign type.
-    This is exponential work, with a declared upper bound on right-side systems.
+    Work in sorted order, using the smallest coordinate, adjacent differences,
+    and smaller-pair minus largest-item forms. Restore all label permutations.
+    Enumerate independent m-form systems with right sides -1, 0, 1 (only
+    0, 1 for the first m order forms), then clear the determinant and coordinate
+    gcd. System work is checked before starting; candidate growth is bounded too.
     """
     if type(m) is not int or m < 1:
         raise ValueError("the number of goods must be a positive integer")
-    if type(max_systems) is not int or max_systems < 1:
-        raise ValueError("max_systems must be a positive integer")
+    if any(type(v) is not int or v < 1 for v in (max_systems, max_candidates)):
+        raise ValueError("catalogue budgets must be positive integers")
     # Avoid constructing even the forms or an enormous power on a refused call.
     if m > max_systems.bit_length():
         raise ValueError("system budget exceeded before enumeration")
-    form_count = m + m*(m-1)**2//2
+    form_count = m + comb(m, 3)
     upper = comb(form_count, m) * 3**m
     if upper > max_systems:
         raise ValueError(f"system budget exceeded: upper bound {upper} > {max_systems}")
-    forms = comparison_forms(m)
+    full_forms = comparison_forms(m)
+    forms = [tuple(int(g == 0) for g in range(m))]
+    forms += [tuple(int(g == i+1)-int(g == i) for g in range(m)) for i in range(m-1)]
+    forms += [tuple(int(g in (i, j))-int(g == k) for g in range(m))
+              for i, j, k in combinations(range(m), 3)]
     bound = 2**m
     candidates = {(0,)*m}
     bases = nonsingular = systems = nonnegative = 0
@@ -123,18 +129,26 @@ def catalogue(m: int, *, max_systems: int = 1_000_000) -> RowCatalogue:
         for right in product(*domains):
             systems += 1
             row = tuple(sum(a*b for a, b in zip(coefs, right)) for coefs in inverse)
-            if min(row) < 0:
+            if row[0] < 0 or any(a > b for a, b in zip(row, row[1:])):
                 continue
             if max(row) > bound:
                 raise AssertionError("Cramer/Hadamard coordinate bound failed")
             nonnegative += 1
             divisor = gcd(*row)
             candidates.add(tuple(v//divisor for v in row) if divisor else row)
+            if len(candidates) > max_candidates:
+                raise ValueError("candidate budget exceeded; no complete catalogue")
+    labeled = set()
+    for row in candidates:
+        for permuted in permutations(row):
+            labeled.add(permuted)
+            if len(labeled) > max_candidates:
+                raise ValueError("candidate budget exceeded; no complete catalogue")
     representatives = {}
-    for row in sorted(candidates, key=lambda r: (max(r), sum(r), r)):
-        representatives.setdefault(_signature(row, forms), row)
+    for row in sorted(labeled, key=lambda r: (max(r), sum(r), r)):
+        representatives.setdefault(_signature(row, full_forms), row)
     return RowCatalogue(m, tuple(representatives[s] for s in sorted(representatives)),
-                        upper, bases, nonsingular, systems, nonnegative, len(candidates))
+                        upper, bases, nonsingular, systems, nonnegative, len(labeled))
 
 
 def _components(mask: int, neighbors: tuple[int, ...]) -> tuple[int, ...]:
@@ -153,16 +167,20 @@ def _components(mask: int, neighbors: tuple[int, ...]) -> tuple[int, ...]:
     return tuple(components)
 
 
-def graph_census(bank: RowCatalogue, sizes: tuple[int, ...]) -> dict:
-    """All real-profile EF1 vertex sets for a small labeled size vector.
+def graph_census(bank: RowCatalogue, sizes: tuple[int, ...], *,
+                 max_graphs: int = 1_000_000, max_intersections: int = 20_000_000) -> dict:
+    """All supplied-row profile graphs for a small labeled size vector.
 
-    Row predicates are deduplicated before taking their Cartesian product.
+    A complete catalogue makes this an all-real-profile census. Row predicates
+    are deduplicated before taking their Cartesian product.
     Every fixed-size allocation is considered, including non-picking states.
     """
     m, n = bank.goods, len(sizes)
-    if (m > 4 or n < 2 or any(type(s) is not int or s not in (1, 2) for s in sizes)
+    if (m > 5 or n < 2 or any(type(s) is not int or s not in (1, 2) for s in sizes)
             or sum(sizes) != m):
-        raise ValueError("census requires at most four goods and singleton/pair bundles")
+        raise ValueError("census requires at most five goods and singleton/pair bundles")
+    if any(type(limit) is not int or limit < 1 for limit in (max_graphs, max_intersections)):
+        raise ValueError("census budgets must be positive integers")
     states = tuple(a for a in product(range(n), repeat=m)
                    if tuple(a.count(i) for i in range(n)) == sizes)
     index = {state: k for k, state in enumerate(states)}
@@ -177,9 +195,9 @@ def graph_census(bank: RowCatalogue, sizes: tuple[int, ...]) -> dict:
                 mask |= 1 << index[tuple(changed)]
         neighbors.append(mask)
     neighbors = tuple(neighbors)
-    observer_masks = []
+    observer_masks, mask_rows = [], []
     for observer in range(n):
-        masks = set()
+        masks = {}
         for row in bank.rows:
             fair = 0
             for k, allocation in enumerate(bundles):
@@ -187,16 +205,24 @@ def graph_census(bank: RowCatalogue, sizes: tuple[int, ...]) -> dict:
                 if all(len(target) < 2 or own >= min(row[g] for g in target)
                        for target in allocation):
                     fair |= 1 << k
-            masks.add(fair)
+            masks.setdefault(fair, row)
         observer_masks.append(tuple(sorted(masks)))
-    graphs = set()
-    for masks in product(*observer_masks):
-        fair = (1 << len(states))-1
-        for mask in masks:
-            fair &= mask
-        graphs.add(fair)
+        mask_rows.append(masks)
+    graphs = {(1 << len(states))-1}
+    intersections = 0
+    for masks in observer_masks:
+        intersections += len(graphs)*len(masks)
+        if intersections > max_intersections:
+            raise ValueError("intersection budget exceeded; no complete census")
+        following = set()
+        for fair in graphs:
+            for mask in masks:
+                following.add(fair & mask)
+                if len(following) > max_graphs:
+                    raise ValueError("graph budget exceeded; no complete census")
+        graphs = following
     histogram = {}
-    diameter = 0
+    diameter, witness = 0, None
     disconnected = empty = 0
     for fair in graphs:
         groups = _components(fair, neighbors)
@@ -210,30 +236,50 @@ def graph_census(bank: RowCatalogue, sizes: tuple[int, ...]) -> dict:
             distance = -1
             while frontier:
                 distance += 1
+                farthest = frontier
                 following = 0
-                for k in range(len(states)):
-                    if frontier & (1 << k):
-                        following |= neighbors[k]
+                active = frontier
+                while active:
+                    bit = active & -active
+                    active ^= bit
+                    following |= neighbors[bit.bit_length()-1]
                 frontier = following & fair & ~reached
                 reached |= frontier
-            diameter = max(diameter, distance)
+            if distance > diameter:
+                diameter = distance
+                witness = (fair, start, (farthest & -farthest).bit_length()-1)
+    example = None
+    if witness is not None:
+        graph, start, target = witness
+        for masks in product(*observer_masks):
+            fair = (1 << len(states))-1
+            for mask in masks:
+                fair &= mask
+            if fair == graph:
+                example = {"utilities": [mask_rows[i][mask] for i, mask in enumerate(masks)],
+                           "start": states[start], "target": states[target],
+                           "distance": diameter}
+                break
     return {"sizes": list(sizes), "allocations": len(states),
             "row_profiles_covered": len(bank.rows)**n,
+            "intersections_checked": intersections,
             "observer_types": list(map(len, observer_masks)), "distinct_graphs": len(graphs),
             "component_histogram": dict(sorted(histogram.items())),
             "empty_graphs": empty, "disconnected_graphs": disconnected,
-            "maximum_component_diameter": diameter}
+            "maximum_component_diameter": diameter, "diameter_witness": example}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--goods", type=int, default=3)
     parser.add_argument("--max-systems", type=int, default=1_000_000)
+    parser.add_argument("--max-candidates", type=int, default=1_000_000)
     parser.add_argument("--rows", action="store_true", help="include every representative")
     parser.add_argument("--sizes", help="also census all EF1 graphs, e.g. 2,2 or 2,1,1")
     args = parser.parse_args()
     try:
-        bank = catalogue(args.goods, max_systems=args.max_systems)
+        bank = catalogue(args.goods, max_systems=args.max_systems,
+                         max_candidates=args.max_candidates)
         result = bank.summary()
         if args.rows:
             result["rows"] = bank.rows
