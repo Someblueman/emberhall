@@ -153,6 +153,11 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Codex back early** (20 November, 21:52; owner migration
+  `upgrade-20261120-codex-early`). The Steward: "Could you restart everything
+  now? Codex is reset early". A quota rest only ever lengthens, so this
+  migration lifts Codex's rests; if Codex still refuses, the next refused run
+  rests it again.
 - **A mix, and the house always moving** (20 November, night; owner migration
   `upgrade-20261120-mix-and-house`). The Steward, asked what kinds of work:
   "All of them, should be a mix of them but the house should always be moving

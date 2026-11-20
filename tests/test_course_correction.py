@@ -268,6 +268,19 @@ class CourseMigrationTests(unittest.TestCase):
         self.h.reject("owner-migrate", good, "already used|stale")
         self.assertIsNone(maintenance.UPGRADE.fullmatch("upgrade-tomorrow"))
 
+    def test_the_owner_lifts_codex_rests_when_codex_returns_early(self):
+        data = self.migration(); data.pop("rule_base")
+        self.h.event("owner-migrate", data)
+        life = self.h.state.setdefault("life", {})
+        life.setdefault("model_budgets", {})["codex"] = {"gpt-6.1-sol": {"until": 9e12}}
+        life["model_budgets"]["muse"] = {"muse-ember-1.0": {"until": 9e12}}
+        life.setdefault("budgets", {})["codex"] = {"until": 9e12}
+        lift = self.general(scope="upgrade-20261120-codex-early"); lift.pop("rule_base")
+        self.h.event("owner-migrate", lift)
+        self.assertNotIn("codex", self.h.state["life"]["model_budgets"])
+        self.assertNotIn("codex", self.h.state["life"]["budgets"])
+        self.assertIn("muse", self.h.state["life"]["model_budgets"], "only Codex is lifted")
+
 
 class RenovationTests(unittest.TestCase):
     def descriptor(self, **files):

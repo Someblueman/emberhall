@@ -193,6 +193,12 @@ UPGRADE = re.compile(r"upgrade-[0-9]{8}-[a-z0-9][a-z0-9-]{0,59}")
 HOUSE_MODULE = re.compile(r"house/[a-z_][a-z0-9_]*\.py")
 
 
+# An early return (Steward, 20 November, 21:52: "Could you restart everything now? Codex is reset early").
+# A quota rest can only lengthen, never shorten, so the owner lifts one family's rests with its own migration.
+# Should the provider still refuse, the next refused run records a fresh rest as usual.
+LIFTS = {"upgrade-20261120-codex-early": "codex"}
+
+
 def general_upgrade(state: dict, scope: object) -> bool:
     return (isinstance(scope, str) and UPGRADE.fullmatch(scope) is not None
             and COURSE_SCOPE in state.get("maintenance", {}).get("migrations", {}))
@@ -420,6 +426,10 @@ def apply(state: dict, event: dict) -> None:
         state["maintenance"] = current
         if scope == WORKSPACE_SCOPE:
             current["workspace_layout_sequence"] = seq
+        if scope in LIFTS:
+            life = state.setdefault("life", {})
+            life.get("model_budgets", {}).pop(LIFTS[scope], None)
+            life.get("budgets", {}).pop(LIFTS[scope], None)
         if resolution is not None:
             current.setdefault("provider_restored", {})["opencode"] = resolution
             del state["life"]["budgets"]["opencode"]
