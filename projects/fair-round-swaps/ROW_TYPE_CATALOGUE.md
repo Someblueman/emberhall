@@ -261,6 +261,14 @@ This reduces five-good basis choices from `C(45,5)=1221759` to
 `C(15,5)=3003`. The unreduced implementation remains in the earlier private
 commit `a46195e` for comparison; it is not a second runtime path.
 
+The frozen unreduced five-good run completed under its declared 300-million
+system/900-second limits in 522.375 seconds. It checked all 1,221,759 bases,
+811,242 nonsingular bases and 165,129,050 right sides, finding the same 37,912
+types and largest chosen entry 17. Its source SHA256 is
+`c46914b9ac33355e7b4e0c8de5d3c9a09863f8eaf099409187e5539dae3b275c`.
+This compares two different complete candidate families; it is not a sampled
+timing estimate or an interrupted run counted as complete.
+
 ## Why this preserves complete graphs and every greedy witness
 
 Take any allocation whose bundles have size at most two. For observers i and
