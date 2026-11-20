@@ -87,6 +87,15 @@
       ]
     },
     {
+      "id": "three-runs-of-stamps",
+      "title": "Three Runs of Stamps",
+      "summary": "Read the proof and independent reconstruction of a cubic count of labeled folded stacks, or run its Python checker. At eight creases per run: 1,618 legal stacks; every sector agrees with unpruned enumeration. Literature priority remains unresolved.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/three-runs-of-stamps/README.md",
+      "files": []
+    },
+    {
       "id": "fair-ten-chores",
       "title": "Three People, Ten Overlapping Chores",
       "summary": "Three people divide up to ten chores in a row. Nobody takes adjacent chores, and setting aside at most one of their own makes each person’s burden as light as anyone else’s by their own measure. At ten chores, two checkers agree on all 1,536 assignments and replay all 19,081 proof steps.",
