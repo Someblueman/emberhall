@@ -3,11 +3,26 @@
 For $k\ge2$, the crease pattern `M^k V^k M^k` has
 $(9k^3-25k^2+30k-12)/2$ legal labeled stacks in the fixed orientation.
 The [author proof](cubic.md) partitions every stack by the first adjacent
-valley after step one. An independent mathematical review of the full
-argument is pending.
+valley after step one. Tern’s [independent reconstruction of the full argument](CUBIC_RECONSTRUCTION.md)
+accepts the count for every integer $k\ge2$ in this model, including the
+fourth-stop induction and the terminal boundaries. This is a reconstruction
+after reading the authors, not an independent discovery. **Literature priority
+and overlap remain unresolved.**
 
-From a clone, reproduce the count and compare every sector with an
-unpruned enumeration. A recorded run for eight creases per block follows.
+Read the [proof](cubic.md), follow the [independent reconstruction](CUBIC_RECONSTRUCTION.md),
+or run the [standalone checker](cubic.py). The reconstruction includes a small
+Python calculation that imports none of the author’s modules. The proof’s
+opening review-status sentence predates that completed reconstruction.
+
+From the repository root of a [clone of Emberhall](https://github.com/Someblueman/emberhall),
+with Python 3.10 or newer and no dependencies, reproduce the count and compare
+every sector with unpruned enumeration:
+
+```sh
+python3 projects/three-runs-of-stamps/cubic.py 8 --verify
+```
+
+Recorded again from the complete source on 20 November 2026:
 
 ```text
 $ python3 projects/three-runs-of-stamps/cubic.py 8 --verify
@@ -24,7 +39,7 @@ First adjacent valley after step one: never | 218
 Every sector agrees with unpruned enumeration.
 ```
 
-From the repository root, with Python 3.10 or newer and no dependencies:
+More checks from the same repository root:
 
 ```sh
 python3 projects/three-runs-of-stamps/count.py --k 2 --list
@@ -159,7 +174,7 @@ The [independent reconstruction](RECONSTRUCTION.md) also verifies this larger
 family. The [full decomposition](cubic.md) counts the stacks whose second
 or later valley face is placed in a nonadjacent gap.
 
-## Literature status and next work
+## Literature status and review
 
 The [longer preprint, version 2](https://arxiv.org/html/2503.23661v2), section
 5.2, Table 2, gives the cubic as an interpolation tested through k=78.
@@ -178,5 +193,9 @@ The abstract alone does not settle whether any argument here overlaps it.
 Sakai's [earlier recurrence paper](https://journalofscience.org/index.php/GJSFR/article/view/102616).
 Neither abstract certifies a solution to the fixed three-run problem.
 
-The next mathematical milestone is independent reconstruction of the full
-classification, including the fourth-stop induction and both terminal boundaries.
+The [full independent reconstruction](CUBIC_RECONSTRUCTION.md) is complete:
+it checks the classification, the fourth-stop induction and both terminal
+boundaries, and reconstructs small counts without importing the author’s
+enumerator. Finite agreement supports the argument; it does not replace its
+arbitrary-length proof. Resolving the literature overlap still requires
+access to the cited full text.
