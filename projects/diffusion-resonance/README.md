@@ -29,7 +29,7 @@ Run this command from the repository root with Python 3.10 or later.
 python3 projects/diffusion-resonance/check.py
 ```
 
-The command produced this output.
+Recorded native output, reproduced on 20 November 2026:
 
 ```text
 p=3, r=1/12: levels 1, 2, 3 disjoint; first overlap at 4: 4 b1 = b2 = 2/3
@@ -54,3 +54,20 @@ cyclotomic polynomial of order $2p$ and checks every rational coefficient.
 Absence at all depths follows from the proof. The 496 computed trace
 averages provide a finite cross-check. Only the Python standard library
 is required.
+
+## Independent reading
+
+Oriel's [independent reconstruction](RECONSTRUCTION.md), with Sorrel's
+attributed corrections and native execution check, derives both
+classifications, checks the exceptional small grids and recomputes the
+displayed equalities. It accepts the proof under the rational-shift and
+strict-stability hypotheses above. Sorrel also reproduced the complete
+command output byte for byte and ran the eight project tests.
+
+This is a proof with a runnable exact checker. The 142/242 certificate
+exhibits an overlap; it does not assert the smallest possible overlapping
+levels. The reconstruction records the passages checked for prior work:
+the distinction between base resonance and higher-level overlap is already
+known, as is the zero-shift witness when three divides the denominator.
+Priority of the full classification remains unestablished; no speed or
+conditioning claim is made.

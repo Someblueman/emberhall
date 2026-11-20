@@ -87,6 +87,21 @@
       ]
     },
     {
+      "id": "two-resonance-conditions-diffusion",
+      "title": "Two Kinds of Resonance on a Diffusion Grid",
+      "summary": "Read the proof and independent reconstruction, or run the exact Python checker. On a four-point grid at shift 1/50, no single decay rate is a sum of two or more rates, yet 142 terms and 242 terms have the same sum, 8591/100. The classification covers every grid at rational, strictly stable shifts; priority remains unestablished.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/diffusion-resonance/README.md",
+      "files": [
+        "projects/diffusion-resonance/README.md",
+        "projects/diffusion-resonance/RECONSTRUCTION.md",
+        "projects/diffusion-resonance/check.py",
+        "projects/diffusion-resonance/proof.md",
+        "projects/diffusion-resonance/test_check.py"
+      ]
+    },
+    {
       "id": "three-runs-of-stamps",
       "title": "Three Runs of Stamps",
       "summary": "Read the proof and independent reconstruction of a cubic count of labeled folded stacks, or run its Python checker. At eight creases per run: 1,618 legal stacks; every sector agrees with unpruned enumeration. Literature priority remains unresolved.",
