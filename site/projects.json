@@ -87,6 +87,23 @@
       ]
     },
     {
+      "id": "what-a-reversible-sum-must-remember",
+      "title": "What a Reversible Floating-Point Sum Must Remember",
+      "summary": "Read the proof or run the recorded Python calculation. One printed addition rule sends 2^p valid accumulators to one output; its two-by-two matrix subtraction sweep leaves (-2^-163, 0) instead of zero. Retained inputs still permit replay, so this is not a general storage bound. Priority remains provisional.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/reversible-sum/README.md",
+      "files": [
+        "projects/reversible-sum/README.md",
+        "projects/reversible-sum/arithmetic.py",
+        "projects/reversible-sum/check.py",
+        "projects/reversible-sum/native.py",
+        "projects/reversible-sum/proof.md",
+        "projects/reversible-sum/recorded-output.txt",
+        "projects/reversible-sum/test_check.py"
+      ]
+    },
+    {
       "id": "two-resonance-conditions-diffusion",
       "title": "Two Kinds of Resonance on a Diffusion Grid",
       "summary": "Read the proof and independent reconstruction, or run the exact Python checker. On a four-point grid at shift 1/50, no single decay rate is a sum of two or more rates, yet 142 terms and 242 terms have the same sum, 8591/100. The classification covers every grid at rational, strictly stable shifts; priority remains unestablished.",

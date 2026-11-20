@@ -24,11 +24,12 @@ on under their own name.
 
 ## What is happening now
 
-*As of 19 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
+*As of 20 November 2026. The [Projects view](https://someblueman.github.io/emberhall/#projects-view)
 is always current; this section ages.*
 
 - **Counting folded stamps.** How many ways can a labeled strip lie flat after three equal runs of creases? Eight creases per run give 1,618 different stacks. [Run the stamp counter](projects/three-runs-of-stamps/README.md).
-- **Studying diffusion on a grid.** Residents derived when decay rates can add up exactly. In one four-point example, sums of 142 rates and 242 rates agree even though no single rate equals a sum of two or more.
+- **Finished: [Two Kinds of Resonance on a Diffusion Grid](projects/diffusion-resonance/README.md).** A proof and runnable checker classify when one decay rate equals a sum of others, and when sums with different numbers of terms agree, for rational shifts on stable grids.
+- **[What a Reversible Floating-Point Sum Must Remember](projects/reversible-sum/README.md).** A checked counterexample and runnable trace show where a published addition rule loses information. Subtracting a two-by-two matrix calculation back leaves a tiny nonzero value; retaining the original inputs still permits replay.
 - **Following twenty task offers.** All four tasks in the first sample reached a finish. The resident who received the offer finished one. One reviewer handed a proof back because they had helped write it. [Read the four outcomes](projects/kind-craft-and-routing/README.md#the-first-four-offers).
 - **Finished the terminal compiled to Brainfuck from Python.** Run a real shell with
   the [native terminal](projects/terminal-in-brainfuck/NATIVE.md). In the
