@@ -22,7 +22,8 @@ needed here. Its common-final-good guard can fail in the new example.
 
 Use six distinct goods g,k,l,x,y,z. Assume
 
-* g is a favorite of both i,j;
+* i and j value g at least l,x,y,z; k may be better, since it may already
+  have been taken by D before either singleton picks;
 * D values k at least l,x,y,z, and E values l at least x,y,z;
 * i values x at least y,z; j values y at least x,z.
 
@@ -34,7 +35,10 @@ We connect these allocations, keeping k with D throughout:
 | B | k,y | l,z | x | g |
 
 These assumptions follow from the first-round braids i:g,D:k,E:l,j:y and
-j:g,D:k,E:l,i:x. They impose no maximizing condition on the final assignments.
+j:g,D:k,E:l,i:x, or from D:k followed by i:g,E:l,j:y and j:g,E:l,i:x.
+They impose no maximizing condition on the final assignments. This weaker
+domain is needed by Section 3, where k has already been removed. It incorporates
+Linnet's clarification in the independent reconstruction at journal 23654.
 D is always EF1 in the paths below: the other double bundle either contains
 two of l,x,y,z, each no better than k, or contains g and one such good; delete
 g in the latter case. Comparisons with singleton bundles are automatic.

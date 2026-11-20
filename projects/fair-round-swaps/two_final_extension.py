@@ -50,12 +50,13 @@ def _checked(u: Profile, route: list[Allocation]) -> list[Allocation]:
 def bridge(u: Profile) -> list[Allocation]:
     """Connect LEFT to RIGHT without the earlier common-final-good guard.
 
-    The first four picks of the two displayed braids must be greedy. Their
-    final two assignments may be arbitrary: D's first good stays fixed.
+    Check the local inequalities in the proof, including the case where
+    D already took k before the shared favorite g was chosen. The final two
+    assignments may be arbitrary: D's first good stays fixed.
     """
     _profile(u)
     required = ((0, 1, (2, 3, 4, 5)), (1, 2, (3, 4, 5)),
-                (2, 0, (1, 2, 3, 4, 5)), (3, 0, (1, 2, 3, 4, 5)),
+                (2, 0, (2, 3, 4, 5)), (3, 0, (2, 3, 4, 5)),
                 (2, 3, (4, 5)), (3, 4, (3, 5)))
     if any(u[i][g] < u[i][h] for i, g, rest in required for h in rest):
         raise ValueError("the first-round braid inequalities do not hold")

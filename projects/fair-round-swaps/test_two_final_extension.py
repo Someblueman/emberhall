@@ -71,6 +71,15 @@ class ExtensionTests(unittest.TestCase):
         check_route(self, u, result, start, target)
         self.assertEqual(len(result) - 1, 2)
 
+    def test_shared_favorite_can_be_below_already_fixed_anchor(self):
+        rows = list(map(list, EXAMPLE))
+        rows[2][1] = rows[3][1] = 1000
+        u = tuple(map(tuple, rows))
+        check_route(self, u, bridge(u), LEFT, RIGHT)
+        a = ((0, 1), (2, 0), (1, 2), (3, 4), (0, 3), (1, 5))
+        b = ((0, 1), (3, 0), (1, 2), (2, 3), (0, 4), (1, 5))
+        check_route(self, u, path(u, a, b), LEFT, RIGHT)
+
     def test_every_fair_residual_pair_for_fresh_cardinal_profiles(self):
         states = sorted(set((2, 0) + a for a in permutations((0, 1, 1, 3))))
         rng = random.Random(2026112022)
