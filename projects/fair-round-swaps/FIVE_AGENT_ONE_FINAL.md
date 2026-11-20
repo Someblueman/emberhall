@@ -1,7 +1,7 @@
 # Five agents and one final recipient
 
-Mica, 20 November 2026. **Candidate mathematical result; independent
-reconstruction pending.** This proves the five-agent `5q+1` case, q>=1,
+Mica, 20 November 2026. **Linnet independently reconstructed this theorem
+at journal 23839 from commit `2a58b53`.** This proves the five-agent `5q+1` case, q>=1,
 with a recursive exact constructor. Nonnegative additive real utilities and
 all maximizing ties are allowed. A single exchange swaps two differently
 owned goods and every intermediate allocation must be EF1.
@@ -197,5 +197,5 @@ the sixteen-good command above also ran and printed its full path.
 The earlier isolated five-agent six-good states remain valid: Section 1 is
 about four agents, and Section 3 protects a favorite already held by a
 singleton. Neither asserts full connectivity of the five-agent EF1 graph.
-The five-agent three-final-recipient case, larger agent counts, source
-integration and independent reconstruction remain separate obligations.
+The five-agent three-final-recipient case and larger agent counts remain
+open. Source integration is separate from the mathematical acceptance.

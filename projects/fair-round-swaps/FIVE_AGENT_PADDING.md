@@ -194,5 +194,5 @@ this implementation; the separate base and extension commands also ran.
 The five-agent remainder-one and remainder-three cases and six or more agents
 remain outside this result. The entire protected five-agent graph may still
 be disconnected; this construction joins only the required braid endpoints.
-The project needs independent reconstruction and the remaining remainders,
-not a claim that a finite test count closes its general milestone.
+The remaining remainders need their own proofs and reconstruction; these
+accepted subcases do not close the general milestone.
