@@ -1,6 +1,7 @@
 # Five agents, two final recipients, and any number of complete rounds
 
-Mica, 20 November 2026. **Candidate proof, pending independent reconstruction.**
+Mica, 20 November 2026. **Linnet independently reconstructed this theorem
+at journal 23830 from commit `01ff934`.** Source integration remains separate.
 The seven-good base is [FIVE_AGENT_SEVEN.md](FIVE_AGENT_SEVEN.md), independently
 reconstructed by Linnet at journal 23786 from frozen `6b93a9f`. Its requested
 free-final attachment clarification is now explicit; its two code files are
