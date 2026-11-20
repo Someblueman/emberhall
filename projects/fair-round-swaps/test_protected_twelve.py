@@ -221,8 +221,9 @@ class TwelveTests(unittest.TestCase):
         data = load_frontier()
         continuation = data['splice_search']
         phase = continuation['phases'][-1]
-        self.assertIn(phase['status'], ('iteration_limit', 'time_limit', 'vertex_limit'))
-        self.assertEqual(phase['final_query_status'], 'sat')
+        self.assertIn(phase['status'], ('iteration_limit', 'time_limit', 'vertex_limit', 'budget_exhausted'))
+        if phase['status'] != 'budget_exhausted':
+            self.assertEqual(phase['final_query_status'], 'sat')
         case = continuation['final_counterexample']
         u = tuple(tuple(Fraction(x) for x in row) for row in case['utilities'])
         vertices = frontier_vertices(data)
@@ -243,8 +244,15 @@ class TwelveTests(unittest.TestCase):
         self.assertEqual((len(allowed), len(seen)),
                          (case['cut']['fair_vertices'], case['cut']['start_component']))
         self.assertEqual(candidate_cut(u, vertices), case['cut'])
-        self.check(u, case['search'])
-        self.assertTrue(any(tuple(a) not in set(vertices) for a in case['search']['path']))
+        if phase['status'] == 'budget_exhausted':
+            self.assertEqual(case['search']['status'], 'budget_exhausted')
+            self.assertEqual(Graph(u).search(250000)['status'], 'budget_exhausted')
+            repair = continuation['adjudication']['search']
+            self.check(u, Graph(u).search(2494800))
+        else:
+            repair = case['search']
+        self.check(u, repair)
+        self.assertTrue(any(tuple(a) not in set(vertices) for a in repair['path']))
         command = subprocess.run([sys.executable, '-S',
                                   str(Path(__file__).with_name('protected_twelve.py')),
                                   '--splice-cover', '--max-checks', '2'],
@@ -262,6 +270,9 @@ class TwelveTests(unittest.TestCase):
         self.check(u, {'status': 'connected', 'path': route})
         self.assertTrue(all(v > 0 for row in u for v in row))
         self.assertTrue(all(len(set(row)) == 12 for row in u))
+        self.assertEqual(min(abs(row[a]+row[b]-row[c]) for row in u
+                             for a, b in combinations(range(12), 2)
+                             for c in range(12) if c not in (a, b)), 1)
         cache = {}
 
         def neighbors(a):
@@ -295,6 +306,15 @@ class TwelveTests(unittest.TestCase):
         result = verify_ten_step_distance(u, route)
         self.assertEqual(result['distance'], 10)
         self.assertEqual(result['ball_sizes'], [5792, 5775])
+        shortcut = [START]
+        for x, y in ((0, 6), (0, 7)):
+            state = list(shortcut[-1])
+            state[x], state[y] = state[y], state[x]
+            shortcut.append(tuple(state))
+        self.assertEqual(shortcut[-1], TARGET)
+        self.assertEqual(shortcut[1][0], 0)
+        self.assertTrue(all(fair(u, state) for state in shortcut))
+        self.assertEqual(sum(x != y for x, y in zip(START, TARGET)), 3)
         old = data['continuations'][-1]['final_counterexample']
         old_u = tuple(tuple(Fraction(v) for v in row) for row in old['utilities'])
         old_route = list(map(tuple, old['search']['path']))

@@ -1,4 +1,4 @@
-"""Bounded exact exploration of the five-final protected braid, not a theorem."""
+"""Exact paths and distance checks for the unresolved five-final protected core."""
 
 from __future__ import annotations
 
