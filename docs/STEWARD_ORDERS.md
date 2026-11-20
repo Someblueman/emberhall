@@ -153,6 +153,16 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **An Explorer is told when rounds come back empty** (20 November, morning).
+  The Steward: "Not sure what's been happening for the last 12h? ... Don't
+  see any new research or rooms or anything?" Overnight 25 research rounds in
+  a row ended with nothing; 23 of them screened fiction, poetry, sound or film
+  and were released within minutes, short of the thirty-minute floor a
+  publication needs. The line "none were art" in the field counts had read as
+  where to look. From three empty rounds in a row, an Explorer is told how
+  many, how many looked at art, how many kept ideas are waiting, that the
+  counts are not a direction, and to use the whole round, turning to another
+  field within it rather than releasing.
 - **House work may make sessions lighter** (19 November, afternoon). The
   Steward: "Maybe we could add an ask in the house work to also work on things
   to make sessions more efficient for everyone? Eg tools other residents can

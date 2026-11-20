@@ -203,6 +203,51 @@ def field_mix(state: dict, last: int = 20) -> str:
     return text
 
 
+# Empty rounds (Steward, 20 November: "Don't see any new research"). Overnight 25 research rounds in a
+# row ended with nothing: most screened fiction, poetry, sound or film, read the closest earlier works and
+# released within a few minutes, short of the thirty-minute floor a publication needs. The field counts
+# above said "none were art", which read as where to look. From three empty rounds an Explorer is told so.
+EMPTY_ROUNDS = 3
+ARTFUL = re.compile(r"literar|fiction|poem|poetry|prose|story|stories|sound|music|film|animation|comic|"
+                    r"\bart\b|artistic|visual work", re.I)
+
+
+def empty_rounds(state: dict) -> tuple[int, int, float | None]:
+    """Research rounds since the last one that published: how many, how many read art, when the first began."""
+    rounds = sorted(state.get("shelf", {}).get("rounds", {}).values(),
+                    key=lambda item: item.get("started_sequence") or 0, reverse=True)
+    count = artful = 0
+    first = None
+    for item in rounds:
+        if item.get("status") not in {"released", "expired", "slept"} or item.get("ideas"):
+            break
+        count += 1
+        artful += bool(ARTFUL.search(item.get("note") or ""))
+        first = item.get("started_at", first)
+    return count, artful, first
+
+
+def empty_rounds_line(state: dict) -> str:
+    from . import shelf as shelf_model
+    count, artful, first = empty_rounds(state)
+    if count < EMPTY_ROUNDS:
+        return ""
+    ideas = state.get("shelf", {}).get("ideas", {}).values()
+    waiting = {scale: sum(1 for idea in ideas if idea.get("status") == "shelved" and idea.get("scale", "great")
+                          == scale and shelf_model.grounded(state, idea)) for scale in ("great", "small")}
+    since = f" since {datetime.fromtimestamp(first).strftime('%d %B %H:%M')}" if first else ""
+    return (f"THE LAST {count} RESEARCH ROUNDS BROUGHT NOTHING{since}. {artful} of them looked at fiction, poetry, "
+            "sound, film or other art, read the closest earlier works and were released within minutes, short of "
+            "the thirty-minute floor a publication needs. Declining a weak idea is right, but the slots need "
+            f"something to choose: kept ideas waiting now are great {waiting['great']}, small {waiting['small']}. "
+            "The field counts above are information, not a direction"
+            + (": art has been searched more than anything else lately and nothing came of it" if 2 * artful > count
+               else "") + ". So use the whole round. Give one idea at least thirty minutes of "
+            "real reading before you decide. If your first field yields nothing, turn to another within the same "
+            "round (mathematics, a language, a library, a science, the house, art) instead of releasing, and "
+            "publish the best idea you find. ")
+
+
 # The Steward, 18 November, evening: every waiting idea was a film or a little game, the mathematics included.
 # Until then every idea was asked whether a stranger would grin and told it must do something a visitor can see.
 NOT_A_TOY = (
@@ -1191,7 +1236,7 @@ class Coordinator:
                           "something one or two residents can finish in days and someone can use, check, run, "
                           "read or watch. "))
                     for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
-                field_mix(state) + chosen_mix(state) +
+                field_mix(state) + chosen_mix(state) + empty_rounds_line(state) +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
                 "After waking, read the current shelf, its graveyard (so you do not bring back what already "
                 "failed) and the active rules. Before research use shelf explore-start with current expect "

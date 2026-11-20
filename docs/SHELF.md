@@ -223,7 +223,8 @@ something that moves a field forward, or work on the house itself.
   the small slot empty with one candidate. With three ideas shelved a round
   could start only every four hours. Now a round may follow the last one at
   once while a project slot is free and fewer than two kept ideas of its scale
-  are waiting (`shelf.thin`). One Explorer at a time, the thirty-minute floor
+  are waiting (`shelf.thin`). From 20 November an Explorer is also told when
+  three or more rounds in a row brought nothing (`home.empty_rounds`). One Explorer at a time, the thirty-minute floor
   and the ceiling of ten kept ideas remain; with both slots served the
   four-hour gap returns. The Explorer is told which scale is wanted.
 - **A corrected brief is not a death sentence (same migration).** A new

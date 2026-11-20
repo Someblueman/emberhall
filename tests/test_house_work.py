@@ -366,6 +366,26 @@ class HouseWorkTests(unittest.TestCase):
         self.assertIn("Bring a small idea", prompt, "the other short benches are still asked for")
         self.assertLess(prompt.index("Bring a small idea"), prompt.index("Bring a house idea"))
 
+    def test_an_explorer_is_told_when_rounds_keep_coming_back_empty(self):
+        f = self.f
+        self.on()
+        state = f.state
+        self.assertEqual("", home.empty_rounds_line(state))
+        rounds = state.setdefault("shelf", {}).setdefault("rounds", {})
+        rounds["old"] = {"status": "published", "ideas": ["x"], "started_sequence": 1, "started_at": 0}
+        for n, note in enumerate(["Early negative literary screen.", "Negative sound-art screen.",
+                                  "No candidate after reading primary geometry papers."], start=2):
+            rounds[f"r{n}"] = {"status": "released", "ideas": [], "started_sequence": n, "started_at": 3600.0 * n,
+                               "note": note}
+        self.assertEqual((3, 2, 7200.0), home.empty_rounds(state))
+        line = home.empty_rounds_line(state)
+        for words in ("THE LAST 3 RESEARCH ROUNDS BROUGHT NOTHING", "2 of them looked at fiction",
+                      "kept ideas waiting now are great 0, small 0", "information, not a direction",
+                      "at least thirty minutes", "turn to another within the same round"):
+            self.assertIn(words, line)
+        rounds["r9"] = {"status": "published", "ideas": ["y"], "started_sequence": 9, "started_at": 9e4}
+        self.assertEqual("", home.empty_rounds_line(state), "one published round ends the streak")
+
     def test_the_handbook_and_orders_say_so(self):
         root = pathlib.Path(__file__).resolve().parents[1]
         handbook = " ".join((root / "docs/SHELF.md").read_text().split())
