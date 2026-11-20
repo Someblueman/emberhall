@@ -180,6 +180,38 @@ def review_demand(state: dict, demand: dict, private: Path, busy: bool) -> dict:
 
 
 HOME_FOCUS = ("improve", "room", "tend", "research")
+# A mix, and the house always moving (Steward, 20 November: "All of them, should be a mix of them but the house
+# should always be moving forward as well"; owner migration MIX). Of the last 12 projects 8 were mathematics,
+# and the house work had finished all 30 of its tasks with nothing after them. From the migration one session
+# at a time always looks after the house (no half-hour gap; every other turn improves it), and each research
+# round starts in the next field in turn.
+MIX = "upgrade-20261120-mix-and-house"
+MIX_FOCUS = ("improve", "room", "improve", "research", "improve", "tend", "improve", "checks")
+FIELD_TURNS = (
+    "software people would use: a library someone would import, a tool, or a game that runs",
+    "mathematics: a question with a result another mind can check",
+    "a science: an experiment, a simulation, a dataset or a model that tests something real",
+    "art, writing, film, music or play: a thing made to be looked at, read, heard or played",
+    "a programming language with an idea of its own and a program better written in it",
+    "design: something whose form or look is the work",
+)
+
+
+def mixing(state: dict) -> bool:
+    return MIX in state.get("maintenance", {}).get("migrations", {})
+
+
+def field_turn(state: dict) -> str:
+    """Where the next research round starts: the fields take turns, one round each."""
+    if not mixing(state):
+        return ""
+    since = state["maintenance"]["migrations"][MIX]["at"]
+    started = sum((item.get("started_at") or 0) >= since for item in state.get("shelf", {}).get("rounds", {}).values())
+    turn = FIELD_TURNS[started % len(FIELD_TURNS)]
+    return (f"THIS ROUND STARTS IN {turn}. The Steward, 20 November: 'All of them, "
+            "should be a mix of them'. The fields take turns, one round each, so the shelf holds a mix. Spend "
+            "your first thirty minutes there; only if it honestly yields nothing worth days, turn to another "
+            "field within the same round. ")
 def field_mix(state: dict, last: int = 20) -> str:
     """Tell an Explorer the wishes are equal and what the recent rounds brought, by field."""
     from . import shelf as shelf_model
@@ -320,7 +352,9 @@ def chosen_mix(state: dict, last: int = 9) -> str:
             + (f"; by field the last {len(fields)} were " + ", ".join(
                 f"{field} {fields.count(field)}" for field in sorted(set(fields), key=lambda item: -fields.count(item)))
                if staffing.LIGHT in state.get("maintenance", {}).get("migrations", {}) and fields else "")
-            + ". This is not a quota. It is what a stranger opening the Gallery will find a lot of, and little of. ")
+            + ". This is not a quota. It is what a stranger opening the Gallery will find a lot of, and little of. "
+            + ("The Steward wants a mix ('All of them, should be a mix of them'): when kept ideas are close, choose "
+               "the one from a field the house has chosen least lately. " if mixing(state) else ""))
 
 
 # Second looks (Steward, 17 November, evening): after the momentum migration every fifth house run
@@ -771,7 +805,9 @@ def house_work_line(state: dict) -> str | None:
             f"task with --project {key} and --ready, exactly as project builders do, claim it, build and test it, "
             "commit in your room and finish the task with a handoff the next builder can continue from. Keep to "
             "the files your task owns, since others are building the same work. The project owner records "
-            "project-done when the milestone is met.\n")
+            "project-done when the milestone is met. If every task is done and the milestone already looks met, "
+            "do not invent more: say so at the Hearth, and if you are the owner record project-done so the next "
+            "house work can start.\n")
 
 
 def focus_prompt(state: dict, focus: str) -> str:
@@ -1271,6 +1307,8 @@ class Coordinator:
                           "something one or two residents can finish in days and someone can use, check, run, "
                           "read or watch. "))
                     for which in shelf_model.thin(state, shelf_model.empty() | state.get("shelf", {})))) +
+                (field_turn(state) if {"great", "small"} & set(shelf_model.thin(state, shelf_model.empty() |
+                                                                       state.get("shelf", {}))) else "") +
                 field_mix(state) + chosen_mix(state) + empty_rounds_line(state) +
                 f"Admission observed shelf generation {assigned['explore_generation']}; this is not a research lease. "
                 "After waking, read the current shelf, its graveyard (so you do not bring back what already "
@@ -1635,11 +1673,13 @@ class Coordinator:
         house_first = (idle and shelf_model.higher_since(state) is not None
                        and any(shelf_model.slot_free(whole, which) for which in ("great", "small")))
         if not house_first and (last.get("run") in self.running
-                                or time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS):
+                                or (not mixing(state) and time.time() - last.get("at", 0) < HOME_FOCUS_GAP_SECONDS)):
             return None
         choices = HOME_FOCUS if shelf_model.open_since(state) is not None else HOME_FOCUS[:3]
         if staffing.momentum(state):
             choices = (*choices, CHECKS_FOCUS)
+        if mixing(state):
+            choices = tuple(focus for focus in MIX_FOCUS if focus in choices)
         return choices[last.get("count", 0) % len(choices)]
 
     def focus_record(self) -> dict:

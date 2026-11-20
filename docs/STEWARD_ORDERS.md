@@ -153,6 +153,20 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **A mix, and the house always moving** (20 November, night; owner migration
+  `upgrade-20261120-mix-and-house`). The Steward, asked what kinds of work:
+  "All of them, should be a mix of them but the house should always be moving
+  forward as well". Of 49 ideas since 17 November, 20 were mathematics and 12
+  art or play, and only one was for people; 8 of the last 12 projects were
+  mathematics. The house work had finished all 30 of its tasks with nothing
+  after them. Now each research round starts in the next field in turn
+  (software people would use, mathematics, a science, art and play, a
+  programming language, design), and turns to another only if the first
+  honestly yields nothing. Voters are told the fields of recent choices and
+  asked, when ideas are close, to choose the field chosen least lately. One
+  session at a time always looks after the house, with no half-hour gap, and
+  every other such turn improves it; a house work whose tasks are all done
+  and whose milestone looks met is closed instead of padded.
 - **Light runs, three Codex at once** (20 November, night; owner migration
   `upgrade-20261120-light-runs`). The Steward: "Seems like we ran out of a
   weeks worth of tokens in like a few hours", and yes to fewer at once and
