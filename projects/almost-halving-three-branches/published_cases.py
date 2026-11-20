@@ -143,6 +143,36 @@ def witness(lengths: object, kind: str = "best") -> dict:
             **result}
 
 
+def gap_family_witness(t: int) -> dict:
+    """A separate proved maximum pair for (4t-1, 2t, t), t >= 2.
+
+    This is not an endpoint repair of Construction 16. See the signed-shell
+    proof in PUBLISHED_CASES.md; priority remains provisional.
+    """
+    if type(t) is not int or t < 2:
+        raise ValueError("gap-family parameter must be an integer >= 2")
+    h, e = divmod(t, 2)
+    lengths = (4 * t - 1, 2 * t, t)
+    a_minus = (set(range(h + 1 + e, 2 * h + e))
+               | set(range(2 * h + 1 + e, 3 * h + e))
+               | set(range(5 * h + 2 * e, 6 * h - 1 + 2 * e))
+               | set(range(6 * h + 2 * e, 7 * h - 1 + 2 * e)))
+    b_plus = set(range(1, h)) | set(range(2 * h + 1 + e, 3 * h + e))
+    c_plus = set(range(h + 1 + e, 2 * h + e))
+    left, right = [], [CENTRE]
+    for arm, length in enumerate(lengths, 1):
+        for d in range(1, length + 1):
+            if e and arm == 1 and d == length:
+                continue  # Omit only the longest-arm tip when t is odd.
+            positive = d not in a_minus if arm == 1 else d in (b_plus if arm == 2 else c_plus)
+            (left if positive else right).append((arm, d))
+    result = check_pair(lengths, left, right)
+    if not result["homometric"] or result["size"] != (7 * t) // 2:
+        raise ValueError("signed-shell family failed its exact check")
+    return {"lengths": lengths, "construction": f"signed-shell family t={t}",
+            "left": left, "right": right, **result}
+
+
 def demo() -> None:
     examples = [((8, 5, 2), "path"), ((9, 7, 4), "alternating"),
                 ((9, 7, 5), "alternating"), ((11, 7, 3), "block"),
@@ -172,12 +202,16 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--demo", action="store_true")
     mode.add_argument("--check", metavar="JSON", help="read a witness JSON file, or - for stdin")
+    mode.add_argument("--gap-family", type=int, metavar="T",
+                      help="maximum pair for the proved family (4T-1, 2T, T), T >= 2")
     args = parser.parse_args()
-    if (args.demo or args.check) and args.lengths:
-        parser.error("lengths cannot accompany --demo or --check")
+    if (args.demo or args.check or args.gap_family is not None) and args.lengths:
+        parser.error("lengths cannot accompany --demo, --check or --gap-family")
     try:
         if args.demo:
             demo()
+        elif args.gap_family is not None:
+            print(json.dumps(gap_family_witness(args.gap_family), sort_keys=True))
         elif args.check:
             raw = sys.stdin.read() if args.check == "-" else Path(args.check).read_text()
             payload = json.loads(raw)

@@ -117,6 +117,102 @@ class PublishedCasesTest(unittest.TestCase):
         self.assertEqual(run.returncode, 1)
         self.assertFalse(json.loads(run.stdout)["homometric"])
 
+    def test_gap_family_full_partition(self):
+        for t in (2, 3, 4, 5, 6, 7, 14, 15):
+            with self.subTest(t=t):
+                result = pc.gap_family_witness(t)
+                left, right = result["left"], result["right"]
+                self.assert_witness(result["lengths"], (left, right))
+                self.assertEqual(len(left), (7 * t) // 2)
+                self.assertEqual(len(set(left) | set(right)), 7 * t - (t % 2))
+        for t in (0, 1, -1, True):
+            with self.assertRaises(ValueError):
+                pc.gap_family_witness(t)
+
+    def test_shell_omitted_vertex_correction(self):
+        lengths = (9, 7, 4)
+        left, right = pc.alternating_pair(lengths, (1, 2, 3))
+        all_vertices = [pc.CENTRE] + [(i, d) for i, n in enumerate(lengths, 1)
+                                    for d in range(1, n + 1)]
+        for altered in (False, True):
+            a = left.copy()
+            if altered:
+                a[a.index(pc.CENTRE)] = (1, 9)
+            signs = {v: (1 if v in a else -1) for v in a + right}
+            holes = set(all_vertices) - signs.keys()
+            corrected, uncorrected = {}, {}
+            for d in range(1, 17):
+                full = sum(s * sum(pc.distance(v, w) == d for w in all_vertices)
+                           for v, s in signs.items())
+                correction = sum(s * sum(pc.distance(v, w) == d for w in holes)
+                                 for v, s in signs.items())
+                corrected[d] = full - correction
+                uncorrected[d] = full
+            lp, rp = graph_profile(lengths, a), graph_profile(lengths, right)
+            self.assertEqual(corrected, {d: 2 * (lp[d] - rp[d]) for d in corrected})
+            if not altered:
+                self.assertFalse(any(corrected.values()))
+                self.assertTrue(any(uncorrected.values()))
+
+    def test_gap_family_formal_identity(self):
+        # Integer Laurent coefficients in TWO INDEPENDENT variables z and r.
+        # This verifies the displayed identity, not finitely many values of h.
+        def term(i=0, j=0, coefficient=1):
+            return {(i, j): coefficient}
+
+        def add(*polys):
+            result = Counter()
+            for p in polys:
+                result.update(p)
+            return {key: value for key, value in result.items() if value}
+
+        def mul(*polys):
+            result = term()
+            for p in polys:
+                out = Counter()
+                for (i, j), a in result.items():
+                    for (k, l), b in p.items():
+                        out[i + k, j + l] += a * b
+                result = {key: value for key, value in out.items() if value}
+            return result
+
+        def invert(p):
+            return {(-i, -j): c for (i, j), c in p.items()}
+
+        one, z, r = term(), term(1), term(0, 1)
+        t1 = add(z, term(0, 8, -1),
+                 mul(term(0, 1, -2), add(one, r), add(one, term(-1, 4)),
+                     add(z, term(0, 1, -1))))
+        t2 = add(z, term(1, 4, -1),
+                 mul(term(0, 1, -2), add(one, term(0, 2)), add(one, term(1, 1, -1))))
+        t3 = add(term(1, 0, -1), term(1, 2), term(1, 1, 2), term(0, 2, -2))
+        residual = add(
+            mul(term(0, 0, -1), add(one, term(1, 0, -1)),
+                add(one, term(-1, 8, -1), term(0, 4, -1), term(0, 2, -1))),
+            mul(t1, add(one, term(0, 4, -1), term(0, 2, -1))),
+            mul(t2, add(one, term(-1, 8, -1), term(0, 2, -1))),
+            mul(t3, add(one, term(-1, 8, -1), term(0, 4, -1))),
+            mul(term(0, 8), invert(t1)), mul(term(1, 4), invert(t2)),
+            mul(term(1, 2), invert(t3)))
+        self.assertEqual(residual, {})
+        # Odd t omits the long-arm leaf, leaving lengths 8h+2, 4h+2, 2h+1.
+        a = add(z, term(3, 8, -1),
+                mul(term(1, 1, -2), add(one, r), add(one, term(0, 4)),
+                    add(z, term(0, 1, -1))))
+        b = add(term(1, 0, -1), term(3, 4),
+                mul(term(0, 0, 2), add(one, term(1, 2)), add(z, term(0, 1, -1))))
+        c = add(term(1, 0, -1), term(2, 2),
+                mul(term(1, 1, 2), add(z, term(0, 1, -1))))
+        odd_residual = add(
+            mul(term(0, 0, -1), add(one, term(1, 0, -1)),
+                add(one, term(2, 8, -1), term(2, 4, -1), term(1, 2, -1))),
+            mul(a, add(one, term(2, 4, -1), term(1, 2, -1))),
+            mul(b, add(one, term(2, 8, -1), term(1, 2, -1))),
+            mul(c, add(one, term(2, 8, -1), term(2, 4, -1))),
+            mul(term(3, 8), invert(a)), mul(term(3, 4), invert(b)),
+            mul(term(2, 2), invert(c)))
+        self.assertEqual(odd_residual, {})
+
 
 if __name__ == "__main__":
     unittest.main()

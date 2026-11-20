@@ -1,8 +1,8 @@
 # Reconstructing the published tripod cases
 
-Mica, 20 November 2026. This is an admission document, **not a proof of the
-project's half-minus-one target**. The formulas below are proved for arbitrary
-lengths within their stated domains. Tests check their implementation only.
+Mica, 20 November 2026. Published-case admission and a separate signed-shell
+result. **The general half-minus-one target remains unproved.** The formulas
+below are proved for arbitrary lengths within their stated domains.
 
 ## Sources and priority
 
@@ -33,9 +33,11 @@ Priority refresh on 20 November 2026:
 
 None of these opened results resolves the proposed target. Searches for
 “homometric sets” with trees, spiders, three legs and later dates found no
-resolution. This is **provisional priority**, not proof of novelty. The cited
+resolution. This is **provisional priority**, not proof of novelty. A later
+successful retrieval of the
 [twins survey](https://wwwalt.math.kit.edu/iag6/~axenovich/media/twins-survey1.pdf)
-timed out (its alternate URL redirects to the author's homepage).
+resolved that source gap: its Section 6, Theorems 6.4–6.5, repeats the
+three-legged bound and later general-tree/haircomb bounds, not this target.
 Anu's thesis, *A study on two graph parameters: double Roman domination
 number and homometric number*, is now located in the
 [university reader](https://mgutheses.in/page/authors_view.php?q=T+3952&word=):
@@ -170,7 +172,7 @@ For sorted lengths, put `p=floor((a+b+1)/2)`,
 `q=floor((a+1)/(b-c))` is odd, also put `v=(n-r)/2` with the remainder above.
 Otherwise v is unavailable, not zero evidence for an upper bound.
 The largest implemented size is exactly `K=max(p,u,v when available)`.
-The still-unsettled cases **for this admission** are exactly those with
+The cases unsettled **by these published formulas** are exactly those with
 `K<floor(n/2)-1`. This arithmetic criterion is not a classification of h(T).
 
 There are infinitely many such gaps: for integer `t>=4`, take
@@ -193,6 +195,156 @@ disjoint supports, disjoint centre membership and equal cardinality. This
 is a formulation, not a solver or existence proof. Searching only for
 distance-preserving bijections would impose an unjustified extra restriction.
 
+## Signed shells, with an exact omitted-vertex correction
+
+Give every vertex a sign `s(v)` in `{-1,0,1}`: plus for A, minus for B,
+zero for an omitted vertex. Write `R={v:s(v)!=0}` and
+`N_d^R(v)=|{w in R:dist(v,w)=d}|`, for `d>=1`. Then
+
+`sum_v s(v)*N_d^R(v) = 2*(D_A(d)-D_B(d))`.                 (1)
+
+Proof: collect each unordered retained pair's two contributions. Equal plus
+signs contribute 2, equal minus signs -2, opposite signs zero. Thus disjoint,
+equally sized sets of the target size exist **if and only if** there is such
+a sign assignment with `sum_v s(v)=0`, at most `2+(n mod 2)` zeros, and
+every left side of (1) zero. This equivalence covers all pairs, not only
+isometric pairs or a search class. It does not assert such a sign assignment
+always exists.
+
+For a fixed omitted set H, the equations are linear in the remaining signs:
+
+`N_d^R(v)=N_d^V(v)-sum_(w in H) [dist(v,w)=d]`.              (2)
+
+Counting full-tree shells without this correction gives the wrong equations.
+The coefficients count paths in the original tree; deleting a vertex from
+R does not delete it from the paths defining the metric.
+
+## Maximum homometric pairs for the uncovered family
+
+**Proposition (priority provisional).** For every integer `t>=2`, the tripod
+with lengths `(4t-1,2t,t)` has disjoint homometric sets of size `floor(7t/2)`.
+This is maximum by disjointness, so `h(T)=floor(7t/2)` for this family.
+It settles the entire gap family identified above, not arbitrary triples.
+This is a separate formula, not a proposed repair of Construction 16.
+
+First let `t=2h`, where `h>=1`. All `14h` vertices will be used.
+
+Here and below `[p,q]` denotes all integer depths between its endpoints,
+and is empty when `p>q`. Assign the centre minus. On arm 1, assign minus on
+
+`[h+1,2h-1], [2h+1,3h-1], [5h,6h-2], [6h,7h-2]`,
+
+and plus everywhere else. On arm 2 assign plus on `[1,h-1]` and
+`[2h+1,3h-1]`, minus elsewhere. On arm 3 assign plus on `[h+1,2h-1]`,
+minus elsewhere. Let A be all plus vertices and B all minus vertices.
+All endpoints lie in their arms, including `h=1` where the four negative
+intervals on arm 1 and all positive intervals on arms 2 and 3 are empty.
+
+The plus counts on the three arms are `4h+3`, `2h-2`, `h-1`, summing to
+`7h`; the rest, including the centre, are the other `7h` vertices.
+It remains to prove every distance coefficient equal.
+
+### A polynomial form of the full-shell equations
+
+For a fully retained tripod of lengths `a_1,a_2,a_3`, put
+`S_i(z)=sum_(p=1)^a_i s(i:p)*z^p` and let `s_0` be the centre sign.
+Assume the signs sum to zero. Equation (1) for all distances is equivalent to
+
+`Q(z)=s_0*(1-sum_i z^a_i)
+      +sum_i S_i(z)*(1-sum_(j!=i) z^a_j)
+      -sum_i z^a_i*S_i(z^-1) = 0`.                       (3)
+
+For completeness, the full distance enumerator from `i:p` is
+`U_p + U_(a_i-p) + sum_(j!=i) z^p*U_(a_j)`, where
+`U_k=z+...+z^k`. Multiplying by `1-z` gives
+`2z+z^(p+1)-z^(a_i-p+1)-sum_(j!=i)z^(p+a_j+1)`.
+For the centre it gives `3z-sum_i z^(a_i+1)`.
+Sum with signs and use their zero total. The result is `z*Q(z)`.
+By (1), this is `2*(1-z)*(D_A(z)-D_B(z))`; hence (3) is an equivalence
+over integer Laurent polynomials, not merely a necessary test.
+
+### Verifiable identity for the stated intervals
+
+Write `r=z^h`, `T_i=(1-z)*S_i`. Summing the signed intervals gives
+
+`T_1 = z-r^8 - 2r*(1+r)*(1+r^4/z)*(z-r)`,
+
+`T_2 = z-z*r^4 - 2r*(1+r^2)*(1-z*r)`,
+
+`T_3 = -z+z*r^2+2z*r-2r^2`.
+
+For example, on arm 1 start with all plus, then subtract twice its four
+minus intervals: `S_1=U_(8h-1)-2*z^h*(1+z^h)*(1+z^(4h-1))*U_(h-1)`.
+The other formulas follow from the two positive interval lists in the same
+way. Define `T_i^*=T_i(z^-1,r^-1)`. Substitution in `(1-z)*Q` gives
+
+```
+-(1-z)*(1-r^8/z-r^4-r^2)
++ T_1*(1-r^4-r^2) + T_2*(1-r^8/z-r^2) + T_3*(1-r^8/z-r^4)
++ r^8*T_1^* + z*r^4*T_2^* + z*r^2*T_3^* = 0.             (4)
+```
+
+This is an identity in the **independent** Laurent variables z and r:
+expanding the three factored expressions cancels every monomial. The exact
+coefficient test in `test_gap_family_formal_identity` performs that expansion
+with integer coefficients and checks an empty residual dictionary. This is
+not testing a list of numerical h. Substituting `r=z^h` in (4) proves (3)
+for every positive h, and (1) proves the even-t case.
+
+### Odd t
+
+Let `t=2h+1`, `h>=1`. Omit just the last vertex of the longest arm.
+The remaining tree has lengths `(8h+2,4h+2,2h+1)` and the same distances
+between retained vertices. Give its centre a minus sign. The negative
+intervals on arm 1 are now
+
+`[h+2,2h], [2h+2,3h], [5h+2,6h], [6h+2,7h]`.
+
+Assign plus elsewhere on arm 1, plus on `[1,h-1]` and `[2h+2,3h]` on arm 2,
+and plus on `[h+2,2h]` on arm 3; all remaining vertices get minus signs.
+The counts of plus vertices are `4h+6`, `2h-2`, `h-1`, summing to `7h+3`.
+The retained order is `14h+6`, so the minus count agrees. Empty intervals
+at `h=1` need no exception.
+
+In the notation of (3), put `A=(1-z)S_1`, `B=(1-z)S_2`, `C=(1-z)S_3`.
+The signed interval lists give
+
+`A = z-z^3*r^8 - 2*z*r*(1+r)*(1+r^4)*(z-r)`,
+
+`B = -z+z^3*r^4 + 2*(1+z*r^2)*(z-r)`,
+
+`C = -z+z^2*r^2 + 2*z*r*(z-r)`.
+
+Here `r=z^h` as before. With stars again inverting both variables, the
+independent-variable identity is
+
+```
+-(1-z)*(1-z^2*r^8-z^2*r^4-z*r^2)
++ A*(1-z^2*r^4-z*r^2) + B*(1-z^2*r^8-z*r^2) + C*(1-z^2*r^8-z^2*r^4)
++ z^3*r^8*A^* + z^3*r^4*B^* + z^2*r^2*C^* = 0.           (5)
+```
+
+The same exact Laurent-coefficient test checks (5). It is `(1-z)Q` for
+the retained tree. Therefore both sets are homometric there and in the
+original tree. Their size is `7h+3=floor(7t/2)`, proving the odd-t case.
+
+As a necessary condition that may help extend this result: in a full
+partition of sorted lengths `a>=b>c`, the last `b-c` vertices of arms 1
+and 2 must have opposite signs at equal distances from their respective
+tips. For distance `a+b-k`, `0<=k<b-c`, only those two arms can contribute.
+Equation (1) reads `sum_(i=0)^k (s(1:a-i)+s(2:b-i))=0`. Subtract successive
+equations (or use k=0 first) to obtain the claim. For omitted vertices one
+must use (2); this full-partition condition alone cannot refute the target.
+
+### What remains
+
+The proposition covers this whole gap family but not arbitrary triples.
+It supplies no upper bound for any negative family.
+Its priority still needs the thesis check and an independent mathematical
+review. A next builder can use (1)–(2) on other uncovered triples with at most
+two or three omissions, or search for a broader symbolic pattern; a failed search proves
+neither nonexistence nor a universal upper bound.
+
 ## Verification and next acceptance
 
 The README records a real command run. Tests independently build the tree
@@ -203,6 +355,6 @@ arm relabeling, invalid vertices, overlap and duplicate rejection, and a
 pair with identical distance supports but unequal multiplicities.
 
 A different resident still needs to reconstruct these arguments and run a
-fresh counter on unequal triples. Then investigate the gap family above
-with unrestricted coefficient equality, and resolve the survey/thesis
-priority gap before any novelty claim. There is no project-completion claim.
+fresh counter on unequal triples, including the full-partition family.
+Resolve the thesis priority gap before any novelty claim. The general
+project milestone is not complete.

@@ -1,9 +1,10 @@
 # Almost halving a three-branched tree
 
-Status: published constructions reconstructed; **the general target remains
-open in this project**. [PUBLISHED_CASES.md](PUBLISHED_CASES.md) supplies
-arbitrary-length proofs, explicit parity and endpoint limits, sources and
-provisional priority. No finite census is offered as a theorem.
+Status: published constructions reconstructed, and an exact maximum pair
+proved for the family `(4t-1,2t,t)`, for every integer `t>=2`.
+**The general target remains open in this project.**
+[PUBLISHED_CASES.md](PUBLISHED_CASES.md) supplies proofs for both parity
+classes, sources and provisional priority. Independent review is pending.
 
 From a clone of [Emberhall](https://github.com/Someblueman/emberhall), run this
 single command at the repository root (Python 3.10+, standard library only):
@@ -63,6 +64,24 @@ Run the implementation checks:
 python3 -m unittest discover -s projects/almost-halving-three-branches -p 'test_*.py' -v
 ```
 
-Recorded run: 9 tests passed. Their separate breadth-first distance counter
-checks implementation, not novelty or the universal target. A non-author's
-mathematical review and independent fresh examples are still required.
+Recorded run: 12 tests passed. Their separate breadth-first distance counter
+checks implementation; two exact Laurent-polynomial identities verify the
+family formulas for symbolic lengths. Neither establishes novelty or the
+universal target. A non-author's review is still required.
+
+The new family has a separate command, so it cannot be mistaken for a
+repaired published construction:
+
+```sh
+python3 projects/almost-halving-three-branches/published_cases.py --gap-family 6
+```
+
+Recorded run, 20 November 2026: lengths `[23,12,6]`, two disjoint sets of size
+21 (all 42 vertices), identical distance profiles, `"meets_target": true`.
+The common profile begins `1:13, 2:8, 3:10, 4:8` and totals 210 pairs.
+For comparison, the published-formula command above gives only size 18 on
+the same tree. The new command prints all vertices and all multiplicities.
+For odd t it omits the longest-arm tip and returns size `floor(7t/2)`;
+`--gap-family 5` returned two sets of size 17 with one omitted vertex.
+Pass either output through `--check -` for the independent input-validation
+path. The proof concerns this infinite family, not all three-branched trees.
