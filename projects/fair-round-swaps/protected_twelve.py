@@ -126,17 +126,23 @@ def load_frontier():
     import zlib
 
     text = Path(__file__).with_name("PROTECTED_TWELVE.md").read_text()
-    begin, end = "<!-- twelve-data:start -->", "<!-- twelve-data:end -->"
-    if text.count(begin) != 1 or text.count(end) != 1:
-        raise ValueError("missing retained frontier data")
-    encoded = "".join(text.split(begin)[1].split(end)[0].split())
-    decoder = zlib.decompressobj()
-    raw = decoder.decompress(base64.b64decode(encoded, validate=True), 16*1024*1024)
-    if not decoder.eof or decoder.unused_data:
-        raise ValueError("invalid or oversized retained data")
-    data = json.loads(raw)
-    if data.get("version") != 1:
-        raise ValueError("unknown retained-data version")
+    def block(name):
+        begin, end = f"<!-- {name}:start -->", f"<!-- {name}:end -->"
+        if text.count(begin) != 1 or text.count(end) != 1:
+            raise ValueError("missing retained frontier data")
+        encoded = "".join(text.split(begin)[1].split(end)[0].split())
+        decoder = zlib.decompressobj()
+        raw = decoder.decompress(base64.b64decode(encoded, validate=True), 16*1024*1024)
+        if not decoder.eof or decoder.unused_data:
+            raise ValueError("invalid or oversized retained data")
+        data = json.loads(raw)
+        if data.get("version") != 1:
+            raise ValueError("unknown retained-data version")
+        return data
+
+    data = block("twelve-data")
+    if "<!-- splice-data:" in text:
+        data["splice_search"] = block("splice-data")
     return data
 
 
@@ -221,6 +227,52 @@ def splice_cover(u, paths):
             "scope": "induced path union only; uncovered is not full separation"}
 
 
+def verify_ten_step_distance(u, path):
+    """Certify ten as the distance by complete radius-four balls and a path.
+
+    Disjoint balls with no edge between them exclude every path of length at
+    most nine. This visits the full protected graph, not a retained subgraph.
+    """
+    graph = Graph(u)
+    path = tuple(map(tuple, path))
+    if (len(path) != 11 or path[0] != START or path[-1] != TARGET
+            or any(len(a) != 12 or a[0] not in (5, 6)
+                   or tuple(a.count(i) for i in range(7)) != (2,)*5+(1, 1)
+                   or not graph.fair(a) for a in path)
+            or any(not exchange(a, b) for a, b in zip(path, path[1:]))):
+        raise ValueError("need a fair ten-exchange protected path between canonical endpoints")
+
+    def ball(root, opposite):
+        seen, frontier, layers = {root}, {root}, [1]
+        for _ in range(4):
+            following = {b for a in frontier for b in graph.neighbors(a)
+                         if b not in seen and graph.fair(b)}
+            seen.update(following)
+            if opposite in seen:
+                raise ValueError("a path shorter than ten exists")
+            frontier = following
+            layers.append(len(frontier))
+        return seen, layers
+
+    left, left_layers = ball(START, TARGET)
+    right, right_layers = ball(TARGET, START)
+    if left & right or any(b in right for a in left for b in graph.neighbors(a)):
+        raise ValueError("a path of at most nine exists")
+    return {"distance": 10, "radius": 4, "start_layers": left_layers,
+            "target_layers": right_layers, "ball_sizes": [len(left), len(right)],
+            "intersection": 0, "cross_edges": 0, "checked": len(graph.cache),
+            "scope": "this canonical protected pair; no universal distance bound"}
+
+
+def frontier_vertices(data):
+    """Reconstruct the latest pool without replacing any earlier archive."""
+    continuation = data.get("splice_search", {})
+    vertices = cover_vertices(data["paths"] + continuation.get("added_paths", []))
+    if continuation.get("include_original_states"):
+        vertices = tuple(map(tuple, data["states"])) + vertices
+    return tuple(dict.fromkeys(vertices))
+
+
 def smt2(states, paths=None):
     """Rebuild the finite real-linear separating-cut query without a solver.
 
@@ -288,7 +340,18 @@ def main():
                         help="replay the last exact counterexample to the retained path cover")
     parser.add_argument("--splice-cover", action="store_true",
                         help="join retained path segments, or export their induced cut query")
+    parser.add_argument("--ten-step-case", action="store_true",
+                        help="verify the retained exact ten-exchange distance")
     args = parser.parse_args()
+    if args.ten_step_case:
+        if (args.splice_cover or args.cover_case or args.cover or args.input
+                or args.candidate_cut or args.frontier or args.write_smt2):
+            parser.error("--ten-step-case cannot be combined with another mode")
+        case = load_frontier()["splice_search"]["ten_step_case"]
+        u = tuple(tuple(Fraction(x) for x in row) for row in case["utilities"])
+        print(json.dumps({**verify_ten_step_distance(u, case["path"]),
+                          "utilities": case["utilities"], "path": case["path"]}))
+        return
     if args.splice_cover and (args.cover or args.cover_case or args.input
                               or args.candidate_cut or args.frontier):
         parser.error("--splice-cover cannot be combined with another retained mode or input")
@@ -296,9 +359,17 @@ def main():
         data = load_frontier()
         case = data["continuations"][-1]["final_counterexample"]
         u = tuple(tuple(Fraction(v) for v in row) for row in case["utilities"])
-        print(json.dumps({"listed": check_cover(u, data["paths"]),
-                          "spliced": splice_cover(u, data["paths"]),
-                          "scope": "retained path union; no universal verdict"}))
+        report = {"listed": check_cover(u, data["paths"]),
+                  "spliced": splice_cover(u, data["paths"]),
+                  "scope": "retained path union; no universal verdict"}
+        continuation = data.get("splice_search")
+        if continuation and continuation.get("final_counterexample"):
+            case = continuation["final_counterexample"]
+            v = tuple(tuple(Fraction(x) for x in row) for row in case["utilities"])
+            report["frontier"] = {
+                "candidate": candidate_cut(v, frontier_vertices(data)),
+                "full_graph": Graph(v).search(None if args.max_checks == 0 else args.max_checks)}
+        print(json.dumps(report))
         return
     if args.cover_case and (args.input or args.write_smt2 or args.candidate_cut):
         parser.error("--cover-case cannot be combined with another input or retained query")
@@ -323,7 +394,7 @@ def main():
         paths = data["paths"] if args.cover else None
         states = data["states"] if paths is None else cover_vertices(paths)
         if args.splice_cover:
-            states = cover_vertices(data["paths"])
+            states = frontier_vertices(data)
         text = smt2(states, paths)
         Path(args.write_smt2).write_text(text)
         print(json.dumps({"bytes": len(text.encode()), "status": "unverified_solver_input"}))

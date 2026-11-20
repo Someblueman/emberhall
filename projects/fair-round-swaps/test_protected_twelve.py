@@ -12,7 +12,7 @@ import unittest
 
 from every_frozen_pair import family
 from protected_twelve import (Graph, START, TARGET, candidate_cut, check_cover, load_frontier,
-                              profile, smt2, splice_cover, cover_vertices)
+                              profile, smt2, splice_cover, cover_vertices, frontier_vertices, verify_ten_step_distance)
 
 
 def fair(u, a):
@@ -216,6 +216,95 @@ class TwelveTests(unittest.TestCase):
             self.assertEqual(query.count('() Real)'), 84)
             self.assertIn('(assert (not r', query)
             self.assertEqual(query.count('(check-sat)'), 1)
+
+    def test_retained_spliced_frontier_fails_only_in_its_finite_pool(self):
+        data = load_frontier()
+        continuation = data['splice_search']
+        phase = continuation['phases'][-1]
+        self.assertIn(phase['status'], ('iteration_limit', 'time_limit', 'vertex_limit'))
+        self.assertEqual(phase['final_query_status'], 'sat')
+        case = continuation['final_counterexample']
+        u = tuple(tuple(Fraction(x) for x in row) for row in case['utilities'])
+        vertices = frontier_vertices(data)
+        self.assertEqual(len(vertices), phase['final_vertices'])
+        # A fresh deletion/transposition traversal proves the saved finite cut.
+        allowed = {a for a in vertices if fair(u, a)}
+        seen, pending = {START}, [START]
+        while pending:
+            a = pending.pop()
+            for x, y in combinations(range(12), 2):
+                b = list(a)
+                b[x], b[y] = b[y], b[x]
+                b = tuple(b)
+                if b in allowed and b not in seen:
+                    seen.add(b)
+                    pending.append(b)
+        self.assertNotIn(TARGET, seen)
+        self.assertEqual((len(allowed), len(seen)),
+                         (case['cut']['fair_vertices'], case['cut']['start_component']))
+        self.assertEqual(candidate_cut(u, vertices), case['cut'])
+        self.check(u, case['search'])
+        self.assertTrue(any(tuple(a) not in set(vertices) for a in case['search']['path']))
+        command = subprocess.run([sys.executable, '-S',
+                                  str(Path(__file__).with_name('protected_twelve.py')),
+                                  '--splice-cover', '--max-checks', '2'],
+                                 check=True, capture_output=True, text=True)
+        report = json.loads(command.stdout)['frontier']
+        self.assertFalse(report['candidate']['target_reached'])
+        self.assertEqual(report['full_graph']['status'], 'budget_exhausted')
+        self.assertIsNone(report['full_graph']['path'])
+
+    def test_exact_ten_step_distance_has_no_shorter_full_graph_path(self):
+        data = load_frontier()
+        case = data['splice_search']['ten_step_case']
+        u = tuple(map(tuple, case['utilities']))
+        route = tuple(map(tuple, case['path']))
+        self.check(u, {'status': 'connected', 'path': route})
+        self.assertTrue(all(v > 0 for row in u for v in row))
+        self.assertTrue(all(len(set(row)) == 12 for row in u))
+        cache = {}
+
+        def neighbors(a):
+            for x, y in combinations(range(12), 2):
+                b = list(a)
+                b[x], b[y] = b[y], b[x]
+                if b != list(a) and b[0] in (5, 6):
+                    yield tuple(b)
+
+        def ball(root):
+            seen, layer, counts = {root}, {root}, [1]
+            for _ in range(4):
+                following = set()
+                for a in layer:
+                    for b in neighbors(a):
+                        if b not in cache:
+                            cache[b] = fair(u, b)  # Literal deletion oracle.
+                        if b not in seen and cache[b]:
+                            following.add(b)
+                seen.update(following)
+                layer = following
+                counts.append(len(layer))
+            return seen, counts
+
+        left, counts_left = ball(START)
+        right, counts_right = ball(TARGET)
+        self.assertEqual(counts_left, [1, 22, 206, 1165, 4398])
+        self.assertEqual(counts_right, [1, 21, 198, 1149, 4406])
+        self.assertFalse(left & right)
+        self.assertFalse(any(b in right for a in left for b in neighbors(a)))
+        result = verify_ten_step_distance(u, route)
+        self.assertEqual(result['distance'], 10)
+        self.assertEqual(result['ball_sizes'], [5792, 5775])
+        old = data['continuations'][-1]['final_counterexample']
+        old_u = tuple(tuple(Fraction(v) for v in row) for row in old['utilities'])
+        old_route = list(map(tuple, old['search']['path']))
+        detour = [old_route[0], old_route[1]] + old_route
+        with self.assertRaisesRegex(ValueError, 'at most nine'):
+            verify_ten_step_distance(old_u, detour)
+        command = subprocess.run([sys.executable, '-S',
+                                  str(Path(__file__).with_name('protected_twelve.py')),
+                                  '--ten-step-case'], check=True, capture_output=True, text=True)
+        self.assertEqual(json.loads(command.stdout)['distance'], 10)
 
     def test_cover_case_command_keeps_the_graph_budget_separate(self):
         result = subprocess.run([sys.executable, '-S',
