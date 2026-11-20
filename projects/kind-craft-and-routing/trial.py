@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 
 from cohort import CONTROLLER, FAMILIES, TARGET, read_pages, roster
+import registered_cohort
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -20,6 +21,7 @@ INSTALLS = {"renovation-install", "owner-migrate"}
 CHOICE_MODULES = ("home", "life", "staffing", "providers", "maintenance", "work_metrics", "ballot_work", "course")
 REVIEWED = "reviewed"
 ONE_FAMILY = "one-family"
+NEXT = "next"
 SHELF_UPGRADE = "upgrade-20261119-one-family-keeps"
 DELIVERED_AT = 21936
 DECLARED_AT = 21948
@@ -27,11 +29,13 @@ ONE_FAMILY_MANIFEST = Path(__file__).with_name("one-family-baseline.json")
 
 
 def baseline_option(parser):
-    parser.add_argument("--baseline", choices=(REVIEWED, ONE_FAMILY), default=REVIEWED,
+    parser.add_argument("--baseline", choices=(REVIEWED, ONE_FAMILY, NEXT), default=REVIEWED,
                         help="installation to enroll from (default: reviewed)")
 
 
 def baseline_anchor(baseline):
+    if baseline == NEXT:
+        return registered_cohort.load()["installation"]
     return DELIVERED_AT if baseline == ONE_FAMILY else PROPOSED_AT
 
 
@@ -43,12 +47,16 @@ def baseline_pages(paths, baseline):
 
 def choice_files(install, baseline=REVIEWED):
     manifest = install["data"]["protected_files"]
+    if baseline == NEXT:
+        return tuple(manifest.get(f"house/{name}.py") for name in registered_cohort.POLICY_MODULES)
     names = CHOICE_MODULES + (("shelf",) if baseline == ONE_FAMILY else ())
     return tuple(manifest.get(f"house/{name}.py") for name in names)
 
 
 def installation(events, baseline):
     """Find the first matching installation after the selected enrollment declaration."""
+    if baseline == NEXT:
+        return registered_cohort.installation(events)
     first = events[0]["sequence"]
     anchor = baseline_anchor(baseline)
     if first > anchor:
@@ -109,18 +117,26 @@ def assess(events, through, baseline=REVIEWED):
               "state": "installation not observed", "routing_weight": 0}
     if baseline == REVIEWED:
         report.update(proposal=PROPOSAL, proposed_at=PROPOSED_AT)
-    else:
+    elif baseline == ONE_FAMILY:
         report.update(delivered_at=DELIVERED_AT, declared_at=DECLARED_AT)
+    elif baseline == NEXT:
+        report.update(registration=registered_cohort.load()["name"], declared_at=None)
+        if start is None:
+            report["state"] = "registered installation or declaration not observed"
     if start is None:
         return report
-    after = start["sequence"]
+    installed_at = start["sequence"]
+    after = start.get("cohort_declared_at", installed_at)
+    if baseline == NEXT:
+        report["declared_at"] = after
+        report["admissions_after"] = after
     initial_choices = choice_files(start, baseline)
     # Admissions are compared under the same recorded choice code. Later receipts can
     # still settle the first independent review of an already admitted contribution.
     changed = None
     unverified = None
     for event in events:
-        if event["sequence"] < after or event["op"] not in INSTALLS:
+        if event["sequence"] < installed_at or event["op"] not in INSTALLS:
             continue
         current = choice_files(event, baseline)
         if None in current:
@@ -152,7 +168,8 @@ def assess(events, through, baseline=REVIEWED):
         state = "choice code changed before twenty offers qualified"
     if unverified and len(rows) < TARGET:
         state = "choice code unverified before twenty offers qualified"
-    return report | {"state": state, "installed_at": after, "installed_source": start["data"]["source_head"],
+    return report | {"state": state, "installed_at": installed_at,
+                     "installed_source": start["data"]["source_head"],
                      "runtime_changed_at": changed, "runtime_unverified_at": unverified,
                      "first_unresolved": cohort["first_unresolved"],
                      "twentieth_start": cohort["twentieth_start"], "genuine_ties": cohort["genuine_ties"],
@@ -167,6 +184,8 @@ def assess(events, through, baseline=REVIEWED):
 def display(report):
     if report["baseline"] == ONE_FAMILY:
         print(f"One-family shelf baseline | declared at {DECLARED_AT}")
+    elif report["baseline"] == NEXT:
+        print(f"Registered cohort {report['registration']} | declared at {report['declared_at'] or 'unobserved'}")
     print(f"Journal {report['first']}–{report['through']} | {report['state']}")
     print(f"Installation {report['installed_at'] or 'unobserved'} | "
           f"{len(report['enrolled'])}/{TARGET} tasks | routing weight 0")
