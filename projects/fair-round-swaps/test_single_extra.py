@@ -5,7 +5,8 @@ from itertools import combinations, product
 from random import Random
 import unittest
 
-from single_extra import greedy_witness, isolated_family, neighbor_up_to_four, rejected_swaps
+from single_extra import (_shared_bridge, greedy_witness, isolated_family,
+                          neighbor_up_to_four, path, rejected_swaps)
 from swaps import allocation, picking_outcomes, rounds_for, states_with_sizes, validate_witness
 
 
@@ -121,6 +122,67 @@ class SingleExtraTest(unittest.TestCase):
         u, a, _ = isolated_family(5)
         with self.assertRaises(ValueError):
             neighbor_up_to_four(u, a)
+        with self.assertRaises(ValueError):
+            path(u, a, a)
+
+    def test_shared_bridge_including_ties_and_forbidden_double_pair(self):
+        # D=0; i=1; j=2. Goods special=0, shared=1, x=2, y=3.
+        a, b = (0, 1, 0, 2), (0, 2, 1, 0)
+        lengths = set()
+        rows = [row for row in product(range(3), repeat=4)
+                if row[1] >= max(row[2], row[3])]
+        for first, second in product(rows, repeat=2):
+            u = ((0,) * 4, first, second)
+            if not deletion_fair(u, a) or not deletion_fair(u, b):
+                continue
+            result = _shared_bridge(u, a, b, 0, 1, 2, 3)
+            lengths.add(len(result) - 1)
+            self.assertTrue(all(deletion_fair(u, state) for state in result))
+            self.assertTrue(all(not (state[0] == state[1] == 0) for state in result))
+            self.assertTrue(all(y in {z for _, z in neighbors(x)}
+                                for x, y in zip(result, result[1:])))
+        self.assertEqual(lengths, {2, 3})
+
+    def test_all_binary_three_agent_greedy_endpoint_pairs(self):
+        checked = 0
+        for flat in product((0, 1), repeat=12):
+            u = tuple(tuple(flat[i * 4:(i + 1) * 4]) for i in range(3))
+            outcomes = picking_outcomes(u, rounds_for(3, 4, (0,)))
+            for a, b in combinations(outcomes, 2):
+                result = path(u, a, b)
+                self.assertEqual((result[0], result[-1]), (a, b))
+                self.assertTrue(all(deletion_fair(u, state) for state in result))
+                self.assertTrue(all(y in {z for _, z in neighbors(x)}
+                                    for x, y in zip(result, result[1:])))
+                checked += 1
+        self.assertGreater(checked, 10000)
+
+    def test_larger_one_extra_paths_and_all_ties(self):
+        rng = Random(2026112009)
+
+        def endpoint(u):
+            n = len(u)
+            order = list(range(n))
+            rng.shuffle(order)
+            pool = set(range(n + 1))
+            w = []
+            for i in order + [0]:
+                best = max(u[i][g] for g in pool)
+                g = rng.choice([g for g in sorted(pool) if u[i][g] == best])
+                w.append((i, g))
+                pool.remove(g)
+            return allocation(tuple(w), n + 1)
+
+        for n in (4, 5, 6, 8, 10):
+            for trial in range(30):
+                u = tuple(tuple(0 if trial == 0 else rng.randrange(5) for _ in range(n + 1))
+                          for _ in range(n))
+                a, b = endpoint(u), endpoint(u)
+                result = path(u, a, b)
+                self.assertEqual((result[0], result[-1]), (a, b))
+                self.assertTrue(all(deletion_fair(u, state) for state in result))
+                self.assertTrue(all(y in {z for _, z in neighbors(x)}
+                                    for x, y in zip(result, result[1:])))
 
 
 if __name__ == "__main__":

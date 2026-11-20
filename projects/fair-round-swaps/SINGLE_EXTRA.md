@@ -1,17 +1,18 @@
-# One extra good: isolation is the wrong counterexample target
+# Greedy outcomes with one extra good are connected
 
-**Candidate boundary results by Sorrel, 20 November 2026. Independent
-mathematical reconstruction pending. The greedy-endpoint question is unresolved.**
+**Candidate theorem and construction by Sorrel, 20 November 2026.
+Independent mathematical reconstruction pending. The general incomplete-round
+question remains unresolved.**
 
 Use the [frozen model](proof.md): nonnegative additive real utilities, arbitrary
 maximizing ties, fixed labeled bundle sizes and exchanges of two goods only.
 Here there are `n+1` goods, one agent D receives two and every other agent one.
-The question is whether two greedy one-round-plus-one-pick outcomes can be
-connected through EF1 allocations. The attempted stronger lemma, that the
-**entire** EF1 graph is connected, fails already at five agents.
+The candidate theorem below connects any two greedy one-round-plus-one-pick
+outcomes. It covers arbitrary n and ties, but only n+1 goods. The stronger claim
+that the **entire** EF1 graph is connected fails already at five agents.
 
-The results below give a precise obstruction to that shortcut, not an answer
-to the project's full question. No literature priority is claimed.
+This is a proposed subcase result, not an answer for arbitrary incomplete rounds.
+No literature priority is claimed.
 
 ## The exact ordinal reduction
 
@@ -25,6 +26,119 @@ good. Thus D imposes no restriction, and (1) is necessary and sufficient.
 In this size vector, only singleton agents' weak orders matter. This extends
 the same elementary reduction used in the four-good investigation; it does
 not extend to size vectors with larger bundles.
+
+## Candidate one-extra-good theorem
+
+For every n>=2, any two recursively balanced picking outcomes with n+1 goods
+and the same doubled recipient D have an EF1 exchange path. Intermediate
+allocations need not themselves be picking outcomes. The constructor `path`
+implements the following induction; it makes no shortest-path or polynomial
+running-time claim.
+
+### The local bridge: never put both distinguished goods together
+
+Suppose three agents have local endpoints
+
+* A: D={g,x}, i={h}, j={y};
+* B: D={g,y}, i={x}, j={h},
+
+where i and j each value h at least as much as x and y. Assume both endpoints
+are EF1. Other singleton agents, if present, are fixed and each values its own
+good at least as much as x and y; they may value g or h more highly.
+
+There is an EF1 path of at most three exchanges which never gives D both g,h.
+First try swapping h,y in A, yielding C: D={g,x}, i={y}, j={h}. If C is EF1,
+swap x,y to reach B. Otherwise try swapping x,y in A, yielding E:
+D={g,y}, i={h}, j={x}. If E is EF1, swap h,x to reach B.
+
+If both trials fail, only i can fail at C, and only j can fail at E. D's
+comparison with a singleton is automatic; fixed observers see an endpoint
+pair; and the holder of h satisfies (1). Thus
+
+`u_i(y) < min(u_i(g),u_i(x))`, and
+`u_j(x) < min(u_j(g),u_j(y))`.
+
+Use instead
+
+`A -> (D={x,y},i={h},j={g}) -> (D={x,y},i={g},j={h}) -> B`.
+
+In the first middle state j values g above x, the smaller of x,y in j's
+ordering. In the second i values g above y, the smaller in i's ordering.
+The holder of h is safe in both. Every fixed observer dominates x,y, and D
+has only singleton bundles to compare with. Both middle states are EF1.
+This proves the bridge, including ties and the forbidden-pair property.
+
+### Induction and removal of a singleton
+
+The base n=2 is immediate: each fixed-size allocation is determined by the
+singleton's good, so any two distinct EF1 allocations are one exchange apart.
+Induct on n. All connectivity below is in the **ambient EF1 graph**: a path
+between endpoints in one picking class may leave that class.
+
+If a fixed singleton i receives a good z which it values at least as much as
+every remaining good except possibly one distinguished good g, any EF1 path
+on the remaining agents and goods lifts after restoring i:z. Indeed, D's pair
+contains at most one copy of g, so i can remove it and compare with the other
+good, worth at most z. Other comparisons with or by singleton bundles are
+automatic. This observation also applies when there is no exceptional g.
+
+Removing a singleton and its good from a greedy witness preserves greedy
+choices on the reduced instance: earlier maximizing picks only lose an
+alternative, while later pools agree after the removed pick. The remaining
+size vector again has one double bundle and all other bundles singleton.
+
+### All endpoints beginning with D:g can be connected
+
+Fix D's first maximizing good g. Partition these witnesses by the second
+pick i:h, necessarily by a singleton. Within one such second-pick class,
+remove i,h and apply the n-1 induction hypothesis. Here h maximizes i's
+utility on all goods except g, so the lifting observation applies.
+
+For two different second agents i,j with distinct favorites h,k, the classes
+have a common allocation: execute D:g, i:h, j:k or D:g, j:k, i:h, then finish
+alike. Removal of a different favorite cannot invalidate a maximizing pick.
+
+If they share favorite h, put all other singleton agents in the same order
+following D:g and i:h (respectively j:h). They see identical remaining pools
+and take identical goods. Two goods remain, say x,y. In one witness j takes
+its favorite of these and D the last; in the other i takes its favorite and
+D the last. If the singleton choices coincide, exchanging h with that good
+connects the endpoints directly. Otherwise the endpoints have the local
+bridge's form. The fixed singleton observers picked while x,y were still
+available, so they dominate both. They might prefer g,h, but the bridge never
+puts both in D's bundle. It therefore lifts to the entire allocation.
+
+Two tied second goods for the same singleton connect through any other
+singleton's maximizing second-pick class, using the preceding cases. For
+n>=3 another singleton exists; n=2 was the base. Every second-pick class can
+therefore reach every other, establishing the assertion about D:g.
+
+### Connect all first-pick classes
+
+Partition full witnesses by their first pick i:g. If i is a singleton, remove
+i,g and apply induction; g is a global favorite for i, so lifting holds without
+an exception. If i=D, the preceding argument gives the required connectivity.
+
+For different first agents with distinct favorite goods, classes intersect
+by executing those two picks in either order and finishing alike.
+
+For different singleton first agents i,j sharing favorite g, let all other
+singletons pick identically after g is removed. Let D next pick the same
+maximizer h from the three remaining goods. Finally, the other singleton
+picks and D receives the last good. Equal last singleton choices give one
+exchange. Distinct choices give the local bridge with g as the shared good
+and h as the other distinguished good. Fixed singleton observers dominate
+h,x,y, so the bridge is EF1 in the full instance.
+
+For D and singleton i sharing favorite g, put every other singleton in the
+same order after removing g. Let i choose its favorite x from the last two
+goods in the D-first run, with D taking the last y. In the i-first run, D
+gets both x,y (choosing its favorite first). The endpoints differ only by
+exchanging g,x. Both are greedy outcomes.
+
+Finally, two tied first goods of the same agent connect through any other
+agent's maximizing first-pick class. The classes exhaust all endpoint
+witnesses, completing the induction. No argument requires strict preferences.
 
 ## Five is the least number of agents permitting an isolated EF1 state
 
@@ -113,9 +227,9 @@ In the isolated family, both g and h are valued at 4 by some singleton who
 owns a value-2 good. Neither is safe. The same is true after rotating the core
 goods (their value becomes 3, still below 4). Neither displayed endpoint can
 be a greedy outcome. In particular, no isolated allocation in this size
-vector can itself supply the required greedy endpoint. A negative answer to
-the original question here needs distinct **non-singleton components**, each
-containing a verified greedy endpoint.
+vector can itself supply a required greedy endpoint. The candidate theorem
+above further rules out separated greedy-containing components in this
+one-extra-good case; it does not classify every other component.
 
 ## Recognizing greedy endpoints without enumerating schedules
 
@@ -154,14 +268,17 @@ EF1 states: 90; component sizes: [1, 89]
 greedy endpoints: 24; all in the same component: True
 isolated state: 123400; all 14 possible exchanges violate EF1
 second EF1 state: 412300; neither state is a greedy endpoint
+one-extra construction: 276 greedy endpoint pairs; longest constructed path 14 swaps
 family checks: n=5,6,7,10,25, both tied and strict utilities
-Scope: defeats all-EF1 connectivity; greedy-endpoint question remains open
+Scope: one-extra theorem is a candidate; multiple full rounds remain open
 ```
 
 Owner vectors use agent 0 for D. The test suite uses direct deletion tests for
 fairness, independently walks the complete six-good graph, compares the
 precedence recognizer with exhaustive picking outcomes, and exercises 22,155
-fair binary profile cases up to four agents. The universal statements rest
+fair binary profile cases up to four agents. It also checks the local bridge
+including ties, every greedy endpoint pair in all 4,096 binary three-agent
+profiles, and sampled paths through ten agents. The universal statements rest
 on the proofs above, not these finite checks. Candidate mathematics and the
 recognizer still need independent reconstruction.
 
@@ -176,10 +293,10 @@ neighbor. The inspected examples in Theorems 3.1, 4.8 and 4.9 have size vectors
 3.2–3.3 and Proposition 3.4, supply the project's actual greedy-endpoint question.
 The opened prior texts and a bounded search do not establish priority.
 
-The full arbitrary-agent question, even its one-extra-good restriction,
-remains unresolved here. The next useful step is a path argument specifically
-for greedy-containing components, or a separating example whose **both**
-endpoints pass the precedence test. Enlarging the isolated family, counting
-more profiles, or relabeling these non-greedy endpoints would not meet that
-obligation. The provisional near-complete-round proof also still requires
-its own independent mathematical reconstruction.
+The full arbitrary-length question remains unresolved. The next useful step
+is independent reconstruction of the lifting and first-D-good argument above,
+then work on multiple complete rounds with a remainder between 1 and n-2.
+Removing an agent with several goods no longer gives the simple singleton
+lifting argument. Enlarging the isolated family or counting more profiles
+would not discharge that obligation. The provisional near-complete-round proof
+also still requires its own independent mathematical reconstruction.
