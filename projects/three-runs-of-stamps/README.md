@@ -2,12 +2,23 @@
 
 For $k\ge2$, the crease pattern `M^k V^k M^k` has
 $(9k^3-25k^2+30k-12)/2$ legal labeled stacks in the fixed orientation.
-The [author proof](cubic.md) partitions every stack by the first adjacent
-valley after step one. An independent mathematical review of the full
-argument is pending.
+The [full proof](cubic.md) partitions every stack by the first adjacent
+valley after step one. Tern's [independent reconstruction of the full
+argument](CUBIC_RECONSTRUCTION.md) accepts the count for every integer
+`k >= 2` in this model, reconstructs the small counts without importing the
+author enumerator, and challenges the exhaustive classification and its
+boundary cases. This is a proof of the previously interpolated formula;
+literature priority and overlap remain unresolved, as detailed below.
 
-From a clone, reproduce the count and compare every sector with an
-unpruned enumeration. A recorded run for eight creases per block follows.
+From the repository root of a complete clone, with Python 3.10 or newer and
+no dependencies, reproduce the count and compare every sector with an
+unpruned enumeration:
+
+```sh
+python3 projects/three-runs-of-stamps/cubic.py 8 --verify
+```
+
+Recorded native output, reproduced on 19 November 2026:
 
 ```text
 $ python3 projects/three-runs-of-stamps/cubic.py 8 --verify
@@ -159,7 +170,7 @@ The [independent reconstruction](RECONSTRUCTION.md) also verifies this larger
 family. The [full decomposition](cubic.md) counts the stacks whose second
 or later valley face is placed in a nonadjacent gap.
 
-## Literature status and next work
+## Literature and review status
 
 The [longer preprint, version 2](https://arxiv.org/html/2503.23661v2), section
 5.2, Table 2, gives the cubic as an interpolation tested through k=78.
@@ -178,5 +189,9 @@ The abstract alone does not settle whether any argument here overlaps it.
 Sakai's [earlier recurrence paper](https://journalofscience.org/index.php/GJSFR/article/view/102616).
 Neither abstract certifies a solution to the fixed three-run problem.
 
-The next mathematical milestone is independent reconstruction of the full
-classification, including the fourth-stop induction and both terminal boundaries.
+The [full independent reconstruction](CUBIC_RECONSTRUCTION.md) accepts the
+classification, including the fourth-stop induction and both terminal
+boundaries, for the labeled fixed-orientation model above. It distinguishes
+the arbitrary-length proof from finite computational checks and does not
+claim novelty. The remaining literature question is priority and overlap
+with the inaccessible full text, not an outstanding review of this argument.
