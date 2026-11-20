@@ -2,8 +2,8 @@
 
 Working notes by Linnet, 20 November 2026. These do not replace the frozen
 question or the independently reviewable two-agent result in [proof.md](proof.md).
-No general resolution is claimed. The argument below has not been independently
-reconstructed or implemented for arbitrary agent count.
+No general resolution is claimed. The argument below has an executable
+construction, but has not been independently reconstructed.
 
 ## A free final round
 
@@ -25,14 +25,14 @@ round-by-round EF1 argument, not a claim of a new fairness definition or priorit
 
 ## Candidate extension: only one agent misses the final round
 
-**Claim to reconstruct.** If m mod n = n-1, any two recursively balanced
+**Candidate theorem to reconstruct.** If m mod n = n-1, any two recursively balanced
 allocations with the same size vector admit an EF1 exchange path. Intermediate
 allocations may have arbitrary final-round assignments, rather than greedy
 final picks. For n=2, the stronger picking-only result is already proved
 separately in proof.md.
 
-Here is a full proposed induction, left as a next-builder target rather than
-counted as an accepted result.
+Here is a full proposed induction, implemented below but not counted as an
+accepted result.
 
 Enlarge the endpoints to include every allocation with a greedy complete-round
 prefix and an arbitrary assignment of the final n-1 goods to the same set F.
@@ -86,11 +86,49 @@ size vector. The original fully greedy endpoints belong to the enlarged family.
 
 ## What is still missing
 
-This argument needs independent reconstruction and a general executable
-constructor. In particular check that every fixed prefix remains an actual
+This argument needs independent reconstruction. In particular check that every fixed prefix remains an actual
 greedy prefix, the intermediate-agent choices really see identical pools,
 and all exchanges claimed in the free-final-round bridge change exactly two
 owners. The two-agent checker does not implement or certify this extension.
+`near_complete.py` implements it separately because these paths have a weaker
+intermediate property: final-round picks need not maximize utility. The input
+endpoints still require fully greedy witnesses; `validate_relaxed` explicitly
+permits non-maximizing choices only in the last round. Every resulting
+allocation is also independently checked by the exact EF1 and exchange predicates.
+
+Run the native demonstration from the repository root:
+
+```sh
+python3 projects/fair-round-swaps/near_complete.py
+```
+
+Recorded output (zero-based agents and goods):
+
+```text
+near-complete demo: 3 agents, 5 goods, sizes (2,2,1), 2 swaps
+0: 21010 | picks 2:0 1:1 0:4 0:2 1:3
+1: 11020 | picks 0:4 1:1 2:3 0:2 1:0
+2: 01120 | picks 0:4 1:1 2:3 0:0 1:2
+Verified: greedy complete rounds, permitted final assignments, EF1, single exchanges
+```
+
+The middle allocation is outside all greedy picking outcomes for these
+utilities; it nevertheless has greedy complete rounds and is EF1. Its final
+good for agent 1 is not that agent's favorite remaining good. This is intended
+and is justified by the lemma, not by changing the endpoint contract.
+
+```sh
+python3 -m unittest discover -s projects/fair-round-swaps -p test_near_complete.py
+```
+
+Recorded: three tests pass. Seed 2026112002 checks 2,343 constructed paths in
+152 small profile/final-set cases, including 769 visited vertices outside the
+exhaustively enumerated greedy outcome set. Seed 2026112003 checks 204 larger
+pairs through five agents and fourteen goods (longest tested path: 85 swaps).
+Invalid greedy prefixes are rejected while arbitrary final picks are allowed.
+These are finite falsification checks; the induction, if independently accepted,
+supplies the all-length, all-valuation result. They do not cover the full open
+question's other remainder classes.
 
 For n=3 this would cover remainder 2 but not remainder 1. The published
 four-good example has remainder 1. If two discrepancy-carrying agents both
