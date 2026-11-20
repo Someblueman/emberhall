@@ -216,6 +216,22 @@ connectivity remain different questions. Even an unsatisfiable exploratory
 query would require a separately checked portable proof before becoming
 a universal theorem.
 
+The current exporter omits an EF1 comparison when a held good h is
+already known to dominate one item t of the target pair. In symbols,
+`value(own)-value(t) = value(h)-value(t) + value(own minus h) >= 0`.
+Deleting the other target item settles the comparison. The only ranks
+used are the stated greedy-anchor inequalities and the carriers' shared
+favorite/alternative inequalities. Earlier anchors and the other
+carrier's alternative are not silently treated as dominated. The source
+and tests identify this small inference explicitly.
+
+On the stopped second-phase 15,421-state candidate, this reduces the
+number of nontrivial fairness comparisons from 462,630 to 200,236, and
+SMT-LIB text from 31,216,816 to 16,724,972 bytes. The new query parses;
+no solver-time improvement is claimed. The recorded search phases ran
+the earlier unsimplified encoding, so their query hashes and timings are
+not retroactively attributed to this exporter.
+
 The predeclared continuation limits are 1,000 additions, 1,200 seconds for
 the loop, 12,500 vertices (checked before an addition), 45 seconds per
 solver query and 250,000 newly checked allocations per full-graph repair.

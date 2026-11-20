@@ -273,6 +273,18 @@ def frontier_vertices(data):
     return tuple(dict.fromkeys(vertices))
 
 
+def _implied_by_rankings(observer, own, target):
+    """Nonnegativity plus one stated rank can settle a whole EF1 comparison."""
+    for held in own:
+        for remaining_good in target:
+            if observer < 5:
+                if held == observer+1 and remaining_good > observer+1:
+                    return True
+            elif held == 0 or (held == observer+1 and remaining_good >= 6):
+                return True
+    return False
+
+
 def smt2(states, paths=None):
     """Rebuild the finite real-linear separating-cut query without a solver.
 
@@ -302,9 +314,10 @@ def smt2(states, paths=None):
         for i in range(7):
             own = f"(+ {' '.join(f'u_{i}_{g}' for g in bundles[i])})"
             for j in range(5):
-                if i != j:
+                if i != j and not _implied_by_rankings(i, bundles[i], bundles[j]):
                     terms.append(f"(or {' '.join(f'(>= {own} u_{i}_{g})' for g in bundles[j])})")
-        lines.append(f"(assert (= f{k} (and {' '.join(terms)})))")
+        formula = f"(and {' '.join(terms)})" if terms else "true"
+        lines.append(f"(assert (= f{k} {formula}))")
     if paths is not None:
         for path in paths:
             path = [tuple(a) for a in path]

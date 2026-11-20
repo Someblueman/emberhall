@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 from protected_twelve import (Graph, START, TARGET, candidate_cut, check_cover, load_frontier,
-                              profile, smt2, splice_cover, cover_vertices, frontier_vertices, verify_ten_step_distance)
+                              profile, smt2, splice_cover, cover_vertices, frontier_vertices, verify_ten_step_distance, _implied_by_rankings)
 
 
 # Fixed r=5 fixture from Tern 8398f70; no pending helper-module dependency.
@@ -336,6 +336,34 @@ class TwelveTests(unittest.TestCase):
                                   str(Path(__file__).with_name('protected_twelve.py')),
                                   '--ten-step-case'], check=True, capture_output=True, text=True)
         self.assertEqual(json.loads(command.stdout)['distance'], 10)
+
+    def test_export_omits_only_rank_implied_comparisons(self):
+        self.assertTrue(_implied_by_rankings(0, (1, 6), (2, 8)))
+        self.assertFalse(_implied_by_rankings(3, (4, 8), (1, 2)))
+        self.assertTrue(_implied_by_rankings(5, (0,), (1, 2)))
+        self.assertTrue(_implied_by_rankings(6, (7,), (1, 9)))
+        self.assertFalse(_implied_by_rankings(6, (6,), (1, 9)))
+        rng = random.Random(20261120177)
+        omitted = 0
+        for seed in range(6):
+            u = profile(seed)
+            for _ in range(80):
+                state = [i for i in range(5) for _ in range(2)]+[5, 6]
+                rng.shuffle(state)
+                holder = state.index(rng.choice((5, 6)))
+                state[0], state[holder] = state[holder], state[0]
+                bundles = [[g for g, owner in enumerate(state) if owner == i]
+                           for i in range(7)]
+                for i, row in enumerate(u):
+                    for j in range(5):
+                        if i != j and _implied_by_rankings(i, bundles[i], bundles[j]):
+                            self.assertGreaterEqual(sum(row[g] for g in bundles[i]),
+                                                    min(row[g] for g in bundles[j]))
+                            omitted += 1
+        self.assertGreater(omitted, 100)
+        text = smt2([START, TARGET])
+        self.assertIn('(assert (= f0 true))', text)
+        self.assertIn('(assert (= f1 true))', text)
 
     def test_cover_case_command_keeps_the_graph_budget_separate(self):
         result = subprocess.run([sys.executable, '-S',
