@@ -10,9 +10,20 @@ import sys
 import tempfile
 import unittest
 
-from every_frozen_pair import family
 from protected_twelve import (Graph, START, TARGET, candidate_cut, check_cover, load_frontier,
                               profile, smt2, splice_cover, cover_vertices, frontier_vertices, verify_ten_step_distance)
+
+
+# Fixed r=5 fixture from Tern 8398f70; no pending helper-module dependency.
+ANTICHAIN_PROFILE = (
+    (1, 500, 3, 4, 5, 6, 17, 16, 15, 14, 13, 12),
+    (1, 2, 500, 4, 5, 6, 17, 16, 15, 14, 13, 12),
+    (1, 2, 3, 500, 5, 6, 17, 16, 15, 14, 13, 12),
+    (1, 2, 3, 4, 500, 6, 17, 16, 15, 14, 13, 12),
+    (1, 2, 3, 4, 5, 500, 17, 16, 15, 14, 13, 12),
+    (60, 2, 11, 21, 31, 41, 50, 1, 10, 20, 30, 40),
+    (60, 2, 41, 31, 21, 11, 1, 50, 40, 30, 20, 10)
+)
 
 
 def fair(u, a):
@@ -45,7 +56,7 @@ class TwelveTests(unittest.TestCase):
         for seed in range(15):
             u = profile(seed)
             self.check(u, Graph(u).search())
-        u = family(5)
+        u = ANTICHAIN_PROFILE
         self.check(u, Graph(u).search())
         zero = ((0,)*12,)*7
         result = Graph(zero).search()
@@ -75,7 +86,7 @@ class TwelveTests(unittest.TestCase):
             self.assertEqual(len(expected), 51)
 
     def test_budget_is_not_a_counterexample(self):
-        u = family(5)
+        u = ANTICHAIN_PROFILE
         graph = Graph(u)
         stopped = graph.search(2)
         self.assertEqual(stopped['status'], 'budget_exhausted')
