@@ -1,7 +1,9 @@
-"""Reproduce the four-good bridge and exercise the constructive two-agent proof."""
+"""Reproduce the calibration and exercise the general fair-exchange construction."""
 
 from fractions import Fraction
 from itertools import combinations, permutations, product
+import json
+from pathlib import Path
 from random import Random
 
 from swaps import (allocation, components, ef1, exchange, picking_outcomes,
@@ -131,8 +133,65 @@ def failure_boundaries():
     print("failure boundaries: 6 invalid inputs rejected; unfair state and non-exchanges rejected")
 
 
+def general_checks():
+    from arbitrary_few_final import braid_example, path as general_path
+    from general_construct import check_route, read_instance
+
+    rng = Random(2026112057)
+    cases = [json.loads(Path(__file__).with_name("general_example.json").read_text())]
+    for n, q, r in ((4, 0, 2), (4, 2, 0), (5, 2, 1), (5, 2, 2),
+                    (4, 1, 3), (8, 2, 5), (10, 3, 8)):
+        u, a, b, final = braid_example(n, q, r)
+        labels = rng.sample(range(n), n)
+        cases.append({
+            "utilities": [[str(Fraction(v, 7)) for v in u[labels.index(i)]] for i in range(n)],
+            "final_recipients": [labels[i] for i in final],
+            "start": [[labels[i], g] for i, g in a],
+            "target": [[labels[i], g] for i, g in b],
+        })
+
+    for n, q, r in ((3, 2, 1), (4, 2, 0), (4, 2, 2), (5, 1, 2),
+                    (5, 2, 1), (5, 2, 3)):
+        m = n*q+r
+        u = [[rng.randrange(9) for _ in range(m)] for _ in range(n)]
+        final = rng.sample(range(n), r)
+
+        def witness():
+            order = []
+            for _ in range(q):
+                order.extend(rng.sample(range(n), n))
+            order.extend(rng.sample(final, r))
+            remaining, result = set(range(m)), []
+            for i in order:
+                best = max(u[i][g] for g in remaining)
+                g = rng.choice([g for g in sorted(remaining) if u[i][g] == best])
+                remaining.remove(g)
+                result.append([i, g])
+            return result
+
+        cases.append({"utilities": u, "final_recipients": final,
+                      "start": witness(), "target": witness()})
+
+    states = swaps = longest = 0
+    for index, data in enumerate(cases):
+        u, final, a, b = read_instance(data)
+        route = general_path(u, a, b, final)
+        result = check_route(u, final, a, b, route)
+        states += len(route)
+        swaps += result["swaps"]
+        longest = max(longest, result["swaps"])
+        if index == 0:
+            assert result["swaps"] == 2
+            greedy = picking_outcomes(u, rounds_for(len(u), len(u[0]), final))
+            assert any(state not in greedy for state in route)
+            print("supplied general example: " + " -> ".join("".join(map(str, state)) for state in route))
+    print(f"general endpoints: {len(cases)} cases, {states} states, {swaps} exchanges, "
+          f"longest tested path {longest}; no/full/five/eight-final and rational labelled cases")
+
+
 if __name__ == "__main__":
     four_goods()
     two_agent_checks()
     failure_boundaries()
-    print("PASS: exact finite checks support the construction; the universal claim rests on proof.md")
+    general_checks()
+    print("PASS: exact finite checks support the implementations; the universal theorem rests on proof.md")
