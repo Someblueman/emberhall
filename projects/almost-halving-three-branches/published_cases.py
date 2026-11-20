@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from itertools import combinations, permutations
+from itertools import combinations, permutations, product
 import json
 from math import gcd
 from pathlib import Path
@@ -135,8 +135,7 @@ def block_pair(lengths: Lengths, order: tuple[int, int, int]) -> Pair:
     return left, right
 
 
-def construct(lengths: object, kind: str = "best") -> tuple[str, Pair]:
-    lengths = validate_lengths(lengths)
+def _base_candidates(lengths: Lengths, kind: str) -> list[tuple[str, Pair]]:
     candidates = []
     if kind in {"best", "path"}:
         candidates.append(("path", path_pair(lengths)))
@@ -165,6 +164,26 @@ def construct(lengths: object, kind: str = "best") -> tuple[str, Pair]:
             except ValueError:
                 continue
             candidates.append((f"{name}{order}", pair))
+    return candidates
+
+
+def construct(lengths: object, kind: str = "best") -> tuple[str, Pair]:
+    lengths = validate_lengths(lengths)
+    if kind == "best":
+        candidates = []
+        # A target pair can omit at most three vertices. Every prefix subtree
+        # is isometric in the original tree; no repaired formula is introduced.
+        for trim in product(range(4), repeat=3):
+            if sum(trim) > 3:
+                continue
+            reduced = tuple(n - d for n, d in zip(lengths, trim))
+            if min(reduced) < 1:
+                continue
+            for name, pair in _base_candidates(reduced, kind):
+                label = name if not any(trim) else f"trim {trim}: {name}"
+                candidates.append((label, pair))
+    else:
+        candidates = _base_candidates(lengths, kind)
     if not candidates:
         raise ValueError(f"no supported {kind} construction for {lengths}; no endpoint repair used")
     return max(candidates, key=lambda item: len(item[1][0]))

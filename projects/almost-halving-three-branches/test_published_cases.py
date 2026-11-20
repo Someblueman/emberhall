@@ -117,6 +117,19 @@ class PublishedCasesTest(unittest.TestCase):
             self.assertTrue(result["attains_bound"])
             self.assert_witness(lengths, (result["left"], result["right"]))
 
+    def test_prefix_trimming_preserves_original_metric(self):
+        result = pc.witness((29, 17, 6))
+        self.assertEqual(result["size"], 26)
+        self.assertTrue(result["attains_bound"])
+        self.assert_witness((29, 17, 6), (result["left"], result["right"]))
+
+    def test_remaining_family_is_not_reported_as_solved(self):
+        result = pc.witness((110, 77, 44))
+        self.assertEqual(result["size"], 113)
+        self.assertEqual(result["target"], 115)
+        self.assertFalse(result["meets_target"])
+        self.assert_witness((110, 77, 44), (result["left"], result["right"]))
+
     def test_residue_upper_bound_and_equal_arm_sharpness(self):
         for lengths in [(3, 3, 3), (15, 11, 7), (11, 7, 5)]:
             self.assertEqual(pc.certified_upper_bound(lengths), (1 + sum(lengths)) // 2 - 1)

@@ -30,6 +30,11 @@ Priority refresh on 20 November 2026:
   establish equality of multiplicities.
 * The relevant [Oberwolfach report](https://publications.mfo.de/bitstream/handle/mfo/3349/OWR_2013_18.pdf?isAllowed=y&sequence=1),
   printed p. 1119, poses a general-graph asymptotic problem, not this tripod bound.
+* Alon, [Problems and results in Extremal Combinatorics III](https://web.math.princeton.edu/~nalon/PDFS/extremalIII4.pdf),
+  Section 2 (2016), improves the general-graph lower bound, not this target.
+* The [institutional abstract of Mohankumar–Abhishek (2021)](https://www.amrita.edu/publication/detour-homometric-number-of-a-graph/)
+  studies detour homometry on graphs with cycles. Its full text was not
+  retrievable; the abstract alone is not a complete priority check.
 
 None of these opened results resolves the proposed target. Searches for
 “homometric sets” with trees, spiders, three legs and later dates found no
@@ -466,14 +471,53 @@ Odd t and arbitrary triples are not covered by this proposition.
 
 ## Present coverage, and the remaining question
 
-For sorted lengths, the checker's default takes the maximum of the published
+Removing only the last vertices of arms leaves a connected prefix subtree
+isometric in the original tree: every unique path between retained vertices
+stays in that subtree. Consequently any proved witness there lifts unchanged
+to the original tree, with the same size and distance multiplicities.
+The default checks all 20 nonnegative tip-deletion triples whose sum is at
+most three, keeping only positive resulting arm lengths. Three is sufficient
+for this closure operation when seeking the target, since a target pair
+omits at most three original vertices in total. This does not say that a
+target pair must arise from these constructions or from prefix subtrees.
+
+For each such subtree, the checker takes the maximum of the published
 sizes p, u, v above, the separated-path size `min(a,b+c+1)`, and the size
-from either proved family when its exact length conditions hold. These
+from either proved family when its exact length conditions hold. It then
+takes the maximum over the 20 subtrees, checking in the original metric. These
 constructions certify the target exactly when that maximum is at least
 `floor(n/2)-1`. Remaining triples are **unsettled here**, not counterexamples;
 even a failed exhaustive check of one finite tree would not provide the
 required infinite structural obstruction. The residue upper bound excludes
 full partitions only and is compatible with the project target.
+
+For example `(29,17,6)` contains `(29,16,6)`. Its block width is 10,
+quotient 3, remainder 0, giving size 26; this already attains the original
+tree's disjointness upper bound. Trimming is explicitly labelled in output.
+An invalid block is never truncated or silently repaired: only the unchanged
+valid formula on the explicitly smaller tree is used.
+
+### An explicit next family still outside this coverage
+
+For every integer `t>=11`, the current constructions, including all three-tip
+trimmings, give maximum size `10t+3` on `T(10t,7t,4t)`. This is below
+`floor((21t+1)/2)-1`, and is **not an upper bound on h(T)**.
+
+Here is a proof of that limitation. Write the three deletions as `d_a,d_b,d_c`,
+nonnegative with total at most 3. The arm order remains unchanged. Path
+halves give at most `floor((17t+1)/2)`, alternating gives at most `9t`, and
+separated paths give at most `10t`. Neither special family can occur after
+these deletions: for the first, `a'+1=4c'` would require
+`6t=4d_c-d_a+1<=13`; for the second, `a'+1=2(c'+1)` would require
+`2t=d_a-2d_c+1<=4`.
+
+For blocks, `x'=3t-d_b+d_c` and `a'+1=10t+1-d_a`. For t>=11 their quotient
+is exactly 3: the numerator is at least `10t-2>=3(3t+3)` and less than
+`4(3t-3)`. The block size is therefore `2b'-c'=10t-2d_b+d_c<=10t+3`.
+Deleting three tips of the shortest arm attains that last value (remainder
+`t-8`), proving the stated maximum for this construction menu. Finally,
+`floor((21t+1)/2)-1>10t+3` for t>=11. The next builder has a definite
+unbounded family to study using unrestricted signed-shell equations.
 
 ## Verification and next acceptance
 

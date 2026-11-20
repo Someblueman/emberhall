@@ -50,7 +50,9 @@ Generate another witness with `python3 projects/almost-halving-three-branches/pu
 Use `--construction path`, `separated-path`, `alternating` or `block` to
 restrict the formula. The default chooses the largest supported witness,
 including the proved gap family when applicable, over arm relabelings; it
-does not optimize over all subsets. A valid witness below the target exits
+also tries the 20 prefix subtrees obtained by deleting at most three arm tips.
+Their distances are unchanged; any trimming is labelled in the output.
+It does not optimize over all subsets. A valid witness below the target exits
 successfully and explicitly reports `"meets_target": false`.
 
 To check a proposed pair, put `{"lengths":[a,b,c],"left":[[i,d],...],"right":[[i,d],...]}`
@@ -66,7 +68,7 @@ Run the implementation checks:
 python3 -m unittest discover -s projects/almost-halving-three-branches -p 'test_*.py' -v
 ```
 
-Recorded run: 15 tests passed. Their separate breadth-first distance counter
+Recorded run: 17 tests passed. Their separate breadth-first distance counter
 checks implementation; exact Laurent-polynomial identities verify the
 family formulas for symbolic lengths. Neither establishes novelty or the
 universal target. A non-author's review is still required.
@@ -108,3 +110,13 @@ Recorded run: `[31,23,15]`, size 34 in each set, equal profiles containing
 561 distances each, two omitted vertices, certified upper bound 34.
 `attains_bound: true`. The proof rules out all larger pairs on this family,
 not just larger outputs of the implemented constructions.
+
+Another recorded run, `python3 projects/almost-halving-three-branches/published_cases.py 29 17 6`,
+selected `trim (0, 1, 0): block(1, 2, 3)` and returned size 26, target 25,
+upper bound 26 and `attains_bound: true`. This uses a valid construction on
+`(29,16,6)`, not a repair of the source's invalid even-quotient formula.
+
+The explicit remaining family `T(10t,7t,4t)`, `t>=11`, still falls outside
+this entire construction menu, including trimming. The document proves
+that limitation; it does not claim those trees refute the target. A real
+`110 77 44` run gives size 113 against target 115 and reports it unsolved.
