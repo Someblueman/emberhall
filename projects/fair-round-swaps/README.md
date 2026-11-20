@@ -1,11 +1,12 @@
 # Fair Swaps After an Uneven Final Round
 
 A mathematical investigation of paths between fair divisions of indivisible
-goods. The [candidate proof](proof.md) connects any two **two-agent** recursively
-balanced picking outcomes with the same size vector, including an incomplete
-final round. Every intermediate allocation is itself a picking outcome, hence
-EF1. **Independent reconstruction is pending.** The general question for three
-or more agents is still unresolved here. No priority claim is made.
+goods. The [independently reconstructed proof](proof.md) connects any two
+**two-agent** recursively balanced picking outcomes with the same size vector,
+including an incomplete final round. Every intermediate allocation is itself a
+picking outcome, hence EF1. The first milestone is accepted on this two-agent
+result. The general question for three or more agents is still unresolved here.
+No priority claim is made.
 
 The exact model, ties, exchange restrictions and proof are in [proof.md](proof.md).
 This work starts from [Frank and Suksompong, 2026, section 3](https://arxiv.org/html/2609.15358v1).
@@ -39,7 +40,7 @@ so it works for all utility magnitudes with those strict rankings. The two-agent
 tests include all weak order profiles on three labelled goods, all strict order
 profiles on five goods up to simultaneous relabelling, and seeded larger cases
 through nine goods. They test the construction and do not prove its universal
-claim. The induction does that, subject to independent review.
+claim. The independently reconstructed induction does that.
 
 ## Construct a path
 
@@ -73,11 +74,15 @@ python3 -m unittest discover -s projects/fair-round-swaps -p 'test_*.py'
 
 ## Project plan
 
-1. **Current milestone:** frozen model, published four-good reconstruction,
-   candidate arbitrary-length two-agent proof and working path constructor are
-   written. A non-author must reconstruct the suffix induction, all tie cases
-   and the final-singleton exchange before accepting this milestone.
-2. **Next milestone:** resolve the full arbitrary-agent question with a proof
+1. **Accepted first result:** frozen model, published four-good reconstruction,
+   arbitrary-length two-agent proof and working path constructor. Hawthorn
+   independently reconstructed the suffix induction, all tie cases and the
+   final-singleton exchange at source `aa358ec`. The full contribution
+   `ed36452` then passed independent source review and the project test suite;
+   journal receipt 23395 records its integration as `70c1f6c`, and receipt
+   23413 records remote equality. This accepts the two-agent result, not every
+   conjecture or extension in the contribution.
+2. **Current target:** resolve the full arbitrary-agent question with a proof
    or a counterexample. The complete fixed-size EF1 graph generator is ready
    for small obstructions. Restricting that graph to picking outcomes would
    answer the wrong question.
@@ -90,3 +95,8 @@ breaks: a final recipient can lie outside the two agents carrying a disputed
 good. The three-agent four-good example already shows that staying within
 picking outcomes is then too restrictive. Do not silently replace EF1 paths
 by picking-only paths in the next stage.
+
+The separate [near-complete-final-round argument](FRONTIER.md), for which
+only one agent misses the last round, remains provisional pending independent
+mathematical reconstruction. Source acceptance and finite tests alone do not
+settle that theorem or the remaining cases.

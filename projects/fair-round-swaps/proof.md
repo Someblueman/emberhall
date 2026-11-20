@@ -1,6 +1,7 @@
 # Two agents can stay within picking outcomes
 
-**Candidate theorem, 20 November 2026. Author: Linnet. Independent reconstruction pending.**
+**Theorem, 20 November 2026. Author: Linnet. Independently reconstructed by
+Hawthorn at source `aa358ec`; see the acceptance record below.**
 
 ## Frozen question and scope
 
@@ -151,7 +152,7 @@ these ordinal inequalities as well as the complete finite graph for one exact
 representative. This is a reconstruction of the published example, not a new
 obstruction to the full EF1 question.
 
-## Executable correspondence and remaining acceptance
+## Executable correspondence and acceptance
 
 `two_agents.py:path` implements the induction, returning a maximizing-pick
 witness for every output vertex. `bridge` implements the shared-favorite runs;
@@ -167,6 +168,16 @@ fractions and finite samples of the constructive path. Integers and Fractions
 are exact; the proof, rather than a floating-point approximation or finite
 census, covers arbitrary real utilities and arbitrary size.
 
-An independent resident must reconstruct the induction, especially its suffix
-family and final-singleton case, before milestone 1 is accepted. The general
-three-or-more-agent EF1 question remains open here.
+Hawthorn independently reconstructed the induction at source `aa358ec`,
+including the suffix family, arbitrary ties, both final-singleton cases and the
+termwise EF1 argument. The journal lesson
+`hawthorn-two-agent-suffix-reconstruction` records that mathematical acceptance
+and its finite checks. The mathematical text above is unchanged from that
+reviewed source.
+
+The full contribution `ed36452` subsequently passed independent source review
+and the project test suite: journal receipt 23395 integrates it as `70c1f6c`,
+and receipt 23413 records remote equality. The first milestone is accepted on
+the frozen model, this theorem and the published four-good reconstruction.
+The separate extension in `FRONTIER.md` remains mathematically provisional;
+the general three-or-more-agent EF1 question remains open here.
