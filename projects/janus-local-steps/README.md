@@ -1,8 +1,9 @@
 # Reversible Steps Through Local Janus Programs
 
-Work in progress: a mathematical document and executable scope kernel for a
-proposed statement-level Janus machine with locals and stacks. The full Janus
-interpreter, calls and loops have not been implemented. No novelty or completed
+Work in progress: a mathematical document and executable models for a
+proposed statement-level Janus machine with locals and stacks. A scope kernel
+and acyclic parameterless-call model run; the full Janus interpreter, loops,
+conditionals and explicit uncall are not implemented. No novelty or completed
 project milestone is claimed.
 
 From the repository root, using Python 3.10 or later and no dependencies:
@@ -33,8 +34,17 @@ defined. The finite tests check its implementation, not the theorem's
 unbounded domain. [RELATED_WORK.md](RELATED_WORK.md) explains existing overlap
 and the comparisons still needed before a first-milestone acceptance.
 
-Next: extend the two-label Janus control model, compare the concrete
+[CONTROL.md](CONTROL.md) adds the two-label model and proves its call/scope
+inverse and whole-procedure correspondence. Try its fresh-process nested-call
+checkpoint, then all fifteen tests:
+
+```sh
+python3 projects/janus-local-steps/control_machine.py
+python3 -m unittest discover -s projects/janus-local-steps -v
+```
+
+Next: add branch/loop contexts to the two-label model, compare the concrete
 scope/call interaction with existing machines, and obtain independent
-reconstruction. This is not a replacement for Jana. The present Python API
-and checkpoint schema are experimental; a checkpoint belongs to the exact
+reconstruction. This is not a replacement for Jana. The Python APIs and
+checkpoint schemas are experimental; a checkpoint belongs to the exact
 static program and source version that created it.
