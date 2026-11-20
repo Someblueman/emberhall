@@ -63,7 +63,7 @@ def construct(data):
         raise ValueError("witness names an unknown agent") from error
     if len(final) == 1:
         result = one_final_path(mapped_u, a, b)
-        method = "four-agent 4q+1 proof; finite graph reference constructor"
+        method = "four-agent 4q+1 proof; recursive constructor"
     elif len(final) == 2:
         result = two_final_path(mapped_u, a, b)
         method = "four-agent 4q+2 proof; recursive constructor"

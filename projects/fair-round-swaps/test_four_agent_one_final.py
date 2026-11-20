@@ -105,6 +105,44 @@ class OneFinalTests(unittest.TestCase):
             a, b = witness(), witness()
             verify(self, u, path(u, a, b), allocation(a, 9), allocation(b, 9))
 
+    def test_recursive_paths_with_long_inputs_and_zero_ties(self):
+        rng = random.Random(2026112034)
+        for q in (2, 3, 6, 12):
+            for sample in range(8):
+                m = 4 * q + 1
+                u = tuple(tuple(rng.randrange(20) if sample else 0 for _ in range(m))
+                          for _ in range(4))
+                def witness():
+                    remaining, result = tuple(range(m)), []
+                    for agents in rounds_for(4, m, (0,)):
+                        order = list(agents)
+                        rng.shuffle(order)
+                        for i in order:
+                            g = rng.choice(favorites(u, i, remaining))
+                            result.append((i, g))
+                            remaining = tuple(h for h in remaining if h != g)
+                    return tuple(result)
+                a, b = witness(), witness()
+                verify(self, u, path(u, a, b), allocation(a, m), allocation(b, m))
+
+    def test_fixed_prefixes_in_the_one_recipient_braid(self):
+        u = ((0, 100, 90, 80, 80, 10, 9, 1, 1),
+             (100, 90, 85, 10, 60, 50, 40, 0, 20),
+             (100, 90, 85, 60, 10, 50, 40, 20, 0),
+             (0, 100, 100, 80, 80, 20, 10, 1, 1))
+        first_a = ((1, 0), (0, 1), (3, 2), (2, 3))
+        first_b = ((2, 0), (0, 1), (3, 2), (1, 4))
+        rest_a = ((1, 4), (0, 5), (3, 6), (2, 7), (0, 8))
+        rest_b = ((2, 3), (0, 5), (3, 6), (1, 8), (0, 7))
+        for fixed in ((), (0,), (3,), (0, 3), (3, 0)):
+            def reorder(first):
+                prefix = tuple(next(p for p in first if p[0] == i) for i in fixed)
+                return prefix + tuple(p for p in first if p[0] not in fixed)
+            a, b = reorder(first_a) + rest_a, reorder(first_b) + rest_b
+            result = path(u, a, b)
+            verify(self, u, result, allocation(a, 9), allocation(b, 9))
+            self.assertTrue(all(state[g] == i for state in result for i, g in a[:len(fixed)]))
+
     def test_invalid_protection_and_prefix(self):
         with self.assertRaisesRegex(ValueError, 'distinct singleton'):
             carrier_path(EXAMPLE, LEFT, RIGHT, (0, 1))

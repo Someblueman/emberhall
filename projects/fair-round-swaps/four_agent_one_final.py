@@ -1,13 +1,13 @@
 """The protected five-good bridge for the four-agent 4q+1 theorem.
 
-The full endpoint constructor enumerates EF1 states and is intended for small
-inputs. The bridge and padding operations work at arbitrary round lengths.
+The endpoint constructor uses the shared round/prefix induction. Only the
+five-good base case and protected bridge enumerate small EF1 graphs.
 """
 
 from __future__ import annotations
 
-from four_agent_lift import _search
-from swaps import (Allocation, Profile, Witness, allocation, ef1, favorites,
+from four_agent_lift import _construct, _search
+from swaps import (Allocation, Profile, Witness, allocation, ef1, exchange, favorites,
                    rounds_for, validate_profile, validate_witness)
 
 
@@ -70,10 +70,9 @@ def padded_path(u: Profile, prefix: Witness, tail: tuple[int, ...],
 
 
 def path(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
-    """Full EF1 graph search for greedy 4q+1 endpoints; final recipient is 0.
+    """Recursive EF1 path for greedy 4q+1 endpoints; final recipient is 0.
 
-    This finite reference constructor has exponential memory requirements.
-    Use the protected bridge for large local braid instances.
+    No shortest-path or polynomial-complexity guarantee is made.
     """
     validate_profile(u)
     m = len(u[0])
@@ -82,7 +81,15 @@ def path(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
     rounds = rounds_for(4, m, (0,))
     validate_witness(u, rounds, start)
     validate_witness(u, rounds, target)
-    return _search(u, allocation(start, m), allocation(target, m))
+    result = []
+    for a in _construct(u, start, target, (0,), padded_path):
+        if not result or a != result[-1]:
+            result.append(a)
+    if not all(ef1(u, a) for a in result):
+        raise AssertionError("constructed path leaves EF1")
+    if not all(exchange(a, b) for a, b in zip(result, result[1:])):
+        raise AssertionError("constructed path has a non-exchange step")
+    return result
 
 
 EXAMPLE: Profile = ((0, 10, 9, 1, 2), (10, 9, 8, 5, 0),
@@ -96,4 +103,4 @@ if __name__ == "__main__":
     for index, a in enumerate(result):
         print(f"{index}: {''.join(map(str, a))}")
     print(f"Verified: {len(result)-1} exchanges; good 0 stays with a carrier; every state EF1")
-    print("Candidate theorem: four agents, 4q+1 goods; independent reconstruction pending")
+    print("Reconstructed theorem: four agents, 4q+1 goods; general agent count remains open")

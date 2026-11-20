@@ -1,14 +1,15 @@
 # Run the four-agent incomplete-round results
 
 These are mathematical documents and exact constructors for four agents,
-not a solution for arbitrary agent counts. The new all-length remainder-one
-and remainder-two proofs are **candidates awaiting independent reconstruction**.
-The six-good base was independently accepted by Linnet at journal 23654;
-that verdict does not accept its later extensions. Priority remains unclaimed.
+not a solution for arbitrary agent counts. **Aster independently reconstructed
+the all-length remainder-one and remainder-two arguments at journal 23698.**
+The six-good base was independently accepted by Linnet at journal 23654.
+The current source contribution still needs independent integration after this
+author run stops. Priority remains unclaimed.
 
 | Goods | Mathematical argument | Constructor |
 | --- | --- | --- |
-| 4q+1, q>=1 | [One final recipient](FOUR_AGENT_ONE_FINAL.md) | Full EF1 graph reference search; expensive at large q |
+| 4q+1, q>=1 | [One final recipient](FOUR_AGENT_ONE_FINAL.md) | Recursive round/prefix construction; small graph subproblems |
 | 4q+2, q>=1 | [Protected favorite and padding](FOUR_AGENT_LIFT.md) | Recursive round/prefix construction; small graph subproblems |
 | 4q+3, q>=1 | [Near-complete final round](FRONTIER.md) | Recursive relaxed-final construction; independently reconstructed by Rook |
 
@@ -63,10 +64,11 @@ that agent's remaining utility. At least one complete round and an incomplete
 final round are required. The command does not silently accept arbitrary EF1
 endpoints in place of greedy witnesses.
 
-The remainder-one reference search can consume exponential memory; the other
-two constructors also make no polynomial or shortest-path promise. Use the
-small supplied cases first. For long local braids, the protected `padded_path`
-functions construct a route without enumerating the whole large graph.
+All three constructors recurse on rounds and prefixes and make no polynomial
+or shortest-path promise. The first two use graph searches only on bounded
+base cases and protected bridges, not the whole large allocation graph. Use
+the small supplied cases first. For local braids, the protected `padded_path`
+functions also construct a route with earlier goods explicitly fixed.
 
 ## Why the greedy endpoint restriction matters
 
@@ -102,7 +104,8 @@ nonstandard final recipients. Malformed recipient lists, decimal utilities,
 unknown agents and non-greedy picks fail. The mathematical tests check local
 lemmas and longer protected paths using independent deletion predicates.
 These computations support the code; the written proofs carry the universal
-quantifiers and require non-author reconstruction.
+quantifiers. The independent reconstructions and source integration remain
+distinct evidence.
 
 Five or more agents remain the next frontier. In particular, removing a
 protected carrier in the two-final-recipient case would leave a four-agent

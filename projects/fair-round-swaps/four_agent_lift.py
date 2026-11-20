@@ -68,7 +68,8 @@ def carrier_path(u: Profile, start: Allocation, target: Allocation) -> list[Allo
 
 
 def padded_path(u: Profile, prefix: Witness, tail: tuple[int, ...],
-                start: Allocation, target: Allocation) -> list[Allocation]:
+                start: Allocation, target: Allocation,
+                carriers: tuple[int, int] = (2, 3)) -> list[Allocation]:
     """Lift a protected six-good path after a greedy prefix that omits g.
 
     `tail[0]` is g. `start` and `target` refer to the six positions in `tail`.
@@ -77,6 +78,8 @@ def padded_path(u: Profile, prefix: Witness, tail: tuple[int, ...],
     """
     validate_profile(u)
     m = len(u[0])
+    if len(carriers) != 2 or set(carriers) != {2, 3}:
+        raise ValueError("two-final padding requires singleton carriers 2 and 3")
     if (len(u) != 4 or m % 4 != 2 or m < 6 or len(tail) != 6
             or len(set(tail)) != 6 or any(type(g) is not int or g not in range(m) for g in tail)
             or len(prefix) != m - 6):
@@ -115,10 +118,11 @@ def padded_path(u: Profile, prefix: Witness, tail: tuple[int, ...],
     return result
 
 
-def _construct(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
+def _construct(u: Profile, start: Witness, target: Witness,
+               final: tuple[int, ...], protected) -> list[Allocation]:
     """The outer round induction and inner fixed-first-round-prefix induction."""
     m = len(u[0])
-    if m == 6:
+    if m == 4 + len(final):
         return _search(u, allocation(start, m), allocation(target, m))
 
     def complete(rs, goods):
@@ -154,15 +158,17 @@ def _construct(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
                 left, right = tuple(left) + rest, tuple(right) + rest
                 return left, right, [allocation(prefix + w, m) for w in (left, right)]
             if len(later) == 1:
-                if i in (0, 1) or j in (0, 1):
-                    carrier = i if i in (0, 1) else j
-                    other = 1 - carrier
-                    left = tuple(left) + ((carrier, x), (other, common[0]))
-                    right = tuple(right) + ((carrier, y), (other, common[0]))
+                if i in final or j in final:
+                    carrier = i if i in final else j
+                    rest = tuple(zip((a for a in final if a != carrier), common))
+                    left = tuple(left) + ((carrier, x),) + rest
+                    right = tuple(right) + ((carrier, y),) + rest
                     return left, right, [allocation(prefix + w, m) for w in (left, right)]
-                tail = (g, middle_goods[0], middle_goods[1], x, y, common[0])
-                left = tuple(left) + ((0, x), (1, common[0]))
-                right = tuple(right) + ((0, y), (1, common[0]))
+                noncarriers = tuple(a for a in range(4) if a not in (i, j))
+                tail = (g, *(middle_goods[a] for a in noncarriers), x, y, *common)
+                rest = tuple(zip(final[1:], common))
+                left = tuple(left) + ((final[0], x),) + rest
+                right = tuple(right) + ((final[0], y),) + rest
                 full_left, full_right = prefix + left, prefix + right
                 # The common bundles form greedy rounds after omitting g.
                 by_agent = {a: [h for b, h in full_left if a == b and h not in tail]
@@ -170,11 +176,11 @@ def _construct(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
                 positions = {h: index for index, (_, h) in enumerate(full_left)}
                 common_prefix = []
                 for t in range(len(by_agent[0])):
-                    doubles = sorted((0, 1), key=lambda a: positions[by_agent[a][t]])
-                    common_prefix.extend((a, by_agent[a][t]) for a in (*doubles, i, j))
+                    earlier = sorted(noncarriers, key=lambda a: positions[by_agent[a][t]])
+                    common_prefix.extend((a, by_agent[a][t]) for a in (*earlier, i, j))
                 a, b = allocation(full_left, m), allocation(full_right, m)
-                route = padded_path(u, tuple(common_prefix), tail,
-                                    tuple(a[h] for h in tail), tuple(b[h] for h in tail))
+                route = protected(u, tuple(common_prefix), tail,
+                                  tuple(a[h] for h in tail), tuple(b[h] for h in tail), (i, j))
                 return left, right, route
             left.append((i, x))
             right.append((j, y))
@@ -189,7 +195,7 @@ def _construct(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
             aa = tuple((i, labels[g]) for i, g in a)
             bb = tuple((i, labels[g]) for i, g in b)
             result = []
-            for reduced in _construct(small, aa, bb):
+            for reduced in _construct(small, aa, bb, final, protected):
                 full = list(allocation(prefix, m))
                 for g, owner in zip(goods, reduced):
                     full[g] = owner
@@ -221,7 +227,7 @@ def _construct(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
         after = connect(rs, goods, right, b, prefix)
         return before + middle[1:] + after[1:]
 
-    return connect(rounds_for(4, m, (0, 1)), tuple(range(m)), start, target, ())
+    return connect(rounds_for(4, m, final), tuple(range(m)), start, target, ())
 
 
 def path(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
@@ -238,7 +244,7 @@ def path(u: Profile, start: Witness, target: Witness) -> list[Allocation]:
     validate_witness(u, rounds, start)
     validate_witness(u, rounds, target)
     result = []
-    for a in _construct(u, start, target):
+    for a in _construct(u, start, target, (0, 1), padded_path):
         if not result or a != result[-1]:
             result.append(a)
     if not all(ef1(u, a) for a in result):
@@ -275,4 +281,4 @@ if __name__ == "__main__":
     for index, a in enumerate(result):
         print(f"{index}: {''.join(map(str, a))}")
     print(f"Verified: {len(result)-1} exchanges, every full allocation EF1")
-    print("Candidate theorem: four agents, 4q+2 goods; other remainders remain separate")
+    print("Reconstructed theorem: four agents, 4q+2 goods; general agent count remains open")

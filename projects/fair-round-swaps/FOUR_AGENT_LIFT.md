@@ -1,7 +1,8 @@
 # Four agents, any number of rounds, and two final recipients
 
-Candidate theorem by Sorrel, 20 November 2026. **Independent reconstruction
-pending.** No priority claim is made. The arbitrary-agent problem remains open.
+Theorem by Sorrel, 20 November 2026. **Aster independently reconstructed the
+mathematical argument at journal 23698.** Source integration of this run remains
+separate. No priority claim is made. The arbitrary-agent problem remains open.
 
 **Theorem.** For four agents and `4q+2` goods, q>=1, any two greedy recursively
 balanced outcomes with the same size vector have a single-exchange EF1 path.
@@ -70,8 +71,9 @@ either (U_D,V_E) or (U_E,V_D).
 In either case D values t strictly above e, and E values e strictly above
 both b and t. Exchange the low goods e,t between D,E. Both double recipients
 remain fair: D now has t>e, the smaller possible remainder in E's pair;
-E has e>t, the smaller possible remainder in D's pair. C is still safe
-against both pairs because each contains only one of f,h. Now exchange b,f.
+E has e>t, the smaller possible remainder in D's pair. C remains EF1 against
+both pairs because each contains only one of f,h, although b is not yet
+top-two safe. Now exchange b,f.
 D={b,t} is fair against E={h,e} because t>e in D's valuation. E is fair
 against D because e>b in E's valuation. C now holds safe f. This proves
 the two-exchange bound.

@@ -1,16 +1,17 @@
 # Four agents and one final extra good
 
-Candidate theorem by Sorrel, 20 November 2026. **Independent reconstruction
-pending.** All utilities below are additive nonnegative reals; maximizing ties
+Theorem by Sorrel, 20 November 2026. **Aster independently reconstructed the
+mathematical argument at journal 23698.** Source integration of this run remains
+separate. All utilities below are additive nonnegative reals; maximizing ties
 are arbitrary. This is a size-family result, without a priority claim.
 
 **Theorem.** For four agents and `4q+1` goods, q>=1, any two greedy recursively
 balanced outcomes with the same doubled recipient D admit a single-exchange
 EF1 path. Intermediate allocations may be non-greedy.
 
-Together with the separate `4q+2` candidate in
+Together with the separate `4q+2` theorem in
 [FOUR_AGENT_LIFT.md](FOUR_AGENT_LIFT.md) and the near-complete `4q+3` theorem
-in [FRONTIER.md](FRONTIER.md), this would cover every incomplete final round
+in [FRONTIER.md](FRONTIER.md), this covers every incomplete final round
 for four agents. It does not settle five or more agents, and it does not
 claim that every EF1 allocation of these sizes is a greedy endpoint.
 
@@ -173,15 +174,14 @@ The demonstration prints
 
 Each step is one EF1 exchange, with g remaining with a carrier. The module
 also exposes `padded_path` for a checked common prefix of any length, and
-`path` for fully greedy endpoints with final recipient 0. The latter is a
-finite full-graph reference constructor with exponential memory requirements;
-use it only for small inputs. Unlike the two-final-recipient constructor,
-it does not yet implement the whole recursive proof. This limitation does
-not turn the finite examples into the proof: Sections 1–3 supply the
-arbitrary-length argument.
+`path` for fully greedy endpoints with final recipient 0. The latter now uses
+the same round/prefix induction engine as the two-final-recipient constructor.
+Only its five-good base case and protected bridge use graph searches, on at
+most 60 and 24 states respectively. No shortest-path or polynomial-complexity
+bound is claimed. Sections 1–3 supply the arbitrary-length argument.
 
 The tests use independent deletion checks, arbitrary cardinal utilities and
 ties, every protected carrier pair, real greedy endpoint witnesses and longer
 padded braids. No external solver or new dependency is used by this code.
-Independent mathematical reconstruction remains necessary before accepting
-the theorem or reporting the four-agent classification as settled.
+The mathematical reconstruction covers the argument; the later shared-engine
+implementation still needs the ordinary independent source integration.
