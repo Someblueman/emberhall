@@ -231,6 +231,62 @@ def buffer_permute(marks: tuple[int, ...], start: Pairing,
     return tuple(route)
 
 
+def connect_with_zero_pair(marks: tuple[int, ...], start: Pairing,
+                           target: Pairing) -> tuple[Pairing, ...]:
+    """Connect arbitrary legal matchings when the start contains a zero pair.
+
+    This works for any number of observer bits, in at most
+    3 floor(3(r-1)/2) exchanges. No matching graph is enumerated.
+    """
+    start, target = validate(marks, start), validate(marks, target)
+    if start == target:
+        return (start,)
+    zero = next((pair for pair in start if all(marks[g] == 0 for g in pair)), None)
+    if zero is None:
+        raise ValueError("the start must contain a pair of zero-marked goods")
+    p, q = zero
+    old = {g: h for a, b in start for g, h in ((a, b), (b, a))}
+    new = {g: h for a, b in target for g, h in ((a, b), (b, a))}
+    unseen = {g for g in old if old[g] != new[g]}
+    moves = []
+    while unseen:
+        first = a = min(unseen)
+        cycle = []
+        while True:
+            b = old[a]
+            cycle.append((a, b))
+            unseen.difference_update((a, b))
+            a = new[b]
+            if a == first:
+                break
+        if any(p in pair for pair in cycle):
+            continue  # the cycle containing both zero goods is performed last
+        a = cycle[0][0]
+        moves.append((p, a))
+        moves.extend((p, x) for x, _ in cycle[1:])
+        moves.append((p, a))
+    a = new[p]
+    while a != q:
+        moves.append((q, a))
+        a = new[old[a]]
+
+    reached = start
+    for move in moves:
+        reached = swap_goods(reached, move)
+    assert unlabelled(reached) == unlabelled(target)
+    # Pre-permute root labels, then replay the same good exchanges. Good
+    # exchanges commute with renaming recipients, so the endpoint is exact.
+    slots = {pair: i for i, pair in enumerate(target)}
+    desired = [None] * len(start)
+    for i, pair in enumerate(reached):
+        desired[slots[pair]] = start[i]
+    route = list(buffer_permute(marks, start, tuple(desired)))
+    for move in moves:
+        route.append(swap_goods(route[-1], move))
+    assert route[-1] == target
+    return tuple(route)
+
+
 def maximum_labelled_components(pairs: int) -> int:
     """Sharp bound above ONE unlabelled component for three-bit marks."""
     if type(pairs) is not int or pairs < 0:
@@ -296,70 +352,45 @@ def realize_fixed_observers(marks: tuple[int, ...]) -> tuple[tuple[Fraction, ...
     return observers + (automatic,) * (n // 2)
 
 
-def _with_observers(state: Pairing, loan: int | None = None,
-                    observer: int = 0) -> tuple[int, ...]:
+def _with_observers(state: Pairing, loans: dict[int, int] | None = None) -> tuple[int, ...]:
+    loans = {} if loans is None else loans
     owners = [0, 1, 2] + [-1] * (2 * len(state))
-    if loan is not None:
-        owners[loan + 3] = observer
+    for good, observer in loans.items():
+        owners[good + 3] = observer
     for i, pair in enumerate(state):
         for g in pair:
-            actual = observer if g == loan else g + 3
+            actual = loans.get(g, g + 3)
             owners[actual] = i + 3
     return tuple(owners)
 
 
-def loan_label_permutation(marks: tuple[int, ...], start: Pairing,
-                           target: Pairing, observer: int = 0) -> tuple[tuple[int, ...], ...]:
-    """EF1 route under realize_fixed_observers, temporarily moving one observer.
+def connect_realized(marks: tuple[int, ...], start: Pairing, target: Pairing,
+                     observer_order: tuple[int, int, int] = (0, 1, 2)) -> tuple[tuple[int, ...], ...]:
+    """EF1 path for any legal endpoints under realize_fixed_observers(marks).
 
-    The endpoints must have the same unlabelled matching, and a zero-marked
-    good must be paired with a good high for the chosen observer. The path
-    has at most 2+2 floor(3(r-1)/2) exchanges when r>=1. Owner vectors include the three observer
-    goods before the free goods. Other observers keep their goods throughout.
+    Borrow at most two observer goods to create a zero pair, connect all
+    free pairs, then repay the loans. At most 4+3 floor(3(r-1)/2) exchanges
+    for r>=1; zero free goods have a single allocation. This is a theorem
+    for the explicit positive strict realization, not arbitrary utilities.
     """
     start, target = validate(marks, start), validate(marks, target)
-    if (any(m not in range(8) for m in marks)
-            or type(observer) is not int or observer not in range(3)):
-        raise ValueError("need three-bit marks and an observer numbered 0, 1, or 2")
-    if unlabelled(start) != unlabelled(target):
-        raise ValueError("the endpoints must have the same unlabelled pairing")
-
+    if (any(m not in range(8) for m in marks) or sorted(observer_order) != [0, 1, 2]
+            or any(type(i) is not int for i in observer_order)):
+        raise ValueError("need three-bit marks and a permutation of the three observers")
     if start == target:
         return (_with_observers(start),)
-    high = next((h for pair in start for h, z in (pair, pair[::-1])
-                 if marks[z] == 0 and marks[h] & (1 << observer)), None)
-    if high is None:
-        raise ValueError("need a zero good paired with a good high for this observer")
-    relaxed_marks = tuple(0 if g == high else m for g, m in enumerate(marks))
-    route = [_with_observers(start), _with_observers(start, high, observer)]
-    partial = buffer_permute(relaxed_marks, start, target)
-    route.extend(_with_observers(state, high, observer) for state in partial[1:])
-    route.append(_with_observers(target))
+    loans, route = {}, [_with_observers(start)]
+    for good in start[0]:
+        if marks[good]:
+            loans[good] = next(i for i in observer_order if marks[good] & (1 << i))
+            route.append(_with_observers(start, loans))
+    relaxed = tuple(0 if g in loans else mark for g, mark in enumerate(marks))
+    partial = connect_with_zero_pair(relaxed, start, target)
+    route.extend(_with_observers(state, loans) for state in partial[1:])
+    for good in tuple(loans)[::-1]:
+        del loans[good]
+        route.append(_with_observers(target, loans))
     return tuple(route)
-
-
-def connect_realized_family(marks: tuple[int, ...], start: Pairing,
-                            target: Pairing) -> tuple[tuple[int, ...], ...]:
-    """Connect any two endpoints of a complementary family with a 0/7 class.
-
-    Utilities are exactly realize_fixed_observers(marks). The other two
-    observers stay fixed; there are at most 5r-1 exchanges for r>=1.
-    Without a 0/7 class only paths within the same label class are supplied.
-    """
-    direct = connect_complementary(marks, start, target)
-    if direct is not None:
-        return tuple(_with_observers(state) for state in direct)
-    if 0 not in marks:
-        raise ValueError("cross-class construction requires a 0/7 class")
-    start, target = validate(marks, start), validate(marks, target)
-    available = {}
-    for pair in target:
-        key = min(marks[g] for g in pair)
-        available.setdefault(key, deque()).append(pair)
-    middle = tuple(available[min(marks[g] for g in pair)].popleft() for pair in start)
-    first = connect_complementary(marks, start, middle)
-    second = loan_label_permutation(marks, middle, target)
-    return tuple(_with_observers(state) for state in first) + second[1:]
 
 
 BOUNDARY_MARKS = (1, 6, 2, 5)
@@ -443,7 +474,7 @@ def main() -> None:
     target = root[::-1]
     print("reversed-label target in same fixed-observer component:",
           connect_complementary(marks, root, target) is not None)
-    loan_path = loan_label_permutation(marks, root, target)
+    loan_path = connect_realized(marks, root, target)
     print("reversed-label EF1 loan swaps:", len(loan_path) - 1)
 
 

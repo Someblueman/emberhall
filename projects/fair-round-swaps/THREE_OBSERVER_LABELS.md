@@ -250,7 +250,7 @@ the classified labelled graph. `realize_fixed_observers` returns these
 exact rational utilities. Allowing the observers' goods to move changes the
 graph and is deliberately outside this count.
 
-## An observer loan reconnects the sharp examples
+## At most two observer loans connect the realized class
 
 The distinction above can be demonstrated constructively, for arbitrarily
 many goods, rather than left as a warning.
@@ -290,20 +290,84 @@ The exact realization above satisfies the hypotheses: each observer's good
 is below the other observers' thresholds, and every automatic pair, even
 one containing a former observer good, is fair. In a complementary family
 with a nonempty `0/7` class, the zero's partner is high for all three
-observers. `loan_label_permutation` returns every allocation along the
-resulting path. Its internal conservative marks set the borrowed observer
+observers. `connect_realized` uses one loan when its first pair contains a
+zero good. Its internal conservative marks set the borrowed observer
 good to zero and leave the other old marks unchanged; actual relaxation of
 one threshold can only allow more pairs.
 
-**Full endpoint consequence for this family.** If the `0/7` class is
-nonempty, any two fixed-observer endpoints of the realized complementary
-family, including different unlabelled matchings and different label
-classes, connect in at most `5r-1` exchanges. First
-assign each target pair to some current recipient of the same complementary
-type, obtaining an intermediate labelled target. Reach it by at most `2r`
-same-type good exchanges. Then use the loan lemma to correct the remaining
-recipient labels in at most `3r-1` exchanges. The other two observers stay
-fixed throughout. `connect_realized_family` implements this composition.
+The construction extends to **every** three-bit profile produced by
+`realize_fixed_observers`, without requiring a zero good, a complementary
+family, or an unlabelled-connectivity theorem. Two ingredients establish it.
+
+### Two universal goods connect all legal labelled matchings
+
+Consider any compatibility graph in which two goods `p,q` are compatible
+with every good. Suppose the starting matching pairs `p,q` together; the
+target need not. Write `B=floor(3(r-1)/2)`. Any two labelled endpoints of
+this form connect in at most `3B` exchanges. This theorem also holds for
+graphs that cannot arise from three observers.
+
+To construct an unlabelled path, decompose the symmetric difference of the
+start and target into alternating cycles. For a cycle not containing the
+zero pair, write the current edges as `(a_1,b_1),...,(a_k,b_k)` and the
+target edges as `(b_1,a_2),...,(b_k,a_1)`. Exchange `p` with `a_1`, then
+with `a_2,...,a_k`, then with `a_1` again. At every step the newly fixed
+nonzero pair is a target edge and the remaining changing pairs contain
+`p` or `q`. The final step restores `p,q`. This takes `k+1` exchanges.
+
+Do these cycles first. If the target separates `p,q`, finish the alternating
+cycle containing their current edge. Orient its first current edge as
+`(q,p)` and let its other current edges be `(a_2,b_2),...,(a_k,b_k)`, so the
+target begins `(p,a_2)` and ends `(b_k,q)`. Exchange `q` with
+`a_2,...,a_k`. Each step fixes a target edge, leaving the other changing
+edge incident to `q`. The last such edge is already the last target edge.
+This takes `k-1` exchanges. If `p,q` stay paired, regard this as `k=1`.
+
+The ordinary cycles involve at most `r-k` pairs and cost at most
+`floor(3(r-k)/2)`, since each cycle has length at least two. Adding `k-1`
+is at most `B`. This constructs a path of length at most `B` to the target
+*unlabelled* matching, with some recipient labels.
+
+Compute the permutation between those labels and the desired labels.
+Pre-permute the starting pairs accordingly using the moving zero pair,
+at cost at most `2B`, then execute exactly the same specified good
+exchanges as before. Good exchanges commute with renaming recipients, so
+the endpoint now has the requested labels. The total is at most `3B`.
+`connect_with_zero_pair` implements this argument without graph enumeration.
+
+### Create the two universal goods by at most two loans
+
+Take the first starting pair `{a,b}`. For each nonzero-marked endpoint,
+choose an observer whose bit is present and exchange that endpoint with
+the observer's current good. If both endpoints are nonzero their marks
+are disjoint, so the two chosen observers are different. Each observer's
+own value increases. The new free pair consists of zero-marked original
+goods or borrowed observer goods, each now below every current observer
+threshold. Every other pair remains legal. Automatic recipients are fair
+even when holding observer goods, as established by the realization.
+
+Conservatively replace the marks of the borrowed endpoints by zero and
+leave the other marks as they were. Under these marks both the starting
+pair and the target pairing (with the same endpoint substitutions) are
+legal, and there are two universal goods. Apply the preceding construction.
+Restore the loans in reverse order, now at the target positions. During
+repayment, each pair is either an original target pair or a target pair
+with some endpoint replaced by a still-borrowed observer good. The latter
+is below all current thresholds; the former is legal even under the
+original thresholds. Thus falling observer thresholds cause no failure.
+
+**Theorem for the explicit realization.** Any two legal fixed-observer
+endpoints of `realize_fixed_observers(marks)` connect in the full EF1 graph,
+using at most two observers' goods and at most
+`4+3 floor(3(r-1)/2)` exchanges for `r>=1`. The empty case is trivial.
+`connect_realized` implements both loans, the full labelled path, and
+repayment. Its optional observer order chooses among eligible lenders.
+
+The valuations are essential hypotheses. This is a positive strict
+all-size family inside the project's model, not a proof for arbitrary
+observer values or arbitrary double-recipient rows. In particular it
+provides no reason to treat a fixed-observer disconnection as a full EF1
+counterexample.
 
 For the balanced 100-pair example the fixed-observer graph has
 `1612207508215775948685323966297082670959348818240567745024` components.
@@ -392,7 +456,15 @@ disconnected unlabelled graphs. The loan test checks all 24 pair-label
 permutations of a four-pair sharp example with each of the three possible
 borrowers. Thirty further constructed paths change both the matching and
 its label class, with exact positive rational EF1 checked at every step
-through twelve pairs.
+through twelve pairs. The two-universal-goods constructor has 1,944 exact
+labelled endpoint checks over every graph on four nonzero goods that has
+a perfect matching, with two universal goods added. The general two-loan
+constructor additionally passes literal EF1 checks for a path in every
+one of the 498 feasible three-bit multisets on two, four, or six goods.
+Both forms of a long alternating cycle are checked on 26 goods: the zero
+pair survives to the target in one and is split in the other. The final
+project suite passes all 48 tests (65.038 seconds in this run); syntax,
+whitespace and module-size checks also pass.
 
 The construction and tests are self-contained except for the CLI census's
 use of the existing `swaps.py` finite model. They need no unmerged pairing

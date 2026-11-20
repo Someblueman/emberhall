@@ -12,8 +12,8 @@ import unittest
 from three_observer_labels import (
     BOUNDARY_MARKS, BOUNDARY_PROFILE, BOUNDARY_START, BOUNDARY_TARGET,
     boundary_census, buffer_permute, buffer_transpose, complementary_family, connect,
-    connect_complementary, connect_realized_family, explore, maximum_labelled_components,
-    loan_label_permutation, realize_fixed_observers, validate,
+    connect_complementary, connect_realized, connect_with_zero_pair, explore,
+    maximum_labelled_components, realize_fixed_observers, validate,
 )
 
 
@@ -266,7 +266,8 @@ class LabelledLiftTests(unittest.TestCase):
         profile = realize_fixed_observers(marks)
         for target in permutations(root):
             for observer in range(3):
-                route = loan_label_permutation(marks, root, target, observer)
+                order = (observer,) + tuple(i for i in range(3) if i != observer)
+                route = connect_realized(marks, root, target, order)
                 self.assertLessEqual(len(route) - 1, 2 + 2 * (3 * (len(root) - 1) // 2))
                 self.assertTrue(all(fair_by_deletions(profile, state) for state in route))
                 self.assertEqual(route[0], (0, 1, 2) + tuple(i + 3 for i in owners(root)))
@@ -283,17 +284,17 @@ class LabelledLiftTests(unittest.TestCase):
         # Same argument with a non-complementary pair: only the zero/high loan
         # and unchanged pair legality are used by this construction.
         marks, root = (0, 1, 2, 4, 0, 0), ((0, 1), (2, 3), (4, 5))
-        route = loan_label_permutation(marks, root, root[::-1])
+        route = connect_realized(marks, root, root[::-1])
         self.assertTrue(all(fair_by_deletions(realize_fixed_observers(marks), a) for a in route))
         marks, root = complementary_family((3, 3, 3, 3))
         profile = realize_fixed_observers(marks)
-        route = loan_label_permutation(marks, root, root[::-1])
+        route = connect_realized(marks, root, root[::-1])
         self.assertTrue(all(fair_by_deletions(profile, a) for a in route))
         self.assertEqual(len(route) - 1, 34)
-        with self.assertRaises(ValueError):
-            loan_label_permutation(BOUNDARY_MARKS, ((0, 1), (2, 3)), ((2, 3), (0, 1)))
-        with self.assertRaises(ValueError):
-            loan_label_permutation((0, 0, 0, 0), ((0, 1), (2, 3)), ((0, 2), (1, 3)))
+        route = connect_realized(BOUNDARY_MARKS, ((0, 1), (2, 3)), ((2, 3), (0, 1)))
+        self.assertTrue(all(fair_by_deletions(realize_fixed_observers(BOUNDARY_MARKS), a) for a in route))
+        self.check_path((0, 0, 0, 0), connect_with_zero_pair((0, 0, 0, 0),
+                        ((0, 1), (2, 3)), ((0, 2), (1, 3))), ((0, 1), (2, 3)), ((0, 2), (1, 3)))
 
     def test_realized_family_connects_different_matchings_and_label_classes(self):
         rng = Random(20261120517)
@@ -310,7 +311,7 @@ class LabelledLiftTests(unittest.TestCase):
                 target = [tuple(sorted(relabel[g] for g in pair)) for pair in root]
                 rng.shuffle(target)
                 target = tuple(target)
-                route = connect_realized_family(marks, root, target)
+                route = connect_realized(marks, root, target)
                 self.assertEqual(route[-1], (0, 1, 2) + tuple(i + 3 for i in owners(target)))
                 self.assertLessEqual(len(route) - 1, 5 * len(root) - 1)
                 self.assertTrue(all(fair_by_deletions(profile, state) for state in route))
@@ -319,6 +320,60 @@ class LabelledLiftTests(unittest.TestCase):
                     self.assertEqual(len(changed), 2)
                     x, y = changed
                     self.assertEqual((a[x], a[y]), (b[y], b[x]))
+
+    def test_two_universal_goods_connect_every_target_on_six_goods(self):
+        edges = tuple(combinations(range(2, 6), 2))
+        checked = 0
+        for present in range(1 << len(edges)):
+            marks = [0] * 6
+            for bit, (a, b) in enumerate(edges):
+                if not present & (1 << bit):
+                    marks[a] |= 1 << bit
+                    marks[b] |= 1 << bit
+            marks = tuple(marks)
+            base = list(pairings(tuple(range(2, 6)), marks))
+            if not base:
+                continue
+            start = ((0, 1),) + base[0]
+            for matching in pairings(tuple(range(6)), marks):
+                for target in permutations(matching):
+                    route = connect_with_zero_pair(marks, start, target)
+                    self.check_path(marks, route, start, target)
+                    self.assertLessEqual(len(route) - 1, 9)
+                    checked += 1
+        print(f"two universal goods: {checked} exact arbitrary-graph endpoint routes")
+        # A chordless 24-cycle forces a long alternating cycle, with no
+        # unproved direct chord available to shorten the buffer construction.
+        n = 26
+        marks = [0] * n
+        for bit, (a, b) in enumerate(combinations(range(2, n), 2)):
+            if b - a not in (1, n - 3):
+                marks[a] |= 1 << bit
+                marks[b] |= 1 << bit
+        marks = tuple(marks)
+        root = ((0, 1),) + tuple((i, i + 1) for i in range(2, n, 2))
+        tail = tuple((i, i + 1) for i in range(3, n - 1, 2))
+        for target in (((0, 1),) + tail + ((2, n - 1),),
+                       ((0, 2),) + tail + ((1, n - 1),)):
+            target = target[::-1]
+            route = connect_with_zero_pair(marks, root, target)
+            self.check_path(marks, route, root, target)
+            self.assertLessEqual(len(route) - 1, 3 * (3 * (len(root) - 1) // 2))
+
+    def test_realized_loan_all_small_three_bit_profiles(self):
+        checked = 0
+        for n in (2, 4, 6):
+            for marks in combinations_with_replacement(range(8), n):
+                matches = list(pairings(tuple(range(n)), marks))
+                if not matches:
+                    continue
+                profile = realize_fixed_observers(marks)
+                root, target = matches[0], matches[-1][::-1]
+                route = connect_realized(marks, root, target)
+                self.assertTrue(all(fair_by_deletions(profile, a) for a in route))
+                self.assertLessEqual(len(route) - 1, 4 + 3 * (3 * (n // 2 - 1) // 2))
+                checked += 1
+        print(f"positive strict realized profiles: {checked} exact EF1 loan routes")
 
     def test_separate_unlabelled_components_and_invalid_inputs(self):
         # Encode a chordless six-cycle: each forbidden pair gets its own bit.
@@ -347,6 +402,10 @@ class LabelledLiftTests(unittest.TestCase):
             connect_complementary((0, 0), ((0, 1),), ((0, 1),))
         with self.assertRaises(ValueError):
             realize_fixed_observers((0, 8))
+        with self.assertRaises(ValueError):
+            connect_with_zero_pair(BOUNDARY_MARKS, ((0, 1), (2, 3)), ((2, 3), (0, 1)))
+        with self.assertRaises(ValueError):
+            connect_realized((0, 0), ((0, 1),), ((0, 1),), (0, 0, 1))
         run = subprocess.run([sys.executable, str(Path(__file__).with_name("three_observer_labels.py"))],
                              capture_output=True, text=True, check=True)
         self.assertIn("'fair_states': 156", run.stdout)
