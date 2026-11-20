@@ -1,4 +1,4 @@
-"""A two-exchange improvement, not a repeated normalization theorem.
+"""Safe-tail normalization and a two-exchange improvement outside that domain.
 
 Pair anchors must have been picked greedily with the singleton good withheld.
 The output need not admit another such anchor order. See RESERVED_SINGLETON.md.
@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from itertools import permutations, product
 
-from swaps import Allocation, Profile, ef1, exchange, validate_profile
+from swaps import (Allocation, Profile, Witness, ef1, exchange, rounds_for,
+                   validate_profile, validate_witness)
 
 
 def validate_reserved(u: Profile, owners: Allocation, singleton: int,
@@ -115,6 +116,67 @@ def improve(u: Profile, owners: Allocation, singleton: int,
     return route, branch
 
 
+def normalize_safe(u: Profile, owners: Allocation, singleton: int,
+                   anchors: tuple[tuple[int, int], ...]) -> tuple[list[Allocation], Witness]:
+    """Normalize when the reserved singleton dominates all original tails.
+
+    This weaker input contract extends the existing provisional-anchor method:
+    the input need not itself have a complete greedy picking witness.
+    """
+    validate_reserved(u, owners, singleton, anchors)
+    z = owners.index(singleton)
+    original = dict(anchors)
+    tails = tuple(g for g, a in enumerate(owners)
+                  if a != singleton and g != original[a])
+    if any(u[singleton][g] > u[singleton][z] for g in tails):
+        raise ValueError("normalization requires the singleton to dominate all tails")
+    route, _ = improve(u, owners, singleton, anchors)
+    favorite = route[-1].index(singleton)
+    picks = [(singleton, favorite)]
+
+    def move(x: int, y: int) -> None:
+        if x == y:
+            return
+        target = list(route[-1])
+        target[x], target[y] = target[y], target[x]
+        result = tuple(target)
+        if not exchange(route[-1], result) or not ef1(u, result):
+            raise AssertionError("normalization produced an invalid exchange")
+        route.append(result)
+
+    if favorite == z:
+        picks.extend(anchors)
+    else:
+        donor = owners[favorite]
+        q = next(g for g, a in enumerate(route[-1]) if a == donor and g != z)
+        provisional = z
+        for a, p in anchors:
+            if a == donor:
+                continue
+            chosen = p
+            if u[a][provisional] > u[a][p]:
+                chosen = provisional
+                move(p, provisional)
+                provisional = p
+            picks.append((a, chosen))
+        chosen = max((provisional, q), key=lambda g: (u[donor][g], -g))
+        picks.append((donor, chosen))
+
+    fixed = dict(picks)
+    remaining = set(range(len(owners))) - set(fixed.values())
+    finals = []
+    for a, _ in anchors:
+        g = max(remaining, key=lambda h: (u[a][h], -h))
+        old = next(h for h, b in enumerate(route[-1]) if b == a and h != fixed[a])
+        move(old, g)
+        finals.append((a, g))
+        remaining.remove(g)
+    witness = tuple(picks + finals)
+    schedule = rounds_for(len(u), len(owners), tuple(a for a, _ in anchors))
+    validate_witness(u, schedule, witness)
+    return route, witness
+
+
 LOSS_PROFILE = ((1, 0, 3, 4, 0, 0, 0), (2, 1, 0, 1, 4, 0, 2),
                 (1, 4, 1, 1, 0, 4, 3), (2, 1, 2, 2, 3, 3, 4))
 LOSS_START = (1, 0, 1, 0, 3, 2, 2)
@@ -145,6 +207,9 @@ def pair_obstruction(n: int, strict: bool = False) -> tuple[Profile, Allocation]
 
 
 def main() -> None:
+    safe, witness = normalize_safe(((2, 3, 1), (3, 2, 1)), (0, 1, 1), 0, ((1, 1),))
+    print("Safe-tail normalization: " + " -> ".join("".join(map(str, a)) for a in safe))
+    print("Greedy witness:", witness)
     route, branch = improve(LOSS_PROFILE, LOSS_START, 3, LOSS_ANCHORS)
     print("Reserved singleton: a local improvement, not a normalization")
     print(f"branch: {branch}; exchanges: {len(route) - 1}")

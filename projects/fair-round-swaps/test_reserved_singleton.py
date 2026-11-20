@@ -9,7 +9,7 @@ import sys
 import unittest
 
 from reserved_singleton import (LOSS_ANCHORS, LOSS_PROFILE, LOSS_START, LOSS_STRICT_PROFILE,
-                                improve, pair_obstruction, validate_reserved)
+                                improve, normalize_safe, pair_obstruction, validate_reserved)
 
 
 def fair(u, a):
@@ -55,6 +55,57 @@ def has_anchors(u, a, singleton):
 
 
 class ReservedSingletonTests(unittest.TestCase):
+    def test_safe_tail_normalization(self):
+        u = ((2, 3, 1), (3, 2, 1))
+        start = (0, 1, 1)
+        self.assertTrue(all(max(row[g] for g, a in enumerate(start) if a == i) < max(row)
+                            for i, row in enumerate(u)))
+        route, witness = normalize_safe(u, start, 0, ((1, 1),))
+        self.assertEqual(route, [start, (1, 0, 1)])
+        self.assertEqual(witness, ((0, 1), (1, 0), (1, 2)))
+        rng = Random(20261120082)
+        examples = 0
+        for n in range(2, 13):
+            m = 2 * n - 1
+            for _ in range(30):
+                rows = [[Fraction(rng.randrange(9), rng.choice((1, 2, 5)))
+                         for _ in range(m)] for _ in range(n)]
+                singleton = rng.randrange(n)
+                z = rng.randrange(m)
+                doubles = [i for i in range(n) if i != singleton]
+                rng.shuffle(doubles)
+                remaining = set(range(m)) - {z}
+                start = [-1] * m
+                start[z] = singleton
+                anchors = []
+                for i in doubles:
+                    g = max(remaining, key=lambda h: (rows[i][h], h))
+                    start[g] = i
+                    anchors.append((i, g))
+                    remaining.remove(g)
+                rows[singleton][z] = max(rows[singleton][g] for g in remaining)
+                tails = list(remaining)
+                rng.shuffle(tails)
+                for i, g in zip(doubles, tails):
+                    start[g] = i
+                u, start = tuple(map(tuple, rows)), tuple(start)
+                route, witness = normalize_safe(u, start, singleton, tuple(anchors))
+                check_route(self, u, route, singleton)
+                self.assertLessEqual(len(route) - 1, 2 * (n - 1))
+                self.assertEqual({i for i, _ in witness[:n]}, set(range(n)))
+                self.assertEqual([i for i, _ in witness[n:]], doubles)
+                remaining = set(range(m))
+                final = [-1] * m
+                for i, g in witness:
+                    self.assertTrue(all(u[i][g] >= u[i][h] for h in remaining))
+                    remaining.remove(g)
+                    final[g] = i
+                self.assertEqual(tuple(final), route[-1])
+                examples += 1
+        with self.assertRaisesRegex(ValueError, "dominate all tails"):
+            normalize_safe(LOSS_PROFILE, LOSS_START, 3, LOSS_ANCHORS)
+        print(f"safe-tail normalizations: {examples}")
+
     def test_blocked_tail_uses_later_anchor(self):
         u = ((9, 15, 3, 3, 12), (18, 3, 6, 5, 0), (12, 6, 12, 1, 0))
         start = (0, 2, 1, 2, 1)
