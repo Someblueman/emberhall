@@ -73,6 +73,18 @@ of the full profiles, not just equality of their supports.
 
 The unused count in the whole tree is `c + (m mod 2)`.
 
+### An additional pair of separated paths
+
+There is also an immediate construction not requiring both sets to lie in
+one diameter path. Put `q=min(a,b+c+1)`. Take the first q vertices of arm 1,
+and the first q vertices of the path from the tip of arm 2 through the centre
+to the tip of arm 3. They are disjoint isometric q-vertex paths. Both profiles
+therefore have coefficient `q-d` for `1<=d<q`.
+Since `n=a+(b+c+1)`, their unused count is `|a-(b+c+1)|`. This construction
+meets the project target exactly when that absolute difference is at most 3.
+It is labelled `separated-path` in the checker, distinct from the printed
+diameter-halves construction. No novelty is claimed for this observation.
+
 ## Alternating construction, including a one-vertex third arm
 
 Relabel arms temporarily so `a >= b`, with third length `c`; do not require
@@ -171,7 +183,8 @@ For sorted lengths, put `p=floor((a+b+1)/2)`,
 `u=max(b+floor(c/2), c+floor(a/2))`. If `b>c` and
 `q=floor((a+1)/(b-c))` is odd, also put `v=(n-r)/2` with the remainder above.
 Otherwise v is unavailable, not zero evidence for an upper bound.
-The largest implemented size is exactly `K=max(p,u,v when available)`.
+The largest size of these published implementations is exactly
+`K=max(p,u,v when available)`.
 The cases unsettled **by these published formulas** are exactly those with
 `K<floor(n/2)-1`. This arithmetic criterion is not a classification of h(T).
 
@@ -344,6 +357,123 @@ Its priority still needs the thesis check and an independent mathematical
 review. A next builder can use (1)–(2) on other uncovered triples with at most
 two or three omissions, or search for a broader symbolic pattern; a failed search proves
 neither nonexistence nor a universal upper bound.
+
+## A full-partition obstruction and a sharp case
+
+The root-of-unity calculation below is an upper bound over **every** full
+partition, not over a class of searched constructions. Suppose there is an
+even integer `m>=2` and positive integers `k_1,k_2,k_3` of odd total K such
+that the arm lengths are `a_i=k_i*m-1`. Then `n=K*m-2` is even and
+
+`h(T) <= n/2-1`.                                          (6)
+
+To prove this, assume a full homometric partition and use its signs in (3).
+Let z be any nontrivial m-th root of unity, let `S=S_1+S_2+S_3`, and note
+`z^a_i=z^-1`. Multiplication of (3) by z yields
+
+`(z-3)*s_0 + (z-2)*S(z) - S(z^-1) = 0`.
+
+Use this equation at both z and z^-1 to eliminate `S(z^-1)`. The result is
+
+`2*(2-z-z^-1)*(S(z)+s_0)=0`.
+
+The first factor is nonzero: on the unit circle `z+z^-1=2` only for z=1.
+Hence the total sign polynomial `F=s_0+S` vanishes at every nontrivial m-th
+root, and balance gives `F(1)=0` too. Divide F by `z^m-1`. The remainder
+has degree less than m and vanishes at m distinct roots, so is zero.
+Each remainder coefficient is therefore the sum of signs on one depth
+residue modulo m. But each nonzero residue contains K vertices, while
+residue zero contains `K-2` (including the centre). Both counts are odd.
+An odd number of signs in `{-1,1}` cannot sum to zero, a contradiction.
+This excludes all full partitions and proves (6).
+
+For the program, it suffices to take `m=gcd(a_1+1,a_2+1,a_3+1)`: an even
+divisor with odd quotient sum exists exactly when this greatest divisor is
+even and its quotient sum is odd. A smaller divisor multiplies that sum by
+an integer, so cannot make an even sum odd. If the criterion fails, the
+program reports only the ordinary disjointness upper bound; it makes no
+claim that this bound is attained.
+
+For equal odd arms `l`, take `m=l+1` and all `k_i=1`. The alternating
+construction supplies `(3l-1)/2` vertices in each set, matching (6), so
+
+`h(T(l,l,l)) = (3l-1)/2 = floor(n/2)-1` for every odd l.
+
+For even l, the same construction reaches `3l/2=floor(n/2)`, the
+disjointness upper bound. These exact parity statements are stronger than
+silently assigning a rounding convention to the source's displayed `n/2`.
+This obstruction concerns full partitions only. Omitted vertices change
+(3) through (2); it cannot rule out pairs meeting the project's target.
+In particular it does not turn the earlier construction-gap family into
+a counterexample.
+
+## An unequal-arm family attaining half-minus-one exactly
+
+**Proposition (priority provisional).** For every positive even integer t,
+the tree with lengths `(4t-1,3t-1,2t-1)` has
+`h(T)=9t/2-2=floor(n/2)-1`. Thus the proposed target cannot be raised even
+if equal-arm trees are excluded. The upper bound is (6), with `m=t` and
+`(k_1,k_2,k_3)=(4,3,2)`. Here is a matching construction.
+
+Omit depths `t-1` and `4t-1` of arm 1 and assign the centre minus.
+On arm 1, alternate plus at odd depths and minus at even depths on
+`[1,t-2]` and `[3t+1,4t-2]`; assign minus throughout `[t,3t]`.
+On arm 2, alternate plus at odd depths and minus at even depths, except
+make depths t and 2t plus. On arm 3, use plus everywhere except depth t.
+All signs and omissions are disjoint and within range, including t=2.
+The plus counts are `t-2`, `3t/2+2`, `2t-2`, totaling `9t/2-2`.
+The retained order is `9t-4`, so the minus count agrees.
+
+For a coefficient proof put `E=z(1-z^(t-2))/(1+z)`, the alternating
+polynomial of `[1,t-2]`, and `U_j=z+...+z^j`. With the S_i of (3),
+
+```
+R = z^(3t)*E - z^(t-1)*U_(2t+1),   S_1=E+R,
+S_2=(z+z^(3t))/(1+z)+2z^t+2z^(2t),
+S_3=U_(2t-1)-2z^t.
+```
+
+These are finite polynomials because t is even. Set `p=t-1`, `a=4t-1`.
+The signed distance polynomials from the two omitted vertices to retained
+vertices are exactly
+
+```
+C_p=-z^p+z^p*E(z^-1)+z^-p*R+z^p*(S_2+S_3),
+C_a=-z^a+z^a*S_1(z^-1)+z^a*(S_2+S_3).
+```
+
+The four terms respectively count the centre, the part of arm 1 on the
+near side, its far side, and the other two arms (the tip has only one side).
+Equation (2) says the required identity is `z*Q=(1-z)*(C_p+C_a)`.
+
+For an explicitly finite verification, put `r=z^t`, `D=1-z^2` and clear
+the common denominator D. The numerators of E, R, S_2, S_3 become
+
+```
+E_D=(1-z)*(z-r/z),
+R_D=r^3*E_D-r*(1+z)*(1-z*r^2),
+P_2=(1-z)*(z+r^3)+2*(r+r^2)*D,
+P_3=(1+z)*(z-r^2)-2*r*D;   P_1=E_D+R_D.
+```
+
+Substitute these in the preceding identity using `z^p=r/z`, `z^a=r^4/z`
+and `D*S_i(z^-1)=-z^2*P_i(z^-1,r^-1)`. Expansion has zero residual in
+independent Laurent variables z and r; the exact integer coefficient test
+checks this identity as well as (4)–(5). Substituting `r=z^t` and applying
+(1)–(2) proves equality of all distance multiplicities for every even t.
+This is a proof for this infinite family, not a conclusion from its examples.
+Odd t and arbitrary triples are not covered by this proposition.
+
+## Present coverage, and the remaining question
+
+For sorted lengths, the checker's default takes the maximum of the published
+sizes p, u, v above, the separated-path size `min(a,b+c+1)`, and the size
+from either proved family when its exact length conditions hold. These
+constructions certify the target exactly when that maximum is at least
+`floor(n/2)-1`. Remaining triples are **unsettled here**, not counterexamples;
+even a failed exhaustive check of one finite tree would not provide the
+required infinite structural obstruction. The residue upper bound excludes
+full partitions only and is compatible with the project target.
 
 ## Verification and next acceptance
 

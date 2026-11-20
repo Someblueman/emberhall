@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact witnesses for supported published tripod constructions; no search oracle.
+"""Exact witnesses for published and proved tripod families; no search oracle.
 
 Vertices are (arm, depth), with centre (0, 0) and arms numbered 1, 2, 3.
 Only Python's standard library is used. See PUBLISHED_CASES.md for proofs.
@@ -10,6 +10,7 @@ import argparse
 from collections import Counter
 from itertools import combinations, permutations
 import json
+from math import gcd
 from pathlib import Path
 import sys
 
@@ -53,6 +54,15 @@ def profile(vertices: list[Vertex]) -> Counter[int]:
     return Counter(distance(u, v) for u, v in combinations(vertices, 2))
 
 
+def certified_upper_bound(lengths: Lengths) -> int:
+    """Disjointness, improved by the proved full-partition residue obstruction."""
+    bound = (1 + sum(lengths)) // 2
+    period = gcd(*(n + 1 for n in lengths))
+    if period % 2 == 0 and sum((n + 1) // period for n in lengths) % 2 == 1:
+        bound -= 1
+    return bound
+
+
 def check_pair(lengths: object, left: object, right: object) -> dict:
     lengths = validate_lengths(lengths)
     left = validate_vertices(lengths, left)
@@ -66,8 +76,10 @@ def check_pair(lengths: object, left: object, right: object) -> dict:
     difference = {d: lp[d] - rp[d] for d in sorted(lp.keys() | rp.keys())
                   if lp[d] != rp[d]}
     target = (1 + sum(lengths)) // 2 - 1
+    bound = certified_upper_bound(lengths)
     return {"homometric": not difference, "size": len(left), "target": target,
             "meets_target": not difference and len(left) >= target,
+            "upper_bound": bound, "attains_bound": not difference and len(left) == bound,
             "left_profile": dict(sorted(lp.items())),
             "right_profile": dict(sorted(rp.items())), "difference": difference}
 
@@ -78,6 +90,15 @@ def path_pair(lengths: Lengths) -> Pair:
             + [(j, d) for d in range(1, lengths[j - 1] + 1)])
     k = len(path) // 2
     return path[:k], path[k:2 * k]
+
+
+def separated_path_pair(lengths: Lengths) -> Pair:
+    """One path inside the longest arm; one through the other arms and centre."""
+    i, j, k = sorted(range(1, 4), key=lambda arm: lengths[arm - 1], reverse=True)
+    size = min(lengths[i - 1], 1 + lengths[j - 1] + lengths[k - 1])
+    other = ([(j, d) for d in range(lengths[j - 1], 0, -1)] + [CENTRE]
+             + [(k, d) for d in range(1, lengths[k - 1] + 1)])
+    return [(i, d) for d in range(1, size + 1)], other[:size]
 
 
 def alternating_pair(lengths: Lengths, order: tuple[int, int, int]) -> Pair:
@@ -119,6 +140,22 @@ def construct(lengths: object, kind: str = "best") -> tuple[str, Pair]:
     candidates = []
     if kind in {"best", "path"}:
         candidates.append(("path", path_pair(lengths)))
+    if kind in {"best", "separated-path"}:
+        candidates.append(("separated-path", separated_path_pair(lengths)))
+    order = sorted(range(1, 4), key=lambda arm: lengths[arm - 1], reverse=True)
+    a, b, c = (lengths[i - 1] for i in order)
+    if kind == "best" and c >= 2 and (a, b) == (4 * c - 1, 2 * c):
+        family = gap_family_witness(c)
+        pair = tuple([CENTRE if v == CENTRE else (order[v[0] - 1], v[1]) for v in part]
+                     for part in (family["left"], family["right"]))
+        candidates.append((family["construction"], pair))
+    t = (c + 1) // 2
+    if kind == "best" and t >= 2 and t % 2 == 0 and (a, b, c) == (
+            4 * t - 1, 3 * t - 1, 2 * t - 1):
+        family = sharp_family_witness(t)
+        pair = tuple([CENTRE if v == CENTRE else (order[v[0] - 1], v[1]) for v in part]
+                     for part in (family["left"], family["right"]))
+        candidates.append((family["construction"], pair))
     for order in permutations((1, 2, 3)):
         for name, builder in (("alternating", alternating_pair), ("block", block_pair)):
             if kind not in {"best", name}:
@@ -173,11 +210,35 @@ def gap_family_witness(t: int) -> dict:
             "left": left, "right": right, **result}
 
 
+def sharp_family_witness(t: int) -> dict:
+    """Optimal half-minus-one sets for (4t-1, 3t-1, 2t-1), positive even t."""
+    if type(t) is not int or t < 2 or t % 2:
+        raise ValueError("sharp-family parameter must be a positive even integer")
+    lengths = (4 * t - 1, 3 * t - 1, 2 * t - 1)
+    left, right = [], [CENTRE]
+    for arm, length in enumerate(lengths, 1):
+        for depth in range(1, length + 1):
+            if arm == 1:
+                if depth in (t - 1, 4 * t - 1):
+                    continue
+                positive = not (t <= depth <= 3 * t) and depth % 2 == 1
+            elif arm == 2:
+                positive = depth % 2 == 1 or depth in (t, 2 * t)
+            else:
+                positive = depth != t
+            (left if positive else right).append((arm, depth))
+    result = check_pair(lengths, left, right)
+    if not result["homometric"] or not result["attains_bound"]:
+        raise ValueError("sharp family failed its exact check")
+    return {"lengths": lengths, "construction": f"sharp family t={t}",
+            "left": left, "right": right, **result}
+
+
 def demo() -> None:
     examples = [((8, 5, 2), "path"), ((9, 7, 4), "alternating"),
                 ((9, 7, 5), "alternating"), ((11, 7, 3), "block"),
                 ((13, 7, 3), "block"), ((14, 7, 3), "block"),
-                ((23, 12, 6), "best")]
+                ((23, 12, 6), "path")]
     for lengths, kind in examples:
         result = witness(lengths, kind)
         print(json.dumps(result, sort_keys=True))
@@ -197,21 +258,27 @@ def demo() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("lengths", nargs="*", type=int, metavar="LENGTH")
-    parser.add_argument("--construction", choices=("best", "path", "alternating", "block"),
+    parser.add_argument("--construction",
+                        choices=("best", "path", "separated-path", "alternating", "block"),
                         default="best")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--demo", action="store_true")
     mode.add_argument("--check", metavar="JSON", help="read a witness JSON file, or - for stdin")
     mode.add_argument("--gap-family", type=int, metavar="T",
                       help="maximum pair for the proved family (4T-1, 2T, T), T >= 2")
+    mode.add_argument("--sharp-family", type=int, metavar="T",
+                      help="optimal pair for (4T-1, 3T-1, 2T-1), positive even T")
     args = parser.parse_args()
-    if (args.demo or args.check or args.gap_family is not None) and args.lengths:
-        parser.error("lengths cannot accompany --demo, --check or --gap-family")
+    if (args.demo or args.check or args.gap_family is not None
+            or args.sharp_family is not None) and args.lengths:
+        parser.error("lengths cannot accompany a named mode")
     try:
         if args.demo:
             demo()
         elif args.gap_family is not None:
             print(json.dumps(gap_family_witness(args.gap_family), sort_keys=True))
+        elif args.sharp_family is not None:
+            print(json.dumps(sharp_family_witness(args.sharp_family), sort_keys=True))
         elif args.check:
             raw = sys.stdin.read() if args.check == "-" else Path(args.check).read_text()
             payload = json.loads(raw)

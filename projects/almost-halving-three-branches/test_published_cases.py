@@ -101,11 +101,31 @@ class PublishedCasesTest(unittest.TestCase):
                 pc.check_pair((3, 3, 3), left, right)
 
     def test_uncovered_does_not_claim_refutation(self):
-        result = pc.witness((23, 12, 6))
+        result = pc.witness((23, 12, 6), "path")
         self.assertEqual(result["size"], 18)
         self.assertEqual(result["target"], 20)
         self.assertTrue(result["homometric"])
         self.assertFalse(result["meets_target"])
+
+    def test_separated_paths_and_best_family(self):
+        for lengths in [(11, 7, 5), (23, 12, 10), (7, 11, 5)]:
+            result = pc.witness(lengths, "separated-path")
+            self.assert_witness(lengths, (result["left"], result["right"]))
+            self.assertTrue(result["meets_target"])
+        for lengths in [(23, 12, 6), (12, 6, 23), (5, 19, 10)]:
+            result = pc.witness(lengths)
+            self.assertTrue(result["attains_bound"])
+            self.assert_witness(lengths, (result["left"], result["right"]))
+
+    def test_residue_upper_bound_and_equal_arm_sharpness(self):
+        for lengths in [(3, 3, 3), (15, 11, 7), (11, 7, 5)]:
+            self.assertEqual(pc.certified_upper_bound(lengths), (1 + sum(lengths)) // 2 - 1)
+        for lengths in [(4, 4, 4), (23, 12, 6), (7, 5, 1)]:
+            self.assertEqual(pc.certified_upper_bound(lengths), (1 + sum(lengths)) // 2)
+        for length in (1, 2, 3, 4, 5):
+            result = pc.witness((length,) * 3)
+            self.assert_witness((length,) * 3, (result["left"], result["right"]))
+            self.assertTrue(result["attains_bound"])
 
     def test_real_cli_rejects_altered_json(self):
         script = str(Path(pc.__file__))
@@ -128,6 +148,19 @@ class PublishedCasesTest(unittest.TestCase):
         for t in (0, 1, -1, True):
             with self.assertRaises(ValueError):
                 pc.gap_family_witness(t)
+
+    def test_sharp_family_attains_obstruction_bound(self):
+        for t in (2, 4, 6, 8, 12):
+            result = pc.sharp_family_witness(t)
+            self.assert_witness(result["lengths"], (result["left"], result["right"]))
+            self.assertEqual(result["size"], 9 * t // 2 - 2)
+            self.assertTrue(result["attains_bound"])
+            self.assertEqual(len(set(result["left"]) | set(result["right"])), 9 * t - 4)
+        result = pc.witness((15, 31, 23))
+        self.assertTrue(result["attains_bound"])
+        for t in (0, 1, 3, True):
+            with self.assertRaises(ValueError):
+                pc.sharp_family_witness(t)
 
     def test_shell_omitted_vertex_correction(self):
         lengths = (9, 7, 4)
@@ -212,6 +245,39 @@ class PublishedCasesTest(unittest.TestCase):
             mul(term(3, 8), invert(a)), mul(term(3, 4), invert(b)),
             mul(term(2, 2), invert(c)))
         self.assertEqual(odd_residual, {})
+        # The root-of-unity upper-bound proof eliminates S(z^-1) exactly.
+        coefficient = add(mul(add(term(-1), term(0, 0, -2)),
+                              add(z, term(0, 0, -2))), term(0, 0, -1))
+        constant = add(term(-1), term(0, 0, -3),
+                       mul(add(term(-1), term(0, 0, -2)), add(z, term(0, 0, -3))))
+        expected = add(term(0, 0, 4), term(1, 0, -2), term(-1, 0, -2))
+        self.assertEqual(coefficient, expected)
+        self.assertEqual(constant, expected)
+        # Sharp family: two omitted vertices, cleared denominator D=1-z^2.
+        d = add(one, term(2, 0, -1))
+        minus = add(one, term(1, 0, -1))
+        e = mul(minus, add(z, term(-1, 1, -1)))
+        tail = add(mul(term(0, 3), e),
+                   mul(term(0, 1, -1), add(one, z), add(one, term(1, 2, -1))))
+        p1 = add(e, tail)
+        p2 = add(mul(minus, add(z, term(0, 3))),
+                 mul(term(0, 0, 2), add(r, term(0, 2)), d))
+        p3 = add(mul(add(one, z), add(z, term(0, 2, -1))), mul(term(0, 1, -2), d))
+        powers = [term(-1, 4), term(-1, 3), term(-1, 2)]
+        polys = [p1, p2, p3]
+        nq = mul(z, add(
+            mul(term(0, 0, -1), d,
+                add(one, *[mul(term(0, 0, -1), x) for x in powers])),
+            *[mul(polys[i], add(one, *[mul(term(0, 0, -1), powers[j])
+                                      for j in range(3) if i != j])) for i in range(3)],
+            *[mul(term(2), powers[i], invert(polys[i])) for i in range(3)]))
+        np = add(mul(term(0, 0, -1), d, term(-1, 1)),
+                 mul(term(0, 0, -1), term(1, 1), invert(e)),
+                 mul(term(1, -1), tail), mul(term(-1, 1), add(p2, p3)))
+        na = add(mul(term(0, 0, -1), d, term(-1, 4)),
+                 mul(term(0, 0, -1), term(1, 4), invert(p1)),
+                 mul(term(-1, 4), add(p2, p3)))
+        self.assertEqual(add(nq, mul(term(0, 0, -1), minus, add(np, na))), {})
 
 
 if __name__ == "__main__":

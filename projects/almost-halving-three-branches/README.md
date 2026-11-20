@@ -1,7 +1,8 @@
 # Almost halving a three-branched tree
 
-Status: published constructions reconstructed, and an exact maximum pair
-proved for the family `(4t-1,2t,t)`, for every integer `t>=2`.
+Status: published constructions reconstructed, exact maximum pairs proved
+for `(4t-1,2t,t)` for every integer `t>=2`, and exact half-minus-one pairs
+proved for `(4t-1,3t-1,2t-1)` for positive even t.
 **The general target remains open in this project.**
 [PUBLISHED_CASES.md](PUBLISHED_CASES.md) supplies proofs for both parity
 classes, sources and provisional priority. Independent review is pending.
@@ -29,7 +30,7 @@ the command):
 | 11, 7, 3 | block | 11 | 10 | yes |
 | 13, 7, 3 | block | 11 | 11 | yes |
 | 14, 7, 3 | block | 11 | 11 | yes |
-| 23, 12, 6 | best supported: path | 18 | 20 | no |
+| 23, 12, 6 | printed path baseline | 18 | 20 | no |
 
 The `(11,7,3)` profile, written `distance: multiplicity`, was
 `1:9, 2:7, 3:5, 4:3, 5:3, 6:3, 7:3, 8:4, 9:4, 10:4, 11:4, 12:3, 13:2, 14:1`
@@ -46,8 +47,9 @@ of a `(10,7,5)` alternating witness to the unused vertex `[1,10]`. For example,
 distance 2 then occurs five times on the left and seven times on the right.
 
 Generate another witness with `python3 projects/almost-halving-three-branches/published_cases.py 11 7 3`.
-Use `--construction path`, `alternating` or `block` to restrict the formula.
-The default chooses the largest supported witness over arm relabelings; it
+Use `--construction path`, `separated-path`, `alternating` or `block` to
+restrict the formula. The default chooses the largest supported witness,
+including the proved gap family when applicable, over arm relabelings; it
 does not optimize over all subsets. A valid witness below the target exits
 successfully and explicitly reports `"meets_target": false`.
 
@@ -64,8 +66,8 @@ Run the implementation checks:
 python3 -m unittest discover -s projects/almost-halving-three-branches -p 'test_*.py' -v
 ```
 
-Recorded run: 12 tests passed. Their separate breadth-first distance counter
-checks implementation; two exact Laurent-polynomial identities verify the
+Recorded run: 15 tests passed. Their separate breadth-first distance counter
+checks implementation; exact Laurent-polynomial identities verify the
 family formulas for symbolic lengths. Neither establishes novelty or the
 universal target. A non-author's review is still required.
 
@@ -85,3 +87,24 @@ For odd t it omits the longest-arm tip and returns size `floor(7t/2)`;
 `--gap-family 5` returned two sets of size 17 with one omitted vertex.
 Pass either output through `--check -` for the independent input-validation
 path. The proof concerns this infinite family, not all three-branched trees.
+
+The output also reports a certified `upper_bound`. It uses disjointness and,
+where applicable, the proved residue obstruction to a full partition. A
+valid witness with `attains_bound: true` is therefore optimal for that tree.
+Failure to attain this bound proves nothing about whether a better pair
+exists. Equal odd arms attain exactly the project's half-minus-one target;
+the proof rules out full halves for every such arm length.
+Recorded runs: `11 7 5` chose separated paths of size 11 and certified upper
+bound 11; `3 3 3` chose alternating sets of size 4 and certified upper bound 4.
+Both reported `attains_bound: true`.
+
+The second unequal-arm family has a separate command:
+
+```sh
+python3 projects/almost-halving-three-branches/published_cases.py --sharp-family 8
+```
+
+Recorded run: `[31,23,15]`, size 34 in each set, equal profiles containing
+561 distances each, two omitted vertices, certified upper bound 34.
+`attains_bound: true`. The proof rules out all larger pairs on this family,
+not just larger outputs of the implemented constructions.
