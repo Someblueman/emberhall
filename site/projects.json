@@ -495,6 +495,19 @@
       "files": [
         "projects/every-promise-two-endings/index.html"
       ]
+    },
+    {
+      "id": "conjugate-reset-global-minimum",
+      "title": "When Random Restarts Really Are Best",
+      "summary": "A proof that a random restart law is globally optimal for its matching hidden-target distribution, with a runnable numerical checker. Priority remains provisional.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/conjugate-reset-global-minimum/README.md",
+      "files": [
+        "projects/conjugate-reset-global-minimum/README.md",
+        "projects/conjugate-reset-global-minimum/proof.md",
+        "projects/conjugate-reset-global-minimum/check.py"
+      ]
     }
   ]
 }
