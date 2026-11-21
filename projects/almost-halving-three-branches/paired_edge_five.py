@@ -1,180 +1,281 @@
-"""A partial, unrestricted reduction for the five-fold prefix; not a solution."""
+"""Full five-fold partitions for eight previously missing affine classes.
+
+Standard library only. See PAIRED_EDGE_FIVE.md for the all-parameter proof.
+"""
 from __future__ import annotations
 
 import argparse
-from itertools import product
+import hashlib
+from itertools import combinations
 import json
-from math import comb, gcd
+from pathlib import Path
 
-from mixed_edge_seven import Poly, _add, _mon, _mul, _scale
+# Every block is repeated k times, followed by its tail. Signs start at
+# depth one for coarse vertices, and at edge zero for X.
+COARSE_BLOCKS = (
+    "--++++---+---+---++++---+---+-",
+    "++----+++-+++----++++---+---++",
+    "++----+++-+++-+++----+++-+++-+",
+)
+COARSE_TAILS = ("--++++---+---+---++++---", "++----+++-+++----+++", "++----+++")
+EDGE_BLOCKS = (
+    "+++++++++++-++-+++++++++++-++-",
+    "-+--+--+--+--+--------+--++--+",
+    "+--+--+--+--+--+--+--+--+--+--",
+)
+EDGE_TAILS = ("+++++++++++-++-++-+++-++", "-+--+--+--+--+---+--", "+--+--+--")
+TAIL_LENGTHS = (24, 20, 9)
 
-
-def reflection_cases() -> list[dict]:
-    """All sixteen necessary masks; three coefficients describe the odd arm."""
-    cases = []
-    for odd in product((-1, 1), repeat=3):
-        if odd[0] * odd[1] * odd[2] != -1:
-            continue
-        for middle in product((-1, 1), repeat=2):
-            cases.append({
-                "odd": odd,
-                "middle": middle,
-                "long": tuple(odd[k % 3] * middle[k % 2] for k in range(6)),
-            })
-    return cases
-
-
-def reduction(t: int) -> dict:
-    if type(t) is not int or t < 0:
-        raise ValueError("t must be a nonnegative integer")
-    lengths = a, b, c = tuple(n + 1064 * t for n in (18, 14, 3))
-    divisors = (gcd(a, c), gcd(b, c), gcd(a, b))
-    domain = (t % 3 == 0 and t % 15 != 3 and t % 11 not in (1, 6, 9))
-    if not domain:
-        raise ValueError("this reduction is recorded only for the 32 missing classes")
-    if divisors != (3, 1, 2) or (a % 6, b % 6, c % 6) != (0, 2, 3):
-        raise ArithmeticError("the stated gcd and parity hypotheses failed")
-    cases = reflection_cases()
-    remaining = [case for case in cases if case["odd"] != (-1, -1, -1)]
-    # The four discarded masks are excluded by proved necessary conditions.
-    if a % 22 == 0 or b % 30 == 0:
-        raise ArithmeticError("a discarded constant mask satisfies its divisibility")
-    return {
-        "t": t, "lengths": lengths, "pairwise_gcds": divisors,
-        "odd_arm_forced_period": 3,
-        "necessary_reflection_masks": len(cases),
-        "eliminated_reflection_masks": 4,
-        "remaining_reflection_masks": remaining,
-        "odd_words_up_to_global_negation": [(1, x, y) for x, y in product((-1, 1), repeat=2)],
-        "remaining_mask_word_combinations": 48,
-        "paired_edge_assignment_excluded": False,
-        "status": "partial reduction; 48 cases remain unresolved",
-    }
+# Sparse integer Laurent polynomials in z and V; V is independently formal.
+Poly = dict[tuple[int, int], int]
 
 
-def observed_mask(x, y) -> dict:
-    """Check a supplied pair's pointwise reversal signs against the mask list."""
-    if len(x) != 3 or len(y) != 3:
-        raise ValueError("require three arms in each row")
-    words = []
-    for first, second in zip(x, y):
-        if len(first) != len(second) or not first:
-            raise ValueError("paired arms must have equal positive lengths")
-        if any(type(s) is not int or s not in (-1, 1) for s in (*first, *second)):
-            raise ValueError("edge signs must be -1 or 1")
-        words.append(tuple(a * b for a, b in zip(first, reversed(second))))
-    for case in reflection_cases():
-        patterns = (case["long"], case["middle"], case["odd"])
-        if all(all(s == pattern[k % len(pattern)] for k, s in enumerate(word))
-               for word, pattern in zip(words, patterns)):
-            return case
-    raise ValueError("pair does not obey the necessary reflection masks")
+def add(*polys: Poly) -> Poly:
+    result: Poly = {}
+    for poly in polys:
+        for term, coefficient in poly.items():
+            result[term] = result.get(term, 0) + coefficient
+    return {term: coefficient for term, coefficient in result.items() if coefficient}
 
 
-def residue_system(odd_mask, middle_mask, odd_word) -> tuple[list[list[Poly]], list[Poly]]:
-    """Return M Z=b in independent w,v, for c=6h+3 and v=w**h.
+def scale(poly: Poly, coefficient: int) -> Poly:
+    return {term: coefficient*value for term, value in poly.items() if coefficient*value}
 
-    Z contains (1-w) times the six residue fields of the long arm, then
-    those of the middle arm. A monomial's first two exponents denote w,v.
-    No inversion, coefficient bound or existence assertion is performed.
+
+def multiply(*polys: Poly) -> Poly:
+    result = {(0, 0): 1}
+    for poly in polys:
+        terms: Poly = {}
+        for (a, b), c in result.items():
+            for (d, e), f in poly.items():
+                term = a+d, b+e
+                terms[term] = terms.get(term, 0) + c*f
+        result = {term: coefficient for term, coefficient in terms.items() if coefficient}
+    return result
+
+
+def word_polynomial(word: str, start: int = 0, masked: bool = False) -> Poly:
+    if any(s not in "+-" for s in word):
+        raise ValueError("a sign word contains a character other than + or -")
+    return {(i+start, 0): (1 if s == "+" else -1)*((1, -1, 1)[(i+start) % 3] if masked else 1)
+            for i, s in enumerate(word)}
+
+
+def proof_residuals(edge_blocks=EDGE_BLOCKS, edge_tails=EDGE_TAILS) -> dict[str, Poly]:
+    """Check the coarse shell and both edge equations in independent z,V."""
+    if tuple(map(len, edge_blocks)) != (30, 30, 30) or tuple(map(len, edge_tails)) != TAIL_LENGTHS:
+        raise ValueError("wrong edge block or tail lengths")
+    one, v, z30 = {(0, 0): 1}, {(0, 1): 1}, {(30, 0): 1}
+    denominator = add(one, scale(z30, -1))
+    endpoints = [{(n, 1): 1} for n in TAIL_LENGTHS]
+
+    def numerators(blocks, tails, start=0, mask=False):
+        return [add(multiply(word_polynomial(block, start, mask and i != 1),
+                             add(one, scale(v, -1))),
+                    multiply(v, denominator, word_polynomial(tail, start, mask and i != 1)))
+                for i, (block, tail) in enumerate(zip(blocks, tails))]
+
+    coarse = numerators(COARSE_BLOCKS, COARSE_TAILS, start=1)
+    x = numerators(edge_blocks, edge_tails)
+    reflected_y = numerators(edge_blocks, edge_tails, mask=True)
+    shell = multiply(denominator, add(one, *(scale(a, -1) for a in endpoints)))
+    first: Poly = {}
+    reversed_second: Poly = {}
+    for i in range(3):
+        j, k = (j for j in range(3) if j != i)
+        factor = add(one, scale(endpoints[j], -1), scale(endpoints[k], -1))
+        star = {(-a, -b): c for (a, b), c in coarse[i].items()}
+        shell = add(shell, multiply(coarse[i], factor), multiply(endpoints[i], z30, star))
+        first = add(first, multiply(x[i], factor), scale(reflected_y[i], -1))
+        reversed_second = add(reversed_second,
+                              multiply(add(reflected_y[i], scale(x[i], -1)),
+                                       endpoints[j], endpoints[k]),
+                              scale(multiply(reflected_y[i], add(endpoints[j], endpoints[k])), -1))
+    return {"coarse_shell": shell, "first_edge_equation": first,
+            "reversed_second_edge_equation": reversed_second}
+
+
+# A separate exact family refuting the inherited claim that every odd-arm
+# edge row must have period three. Each row is prefix + block*k + suffix.
+NONPERIODIC_PATTERNS = (
+    ('+++++++++++-', '++++++++++++++++++++++++++++++', '+++++++++++++++++++++-++++++++++++++++++++'),
+    ('-+--+--+', '--+--+---++-+++++-++-+++--+---', '--+--+---++-+++++-++-+++-++---------------'),
+    ('+', '------------------------------', '----------------------------+--+------'),
+)
+
+
+def nonperiodic_rows(k: int):
+    if type(k) is not int or k < 0:
+        raise ValueError("k must be a nonnegative integer")
+    x = [prefix+block*k+suffix for prefix, block, suffix in NONPERIODIC_PATTERNS]
+    y = []
+    for arm, word in enumerate(x):
+        masked = [c if arm == 1 or (1, -1, 1)[j % 3] == 1 else ("-" if c == "+" else "+")
+                  for j, c in enumerate(word)]
+        y.append("".join(masked)[::-1])
+    return x, y
+
+
+def nonperiodic_residuals() -> tuple[Poly, Poly]:
+    """Certify both edge equations for every counterexample parameter k."""
+    one, v = {(0, 0): 1}, {(0, 1): 1}
+    denominator = add(one, {(30, 0): -1})
+    endpoints = [{(n, 1): 1} for n in (54, 50, 39)]
+    numerators, masked = [], []
+    for arm, (prefix, block, suffix) in enumerate(NONPERIODIC_PATTERNS):
+        for is_masked, target in ((False, numerators), (arm != 1, masked)):
+            target.append(add(
+                multiply(denominator, word_polynomial(prefix, masked=is_masked)),
+                multiply(add(one, scale(v, -1)), word_polynomial(block, len(prefix), is_masked)),
+                multiply(v, denominator, word_polynomial(suffix, len(prefix), is_masked))))
+    first, second = {}, {}
+    for i in range(3):
+        j, k = (j for j in range(3) if j != i)
+        first = add(first, multiply(numerators[i], add(one, scale(endpoints[j], -1),
+                                                      scale(endpoints[k], -1))), scale(masked[i], -1))
+        second = add(second, multiply(add(masked[i], scale(numerators[i], -1)),
+                                      endpoints[j], endpoints[k]),
+                     scale(multiply(masked[i], add(endpoints[j], endpoints[k])), -1))
+    return first, second
+
+
+def parameter_k(t: int) -> int:
+    if type(t) is not int or t < 0 or t % 15 != 9:
+        raise ValueError("construction requires nonnegative t=9 mod 15; other cases are not ruled out")
+    return (532*t-3)//15
+
+
+def build_pair(k: int) -> dict:
+    """Partition the five-fold prefix, omitting its two appended original tips."""
+    if type(k) is not int or k < 0:
+        raise ValueError("k must be a nonnegative integer")
+    coarse_lengths = tuple(30*k+n for n in TAIL_LENGTHS)
+    retained = tuple(5*n for n in coarse_lengths)
+    lengths = retained[0]+1, retained[1]+1, retained[2]
+    left, right = [(0, 0)], []
+    for arm, (block, tail, edge_block, edge_tail) in enumerate(
+            zip(COARSE_BLOCKS, COARSE_TAILS, EDGE_BLOCKS, EDGE_TAILS), 1):
+        coarse, x = block*k+tail, edge_block*k+edge_tail
+        mask = "+"*len(x) if arm == 2 else ("+-+"*((len(x)+2)//3))[:len(x)]
+        reflected = "".join("+" if a == b else "-" for a, b in zip(x, mask))
+        y = reflected[::-1]
+        for edge, old in enumerate(coarse):
+            for offset, sign in enumerate((x[edge], x[edge], y[edge], y[edge], old), 1):
+                (left if sign == "+" else right).append((arm, 5*edge+offset))
+    return {"lengths": lengths, "left": left, "right": right,
+            "omitted": [(1, lengths[0]), (2, lengths[1])], "base_k": k}
+
+
+def validate_pair(lengths, left, right):
+    if len(lengths) != 3 or any(type(n) is not int or n <= 0 for n in lengths):
+        raise ValueError("require three positive integer arm lengths")
+    selections = []
+    for vertices in (left, right):
+        selected = set()
+        for vertex in vertices:
+            if not isinstance(vertex, (list, tuple)) or len(vertex) != 2:
+                raise ValueError("a vertex must be [arm, depth]")
+            arm, depth = vertex
+            if type(arm) is not int or type(depth) is not int or not (
+                    (arm, depth) == (0, 0) or 1 <= arm <= 3 and 1 <= depth <= lengths[arm-1]):
+                raise ValueError("vertex outside the original tree")
+            if (arm, depth) in selected:
+                raise ValueError("duplicate vertex")
+            selected.add((arm, depth))
+        selections.append(selected)
+    if selections[0] & selections[1]:
+        raise ValueError("the two subsets overlap")
+    return selections
+
+
+def distance_profile(lengths, vertices) -> list[int]:
+    """Exact original-tree counts using carry-free integer convolutions.
+
+    Same-arm distances are differences of depths; cross-arm distances are
+    sums. Omitted vertices remain in those paths. Each convolution digit is
+    at most the longest arm, so the chosen base prevents all carries.
     """
-    for word, length in ((odd_mask, 3), (middle_mask, 2), (odd_word, 3)):
-        if len(word) != length or any(type(s) is not int or s not in (-1, 1) for s in word):
-            raise ValueError("require sign words of lengths three, two and three")
-    if odd_mask[0] * odd_mask[1] * odd_mask[2] != -1:
-        raise ValueError("the odd reflection mask must have product -1")
-    eps = ([odd_mask[k % 3] * middle_mask[k % 2] for k in range(6)],
-           [middle_mask[k % 2] for k in range(6)],
-           [odd_mask[k % 3] for k in range(6)])
-    # Endpoint monomials: v*w^3, z^2*v*w^2, z^3*v, with w=z^6.
-    ends = ((0, 3), (2, 2), (3, 0))
-    matrix = [[{} for _ in range(18)] for _ in range(12)]
-
-    def add(row, column, coefficient, w_power=0, v_power=0):
-        matrix[row][column] = _add(matrix[row][column],
-                                  _scale(_mon(a=w_power, b=v_power), coefficient))
-
-    for arm in range(3):
-        j, k = (i for i in range(3) if i != arm)
-        for residue in range(6):
-            column, e = arm * 6 + residue, eps[arm][residue]
-            add(residue, column, 1 - e)
-            for other in (j, k):
-                shift, power = ends[other]
-                total = residue + shift
-                add(total % 6, column, -1, power + total // 6, 1)
-                add(6 + total % 6, column, -e, power + total // 6)
-            total = residue + ends[j][0] + ends[k][0]
-            add(6 + total % 6, column, e - 1,
-                ends[j][1] + ends[k][1] + total // 6, 1)
-    odd_numerators = [_scale(_add(_mon(), _scale(_mon(a=int(i < 3), b=1), -1)),
-                             odd_word[i % 3]) for i in range(6)]
-    rhs = [_scale(_add(*(_mul(row[12 + i], odd_numerators[i]) for i in range(6))), -1)
-           for row in matrix]
-    return [row[:12] for row in matrix], rhs
+    width = max(1, (max(lengths).bit_length()+7)//8)
+    selected = [bytearray((n+1)*width) for n in lengths]
+    reversed_selected = [bytearray((n+1)*width) for n in lengths]
+    profile = [0] * (sum(sorted(lengths)[-2:])+1)
+    centre = (0, 0) in vertices
+    for arm, depth in vertices:
+        if arm:
+            selected[arm-1][depth*width] = 1
+            reversed_selected[arm-1][(lengths[arm-1]-depth)*width] = 1
+            if centre:
+                profile[depth] += 1
+    packed = [int.from_bytes(row, "little") for row in selected]
+    for i, n in enumerate(lengths):
+        product = packed[i] * int.from_bytes(reversed_selected[i], "little")
+        digits = product.to_bytes((2*n+1)*width, "little")
+        for distance in range(1, n+1):
+            start = (n+distance)*width
+            profile[distance] += int.from_bytes(digits[start:start+width], "little")
+    for i, j in combinations(range(3), 2):
+        limit = lengths[i]+lengths[j]
+        digits = (packed[i]*packed[j]).to_bytes((limit+1)*width, "little")
+        for distance in range(2, limit+1):
+            start = distance*width
+            profile[distance] += int.from_bytes(digits[start:start+width], "little")
+    return profile
 
 
-def alternating_taylor_certificate() -> bool:
-    """Check the Cramer numerator's cubic term, before any odd field is fixed."""
-    from itertools import permutations
-
-    one, A, B, C = _mon(), _mon(a=1), _mon(b=1), _mon(c=1)
-    neg = lambda p: _scale(p, -1)
-    AB, AC, BC = _mul(A, B), _mul(A, C), _mul(B, C)
-    K = _add(_scale(one, 2), neg(B), neg(C))
-    J = _add(_scale(BC, -2), B, C)
-    matrix = [
-        [_add(one, neg(A), neg(C)), neg(one), _add(one, neg(A), neg(B)), one],
-        [neg(AC), _add(AC, neg(A), neg(C)), neg(AB), _add(neg(AB), A, B)],
-        [neg(one), _add(one, A, neg(C)), one, _add(one, A, neg(B))],
-        [_add(neg(AC), A, neg(C)), AC, _add(AB, neg(A), B), AB],
-    ]
-
-    def determinant(rows):
-        terms = []
-        for order in permutations(range(4)):
-            sign = (-1) ** sum(order[i] > order[j] for i in range(4)
-                                for j in range(i + 1, 4))
-            terms.append(_scale(_mul(*(rows[i][j] for i, j in enumerate(order))), sign))
-        return _add(*terms)
-
-    def cubic_taylor(polynomial):
-        # Coefficients after A=1+x, B=1+y, C=1+z, through total degree three.
-        result = {}
-        for i, j, k in product(range(4), repeat=3):
-            if i + j + k > 3:
-                continue
-            value = sum(coefficient * comb(p[0], i) * comb(p[1], j) * comb(p[2], k)
-                        for p, coefficient in polynomial.items()
-                        if p[0] >= i and p[1] >= j and p[2] >= k)
-            if value:
-                result[i, j, k] = value
-        return result
-
-    cramer = []
-    for column in ((neg(K), neg(J), {}, {}), ({}, {}, neg(K), neg(J))):
-        rows = [[column[i], *row[1:]] for i, row in enumerate(matrix)]
-        cramer.append(cubic_taylor(determinant(rows)))
-    return (not cubic_taylor(determinant(matrix))
-            and cramer == [{(0, 1, 2): 8, (0, 2, 1): -8}, {}])
+def check_pair(pair) -> dict:
+    lengths, left, right = pair["lengths"], pair["left"], pair["right"]
+    left, right = validate_pair(lengths, left, right)
+    first, second = distance_profile(lengths, left), distance_profile(lengths, right)
+    if sum(first) != len(left)*(len(left)-1)//2 or sum(second) != len(right)*(len(right)-1)//2:
+        raise ArithmeticError("distance counter lost or duplicated a pair")
+    equal = len(left) == len(right)
+    homometric = equal and first == second
+    return {"lengths": lengths, "size": len(left), "right_size": len(right),
+            "target": (1+sum(lengths))//2-1, "homometric": homometric,
+            "meets_target": homometric and len(left) >= (1+sum(lengths))//2-1,
+            "left_distance_pairs": sum(first), "right_distance_pairs": sum(second),
+            "profile_sha256": hashlib.sha256(json.dumps(first, separators=(",", ":")).encode()).hexdigest(),
+            "mismatch_distance": next((d for d, (x, y) in enumerate(zip(first, second)) if x != y), None)}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("t", type=int, nargs="?", default=0)
-    parser.add_argument("--prove-partial", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--prove", action="store_true")
+    mode.add_argument("--check", type=Path, metavar="JSON")
+    mode.add_argument("--base-k", type=int)
+    parser.add_argument("t", type=int, nargs="?")
+    parser.add_argument("--witness", type=Path, metavar="JSON")
     args = parser.parse_args()
-    if args.prove_partial:
-        if not alternating_taylor_certificate():
-            raise ArithmeticError("alternating-reflection Taylor certificate failed")
-        print("PASS: partial alternating-reflection certificate; 48 cases remain open")
+    if args.prove:
+        if args.t is not None or args.witness:
+            parser.error("--prove takes no t or witness file")
+        residuals = proof_residuals()
+        if any(residuals.values()) or any(nonperiodic_residuals()):
+            raise ArithmeticError("an exact polynomial identity failed")
+        print("PASS: coarse shell and both edge identities; every k>=0, hence every t=9 mod15; "
+              "nonperiodic counterexample identities verified")
         return 0
+    if args.check and (args.t is not None or args.witness):
+        parser.error("--check takes no t or witness file")
+    if args.base_k is not None and args.t is not None:
+        parser.error("choose t or --base-k")
     try:
-        result = reduction(args.t)
-    except ValueError as error:
+        if args.check:
+            pair = json.loads(args.check.read_text())
+        else:
+            if args.base_k is None and args.t is None:
+                parser.error("give t, --base-k, --prove or --check")
+            pair = build_pair(args.base_k if args.base_k is not None else parameter_k(args.t))
+        result = check_pair(pair)
+        if not args.check:
+            result.update(base_k=pair["base_k"], omitted=pair["omitted"], affine_t=args.t)
+        if args.witness:
+            args.witness.write_text(json.dumps(pair, separators=(",", ":"))+"\n")
+    except (ValueError, KeyError, TypeError, OSError) as error:
         parser.error(str(error))
     print(json.dumps(result, sort_keys=True))
-    return 0
+    return 0 if result["homometric"] else 1
 
 
 if __name__ == "__main__":
