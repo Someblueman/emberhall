@@ -81,12 +81,13 @@ def bounded_comparison() -> tuple[dict, Run, tuple[Run, Run]]:
                             first_split = pair
     assert counts["workloads"] == 39
     assert counts["owner_failure_runs"] == 0, counts
-    assert counts["worker_failure_runs"] > 0, counts
     assert counts["unexpected_failures"] == counts["bound_hits"] == 0, counts
-    assert first_failure is not None and first_split is not None, counts
-    # This is a scientific stop, not a claim of safety beyond this finite domain.
-    counts["decision"] = "STOP-KNOWN-ONLY"
-    return counts, first_failure, first_split
+    assert first_split is not None, counts
+    counts["prestart_control_observed"] = first_failure is not None
+    # The frozen schedule is not widened to rescue a failed control.
+    counts["decision"] = "STOP-KNOWN-ONLY" if first_failure else "STOP-CONFOUNDED"
+    witness = first_failure or execute((2,), "bottom_up", "worker", False, 1)
+    return counts, witness, first_split
 
 
 def compact_run(run: Run) -> dict:
@@ -102,16 +103,15 @@ def main() -> int:
     args = parser.parse_args()
     suite = unittest.defaultTestLoader.discover(str(Path(__file__).parent), pattern="test_gate.py")
     test_result = unittest.TextTestRunner(stream=sys.stderr, verbosity=1).run(suite)
-    if not test_result.wasSuccessful():
-        return 1
     summary, failure, split = bounded_comparison()
     native = witnesses()
     assert native["cases"][0]["violations"]
     assert all(not case["violations"] for case in native["cases"][1:])
     protocol = Path(__file__).with_name("PROTOCOL.md").read_bytes()
     report = {"protocol_sha256": hashlib.sha256(protocol).hexdigest(),
-              "tests": test_result.testsRun, "controlled_model": summary,
-              "known_failure": compact_run(failure),
+              "tests": {"run": test_result.testsRun, "failures": len(test_result.failures),
+                        "errors": len(test_result.errors)}, "controlled_model": summary,
+              "prestart_control": compact_run(failure),
               "direction_split": [compact_run(run) for run in split],
               "native_asyncio": native}
     if args.json:
@@ -119,7 +119,7 @@ def main() -> int:
     else:
         print(json.dumps({"protocol_sha256": report["protocol_sha256"],
                           "tests": report["tests"], **summary}, indent=2))
-        print("\nKnown pre-start failure (controlled model):")
+        print("\nPre-start control trace (controlled model; inspect observed violations):")
         print(f"weights={failure.weights}, policy={failure.direction}, cleanup={failure.cleanup}, cut={failure.cut}")
         for i, row in enumerate(failure.trace):
             state = row["state"]
@@ -135,9 +135,11 @@ def main() -> int:
         for case in native["cases"]:
             print(case["case"] + ": " + " | ".join(case["events"]))
             print("violations:", case["violations"])
-        print("\nSTOP-KNOWN-ONLY: all ownership failures reduce to cancellation before worker start.")
-        print("No new ownership consequence established; corpus expansion remains closed.")
-    return 0
+        print("\n" + summary["decision"] + ": no new ownership consequence established.")
+        if not summary["prestart_control_observed"]:
+            print("Frozen control failed: dispatcher cancellation did not reach a worker before start.")
+        print("Corpus expansion remains closed. See RESULTS.md for the failed preregistered control.")
+    return 0 if test_result.wasSuccessful() and summary["prestart_control_observed"] else 1
 
 
 if __name__ == "__main__":

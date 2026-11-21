@@ -80,11 +80,16 @@ class ModelTests(unittest.TestCase):
         clean["workers"][0]["pending"] = False
         self.assertEqual(bottom, clean)
 
-    def test_cancel_before_and_after_start(self):
+    def test_frozen_schedule_starts_worker_before_dispatcher_cleanup(self):
         for policy in ("bottom_up", "simultaneous"):
             unsafe = execute((2,), policy, "worker", False, 1)
-            self.assertIn("lost:0", violations((2,), unsafe.final))
-            self.assertIn("stranded:0", violations((2,), unsafe.final))
+            # The original preregistered expectation of loss at cut 1 failed.
+            # Keep that scientific failure in reproduce.py, not as a false
+            # assertion about what these scheduler transitions actually do.
+            self.assertEqual(violations((2,), unsafe.final), ())
+            actions = [row["action"] for row in unsafe.trace]
+            self.assertLess(actions.index("worker 0: enter finally-protected body"),
+                            actions.index("dispatcher observes cancellation"))
             repaired = execute((2,), policy, "owner", False, 1)
             self.assertEqual(violations((2,), repaired.final), ())
             started = execute((2,), policy, "worker", False, 2)

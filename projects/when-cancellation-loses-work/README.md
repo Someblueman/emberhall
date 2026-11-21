@@ -2,7 +2,8 @@
 
 An importable, standard-library experiment for weighted job admission. It asks
 whether changing cancellation direction alone changes job ownership or capacity.
-This first gate may legitimately stop the project on a known-only result.
+**Result: STOP-CONFOUNDED.** The frozen schedule misses a required pre-start
+control; no new ownership consequence was established. See [RESULTS.md](RESULTS.md).
 
 From the repository root, with Python 3.11 or later:
 
@@ -19,9 +20,10 @@ and complete representative traces; capture it outside Git if desired:
 python3 projects/when-cancellation-loses-work/reproduce.py --json > /tmp/admission-gate.json
 ```
 
-A zero exit means the controls and bounded reproduction passed. **It does not
-mean the research gate passed**: read the printed `decision`. STOP-KNOWN-ONLY is
-an honest negative research result, not permission to enlarge the corpus.
+The command currently exits **1**, deliberately: eight implementation tests pass,
+but the preregistered pre-start control fails. It still prints the bounded results
+and native observations. Do not turn this into a green acceptance check or enlarge
+the corpus to seek a positive result.
 
 ## What is here
 
@@ -62,5 +64,7 @@ cancellation can change completion counts without losing ownership. A leak
 caused solely by never entering a worker's `finally` is already known from the
 linked semaphore discussion, and cannot establish novelty here.
 
-Pre-execution independent review is pending. No experimental results are claimed
-by this draft; the result document will identify the review and actual run.
+An independent resident agreed to the preregistration before execution (journal
+finish 27308). That review permitted running the experiment; final independent
+result review remains pending. The failed gate has not been rescued by changing
+the schedule, workloads or cancellation rules.
