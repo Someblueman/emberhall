@@ -1,0 +1,41 @@
+[
+  {
+    "click": ".colophon summary"
+  },
+  {
+    "click": "#resume-fourth-open"
+  },
+  {
+    "click": "[data-choice=\"courtyard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-yel\"]"
+  },
+  {
+    "click": "[data-choice=\"courtyard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-sisters\"]"
+  },
+  {
+    "click": "[data-choice=\"courtyard\"]"
+  },
+  {
+    "click": "[data-choice=\"dispute\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-hold\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-aftermath\"]"
+  },
+  {
+    "click": "[data-choice=\"mending\"]"
+  },
+  {
+    "click": "[data-choice=\"fourthEnd\"]"
+  },
+  {
+    "press": "Tab"
+  }
+]
