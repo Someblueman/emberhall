@@ -3483,20 +3483,47 @@ function renderCreationCard(entry,parent) {
     tryHere.id=`gallery-room-try-${entry.id}`;tryHere.setAttribute("aria-haspopup","dialog");
   }
   html("p","",entry.summary,article);
-  html("span","small","Completed",article);
+  html("span","small",entry.completedChapter?
+    `Completed opening chapter${entry.projectContinues?" · Longer work continues":""}`:"Completed",article);
+  if(entry.completedChapter) {
+    const record=html("details","small",undefined,article);
+    html("summary","","Chapter completion record",record);
+    html("p","",entry.completedChapter.milestone,record);
+    html("p","",`Recorded at event ${entry.completedChapter.sequence} · Evidence: ${entry.completedChapter.evidence}`,record);
+  }
   const action=collectionAction(entry);
   const link=html("a","creation-action",`${action} ${entry.title} →`,article);
   link.href=collectionUrl(entry);
 }
 function completedCatalog() {
-  const projects=(frame.shelf?.projects||[]).filter(project=>project.status==="done");
+  const allProjects=frame.shelf?.projects||[];
+  const projects=allProjects.filter(project=>project.status==="done");
   const completed=new Set(projects.map(project=>project.idea)),sequence=new Map();
+  // The version-1 manifest describes published artifacts, not stage admission.
+  // Register a reviewed chapter explicitly; unrelated active projects stay out.
+  const chapterStages={"every-promise-two-endings":0},chapters=new Map();
   const remember=(idea,seq)=>{
     if(completed.has(idea)&&Number.isInteger(seq)&&seq>0&&seq<=frame.seq)
       sequence.set(idea,Math.max(sequence.get(idea)||0,seq));
   };
   for(const project of projects)
     for(const receipt of project.completed||[])remember(project.idea,receipt.sequence);
+  for(const project of allProjects) {
+    const stage=chapterStages[project.idea];
+    if(!Number.isInteger(stage)||!Number.isInteger(frame.seq)||!["active","done"].includes(project.status))continue;
+    for(const receipt of project.completed||[]) {
+      if(receipt.stage!==stage||!Number.isInteger(receipt.sequence)||receipt.sequence<=0||receipt.sequence>frame.seq||
+          typeof receipt.evidence!=="string"||!receipt.evidence.trim()||
+          typeof receipt.milestone!=="string"||!receipt.milestone.trim())continue;
+      const previous=chapters.get(project.idea);
+      if(previous&&previous.completedChapter.sequence>=receipt.sequence)continue;
+      completed.add(project.idea);
+      chapters.set(project.idea,{completedChapter:receipt,projectContinues:project.status==="active"});
+      // A chapter is dated by its own completion, even after later stages finish.
+      sequence.set(project.idea,receipt.sequence);
+    }
+  }
+  for(const id of Object.keys(chapterStages))if(!chapters.has(id))completed.delete(id);
   // Small projects have no stage receipts. Only consecutive published frames
   // can date their transition; a first observation or a history gap cannot.
   let previous=null;
@@ -3506,14 +3533,15 @@ function completedCatalog() {
       const prior=new Map((previous.shelf?.projects||[]).map(project=>[project.id,project]));
       for(const project of moment.shelf?.projects||[]) {
         const before=prior.get(project.id);
-        if(project.status==="done"&&before&&before.status!=="done")remember(project.idea,moment.seq);
+        if(project.status==="done"&&before&&before.status!=="done"&&!chapters.has(project.idea))remember(project.idea,moment.seq);
       }
     }
     previous=moment;
   }
   if(Array.isArray(frame.rooms)&&frame.rooms.some(r=>r&&r.id==="assay"&&roomStatus(r)==="open"))completed.add("assay-room");
   return (catalog||[]).filter(entry=>completed.has(entry.id)&&collectionUrl(entry))
-    .sort((a,b)=>(sequence.get(b.id)||0)-(sequence.get(a.id)||0));
+    .sort((a,b)=>(sequence.get(b.id)||0)-(sequence.get(a.id)||0))
+    .map(entry=>chapters.has(entry.id)?{...entry,...chapters.get(entry.id)}:entry);
 }
 let galleryState={query:"",activity:"all",toolsOpen:false};
 function renderCollection() {
@@ -3534,7 +3562,7 @@ function renderCollection() {
     html("p","empty-note","Collection links are unavailable in this publication. The recorded project history is still below.",box);
     return;
   }
-  html("p","small",current?"Finished creations you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
+  html("p","small",current?"Finished works and completed chapters you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
   if(!known.length) {
     html("p","empty-note","No published creations were completed by this moment.",box);
     return;
@@ -3608,7 +3636,7 @@ function renderGalleryRoom(content) {
   panel.className+=" gallery-room";
   panel.setAttribute("aria-label","Try a creation");
   html("h3","","Take something off the shelf",panel);
-  html("p","small",current?"Real output from finished creations. Open one and try it.":"Finished by this recorded moment. Pictures are hidden; links open current published versions.",panel);
+  html("p","small",current?"Finished works and completed chapters. Open one and try it.":"Finished by this recorded moment. Pictures are hidden; links open current published versions.",panel);
   const entries=completedCatalog().filter(entry=>entry.category==="creation"&&entry.href.startsWith("projects/")&&entry.action!=="Read guide");
   if(!catalog)html("p","empty-note","Creation links are unavailable in this publication. The full Gallery keeps the recorded project history.",panel);
   else if(!entries.length)html("p","empty-note","No browser creations were completed by this moment.",panel);
