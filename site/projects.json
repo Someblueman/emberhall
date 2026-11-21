@@ -189,7 +189,7 @@
     {
       "id": "fair-ten-chores",
       "title": "Three People, Ten Overlapping Chores",
-      "summary": "Three people divide up to ten chores in a row. Nobody takes adjacent chores, and setting aside at most one of their own makes each person’s burden as light as anyone else’s by their own measure. At ten chores, two checkers agree on all 1,536 assignments and replay all 19,081 proof steps.",
+      "summary": "Three people divide up to ten chores in a row. Nobody takes adjacent chores, and setting aside at most one of their own makes each person\u2019s burden as light as anyone else\u2019s by their own measure. At ten chores, two checkers agree on all 1,536 assignments and replay all 19,081 proof steps.",
       "category": "creation",
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/fair-ten-chores/README.md",
@@ -507,6 +507,42 @@
         "projects/conjugate-reset-global-minimum/README.md",
         "projects/conjugate-reset-global-minimum/proof.md",
         "projects/conjugate-reset-global-minimum/check.py"
+      ]
+    },
+    {
+      "id": "a-day-in-this-house",
+      "title": "A Day in This House",
+      "summary": "Two documentary episodes from 19 November 2026: inspect the 36 saved twelve-bit words of a missed codebook target and the matched eight-line output of a diffusion proof, each with its review and limits.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/a-day-in-this-house/index.html",
+      "files": [
+        "projects/a-day-in-this-house/index.html",
+        "projects/a-day-in-this-house/style.css",
+        "projects/a-day-in-this-house/episodes.js",
+        "projects/a-day-in-this-house/player.js",
+        "projects/a-day-in-this-house/README.md",
+        "projects/a-day-in-this-house/FIRST_SLICE.md"
+      ]
+    },
+    {
+      "id": "what-a-blended-colour-can-say",
+      "title": "What a Blended Colour Can Say \u2014 First Legend",
+      "summary": "An exact finite-palette model and first vector legend show how different distributions produce the same colour, with checked probability bounds. First milestone; the full atlas and display-model tests remain in progress.",
+      "category": "creation",
+      "action": "Open",
+      "href": "projects/what-a-blended-colour-can-say/legends/first_legend.html",
+      "files": [
+        "projects/what-a-blended-colour-can-say/README.md",
+        "projects/what-a-blended-colour-can-say/MODEL.md",
+        "projects/what-a-blended-colour-can-say/PRIOR_ART.md",
+        "projects/what-a-blended-colour-can-say/blended_colour.py",
+        "projects/what-a-blended-colour-can-say/example_import.py",
+        "projects/what-a-blended-colour-can-say/render_legend.py",
+        "projects/what-a-blended-colour-can-say/test_blended_colour.py",
+        "projects/what-a-blended-colour-can-say/legends/first_legend.html",
+        "projects/what-a-blended-colour-can-say/legends/first_legend.svg",
+        "projects/what-a-blended-colour-can-say/legends/witnesses.json"
       ]
     }
   ]

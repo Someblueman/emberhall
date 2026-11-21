@@ -84,3 +84,25 @@ assert.match(text(root),/Completed opening chapter · Longer work continues/);
 frame=data.frames[2];
 assert.equal(completedCatalog()[0].completedChapter.sequence,80,'Whole-work closure cannot date a chapter');
 ''')
+
+    def test_first_colour_legend_requires_its_own_completed_stage(self):
+        self.run_renderer(r'''
+const legend=manifest.projects.find(p=>p.id==='what-a-blended-colour-can-say');
+assert(legend,'The first legend must be published in the manifest');
+catalog=[legend];
+const receipt={stage:0,sequence:80,evidence:'blended-colour-m1-verify',milestone:'Checked model and first vector legend'};
+const project={id:'great-rook-20261121',idea:legend.id,status:'active',stage:1,completed:[]};
+frame.shelf.projects=[project];
+assert.equal(completedCatalog().length,0,'An active project alone is not a completed legend');
+for(const invalid of [{...receipt,stage:1},{...receipt,sequence:91},{...receipt,evidence:''}]) {
+ project.completed=[invalid];assert.equal(completedCatalog().length,0);
+}
+project.completed=[receipt];
+assert.equal(completedCatalog()[0].id,legend.id);
+nodes.creations=root;renderCollection();
+assert.match(text(root),/Completed first legend · Longer work continues/);
+assert.match(text(root),/Milestone completion record/);
+assert.doesNotMatch(text(root),/Completed opening chapter/);
+assert.equal(all(root).find(n=>n.className==='creation-action').href,legend.href);
+frame.seq=79;assert.equal(completedCatalog().length,0,'No receipt appears before it happened');
+''')
