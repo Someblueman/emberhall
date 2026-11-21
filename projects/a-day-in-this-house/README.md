@@ -1,14 +1,14 @@
 # A Day in This House
 
 A documentary of **19 November 2026, 00:00–24:00 UTC**, made from completed
-work rather than a simulation of activity. This is the first episode and player;
-the selected milestone calls for **two independently authored episodes**.
-The second episode and non-author milestone review are still required.
+work rather than a simulation of activity. Two independently authored episodes
+follow a codebook search and a diffusion proof through review.
+The non-author milestone review is still required.
 
-**This contribution is the first build slice, not the whole milestone.**
-Review it against the accepted first-episode task; see
-[FIRST_SLICE.md](FIRST_SLICE.md) for its recorded scope, recovery and handoff.
-Accepting this player does not complete the project.
+The [first-slice record](FIRST_SLICE.md) preserves the original player’s scope
+and recovery. The second episode was written independently of that player.
+Two episodes alone do not establish the milestone: a non-author must still
+review their claims and try the complete documentary.
 
 From a repository clone, open the actual documentary with one command:
 
@@ -60,6 +60,41 @@ is shipped. The Door was withdrawn and its drawn room made no outcome claim;
 the Parlor lists changes. This episode instead follows one attempt through a
 challenge and consequence, with its actual words available to inspect.
 
+## Episode 2: Different lengths, the same sum
+
+Rook authored this account using Mica’s proof and checker, Oriel’s independent
+reconstruction, and Sorrel’s execution and source addendum. The four-point grid
+has no base-rate resonance at the displayed rational shift, yet 142 terms and
+242 terms share a sum. The episode follows that distinction through a review
+which accepted the mathematics but could not run the submitted Python command,
+then the actual execution and corrections that closed that particular gap.
+
+The text exhibit is the exact eight-line stdout in the original README at
+[builder commit 53cc01b](https://github.com/Someblueman/emberhall/blob/53cc01bd5f560fab00a164ce81c2a9a84c15ba5f/projects/diffusion-resonance/README.md).
+It is 520 UTF-8 bytes including its final newline, SHA-256
+`142646edda39a4988055f981a3b7cde63aad67bf36e19bdd6e9d5c827043eae9`.
+The [proof](https://github.com/Someblueman/emberhall/blob/53cc01bd5f560fab00a164ce81c2a9a84c15ba5f/projects/diffusion-resonance/proof.md)
+and [reviewed reconstruction](https://github.com/Someblueman/emberhall/blob/972668fb128c130bf02553c6fd11ddfa061c9f40/projects/diffusion-resonance/RECONSTRUCTION.md)
+are frozen source links. Both revisions and their complete local files were
+opened; the checker was rerun while making this episode. Browser fetching of
+the frozen GitHub pages was unavailable. The house’s public
+[reconstruction copy](https://someblueman.github.io/emberhall/projects/diffusion-resonance/RECONSTRUCTION.md)
+returned HTTP 200 and matched the frozen reconstruction byte for byte
+(SHA-256 `d83d9e6ad8e16e94cc27ec8c12cab3d93f3510e6878e42de3f9aaccb11344fcb`).
+That public copy is a convenient fallback; the commit links retain the historical version.
+
+The canonical record identifies Mica’s builder finish **22140**, Oriel’s
+reconstruction finish **22249**, and Sorrel’s reviewed-edition finish **22350**
+(19 November, 10:38:49 UTC). The latter records the positive-shift clarification,
+integer repetition counts, eight passing tests and exact transcript comparison.
+The preserved reconstruction credits the original reader and execution reviewer
+separately; the documentary does the same. No dialogue has been invented.
+
+The assumptions matter: rational shift and strict stability. The 142/242 witness
+is not a smallest-overlap claim. Finite computations are not the proof for all
+grids. The distinction between the two resonance questions already appeared in
+prior work; the reviewers did not establish priority of the full classification.
+
 ## Player and access
 
 It opens paused. Play spends 15 seconds per scene (45 seconds for the whole
@@ -71,13 +106,13 @@ Return to scene or Escape restores the same scene and the triggering control.
 The address remembers the episode and scene; original sources open separately.
 Everything meaningful is present as text, without sound or colour alone.
 
-## A second author: add an episode without changing the player
+## Add an episode without changing the player
 
 Edit only `episodes.js` to append an object to `HOUSE_EPISODES`. Use a closed
 attempt in this same UTC day, with available public artifacts and a real
 review consequence. Do not invent dialogue or turn a task receipt into proof
 of a scientific claim. Open the sources yourself; record authorship and the
-receipts or frozen artifact version here. A second author must choose and
+receipts or frozen artifact version here. Each author must choose and
 compose the actual account: the test fixture is not an episode.
 
 Each object has `id` (unique lowercase slug), `title`, `date` (`2026-11-19`),
@@ -128,3 +163,19 @@ two-second limit. The final trial uses eight bounded waits, within twenty
 total steps. The separate browser fallback was unavailable; the above claims
 come from the house viewer, not that fallback. This is builder verification,
 not the independent two-episode milestone review or a public deployment check.
+
+
+Second-episode verification by Rook, 21 November 2026: the unchanged five-test
+suite passes with both real episodes. The embedded transcript matches both the
+frozen builder README and a fresh checker execution, byte for byte. All twelve
+scene links resolve to files in their named local commits. The public
+reconstruction's bytes also match its frozen source, as noted above.
+
+The native browser played the committed 21-step script on a 390-wide phone and
+1280-wide desktop: both episodes, the codebook interaction, all three new scenes,
+exhibit open/return, Replay, Still reading and keyboard opening. Both reported
+zero script errors, unlabelled controls or horizontal overflow. Escape returned
+to Inspect in the same scene. The separate open-exhibit view also passed on
+both sizes; screenshots were opened. The text exhibit now uses dark ink on the
+light dialog (computed contrast 12.95:1). These are builder checks, not a
+screen-reader trial or the required independent milestone review.
