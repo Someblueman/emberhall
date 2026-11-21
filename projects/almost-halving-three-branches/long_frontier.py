@@ -15,14 +15,16 @@ from published_cases import check_pair, validate_lengths, validate_vertices
 def penultimate_certificate(lengths, modulus=8, arms=(1, 2)):
     """Symbolic obstruction for two penultimate tips, for every admitted length."""
     lengths = validate_lengths(lengths)
-    if type(modulus) is not int or modulus < 6 or modulus % 2:
-        raise ValueError("modulus must be even and at least six")
+    if type(modulus) is not int or modulus < 5:
+        raise ValueError("modulus must be an integer at least five")
     if any(n < 3 or (n-3) % modulus for n in lengths):
         raise ValueError("each length must be three modulo the modulus")
     if (len(arms) != 2 or any(type(i) is not int or i not in (1, 2, 3) for i in arms)
             or arms[0] == arms[1]):
         raise ValueError("choose two distinct arms from 1, 2, 3")
     k = sum((n-3)//modulus for n in lengths)
+    if modulus*k % 2:
+        raise ValueError("the original tree must have even order")
     half = modulus*k//2 + 4
     edge_count = 6*k + 7 + modulus*k*(k+1)//2
     return {
@@ -122,15 +124,28 @@ def complete_support(lengths, omitted=(), max_free=16, max_vertices=512):
     omitted = validate_vertices(lengths, omitted)
     if type(max_free) is not int or max_free < 0:
         raise ValueError("max_free must be nonnegative")
+    order = 1+sum(lengths)
+    retained = order-len(omitted)
+    if order > max_vertices:
+        raise ValueError("size limit exceeded; no obstruction or existence verdict")
+    if retained == 0 or retained % 2:
+        raise ValueError("retained support must have positive even size")
+    even = 1+sum(n//2 for n in lengths)-sum(depth % 2 == 0 for _, depth in omitted)
+    if even % 2 and even != retained//2:
+        return {"lengths": lengths, "omitted": omitted, "size": retained//2,
+                "status": "support_obstructed", "proof": "bipartition count",
+                "even_depth_count": even, "all_omissions_obstructed": False}
     vertices, rows = support_rows(lengths, omitted, max_vertices)
     n = len(vertices)
     basis, certificate = parity_basis(n, rows)
     report = {"lengths": lengths, "omitted": omitted, "size": n//2,
-              "parity_rank": len(basis), "all_omissions_obstructed": False}
+              "independent_parity_rows": len(basis), "all_omissions_obstructed": False}
     if certificate is not None:
+        verified = verify_certificate(lengths, omitted, certificate, max_vertices)
+        if not verified["valid"]:
+            raise ArithmeticError("generated parity certificate failed verification")
         report.update(status="support_obstructed", certificate=certificate,
-                      certificate_check=verify_certificate(lengths, omitted, certificate,
-                                                           max_vertices))
+                      certificate_check=verified)
         return report
     # Complementation preserves every equation: fix the first vertex outside A.
     a = 1
@@ -178,11 +193,48 @@ def complete_support(lengths, omitted=(), max_free=16, max_vertices=512):
     return report
 
 
+def census(lengths, max_free=16, max_vertices=512):
+    """Exhaust every support that could meet half-minus-one, for even order only."""
+    lengths = validate_lengths(lengths)
+    order = 1+sum(lengths)
+    if order % 2 or order < 4:
+        raise ValueError("census requires even order at least four")
+    if order > max_vertices:
+        raise ValueError("size limit exceeded; no all-pairs verdict")
+    vertices = [(0, 0)]+[(i, d) for i, n in enumerate(lengths, 1)
+                         for d in range(1, n+1)]
+    counts = {"bipartition count": 0, "parity certificate": 0,
+              "exhaustive parity completion": 0, "inconclusive": 0}
+    tested = 0
+    for omissions in (0, 2):
+        for holes in combinations(vertices, omissions):
+            result = complete_support(lengths, holes, max_free, max_vertices)
+            tested += 1
+            if result["status"] == "witness":
+                result.update(tested_supports=tested, census_complete=False)
+                return result
+            if result["status"] == "inconclusive":
+                counts["inconclusive"] += 1
+            elif "certificate" in result:
+                counts["parity certificate"] += 1
+            else:
+                counts[result["proof"]] += 1
+    report = {"lengths": lengths, "target": order//2-1, "tested_supports": tested,
+              "counts": counts, "census_complete": not counts["inconclusive"],
+              "infinite_family_proved": False}
+    if not counts["inconclusive"]:
+        report.update(status="finite_all_pairs_bound", all_pairs_upper_bound=order//2-2)
+    else:
+        report["status"] = "inconclusive"
+    return report
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--penultimate", type=int, metavar="T")
     mode.add_argument("--solve", nargs=3, type=int, metavar=("A", "B", "C"))
+    mode.add_argument("--census", nargs=3, type=int, metavar=("A", "B", "C"))
     mode.add_argument("--check", type=Path, metavar="PAIR_JSON")
     mode.add_argument("--verify-certificate", type=Path, metavar="JSON")
     parser.add_argument("--arms", nargs=2, type=int, default=(1, 2))
@@ -197,6 +249,8 @@ def main():
             t = args.penultimate
             result = penultimate_certificate((227+7560*t, 67+7560*t, 11+7560*t),
                                              arms=args.arms)
+        elif args.census is not None:
+            result = census(args.census, args.max_free, args.max_vertices)
         elif args.solve is not None:
             result = complete_support(args.solve, args.omit, args.max_free, args.max_vertices)
         elif args.check is not None:

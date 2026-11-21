@@ -40,7 +40,7 @@ def profile(vertices, distances):
 
 class LongFrontierTest(unittest.TestCase):
     def test_infinite_certificate_with_independent_counts(self):
-        for lengths, modulus in [((3, 9, 15), 6), ((19, 11, 27), 8),
+        for lengths, modulus in [((8, 13, 18), 5), ((3, 9, 15), 6), ((19, 11, 27), 8),
                                  ((13, 23, 33), 10), ((227, 67, 11), 8)]:
             distances = metric(lengths)
             for arms in combinations((1, 2, 3), 2):
@@ -55,6 +55,12 @@ class LongFrontierTest(unittest.TestCase):
                                     for v in retained))
                 self.assertNotEqual(len(selected) % 2, result['required_edge_parity'])
                 self.assertFalse(result['all_omissions_obstructed'])
+
+        control = lf.complete_support((7, 3, 3), [(1, 6), (2, 2)])
+        self.assertEqual(control['status'], 'witness')  # Modulus four really differs.
+        distances = metric((7, 3, 3))
+        self.assertEqual(profile(control['left'], distances),
+                         profile(control['right'], distances))
 
     def test_symbolic_arithmetic_at_large_parameters(self):
         for t in (0, 1, 2, 101, 10**40):
@@ -102,20 +108,39 @@ class LongFrontierTest(unittest.TestCase):
         self.assertGreater(result['balanced_candidates'], 0)
 
     def test_limits_and_input_boundaries(self):
-        self.assertEqual(lf.complete_support((4, 3, 2), max_free=0)['status'], 'inconclusive')
+        limited = lf.complete_support((227, 67, 11), [(1, 216), (2, 56)])
+        self.assertEqual(limited['status'], 'inconclusive')
+        self.assertEqual(limited['free_bits_after_complement'], 17)
+        completed = lf.complete_support((227, 67, 11), [(1, 216), (2, 56)], max_free=20)
+        self.assertEqual(completed['status'], 'support_obstructed')
+        self.assertEqual(completed['parity_candidates'], 131072)
         for lengths, holes in [((2, 2, 2), ()), ((1, 1, 1), [(1, 1), (1, 1)])]:
             with self.assertRaises(ValueError):
                 lf.complete_support(lengths, holes)
         with self.assertRaises(ValueError):
             lf.complete_support((227, 67, 11), max_vertices=20)
-        for modulus in (True, 4, 7):
+        for modulus in (True, 4):
             with self.assertRaises(ValueError):
                 lf.penultimate_certificate((3, 3, 3), modulus)
+        with self.assertRaises(ValueError):
+            lf.penultimate_certificate((10, 3, 3), 7)
+
+    def test_census_keeps_inconclusive_supports_visible(self):
+        limited = lf.census((3, 3, 3), max_free=0)
+        self.assertEqual(limited['status'], 'inconclusive')
+        self.assertEqual(limited['tested_supports'], 46)
+        self.assertGreater(limited['counts']['inconclusive'], 0)
+        self.assertNotIn('all_pairs_upper_bound', limited)
+        complete = lf.census((3, 3, 3))
+        self.assertEqual(complete['status'], 'witness')
+        self.assertTrue(complete['check']['meets_target'])
+        with self.assertRaises(ValueError):
+            lf.census((2, 2, 2))
 
     def test_real_cli_witness_and_altered_pair(self):
         script = str(Path(lf.__file__))
-        run = subprocess.run([sys.executable, script, '--solve', '5', '4', '2',
-                              '--omit', '1', '1', '--omit', '1', '2'],
+        run = subprocess.run([sys.executable, script, '--solve', '40', '23', '6',
+                              '--omit', '2', '22', '--omit', '2', '23'],
                              capture_output=True, text=True, check=True)
         pair = json.loads(run.stdout)
         distances = metric(pair['lengths'])
@@ -126,7 +151,7 @@ class LongFrontierTest(unittest.TestCase):
             path.write_text(json.dumps(pair))
             self.assertEqual(subprocess.run([sys.executable, script, '--check', str(path)],
                                             capture_output=True).returncode, 0)
-            pair['left'][0] = [1, 1]
+            pair['left'][0] = [2, 22]
             path.write_text(json.dumps(pair))
             bad = subprocess.run([sys.executable, script, '--check', str(path)],
                                  capture_output=True, text=True)
