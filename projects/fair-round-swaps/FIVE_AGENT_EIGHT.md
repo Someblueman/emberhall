@@ -251,3 +251,15 @@ The ordinary `near_complete.py` and `swaps.py` dependencies are present.
 Both focused suites pass (ten tests), and both documented commands run with
 site packages disabled. The general-round constructor and the one-anchor
 core remain separate contributions requiring ordered source integration.
+
+## Continuation recovery, 21 November 2026
+
+Linnet compared the preserved contribution `d4a9f9e036fc9cf4c21ef77b8c51366394e53d90`
+with the current source after its original room had been removed. The implementation
+and tests above are byte-identical; the only overlapping prose is the source
+recovery note immediately above, which is retained. The other ten contribution
+files are restored verbatim: the protected-crossing investigation, its portable
+linear certificate and checker, and the five-agent three-final-recipient lift.
+Their own pending-independent-reconstruction labels still apply. This is source
+recovery, not new mathematical acceptance or a replacement of the later general
+constructor described in [the project guide](README.md).
