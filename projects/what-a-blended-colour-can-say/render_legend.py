@@ -74,9 +74,11 @@ def evaluate_cases(palettes: Mapping[str, bc.Palette], cases: Sequence[Case],
     return result
 
 
-def _pct(value: str, upper: bool = False) -> str:
-    """Outward two-decimal percent, using integer arithmetic."""
+def _pct(value: str, upper: bool = False, *, nearest: bool = False) -> str:
+    """Two-decimal percent: outward bounds or half-up distribution labels."""
     x = F(value) * 10000
+    if nearest:
+        x += F(1, 2)
     n = -(-x.numerator // x.denominator) if upper else x.numerator // x.denominator
     return f'{n // 100}.{n % 100:02d}%'
 
@@ -204,10 +206,152 @@ document.getElementById('view-tools').hidden = false;
 </script></body></html>'''
 
 
+# Keep closed native selects usable with real keys on both desktop and mobile.
+# Popup menus retain their browser behavior; this handles keys delivered to the page.
+SELECT_KEYS = """
+document.querySelectorAll('select').forEach(control => {
+  control.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const moves = {Home: 0, End: control.options.length - 1,
+                   ArrowDown: control.selectedIndex + 1, ArrowUp: control.selectedIndex - 1};
+    if (!(event.key in moves)) return;
+    event.preventDefault();
+    control.selectedIndex = Math.max(0, Math.min(control.options.length - 1, moves[event.key]));
+    control.dispatchEvent(new Event('change'));
+  });
+});
+"""
+
+
+def _mode_result(s: dict, mode: str) -> tuple[dict, str, str]:
+    if mode == 'exact':
+        cert, scope = s['certificate'], 'Exact linear-light colour'
+    else:
+        observation = next(o for o in s['observations'] if o['mode'] == mode)
+        cert = observation['certificate']
+        scope = f"{mode} observation {observation['hex']} (conservative outer box)"
+    lo, hi = F(cert['p_min']), F(cert['p_max'])
+    status = 'EXACT' if lo == hi else 'UNIDENTIFIABLE' if (lo, hi) == (0, 1) else 'BOUNDED'
+    return cert, scope, status
+
+
+def _mode_svg(swatches: list[dict], palettes: Mapping[str, bc.Palette], title: str,
+              queries: Mapping[str, str], *, all_modes: bool = False) -> str:
+    height = 140 + 320 * len(swatches)
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="{height}" viewBox="0 0 1040 {height}" role="img" aria-labelledby="mode-title mode-desc">',
+             f'<title id="mode-title">{escape(title)}</title>',
+             '<desc id="mode-desc">Each row states its observation model, corresponding probability bounds, status and extremal distributions.</desc>',
+             '<style>[hidden]{display:none}text{font:16px sans-serif;fill:#172c3c}.heading{font:bold 20px sans-serif}.small{font:14px monospace}.label{font:bold 16px sans-serif}</style>',
+             f'<rect width="1040" height="{height}" fill="#f3f1e9"/>',
+             _text(30, 40, title, 'heading'),
+             _text(30, 74, 'One observation model per row. The bounds, status and distributions all belong to that model.'),
+             _text(30, 103, 'Rounded models use closed conservative boxes; exact fractions in certificates are authoritative.')]
+    for i, s in enumerate(swatches):
+        y = 140 + 320 * i
+        for mode in ('exact', *(o['mode'] for o in s['observations'])):
+            if not all_modes and mode != queries[s['id']]:
+                continue
+            cert, scope, status = _mode_result(s, mode)
+            hidden = '' if mode == queries[s['id']] else ' hidden="hidden"'
+            parts.extend((f'<g data-case="{i}" data-mode="{mode}" data-query="{queries[s["id"]]}"{hidden}>',
+                          f'<rect x="18" y="{y}" width="1004" height="306" rx="10" fill="white"/>',
+                          _text(34, y + 30, f"{s['id']} / {s['title']}", 'heading'),
+                          _text(34, y + 60, scope, 'label'),
+                          _text(34, y + 94, f"{s['event_label']} {_range(cert, mode == 'exact')} / {status}", 'heading'),
+                          f'<rect x="34" y="{y+118}" width="92" height="72" fill="{s["hex"]}" stroke="#526776"/>',
+                          _text(144, y + 142, f"Displayed sRGB: {s['hex']}"),
+                          _text(144, y + 172, 'linear8 bytes are data, not displayed light.', 'small'),
+                          _text(34, y + 232, 'EXACT: one value; BOUNDED: a restricted interval.', 'small'),
+                          _text(34, y + 258, 'UNIDENTIFIABLE: any probability from 0 to 1.', 'small'),
+                          _text(552, y + 60, f'{mode}: lower / upper endpoint distributions', 'label')))
+            for k, key in enumerate(('witness_min', 'witness_max')):
+                weights = cert[key]
+                # Rounded endpoint fractions can be thousands of digits long.
+                bars = _bars(palettes[s['palette']], weights, 552, y + 85 + 86*k)
+                labels = [f'{j+1}: {_pct(w, nearest=True)}' for j, w in enumerate(weights) if F(w)]
+                bars = bars[:bars.index('<text')]
+                for line in range(0, len(labels), 3):
+                    bars += _text(552, y + 127 + 86*k + 18*(line//3), '  '.join(labels[line:line+3]), 'small')
+                parts.append(bars)
+            parts.extend((_text(552, y+260, 'Labels: stop number : rounded probability', 'small'),
+                          _text(552, y+283, 'Exact weights: cards and rational certificates', 'small'), '</g>'))
+    return '\n'.join(parts + ['</svg>'])
+
+
+def _mode_html(swatches: list[dict], palettes: Mapping[str, bc.Palette], title: str,
+               queries: Mapping[str, str], svg: str) -> str:
+    cards = []
+    modes = ('exact', *(o['mode'] for o in swatches[0]['observations']))
+    for i, s in enumerate(swatches):
+        palette = palettes[s['palette']]
+        for mode in modes:
+            cert, scope, status = _mode_result(s, mode)
+            hidden = '' if mode == queries[s['id']] else ' hidden'
+            endpoints = []
+            for name, key in (('Lower endpoint', 'witness_min'), ('Upper endpoint', 'witness_max')):
+                bars = ''.join(f'<span style="flex:{float(F(w)):.12g};background:{bc.rgb_to_hex(palette.colours[j])}"></span>' for j, w in enumerate(cert[key]) if F(w))
+                labels = '; '.join(f'{palette.labels[j]}: {w if mode == "exact" else _pct(w, nearest=True)}' for j, w in enumerate(cert[key]) if F(w))
+                endpoints.append(f'<h3>{name}</h3><div class="bar" aria-hidden="true">{bars}</div><p class="numbers">{escape(labels)}</p>')
+            targets = ', '.join(palette.labels[j] for j in s['event_indices'])
+            cards.append(f'<article data-case="{i}" data-mode="{mode}" data-query="{queries[s["id"]]}"{hidden}>'
+                         f'<h2>{escape(s["id"] + " / " + s["title"])}</h2><p class="scope">{escape(scope)}</p>'
+                         f'<p class="result">{escape(s["event_label"])}: <strong>{_range(cert, mode == "exact")}</strong><br><b>{status}</b></p>'
+                         f'<p>Target stops: {escape(targets)}</p><div class="columns"><section>'
+                         f'<div class="swatch" style="background:{s["hex"]}" role="img" aria-label="Displayed sRGB colour {s["hex"]}"></div>'
+                         f'<p>Displayed sRGB: <code>{s["hex"]}</code></p><p>All bounds and distributions in this card use <b>{mode}</b>.</p>'
+                         f'</section><section aria-label="Endpoint distributions for {mode}">{"".join(endpoints)}</section></div></article>')
+    options = ''.join(f'<option value="{i}">{escape(s["id"]+" / "+s["title"])}</option>' for i, s in enumerate(swatches))
+    mode_options = ''.join(f'<option value="{m}">{m}</option>' for m in modes)
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{escape(title)}</title><style>
+*{{box-sizing:border-box}}[hidden]{{display:none!important}}body{{margin:0;background:#f3f1e9;color:#172c3c;font:17px/1.5 system-ui,sans-serif}}main{{max-width:1080px;margin:auto;padding:24px}}h1{{font:36px Georgia,serif}}h2{{font-size:22px}}h3{{font-size:17px}}article{{background:white;border:1px solid #d6d9d8;border-radius:12px;margin:24px 0;padding:22px}}.scope{{font-weight:bold;border-left:5px solid #14547a;padding:10px;background:#edf4f7}}.result{{font-size:23px}}.columns{{display:grid;grid-template-columns:1fr 1fr;gap:32px}}.bar{{display:flex;height:28px;border:1px solid #526776}}.numbers{{overflow-wrap:anywhere;font-size:15px}}.swatch{{width:140px;height:95px;border:1px solid #526776}}.tools{{display:flex;flex-wrap:wrap;gap:10px;align-items:center}}button,select{{font:inherit;padding:8px;max-width:100%}}:focus-visible{{outline:3px solid #14547a;outline-offset:3px}}a{{color:#14547a}}#vector-window{{height:560px;max-height:65vh;overflow:auto;border:1px solid #526776}}#vector-window svg{{display:block;width:1040px;max-width:none;height:auto}}@media(max-width:650px){{main{{padding:14px}}h1{{font-size:29px}}article{{padding:16px}}.columns{{grid-template-columns:1fr;gap:8px}}}}
+</style></head><body><main><h1>{escape(title)}</h1>
+<p>Choose the observation model. Every visible interval, status and endpoint distribution uses that selection.</p>
+<div class="tools" id="view-tools" hidden><label for="mode-choice">Observation model</label><select id="mode-choice"><option value="query">Case question</option>{mode_options}</select>
+<label for="case-choice">Case</label><select id="case-choice"><option value="all">All cases</option>{options}</select><button id="vector-toggle" type="button" aria-pressed="false">Open the complete vector atlas</button></div>
+<p id="selection" role="status" aria-live="polite">Showing each case's stated model.</p>
+<p>EXACT means one probability; BOUNDED means a restricted interval; UNIDENTIFIABLE means [0, 1]. Byte bounds conservatively enclose rounded observations. Percentages round outward. linear8 bytes are raw data; the swatch always shows sRGB light.</p>
+<p><a href="first_legend.svg" download>Download vector atlas</a> · <a href="witnesses.json">Rational certificates</a></p>
+<section id="vector-view" aria-label="Selected observation model vector atlas" hidden><p>Use the model and case selectors above in either view. Pan sideways with arrow keys or the column buttons.</p><div class="tools"><button id="vector-left" type="button">Swatch and interval</button><button id="vector-right" type="button">Endpoint distributions</button></div><div id="vector-window" tabindex="0" role="region" aria-label="Scrollable vector atlas">{svg}</div></section><template id="vector-models">{_mode_svg(swatches, palettes, title, queries, all_modes=True)}</template>
+<div id="card-view">{''.join(cards)}</div><footer>Closed rational outer boxes, half-up byte rounding and declared linear-light palettes only. No screenshot decoding, profiles, compression or alpha compositing. No reader benefit is claimed.</footer></main><script>
+const choice=document.getElementById('case-choice'), mode=document.getElementById('mode-choice'), viewport=document.getElementById('vector-window');
+function select() {{
+  document.querySelectorAll('article[data-mode]').forEach(node=>{{
+    const wanted=mode.value==='query'?node.dataset.query:mode.value;
+    node.hidden=node.dataset.mode!==wanted || (choice.value!=='all' && node.dataset.case!==choice.value);
+  }});
+  const diagram=document.getElementById('vector-models').content.firstElementChild.cloneNode(true);
+  diagram.querySelectorAll('g[data-mode]').forEach(node=>{{
+    const wanted=mode.value==='query'?node.dataset.query:mode.value;
+    if(node.dataset.mode!==wanted || (choice.value!=='all' && node.dataset.case!==choice.value)) node.remove();
+    else node.removeAttribute('hidden');
+  }});
+  viewport.replaceChildren(diagram);
+  viewport.scrollTop=choice.value==='all'?0:140+320*Number(choice.value);
+  document.getElementById('selection').textContent=mode.value==='query'?"Showing each case's stated model.":'Showing '+mode.value+' bounds, status and endpoint distributions.';
+}}
+choice.addEventListener('change',select);mode.addEventListener('change',select);
+document.getElementById('vector-toggle').addEventListener('click',event=>{{
+ const showing=document.getElementById('vector-view').hidden;
+ document.getElementById('vector-view').hidden=!showing;document.getElementById('card-view').hidden=showing;
+ event.target.setAttribute('aria-pressed',String(showing));event.target.textContent=showing?'Read the responsive cards':'Open the complete vector atlas';select();
+}});
+document.getElementById('vector-left').addEventListener('click',()=>{{viewport.scrollLeft=0;}});
+document.getElementById('vector-right').addEventListener('click',()=>{{viewport.scrollLeft=520;}});
+document.getElementById('view-tools').hidden=false;
+{SELECT_KEYS}
+</script></body></html>'''
+
+
 def render_atlas(palettes: Mapping[str, bc.Palette], cases: Sequence[Case], *,
                  modes: Sequence[str] = dc.MODES,
-                 title: str = 'What a Blended Colour Can Say') -> dict[str, str]:
-    """Pure renderer: caller-owned palettes/cases -> SVG, HTML and certificate JSON."""
+                 title: str = 'What a Blended Colour Can Say', mode_led: bool = False,
+                 query_modes: Mapping[str, str] | None = None) -> dict[str, str]:
+    """Render caller cases; mode_led opts into scope-led cards and vector rows.
+
+    The default presentation is fixed for the archived first experiment and
+    existing importers. Certificates and the return contract are identical.
+    """
     swatches = evaluate_cases(palettes, cases, modes)
     data = dict(schema='blended-colour-atlas-v2', model='rational-linear-light-srgb',
                 rounding='half-up', observation_claim='closed-rational-outer-box',
@@ -215,6 +359,13 @@ def render_atlas(palettes: Mapping[str, bc.Palette], cases: Sequence[Case], *,
                                      colours=[list(map(str, c)) for c in p.colours])
                           for name, p in palettes.items()}, swatches=swatches)
     verify_atlas(data)
+    if mode_led:
+        queries = {s['id']: (query_modes or {}).get(s['id'], modes[0]) for s in swatches}
+        if any(m not in ('exact', *modes) for m in queries.values()):
+            raise ValueError('Query mode must have a computed certificate')
+        svg = _mode_svg(swatches, palettes, title, queries)
+        return dict(svg=svg, html=_mode_html(swatches, palettes, title, queries, svg),
+                    witnesses=json.dumps(data, indent=2, sort_keys=True) + '\n')
     return dict(svg=build_svg(swatches, palettes, title), html=build_html(swatches, palettes, title),
                 witnesses=json.dumps(data, indent=2, sort_keys=True) + '\n')
 
@@ -222,7 +373,7 @@ def render_atlas(palettes: Mapping[str, bc.Palette], cases: Sequence[Case], *,
 def generate_all(out_dir: Path | None = None) -> dict[str, str]:
     target = out_dir if out_dir is not None else PROJECT_DIR / 'legends'
     target.mkdir(parents=True, exist_ok=True)
-    outputs = render_atlas(bc.builtin_palettes(), default_cases())
+    outputs = render_atlas(bc.builtin_palettes(), default_cases(), mode_led=True)
     names = dict(svg='first_legend.svg', html='first_legend.html', witnesses='witnesses.json')
     for kind, name in names.items():
         (target / name).write_text(outputs[kind], encoding='utf-8')
