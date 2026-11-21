@@ -187,6 +187,170 @@ class ResidueReductionTests(unittest.TestCase):
         impossible = frontier.compressed_system((227, 67, 11))
         self.assertIsNone(frontier.small_counts(impossible))  # never means an obstruction
 
+    def test_moments_witness_holds_symbolically_for_all_t_ge_1(self):
+        for t0, (counts, y0, dy) in frontier.MOMENTS_WITNESS_BRANCHES.items():
+            base = frontier.moments_witness(t0)
+            nxt = frontier.moments_witness(t0 + 4)
+            self.assertTrue(base['first_moment_equations_hold'])
+            self.assertFalse(base['homometric_pair_proved'])
+            self.assertEqual(len(base['cells']), 25)
+            # Check exact affine growth of moment_constant and monotone quadratic bound margins for all k>=0
+            for i, (c0, c1) in enumerate(zip(base['cells'], nxt['cells'])):
+                self.assertEqual(c0['column'], c1['column'])
+                self.assertEqual(c0['moment_linear'], c1['moment_linear'])
+                if i > 0:
+                    self.assertEqual(c1['count'] - c0['count'], 3780)
+                    p0 = (c0['count'] + counts[i]) // 2
+                    self.assertGreaterEqual(dy[i] + 3780 * (c0['count'] - p0), 0)
+                    self.assertGreaterEqual(3780 * p0 - dy[i], 0)
+            dmc_eq = [sum(counts[i] * (c1['moment_constant'][r] - c0['moment_constant'][r])
+                          + dy[i] * c0['moment_linear'][r] for i, (c0, c1) in enumerate(zip(base['cells'], nxt['cells'])))
+                      for r in range(8)]
+            self.assertEqual(dmc_eq, [0] * 8)
+            huge = frontier.moments_witness(t0 + 4 * 10**60)
+            self.assertTrue(huge['first_moment_equations_hold'])
+        for bad_t in (0, -1, True):
+            with self.assertRaises(ValueError):
+                frontier.moments_witness(bad_t)
+        cli = [sys.executable, str(Path(frontier.__file__))]
+        with tempfile.TemporaryDirectory() as folder:
+            run = subprocess.run(cli + ['4', '--moments-witness'], text=True, capture_output=True, check=True)
+            saved = json.loads(run.stdout)
+            self.assertTrue(saved['first_moment_equations_hold'])
+            path = Path(folder) / 'm17.json'
+            path.write_text(json.dumps(saved))
+            ok = subprocess.run(cli + ['--verify', str(path)], text=True, capture_output=True)
+            self.assertEqual(ok.returncode, 0, ok.stderr)
+            saved['signed_moments'][1] += 2
+            path.write_text(json.dumps(saved))
+            bad = subprocess.run(cli + ['--verify', str(path)], text=True, capture_output=True)
+            self.assertEqual(bad.returncode, 1, bad.stderr)
+
+    def test_second_moment_bounds_match_subsets(self):
+        for n in range(1, 10):
+            for p in range(0, n + 1):
+                count = 2 * p - n
+                tot_y = n * (n - 1) // 2
+                tot_z = n * (n - 1) * (n - 2) // 6
+                by_y = {}
+                for subset in combinations(range(n), p):
+                    y_val = 2 * sum(subset) - tot_y
+                    z_val = 2 * sum(j * (j - 1) // 2 for j in subset) - tot_z
+                    lo, hi = by_y.get(y_val, (z_val, z_val))
+                    by_y[y_val] = (min(lo, z_val), max(hi, z_val))
+                for y_val, (true_lo, true_hi) in by_y.items():
+                    lo, hi, par = frontier.second_moment_bounds(n, count, y_val)
+                    self.assertEqual((lo, hi, par), (true_lo, true_hi, (-tot_z) % 2))
+
+    def test_triple_moments_witness_all_t_ge_1_and_defects(self):
+        # Verify exact polynomial inequalities proving Y and Z stay in Schur bounds for ALL k>=0!
+        def padd(a, b):
+            return [(a[i] if i < len(a) else 0) + (b[i] if i < len(b) else 0) for i in range(max(len(a), len(b)))]
+
+        def psub(a, b):
+            return [(a[i] if i < len(a) else 0) - (b[i] if i < len(b) else 0) for i in range(max(len(a), len(b)))]
+
+        def pmul(a, b):
+            out = [0] * (len(a) + len(b) - 1)
+            for i, x in enumerate(a):
+                for j, y in enumerate(b):
+                    out[i + j] += x * y
+            while len(out) > 1 and out[-1] == 0:
+                out.pop()
+            return out
+
+        for t0, (counts, y0, y1, y2, z0, z1, z2, z3) in frontier.TRIPLE_ROOT_WITNESS_BRANCHES.items():
+            # Verify k=0, 1, 2 (and huge k) directly against verify_triple_moments
+            for k in (0, 1, 2, 10**60):
+                w = frontier.triple_moments_witness(t0 + 4 * k)
+                self.assertTrue(w["aggregate_equations_hold"])
+                self.assertTrue(w["first_moment_equations_hold"])
+                self.assertTrue(w["second_moment_equations_hold"])
+                self.assertFalse(w["homometric_pair_proved"])
+
+            # Prove quadratic Y and cubic Z remain inside Schur bounds for EVERY integer k >= 0
+            base = frontier.triple_moments_witness(t0)
+            for j, cell in enumerate(base["cells"]):
+                if j == 0:
+                    continue
+                n_p = [cell["count"], 3780]
+                p_p = [(cell["count"] + counts[j]) // 2, 1890]
+                y_p = [y0[j], y1[j], y2[j]]
+                z_p = [z0[j], z1[j], z2[j], z3[j]]
+                two_tot_y = pmul(n_p, psub(n_p, [1]))
+                m4_p = padd(pmul([2], y_p), two_tot_y)
+                self.assertTrue(all(c % 4 == 0 for c in m4_p))
+                m_p = [c // 4 for c in m4_p]
+                six_tot_z = pmul(two_tot_y, psub(n_p, [2]))
+
+                a_p = psub(pmul([2], m_p), pmul(p_p, psub(p_p, [1])))
+                ub_24p2 = padd(
+                    pmul(p_p, padd(padd(pmul([3], pmul(a_p, a_p)),
+                                        pmul(pmul([6], pmul(p_p, psub(p_p, [2]))), a_p)),
+                                   pmul(pmul([4], pmul(p_p, p_p)), pmul(psub(p_p, [1]), psub(p_p, [2]))))),
+                    pmul(pmul([12], pmul(p_p, p_p)), padd(a_p, pmul([2], pmul(p_p, p_p)))),
+                )
+                lhs_min = psub(pmul(pmul([12], pmul(p_p, p_p)), z_p),
+                               psub(ub_24p2, pmul(pmul([2], pmul(p_p, p_p)), six_tot_z)))
+                self.assertTrue(all(c >= 0 for c in lhs_min))
+
+                d_p = psub(n_p, p_p)
+                b_p = pmul([2], d_p)
+                u_p = psub(pmul(p_p, psub(psub(pmul([2], n_p), p_p), [1])), pmul([2], m_p))
+                qn_p = psub(u_p, b_p)
+                rn_p = psub(pmul(b_p, psub(p_p, [1])), u_p)
+                ln_p = psub(pmul(b_p, n_p), rn_p)
+                self.assertTrue(all(c >= 0 for c in psub(qn_p, b_p)))
+                self.assertTrue(all(c >= 0 for c in rn_p))
+                self.assertTrue(all(c >= 0 for c in psub(ln_p, pmul([2], b_p))))
+                b3_p = pmul(b_p, pmul(b_p, b_p))
+                s2_lb = padd(pmul(pmul(qn_p, psub(qn_p, b_p)), psub(qn_p, pmul([2], b_p))),
+                             psub(pmul(b3_p, six_tot_z),
+                                  pmul(pmul(ln_p, psub(ln_p, b_p)), psub(ln_p, pmul([2], b_p)))))
+                rhs_max = psub(psub(pmul([2], s2_lb), pmul(b3_p, six_tot_z)), pmul(pmul([6], b3_p), z_p))
+                self.assertTrue(all(c >= 0 for c in rhs_max))
+
+            # Earlier 17-equation witness must fail E''(-1) = 0 for every t0 + 4k
+            defect = frontier.bramble_second_moment_defect(t0)
+            self.assertTrue(defect["second_moment_quadratic_annihilated"])
+            self.assertNotEqual(defect["weighted_second_moment_defect"], 0)
+            self.assertFalse(defect["triple_root_lift_possible_for_earlier_witness"])
+
+        # CLI & corruption test for --triple-moments-witness and --structural-obstructions
+        cli = [sys.executable, str(Path(frontier.__file__))]
+        with tempfile.TemporaryDirectory() as folder:
+            run = subprocess.run(cli + ['4', '--triple-moments-witness'], text=True, capture_output=True, check=True)
+            saved = json.loads(run.stdout)
+            self.assertTrue(saved['second_moment_equations_hold'])
+            path = Path(folder) / 'm25.json'
+            path.write_text(json.dumps(saved))
+            ok = subprocess.run(cli + ['--verify', str(path)], text=True, capture_output=True)
+            self.assertEqual(ok.returncode, 0, ok.stderr)
+            saved['signed_second_moments'][1] += 2
+            path.write_text(json.dumps(saved))
+            bad = subprocess.run(cli + ['--verify', str(path)], text=True, capture_output=True)
+            self.assertEqual(bad.returncode, 1, bad.stderr)
+            st = subprocess.run(cli + ['1', '--structural-obstructions'], text=True, capture_output=True, check=True)
+            st_data = json.loads(st.stdout)
+            self.assertFalse(st_data['synchronized_periodic_fixed_hole_Q2_possible'])
+            self.assertFalse(st_data['terminal_constant_run_possible'])
+            self.assertTrue(st_data['cross_arm_23_exceeds_max_arm'])
+
+        # Concrete positive-control witness check: T(27,11,3) with holes (1,9),(1,27) satisfies verify_triple_moments!
+        small = frontier.compressed_system((27, 11, 3), [(1, 9), (1, 27)], 8)
+        left_set = {(1, 1), (1, 3), (1, 5), (1, 8), (1, 11), (1, 12), (1, 13), (1, 15),
+                    (1, 16), (1, 19), (1, 22), (1, 23), (1, 25), (1, 26), (2, 1), (2, 3),
+                    (2, 5), (2, 6), (2, 9), (3, 2)}
+        counts_small, y_small, z_small = [], [], []
+        for cell in small["cells"]:
+            depths = range(cell["first"], cell["hi"] + 1, 8)
+            signs = [1 if (cell["arm"], d) in left_set else -1 for d in depths]
+            counts_small.append(sum(signs))
+            y_small.append(sum(j * s for j, s in enumerate(signs)))
+            z_small.append(sum(j * (j - 1) // 2 * s for j, s in enumerate(signs)))
+        res_small = frontier.verify_triple_moments(small, counts_small, y_small, z_small)
+        self.assertTrue(res_small["second_moment_equations_hold"])
+
 
 if __name__ == '__main__':
     unittest.main()

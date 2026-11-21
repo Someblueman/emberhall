@@ -8,6 +8,11 @@ two vertices of each depth parity.
 Hawthorn's continuation below excludes every colouring for a further
 family of interior-hole supports, including seven further supports
 at every parameter of the long frontier.
+Bramble's continuation below excludes every colouring for twenty-one further
+supports at every parameter of the long frontier: seven aligned even-depth
+supports (`q=8P+5`, completing all 29 aligned even-depth supports on arms
+1 and 2), eleven aligned odd-depth supports (`q=10P+2` and `q=10P`), and
+the three two-tip terminal deletions via the full-partition residue lemma.
 None of these results excludes all remaining colourings. Priority remains provisional under
 [PRIORITY_REFRESH.md](PRIORITY_REFRESH.md). The default construction command,
 accepted finite results, and earlier formulas are unchanged.
@@ -683,6 +688,153 @@ than the advisory module threshold; this addition stays in its assigned
 file because it is another certificate for the same frontier, sharing its
 validation and command. No new dependency or general proof framework is used.
 
+## Completing aligned even-depth holes, eleven odd-depth aligned pairs, and two-tip deletions
+
+Bramble, 21 November 2026. **These are additional support obstructions, not
+an all-pairs bound.** All non-aligned surviving supports and the remaining
+odd-depth aligned supports (`q mod 10 in {4,6,8}`) remain open for `t>=1`.
+Priority remains provisional.
+
+### Family 1 (`mod8-q5`): completing every aligned even-depth pair on arms 1 and 2
+
+**Theorem.** Let `a>=b>=c` be positive integers all `3 mod 8`, write
+`A=(a-3)/8, B=(b-3)/8, C=(c-3)/8`, `K=A+B+C`, and take any integer `P`
+with `0<=P<B-C`. Put `q=8P+5` and `M=a+b-q=8(A+B-P)+1`. Omit
+
+    h1 = (1,a-q),       h2 = (2,b-q).
+
+Then the remaining `8K+8` vertices cannot be partitioned into homometric
+sets of size `m=4K+4`, for any colouring. Join distinct retained vertices
+at original-tree distance `d` when:
+
+* `d < M` and `d mod 8 in {2,5,7}`, or
+* `d in {M, M+1}`, or
+* `M+1 < d < a+b` and `d mod 8 in {1,6,7}`.
+
+Note `d=a+b` is excluded. Every retained vertex has degree parity `(K+1) mod 2`,
+and the exact selected edge count is
+
+    e = 12K^2 + 22K + 11 + 8P,                        (16)
+
+which is always odd, contradicting (1) because `m=4K+4` is even.
+
+*Proof.* Let `G0` join all pairs of the full tree at `d mod 8 in {2,5,7}`.
+At depth `8j+r`: the centre (`r=0`) has `sum (3Q_i+1)=3K+3` neighbours in `G0`;
+on arm `i` at `r`, each other arm `j` contributes `3Q_j+1+[r=4]` neighbours
+(since `{1,2,3} intersect {2-r,5-r,7-r}` has size 2 for `r=4` and 1 otherwise),
+and the path `0..8Q_i+3` contributes `3Q_i+1` neighbours for every `r`.
+Thus `deg_(G0)(v) = 3K+3+2[r=4] == K+1 (mod 2)` everywhere, and summing over
+all `8K+10` vertices (`K` of them at `r=4`) gives `e(G0) = 12K^2+28K+15`.
+
+Both holes have depth `6 mod 8`, degree `3K+3`, and cross distance
+`a+b-2q == 4 (mod 8)`, so they are nonadjacent in `G0`. Deleting them leaves
+`12K^2+22K+9` edges and preserves degree parity at the centre (distance `6 mod 8`)
+and on arm 3 (identical distance residues to `h1,h2`). On arm 1 (and arm 2),
+below the hole the distance residues `6-r` and `r+6` lie in `{2,5,7}` for
+the exact same set `r in {1,4,7}` and cancel; above the hole, `r-6 == r+2`
+hits `{2,5,7}` for `r in {0,3,5}` while `r+6` hits `{1,4,7}`, flipping
+degree parity precisely when `r not in {2,6}`.
+
+Now toggle `J`, the symmetric difference between `G` and `G0`. Since `P<=B-C-1`,
+`a+c <= M-3 < M` and `a <= M-5 < M`, so only cross pairs `(1,a-u),(2,b-v)`
+with `u+v <= 8P+5` reach `d >= M`. Since `h1,h2` are omitted, `0<=u,v<=8P+4`.
+With `s=u+v` and `a+b == 6 (mod 8)`, `J` toggles `s in [1,8P+5] \ {8P+4}`
+with `s mod 8 in {0,1,4,5}` (because `d=a+b` at `s=0` and `d=M+1 == 2` at
+`s=8P+4` agree in `G` and `G0`, while `d=M == 1` at `s=8P+5` is added in `G`).
+For `u=0`, `v` cannot equal `8P+5` (hole `h2`), so `s` ranges over `[1,8P+3]`,
+which has `4P+1` (odd) elements in `{0,1,4,5} mod 8`, matching the deletion
+flip at `r=3`. For `1<=u<=8P+4`, `v` covers `[0,8P+5-u]` (`<=8P+4`), so `s`
+covers `[u,8P+5] \ {8P+4}`. The full set `[1,8P+5] \ {8P+4}` has `4P+2` (even)
+toggled elements, so `deg_J(u)` is odd iff `[1,u-1]` has an odd count in
+`{0,1,4,5} mod 8`, i.e., `u mod 8 not in {1,5}`, equivalently
+`r == 3-u not in {2,6}`. Thus `J` cancels every deletion parity flip.
+
+For the edge count, on `[1,8P+3]` each full block `s=8j+0..7` (`j>=1`) adds
+`(8j+1)+(8j+6)+(8j+8)` and removes `(8j+2)+(8j+5)+(8j+8)` (net `0`);
+`j=0` (`1..7`) has net `(6+8)-(2+5+8)=-1`; `s in {8P,8P+1}` has net
+`(8P+1)-(8P+2)=-1` (already counted in `j=0` if `P=0`, giving net `-2`);
+and `s=8P+5` adds `8P+4` retained pairs (omitting `(0,8P+5),(8P+5,0)`).
+Total net change is `+2` for `P=0` and `8P+2` for `P>=1`, giving (16).
+
+On `T(227+7560t,67+7560t,11+7560t)`, this excludes `q=5,13,21,29,37,45,53`
+(seven supports per `t`). Together with the zero-mod-four exclusion (`q=3,7 mod 8`,
+14 supports) and `q=8P+1` (8 supports), **all 29 aligned even-depth pairs**
+`(1,a-q),(2,b-q)` (`1<=q<=57` odd) are excluded for every `t>=0`.
+On `T(27,11,3)`, which satisfies `a,b,c==3 mod 8`, omitting `(1,9),(1,27)`
+still admits a verified size-20 homometric pair; tests check this positive control.
+
+### Families 2 and 3 (`mod10-q2` and `mod10-q0`): eleven aligned odd-depth pairs
+
+**Theorem.** Let `a=10A+7, b=10B+7, c=10C+1` with `A>=B>=C>=0` and `K=A+B+C`
+odd (equivalently `a+b+c==1 mod 4`, so `m=5K+7` is even). Take `q=10P+2`
+(`0<=P<=B-C`) or `q=10P` (`1<=P<=B-C`), and omit `h1=(1,a-q), h2=(2,b-q)`
+(both at **odd** depth `5 mod 10` or `7 mod 10`). No target-sized homometric
+partition exists for any colouring:
+
+* **`mod10-q2` (`q=10P+2`)**: select `d<=a+b-q` with `d mod 10 in {0,2,3,6,9}`,
+  and `d>a+b-q` with `d mod 10 in {0,6,7,8,9}`. Every retained vertex has
+  **odd** degree, and `e = 25K^2+65K+39` (independent of `P`, always odd).
+* **`mod10-q0` (`q=10P`)**: select `d<a+b-q` with `d mod 10 in {1,3,4,6,8,9}`,
+  `d=a+b-q+1`, and `a+b-q+1<d<a+b` with `d mod 10 in {4,9}`. Every retained
+  vertex has **odd** degree, and `e = 30K^2+83K+56 - 2P(10P+1)` (always odd).
+
+*Proof sketch (direct modular degree & edge counts).*
+For `mod10-q2`, let `G0` select `{0,2,3,6,9} mod 10`. Counting modulo 10 over
+arms `10A+7, 10B+7, 10C+1` gives full degrees `5K+6` (`r=0`), `5K+8`
+(`r=5`), `5K+7` (`r not in {0,5}`) on arms 1, 2; `5K+6` (`r<=4`) or `5K+8`
+(`r>=5`) on arm 3; and `5K+6` at centre (`e(G0)=25K^2+75K+56`). Because `K`
+is odd, `5K+6, 5K+8` are odd and `5K+7` is even. The holes (`r=5`, adjacent
+at distance `0 mod 10`) remove `10K+15` edges, flip `r not in {0,5}` below
+the hole to odd (while `r-5 == r+5` cancels above), and `J` (toggling
+`s=u+v in [0,10P+1]` with `s mod 10 in {1,2,6,7}`, note `a+c<=M-4<M`)
+flips `r not in {0,5}` above the hole to odd (`4P+1` odd total toggled,
+subtracting even counts iff `w=u mod 10 not in {2,7}`, i.e. `r=7-w not in {0,5}`)
+and adds `-2` net edges for every `P>=0`, leaving `e=25K^2+65K+39`.
+
+For `mod10-q0`, let `G0` select `{1,3,4,6,8,9} mod 10`. Full degrees are
+`6K+9` at centre, `6K+9+2[r in {2,7}]` on arm 3, and `6K+9+[r in {2,3,7,8}]`
+on arms 1, 2 (`e(G0)=30K^2+95K+75`). Adjacent holes (`r=7`, distance `4 mod 10`)
+remove `12K+19` edges, flip `{2,3,7,8}` below `h1` to odd, and above `h1`
+flip `r not in {1,6}`. Toggling `J` (`s=0`, `s in [1,10P-2]` with `s mod 10 in {1,3,6,8}`,
+`s=10P-1`, and `s=10P`) has `4P+3` odd elements on `[0,10P]` (`4P+2` even on
+`[0,10P-1]` at `u=0` where `r=7` was already flipped by deletion), flipping
+`r in {0,4,5,9}` back to odd and keeping `{1,2,3,6,7,8}` odd, while changing
+edges by `-1 - (20P^2+2P) + 10P - (10P-1) = -2P(10P+1)`.
+
+Since `7560` is divisible by 10 and 4, every `t>=0` on `T(227+7560t,67+7560t,11+7560t)`
+has `(7,7,1) mod 10` and `K=29+2268t` odd, excluding `q=2,12,22,32,42,52`
+(6 supports) and `q=10,20,30,40,50` (5 supports): **11 odd-depth aligned supports per `t`**.
+
+### Two-tip terminal deletions
+
+Omitting any two distinct arm tips `(1,a),(2,b)`, `(1,a),(3,c)`, or `(2,b),(3,c)`
+on `T(227+7560t,67+7560t,11+7560t)` leaves a full prefix tripod of lengths
+`(226+7560t,66+7560t,11+7560t)` (`g=5, r=1`), `(226+7560t,67+7560t,10+7560t)`
+(`g=3, r=1`), or `(227+7560t,66+7560t,10+7560t)` (`g=7, r=3`). Since `7560`
+is divisible by `3, 5, 7`, `g` and `r` are independent of `t`. In all three
+cases `h=gcd(r,g)=1` and `0<r<g-1`, so by the full-partition residue lemma of
+[BEYOND_REFLECTIONS.md](BEYOND_REFLECTIONS.md) every residue population
+modulo `g` must be even, contradicting `N_0=Q+1, N_1=Q+3, N_(r+1)=Q`. This
+excludes all **3 two-tip odd-depth pairs** for every `t>=0`.
+
+### Reproduction of the new obstructions
+
+```sh
+python3 projects/almost-halving-three-branches/lifting_frontier.py --extended-obstruction --family mod8-q5 --audit
+python3 projects/almost-halving-three-branches/lifting_frontier.py --extended-obstruction --family mod10-q2 --audit
+python3 projects/almost-halving-three-branches/lifting_frontier.py --extended-obstruction --family mod10-q0 --audit
+python3 projects/almost-halving-three-branches/lifting_frontier.py --terminal-tips --arms 2 3 --audit
+```
+
+Recorded `t=0` audits (306 original vertices, 304 retained): `mod8-q5` (`q=53`)
+has `17,301` edges (`[75,0,229,0]` mod 4); `mod10-q2` (`q=52`) has `22,949`
+edges (`[0,47,0,257]` mod 4); `mod10-q0` (`q=50`) has `27,183` edges
+(`[0,133,0,171]` mod 4); `--terminal-tips --arms 2 3` checks `g=7` populations
+`[43,45,45,45,42,42,42]`. All 25 focused tests and all 219 project tests pass,
+including 96 independently traversed `mod8-q5` supports, 17 `mod10` supports,
+the `T(27,11,3)` positive witness, huge `t=10^60` parameters, and real CLI
+corruption rejection.
+
 ## Reproduce
 
 From a repository clone, Python 3.10+ and its standard library suffice:
@@ -708,3 +860,71 @@ verdicts or invalid holes. The optional original-tree audit is limited to
 Seven focused tests independently recount small unequal trees, exhaust all colourings
 of a smallest admitted support, check a valid positive boundary, and
 exercise a corrupted certificate through the real command line.
+
+## Why remaining supports escape linear degree-congruence obstructions, and aligned tip antisymmetry
+
+### Exact boundary for linear degree-congruence obstructions
+
+In any equal-sized bipartition `(A, B)` of the `2m` retained vertices, the
+weighted distance equation `e_w(A) = e_w(B)` is linear in the indicator `s_v in {0, 1}`
+of `A` (as well as `sum s_v = m`):
+
+```text
+sum_{v} s_v = m,     sum_{v} deg_{w,d}(v) * s_v = e_d(G)   (for each distance d >= 1).
+```
+
+Because `sum_v deg_d(v) = 2 * e_d(G)` on the entire retained graph `G`, **every odd
+modulus `M` is automatically solved** by `s_v = (M + 1)/2 (mod M)` (`2 * s_v = 1 mod M`).
+Thus no constant-degree or weighted-distance linear congruence modulo any odd
+integer `M` can obstruct any tripod support.
+
+For two-power moduli `M = 2^k`, `--linear-obstruction-check` runs exact Howell
+normal form elimination over `Z / 64 Z` (`--modulus 64`) on all distance-degree
+equations simultaneously:
+* At `t = 0` (`306` original vertices, `304` retained), it rejects all obstructed
+  controls (`2|4`, `mod8-q5`, `mod10-q2`, `mod10-q0`, and `terminal-tips`), confirming
+  their degree-parity contradictions directly from vertex distances.
+* By contrast, **all 17 remaining even-offset aligned odd-depth pairs**
+  `(1, 227 - q), (2, 67 - q)` with `q mod 10 in {4, 6, 8}` (`4 <= q <= 56`) AND
+  the non-aligned surviving supports `(1,1),(2,1)`, `(1,2),(2,2)`, `(1,4),(2,2)`
+  are **consistent modulo 64**. Hence no cut-graph degree congruence modulo any
+  `2^k` (`k <= 6`) or odd modulus can refute these supports at `t = 0`; closing
+  them requires higher-order / multi-distance structure.
+
+### Aligned tip-antisymmetry theorem (`0 <= q <= b - c`, all `t >= 0`)
+
+**Theorem.** Let `lengths = (a, b, c)` satisfy `a >= b > c >= 1`, and omit
+`h1 = (1, a - q), h2 = (2, b - q)` with `0 <= q <= b - c` (covering all 57
+aligned pairs on `T(227+7560t, 67+7560t, 11+7560t)` for every `t >= 0`). In any
+exact target-sized homometric colouring `s_v in {+1, -1}` of this support,
+`s_2(b - r) = -s_1(a - r)` holds for every `r != q` with `0 <= r <= b - c - 1`
+(if `q >= 1`; or `1 <= r <= b - c - 2` if `q == 0`).
+
+*Proof.* Every pair of retained vertices NOT joining arm 1 and arm 2 has distance
+at most `max(a, b, c, a+c, b+c) = a + c = a + b - (b - c)`. Thus for `0 <= r <= b - c - 1`,
+every retained pair at distance `a + b - r` is `((1, a - i), (2, b - j))` with
+`i + j = r` and `i != q, j != q`. Strong induction on `r`:
+* For `q >= 1`: base `r = 0` forces `s_1(a) + s_2(b) = 0`. At step `r <= b - c - 1`
+  (`r != q`), the active interior set `{1 <= i <= r - 1 : i != q, r - i != q}` is
+  symmetric under `i <-> r - i`; since `i, r - i < r`, the induction hypothesis
+  `s_2(b - (r - i)) = -s_1(a - (r - i))` cancels the entire interior sum identically,
+  leaving only `(i = 0, j = r)` and `(i = r, j = 0)`, i.e.
+  `(s_1(a) + s_2(b - r)) + (s_1(a - r) + s_2(b)) = s_1(a - r) + s_2(b - r) = 0`.
+* For `q == 0`: `(0, r)` and `(r, 0)` are omitted, so `r = 2` is the base
+  `(i = 1, j = 1)` and induction cancels interior `2 <= i <= r - 2` for
+  `2 <= r <= b - c - 1`, forcing `s_2(b - (r - 1)) = -s_1(a - (r - 1))` for `1 <= r <= b - c - 2`.
+
+```sh
+python3 projects/almost-halving-three-branches/lifting_frontier.py --linear-obstruction-check --holes 1:223 2:63
+python3 projects/almost-halving-three-branches/lifting_frontier.py --tip-antisymmetry --tip-offset 4
+python3 projects/almost-halving-three-branches/lifting_frontier.py --tip-antisymmetry --lengths 19 11 5 --tip-offset 4 --audit
+```
+
+These commands confirm `Z/64Z` linear degree consistency on `q = 4` at `t = 0` and
+audit exact rational RREF tip-antisymmetry against tree distances (`36` original
+vertices on `T(19, 11, 5)`). Recorded here: all 28 `test_lifting_frontier.py`
+tests (and all 233 project tests) pass, including `Z/64Z` Howell checks across all
+17 `q mod 10 in {4, 6, 8}` supports, surviving non-aligned supports, five
+obstructed controls, the `T(27,11,3)` positive witness, symbolic RREF audits,
+and CLI `--verify` corruption rejection. Python compilation and `git diff --check`
+pass.
