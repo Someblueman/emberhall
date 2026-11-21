@@ -153,6 +153,12 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Gallery seen** (21 November, evening; owner migration
+  `upgrade-20261121-gallery-seen`). The Steward: "Still can't see anything
+  different really?". The list of finished work missing from the Gallery
+  went only to the session improving the house, which runs only when nothing
+  else waits: one session in eight hours saw it. Now one ordinary session at a
+  time is handed the first missing work, to add after its own task.
 - **Better, not first** (21 November, morning; owner migration
   `upgrade-20261121-better-not-first`). Asked "But all the new researched
   projects are still just math or art?", the Steward said yes to dropping

@@ -254,6 +254,17 @@ def better_not_first(state: dict) -> bool:
 SHOWN = "upgrade-20261121-done-and-shown"
 
 
+# Seen (Steward, 21 November, afternoon: "Still can't see anything different really?"). The Gallery list went
+# only to the session improving the house, and that focus runs only when nothing else is waiting: one session
+# in eight hours saw it, and three finished works were still missing. From the migration one ordinary session
+# at a time is handed the first missing one before its own work.
+SEEN = "upgrade-20261121-gallery-seen"
+
+
+def seen(state: dict) -> bool:
+    return SEEN in state.get("maintenance", {}).get("migrations", {})
+
+
 def showing(state: dict) -> bool:
     return SHOWN in state.get("maintenance", {}).get("migrations", {})
 
@@ -1493,6 +1504,9 @@ class Coordinator:
             assignment += deep_prompt(state, assigned)
             assignment += asked_prompt(state, resident)
             assignment += closing_line(state, resident)
+            if (self.focus is None and "explore_generation" not in assigned and not help_request
+                    and assigned.get("mode") != "review"):
+                assignment += self.gallery_offer(state, run)
             from . import checks
             second = self.focus == CHECKS_FOCUS and "task" not in assigned and not help_request
             journal = self.record.read()[1] if checks.enabled(state) or second else None   # lesson ages
@@ -1807,6 +1821,28 @@ class Coordinator:
         if mixing(state):
             choices = tuple(focus for focus in MIX_FOCUS if focus in choices)
         return choices[last.get("count", 0) % len(choices)]
+
+    def gallery_offer(self, state: dict, run: str) -> str:
+        """Hand one ordinary session at a time the finished work a visitor cannot see yet (SEEN)."""
+        if not seen(state):
+            return ""
+        offered = self.private / "gallery-offer.json"
+        try:
+            holder = json.loads(offered.read_text()).get("run")
+        except (OSError, ValueError, AttributeError):
+            holder = None
+        if holder in self.running:
+            return ""
+        missing = gallery_gaps(state, self.catalog())
+        if not missing:
+            return ""
+        write_private(offered, {"run": run, "at": time.time(), "gap": missing[0]})
+        return ("ONE MORE THING THIS RUN, A THING A VISITOR CANNOT SEE (Steward, 21 November: 'Still can't see "
+                f"anything different really?'): {missing[0]} is finished but has no Gallery entry. Once you hold no "
+                "other task (now, or after finishing the one you were given), create and claim "
+                "a task owning site/projects.json, add an entry that opens the real thing (its page, its checker's "
+                "real output, its proof), check that the entry's files exist and load, and finish the task. "
+                "If another resident already added it, say so and carry on.\n")
 
     def catalog(self) -> dict | None:
         """The Gallery list as committed at the current source head; None when it cannot be read."""

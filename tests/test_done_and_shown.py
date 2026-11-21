@@ -91,3 +91,30 @@ class DoneAndShownTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GallerySeenTests(unittest.TestCase):
+    def coordinator(self, private, running=()):
+        import types
+        from pathlib import Path
+        holder = types.SimpleNamespace(private=Path(private), running=dict.fromkeys(running),
+                                       catalog=lambda: CATALOG)
+        holder.gallery_offer = lambda state, run: home.Coordinator.gallery_offer(holder, state, run)
+        return holder
+
+    def test_one_ordinary_session_at_a_time_is_handed_a_missing_gallery_entry(self):
+        import tempfile
+        state = house_state(shown=True)
+        with tempfile.TemporaryDirectory() as private:
+            house = self.coordinator(private)
+            self.assertEqual("", house.gallery_offer(state, "r1"), "nothing before the migration")
+            state["maintenance"]["migrations"][home.SEEN] = {"at": 0.0}
+            first = house.gallery_offer(state, "r1")
+            self.assertIn("Fair Swaps (projects/fair-round-swaps/) is finished but has no Gallery entry", first)
+            self.assertIn("site/projects.json", first)
+            house.running["r1"] = None
+            self.assertEqual("", house.gallery_offer(state, "r2"), "only one session holds it at a time")
+            del house.running["r1"]
+            self.assertIn("Fair Swaps", house.gallery_offer(state, "r3"), "once it ends, the next one gets it")
+            state["shelf"]["projects"]["fair"]["status"] = "active"
+            self.assertEqual("", self.coordinator(private).gallery_offer(state, "r4"), "nothing missing, nothing said")
