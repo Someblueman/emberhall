@@ -350,6 +350,9 @@ dialog::backdrop {
   padding-top:1rem;
   line-height:1.65
 }
+#exhibit-body .output {
+  color:var(--ink)
+}
 #exhibit-body label {
   display:block;
   font:.8rem system-ui,sans-serif

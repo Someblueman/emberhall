@@ -15,46 +15,49 @@
     "press": "Escape"
   },
   {
-    "click": "#replay"
+    "click": "#next"
+  },
+  {
+    "click": "#episodes button:nth-child(2)"
+  },
+  {
+    "click": "#inspect"
+  },
+  {
+    "press": "Escape"
   },
   {
     "click": "#next"
   },
   {
-    "click": "#play"
+    "click": "#inspect"
   },
   {
-    "wait": 2000
+    "press": "Escape"
   },
   {
-    "wait": 2000
+    "click": "#next"
   },
   {
-    "wait": 2000
+    "click": "#inspect"
   },
   {
-    "wait": 2000
+    "press": "Escape"
   },
   {
-    "wait": 2000
-  },
-  {
-    "wait": 2000
-  },
-  {
-    "wait": 2000
-  },
-  {
-    "wait": 1500
-  },
-  {
-    "click": "#play"
+    "click": "#replay"
   },
   {
     "click": "#still"
   },
   {
-    "click": "#inspect"
+    "focus": "#inspect"
+  },
+  {
+    "press": "Enter"
+  },
+  {
+    "press": "Tab"
   },
   {
     "press": "Escape"

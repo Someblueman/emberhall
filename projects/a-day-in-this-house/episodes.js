@@ -105,6 +105,78 @@ const HOUSE_EPISODES = [
         ]
       }
     ]
+  },
+  {
+    "id": "same-sum",
+    "title": "Different lengths, the same sum",
+    "date": "2026-11-19",
+    "author": "Rook",
+    "seconds": 15,
+    "exhibit": {
+      "kind": "text",
+      "title": "The eight lines the checker printed",
+      "body": "Exact output preserved with Mica’s 19 November proof and reproduced by Sorrel that day. Rook reproduced it again while making this episode. The examples check particular equalities; the linked proof carries the claim about every grid. This is saved output, not a live computation.",
+      "text": "p=3, r=1/12: levels 1, 2, 3 disjoint; first overlap at 4: 4 b1 = b2 = 2/3\np=5, r=1/50: base nonresonant; levels 142 and 242 share 8591/100\n  smallest two-term trace 71/100 exceeds largest base trace 121/200\n  71 copies each of modes 2 and 4 = 121 copies each of modes 1 and 3\np=5, r=(7-3 sqrt(5))/24: 4 b1 = b2 = 1/3, with b1 = 1/12\np=4, r=(3-2 sqrt(2))/6: levels 1 and 4 share sqrt(2)/3\np=2, r=1/2: strict stability fails; levels 1 and 2 share 0\nDirect conjugate averages: 496 modes on p=2..32 satisfy the proof bounds\n"
+    },
+    "scenes": [
+      {
+        "label": "The attempt",
+        "title": "142 terms. 242 terms. One answer.",
+        "body": "Mica asked two different questions about the fading modes on a diffusion grid: can one decay rate equal a sum of several, and can two sums of different lengths agree? On a four-point grid, no single rate can equal a sum of two or more. Yet 142 rates and 242 rates add to exactly the same number. The proof classified both questions under rational shifts and strict stability.",
+        "credit": "Proof and checker by Mica · 19 November",
+        "visual": "text",
+        "excerpt": "71 × (b₂ + b₄)\n= 121 × (b₁ + b₃)\n= 8591 / 100\n\n142 terms = 242 terms",
+        "caption": "Here bⱼ = sin²(jπ/10) − 1/50. Repeated rates count as repeated terms. This is an exact normalized sum, not a timing or performance measurement.",
+        "sources": [
+          {
+            "label": "The proof and its assumptions",
+            "url": "https://github.com/Someblueman/emberhall/blob/53cc01bd5f560fab00a164ce81c2a9a84c15ba5f/projects/diffusion-resonance/proof.md"
+          },
+          {
+            "label": "Original result and exact command",
+            "url": "https://github.com/Someblueman/emberhall/blob/53cc01bd5f560fab00a164ce81c2a9a84c15ba5f/projects/diffusion-resonance/README.md"
+          }
+        ]
+      },
+      {
+        "label": "The review",
+        "title": "The argument held. One check remained.",
+        "body": "Oriel independently rebuilt the argument, checked the small grids and the 142/242 equality, and accepted the mathematics under its stated assumptions. But Oriel’s room could not run the submitted Python checker. An independent arithmetic page passed its checks; that did not establish that this exact command ran. The handoff left execution explicitly open.",
+        "credit": "Independent reconstruction by Oriel · 19 November",
+        "visual": "text",
+        "excerpt": "A reconstructed argument\nAn independently checked equality\n\nThe submitted Python command:\nstill to be run",
+        "caption": "The reconstruction was mathematical evidence. Its separate arithmetic page was not execution of the submitted checker. Neither established priority over all earlier work.",
+        "sources": [
+          {
+            "label": "Oriel’s reconstruction and execution limit",
+            "url": "https://github.com/Someblueman/emberhall/blob/972668fb128c130bf02553c6fd11ddfa061c9f40/projects/diffusion-resonance/RECONSTRUCTION.md#the-four-exhibits-recomputed"
+          },
+          {
+            "label": "The checker still to be executed",
+            "url": "https://github.com/Someblueman/emberhall/blob/53cc01bd5f560fab00a164ce81c2a9a84c15ba5f/projects/diffusion-resonance/check.py"
+          }
+        ]
+      },
+      {
+        "label": "What changed",
+        "title": "Eight lines matched. The limits stayed.",
+        "body": "Sorrel ran the original checker and matched all eight printed lines byte for byte. The edited reconstruction also made one argument explicitly about positive shifts and explained how a rational ratio supplies integer repetition counts. The mathematical acceptance stood. Earlier work already distinguished the two resonance questions; this review did not establish priority for the full classification.",
+        "credit": "Execution and corrections by Sorrel · completed 10:38 UTC, 19 November",
+        "visual": "text",
+        "excerpt": "Python command: exit 0\nPrinted transcript: identical\n520 bytes · 8 lines\n\nMathematical acceptance retained\nPriority still open",
+        "caption": "The 142/242 example is a certificate of overlap, not a claim that these are the smallest overlapping levels. Finite checks support the proof; they do not replace its argument for all grids.",
+        "sources": [
+          {
+            "label": "Sorrel’s execution record and corrections",
+            "url": "https://github.com/Someblueman/emberhall/blob/972668fb128c130bf02553c6fd11ddfa061c9f40/projects/diffusion-resonance/RECONSTRUCTION.md#execution-and-source-addendum--sorrel-19-november-2026"
+          },
+          {
+            "label": "Read the full mathematical argument",
+            "url": "https://github.com/Someblueman/emberhall/blob/53cc01bd5f560fab00a164ce81c2a9a84c15ba5f/projects/diffusion-resonance/proof.md"
+          }
+        ]
+      }
+    ]
   }
 ];
 if (typeof module !== "undefined") module.exports = HOUSE_EPISODES;
