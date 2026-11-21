@@ -122,6 +122,12 @@ class PublishedCasesTest(unittest.TestCase):
         self.assertEqual(result["size"], 26)
         self.assertTrue(result["attains_bound"])
         self.assert_witness((29, 17, 6), (result["left"], result["right"]))
+        for lengths, size in [((43, 31, 20), 46), ((40, 24, 6), 34),
+                              ((40, 48, 54), 70)]:
+            result = pc.witness(lengths)
+            self.assertTrue(result["construction"].startswith("trim "))
+            self.assertEqual(result["size"], size)
+            self.assert_witness(lengths, (result["left"], result["right"]))
 
     def test_new_family_is_selected_and_old_modes_preserved(self):
         result = pc.witness((110, 77, 44))
@@ -143,16 +149,40 @@ class PublishedCasesTest(unittest.TestCase):
         self.assertEqual(pc.certified_upper_bound((15, 11, 7)), 16)
 
     def test_genuinely_uncovered_case_remains_explicit(self):
-        result = pc.witness((43, 31, 19))
-        self.assertEqual(result["size"], 45)
-        self.assertEqual(result["target"], 46)
+        result = pc.witness((50, 33, 9))
+        self.assertEqual(result["size"], 43)
+        self.assertEqual(result["target"], 45)
         self.assertFalse(result["meets_target"])
         self.assertFalse(result["attains_bound"])
+
+    def test_current_odd_constructions_and_permuted_labels(self):
+        for lengths, size in [((19, 11, 3), 16), ((26, 15, 4), 22),
+                              ((32, 19, 6), 28), ((40, 23, 6), 34),
+                              ((54, 47, 40), 70), ((43, 31, 19), 46)]:
+            for order in (lengths, lengths[::-1], (lengths[1], lengths[2], lengths[0])):
+                with self.subTest(lengths=order):
+                    result = pc.witness(order)
+                    self.assertEqual(result["size"], size)
+                    self.assertTrue(result["meets_target"])
+                    self.assertTrue(result["attains_bound"])
+                    self.assert_witness(order, (result["left"], result["right"]))
+
+    def test_every_small_arithmetic_progression_meets_target(self):
+        for b in range(2, 16):
+            for d in range(1, b):
+                lengths = (b + d, b, b - d)
+                with self.subTest(b=b, d=d):
+                    result = pc.witness(lengths)
+                    self.assertTrue(result["meets_target"])
+                    self.assertTrue(result["attains_bound"])
+                    self.assert_witness(lengths, (result["left"], result["right"]))
 
     def test_real_default_command_round_trip(self):
         script = str(Path(pc.__file__))
         for lengths, size in [((110, 77, 44), 115), ((63, 137, 100), 150),
-                              ((12, 9, 6), 14), ((133, 95, 57), 142)]:
+                              ((12, 9, 6), 14), ((133, 95, 57), 142),
+                              ((3, 19, 11), 16), ((6, 40, 23), 34),
+                              ((40, 54, 47), 70)]:
             run = subprocess.run([sys.executable, script, *map(str, lengths)],
                                  text=True, capture_output=True, check=True)
             self.assertEqual(json.loads(run.stdout)["size"], size)
@@ -175,6 +205,12 @@ class PublishedCasesTest(unittest.TestCase):
         left, right = pc.alternating_pair((10, 7, 5), (1, 2, 3))
         left[left.index(pc.CENTRE)] = (1, 10)
         result = {"lengths": (10, 7, 5), "left": left, "right": right}
+        run = subprocess.run([sys.executable, script, "--check", "-"],
+                             input=json.dumps(result), text=True, capture_output=True)
+        self.assertEqual(run.returncode, 1)
+        self.assertFalse(json.loads(run.stdout)["homometric"])
+        result = pc.witness((19, 11, 3))
+        result["left"][result["left"].index(pc.CENTRE)] = (2, 11)
         run = subprocess.run([sys.executable, script, "--check", "-"],
                              input=json.dumps(result), text=True, capture_output=True)
         self.assertEqual(run.returncode, 1)

@@ -187,6 +187,20 @@ def _base_candidates(lengths: Lengths, kind: str) -> list[tuple[str, Pair]]:
                 from progression_target import odd_class_witness
                 family = odd_class_witness(b, d)
                 add_family(family["method"], family)
+            else:
+                if d % 2 == 0:
+                    from next_odd_family import family_witness
+                    family = family_witness(b, d)
+                elif c == 4:
+                    from odd_spacing import four_short_witness
+                    family = four_short_witness(b)
+                elif c >= 4 and b >= 2 * c - 1 and (b - 2 * c + 1) % 4 == 0:
+                    from general_odd_spacing import periodic_witness
+                    family = periodic_witness(c, (b - 2 * c + 1) // 4)
+                else:
+                    from middle_prefix import construct as middle_prefix_witness
+                    family = middle_prefix_witness(b, d)
+                add_family(family["construction"], family)
     for order in permutations((1, 2, 3)):
         for name, builder in (("alternating", alternating_pair), ("block", block_pair)):
             if kind not in {"best", name}:
