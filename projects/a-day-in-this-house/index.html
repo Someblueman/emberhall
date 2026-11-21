@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>A Day in This House — 19 November 2026</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="episodes.js"></script>
+  <script defer src="player.js"></script>
+</head>
+<body>
+  <a class="skip" href="#story">Skip to the episode</a>
+  <header class="masthead"><a href="../../site/index.html">Emberhall</a><span>Field recordings · 01</span></header>
+  <main>
+    <div class="edition"><span>A day in this house</span><time datetime="2026-11-19">19 November 2026 · UTC</time></div>
+    <h1>What survives a miss?</h1>
+    <p class="standfirst">A real attempt, its independent review, and the work left behind.</p>
+    <nav id="episodes" aria-label="Episodes from this day"></nav>
+    <div class="transport" aria-label="Episode playback">
+      <button id="previous" type="button" aria-label="Previous scene">←</button>
+      <button id="play" type="button">Play</button>
+      <button id="next" type="button" aria-label="Next scene">→</button>
+      <button id="replay" type="button">Replay</button>
+      <label class="still" for="still"><input id="still" type="checkbox"> Still reading</label>
+    </div>
+    <article id="story" tabindex="-1" aria-labelledby="scene-title">
+      <div class="narrative">
+        <p id="chapter" class="eyebrow"></p>
+        <h2 id="scene-title">A valid code. A missed target.</h2>
+        <p id="scene-body">The saved list contains 36 valid twelve-bit words. The attempt needed at least 38. Independent review corrected the search's timing claims; the mathematical miss remains.</p>
+        <p id="attribution" class="attribution"></p>
+        <button id="inspect" class="primary" type="button">Inspect the saved work <span aria-hidden="true">↗</span></button>
+      </div>
+      <figure class="evidence">
+        <div id="evidence-art" aria-hidden="true"></div>
+        <figcaption id="caption"></figcaption>
+      </figure>
+    </article>
+    <nav id="chapters" aria-label="Scenes"></nav>
+    <p id="play-status" class="small" role="status"></p>
+    <section class="sources" aria-labelledby="sources-title">
+      <h3 id="sources-title">Open the record</h3>
+      <ul id="source-list"></ul>
+      <p class="small">This is an authored account of a closed attempt, not live activity. Original work opens in a new tab; this scene stays here. No sound is needed.</p>
+    </section>
+    <noscript><p>The three scenes need JavaScript. <a href="../two-deletion-codes/README.md">Read the original result and its limits.</a></p></noscript>
+    <p id="error" role="alert" hidden></p>
+  </main>
+  <footer>Recorded facts, with the uncertainty kept in.<br><a href="README.md">Sources, authorship and how to add an episode</a></footer>
+  <dialog id="exhibit" aria-labelledby="exhibit-title">
+    <div class="exhibit-header"><div><p class="eyebrow">The original work, close up</p><h2 id="exhibit-title"></h2></div><button id="close" type="button">Return to scene</button></div>
+    <div id="exhibit-body"></div>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,399 @@
+{
+  "model": "exact_rational_linear_rgb_weighted_average",
+  "palettes": {
+    "two_colour_diverging": {
+      "labels": [
+        "Low (0)",
+        "High (1)"
+      ],
+      "colours_hex": [
+        "#2040bf",
+        "#df6020"
+      ],
+      "nullspace_dim": 0
+    },
+    "five_colour_ramp": {
+      "labels": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "L5"
+      ],
+      "colours_hex": [
+        "#efefdf",
+        "#b7c7bf",
+        "#809f9f",
+        "#487880",
+        "#105060"
+      ],
+      "nullspace_dim": 3
+    },
+    "five_colour_tetra_3d": {
+      "labels": [
+        "L1 Very Low",
+        "L2 Low",
+        "L3 Medium",
+        "L4 High",
+        "L5 Very High"
+      ],
+      "colours_hex": [
+        "#1a33cc",
+        "#33b2cc",
+        "#707396",
+        "#e66633",
+        "#b21a80"
+      ],
+      "nullspace_dim": 1
+    }
+  },
+  "swatches": [
+    {
+      "id": "S1",
+      "title": "2-Colour Blend (1:3)",
+      "subtitle": "Unique binary mix",
+      "palette": "two_colour_diverging",
+      "event_label": "P(High)",
+      "event_indices": [
+        1
+      ],
+      "weights": [
+        "1/4",
+        "3/4"
+      ],
+      "rgb": [
+        "11/16",
+        "11/32",
+        "9/32"
+      ],
+      "hex": "#af5848",
+      "held_out": false,
+      "certificate": {
+        "event_indices": [
+          1
+        ],
+        "p_min": "3/4",
+        "p_max": "3/4",
+        "witness_min": [
+          "1/4",
+          "3/4"
+        ],
+        "witness_max": [
+          "1/4",
+          "3/4"
+        ],
+        "dual_min": [
+          "-1/6",
+          "4/3",
+          "0",
+          "0"
+        ],
+        "dual_max": [
+          "-1/6",
+          "4/3",
+          "0",
+          "0"
+        ],
+        "status": "EXACT"
+      }
+    },
+    {
+      "id": "S2",
+      "title": "3D Outer Face Mix",
+      "subtitle": "On conv(L1, L2, L4) facet",
+      "palette": "five_colour_tetra_3d",
+      "event_label": "P(Level >= 4)",
+      "event_indices": [
+        3,
+        4
+      ],
+      "weights": [
+        "1/5",
+        "1/5",
+        "0",
+        "3/5",
+        "0"
+      ],
+      "rgb": [
+        "3/5",
+        "21/50",
+        "11/25"
+      ],
+      "hex": "#996b70",
+      "held_out": false,
+      "certificate": {
+        "event_indices": [
+          3,
+          4
+        ],
+        "p_min": "3/5",
+        "p_max": "3/5",
+        "witness_min": [
+          "1/5",
+          "1/5",
+          "0",
+          "3/5",
+          "0"
+        ],
+        "witness_max": [
+          "1/5",
+          "1/5",
+          "0",
+          "3/5",
+          "0"
+        ],
+        "dual_min": [
+          "1223/72",
+          "-175/12",
+          "35/12",
+          "-725/36"
+        ],
+        "dual_max": [
+          "-65/72",
+          "25/12",
+          "-5/12",
+          "35/36"
+        ],
+        "status": "EXACT"
+      }
+    },
+    {
+      "id": "S3",
+      "title": "3D Near-Outer Blend",
+      "subtitle": "Tight 10pp interval",
+      "palette": "five_colour_tetra_3d",
+      "event_label": "P(Level >= 4)",
+      "event_indices": [
+        3,
+        4
+      ],
+      "weights": [
+        "1/4",
+        "0",
+        "1/4",
+        "1/2",
+        "0"
+      ],
+      "rgb": [
+        "117/200",
+        "29/80",
+        "179/400"
+      ],
+      "hex": "#955c72",
+      "held_out": false,
+      "certificate": {
+        "event_indices": [
+          3,
+          4
+        ],
+        "p_min": "1/2",
+        "p_max": "3/5",
+        "witness_min": [
+          "1/4",
+          "0",
+          "1/4",
+          "1/2",
+          "0"
+        ],
+        "witness_max": [
+          "3/10",
+          "1/10",
+          "0",
+          "23/40",
+          "1/40"
+        ],
+        "dual_min": [
+          "131/72",
+          "5/12",
+          "-25/12",
+          "-65/36"
+        ],
+        "dual_max": [
+          "-65/72",
+          "25/12",
+          "-5/12",
+          "35/36"
+        ],
+        "status": "BOUNDED"
+      }
+    },
+    {
+      "id": "S4",
+      "title": "3D Pure Stop L3 (Tail)",
+      "subtitle": "Up to 40% high risk",
+      "palette": "five_colour_tetra_3d",
+      "event_label": "P(Level >= 4)",
+      "event_indices": [
+        3,
+        4
+      ],
+      "weights": [
+        "0",
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "rgb": [
+        "11/25",
+        "9/20",
+        "59/100"
+      ],
+      "hex": "#707396",
+      "held_out": false,
+      "certificate": {
+        "event_indices": [
+          3,
+          4
+        ],
+        "p_min": "0",
+        "p_max": "2/5",
+        "witness_min": [
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ],
+        "witness_max": [
+          "1/5",
+          "2/5",
+          "0",
+          "3/10",
+          "1/10"
+        ],
+        "dual_min": [
+          "-731/72",
+          "115/12",
+          "25/12",
+          "305/36"
+        ],
+        "dual_max": [
+          "-65/72",
+          "25/12",
+          "-5/12",
+          "35/36"
+        ],
+        "status": "BOUNDED"
+      }
+    },
+    {
+      "id": "S5",
+      "title": "1D Ramp Midpoint",
+      "subtitle": "Collinear ramp widens bound",
+      "palette": "five_colour_ramp",
+      "event_label": "P(Level >= 4)",
+      "event_indices": [
+        3,
+        4
+      ],
+      "weights": [
+        "0",
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "rgb": [
+        "1/2",
+        "5/8",
+        "5/8"
+      ],
+      "hex": "#809f9f",
+      "held_out": false,
+      "certificate": {
+        "event_indices": [
+          3,
+          4
+        ],
+        "p_min": "0",
+        "p_max": "2/3",
+        "witness_min": [
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ],
+        "witness_max": [
+          "1/3",
+          "0",
+          "0",
+          "2/3",
+          "0"
+        ],
+        "dual_min": [
+          "8/7",
+          "-16/7",
+          "0",
+          "0"
+        ],
+        "dual_max": [
+          "10/7",
+          "-32/21",
+          "0",
+          "0"
+        ],
+        "status": "BOUNDED"
+      }
+    },
+    {
+      "id": "S6",
+      "title": "Held-Out: Stop L3 (Mid)",
+      "subtitle": "Exact L3 unidentifiable",
+      "palette": "five_colour_tetra_3d",
+      "event_label": "P(Level = 3)",
+      "event_indices": [
+        2
+      ],
+      "weights": [
+        "0",
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "rgb": [
+        "11/25",
+        "9/20",
+        "59/100"
+      ],
+      "hex": "#707396",
+      "held_out": true,
+      "certificate": {
+        "event_indices": [
+          2
+        ],
+        "p_min": "0",
+        "p_max": "1",
+        "witness_min": [
+          "1/5",
+          "2/5",
+          "0",
+          "3/10",
+          "1/10"
+        ],
+        "witness_max": [
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ],
+        "dual_min": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "dual_max": [
+          "185/8",
+          "-75/4",
+          "-25/4",
+          "-75/4"
+        ],
+        "status": "UNIDENTIFIABLE"
+      }
+    }
+  ]
+}

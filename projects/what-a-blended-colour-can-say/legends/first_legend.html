@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What a Blended Colour Can Say — First Vector Legend</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f4f1ea; color: #1c2026; line-height: 1.45; }
+  main { max-width: 820px; margin: 0 auto; }
+  h1 { font-family: Georgia, serif; font-size: 1.45rem; margin: 0 0 0.25rem; }
+  p.lead { margin: 0 0 1rem; color: #4a5568; font-size: 0.95rem; }
+  .svg-frame { background: #fbfaf7; border: 1px solid #d5cfc3; border-radius: 10px; padding: 8px; overflow: hidden; }
+  .svg-frame svg { display: block; width: 100%; height: auto; }
+  .table-wrap { margin-top: 16px; background: #fff; border: 1px solid #d5cfc3; border-radius: 10px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #ece7dc; }
+  th { background: #faf8f3; font-weight: 600; }
+  @media (max-width: 600px) {
+    table { font-size: 0.76rem; }
+    th, td { padding: 6px 5px; }
+    .col-case { display: none; }
+  }
+  .chip { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.25); }
+  .pill { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 0.74rem; font-weight: 700; }
+  .pill-exact { background: #e6f4ea; color: #137333; }
+  .pill-bounded { background: #e8f0fe; color: #1967d2; }
+  .pill-unidentifiable { background: #fce8e6; color: #b31412; }
+  footer { margin-top: 12px; font-size: 0.82rem; color: #5f6368; }
+</style>
+</head>
+<body>
+<main>
+  <h1>What a Blended Colour Can Say</h1>
+  <p class="lead">Preview wrapper for the regenerable Milestone 1 vector legend (<code>first_legend.svg</code>) and exact rational LP certificates (<code>witnesses.json</code>).</p>
+  <section class="svg-frame" aria-label="Probability-Interval Vector Legend">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 1040" width="780" height="1040" role="img" aria-labelledby="legend-title legend-desc">
+<title id="legend-title">What a Blended Colour Can Say — First Probability-Interval Legend</title>
+<desc id="legend-desc">Finite-palette colour blending legend showing exact, bounded, and unidentifiable event probabilities.</desc>
+<defs>
+  <pattern id="unid-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="10" height="10" fill="#fce8e6"/>
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#c5221f" stroke-width="3.5" stroke-opacity="0.45"/>
+  </pattern>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1 L 8 5 L 0 9 z" fill="#4a5568"/>
+  </marker>
+</defs>
+<style>
+  .bg { fill: #fbfaf7; }
+  .card { fill: #ffffff; stroke: #dcd7cc; stroke-width: 1.25; }
+  .title { font: 700 22px "Georgia", "Times New Roman", serif; fill: #1c2026; }
+  .subtitle { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4a5568; }
+  .sec { font: 700 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1c2026; letter-spacing: 0.4px; }
+  .lbl { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1c2026; }
+  .small { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4a5568; }
+  .bar-light { font: 600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; }
+  .bar-dark { font: 600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1c2026; }
+  .mono { font: 600 12px "SFMono-Regular", Consolas, monospace; fill: #1c2026; }
+  .badge { font: 700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0.4px; }
+</style>
+<rect class="bg" x="0" y="0" width="780" height="1040"/>
+<text class="title" x="32" y="42">What a Blended Colour Can Say</text>
+<text class="subtitle" x="32" y="64">Probability-interval legend under exact linear RGB blending (Milestone 1)</text>
+<line x1="32" y1="78" x2="748" y2="78" stroke="#dcd7cc" stroke-width="1"/>
+<rect class="card" x="32" y="92" width="716" height="138" rx="8"/>
+<text class="sec" x="48" y="116">1. DECLARED PALETTES &amp; TARGET EVENT E = {L4, L5}</text>
+<text class="small" x="48" y="136">5-Colour 3D Palette (non-coplanar, nullspace dim 1):</text>
+<rect x="48" y="146" width="80" height="26" rx="4" fill="#1a33cc" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="48" y="188">L1</text>
+<text class="mono" x="48" y="203">#1a33cc</text>
+<rect x="144" y="146" width="80" height="26" rx="4" fill="#33b2cc" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="144" y="188">L2</text>
+<text class="mono" x="144" y="203">#33b2cc</text>
+<rect x="240" y="146" width="80" height="26" rx="4" fill="#707396" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="240" y="188">L3</text>
+<text class="mono" x="240" y="203">#707396</text>
+<rect x="332" y="142" width="88" height="66" rx="6" fill="#fff5eb" stroke="#d95f02" stroke-width="1.5" stroke-dasharray="4 2"/>
+<rect x="336" y="146" width="80" height="26" rx="4" fill="#e66633" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="336" y="188">L4</text>
+<text class="mono" x="336" y="203">#e66633</text>
+<rect x="428" y="142" width="88" height="66" rx="6" fill="#fff5eb" stroke="#d95f02" stroke-width="1.5" stroke-dasharray="4 2"/>
+<rect x="432" y="146" width="80" height="26" rx="4" fill="#b21a80" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="432" y="188">L5</text>
+<text class="mono" x="432" y="203">#b21a80</text>
+<text class="badge" x="392" y="136" style="fill:#b44600">EVENT E = L4 or L5</text>
+<line x1="538" y1="126" x2="538" y2="216" stroke="#e6e1d6"/>
+<text class="small" x="554" y="136">2-Colour Baseline:</text>
+<rect x="554" y="146" width="80" height="26" rx="4" fill="#2040bf" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="554" y="188">Low</text>
+<text class="mono" x="554" y="203">#2040bf</text>
+<rect x="646" y="146" width="80" height="26" rx="4" fill="#df6020" stroke="#1c2026" stroke-opacity="0.25"/>
+<text class="lbl" x="646" y="188">High</text>
+<text class="mono" x="646" y="203">#df6020</text>
+<rect class="card" x="32" y="244" width="716" height="178" rx="8"/>
+<text class="sec" x="48" y="268">2. AMBIGUOUS WITNESS: TWO DISTRIBUTIONS, ONE IDENTICAL COLOUR</text>
+<text class="lbl" x="48" y="294">Dist. A (100% L3):</text>
+<rect x="176" y="280" width="204" height="22" rx="3" fill="#707396" stroke="#1c2026" stroke-opacity="0.3"/>
+<text class="bar-light" x="184" y="295">100% L3  |  P(E) = 0%</text>
+<text class="lbl" x="48" y="334">Dist. B (0% L3):</text>
+<rect x="176.0" y="320" width="40.8" height="22" fill="#1a33cc" stroke="#ffffff" stroke-width="1"/>
+<text class="bar-light" x="181.0" y="335">20%</text>
+<rect x="216.8" y="320" width="81.6" height="22" fill="#33b2cc" stroke="#ffffff" stroke-width="1"/>
+<text class="bar-dark" x="221.8" y="335">40%</text>
+<rect x="298.4" y="320" width="61.2" height="22" fill="#e66633" stroke="#ffffff" stroke-width="1"/>
+<text class="bar-dark" x="303.4" y="335">30%</text>
+<rect x="359.6" y="320" width="20.4" height="22" fill="#b21a80" stroke="#ffffff" stroke-width="1"/>
+<text class="small" x="176" y="358">20% L1 + 40% L2 + 30% L4 + 10% L5</text>
+<text class="small" x="176" y="374">P(E) = 40% high-risk mass</text>
+<line x1="386" y1="291" x2="432" y2="312" stroke="#4a5568" stroke-width="1.6" marker-end="url(#arrow)"/>
+<line x1="386" y1="331" x2="432" y2="320" stroke="#4a5568" stroke-width="1.6" marker-end="url(#arrow)"/>
+<rect x="442" y="284" width="68" height="62" rx="8" fill="#707396" stroke="#1c2026" stroke-width="1.5"/>
+<text class="mono" x="448" y="362">#707396</text>
+<text class="lbl" x="528" y="296">Identical pixel colour!</text>
+<text class="small" x="528" y="316">• P(L4 or L5): [0%, 40%] (BOUNDED)</text>
+<text class="small" x="528" y="336">• P(Exact L3): [0%, 100%]</text>
+<rect x="528" y="346" width="126" height="22" rx="4" fill="#fce8e6" stroke="#f6aea9"/>
+<text class="badge" x="537" y="361" style="fill:#b31412">UNIDENTIFIABLE</text>
+<text class="small" x="48" y="406">Takeaway: a static stop legend labels #707396 as "100% L3", hiding up to 40% high-risk weight.</text>
+<rect class="card" x="32" y="436" width="716" height="464" rx="8"/>
+<text class="sec" x="48" y="462">3. PROBABILITY-INTERVAL LEGEND (CHECKED SWATCHES &amp; HELD-OUT CASE)</text>
+<text class="small" x="48" y="482">Swatch</text>
+<text class="small" x="126" y="482">Case / Event</text>
+<text class="small" x="394" y="482">Certified Range [P_min, P_max]</text>
+<text class="small" x="614" y="482">Status</text>
+<line x1="48" y1="490" x2="732" y2="490" stroke="#e2ddd3"/>
+<rect x="48" y="504" width="52" height="36" rx="6" fill="#af5848" stroke="#1c2026" stroke-width="1.2"/>
+<text class="mono" x="48" y="552">S1 #af5848</text>
+<text class="lbl" x="126" y="518">2-Colour Blend (1:3)</text>
+<text class="small" x="126" y="536">P(High) · Unique binary mix</text>
+<rect x="394" y="514" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
+<line x1="394.0" y1="512" x2="394.0" y2="530" stroke="#a09a8e" stroke-width="1"/>
+<line x1="492.0" y1="512" x2="492.0" y2="530" stroke="#a09a8e" stroke-width="1"/>
+<line x1="590.0" y1="512" x2="590.0" y2="530" stroke="#a09a8e" stroke-width="1"/>
+<polygon points="541.0,511 548.0,521 541.0,531 534.0,521" fill="#137333" stroke="#ffffff" stroke-width="1"/>
+<text class="mono" x="394" y="544">75%</text>
+<rect x="610" y="510" width="84" height="22" rx="4" fill="#e6f4ea" stroke="#a8dab5"/>
+<text class="badge" x="619" y="525" style="fill:#137333">EXACT</text>
+<rect x="48" y="567" width="52" height="36" rx="6" fill="#996b70" stroke="#1c2026" stroke-width="1.2"/>
+<text class="mono" x="48" y="615">S2 #996b70</text>
+<text class="lbl" x="126" y="581">3D Outer Face Mix</text>
+<text class="small" x="126" y="599">P(Level &gt;= 4) · On conv(L1, L2, L4) facet</text>
+<rect x="394" y="577" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
+<line x1="394.0" y1="575" x2="394.0" y2="593" stroke="#a09a8e" stroke-width="1"/>
+<line x1="492.0" y1="575" x2="492.0" y2="593" stroke="#a09a8e" stroke-width="1"/>
+<line x1="590.0" y1="575" x2="590.0" y2="593" stroke="#a09a8e" stroke-width="1"/>
+<polygon points="511.6,574 518.6,584 511.6,594 504.6,584" fill="#137333" stroke="#ffffff" stroke-width="1"/>
+<text class="mono" x="394" y="607">60%</text>
+<rect x="610" y="573" width="84" height="22" rx="4" fill="#e6f4ea" stroke="#a8dab5"/>
+<text class="badge" x="619" y="588" style="fill:#137333">EXACT</text>
+<rect x="48" y="630" width="52" height="36" rx="6" fill="#955c72" stroke="#1c2026" stroke-width="1.2"/>
+<text class="mono" x="48" y="678">S3 #955c72</text>
+<text class="lbl" x="126" y="644">3D Near-Outer Blend</text>
+<text class="small" x="126" y="662">P(Level &gt;= 4) · Tight 10pp interval</text>
+<rect x="394" y="640" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
+<line x1="394.0" y1="638" x2="394.0" y2="656" stroke="#a09a8e" stroke-width="1"/>
+<line x1="492.0" y1="638" x2="492.0" y2="656" stroke="#a09a8e" stroke-width="1"/>
+<line x1="590.0" y1="638" x2="590.0" y2="656" stroke="#a09a8e" stroke-width="1"/>
+<rect x="492.0" y="640" width="19.6" height="14" rx="3" fill="#1967d2" fill-opacity="0.82" stroke="#114a9f" stroke-width="1"/>
+<text class="mono" x="394" y="670">50% – 60%</text>
+<rect x="610" y="636" width="84" height="22" rx="4" fill="#e8f0fe" stroke="#aecbfa"/>
+<text class="badge" x="619" y="651" style="fill:#1967d2">BOUNDED</text>
+<rect x="48" y="693" width="52" height="36" rx="6" fill="#707396" stroke="#1c2026" stroke-width="1.2"/>
+<text class="mono" x="48" y="741">S4 #707396</text>
+<text class="lbl" x="126" y="707">3D Pure Stop L3 (Tail)</text>
+<text class="small" x="126" y="725">P(Level &gt;= 4) · Up to 40% high risk</text>
+<rect x="394" y="703" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
+<line x1="394.0" y1="701" x2="394.0" y2="719" stroke="#a09a8e" stroke-width="1"/>
+<line x1="492.0" y1="701" x2="492.0" y2="719" stroke="#a09a8e" stroke-width="1"/>
+<line x1="590.0" y1="701" x2="590.0" y2="719" stroke="#a09a8e" stroke-width="1"/>
+<rect x="394.0" y="703" width="78.4" height="14" rx="3" fill="#1967d2" fill-opacity="0.82" stroke="#114a9f" stroke-width="1"/>
+<text class="mono" x="394" y="733">0% – 40%</text>
+<rect x="610" y="699" width="84" height="22" rx="4" fill="#e8f0fe" stroke="#aecbfa"/>
+<text class="badge" x="619" y="714" style="fill:#1967d2">BOUNDED</text>
+<rect x="48" y="756" width="52" height="36" rx="6" fill="#809f9f" stroke="#1c2026" stroke-width="1.2"/>
+<text class="mono" x="48" y="804">S5 #809f9f</text>
+<text class="lbl" x="126" y="770">1D Ramp Midpoint</text>
+<text class="small" x="126" y="788">P(Level &gt;= 4) · Collinear ramp widens bound</text>
+<rect x="394" y="766" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
+<line x1="394.0" y1="764" x2="394.0" y2="782" stroke="#a09a8e" stroke-width="1"/>
+<line x1="492.0" y1="764" x2="492.0" y2="782" stroke="#a09a8e" stroke-width="1"/>
+<line x1="590.0" y1="764" x2="590.0" y2="782" stroke="#a09a8e" stroke-width="1"/>
+<rect x="394.0" y="766" width="130.7" height="14" rx="3" fill="#1967d2" fill-opacity="0.82" stroke="#114a9f" stroke-width="1"/>
+<text class="mono" x="394" y="796">0% – 66.7%</text>
+<rect x="610" y="762" width="84" height="22" rx="4" fill="#e8f0fe" stroke="#aecbfa"/>
+<text class="badge" x="619" y="777" style="fill:#1967d2">BOUNDED</text>
+<rect x="42" y="813" width="696" height="56" rx="6" fill="#fffdf5" stroke="#e2c675" stroke-dasharray="4 3"/>
+<rect x="48" y="819" width="52" height="36" rx="6" fill="#707396" stroke="#1c2026" stroke-width="1.2"/>
+<text class="mono" x="48" y="867">S6 #707396</text>
+<text class="lbl" x="126" y="833">Held-Out: Stop L3 (Mid)</text>
+<text class="small" x="126" y="851">P(Level = 3) · Exact L3 unidentifiable</text>
+<rect x="394" y="829" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
+<line x1="394.0" y1="827" x2="394.0" y2="845" stroke="#a09a8e" stroke-width="1"/>
+<line x1="492.0" y1="827" x2="492.0" y2="845" stroke="#a09a8e" stroke-width="1"/>
+<line x1="590.0" y1="827" x2="590.0" y2="845" stroke="#a09a8e" stroke-width="1"/>
+<rect x="394" y="829" width="196" height="14" rx="4" fill="url(#unid-hatch)" stroke="#c5221f" stroke-width="1.3"/>
+<text class="mono" x="394" y="859">0% – 100%</text>
+<rect x="610" y="825" width="122" height="22" rx="4" fill="#fce8e6" stroke="#f6aea9"/>
+<text class="badge" x="619" y="840" style="fill:#b31412">UNIDENTIFIABLE</text>
+<rect class="card" x="32" y="914" width="716" height="102" rx="8"/>
+<text class="sec" x="48" y="938">4. WHY PALETTE GEOMETRY CONTROLS IDENTIFIABILITY</text>
+<text class="small" x="48" y="960">• 2 colours (nullspace dim 0): unique recovery on the segment [c1, c2].</text>
+<text class="small" x="48" y="979">• 5-colour 1D ramp (nullspace dim 3): 3-D ambiguity polytope; S5 tail spans 0%–67%.</text>
+<text class="small" x="48" y="998">• 5-colour 3D palette (nullspace dim 1): 1-D fiber gives tight bounds (S2 exact, S3 10pp) and flags Radon ambiguities (S6).</text>
+</svg>
+  </section>
+  <section class="table-wrap" aria-label="Checked Swatch Certificates Summary">
+    <table>
+      <thead><tr><th>ID</th><th>Colour</th><th class="col-case">Case</th><th>Event</th><th>Range</th><th>Status</th></tr></thead>
+      <tbody><tr><td><code>S1</code></td><td><span class='chip' style='background:#af5848'></span> <code>#af5848</code></td><td class='col-case'>2-Colour Blend (1:3)</td><td>P(High)</td><td><strong>75%</strong></td><td><span class='pill pill-exact'>EXACT</span></td></tr><tr><td><code>S2</code></td><td><span class='chip' style='background:#996b70'></span> <code>#996b70</code></td><td class='col-case'>3D Outer Face Mix</td><td>P(Level &gt;= 4)</td><td><strong>60%</strong></td><td><span class='pill pill-exact'>EXACT</span></td></tr><tr><td><code>S3</code></td><td><span class='chip' style='background:#955c72'></span> <code>#955c72</code></td><td class='col-case'>3D Near-Outer Blend</td><td>P(Level &gt;= 4)</td><td><strong>50%–60%</strong></td><td><span class='pill pill-bounded'>BOUNDED</span></td></tr><tr><td><code>S4</code></td><td><span class='chip' style='background:#707396'></span> <code>#707396</code></td><td class='col-case'>3D Pure Stop L3 (Tail)</td><td>P(Level &gt;= 4)</td><td><strong>0%–40%</strong></td><td><span class='pill pill-bounded'>BOUNDED</span></td></tr><tr><td><code>S5</code></td><td><span class='chip' style='background:#809f9f'></span> <code>#809f9f</code></td><td class='col-case'>1D Ramp Midpoint</td><td>P(Level &gt;= 4)</td><td><strong>0%–66.7%</strong></td><td><span class='pill pill-bounded'>BOUNDED</span></td></tr><tr><td><code>S6</code></td><td><span class='chip' style='background:#707396'></span> <code>#707396</code></td><td class='col-case'>Held-Out: Stop L3 (Mid)</td><td>P(Level = 3)</td><td><strong>0%–100%</strong></td><td><span class='pill pill-unidentifiable'>UNIDENTIFIABLE</span></td></tr></tbody>
+    </table>
+  </section>
+  <footer>Model premise: exact linear weighted average over declared rational RGB stops. Regenerate with <code>python3 projects/what-a-blended-colour-can-say/render_legend.py</code>.</footer>
+</main>
+</body>
+</html>

@@ -3297,7 +3297,7 @@ function safeHttpUrl(raw) {
 function collectionUrl(entry) {
   const href=entry.href;
   if(typeof href!=="string")return null;
-  if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*(?:[a-z0-9-]+\.html)?$/.test(href))return href;
+  if(entry.category==="creation" && /^projects\/[a-z0-9-]+\/(?:[a-z0-9-]+\/)*(?:[a-z0-9_-]+\.html)?$/.test(href))return href;
   if(entry.category==="house-tool" && entry.action==="Open" && href==="chronicle/index.html")return href;
   if((entry.category==="house-tool" || (entry.category==="creation" && entry.action==="Read guide")) && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
   return null;
@@ -3484,10 +3484,10 @@ function renderCreationCard(entry,parent) {
   }
   html("p","",entry.summary,article);
   html("span","small",entry.completedChapter?
-    `Completed opening chapter${entry.projectContinues?" · Longer work continues":""}`:"Completed",article);
+    `Completed ${entry.id==="what-a-blended-colour-can-say"?"first legend":"opening chapter"}${entry.projectContinues?" · Longer work continues":""}`:"Completed",article);
   if(entry.completedChapter) {
     const record=html("details","small",undefined,article);
-    html("summary","","Chapter completion record",record);
+    html("summary","",entry.id==="what-a-blended-colour-can-say"?"Milestone completion record":"Chapter completion record",record);
     html("p","",entry.completedChapter.milestone,record);
     html("p","",`Recorded at event ${entry.completedChapter.sequence} · Evidence: ${entry.completedChapter.evidence}`,record);
   }
@@ -3501,7 +3501,7 @@ function completedCatalog() {
   const completed=new Set(projects.map(project=>project.idea)),sequence=new Map();
   // The version-1 manifest describes published artifacts, not stage admission.
   // Register a reviewed chapter explicitly; unrelated active projects stay out.
-  const chapterStages={"every-promise-two-endings":0},chapters=new Map();
+  const chapterStages={"every-promise-two-endings":0,"what-a-blended-colour-can-say":0},chapters=new Map();
   const remember=(idea,seq)=>{
     if(completed.has(idea)&&Number.isInteger(seq)&&seq>0&&seq<=frame.seq)
       sequence.set(idea,Math.max(sequence.get(idea)||0,seq));
