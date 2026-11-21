@@ -123,6 +123,15 @@ class CorrectedSubdivisionTest(unittest.TestCase):
                 self.assertNotEqual(profile(a, metric), profile(b, metric))
                 self.assertNotEqual(packed_profile(a, result['lengths']), packed_profile(b, result['lengths']))
 
+    def test_full_lift_obstruction_keeps_target_open(self):
+        result = cs.full_lift_obstruction(2, 1, 3)
+        self.assertEqual(result['base_lengths'], (5, 3, 1))
+        self.assertEqual(result['lengths'], (15, 9, 3))
+        self.assertEqual(result['upper_bound'], result['target'])
+        self.assertFalse(result['target_ruled_out'])
+        self.assertFalse(result['full_partition'])
+        self.assertTrue(result['base_full_partition'])
+
     def test_bad_base_and_parameters(self):
         left, right = multiple_pair(3, 1)
         altered_left, altered_right = list(left), list(right)

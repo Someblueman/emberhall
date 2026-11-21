@@ -202,6 +202,25 @@ def priority_lift(family: str, t: int) -> dict:
             "family": family, "t": t, "priority": "provisional", "universal_milestone": "open"}
 
 
+def full_lift_obstruction(d: int, k: int, factor: int) -> dict:
+    """A corollary of the existing full-partition classification, for all colours."""
+    integer(d, "d", 2)
+    integer(k, "k", 1)
+    odd_factor(factor)
+    b = 2*k*d-1
+    base = classify(b, d)
+    scaled = classify(factor*b, factor*d)
+    if not base["full_partition"] or scaled["full_partition"]:
+        raise ArithmeticError("subdivision obstruction contradicts the classification")
+    return {"base_lengths": base["lengths"], "base_full_partition": True,
+            "lengths": scaled["lengths"], "factor": factor,
+            "full_partition": False, "upper_bound": scaled["upper_bound"],
+            "target": scaled["target"], "target_ruled_out": False,
+            "scope": "every colouring of the entire subdivided tree",
+            "reason": "d does not divide b; factor cannot divide factor*b+1",
+            "universal_milestone": "open"}
+
+
 def repair_certificate(lengths: tuple[int, int, int], factor: int,
                        tips: tuple[int, int, int], centre: int, radius: int) -> dict:
     """Support obstructions, conditional on a full homometric base with these tips.
@@ -258,6 +277,7 @@ def main() -> int:
     mode.add_argument("--prove", action="store_true")
     mode.add_argument("--example", nargs=2, type=int, metavar=("B", "D"))
     mode.add_argument("--lift", metavar="JSON", help="full base partition; '-' reads stdin")
+    mode.add_argument("--full-lift-obstruction", nargs=2, type=int, metavar=("D", "K"))
     mode.add_argument("--priority-lift", choices=("five", "seven"))
     mode.add_argument("--obstruction", choices=("five", "seven"))
     parser.add_argument("--factor", type=int)
@@ -279,7 +299,11 @@ def main() -> int:
                 raise ArithmeticError("nonzero alternating-edge identity")
             print("PASS: six stencil patterns and the alternating-edge lift identity")
             return 0
-        if args.priority_lift:
+        if args.full_lift_obstruction:
+            if args.factor is None or args.t is not None or args.radius is not None or args.stencil is not None:
+                parser.error("--full-lift-obstruction requires only --factor")
+            result = full_lift_obstruction(*args.full_lift_obstruction, args.factor)
+        elif args.priority_lift:
             if args.t is None or args.radius is not None or args.factor is not None or args.stencil is not None:
                 parser.error("--priority-lift requires only --t")
             result = priority_lift(args.priority_lift, args.t)

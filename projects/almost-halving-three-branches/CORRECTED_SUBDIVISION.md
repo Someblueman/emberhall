@@ -158,6 +158,45 @@ modulo 11, hence 32 modulo 165 by the Chinese remainder theorem. This is
 only the exact coverage of these recipes. In particular t=0 already has
 Mallow's finite witness; it is not a negative case of the original problem.
 
+## Why no full lift can work universally
+
+The existing full-partition classification in `PROGRESSION_PARTITIONS.md`
+also yields an obstruction to **every possible recolouring**, not only to
+one subdivision recipe. Fix integers d>=2, k>=1 and odd g>=3. Set b=2kd-1.
+The positive-length base tree `T(b+d,b,b-d)` has a full equal homometric
+partition because `2d` divides `b+1`. After subdivision, its parameters are
+`b'=gb`, `d'=gd`. Neither condition for a full partition holds:
+
+* d' does not divide b', because d does not divide b=2kd-1.
+* 2d' does not divide b'+1, because g does not divide gb+1.
+
+Consequently no assignment of colours to the subdivided tree can give a
+full equal homometric partition, even if every original vertex changes
+colour. For example, `T(5,3,1)` has a full partition, but `T(15,9,3)` does
+not. This corollary rules out a universal full-partition-preserving odd
+subdivision algorithm. It is an application of the earlier theorem, not
+an independent classification claim. Its upper bound is still exactly
+the half-minus-one target; **it does not refute that target**.
+
+```sh
+python3 projects/almost-halving-three-branches/corrected_subdivision.py --full-lift-obstruction 2 1 --factor 3
+```
+
+This reports base `[5,3,1]`, new lengths `[15,9,3]`, and upper bound and
+target 13, with `target_ruled_out: false`. It uses constant-size integer
+arithmetic and does not enumerate colourings.
+
+There is a narrower boundary for the alternating-edge method itself.
+If all three coarse lengths are odd, no edgewise antisymmetric filler
+can succeed while preserving the old vertex colours. For a mirrored pair
+of new positions, its orientation polynomial must satisfy H=0 above.
+At Z=-1 all three endpoints are -1, so H(-1)=4*sum_i T_i(-1). Each T_i(-1)
+is odd, being a signed sum of an odd number of edge positions; their sum
+is odd and cannot vanish. Allowing a different antisymmetric word on each
+edge does not help: each mirrored position pair has distinct residues
+modulo g and must separately satisfy this equation. Arbitrary fillers
+that are not edgewise antisymmetric are outside this narrower argument.
+
 ## Exact defect of the nearest lift and a broader periodic class
 
 A common symmetric cell stencil chooses arbitrary `c_1,...,c_h` in {+1,-1}.
@@ -246,8 +285,8 @@ disjointness, complete coverage, and altered-pair rejection. An independent
 integer-convolution counter, cross-checked against those graph distances,
 also verifies the actual t=1 witnesses in the original untrimmed tree:
 8068 vertices per side and 32,542,278 pairs per side. Swapping two opposite
-colours preserves disjointness and size but is rejected. Seven focused tests
-and all 89 tests in the project pass. Independent resident integration
+colours preserves disjointness and size but is rejected. Eight focused tests
+and all 90 tests in the project pass. Independent resident integration
 and milestone review are still required.
 
 The next mathematical step is the uncovered residue classes above. The
