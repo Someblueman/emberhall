@@ -70,6 +70,12 @@ class EdgeDependentTests(unittest.TestCase):
         self.assertEqual(result["left_profile"], direct_profile(result["left"]))
         self.assertEqual(result["right_profile"], direct_profile(result["right"]))
         self.assertTrue(result["altered_pair_rejected"])
+        words = ("+++"+"-"*11+"++++", "---"+"+"*7+"----", "+++")
+        extra = {(0, 0): 1} | {(i, p): 1 if s == "+" else -1
+                              for i, w in enumerate(words, 1) for p, s in enumerate(w, 1)}
+        pair = ed.check_pair((18, 14, 3), [v for v, s in extra.items() if s == 1],
+                             [v for v, s in extra.items() if s == -1])
+        self.assertTrue(pair["homometric"])
 
     def test_arithmetic_certificates_and_coarse_seeds(self):
         self.assertEqual(ed.prove()["proof"], "PASS")
@@ -132,7 +138,7 @@ class EdgeDependentTests(unittest.TestCase):
 
     def test_real_cli_accepts_and_rejects(self):
         command = [sys.executable, str(Path(ed.__file__))]
-        result = subprocess.run(command + ["--demo"], capture_output=True, text=True)
+        result = subprocess.run(command + ["--mixed-control", "5"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         pair = json.loads(result.stdout)
         with tempfile.TemporaryDirectory() as directory:
@@ -140,8 +146,7 @@ class EdgeDependentTests(unittest.TestCase):
             path.write_text(json.dumps(pair))
             self.assertEqual(subprocess.run(command + ["--check", str(path)],
                                            capture_output=True).returncode, 0)
-            pair["left"].remove([0, 0]); pair["left"].append([1, 1])
-            pair["right"].remove([1, 1]); pair["right"].append([0, 0])
+            pair["left"].remove([0, 0]); pair["left"].append([1, 91])
             path.write_text(json.dumps(pair))
             altered = subprocess.run(command + ["--check", str(path)],
                                      capture_output=True, text=True)

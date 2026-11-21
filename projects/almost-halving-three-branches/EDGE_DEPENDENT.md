@@ -49,8 +49,9 @@ checks the independently derived shell equation. Counting is quadratic in
 tree order; proof and parameter commands do not grow with t.
 Seven focused tests and all 89 project tests passed. The tests compare the
 shell calculation with a separate direct tree metric, include arbitrary
-internal and centre holes, and exercise the real checking command's
-size-preserving altered-witness rejection. Ruff was unavailable in this room.
+internal and centre holes, and exercise the real checking command on the
+size-88 witness and its size-preserving alteration (move the centre to an
+omitted tip). The altered pair is rejected. Ruff was unavailable in this room.
 
 ## 1. The shell equation with arbitrary holes
 
@@ -248,6 +249,13 @@ Copy the second seed at offset 1 and its negative at offset 2.
 Its child row equals none of +/-parent or +/-child of the original seed:
 the enlarged class contains genuinely additional successful lifts.
 
+The enlargement is also nontrivial on the priority instance: on the five-fold
+coarse tree `(18,14,3)` at t=0, centre + with arm words
+`+++ -^11 ++++`, `--- +^7 ----`, `+++` is another full homometric
+colouring. Its child values equal none of +/-parent or +/-child of the
+original constant-arm colouring. The new obstruction covers these additional
+layer choices as well; it is not merely a different description of one seed.
+
 The mixed control instead uses coarse `(18,14,3)`, centre + and base words
 `-^18`, `+^14`, `+^3`. Its two child rows are
 
@@ -296,3 +304,41 @@ This contradiction quantifies over every full colouring; no search is used.
 reports upper bound and target 13, `full_partition_impossible: true`, and
 `target_ruled_out: false`. A coprime triple or any even arm is refused as
 outside this certificate's domain, not classified as having a partition.
+
+A live literature check on 21 November reopened
+[Theorem 8 and Construction 15](https://ajc.maths.uq.edu.au/pdf/55/ajc_v55_p175.pdf).
+The equal-leg half-size wording must retain the parity caveat already in
+PUBLISHED_CASES.md; it is not a literal full-partition assertion for odd legs.
+The [thesis chapter link](https://mgutheses.in/page/authors_view.php?q=T+3952&word=)
+still returned navigation rather than chapter text. Search exposed excerpts
+of the [detour paper](https://www.researchgate.net/publication/349451258_Detour_homometric_number_of_a_graph),
+but opening it, its DOI and the publisher PDF failed. Excerpts are not a
+full-source comparison. Neither priority gap is declared resolved here.
+
+## Bounded extension screen: no new affine-family certificate
+
+For a reproducible description of the unsuccessful direction, put
+`B=(18,14,3)`, `N=1064t`, choose K and p, and set `L_i=B_i+K`.
+Each of the two edge rows had a fixed prefix of length floor(L_i/2),
+then a p-sign word repeated `(N-K)/p` times, then a fixed suffix of length
+ceil(L_i/2). Every prefix, period and suffix sign was independent. Multiply
+(3) by `1-z^p`, use an independent variable `u=z^(N-K)`, and set every
+coefficient of u and z to zero. This is a search for an all-parameter
+polynomial identity, not a test of finitely many growing trees.
+
+Exact rational elimination followed by the existing bounded sign solver
+returned no solution for `(K,p)=(12,4),(16,4),(16,8)`, after 50,775,
+571,731 and 837,067 branch nodes respectively. These observations are not
+used in any proof above. The `(30,30)` version, relevant when t is a
+positive multiple of 15, reached 10,000 nodes without a conclusion.
+A bounded randomized pass and exact local repairs found no zero identity;
+another 10,000-node search biased toward that candidate remained limited.
+There is no valid new witness from this screen and no exclusion of all
+mixed edge fields. An unrestricted mixed-edge analysis on the growing
+coarse trees remains necessary.
+
+The larger `(24,4)` search had a two-million-node ceiling but was stopped
+at 13:03 UTC at the end of this building stretch before returning a result.
+Its actual node count is unmeasured; it remains unresolved. The queued
+`(24,8)` search was not reached. All these experiments were separate from
+the delivered constructor and proof commands.
