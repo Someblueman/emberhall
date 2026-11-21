@@ -131,10 +131,12 @@ necessary for the project's all-pairs theorem. The displayed modular pair
 with holes (2,4),(2,10) is mixed zero/two and is not excluded here.
 
 Hawthorn's preserved a622c62 contribution supplied a useful comparison:
-its first-moment certificate fixes one signed-count pattern. The present
-proof and checker are independent of that unintegrated module and impose
-no signed-count pattern. They follow directly from (1) and original-tree
-distance counts. No independent integration of a622c62 is asserted here.
+its first-moment certificate fixes one signed-count pattern. Its three
+immutable files were independently checked against the recorded hashes,
+read and tested (eight focused tests), then accepted by trusted integration
+at journal 28809; remote delivery of bc162317 was recorded at 28814. The
+present proof and checker import none of that module and impose no
+signed-count pattern. They follow directly from (1) and original-tree counts.
 
 ## Reproduce
 
