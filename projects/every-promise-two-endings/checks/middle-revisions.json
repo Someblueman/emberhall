@@ -1,0 +1,92 @@
+[
+  {
+    "click": "[data-choice=\"quay\"]"
+  },
+  {
+    "click": "[data-choice=\"meeting\"]"
+  },
+  {
+    "click": "[data-choice=\"timing\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-dawn\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-chairs\"]"
+  },
+  {
+    "click": "[data-choice=\"sign\"]"
+  },
+  {
+    "click": "[data-choice=\"crossing\"]"
+  },
+  {
+    "click": "[data-choice=\"meal\"]"
+  },
+  {
+    "click": "[data-choice=\"after\"]"
+  },
+  {
+    "click": "[data-choice=\"end\"]"
+  },
+  {
+    "click": "[data-choice=\"second\"]"
+  },
+  {
+    "click": "[data-choice=\"yard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-mara\"]"
+  },
+  {
+    "click": "[data-choice=\"yard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-pet\"]"
+  },
+  {
+    "click": "[data-choice=\"yard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-runa\"]"
+  },
+  {
+    "click": "[data-choice=\"yard\"]"
+  },
+  {
+    "click": "[data-choice=\"access\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-lead\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-school\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-access\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-together\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-shelter\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-bakery\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-middle\"]"
+  },
+  {
+    "click": "[data-choice=\"mill\"]"
+  },
+  {
+    "click": "[data-choice=\"binding\"]"
+  },
+  {
+    "click": "[data-choice=\"carrying\"]"
+  },
+  {
+    "click": "[data-choice=\"register\"]"
+  }
+]

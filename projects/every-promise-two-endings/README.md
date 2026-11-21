@@ -1,12 +1,13 @@
 # Every Promise Has Two Endings
 
-**The weight of morning** is the complete opening chapter of an unfinished
-literary game. Iris helps two flooded towns agree how to open their rebuilt
-bridge. You can question the people at the table, revise two promises, then
-spend the next day with the people who carry them out.
+A literary game about Iris, two flooded towns, and promises that have to survive
+what people do with them. The accepted opening, **The weight of morning**, now
+leads into two candidate middle chapters: **What we carry upstairs** and
+**The sound a thing keeps**. The final acts remain unwritten.
 
-About fifteen minutes, or longer if you linger. Contains grief, a missing
-family member and the aftermath of a flood. No timed choices or sound.
+A complete reading is about 8,700 words with optional conversations. Contains
+grief, missing family members, displacement and the aftermath of a flood.
+There are no timed choices, sound, scores or designated correct endings.
 
 ## Read
 
@@ -17,18 +18,21 @@ open projects/every-promise-two-endings/index.html
 ```
 
 On other systems, double-click that file or use the browser's Open File command.
-The one HTML file contains the prose, illustration, styling and reader. It
-needs no server, build, installation, account or network connection. The
-footer also downloads a standalone copy that can be renamed and read offline.
+The HTML contains the prose, illustration, styles and reader. No server, build,
+installation, account or network connection is needed. The footer downloads a
+standalone copy that can be renamed and read offline.
 
 Tab and Enter reach every choice. Your place is saved locally when your browser
-allows it; otherwise the footer says it lasts only until the page closes. The
-two promises can be revised before signing. At the end you can return to that
-passage, or start again. There is no score and no designated correct ending.
+allows it; otherwise the footer says it lasts only until the page closes.
+Each negotiation can be revised before agreement. Chapter ends let you return
+to earlier negotiations or start again. Returning to an earlier chapter clears
+later decisions while preserving the earlier promises you have not revised.
+Existing opening-chapter bookmarks still open at their saved scene and choices;
+an old bookmark at the ending can continue into chapter two.
 
-This is the real first chapter, not a description of the proposed game. The
-remaining acts have not been written. All prose and the SVG illustration were
-authored for this chapter by Sorrel at Emberhall; there is no runtime model.
+All prose and the bridge illustration are authored at Emberhall. Sorrel wrote
+the opening and its reader; Hawthorn wrote these two middle chapters and
+extended the reader. There is no runtime text generation.
 
 ## Check the reader
 
@@ -38,47 +42,52 @@ Node.js is needed only for development checks:
 node projects/every-promise-two-endings/test_chapter.cjs
 ```
 
-The check executes the actual script embedded in the HTML. It explores all
-625 reachable states, including different question orders and revisions;
-checks all four consequence combinations, round-trip bookmarks, invalid
-bookmarks, unavailable choices and restart; and counts the words on complete
-readings. It does not judge the writing or simulate a person caring about it.
+The test executes the script embedded in the actual HTML, explores every
+reachable state, checks choice availability, revisions and restarts, and
+round-trips bookmarks at every state. It also checks legacy opening bookmarks,
+the sixteen middle-chapter readings, both ways to return household possessions,
+and the specific later actions affected by earlier promises.
 
 Recorded development run, 21 November 2026:
 
 ```text
-PASS: 625 reachable states; 15 scenes; four distinct consequence combinations; revisions, restart and bookmarks.
+Third chapter: 1919–1960 words; both return routes and revisions pass.
+Middle chapter: 16 distinct readings; 3444–3512 words including conversations.
+PASS: 7281 reachable states; 37 scenes; four distinct consequence combinations; revisions, restart and bookmarks.
 dawn/chairs: 3279 words including optional conversations
 dawn/pages: 3259 words including optional conversations
 daylight/chairs: 3317 words including optional conversations
 daylight/pages: 3297 words including optional conversations
 ```
 
-The house's network-refused Chrome viewer opened the final page at true 390-pixel
-phone and 1280-pixel desktop widths. Both reported zero script errors, unlabelled
-controls, missing image descriptions and horizontal overflow. A 24-step reading
-opened all four conversations, revised both promises, signed and reached the end
-on both devices. Real Tab/Enter presses began the reading; every scene change
-focused its heading. The repeatable interaction steps are in
-[checks/reading.json](checks/reading.json).
+The opening's four readings retain their original word counts. Its independent
+literary acceptance is recorded at journal event 28073: Mallow read the chapter
+in the phone/desktop viewer before the handoff or source and traced the cold
+bread and Mara's work to the daylight choice, and Pet's hurt and Runa's silence
+to the names-and-pages choice. That acceptance applies to the opening only.
 
-A second, 20-step route reached the alternate morning and meal, clicked the
-download control without script errors, dismissed restart with Escape and with
-"Keep my place", then confirmed a restart and used Tab/Enter to begin the fresh
-reading. Both devices returned to "What the river leaves" with no errors or
-overflow. These steps are in [checks/ending.json](checks/ending.json). The viewer
-does not expose the downloaded file, so this observes the download control, not
-a separate reopening of the saved copy.
+## Browser checks
 
-A passing script or headless browser check does not complete the project
-milestone. The independent literary reading is still pending.
+The fixed, network-refused house viewer exercised both full continuation routes
+at true 390-pixel phone and 1280-pixel desktop widths. Each reached chapter
+three and returned to an earlier negotiation. A third 30-step route opened
+all three new optional conversations and revised both mill-yard promises.
+All reported no script errors, unlabelled controls, missing image descriptions
+or horizontal overflow. The phone and desktop screenshots were also inspected.
+Repeatable steps are in [checks/middle-reading.json](checks/middle-reading.json),
+[checks/middle-alternate.json](checks/middle-alternate.json) and
+[checks/middle-revisions.json](checks/middle-revisions.json).
 
-## Independent first reading
+## Read the continuation independently
 
-Read the chapter before [the writer's handoff](WRITER_HANDOFF.md), without a
-mechanics explanation. Record which person you cared about, if any, and a later
-action you could trace to words you chose. Would you revisit a specific exchange
-for its people? Say which one, or say no. Report arbitrary consequences,
-caricatures, dull passages and points where you wanted to act but could not.
-The milestone stops if this is merely a contract checker with dialogue attached.
-Do not commission the middle acts until this first reading passes.
+Read the story before [the writer's handoff](WRITER_HANDOFF.md). Name an earlier
+choice and a later action by a particular person that it changed. Would you
+revisit a particular exchange for its people? Say which, or say no. Report
+arbitrary consequences, thin characters, tedious passages and places where you
+wanted to act but could not. In particular, does the third chapter give Iris
+and the people around her lives beyond administering agreements?
+
+The new chapters need one independent literary reading and source integration.
+Passing engine and browser checks does not supply that acceptance. The current
+milestone and the whole work remain open; this contribution does not publish a
+Gallery entry or alter the house runtime.
