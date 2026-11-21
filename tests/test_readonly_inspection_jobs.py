@@ -126,20 +126,21 @@ def execute(record, workspace, resident, run, argv, requestid):
         self.assertEqual(self.wait_result(writer)["result"]["status"], "rejected")
         self.assertEqual(self.wait_result(second_writer)["result"]["status"], "rejected")
 
-    def test_only_one_inspection_runs_and_each_lane_has_an_inherited_lock(self):
+    def test_three_inspections_run_at_once_each_under_its_own_inherited_lock(self):
         self.paused_runtime()
-        first = self.enqueue("first-inspection", "--inspect")
-        second = self.enqueue("second-inspection", "--inspect", "--path", "note.md")
+        looks = [self.enqueue(f"inspection-{n}", "--inspect", *(["--path", "note.md"] if n % 2 else []))
+                 for n in range(4)]
         mailbox_jobs.tick(self.record)
         self.wait_entered()
         mailbox_jobs.tick(self.record)
-        self.assertEqual(self.metadata(second)["status"], "queued")
-        with (self.private / "jobs" / "inspection.lock").open("a+b") as lock:
-            with self.assertRaises(BlockingIOError):
-                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        self.assertEqual(["running"] * 3 + ["queued"], [self.metadata(job)["status"] for job in looks])
+        for name in ("inspection", "inspection-1", "inspection-2"):
+            with (self.private / "jobs" / (name + ".lock")).open("a+b") as lock:
+                with self.assertRaises(BlockingIOError):
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         (self.workspace / "proceed").touch()
-        self.assertTrue(self.wait_result(first)["ok"])
-        self.assertTrue(self.wait_result(second)["ok"])
+        for job in looks:
+            self.assertTrue(self.wait_result(job)["ok"])
 
     def test_lane_reparses_entire_fixed_command_and_ignores_stored_labels(self):
         base = ["integrate", self.author, "--as", self.resident]
@@ -286,13 +287,14 @@ def execute(record, workspace, resident, run, argv, requestid):
         self.assertEqual(mailbox_jobs.result(fresh, job), result)
 
     def test_duplicate_running_lane_fails_closed_before_start_or_signal(self):
-        for mode in (["--inspect"], ["--publish"]):
+        for mode, count in ((["--inspect"], mailbox_jobs.SLOTS["inspection"] + 1),
+                            (["--publish"], mailbox_jobs.SLOTS["worker"] + 1)):
             item = {"argv": ["integrate", self.author, "--as", self.resident, *mode],
                     "run": self.run, "resident": self.resident, "status": "running"}
-            with patch("house.mailbox_jobs.jobs", return_value=[item, item.copy()]), \
+            with patch("house.mailbox_jobs.jobs", return_value=[item.copy() for _ in range(count)]), \
                     patch("house.mailbox_jobs.start") as start, \
                     patch("house.mailbox_jobs.interrupt") as interrupt:
-                with self.assertRaisesRegex(ValueError, "more than one"):
+                with self.assertRaisesRegex(ValueError, "more trusted action workers"):
                     mailbox_jobs.tick(self.record)
                 start.assert_not_called()
                 interrupt.assert_not_called()

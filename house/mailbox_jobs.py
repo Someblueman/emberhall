@@ -1,4 +1,4 @@
-"""A serialized action worker and one bounded read-only source inspector."""
+"""A serialized action worker and up to three bounded read-only source inspectors."""
 from __future__ import annotations
 
 import argparse
@@ -255,22 +255,29 @@ def lane(record: Record, item: dict) -> str:
     return "inspection" if args.command in {"view", "read-site"} or (args.command == "integrate" and args.inspect) else "worker"
 
 
+# Read-only looks run side by side (Steward, 21 November: "Still can't see anything different really?").
+# One inspection at a time took 20 to 60 seconds each; a reviewer asking for ten paths held the lane for up to
+# fifteen minutes, and five reviews that afternoon gave up with nothing decided. Inspections change nothing, so
+# three may run at once, each holding its own lock; actions that change the house still go one at a time.
+SLOTS = {"worker": 1, "inspection": 3}
+
+
 def tick(record: Record) -> None:
     all_jobs = jobs(record)
     processes = getattr(record, "_mailbox_processes", {})
     running = [item for item in all_jobs if item["status"] == "running"]
-    occupied = set()
+    occupied: dict[str, int] = {}
     for item in running:
         name = lane(record, item)
-        if name in occupied:
-            raise ValueError("more than one trusted action worker recorded in a lane")
-        occupied.add(name)
+        occupied[name] = occupied.get(name, 0) + 1
+        if occupied[name] > SLOTS[name]:
+            raise ValueError("more trusted action workers recorded in a lane than it has slots")
     for item in running:
         child = processes.get(item["id"])
         if child is not None and child.poll() is None and time.time() - item["started_at"] < 1200:
             continue
         interrupt(record, item)
-        occupied.remove(lane(record, item))
+        occupied[lane(record, item)] -= 1
     pending = sorted((item for item in all_jobs if item["status"] == "queued"), key=lambda item: (item["created_at"], item["id"]))
     for item in pending:
         try:
@@ -278,7 +285,7 @@ def tick(record: Record) -> None:
         except (*ERRORS, SystemExit):
             complete(record, item, {"ok": False, "error": "invalid trusted action command"})
             continue
-        if name in occupied:
+        if occupied.get(name, 0) >= SLOTS[name]:
             continue
         state = record.read()[0]
         run = state.get("life", {}).get("runs", {}).get(item["run"], {})
@@ -289,18 +296,27 @@ def tick(record: Record) -> None:
         if runtime.is_symlink() or not runtime.is_file() or hashlib.sha256(runtime.read_bytes()).hexdigest() != item["runtime_sha256"]:
             complete(record, item, {"ok": False, "error": "trusted action runtime bytes changed before launch"})
             continue
-        start(record, item, name, processes)
-        occupied.add(name)
+        if start(record, item, name, processes):
+            occupied[name] = occupied.get(name, 0) + 1
 
 
-def start(record: Record, item: dict, name: str, processes: dict) -> None:
+def start(record: Record, item: dict, name: str, processes: dict) -> bool:
+    root = record.common / "house-home" / "jobs"
+    for slot in range(SLOTS[name]):
+        if launch(record, item, root / ((name if slot == 0 else f"{name}-{slot}") + ".lock"), processes):
+            return True
+    return False
+
+
+def launch(record: Record, item: dict, lock_path: Path, processes: dict) -> bool:
+    """Start the job under this lock when it is free; False when another worker holds it."""
     root = record.common / "house-home" / "jobs"
     path = root / item["id"]
-    with (root / (name + ".lock")).open("a+b") as lock:
+    with lock_path.open("a+b") as lock:
         try:
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            return
+            return False
         gate_read, gate_write = os.pipe()
         child = None
         try:
@@ -321,6 +337,7 @@ def start(record: Record, item: dict, name: str, processes: dict) -> None:
             complete(record, item, {"ok": False, "error": "trusted action worker failed to launch"})
         finally:
             os.close(gate_read); os.close(gate_write)
+    return True
 
 
 def main(argv=None):

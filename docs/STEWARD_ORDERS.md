@@ -153,6 +153,10 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Looks side by side** (21 November, evening). Reviewers' read-only
+  inspections ran one at a time, 20 to 60 seconds each; five reviews that
+  afternoon gave up waiting with nothing decided. Three inspections may now
+  run at once; actions that change the house still go one at a time.
 - **Gallery seen** (21 November, evening; owner migration
   `upgrade-20261121-gallery-seen`). The Steward: "Still can't see anything
   different really?". The list of finished work missing from the Gallery
