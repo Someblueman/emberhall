@@ -6,7 +6,7 @@ from itertools import product
 import json
 from math import comb, gcd
 
-from mixed_edge_seven import _add, _mon, _mul, _scale
+from mixed_edge_seven import Poly, _add, _mon, _mul, _scale
 
 
 def reflection_cases() -> list[dict]:
@@ -69,6 +69,49 @@ def observed_mask(x, y) -> dict:
                for word, pattern in zip(words, patterns)):
             return case
     raise ValueError("pair does not obey the necessary reflection masks")
+
+
+def residue_system(odd_mask, middle_mask, odd_word) -> tuple[list[list[Poly]], list[Poly]]:
+    """Return M Z=b in independent w,v, for c=6h+3 and v=w**h.
+
+    Z contains (1-w) times the six residue fields of the long arm, then
+    those of the middle arm. A monomial's first two exponents denote w,v.
+    No inversion, coefficient bound or existence assertion is performed.
+    """
+    for word, length in ((odd_mask, 3), (middle_mask, 2), (odd_word, 3)):
+        if len(word) != length or any(type(s) is not int or s not in (-1, 1) for s in word):
+            raise ValueError("require sign words of lengths three, two and three")
+    if odd_mask[0] * odd_mask[1] * odd_mask[2] != -1:
+        raise ValueError("the odd reflection mask must have product -1")
+    eps = ([odd_mask[k % 3] * middle_mask[k % 2] for k in range(6)],
+           [middle_mask[k % 2] for k in range(6)],
+           [odd_mask[k % 3] for k in range(6)])
+    # Endpoint monomials: v*w^3, z^2*v*w^2, z^3*v, with w=z^6.
+    ends = ((0, 3), (2, 2), (3, 0))
+    matrix = [[{} for _ in range(18)] for _ in range(12)]
+
+    def add(row, column, coefficient, w_power=0, v_power=0):
+        matrix[row][column] = _add(matrix[row][column],
+                                  _scale(_mon(a=w_power, b=v_power), coefficient))
+
+    for arm in range(3):
+        j, k = (i for i in range(3) if i != arm)
+        for residue in range(6):
+            column, e = arm * 6 + residue, eps[arm][residue]
+            add(residue, column, 1 - e)
+            for other in (j, k):
+                shift, power = ends[other]
+                total = residue + shift
+                add(total % 6, column, -1, power + total // 6, 1)
+                add(6 + total % 6, column, -e, power + total // 6)
+            total = residue + ends[j][0] + ends[k][0]
+            add(6 + total % 6, column, e - 1,
+                ends[j][1] + ends[k][1] + total // 6, 1)
+    odd_numerators = [_scale(_add(_mon(), _scale(_mon(a=int(i < 3), b=1), -1)),
+                             odd_word[i % 3]) for i in range(6)]
+    rhs = [_scale(_add(*(_mul(row[12 + i], odd_numerators[i]) for i in range(6))), -1)
+           for row in matrix]
+    return [row[:12] for row in matrix], rhs
 
 
 def alternating_taylor_certificate() -> bool:

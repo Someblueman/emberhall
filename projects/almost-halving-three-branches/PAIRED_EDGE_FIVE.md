@@ -123,12 +123,19 @@ acts diagonally on the six residue fields. The endpoint monomials are
 odd field, after multiplication by 1−w, are
 `r_j(1−wv)` in residues 0,1,2 and `r_j(1−v)` in residues 3,4,5.
 The two edge equations give twelve exact linear polynomial equations
-for the twelve even-arm residue fields. Some masks leave free fields,
+for the twelve even-arm residue fields. `residue_system(p,q,R)` constructs
+their matrix and right side in independent w,v using only integer sparse
+polynomials. Its unknowns are (1−w) times the long arm's six residue fields,
+then the middle arm's six fields. The first six equations are F_X−W_Y;
+the last six are the reversed second equation divided by its common v.
+Tests compare both halves with literal edge equations after three
+specializations; the generic construction follows those displayed operators.
+Some masks leave free fields,
 so matrix invertibility cannot be assumed. Real linear feasibility also
 does not ensure ±1 coefficients. Keep those two failure boundaries explicit.
 
 No earlier proof, default command, priority statement, Gallery or runtime
 was changed. Only the seven-fold obstruction is a completed infinite result.
-Five focused standard-library tests pass, including the exact cubic
+Six focused standard-library tests pass, including the exact cubic
 certificate, the mask counts, all 32 arithmetic classes, a valid base pair
 that remains admitted, and rejection of its altered edge row.
