@@ -144,7 +144,9 @@ def build_svg(swatches: list[dict], palettes: Mapping[str, bc.Palette] | None = 
 def build_html(swatches: list[dict], palettes: Mapping[str, bc.Palette],
                title: str = 'What a Blended Colour Can Say') -> str:
     cards = []
-    for s in swatches:
+    options = ''.join(f'<option value="{i}">{escape(s["id"] + " / " + s["title"])}</option>'
+                      for i, s in enumerate(swatches))
+    for i, s in enumerate(swatches):
         cert, palette = s['certificate'], palettes[s['palette']]
         distributions = []
         for name, key in (('Lower endpoint', 'witness_min'), ('Upper endpoint', 'witness_max')):
@@ -153,7 +155,7 @@ def build_html(swatches: list[dict], palettes: Mapping[str, bc.Palette],
             labels = '; '.join(f'{palette.labels[i]}: {w}' for i, w in enumerate(cert[key]) if F(w))
             distributions.append(f'<p><b>{name}</b></p><div class="bar" aria-hidden="true">{bars}</div><p class="numbers">{escape(labels)}</p>')
         observations = ''.join(f'<p><b>{o["mode"]}</b> <code>{o["hex"]}</code>: {_range(o["certificate"])} (conservative)</p>' for o in s['observations'])
-        cards.append(f'<article><h2>{escape(s["id"] + " / " + s["title"])}</h2><div class="columns"><section>'
+        cards.append(f'<article data-case="{i}"><h2>{escape(s["id"] + " / " + s["title"])}</h2><div class="columns"><section>'
                      f'<div class="swatch" style="background:{s["hex"]}" role="img" aria-label="Displayed sRGB colour {s["hex"]}"></div>'
                      f'<p><code>{s["hex"]}</code> · displayed sRGB8</p><p>{escape(s["event_label"])}: <b>{_range(cert, True)}</b> ({cert["status"]})</p>{observations}'
                      f'</section><section aria-label="Explicit endpoint distributions">{"".join(distributions)}</section></div></article>')
@@ -161,12 +163,45 @@ def build_html(swatches: list[dict], palettes: Mapping[str, bc.Palette],
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(title)}</title><style>
 *{{box-sizing:border-box}}body{{margin:0;background:#f3f1e9;color:#172c3c;font:17px/1.5 system-ui,sans-serif}}main{{max-width:1080px;margin:auto;padding:24px}}h1{{font:36px Georgia,serif}}h2{{font-size:22px}}article{{background:white;border:1px solid #d6d9d8;border-radius:12px;margin:24px 0;padding:22px}}a{{color:#14547a}}.columns{{display:grid;grid-template-columns:1fr 1fr;gap:32px}}.bar{{height:28px;display:flex;border:1px solid #526776}}.numbers{{overflow-wrap:anywhere;font-size:15px}}.swatch{{width:140px;height:95px;border:1px solid #526776}}code{{font-size:15px}}@media(max-width:650px){{main{{padding:14px}}h1{{font-size:29px}}.columns{{grid-template-columns:1fr;gap:8px}}article{{padding:16px}}}}
+[hidden]{{display:none!important}}button,select{{font:inherit;padding:8px;max-width:100%}}button{{cursor:pointer}}.tools{{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}}:focus-visible{{outline:3px solid #14547a;outline-offset:3px}}#vector-window{{height:560px;max-height:65vh;overflow:auto;border:1px solid #526776;background:#f3f1e9}}#vector-window svg{{display:block;width:1040px;max-width:none;height:auto}}.vector-help{{font-size:15px}}
 </style></head><body><main><h1>{escape(title)}</h1>
 <p>What probability could hide behind one blended colour? Every interval below has exact rational certificates and endpoint distributions you can inspect.</p>
-<p><a href="first_legend.svg">Open the complete vector atlas</a> · <a href="witnesses.json">Rational certificates</a> · <a href="example-output.txt">Real importing program output</a></p>
+<div class="tools" id="view-tools" hidden>
+<label for="case-choice">Case</label><select id="case-choice"><option value="all">All cases</option>{options}</select>
+<button type="button" id="vector-toggle" aria-pressed="false">Open the complete vector atlas</button></div>
+<p><a href="first_legend.svg" download>Download SVG for printing or zooming</a> · <a href="witnesses.json">Rational certificates</a> · <a href="example-output.txt">Real importing program output</a></p>
+<section id="vector-view" aria-label="Complete vector atlas" hidden>
+<p class="vector-help">Text stays at its printed size. Swipe sideways or focus the diagram and use arrow keys. Choose a case above to jump to its row.</p>
+<div class="tools"><button type="button" id="vector-left">Swatch and interval</button><button type="button" id="vector-right">Endpoint distributions</button></div>
+<div id="vector-window" tabindex="0" role="region" aria-label="Scrollable vector atlas">{build_svg(swatches, palettes, title)}</div></section>
+<div id="card-view">
 <p>Compute a linear-light blend, transfer to sRGB, then round to bytes. The opaque, flat sRGB8 swatches follow that pipeline. Raw linear8 data has a separate byte bound; its hex preview does not have the same displayed light.</p>
 <p>Byte intervals conservatively include every compatible distribution. Percentage endpoints round outward; the exact fractions in the certificates are authoritative. Bars show the two <em>exact-case</em> endpoint distributions beside the same swatch. This is a supplied comparison, not a blind readability study.</p>
-{''.join(cards)}<footer>Supported: declared rational linear-light sRGB palettes, exact colours, sRGB8 and linear8 observations, half-up rounding. No screenshots, compression, alpha compositing, colour profiles or encoded-space blending. See DISPLAY.md in the repository for the derivation and limits.</footer></main></body></html>'''
+{''.join(cards)}</div><footer>Supported: declared rational linear-light sRGB palettes, exact colours, sRGB8 and linear8 observations, half-up rounding. No screenshots, compression, alpha compositing, colour profiles or encoded-space blending. See DISPLAY.md in the repository for the derivation and limits.</footer></main><script>
+const choice = document.getElementById('case-choice');
+const vector = document.getElementById('vector-view');
+const viewport = document.getElementById('vector-window');
+const toggle = document.getElementById('vector-toggle');
+function showCase() {{
+  const index = choice.value;
+  document.querySelectorAll('article[data-case]').forEach(card => {{
+    card.hidden = index !== 'all' && card.dataset.case !== index;
+  }});
+  viewport.scrollTop = index === 'all' ? 0 : 150 + 290 * Number(index);
+}}
+toggle.addEventListener('click', () => {{
+  const showing = vector.hidden;
+  vector.hidden = !showing;
+  document.getElementById('card-view').hidden = showing;
+  toggle.textContent = showing ? 'Read the responsive cards' : 'Open the complete vector atlas';
+  toggle.setAttribute('aria-pressed', String(showing));
+  showCase();
+}});
+choice.addEventListener('change', showCase);
+document.getElementById('vector-left').addEventListener('click', () => {{ viewport.scrollLeft = 0; }});
+document.getElementById('vector-right').addEventListener('click', () => {{ viewport.scrollLeft = 520; }});
+document.getElementById('view-tools').hidden = false;
+</script></body></html>'''
 
 
 def render_atlas(palettes: Mapping[str, bc.Palette], cases: Sequence[Case], *,
