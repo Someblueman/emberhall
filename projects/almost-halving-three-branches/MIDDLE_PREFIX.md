@@ -1,165 +1,192 @@
-# Removing the two middle-arm tips
+# Two deleted middle tips always suffice
 
-Hawthorn, 21 November 2026. **The general conjecture remains open.** This
-document proves a subfamily and records an exact finite search. Neither a
-construction for every odd `(b,d)` nor a counterexample has been obtained.
-The project milestone is not complete. Priority remains provisional under
-[PRIORITY_REFRESH.md](PRIORITY_REFRESH.md); this work does not resolve its
-unread sources or make a novelty claim. Independent review is still required.
+Hawthorn, 21 November 2026. **The two-middle-tip conjecture is true.**
 
-## A proved infinite subfamily
+For every odd `b>=3` and odd `1<=d<b`, the retained tree
 
-For every positive odd integer `d`, the retained tree
+`T(b+d, b-2, b-d)`
 
-`T(3d+3, 2d+1, d+3)`
+has a full homometric partition. Its two parts have `(3b-1)/2` vertices.
+Viewed inside `T(b+d,b,b-d)`, they omit precisely the last two middle-arm
+vertices and attain the project's half-minus-one target. This is a result
+about equal multisets of distances, including multiplicities, not isometry.
+It does not settle arbitrary three-arm lengths or change the full-partition
+classification for the original, untrimmed arithmetic progression.
 
-has a full homometric partition into sets of size `3d+4`. Thus the original
-tree `T(3d+3, 2d+3, d+3)` attains the project's target, with exactly the two
-middle-arm tips omitted. In the conjecture's notation this is `b=2d+3`.
-For odd `d>=5` the size is optimal: neither `d | (2d+3)` nor
-`2d | (2d+4)`, so the full-partition obstruction in
-[PROGRESSION_PARTITIONS.md](PROGRESSION_PARTITIONS.md) gives this upper bound.
-For `d=1,3`, only the stated target attainment is claimed here.
+Priority remains **provisional**, subject to the unread sources in
+[PRIORITY_REFRESH.md](PRIORITY_REFRESH.md). A non-author still needs to
+reconstruct this proof and verify the source contribution before integration
+and any wider milestone acceptance. No claim of public delivery follows from
+a private source-room run.
 
-From a repository checkout, with Python 3.10+ and its standard library:
+## Run it
+
+Python 3.10+ and the standard library suffice. From a repository checkout:
 
 ```sh
-python3 projects/almost-halving-three-branches/middle_prefix.py --family 37
+python3 projects/almost-halving-three-branches/middle_prefix.py 87 33
 python3 projects/almost-halving-three-branches/middle_prefix.py --prove
 ```
 
-The first command prints the sets and complete distance profiles in the
-existing checker's format. Pipe it to `published_cases.py --check -` to
-check the original tree. `--summary` suppresses those larger fields.
-Recorded family run: original lengths `(114,77,40)`, retained lengths
-`(114,75,40)`, both sets of size 115, omitted vertices `(2,76),(2,77)`.
-The proof command checks four Laurent identities, four size identities
-and five small base cases. Source publication awaits independent integration;
-a private source-room run is not evidence of public delivery.
+The first command constructs the sets without search and checks their full
+profiles in the original tree. It uses the existing checker format, so its
+output can be piped into `published_cases.py --check -`. Add `--summary` to
+suppress sets and profiles. The second command expands the universal Laurent
+identity below in nine independent symbols; it does not substitute a finite
+list of b,d values. The existence argument for the signs is the signed-path
+proof below, not a finite computation.
 
-## Explicit construction
+Recorded runs:
 
-Write `d=2h+1`, so the retained lengths are `(6h+6,4h+3,2h+4)`.
-For `0<=h<5`, the three arm sign strings are `SMALL_SIGNS[h]` in
-[middle_prefix.py](middle_prefix.py). The centre has sign `+`.
-These five finite pairs are checked directly by `--prove`.
-
-For `h>=5`, let `m=h mod 4`. The table below gives each arm's interior
-words `W` and boundary words `B`. Arm 1 has six blocks, arm 2 four,
-and arm 3 two. All block and boundary indices start at zero.
-
-* In block `j`, repeat its four-character word at depths `jh+p`,
-  `3<=p<=h-3`, starting with its first character at `p=3`.
-* Boundary word `j` starts at depth `jh-2` and proceeds one depth per
-  character. A dot denotes an out-of-tree position and assigns no sign.
-  The final boundary is longer because the arm ends beyond its last `jh`.
-
-The interiors and boundaries are disjoint and cover every retained vertex.
-In particular, at `h=5` the interiors are empty; neighboring five-position
-boundaries remain disjoint. Take all positive vertices as one set and all
-negative vertices as the other.
-
-| m | Arm | W | B |
+| b,d | Original lengths | Retained lengths | Each part |
 |---|---|---|---|
-| 0 | 1 | `-+-+ -+-+ -+++ -+++ -+-+ -+-+` | `...++ +-+-+ +-+-+ +-+++ +-+++ +-+-+ +-+-+-++-` |
-| 0 | 2 | `+-+- +-+- -+-+ -+-+` | `...-- -+-+- -+-++ +-+-+ +-+--+` |
-| 0 | 3 | `-+-- -+--` | `...-- --+-- --+---+` |
-| 1 | 1 | `++++ ++++ +-++ -+++ ++++ ++++` | `...++ +++++ +++++ +-+++ -+++- +++++ ++++++++-` |
-| 1 | 2 | `---- ---- ---- ----` | `...-- ----- ----- ----- -----+` |
-| 1 | 3 | `--+- -+--` | `...-- --+-- -+----+` |
-| 2 | 1 | `-+-+ -+-+ -+++ ++-+ -+-+ -+-+` | `...++ +-+-+ +-+-+ +++-+ +-+++ +-+-+ +-+-+-++-` |
-| 2 | 2 | `+-+- +-+- -+-+ -+-+` | `...-- -+-+- -+-++ +-+-+ +-+--+` |
-| 2 | 3 | `-+-- ---+` | `...-- +---+ --+---+` |
-| 3 | 1 | `++++ ++++ +-++ ++-+ ++++ ++++` | `...++ +++++ +++++ +++-+ -+++- +++++ ++++++++-` |
-| 3 | 2 | `---- ---- ---- ----` | `...-- ----- ----- ----- -----+` |
-| 3 | 3 | `--+- ---+` | `...-- +---+ -+----+` |
+| 47,7 | 54,47,40 | 54,45,40 | 70 |
+| 57,9 | 66,57,48 | 66,55,48 | 85 |
+| 87,13 | 100,87,74 | 100,85,74 | 130 |
+| 87,33 | 120,87,54 | 120,85,54 | 130 |
+| 121,51 | 172,121,70 | 172,119,70 | 181 |
+| 151,99 | 250,151,52 | 250,149,52 | 226 |
 
-## Identity valid for every parameter
+The implementation tests build the graphs and count distances by breadth-first
+search, independently of the production distance formula. They cover small
+odd parameters, fresh large cases, the shortest short arm, and reject a
+size-preserving alteration of a valid pair.
 
-Use independent Laurent variables `z,r`, substituting `r=z^h` only after
-the identity is established. Put `D=1-z^4` and let `P_i=D*S_i`, where
-`S_i` is the signed depth polynomial of arm i. The endpoint monomials are
+## 1. A signed path supplies the periodic word
 
-`(A_1,A_2,A_3)=(z^6*r^6, z^3*r^4, z^4*r^2)`.
+Put
 
-If `w` is a block's four-sign word, indexed periodically so that `w(3)`
-is its first sign, its contribution to `P_i` is exactly
+`ell=d+2`, `m=b-2`, `c=b-d`, `a=b+d=m+ell`.
+
+Thus ell and m are odd, c is positive and even, and `c-m=4-ell`.
+All residue indices below lie in `0,...,ell-1`. Consider two reflections:
+
+* `alpha(j) = (m-j) mod ell`, with edge sign +1;
+* `beta(j) = (c-j) mod ell`, with edge sign
+  `epsilon(j)=(-1)^floor((c-j)/ell)`.
+
+The beta edge has the same sign in both directions. Indeed, writing
+`c-j=q*ell+k`, with `0<=k<ell`, gives `c-k=q*ell+j` as well.
+Each reflection has exactly one fixed point because ell is odd. Alpha's
+loop is positive. At beta's fixed point, `c-2j=q*ell`; c and 2j are even
+and ell is odd, so q is even and this loop is positive too.
+
+Moreover, `beta(alpha(j)) = j+4 mod ell`. Since `gcd(4,ell)=1`, the graph
+formed by the two reflections is connected. Removing its two positive
+loops leaves a path: the two distinct fixed points have degree one and
+every other vertex has degree two. Equivalently, its ell vertices have
+ell-1 non-loop edges. There are no nontrivial cycles to cause a sign conflict.
+
+Set `u_0=-1` and propagate signs along the path. This assigns every u_j a
+sign, uniquely, satisfying
 
 ```text
-r^j * (sum_(p=3)^6 w(p)*z^p - r*sum_(q=-2)^1 w(m+q)*z^q).
+u_(m-j mod ell) = u_j,
+u_(c-j mod ell) = (-1)^floor((c-j)/ell) * u_j.       (1)
 ```
 
-Multiplying the finite repeated word by `1-z^4` cancels all interior
-terms, leaving these four head and four tail terms. This remains valid
-for the empty interior at `h=5`. A boundary sign `s` at `jh+p`
-contributes `s*r^j*z^p*D`.
+Extend u periodically to every integer index. In particular,
+`u_m=u_0=-1` and `u_(m+j)=u_(-j)`.
+The implementation traverses these two labelled edges from each visited
+residue; it never searches over colourings.
 
-For each of the four table classes, integer coefficient collection gives
+## 2. Colour the retained tree
+
+For every integer p, write `p=q*ell+j`, `0<=j<ell`, and define
+
+`h_p = -(-1)^q * u_j`.
+
+This definition includes negative p; the quotient is the floor quotient.
+It immediately gives `h_0=1` and `h_(p+ell)=-h_p`. The second relation in
+(1) gives the reflection identity `h_(c-p)=h_p` for every integer p:
+if `c-j=q'*ell+k`, then
+
+`h_(c-p)=-(-1)^(q'-q)*u_k=-(-1)^(2q'-q)*u_j=h_p`.
+
+Assign these signs:
+
+* centre: +1;
+* long arm, depths `1,...,a`: `u_p`;
+* middle arm, depths `1,...,m`: `-u_p`;
+* short arm, depths `1,...,c`: `h_p`.
+
+Every retained vertex is assigned exactly once. Positive and negative
+vertices will be the required sets. We prove balance and homometry next.
+
+## 3. Word identities, without numerical parameters
+
+Let a star mean replacing z by z^-1. Define the finite polynomials
 
 ```text
-D*(1-A_1-A_2-A_3)
- + sum_i P_i*(1-sum_(j!=i) A_j)
- + z^4*sum_i A_i*P_i(z^-1,r^-1) = 0.                 (1)
+K=z^ell, B=z^m, C=z^c, A=z^a=K*B,
+U=sum_(p=1)^a u_p*z^p,
+V=-sum_(p=1)^m u_p*z^p,
+W=sum_(p=1)^c h_p*z^p, H=1+W,
+P=sum_(j=1)^ell u_j*z^j,
+R=sum_(j=1)^ell u_(m+j)*z^j.
 ```
 
-`symbolic_residual(m)` constructs precisely these finite expressions;
-it does not fit numerical samples or substitute a finite value of h.
-Because `D*S_i(z^-1)=-z^4*P_i(z^-1,r^-1)`, equation (1) is D times
-the full-shell identity in [NEXT_FAMILY.md](NEXT_FAMILY.md). Cancellation
-of nonzero D is valid in the Laurent polynomial ring.
+Periodicity of u and cancellation of the two prefixes give
 
-For balance, write `h=4q+m`. A block contributes
+`U+K*V=P`, `U+V=B*R`, hence `P+(1-K)*V-B*R=0`.       (2)
 
-`q*sum(w) + floor((m-5)/4)*sum(w) + prefix_w((m-5) mod 4)`.
+The reflection of h gives `H=C*H*`, or `C*W*=H-C`. Also,
+`u_(m+j)=u_(-j)` and `u_m=u_0=-1` imply
 
-Adding every block, boundary and centre gives coefficient zero for q and
-constant zero, separately in all four classes. Thus the two signs occur
-equally often. The full-shell identity then gives equal multiplicities
-at every positive distance, not merely equal distance sums or isometry.
-The retained order is `12h+14`, so each part has `6h+7=3d+4` vertices.
-Deleting only terminal vertices preserves the original distances. This
-proves the stated family.
+`R-P-K*P* = -sum_(j=0)^(ell-1) u_j*z^j`.             (3)
 
-## Exact search and its limits
+For clarity, the constant coefficient in (3) is -u_0; at depths
+1 through ell-1 the reflected terms cancel; at ell the coefficient
+is `u_m-u_0=0`.
 
-```sh
-python3 projects/almost-halving-three-branches/middle_prefix.py 47 7 --summary
-python3 projects/almost-halving-three-branches/middle_prefix.py 57 9 --summary
+The h sequence is anti-periodic with period ell. Multiplication of its
+finite prefix H by `1+K` leaves its first ell coefficients and the negative
+of the next ell coefficients after depth c. Since
+`h_(c+j)=h_(-j)=u_(-j)=u_(m+j)` for `1<=j<=ell`, equation (3) yields
+
+`(1+K)*H = (1-C)*R-P-K*P*`.                          (4)
+
+This cancellation remains valid when `c<ell`: the head and tail terms
+then overlap and are added as polynomial coefficients. No length ordering
+beyond the stated hypotheses was used.
+
+Evaluating (4) at z=1, and noting `R(1)=P(1)`, gives
+`H(1)=-P(1)`. Equation (2) gives `U(1)+V(1)=P(1)`. Thus the sum of all
+vertex signs, `H(1)+U(1)+V(1)`, is zero. The colouring is balanced.
+
+## 4. Full distance multiplicities
+
+Use the full-shell identity from [NEXT_FAMILY.md](NEXT_FAMILY.md):
+
+```text
+Q = 1-A-B-C
+    + U*(1-B-C) + V*(1-A-C) + W*(1-A-B)
+    - A*U* - B*V* - C*W*.
 ```
 
-Both formerly node-limited instances have positive witnesses: size 70 on
-retained `(54,45,40)` and size 85 on retained `(66,55,48)`, respectively.
-The tests reconstruct the original graphs and count distances by breadth-first
-search, including these two cases, fresh family parameters and all small bases.
-They reject an altered pair which still has disjoint, equal-sized parts.
-These are finite checks, not a proof of the general conjecture.
+Here `A*U*` means A times the starred polynomial U, and similarly for
+the other products. Substituting `A=K*B`, `U=P-K*V`,
+`U*=P*-K^-1*V*`, and `C*W*=H-C` gives the exact factorization
 
-For a fixed retained tree, assign one sign `s_v` to each vertex. The search
-forms the exact integer equations
+```text
+Q = B * ((1-C)*R-P-K*P*-(1+K)*H)
+    + (1-C) * (P+(1-K)*V-B*R).
+```
 
-`sum_v s_v=0`, and `sum_v s_v*N_k(v)=0` for each positive distance k,
+Both parentheses vanish by (2) and (4), so Q=0. `--prove` checks precisely
+this factorization in a free Laurent ring, treating K,B,C,P,V,P*,V*,H,R
+as independent symbols. It is separate from graph-distance testing.
 
-where `N_k(v)` counts retained vertices at distance k from v. Each pair
-with equal signs contributes twice that sign to a shell equation; an
-opposite-sign pair contributes zero. Hence these equations are equivalent
-to a full homometric partition, including balance.
+For balanced signs, the full-shell identity states
+`(1-z)*sum_(k>=1) L_k*z^k = z*Q`, where
+`L_k=sum_v s_v*N_k(v)` and N_k(v) counts retained vertices at distance k.
+Every pair of equal signs contributes twice its sign to L_k, while an
+opposite-sign pair contributes zero. Therefore Q=0 proves equality of
+all distance multiplicities. The retained tree has `3b-1` vertices, so
+each set has `(3b-1)/2` vertices. Restoring the two terminal middle-arm
+vertices does not change distances between retained vertices. This proves
+the conjecture.
 
-Exact rational row reduction expresses every pivot sign in terms of free
-signs. Clearing denominators reduces the requirement that a pivot be a
-sign to an equation `abs(sum c_i*s_i)=D`. The search branches on both signs,
-pruning only when an exact integer reachable-sum calculation permits no
-extension. Fixing the first free sign to + loses only the global colour
-swap. Consequently a completed negative search would cover every colouring
-of that retained tree. No negative instance is claimed here.
-
-The command distinguishes `partition`, `node-limit` (exit 3), and an exhausted
-`no-partition`; a limit never becomes a negative. Search is capped at 900
-retained vertices and at the explicit node budget (`--nodes`, default 100000).
-The proved family constructor does not have these search caps. Small randomly
-generated sign systems are also compared with exhaustive enumeration, including
-inconsistent equations and denominator-cleared targets.
-
-The next task is still the original one: a construction for all remaining
-odd `(b,d)`, or an independently reproducible exact counterexample. A proof
-of this one family, finite positive witnesses, and failure of a restricted
-colouring pattern do not meet that acceptance result.
+The earlier partial `b=2d+3` tables and bounded sign search were discovery
+tools; the implementation replaces them with this all-parameter construction.
+No timeout, failed restricted template, or finite census is used as proof.
