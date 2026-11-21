@@ -1,15 +1,13 @@
-# The divisible arithmetic-progression subfamily
+# Every arithmetic progression with an even middle arm
 
-Rook, 21 November 2026. The attempt to cover every arithmetic progression
-gives the following exact, two-parameter result:
+Rook, 21 November 2026. **For every even integer b>=2 and every integer
+1<=d<b,** the tree `T(b+d,b,b-d)` has two disjoint homometric sets of size
+`3b/2`. This is optimal by disjointness, since the tree has `3b+1` vertices.
 
-> For all integers `q>=2` and `d>=1`, the tree with arm lengths
-> `((q+1)d, qd, (q-1)d)` has disjoint homometric sets of size
-> `floor((3qd+1)/2)`, the largest size allowed by disjointness.
-
-This covers every arithmetic-progression triple whose middle arm is a
-multiple of the spacing. It does **not** cover all `T(b+d,b,b-d)`: the
-remaining nondivisible cases need further work. Priority remains provisional.
+Only one vertex is omitted. When d is even it is the longest-arm tip; when
+d is odd it is the shortest-arm tip. This covers all even middle lengths,
+not merely a finite collection of ratios. Odd middle lengths are not all
+settled. Literature priority remains provisional.
 
 ## Run it
 
@@ -17,144 +15,144 @@ From the [Emberhall repository](https://github.com/Someblueman/emberhall),
 using Python 3.10+ and its standard library:
 
 ```sh
-python3 projects/almost-halving-three-branches/progression_target.py 7 10
+python3 projects/almost-halving-three-branches/progression_target.py 100 37
 ```
 
-The two arguments are q and d. This recorded run produced two sets of size
-105 on `(80,70,60)`, target 104, with only the longest tip omitted.
-The command emits all selected vertices and distance multiplicities;
-`--summary` omits those lists. Its output can be passed to the existing
-`published_cases.py --check -` command. `--prove` checks the two new
-identities in three independent Laurent variables, not sampled lengths.
+The arguments are b and d. This recorded run produced two sets of size 150
+on `(137,100,63)`, target 149, omitting only `[3,63]`. The command emits all
+vertices and both complete distance profiles; `--summary` omits the lists.
+Its output works with `published_cases.py --check -`. `--prove` checks the
+identity below in three independent Laurent variables.
 
-## The two cases already available
+Additional recorded graph-distance checks include `(18,14,10)`,
+`(38,28,18)`, `(80,70,60)`, `(57,40,23)` and the boundary cases `(3,2,1)`
+and `(39,20,1)`. The tests build the graph and use breadth-first distances,
+independently of the production distance formula. They also reject a
+size-preserving alteration of a valid pair.
+An additional recorded audit checked all 900 even-middle progressions with
+b<=60 using the separate graph counter; all agreed (2.395 seconds).
 
-If q is even, omit the longest tip. The retained lengths are
-`((q+1)d-1,qd,(q-1)d)`. The published block construction has width d,
-odd quotient q+1 and remainder zero, so it partitions this entire subtree.
-Its size is `3qd/2=floor((3qd+1)/2)`.
+## Even spacing: explicit construction
 
-If q and d are both odd, use the full partition from
-[PROGRESSION_PARTITIONS.md](PROGRESSION_PARTITIONS.md). It has size
-`(3qd+1)/2`. That proof covers arbitrary odd q,d, not only fixed ratios.
+First suppose both b and d are even. Omit depth b+d of arm 1. The retained
+prefix subtree has lengths `(b+d-1,b,b-d)` and unchanged distances.
+Give the centre sign +1 and assign:
 
-It remains to handle odd q and even d. The construction below is new to
-the project and closes this remaining parity case for every quotient.
+* On arm 1, sign `(-1)^p` at depths `1<=p<d`, sign -1 at `d<=p<=b`,
+  and sign `-(-1)^p` at `b<p<=b+d-1`.
+* On arm 2, sign `-(-1)^p` at every depth `1<=p<=b`.
+* On arm 3, sign +1 at every depth `1<=p<=b-d`.
 
-## Odd q and even d
+The first and last intervals on arm 1 have odd length d-1 and sums -1
+and +1 respectively. Its middle interval has sum `-(b-d+1)`. Arm 2 has
+sum zero and arm 3 has sum b-d. Including the centre gives total zero.
+All `3b` retained vertices are used, so each sign class has size `3b/2`.
 
-Write `d=2h`, `N=2q-2` and omit the longest tip. The retained lengths are
-`((2q+2)h-1, 2qh, (2q-2)h)`. Give the centre sign +1.
-On each arm, block j has interior depths `jh+p`, `1<=p<h`; the word
-assigned to a block repeats from p=1. Boundaries have depths jh, with
-j=1..2q+1 on arm 1, 1..2q on arm 2 and 1..N on arm 3.
-Take positive signs for one set and negative signs for the other.
+## Exact distance identity
 
-For **even h**:
-
-| Arm | Interior words in order | Boundary signs |
-|---|---|---|
-| 1 | two `-+`, then N copies of `--`, then two `+-` | one `+`, then 2q copies of `-` |
-| 2 | 2q copies of `+-` | 2q copies of `-` |
-| 3 | N copies of `++` | N copies of `+` |
-
-For **odd h**:
-
-| Arm | Interior words in order | Boundary signs |
-|---|---|---|
-| 1 | `-+ -- +-`, then q-2 pairs of identical constant words alternating `++ ++`, `-- --`, starting and ending with `++ ++`, then `+- -- -+` | repeat `--++` and truncate to 2q+1 signs |
-| 2 | `+-`, then N copies of `++`, then `-+` | q copies of `+-` |
-| 3 | N copies of `--` | q-1 copies of `-+` |
-
-There are exactly the stated numbers of blocks and boundaries. Empty
-interiors at h=1 cause no problem. For even h, the three arm sign sums are
-`-Nh-1, 0, Nh`. For odd h, they are `-1, N(h-1), -N(h-1)`.
-Including the centre, each total is zero. All `6qh` retained vertices
-therefore split into two sets of size `3qh=3qd/2`.
-
-## Exact distance proof
-
-Use the full-shell Q from NEXT_FAMILY.md on the retained subtree. Put
-`r=z^h`, `s=r^N`; initially treat z,r,s as independent Laurent variables.
-The endpoint monomials are `A_1=sr^4/z`, `A_2=sr^2`, `A_3=s`.
-Write `D=1-z^2`, `U=(z-r)(1+z)`, and
+Put `u=z^b`, `v=z^d`, initially treating z,u,v as independent Laurent
+indeterminates. The signed depth polynomials are
 
 ```
-E=-(z+r)(1-z) for even h,
-E= (r-z)(1-z) for odd h.
+S_1 = (u-1)*(z+v)/(1+z) - (v-zu)/(1-z),
+S_2 = z*(1-u)/(1+z),
+S_3 = z*(1-u/v)/(1-z).
 ```
 
-Then U is D times a constant-positive block interior; E is D times a
-`-+` block interior. Negation handles `--` and `+-`. A boundary sign at
-jh contributes `+/- D*r^j`. This gives every S_i by finite geometric sums.
-
-The following cleared numerators make those sums independently checkable.
-Let `G=1-sr^2`, `C=1-s`. For even h set `H=1-r` and `Y_i=H*D*S_i`:
+These expressions are finite polynomials after substitution, by the even
+parities of b,d and the explicit intervals above. Set `D=1-z^2`,
+`P_i=D*S_i`, and `(A_1,A_2,A_3)=(uv/z,u,u/v)`. Thus
 
 ```
-Y_1 = H*E*(1+r)*G - U*r^2*C + D*(H*r-r^2*G),
-Y_2 = -(E+D*r)*G,
-Y_3 = (U+D*r)*C.
+P_1 = (1-z)*(u-1)*(z+v) - (1+z)*(v-zu),
+P_2 = z*(1-u)*(1-z),
+P_3 = z*(1-u/v)*(1+z).
 ```
 
-For odd h set `H=1-r^4`, `V_+=1+r+r^2+r^3`,
-`V_-=1-r+r^2-r^3`, `J=1-r^2`, and again `Y_i=H*D*S_i`:
+For balanced signs, the full-shell identity from NEXT_FAMILY.md is
 
 ```
-Y_1 = H*(E*J*(1-sr)-U*(r+sr^2))
-      + U*r*(1+r)*(r^2+s)*J
-      + D*(-r*(1+r)*C*J+s*(-r-r^2+r^3)*H),
-Y_2 = H*E*(sr-1) + U*r*C*V_+ + D*r*G*V_-,
-Y_3 = -C*(U*V_+ + D*r*V_-).
+Q = 1-A_1-A_2-A_3
+    + sum_i S_i*(1-sum_(j!=i) A_j) - sum_i A_i*S_i(z^-1).
 ```
 
-For example, the alternating pairs in the odd-h middle run sum to
-`U*r*(1+r)*(r^2+s)/(1+r^2)` because q-2 is odd. Its boundary string sums
-to `-r*(1+r)*(1-s)/(1+r^2)+s*(-r-r^2+r^3)`.
-These identities derive Y_1 directly, rather than fitting sampled outputs.
+Its coefficients vanish exactly when the two distance profiles agree:
+if `L_k=sum_x s(x) N_k(x)`, then
+`(1-z)*sum_(k>=1) L_k*z^k=zQ`, and `L_k` is twice the difference of the
+within-set distance multiplicities.
 
-Use a star for simultaneous inversion of z,r,s. With `K=1-A_1-A_2-A_3`,
-direct integer coefficient collection gives
+Use a star for simultaneous inversion of z,u,v. Since `D*=-D/z^2`,
+`D*S_i(z^-1)=-z^2*P_i*`. Direct multiplication gives the finite identity
 
 ```
-D*H*K + sum_i Y_i*(1-sum_(j!=i) A_j) - eta*sum_i A_i*Y_i* = 0,
-eta=z^2*r for even h, and eta=z^2*r^4 for odd h.
+D*(1-A_1-A_2-A_3)
+ + sum_i P_i*(1-sum_(j!=i) A_j)
+ + z^2*sum_i A_i*P_i* = 0.
 ```
 
-Indeed `(DH)*=DH/eta`, so the displayed expression is precisely DHQ.
-The ring has no zero divisors and DH is nonzero; hence Q=0.
-The signed-shell identity then proves equal distance multiplicities.
-This is a proof for arbitrary odd q and even d. Combined with the first
-two cases it proves the proposition for every q>=2,d>=1.
+The checker collects every integer Laurent coefficient in three independent
+variables and obtains zero. No value of b or d is substituted in this
+identity check. Cancelling nonzero D proves Q=0 for every permitted even
+b,d. Together with balance, this proves the stated construction.
 
-## A rigorous failure of the simpler prefix prescription
+## Odd spacing: change the omitted tip
+
+Now let b be even and d odd. If d<b-1, apply the preceding construction
+with even spacing `D=d+1`. Its retained lengths are
+
+`(b+D-1,b,b-D)=(b+d,b,b-d-1)`.
+
+This is exactly the original tree with only its shortest tip omitted.
+It is an isometric prefix subtree and has 3b vertices, so the same pair is
+homometric in the original tree and still has size `3b/2`.
+
+If d=b-1, the shortest arm has one vertex. Omit it; the other two arms and
+centre form a path with 3b vertices. The first and last `3b/2` vertices
+are disjoint equal-length paths and have identical distance profiles.
+This also covers b=2,d=1.
+
+## Corollary: every divisible middle length
+
+For all q>=2,d>=1,
+
+`h(T((q+1)d,qd,(q-1)d))=floor((3qd+1)/2)`.
+
+If qd is even, use the theorem above. Otherwise q and d are odd, and the
+full partition for `d divides b` in PROGRESSION_PARTITIONS.md applies.
+Thus the earlier divisible-subfamily result follows from a shorter and
+stronger argument; no separate parity tables or solver are required.
+
+## Why the obvious odd-middle extension fails
 
 The broader search first tried only the longest tip when b is even, and
 only the two longest tips when b is odd. The latter choice cannot work
 when `b=3 mod 4` and d is even: its retained lengths are all odd, and the
 two bipartition classes have sizes `(3b-3)/2` and `(3b+1)/2`, both odd.
 
-In any bipartite graph, let a selected set of size m have parity imbalance
-delta. The alternating sum of its distance profile is `(delta^2-m)/2`.
-Thus equally sized homometric parts in a full partition must have equal
-or opposite imbalances. Equal imbalances require both bipartition classes
+In any bipartite graph, a selected set of size m and parity imbalance
+Delta has alternating distance-profile sum `(Delta^2-m)/2`. Equally
+sized homometric parts in a full partition therefore have equal or
+opposite imbalances. Equal imbalances require both bipartition classes
 to have even sizes; opposite imbalances require equal class sizes.
-Neither holds for the retained tree above. This excludes **every** full
-partition of that particular two-tip prefix, not every permitted pair in
-the original tree.
+Neither condition holds for that retained tree. This excludes every
+full partition of that particular prefix, not every pair in the original.
 
-It is emphatically not a counterexample to the target. For example, for
-every `b=3 mod 4`, `d=b-1`, the original tree `(2b-1,b,1)` has two disjoint
-paths of size `(3b-1)/2`, meeting the target, despite this failed prefix.
+For example, for every `b=3 mod 4`, `d=b-1`, the original tree
+`(2b-1,b,1)` has disjoint paths of size `(3b-1)/2`, meeting the target,
+despite this failed two-longest-tips prescription.
 
-Bounded discovery check: the original prefix prescription was tested for
-b=2..30 (435 cases); its 49 failures occurred in the parity class just
-proved impossible. Changing those cases to omit one longest and one
-shortest tip produced verified candidate pairs for b=2..60 (1,770 cases).
-Each candidate was checked by exact distance counts. These finite outcomes
-suggest a broader route; they do not prove the target for all progressions.
-The discovery solver is not needed by the delivered standard-library code.
+The original prescription was screened for b=2..30 (435 cases); its 49
+failures fell in this proved obstruction class. Changing those cases to
+omit one longest and one shortest tip yielded exact-checked candidates
+for all b=2..60 (1,770 cases). These are bounded discovery observations,
+not a proof for odd middle lengths. The external discovery solver is not
+needed by the delivered standard-library construction or identity check.
 
-The remaining task is a proof for nondivisible middle lengths, such as
-`b=5t,d=2t`, together with the already required independent reconstruction
-and priority review. No full-milestone completion is claimed here.
+## What remains
+
+The main unresolved progression cases have odd b, with neither `d divides b`
+nor `2d divides b+1`. The full-partition classification rules out full halves
+there, but generally does not yet construct the target `(3b-1)/2`.
+Some such cases are covered by earlier individual family proofs.
+The general three-arm milestone, independent mathematical reconstruction
+and literature-priority check all remain open.

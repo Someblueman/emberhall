@@ -1,15 +1,11 @@
-"""Optimal pairs on T((q+1)d, qd, (q-1)d), q>=2, d>=1.
-
-This settles the divisible subfamily, not every arithmetic progression.
-"""
+"""Optimal pairs on T(b+d,b,b-d) for even b and 1<=d<b."""
 from __future__ import annotations
 
 import argparse
 import json
 
 from next_family import positive_integer
-from progression_partitions import multiple_pair
-from published_cases import block_pair, check_pair
+from published_cases import check_pair, path_pair
 
 Poly = dict[tuple[int, int, int], int]
 
@@ -43,117 +39,81 @@ def _mul(*polynomials: Poly) -> Poly:
     return result
 
 
-def even_divisor_words(q: int, parity: int) -> list[tuple[list[str], str]]:
-    """Interior words and boundary signs for odd q and h=d/2."""
-    if type(q) is not int or q < 3 or q % 2 != 1 or parity not in (0, 1):
-        raise ValueError("require odd q >= 3 and parity 0 or 1")
-    n = 2 * q - 2
-    if parity == 0:
-        return [(["-+"] * 2 + ["--"] * n + ["+-"] * 2, "+" + "-" * (2 * q)),
-                (["+-"] * (2 * q), "-" * (2 * q)),
-                (["++"] * n, "+" * n)]
-    middle = [word for j in range(q - 2)
-              for word in (["++"] * 2 if j % 2 == 0 else ["--"] * 2)]
-    boundaries = "".join("-" if ((j - 1) // 2) % 2 == 0 else "+"
-                         for j in range(1, 2 * q + 2))
-    return [(["-+", "--", "+-"] + middle + ["+-", "--", "-+"], boundaries),
-            (["+-"] + ["++"] * n + ["-+"], "+-" * q),
-            (["--"] * n, "-+" * (q - 1))]
+def _even_spacing_signs(b: int, d: int) -> dict:
+    """b,d even, 0<d<b: retain (b+d-1,b,b-d)."""
+    signs = {(0, 0): 1}
+    for p in range(1, b + d):
+        signs[1, p] = (-1) ** p if p < d else -1 if p <= b else -(-1) ** p
+    for p in range(1, b + 1):
+        signs[2, p] = -(-1) ** p
+    for p in range(1, b - d + 1):
+        signs[3, p] = 1
+    return signs
 
 
-def divisible_witness(q: int, d: int) -> dict:
-    positive_integer(q)
+def even_middle_witness(b: int, d: int) -> dict:
+    """An optimal pair on T(b+d,b,b-d) for every even b and 0<d<b."""
+    positive_integer(b)
     positive_integer(d)
-    if q < 2:
-        raise ValueError("q must be at least 2")
-    lengths = ((q + 1) * d, q * d, (q - 1) * d)
-    if q % 2 == 0:
-        left, right = block_pair((lengths[0] - 1, lengths[1], lengths[2]), (1, 2, 3))
-        method = "published odd block on a prefix subtree"
-    elif d % 2:
-        left, right = multiple_pair(q * d, d)
-        method = "odd multiple full partition"
+    if b % 2 or d >= b:
+        raise ValueError("require even b and 1 <= d < b")
+    lengths = (b + d, b, b - d)
+    if d == b - 1:
+        left, right = path_pair(lengths)
+        omitted = [(3, 1)]
+        method = "two halves of the diameter path"
     else:
-        h = d // 2
-        signs = {(0, 0): 1}
-        for arm, (words, boundaries) in enumerate(even_divisor_words(q, h % 2), 1):
-            for j, word in enumerate(words):
-                for p in range(1, h):
-                    signs[arm, j * h + p] = 1 if word[(p - 1) % 2] == "+" else -1
-            for j, sign in enumerate(boundaries, 1):
-                signs[arm, j * h] = 1 if sign == "+" else -1
+        spacing = d if d % 2 == 0 else d + 1
+        signs = _even_spacing_signs(b, spacing)
         left = sorted(v for v, sign in signs.items() if sign == 1)
         right = sorted(v for v, sign in signs.items() if sign == -1)
-        method = "even divisor periodic partition"
+        omitted = [(1, b + d)] if d % 2 == 0 else [(3, b - d)]
+        method = "even spacing signs" if d % 2 == 0 else "neighboring even spacing"
     result = check_pair(lengths, left, right)
-    if not result["homometric"] or result["size"] != (3 * q * d + 1) // 2:
-        raise ArithmeticError("divisible-family construction failed its exact check")
-    omitted = [] if q * d % 2 else [(1, lengths[0])]
+    if not result["homometric"] or result["size"] != 3 * b // 2:
+        raise ArithmeticError("even-middle construction failed its exact check")
     return {**result, "lengths": lengths, "left": left, "right": right,
-            "q": q, "d": d, "method": method, "omitted": omitted}
+            "b": b, "d": d, "method": method, "omitted": omitted}
 
 
-def even_divisor_residual(parity: int) -> Poly:
-    """Clear the full-shell identity in independent z,r,s (s=r**(2q-2))."""
-    if parity not in (0, 1):
-        raise ValueError("parity must be 0 or 1")
-    one, z, r, s = _mon(), _mon(1), _mon(r=1), _mon(s=1)
-    r2, r4 = _mon(r=2), _mon(r=4)
+def even_middle_residual() -> Poly:
+    """D*Q in independent z,u,v, with u=z**b and v=z**d."""
+    one, z, u, v = _mon(), _mon(1), _mon(r=1), _mon(s=1)
+    minus_z = _add(one, _scale(z, -1))
+    plus_z = _add(one, z)
     D = _add(one, _scale(_mon(2), -1))
-    U = _mul(_add(z, _scale(r, -1)), _add(one, z))
-    E = _mul(_add(_scale(z, -1), _scale(r, -1)) if parity == 0
-             else _add(r, _scale(z, -1)), _add(one, _scale(z, -1)))
-    gamma = _add(one, _scale(_mul(s, r2), -1))
-    if parity == 0:
-        H = _add(one, _scale(r, -1))
-        y1 = _add(_mul(H, E, _add(one, r), gamma),
-                  _scale(_mul(U, r2, _add(one, _scale(s, -1))), -1),
-                  _mul(D, _add(_mul(H, r), _scale(_mul(r2, gamma), -1))))
-        y2 = _scale(_mul(_add(E, _mul(D, r)), gamma), -1)
-        y3 = _mul(_add(U, _mul(D, r)), _add(one, _scale(s, -1)))
-        reflection_factor = _mon(2, 1)
-    else:
-        H = _add(one, _scale(r4, -1))
-        plus = _add(one, r, r2, _mon(r=3))
-        minus = _add(one, _scale(r, -1), r2, _scale(_mon(r=3), -1))
-        f = _add(one, _scale(r2, -1))
-        y1 = _add(_mul(H, _add(_mul(E, f, _add(one, _scale(_mul(s, r), -1))),
-                              _scale(_mul(U, _add(r, _mul(s, r2))), -1))),
-                  _mul(U, r, _add(one, r), _add(r2, s), f),
-                  _mul(D, _add(_scale(_mul(r, _add(one, r), _add(one, _scale(s, -1)), f), -1),
-                               _mul(s, _add(_scale(r, -1), _scale(r2, -1), _mon(r=3)), H))))
-        y2 = _add(_mul(H, E, _add(_mul(s, r), _scale(one, -1))),
-                  _mul(U, r, _add(one, _scale(s, -1)), plus), _mul(D, r, gamma, minus))
-        y3 = _scale(_mul(_add(one, _scale(s, -1)), _add(_mul(U, plus), _mul(D, r, minus))), -1)
-        reflection_factor = _mon(2, 4)
-    ends = (_mon(-1, 4, 1), _mon(r=2, s=1), s)
-    result = _mul(D, H, _add(one, *[_scale(a, -1) for a in ends]))
-    for i, numerator in enumerate((y1, y2, y3)):
+    ends = (_mon(-1, 1, 1), u, _mon(r=1, s=-1))
+    p1 = _add(_mul(minus_z, _add(u, _scale(one, -1)), _add(z, v)),
+              _scale(_mul(plus_z, _add(v, _scale(_mul(z, u), -1))), -1))
+    p2 = _mul(z, _add(one, _scale(u, -1)), minus_z)
+    p3 = _mul(z, _add(one, _scale(ends[2], -1)), plus_z)
+    result = _mul(D, _add(one, *[_scale(a, -1) for a in ends]))
+    for i, numerator in enumerate((p1, p2, p3)):
         star = {tuple(-a for a in powers): value for powers, value in numerator.items()}
         result = _add(result,
                       _mul(numerator, _add(one, *[_scale(a, -1) for j, a in enumerate(ends) if j != i])),
-                      _scale(_mul(reflection_factor, ends[i], star), -1))
+                      _mul(_mon(2), ends[i], star))
     return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("q", type=int, nargs="?")
+    parser.add_argument("b", type=int, nargs="?")
     parser.add_argument("d", type=int, nargs="?")
     parser.add_argument("--prove", action="store_true")
     parser.add_argument("--summary", action="store_true")
     args = parser.parse_args()
     if args.prove:
-        if args.q is not None or args.d is not None:
+        if args.b is not None or args.d is not None:
             parser.error("--prove does not take parameters")
-        if even_divisor_residual(0) or even_divisor_residual(1):
+        if even_middle_residual():
             raise ArithmeticError("nonzero three-variable symbolic residual")
-        print("PASS: both even-divisor identities in independent z,r,s")
+        print("PASS: even-middle identity in independent z,u,v")
         return 0
-    if args.q is None or args.d is None:
-        parser.error("give q>=2 and d>=1, or --prove")
+    if args.b is None or args.d is None:
+        parser.error("give even b and 1 <= d < b, or --prove")
     try:
-        result = divisible_witness(args.q, args.d)
+        result = even_middle_witness(args.b, args.d)
     except ValueError as error:
         parser.exit(2, str(error) + "\n")
     if args.summary:
