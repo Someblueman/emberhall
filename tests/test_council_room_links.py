@@ -71,6 +71,58 @@ assert.equal(openCouncilRecord('other','one'),false);
 frame.voting=null;assert.equal(openCouncilRecord('proposal','one'),false);
 """)
 
+    def test_all_active_proposals_are_paged_ready_first_with_working_links(self):
+        self.run_renderer(SETUP + r"""
+const records=Array.from({length:12},(_,i)=>proposal('p'+i,'Proposal '+i));
+records[0].notice={at:1,until:2};
+records[0].trial={task:'trial',evidence:'Checked'};
+records[0].endorsements=[{resident:person},{resident:person}];
+frame.voting.proposals=records;
+const before=JSON.stringify(data);draw();
+const shownIds=()=>byId(nodes['room-content'],'council-active-proposals').children.map(n=>
+  n.children.find(c=>c.tag==='a').id);
+assert.equal(shownIds().length,5);
+assert.equal(shownIds()[0],'council-proposal-p0','Ready proposal must precede newer proposals');
+assert.equal(shownIds()[1],'council-proposal-p11');
+assert(link('council-previous').disabled);assert(!link('council-next').disabled);
+assert.equal(link('council-next').attrs['aria-controls'],'council-active-proposals');
+const seen=[...shownIds()];
+link('council-next').dispatch('click');seen.push(...shownIds());
+assert.equal(document.activeElement,link('council-active-proposals'));
+assert.match(text(nodes['room-content']),/6–10 of 12 active proposals/);
+link('council-next').dispatch('click');seen.push(...shownIds());
+assert.equal(shownIds().length,2);assert(link('council-next').disabled);
+render=()=>{draw();voting();};refreshView(true);
+assert.match(text(nodes['room-content']),/11–12 of 12 active proposals/);
+assert.equal(document.activeElement,link('council-active-proposals'));
+assert.equal(new Set(seen).size,12);assert.equal(seen.length,12);
+assert.doesNotMatch(text(nodes['room-content']),/Future secret/);
+link('council-proposal-p1').listeners.click[0]({preventDefault(){}});
+assert(byId(nodes.voting,'vote-rule-p1').open);
+assert.equal(frame.seq,2);assert.equal(JSON.stringify(data),before);
+draw();assert.match(text(nodes['room-content']),/11–12 of 12 active proposals/);
+link('council-previous').dispatch('click');
+assert.match(text(nodes['room-content']),/6–10 of 12 active proposals/);
+""")
+
+    def test_proposal_pages_clamp_when_records_shrink_and_reset_in_history(self):
+        self.run_renderer(SETUP + r"""
+frame.voting.proposals=Array.from({length:11},(_,i)=>proposal('p'+i,'Proposal '+i));
+draw();link('council-next').dispatch('click');link('council-next').dispatch('click');
+frame.voting.proposals=frame.voting.proposals.slice(0,6);draw();
+assert.match(text(nodes['room-content']),/6–6 of 6 active proposals/);
+frame={...frame,seq:1};draw();
+assert.match(text(nodes['room-content']),/1–5 of 6 active proposals/);
+assert(link('council-previous').disabled);
+frame.voting.proposals=frame.voting.proposals.slice(0,2);draw();
+assert(link('council-next').disabled);
+const pages=all(nodes['room-content']).find(n=>n.attrs['aria-label']==='Active proposal pages');
+assert(pages.hidden);assert.equal(pages.attrs.style,'display:none');
+frame.voting.proposals=[];draw();
+assert(!link('council-active-proposals'));assert.equal(councilRoomState.page,0);
+assert.match(text(nodes['room-content']),/0 active proposals/);
+""")
+
 
 if __name__ == '__main__':
     unittest.main()
