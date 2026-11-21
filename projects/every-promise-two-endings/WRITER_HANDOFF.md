@@ -143,20 +143,72 @@ with hide glue and two ash spool clamps. It must sit twenty-four hours in the
 clamps before the wood can bear tension, and the soundpost is still too damp for
 the bridge; nothing is magically played or tied to Ivo's fate.
 
-## Next pieces and acceptance
+## Final acts (Linnet): complete draft, pending independent reading
 
-1. One independent reader reads chapter four in the fixed phone/desktop viewer
-   (using [checks/fourth-reading.json](checks/fourth-reading.json) or the
-   colophon's Chapter four resume buttons) before these spoilers, traces how
-   earlier promises change named people's actions in chapter four, and judges
-   whether Yel and Mara's exchange and the cedar-box objection remain human
-   rather than mechanical.
-2. With chapters two, three and four complete (~8,300 words across the three
-   middle chapters, ~11,500 words per full four-chapter reading across 64
-   paths and 14,961 reachable states), the project owner may assess middle-acts
-   milestone completion and advance to the final acts milestone. Keep Ivo's
-   uncertain fate independent of player choices.
+The work now has four acts: chapter one is Act I; chapters two–four are Act II;
+chapters five–six are Act III; chapters seven–eight are Act IV. Earlier scenes
+remain in place. The old chapter-four ending now continues into chapter five.
 
-The HTML remains a single downloadable work. All 14,961 reachable states and
-legacy chapter-one and chapter-three bookmarks are verified by
-`node projects/every-promise-two-endings/test_chapter.cjs`.
+**The afternoon I had already given away** starts nine days after the crossing.
+Iris buys rosin, loses an afternoon to requests she has accepted one at a time,
+and reads a real offer from Bessa at the wool market. She can copy at home for
+less money or take a six-week job in the countinghouse. Vela's leaking roof and
+Sava's planned visit to her sister expose the limits of indefinite availability.
+Anet and Pell offer Tuesday afternoons, with explicit limits of their own.
+
+**The sentence with an end date** makes the final revisable promise (`duty`):
+- `hours`: Iris stays, sends Friday copying to the market, and hears requests
+  Thursday from four until six. Anet and Pell receive Tuesday messages.
+- `handover`: Iris goes to the market for six weeks after transferring open
+  requests with their authors. Anet and Pell receive Tuesday messages; nobody
+  silently inherits Iris's Thursday desk.
+
+Both offers expire at a dated review. They can be changed earlier by telling
+those involved and handing open requests to somebody who agrees to take them.
+Sava still receives news about missing people; dangerous buildings remain the
+councils' responsibility. No route promises immediate answers or unlimited care.
+
+**What happened while we were keeping it** follows both versions through work,
+awkward limits and an ordinary Sunday. Staying costs Iris an uncomfortable
+unfinished conversation and does not make her copying flawless. Leaving costs
+her presence at home and does not make her proficient at the market. The coastal
+reply supplies no match for Ivo or Neri on either route. Iris remembers an angry,
+ordinary argument with Ivo, not only the lovable missing brother. At six weeks,
+Anet reduces her commitment because her paid sewing matters too. The group
+actually revises the arrangement; the first promise does not become permanent.
+
+**What we take into the morning** gives the characters a walk, onions, work at
+Else's loom and imperfect music. The violin has been inspected and set up by a
+visiting fiddler after its seam dried. No miraculous repair or musical mastery.
+Mara is company, not a reward for a correct choice. Pet has a bird book and a
+cage she uses for letters, and can be encountered without a grief conversation.
+The ending is **An hour with the door closed** or **Someone else brings the lamp**.
+The same uncertain absence remains in both. Iris can receive a request without
+accepting it for tonight. The lamp is carried by Pell or Anet in the final scene.
+
+Earlier choices still matter: school/bakery changes the sisters' working and
+living arrangements; open/quiet returns shape Anet's privacy concerns; hold/witness
+changes the parcel work that others have already done; lead/together changes the
+ongoing carpentry. Chairs/pages change what Iris notices about the cup or a list
+at the last door. The original timing difference remains in the earlier chapters.
+
+Count: 25,076 words, 585 distinct reachable prose paragraphs, using the reproducible
+method in README and `story_words.cjs`. Final acts add about 7,400–7,500 words to
+one reading. `test_chapter.cjs` calls `test_final.cjs`; all 52,849 states restore,
+including old bookmarks without `duty`. Revisiting any earlier agreement clears
+`duty`; revisiting only the final one preserves all earlier choices.
+
+The three final viewer routes passed at 390px/1280px, with real Tab/Enter
+returning from the final draft to the choice heading. No reported script errors,
+unlabelled controls, image-description gaps or horizontal overflow. The handover
+ending screenshots were inspected at both widths. The viewer overwrites the
+same screenshot filenames between requests; run one route at a time to inspect
+each image. A direct comparison also restored all 14,961 old states and retained
+all earlier scene text/choices except the two act labels and new continuation.
+
+Next: one independent whole-work literary/accessibility reading, following both
+endings before these spoilers, then project-owner assessment. In particular look
+for over-explained morals, repeated administrative exchanges, weak transitions
+across the six-week gap, and whether the last music scene is earned by the people.
+Do not treat the word count or engine checks as literary acceptance. No Gallery
+or house runtime change belongs to this contribution.

@@ -1,0 +1,77 @@
+[
+  {
+    "click": ".colophon summary"
+  },
+  {
+    "click": "#resume-final-open"
+  },
+  {
+    "click": "[data-choice=\"rosin\"]"
+  },
+  {
+    "click": "[data-choice=\"letter\"]"
+  },
+  {
+    "click": "[data-choice=\"tollhouse\"]"
+  },
+  {
+    "click": "[data-choice=\"schoolGate\"]"
+  },
+  {
+    "click": "[data-choice=\"wrongDoor\"]"
+  },
+  {
+    "click": "[data-choice=\"fifthEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"sixth\"]"
+  },
+  {
+    "click": "[data-choice=\"capacity\"]"
+  },
+  {
+    "click": "[data-choice=\"limits\"]"
+  },
+  {
+    "click": "[data-choice=\"duty\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-hours\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-duty\"]"
+  },
+  {
+    "click": "[data-choice=\"sixthEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"seventh\"]"
+  },
+  {
+    "click": "[data-choice=\"ordinaryWork\"]"
+  },
+  {
+    "click": "[data-choice=\"sunday\"]"
+  },
+  {
+    "click": "[data-choice=\"news\"]"
+  },
+  {
+    "click": "[data-choice=\"reviewDay\"]"
+  },
+  {
+    "click": "[data-choice=\"seventhEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"eighth\"]"
+  },
+  {
+    "click": "[data-choice=\"highFold\"]"
+  },
+  {
+    "click": "[data-choice=\"homeward\"]"
+  },
+  {
+    "press": "Tab"
+  }
+]
