@@ -59,10 +59,16 @@ while (queue.length) {
   const page = view(s);
   assert.ok(page.title && page.prose.length && page.choices.length, `empty scene ${s.scene}`);
   assert.deepEqual(plain(restore(JSON.stringify(s))), plain(s), `bookmark fails at ${s.scene}`);
-  if (!s.access && !s.shelter && !s.objects) {
-    const {access, shelter, objects, ...legacy} = s;
+  if (!s.access && !s.shelter && !s.objects && !s.aftermath) {
+    const {access, shelter, objects, aftermath, ...legacy} = s;
     if (!['second','yard','mara','pet','runa','access'].includes(s.scene)) {
       assert.deepEqual(plain(restore(JSON.stringify(legacy))), plain(s), 'chapter-one bookmark migration');
+    }
+  }
+  if (s.access && s.shelter && s.objects && !s.aftermath) {
+    const {aftermath, ...legacyThree} = s;
+    if (!['fourth','courtyard','yel','sisters','dispute'].includes(s.scene)) {
+      assert.deepEqual(plain(restore(JSON.stringify(legacyThree))), plain(s), 'chapter-three bookmark migration');
     }
   }
   assert.throws(() => step(s, 'not-a-choice'), /not available/);
@@ -77,7 +83,8 @@ assert.deepEqual([...scenes].sort(), ['after', 'crossing', 'dan', 'draft', 'edda
   'ivo', 'meal', 'meeting', 'names', 'opening', 'quay', 'sava', 'signed', 'timing',
   'second', 'yard', 'mara', 'pet', 'runa', 'access', 'shelter', 'middleDraft',
   'invitation', 'mill', 'binding', 'carrying', 'register', 'middleEnd',
-  'third', 'storeDoor', 'objects', 'objectDraft', 'returning', 'violin', 'dinner', 'thirdEnd'].sort());
+  'third', 'storeDoor', 'objects', 'objectDraft', 'returning', 'violin', 'dinner', 'thirdEnd',
+  'fourth', 'courtyard', 'yel', 'sisters', 'dispute', 'fourthDraft', 'objection', 'mending', 'fourthEnd'].sort());
 for (const bad of ['{', 'null', '[]', '{}', JSON.stringify({...fresh(), scene: '__proto__'}),
   JSON.stringify({...fresh(), scene: 'draft'}), JSON.stringify({...fresh(), revising: true}),
   JSON.stringify({...fresh(), heard: ['unknown']}), JSON.stringify({...fresh(), scene: 'constructor'})]) {
@@ -85,8 +92,8 @@ for (const bad of ['{', 'null', '[]', '{}', JSON.stringify({...fresh(), scene: '
 }
 // The new chapter has sixteen paths: both old promises and both new promises matter.
 const middleEndings = new Set();
-let middleRange = [], thirdRange = [];
-const thirdEndings = new Set(), completeReadings = new Set();
+let middleRange = [], thirdRange = [], fourthRange = [];
+const thirdEndings = new Set(), fourthEndings = new Set(), completeReadings = new Set();
 for (const timing of ['dawn', 'daylight']) for (const names of ['chairs', 'pages']) {
   const opening = walk(fresh(), ['quay', 'meeting', 'timing', `choose-${timing}`,
     `choose-${names}`, 'sign', 'crossing', 'meal', 'after', 'end']);
@@ -111,7 +118,7 @@ for (const timing of ['dawn', 'daylight']) for (const names of ['chairs', 'pages
         third = step(third, action); prose += text(third);
         count += text(third).split(/\s+/).length;
       }
-      thirdEndings.add(prose); completeReadings.add(reading + prose); thirdRange.push(count);
+      thirdEndings.add(prose); thirdRange.push(count);
       assert.equal(third.scene, 'thirdEnd');
       assert.ok(prose.includes(objects === 'open' ? 'photograph face down' : 'seen four households'), 'returning mode changes the afternoon');
       const changed = walk(third, ['return-objects', 'revise-objects',
@@ -120,6 +127,36 @@ for (const timing of ['dawn', 'daylight']) for (const names of ['chairs', 'pages
       assert.equal(changed.access, access); assert.equal(changed.shelter, shelter);
       assert.equal(step(third, 'return-middle').objects, null);
       assert.equal(step(third, 'return-draft').objects, null);
+      for (const aftermath of ['hold', 'witness']) {
+        let fourth = third, fourthProse = '', fourthWords = 0, courtyardSeen = false;
+        for (const action of ['fourth', 'courtyard', 'ask-yel', 'courtyard',
+          'ask-sisters', 'courtyard', 'dispute', `choose-${aftermath}`,
+          'agree-aftermath', 'mending', 'fourthEnd']) {
+          fourth = step(fourth, action);
+          if (fourth.scene === 'courtyard' && courtyardSeen) continue;
+          if (fourth.scene === 'courtyard') courtyardSeen = true;
+          fourthProse += text(fourth);
+          fourthWords += text(fourth).split(/\s+/).length;
+        }
+        assert.equal(fourth.scene, 'fourthEnd');
+        assert.ok(fourthWords >= 2100, `fourth chapter too short: ${fourthWords}`);
+        fourthEndings.add(fourthProse);
+        completeReadings.add(reading + prose + fourthProse);
+        fourthRange.push(fourthWords);
+        assert.ok(fourthProse.includes(aftermath === 'hold' ? 'three-day list' : 'up the valley path'), 'aftermath choice changes how the cedar box is settled');
+        assert.ok(fourthProse.includes(objects === 'open' ? 'saw the photograph on the school table' : 'handed out at the mill door'), 'store-room method shapes the objection');
+        assert.ok(fourthProse.includes(shelter === 'school' ? 'bread list before Lise begins' : 'burnt the back of her thumb'), 'shelter choice shapes Runa and Edda living with the arrangement');
+        assert.ok(fourthProse.includes('threw the apron out'), 'Yel and Mara speak directly without Iris administering them');
+        const rechosen = walk(fourth, ['return-aftermath', 'revise-aftermath',
+          `choose-${aftermath === 'hold' ? 'witness' : 'hold'}`]);
+        assert.equal(rechosen.scene, 'fourthDraft');
+        assert.equal(rechosen.objects, objects);
+        assert.equal(rechosen.access, access);
+        assert.equal(rechosen.shelter, shelter);
+        assert.equal(step(fourth, 'return-objects').aftermath, null);
+        assert.equal(step(fourth, 'return-middle').aftermath, null);
+        assert.equal(step(fourth, 'return-draft').aftermath, null);
+      }
     }
     middleEndings.add(reading); middleRange.push(words);
     assert.match(reading, timing === 'dawn' ? /sets her end down at once/ : /marks the seam before we lift/);
@@ -141,18 +178,22 @@ for (const timing of ['dawn', 'daylight']) for (const names of ['chairs', 'pages
   }
 }
 assert.equal(middleEndings.size, 16);
-// Chapter three remembers each middle decision and the meal, while the full story
-// also retains the crossing's consequences in chapter two.
+// Chapter three remembers each middle decision and the meal, while chapter four
+// remembers the store-room return, shelter, access and first-day promises across 64 full paths.
 assert.equal(thirdEndings.size, 16);
-assert.equal(completeReadings.size, 32);
+assert.equal(fourthEndings.size, 64);
+assert.equal(completeReadings.size, 64);
 for (const bad of [
-  {...fresh(), access: 'unknown'}, {...fresh(), objects: 'unknown'},
+  {...fresh(), access: 'unknown'}, {...fresh(), objects: 'unknown'}, {...fresh(), aftermath: 'unknown'},
   {...fresh(), scene: 'third', timing:'dawn', names:'chairs'},
+  {...fresh(), scene: 'fourth', timing:'dawn', names:'chairs', access:'lead', shelter:'school'},
+  {...fresh(), scene: 'mending', timing:'dawn', names:'chairs', access:'lead', shelter:'school', objects:'open'},
   {...fresh(), scene: 'dinner', timing:'dawn', names:'chairs', access:'lead', shelter:'school'}, {...fresh(), shelter: 'unknown'},
   {...fresh(), scene: 'second'},
   {...fresh(), scene: 'shelter', timing:'dawn', names:'chairs'},
   {...fresh(), scene: 'middleEnd', timing:'dawn', names:'chairs', access:'lead'}
 ]) assert.deepEqual(plain(restore(JSON.stringify(bad))), plain(fresh()));
+console.log(`Fourth chapter: ${Math.min(...fourthRange)}–${Math.max(...fourthRange)} words; both dispute routes, conversations and revisions pass.`);
 console.log(`Third chapter: ${Math.min(...thirdRange)}–${Math.max(...thirdRange)} words; both return routes and revisions pass.`);
 console.log(`Middle chapter: 16 distinct readings; ${Math.min(...middleRange)}–${Math.max(...middleRange)} words including conversations.`);
 console.log(`PASS: ${seen.size} reachable states; ${scenes.size} scenes; four distinct consequence combinations; revisions, restart and bookmarks.`);

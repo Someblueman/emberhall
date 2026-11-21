@@ -1,0 +1,47 @@
+[
+  {
+    "click": ".colophon summary"
+  },
+  {
+    "click": "#resume-fourth-quiet"
+  },
+  {
+    "click": "[data-choice=\"courtyard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-yel\"]"
+  },
+  {
+    "click": "[data-choice=\"courtyard\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-sisters\"]"
+  },
+  {
+    "click": "[data-choice=\"courtyard\"]"
+  },
+  {
+    "click": "[data-choice=\"dispute\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-hold\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-aftermath\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-witness\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-aftermath\"]"
+  },
+  {
+    "click": "[data-choice=\"mending\"]"
+  },
+  {
+    "click": "[data-choice=\"fourthEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"return-aftermath\"]"
+  }
+]
