@@ -1,0 +1,147 @@
+{
+  "cases": [
+    {
+      "event_label": "P(Tier >= 4)",
+      "id": "H1A",
+      "palette": "citrus_slate_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the exact linear-light model, could P(Tier >= 4) exceed 45%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "exact",
+      "set": "A",
+      "title": "Held-out outer face A"
+    },
+    {
+      "event_label": "P(Tier >= 4)",
+      "id": "H2A",
+      "palette": "citrus_slate_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the exact linear-light model, could P(Tier >= 4) exceed 55%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "exact",
+      "set": "A",
+      "title": "Held-out interior blend A"
+    },
+    {
+      "event_label": "P(Tier 3)",
+      "id": "H3A",
+      "palette": "citrus_slate_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the exact linear-light model, could P(Tier 3) exceed 80%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "exact",
+      "set": "A",
+      "title": "Held-out stop T3 (Mid)"
+    },
+    {
+      "event_label": "P(Tier >= 4)",
+      "id": "H4A",
+      "palette": "citrus_slate_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the srgb8 conservative observation model, could P(Tier >= 4) be below 48%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "srgb8",
+      "set": "A",
+      "title": "Held-out sRGB8 blend A"
+    },
+    {
+      "event_label": "P(Tier >= 4)",
+      "id": "H5A",
+      "palette": "citrus_slate_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the linear8 conservative observation model, could P(Tier >= 4) exceed 55%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "linear8",
+      "set": "A",
+      "title": "Held-out linear8 blend A"
+    },
+    {
+      "event_label": "P(Grade >= 4)",
+      "id": "H1B",
+      "palette": "ochre_indigo_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the exact linear-light model, could P(Grade >= 4) exceed 55%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "exact",
+      "set": "B",
+      "title": "Held-out outer face B"
+    },
+    {
+      "event_label": "P(Grade >= 4)",
+      "id": "H2B",
+      "palette": "ochre_indigo_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the exact linear-light model, could P(Grade >= 4) be below 45%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "exact",
+      "set": "B",
+      "title": "Held-out interior blend B"
+    },
+    {
+      "event_label": "P(R2 or R4)",
+      "id": "H3B",
+      "palette": "amber_navy_ramp",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the exact linear-light model, could P(R2 or R4) be below 15%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "exact",
+      "set": "B",
+      "title": "Held-out ramp mix B"
+    },
+    {
+      "event_label": "P(Grade >= 4)",
+      "id": "H4B",
+      "palette": "ochre_indigo_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the srgb8 conservative observation model, could P(Grade >= 4) exceed 65%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "srgb8",
+      "set": "B",
+      "title": "Held-out sRGB8 blend B"
+    },
+    {
+      "event_label": "P(Grade >= 4)",
+      "id": "H5B",
+      "palette": "ochre_indigo_3d",
+      "q1": "Minimum compatible probability p_min for the target event (fraction or %)",
+      "q2": "Maximum compatible probability p_max for the target event (fraction or %)",
+      "q3": "Identifiability status (EXACT / BOUNDED / UNIDENTIFIABLE)",
+      "q4": "Under the linear8 conservative observation model, could P(Grade >= 4) be below 26%? (YES / NO)",
+      "q5": "Clarity rating (1 to 5 integer) and brief note",
+      "query_mode": "linear8",
+      "set": "B",
+      "title": "Held-out linear8 blend B"
+    }
+  ],
+  "orders": {
+    "atlas_a_then_dist_b": {
+      "default_for_first_non_author": false,
+      "first": "atlas_a/first_legend.html",
+      "second": "dist_b/index.html"
+    },
+    "dist_a_then_atlas_b": {
+      "default_for_first_non_author": true,
+      "first": "dist_a/index.html",
+      "second": "atlas_b/first_legend.html"
+    }
+  },
+  "schema": "blended-colour-m3-prompts-v1"
+}

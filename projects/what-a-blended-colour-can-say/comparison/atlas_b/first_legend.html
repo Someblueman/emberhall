@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Held-Out Comparison Set B: Probability-Interval Atlas</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f1e9;color:#172c3c;font:17px/1.5 system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:24px}h1{font:36px Georgia,serif}h2{font-size:22px}article{background:white;border:1px solid #d6d9d8;border-radius:12px;margin:24px 0;padding:22px}a{color:#14547a}.columns{display:grid;grid-template-columns:1fr 1fr;gap:32px}.bar{height:28px;display:flex;border:1px solid #526776}.numbers{overflow-wrap:anywhere;font-size:15px}.swatch{width:140px;height:95px;border:1px solid #526776}code{font-size:15px}@media(max-width:650px){main{padding:14px}h1{font-size:29px}.columns{grid-template-columns:1fr;gap:8px}article{padding:16px}}
+[hidden]{display:none!important}button,select{font:inherit;padding:8px;max-width:100%}button{cursor:pointer}.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}:focus-visible{outline:3px solid #14547a;outline-offset:3px}#vector-window{height:560px;max-height:65vh;overflow:auto;border:1px solid #526776;background:#f3f1e9}#vector-window svg{display:block;width:1040px;max-width:none;height:auto}.vector-help{font-size:15px}
+</style></head><body><main><h1>Held-Out Comparison Set B: Probability-Interval Atlas</h1>
+<p>What probability could hide behind one blended colour? Every interval below has exact rational certificates and endpoint distributions you can inspect.</p>
+<div class="tools" id="view-tools" hidden>
+<label for="case-choice">Case</label><select id="case-choice"><option value="all">All cases</option><option value="0">H1B / Held-out outer face B</option><option value="1">H2B / Held-out interior blend B</option><option value="2">H3B / Held-out ramp mix B</option><option value="3">H4B / Held-out sRGB8 blend B</option><option value="4">H5B / Held-out linear8 blend B</option></select>
+<button type="button" id="vector-toggle" aria-pressed="false">Open the complete vector atlas</button></div>
+<p><a href="first_legend.svg" download>Download SVG for printing or zooming</a> · <a href="witnesses.json">Rational certificates</a> · <a href="example-output.txt">Real importing program output</a></p>
+<section id="vector-view" aria-label="Complete vector atlas" hidden>
+<p class="vector-help">Text stays at its printed size. Swipe sideways or focus the diagram and use arrow keys. Choose a case above to jump to its row.</p>
+<div class="tools"><button type="button" id="vector-left">Swatch and interval</button><button type="button" id="vector-right">Endpoint distributions</button></div>
+<div id="vector-window" tabindex="0" role="region" aria-label="Scrollable vector atlas"><svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1600" viewBox="0 0 1040 1600" role="img" aria-labelledby="title desc">
+<title id="title">Held-Out Comparison Set B: Probability-Interval Atlas</title>
+<desc id="desc">Exact probability intervals, conservative byte observation intervals, and endpoint distributions beside each displayed swatch.</desc>
+<style>text{font:16px sans-serif;fill:#172c3c}.title{font:bold 29px Georgia,serif}.heading{font:bold 19px sans-serif}.small{font:14px monospace}.label{font:bold 15px sans-serif}</style>
+<rect width="1040" height="1600" fill="#f3f1e9"/>
+<text x="30" y="43" class="title">Held-Out Comparison Set B: Probability-Interval Atlas</text>
+<text x="30" y="76" class="">Linear-light blends. Opaque, flat sRGB swatches. Exact fractions are authoritative.</text>
+<text x="30" y="105" class="">Byte ranges are conservative; percentages round outward. Distribution bars show exact-case endpoints.</text>
+<text x="30" y="130" class="">linear8 is raw linear data: its hex preview is NOT equivalent displayed light. No reader study claimed.</text>
+<rect x="18" y="150" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="180" class="heading">H1B / Held-out outer face B</text>
+<text x="34" y="206" class="label">P(Grade &gt;= 4)  [5/8, 5/8]  EXACT</text>
+<rect x="34" y="227" width="92" height="76" fill="#b186b8" stroke="#526776"/>
+<text x="34" y="328" class="small">#b186b8</text>
+<text x="144" y="244" class="label">Displayed sRGB8</text>
+<text x="144" y="270" class="small">ochre_indigo_3d</text>
+<text x="552" y="208" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="227" width="51.25000" height="22" fill="#5959da"/><rect x="603.25000" y="227" width="102.50000" height="22" fill="#7cd37c"/><rect x="705.75000" y="227" width="256.25000" height="22" fill="#cb59c4"/><text x="552" y="269" class="small">1: 1/8  2: 1/4  5: 5/8</text>
+<rect x="552.00000" y="297" width="51.25000" height="22" fill="#5959da"/><rect x="603.25000" y="297" width="102.50000" height="22" fill="#7cd37c"/><rect x="705.75000" y="297" width="256.25000" height="22" fill="#cb59c4"/><text x="552" y="339" class="small">1: 1/8  2: 1/4  5: 5/8</text>
+<text x="34" y="364" class="small">srgb8 #b186b8 -&gt; [57.40%, 63.53%] conservative</text>
+<text x="34" y="391" class="small">linear8 #703d7b -&gt; [61.48%, 63.23%] conservative</text>
+<text x="552" y="402" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="440" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="470" class="heading">H2B / Held-out interior blend B</text>
+<text x="34" y="496" class="label">P(Grade &gt;= 4)  [1/2, 5/8]  BOUNDED</text>
+<rect x="34" y="517" width="92" height="76" fill="#bf9498" stroke="#526776"/>
+<text x="34" y="618" class="small">#bf9498</text>
+<text x="144" y="534" class="label">Displayed sRGB8</text>
+<text x="144" y="560" class="small">ochre_indigo_3d</text>
+<text x="552" y="498" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="517" width="102.50000" height="22" fill="#7cd37c"/><rect x="654.50000" y="517" width="102.50000" height="22" fill="#b085ac"/><rect x="757.00000" y="517" width="102.50000" height="22" fill="#ed7c59"/><rect x="859.50000" y="517" width="102.50000" height="22" fill="#cb59c4"/><text x="552" y="559" class="small">2: 1/4  3: 1/4  4: 1/4  5: 1/4</text>
+<rect x="552.00000" y="587" width="30.75000" height="22" fill="#5959da"/><rect x="582.75000" y="587" width="123.00000" height="22" fill="#7cd37c"/><rect x="705.75000" y="587" width="128.12500" height="22" fill="#ed7c59"/><rect x="833.87500" y="587" width="128.12500" height="22" fill="#cb59c4"/><text x="552" y="629" class="small">1: 3/40  2: 3/10  4: 5/16  5: 5/16</text>
+<text x="34" y="654" class="small">srgb8 #bf9498 -&gt; [44.55%, 63.67%] conservative</text>
+<text x="34" y="681" class="small">linear8 #854c50 -&gt; [47.12%, 63.61%] conservative</text>
+<text x="552" y="692" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="730" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="760" class="heading">H3B / Held-out ramp mix B</text>
+<text x="34" y="786" class="label">P(R2 or R4)  [0, 1]  UNIDENTIFIABLE</text>
+<rect x="34" y="807" width="92" height="76" fill="#aa8fb7" stroke="#526776"/>
+<text x="34" y="908" class="small">#aa8fb7</text>
+<text x="144" y="824" class="label">Displayed sRGB8</text>
+<text x="144" y="850" class="small">amber_navy_ramp</text>
+<text x="552" y="788" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="807" width="102.50000" height="22" fill="#597cda"/><rect x="654.50000" y="807" width="307.50000" height="22" fill="#bc95aa"/><text x="552" y="849" class="small">1: 1/4  3: 3/4</text>
+<rect x="552.00000" y="877" width="307.50000" height="22" fill="#9589c4"/><rect x="859.50000" y="877" width="102.50000" height="22" fill="#daa089"/><text x="552" y="919" class="small">2: 3/4  4: 1/4</text>
+<text x="34" y="944" class="small">srgb8 #aa8fb7 -&gt; [0.00%, 100.00%] conservative</text>
+<text x="34" y="971" class="small">linear8 #664679 -&gt; [0.00%, 100.00%] conservative</text>
+<text x="552" y="982" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1020" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1050" class="heading">H4B / Held-out sRGB8 blend B</text>
+<text x="34" y="1076" class="label">P(Grade &gt;= 4)  [3/5, 3/5]  EXACT</text>
+<rect x="34" y="1097" width="92" height="76" fill="#c58093" stroke="#526776"/>
+<text x="34" y="1198" class="small">#c58093</text>
+<text x="144" y="1114" class="label">Displayed sRGB8</text>
+<text x="144" y="1140" class="small">ochre_indigo_3d</text>
+<text x="552" y="1078" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1097" width="123.00000" height="22" fill="#5959da"/><rect x="675.00000" y="1097" width="41.00000" height="22" fill="#7cd37c"/><rect x="716.00000" y="1097" width="246.00000" height="22" fill="#ed7c59"/><text x="552" y="1139" class="small">1: 3/10  2: 1/10  4: 3/5</text>
+<rect x="552.00000" y="1167" width="123.00000" height="22" fill="#5959da"/><rect x="675.00000" y="1167" width="41.00000" height="22" fill="#7cd37c"/><rect x="716.00000" y="1167" width="246.00000" height="22" fill="#ed7c59"/><text x="552" y="1209" class="small">1: 3/10  2: 1/10  4: 3/5</text>
+<text x="34" y="1234" class="small">srgb8 #c58093 -&gt; [54.08%, 61.28%] conservative</text>
+<text x="34" y="1261" class="small">linear8 #8f374a -&gt; [55.08%, 61.30%] conservative</text>
+<text x="552" y="1272" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1310" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1340" class="heading">H5B / Held-out linear8 blend B</text>
+<text x="34" y="1366" class="label">P(Grade &gt;= 4)  [4/15, 3/5]  BOUNDED</text>
+<rect x="34" y="1387" width="92" height="76" fill="#bf899b" stroke="#526776"/>
+<text x="34" y="1488" class="small">#bf899b</text>
+<text x="144" y="1404" class="label">Displayed sRGB8</text>
+<text x="144" y="1430" class="small">ochre_indigo_3d</text>
+<text x="552" y="1368" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1387" width="27.33333" height="22" fill="#7cd37c"/><rect x="579.33333" y="1387" width="273.33333" height="22" fill="#b085ac"/><rect x="852.66667" y="1387" width="95.66667" height="22" fill="#ed7c59"/><rect x="948.33333" y="1387" width="13.66667" height="22" fill="#cb59c4"/><text x="552" y="1429" class="small">2: 1/15  3: 2/3  4: 7/30  5: 1/30</text>
+<rect x="552.00000" y="1457" width="82.00000" height="22" fill="#5959da"/><rect x="634.00000" y="1457" width="82.00000" height="22" fill="#7cd37c"/><rect x="716.00000" y="1457" width="164.00000" height="22" fill="#ed7c59"/><rect x="880.00000" y="1457" width="82.00000" height="22" fill="#cb59c4"/><text x="552" y="1499" class="small">1: 1/5  2: 1/5  4: 2/5  5: 1/5</text>
+<text x="34" y="1524" class="small">srgb8 #bf899b -&gt; [23.33%, 61.24%] conservative</text>
+<text x="34" y="1551" class="small">linear8 #854054 -&gt; [24.39%, 61.40%] conservative</text>
+<text x="552" y="1562" class="small">Segment labels: stop number : exact probability</text>
+</svg></div></section>
+<div id="card-view">
+<p>Compute a linear-light blend, transfer to sRGB, then round to bytes. The opaque, flat sRGB8 swatches follow that pipeline. Raw linear8 data has a separate byte bound; its hex preview does not have the same displayed light.</p>
+<p>Byte intervals conservatively include every compatible distribution. Percentage endpoints round outward; the exact fractions in the certificates are authoritative. Bars show the two <em>exact-case</em> endpoint distributions beside the same swatch. This is a supplied comparison, not a blind readability study.</p>
+<article data-case="0"><h2>H1B / Held-out outer face B</h2><div class="columns"><section><div class="swatch" style="background:#b186b8" role="img" aria-label="Displayed sRGB colour #b186b8"></div><p><code>#b186b8</code> · displayed sRGB8</p><p>P(Grade &gt;= 4): <b>[5/8, 5/8]</b> (EXACT)</p><p><b>srgb8</b> <code>#b186b8</code>: [57.40%, 63.53%] (conservative)</p><p><b>linear8</b> <code>#703d7b</code>: [61.48%, 63.23%] (conservative)</p></section><section aria-label="Explicit endpoint distributions"><p><b>Lower endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.125;background:#5959da"></span><span style="flex:0.25;background:#7cd37c"></span><span style="flex:0.625;background:#cb59c4"></span></div><p class="numbers">G1 Safe: 1/8; G2 Guarded: 1/4; G5 Critical: 5/8</p><p><b>Upper endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.125;background:#5959da"></span><span style="flex:0.25;background:#7cd37c"></span><span style="flex:0.625;background:#cb59c4"></span></div><p class="numbers">G1 Safe: 1/8; G2 Guarded: 1/4; G5 Critical: 5/8</p></section></div></article><article data-case="1"><h2>H2B / Held-out interior blend B</h2><div class="columns"><section><div class="swatch" style="background:#bf9498" role="img" aria-label="Displayed sRGB colour #bf9498"></div><p><code>#bf9498</code> · displayed sRGB8</p><p>P(Grade &gt;= 4): <b>[1/2, 5/8]</b> (BOUNDED)</p><p><b>srgb8</b> <code>#bf9498</code>: [44.55%, 63.67%] (conservative)</p><p><b>linear8</b> <code>#854c50</code>: [47.12%, 63.61%] (conservative)</p></section><section aria-label="Explicit endpoint distributions"><p><b>Lower endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.25;background:#7cd37c"></span><span style="flex:0.25;background:#b085ac"></span><span style="flex:0.25;background:#ed7c59"></span><span style="flex:0.25;background:#cb59c4"></span></div><p class="numbers">G2 Guarded: 1/4; G3 Moderate: 1/4; G4 Elevated: 1/4; G5 Critical: 1/4</p><p><b>Upper endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.075;background:#5959da"></span><span style="flex:0.3;background:#7cd37c"></span><span style="flex:0.3125;background:#ed7c59"></span><span style="flex:0.3125;background:#cb59c4"></span></div><p class="numbers">G1 Safe: 3/40; G2 Guarded: 3/10; G4 Elevated: 5/16; G5 Critical: 5/16</p></section></div></article><article data-case="2"><h2>H3B / Held-out ramp mix B</h2><div class="columns"><section><div class="swatch" style="background:#aa8fb7" role="img" aria-label="Displayed sRGB colour #aa8fb7"></div><p><code>#aa8fb7</code> · displayed sRGB8</p><p>P(R2 or R4): <b>[0, 1]</b> (UNIDENTIFIABLE)</p><p><b>srgb8</b> <code>#aa8fb7</code>: [0.00%, 100.00%] (conservative)</p><p><b>linear8</b> <code>#664679</code>: [0.00%, 100.00%] (conservative)</p></section><section aria-label="Explicit endpoint distributions"><p><b>Lower endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.25;background:#597cda"></span><span style="flex:0.75;background:#bc95aa"></span></div><p class="numbers">R1: 1/4; R3: 3/4</p><p><b>Upper endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.75;background:#9589c4"></span><span style="flex:0.25;background:#daa089"></span></div><p class="numbers">R2: 3/4; R4: 1/4</p></section></div></article><article data-case="3"><h2>H4B / Held-out sRGB8 blend B</h2><div class="columns"><section><div class="swatch" style="background:#c58093" role="img" aria-label="Displayed sRGB colour #c58093"></div><p><code>#c58093</code> · displayed sRGB8</p><p>P(Grade &gt;= 4): <b>[3/5, 3/5]</b> (EXACT)</p><p><b>srgb8</b> <code>#c58093</code>: [54.08%, 61.28%] (conservative)</p><p><b>linear8</b> <code>#8f374a</code>: [55.08%, 61.30%] (conservative)</p></section><section aria-label="Explicit endpoint distributions"><p><b>Lower endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.3;background:#5959da"></span><span style="flex:0.1;background:#7cd37c"></span><span style="flex:0.6;background:#ed7c59"></span></div><p class="numbers">G1 Safe: 3/10; G2 Guarded: 1/10; G4 Elevated: 3/5</p><p><b>Upper endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.3;background:#5959da"></span><span style="flex:0.1;background:#7cd37c"></span><span style="flex:0.6;background:#ed7c59"></span></div><p class="numbers">G1 Safe: 3/10; G2 Guarded: 1/10; G4 Elevated: 3/5</p></section></div></article><article data-case="4"><h2>H5B / Held-out linear8 blend B</h2><div class="columns"><section><div class="swatch" style="background:#bf899b" role="img" aria-label="Displayed sRGB colour #bf899b"></div><p><code>#bf899b</code> · displayed sRGB8</p><p>P(Grade &gt;= 4): <b>[4/15, 3/5]</b> (BOUNDED)</p><p><b>srgb8</b> <code>#bf899b</code>: [23.33%, 61.24%] (conservative)</p><p><b>linear8</b> <code>#854054</code>: [24.39%, 61.40%] (conservative)</p></section><section aria-label="Explicit endpoint distributions"><p><b>Lower endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.0666666666667;background:#7cd37c"></span><span style="flex:0.666666666667;background:#b085ac"></span><span style="flex:0.233333333333;background:#ed7c59"></span><span style="flex:0.0333333333333;background:#cb59c4"></span></div><p class="numbers">G2 Guarded: 1/15; G3 Moderate: 2/3; G4 Elevated: 7/30; G5 Critical: 1/30</p><p><b>Upper endpoint</b></p><div class="bar" aria-hidden="true"><span style="flex:0.2;background:#5959da"></span><span style="flex:0.2;background:#7cd37c"></span><span style="flex:0.4;background:#ed7c59"></span><span style="flex:0.2;background:#cb59c4"></span></div><p class="numbers">G1 Safe: 1/5; G2 Guarded: 1/5; G4 Elevated: 2/5; G5 Critical: 1/5</p></section></div></article></div><footer>Supported: declared rational linear-light sRGB palettes, exact colours, sRGB8 and linear8 observations, half-up rounding. No screenshots, compression, alpha compositing, colour profiles or encoded-space blending. See DISPLAY.md in the repository for the derivation and limits.</footer></main><script>
+const choice = document.getElementById('case-choice');
+const vector = document.getElementById('vector-view');
+const viewport = document.getElementById('vector-window');
+const toggle = document.getElementById('vector-toggle');
+function showCase() {
+  const index = choice.value;
+  document.querySelectorAll('article[data-case]').forEach(card => {
+    card.hidden = index !== 'all' && card.dataset.case !== index;
+  });
+  viewport.scrollTop = index === 'all' ? 0 : 150 + 290 * Number(index);
+}
+toggle.addEventListener('click', () => {
+  const showing = vector.hidden;
+  vector.hidden = !showing;
+  document.getElementById('card-view').hidden = showing;
+  toggle.textContent = showing ? 'Read the responsive cards' : 'Open the complete vector atlas';
+  toggle.setAttribute('aria-pressed', String(showing));
+  showCase();
+});
+choice.addEventListener('change', showCase);
+document.getElementById('vector-left').addEventListener('click', () => { viewport.scrollLeft = 0; });
+document.getElementById('vector-right').addEventListener('click', () => { viewport.scrollLeft = 520; });
+document.getElementById('view-tools').hidden = false;
+</script></body></html>
