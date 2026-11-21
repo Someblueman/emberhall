@@ -123,12 +123,42 @@ class PublishedCasesTest(unittest.TestCase):
         self.assertTrue(result["attains_bound"])
         self.assert_witness((29, 17, 6), (result["left"], result["right"]))
 
-    def test_remaining_family_is_not_reported_as_solved(self):
+    def test_new_family_is_selected_and_old_modes_preserved(self):
         result = pc.witness((110, 77, 44))
-        self.assertEqual(result["size"], 113)
+        self.assertEqual(result["size"], 115)
         self.assertEqual(result["target"], 115)
-        self.assertFalse(result["meets_target"])
+        self.assertTrue(result["attains_bound"])
         self.assert_witness((110, 77, 44), (result["left"], result["right"]))
+        self.assertEqual(pc.witness((110, 77, 44), "path")["size"], 94)
+        self.assertEqual(pc.witness((110, 77, 44), "block")["size"], 110)
+
+    def test_arithmetic_cases_and_original_arm_labels(self):
+        for lengths, size in [((63, 137, 100), 150), ((9, 6, 12), 14),
+                              ((10, 16, 13), 19), ((57, 133, 95), 142)]:
+            result = pc.witness(lengths)
+            self.assertEqual(result["size"], size)
+            self.assertTrue(result["attains_bound"])
+            self.assert_witness(lengths, (result["left"], result["right"]))
+        # Both upper-bound proofs apply, but remove only one from full size.
+        self.assertEqual(pc.certified_upper_bound((15, 11, 7)), 16)
+
+    def test_genuinely_uncovered_case_remains_explicit(self):
+        result = pc.witness((43, 31, 19))
+        self.assertEqual(result["size"], 45)
+        self.assertEqual(result["target"], 46)
+        self.assertFalse(result["meets_target"])
+        self.assertFalse(result["attains_bound"])
+
+    def test_real_default_command_round_trip(self):
+        script = str(Path(pc.__file__))
+        for lengths, size in [((110, 77, 44), 115), ((63, 137, 100), 150),
+                              ((12, 9, 6), 14), ((133, 95, 57), 142)]:
+            run = subprocess.run([sys.executable, script, *map(str, lengths)],
+                                 text=True, capture_output=True, check=True)
+            self.assertEqual(json.loads(run.stdout)["size"], size)
+            checked = subprocess.run([sys.executable, script, "--check", "-"],
+                                     input=run.stdout, text=True, capture_output=True)
+            self.assertEqual(checked.returncode, 0, checked.stderr)
 
     def test_residue_upper_bound_and_equal_arm_sharpness(self):
         for lengths in [(3, 3, 3), (15, 11, 7), (11, 7, 5)]:

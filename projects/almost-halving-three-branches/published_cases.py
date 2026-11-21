@@ -55,11 +55,16 @@ def profile(vertices: list[Vertex]) -> Counter[int]:
 
 
 def certified_upper_bound(lengths: Lengths) -> int:
-    """Disjointness, improved by the proved full-partition residue obstruction."""
+    """Disjointness and the proved residue/arithmetic partition obstructions."""
     bound = (1 + sum(lengths)) // 2
     period = gcd(*(n + 1 for n in lengths))
     if period % 2 == 0 and sum((n + 1) // period for n in lengths) % 2 == 1:
         bound -= 1
+    a, b, c = sorted(lengths, reverse=True)
+    d = a - b
+    if d > 0 and a + c == 2 * b and b % 2 and b % d and (b + 1) % (2 * d):
+        # This may overlap the residue obstruction: never subtract twice.
+        bound = min(bound, (3 * b - 1) // 2)
     return bound
 
 
@@ -141,20 +146,47 @@ def _base_candidates(lengths: Lengths, kind: str) -> list[tuple[str, Pair]]:
         candidates.append(("path", path_pair(lengths)))
     if kind in {"best", "separated-path"}:
         candidates.append(("separated-path", separated_path_pair(lengths)))
-    order = sorted(range(1, 4), key=lambda arm: lengths[arm - 1], reverse=True)
-    a, b, c = (lengths[i - 1] for i in order)
+    canonical_order = sorted(range(1, 4), key=lambda arm: lengths[arm - 1], reverse=True)
+    a, b, c = (lengths[i - 1] for i in canonical_order)
+
+    def add_family(name: str, family: dict) -> None:
+        pair = tuple([CENTRE if v == CENTRE else (canonical_order[v[0] - 1], v[1])
+                      for v in part] for part in (family["left"], family["right"]))
+        candidates.append((name, pair))
+
     if kind == "best" and c >= 2 and (a, b) == (4 * c - 1, 2 * c):
         family = gap_family_witness(c)
-        pair = tuple([CENTRE if v == CENTRE else (order[v[0] - 1], v[1]) for v in part]
-                     for part in (family["left"], family["right"]))
-        candidates.append((family["construction"], pair))
+        add_family(family["construction"], family)
     t = (c + 1) // 2
     if kind == "best" and t >= 2 and t % 2 == 0 and (a, b, c) == (
             4 * t - 1, 3 * t - 1, 2 * t - 1):
         family = sharp_family_witness(t)
-        pair = tuple([CENTRE if v == CENTRE else (order[v[0] - 1], v[1]) for v in part]
-                     for part in (family["left"], family["right"]))
-        candidates.append((family["construction"], pair))
+        add_family(family["construction"], family)
+    if kind == "best":
+        # Constructors use check_pair, not construct. Local imports keep the
+        # standalone script and each proof module usable without a cycle.
+        t = c // 4
+        if t >= 2 and (a, b, c) == (10 * t, 7 * t, 4 * t):
+            from next_family import family_witness
+            add_family("next family", family_witness(t))
+        t = c // 3
+        if t >= 3 and t % 2 and (a, b, c) == (7 * t, 5 * t, 3 * t):
+            from odd_middle import family_witness
+            add_family("seven-five-three family", family_witness(t))
+        if a > b and a + c == 2 * b:
+            d = a - b
+            if b % 2 == 0:
+                from progression_target import even_middle_witness
+                family = even_middle_witness(b, d)
+                add_family(family["method"], family)
+            elif b % d == 0 or (b + 1) % (2 * d) == 0:
+                from progression_partitions import classify
+                family = classify(b, d, include_witness=True)
+                add_family(family["reason"], family)
+            elif b % 4 == 1 and d % 4 == 3:
+                from progression_target import odd_class_witness
+                family = odd_class_witness(b, d)
+                add_family(family["method"], family)
     for order in permutations((1, 2, 3)):
         for name, builder in (("alternating", alternating_pair), ("block", block_pair)):
             if kind not in {"best", name}:
