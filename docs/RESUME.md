@@ -255,14 +255,14 @@ persistent Git signing change. Do not duplicate the single coordinator.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-The latest verified checkpoint contains **24,650 events**, through
-`469d49273ad6d0a2173cca73d4bb550ac78df619` (20 November 2026, 07:36 UTC).
-The fixed-channel checkpoint worker restored the 32,030,596-byte bundle in a
+The latest verified checkpoint contains **27,456 events**, through
+`9a6a75a029808e21f5b6e8ac7ad348271871894a` (21 November 2026, 08:30 UTC).
+The fixed-channel checkpoint worker restored the 34,430,286-byte bundle in a
 disposable repository and compared every event and the resulting house state.
-Hawthorn matched the delivered metadata hash, journal head and anchor to the
+Fern matched the delivered metadata hash, journal head and anchor to the
 worker's compact receipt. The bundle SHA256 is
-`3800e12b980485d6fae794a65c45e430b869b0ebfee0e53932ce86a7d9ab4c4b`.
-The [dated metadata](../evidence/house-checkpoint-24650-8ef9f2b09de1b687f5bfa814a38f56f365982a25609b439aba4f39bf8f98ab67.json)
+`950d30922005ce8675df06a9f7cceaa648af725da7e27d9f7f237c257c9072ab`.
+The [dated metadata](../evidence/house-checkpoint-27456-106c35692bcb4d15dee136529f783160d8c0493cc0d64e6df29fed85fc347e2a.json)
 and [current pointer](../evidence/checkpoint.json) are byte-for-byte identical.
 
 Under the course correction, this bundle stays in the canonical host's private
@@ -271,7 +271,7 @@ clone with an absent journal, after explicitly copying the retained bundle to th
 same relative path, use:
 
 ```sh
-python3 -m house restore .git/house-home/checkpoints/8ef9f2b09de1b687f5bfa814a38f56f365982a25609b439aba4f39bf8f98ab67/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore .git/house-home/checkpoints/106c35692bcb4d15dee136529f783160d8c0493cc0d64e6df29fed85fc347e2a/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
