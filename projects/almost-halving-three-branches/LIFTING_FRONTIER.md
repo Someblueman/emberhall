@@ -340,6 +340,101 @@ by one. Corruption tests reject altered coefficients and a false
 all-colourings verdict. This exact restriction still leaves mixed-parity
 colourings of every remaining support unresolved.
 
+## One-swap colourings force an adjacent exchange
+
+For the same frontier, omit two odd vertices, start from its even/odd
+partition, and exchange an even vertex u with a retained odd vertex v.
+If the resulting sets are homometric, **u and v must be adjacent in the
+original tree**. This is an arbitrary-parameter restriction on every such
+colouring and every pair of odd holes. It does not exclude adjacent swaps.
+
+Let P_u be the odd-distance profile from u to the full odd class O, and
+P_v the odd-distance profile from v to the full even class E. Equality of
+odd-distance pairs after the swap requires
+
+    P_u(z)-P_v(z)=z^dist(u,h_1)+z^dist(u,h_2).         (11)
+
+Indeed the swapped sets contain respectively v and u as their only vertex
+of the minority parity. The removed u-v term occurs on both sides and
+cancels. Thus the full-profile difference must be coefficientwise
+nonnegative, with coefficient sum two. This necessary condition is already
+strong enough to force adjacency on the specified frontier.
+
+Write z^(2k+1)=z*x^k. For an even root u=(a,2r) on an arm, r=1,...,p_a,
+and an odd root v=(b,2s+1), s=0,...,p_b, their normalized profiles are
+
+    P_u/z = [0,r-1]+[0,p_a-r]+sum_(j!=a)[r,r+p_j],
+    P_v/z = [0,s]+[0,p_b-s-1]+sum_(j!=b)[s+1,s+p_j].
+
+Here [l,h] means sum of x^k for l<=k<=h, or zero if l>h. At the centre,
+P_u/z=sum_j[0,p_j]. These formulas count original paths, including the
+centre once and without contracting either omitted vertex.
+
+An interval is the difference of two step functions. Consequently the
+profile difference is the cumulative count of four positive endpoints P
+minus four negative endpoints Q. Off-centre these multisets are
+
+    P = {r, p_b-s, s+p_j+1 for j!=b},
+    Q = {s+1, p_a-r+1, r+p_j+1 for j!=a}.
+
+At the centre replace P's first endpoint by 0 and take
+Q={s+1,p_1+1,p_2+1,p_3+1}. Coefficientwise nonnegativity is equivalent
+to the four sorted positive endpoints being no larger than the respective
+sorted negative endpoints. Also sum(Q)-sum(P)=2, since the odd class has
+two more vertices. Hence some matching of the endpoints obeys
+
+    Q_i = P_permutation(i) + delta_i,
+    delta_i>=0 integers, sum(delta_i)=2.              (12)
+
+There are 24 permutations and exactly 10 such delta vectors. For each of
+12 choices of root arms (including the centre), substitute
+p=(3780t+113,3780t+33,3780t+5) into (12). This gives **2,880 affine
+systems over the unbounded variables t,r,s**, rather than a census of
+parameter values. For the centre also impose r=0. The checker performs
+exact rational row reduction on every system and obtains:
+
+| Algebraic outcome | Systems |
+|---|---:|
+| Inconsistent equations | 1,932 |
+| Forces a negative or nonintegral t | 723 |
+| Forces a nonintegral or out-of-domain root coordinate | 27 |
+| Forces adjacency | 198 |
+
+Every surviving system implies a=b and s=r or s=r-1, or u is the centre
+and s=0. These are precisely the original-tree edges. Unsorted matches
+were deliberately admitted; this enlarges the necessary domain and does
+not exclude a legitimate solution. No finite bound on t, r or s is used.
+If any system cannot be classified, the command fails instead of issuing
+a certificate. A saved certificate is rebuilt and compared in full.
+
+For adjacent roots, (11) makes the possible hole distances explicit:
+
+| Exchange | (P_u-P_v)/z |
+|---|---|
+| u=(a,2r), v=(a,2r-1) | x^(r+p_j)+x^(r+p_k), j,k!=a |
+| u=(a,2r), v=(a,2r+1) | x^r+x^(p_a-r) |
+| u=centre, v=(a,1) | 1+x^p_a |
+
+Thus the holes must lie on these two distance shells around u, with
+multiplicity if the exponents coincide, and cannot equal v. Satisfying
+this odd-distance condition still leaves **all even-distance equations**
+to prove. Exploratory checks found no exact one-swap solution for a few
+small shifts; those bounded failures are not part of the theorem.
+
+```sh
+python3 projects/almost-halving-three-branches/lifting_frontier.py --swap-adjacency
+```
+
+This prints the four counts above, `one_swap_roots_must_be_adjacent: true`,
+and `one_swap_homometric_pairs_excluded: false`. Independent breadth-first
+profiles on the 306-vertex original tree check every even/odd root pair:
+exactly its 305 edges have a nonnegative profile difference, and every
+edge has the two monomials in the table. Tests also reject altered
+classification counts and a false all-colourings verdict through the real
+command. The next gap is exact even-distance compatibility for adjacent
+swaps, followed by colourings with more minority vertices; neither is
+claimed solved here.
+
 ## Reproduce
 
 From a repository clone, Python 3.10+ and its standard library suffice:

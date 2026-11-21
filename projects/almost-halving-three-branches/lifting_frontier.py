@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import argparse
 from collections import deque
+from fractions import Fraction
+from itertools import permutations, product
 import json
 from pathlib import Path
 
@@ -305,6 +307,98 @@ def verify_parity_obstruction(saved):
     return expected
 
 
+def _affine_rows(rows):
+    """Exact elimination of equations a*t+b*r+c*s+d=0."""
+    rows = [[Fraction(x) for x in row] for row in rows]
+    pivot = 0
+    for column in range(3):
+        hit = next((i for i in range(pivot, len(rows)) if rows[i][column]), None)
+        if hit is None:
+            continue
+        rows[pivot], rows[hit] = rows[hit], rows[pivot]
+        scale = rows[pivot][column]
+        rows[pivot] = [x/scale for x in rows[pivot]]
+        for i in range(len(rows)):
+            if i != pivot and rows[i][column]:
+                scale = rows[i][column]
+                rows[i] = [x-scale*y for x, y in zip(rows[i], rows[pivot])]
+        pivot += 1
+    if any(not any(row[:3]) and row[3] for row in rows):
+        return None
+    return rows[:pivot]
+
+
+def _implied_zero(rows, expression):
+    expression = list(map(Fraction, expression))
+    for row in rows:
+        column = next(i for i in range(3) if row[i])
+        scale = expression[column]
+        expression = [x-scale*y for x, y in zip(expression, row)]
+    return not any(expression)
+
+
+def swap_adjacency_certificate():
+    """Finite affine proof for all t, not a bounded search over trees.
+
+    Classify all 4!*10 endpoint matches for each of 12 root-arm choices.
+    A surviving system must force the even and odd roots to be adjacent.
+    """
+    constants = (113, 33, 5)
+    counts = dict(inconsistent=0, nonintegral_or_negative_parameter=0,
+                  invalid_root_coordinate=0, adjacency_forced=0)
+    deltas = [d for d in product(range(3), repeat=4) if sum(d) == 2]
+    for a, b in product(range(-1, 3), range(3)):
+        negative = ([(0, 0, 1, 1)] + [(3780, 0, 0, p+1) for p in constants]
+                    if a == -1 else
+                    [(0, 0, 1, 1), (3780, -1, 0, constants[a]+1)]
+                    + [(3780, 1, 0, p+1) for j, p in enumerate(constants) if j != a])
+        positive = [(0, int(a != -1), 0, 0), (3780, 0, -1, constants[b])]
+        positive += [(3780, 0, 1, p+1) for j, p in enumerate(constants) if j != b]
+        for order, delta in product(permutations(range(4)), deltas):
+            rows = []
+            for i in range(4):
+                row = [x-y for x, y in zip(negative[i], positive[order[i]])]
+                row[3] -= delta[i]
+                rows.append(row)
+            if a == -1:
+                rows.append([0, 1, 0, 0])
+            rows = _affine_rows(rows)
+            if rows is None:
+                counts['inconsistent'] += 1
+                continue
+            adjacent = (_implied_zero(rows, (0, 0, 1, 0)) if a == -1 else
+                        a == b and (_implied_zero(rows, (0, -1, 1, 0))
+                                    or _implied_zero(rows, (0, -1, 1, 1))))
+            if adjacent:
+                counts['adjacency_forced'] += 1
+                continue
+            fixed = {}
+            for row in rows:
+                columns = [i for i, value in enumerate(row[:3]) if value]
+                if len(columns) == 1:
+                    fixed[columns[0]] = -row[3]
+            if 0 in fixed and (fixed[0].denominator != 1 or fixed[0] < 0):
+                counts['nonintegral_or_negative_parameter'] += 1
+                continue
+            if any(value.denominator != 1 or value < (1 if j == 1 and a != -1 else 0)
+                   for j, value in fixed.items()):
+                counts['invalid_root_coordinate'] += 1
+                continue
+            raise AssertionError('an endpoint system needs a further mathematical argument')
+    return {"family": "T(227+7560t,67+7560t,11+7560t), integer t>=0",
+            "endpoint_systems": 2880, "classification": counts,
+            "one_swap_roots_must_be_adjacent": True,
+            "one_swap_homometric_pairs_excluded": False,
+            "all_colourings_excluded": False}
+
+
+def verify_swap_adjacency_certificate(saved):
+    expected = swap_adjacency_certificate()
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError('swap adjacency certificate differs from the reconstructed proof')
+    return expected
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parameter", type=int, default=0,
@@ -314,6 +408,8 @@ def main(argv=None):
     parser.add_argument("--holes", nargs=2, default=["0:0", "1:4"],
                         help="two arm:depth vertices (centre is 0:0)")
     parser.add_argument("--verify", type=Path, help="verify a saved JSON certificate")
+    parser.add_argument("--swap-adjacency", action="store_true",
+                        help="symbolically classify one-swap roots for every parameter")
     parser.add_argument("--parity-obstruction", action="store_true",
                         help="exclude pure depth-parity sets on the entire frontier")
     parser.add_argument("--coarse", action="store_true",
@@ -321,7 +417,12 @@ def main(argv=None):
     parser.add_argument("--audit", action="store_true", help="BFS check, up to 512 vertices")
     args = parser.parse_args(argv)
     try:
-        if args.parity_obstruction:
+        if args.swap_adjacency:
+            if args.parity_obstruction or args.coarse or args.audit or args.lengths:
+                parser.error("--swap-adjacency accepts only --verify")
+            result = (verify_swap_adjacency_certificate(json.loads(args.verify.read_text()))
+                      if args.verify else swap_adjacency_certificate())
+        elif args.parity_obstruction:
             if args.coarse or args.audit or args.lengths:
                 parser.error("--parity-obstruction accepts only --parameter or --verify")
             result = (verify_parity_obstruction(json.loads(args.verify.read_text()))

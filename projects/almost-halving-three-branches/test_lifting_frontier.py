@@ -12,7 +12,8 @@ import unittest
 from lifting_frontier import (audit_original_tree, certificate, frontier_lengths,
                               verify_certificate, coarse_certificate, coarse_pair,
                               verify_coarse_certificate, audit_coarse_certificate,
-                              parity_obstruction, verify_parity_obstruction)
+                              parity_obstruction, verify_parity_obstruction,
+                              swap_adjacency_certificate, verify_swap_adjacency_certificate)
 
 
 def graph_distances(lengths):
@@ -262,6 +263,57 @@ class PureParityObstructionTests(unittest.TestCase):
         broken['cases'][0]['required_coefficient'] = 1
         with self.assertRaises(ValueError):
             verify_parity_obstruction(broken)
+
+
+class SwapAdjacencyTests(unittest.TestCase):
+    def test_every_original_tree_root_pair_and_adjacent_shell_formula(self):
+        lengths = frontier_lengths(0)
+        vertices, distances = graph_distances(lengths)
+        even = [v for v in vertices if v[1] % 2 == 0]
+        odd = [v for v in vertices if v[1] % 2]
+        from_even = {u: Counter(distances[u, w] for w in odd) for u in even}
+        from_odd = {v: Counter(distances[v, w] for w in even) for v in odd}
+        admitted = 0
+        for u in even:
+            for v in odd:
+                difference = from_even[u].copy()
+                difference.subtract(from_odd[v])
+                nonnegative = all(n >= 0 for n in difference.values())
+                self.assertEqual(nonnegative, distances[u, v] == 1)
+                if not nonnegative:
+                    continue
+                self.assertEqual(sum(difference.values()), 2)
+                a, depth = u
+                if a == 0:
+                    expected = Counter((1, lengths[v[0]-1]))
+                elif v[1] == depth-1:
+                    expected = Counter(depth+length for j, length in enumerate(lengths, 1) if j != a)
+                else:
+                    expected = Counter((depth+1, lengths[a-1]-depth))
+                self.assertEqual(+difference, expected)
+                admitted += 1
+        self.assertEqual(admitted, 305)
+
+    def test_symbolic_certificate_and_cli_corruption(self):
+        saved = swap_adjacency_certificate()
+        self.assertEqual(sum(saved['classification'].values()), 2880)
+        self.assertEqual(verify_swap_adjacency_certificate(saved), saved)
+        self.assertFalse(saved['one_swap_homometric_pairs_excluded'])
+        for field in ('endpoint_systems', 'all_colourings_excluded'):
+            broken = deepcopy(saved)
+            broken[field] = True if field == 'all_colourings_excluded' else 2879
+            with self.assertRaises(ValueError):
+                verify_swap_adjacency_certificate(broken)
+        broken = deepcopy(saved)
+        broken['classification']['adjacency_forced'] += 1
+        cli = Path(__file__).with_name('lifting_frontier.py')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'adjacency.json'
+            path.write_text(json.dumps(broken))
+            result = subprocess.run([sys.executable, str(cli), '--swap-adjacency', '--verify', str(path)],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn('differs from the reconstructed proof', result.stderr)
 
 
 if __name__ == '__main__':
