@@ -39,8 +39,8 @@ def counts(vertices, metric):
 
 class RatioTest(unittest.TestCase):
     def test_actual_controls_independently(self):
-        for t in (1, 2):
-            witness = ratio.finite_witness(t)
+        for t in (1, 2, 3, 7, 11):
+            witness = ratio.family_witness(t)
             left, right = [list(map(tuple, witness[key])) for key in ("left", "right")]
             metric = original_distances(witness["lengths"])
             self.assertFalse(set(left) & set(right))
@@ -49,17 +49,42 @@ class RatioTest(unittest.TestCase):
             self.assertEqual(counts(left, metric), counts(right, metric))
             certificate = ratio.terminal_certificate(witness["lengths"], left, right)
             self.assertTrue(certificate["necessary_condition_passes"])
-            self.assertEqual(certificate["cutoff"], 24*t+1)
+            self.assertEqual(certificate["cutoff"], 24*t)
             self.assertEqual(certificate["long_holes"], [])
             self.assertEqual(certificate["middle_holes"], [])
 
-    def test_t1_is_outside_reflection_template(self):
-        witness = ratio.finite_witness(1)
-        signs = dict.fromkeys(map(tuple, witness["left"]), 1)
-        signs.update(dict.fromkeys(map(tuple, witness["right"]), -1))
-        central = [signs[(1, 16-j)] if j < 16 else signs[(0, 0)] if j == 16
-                   else signs[(3, j-16)] for j in range(1, 25)]
-        self.assertTrue(any(a != -b for a, b in zip(central, reversed(central))))
+    def test_general_parameters_and_three_tip_omissions(self):
+        for p, q in ((1, 0), (1, 4), (2, 1), (5, 3)):
+            witness = ratio.parameter_witness(p, q)
+            metric = original_distances(witness["lengths"])
+            left, right = [list(map(tuple, witness[key])) for key in ("left", "right")]
+            self.assertEqual(counts(left, metric), counts(right, metric))
+            self.assertEqual(len(left), 14*p+4*q-1)
+            self.assertEqual(set(metric)-set(left)-set(right),
+                             {(i, n) for i, n in enumerate(witness["lengths"], 1)})
+
+    def test_symbolic_identity_and_changed_sign_rejection(self):
+        self.assertEqual(ratio.identity_residual(), {})
+        numerators = ratio.symbolic_numerators()
+        numerators[2][(0, 1, 0)] *= -1
+        self.assertTrue(ratio.identity_residual(numerators))
+
+    def test_symbolic_numerators_match_actual_words(self):
+        for p, q in ((1, 0), (2, 5), (5, 1)):
+            witness = ratio.parameter_witness(p, q)
+            signs = dict.fromkeys(map(tuple, witness["left"]), 1)
+            signs.update(dict.fromkeys(map(tuple, witness["right"]), -1))
+            for arm, numerator in enumerate(ratio.symbolic_numerators(), 1):
+                expected = Counter()
+                for (z, x, y), coefficient in numerator.items():
+                    expected[z+p*x+q*y] += coefficient
+                actual = Counter()
+                for (i, depth), sign in signs.items():
+                    if i == arm:
+                        actual[depth] += sign
+                        actual[depth+1] -= sign
+                self.assertEqual({d:c for d,c in actual.items() if c},
+                                 {d:c for d,c in expected.items() if c})
 
     def test_terminal_equivalence_all_balanced_colourings(self):
         # This audits arbitrary signs and interior/tip omissions, not just positives.
@@ -118,15 +143,21 @@ class RatioTest(unittest.TestCase):
                                   input=json.dumps(witness), text=True, capture_output=True)
         self.assertEqual(rejected.returncode, 1)
         self.assertFalse(json.loads(rejected.stdout)["homometric"])
-        unsupported = subprocess.run([sys.executable, script, "--witness", "3"],
+        proof = subprocess.run([sys.executable, script, "--prove"],
+                               text=True, capture_output=True, check=True)
+        self.assertIn("zero polynomial", proof.stdout)
+        unsupported = subprocess.run([sys.executable, script, "--parameters", "2", "-1"],
                                      text=True, capture_output=True)
         self.assertNotEqual(unsupported.returncode, 0)
-        self.assertIn("remain open", unsupported.stderr)
+        self.assertIn("nonnegative", unsupported.stderr)
 
     def test_validation(self):
         for value in (0, -1, True, 1.5):
             with self.assertRaises(ValueError):
                 ratio.family_bound(value)
+        for p, q in ((0, 1), (True, 1), (1, -1), (1, False)):
+            with self.assertRaises(ValueError):
+                ratio.parameter_witness(p, q)
         for holes in ([0], [2, 2], [3]):
             with self.assertRaises(ValueError):
                 ratio.reconstruct_tail([1, 0, -1], holes, [])

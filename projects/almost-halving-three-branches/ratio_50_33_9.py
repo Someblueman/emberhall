@@ -1,7 +1,7 @@
-"""Terminal-shell reconstruction for arbitrary near-partitions of a tripod.
+"""A two-parameter tripod construction and arbitrary-hole terminal reconstruction.
 
-See RATIO_50_33_9.md. The universal target remains open. Only t=1 and t=2
-have witnesses here; the necessary tail recurrence applies at every scale.
+See RATIO_50_33_9.md. Every T(50t,33t,9t), t>0, is constructed exactly.
+The universal target over arbitrary triples remains open.
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def family_bound(t: int) -> dict:
     return {"t": t, "lengths": [50*t, 33*t, 9*t], "target": 46*t-1,
             "maximum_omissions": 3, "minimum_reconstructed_tip_levels": 24*t-3,
             "scope": "every target-or-larger homometric pair, with arbitrary omissions",
-            "existence_proved_here": t in (1, 2), "universal_target_proved": False}
+            "existence_proved_here": True, "universal_target_proved": False}
 
 
 def reconstruct_tail(long_signs: list[int], long_holes: list[int],
@@ -92,43 +92,96 @@ def terminal_certificate(lengths: object, left: object, right: object) -> dict:
             "sufficient_for_homometry": False}
 
 
-def finite_witness(t: int) -> dict:
-    """Two exact controls, not an extrapolation to unproved scales."""
-    t = _parameter(t)
-    if t == 1:
-        # Recovered by solving the full signed-shell equations, without reflection.
-        words = (
-            "+--+-++++-+--+-0+----++++++----++----++++++----++0",
-            "-++++------++++--++++------++++--",
-            "--++++--0",
-        )
-        left, right = [], [(0, 0)]
-        for arm, word in enumerate(words, 1):
-            for depth, sign in enumerate(word, 1):
-                if sign != "0":
-                    (left if sign == "+" else right).append((arm, depth))
-    elif t == 2:
-        # Rook's already-proved r|b construction; copied as an explicit control.
-        r, b, c = 33, 66, 18
-        retained_c = c-(r+c) % 2
-        length = r+retained_c
-        p = [1 if ((j-length//2-1)//r) % 2 == 0 else -1
-             for j in range(1, length+1)]
-        left, right = [], []
-        for j, sign in enumerate(p, 1):
-            vertex = ((1, r-j) if j < r else (0, 0) if j == r else (3, j-r))
-            (left if sign == 1 else right).append(vertex)
-        for j in range(1, b+1):
-            sign = p[r-1-(j-1) % r]
-            (left if sign == 1 else right).append((1, r+j))
-            (right if sign == 1 else left).append((2, j))
-    else:
-        raise ValueError("this module has witnesses only for t=1 and t=2; other scales remain open")
-    lengths = [50*t, 33*t, 9*t]
+def parameter_witness(p: int, q: int) -> dict:
+    """Construct T(15p+5q,10p+3q,3p), for p>=1 and q>=0."""
+    if type(p) is not int or p < 1 or type(q) is not int or q < 0:
+        raise ValueError("p must be positive and q must be nonnegative integers")
+    d = 3*p+q
+    blocks = (
+        ((1, d-1), (-1, p), (1, p), (-1, q), (1, p), (-1, p),
+         (1, p+q), (-1, p), (1, p), (-1, q), (1, p), (-1, p), (1, d)),
+        ((-1, d-1), (1, p), (-1, p), (1, q), (-1, p), (1, p), (-1, d)),
+        ((-1, p-1), (1, p), (-1, p)),
+    )
+    left, right = [], [(0, 0)]
+    for arm, runs in enumerate(blocks, 1):
+        depth = 0
+        for sign, length in runs:
+            for position in range(depth+1, depth+length+1):
+                (left if sign == 1 else right).append((arm, position))
+            depth += length
+    lengths = [15*p+5*q, 10*p+3*q, 3*p]
     checked = check_pair(lengths, left, right)
-    if not checked["homometric"] or checked["size"] != 46*t-1:
-        raise ArithmeticError("stored control failed its original-tree check")
-    return {"t": t, "lengths": lengths, "left": left, "right": right, **checked}
+    expected = 14*p+4*q-1
+    if not checked["homometric"] or checked["size"] != expected:
+        raise ArithmeticError("the constructed words failed their original-tree check")
+    return {"parameters": [p, q], "lengths": lengths,
+            "left": left, "right": right, **checked}
+
+
+def family_witness(t: int) -> dict:
+    t = _parameter(t)
+    return {"t": t, **parameter_witness(3*t, t)}
+
+
+# Sparse Laurent polynomials in independent variables z,x,y. These tables
+# are endpoint numerators, separate from the literal block implementation.
+Poly = dict[tuple[int, int, int], int]
+
+
+def _add(*polynomials: Poly) -> Poly:
+    result = {}
+    for polynomial in polynomials:
+        for exponent, coefficient in polynomial.items():
+            result[exponent] = result.get(exponent, 0)+coefficient
+    return {e: c for e, c in result.items() if c}
+
+
+def _scale(polynomial: Poly, factor: int) -> Poly:
+    return {e: factor*c for e, c in polynomial.items() if factor*c}
+
+
+def _mul(a: Poly, b: Poly) -> Poly:
+    result = {}
+    for ea, ca in a.items():
+        for eb, cb in b.items():
+            exponent = tuple(x+y for x, y in zip(ea, eb))
+            result[exponent] = result.get(exponent, 0)+ca*cb
+    return {e: c for e, c in result.items() if c}
+
+
+def symbolic_numerators() -> tuple[Poly, Poly, Poly]:
+    """N_i=(1-z)S_i, with x=z^p and y=z^q substituted only after proof."""
+    endpoints = (
+        (((3, 1), -2), ((4, 1), 2), ((5, 1), -2), ((5, 2), 2),
+         ((6, 2), -2), ((7, 2), 2), ((8, 3), -2), ((9, 3), 2),
+         ((10, 3), -2), ((10, 4), 2), ((11, 4), -2), ((12, 4), 2), ((15, 5), -1)),
+        (((3, 1), 2), ((4, 1), -2), ((5, 1), 2), ((5, 2), -2),
+         ((6, 2), 2), ((7, 2), -2), ((10, 3), 1)),
+        (((1, 0), 2), ((2, 0), -2), ((3, 0), 1)),
+    )
+    result = []
+    for first_sign, terms in zip((1, -1, -1), endpoints):
+        result.append({(1, 0, 0): first_sign,
+                       **{(0, a, b): c for (a, b), c in terms}})
+    return tuple(result)
+
+
+def identity_residual(numerators: tuple[Poly, Poly, Poly] | None = None) -> Poly:
+    """Exact z(1-z) times the full signed-shell numerator; zero proves all p,q."""
+    ns = symbolic_numerators() if numerators is None else numerators
+    if len(ns) != 3:
+        raise ValueError("three arm numerators are required")
+    one, z = {(0, 0, 0): 1}, {(1, 0, 0): 1}
+    endpoints = ({(0, 15, 5): 1}, {(0, 10, 3): 1}, {(0, 3, 0): 1})
+    result = _scale(_mul(_add(one, _scale(z, -1)),
+                         _add(z, _scale(_add(*endpoints), -1))), -1)
+    for i, numerator in enumerate(ns):
+        others = _add(*(endpoint for j, endpoint in enumerate(endpoints) if j != i))
+        star = {tuple(-value for value in e): c for e, c in numerator.items()}
+        result = _add(result, _mul(numerator, _add(z, _scale(others, -1))),
+                      _mul(_mul(z, endpoints[i]), star))
+    return result
 
 
 def check_document(document: object) -> dict:
@@ -144,13 +197,22 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--lemma", type=int, metavar="T")
     mode.add_argument("--witness", type=int, metavar="T")
+    mode.add_argument("--parameters", type=int, nargs=2, metavar=("P", "Q"))
+    mode.add_argument("--prove", action="store_true")
     mode.add_argument("--check", metavar="FILE", help="JSON witness; '-' reads stdin")
     args = parser.parse_args()
     try:
         if args.lemma is not None:
             result = family_bound(args.lemma)
         elif args.witness is not None:
-            result = finite_witness(args.witness)
+            result = family_witness(args.witness)
+        elif args.parameters is not None:
+            result = parameter_witness(*args.parameters)
+        elif args.prove:
+            if identity_residual():
+                raise ArithmeticError("the exact Laurent identity failed")
+            result = {"identity": "zero polynomial in Z[z,z^-1,x,x^-1,y,y^-1]",
+                      "domain": "integers p>=1, q>=0", "universal_tripod_target": False}
         else:
             data = sys.stdin.read() if args.check == "-" else Path(args.check).read_text()
             result = check_document(json.loads(data))
