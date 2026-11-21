@@ -90,6 +90,18 @@ class LiftingFrontierTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'quotients must be even'):
             certificate(lengths, [(0, 0), (3, 4)])
 
+    def test_mixed_even_holes_positive_boundary_and_forced_counts(self):
+        _, distances = graph_distances((3, 7, 7))
+        left = [(1, 2), (2, 1), (2, 3), (2, 5), (2, 6), (3, 3), (3, 4), (3, 7)]
+        right = [(1, 1), (1, 3), (2, 4), (2, 7), (3, 1), (3, 2), (3, 5), (3, 6)]
+        self.assertEqual(histogram(left, distances), histogram(right, distances))
+        self.assertEqual(sum(d % 4 == 0 for _, d in left), 1)
+        self.assertEqual(sum(d % 4 == 2 for _, d in left), 2)
+        self.assertEqual(sum(d % 4 == 0 for _, d in right), 1)
+        self.assertEqual(sum(d % 4 == 2 for _, d in right), 2)
+        with self.assertRaisesRegex(ValueError, 'depths divisible by four'):
+            certificate((3, 7, 7), [(0, 0), (2, 2)])
+
     def test_symbolic_frontier_and_real_audit(self):
         result = certificate(frontier_lengths(0), [(0, 0), (1, 4)])
         audit = audit_original_tree(result)

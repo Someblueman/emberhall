@@ -77,6 +77,30 @@ because K is even. Equations (1) and (3) require residue zero, contradicting
 (4). All counts used the full retained support, with no assumption about
 its colouring. This proves the theorem.
 
+## The other even-hole patterns: a necessary count equation
+
+For any two even-depth holes in the same length domain, let h be the number
+at depths zero modulo four. Let x0 and x2 count the vertices of A in the
+two even residue classes. The retained even-depth count is m-2=2K+2.
+Equality of odd-distance multiplicities gives
+(x-y)(m-x-y)=0, where x and y count even vertices in A and B. Thus
+
+    x0+x2=K+1, and A contains K+3 odd-depth vertices.
+
+Now n0=K+1-h, n2=K+1+h, and both odd residue classes still have K+3
+vertices. Counting the distance-2-modulo-4 graph exactly as above gives
+
+    2h*x0 = h*(K+1-h).                                (5)
+
+Indeed its edge count is n0*n2+(K+3)^2, and A's degree sum is
+n2*x0+n0*x2+(K+3)^2; subtract and use x0+x2=K+1.
+For h=2, (5) is the obstruction already proved: x0=(K-1)/2 is not an
+integer. For h=1, **every** possible homometric partition must split both
+even residue classes exactly in half: x0=K/2 and x2=K/2+1. For h=0,
+this argument imposes only x0+x2=K+1. These are necessary conditions,
+not existence assertions. They hold regardless of the holes' arms and
+depths, and further restrict all signed-count patterns in the mixed case.
+
 ## Exact limits and a positive boundary
 
 The evenness of K is necessary for this argument and cannot simply be
@@ -134,6 +158,6 @@ proved domain. Save the ordinary JSON output and pass it to `--verify FILE`;
 the checker reconstructs all fields, rejecting altered counts, residues,
 verdicts or invalid holes. The optional original-tree audit is limited to
 512 vertices and refuses larger inputs without a distance-audit verdict.
-Tests independently recount small unequal trees, exhaust all colourings
+Seven focused tests independently recount small unequal trees, exhaust all colourings
 of a smallest admitted support, check a valid positive boundary, and
 exercise a corrupted certificate through the real command line.
