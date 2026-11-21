@@ -1,10 +1,11 @@
-"""Optimal pairs on T(b+d,b,b-d) for even b and 1<=d<b."""
+"""Proved homometric constructions for arithmetic-progression tripods."""
 from __future__ import annotations
 
 import argparse
 import json
 
 from next_family import positive_integer
+from progression_partitions import classify
 from published_cases import check_pair, path_pair
 
 Poly = dict[tuple[int, int, int], int]
@@ -96,6 +97,61 @@ def even_middle_residual() -> Poly:
     return result
 
 
+def odd_class_witness(b: int, d: int) -> dict:
+    """Meet half-minus-one for b=1 mod 4, d=3 mod 4, 0<d<b."""
+    positive_integer(b)
+    positive_integer(d)
+    if b % 4 != 1 or d % 4 != 3 or d >= b:
+        raise ValueError("require b=1 mod 4, d=3 mod 4 and d<b")
+    a, c = b + d - 1, b - d - 1
+    signs = {(0, 0): 1}
+    for p in range(1, a + 1):
+        if p <= d:
+            value = 1 if p % 4 in (0, 1) else -1
+        elif p <= b:
+            value = -1
+        else:
+            value = 1 if (p - b) % 4 in (1, 2) else -1
+        signs[1, p] = value
+    for p in range(1, b + 1):
+        signs[2, p] = 1 if p % 4 in (2, 3) else -1
+    for p in range(1, c + 1):
+        signs[3, p] = 1
+    left = sorted(v for v, sign in signs.items() if sign == 1)
+    right = sorted(v for v, sign in signs.items() if sign == -1)
+    lengths = (b + d, b, b - d)
+    result = check_pair(lengths, left, right)
+    if not result["homometric"] or result["size"] != (3 * b - 1) // 2:
+        raise ArithmeticError("odd congruence-class construction failed its exact check")
+    bound = classify(b, d)["upper_bound"]
+    return {**result, "lengths": lengths, "left": left, "right": right,
+            "b": b, "d": d, "method": "odd congruence class",
+            "omitted": [(1, b + d), (3, b - d)],
+            "upper_bound": bound, "attains_bound": len(left) == bound}
+
+
+def odd_class_residual() -> Poly:
+    """D*Q in independent z,u,v for the odd congruence-class formula."""
+    one, z, u, v = _mon(), _mon(1), _mon(r=1), _mon(s=1)
+    z2 = _mon(2)
+    minus = _add(one, _scale(z, -1))
+    plus_square = _add(one, z2)
+    D = _mul(minus, plus_square)
+    ends = (_mon(-1, 1, 1), u, _mon(-1, 1, -1))
+    p1 = _add(_mul(u, v, _add(one, _scale(z2, -1))),
+              _scale(_mul(z, _add(u, _scale(v, -1))), 2), _mul(z, minus, minus))
+    p2 = _mul(minus, _add(z2, _scale(z, -1),
+                          _scale(_mul(u, z), -1), _scale(_mul(u, z2), -1)))
+    p3 = _mul(z, _add(one, _scale(ends[2], -1)), plus_square)
+    result = _mul(D, _add(one, *[_scale(a, -1) for a in ends]))
+    for i, numerator in enumerate((p1, p2, p3)):
+        star = {tuple(-a for a in powers): value for powers, value in numerator.items()}
+        result = _add(result,
+                      _mul(numerator, _add(one, *[_scale(a, -1) for j, a in enumerate(ends) if j != i])),
+                      _mul(_mon(3), ends[i], star))
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("b", type=int, nargs="?")
@@ -106,14 +162,24 @@ def main() -> int:
     if args.prove:
         if args.b is not None or args.d is not None:
             parser.error("--prove does not take parameters")
-        if even_middle_residual():
+        if even_middle_residual() or odd_class_residual():
             raise ArithmeticError("nonzero three-variable symbolic residual")
-        print("PASS: even-middle identity in independent z,u,v")
+        print("PASS: even-middle and odd-class identities in independent z,u,v")
         return 0
     if args.b is None or args.d is None:
-        parser.error("give even b and 1 <= d < b, or --prove")
+        parser.error("give b and d, or --prove")
     try:
-        result = even_middle_witness(args.b, args.d)
+        if args.b % 2 == 0:
+            result = even_middle_witness(args.b, args.d)
+        else:
+            full = classify(args.b, args.d, include_witness=True)
+            if full["full_partition"]:
+                checked = check_pair(full["lengths"], full["left"], full["right"])
+                result = {**full, **checked, "method": full["reason"]}
+            elif args.b % 4 == 1 and args.d % 4 == 3:
+                result = odd_class_witness(args.b, args.d)
+            else:
+                raise ValueError("this odd-middle case is not covered by these constructions")
     except ValueError as error:
         parser.exit(2, str(error) + "\n")
     if args.summary:

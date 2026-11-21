@@ -6,7 +6,8 @@ Rook, 21 November 2026. **For every even integer b>=2 and every integer
 
 Only one vertex is omitted. When d is even it is the longest-arm tip; when
 d is odd it is the shortest-arm tip. This covers all even middle lengths,
-not merely a finite collection of ratios. Odd middle lengths are not all
+not merely a finite collection of ratios. A further construction below
+meets the target for `b=1 mod 4, d=3 mod 4`. Odd middle lengths are not all
 settled. Literature priority remains provisional.
 
 ## Run it
@@ -22,7 +23,9 @@ The arguments are b and d. This recorded run produced two sets of size 150
 on `(137,100,63)`, target 149, omitting only `[3,63]`. The command emits all
 vertices and both complete distance profiles; `--summary` omits the lists.
 Its output works with `published_cases.py --check -`. `--prove` checks the
-identity below in three independent Laurent variables.
+two identities below in three independent Laurent variables. The command
+also supports the full-partition cases proved in PROGRESSION_PARTITIONS.md;
+uncovered odd cases return an explicit error, not a negative theorem.
 
 Additional recorded graph-distance checks include `(18,14,10)`,
 `(38,28,18)`, `(80,70,60)`, `(57,40,23)` and the boundary cases `(3,2,1)`
@@ -111,6 +114,44 @@ centre form a path with 3b vertices. The first and last `3b/2` vertices
 are disjoint equal-length paths and have identical distance profiles.
 This also covers b=2,d=1.
 
+## An additional odd-middle congruence class
+
+Let `b=1 mod 4`, `d=3 mod 4`, `0<d<b`. Omit one tip from arm 1 and one
+from arm 3, retaining `(b+d-1,b,b-d-1)`. Give the centre sign +1.
+
+* On arm 1, use the repeated word `+--+` through depth d, then minus
+  throughout depths d+1..b, then the repeated word `++--` starting at
+  depth b+1 through b+d-1.
+* On arm 2, repeat `-++-` from depth 1 through b.
+* Give every retained vertex on arm 3 sign +1.
+
+Writing `c=b-d-1`, the arm sign sums are `-c,-1,c`, so the total is zero.
+All `3b-1` retained vertices are used, giving two sets of size `(3b-1)/2`,
+the project target. For example, the command with arguments `13 3` gives
+two sets of size 19 on `(16,13,10)` and certifies that this is optimal.
+Where a full partition exists, the command returns that larger pair.
+
+For a symbolic proof put `u=z^b`, `v=z^d`,
+`(A_1,A_2,A_3)=(uv/z,u,u/(zv))` and `D=(1-z)(1+z^2)`. Summing the
+period-four words and the constant interval gives `P_i=D*S_i` as
+
+```
+P_1 = uv*(1-z^2) + 2z*(u-v) + z*(1-z)^2,
+P_2 = (1-z)*(z^2-z-uz-uz^2),
+P_3 = z*(1-u/(zv))*(1+z^2).
+```
+
+Since `D*=-D/z^3`, exact multiplication in independent z,u,v gives
+
+```
+D*(1-A_1-A_2-A_3)
+ + sum_i P_i*(1-sum_(j!=i) A_j)
+ + z^3*sum_i A_i*P_i* = 0.
+```
+
+The same full-shell argument proves equality of all distance
+multiplicities. This is the second identity checked by `--prove`.
+
 ## Corollary: every divisible middle length
 
 For all q>=2,d>=1,
@@ -151,8 +192,9 @@ needed by the delivered standard-library construction or identity check.
 ## What remains
 
 The main unresolved progression cases have odd b, with neither `d divides b`
-nor `2d divides b+1`. The full-partition classification rules out full halves
-there, but generally does not yet construct the target `(3b-1)/2`.
-Some such cases are covered by earlier individual family proofs.
+nor `2d divides b+1`, outside the additional congruence class above.
+The full-partition classification rules out full halves there, but generally
+does not yet construct the target `(3b-1)/2`. Some such cases are covered by
+earlier individual family proofs.
 The general three-arm milestone, independent mathematical reconstruction
 and literature-priority check all remain open.
