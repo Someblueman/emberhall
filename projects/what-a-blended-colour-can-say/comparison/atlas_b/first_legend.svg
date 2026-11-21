@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1600" viewBox="0 0 1040 1600" role="img" aria-labelledby="title desc">
+<title id="title">Held-Out Comparison Set B: Probability-Interval Atlas</title>
+<desc id="desc">Exact probability intervals, conservative byte observation intervals, and endpoint distributions beside each displayed swatch.</desc>
+<style>text{font:16px sans-serif;fill:#172c3c}.title{font:bold 29px Georgia,serif}.heading{font:bold 19px sans-serif}.small{font:14px monospace}.label{font:bold 15px sans-serif}</style>
+<rect width="1040" height="1600" fill="#f3f1e9"/>
+<text x="30" y="43" class="title">Held-Out Comparison Set B: Probability-Interval Atlas</text>
+<text x="30" y="76" class="">Linear-light blends. Opaque, flat sRGB swatches. Exact fractions are authoritative.</text>
+<text x="30" y="105" class="">Byte ranges are conservative; percentages round outward. Distribution bars show exact-case endpoints.</text>
+<text x="30" y="130" class="">linear8 is raw linear data: its hex preview is NOT equivalent displayed light. No reader study claimed.</text>
+<rect x="18" y="150" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="180" class="heading">H1B / Held-out outer face B</text>
+<text x="34" y="206" class="label">P(Grade &gt;= 4)  [5/8, 5/8]  EXACT</text>
+<rect x="34" y="227" width="92" height="76" fill="#b186b8" stroke="#526776"/>
+<text x="34" y="328" class="small">#b186b8</text>
+<text x="144" y="244" class="label">Displayed sRGB8</text>
+<text x="144" y="270" class="small">ochre_indigo_3d</text>
+<text x="552" y="208" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="227" width="51.25000" height="22" fill="#5959da"/><rect x="603.25000" y="227" width="102.50000" height="22" fill="#7cd37c"/><rect x="705.75000" y="227" width="256.25000" height="22" fill="#cb59c4"/><text x="552" y="269" class="small">1: 1/8  2: 1/4  5: 5/8</text>
+<rect x="552.00000" y="297" width="51.25000" height="22" fill="#5959da"/><rect x="603.25000" y="297" width="102.50000" height="22" fill="#7cd37c"/><rect x="705.75000" y="297" width="256.25000" height="22" fill="#cb59c4"/><text x="552" y="339" class="small">1: 1/8  2: 1/4  5: 5/8</text>
+<text x="34" y="364" class="small">srgb8 #b186b8 -&gt; [57.40%, 63.53%] conservative</text>
+<text x="34" y="391" class="small">linear8 #703d7b -&gt; [61.48%, 63.23%] conservative</text>
+<text x="552" y="402" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="440" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="470" class="heading">H2B / Held-out interior blend B</text>
+<text x="34" y="496" class="label">P(Grade &gt;= 4)  [1/2, 5/8]  BOUNDED</text>
+<rect x="34" y="517" width="92" height="76" fill="#bf9498" stroke="#526776"/>
+<text x="34" y="618" class="small">#bf9498</text>
+<text x="144" y="534" class="label">Displayed sRGB8</text>
+<text x="144" y="560" class="small">ochre_indigo_3d</text>
+<text x="552" y="498" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="517" width="102.50000" height="22" fill="#7cd37c"/><rect x="654.50000" y="517" width="102.50000" height="22" fill="#b085ac"/><rect x="757.00000" y="517" width="102.50000" height="22" fill="#ed7c59"/><rect x="859.50000" y="517" width="102.50000" height="22" fill="#cb59c4"/><text x="552" y="559" class="small">2: 1/4  3: 1/4  4: 1/4  5: 1/4</text>
+<rect x="552.00000" y="587" width="30.75000" height="22" fill="#5959da"/><rect x="582.75000" y="587" width="123.00000" height="22" fill="#7cd37c"/><rect x="705.75000" y="587" width="128.12500" height="22" fill="#ed7c59"/><rect x="833.87500" y="587" width="128.12500" height="22" fill="#cb59c4"/><text x="552" y="629" class="small">1: 3/40  2: 3/10  4: 5/16  5: 5/16</text>
+<text x="34" y="654" class="small">srgb8 #bf9498 -&gt; [44.55%, 63.67%] conservative</text>
+<text x="34" y="681" class="small">linear8 #854c50 -&gt; [47.12%, 63.61%] conservative</text>
+<text x="552" y="692" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="730" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="760" class="heading">H3B / Held-out ramp mix B</text>
+<text x="34" y="786" class="label">P(R2 or R4)  [0, 1]  UNIDENTIFIABLE</text>
+<rect x="34" y="807" width="92" height="76" fill="#aa8fb7" stroke="#526776"/>
+<text x="34" y="908" class="small">#aa8fb7</text>
+<text x="144" y="824" class="label">Displayed sRGB8</text>
+<text x="144" y="850" class="small">amber_navy_ramp</text>
+<text x="552" y="788" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="807" width="102.50000" height="22" fill="#597cda"/><rect x="654.50000" y="807" width="307.50000" height="22" fill="#bc95aa"/><text x="552" y="849" class="small">1: 1/4  3: 3/4</text>
+<rect x="552.00000" y="877" width="307.50000" height="22" fill="#9589c4"/><rect x="859.50000" y="877" width="102.50000" height="22" fill="#daa089"/><text x="552" y="919" class="small">2: 3/4  4: 1/4</text>
+<text x="34" y="944" class="small">srgb8 #aa8fb7 -&gt; [0.00%, 100.00%] conservative</text>
+<text x="34" y="971" class="small">linear8 #664679 -&gt; [0.00%, 100.00%] conservative</text>
+<text x="552" y="982" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1020" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1050" class="heading">H4B / Held-out sRGB8 blend B</text>
+<text x="34" y="1076" class="label">P(Grade &gt;= 4)  [3/5, 3/5]  EXACT</text>
+<rect x="34" y="1097" width="92" height="76" fill="#c58093" stroke="#526776"/>
+<text x="34" y="1198" class="small">#c58093</text>
+<text x="144" y="1114" class="label">Displayed sRGB8</text>
+<text x="144" y="1140" class="small">ochre_indigo_3d</text>
+<text x="552" y="1078" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1097" width="123.00000" height="22" fill="#5959da"/><rect x="675.00000" y="1097" width="41.00000" height="22" fill="#7cd37c"/><rect x="716.00000" y="1097" width="246.00000" height="22" fill="#ed7c59"/><text x="552" y="1139" class="small">1: 3/10  2: 1/10  4: 3/5</text>
+<rect x="552.00000" y="1167" width="123.00000" height="22" fill="#5959da"/><rect x="675.00000" y="1167" width="41.00000" height="22" fill="#7cd37c"/><rect x="716.00000" y="1167" width="246.00000" height="22" fill="#ed7c59"/><text x="552" y="1209" class="small">1: 3/10  2: 1/10  4: 3/5</text>
+<text x="34" y="1234" class="small">srgb8 #c58093 -&gt; [54.08%, 61.28%] conservative</text>
+<text x="34" y="1261" class="small">linear8 #8f374a -&gt; [55.08%, 61.30%] conservative</text>
+<text x="552" y="1272" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1310" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1340" class="heading">H5B / Held-out linear8 blend B</text>
+<text x="34" y="1366" class="label">P(Grade &gt;= 4)  [4/15, 3/5]  BOUNDED</text>
+<rect x="34" y="1387" width="92" height="76" fill="#bf899b" stroke="#526776"/>
+<text x="34" y="1488" class="small">#bf899b</text>
+<text x="144" y="1404" class="label">Displayed sRGB8</text>
+<text x="144" y="1430" class="small">ochre_indigo_3d</text>
+<text x="552" y="1368" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1387" width="27.33333" height="22" fill="#7cd37c"/><rect x="579.33333" y="1387" width="273.33333" height="22" fill="#b085ac"/><rect x="852.66667" y="1387" width="95.66667" height="22" fill="#ed7c59"/><rect x="948.33333" y="1387" width="13.66667" height="22" fill="#cb59c4"/><text x="552" y="1429" class="small">2: 1/15  3: 2/3  4: 7/30  5: 1/30</text>
+<rect x="552.00000" y="1457" width="82.00000" height="22" fill="#5959da"/><rect x="634.00000" y="1457" width="82.00000" height="22" fill="#7cd37c"/><rect x="716.00000" y="1457" width="164.00000" height="22" fill="#ed7c59"/><rect x="880.00000" y="1457" width="82.00000" height="22" fill="#cb59c4"/><text x="552" y="1499" class="small">1: 1/5  2: 1/5  4: 2/5  5: 1/5</text>
+<text x="34" y="1524" class="small">srgb8 #bf899b -&gt; [23.33%, 61.24%] conservative</text>
+<text x="34" y="1551" class="small">linear8 #854054 -&gt; [24.39%, 61.40%] conservative</text>
+<text x="552" y="1562" class="small">Segment labels: stop number : exact probability</text>
+</svg>
