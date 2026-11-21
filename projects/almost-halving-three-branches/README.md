@@ -1,23 +1,44 @@
 # Almost halving a three-branched tree
 
-Status: published constructions reconstructed, exact maximum pairs proved
-for `(4t-1,2t,t)` for every integer `t>=2`, and exact half-minus-one pairs
-proved for `(4t-1,3t-1,2t-1)` for positive even t.
+Status: published constructions reconstructed; optimal pairs proved for
+`(10t,7t,4t)` for all `t>=2` and for every arithmetic-progression triple
+`(b+d,b,b-d)` with even b. Full partitions of arithmetic-progression triples
+are classified, and an additional odd-middle congruence class meets the target.
 **The general target remains open in this project.**
-[PUBLISHED_CASES.md](PUBLISHED_CASES.md) supplies proofs for both parity
-classes, sources and provisional priority. Independent review is pending.
+[PUBLISHED_CASES.md](PUBLISHED_CASES.md) retains the earlier constructions and
+sources. [NEXT_FAMILY.md](NEXT_FAMILY.md),
+[PROGRESSION_TARGET.md](PROGRESSION_TARGET.md), and
+[PROGRESSION_PARTITIONS.md](PROGRESSION_PARTITIONS.md) prove the extensions;
+[ARITHMETIC_FAMILY.md](ARITHMETIC_FAMILY.md) records a separate `(11t,8t,5t)`
+construction, now covered by the even-middle result. Independent mathematical
+review is pending and [priority remains provisional](PRIORITY_REFRESH.md).
 
 From a clone of [Emberhall](https://github.com/Someblueman/emberhall), run this
 single command at the repository root (Python 3.10+, standard library only):
 
 ```sh
-python3 projects/almost-halving-three-branches/published_cases.py --demo
+python3 projects/almost-halving-three-branches/published_cases.py 110 77 44
 ```
 
-The command prints seven JSON witnesses, including both vertex sets and every
-distance multiplicity, then two expected rejections. Arm numbers are 1–3;
+The command prints a JSON witness with two disjoint sets of size 115, both
+complete distance profiles, target 115 and certified upper bound 115.
+Arm numbers are 1–3;
 `[0,0]` is the centre, and `[i,d]` is depth d on arm i. Distances are in the
 original tree, not an induced subgraph.
+
+Current real default-command runs, 21 November 2026:
+
+| Arm lengths | Size | Target | Upper bound | Meets target |
+|---|---:|---:|---:|---|
+| 110,77,44 | 115 | 115 | 115 | yes |
+| 137,100,63 | 150 | 149 | 150 | yes |
+| 12,9,6 | 14 | 13 | 14 | yes |
+| 16,13,10 | 19 | 19 | 19 | yes |
+| 43,31,19 | 45 | 46 | 46 | no |
+
+The last row is an explicit remaining gap, not a counterexample. The command
+searches the proved construction menu, not all subsets. To replay the original
+seven published-case examples and two expected rejections, use `--demo`.
 
 Real run, 20 November 2026 (compact transcription; full counts are emitted by
 the command):
@@ -49,7 +70,7 @@ distance 2 then occurs five times on the left and seven times on the right.
 Generate another witness with `python3 projects/almost-halving-three-branches/published_cases.py 11 7 3`.
 Use `--construction path`, `separated-path`, `alternating` or `block` to
 restrict the formula. The default chooses the largest supported witness,
-including the proved gap family when applicable, over arm relabelings; it
+including the new family and arithmetic-progression constructions, over arm relabelings; it
 also tries the 20 prefix subtrees obtained by deleting at most three arm tips.
 Their distances are unchanged; any trimming is labelled in the output.
 It does not optimize over all subsets. A valid witness below the target exits
@@ -68,7 +89,7 @@ Run the implementation checks:
 python3 -m unittest discover -s projects/almost-halving-three-branches -p 'test_*.py' -v
 ```
 
-Recorded run: 17 tests passed. Their separate breadth-first distance counter
+Recorded run, 21 November 2026: 42 tests passed. Their separate breadth-first distance counter
 checks implementation; exact Laurent-polynomial identities verify the
 family formulas for symbolic lengths. Neither establishes novelty or the
 universal target. A non-author's review is still required.
@@ -91,7 +112,7 @@ Pass either output through `--check -` for the independent input-validation
 path. The proof concerns this infinite family, not all three-branched trees.
 
 The output also reports a certified `upper_bound`. It uses disjointness and,
-where applicable, the proved residue obstruction to a full partition. A
+where applicable, the proved residue or arithmetic-progression obstruction to a full partition. A
 valid witness with `attains_bound: true` is therefore optimal for that tree.
 Failure to attain this bound proves nothing about whether a better pair
 exists. Equal odd arms attain exactly the project's half-minus-one target;
@@ -116,7 +137,9 @@ selected `trim (0, 1, 0): block(1, 2, 3)` and returned size 26, target 25,
 upper bound 26 and `attains_bound: true`. This uses a valid construction on
 `(29,16,6)`, not a repair of the source's invalid even-quotient formula.
 
-The explicit remaining family `T(10t,7t,4t)`, `t>=11`, still falls outside
-this entire construction menu, including trimming. The document proves
-that limitation; it does not claim those trees refute the target. A real
-`110 77 44` run gives size 113 against target 115 and reports it unsolved.
+The former gap `T(10t,7t,4t)` is now resolved by the proof in NEXT_FAMILY.md:
+the optimum is `floor(21t/2)` for all `t>=2`. Its old menu-only bound of
+`10t+3` remains a correct historical limitation of the earlier formulas.
+The default command now uses the stronger result; explicit published modes
+still use their original formulas. Arbitrary triples and several odd-middle
+progressions remain unresolved.
