@@ -76,12 +76,15 @@ class CellGraphTest(unittest.TestCase):
         self.assertFalse(ratio.classify((3, 3, 3))['admitted'])
 
     def test_full_partition_and_half_minus_one(self):
-        for lengths in ((6, 3, 2), (11, 6, 4), (13, 8, 4), (8, 5, 3)):
+        for lengths in ((6, 3, 2), (11, 6, 4), (13, 8, 4), (8, 5, 3), (10, 7, 4), (1, 1, 1)):
             witness = ratio.original_tree(lengths)
             metric = distances(lengths)
             self.assertEqual(counts(witness['left'], metric), counts(witness['right'], metric))
-            expected = (sum(lengths)+1)//2 if sum(lengths) % 2 else sum(lengths)//2-1
-            self.assertEqual(witness['size'], expected)
+            self.assertGreaterEqual(witness['size'], (sum(lengths)+1)//2-1)
+            if sum(lengths) % 2 and gcd(lengths[0]-lengths[1], lengths[1]-lengths[2]) == 1:
+                self.assertEqual(witness['size'], (sum(lengths)+1)//2)
+        with self.assertRaisesRegex(ValueError, 'not ruled out'):
+            ratio.original_tree((91, 71, 15))
 
     def test_template_corruption_preserves_symmetry_but_fails_identity(self):
         words = ratio.template()['words']
@@ -95,6 +98,15 @@ class CellGraphTest(unittest.TestCase):
         self.assertEqual(changed[0].count('+'), words[0].count('+'))
         self.assertTrue(ratio.cell_identity(changed))
         self.assertFalse(ratio.verify_template(changed))
+
+    def test_interior_seed_is_not_a_cell_obstruction_counterexample(self):
+        witness = ratio.frontier_seed()
+        metric = distances(witness['lengths'])
+        self.assertEqual(counts(witness['left'], metric), counts(witness['right'], metric))
+        self.assertEqual(set(metric)-set(witness['left'])-set(witness['right']),
+                         {(1, 19), (1, 99)})
+        with self.assertRaisesRegex(ValueError, 'not ruled out'):
+            ratio.original_tree(witness['lengths'])
 
     def test_real_cli_and_altered_witness(self):
         script = str(Path(ratio.__file__))

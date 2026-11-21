@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
+from itertools import product
 import json
 from math import gcd
 from pathlib import Path
@@ -165,14 +166,50 @@ def construct(t: int, lengths: object = BASE) -> dict:
 
 
 def original_tree(lengths: object) -> dict:
-    """Apply the cell method at scale one, using a full partition when possible."""
+    """Choose the largest target-sized full prefix certified by the cell theorem."""
     lengths = validate_lengths(lengths)
-    cells = lengths if sum(lengths) % 2 == 0 else tuple(n+1 for n in lengths)
+    order = sum(lengths)+1
+    budget = order-2*(order//2-1)
+    candidates = sorted(product(range(budget+1), repeat=3), key=lambda row: (sum(row), row))
+    selected = None
+    for trim in candidates:
+        omitted = sum(trim)
+        if omitted > budget or (order-omitted) % 2 or any(d > n for d, n in zip(trim, lengths)):
+            continue
+        cells = tuple(n-d+1 for n, d in zip(lengths, trim))
+        if classify(cells)['admitted']:
+            selected = trim, cells
+            break
+    if selected is None:
+        raise ValueError('no target-sized prefix is admitted by the cell method; '
+                         'arbitrary homometric pairs are not ruled out')
+    trim, cells = selected
     witness = construct(1, cells)
     checked = check_pair(lengths, witness['left'], witness['right'])
     if not checked['homometric'] or not checked['meets_target']:
         raise ArithmeticError("the original-tree conversion failed")
-    return {**witness, "lengths": lengths, **checked}
+    return {**witness, "lengths": lengths, "trim": trim, **checked}
+
+
+def frontier_seed() -> dict:
+    """A finite interior-hole control outside every target-sized full prefix."""
+    words = (
+        '+-+-+-+-+-+-+-+-+-0-+-++++++++++++++++-+-++++++++++++++++-+-++++++++++++++++'
+        '-+--+-+-+-+-+-+-+-+-+-0',
+        '+-+-+-+-+-+-+-+-+-++-+----------------+-+----------------+-++-+-+-+-+-+-+-+-+-+',
+        '+-+-----------------+-+',
+    )
+    left, right = [], [(0, 0)]
+    for arm, word in enumerate(words, 1):
+        for depth, sign in enumerate(word, 1):
+            if sign != '0':
+                (left if sign == '+' else right).append((arm, depth))
+    lengths = (99, 79, 23)
+    checked = check_pair(lengths, left, right)
+    if not checked['homometric'] or checked['size'] != 100:
+        raise ArithmeticError('the finite frontier control failed')
+    return {'lengths': lengths, 'left': left, 'right': right, **checked,
+            'scope': 'finite t=0 control only; no affine extrapolation'}
 
 
 def main() -> int:
@@ -182,11 +219,14 @@ def main() -> int:
     mode.add_argument('--tree', type=int, nargs=3, metavar=('A', 'B', 'C'))
     mode.add_argument('--prove', action='store_true')
     mode.add_argument('--classify', type=int, nargs=3, metavar=('A', 'B', 'C'))
+    mode.add_argument('--frontier', action='store_true')
     mode.add_argument('--check', metavar='FILE')
     parser.add_argument('--base', type=int, nargs=3, default=BASE)
     args = parser.parse_args()
     try:
-        if args.classify is not None:
+        if args.frontier:
+            result = frontier_seed()
+        elif args.classify is not None:
             result = classify(args.classify)
         elif args.prove:
             result = template(args.base)
