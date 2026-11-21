@@ -65,9 +65,45 @@ class RatioTest(unittest.TestCase):
 
     def test_symbolic_identity_and_changed_sign_rejection(self):
         self.assertEqual(ratio.identity_residual(), {})
+        self.assertEqual(ratio.general_identity_residual(), {})
+        self.assertEqual(ratio.companion_identity_residual(), {})
         numerators = ratio.symbolic_numerators()
         numerators[2][(0, 1, 0)] *= -1
         self.assertTrue(ratio.identity_residual(numerators))
+        layered = ratio.general_symbolic_numerators()
+        layered[0][(1, 0, 0, 0, 0)] *= -1
+        self.assertTrue(ratio.general_identity_residual(layered))
+        companion = ratio.companion_numerators()
+        companion[2][(0, -1, 1)] *= -1
+        self.assertTrue(ratio.companion_identity_residual(companion))
+
+    def test_layered_family_independently(self):
+        for p, q, layers in ((1, 0, 0), (2, 1, 2), (2, 3, 3), (3, 0, 4)):
+            witness = ratio.parameter_witness(p, q, layers=layers)
+            metric = original_distances(witness["lengths"])
+            left, right = [list(map(tuple, witness[key])) for key in ("left", "right")]
+            self.assertEqual(counts(left, metric), counts(right, metric))
+            self.assertEqual(len(left), 6*p+(3*layers+1)*(2*p+q)-1)
+            self.assertEqual(set(metric)-set(left)-set(right),
+                             {(i, n) for i, n in enumerate(witness["lengths"], 1)})
+
+    def test_general_bands_independently(self):
+        for p, q, layers, bands in ((1, 0, 0, 2), (1, 1, 2, 3), (2, 0, 1, 2)):
+            witness = ratio.parameter_witness(p, q, layers=layers, bands=bands)
+            metric = original_distances(witness["lengths"])
+            left, right = [list(map(tuple, witness[key])) for key in ("left", "right")]
+            self.assertEqual(counts(left, metric), counts(right, metric))
+            self.assertEqual(len(left), 3*(bands+1)*p+(3*layers+1)*(2*bands*p+q)-1)
+
+    def test_companion_family_independently(self):
+        for p, r in ((1, 2), (4, 5), (3, 7), (4, 7)):
+            witness = ratio.companion_witness(p, r)
+            metric = original_distances(witness["lengths"])
+            left, right = [list(map(tuple, witness[key])) for key in ("left", "right")]
+            self.assertEqual(counts(left, metric), counts(right, metric))
+            self.assertEqual(len(left), 7*r-1)
+            self.assertEqual(set(metric)-set(left)-set(right),
+                             {(i, n) for i, n in enumerate(witness["lengths"], 1)})
 
     def test_symbolic_numerators_match_actual_words(self):
         for p, q in ((1, 0), (2, 5), (5, 1)):
@@ -158,6 +194,15 @@ class RatioTest(unittest.TestCase):
         for p, q in ((0, 1), (True, 1), (1, -1), (1, False)):
             with self.assertRaises(ValueError):
                 ratio.parameter_witness(p, q)
+        for p, r in ((0, 2), (2, 2), (3, 2), (True, 3)):
+            with self.assertRaises(ValueError):
+                ratio.companion_witness(p, r)
+        for bands in (0, -1, True, 1.5):
+            with self.assertRaises(ValueError):
+                ratio.parameter_witness(1, 0, bands=bands)
+        for layers in (-1, True, 1.5):
+            with self.assertRaises(ValueError):
+                ratio.parameter_witness(1, 0, layers=layers)
         for holes in ([0], [2, 2], [3]):
             with self.assertRaises(ValueError):
                 ratio.reconstruct_tail([1, 0, -1], holes, [])
