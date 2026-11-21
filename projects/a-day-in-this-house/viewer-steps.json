@@ -1,0 +1,62 @@
+[
+  {
+    "click": "#next"
+  },
+  {
+    "click": "#inspect"
+  },
+  {
+    "click": ".bits button:nth-child(1)"
+  },
+  {
+    "click": ".bits button:nth-child(3)"
+  },
+  {
+    "press": "Escape"
+  },
+  {
+    "click": "#replay"
+  },
+  {
+    "click": "#next"
+  },
+  {
+    "click": "#play"
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 2000
+  },
+  {
+    "wait": 1500
+  },
+  {
+    "click": "#play"
+  },
+  {
+    "click": "#still"
+  },
+  {
+    "click": "#inspect"
+  },
+  {
+    "press": "Escape"
+  }
+]
