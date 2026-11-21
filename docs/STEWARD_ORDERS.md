@@ -153,6 +153,16 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Done and shown** (21 November, morning; owner migration
+  `upgrade-20261121-done-and-shown`). The Steward: "Still can't see anything
+  actually being built or projects being completed". A Day in This House was
+  built and accepted by 03:24, but only its owner may record project-done and
+  nothing woke the owner until 07:40; eleven other sessions woke, found nothing
+  left and slept. Fair Swaps and the documentary finished with no Gallery
+  entry. Now, when every task of an active project is done, its owner is the
+  next resident of its family woken and is told to close it (with a Gallery
+  entry when it made something to see) or set its next task; finished work
+  missing from the Gallery is named to the resident improving the house.
 - **Codex back early** (20 November, 21:52; owner migration
   `upgrade-20261120-codex-early`). The Steward: "Could you restart everything
   now? Codex is reset early". A quota rest only ever lengthens, so this

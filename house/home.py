@@ -212,6 +212,91 @@ def field_turn(state: dict) -> str:
             "should be a mix of them'. The fields take turns, one round each, so the shelf holds a mix. Spend "
             "your first thirty minutes there; only if it honestly yields nothing worth days, turn to another "
             "field within the same round. ")
+
+
+# Done and shown (Steward, 21 November: "Still can't see anything actually being built or projects being
+# completed"; owner migration SHOWN). A Day in This House was built and independently accepted by 03:24, but
+# only its owner may record project-done and nothing woke the owner until 07:40: eleven other residents woke,
+# found nothing left to do and slept. Fair Swaps and the documentary finished without a Gallery entry, so a
+# visitor saw neither. From the migration, when every task of an active project is done its owner is the next
+# resident of its family woken, and told to close it or set its next task; finished work missing from the
+# Gallery is named to the resident improving the house.
+SHOWN = "upgrade-20261121-done-and-shown"
+
+
+def showing(state: dict) -> bool:
+    return SHOWN in state.get("maintenance", {}).get("migrations", {})
+
+
+def closing_projects(state: dict) -> dict[str, dict]:
+    """Active projects with at least one task and every task done: only their owner can move them on."""
+    if not showing(state):
+        return {}
+    finished: dict[str, list[bool]] = {}
+    for task in state.get("tasks", {}).values():
+        if task.get("project"):
+            finished.setdefault(task["project"], []).append(task["status"] == "done")
+    return {key: project for key, project in state.get("shelf", {}).get("projects", {}).items()
+            if project.get("status") == "active" and finished.get(key) and all(finished[key])}
+
+
+def closing_owner(state: dict, kind: str, at: float, allowed=lambda resident: True) -> str | None:
+    """The owner of a project with nothing left open, when they are of this family and may return now."""
+    owners = sorted({project["owner"] for project in closing_projects(state).values()})
+    for owner in owners:
+        previous = latest_run(state, owner)
+        if previous is None or previous["agent"] != kind or not allowed(owner):
+            continue
+        model = lived(state, kind, previous["model"])
+        if return_eligible(state, owner, kind, model, at) and model_available(state, kind, model, at):
+            return owner
+    return None
+
+
+def closing_line(state: dict, resident: str) -> str:
+    """Tell an owner whose project has nothing left open that the house is waiting for them."""
+    lines = []
+    for key, project in closing_projects(state).items():
+        if project["owner"] != resident:
+            continue
+        title = state["shelf"]["ideas"].get(project["idea"], {}).get("title", key)
+        lines.append(
+            f"YOUR PROJECT {key} ({title}) HAS NO OPEN TASK: every task is done and the house is waiting for you, "
+            "its owner. Do this first, before anything else in this run. Check its current milestone against the "
+            "finished tasks' evidence. If it is met, make sure a visitor can see it: if it made something to look "
+            "at, run, read or play, add or update its entry in site/projects.json so it shows in the Gallery (a "
+            "change to the house itself needs none), then record shelf kind project-done with the finished task "
+            "that holds the milestone evidence. If it is not met, create the next piece as a task with --project "
+            f"{key} and --ready so others can build it. Do not sleep having done neither.\n")
+    return "".join(lines)
+
+
+def gallery_gaps(state: dict, catalog: dict | None, days: float = 7) -> list[str]:
+    """Finished projects of the last week that made files under projects/ but have no Gallery entry."""
+    if not showing(state):
+        return []
+    entries = (catalog or {}).get("projects") or []
+    shown_ids = {entry.get("id") for entry in entries if isinstance(entry, dict)}
+    shown_paths = [path for entry in entries if isinstance(entry, dict)
+                   for path in [entry.get("href") or ""] + list(entry.get("files") or []) if isinstance(path, str)]
+    folders: dict[str, set[str]] = {}
+    for task in state.get("tasks", {}).values():
+        for path in task.get("artifacts") or []:
+            parts = path.split("/") if isinstance(path, str) else []
+            if task.get("project") and len(parts) > 2 and parts[0] == "projects":
+                folders.setdefault(task["project"], set()).add(f"projects/{parts[1]}/")
+    gaps = []
+    for key, project in state.get("shelf", {}).get("projects", {}).items():
+        if (project.get("status") != "done" or state["at"] - (project.get("closed_at") or 0) > days * 86400
+                or project.get("idea") in shown_ids or not folders.get(key)):
+            continue
+        if any(path.startswith(folder) for folder in folders[key] for path in shown_paths):
+            continue
+        title = state["shelf"]["ideas"].get(project["idea"], {}).get("title", key)
+        gaps.append(f"{title} ({', '.join(sorted(folders[key]))})")
+    return gaps
+
+
 def field_mix(state: dict, last: int = 20) -> str:
     """Tell an Explorer the wishes are equal and what the recent rounds brought, by field."""
     from . import shelf as shelf_model
@@ -810,11 +895,18 @@ def house_work_line(state: dict) -> str | None:
             "house work can start.\n")
 
 
-def focus_prompt(state: dict, focus: str) -> str:
+def focus_prompt(state: dict, focus: str, catalog: dict | None = None) -> str:
     """One resident at a time looks after the house itself, not the current project."""
     head = ("HOUSE FOCUS for this run (instead of the current project; other residents are building that): ")
+    missing = gallery_gaps(state, catalog) if focus == "improve" else []
+    gaps = ("FINISHED BUT NOT IN THE GALLERY, so no visitor can see them: " + "; ".join(missing) + ". Do this "
+            "first in this run: give one of them a Gallery entry in site/projects.json that opens the real thing "
+            "(its page, its checker's real output, its proof), test that the entry loads, and commit it. Then "
+            "carry on with the rest. " if missing else "")
     work = house_work_line(state) if focus in {"improve", "room"} else None
     if work is not None:
+        if gaps:
+            return head + gaps + work
         if focus == "room":
             work = work[:-1] + (" If its next piece is a room, plan and open it as docs/BUILDING.md describes "
                                 "(life kind room-plan, then room-open).\n")
@@ -832,7 +924,7 @@ def focus_prompt(state: dict, focus: str) -> str:
             "It may equally be something every resident will feel. " + LIGHTER + "Build one that removes "
             "a cost you met in your own runs, list it in docs/skills/README.md with what it saves, and say at "
             "the Hearth that it is there. "
-            + bigger).rstrip(" ") + "\n"
+            + bigger + gaps).rstrip(" ") + "\n"
     if focus == "room":
         rooms = state.get("life", {}).get("rooms", {})
         names = ", ".join(f"{room['name']} ({room['status']})" for room in rooms.values())
@@ -1369,13 +1461,14 @@ class Coordinator:
             assignment += course_prompt(state, assigned)
             assignment += deep_prompt(state, assigned)
             assignment += asked_prompt(state, resident)
+            assignment += closing_line(state, resident)
             from . import checks
             second = self.focus == CHECKS_FOCUS and "task" not in assigned and not help_request
             journal = self.record.read()[1] if checks.enabled(state) or second else None   # lesson ages
             if not second:
                 assignment += checks.offer(state, resident, journal)
             if self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
-                assignment += focus_prompt(state, self.focus)
+                assignment += focus_prompt(state, self.focus, self.catalog() if showing(state) else None)
             elif second:
                 assignment += checks.focus(state, resident, journal)
         from .body import PUBLIC_HEARTH
@@ -1479,8 +1572,10 @@ class Coordinator:
                 return None
             resident = target
         else:
-            turn = course.next_resident(state, kind, at, lambda resident: resident not in authors
-                                        and ballot_work.eligible(state, bound_task, resident)) if rotating else None
+            allowed = lambda resident: resident not in authors and ballot_work.eligible(state, bound_task, resident)
+            # An owner whose project has nothing left open goes first: only they can close it or move it on.
+            turn = (closing_owner(state, kind, at, allowed) or course.next_resident(state, kind, at, allowed)
+                    ) if rotating else None
             if turn is not None:
                 model = lived(state, kind, latest_run(state, turn)["model"])
             eligible = [turn] if turn is not None else [
@@ -1681,6 +1776,15 @@ class Coordinator:
         if mixing(state):
             choices = tuple(focus for focus in MIX_FOCUS if focus in choices)
         return choices[last.get("count", 0) % len(choices)]
+
+    def catalog(self) -> dict | None:
+        """The Gallery list as committed at the current source head; None when it cannot be read."""
+        try:
+            from .publish import committed_blob
+            raw = committed_blob(self.record, source_head(self.record), "site/projects.json", optional=True)
+            return json.loads(raw) if raw else None
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
 
     def focus_record(self) -> dict:
         try:
