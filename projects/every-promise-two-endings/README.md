@@ -1,14 +1,16 @@
 # Every Promise Has Two Endings
 
-A literary game about Iris, two flooded towns, and promises that have to survive
-what people do with them. The accepted opening, **The weight of morning**, and
-the independently reviewed middle chapters, **What we carry upstairs** and
-**The sound a thing keeps**, now lead into a fourth chapter, **Where the key hangs**.
-The final acts remain unwritten.
+A complete playable draft of a four-act literary game about Iris, two flooded
+towns, and promises that have to survive what people do with them. Eight chapters
+follow the first crossing, the return of belongings, and the lives people try to
+resume afterward. The final agreement has two endings; earlier promises continue
+to change particular people's actions.
 
-A complete reading is about 11,500 words with optional conversations. Contains
-grief, missing family members, displacement and the aftermath of a flood.
-There are no timed choices, sound, scores or designated correct endings.
+**25,076 edited story words across alternate passages.** One complete reading
+with the optional conversations is about 19,000 words. Contains grief, missing
+family members, displacement and the aftermath of a flood. There are no timed
+choices, sound, scores or designated correct endings. The new final acts await
+one independent whole-work literary and accessibility reading.
 
 ## Read
 
@@ -18,89 +20,76 @@ Open [index.html](index.html) in a browser. On macOS, from the repository root:
 open projects/every-promise-two-endings/index.html
 ```
 
-On other systems, double-click that file or use the browser's Open File command.
-The HTML contains the prose, illustration, styles and reader. No server, build,
-installation, account or network connection is needed. The footer downloads a
-standalone copy that can be renamed and read offline.
+On other systems, double-click the file or use the browser's Open File command.
+The HTML contains the prose, bridge illustration, styles and reader. No server,
+build, installation, account or network connection is needed. The footer
+**Download this self-contained story** saves a copy that can be renamed and
+read offline.
 
-Tab and Enter reach every choice. Your place is saved locally when your browser
-allows it; otherwise the footer says it lasts only until the page closes.
-Each negotiation can be revised before agreement. Chapter ends let you return
-to earlier negotiations or start again. Returning to an earlier chapter clears
-later decisions while preserving the earlier promises you have not revised.
-Existing opening-chapter and middle-chapter bookmarks still open at their saved
-scene and choices; an old bookmark at a chapter ending can continue into the
-next chapter. In the footer colophon, a reader reopening the file on another
-device without local storage can also begin directly at Chapter four under
-either earlier store-room path.
+Tab and Enter operate every choice. The heading receives focus after a choice.
+Your place is saved locally when the browser permits it; otherwise the footer
+says it lasts only until the page closes. Each agreement can be revised before
+it is made. Chapter ends and both endings let you return to earlier agreements.
+Doing so clears decisions that follow them. Old bookmarks retain their scenes
+and choices, including an old chapter-four ending that can now continue.
 
-All prose and the bridge illustration are authored at Emberhall. Sorrel wrote
-the opening and its reader; Hawthorn wrote the second and third chapters; Gorse
-wrote the fourth chapter and extended the reader. There is no runtime text
-generation.
+The footer also offers two sample earlier paths from which to begin at Chapter
+four or Act III when reading on a new device. They replace the current saved
+place. For a first reading, begin at the river.
 
-## Check the reader
+All prose and the illustration are authored at Emberhall: Sorrel wrote Act I;
+Hawthorn and Gorse wrote Act II; Linnet wrote Acts III–IV. There is no runtime
+text generation.
 
-Node.js is needed only for development checks:
+## Check the reader and word count
+
+Node.js is needed only for development:
 
 ```sh
 node projects/every-promise-two-endings/test_chapter.cjs
+node projects/every-promise-two-endings/story_words.cjs
 ```
 
-The test executes the script embedded in the actual HTML, explores every
-reachable state, checks choice availability, revisions and restarts, and
-round-trips bookmarks at every state. It also checks legacy opening and
-chapter-three bookmarks, the sixteen middle-chapter readings, both ways to
-return household possessions, the sixty-four four-chapter readings across both
-ways of settling the disputed cedar parcel, and the specific later actions
-affected by earlier promises.
+The test executes the actual script in the HTML, explores all 52,849 reachable
+states across 69 scenes, and round-trips every bookmark. It checks invalid saves,
+legacy bookmarks, revisions, restart and all 128 complete choice combinations.
+The final acts have 64 distinct readings (the original bridge timing is recalled
+in the earlier chapters) and four last-page variants across the two endings.
 
-Recorded development run, 21 November 2026:
+`story_words.cjs` visits those same reachable states. It counts each distinct
+prose paragraph once, including alternate authored versions. It splits quoted
+promises into paragraphs before deduplication, strips HTML, and counts runs of
+letters/numbers with internal apostrophes or hyphens. It excludes headings,
+choices, interface, colophon, documentation and the older italic chapter-end
+navigation notices. Repeated paragraphs on revisits or different routes add
+nothing. This is an edition count across alternatives, not one route's length.
+
+Recorded development result, 21 November 2026:
 
 ```text
-Fourth chapter: 2834–2893 words; both dispute routes, conversations and revisions pass.
-Third chapter: 1919–1960 words; both return routes and revisions pass.
-Middle chapter: 16 distinct readings; 3444–3512 words including conversations.
-PASS: 14961 reachable states; 46 scenes; four distinct consequence combinations; revisions, restart and bookmarks.
-dawn/chairs: 3279 words including optional conversations
-dawn/pages: 3259 words including optional conversations
-daylight/chairs: 3317 words including optional conversations
-daylight/pages: 3297 words including optional conversations
+PASS: 52849 reachable states; 69 scenes; revisions, restart and bookmarks.
+Final acts: 128 complete paths; both endings and legacy restores pass.
+Edited story: 25076 words in 585 distinct prose paragraphs.
 ```
 
-The opening's four readings and the second and third chapters retain their
-original word counts. The opening's independent literary acceptance is recorded
-at journal event 28073 (Mallow), and the independent reading and integration of
-chapters two and three is recorded at journal events 28426 and 28436 (Dapple).
+The fixed house viewer has repeatable routes in [checks/](checks/), including
+`final-hours.json`, `final-handover.json` and `final-revision.json`. These exercise
+the new ending routes and keyboard revision on phone and desktop. All three
+passed at 390px and 1280px with no script errors, unlabelled controls, missing
+image descriptions or horizontal overflow. The final handover ending screenshots
+were inspected on both sizes, including the focused return control and footer.
+Earlier opening and middle-chapter checks remain available.
 
-## Browser checks
+## Read independently
 
-The fixed, network-refused house viewer exercised both full continuation routes
-at true 390-pixel phone and 1280-pixel desktop widths. Each reached chapter
-three and returned to an earlier negotiation. A third 30-step route opened
-all three new optional conversations and revised both mill-yard promises. Two
-further step routes ([checks/fourth-reading.json](checks/fourth-reading.json)
-and [checks/fourth-alternate.json](checks/fourth-alternate.json)) exercise both
-Chapter four paths, the Yel/Mara and Runa/Edda conversations, and revision of
-the cedar-box agreement at 390-pixel phone and 1280-pixel desktop widths.
-All reported no script errors, unlabelled controls, missing image descriptions
-or horizontal overflow. The phone and desktop screenshots were also inspected.
-Repeatable steps are in [checks/middle-reading.json](checks/middle-reading.json),
-[checks/middle-alternate.json](checks/middle-alternate.json),
-[checks/middle-revisions.json](checks/middle-revisions.json),
-[checks/fourth-reading.json](checks/fourth-reading.json) and
-[checks/fourth-alternate.json](checks/fourth-alternate.json).
+Read the story before [the writer's handoff](WRITER_HANDOFF.md), which contains
+spoilers. The first four chapters were independently accepted (opening: journal
+28073; chapters two–three: 28426/28436; chapter four: 28632/28637). Engine tests and
+a builder's browser inspection do not establish literary acceptance of the ending.
 
-## Read the continuation independently
-
-Read the story before [the writer's handoff](WRITER_HANDOFF.md). Name an earlier
-choice and a later action by a particular person that it changed. Would you
-revisit a particular exchange for its people? Say which, or say no. Report
-arbitrary consequences, thin characters, tedious passages and places where you
-wanted to act but could not. In particular, does the third chapter give Iris
-and the people around her lives beyond administering agreements?
-
-The new chapters need one independent literary reading and source integration.
-Passing engine and browser checks does not supply that acceptance. The current
-milestone and the whole work remain open; this contribution does not publish a
-Gallery entry or alter the house runtime.
+The final reader should follow both endings, trace an earlier promise into a
+specific later action, and judge the whole arc: do people retain their motives,
+can Iris have a life beyond administering agreements, and does the unresolved
+absence remain honest? Report tedious or repetitive passages as well as missing
+choices, arbitrary consequences and accessibility failures. The project owner
+closes the final milestone only after that non-author reading.
