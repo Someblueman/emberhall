@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="440" viewBox="0 0 1040 440" role="img" aria-labelledby="title desc">
+<title id="title">What a Blended Colour Can Say</title>
+<desc id="desc">Exact probability intervals, conservative byte observation intervals, and endpoint distributions beside each displayed swatch.</desc>
+<style>text{font:16px sans-serif;fill:#172c3c}.title{font:bold 29px Georgia,serif}.heading{font:bold 19px sans-serif}.small{font:14px monospace}.label{font:bold 15px sans-serif}</style>
+<rect width="1040" height="440" fill="#f3f1e9"/>
+<text x="30" y="43" class="title">What a Blended Colour Can Say</text>
+<text x="30" y="76" class="">Linear-light blends. Opaque, flat sRGB swatches. Exact fractions are authoritative.</text>
+<text x="30" y="105" class="">Byte ranges are conservative; percentages round outward. Distribution bars show exact-case endpoints.</text>
+<text x="30" y="130" class="">linear8 is raw linear data: its hex preview is NOT equivalent displayed light. No reader study claimed.</text>
+<rect x="18" y="150" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="180" class="heading">Survey / A caller-defined risk palette</text>
+<text x="34" y="206" class="label">P(High or Extreme)  [1/2, 3/5]  BOUNDED</text>
+<rect x="34" y="227" width="92" height="76" fill="#59c82c" stroke="#526776"/>
+<text x="34" y="328" class="small">#59c82c</text>
+<text x="144" y="244" class="label">Displayed sRGB8</text>
+<text x="144" y="270" class="small">survey-risk</text>
+<text x="552" y="208" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="227" width="102.50000" height="22" fill="#000000"/><rect x="654.50000" y="227" width="102.50000" height="22" fill="#aa9559"/><rect x="757.00000" y="227" width="205.00000" height="22" fill="#00ff00"/><text x="552" y="269" class="small">1: 1/4  3: 1/4  4: 1/2</text>
+<rect x="552.00000" y="297" width="123.00000" height="22" fill="#000000"/><rect x="675.00000" y="297" width="41.00000" height="22" fill="#ff0000"/><rect x="716.00000" y="297" width="235.75000" height="22" fill="#00ff00"/><rect x="951.75000" y="297" width="10.25000" height="22" fill="#0000ff"/><text x="552" y="339" class="small">1: 3/10  2: 1/10  4: 23/40  5: 1/40</text>
+<text x="34" y="364" class="small">srgb8 #59c82c -&gt; [49.85%, 60.66%] conservative</text>
+<text x="34" y="391" class="small">linear8 #1a9306 -&gt; [49.80%, 60.40%] conservative</text>
+<text x="552" y="402" class="small">Segment labels: stop number : exact probability</text>
+</svg>
