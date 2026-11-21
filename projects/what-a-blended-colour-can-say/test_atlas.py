@@ -65,6 +65,17 @@ class AtlasTests(unittest.TestCase):
         self.assertEqual(s['observations'][0]['certificate']['p_max'], '257/510')
         self.assertEqual(set(data['palettes']), {palette.name})
 
+    def test_html_embeds_the_real_vector_at_native_width_with_case_controls(self):
+        html = self.rendered['html']
+        self.assertIn(self.rendered['svg'], html)
+        self.assertIn('width:1040px;max-width:none', html)
+        self.assertIn('tabindex="0" role="region"', html)
+        self.assertIn('id="vector-left"', html)
+        self.assertIn('id="vector-right"', html)
+        for i, case in enumerate(rl.default_cases()):
+            self.assertIn(f'<option value="{i}">{case.id} / ', html)
+            self.assertIn(f'<article data-case="{i}">', html)
+
     def test_supported_observation_bounds_include_exact_intervals(self):
         for s in self.data['swatches']:
             exact = s['certificate']
