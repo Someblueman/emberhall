@@ -84,7 +84,10 @@ assert.deepEqual([...scenes].sort(), ['after', 'crossing', 'dan', 'draft', 'edda
   'second', 'yard', 'mara', 'pet', 'runa', 'access', 'shelter', 'middleDraft',
   'invitation', 'mill', 'binding', 'carrying', 'register', 'middleEnd',
   'third', 'storeDoor', 'objects', 'objectDraft', 'returning', 'violin', 'dinner', 'thirdEnd',
-  'fourth', 'courtyard', 'yel', 'sisters', 'dispute', 'fourthDraft', 'objection', 'mending', 'fourthEnd'].sort());
+  'fourth', 'courtyard', 'yel', 'sisters', 'dispute', 'fourthDraft', 'objection', 'mending', 'fourthEnd',
+  'fifth','rosin','letter','tollhouse','schoolGate','wrongDoor','fifthEnd',
+  'sixth','capacity','limits','duty','finalDraft','agreement','sixthEnd',
+  'seventh','ordinaryWork','sunday','news','reviewDay','seventhEnd','eighth','highFold','homeward'].sort());
 for (const bad of ['{', 'null', '[]', '{}', JSON.stringify({...fresh(), scene: '__proto__'}),
   JSON.stringify({...fresh(), scene: 'draft'}), JSON.stringify({...fresh(), revising: true}),
   JSON.stringify({...fresh(), heard: ['unknown']}), JSON.stringify({...fresh(), scene: 'constructor'})]) {
@@ -198,3 +201,5 @@ console.log(`Third chapter: ${Math.min(...thirdRange)}–${Math.max(...thirdRang
 console.log(`Middle chapter: 16 distinct readings; ${Math.min(...middleRange)}–${Math.max(...middleRange)} words including conversations.`);
 console.log(`PASS: ${seen.size} reachable states; ${scenes.size} scenes; four distinct consequence combinations; revisions, restart and bookmarks.`);
 console.log(wordCounts.join('\n'));
+
+require('./test_final.cjs')({fresh, view, step, restore});

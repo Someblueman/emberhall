@@ -1,0 +1,68 @@
+[
+  {
+    "click": ".colophon summary"
+  },
+  {
+    "click": "#resume-final-open"
+  },
+  {
+    "click": "[data-choice=\"rosin\"]"
+  },
+  {
+    "click": "[data-choice=\"letter\"]"
+  },
+  {
+    "click": "[data-choice=\"tollhouse\"]"
+  },
+  {
+    "click": "[data-choice=\"schoolGate\"]"
+  },
+  {
+    "click": "[data-choice=\"wrongDoor\"]"
+  },
+  {
+    "click": "[data-choice=\"fifthEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"sixth\"]"
+  },
+  {
+    "click": "[data-choice=\"capacity\"]"
+  },
+  {
+    "click": "[data-choice=\"limits\"]"
+  },
+  {
+    "click": "[data-choice=\"duty\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-hours\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-duty\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-handover\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-duty\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-hours\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-duty\"]"
+  },
+  {
+    "click": "[data-choice=\"sixthEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"return-duty\"]"
+  },
+  {
+    "press": "Tab"
+  },
+  {
+    "press": "Enter"
+  }
+]
