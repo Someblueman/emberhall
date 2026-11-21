@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#162d35">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Every Promise Has Two Endings — The weight of morning</title>
+<style>
+:root{color-scheme:light;--paper:#f6f1e7;--ink:#25353a;--muted:#526568;--river:#163b48;--copper:#a95536;--line:#c8c9bb;--wash:#eae6d9}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif;line-height:1.75}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit}a{color:var(--river);text-underline-offset:.2em}button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--copper);outline-offset:5px}header{background:var(--river);color:var(--paper);padding:1rem max(1.25rem,calc((100vw - 70rem)/2));display:flex;justify-content:space-between;align-items:center;gap:1rem;font: .76rem/1.4 system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase}header a{color:inherit}header span{max-width:26rem}header button{border:1px solid #9aafb2;background:transparent;color:inherit;padding:.5rem .8rem;font:inherit;letter-spacing:0;text-transform:none;cursor:pointer}.cover{background:#162d35;overflow:hidden}.cover svg{width:100%;height:clamp(165px,25vw,300px);display:block}.book{max-width:43rem;margin:0 auto;padding:3.1rem 1.5rem 4rem}.eyebrow{font:.75rem/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.2em;color:var(--copper);margin:0 0 .8rem}h1{font-size:clamp(2.25rem,6vw,3.65rem);line-height:1.12;font-weight:400;letter-spacing:-.045em;margin:.3rem 0 2rem;text-wrap:balance}#prose p{font-size:1.16rem;margin:0 0 1.35rem}#prose p:first-child:first-letter{font-size:3.3rem;line-height:.85;float:left;padding:.14rem .35rem 0 0;color:var(--copper)}#prose em{color:#344e55}#prose blockquote{margin:1.75rem 0;padding:1rem 1.4rem;border-left:3px solid var(--copper);background:var(--wash);font-size:1.18rem}#prose blockquote p{margin:.5rem 0}#choices{display:grid;gap:.7rem;margin-top:2.3rem}#choices button{cursor:pointer;text-align:left;border:1px solid var(--line);border-left:3px solid var(--river);padding:1rem 1.2rem;background:transparent;color:var(--ink);line-height:1.45;transition:background .12s}#choices button:hover{background:var(--wash)}#choices button strong{font-weight:400;font-size:1.14rem;display:block}#choices button small{font:.85rem/1.5 system-ui,sans-serif;color:var(--muted);display:block;margin-top:.4rem}.folio{display:flex;justify-content:space-between;gap:1rem;border-top:1px solid var(--line);padding-top:1.2rem;margin-top:2.4rem;color:var(--muted);font:.75rem/1.6 system-ui,sans-serif}.colophon{max-width:43rem;margin:0 auto;padding:0 1.5rem 2rem;color:var(--muted);font:.8rem/1.6 system-ui,sans-serif}.colophon details{border-top:1px solid var(--line);padding-top:1rem}.colophon summary{cursor:pointer}.colophon p{max-width:36rem}dialog{max-width:30rem;width:calc(100% - 2rem);border:1px solid var(--line);padding:1.8rem;background:var(--paper);color:var(--ink)}dialog::backdrop{background:#10252bc9}dialog h2{font-weight:400;line-height:1.25}dialog button{padding:.6rem .9rem;cursor:pointer;border:1px solid var(--river);background:var(--wash);color:var(--ink);margin:.4rem .4rem 0 0}noscript{display:block;padding:2rem;max-width:43rem;margin:auto}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}@media(max-width:480px){header{font-size:.66rem;letter-spacing:.07em}.book{padding-top:2rem}#prose p{font-size:1.08rem}.folio{flex-direction:column;gap:.25rem}}
+</style>
+</head>
+<body>
+<header><span>Every Promise Has Two Endings</span><button id="restart" type="button">Start again</button></header>
+<div class="cover">
+<svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="art-title art-desc">
+<title id="art-title">The repaired bridge at dusk</title><desc id="art-desc">A copper-lit window on either riverbank. A narrow timber bridge, still missing its rail, crosses dark water beneath the last light.</desc>
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#152c36"/><stop offset="1" stop-color="#657c7d"/></linearGradient><linearGradient id="water" x2="0" y2="1"><stop stop-color="#354f59"/><stop offset="1" stop-color="#122e3a"/></linearGradient></defs>
+<path fill="url(#sky)" d="M0 0h1200v300H0z"/><path fill="#a1aaa0" opacity=".16" d="M0 130q170-100 360-23t370-24 470 38v40H0z"/><path fill="url(#water)" d="M0 193h1200v107H0z"/>
+<path fill="#182e35" d="M0 101l92 40 59-8 65 49 120 12v106H0zM1200 70l-109 64-81-20-84 73-82 9v104h356z"/>
+<path fill="#1f3037" d="M70 138v-59l35-24 37 25v69zM1037 138V63l46-25 53 37v65z"/>
+<path fill="#e9b374" d="M99 95h14v21H99zM1065 75h17v24h-17z"/><path fill="#c28c59" opacity=".22" d="M95 228l29 0 17 72H74zM1063 230h21l35 70h-82z"/>
+<path stroke="#d3b49b" stroke-width="7" fill="none" d="M297 191q299 31 594-6"/><path stroke="#40535a" stroke-width="12" d="M371 197l-19 80m153-69-5 92m205-96 16 96m98-110 31 73"/>
+<path stroke="#9c8574" stroke-width="3" fill="none" d="M308 191v-29m70 38v-31m65 36v-30m352 25v-30m66 23v-31M308 169l135 13m352-7 66-6"/>
+<g stroke="#9eb0ad" opacity=".25" fill="none"><path d="M402 239h84m-10 30h153m76-32h74m-156 50h181M165 265h91M911 242h83"/></g>
+<path fill="#e3caa2" d="M572 190h7v14h-7z"/><path stroke="#142a33" stroke-width="4" d="M575 205v10m0-15-7 8m7-8 6 7"/>
+</svg>
+</div>
+<main class="book" id="book">
+<p class="eyebrow" id="eyebrow">Chapter one · a literary game · about fifteen minutes</p>
+<h1 id="heading" tabindex="-1">The weight of morning</h1>
+<div id="prose"></div><div id="choices" aria-label="Your next words"></div>
+<div class="folio"><span id="place">The river, the evening before</span><span id="save-status" role="status"></span></div>
+</main>
+<footer class="colophon"><details><summary>About this chapter &amp; keeping a copy</summary><p>An original opening chapter by Sorrel at Emberhall. All words and the bridge illustration are authored here; no live text generation, accounts, analytics or network requests. This is the first chapter of a work in progress, not the complete novella.</p><p>Read at your own pace. Tab and Enter operate every choice. Your place is saved in this browser when local storage is available. You may revise both promises before signing, or start again to follow other words. There is no score. <a id="download" href="index.html" download="every-promise-chapter-one.html">Download this self-contained chapter</a> to read offline.</p><p>Contains grief, a missing family member and the aftermath of a flood. No sound or timed choices.</p></details></footer>
+<dialog id="restart-dialog" aria-labelledby="restart-title"><h2 id="restart-title">Return to the riverbank?</h2><p>This replaces your saved place. You can also keep reading from here.</p><button id="cancel-restart" type="button">Keep my place</button><button id="confirm-restart" type="button">Start the chapter again</button></dialog>
+<noscript>This chapter needs JavaScript for its choices. It runs entirely on your device; enable JavaScript and reopen the file to read.</noscript>
+<script id="chapter">
+"use strict";
+const fresh = () => ({scene:"opening",timing:null,names:null,heard:[],revising:false});
+const choice = (id,label,detail="") => ({id,label,detail});
+function view(s){
+ const dawn=s.timing==="dawn", chairs=s.names==="chairs";
+ const timeLine=dawn ? "Tomorrow at first light the bridge will open, two people abreast, with Dan at the centre." : "Tomorrow the bridge will open after Dan has inspected the timbers in daylight. The ferry will carry those waiting until then.";
+ const nameLine=chairs ? "At the meal we will keep a place for each person who has not come home. No one will be asked to give up that place." : "At noon we will read the names of those who have not come home, and give each family a page on which to answer. Afterward every place at the meal may be used.";
+ const scenes={
+ opening:{title:"The weight of morning",eyebrow:"Chapter one · the evening before",place:"The river, the evening before",prose:[
+ "The bridge has no rail in its middle. In the dark it looks finished. That is the first thing I think when I come down to the river, carrying the clean sheet of paper in my father's violin case. Then the lantern moves, and the gap appears.",
+ "Dan is standing in it. He lifts one hand to me, keeping the other on a post. Seven weeks ago the river took the old bridge, the lower mill, and the night ferry. We found the ferry upside down in a field. My brother's blue coat was caught on its handle. I have stopped telling people that it was a good coat. They hear a different sentence.",
+ "On my bank, Edda has covered six loaves with a tablecloth. Across the water, in Lowbank, somebody is ringing the evening kitchen bell. They cannot hear her say, ‘Not yet.’ She says it to the loaves, perhaps, or to her own hands. These are the trial loaves. Tomorrow she will bake before dawn.",
+ "I used to interpret at the wool market: prices, jokes, the exact size of an insult. After the flood, both councils asked me to write the promise that would open the bridge. Our towns speak the same language. It ought to have been a short job.",
+ "‘Iris,’ Edda says. ‘Before everyone arrives. Tell me what <em>open</em> is going to mean.’",
+ "There are two cups beside her. She pours mine without asking whether I still take milk. For seven weeks everyone has asked me small questions with the caution of people carrying a full bowl. I am so grateful for the milk that I cannot thank her."
+ ],choices:[choice("quay","Sit beside Edda.","The agreement can wait long enough for a cup of tea.")]},
+ quay:{title:"What the river leaves",eyebrow:"Before the meeting",place:"Edda’s tea table",prose:[
+ "Dan comes over on the new boards, heel first, testing each one. He puts a carpenter's pencil beside my paper. His right thumbnail is split to the root. He turns that hand palm down when he sees me notice.",
+ "‘The posts will hold,’ he says. ‘I want to see the grain under the middle joint when the light gets in tomorrow. Water's still coming out of it.’",
+ "Edda pushes his cup toward him. ‘And I want to get bread across while it's bread. We agreed the meal was tomorrow. My sister has borrowed tables from people she hasn't spoken to in eleven years.’",
+ "Sava arrives from the ferry steps with her register wrapped in oilcloth. Since the flood she has kept the list of beds in Lowbank: which roof leaks, who snores, who must not be put beside whom. She sits on the empty flour sack. ‘Say what you mean,’ she tells us. ‘And say what it will make somebody else do.’",
+ "The paper is still blank. There is time to ask what each of them is carrying."
+ ],choices:[choice("ask-edda",s.heard.includes("edda")?"Ask Edda about the bread again.":"Ask Edda why the morning matters."),choice("ask-dan",s.heard.includes("dan")?"Ask Dan about the joint again.":"Ask Dan what he is afraid of."),choice("ask-sava",s.heard.includes("sava")?"Ask Sava about the list again.":"Ask Sava about the people still missing."),choice("ask-ivo",s.heard.includes("ivo")?"Speak of Ivo again.":"Tell them what I have not asked for."),choice("meeting","Take the paper into the old tollhouse.","You may begin whenever you are ready.")]},
+ edda:{title:"The heel of the loaf",eyebrow:"Edda",place:"Edda’s tea table",prose:[
+ "‘My ovens stayed dry,’ Edda says. ‘So I made myself useful. I sent bread over in baskets. Every basket came back with a thank-you written on it. Then the thank-yous got longer. Then people started sending coins.’",
+ "‘You do sell bread,’ Dan says.",
+ "‘I do. To people who can come into my shop and complain about it.’ She uncovers a loaf and breaks off its heel. The steam is faint but still there. ‘My sister said she wouldn't come home as somebody I was feeding. She wanted to sit down and pass something to me.’",
+ "Edda's sister, Runa, used to walk over the bridge every Thursday to mend the shop accounts. In Lowbank she has made herself an apron from a flour sack. Edda says this with indignation, though all three of us are sitting on flour sacks.",
+ "‘She can come later,’ I say.",
+ "‘Of course she can. And I can ask people to wait. I just want the waiting put into the sentence. Don't let the sentence pretend it costs nothing.’",
+ "She gives Dan the heel. He takes it with the injured hand. Neither of them looks at what the other has done."
+ ],choices:[choice("back","Leave the heel of bread between them.")]},
+ dan:{title:"A line inside the wood",eyebrow:"Dan",place:"Edda’s tea table",prose:[
+ "‘A bridge isn't either safe or unsafe,’ Dan says. ‘It is safe for a particular thing. Two people walking. A cart. A dozen people stopping in the middle to look at the river.’",
+ "He rubs the pencil between finger and thumb. I remember him teaching Ivo to do that when we were children. Ivo could spin it three times without dropping it. I could do four. It seems important, abruptly, that somebody remember this correctly.",
+ "‘Will it hold two people?’ I ask.",
+ "‘Yes. I think so. I will stand there.’",
+ "‘And if we wait?’",
+ "‘I'll know which way the joint is opening. I can brace it. We can walk across without watching each other's feet.’ He looks toward Lowbank. ‘My daughter says I only built it so I'd have something to finish. She's coming to the meeting tonight. If I tell you it has to wait, I want you to know I am waiting too.’",
+ "His daughter is Mara. They have not spoken since he stayed to shore the mill while she carried his wife up the hill. His wife survived. This has not made their argument smaller.",
+ "‘Don't write that Dan guarantees it,’ he says. ‘Write that Dan will be there. Those are different things.’"
+ ],choices:[choice("back","Keep the distinction.")]},
+ sava:{title:"Room in the register",eyebrow:"Sava",place:"Edda’s tea table",prose:[
+ "Sava lets the register fall open. There is a pressed violet in the spine. Beside one bed number she has written <em>cannot bear door closed</em>. Beside another: <em>ask before touching shoulder</em>.",
+ "‘When someone goes missing,’ she says, ‘everything they owned begins asking other people what to do. A bed. A coat. An unpaid bill. A seat at a table.’",
+ "I ask whether she wants the list read at the meal. She does not answer at once.",
+ "‘My husband disappeared in the first flood, fourteen years ago. I kept his place for three winters. On the fourth, my nephew sat in it. I shouted at a boy who was only cold.’ She straightens the violet. ‘I don't want anyone to hurry you. I don't want anyone to give you a promise that will someday make you shout at a cold boy, either.’",
+ "Edda says there is room for extra tables. Sava says, ‘Tomorrow there is.’ It is not a rebuke. Edda nods as though she has been given a weight she knows how to lift.",
+ "‘A name read aloud can be a welcome,’ Sava tells me. ‘Or a closing of a door. You'll need to stay there and hear which it is.’"
+ ],choices:[choice("back","Close the register carefully.")]},
+ ivo:{title:"The blue coat",eyebrow:"Iris",place:"Edda’s tea table",prose:[
+ "‘I don't want Ivo written into this because I'm holding the pen,’ I say.",
+ "No one answers quickly enough. I hear myself add, ‘I don't want him left out because of it, either.’",
+ "Dan looks down at the boards. Edda folds the edge of the cloth over one bare loaf. It is Sava who asks what Ivo would have wanted from the day.",
+ "‘He would have wanted to be the first across. Then he'd have claimed he hadn't been racing.’ I have not said his name in a sentence with a joke for weeks. It hurts in a fresh place. ‘He would have wanted Runa's pickled pears. He said he hated them and ate half a jar every time.’",
+ "‘I've kept pears,’ Edda says.",
+ "I almost ask her why. I almost make her explain a kindness so I can decide whether to be grateful or furious. Instead I drink the tea. There is a skin on it now.",
+ "The clean paper rests against my knee. It will not bring my brother back. It can still make people do things to one another. That is enough reason to be careful with it."
+ ],choices:[choice("back","Set the empty cup down.")]},
+ meeting:{title:"Two banks, one table",eyebrow:"The old tollhouse",place:"The meeting",prose:[
+ "The tollhouse smells of limewash. Its waterline is a brown seam at my shoulder. Someone has painted below it and left the rest alone. I put the violin case on the table; Edda lays down her bread knife, and Dan moves it out of the way of my elbow.",
+ "Runa has come by ferry. I know her from Edda at once, though where Edda leans forward, Runa leans back. Beside her is Mara with two stools tied together. She has brought them for the meal. Dan begins to offer his hand. She gives him the stools instead.",
+ "We have spent three afternoons agreeing that the bridge belongs to neither council. Tonight we must agree what to do with it. The first draft says, <em>The bridge will open tomorrow, and all who belong here will have a place.</em> Everybody liked it. Nobody meant the same morning, or the same place.",
+ "‘We've been saying tomorrow for three days,’ Runa says. ‘Pick one we have to wake up in.’",
+ "They laugh. Dan does not. He is looking at a dark patch on Mara's sleeve. When she follows his eyes, she says, ‘Not mine. A nosebleed on the ferry.’ He nods once, too hard.",
+ "I turn the sheet over. ‘We need two promises. What happens on the bridge. What happens when we sit down.’",
+ "‘Write both,’ Runa says. ‘Then read them back to us without making them prettier.’"
+ ],choices:[choice("timing","Begin with the bridge.")]},
+ timing:{title:"When is open?",eyebrow:"The first promise",place:"The meeting",prose:[
+ "Through the door I can see the light going out behind Lowbank. The clouds are thin enough that we should have a proper morning. Dan draws a little cross where the joint is, then wipes it away because he has drawn on the wrong side of the paper.",
+ "‘First light,’ Edda says. ‘Two at a time. No carts. You'll be at the middle.’ She is speaking to Dan, not to me. ‘If it shifts, you stop them.’",
+ "‘Yes,’ he says. Then: ‘Or I inspect in daylight. The ferry keeps running. I brace the joint before anyone uses it.’",
+ "Runa counts something on her fingers. ‘If we wait, the ferry carries the old people first. Not the food. The food can be late.’ Edda opens her mouth, shuts it, and nods. She has heard the cost of her own wish offered back to her.",
+ "Mara says that if Dan stands at the middle she will stand with him. He tells her he doesn't need watching. ‘I know,’ she says. He is not able to answer that.",
+ "Neither plan is a guarantee. In one, Dan will listen with his feet while people cross. In the other, the morning will be spent waiting on a bank that has had enough waiting. I have to put one of these things in ink."
+ ],choices:[choice("choose-dawn","Open at first light, two people abreast, with Dan in the middle.","People cross early. The unfinished joint stays under watch."),choice("choose-daylight","Wait for Dan to inspect in daylight. Keep the ferry running.","The bridge can be braced first. People and bread will wait.")]},
+ names:{title:"Who gets a place?",eyebrow:"The second promise",place:"The meeting",prose:[
+ "Sava opens the register at the names no one can cross out. There are nine. The room makes nine different silences, and then I understand that it has made only one and I am doing the counting.",
+ "‘We could set a place for each of them,’ Edda says. ‘No family has to give it up.’ Runa asks where the children will sit. ‘We can fetch more chairs.’",
+ "‘We could read the names at noon,’ Sava says. ‘Give each family a page. Let them tell us what must be kept. Then use the chairs for whoever is here.’",
+ "‘And if somebody comes home next week?’ Mara asks.",
+ "‘We get them a chair,’ Sava says. ‘This is not a declaration.’",
+ "Runa puts a hand on the register but not on any name. ‘Then say that. Say it every time.’ Her neighbour Pet has been sleeping in the school since the flood. Pet's son is on the list. Runa has promised to bring her to the meal, and she will have to explain whichever sentence we choose.",
+ "I write Ivo on a scrap, so that I can see his name without everybody looking at it. A chair is not a person. A page is not a person. Neither is nothing."
+ ],choices:[choice("choose-chairs","Keep a place for each person still missing. No family must give it up.","The empty places stay at the shared table."),choice("choose-pages","Read the names at noon. Give families a page, then use every chair.","Remember together, without holding the seats empty.")]},
+ draft:{title:"Read it without making it prettier",eyebrow:"The unsigned passage",place:"Before the ink dries",prose:[
+ "I read the words slowly. Dan keeps his eyes on his cup. Runa moves her lips with mine, a fraction behind. They are not listening for a trick. They are trying the sentences against the day they are going to have.",
+ `<blockquote><p>${timeLine}</p><p>${nameLine}</p></blockquote>`,
+ "‘You will stay?’ Sava asks me.",
+ "‘Through the meal.’",
+ "‘Good. If anyone asks what we meant, you can tell them what we said.’ She closes the register. ‘Those won't always be the same question.’",
+ "Mara takes the pencil from her father and writes <em>no carts yet</em> beneath the bridge sentence. Whichever morning we choose, the carts must wait. Dan makes room for her elbow. I am the only person who sees him do it.",
+ "There is room at the bottom for four signatures. Mine is not one of them. I can still ask them to change either sentence. After they sign, I will have to be there when the words turn into a morning."
+ ],choices:[choice("revise-time","Read the bridge promise again.","Change when the crossing opens."),choice("revise-names","Read the promise about places again.","Change what the meal holds for the missing."),choice("sign","Put the pen where everyone can reach it.","Keep these two promises and go to the bridge.")]},
+ signed:{title:"The signatures",eyebrow:"The last of the evening",place:"Outside the tollhouse",prose:[
+ "Runa signs first, in the large hand she uses on Edda's accounts. Sava signs small. Dan has to change his grip around the split nail; Mara holds the paper steady. She does not sign for him. I leave that distinction alone.",
+ "Outside, the river has lost its colour. At the ferry steps a child has a bundle of spoons tucked into his belt like knives. He tells me that tomorrow he is taking them home. Not <em>back</em> home. Just home.",
+ "I hang the signed sheet inside the tollhouse door, low enough for a person sitting down to read. Edda waits while I do this. She has picked up both cups, and for a moment she looks exactly like a woman whose only problem is what to do with two cups.",
+ "‘You could have written any words,’ she says.",
+ "‘Not any.’",
+ "She considers this. ‘No. But those are yours now.’ She follows my eyes to the signatures. ‘I don't mean your fault. I mean you were here.’",
+ "At home I leave the violin case beside my bed. There is still a dent in the pillow where I used to put my elbow and listen for Ivo's key. Tonight I turn the pillow over. I sleep badly, but I sleep.",
+ "Before first light I go down to the river. The fresh loaves have made Edda's windows white with steam. Across the water, the kitchen bell begins again. This time no one tells it to stop."
+ ],choices:[choice("crossing","Return to the bridge in the morning.")]},
+ crossing:dawn?{title:"Two abreast",eyebrow:"The first promise, kept",place:"First light · the new bridge",prose:[
+ "Dan stands at the middle as the sentence requires. Mara is beside him. They look less like guards than two people who have misplaced their conversation and are waiting for it to return.",
+ "Runa crosses first with Pet. I know Pet by the red scarf she has wound twice around her wrist. Halfway across she stops. Dan holds up a hand on our bank, and the next pair waits. He doesn't tell her to move.",
+ "‘That was his window,’ Pet says. Her son's room was above the mill. From here the space where it stood looks too small for a room.",
+ "Mara turns so she is looking at the same thing. Runa keeps hold of Pet's sleeve. It takes long enough for the loaves to lose their last warmth. Edda watches from beside me, the cloth open over her arms.",
+ "Then Pet walks on. Runa puts one foot ahead of the other so deliberately that I realise she has been frightened all along. On our side she takes a loaf from Edda and breaks it without a knife. ‘Still good,’ she says, and Edda looks away.",
+ "Under the next pair, the wet joint makes a noise like a tooth being pulled. Dan stops the line. His face changes before his voice does. Mara kneels and wedges a spare block beneath the timber. For twenty minutes no one crosses. The people waiting repeat our sentence to one another: two abreast, Dan at the middle. Some say it with comfort. Some say it as a complaint.",
+ "At last he lets them walk. His hand is bleeding into the pencil mark. Mara does not take it. She stays close enough that he could offer it."
+ ],choices:[choice("meal","Follow the people carrying the tables.")]}:{title:"The work of waiting",eyebrow:"The first promise, kept",place:"Daylight · the ferry steps",prose:[
+ "When Runa reaches our bank by ferry, the loaves are cold. She sees Edda's face and says, too quickly, ‘They'll toast.’ Then she takes the largest loaf and breaks it for the people getting off behind her. She is still the person passing something. I do not know whether Edda notices.",
+ "Dan has chalked a white line under the joint. In the daylight it opens into two lines. ‘There,’ he says, so quietly that only Mara hears. She climbs down to hold the brace while he drives it in.",
+ "The ferry brings the old people first, as Runa said it should. By its third trip the boy with the spoons is crying. He has been promised today so often that a few more hours feels like a different kind of no. Pet gives him one end of her red scarf and asks him to keep it out of the water. A job is sometimes a kindness and sometimes an insult. Today he takes it as a job.",
+ "Edda walks down to help with the rope. A basket catches the step and one loaf falls into the river. We all watch it turn once and sail away, absurdly intact. Runa laughs. Edda does not. Then Runa says, ‘Well. That one's gone home without us,’ and Edda makes a sound that is almost laughter.",
+ "At half past ten Dan takes the chalk line off with his sleeve. He asks Mara to walk the bridge with him. She says, ‘I was going to anyway.’ They start at opposite ends. They meet in the middle, where he kneels to show her what he has done. He is not asking her to forgive him. I can see how hard it is for him to ask only this.",
+ "The bridge opens. No one cheers until Pet begins, and then everybody cheers too loudly, relieved to be given something definite to do. The boy runs across with the spoons."
+ ],choices:[choice("meal","Carry the empty bread basket to the meal.")]},
+ meal:chairs?{title:"Nine empty places",eyebrow:"The second promise, kept",place:"Noon · the long table",prose:[
+ "Edda has put nine cups upside down. That is how we used to keep the dust out when people were late. It is a household gesture, and for a moment it defeats me more completely than a speech would have done.",
+ "Pet sits beside her son's place. She turns his cup over. Sava goes round with the register, asking each family whether the name is right. Not <em>correct</em>. Right. A woman asks for her mother's childhood name. A man asks her to leave the surname off. Sava changes both without asking why.",
+ "Then the people from the school arrive. There are more children than anyone remembered. Runa brings another bench, but there is no space to slide it between the trees and the table. Edda says we can move the table. It is already full of bowls.",
+ "A boy sits in Ivo's chair. He is not making a statement. He has a bowl too hot for his hands, and he needs somewhere to put it. Edda moves toward him. I see Sava see her move. I have exactly enough time to understand what my sentence has asked Edda to protect.",
+ "‘Leave him,’ I say. It comes out sharper than I want. The boy stands at once. ‘No. Sit. Please.’",
+ "‘We said no one had to give up a place,’ Edda says. She is speaking for me. I wish she would stop, and I love her for it.",
+ "I pull my chair alongside the boy's. ‘I haven't given it up.’ There is hardly room for my knees. The words work, narrowly. They leave Edda with a problem in her face that I cannot solve for her.",
+ "Pet will not move her son's cup. Nobody asks her to. Runa takes a plate and sits on the grass beside the children, in her best skirt. After a while Dan brings the two stools Mara carried. He puts one near Pet without sitting in the other. She taps it once. He sits.",
+ "Sava writes something in the margin of her register. Later she shows me: <em>For the next meal, more room.</em> She has not crossed out a name."
+ ],choices:[choice("after","Stay to wash the cups.")]}:{title:"The names at noon",eyebrow:"The second promise, kept",place:"Noon · the long table",prose:[
+ "Sava stands at the end of the table with nine blank pages. She says first what Runa asked us to say: this is not a declaration. Then she reads the names. The kitchen door keeps opening behind her. Every time it opens, everyone looks.",
+ "Ivo's name comes fifth. I had thought knowing the order would make it easier. Edda is holding a jar of pears, and the sight of her unable to put it down is worse than the name.",
+ "Sava gives me a page. I write, <em>He always said he hated these.</em> It is not an answer to a question anyone has asked. I slide it under the jar so the wind will not take it.",
+ "Pet leaves her page blank. When the people from the school arrive, a boy sits beside her. He has a bowl too hot for his hands. Pet looks at the boy, then at the place where Sava read her son's name. ‘That was quick,’ she says.",
+ "Runa begins to explain the agreement. Pet says, ‘I was here. I heard it.’ Runa stops. That is the first good thing she can do, and it is very difficult for her.",
+ "The boy stands. Pet takes the bowl from him and sets it on the table. ‘Sit before you drop it.’ She does not look at Runa. For the rest of the meal Runa brings things she thinks Pet might need, and Pet passes most of them to the boy.",
+ "There is room for everyone at the table. That was part of what we meant. It is not the same as everyone feeling there is room. Sava goes to sit on Pet's other side, taking her own blank page. She asks about the small pear tree behind the mill. Pet tells her it was an apple tree. Then she tells her why it never fruited.",
+ "Later Pet folds her page into quarters and puts it in her pocket. I do not know whether she has written anything. I do not get to know merely because I chose the sentence."
+ ],choices:[choice("after","Stay to wash the cups.")]},
+ after:{title:"What remains to be done",eyebrow:"Late afternoon",place:"The river, on both sides",prose:[
+ "When the table is cleared, there is a white ring on the wood where the jar of pears stood. Edda rubs it with her thumb. ‘That'll stay,’ she says. Runa tells her to use salt. They argue about the salt with the ease of people whose argument has somewhere ordinary to go.",
+ dawn ? "Mara comes up carrying the block she wedged under the joint. Dan has asked her to bring a better one tomorrow. ‘I said I'd bring a better one,’ she corrects me. It matters to her that I understand who offered. I tell her I do, and this time I think I do." : "Mara comes up with a piece of chalk. She has marked the brace so they can tell if it moves overnight. ‘He showed me,’ she says. Then, after a moment: ‘I already knew. But I let him.’ She puts the chalk in her own pocket.",
+ chairs ? "The little boy brings me Ivo's cup, washed. ‘Was he coming?’ he asks. I could explain the promise. Instead I tell him I don't know. He thinks for a moment and says he can use a different cup next time. I say this one is all right. He does not seem certain I mean it. Next time I will have to mean it again." : "Sava brings me the page from beneath the pears. The glass has left a sticky crescent through my sentence. ‘Keep it,’ she says. I ask whether she means the page or the stain. She says, ‘I don't know. I haven't been doing this any longer than you have.’",
+ "At the tollhouse, somebody has written beneath our signatures: <em>Who brings the lamp back?</em> Nobody has stolen it. It is standing on the far bank, where people will need it after dark. The question is still real.",
+ "I fetch the carpenter's pencil. I could write a rule about the lamp. Instead I write: <em>I'll come for it at dusk. Leave it lit.</em>",
+ "Across the water Dan is carrying one end of a bench. Mara has the other. They are walking at different speeds and neither will mention it. The bench turns slightly between them. They stop, without putting it down, and begin again.",
+ "I put the paper in my father's violin case. Not the agreement; that stays on the door. Just the scrap with Ivo's name. There is room beside it for the pencil."
+ ],choices:[choice("end","Leave the lamp lit.")]},
+ end:{title:"Leave it lit",eyebrow:"End of chapter one",place:"The first day is over",prose:[
+ "At dusk I cross for the lamp. Someone has trimmed the wick. Someone has left half a loaf beside it, wrapped in the cloth from Edda's table.",
+ "I take the lamp. I leave the bread. There will be somebody along.",
+ "<em>The weight of morning</em> ends here. These people have further days to live; the remaining acts are not yet written. You can return to the unsigned passage and choose other words, or begin again and listen to someone you hurried past."
+ ],choices:[choice("return-draft","Return to the unsigned passage.","Keep what you heard; try the other morning or the other meal."),choice("start-over","Begin again at the river.")]}
+ };
+ return Object.prototype.hasOwnProperty.call(scenes,s.scene)?scenes[s.scene]:undefined;
+}
+function step(state,action){
+ if(!view(state).choices.some(c=>c.id===action)) throw new Error("That choice is not available here.");
+ const s={...state,heard:[...state.heard]};
+ const routes={quay:"quay",back:"quay",meeting:"meeting",timing:"timing",sign:"signed",crossing:"crossing",meal:"meal",after:"after",end:"end"};
+ if(action==="start-over") return fresh();
+ if(action.startsWith("ask-")){s.scene=action.slice(4);if(!s.heard.includes(s.scene))s.heard.push(s.scene);}
+ else if(action==="revise-time"){s.scene="timing";s.revising=true;}
+ else if(action==="revise-names"){s.scene="names";s.revising=true;}
+ else if(action==="return-draft"){s.scene="draft";s.revising=false;}
+ else if(action==="choose-dawn"||action==="choose-daylight"){s.timing=action.slice(7);s.scene=s.revising?"draft":"names";s.revising=false;}
+ else if(action==="choose-chairs"||action==="choose-pages"){s.names=action.slice(7);s.scene="draft";s.revising=false;}
+ else s.scene=routes[action];
+ return s;
+}
+function restore(raw){
+ try{
+  const s=JSON.parse(raw);
+  if(!s||typeof s.scene!=="string"||!Array.isArray(s.heard)||s.heard.some(v=>!["edda","dan","sava","ivo"].includes(v))||typeof s.revising!=="boolean"||![null,"dawn","daylight"].includes(s.timing)||![null,"chairs","pages"].includes(s.names))return fresh();
+  if(!view(s))return fresh();
+  if(["names","draft","signed","crossing","meal","after","end"].includes(s.scene)&&!s.timing)return fresh();
+  if(["draft","signed","crossing","meal","after","end"].includes(s.scene)&&!s.names)return fresh();
+  if(s.revising&&(!s.timing||!s.names||!["timing","names"].includes(s.scene)))return fresh();
+  return {scene:s.scene,timing:s.timing,names:s.names,heard:[...new Set(s.heard)],revising:s.revising};
+ }catch{return fresh();}
+}
+if(typeof module!=="undefined")module.exports={fresh,view,step,restore};
+if(typeof document!=="undefined"){
+ const key="every-promise-chapter-one-v1";
+ let state=fresh(),canSave=true;
+ try{state=restore(localStorage.getItem(key));}catch{canSave=false;}
+ const heading=document.getElementById("heading"),choices=document.getElementById("choices"),dialog=document.getElementById("restart-dialog");
+ function render(moveFocus=false){
+  const page=view(state);
+  document.title=page.title+" — Every Promise Has Two Endings";
+  heading.textContent=page.title;
+  document.getElementById("eyebrow").textContent=page.eyebrow;
+  document.getElementById("place").textContent=page.place;
+  document.getElementById("prose").innerHTML=page.prose.map(p=>p.startsWith("<blockquote>")?p:"<p>"+p+"</p>").join("");
+  choices.replaceChildren();
+  for(const c of page.choices){
+   const button=document.createElement("button");button.type="button";button.dataset.choice=c.id;
+   const label=document.createElement("strong");label.textContent=c.label;button.append(label);
+   if(c.detail){const detail=document.createElement("small");detail.textContent=c.detail;button.append(detail);}
+   button.addEventListener("click",()=>{state=step(state,c.id);render(true);});choices.append(button);
+  }
+  try{if(canSave)localStorage.setItem(key,JSON.stringify(state));}catch{canSave=false;}
+  document.getElementById("save-status").textContent=canSave?"Your place is saved on this device.":"Your place lasts until this page is closed.";
+  if(moveFocus){heading.focus({preventScroll:true});document.getElementById("book").scrollIntoView({block:"start"});}
+ }
+ document.getElementById("restart").addEventListener("click",()=>dialog.showModal());
+ document.getElementById("cancel-restart").addEventListener("click",()=>dialog.close());
+ document.getElementById("confirm-restart").addEventListener("click",()=>{dialog.close();state=fresh();render(true);});
+ document.getElementById("download").addEventListener("click",event=>{
+  event.preventDefault();
+  // A copy must remain downloadable after the reader renames the HTML file.
+  const url=URL.createObjectURL(new Blob(["<!doctype html>\n"+document.documentElement.outerHTML],{type:"text/html;charset=utf-8"}));
+  const link=document.createElement("a");link.href=url;link.download="every-promise-chapter-one.html";
+  link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ });
+ render();
+}
+</script>
+</body>
+</html>

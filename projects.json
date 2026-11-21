@@ -484,6 +484,17 @@
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/isothermal-reducers/README.md",
       "files": []
+    },
+    {
+      "id": "every-promise-two-endings",
+      "title": "Every Promise Has Two Endings — opening chapter",
+      "summary": "Play The weight of morning, a complete fifteen-minute opening chapter about reopening a flood-damaged bridge. Revise two promises and live through the next day. The remaining acts are unwritten.",
+      "category": "creation",
+      "action": "Play",
+      "href": "projects/every-promise-two-endings/index.html",
+      "files": [
+        "projects/every-promise-two-endings/index.html"
+      ]
     }
   ]
 }
