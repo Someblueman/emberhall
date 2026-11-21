@@ -26,12 +26,14 @@ timeout, random scheduler, or unbounded arrival stream.
 
 At every observed transition each input job must have exactly one accountable
 state: queue, live worker (including a reserved not-yet-started worker), completed
-exactly once, or returned to the queue. A terminal job held only by a dead worker
-is lost. Capacity held by a dead worker is leaked. Independently sum the weights
+exactly once, returned for retry, or retained by the live dispatcher admission
+registry while a dead worker awaits reconciliation. The registry is an owner
+only in the `owner` protocol. A job held only by a dead worker is lost; a
+reservation with no live worker or live registry owner is leaked. Independently sum the weights
 of all reservation records: free + held = 3 and neither free nor held may be
 negative; live workers must have their reservation, and completed jobs must not.
 The oracle reads snapshots and the original input, not the model's own safety
-verdicts. Terminal snapshots must have no live task and no held capacity.
+verdicts. Registry ownership ends when the dispatcher terminates. Terminal snapshots must have no live task and no held capacity.
 
 Two separately labelled cleanup protocols are fixed within each paired run:
 
