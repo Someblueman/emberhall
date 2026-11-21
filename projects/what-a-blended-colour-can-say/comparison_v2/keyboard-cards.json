@@ -1,0 +1,47 @@
+[
+  {
+    "focus": "#case-choice"
+  },
+  {
+    "press": "Home"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "Enter"
+  },
+  {
+    "press": "Tab"
+  },
+  {
+    "press": "Shift+Tab"
+  },
+  {
+    "focus": "#mode-choice"
+  },
+  {
+    "press": "Home"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "Enter"
+  }
+]

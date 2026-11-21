@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-1A",
+      "q4": "Under the exact linear-light model, could P(L4, L5) exceed 50%? (YES / NO)",
+      "query_mode": "exact",
+      "set": "A"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-2A",
+      "q4": "Under the exact linear-light model, could P(L4, L5) be below 20%? (YES / NO)",
+      "query_mode": "exact",
+      "set": "A"
+    },
+    {
+      "event": "P(L3)",
+      "id": "V2-3A",
+      "q4": "Under the exact linear-light model, could P(L3) exceed 90%? (YES / NO)",
+      "query_mode": "exact",
+      "set": "A"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-4A",
+      "q4": "Under the srgb8 conservative observation model, could P(L4, L5) be below 48%? (YES / NO)",
+      "query_mode": "srgb8",
+      "set": "A"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-5A",
+      "q4": "Under the linear8 conservative observation model, could P(L4, L5) exceed 60%? (YES / NO)",
+      "query_mode": "linear8",
+      "set": "A"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-1B",
+      "q4": "Under the exact linear-light model, could P(L4, L5) be below 60%? (YES / NO)",
+      "query_mode": "exact",
+      "set": "B"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-2B",
+      "q4": "Under the exact linear-light model, could P(L4, L5) exceed 50%? (YES / NO)",
+      "query_mode": "exact",
+      "set": "B"
+    },
+    {
+      "event": "P(R2, R4)",
+      "id": "V2-3B",
+      "q4": "Under the exact linear-light model, could P(R2, R4) be below 10%? (YES / NO)",
+      "query_mode": "exact",
+      "set": "B"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-4B",
+      "q4": "Under the srgb8 conservative observation model, could P(L4, L5) exceed 52%? (YES / NO)",
+      "query_mode": "srgb8",
+      "set": "B"
+    },
+    {
+      "event": "P(L4, L5)",
+      "id": "V2-5B",
+      "q4": "Under the linear8 conservative observation model, could P(L4, L5) be below 33.33%? (YES / NO)",
+      "query_mode": "linear8",
+      "set": "B"
+    }
+  ],
+  "order": "dist_a_then_atlas_b",
+  "schema": "blended-comparison-v2"
+}

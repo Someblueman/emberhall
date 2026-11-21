@@ -1,0 +1,28 @@
+{
+  "files": {
+    "atlas_a/first_legend.html": "36bccedadf90ed9a8318d72fabf14d7a338492436aa9b133c4a0b7a1f00b2315",
+    "atlas_a/first_legend.svg": "a08db807de1ff1a51fd5e62f175a8d3ebb1f1234d5288489dc7b2458127372ca",
+    "atlas_a/witnesses.json": "289bb6b0140dc0378f987772b1cb05f8babc622656a5baef9c11f70b9ca40ec2",
+    "atlas_b/first_legend.html": "f098ebdb8e345aa76b0a9251df668cc36f6fb9374b0c08fb777aa1abe756845b",
+    "atlas_b/first_legend.svg": "1719fc84c62c85e345c4f7a5f6fe7741e3f73784e0e492b7d8ec4fe19727414b",
+    "atlas_b/witnesses.json": "0908f686229ac36ae0ade31444b9bb0bd3de2a89bcfb6da35aca342f221d0ad4",
+    "dist_a/index.html": "d7734d7e66404bdcd045ac98c76572be1ac91a90524498e22dddd766947907cb",
+    "dist_b/index.html": "9e22654384ea45e06fc133fc6236005ac000336a9f3edbac9c4d6d59822f4448",
+    "inputs/cases.json": "16f58891c39ca1c181b5e3501d9f86267d57a73fa1f861a491c485c343a2b8ee",
+    "keyboard-cards.json": "360f565a68a18a052ee15e3e2dca79cac2feb340cd6a97edf588e455ee7e78d9",
+    "keyboard-vector.json": "81ad9524ca0219876ba71df2f4677bbe4db73988f46c27ee93924bc77a036a74",
+    "keys/answers.json": "03d2b3908d34262b166818838693dd408b739cb1fb8f37804c6479e30916e1ac",
+    "prompts.json": "05f52a164180c2d7add3a5e13d2aff596e5bd773a3eab5213a37615cc79329bd"
+  },
+  "schema": "blended-comparison-v2-freeze",
+  "sources": {
+    "COMPARISON_V2.md": "d91714877282bbccd643d7b9acf578dcaed8e9d5e4e260282453ccd39df7af65",
+    "blended_colour.py": "e045a4e0e9d8e8137d0c83b0e52dc99779591bed707da05a9ca2fde80d40d311",
+    "comparison.py": "ca0a071d560c5611021093a46798b43368cefbef6cf5697073e31648e639d88f",
+    "comparison_v2.py": "7394517d3e3423e133a125b758abdf9f6d0a275a9abd8a91841526b2a0b1316b",
+    "display_colour.py": "54eff4da65b8eb4c4a9792750d6d43806c7bf2187356bedf3a2ab546819f9e18",
+    "quantized_bounds.py": "9f8469ba82688f78980a6d57edfc5851b23a1319e36b990e9aa8d3039b0c5c40",
+    "render_legend.py": "1e24b368ceed91c29c55a2bd756de0373c64a5db4f68545a3b1824820aefc5fb",
+    "verify_atlas.py": "16cff765899cdfb129ccee12b0e11f2cb3cadf0fdec2b93c3291f12ba870bb74"
+  }
+}

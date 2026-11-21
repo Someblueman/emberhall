@@ -129,6 +129,31 @@ class AtlasTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 rl.render_atlas(palettes, cases, modes=modes)
 
+    def test_mode_led_cards_and_vector_use_matching_scope_certificates(self):
+        rendered = rl.render_atlas(bc.builtin_palettes(), rl.default_cases(), mode_led=True)
+        for swatch in self.data['swatches']:
+            for mode in ('exact', *dc.MODES):
+                cert, scope, status = rl._mode_result(swatch, mode)
+                self.assertIn(scope, rendered['html'])
+                self.assertIn(rl._range(cert, mode == 'exact'), rendered['html'])
+                self.assertIn(status, rendered['svg'])
+        self.assertIn('id="mode-choice"', rendered['html'])
+        self.assertIn('aria-live="polite"', rendered['html'])
+        self.assertNotIn('data-mode="linear8"', rendered['svg'])
+        self.assertIn('id="vector-models"', rendered['html'])
+        self.assertIn('data-mode="srgb8"', rendered['svg'])
+        self.assertEqual(rendered['witnesses'], self.rendered['witnesses'])
+
+    def test_query_defaults_and_missing_observation_mode(self):
+        case = rl.default_cases()[0]
+        rendered = rl.render_atlas(bc.builtin_palettes(), (case,), mode_led=True,
+                                  modes=('linear8',), query_modes={case.id:'exact'})
+        self.assertIn('data-mode="exact" data-query="exact">', rendered['html'])
+        self.assertIn('data-mode="linear8" data-query="exact" hidden', rendered['html'])
+        with self.assertRaises(ValueError):
+            rl.render_atlas(bc.builtin_palettes(), (case,), mode_led=True,
+                            modes=('linear8',), query_modes={case.id:'srgb8'})
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,181 @@
+[
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-1A",
+    "mode": "exact",
+    "palette": "fern_violet_v2",
+    "probe_op": "gt",
+    "threshold": "1/2",
+    "weights": [
+      "1/5",
+      "7/20",
+      "0",
+      "9/20",
+      "0"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-2A",
+    "mode": "exact",
+    "palette": "fern_violet_v2",
+    "probe_op": "lt",
+    "threshold": "1/5",
+    "weights": [
+      "1/8",
+      "1/8",
+      "1/2",
+      "1/8",
+      "1/8"
+    ]
+  },
+  {
+    "event_indices": [
+      2
+    ],
+    "id": "V2-3A",
+    "mode": "exact",
+    "palette": "fern_violet_v2",
+    "probe_op": "gt",
+    "threshold": "9/10",
+    "weights": [
+      "0",
+      "0",
+      "1",
+      "0",
+      "0"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-4A",
+    "mode": "srgb8",
+    "palette": "fern_violet_v2",
+    "probe_op": "lt",
+    "threshold": "12/25",
+    "weights": [
+      "1/3",
+      "1/6",
+      "0",
+      "0",
+      "1/2"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-5A",
+    "mode": "linear8",
+    "palette": "fern_violet_v2",
+    "probe_op": "gt",
+    "threshold": "3/5",
+    "weights": [
+      "1/5",
+      "1/5",
+      "1/5",
+      "1/10",
+      "3/10"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-1B",
+    "mode": "exact",
+    "palette": "copper_ice_v2",
+    "probe_op": "lt",
+    "threshold": "3/5",
+    "weights": [
+      "1/8",
+      "1/4",
+      "0",
+      "5/8",
+      "0"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-2B",
+    "mode": "exact",
+    "palette": "copper_ice_v2",
+    "probe_op": "gt",
+    "threshold": "1/2",
+    "weights": [
+      "1/10",
+      "1/5",
+      "2/5",
+      "1/10",
+      "1/5"
+    ]
+  },
+  {
+    "event_indices": [
+      1,
+      3
+    ],
+    "id": "V2-3B",
+    "mode": "exact",
+    "palette": "plum_lime_ramp_v2",
+    "probe_op": "lt",
+    "threshold": "1/10",
+    "weights": [
+      "0",
+      "1/4",
+      "1/2",
+      "1/4",
+      "0"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-4B",
+    "mode": "srgb8",
+    "palette": "copper_ice_v2",
+    "probe_op": "gt",
+    "threshold": "13/25",
+    "weights": [
+      "1/6",
+      "1/3",
+      "0",
+      "0",
+      "1/2"
+    ]
+  },
+  {
+    "event_indices": [
+      3,
+      4
+    ],
+    "id": "V2-5B",
+    "mode": "linear8",
+    "palette": "copper_ice_v2",
+    "probe_op": "lt",
+    "threshold": "1/3",
+    "weights": [
+      "1/8",
+      "1/4",
+      "1/8",
+      "1/4",
+      "1/4"
+    ]
+  }
+]
