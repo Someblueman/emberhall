@@ -13,6 +13,8 @@ explicit mixed-edge construction for every odd g>=3 on
 `T(18g+1,14g+1,3g)`. At g=5 this checks the requested family's t=0 case;
 other g are **not** further parameters of `T(91+5320t,71+5320t,15+5320t)`.
 This does not add a proved infinite subfamily of that affine family.
+Section 5 also gives an unrestricted full-partition obstruction for odd
+triples with a common factor; it does not rule out half-minus-one pairs.
 Priority stays [provisional](PRIORITY_REFRESH.md).
 
 The predecessors were inspected through the trusted integration channel:
@@ -266,5 +268,31 @@ family this only reproduces t=0, not an uncovered infinite class.
 The next useful route is (4) on the two growing coarse trees, allowing
 nonhomometric layers, or (1) with genuinely internal holes. Small periodic
 prefix/suffix experiments found no extending identity; they prove no
-limitation and are not part of the certificate. No global upper bound,
+limitation and are not part of the certificate. No upper bound for the remaining affine family,
 new priority claim, runtime installation or public delivery is asserted.
+
+## 5. A full-partition obstruction independent of any lift
+
+If three positive odd arm lengths share an integer factor g>1, **no full
+equal homometric partition exists**, even with arbitrary recolouring.
+Consequently their homometric number is at most `(1+L1+L2+L3)/2-1`.
+This is the half-minus-one target, not an obstruction to that target.
+It generalizes the earlier arithmetic-progression full-lift example to
+all odd triples with a common odd factor. The assigned affine family has
+gcd one, so this corollary does not resolve it.
+
+Suppose a full partition existed. Work in the Laurent polynomial quotient
+modulo z^g+1. Every quotient L_i/g is odd, so all A_i=-1. Put S=sum S_i.
+The full shell equation and its reciprocal read
+`Q=4s0+3S+S*=0` and `Q*=4s0+S+3S*=0`.
+Thus `3Q-Q*=8(s0+S)=0`. This quotient is a free abelian group on
+`1,z,...,z^(g-1)`, so multiplication by eight is injective: s0+S=0.
+But the coefficient at z in its remainder is
+`sum_i sum_(k=0)^(L_i/g-1) (-1)^k s(i,kg+1)`.
+There are an odd number of +/-1 terms, so it is odd and cannot be zero.
+This contradiction quantifies over every full colouring; no search is used.
+
+`python3 projects/almost-halving-three-branches/edge_dependent.py --odd-common-factor 15 9 3`
+reports upper bound and target 13, `full_partition_impossible: true`, and
+`target_ruled_out: false`. A coprime triple or any even arm is refused as
+outside this certificate's domain, not classified as having a partition.

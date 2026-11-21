@@ -32,10 +32,14 @@ def multiply(left: Poly, right: Poly) -> Poly:
     return add(*(shift(left, k, v) for k, v in right.items()))
 
 
-def vertices(lengths: tuple[int, int, int]) -> list[Vertex]:
+def validate_lengths(lengths) -> None:
     if (len(lengths) != 3
             or any(type(n) is not int or n < 1 for n in lengths)):
         raise ValueError("require three positive integer arm lengths")
+
+
+def vertices(lengths: tuple[int, int, int]) -> list[Vertex]:
+    validate_lengths(lengths)
     return [(0, 0)] + [(i, p) for i, n in enumerate(lengths, 1)
                        for p in range(1, n + 1)]
 
@@ -191,6 +195,19 @@ def parameter_certificate(t: int) -> dict:
             "target_ruled_out": False}
 
 
+def odd_common_factor_bound(lengths) -> dict:
+    """Exclude every full partition, not just lifts, on the stated odd-arm domain."""
+    validate_lengths(lengths)
+    factor = gcd(*lengths)
+    if factor == 1 or any(n % 2 == 0 for n in lengths):
+        raise ValueError("require three odd lengths with a common factor greater than one")
+    target = (1 + sum(lengths))//2 - 1
+    return {"lengths": lengths, "common_odd_factor": factor,
+            "odd_quotients": [n//factor for n in lengths], "upper_bound": target,
+            "target": target, "full_partition_impossible": True,
+            "target_ruled_out": False}
+
+
 def prove() -> dict:
     # Laurent identity behind the elimination in equation (8) of the document.
     one, a, b, c = _mon(), _mon(1), _mon(r=1), _mon(s=1)
@@ -237,6 +254,10 @@ def prove() -> dict:
     residues = [t for t in range(165) if parameter_certificate(t)["remaining_class"]]
     if len(residues) != 32:
         raise ArithmeticError("unexpected residue count")
+    # Modulo z**g+1, A_i=-1: 3*Q-Q* = 8*(s+sum S_i).
+    q, reflected_q = (4, 3, 1), (4, 1, 3)
+    if tuple(3*a-b for a, b in zip(q, reflected_q)) != (8, 8, 0):
+        raise ArithmeticError("odd common-factor identity failed")
     lengths, base, seeds = mixed_rows()
     if sum(base.values()) or full_shell(lengths, base) or any(
             layer_residuals(lengths, [("child", seed) for seed in seeds])):
@@ -312,6 +333,7 @@ def main() -> int:
     group.add_argument("--parameter", type=int)
     group.add_argument("--demo", action="store_true")
     group.add_argument("--mixed-control", type=int, metavar="ODD_G")
+    group.add_argument("--odd-common-factor", nargs=3, type=int, metavar=("A", "B", "C"))
     group.add_argument("--check", type=Path)
     parser.add_argument("--summary", action="store_true")
     args = parser.parse_args()
@@ -324,6 +346,8 @@ def main() -> int:
             result = demo()
         elif args.mixed_control is not None:
             result = mixed_control(args.mixed_control)
+        elif args.odd_common_factor is not None:
+            result = odd_common_factor_bound(tuple(args.odd_common_factor))
         else:
             pair = json.loads(args.check.read_text())
             result = check_pair(tuple(pair["lengths"]), pair["left"], pair["right"])

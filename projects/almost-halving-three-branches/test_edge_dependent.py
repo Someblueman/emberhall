@@ -87,6 +87,17 @@ class EdgeDependentTests(unittest.TestCase):
             c, _, u, _, _ = ed.components(lengths, field)
             self.assertTrue(ed.add(u, ed.shift(u, 1), ed.shift(c, 0, -1)))
             self.assertGreaterEqual(sum(sorted(lengths)[:2]), max(lengths)-1)
+        bound = ed.odd_common_factor_bound((15, 9, 3))
+        self.assertEqual(bound["upper_bound"], 13)
+        self.assertFalse(bound["target_ruled_out"])
+        self.assertTrue(ed.odd_common_factor_bound((3*10**30+3,)*3)["full_partition_impossible"])
+        vv = ed.vertices((3, 3, 3))
+        for tail in product((-1, 1), repeat=len(vv)-1):
+            field = dict(zip(vv, (1,)+tail))
+            if not sum(field.values()):
+                left = [v for v, s in field.items() if s == 1]
+                right = [v for v, s in field.items() if s == -1]
+                self.assertNotEqual(direct_profile(left), direct_profile(right))
 
     def test_mixed_edges_escape_homometric_seed_class(self):
         lengths, _, seeds = ed.mixed_rows()
@@ -108,6 +119,9 @@ class EdgeDependentTests(unittest.TestCase):
         for t in (-1, True, 0.5):
             with self.assertRaises(ValueError):
                 ed.parameter_certificate(t)
+        for lengths in ((5, 3, 1), (6, 3, 3)):
+            with self.assertRaises(ValueError):
+                ed.odd_common_factor_bound(lengths)
         with self.assertRaises(ValueError):
             ed.shell_numerator((1, 1, 1), {(0, 0): 1})
         for left, right in (([(0, 0)]*2, [(1, 1), (2, 1)]),
