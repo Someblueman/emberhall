@@ -33,14 +33,18 @@
 <div id="prose"></div><div id="choices" aria-label="Your next words"></div>
 <div class="folio"><span id="place">The river, the evening before</span><span id="save-status" role="status"></span></div>
 </main>
-<footer class="colophon"><details><summary>About this chapter &amp; keeping a copy</summary><p>An original opening chapter by Sorrel at Emberhall. All words and the bridge illustration are authored here; no live text generation, accounts, analytics or network requests. This is the first chapter of a work in progress, not the complete novella.</p><p>Read at your own pace. Tab and Enter operate every choice. Your place is saved in this browser when local storage is available. You may revise both promises before signing, or start again to follow other words. There is no score. <a id="download" href="index.html" download="every-promise-chapter-one.html">Download this self-contained chapter</a> to read offline.</p><p>Contains grief, a missing family member and the aftermath of a flood. No sound or timed choices.</p></details></footer>
+<footer class="colophon"><details><summary>About the story &amp; keeping a copy</summary><p>Original chapters by Sorrel and Hawthorn at Emberhall. All words and the bridge illustration are authored here; no live text generation, accounts, analytics or network requests. These are the opening and two middle chapters of a work in progress, not the complete novella.</p><p>Read at your own pace. Tab and Enter operate every choice. Your place is saved in this browser when local storage is available. You may revise both promises before signing, or start again to follow other words. There is no score. <a id="download" href="index.html" download="every-promise.html">Download this self-contained story</a> to read offline.</p><p>Contains grief, a missing family member and the aftermath of a flood. No sound or timed choices.</p></details></footer>
 <dialog id="restart-dialog" aria-labelledby="restart-title"><h2 id="restart-title">Return to the riverbank?</h2><p>This replaces your saved place. You can also keep reading from here.</p><button id="cancel-restart" type="button">Keep my place</button><button id="confirm-restart" type="button">Start the chapter again</button></dialog>
 <noscript>This chapter needs JavaScript for its choices. It runs entirely on your device; enable JavaScript and reopen the file to read.</noscript>
 <script id="chapter">
 "use strict";
-const fresh = () => ({scene:"opening",timing:null,names:null,heard:[],revising:false});
+const fresh = () => ({scene:"opening",timing:null,names:null,heard:[],revising:false,access:null,shelter:null,objects:null});
 const choice = (id,label,detail="") => ({id,label,detail});
 function view(s){
+ const third=thirdView(s);
+ if(third)return third;
+ const middle=middleView(s);
+ if(middle)return middle;
  const dawn=s.timing==="dawn", chairs=s.names==="chairs";
  const timeLine=dawn ? "Tomorrow at first light the bridge will open, two people abreast, with Dan at the centre." : "Tomorrow the bridge will open after Dan has inspected the timbers in daylight. The ferry will carry those waiting until then.";
  const nameLine=chairs ? "At the meal we will keep a place for each person who has not come home. No one will be asked to give up that place." : "At noon we will read the names of those who have not come home, and give each family a page on which to answer. Afterward every place at the meal may be used.";
@@ -189,20 +193,273 @@ function view(s){
  end:{title:"Leave it lit",eyebrow:"End of chapter one",place:"The first day is over",prose:[
  "At dusk I cross for the lamp. Someone has trimmed the wick. Someone has left half a loaf beside it, wrapped in the cloth from Edda's table.",
  "I take the lamp. I leave the bread. There will be somebody along.",
- "<em>The weight of morning</em> ends here. These people have further days to live; the remaining acts are not yet written. You can return to the unsigned passage and choose other words, or begin again and listen to someone you hurried past."
- ],choices:[choice("return-draft","Return to the unsigned passage.","Keep what you heard; try the other morning or the other meal."),choice("start-over","Begin again at the river.")]}
+ "<em>The weight of morning</em> ends here. Three days later, the school still holds the people whose homes the river took. Continue to <em>What we carry upstairs</em>, or return to the unsigned passage and choose other words."
+  ],choices:[choice("second","Continue to chapter two.","What we carry upstairs"),choice("return-draft","Return to the unsigned passage.","Keep what you heard; try the other morning or the other meal."),choice("start-over","Begin again at the river.")]}
  };
  return Object.prototype.hasOwnProperty.call(scenes,s.scene)?scenes[s.scene]:undefined;
 }
+function middleView(s){
+ const dawn=s.timing==="dawn", chairs=s.names==="chairs", lead=s.access==="lead", school=s.shelter==="school";
+ const accessLine=lead ? "Mara will lead the work in the marked rooms. Dan will inspect the route first and wait outside; anyone may call a stop." : "Dan and Mara will enter together. Nothing will be moved until both agree the route is sound; anyone may call a stop.";
+ const shelterLine=school ? "The recovered bedding will stay in the school. The children will have the west room for lessons, and no bed will be moved without its sleeper there." : "Edda will open the rooms above the bakery for those who wish to move. The school will keep beds for anyone who stays; nobody will be moved to make the offer look successful.";
+ const scenes={
+ second:{title:"What we carry upstairs",eyebrow:"Chapter two · three days later",place:"The school in Lowbank",prose:[
+ "The school smells of wool that has dried too slowly. There are sums on the blackboard behind the beds. Someone has divided seventeen by four and left a remainder of one. Under the answer, a pair of stockings hangs from a nail.",
+ "I bring the lamp back here each morning now. At first I carried it by the handle, as though it were still an errand. This morning I brought oil. No one asked me to, and I am trying not to make that into something I can be praised for.",
+ "Pet sits on a narrow bed, turning a blanket so the sound edge is at the top. The boy from the meal is kneeling beside it. His name is Tavi. He is learning to thread a needle. He wets the thread with such concentration that he has forgotten to close his mouth.",
+ chairs ? "Ivo's cup is on the windowsill beside him. I told him he could use it. He has brought it back every evening, washed, as though the permission lasts only one day. Today I leave it where he can reach it." : "Pet's folded page is propping up the short leg of her bed. I look away too late. ‘It wasn't sacred,’ she says. ‘It was a piece of paper.’ Tavi offers her a fresh fold. She says this one will do.",
+ "‘The blankets in the mill loft,’ Pet says. ‘The relief wool. Above the waterline. Are we waiting for them to grow legs?’",
+ "Dan boarded the mill door after the flood. Yesterday he gave Sava an estimate for taking the damaged stair down. Under it, in the same pencil, he wrote that the loft could be reached from the grain passage. I have been carrying the estimate in my pocket. Pet sees the corner of it.",
+ "‘That isn't a blanket,’ she says.",
+ "Tavi has got the needle threaded. He holds it up for us to see. Pet waits until he has had his moment before she asks me to fetch Dan."
+ ],choices:[choice("yard","Take the estimate to the mill yard.")]},
+ yard:{title:"The door with two bolts",eyebrow:"Before another promise",place:"The mill yard",prose:[
+ "The mill wheel has stopped with one paddle pointing up, holding a puddle of rain. Dan is making a stack of sound boards and a second stack that looks almost the same. Mara moves a board from one to the other. He puts it back. She bends it over her knee. Something inside it gives with a dry, small crack. He moves it himself.",
+ dawn ? "The block Mara put under the bridge joint lies beside her boot. She brought the better one she promised; this is the old one. Dan keeps finding uses for it that are not quite uses. This morning it is holding down his drawing." : "Mara takes out the chalk she kept after the bridge inspection. The mark on the brace has not moved. Dan asks whether she checked both sides. She says she did. He asks her to show him. She puts the chalk away.",
+ "‘I need the key,’ she says. ‘You said the grain passage would take us to the loft. Pet can tell us which bales belong to the school.’",
+ "‘I said I'd look.’",
+ "‘You looked yesterday.’",
+ "There is a chipped blue tile over the boarded door. It shows an ear of barley, though for years I thought it was a feather. My father used to stop here to argue about the weight of flour. I cannot remember what his voice sounded like when the argument was small.",
+ "Runa arrives carrying the school's washing in a basket. She has brought it to the mill because there is nowhere else to put it while she talks to us. Sava follows her with a slate. Nobody puts anything down."
+ ],choices:[choice("ask-mara","Ask Mara what work she is offering."),choice("ask-pet","Go back and ask Pet about the blankets."),choice("ask-runa","Ask Runa where the bedding will go."),choice("access","Put the basket down and begin.")]},
+ mara:{title:"A place to stand",eyebrow:"Mara and Dan",place:"Beside the sound boards",prose:[
+ "Mara takes me around the side of the mill. Through a hole in the wall I can see the lower stair hanging from its upper fixing. The bottom three steps are gone. ‘No one is going up that,’ she says. ‘Before you ask.’",
+ "She lays out the route: side door, grain passage, the stone steps at the back, then the loft. She knows which wall carries the beam. She knows because she worked here before the flood, measuring sacks and putting right the accounts her father did in his head.",
+ "‘I want him to tell me what he's found,’ she says. ‘I don't want him to keep it in his head and make me safe by moving me around it.’",
+ "Dan has come far enough to hear. ‘When you were little—’ he begins.",
+ "‘I know. You carried me over the wheel race. I liked it.’ She gives him that much without turning it into permission. ‘I want to go in with what you know. Whether you come with me is another question.’",
+ "He picks a splinter off his sleeve. ‘If you stop for a noise, I need you to stop all the way. Not take the last sack first.’",
+ "‘Then tell me that.’",
+ dawn ? "He looks at the block in the yard. ‘You took a risk under the bridge.’ She says, ‘So did you.’ Neither of them adds what they could add: that the sentence required him to be there, and she had gone of her own accord." : "‘You held the brace where I showed you,’ he says. ‘I held it where it needed holding,’ she says. Then she turns back. ‘Those can both be true, Dad.’ It is the first time I have heard her use the word this week.",
+ "Dan rubs his thumb across his split nail. It has begun to knit. The new skin is still too thin for what he keeps asking it to do."
+ ],choices:[choice("yard","Return to the people waiting with their hands full.")]},
+ pet:{title:"The blue binding",eyebrow:"Pet",place:"The school doorway",prose:[
+ "Pet is standing in the doorway when I return. She will come as far as the mill yard, she says. She will not go inside. ‘Don't call that being sensible. I don't know if it is.’",
+ "The relief bales have blue binding. Her son helped carry them up before the water came into the mill. His name is Neri. I knew it from the register, and until now have never heard her say it.",
+ "‘He tied the top bale badly,’ she says. ‘Everything came loose when we tried to lift it. I told him if he wanted to leave a thing behind he could leave it properly.’",
+ "She pulls her scarf out of the door latch. The wool has caught; a red thread stays in the wood.",
+ "‘I don't want his knot saved,’ she says. ‘I want the blankets down.’",
+ chairs ? "I ask whether she wants a chair in the yard. ‘Are you keeping another place for me?’ she asks. Then she sees my face. ‘An ordinary chair, Iris. Yes. My knee's bad.’ At the school she chooses a stool with a cracked seat and gives me the light end." : "I start to explain why her name will be on the list of people asked. She stops me. ‘You keep telling me what things don't mean.’ I put the slate away. When I ask whether she wants to come now or after lunch, she says now.",
+ "At the corner she waits for Tavi to catch up. He has brought the threaded needle. She takes it away before he can run with it, wraps it in the scarf, and returns the thread to him. He trails it behind us all the way to the yard."
+ ],choices:[choice("yard","Carry Pet's stool to the mill.")]},
+ runa:{title:"The room above the ovens",eyebrow:"Runa",place:"The mill yard",prose:[
+ "Runa sets the basket on a dry board. ‘They've washed these three times,’ she says. ‘You can get the mud out. You can't get a wall out of them.’",
+ "The school's east wall sweats at night. People have shifted their beds into the centre until there is only a narrow path to the door. The west room is dry, but that is where the teacher wants to begin lessons again. Yesterday she tried teaching between the beds. Tavi answered a question from under his blanket, and an old woman told him to keep his voice down.",
+ "‘We can move the beds,’ I say.",
+ "‘Which beds?’ Runa says. ‘Where?’",
+ "Edda has offered the two rooms above the bakery. They are dry. The stairs are steep. She will need to move her flour downstairs, and for a while there will be fewer loaves because there is nowhere to cool them. Runa tells me this without looking at her sister's windows.",
+ "‘You don't want to go there?’",
+ "‘I want not to have to be wanted there.’ She picks a wet sleeve out of the basket. ‘She'll get up early to make me tea. Then I'll get up earlier so she doesn't have to. By the end of the week neither of us will sleep.’",
+ "She smiles, finally. ‘Perhaps that's just sisters. Perhaps it's not a reason to leave Pet against a wet wall. But if we stay in the school, we must make a room for the children. We can't go on calling all of it temporary.’"
+ ],choices:[choice("yard","Help her cover the washing.")]},
+ access:{title:"Whose hand on the key?",eyebrow:"The work at the mill",place:"The boarded door",prose:[
+ "Dan draws the safe route on the back of his estimate. Mara makes him draw where it stops. Beyond the loft there is a store room with the household things people brought up from Lowbank: pots, photographs, parcels tied with washing line. They agree it is out of bounds until its floor can be tested.",
+ "Pet has come to the yard. Her stool stands a little apart from us, where she can see the blue tile. ‘The wool is on our side of that door,’ she says, tapping the drawing. ‘I remember.’",
+ "Dan offers to go up with Mara. Each of them would have to agree before a bale moved. Mara says she can work with that, if he means each of them, and not him explaining until she agrees.",
+ "Or he can inspect with her, give her the key and wait outside. She will lead the carrying. He can call a stop from the yard just as anyone can. ‘I can do it,’ he says. I cannot tell which offer he is talking about.",
+ "Mara looks at me. ‘Don't write that I persuaded him. Write what we each have to do.’",
+ "The lamp is on the drawing to keep the corners flat. We have reached the point where someone must lift it."
+ ],choices:[choice("choose-lead","Mara leads after the inspection. Dan waits in the yard.","His knowledge goes in with her; his body does not."),choice("choose-together","They go in together. Moving a bale needs both voices.","Neither person's yes can stand in for the other's.")]},
+ shelter:{title:"Where the dry things go",eyebrow:"The people at the school",place:"The mill yard",prose:[
+ "Sava has asked the people at the school. Some want to cross to the bakery. Some want to stay close to the streets they knew. Three have said they cannot decide while standing in a wet room. She has recorded that too.",
+ "‘The offer can't be everyone or no one,’ Runa says.",
+ "Edda has come down with an apron over her coat. She says she can clear her upstairs rooms before dusk if she knows now. She speaks carefully. It is the care she uses when a customer counts coins twice and puts some back.",
+ "We could keep the bedding at the school, move the beds away from the wet wall with their sleepers present, and free the west room for lessons. It means another night of close air while the east wall dries. The people staying will help make the room; the teacher has offered her own bed space to begin it.",
+ "Or we can carry bedding to the bakery for those who choose it. The school will keep places for the others. Edda will lose cooling space and some of tomorrow's bread. Runa will have to enter her sister's house carrying a blanket, which is different from arriving with pears.",
+ "‘Don't write that the rooms are a gift,’ Edda says. Runa looks up. ‘Write that they're rooms,’ Edda says. ‘We can find out what else they are after people have slept.’"
+ ],choices:[choice("choose-school","Keep the bedding at the school and make room for lessons.","Move beds with the people who sleep in them."),choice("choose-bakery","Open the bakery rooms to people who want to move.","Keep a bed at the school for anyone who stays.")]},
+ middleDraft:{title:"A sentence with work in it",eyebrow:"Before they agree",place:"Pet's stool beside the door",prose:[
+ "There is no table here. I read the two sentences from the estimate while Pet holds the lamp. Its base has left a ring in the pencil. Dan says he'll still be able to read the drawing.",
+ `<blockquote><p>${accessLine}</p><p>${shelterLine}</p></blockquote>`,
+ "Mara asks who will carry. Runa, two people from the school, and me. Dan asks who will keep the landing clear. We move my name to that job; I cannot lift what Runa can, and pretending otherwise will leave somebody holding the other end.",
+ "‘And me,’ Pet says.",
+ "Dan looks at her knee. ‘You said—’",
+ "‘Outside. I said outside. Give the bales to me. I'll cut the binding.’",
+ "I add her name. She gives the lamp back and rubs the warm mark it has left on her palm.",
+ "No one is signing this sheet. When I have read it again, each person will have to say whether it is work they can do. There is still time to ask for different words."
+ ],choices:[choice("revise-access","Read the promise about the key again."),choice("revise-shelter","Read the promise about the rooms again."),choice("agree-middle","Read it to the people who will do it.")]},
+ invitation:{title:"The person who says no",eyebrow:"Before the carrying",place:"The school",prose:[
+ "The teacher is called Lise. She stands at the foot of a bed, holding the boot its occupant has been looking for. She waits while he puts it on. Then she listens to our two sentences.",
+ school ? "‘The west room by morning?’ she asks. ‘The west room with no beds in it?’ I say yes, if we can move them today. ‘Then I can teach,’ she says. The man with the boot asks where he will sleep. Lise stops talking about tomorrow and helps us measure the space beside his bed." : "She asks who wants the bakery. Four people put up their hands. The man with the boot does not. Runa begins counting the beds we can clear, then catches herself and counts the people who raised their hands instead. Lise asks the others how much room they need left between them.",
+ "Tavi is standing behind Runa with his coat on. He thinks carrying means everybody. When she tells him he will stay here, his face shuts. I recognise the look from the ferry steps even though I did not know his name then.",
+ "Lise asks if he will help her clear the blackboard. He tells her he is not a baby. ‘Neither am I,’ she says. ‘But I can't get the chalk out of that crack with these fingers.’ She shows him. Her hands are swollen at the joints. He examines them without politeness and stays.",
+ "Pet has waited outside. ‘I would have taken him,’ she says as we walk back. ‘He doesn't need another place he isn't allowed to go.’ Then she sees the stair through the hole in the mill wall and says nothing more.",
+ "It is not a lesson any of us asks her to say she has learned. We go in for the blankets."
+ ],choices:[choice("mill","Bring the lamp to the grain passage.")]},
+ mill:{title:"Above the waterline",eyebrow:"The second day's work",place:"The mill loft",prose:[
+ "The mill is cold in a way the yard is not. Every sound stays in it. Runa lifts the corner of her apron before it can brush the wall. Then she drops it again. There is already mud on it from the school.",
+ lead ? "Dan walks the route with Mara before the carrying begins. At the stone steps he puts her hand under a beam so she can feel where the damp ends. Then he goes out. From the landing I see him in the yard, sitting on the stack of unsound boards. He stands when we lift the first bale. He sits again. Mara doesn't look to check whether he is doing what he promised." : "Dan and Mara go ahead. At the stone steps he tells her to duck; she has already ducked. She tells him to keep his left hand free. He moves the lamp to his right. The little corrections accumulate until I am tired on their behalf, and then they reach the loft.",
+ "The bales have blue binding. On the top one the binding has slipped loose, exactly as Pet said. Mara crouches to retie it. Runa says they can carry it loose if they each take a side. Mara leaves the knot alone.",
+ dawn ? "Under the first lift, the landing answers with a knock. Mara sets her end down at once. ‘Like the joint,’ she says. Her voice has gone flat with the effort of keeping it ordinary. The others put their ends down too. The bale sits where it is while she looks beneath the boards. This time nobody has to wedge anything under a weight still moving." : "Mara looks at the beam, then takes out her chalk. She marks the seam before we lift. Dan sees the white line and holds the lamp nearer. It is a tool they have used together before; for a moment neither of them has to explain it.",
+ lead ? "Mara calls Dan from the landing. ‘I need you to look at this.’ He comes as far as the door, then waits for her to finish telling him what she found. Asking him has not taken the key out of her pocket." : "Dan says the landing can take the bale. Mara says it has to rest on the stone, not the boards, when they turn. ‘All right,’ he says. She waits. He moves his end to the stone and says it again. This time they lift.",
+ "The route is narrower than the drawing. I stay at the turn and hold the door with my shoulder. My work is to be an object nobody has to think about. For the first two bales I find this restful. By the third my arm is shaking. I ask for someone to take my place."
+ ],choices:[choice("binding","Follow the last bale into the light.")]},
+ binding:{title:"Not the knot",eyebrow:"Pet's work",place:"The mill yard",prose:[
+ "Pet has the knife ready. Runa lays the loose bale on the boards beside her. The blue cord falls away before Pet can cut it. ‘That one,’ she says. Nobody asks how she knows.",
+ "She spreads the top blanket. A rectangle in the centre is a deeper grey where another fold kept the dust off. She puts her face close to it. Then she holds it up for Runa to take.",
+ "The cord has a loop in it, the start of a knot that would not hold. I pick it up so no one will trip. For a moment I am standing with Neri's unfinished thing in my hand and nowhere to put it.",
+ "‘In the sack,’ Pet says. ‘With the other string.’",
+ "I put it there. Later she takes a short length from the sack to tie two blankets together. She uses the sound part and cuts off the loop. No one saves it from her.",
+ chairs ? "She asks whether there will be chairs where the blankets go. ‘For sitting in,’ she adds, with a glance at me. Runa brings the two stools Mara carried to the meal. Pet tests the cracked one with her hand and says they can mend that before anyone breaks a hip." : "Sava comes with a list. Pet asks for it, reads it, and tells her she has put the same family down twice. Sava crosses out the second entry. Pet keeps the pencil until she has checked the bottom of the page. Being hurt by the first list has not made her unable to use this one.",
+ "Mara has found a tin cup in the passage. She sets it on the wall. It could belong to anyone. We let it belong to anyone while we count the blankets."
+ ],choices:[choice("carrying","Take the bedding where it was promised.")]},
+ carrying:{title:school?"Seventeen and a remainder":"Above Edda's shop",eyebrow:"The rooms, as promised",place:school?"Late afternoon · the school":"Late afternoon · the bakery",prose:school?[
+ "Moving a bed while its sleeper watches takes longer than carrying it into an empty room. The man with the boot wants his head toward the window. Another man wants the same place, but has not said so until we begin. Runa stands holding one end of the bed while they talk. After a while she sets it down.",
+ "Lise measures the path with her own body. If she can pass sideways, carrying a bowl, she calls it room. Pet makes her try with a blanket round her shoulders. ‘You won't always be walking about in your day clothes,’ she says. Lise tries again.",
+ "By dusk the west room has a table and six mismatched chairs. Tavi has washed away the remainder on the blackboard but left the sum. He says it did not fit. Lise says she will need it tomorrow. He looks at the clean patch as though she has asked him to find something he has thrown in the river.",
+ "Edda brings bread that is still warm. She has kept the cooling racks where they were and baked her ordinary afternoon batch. Runa takes the basket, thanks her and turns back to the beds. Edda stands with her hands in the shape the basket left.",
+ "‘Will you come over after?’ Edda asks.",
+ "‘Not tonight.’ Runa pulls a blanket up over a mattress. ‘I'm tired.’",
+ "Edda says of course. When she has gone, Runa sits on the bed she has just made. ‘I could have said tomorrow,’ she tells me. Then she says, ‘But I didn't know.’",
+ "Pet chooses the bed nearest the door. There is a draught. She knows there is a draught. We leave her where she has asked to be and hang a blanket on the inside of the frame."
+ ]:[
+ "The bridge is narrow with a roll of blankets under your arm. We still go two abreast at most, and stop if anyone stops ahead. This is no longer an event that needs an audience. Dan carries Pet's stool. Mara carries the other one.",
+ "Edda's flour sacks fill half the passage downstairs. Above them the floor is warm. Runa stops on the top step and closes her eyes. Edda begins to ask what is wrong, and then sees that nothing is.",
+ "Four people came from the school. Pet was not one of them. She helped fold the bedding for the crossing, then took two blankets back with Sava. Runa sees the empty space where she expected Pet's stool and asks Dan to take it back tomorrow. It was Pet's stool to choose, not Runa's proof that she had helped.",
+ "Edda has put sheets on the beds. Runa asks where they came from. ‘The cupboard,’ Edda says. Runa holds up a corner; their mother's initials are sewn there. Edda says the cupboard again, more quietly.",
+ "‘Tell me which ones you want me to wash separately,’ Runa says.",
+ "Edda begins to say it doesn't matter. She stops. ‘Those two. They run blue.’",
+ "Downstairs there is no space to cool the last batch. Edda sells the warm loaves quickly and puts no new dough in. Tomorrow there will be less bread. She writes it on the shop slate before anyone can make her generosity into a miracle that cost her nothing.",
+ "Runa comes down to fetch the last blanket. She has taken off her outdoor coat. It hangs beside Edda's, not over it."
+ ],choices:[choice("register","Find Sava before the lamp goes out.")]},
+ register:{title:"What the register cannot hold",eyebrow:"After the carrying",place:"The school doorway",prose:[
+ "Sava is copying the day's changes into the bed register. Her pencil stops beside Pet's name. ‘She said her knee was worse,’ she tells me. ‘I need to remember that for the steps.’",
+ "I ask where she puts things like that. She shows me the margin. It is full. She turns the page and there is another margin, also full.",
+ "Beyond the door, Tavi asks Pet whether Neri knew the answer to seventeen divided by four. She says he would have told you it was five and argued until you believed him. Tavi laughs. Pet laughs after him. The order matters to her; I can see her wait.",
+ "‘I didn't know he argued,’ I tell Sava.",
+ "‘Neither did I.’ She does not write it down.",
+ "There are nine names on the other list. Ivo's is still fifth. I have been walking around it as though there must be a side from which it will look different. Now I ask Sava what happened to the household things stored beyond the loft.",
+ "She turns to the back of the register. The last inventory was made before the night ferry sank. My father's violin was left with a box of music in the store room while our roof was repaired. I have been carrying its empty case because it is the right size for paper. I tell her that, and for once I hear how odd it is.",
+ "‘Do you want me to ask Dan?’ she says.",
+ "‘No. I want to ask him.’",
+ "She leaves the register open while I find the words. I do not find them before the lamp begins to smoke."
+ ],choices:[choice("middleEnd","Trim the wick, then go to the door.")]},
+ middleEnd:{title:"The room we did not enter",eyebrow:"End of chapter two · the story continues",place:"Night · outside the mill",prose:[
+ "Dan is putting the tools away. Mara is holding the lamp so he can see what is still in the grass. They are discussing a chisel. It sounds like an argument until I understand that neither of them is angry.",
+ lead ? "Mara has the key. She offers it to him, then closes her hand when he says, ‘Tomorrow.’ It is not hers for ever. It was hers today, which is a thing they will both remember tomorrow." : "Dan locks the door, then lets Mara test it. She pulls hard enough to move the board. ‘That wants another screw,’ she says. He says they will bring one. She does not correct the plural.",
+ "I tell them about the violin. Not about Ivo. I manage to keep one missing thing separate from another for the length of a sentence.",
+ "‘The room beyond the loft,’ Dan says. ‘I haven't tested it.’",
+ "‘I know.’",
+ "Mara asks whether there is anything else I want them to look for. I could say no. I could make the errand small enough that nobody is frightened by it. Instead I say I don't know yet.",
+ "She waits. Across the river, one of the bakery windows goes dark. There is still a light in the other.",
+ "<em>What we carry upstairs</em> ends here. Continue to <em>The sound a thing keeps</em>, or return to either negotiation and follow different words into these rooms."
+  ],choices:[choice("third","Continue to chapter three.","The sound a thing keeps"),choice("return-middle","Return to the mill-yard promises.","Keep the first day; reconsider the work and the rooms."),choice("return-draft","Return to the first evening's promises.","Revisit what the bridge and the meal set in motion."),choice("start-over","Begin again at the river.")]}
+ };
+ return Object.prototype.hasOwnProperty.call(scenes,s.scene)?scenes[s.scene]:undefined;
+}
+
+function thirdView(s){
+ const open=s.objects==="open", lead=s.access==="lead", school=s.shelter==="school";
+ const scenes={
+ third:{title:"The sound a thing keeps",eyebrow:"Chapter three · the next morning",place:"The bakery kitchen",prose:[
+ "Dan's wife comes to the bakery while I am fetching the lamp. Her name is Yel. I know it, of course, but for weeks I have been thinking of her as the person Mara carried uphill. She has brought a pair of trousers to mend and asks Edda where the light is best.",
+ "Edda clears one end of the table. Yel sits, stretches the torn knee across her hand and says she heard we were going back into the mill.",
+ "‘Dan has to look at the floor first,’ I say.",
+ "‘Good.’ She threads her needle. ‘He's been getting up in the night to draw it.’",
+ school ? "Runa comes in with yesterday's basket. She has walked over from the school to return it. Edda asks whether she has eaten. Runa says she came to have breakfast, if there is any. Edda puts a plate down without kissing her or making the visit into a larger event. I can see the effort it costs them both." : "Runa comes down from the upstairs room. She slept badly, she says; the oven started before she expected it. Edda begins to apologise. Runa asks whether she can learn to light it. ‘If I'm going to wake up, I might as well be the one making the noise.’ Edda takes down the coal scoop.",
+ "Yel looks up from the trousers. ‘Bring him back for his dinner,’ she says to me. Then she frowns at her own words. ‘No. I'll tell him.’",
+ "She bites through her thread. I wait, but she does not explain her marriage to me."
+ ],choices:[choice("storeDoor","Meet the others at the mill.")]},
+ storeDoor:{title:"Beyond the chalk line",eyebrow:"The store room",place:"The mill landing",prose:[
+ "There are three screws in the board across the store-room door. Dan removes them one at a time and puts them in his pocket. Mara holds the board. The air on the other side is dry and smells of apples that are no longer there.",
+ "They test the floor from the threshold, then from each beam. I wait beside the lamp. This is slow work, and I am ashamed of how much I want them to do it quickly.",
+ lead ? "Mara still has the outer key. Dan asks for it so he can show me which lock has swollen. She hands it over. When he has finished, he hands it back without looking to see if she notices. She notices." : "They speak quietly about the joists. When one says stop, the other stops. The agreement has become less visible with use. I am not sure whether this means it is working or whether I have ceased to watch closely enough.",
+ "Along the far wall are boxes brought here before the night ferry left. Some have names. Some have descriptions: <em>green house below steps</em>; <em>two sisters, west lane</em>. A mirror has been wrapped in a wedding dress. I cannot tell which thing was meant to protect the other.",
+ "My father's violin lies on a shelf, on top of a folded coat. There is no case around it because I have the case. I had forgotten that I made this arrangement myself. Seeing it without the wood I am used to carrying makes it look immodestly small.",
+ "The bridge has fallen flat against its belly. One string is loose. Dan says not to tighten it yet. He reaches toward the neck, then asks whether he may.",
+ "‘Not yet,’ I say.",
+ "He takes his hand away. Neither of us has done anything wrong, but we both look down."
+ ],choices:[choice("objects","Go outside before deciding what to bring down.")]},
+ objects:{title:"An open table or a closed door",eyebrow:"The things people left",place:"Under the blue tile",prose:[
+ "Word of the store room has reached the school before we have carried anything out. A woman called Anet asks for a blue tin with a dent in its lid. Another person asks for every photograph we find, because he will know the faces even if he does not know the owners.",
+ "Sava has brought the old inventory. It lists twenty-eight parcels. There are more than twenty-eight things on the shelves. Some were brought after she made the list. Some parcels have opened. None of this will be settled by counting harder.",
+ "‘Bring them to the school,’ Runa says. ‘Let people come and see.’",
+ s.names==="chairs" ? "Pet looks toward the stools we used yesterday. ‘Things can have a place without sitting there for ever,’ she says. It is not a withdrawal of what she wanted at the meal. She is talking about a blue tin, and I have to let her be talking about a blue tin." : "Pet says she doesn't want Neri's things read out. ‘If you find any,’ she adds. Sava closes the inventory. Pet looks at the closed book and says, ‘You can still write them down.’ She has not asked us to forget him.",
+ "We can use the school table for an afternoon. People could recognise things the inventory cannot describe, though they would also see things their neighbours had not chosen to show. Nothing would be taken simply because a person spoke first. The things nobody claims would go back upstairs.",
+ "Or Sava and I could meet people at the mill door, hear what they are looking for and bring down matching parcels one at a time. The names would stay inside the book. It would take longer; some people might not know what to ask for. Dan says he can keep the passage open until dusk, but he has promised Yel he will come home for dinner.",
+ "‘And the violin?’ Mara asks me.",
+ "‘When we finish,’ I say. It is an answer I can give without pretending I don't want it."
+ ],choices:[choice("choose-open","Bring the things to the school table for an afternoon.","Let neighbours recognise what the inventory cannot."),choice("choose-quiet","Hear requests at the mill door, one household at a time.","Keep names and parcels out of other people's sight.")]},
+ objectDraft:{title:"What will be shown",eyebrow:"Before the door opens",place:"The mill yard",prose:[
+ open ? "I say that we will bring the things down to the school, let people look, and ask before anybody carries a parcel away. We will cover the labels and not read out the names on the inventory. Unclaimed things will be put back, not divided among the people who came." : "I say that Sava and I will hear each request separately at the door, look together, and bring out what matches. People can change their minds after seeing a thing. Everything else stays upstairs. We cannot promise to reach everyone today.",
+ "Anet asks whether she can help. I almost say we have enough hands. Then I remember I don't know what she came to find. She says she can recognise the houses from the street descriptions. We give her the descriptions, with the names covered, and ask her to tell people who might not have heard.",
+ "‘And if someone doesn't want to come?’ Pet asks.",
+ "‘Then we keep their things.’",
+ "She nods. She does not offer us a reason for anyone staying away."
+ ],choices:[choice("revise-objects","Consider the other way of returning things."),choice("agree-objects","Open the door on those terms.")]},
+ returning:{title:open?"The table by the window":"One household at a time",eyebrow:"The afternoon",place:open?"The school":"The mill door",prose:open?[
+ "We lay a clean sheet over the school table. Anet recognises the first tin before Runa has put it down. She opens it. There is a button box inside. She looks so disappointed that I almost apologise, until she takes out a brass button and holds it against her sleeve. The place it belongs has been empty for weeks.",
+ school ? "Lise moves her newly cleared lesson table to the wall. Tavi objects: they have only just made the room theirs. She says they will move it back afterward. He insists she tell him when. ‘Before you go to bed,’ she says. He carries one end." : "The four people who moved to the bakery come back across the bridge. One has brought a pillowcase to carry things in. Runa puts out chairs, then remembers Pet, still at the school, knows where the chairs are better than she does. She asks her.",
+ "A photograph slips from a parcel when Runa lifts it. It shows a young man in a dress, laughing at something outside the frame. Two people see it before Runa can put it back. One smiles. The other says the young man's name too loudly.",
+ "Anet turns the photograph face down. ‘Let him tell you about that,’ she says. The man is alive, living in a house up the valley. Anet knows; we did not. We wrap the photograph again. The people who saw it cannot be made not to have seen it.",
+ "I move the parcels farther apart. It is a small, late thing to do. Anet stays beside that one until we put it away.",
+ "By four o'clock seven households have taken things home. A woman recognises a bowl by the sound it makes when she taps it. Two brothers quarrel about a blanket, then ask us to keep it another night. We keep it. They leave together, still quarrelling.",
+ "Pet stands behind the table, folding the empty sheet back as the space clears. Someone asks if she found what she wanted. She says she came to help. She does not owe us another answer."
+ ]:[
+ "We put two chairs at the mill door. The first person sits in neither. She tells Sava she wants a tin and cannot describe it. Sava asks how she used it. ‘Buttons,’ the woman says. We find a blue tin with a dent in the lid. Anet takes one brass button out and holds it to her sleeve.",
+ "The requests take longer than the carrying. People remember a thing differently when it is in front of them. A man who was certain about a bowl says his had a narrower foot. Then he sees the chip under the rim and begins to cry. Sava waits until he can hold it safely.",
+ school ? "Lise sends Tavi with bread when the lessons end. He asks whether there are things he would recognise upstairs. There may be. We cannot take him in, and he cannot name anything. I have nothing useful to tell him. He leaves the bread and goes back across the yard." : "One of the women who moved to the bakery waits almost an hour. She has to cross the bridge before dark and leave time for the steep stairs. Runa offers to carry her parcel later. The woman says she wants to see it first. Runa sits beside her to wait.",
+ "At four o'clock we have seen four households. Anet has found two more by asking about the old street names. One cannot come until tomorrow. We write that on the outside of the door so they will not hear only that the mill has closed again.",
+ "Dan stands where the light falls on his pocket watch. He does not take it out until Mara asks the time. Then he says he ought to be going.",
+ "I ask him to leave. I can say it because I am the one whose thing has not been brought down. He shows Mara how the inner board fits and goes. I want him to hurry, but that would still be me telling him how to get home.",
+ "Pet brings another chair for the woman who is still waiting. She does not ask what is in the parcel."
+ ],choices:[choice("violin","Return for the thing I asked for.")]},
+ violin:{title:"Without the case",eyebrow:"Iris",place:"The store-room threshold",prose:[
+ "Mara carries the violin down flat on both hands. I have opened the case on the sound boards. The hollow in the lining is the shape of a certainty: this thing went here. I am angry with the lining for having kept its shape so well.",
+ "A seam has opened beside the tailpiece. The fallen bridge is in Mara's apron pocket. She puts it in the case with the instrument and says someone who knows violins should see it before we put it under tension.",
+ "I tell her my father taught Ivo on it. He wanted to teach me too. I used to hide the bow before lessons because I wanted to go out with my friends. Once I hid it so well that we did not find it for three days.",
+ "‘Were you sorry?’ she asks.",
+ "‘For three days. Then we found it.’",
+ "She laughs. It is a small laugh, enough for what I have told her. I had expected anything I said about the violin to make it heavier. For a moment it is only a thing I was once allowed to dislike.",
+ "She asks if I play now. I say a little, badly. Ivo was better. I hear the sentence I have used to keep myself from playing and cannot finish it in the usual way.",
+ "‘I still could,’ I say.",
+ "Mara says I will have to get the seam mended first. I am grateful she has given me a problem that belongs to the violin."
+ ],choices:[choice("dinner","Take the closed case to the bakery.")]},
+ dinner:{title:"A place at the small table",eyebrow:"Evening",place:"The bakery",prose:[
+ "Yel and Dan are sitting at the little table behind the shop. There is a bowl between them with a cloth over it. Yel lifts the cloth when she sees Mara, then asks her to fetch another spoon. She asks me whether I want one too. I say yes before considering what my arrival might mean to anyone.",
+ open ? "Dan came home while we were putting the last things away at the school. He tells Yel about the brothers and their blanket. She says she knows them; they used to fight over which of them had eaten more of a loaf, weighing the crusts on their mother's scales. Dan laughs with food in his mouth and has to stop." : "Dan got home late. The food has cooled. He says he should have left sooner. Yel says yes, and pushes the bowl toward him. Nothing is forgiven or refused by the movement of the bowl. It is the first thing they need to do.",
+ "Mara puts her spoon down. ‘When I carried Mum,’ she begins. Dan turns toward her so quickly that she stops.",
+ "Yel waits. Then she says, ‘I could hear you both. Before Mara came up the stairs. You were shouting about the water and I couldn't make my legs move.’",
+ "Dan sets his own spoon down.",
+ "‘I thought you could get out,’ he says.",
+ "‘I know,’ Yel says. ‘I want you to know I could hear you.’",
+ "Mara looks at her mother. This is something she did not know either. The argument they have been carrying has acquired another person, who has been here the whole time.",
+ "No one tells the rest of the story. Yel asks me to move the violin case because it is keeping her chair too far from the table. I put it underneath, between my feet. We finish eating."
+ ],choices:[choice("thirdEnd","Walk back to the river.")]},
+ thirdEnd:{title:"The part that is still open",eyebrow:"End of chapter three · the middle acts continue",place:"Night · the bridge",prose:[
+ "Mara walks with me to the bridge. She has left the mill key on its hook inside the bakery door. It can be found in the morning. There is no need to carry it through the night to prove who had it today.",
+ "The case knocks against my knee. I have carried it empty so long that its new weight feels like something I have forgotten rather than something returned.",
+ school ? "Across the water, the school windows are dark except for the west room. Lise is writing tomorrow's sum. Tavi has moved the table back under the blackboard. The remainder is still missing; she will have to put it in herself." : "Above the bakery, someone opens a window for air. Edda calls up that it will let the heat out, then stops calling. Runa leans on the sill. From here I cannot tell whether she answers.",
+ "Mara asks whether we will open the store room again tomorrow. I say yes, if the people working there can. There are still parcels waiting for people Anet has not found.",
+ "‘I'll be there,’ Mara says. Then: ‘For the morning. I have something else in the afternoon.’",
+ "I want to ask what. I want to know what she has kept that is not a piece of this work. Instead I say I'll see her in the morning.",
+ "She stays by the bridge. I turn toward home. At the corner I stop to change hands. When I look back, she is still there. She lifts one hand, and then she goes.",
+ "<em>The sound a thing keeps</em> ends here. The final acts are not yet written. The people here still have promises to renegotiate, things to return and lives beyond the work Iris can see."
+ ],choices:[choice("return-objects","Return to the store-room agreement."),choice("return-middle","Return to the mill-yard promises."),choice("return-draft","Return to the first evening."),choice("start-over","Begin again at the river.")]}
+ };
+ return Object.prototype.hasOwnProperty.call(scenes,s.scene)?scenes[s.scene]:undefined;
+}
+
 function step(state,action){
  if(!view(state).choices.some(c=>c.id===action)) throw new Error("That choice is not available here.");
  const s={...state,heard:[...state.heard]};
- const routes={quay:"quay",back:"quay",meeting:"meeting",timing:"timing",sign:"signed",crossing:"crossing",meal:"meal",after:"after",end:"end"};
+ const routes={quay:"quay",back:"quay",meeting:"meeting",timing:"timing",sign:"signed",crossing:"crossing",meal:"meal",after:"after",end:"end",second:"second",yard:"yard",access:"access",mill:"mill",binding:"binding",carrying:"carrying",register:"register",middleEnd:"middleEnd",third:"third",storeDoor:"storeDoor",objects:"objects",violin:"violin",dinner:"dinner",thirdEnd:"thirdEnd"};
  if(action==="start-over") return fresh();
- if(action.startsWith("ask-")){s.scene=action.slice(4);if(!s.heard.includes(s.scene))s.heard.push(s.scene);}
+ if(["ask-mara","ask-pet","ask-runa"].includes(action)){s.scene=action.slice(4);}
+ else if(action.startsWith("ask-")){s.scene=action.slice(4);if(!s.heard.includes(s.scene))s.heard.push(s.scene);}
  else if(action==="revise-time"){s.scene="timing";s.revising=true;}
  else if(action==="revise-names"){s.scene="names";s.revising=true;}
- else if(action==="return-draft"){s.scene="draft";s.revising=false;}
+ else if(action==="return-draft"){s.scene="draft";s.revising=false;s.access=null;s.shelter=null;s.objects=null;}
+ else if(action==="return-middle"){s.scene="middleDraft";s.objects=null;}
+ else if(action==="return-objects"){s.scene="objectDraft";}
+ else if(action==="revise-objects"){s.scene="objects";}
+ else if(action==="choose-open"||action==="choose-quiet"){s.objects=action.slice(7);s.scene="objectDraft";}
+ else if(action==="agree-objects"){s.scene="returning";}
+ else if(action==="revise-access"){s.scene="access";}
+ else if(action==="revise-shelter"){s.scene="shelter";}
+ else if(action==="choose-lead"||action==="choose-together"){s.access=action.slice(7);s.scene=s.shelter?"middleDraft":"shelter";}
+ else if(action==="choose-school"||action==="choose-bakery"){s.shelter=action.slice(7);s.scene="middleDraft";}
+ else if(action==="agree-middle"){s.scene="invitation";}
  else if(action==="choose-dawn"||action==="choose-daylight"){s.timing=action.slice(7);s.scene=s.revising?"draft":"names";s.revising=false;}
  else if(action==="choose-chairs"||action==="choose-pages"){s.names=action.slice(7);s.scene="draft";s.revising=false;}
  else s.scene=routes[action];
@@ -212,11 +469,22 @@ function restore(raw){
  try{
   const s=JSON.parse(raw);
   if(!s||typeof s.scene!=="string"||!Array.isArray(s.heard)||s.heard.some(v=>!["edda","dan","sava","ivo"].includes(v))||typeof s.revising!=="boolean"||![null,"dawn","daylight"].includes(s.timing)||![null,"chairs","pages"].includes(s.names))return fresh();
+  if(![undefined,null,"lead","together"].includes(s.access)||![undefined,null,"school","bakery"].includes(s.shelter))return fresh();
+  // Existing chapter-one bookmarks retain their exact scene and promises.
+  s.access=s.access??null;s.shelter=s.shelter??null;
+  if(![undefined,null,"open","quiet"].includes(s.objects))return fresh();
+  s.objects=s.objects??null;
+  const middle=Boolean(middleView(s)),third=Boolean(thirdView(s));
   if(!view(s))return fresh();
+  if((middle||third)&&(!s.timing||!s.names))return fresh();
+  if(third&&(!s.access||!s.shelter))return fresh();
+  if(["objectDraft","returning","violin","dinner","thirdEnd"].includes(s.scene)&&!s.objects)return fresh();
+  if(["shelter","middleDraft","invitation","mill","binding","carrying","register","middleEnd"].includes(s.scene)&&!s.access)return fresh();
+  if(["middleDraft","invitation","mill","binding","carrying","register","middleEnd"].includes(s.scene)&&!s.shelter)return fresh();
   if(["names","draft","signed","crossing","meal","after","end"].includes(s.scene)&&!s.timing)return fresh();
   if(["draft","signed","crossing","meal","after","end"].includes(s.scene)&&!s.names)return fresh();
   if(s.revising&&(!s.timing||!s.names||!["timing","names"].includes(s.scene)))return fresh();
-  return {scene:s.scene,timing:s.timing,names:s.names,heard:[...new Set(s.heard)],revising:s.revising};
+  return {scene:s.scene,timing:s.timing,names:s.names,heard:[...new Set(s.heard)],revising:s.revising,access:s.access,shelter:s.shelter,objects:s.objects};
  }catch{return fresh();}
 }
 if(typeof module!=="undefined")module.exports={fresh,view,step,restore};
@@ -250,7 +518,7 @@ if(typeof document!=="undefined"){
   event.preventDefault();
   // A copy must remain downloadable after the reader renames the HTML file.
   const url=URL.createObjectURL(new Blob(["<!doctype html>\n"+document.documentElement.outerHTML],{type:"text/html;charset=utf-8"}));
-  const link=document.createElement("a");link.href=url;link.download="every-promise-chapter-one.html";
+  const link=document.createElement("a");link.href=url;link.download="every-promise.html";
   link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  });
  render();

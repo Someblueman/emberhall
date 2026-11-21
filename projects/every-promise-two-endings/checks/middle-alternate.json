@@ -1,0 +1,92 @@
+[
+  {
+    "click": "[data-choice=\"quay\"]"
+  },
+  {
+    "click": "[data-choice=\"meeting\"]"
+  },
+  {
+    "click": "[data-choice=\"timing\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-daylight\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-pages\"]"
+  },
+  {
+    "click": "[data-choice=\"sign\"]"
+  },
+  {
+    "click": "[data-choice=\"crossing\"]"
+  },
+  {
+    "click": "[data-choice=\"meal\"]"
+  },
+  {
+    "click": "[data-choice=\"after\"]"
+  },
+  {
+    "click": "[data-choice=\"end\"]"
+  },
+  {
+    "click": "[data-choice=\"second\"]"
+  },
+  {
+    "click": "[data-choice=\"yard\"]"
+  },
+  {
+    "click": "[data-choice=\"access\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-together\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-bakery\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-middle\"]"
+  },
+  {
+    "click": "[data-choice=\"mill\"]"
+  },
+  {
+    "click": "[data-choice=\"binding\"]"
+  },
+  {
+    "click": "[data-choice=\"carrying\"]"
+  },
+  {
+    "click": "[data-choice=\"register\"]"
+  },
+  {
+    "click": "[data-choice=\"middleEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"third\"]"
+  },
+  {
+    "click": "[data-choice=\"storeDoor\"]"
+  },
+  {
+    "click": "[data-choice=\"objects\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-quiet\"]"
+  },
+  {
+    "click": "[data-choice=\"agree-objects\"]"
+  },
+  {
+    "click": "[data-choice=\"violin\"]"
+  },
+  {
+    "click": "[data-choice=\"dinner\"]"
+  },
+  {
+    "click": "[data-choice=\"thirdEnd\"]"
+  },
+  {
+    "click": "[data-choice=\"return-middle\"]"
+  }
+]
