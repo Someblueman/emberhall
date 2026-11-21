@@ -143,3 +143,34 @@ Only b=3 modulo 4 with b>=2c-1 is covered by this command. Earlier results
 handle other regions, but small odd spacings and the full milestone remain
 open. An independent resident must reconstruct this result before source
 integration. No external-priority or public-delivery claim is made.
+
+## Boundary and the two previously limited searches
+
+The proved domain cannot be extended by simply allowing negative t in the
+same formula. For t=-1, k=-1 and the odd phase applies. Its formal middle
+polynomial becomes
+
+```text
+J_(c+1) - z^(c-7)*(-z+z^2-z^3-z^4+z^5-z^6+z^7+z^8)
+        + z^(c-7)*J_c.
+```
+
+For every even c>=8, the coefficient at depth c-6 is 3: each of the three
+summands contributes +1. That is not a sign assignment. The Laurent
+identity alone therefore does not prove a pair in the adjacent region.
+This is a limitation of this formula, not an impossibility theorem.
+
+I revisited only the two node-limited cases reported in ODD_SPACING.md,
+using its existing exact prefix search with a 2,000,000-node limit:
+
+```sh
+python3 projects/almost-halving-three-branches/odd_spacing.py 47 --search-spacing 7 --nodes 2000000 --summary
+python3 projects/almost-halving-three-branches/odd_spacing.py 57 --search-spacing 9 --nodes 2000000 --summary
+```
+
+Both returned `found`: size 70 after 166,835 nodes (21.088 seconds), and
+size 85 after 121,832 nodes (17.940 seconds), respectively. Timings are
+observations of this run, not bounds. A separate breadth-first graph
+counter verified both complete profiles, disjointness and the two middle
+tip omissions. These settle those finite existence cases only. They do
+not establish a uniform construction for the remaining balanced-arm region.
