@@ -17,11 +17,17 @@ def violations(weights: tuple[int, ...], state: dict) -> tuple[str, ...]:
             errors.append(f"multiple-owners:{job}")
     for job in sorted(set(counts) - expected):
         errors.append(f"unknown-job:{job}")
+    if "workers" in state:
+        actual_live = {j for j, worker in state["workers"].items() if worker["phase"] != "done"}
+        if actual_live != set(state["live"]):
+            errors.append("live-set-mismatch")
     held = state["held"]
     if set(held) - expected:
         errors.append("unknown-reservation")
     if any(job not in held for job in state["live"]):
         errors.append("unreserved-live-job")
+    if any(job not in held for job in state["registry"]):
+        errors.append("unreserved-registry-job")
     for job, weight in held.items():
         if job in expected and weight != weights[job]:
             errors.append(f"wrong-weight:{job}")

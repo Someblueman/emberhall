@@ -39,11 +39,18 @@ class OracleTests(unittest.TestCase):
         self.state.update(live=[], held={0: 2}, free=1)
         self.assertIn("stranded:0", violations((2,), self.state))
 
+    def test_model_cannot_hide_dead_workers_in_live_set(self):
+        self.state.update(queue=[], live=[0], held={0: 2}, free=1,
+                          workers={0: {"phase": "done"}})
+        self.assertIn("live-set-mismatch", violations((2,), self.state))
+
     def test_live_registry_ends_at_settlement(self):
         self.state.update(queue=[], registry=[0], held={0: 2}, free=1)
         self.assertEqual(violations((2,), self.state), ())
         self.state["terminal"] = True
         self.assertIn("unsettled-terminal", violations((2,), self.state))
+        self.state.update(held={}, free=3)
+        self.assertIn("unreserved-registry-job", violations((2,), self.state))
 
 
 class ModelTests(unittest.TestCase):
