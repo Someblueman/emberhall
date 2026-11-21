@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from fractions import Fraction
 from functools import reduce
+from itertools import permutations
 import json
 from math import lcm
 from pathlib import Path
@@ -197,6 +198,30 @@ def check_cover(u, paths):
             "scope": "listed paths only; not a separation of the full graph"}
 
 
+def common_pair_orbit(path):
+    """Relabel the four common pairs into every valid endpoint-fixed path.
+
+    Only allocation labels are transformed. This does not assert symmetry of
+    the utilities or their greedy order; each resulting path still needs its
+    own EF1 checks in the original profile.
+    """
+    cover_vertices([path])
+    variants = {}
+    for order in permutations(range(1, 5)):
+        agents = (0,) + order + (5, 6)
+        goods = list(range(12))
+        for old in range(1, 5):
+            goods[old+1], goods[old+7] = agents[old]+1, agents[old]+7
+        route = []
+        for state in path:
+            renamed = [0]*12
+            for g, owner in enumerate(state):
+                renamed[goods[g]] = agents[owner]
+            route.append(tuple(renamed))
+        variants.setdefault(tuple(route), None)
+    return tuple(variants)
+
+
 def splice_cover(u, paths):
     """Find a fair path in the induced union, allowing joins between paths.
 
@@ -271,6 +296,25 @@ def frontier_vertices(data):
     if continuation.get("include_original_states"):
         vertices = tuple(map(tuple, data["states"])) + vertices
     return tuple(dict.fromkeys(vertices))
+
+
+def repaired_frontier(data):
+    """Include the saved full-graph repair, after checking its original utilities.
+
+    The default frontier deliberately retains its last witnessed failure.
+    This separate entry point prepares the next search without rewriting that
+    earlier result or assuming that a solver's proposed path is fair.
+    """
+    case = data["splice_search"]["final_counterexample"]
+    result = case["search"]
+    if result["status"] != "connected" or result["path"] is None:
+        raise ValueError("resumption needs a completed full-graph repair")
+    path = cover_vertices([result["path"]])
+    u = tuple(tuple(Fraction(v) for v in row) for row in case["utilities"])
+    Graph(u)
+    if not all(ef1(u, state) for state in path):
+        raise ValueError("saved repair is not fair in its original utilities")
+    return tuple(dict.fromkeys(frontier_vertices(data) + path))
 
 
 def _implied_by_rankings(observer, own, target):
@@ -353,9 +397,13 @@ def main():
                         help="replay the last exact counterexample to the retained path cover")
     parser.add_argument("--splice-cover", action="store_true",
                         help="join retained path segments, or export their induced cut query")
+    parser.add_argument("--resume-frontier", action="store_true",
+                        help="include the checked saved repair in a --splice-cover query export")
     parser.add_argument("--ten-step-case", action="store_true",
                         help="verify the retained exact ten-exchange distance")
     args = parser.parse_args()
+    if args.resume_frontier and not (args.splice_cover and args.write_smt2):
+        parser.error("--resume-frontier requires --splice-cover and --write-smt2")
     if args.ten_step_case:
         if (args.splice_cover or args.cover_case or args.cover or args.input
                 or args.candidate_cut or args.frontier or args.write_smt2):
@@ -407,10 +455,12 @@ def main():
         paths = data["paths"] if args.cover else None
         states = data["states"] if paths is None else cover_vertices(paths)
         if args.splice_cover:
-            states = frontier_vertices(data)
+            states = repaired_frontier(data) if args.resume_frontier else frontier_vertices(data)
         text = smt2(states, paths)
         Path(args.write_smt2).write_text(text)
-        print(json.dumps({"bytes": len(text.encode()), "status": "unverified_solver_input"}))
+        print(json.dumps({"bytes": len(text.encode()), "vertices": len(states),
+                          "includes_saved_repair": args.resume_frontier,
+                          "status": "unverified_solver_input"}))
         return
     if args.candidate_cut:
         data = load_frontier()
