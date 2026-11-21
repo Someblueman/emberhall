@@ -399,6 +399,147 @@ def verify_swap_adjacency_certificate(saved):
     return expected
 
 
+def _reduce_affine(expression, rows):
+    expression = list(map(Fraction, (expression[0], expression[1], 0, expression[2])))
+    for row in rows:
+        column = next(i for i in range(3) if row[i])
+        scale = expression[column]
+        expression = [x-scale*y for x, y in zip(expression, row)]
+    return expression[0], expression[1], expression[3]
+
+
+def _zero_polynomial_systems(events, rows):
+    """Branch on matching positive/negative monomials, at most two ranks."""
+    rows = _affine_rows(rows)
+    if rows is None:
+        return
+    reduced = {}
+    for exponent, coefficient in events.items():
+        key = _reduce_affine(exponent, rows)
+        reduced[key] = reduced.get(key, 0) + coefficient
+    reduced = {key: value for key, value in reduced.items() if value}
+    if not reduced:
+        yield rows
+        return
+    positive = next(key for key, value in reduced.items() if value > 0)
+    for negative, value in reduced.items():
+        if value < 0:
+            t, r, constant = (x-y for x, y in zip(positive, negative))
+            yield from _zero_polynomial_systems(events, rows+[[t, r, 0, constant]])
+
+
+def _adjacent_swap_systems(offsets=(113, 33, 5), step=3780):
+    """Exact endpoint equations. Nonempty survivors are a failed proof gate.
+
+    Alternative constants are used only for a known positive control.
+    All inequalities are necessary domain checks; unproved ones stay open.
+    """
+    add = lambda a, b: tuple(x+y for x, y in zip(a, b))
+    neg = lambda a: tuple(-x for x in a)
+    sub = lambda a, b: add(a, neg(b))
+    scale = lambda a, n: tuple(x*n for x in a)
+    equation = lambda a: [a[0], a[1], 0, a[2]]
+    p = [(step, 0, value) for value in offsets]
+    r, one = (0, 1, 0), (0, 0, 1)
+
+    def admissible(rows, bounds, distinct):
+        if rows is None:
+            return False
+        for bound in bounds:
+            reduced = _reduce_affine(bound, rows)
+            if not any(reduced[:2]) and reduced[2] < 0:
+                return False
+        if any(not any(_reduce_affine(value, rows)) for value in distinct):
+            return False
+        for row in rows:
+            columns = [i for i, value in enumerate(row[:3]) if value]
+            if len(columns) == 1 and (-row[3]).denominator != 1:
+                return False
+            if columns == [0] and -row[3] < 0:
+                return False
+        return True
+
+    def holes(a, exponent):
+        return ([(a, add(r, exponent)), (a, sub(sub(r, exponent), one))]
+                + [(b, sub(exponent, r)) for b in range(3) if b != a])
+
+    def distance_options(v, w):
+        a, q = v
+        b, s = w
+        if a != b:
+            return [(add(add(q, s), one), [])]
+        difference = sub(q, s)
+        return [(difference, [difference]), (neg(difference), [neg(difference)])]
+
+    families, survivors = 0, []
+    for a, outward in product(range(3), (True, False)):
+        s = r if outward else sub(r, one)
+        others = [j for j in range(3) if j != a]
+        exponents = [r, sub(p[a], r)] if outward else [add(r, p[j]) for j in others]
+        for h1, h2 in product(holes(a, exponents[0]), holes(a, exponents[1])):
+            bounds = [r if outward else sub(r, one), sub(p[a], r)]
+            for b, q in (h1, h2):
+                bounds += [q, sub(p[b], q)]
+            distinct = ([sub(h1[1], h2[1])] if h1[0] == h2[0] else [])
+            distinct += [sub(q, s) for b, q in (h1, h2) if b == a]
+            leaves = ([sub(r, p[a])] if outward and a < 2 else [])
+            leaves += [sub(q, p[b]) for b, q in (h1, h2) if b < 2]
+            for leaf in leaves:
+                rows = _affine_rows([[0, 0, 1, 0], equation(leaf)])
+                if not admissible(rows, bounds, distinct):
+                    continue
+                options = (distance_options(h1, h2), distance_options((a, s), h1),
+                           distance_options((a, s), h2))
+                for distances in product(*options):
+                    local_bounds = bounds+[bound for _, extra in distances for bound in extra]
+                    if not admissible(rows, local_bounds, distinct):
+                        continue
+                    events = {}
+                    def put(exponent, coefficient):
+                        events[exponent] = events.get(exponent, 0)+coefficient
+                    put(one, -3)
+                    for i, j in ((0, 1), (0, 2), (1, 2)):
+                        put(add(add(p[i], p[j]), scale(one, 2)), 1)
+                    for b, q in (h1, h2):
+                        put(one, 2)
+                        put(add(q, one), 1)
+                        put(add(sub(p[b], q), one), -1)
+                        for j in range(3):
+                            if j != b:
+                                put(add(add(q, p[j]), scale(one, 2)), -1)
+                    moves = ([add(add(r, p[j]), one) for j in others] if outward else
+                             [r, add(sub(p[a], r), one)])
+                    for exponent in moves:
+                        put(exponent, 1)
+                        put(add(exponent, one), -1)
+                    for exponent, _ in distances:
+                        put(exponent, -1)
+                        put(add(exponent, one), 1)
+                    families += 1
+                    for solution in _zero_polynomial_systems(events, rows):
+                        if admissible(solution, local_bounds, distinct):
+                            survivors.append(solution)
+    return families, survivors
+
+
+def one_swap_obstruction_certificate():
+    adjacency = swap_adjacency_certificate()
+    families, survivors = _adjacent_swap_systems()
+    if survivors:
+        raise AssertionError('adjacent swaps remain unresolved by the symbolic equations')
+    return {"family": adjacency['family'], "adjacency_proof": adjacency['classification'],
+            "adjacent_endpoint_families": families, "surviving_affine_systems": 0,
+            "one_swap_homometric_pairs_excluded": True,
+            "all_colourings_excluded": False}
+
+
+def verify_one_swap_obstruction(saved):
+    expected = one_swap_obstruction_certificate()
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError('one-swap certificate differs from the reconstructed proof')
+    return expected
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parameter", type=int, default=0,
@@ -408,6 +549,8 @@ def main(argv=None):
     parser.add_argument("--holes", nargs=2, default=["0:0", "1:4"],
                         help="two arm:depth vertices (centre is 0:0)")
     parser.add_argument("--verify", type=Path, help="verify a saved JSON certificate")
+    parser.add_argument("--one-swap-obstruction", action="store_true",
+                        help="exclude every one-swap partition on the entire frontier")
     parser.add_argument("--swap-adjacency", action="store_true",
                         help="symbolically classify one-swap roots for every parameter")
     parser.add_argument("--parity-obstruction", action="store_true",
@@ -417,7 +560,12 @@ def main(argv=None):
     parser.add_argument("--audit", action="store_true", help="BFS check, up to 512 vertices")
     args = parser.parse_args(argv)
     try:
-        if args.swap_adjacency:
+        if args.one_swap_obstruction:
+            if args.swap_adjacency or args.parity_obstruction or args.coarse or args.audit or args.lengths:
+                parser.error("--one-swap-obstruction accepts only --verify")
+            result = (verify_one_swap_obstruction(json.loads(args.verify.read_text()))
+                      if args.verify else one_swap_obstruction_certificate())
+        elif args.swap_adjacency:
             if args.parity_obstruction or args.coarse or args.audit or args.lengths:
                 parser.error("--swap-adjacency accepts only --verify")
             result = (verify_swap_adjacency_certificate(json.loads(args.verify.read_text()))

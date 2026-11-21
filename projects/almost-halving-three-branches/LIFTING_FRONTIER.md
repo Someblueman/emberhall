@@ -3,7 +3,8 @@
 Sorrel, 21 November 2026. **The infinite all-pairs frontier remains open.**
 The support obstruction excludes every colouring with two zero-modulo-four
 holes. The continuation below constructs coarse witnesses for all remaining
-supports and proves that an exact pair must mix depth parities in both parts.
+supports and proves that each part of an exact pair must contain at least
+two vertices of each depth parity.
 None of these results excludes all remaining colourings. Priority remains provisional under
 [PRIORITY_REFRESH.md](PRIORITY_REFRESH.md). The default construction command,
 accepted finite results, and earlier formulas are unchanged.
@@ -418,8 +419,7 @@ For adjacent roots, (11) makes the possible hole distances explicit:
 Thus the holes must lie on these two distance shells around u, with
 multiplicity if the exponents coincide, and cannot equal v. Satisfying
 this odd-distance condition still leaves **all even-distance equations**
-to prove. Exploratory checks found no exact one-swap solution for a few
-small shifts; those bounded failures are not part of the theorem.
+to prove. The next section uses those equations to exclude adjacent swaps.
 
 ```sh
 python3 projects/almost-halving-three-branches/lifting_frontier.py --swap-adjacency
@@ -431,9 +431,99 @@ profiles on the 306-vertex original tree check every even/odd root pair:
 exactly its 305 edges have a nonnegative profile difference, and every
 edge has the two monomials in the table. Tests also reject altered
 classification counts and a false all-colourings verdict through the real
-command. The next gap is exact even-distance compatibility for adjacent
-swaps, followed by colourings with more minority vertices; neither is
-claimed solved here.
+command. These odd-shell equations reduce the next section to adjacent
+swaps; colourings with more minority vertices remain outside this reduction.
+
+## No one-swap partition survives the exact distances
+
+The adjacent case can also be excluded. **For every integer t>=0, no
+partition obtained by exchanging one even and one odd vertex in the
+retained parity classes is homometric, for any two odd holes.** Combined
+with the preceding results, every genuine target-sized pair on this
+frontier must contain at least two vertices of each depth parity in each
+part. This remains a restriction, not an all-pairs obstruction.
+
+Here is the finite symbolic reduction and its reproducible certificate.
+Use the established p_i, half-distance variable x, and odd-vertex indices.
+Write u=(a,2r). For an outward swap v=(a,2r+1), allow 0<=r<=p_a;
+r=0 represents the centre. For an inward swap v=(a,2r-1), 1<=r<=p_a.
+Equation (11) requires the two holes to have normalized distance exponents
+
+    outward: {r, p_a-r},
+    inward:  {r+p_j, r+p_k}, j,k!=a.
+
+For one such exponent e, the possible odd hole indices are exactly
+
+    on arm a: q=r+e or q=r-e-1;
+    on arm b!=a: q=e-r.                              (13)
+
+Keep only 0<=q<=p_b, two distinct holes, and neither hole equal to v.
+These are finitely many affine families in the unbounded integers t,r.
+
+There is one more necessary restriction. The largest even distance
+2(p_1+p_2+1) occurs only between the odd leaves of arms 1 and 2. The part
+containing v has just one odd vertex and cannot realize that distance:
+its even-even distances are smaller and its mixed distances are odd.
+Therefore at least one of v,h_1,h_2 must be one of those two leaves.
+Impose each possible leaf equality in turn; overlapping cases do no harm.
+
+The difference of full even-distance profiles after the swap is
+
+    F = -sum_(i<j) I(p_i+p_j+1) + H(h_1)+H(h_2)
+        -x^d(h_1,h_2) + M
+        -x^d(v,h_1)-x^d(v,h_2),                     (14)
+
+where H is (9), d is half the original even distance, and
+
+    outward: M=sum_(j!=a) x^(r+p_j+1),
+    inward:  M=x^r+x^(p_a-r+1).
+
+These expressions follow by subtracting the full even shell at u from
+the full odd shell at v; their interval terms cancel. Multiply (14) by
+1-x. Every interval becomes two monomials, whose exponents are affine
+in t,r. For a same-arm distance split the absolute value into its two
+signs, retaining the corresponding nonnegative inequality. After all
+necessary domain exclusions and possible leaf equalities, the checker
+retains 127 overlapping endpoint families.
+
+For each family, exact polynomial cancellation requires every positive
+monomial to match some negative monomial at the same exponent. The
+checker cancels exponents already equal under the current rational
+linear equations, then selects a remaining positive monomial and branches
+over every remaining negative monomial. Each branch adds their exponent
+equality. Distinct reduced affine expressions impose a new independent
+equation or a contradiction, so there are at most two new ranks for t,r.
+A zero polynomial is retained unless its equations force a negative or
+nonintegral parameter, an invalid vertex bound, coincident holes, or a
+hole equal to v. Inequalities not proved impossible stay unresolved.
+Thus this is a conservative check of all parameter values, not sampling.
+**No affine system survives.** The command fails rather than claiming a
+proof if even one system is left unresolved.
+
+```sh
+python3 projects/almost-halving-three-branches/lifting_frontier.py \
+  --one-swap-obstruction
+```
+
+Recorded result: the 2,880-system adjacency proof above passes, all 127
+adjacent endpoint families are checked, `surviving_affine_systems` is zero,
+`one_swap_homometric_pairs_excluded` is true, and `all_colourings_excluded`
+is false. Saved verdicts, counts, and coefficients are not trusted.
+
+A positive control is essential here. The same endpoint engine with
+p=(3,2,1) and zero parameter slope retains a system. On T(7,5,3), omit
+(1,7),(3,3) and exchange u=(2,2) with v=(2,1) in the parity partition.
+Independent original-tree breadth-first profiles verify the resulting
+seven-vertex sets are homometric. The fixed-frontier certificate therefore
+does not mistake all one-swap partitions for impossible ones.
+
+The tests also use an independent distance table on T(227,67,11) to derive
+the possible holes from every adjacent root pair and compare all 1,155
+resulting complete pairs directly. None is homometric. These finite
+checks and the positive control validate the implementation; the affine
+reduction is what proves the statement for unbounded t. The remaining
+all-pairs gap is mixed-parity colourings with at least two vertices of
+both parities in both sets, over all surviving supports.
 
 ## Reproduce
 

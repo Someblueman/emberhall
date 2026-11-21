@@ -1,7 +1,7 @@
 """Independent original-tree checks for the all-colouring omission theorem."""
 from collections import Counter, deque
 from copy import deepcopy
-from itertools import combinations, permutations
+from itertools import combinations, permutations, product
 import json
 from pathlib import Path
 import subprocess
@@ -13,7 +13,9 @@ from lifting_frontier import (audit_original_tree, certificate, frontier_lengths
                               verify_certificate, coarse_certificate, coarse_pair,
                               verify_coarse_certificate, audit_coarse_certificate,
                               parity_obstruction, verify_parity_obstruction,
-                              swap_adjacency_certificate, verify_swap_adjacency_certificate)
+                              swap_adjacency_certificate, verify_swap_adjacency_certificate,
+                              _adjacent_swap_systems, one_swap_obstruction_certificate,
+                              verify_one_swap_obstruction)
 
 
 def graph_distances(lengths):
@@ -311,6 +313,62 @@ class SwapAdjacencyTests(unittest.TestCase):
             path = Path(directory) / 'adjacency.json'
             path.write_text(json.dumps(broken))
             result = subprocess.run([sys.executable, str(cli), '--swap-adjacency', '--verify', str(path)],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn('differs from the reconstructed proof', result.stderr)
+
+
+class OneSwapObstructionTests(unittest.TestCase):
+    def test_all_original_tree_hole_candidates_for_adjacent_swaps(self):
+        vertices, distances = graph_distances(frontier_lengths(0))
+        even = [v for v in vertices if v[1] % 2 == 0]
+        odd = [v for v in vertices if v[1] % 2]
+        from_even = {u: Counter(distances[u, w] for w in odd) for u in even}
+        from_odd = {v: Counter(distances[v, w] for w in even) for v in odd}
+        checked = 0
+        for u in even:
+            for v in odd:
+                if distances[u, v] != 1:
+                    continue
+                difference = from_even[u].copy()
+                difference.subtract(from_odd[v])
+                shells = list((+difference).elements())
+                self.assertEqual(len(shells), 2)
+                candidates = [[h for h in odd if h != v and distances[u, h] == d] for d in shells]
+                for h1, h2 in product(*candidates):
+                    if h1 == h2 or shells[0] == shells[1] and h1 > h2:
+                        continue
+                    left = [w for w in even if w != u] + [v]
+                    right = [w for w in odd if w not in (v, h1, h2)] + [u]
+                    self.assertEqual(len(left), len(right))
+                    self.assertNotEqual(histogram(left, distances), histogram(right, distances))
+                    checked += 1
+        self.assertEqual(checked, 1155)
+
+    def test_positive_control_and_symbolic_negative_certificate(self):
+        vertices, distances = graph_distances((7, 5, 3))
+        u, v, holes = (2, 2), (2, 1), ((1, 7), (3, 3))
+        left = [w for w in vertices if w[1] % 2 == 0 and w != u] + [v]
+        right = [w for w in vertices if w[1] % 2 and w not in (*holes, v)] + [u]
+        self.assertEqual(len(left), 7)
+        self.assertEqual(histogram(left, distances), histogram(right, distances))
+        _, surviving = _adjacent_swap_systems((3, 2, 1), 0)
+        self.assertTrue(surviving)
+        saved = one_swap_obstruction_certificate()
+        self.assertEqual(saved['adjacent_endpoint_families'], 127)
+        self.assertEqual(verify_one_swap_obstruction(saved), saved)
+        self.assertTrue(saved['one_swap_homometric_pairs_excluded'])
+        self.assertFalse(saved['all_colourings_excluded'])
+        broken = deepcopy(saved)
+        broken['surviving_affine_systems'] = 1
+        with self.assertRaises(ValueError):
+            verify_one_swap_obstruction(broken)
+        cli = Path(__file__).with_name('lifting_frontier.py')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'one-swap.json'
+            saved['all_colourings_excluded'] = True
+            path.write_text(json.dumps(saved))
+            result = subprocess.run([sys.executable, str(cli), '--one-swap-obstruction', '--verify', str(path)],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 2)
             self.assertIn('differs from the reconstructed proof', result.stderr)
