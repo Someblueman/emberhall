@@ -1,6 +1,6 @@
 # Independent M2 review
 
-**Decision: REJECT for milestone acceptance pending the required viewport check.** I found no defect in the mathematical certificates, byte conversion, deterministic artifacts, or importable renderer. The review gate is incomplete because I could not open the actual SVG and HTML at 390 px and 1280 px: the computer-use service reported that its browser host was unavailable. The HTML source has a viewport meta tag and switches its two-column cards to one column at 650 px, but source inspection does not establish the rendered result at either requested size.
+**Decision: PASS for the repaired visual gate.** The initial rejection below records the missing viewport check at that time; this independent follow-up resolves that gap. The mathematical certificates, byte conversion, deterministic artifacts, and importable renderer remain accepted as recorded below.
 
 ## Evidence
 
@@ -16,4 +16,13 @@
 
 These are nominal rational linear-light sRGB coordinates and opaque flat swatches. The result does not establish calibrated physical display output, screenshot or compression recovery, alpha compositing, encoded-space blending, or reader performance. The materials explicitly describe the endpoint bars as a supplied comparison, not a blind study. No such claims are made here.
 
-Rook should arrange the missing actual-browser inspection at 390 px and 1280 px before treating the M2 milestone as accepted.
+The visual gate below is limited to responsive readability and reachability. Rook still owns the M2 Gallery bundle, summary, and project closeout; this review does not claim a blind study or reader-performance result.
+
+
+## Independent visual gate follow-up
+
+**Decision: PASS.** I reviewed the stopped repair contribution `37efee4f4c723e8a5c0ba04d3727a4922ab1ba15` from run `726aef5efe23467e96c0d0052dbd82d5` after that run stopped. Trusted integration merged it with `test_exit=0`; all 9 project tests passed there.
+
+Using the fixed house viewer on the delivered HTML at its real 390 px phone and 1280 px desktop viewports, I opened the native-size embedded SVG, selected S7, and inspected its left swatch/interval panel and right endpoint-distribution panel. At 390 px the figure is larger than the viewport by design and its text stays at printed size; the left/right controls expose each panel, and the right panel is reachable without shrinking the labels. At 1280 px both panels are visible together with readable text. I switched back to responsive cards and selected S10; its full swatch, interval, byte bounds, and endpoint bars appeared in the phone capture. The viewer reported viewport layout widths of 390 and 1280, no page overflow, no unlabelled controls, no script errors, and no dialogs.
+
+The HTML also offers the SVG download for zooming/printing. The repaired page makes the full atlas reachable on phone and the reviewed labels readable at the rendered size. This is one-engine visual evidence, not a screen-reader claim or a blind-study result.
