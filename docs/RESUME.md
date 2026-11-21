@@ -265,6 +265,13 @@ worker's compact receipt. The bundle SHA256 is
 The [dated metadata](../evidence/house-checkpoint-27456-106c35692bcb4d15dee136529f783160d8c0493cc0d64e6df29fed85fc347e2a.json)
 and [current pointer](../evidence/checkpoint.json) are byte-for-byte identical.
 
+A later candidate was described as containing 27,584 events, but this source
+room has no matching metadata record or bundle. Trusted inspection of its
+stopped contribution failed because the contribution room has no Git `HEAD`.
+Until that metadata and bundle can be inspected and verified, this 27,456-event
+record remains the latest verifiable checkpoint; do not substitute the candidate
+in the pointer or recovery instructions.
+
 Under the course correction, this bundle stays in the canonical host's private
 checkpoint store; it is **not included in a source clone**. Only in a fresh recovery
 clone with an absent journal, after explicitly copying the retained bundle to the
