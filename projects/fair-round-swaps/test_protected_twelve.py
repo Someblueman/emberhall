@@ -1,6 +1,7 @@
 """Independently check paths and keep resource limits distinct from separation."""
 
 from fractions import Fraction
+from copy import deepcopy
 from itertools import combinations
 import json
 from pathlib import Path
@@ -11,7 +12,9 @@ import tempfile
 import unittest
 
 from protected_twelve import (Graph, START, TARGET, candidate_cut, check_cover, load_frontier,
-                              profile, smt2, splice_cover, cover_vertices, frontier_vertices, verify_ten_step_distance, _implied_by_rankings)
+                              profile, smt2, splice_cover, cover_vertices, frontier_vertices,
+                              repaired_frontier, common_pair_orbit,
+                              verify_ten_step_distance, _implied_by_rankings)
 
 
 # Fixed r=5 fixture from Tern 8398f70; no pending helper-module dependency.
@@ -232,9 +235,9 @@ class TwelveTests(unittest.TestCase):
         data = load_frontier()
         continuation = data['splice_search']
         phase = continuation['phases'][-1]
-        self.assertIn(phase['status'], ('iteration_limit', 'time_limit', 'vertex_limit', 'budget_exhausted'))
-        if phase['status'] != 'budget_exhausted':
-            self.assertEqual(phase['final_query_status'], 'sat')
+        self.assertIn(phase['status'], ('iteration_limit', 'time_limit', 'vertex_limit',
+                                       'budget_exhausted', 'unknown'))
+        self.assertEqual(phase['active_query_status'], 'sat')
         case = continuation['final_counterexample']
         u = tuple(tuple(Fraction(x) for x in row) for row in case['utilities'])
         vertices = frontier_vertices(data)
@@ -255,6 +258,13 @@ class TwelveTests(unittest.TestCase):
         self.assertEqual((len(allowed), len(seen)),
                          (case['cut']['fair_vertices'], case['cut']['start_component']))
         self.assertEqual(candidate_cut(u, vertices), case['cut'])
+        # The last timeout concerned a larger pool than this witnessed cut.
+        # Its added orbit paths repair this valuation, but settle no others.
+        pending = cover_vertices(phase['pending_paths'])
+        attempted = tuple(dict.fromkeys(vertices + pending))
+        self.assertEqual(len(attempted), phase['attempted_vertices'])
+        self.assertTrue(candidate_cut(u, attempted)['target_reached'])
+        self.assertEqual(phase['final_query_status'], 'unknown')
         if phase['status'] == 'budget_exhausted':
             self.assertEqual(case['search']['status'], 'budget_exhausted')
             self.assertEqual(Graph(u).search(250000)['status'], 'budget_exhausted')
@@ -272,6 +282,71 @@ class TwelveTests(unittest.TestCase):
         self.assertFalse(report['candidate']['target_reached'])
         self.assertEqual(report['full_graph']['status'], 'budget_exhausted')
         self.assertIsNone(report['full_graph']['path'])
+
+    def test_resume_includes_only_a_validated_saved_repair(self):
+        data = load_frontier()
+        original = deepcopy(data)
+        case = data['splice_search']['final_counterexample']
+        u = tuple(tuple(Fraction(x) for x in row) for row in case['utilities'])
+        old = frontier_vertices(data)
+        resumed = repaired_frontier(data)
+        self.assertEqual(data, original)
+        self.assertTrue(set(old) < set(resumed))
+        self.assertEqual(set(resumed), set(old) | set(map(tuple, case['search']['path'])))
+        self.assertTrue(all(fair(u, a) for a in case['search']['path']))
+        self.assertFalse(candidate_cut(u, old)['target_reached'])
+        self.assertTrue(candidate_cut(u, resumed)['target_reached'])
+
+        broken = deepcopy(data)
+        broken['splice_search']['final_counterexample']['search']['status'] = 'budget_exhausted'
+        with self.assertRaisesRegex(ValueError, 'completed full-graph repair'):
+            repaired_frontier(broken)
+        # This remains a correctly shaped exchange walk but visits an unfair state.
+        unfair = next(a for a in Graph.neighbors(START) if not fair(u, a))
+        broken = deepcopy(data)
+        path = broken['splice_search']['final_counterexample']['search']['path']
+        path[1:1] = [list(unfair), list(START)]
+        with self.assertRaisesRegex(ValueError, 'not fair'):
+            repaired_frontier(broken)
+
+        script = str(Path(__file__).with_name('protected_twelve.py'))
+        rejected = subprocess.run([sys.executable, '-S', script, '--resume-frontier'],
+                                  capture_output=True, text=True)
+        self.assertNotEqual(rejected.returncode, 0)
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)/'resumed.smt2'
+            command = subprocess.run([sys.executable, '-S', script, '--splice-cover',
+                                      '--resume-frontier', '--write-smt2', str(target)],
+                                     check=True, capture_output=True, text=True)
+            report = json.loads(command.stdout)
+            self.assertEqual(report['vertices'], len(resumed))
+            self.assertTrue(report['includes_saved_repair'])
+            self.assertEqual(report['status'], 'unverified_solver_input')
+            self.assertEqual(target.read_text().count('() Bool)'), 2*len(resumed))
+
+    def test_common_pair_relabelings_preserve_paths_but_not_utilities(self):
+        case = load_frontier()['splice_search']['final_counterexample']
+        path = case['search']['path']
+        u = tuple(tuple(Fraction(x) for x in row) for row in case['utilities'])
+        variants = common_pair_orbit(path)
+        self.assertIn(tuple(map(tuple, path)), variants)
+        self.assertEqual(len(set(variants)), len(variants))
+        self.assertGreater(len(variants), 1)
+        for route in variants:
+            self.assertEqual((route[0], route[-1]), (START, TARGET))
+            self.assertEqual(len(route), len(path))
+            for state in route:
+                self.assertIn(state[0], (5, 6))
+                self.assertEqual(tuple(state.count(i) for i in range(7)), (2,)*5+(1, 1))
+            for a, b in zip(route, route[1:]):
+                changed = [g for g in range(12) if a[g] != b[g]]
+                self.assertEqual(len(changed), 2)
+                x, y = changed
+                self.assertEqual((a[x], a[y]), (b[y], b[x]))
+        self.assertTrue(all(fair(u, a) for a in path))
+        self.assertTrue(any(not all(fair(u, a) for a in route) for route in variants))
+        with self.assertRaises(ValueError):
+            common_pair_orbit([START, TARGET])
 
     def test_exact_ten_step_distance_has_no_shorter_full_graph_path(self):
         data = load_frontier()
