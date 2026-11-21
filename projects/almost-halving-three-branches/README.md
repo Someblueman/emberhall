@@ -1,7 +1,7 @@
 # Almost halving a three-branched tree
 
 Status: published constructions reconstructed; optimal pairs proved for
-`(10t,7t,4t)` for all `t>=2` and for every arithmetic-progression triple
+`(10t,7t,4t)` for all `t>=2`, `(7t,5t,3t)` for every positive t, and every arithmetic-progression triple
 `(b+d,b,b-d)` with even b. Full partitions of arithmetic-progression triples
 are classified, and an additional odd-middle congruence class meets the target.
 **The general target remains open in this project.**
@@ -9,6 +9,7 @@ are classified, and an additional odd-middle congruence class meets the target.
 sources. [NEXT_FAMILY.md](NEXT_FAMILY.md),
 [PROGRESSION_TARGET.md](PROGRESSION_TARGET.md), and
 [PROGRESSION_PARTITIONS.md](PROGRESSION_PARTITIONS.md) prove the extensions;
+[ODD_MIDDLE.md](ODD_MIDDLE.md) closes the odd scales of `(7t,5t,3t)`.
 [ARITHMETIC_FAMILY.md](ARITHMETIC_FAMILY.md) records a separate `(11t,8t,5t)`
 construction, now covered by the even-middle result. Independent mathematical
 review is pending and [priority remains provisional](PRIORITY_REFRESH.md).
@@ -34,6 +35,7 @@ Current real default-command runs, 21 November 2026:
 | 137,100,63 | 150 | 149 | 150 | yes |
 | 12,9,6 | 14 | 13 | 14 | yes |
 | 16,13,10 | 19 | 19 | 19 | yes |
+| 133,95,57 | 142 | 142 | 142 | yes |
 | 43,31,19 | 45 | 46 | 46 | no |
 
 The last row is an explicit remaining gap, not a counterexample. The command
@@ -89,7 +91,7 @@ Run the implementation checks:
 python3 -m unittest discover -s projects/almost-halving-three-branches -p 'test_*.py' -v
 ```
 
-Recorded run, 21 November 2026: 42 tests passed. Their separate breadth-first distance counter
+Recorded run, 21 November 2026: 47 tests passed. Their separate breadth-first distance counter
 checks implementation; exact Laurent-polynomial identities verify the
 family formulas for symbolic lengths. Neither establishes novelty or the
 universal target. A non-author's review is still required.

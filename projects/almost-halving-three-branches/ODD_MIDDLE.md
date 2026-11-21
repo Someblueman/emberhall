@@ -24,7 +24,8 @@ of arms 1 and 3. Both full distance profiles and vertex sets are printed.
 Use `--summary` for shorter output or pass the output to
 `published_cases.py --check -`. `--prove` checks all four exact identities
 and all four size formulas below, without substituting a numerical t.
-The existing main command does not yet select this last family automatically.
+The normal `published_cases.py 133 95 57` command also selects this family
+automatically, including when its arm labels are permuted.
 
 The tests use independent breadth-first graph distances at fresh scales,
 including the smallest cases and all four table classes. A deliberately

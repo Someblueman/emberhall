@@ -134,7 +134,7 @@ class PublishedCasesTest(unittest.TestCase):
 
     def test_arithmetic_cases_and_original_arm_labels(self):
         for lengths, size in [((63, 137, 100), 150), ((9, 6, 12), 14),
-                              ((10, 16, 13), 19)]:
+                              ((10, 16, 13), 19), ((57, 133, 95), 142)]:
             result = pc.witness(lengths)
             self.assertEqual(result["size"], size)
             self.assertTrue(result["attains_bound"])
@@ -151,7 +151,8 @@ class PublishedCasesTest(unittest.TestCase):
 
     def test_real_default_command_round_trip(self):
         script = str(Path(pc.__file__))
-        for lengths, size in [((110, 77, 44), 115), ((63, 137, 100), 150), ((12, 9, 6), 14)]:
+        for lengths, size in [((110, 77, 44), 115), ((63, 137, 100), 150),
+                              ((12, 9, 6), 14), ((133, 95, 57), 142)]:
             run = subprocess.run([sys.executable, script, *map(str, lengths)],
                                  text=True, capture_output=True, check=True)
             self.assertEqual(json.loads(run.stdout)["size"], size)

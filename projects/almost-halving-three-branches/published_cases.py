@@ -169,6 +169,10 @@ def _base_candidates(lengths: Lengths, kind: str) -> list[tuple[str, Pair]]:
         if t >= 2 and (a, b, c) == (10 * t, 7 * t, 4 * t):
             from next_family import family_witness
             add_family("next family", family_witness(t))
+        t = c // 3
+        if t >= 3 and t % 2 and (a, b, c) == (7 * t, 5 * t, 3 * t):
+            from odd_middle import family_witness
+            add_family("seven-five-three family", family_witness(t))
         if a > b and a + c == 2 * b:
             d = a - b
             if b % 2 == 0:
