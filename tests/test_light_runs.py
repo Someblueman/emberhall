@@ -86,6 +86,25 @@ class MixAndHouseTests(unittest.TestCase):
         self.assertEqual(seen[1], home.field_turn(state), "rounds before the migration do not count")
         self.assertIn("library someone would import", seen[0], "software goes first")
 
+    def test_software_science_and_language_need_not_be_first(self):
+        state = {"maintenance": {"migrations": {home.MIX: {"at": 0}}}, "shelf": {"rounds": {}}}
+        lines = []
+        for n in range(len(home.FIELD_TURNS)):
+            lines.append(home.field_turn(state))
+            state["shelf"]["rounds"][f"r{n}"] = {"started_at": 5}
+        self.assertFalse(any("NOT A REASON TO STOP" in line for line in lines), "nothing before the migration")
+        state["maintenance"]["migrations"][home.BETTER] = {"at": 0}
+        state["shelf"]["rounds"] = {}
+        lines = []
+        for n in range(len(home.FIELD_TURNS)):
+            lines.append(home.field_turn(state))
+            state["shelf"]["rounds"][f"r{n}"] = {"started_at": 5}
+        told = ["NOT A REASON TO STOP" in line for line in lines]
+        self.assertEqual([True, False, True, False, True, False], told,
+                         "software, a science and a language; not mathematics, art or design")
+        self.assertIn("Do not release this round early", lines[0])
+        self.assertIn("do not drop an idea only because something close exists", home.BETTER_NOT_FIRST_CHECK)
+
     def test_one_session_at_a_time_always_looks_after_the_house(self):
         import time
         from house import course, shelf

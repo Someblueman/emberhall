@@ -153,6 +153,17 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Better, not first** (21 November, morning; owner migration
+  `upgrade-20261121-better-not-first`). Asked "But all the new researched
+  projects are still just math or art?", the Steward said yes to dropping
+  first-in-the-world for software, science and programming languages. In the
+  first night of field turns those three took fifteen rounds and shelved one
+  idea, each stopping because something close already existed; mathematics,
+  art and design shelved eleven. Now in those fields the work need not be the
+  first of its kind: it must do something the closest existing ones do not,
+  for someone named. A round in its own field does not give up early, and
+  brings back the best small idea if no great one holds up. Checkers are told
+  not to drop an idea only because something close exists.
 - **Done and shown** (21 November, morning; owner migration
   `upgrade-20261121-done-and-shown`). The Steward: "Still can't see anything
   actually being built or projects being completed". A Day in This House was

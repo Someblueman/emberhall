@@ -211,7 +211,37 @@ def field_turn(state: dict) -> str:
     return (f"THIS ROUND STARTS IN {turn}. The Steward, 20 November: 'All of them, "
             "should be a mix of them'. The fields take turns, one round each, so the shelf holds a mix. Spend "
             "your first thirty minutes there; only if it honestly yields nothing worth days, turn to another "
-            "field within the same round. ")
+            "field within the same round. " + (BETTER_NOT_FIRST_TURN if better_not_first(state)
+                                               and turn in BETTER_FIELDS else ""))
+
+
+# Better, not first (Steward, 21 November, yes to: "for software, science and language, being first in the
+# world wouldn't be required"; owner migration BETTER). In the first night of field turns software, science
+# and a programming language took fifteen rounds between them and shelved one idea: each researcher found
+# something close already existed (Automerge, Peritext, existing parser and database tools) and released
+# the round, often in minutes. Mathematics, art and design shelved eleven. From the migration, in those
+# three fields the work need not be the first of its kind, a round in its own field does not give up early,
+# and the residents who check ideas are told the same.
+BETTER = "upgrade-20261121-better-not-first"
+BETTER_FIELDS = (FIELD_TURNS[0], FIELD_TURNS[2], FIELD_TURNS[4])
+BETTER_NOT_FIRST_TURN = (
+    "IN THIS FIELD SOMETHING CLOSE ALMOST ALWAYS EXISTS, AND THAT IS NOT A REASON TO STOP (Steward, 21 "
+    "November). The work need not be the first of its kind. A library, tool, game, experiment, dataset or "
+    "language is worth shelving when it does something the closest existing ones do not, for someone you can "
+    "name: simpler, smaller, works offline or in another language or ecosystem, open where they are closed, "
+    "joins two that exist, tests something they never tested, or is simply better made. Put the existing ones "
+    "in exists and say plainly what yours does that they do not; that difference is what the checkers judge. "
+    "Do not release this round early: use its thirty minutes in this field, and if no great idea holds up, "
+    "bring back the best small one. Release with nothing only if even a small one cannot be honestly argued, "
+    "and then name the candidates you weighed and what each lacked. ")
+BETTER_NOT_FIRST_CHECK = (
+    "For software, a science or a programming language the work need not be the first of its kind (Steward, "
+    "21 November): do not drop an idea only because something close exists. Drop it when it does nothing the "
+    "existing ones do not for the people it names, or when that difference is not real. ")
+
+
+def better_not_first(state: dict) -> bool:
+    return BETTER in state.get("maintenance", {}).get("migrations", {})
 
 
 # Done and shown (Steward, 21 November: "Still can't see anything actually being built or projects being
@@ -752,7 +782,8 @@ def asked_prompt(state: dict, resident: str) -> str:
                  '{"kind":"idea-second","idea":ID,"verdict":"keep|drop","finding":...} with a finding of at '
                  "least 120 characters saying what you opened and what you saw. Keep only what you would "
                  "defend to the Steward in one sentence. Your single drop ends the idea, with your finding as "
-                 "its lesson; that is a good result, not a failure.\n")
+                 "its lesson; that is a good result, not a failure. "
+                 + (BETTER_NOT_FIRST_CHECK if better_not_first(state) else "")).rstrip(" ") + "\n"
     elif second:
         text += ("Shelved ideas waiting for a second resident you may be: " + "; ".join(second[:8]) + ". For one "
                  "of them open the pages its brief lists under asked and answer plainly: who would use this, "
