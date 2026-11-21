@@ -58,6 +58,25 @@ def idea_line(name: str, idea: dict, resident: str | None) -> str:
             f"{line(idea.get('title', name))}")
 
 
+def choice_line(name: str, choice: dict, ideas: dict, resident: str | None) -> str:
+    candidates = choice.get("candidates", [])
+    if not isinstance(candidates, list) or any(not isinstance(item, str) for item in candidates):
+        raise ValueError(f"choice {name} candidates must be a list of names")
+    votes = mapping(choice.get("votes", {}), f"choice {name} votes")
+    for author, vote in votes.items():
+        mapping(vote, f"choice {name} vote by {author}")
+    detail = f"{len(votes)} recorded votes"
+    if resident is not None:
+        detail += "; your vote is recorded" if resident in votes else "; no vote recorded by you"
+        for candidate in candidates:
+            idea = ideas.get(candidate, {})
+            brief = mapping(idea.get("brief", {}), f"idea {candidate} brief")
+            if resident in {idea.get("author"), brief.get("author")}:
+                detail += "; you wrote a candidate or its current brief"
+                break
+    return f"{line(name)}: candidates {line(', '.join(candidates))}; {detail}"
+
+
 def summarize(status: object, *, resident: str | None = None, limit: int = 10) -> str:
     if not 1 <= limit <= 50:
         raise ValueError("limit must be between 1 and 50")
@@ -98,6 +117,11 @@ def summarize(status: object, *, resident: str | None = None, limit: int = 10) -
         if len(rows) > limit:
             output.append(f"- {len(rows) - limit} more omitted; increase --limit (maximum 50) or inspect the input.")
 
+    open_choices = [(name, row) for name, row in choices.items() if row["status"] == "open"]
+    choice_lines = {name: choice_line(name, row, ideas, resident) for name, row in open_choices}
+    open_choices.sort(key=lambda item: (resident in item[1].get("votes", {}), item[0]))
+    section("Open project choices", [choice_lines[name] for name, _ in open_choices])
+    output.append("Vote eligibility is not assessed. Read the complete current briefs and evidence before voting.")
     section("Active projects", [
         f"{line(name)} [{line(row.get('slot', 'unspecified'))}; owner {line(row.get('owner'))}] "
         + (f"stage {row.get('stage', 0) + 1}/{len(row['milestones'])}: " if row.get("milestones") else "")
@@ -116,11 +140,6 @@ def summarize(status: object, *, resident: str | None = None, limit: int = 10) -
     ])
     omitted = sum(row["status"] == "open" and not row.get("ready") for row in tasks.values())
     output.append(f"Unqueued open tasks omitted: {omitted}. Finished task history omitted.")
-    section("Open project choices", [
-        f"{line(name)}: candidates {line(', '.join(row.get('candidates', [])))}; "
-        f"{len(row.get('votes', {}))} recorded votes (eligibility not assessed)"
-        for name, row in sorted(choices.items()) if row["status"] == "open"
-    ])
     section("Shelved ideas", [
         idea_line(name, row, resident)
         for name, row in sorted(ideas.items()) if row["status"] == "shelved"

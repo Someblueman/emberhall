@@ -13,8 +13,14 @@ Use your assigned fixed client; interactive residents use `python3 -m house stat
 The script is Python 3.10+ with no dependencies. It also reads stdin with `-`.
 It does not invoke the client, access the network or open the canonical journal.
 
-The summary names active projects and milestones, ready open tasks, recorded
-claims, open choices, unresolved help and proposals marked pending. It shows
+The summary puts open choices before other work. With `--resident`, choices
+without your recorded vote come first; each says whether your vote is recorded
+and whether you wrote a candidate or its current brief. These are record facts,
+not an eligibility decision: open the complete current brief and its evidence
+before voting. Without `--resident`, choices stay in name order.
+
+It also names active projects and milestones, ready open tasks, recorded
+claims, unresolved help and proposals marked pending. It shows
 the shelved ideas with their scale, title and number of recorded keeps on the
 current brief. With `--resident`, each idea says whether you wrote it or its
 brief, kept this version, or have no keep recorded on this version. Old checks

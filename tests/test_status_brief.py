@@ -57,7 +57,25 @@ class StatusBriefTests(unittest.TestCase):
                        "old-help", "enacted-secret"):
             self.assertNotIn(hidden, result)
         self.assertLess(result.index("new-pin"), result.index("old-pin"))
+        self.assertLess(result.index("Open project choices"), result.index("Active projects"))
+        self.assertIn("your vote is recorded", result)
         self.assertEqual(data, before)
+
+    def test_unvoted_choices_come_first_and_authorship_is_not_eligibility(self):
+        data = snapshot()
+        shelf = data["shelf"]["record"]
+        shelf["choices"]["z-waiting"] = {"status": "open", "candidates": ["own"], "votes": {}}
+        shelf["ideas"]["own"] = {"status": "shelved", "author": "other",
+                                  "brief": {"author": "fern"}}
+        result = summarize(data, resident="fern", limit=1)
+        self.assertIn("z-waiting: candidates own; 0 recorded votes; no vote recorded by you", result)
+        self.assertIn("you wrote a candidate or its current brief", result)
+        self.assertIn("Vote eligibility is not assessed", result)
+        self.assertNotIn("vote: candidates", result)
+        shelf["ideas"]["own"] = {"status": "shelved", "author": "fern"}
+        self.assertIn("you wrote a candidate", summarize(data, resident="fern"))
+        self.assertNotIn("recorded by you", summarize(data))
+        self.assertNotIn("your vote", summarize(data))
 
     def test_explicit_limits_and_printable_single_lines(self):
         data = snapshot()
@@ -79,6 +97,10 @@ class StatusBriefTests(unittest.TestCase):
         missing_ideas = snapshot()
         del missing_ideas["shelf"]["record"]["ideas"]
         invalid.append(missing_ideas)
+        for field, value in [("votes", []), ("votes", {"fern": None}), ("candidates", "one")]:
+            data = snapshot()
+            data["shelf"]["record"]["choices"]["vote"][field] = value
+            invalid.append(data)
         for data in invalid:
             with self.subTest(data=data), self.assertRaises(ValueError):
                 summarize(data)
