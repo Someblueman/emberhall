@@ -2,14 +2,20 @@
 
 Status: published constructions reconstructed; optimal pairs proved for
 `(10t,7t,4t)` for all `t>=2`, `(7t,5t,3t)` for every positive t, and every arithmetic-progression triple
-`(b+d,b,b-d)` with even b. Full partitions of arithmetic-progression triples
-are classified, and an additional odd-middle congruence class meets the target.
+`(b+d,b,b-d)` for every integer `b>=2` and `1<=d<b`, including all arm
+relabelings. Full partitions of arithmetic-progression triples are classified;
+when a full partition is impossible, the command attains the half-minus-one target.
 **The general target remains open in this project.**
 [PUBLISHED_CASES.md](PUBLISHED_CASES.md) retains the earlier constructions and
 sources. [NEXT_FAMILY.md](NEXT_FAMILY.md),
 [PROGRESSION_TARGET.md](PROGRESSION_TARGET.md), and
 [PROGRESSION_PARTITIONS.md](PROGRESSION_PARTITIONS.md) prove the extensions;
 [ODD_MIDDLE.md](ODD_MIDDLE.md) closes the odd scales of `(7t,5t,3t)`.
+[NEXT_ODD_FAMILY.md](NEXT_ODD_FAMILY.md) covers odd middle lengths with even
+spacing, and [MIDDLE_PREFIX.md](MIDDLE_PREFIX.md) covers odd spacing. The
+specialized formulas in [ODD_SPACING.md](ODD_SPACING.md) and
+[GENERAL_ODD_SPACING.md](GENERAL_ODD_SPACING.md) are also selected within
+their stated domains; no bounded search runs in the default command.
 [ARITHMETIC_FAMILY.md](ARITHMETIC_FAMILY.md) records a separate `(11t,8t,5t)`
 construction, now covered by the even-middle result. Independent mathematical
 review is pending and [priority remains provisional](PRIORITY_REFRESH.md).
@@ -36,7 +42,11 @@ Current real default-command runs, 21 November 2026:
 | 12,9,6 | 14 | 13 | 14 | yes |
 | 16,13,10 | 19 | 19 | 19 | yes |
 | 133,95,57 | 142 | 142 | 142 | yes |
-| 43,31,19 | 45 | 46 | 46 | no |
+| 43,31,19 | 46 | 46 | 46 | yes |
+| 19,11,3 | 16 | 16 | 16 | yes |
+| 40,23,6 | 34 | 34 | 34 | yes |
+| 54,47,40 | 70 | 70 | 70 | yes |
+| 50,33,9 | 43 | 45 | 46 | no |
 
 The last row is an explicit remaining gap, not a counterexample. The command
 searches the proved construction menu, not all subsets. To replay the original
@@ -91,7 +101,7 @@ Run the implementation checks:
 python3 -m unittest discover -s projects/almost-halving-three-branches -p 'test_*.py' -v
 ```
 
-Recorded run, 21 November 2026: 47 tests passed. Their separate breadth-first distance counter
+Recorded run, 21 November 2026: 74 tests passed. Their separate breadth-first distance counter
 checks implementation; exact Laurent-polynomial identities verify the
 family formulas for symbolic lengths. Neither establishes novelty or the
 universal target. A non-author's review is still required.
@@ -143,5 +153,5 @@ The former gap `T(10t,7t,4t)` is now resolved by the proof in NEXT_FAMILY.md:
 the optimum is `floor(21t/2)` for all `t>=2`. Its old menu-only bound of
 `10t+3` remains a correct historical limitation of the earlier formulas.
 The default command now uses the stronger result; explicit published modes
-still use their original formulas. Arbitrary triples and several odd-middle
-progressions remain unresolved.
+still use their original formulas. Arbitrary triples remain unresolved;
+arithmetic-progression triples are now covered by the normal command.
