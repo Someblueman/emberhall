@@ -10,6 +10,7 @@ from collections import deque
 from fractions import Fraction
 from itertools import permutations, product
 import json
+import math
 from pathlib import Path
 
 from published_cases import validate_lengths, validate_vertices
@@ -667,6 +668,512 @@ def audit_interior_obstruction(saved, max_vertices=512):
             "selected_edges": degree_sum//2, "original_tree_distances_checked": True}
 
 
+def _extended_spec(lengths, family, tail_blocks):
+    """Validate parameters and return the distance-selection rules for a family."""
+    a, b, c = lengths
+    if family == 'mod8-q5':
+        if not a >= b >= c or any(n % 8 != 3 for n in lengths):
+            raise ValueError('mod8-q5 requires a>=b>=c, all three lengths three modulo eight')
+        limit = (b - c) // 8 - 1
+        if limit < 0:
+            raise ValueError('mod8-q5 requires b > c')
+        p = limit if tail_blocks is None else tail_blocks
+        if type(p) is not int or not 0 <= p <= limit:
+            raise ValueError('tail blocks must be an integer between zero and (b-c)/8 - 1')
+        q = 8 * p + 5
+        cutoff = a + b - q
+        quotients = [(n - 3) // 8 for n in lengths]
+        k = sum(quotients)
+        return {
+            "family": family, "modulus": 8, "tail_blocks": p, "hole_deficit": q,
+            "holes": ((1, a - q), (2, b - q)), "cutoff_lo": cutoff - 1,
+            "cutoff_hi": cutoff + 1, "mid_distances": (cutoff, cutoff + 1),
+            "max_exclusive": a + b, "low_residues": (2, 5, 7), "high_residues": (1, 6, 7),
+            "common_degree_parity": (k + 1) % 2, "quotient_sum": k, "quotients": quotients,
+            "edges": 12 * k * k + 22 * k + 11 + 8 * p, "hole_depth_parity": "even",
+        }
+    if family in ('mod10-q2', 'mod10-q0'):
+        if (not a >= b >= c or a % 10 != 7 or b % 10 != 7 or c % 10 != 1
+                or (a + b + c) % 4 != 1):
+            raise ValueError(f'{family} requires a>=b>=c with residues (7,7,1) mod 10 and sum 1 mod 4')
+        limit = (b - c - 6) // 10
+        lo = 0 if family == 'mod10-q2' else 1
+        if limit < lo:
+            raise ValueError(f'{family} requires larger b-c for this hole offset')
+        p = limit if tail_blocks is None else tail_blocks
+        if type(p) is not int or not lo <= p <= limit:
+            raise ValueError(f'tail blocks must be an integer between {lo} and (b-c-6)/10')
+        quotients = [(a - 7) // 10, (b - 7) // 10, (c - 1) // 10]
+        k = sum(quotients)
+        if family == 'mod10-q2':
+            q = 10 * p + 2
+            cutoff = a + b - q
+            return {
+                "family": family, "modulus": 10, "tail_blocks": p, "hole_deficit": q,
+                "holes": ((1, a - q), (2, b - q)), "cutoff_lo": cutoff,
+                "cutoff_hi": cutoff, "mid_distances": (),
+                "max_exclusive": None, "low_residues": (0, 2, 3, 6, 9),
+                "high_residues": (0, 6, 7, 8, 9), "common_degree_parity": 1,
+                "quotient_sum": k, "quotients": quotients,
+                "edges": 25 * k * k + 65 * k + 39, "hole_depth_parity": "odd",
+            }
+        q = 10 * p
+        cutoff = a + b - q
+        return {
+            "family": family, "modulus": 10, "tail_blocks": p, "hole_deficit": q,
+            "holes": ((1, a - q), (2, b - q)), "cutoff_lo": cutoff - 1,
+            "cutoff_hi": cutoff + 1, "mid_distances": (cutoff + 1,),
+            "max_exclusive": a + b, "low_residues": (1, 3, 4, 6, 8, 9),
+            "high_residues": (4, 9), "common_degree_parity": 1,
+            "quotient_sum": k, "quotients": quotients,
+            "edges": 30 * k * k + 83 * k + 56 - 2 * p * (10 * p + 1),
+            "hole_depth_parity": "odd",
+        }
+    raise ValueError(f'unknown obstruction family: {family}')
+
+
+def _extended_weight(d, spec):
+    if d <= 0 or (spec['max_exclusive'] is not None and d >= spec['max_exclusive']):
+        return 0
+    if d <= spec['cutoff_lo']:
+        return int(d % spec['modulus'] in spec['low_residues'])
+    if d <= spec['cutoff_hi']:
+        return int(d in spec['mid_distances'])
+    return int(d % spec['modulus'] in spec['high_residues'])
+
+
+def _extended_degree_classes(lengths, spec):
+    """Count degrees modulo four over regime-constant arm intervals."""
+    a, b, c = lengths
+    modulus = spec['modulus']
+    low, high = spec['low_residues'], spec['high_residues']
+    clo, chi, dmax = spec['cutoff_lo'], spec['cutoff_hi'], spec['max_exclusive']
+    mid_set = spec['mid_distances']
+    holes = spec['holes']
+    period = 4 * modulus
+
+    def prefix(n, residues):
+        if n <= 0:
+            return 0
+        q, r = divmod(n, modulus)
+        return q * len(residues) + sum(0 < s <= r for s in residues)
+
+    base_low = prefix(clo, low)
+    base_mid = base_low + len(mid_set)
+    base_high = prefix(chi, high)
+
+    def total(n):
+        if n <= 0:
+            return 0
+        if dmax is not None and n >= dmax:
+            n = dmax - 1
+        if n <= clo:
+            return prefix(n, low)
+        if n <= chi:
+            return base_low + sum(d <= n for d in mid_set)
+        return base_mid + prefix(n, high) - base_high
+
+    def degree(arm, d):
+        if arm == 0:
+            return sum(total(n) for n in lengths) - sum(_extended_weight(h, spec) for _, h in holes)
+        value = total(d - 1) + total(lengths[arm - 1] - d) + _extended_weight(d, spec) - 2 * total(d)
+        value += sum(total(d + n) for j, n in enumerate(lengths, 1) if j != arm)
+        return value - sum(_extended_weight(abs(d - h) if arm == j else d + h, spec) for j, h in holes)
+
+    h1, h2 = holes[0][1], holes[1][1]
+    intervals = [
+        (1, 1, h1 - 1), (1, h1 + 1, h1 + 1 if h1 + 1 < a else a - 1),
+        (1, h1 + 2, a - 1), (1, a, a),
+        (2, 1, h2 - 1), (2, h2 + 1, h2 + 1 if h2 + 1 < b else b - 1),
+        (2, h2 + 2, b - 1), (2, b, b),
+        (3, 1, c - 1), (3, c, c),
+    ]
+    counts = [0] * 4
+    counts[degree(0, 0) % 4] = 1
+    for arm, lo, hi in intervals:
+        if lo > hi:
+            continue
+        for residue in range(period):
+            first = lo + (residue - lo) % period
+            if first <= hi:
+                value = degree(arm, first) % 4
+                counts[value] += (hi - first) // period + 1
+    return counts
+
+
+def extended_obstruction(lengths, family='mod8-q5', tail_blocks=None):
+    """Exclude every colouring for the mod8-q5, mod10-q2, or mod10-q0 hole families."""
+    lengths = validate_lengths(lengths)
+    spec = _extended_spec(lengths, family, tail_blocks)
+    counts = _extended_degree_classes(lengths, spec)
+    odd = spec['common_degree_parity']
+    size = (sum(lengths) - 1) // 2
+    if (sum(counts) != 2 * size or size % 2 or spec['edges'] % 2 == 0
+            or any(counts[i] for i in range(4) if i % 2 != odd)
+            or sum(i * n for i, n in enumerate(counts)) % 4 != 2):
+        raise AssertionError('the extended degree obstruction failed')
+    return {
+        "lengths": list(lengths), "family": family,
+        "hole_depth_parity": spec['hole_depth_parity'],
+        "holes": [list(h) for h in spec['holes']],
+        "tail_blocks": spec['tail_blocks'], "hole_deficit": spec['hole_deficit'],
+        "distance_modulus": spec['modulus'],
+        "cutoff_lo": spec['cutoff_lo'], "cutoff_hi": spec['cutoff_hi'],
+        "mid_distances": list(spec['mid_distances']),
+        "max_exclusive": spec['max_exclusive'],
+        "low_residues": list(spec['low_residues']),
+        "high_residues": list(spec['high_residues']),
+        "degree_counts_mod_four": counts, "common_degree_parity": odd,
+        "target_size": size, "selected_edge_parity": 1, "required_edge_parity": 0,
+        "quotients": spec['quotients'], "quotient_sum": spec['quotient_sum'],
+        "selected_edges": spec['edges'],
+        "every_colouring_of_this_support_excluded": True,
+        "all_omissions_obstructed": False,
+    }
+
+
+def verify_extended_obstruction(saved):
+    if not isinstance(saved, dict) or not {'lengths', 'family', 'tail_blocks'} <= saved.keys():
+        raise ValueError('extended certificate must contain lengths, family, and tail_blocks')
+    expected = extended_obstruction(saved['lengths'], saved['family'], saved['tail_blocks'])
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError('extended certificate differs from the reconstructed proof')
+    return expected
+
+
+def audit_extended_obstruction(saved, max_vertices=512):
+    """BFS uses the original tree, including both omitted path vertices."""
+    saved = verify_extended_obstruction(saved)
+    if type(max_vertices) is not int or max_vertices < 1 or 1 + sum(saved['lengths']) > max_vertices:
+        raise ValueError('original-tree audit exceeds its positive vertex limit')
+    graph = {(0, 0): []}
+    for arm, length in enumerate(saved['lengths'], 1):
+        previous = (0, 0)
+        for depth in range(1, length + 1):
+            vertex = (arm, depth)
+            graph[vertex] = [previous]
+            graph[previous].append(vertex)
+            previous = vertex
+    retained = [v for v in graph if list(v) not in saved['holes']]
+    spec = _extended_spec(tuple(saved['lengths']), saved['family'], saved['tail_blocks'])
+    counts, degree_sum = [0] * 4, 0
+    for source in retained:
+        distances, queue = {source: 0}, deque([source])
+        while queue:
+            vertex = queue.popleft()
+            for neighbor in graph[vertex]:
+                if neighbor not in distances:
+                    distances[neighbor] = distances[vertex] + 1
+                    queue.append(neighbor)
+        degree = sum(_extended_weight(distances[v], spec) for v in retained if v != source)
+        counts[degree % 4] += 1
+        degree_sum += degree
+    if (counts != saved['degree_counts_mod_four'] or degree_sum % 4 != 2
+            or degree_sum // 2 != saved['selected_edges']):
+        raise ValueError('original-tree audit contradicts the extended certificate')
+    return {"original_vertices": len(graph), "retained_vertices": len(retained),
+            "selected_edges": degree_sum // 2, "original_tree_distances_checked": True}
+
+
+def terminal_tip_obstruction(lengths, arms=(1, 2)):
+    """Exclude omitting two arm tips via the full-partition residue lemma."""
+    lengths = validate_lengths(lengths)
+    if (len(arms) != 2 or any(type(a) is not int or a not in (1, 2, 3) for a in arms)
+            or arms[0] == arms[1]):
+        raise ValueError('arms must be two distinct arm numbers in {1, 2, 3}')
+    arms = tuple(sorted(arms))
+    holes = tuple((arm, lengths[arm - 1]) for arm in arms)
+    trimmed = [n - (1 if i in arms else 0) for i, n in enumerate(lengths, 1)]
+    if any(n < 1 for n in trimmed):
+        raise ValueError('trimmed prefix arms must remain positive')
+    g = math.gcd(trimmed[0] - trimmed[1], trimmed[1] - trimmed[2])
+    if g <= 1:
+        raise ValueError('trimmed prefix has trivial arm-difference gcd')
+    r = trimmed[0] % g
+    h = math.gcd(r, g)
+    q_sum = sum(n // g for n in trimmed)
+    if r == 0 or (h == 1 and r == g - 1 and q_sum % 2 == 1):
+        raise ValueError('trimmed prefix is not obstructed by the residue lemma')
+    counts = [q_sum + 1] + [q_sum + 3] * r + [q_sum] * (g - 1 - r)
+    reason = 'gcd_parity_mismatch' if h > 1 else 'forced_zero_residue_sum_odd_population'
+    return {
+        "lengths": list(lengths), "omitted_arms": list(arms),
+        "holes": [list(hole) for hole in holes], "trimmed_lengths": trimmed,
+        "target_size": (sum(lengths) - 1) // 2, "modulus": g, "remainder": r,
+        "gcd_remainder_modulus": h, "quotient_sum": q_sum,
+        "residue_populations": counts, "obstruction_reason": reason,
+        "every_colouring_of_this_support_excluded": True,
+        "all_omissions_obstructed": False,
+    }
+
+
+def verify_terminal_tip_obstruction(saved):
+    if not isinstance(saved, dict) or not {'lengths', 'omitted_arms'} <= saved.keys():
+        raise ValueError('terminal-tip certificate must contain lengths and omitted_arms')
+    expected = terminal_tip_obstruction(saved['lengths'], tuple(saved['omitted_arms']))
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError('terminal-tip certificate differs from the reconstructed proof')
+    return expected
+
+
+def audit_terminal_tip_obstruction(saved, max_vertices=512):
+    saved = verify_terminal_tip_obstruction(saved)
+    if type(max_vertices) is not int or max_vertices < 1 or 1 + sum(saved['lengths']) > max_vertices:
+        raise ValueError('original-tree audit exceeds its positive vertex limit')
+    graph = {(0, 0): []}
+    for arm, length in enumerate(saved['lengths'], 1):
+        prev = (0, 0)
+        for depth in range(1, length + 1):
+            v = (arm, depth)
+            graph[v] = [prev]
+            graph[prev].append(v)
+            prev = v
+    retained = [v for v in graph if list(v) not in saved['holes']]
+    depths, queue = {(0, 0): 0}, deque([(0, 0)])
+    while queue:
+        v = queue.popleft()
+        for nb in graph[v]:
+            if nb not in depths:
+                depths[nb] = depths[v] + 1
+                queue.append(nb)
+    counts = [0] * saved['modulus']
+    for v in retained:
+        counts[depths[v] % saved['modulus']] += 1
+    if counts != saved['residue_populations'] or len(retained) != 2 * saved['target_size']:
+        raise ValueError('original-tree audit contradicts the terminal-tip certificate')
+    return {"original_vertices": len(graph), "retained_vertices": len(retained),
+            "residue_populations": counts, "original_tree_distances_checked": True}
+
+
+def _howell_consistent_mod_2k(rows, rhs, modulus):
+    """Exact Howell elimination over Z/2^k Z testing A*s == rhs (mod modulus)."""
+    m = len(rows)
+    n = len(rows[0])
+    pivots = {}
+
+    def insert_row(vec):
+        vec = [x % modulus for x in vec]
+        col = 0
+        while col < m:
+            val = vec[col]
+            if val == 0:
+                col += 1
+                continue
+            if col not in pivots:
+                odd_part = val
+                pw = 1
+                while odd_part % 2 == 0:
+                    odd_part //= 2
+                    pw *= 2
+                inv = pow(odd_part, -1, modulus)
+                norm = [(x * inv) % modulus for x in vec]
+                pivots[col] = norm
+                if pw > 1:
+                    mult = modulus // pw
+                    insert_row([(x * mult) % modulus for x in norm])
+                return
+            prow = pivots[col]
+            pv = prow[col]
+            if val % pv == 0:
+                q = val // pv
+                for j in range(col, m):
+                    vec[j] = (vec[j] - q * prow[j]) % modulus
+                col += 1
+            else:
+                odd_part = val
+                while odd_part % 2 == 0:
+                    odd_part //= 2
+                inv = pow(odd_part, -1, modulus)
+                norm = [(x * inv) % modulus for x in vec]
+                pivots[col] = norm
+                q = pv // norm[col]
+                old_reduced = [0] * m
+                for j in range(col, m):
+                    old_reduced[j] = (prow[j] - q * norm[j]) % modulus
+                pw_new = norm[col]
+                if pw_new > 1:
+                    mult = modulus // pw_new
+                    insert_row([(x * mult) % modulus for x in norm])
+                vec = old_reduced
+                col += 1
+
+    for col_idx in range(n):
+        insert_row([rows[r][col_idx] for r in range(m)])
+    rem = [x % modulus for x in rhs]
+    for col in range(m):
+        if rem[col] == 0:
+            continue
+        if col not in pivots or rem[col] % pivots[col][col] != 0:
+            return False, col
+        prow = pivots[col]
+        q = rem[col] // prow[col]
+        for j in range(col, m):
+            rem[j] = (rem[j] - q * prow[j]) % modulus
+    return True, None
+
+
+def linear_degree_obstruction_absence(lengths, holes, modulus=64, max_vertices=512):
+    """Test all weighted-distance degree congruence equations mod 2^k simultaneously.
+
+    For odd modulus M, 2*e_d(G) = sum_v deg_d(v) makes s_v = (M+1)/2 solve every
+    degree-distance equation automatically, so no odd linear degree obstruction exists.
+    For M = 2^k, Howell elimination on sum s_v = m and sum deg_d(v)*s_v = e_d(G)
+    decides every linear combination of vertex-degree congruences mod 2^k at once.
+    """
+    lengths = validate_lengths(lengths)
+    holes = validate_vertices(lengths, holes)
+    if type(modulus) is not int or modulus < 2 or (modulus & (modulus - 1)) != 0 or modulus > 256:
+        raise ValueError("modulus must be a power of two between 2 and 256")
+    if type(max_vertices) is not int or max_vertices < 1 or 1 + sum(lengths) > max_vertices:
+        raise ValueError("linear degree consistency check exceeds its positive vertex limit")
+    vertices = [(0, 0)] + [(arm, d) for arm, length in enumerate(lengths, 1)
+                           for d in range(1, length + 1)]
+    hole_set = set(holes)
+    retained = [v for v in vertices if v not in hole_set]
+    if len(retained) % 2:
+        raise ValueError("retained vertex count must be even for an equal-sized bipartition")
+    target_size = len(retained) // 2
+    max_d = lengths[0] + lengths[1]
+    rows = [[1] * len(retained)] + [[0] * len(retained) for _ in range(max_d)]
+    rhs = [target_size] + [0] * max_d
+    for i, (a1, d1) in enumerate(retained):
+        for j in range(i + 1, len(retained)):
+            a2, d2 = retained[j]
+            dist = abs(d1 - d2) if a1 == a2 else d1 + d2
+            rows[dist][i] += 1
+            rows[dist][j] += 1
+            rhs[dist] += 1
+    consistent, fail_row = _howell_consistent_mod_2k(rows, rhs, modulus)
+    return {
+        "lengths": list(lengths), "holes": [list(h) for h in holes],
+        "retained_vertices": len(retained), "target_size": target_size,
+        "modulus": modulus,
+        "odd_modulus_linear_obstruction_impossible": True,
+        "linear_degree_system_consistent": consistent,
+        "failing_distance_row": fail_row,
+        "scope": "concrete tree size only; tests all Z/2^k Z linear degree-distance equations",
+        "infinite_family_proved": False,
+    }
+
+
+def verify_linear_degree_obstruction_absence(saved):
+    if not isinstance(saved, dict) or not {"lengths", "holes", "modulus"} <= saved.keys():
+        raise ValueError("linear-obstruction certificate must contain lengths, holes, and modulus")
+    expected = linear_degree_obstruction_absence(saved["lengths"], saved["holes"], saved["modulus"])
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError("linear-obstruction certificate differs from the reconstructed Howell solve")
+    return expected
+
+
+def aligned_tip_antisymmetry(lengths, tip_offset=4):
+    """Prove exact sign antisymmetry on upper arm 1 & 2 intervals for aligned holes.
+
+    For lengths (a >= b > c >= 1) and holes (1, a-q), (2, b-q) with 0 <= q <= b-c:
+    every retained pair at distance a+b-r (0 <= r <= b-c-1) joins arm 1 and arm 2
+    since same-arm, centre, and arm-3 pair distances are at most a+c = a+b-(b-c).
+    By strong induction using index-set symmetry i <-> r-i, every r <= max_r
+    (b-c-1 for q >= 1; b-c-2 for q == 0) with r != q satisfies s_2(b-r) = -s_1(a-r).
+    """
+    lengths = validate_lengths(lengths)
+    a, b, c = lengths
+    if not (a >= b > c >= 1):
+        raise ValueError("aligned tip antisymmetry requires a >= b > c >= 1")
+    if type(tip_offset) is not int or not 0 <= tip_offset <= b - c:
+        raise ValueError("tip_offset must satisfy 0 <= q <= b - c")
+    holes = ((1, a - tip_offset), (2, b - tip_offset))
+    gap = b - c
+    if tip_offset == 0 and gap < 2:
+        raise ValueError("tip_offset=0 requires b - c >= 2 to force any antisymmetric pair")
+    min_r = 1 if tip_offset == 0 else 0
+    max_r = gap - 2 if tip_offset == 0 else gap - 1
+    forced_offsets = [r for r in range(min_r, max_r + 1) if r != tip_offset]
+    return {
+        "lengths": [a, b, c], "tip_offset": tip_offset,
+        "holes": [list(h) for h in holes], "arm_gap_b_minus_c": gap,
+        "cross_arm1_3_ceiling": a + c, "max_forced_offset": max_r,
+        "forced_offsets_count": len(forced_offsets),
+        "sample_forced_pairs": [[[1, a - r], [2, b - r]] for r in forced_offsets[:4]],
+        "tail_forced_pair": [[1, a - forced_offsets[-1]], [2, b - forced_offsets[-1]]],
+        "all_top_pairs_antisymmetric": True,
+        "every_colouring_of_this_support_excluded": False,
+    }
+
+
+def verify_aligned_tip_antisymmetry(saved):
+    if not isinstance(saved, dict) or not {"lengths", "tip_offset"} <= saved.keys():
+        raise ValueError("tip-antisymmetry certificate must contain lengths and tip_offset")
+    expected = aligned_tip_antisymmetry(saved["lengths"], saved["tip_offset"])
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError("tip-antisymmetry certificate differs from the reconstructed proof")
+    return expected
+
+
+def audit_aligned_tip_antisymmetry(saved, max_vertices=512):
+    """Independently check distance bounds and RREF uniqueness on small trees."""
+    saved = verify_aligned_tip_antisymmetry(saved)
+    if type(max_vertices) is not int or max_vertices < 1 or 1 + sum(saved["lengths"]) > max_vertices:
+        raise ValueError("original-tree audit exceeds its positive vertex limit")
+    a, b, c = saved["lengths"]
+    q = saved["tip_offset"]
+    hole_set = set(map(tuple, saved["holes"]))
+    vertices = [(0, 0)] + [(arm, d) for arm, length in enumerate(saved["lengths"], 1)
+                           for d in range(1, length + 1)]
+    retained = [v for v in vertices if v not in hole_set]
+    gap = b - c
+    max_r = saved["max_forced_offset"]
+    for i, (a1, d1) in enumerate(retained):
+        for j in range(i + 1, len(retained)):
+            a2, d2 = retained[j]
+            dist = abs(d1 - d2) if a1 == a2 else d1 + d2
+            if dist >= a + b - (gap - 1) and {a1, a2} != {1, 2}:
+                raise ValueError("non-(arm1,arm2) pair violated the tip distance ceiling")
+    # Build symbolic linear equations for x_i = s_1(a-i), y_i = s_2(b-i), 0 <= i <= max_r, i != q
+    active = [i for i in range(max_r + 1) if i != q]
+    idx_x = {i: k for k, i in enumerate(active)}
+    idx_y = {i: len(active) + k for k, i in enumerate(active)}
+    nvars = 2 * len(active)
+    mat = []
+    for r in range(gap):
+        row = [Fraction(0)] * nvars
+        for i in range(r + 1):
+            j = r - i
+            if i != q and j != q and i in idx_x and j in idx_y:
+                row[idx_x[i]] += 1
+                row[idx_y[j]] += 1
+        if any(row):
+            mat.append(row)
+    piv_row = 0
+    piv_cols = []
+    for col in range(nvars):
+        piv = next((r for r in range(piv_row, len(mat)) if mat[r][col] != 0), None)
+        if piv is None:
+            continue
+        mat[piv_row], mat[piv] = mat[piv], mat[piv_row]
+        inv = 1 / mat[piv_row][col]
+        mat[piv_row] = [v * inv for v in mat[piv_row]]
+        for r in range(len(mat)):
+            if r != piv_row and mat[r][col] != 0:
+                fac = mat[r][col]
+                mat[r] = [mat[r][k] - fac * mat[piv_row][k] for k in range(nvars)]
+        piv_cols.append(col)
+        piv_row += 1
+    for i in range(1 if q == 0 else 0, max_r + 1):
+        if i == q:
+            continue
+        vec = [Fraction(0)] * nvars
+        vec[idx_x[i]] = Fraction(1)
+        vec[idx_y[i]] = Fraction(1)
+        for prow_idx, pcol in enumerate(piv_cols):
+            if vec[pcol] != 0:
+                fac = vec[pcol]
+                vec = [vec[k] - fac * mat[prow_idx][k] for k in range(nvars)]
+        if any(vec):
+            raise ValueError("symbolic RREF did not force tip antisymmetry")
+    return {"original_vertices": len(vertices), "retained_vertices": len(retained),
+            "forced_offsets_verified": saved["forced_offsets_count"],
+            "symbolic_rref_and_tree_checked": True}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parameter", type=int, default=0,
@@ -678,8 +1185,24 @@ def main(argv=None):
     parser.add_argument("--verify", type=Path, help="verify a saved JSON certificate")
     parser.add_argument("--interior-obstruction", action="store_true",
                         help="exclude every colouring for the interior-hole family")
+    parser.add_argument("--extended-obstruction", action="store_true",
+                        help="exclude every colouring for the mod8-q5, mod10-q2, or mod10-q0 families")
+    parser.add_argument("--family", default="mod8-q5", choices=("mod8-q5", "mod10-q2", "mod10-q0"),
+                        help="extended aligned interior-hole family")
+    parser.add_argument("--terminal-tips", action="store_true",
+                        help="exclude omitting two arm tips via the full-partition residue lemma")
+    parser.add_argument("--arms", type=int, nargs=2, default=[1, 2],
+                        help="two distinct arm numbers for --terminal-tips")
+    parser.add_argument("--linear-obstruction-check", action="store_true",
+                        help="test Z/2^k Z linear degree-distance consistency on concrete lengths")
+    parser.add_argument("--modulus", type=int, default=64,
+                        help="2-power modulus for --linear-obstruction-check")
+    parser.add_argument("--tip-antisymmetry", action="store_true",
+                        help="prove aligned tip antisymmetry s_2(b-r) = -s_1(a-r) for 0<=r<=b-c-1")
+    parser.add_argument("--tip-offset", type=int, default=4,
+                        help="aligned hole tip deficit q in 0<=q<=b-c for --tip-antisymmetry")
     parser.add_argument("--tail-blocks", type=int,
-                        help="aligned hole deficit is 8 times this number plus 1")
+                        help="aligned hole deficit block index")
     parser.add_argument("--one-swap-obstruction", action="store_true",
                         help="exclude every one-swap partition on the entire frontier")
     parser.add_argument("--swap-adjacency", action="store_true",
@@ -691,28 +1214,58 @@ def main(argv=None):
     parser.add_argument("--audit", action="store_true", help="BFS check, up to 512 vertices")
     args = parser.parse_args(argv)
     try:
-        if args.tail_blocks is not None and (not args.interior_obstruction or args.verify):
-            parser.error('--tail-blocks requires --interior-obstruction without --verify')
-        if args.interior_obstruction:
-            if args.one_swap_obstruction or args.swap_adjacency or args.parity_obstruction or args.coarse:
-                parser.error('--interior-obstruction cannot be combined with other proof modes')
+        if args.tail_blocks is not None and (not (args.interior_obstruction or args.extended_obstruction) or args.verify):
+            parser.error('--tail-blocks requires --interior-obstruction or --extended-obstruction without --verify')
+        other_modes = (
+            args.extended_obstruction, args.terminal_tips, args.linear_obstruction_check,
+            args.tip_antisymmetry, args.interior_obstruction, args.one_swap_obstruction,
+            args.swap_adjacency, args.parity_obstruction, args.coarse,
+        )
+        if sum(bool(flag) for flag in other_modes) > 1:
+            parser.error("proof modes cannot be combined")
+        if args.linear_obstruction_check:
+            if args.audit:
+                parser.error("--linear-obstruction-check directly inspects concrete vertex distances without --audit")
+            lengths = args.lengths if args.lengths else frontier_lengths(args.parameter)
+            holes = [tuple(map(int, value.split(":"))) for value in args.holes]
+            result = (verify_linear_degree_obstruction_absence(json.loads(args.verify.read_text()))
+                      if args.verify else linear_degree_obstruction_absence(lengths, holes, args.modulus))
+        elif args.tip_antisymmetry:
+            if args.holes != ["0:0", "1:4"]:
+                parser.error("--tip-antisymmetry fixes its two holes from --tip-offset")
+            lengths = args.lengths if args.lengths else frontier_lengths(args.parameter)
+            result = (verify_aligned_tip_antisymmetry(json.loads(args.verify.read_text()))
+                      if args.verify else aligned_tip_antisymmetry(lengths, args.tip_offset))
+        elif args.extended_obstruction:
+            if args.holes != ["0:0", "1:4"]:
+                parser.error('--extended-obstruction fixes its two holes from the arm lengths')
+            result = (verify_extended_obstruction(json.loads(args.verify.read_text())) if args.verify
+                      else extended_obstruction(args.lengths or frontier_lengths(args.parameter),
+                                                args.family, args.tail_blocks))
+        elif args.terminal_tips:
+            if args.holes != ["0:0", "1:4"]:
+                parser.error('--terminal-tips fixes its two holes from --arms')
+            result = (verify_terminal_tip_obstruction(json.loads(args.verify.read_text())) if args.verify
+                      else terminal_tip_obstruction(args.lengths or frontier_lengths(args.parameter),
+                                                    tuple(args.arms)))
+        elif args.interior_obstruction:
             if args.holes != ["0:0", "1:4"]:
                 parser.error('--interior-obstruction fixes its two holes from the arm lengths')
             result = (verify_interior_obstruction(json.loads(args.verify.read_text())) if args.verify
                       else interior_obstruction(args.lengths or frontier_lengths(args.parameter),
                                                 args.tail_blocks))
         elif args.one_swap_obstruction:
-            if args.swap_adjacency or args.parity_obstruction or args.coarse or args.audit or args.lengths:
+            if args.audit or args.lengths:
                 parser.error("--one-swap-obstruction accepts only --verify")
             result = (verify_one_swap_obstruction(json.loads(args.verify.read_text()))
                       if args.verify else one_swap_obstruction_certificate())
         elif args.swap_adjacency:
-            if args.parity_obstruction or args.coarse or args.audit or args.lengths:
+            if args.audit or args.lengths:
                 parser.error("--swap-adjacency accepts only --verify")
             result = (verify_swap_adjacency_certificate(json.loads(args.verify.read_text()))
                       if args.verify else swap_adjacency_certificate())
         elif args.parity_obstruction:
-            if args.coarse or args.audit or args.lengths:
+            if args.audit or args.lengths:
                 parser.error("--parity-obstruction accepts only --parameter or --verify")
             result = (verify_parity_obstruction(json.loads(args.verify.read_text()))
                       if args.verify else parity_obstruction(args.parameter))
@@ -724,7 +1277,10 @@ def main(argv=None):
             holes = [tuple(map(int, value.split(":"))) for value in args.holes]
             result = (coarse_certificate(lengths, holes) if args.coarse else certificate(lengths, holes))
         if args.audit:
-            audit = (audit_interior_obstruction(result) if args.interior_obstruction else
+            audit = (audit_aligned_tip_antisymmetry(result) if args.tip_antisymmetry else
+                     audit_extended_obstruction(result) if args.extended_obstruction else
+                     audit_terminal_tip_obstruction(result) if args.terminal_tips else
+                     audit_interior_obstruction(result) if args.interior_obstruction else
                      audit_coarse_certificate(result) if args.coarse else audit_original_tree(result))
             print(json.dumps({"certificate": result, "audit": audit}, indent=2))
         else:

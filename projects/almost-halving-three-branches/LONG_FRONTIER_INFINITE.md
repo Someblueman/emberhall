@@ -191,23 +191,104 @@ distance profiles differ from the earliest-positive lift. It does not
 exclude another X for the same holes. `moment_obstruction` computes the
 actual integer coefficients rather than trusting a saved certificate.
 
+## Resolution of the seventeen-equation feasibility subproblem for `t>=1`
+
+Bramble, 21 November 2026. The open subproblem above is **feasible for every
+`t>=1`** (including every `t=4r`, `r>=1`): for `H=[(1,1),(2,1)]` (25 cells),
+each congruence class `t = t_0 + 4k` (`t_0 in {1,2,3,4}`, `k>=0`) admits an
+explicit constant vector `X` (`max |X| <= 4`) and linear moment vector
+`Y(k) = Y_0 + k * dY` satisfying all 17 equations (`E(z) == 0 mod (z^8-1)^2`)
+and every exact quadratic bound in (2).
+
+The proof for every `k>=0` is purely finite:
+* `column` and `moment_linear` are constant in `t`, and `n_c(t_0+4k)=n_c(t_0)+3780k`
+  preserves `n_c mod 4` and hence the parity of `Y_c` on all 24 growing arm cells
+  (while the centre cell has `count=1, dY=0`).
+* Because `7560` is divisible by `8`, `moment_constant` advances linearly by
+  `4k * dmc`. Checking `k=0` and `k=1` (via `moments_witness(t_0)` and
+  `moments_witness(t_0+4)`) proves all 17 linear equations identically for `k>=0`.
+* On each growing cell, the upper and lower gaps `high_c(k)-Y_c(k)` and
+  `Y_c(k)-low_c(k)` are convex quadratics in `k` with leading coefficient
+  `3780^2/4`. Checking nonnegativity at `k=0` plus nonnegative linear
+  derivatives `3780 p_0 - dY >= 0` and `dY + 3780(n_0 - p_0) >= 0` proves
+  attainability in (2) for **all** `k>=0`.
+
+Consequently, infeasibility of the 17 double-root equations cannot refute the
+target across arbitrary `H` for `t>=1`; any all-pairs proof (or construction)
+must lift to higher-degree or exact distance equations.
+
+```sh
+python3 projects/almost-halving-three-branches/long_frontier_infinite.py 4 --moments-witness
+python3 projects/almost-halving-three-branches/long_frontier_infinite.py 4000000 --moments-witness
+```
+
+Both commands return `aggregate_equations_hold: true`,
+`first_moment_equations_hold: true`, and `homometric_pair_proved: false`.
+Saving the JSON and passing it to `--verify FILE` reconstructs all columns and
+moments and rejects altered moments with exit code 1.
+
+## Lifting to triple roots `(z^8 - 1)^3` for every `t >= 1`
+
+Extending the compressed moment hierarchy to `u^2` (with `z^8 = 1 + u`)
+introduces one integer second moment per cell,
+`Z_c = sum_{j=0}^{n_c-1} (j*(j-1)//2) * s_j`, subject to parity
+`Z_c == -C(n_c, 3) (mod 2)` and exact Schur-extremal bounds `[Z_min, Z_max]`
+given `(n_c, X_c, Y_c)`:
+
+* **Why the earlier 17-equation witness cannot lift.** Across all 25 cells,
+  the quadratic coefficient matrix multiplying `Z_c` has rank 7 over `Q` with
+  cokernel `lambda = (-1, 1, -1, 1, -1, 1, -1, 1)` (representing `E''(-1) = 0`),
+  eliminating `Z_c` completely. Evaluating `lambda . u^2` on
+  `MOMENTS_WITNESS_BRANCHES` gives non-zero quadratics of strict constant sign
+  (`31954752 + 295369200k + 685843200k^2`, `101182422 + 373346820k + 342921600k^2`,
+  `394214848 + 1173342240k + 857304000k^2`, and
+  `-672263912 - 1188662580k - 514382400k^2` for `t_0 = 1..4`). Thus those four
+  specific `(X, Y)` families admit no `(z^8 - 1)^3` completion at any `t >= 1`.
+* **Exact 25-equation feasibility for every `t >= 1`.** Retaining the same
+  four signed-count vectors `X` for `t = t_0 + 4k` (`t_0 in {1, 2, 3, 4}`) and
+  allowing quadratic first moments `Y(k) = Y_0 + k*Y_1 + k^2*Y_2` and cubic
+  second moments `Z(k) = Z_0 + k*Z_1 + k^2*Z_2 + k^3*Z_3` solves all 25
+  equations `E(z) == 0 mod (z^8 - 1)^3` and stays strictly within every
+  `(Y, Z)` Schur bound for **all integer `k >= 0`** (`TRIPLE_ROOT_WITNESS_BRANCHES`,
+  proved across `k >= 0` by exact nonnegative Taylor-series coefficients around `k = 0`).
+  Thus triple-root lifting modulo `z^8 - 1` also cannot refute `H = [(1,1),(2,1)]`
+  for any `t >= 1`.
+
+## Structural impossibilities for periodic and constant-run tails (`t >= 1`)
+
+Two broad candidate construction ansätze for `t >= 1` fail unconditionally:
+
+1. **Synchronized periodic fixed-prefix-hole families `(P, B, T)`.** Suppose all
+   holes remain in bounded prefixes `[0, d]` and all three arms insert `7560 t`
+   vertices starting at the **same depth `d + 1`** by repeating length-`B`
+   `{+1, -1}` blocks `B_1(z), B_2(z), B_3(z)`. For large `t`, separating powers
+   of `Q = z^{7560 t}` in `(z - 1)(z^B - 1) E_t(z)` isolates the `Q^2`
+   coefficient `2 z^{2d} (B_1(z) + B_2(z) + B_3(z))`, which can never vanish
+   because `B_{1,j} + B_{2,j} + B_{3,j} in {-3, -1, 1, 3}` is odd for every
+   offset `0 <= j < B`. *(If the block start depths `(d_1, d_2, d_3)` are
+   allowed to differ, `Q^2 = 0` alone is not obstructed—e.g. `(1, 0, 0)` with
+   `P = 2`, `(-1,-1), (-1,1), (1,1)` makes `Q^2` cancel.)*
+2. **Terminal constant-sign runs.** On `T(a, b, c) = T(227+7560t, 67+7560t, 11+7560t)`
+   for every `t >= 1`, `b + c = 78 + 15120t > 227 + 7560t = a`, so no same-arm
+   or centre-to-arm pair reaches distance `b + c`. If a colouring keeps
+   constant signs `(s_1, s_2, s_3) in {+1, -1}^3` (with no holes) on `[a - 216, a]`
+   (arm 1), `[b - 216, b]` (arm 2), and `[c - 160, c]` (arm 3), then distance
+   `a + b` forces `s_2 = -s_1`, distance `a + c` forces `s_3 = -s_1`, and
+   distance `b + c` leaves uncancelled `(2, b)-(3, c)` contribution
+   `s_2 + s_3 = -2 s_1 != 0`.
+
+```sh
+python3 projects/almost-halving-three-branches/long_frontier_infinite.py 4 --triple-moments-witness
+python3 projects/almost-halving-three-branches/long_frontier_infinite.py 4000000 --triple-moments-witness
+python3 projects/almost-halving-three-branches/long_frontier_infinite.py 1 --structural-obstructions
+```
+
 ## The unresolved lemma and next useful work
 
-The required all-pattern lifting lemma is still unproved: for an infinite
-explicit set of t, for **every** same-parity pair H and every permitted
-choice of X,Y satisfying the seventeen equations and (2), no choices of
-cell signs realizing those moments make the full polynomial E vanish.
-Equivalently, at least one remaining coefficient in (1) must be nonzero.
-This statement, together with the support reduction above, would give
-h(T)<=151+11340t. It is not inferred from the one count-pattern certificate.
-
-A concrete earlier subproblem is now only seventeen integer equations in
-at most 82 variables with the explicit quadratic bounds (2): decide whether
-they have any solution for arbitrary H at t=4r. Infeasibility for all H
-would prove the desired bound immediately; feasibility would identify the
-counts and moments the next lifting argument must handle. **No solver for
-that bounded integer feasibility problem is delivered here.** A failed
-`--small-counts` search is inconclusive even for the nine-equation problem.
+The required all-pattern lifting lemma for exact distances remains open: for an
+infinite explicit set of `t`, either find an exact construction or prove that
+no realization of any surviving support `(H, X, Y)` makes the full polynomial
+`E(z)` vanish.
 
 ## Reproduce and recorded checks
 
@@ -229,14 +310,17 @@ The third reports weighted residue 2 and `fixed_counts_obstructed: true`,
 with `arbitrary_counts_obstructed` and `all_omissions_obstructed` both false.
 The fourth rejects the canonical moments while preserving the modular result.
 
-Use `--system` to emit all integer columns. Save a witness and pass it to
-`--verify FILE`: the verifier reconstructs columns from lengths and holes,
-ignoring saved columns. A file with `signed_moments` is checked at both layers.
-Expansion is capped at 512 original vertices; that cap supplies no verdict.
+A file with `signed_second_moments` checks all three layers (`E(z) == 0 mod (z^8-1)^3`),
+a file with `signed_moments` checks two layers, and `--verify FILE` rejects altered
+counts or moments. Expansion is capped at 512 original vertices; that cap supplies no verdict.
 
-Eight focused tests pass. They check all 1890 small support/colouring/modulus
-combinations with independent breadth-first distances, random unbalanced
-shell identities, exact local moment bounds, huge symbolic parameters,
-the real failing lift, and altered count rejection through the command line.
-All 168 available project tests pass. Python compilation and the repository's
-advisory size check pass; Ruff is unavailable in this environment.
+Eleven focused tests pass (including exact subset verification of
+`second_moment_bounds`, nonnegativity of the exact Taylor-series `k >= 0` Schur
+certificates across all four triple-root branches, the `T(27,11,3)` positive-control
+check, 17-equation `E''(-1)` defect verification, periodic/constant-run
+obstruction checks, and CLI `--verify` corruption rejection). They check all
+1890 small support/colouring/modulus combinations with independent breadth-first
+distances, random unbalanced shell identities, exact local moment bounds, huge
+symbolic parameters, the real failing lift, and altered count/moment rejection
+through the command line. All 233 project tests pass. Python compilation and
+`git diff --check` pass.

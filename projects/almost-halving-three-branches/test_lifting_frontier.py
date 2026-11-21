@@ -17,7 +17,15 @@ from lifting_frontier import (audit_original_tree, certificate, frontier_lengths
                               _adjacent_swap_systems, one_swap_obstruction_certificate,
                               verify_one_swap_obstruction)
 from lifting_frontier import (interior_obstruction, verify_interior_obstruction,
-                              audit_interior_obstruction)
+                              audit_interior_obstruction, extended_obstruction,
+                              verify_extended_obstruction, audit_extended_obstruction,
+                              terminal_tip_obstruction, verify_terminal_tip_obstruction,
+                              audit_terminal_tip_obstruction,
+                              linear_degree_obstruction_absence,
+                              verify_linear_degree_obstruction_absence,
+                              aligned_tip_antisymmetry,
+                              verify_aligned_tip_antisymmetry,
+                              audit_aligned_tip_antisymmetry)
 
 
 def graph_distances(lengths):
@@ -461,6 +469,245 @@ class InteriorObstructionTests(unittest.TestCase):
                                   '--verify', str(path)], capture_output=True, text=True)
             self.assertEqual(run.returncode, 2)
             self.assertIn('differs from the reconstructed proof', run.stderr)
+
+
+class ExtendedObstructionTests(unittest.TestCase):
+    def test_mod8_q5_independent_original_tree_degrees(self):
+        checked = 0
+        for x, y, z in product(range(4), repeat=3):
+            c, odd = 8 * z + 3, (x + z + 1) % 2
+            b, a = c + 8 * y, c + 8 * y + 8 * x
+            if y == 0:
+                continue
+            vertices, distances = graph_distances((a, b, c))
+            for p in range(y):
+                saved = extended_obstruction((a, b, c), 'mod8-q5', p)
+                retained = [v for v in vertices if list(v) not in saved['holes']]
+                degrees = []
+                for u in retained:
+                    deg = 0
+                    for v in retained:
+                        d = distances[u, v]
+                        if u == v or d >= saved['max_exclusive']:
+                            continue
+                        if d <= saved['cutoff_lo']:
+                            deg += d % 8 in saved['low_residues']
+                        elif d <= saved['cutoff_hi']:
+                            deg += d in saved['mid_distances']
+                        else:
+                            deg += d % 8 in saved['high_residues']
+                    degrees.append(deg)
+                self.assertEqual(Counter(d % 4 for d in degrees),
+                                 Counter({i: n for i, n in enumerate(saved['degree_counts_mod_four']) if n}))
+                self.assertEqual({d % 2 for d in degrees}, {odd})
+                self.assertEqual(sum(degrees) // 2, saved['selected_edges'])
+                self.assertEqual(sum(degrees) % 4, 2)
+                self.assertEqual(len(retained) // 2 % 2, 0)
+                checked += 1
+        self.assertEqual(checked, 96)
+
+    def test_mod10_families_independent_original_tree_degrees(self):
+        checked_q2 = checked_q0 = 0
+        for a, b, c in ((17, 17, 11), (27, 27, 11), (37, 17, 11), (47, 27, 11),
+                        (57, 37, 11), (37, 27, 21), (47, 37, 21)):
+            vertices, distances = graph_distances((a, b, c))
+            limit = (b - c - 6) // 10
+            for family, lo in (('mod10-q2', 0), ('mod10-q0', 1)):
+                for p in range(lo, limit + 1):
+                    saved = extended_obstruction((a, b, c), family, p)
+                    retained = [v for v in vertices if list(v) not in saved['holes']]
+                    degrees = []
+                    for u in retained:
+                        deg = 0
+                        for v in retained:
+                            d = distances[u, v]
+                            if u == v or (saved['max_exclusive'] is not None and d >= saved['max_exclusive']):
+                                continue
+                            if d <= saved['cutoff_lo']:
+                                deg += d % 10 in saved['low_residues']
+                            elif d <= saved['cutoff_hi']:
+                                deg += d in saved['mid_distances']
+                            else:
+                                deg += d % 10 in saved['high_residues']
+                        degrees.append(deg)
+                    self.assertEqual(Counter(d % 4 for d in degrees),
+                                     Counter({i: n for i, n in enumerate(saved['degree_counts_mod_four']) if n}))
+                    self.assertEqual({d % 2 for d in degrees}, {1})
+                    self.assertEqual(sum(degrees) // 2, saved['selected_edges'])
+                    self.assertEqual(sum(degrees) % 4, 2)
+                    if family == 'mod10-q2':
+                        checked_q2 += 1
+                    else:
+                        checked_q0 += 1
+        self.assertEqual((checked_q2, checked_q0), (12, 5))
+
+    def test_positive_boundary_and_huge_frontier_parameters(self):
+        # Positive boundary: T(27,11,3) lies in mod8-q5 (P=0 excludes (1,22),(2,6)),
+        # yet omitting (1,9),(1,27) yields a real size-20 homometric pair.
+        vertices, distances = graph_distances((27, 11, 3))
+        left = [(1, 1), (1, 3), (1, 5), (1, 8), (1, 11), (1, 12), (1, 13), (1, 15),
+                (1, 16), (1, 19), (1, 22), (1, 23), (1, 25), (1, 26), (2, 1), (2, 3),
+                (2, 5), (2, 6), (2, 9), (3, 2)]
+        right = [(0, 0), (1, 2), (1, 4), (1, 6), (1, 7), (1, 10), (1, 14), (1, 17),
+                 (1, 18), (1, 20), (1, 21), (1, 24), (2, 2), (2, 4), (2, 7), (2, 8),
+                 (2, 10), (2, 11), (3, 1), (3, 3)]
+        self.assertEqual(len(left), 20)
+        self.assertEqual(len(right), 20)
+        self.assertFalse(set(left) & set(right))
+        self.assertEqual(set(vertices) - (set(left) | set(right)), {(1, 9), (1, 27)})
+        self.assertEqual(histogram(left, distances), histogram(right, distances))
+        with self.assertRaises(ValueError):
+            extended_obstruction((27, 11, 3), 'mod10-q2', 0)
+        with self.assertRaises(ValueError):
+            extended_obstruction((27, 11, 3), 'mod8-q5', 1)
+        with self.assertRaises(ValueError):
+            terminal_tip_obstruction((19, 11, 3), (1, 2))
+        # Huge frontier checks across all three families and terminal tips
+        for t in (0, 1, 10**60, 10**60 + 1):
+            lengths = frontier_lengths(t)
+            for family in ('mod8-q5', 'mod10-q2', 'mod10-q0'):
+                saved = extended_obstruction(lengths, family)
+                self.assertEqual(verify_extended_obstruction(saved), saved)
+                self.assertTrue(saved['every_colouring_of_this_support_excluded'])
+                self.assertFalse(saved['all_omissions_obstructed'])
+            for arms in ((1, 2), (1, 3), (2, 3)):
+                tip_cert = terminal_tip_obstruction(lengths, arms)
+                self.assertEqual(verify_terminal_tip_obstruction(tip_cert), tip_cert)
+                self.assertTrue(tip_cert['every_colouring_of_this_support_excluded'])
+                self.assertFalse(tip_cert['all_omissions_obstructed'])
+        # Audit t=0 for each family and terminal tip pair
+        self.assertEqual(audit_extended_obstruction(extended_obstruction(frontier_lengths(0), 'mod8-q5', 0))['selected_edges'], 17253)
+        self.assertEqual(audit_extended_obstruction(extended_obstruction(frontier_lengths(0), 'mod10-q2', 0))['selected_edges'], 22949)
+        self.assertEqual(audit_extended_obstruction(extended_obstruction(frontier_lengths(0), 'mod10-q0', 1))['selected_edges'], 27671)
+        for arms, mod in (((1, 2), 5), ((1, 3), 3), ((2, 3), 7)):
+            audit = audit_terminal_tip_obstruction(terminal_tip_obstruction(frontier_lengths(0), arms))
+            self.assertEqual(len(audit['residue_populations']), mod)
+            self.assertEqual(sum(audit['residue_populations']), 304)
+
+    def test_real_cli_and_corruption_rejection(self):
+        cli = Path(__file__).with_name('lifting_frontier.py')
+        with tempfile.TemporaryDirectory() as directory:
+            for family, expected_edges in (('mod8-q5', 17301), ('mod10-q2', 22949), ('mod10-q0', 27183)):
+                saved = extended_obstruction(frontier_lengths(0), family)
+                path = Path(directory) / f'{family}.json'
+                path.write_text(json.dumps(saved))
+                live = subprocess.run([sys.executable, str(cli), '--extended-obstruction',
+                                       '--family', family, '--audit'], capture_output=True, text=True)
+                self.assertEqual(live.returncode, 0, live.stderr)
+                self.assertEqual(json.loads(live.stdout)['audit']['selected_edges'], expected_edges)
+                run = subprocess.run([sys.executable, str(cli), '--extended-obstruction',
+                                      '--verify', str(path), '--audit'], capture_output=True, text=True)
+                self.assertEqual(run.returncode, 0, run.stderr)
+                self.assertEqual(json.loads(run.stdout)['audit']['selected_edges'], expected_edges)
+                broken = deepcopy(saved)
+                broken['selected_edges'] += 2
+                path.write_text(json.dumps(broken))
+                bad = subprocess.run([sys.executable, str(cli), '--extended-obstruction',
+                                      '--verify', str(path)], capture_output=True, text=True)
+                self.assertEqual(bad.returncode, 2)
+                self.assertIn('differs from the reconstructed proof', bad.stderr)
+            tip_saved = terminal_tip_obstruction(frontier_lengths(0), (2, 3))
+            tpath = Path(directory) / 'tips.json'
+            tpath.write_text(json.dumps(tip_saved))
+            trun = subprocess.run([sys.executable, str(cli), '--terminal-tips',
+                                   '--verify', str(tpath), '--audit'], capture_output=True, text=True)
+            self.assertEqual(trun.returncode, 0, trun.stderr)
+            self.assertEqual(json.loads(trun.stdout)['audit']['retained_vertices'], 304)
+            tip_saved['all_omissions_obstructed'] = True
+            tpath.write_text(json.dumps(tip_saved))
+            tbad = subprocess.run([sys.executable, str(cli), '--terminal-tips',
+                                   '--verify', str(tpath)], capture_output=True, text=True)
+            self.assertEqual(tbad.returncode, 2)
+            self.assertIn('differs from the reconstructed proof', tbad.stderr)
+
+
+class LinearAbsenceAndTipAntisymmetryTests(unittest.TestCase):
+    def test_z64_linear_degree_separation_at_t0(self):
+        base = frontier_lengths(0)
+        obstructed = [
+            ((0, 0), (1, 4)),
+            ((1, 222), (2, 62)),
+            ((1, 225), (2, 65)),
+            ((1, 217), (2, 57)),
+            ((2, 67), (3, 11)),
+        ]
+        for holes in obstructed:
+            cert = linear_degree_obstruction_absence(base, holes, 64)
+            self.assertFalse(cert['linear_degree_system_consistent'])
+            self.assertIsNotNone(cert['failing_distance_row'])
+            self.assertEqual(verify_linear_degree_obstruction_absence(cert), cert)
+
+        surviving_q = [q for q in range(4, 57, 2) if q % 10 in (4, 6, 8)]
+        self.assertEqual(len(surviving_q), 17)
+        for q in surviving_q:
+            cert = linear_degree_obstruction_absence(base, ((1, 227 - q), (2, 67 - q)), 64)
+            self.assertTrue(cert['linear_degree_system_consistent'])
+            self.assertIsNone(cert['failing_distance_row'])
+            self.assertFalse(cert['infinite_family_proved'])
+
+        for holes in (((1, 1), (2, 1)), ((1, 2), (2, 2)), ((1, 4), (2, 2))):
+            cert = linear_degree_obstruction_absence(base, holes, 64)
+            self.assertTrue(cert['linear_degree_system_consistent'])
+
+        # Positive control: valid homometric pair T(27,11,3) omitting (1,9),(1,27) is consistent mod 64
+        self.assertTrue(linear_degree_obstruction_absence((27, 11, 3), ((1, 9), (1, 27)), 64)
+                        ['linear_degree_system_consistent'])
+
+    def test_aligned_tip_antisymmetry_symbolic_and_audited(self):
+        for q in (0, 1, 4, 14, 26, 48, 56):
+            for t in (0, 1, 10**60):
+                cert = aligned_tip_antisymmetry(frontier_lengths(t), q)
+                self.assertEqual(verify_aligned_tip_antisymmetry(cert), cert)
+                expected_count = 54 if q == 0 else (55 if 1 <= q <= 55 else 56)
+                self.assertEqual(cert['forced_offsets_count'], expected_count)
+                self.assertFalse(cert['every_colouring_of_this_support_excluded'])
+
+        # Small-tree audit checks distance ceiling & exact rational RREF
+        for q in (0, 1, 4, 6):
+            cert = aligned_tip_antisymmetry((19, 11, 5), q)
+            audit = audit_aligned_tip_antisymmetry(cert)
+            self.assertTrue(audit['symbolic_rref_and_tree_checked'])
+
+        with self.assertRaises(ValueError):
+            aligned_tip_antisymmetry(frontier_lengths(0), 57)
+
+    def test_linear_and_tip_cli_and_corruption_rejection(self):
+        cli = Path(__file__).with_name('lifting_frontier.py')
+        with tempfile.TemporaryDirectory() as directory:
+            lin = subprocess.run([sys.executable, str(cli), '--linear-obstruction-check',
+                                  '--holes', '1:223', '2:63'], capture_output=True, text=True)
+            self.assertEqual(lin.returncode, 0, lin.stderr)
+            lin_saved = json.loads(lin.stdout)
+            self.assertTrue(lin_saved['linear_degree_system_consistent'])
+            lin_path = Path(directory) / 'lin.json'
+            lin_path.write_text(json.dumps(lin_saved))
+            self.assertEqual(subprocess.run([sys.executable, str(cli), '--linear-obstruction-check',
+                                             '--verify', str(lin_path)],
+                                            capture_output=True, text=True).returncode, 0)
+            broken_lin = deepcopy(lin_saved)
+            broken_lin['linear_degree_system_consistent'] = False
+            lin_path.write_text(json.dumps(broken_lin))
+            bad_lin = subprocess.run([sys.executable, str(cli), '--linear-obstruction-check',
+                                      '--verify', str(lin_path)], capture_output=True, text=True)
+            self.assertEqual(bad_lin.returncode, 2)
+
+            tip = subprocess.run([sys.executable, str(cli), '--tip-antisymmetry',
+                                  '--lengths', '19', '11', '5', '--tip-offset', '4', '--audit'],
+                                 capture_output=True, text=True)
+            self.assertEqual(tip.returncode, 0, tip.stderr)
+            tip_out = json.loads(tip.stdout)
+            self.assertTrue(tip_out['audit']['symbolic_rref_and_tree_checked'])
+            tip_path = Path(directory) / 'tip.json'
+            tip_path.write_text(json.dumps(tip_out['certificate']))
+            self.assertEqual(subprocess.run([sys.executable, str(cli), '--tip-antisymmetry',
+                                             '--verify', str(tip_path), '--audit'],
+                                            capture_output=True, text=True).returncode, 0)
+            broken_tip = deepcopy(tip_out['certificate'])
+            broken_tip['forced_offsets_count'] += 1
+            tip_path.write_text(json.dumps(broken_tip))
+            bad_tip = subprocess.run([sys.executable, str(cli), '--tip-antisymmetry',
+                                      '--verify', str(tip_path)], capture_output=True, text=True)
+            self.assertEqual(bad_tip.returncode, 2)
 
 
 if __name__ == '__main__':
