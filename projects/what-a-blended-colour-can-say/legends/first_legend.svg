@@ -1,169 +1,140 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 1040" width="780" height="1040" role="img" aria-labelledby="legend-title legend-desc">
-<title id="legend-title">What a Blended Colour Can Say — First Probability-Interval Legend</title>
-<desc id="legend-desc">Finite-palette colour blending legend showing exact, bounded, and unidentifiable event probabilities.</desc>
-<defs>
-  <pattern id="unid-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-    <rect width="10" height="10" fill="#fce8e6"/>
-    <line x1="0" y1="0" x2="0" y2="10" stroke="#c5221f" stroke-width="3.5" stroke-opacity="0.45"/>
-  </pattern>
-  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-    <path d="M 0 1 L 8 5 L 0 9 z" fill="#4a5568"/>
-  </marker>
-</defs>
-<style>
-  .bg { fill: #fbfaf7; }
-  .card { fill: #ffffff; stroke: #dcd7cc; stroke-width: 1.25; }
-  .title { font: 700 22px "Georgia", "Times New Roman", serif; fill: #1c2026; }
-  .subtitle { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4a5568; }
-  .sec { font: 700 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1c2026; letter-spacing: 0.4px; }
-  .lbl { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1c2026; }
-  .small { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4a5568; }
-  .bar-light { font: 600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; }
-  .bar-dark { font: 600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1c2026; }
-  .mono { font: 600 12px "SFMono-Regular", Consolas, monospace; fill: #1c2026; }
-  .badge { font: 700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0.4px; }
-</style>
-<rect class="bg" x="0" y="0" width="780" height="1040"/>
-<text class="title" x="32" y="42">What a Blended Colour Can Say</text>
-<text class="subtitle" x="32" y="64">Probability-interval legend under exact linear RGB blending (Milestone 1)</text>
-<line x1="32" y1="78" x2="748" y2="78" stroke="#dcd7cc" stroke-width="1"/>
-<rect class="card" x="32" y="92" width="716" height="138" rx="8"/>
-<text class="sec" x="48" y="116">1. DECLARED PALETTES &amp; TARGET EVENT E = {L4, L5}</text>
-<text class="small" x="48" y="136">5-Colour 3D Palette (non-coplanar, nullspace dim 1):</text>
-<rect x="48" y="146" width="80" height="26" rx="4" fill="#1a33cc" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="48" y="188">L1</text>
-<text class="mono" x="48" y="203">#1a33cc</text>
-<rect x="144" y="146" width="80" height="26" rx="4" fill="#33b2cc" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="144" y="188">L2</text>
-<text class="mono" x="144" y="203">#33b2cc</text>
-<rect x="240" y="146" width="80" height="26" rx="4" fill="#707396" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="240" y="188">L3</text>
-<text class="mono" x="240" y="203">#707396</text>
-<rect x="332" y="142" width="88" height="66" rx="6" fill="#fff5eb" stroke="#d95f02" stroke-width="1.5" stroke-dasharray="4 2"/>
-<rect x="336" y="146" width="80" height="26" rx="4" fill="#e66633" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="336" y="188">L4</text>
-<text class="mono" x="336" y="203">#e66633</text>
-<rect x="428" y="142" width="88" height="66" rx="6" fill="#fff5eb" stroke="#d95f02" stroke-width="1.5" stroke-dasharray="4 2"/>
-<rect x="432" y="146" width="80" height="26" rx="4" fill="#b21a80" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="432" y="188">L5</text>
-<text class="mono" x="432" y="203">#b21a80</text>
-<text class="badge" x="392" y="136" style="fill:#b44600">EVENT E = L4 or L5</text>
-<line x1="538" y1="126" x2="538" y2="216" stroke="#e6e1d6"/>
-<text class="small" x="554" y="136">2-Colour Baseline:</text>
-<rect x="554" y="146" width="80" height="26" rx="4" fill="#2040bf" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="554" y="188">Low</text>
-<text class="mono" x="554" y="203">#2040bf</text>
-<rect x="646" y="146" width="80" height="26" rx="4" fill="#df6020" stroke="#1c2026" stroke-opacity="0.25"/>
-<text class="lbl" x="646" y="188">High</text>
-<text class="mono" x="646" y="203">#df6020</text>
-<rect class="card" x="32" y="244" width="716" height="178" rx="8"/>
-<text class="sec" x="48" y="268">2. AMBIGUOUS WITNESS: TWO DISTRIBUTIONS, ONE IDENTICAL COLOUR</text>
-<text class="lbl" x="48" y="294">Dist. A (100% L3):</text>
-<rect x="176" y="280" width="204" height="22" rx="3" fill="#707396" stroke="#1c2026" stroke-opacity="0.3"/>
-<text class="bar-light" x="184" y="295">100% L3  |  P(E) = 0%</text>
-<text class="lbl" x="48" y="334">Dist. B (0% L3):</text>
-<rect x="176.0" y="320" width="40.8" height="22" fill="#1a33cc" stroke="#ffffff" stroke-width="1"/>
-<text class="bar-light" x="181.0" y="335">20%</text>
-<rect x="216.8" y="320" width="81.6" height="22" fill="#33b2cc" stroke="#ffffff" stroke-width="1"/>
-<text class="bar-dark" x="221.8" y="335">40%</text>
-<rect x="298.4" y="320" width="61.2" height="22" fill="#e66633" stroke="#ffffff" stroke-width="1"/>
-<text class="bar-dark" x="303.4" y="335">30%</text>
-<rect x="359.6" y="320" width="20.4" height="22" fill="#b21a80" stroke="#ffffff" stroke-width="1"/>
-<text class="small" x="176" y="358">20% L1 + 40% L2 + 30% L4 + 10% L5</text>
-<text class="small" x="176" y="374">P(E) = 40% high-risk mass</text>
-<line x1="386" y1="291" x2="432" y2="312" stroke="#4a5568" stroke-width="1.6" marker-end="url(#arrow)"/>
-<line x1="386" y1="331" x2="432" y2="320" stroke="#4a5568" stroke-width="1.6" marker-end="url(#arrow)"/>
-<rect x="442" y="284" width="68" height="62" rx="8" fill="#707396" stroke="#1c2026" stroke-width="1.5"/>
-<text class="mono" x="448" y="362">#707396</text>
-<text class="lbl" x="528" y="296">Identical pixel colour!</text>
-<text class="small" x="528" y="316">• P(L4 or L5): [0%, 40%] (BOUNDED)</text>
-<text class="small" x="528" y="336">• P(Exact L3): [0%, 100%]</text>
-<rect x="528" y="346" width="126" height="22" rx="4" fill="#fce8e6" stroke="#f6aea9"/>
-<text class="badge" x="537" y="361" style="fill:#b31412">UNIDENTIFIABLE</text>
-<text class="small" x="48" y="406">Takeaway: a static stop legend labels #707396 as "100% L3", hiding up to 40% high-risk weight.</text>
-<rect class="card" x="32" y="436" width="716" height="464" rx="8"/>
-<text class="sec" x="48" y="462">3. PROBABILITY-INTERVAL LEGEND (CHECKED SWATCHES &amp; HELD-OUT CASE)</text>
-<text class="small" x="48" y="482">Swatch</text>
-<text class="small" x="126" y="482">Case / Event</text>
-<text class="small" x="394" y="482">Certified Range [P_min, P_max]</text>
-<text class="small" x="614" y="482">Status</text>
-<line x1="48" y1="490" x2="732" y2="490" stroke="#e2ddd3"/>
-<rect x="48" y="504" width="52" height="36" rx="6" fill="#af5848" stroke="#1c2026" stroke-width="1.2"/>
-<text class="mono" x="48" y="552">S1 #af5848</text>
-<text class="lbl" x="126" y="518">2-Colour Blend (1:3)</text>
-<text class="small" x="126" y="536">P(High) · Unique binary mix</text>
-<rect x="394" y="514" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
-<line x1="394.0" y1="512" x2="394.0" y2="530" stroke="#a09a8e" stroke-width="1"/>
-<line x1="492.0" y1="512" x2="492.0" y2="530" stroke="#a09a8e" stroke-width="1"/>
-<line x1="590.0" y1="512" x2="590.0" y2="530" stroke="#a09a8e" stroke-width="1"/>
-<polygon points="541.0,511 548.0,521 541.0,531 534.0,521" fill="#137333" stroke="#ffffff" stroke-width="1"/>
-<text class="mono" x="394" y="544">75%</text>
-<rect x="610" y="510" width="84" height="22" rx="4" fill="#e6f4ea" stroke="#a8dab5"/>
-<text class="badge" x="619" y="525" style="fill:#137333">EXACT</text>
-<rect x="48" y="567" width="52" height="36" rx="6" fill="#996b70" stroke="#1c2026" stroke-width="1.2"/>
-<text class="mono" x="48" y="615">S2 #996b70</text>
-<text class="lbl" x="126" y="581">3D Outer Face Mix</text>
-<text class="small" x="126" y="599">P(Level &gt;= 4) · On conv(L1, L2, L4) facet</text>
-<rect x="394" y="577" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
-<line x1="394.0" y1="575" x2="394.0" y2="593" stroke="#a09a8e" stroke-width="1"/>
-<line x1="492.0" y1="575" x2="492.0" y2="593" stroke="#a09a8e" stroke-width="1"/>
-<line x1="590.0" y1="575" x2="590.0" y2="593" stroke="#a09a8e" stroke-width="1"/>
-<polygon points="511.6,574 518.6,584 511.6,594 504.6,584" fill="#137333" stroke="#ffffff" stroke-width="1"/>
-<text class="mono" x="394" y="607">60%</text>
-<rect x="610" y="573" width="84" height="22" rx="4" fill="#e6f4ea" stroke="#a8dab5"/>
-<text class="badge" x="619" y="588" style="fill:#137333">EXACT</text>
-<rect x="48" y="630" width="52" height="36" rx="6" fill="#955c72" stroke="#1c2026" stroke-width="1.2"/>
-<text class="mono" x="48" y="678">S3 #955c72</text>
-<text class="lbl" x="126" y="644">3D Near-Outer Blend</text>
-<text class="small" x="126" y="662">P(Level &gt;= 4) · Tight 10pp interval</text>
-<rect x="394" y="640" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
-<line x1="394.0" y1="638" x2="394.0" y2="656" stroke="#a09a8e" stroke-width="1"/>
-<line x1="492.0" y1="638" x2="492.0" y2="656" stroke="#a09a8e" stroke-width="1"/>
-<line x1="590.0" y1="638" x2="590.0" y2="656" stroke="#a09a8e" stroke-width="1"/>
-<rect x="492.0" y="640" width="19.6" height="14" rx="3" fill="#1967d2" fill-opacity="0.82" stroke="#114a9f" stroke-width="1"/>
-<text class="mono" x="394" y="670">50% – 60%</text>
-<rect x="610" y="636" width="84" height="22" rx="4" fill="#e8f0fe" stroke="#aecbfa"/>
-<text class="badge" x="619" y="651" style="fill:#1967d2">BOUNDED</text>
-<rect x="48" y="693" width="52" height="36" rx="6" fill="#707396" stroke="#1c2026" stroke-width="1.2"/>
-<text class="mono" x="48" y="741">S4 #707396</text>
-<text class="lbl" x="126" y="707">3D Pure Stop L3 (Tail)</text>
-<text class="small" x="126" y="725">P(Level &gt;= 4) · Up to 40% high risk</text>
-<rect x="394" y="703" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
-<line x1="394.0" y1="701" x2="394.0" y2="719" stroke="#a09a8e" stroke-width="1"/>
-<line x1="492.0" y1="701" x2="492.0" y2="719" stroke="#a09a8e" stroke-width="1"/>
-<line x1="590.0" y1="701" x2="590.0" y2="719" stroke="#a09a8e" stroke-width="1"/>
-<rect x="394.0" y="703" width="78.4" height="14" rx="3" fill="#1967d2" fill-opacity="0.82" stroke="#114a9f" stroke-width="1"/>
-<text class="mono" x="394" y="733">0% – 40%</text>
-<rect x="610" y="699" width="84" height="22" rx="4" fill="#e8f0fe" stroke="#aecbfa"/>
-<text class="badge" x="619" y="714" style="fill:#1967d2">BOUNDED</text>
-<rect x="48" y="756" width="52" height="36" rx="6" fill="#809f9f" stroke="#1c2026" stroke-width="1.2"/>
-<text class="mono" x="48" y="804">S5 #809f9f</text>
-<text class="lbl" x="126" y="770">1D Ramp Midpoint</text>
-<text class="small" x="126" y="788">P(Level &gt;= 4) · Collinear ramp widens bound</text>
-<rect x="394" y="766" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
-<line x1="394.0" y1="764" x2="394.0" y2="782" stroke="#a09a8e" stroke-width="1"/>
-<line x1="492.0" y1="764" x2="492.0" y2="782" stroke="#a09a8e" stroke-width="1"/>
-<line x1="590.0" y1="764" x2="590.0" y2="782" stroke="#a09a8e" stroke-width="1"/>
-<rect x="394.0" y="766" width="130.7" height="14" rx="3" fill="#1967d2" fill-opacity="0.82" stroke="#114a9f" stroke-width="1"/>
-<text class="mono" x="394" y="796">0% – 66.7%</text>
-<rect x="610" y="762" width="84" height="22" rx="4" fill="#e8f0fe" stroke="#aecbfa"/>
-<text class="badge" x="619" y="777" style="fill:#1967d2">BOUNDED</text>
-<rect x="42" y="813" width="696" height="56" rx="6" fill="#fffdf5" stroke="#e2c675" stroke-dasharray="4 3"/>
-<rect x="48" y="819" width="52" height="36" rx="6" fill="#707396" stroke="#1c2026" stroke-width="1.2"/>
-<text class="mono" x="48" y="867">S6 #707396</text>
-<text class="lbl" x="126" y="833">Held-Out: Stop L3 (Mid)</text>
-<text class="small" x="126" y="851">P(Level = 3) · Exact L3 unidentifiable</text>
-<rect x="394" y="829" width="196" height="14" rx="4" fill="#ebe7df" stroke="#d0c9bb"/>
-<line x1="394.0" y1="827" x2="394.0" y2="845" stroke="#a09a8e" stroke-width="1"/>
-<line x1="492.0" y1="827" x2="492.0" y2="845" stroke="#a09a8e" stroke-width="1"/>
-<line x1="590.0" y1="827" x2="590.0" y2="845" stroke="#a09a8e" stroke-width="1"/>
-<rect x="394" y="829" width="196" height="14" rx="4" fill="url(#unid-hatch)" stroke="#c5221f" stroke-width="1.3"/>
-<text class="mono" x="394" y="859">0% – 100%</text>
-<rect x="610" y="825" width="122" height="22" rx="4" fill="#fce8e6" stroke="#f6aea9"/>
-<text class="badge" x="619" y="840" style="fill:#b31412">UNIDENTIFIABLE</text>
-<rect class="card" x="32" y="914" width="716" height="102" rx="8"/>
-<text class="sec" x="48" y="938">4. WHY PALETTE GEOMETRY CONTROLS IDENTIFIABILITY</text>
-<text class="small" x="48" y="960">• 2 colours (nullspace dim 0): unique recovery on the segment [c1, c2].</text>
-<text class="small" x="48" y="979">• 5-colour 1D ramp (nullspace dim 3): 3-D ambiguity polytope; S5 tail spans 0%–67%.</text>
-<text class="small" x="48" y="998">• 5-colour 3D palette (nullspace dim 1): 1-D fiber gives tight bounds (S2 exact, S3 10pp) and flags Radon ambiguities (S6).</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="3050" viewBox="0 0 1040 3050" role="img" aria-labelledby="title desc">
+<title id="title">What a Blended Colour Can Say</title>
+<desc id="desc">Exact probability intervals, conservative byte observation intervals, and endpoint distributions beside each displayed swatch.</desc>
+<style>text{font:16px sans-serif;fill:#172c3c}.title{font:bold 29px Georgia,serif}.heading{font:bold 19px sans-serif}.small{font:14px monospace}.label{font:bold 15px sans-serif}</style>
+<rect width="1040" height="3050" fill="#f3f1e9"/>
+<text x="30" y="43" class="title">What a Blended Colour Can Say</text>
+<text x="30" y="76" class="">Linear-light blends. Opaque, flat sRGB swatches. Exact fractions are authoritative.</text>
+<text x="30" y="105" class="">Byte ranges are conservative; percentages round outward. Distribution bars show exact-case endpoints.</text>
+<text x="30" y="130" class="">linear8 is raw linear data: its hex preview is NOT equivalent displayed light. No reader study claimed.</text>
+<rect x="18" y="150" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="180" class="heading">S1 / 2-Colour Blend (1:3)</text>
+<text x="34" y="206" class="label">P(High)  [3/4, 3/4]  EXACT</text>
+<rect x="34" y="227" width="92" height="76" fill="#d89e91" stroke="#526776"/>
+<text x="34" y="328" class="small">#d89e91</text>
+<text x="144" y="244" class="label">Displayed sRGB8</text>
+<text x="144" y="270" class="small">two_colour_diverging</text>
+<text x="552" y="208" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="227" width="102.50000" height="22" fill="#6389e1"/><rect x="654.50000" y="227" width="307.50000" height="22" fill="#f0a563"/><text x="552" y="269" class="small">1: 1/4  2: 3/4</text>
+<rect x="552.00000" y="297" width="102.50000" height="22" fill="#6389e1"/><rect x="654.50000" y="297" width="307.50000" height="22" fill="#f0a563"/><text x="552" y="339" class="small">1: 1/4  2: 3/4</text>
+<text x="34" y="364" class="small">srgb8 #d89e91 -&gt; [74.41%, 75.04%] conservative</text>
+<text x="34" y="391" class="small">linear8 #af5848 -&gt; [74.57%, 75.10%] conservative</text>
+<text x="552" y="402" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="440" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="470" class="heading">S2 / 3D Outer Face Mix</text>
+<text x="34" y="496" class="label">P(Level &gt;= 4)  [3/5, 3/5]  EXACT</text>
+<rect x="34" y="517" width="92" height="76" fill="#cbadb1" stroke="#526776"/>
+<text x="34" y="618" class="small">#cbadb1</text>
+<text x="144" y="534" class="label">Displayed sRGB8</text>
+<text x="144" y="560" class="small">five_colour_tetra_3d</text>
+<text x="552" y="498" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="517" width="82.00000" height="22" fill="#597ce7"/><rect x="634.00000" y="517" width="82.00000" height="22" fill="#7cdae7"/><rect x="716.00000" y="517" width="246.00000" height="22" fill="#f3aa7c"/><text x="552" y="559" class="small">1: 1/5  2: 1/5  4: 3/5</text>
+<rect x="552.00000" y="587" width="82.00000" height="22" fill="#597ce7"/><rect x="634.00000" y="587" width="82.00000" height="22" fill="#7cdae7"/><rect x="716.00000" y="587" width="246.00000" height="22" fill="#f3aa7c"/><text x="552" y="629" class="small">1: 1/5  2: 1/5  4: 3/5</text>
+<text x="34" y="654" class="small">srgb8 #cbadb1 -&gt; [52.97%, 60.55%] conservative</text>
+<text x="34" y="681" class="small">linear8 #996b70 -&gt; [54.08%, 60.63%] conservative</text>
+<text x="552" y="692" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="730" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="760" class="heading">S3 / 3D Near-Outer Blend</text>
+<text x="34" y="786" class="label">P(Level &gt;= 4)  [1/2, 3/5]  BOUNDED</text>
+<rect x="34" y="807" width="92" height="76" fill="#c9a2b2" stroke="#526776"/>
+<text x="34" y="908" class="small">#c9a2b2</text>
+<text x="144" y="824" class="label">Displayed sRGB8</text>
+<text x="144" y="850" class="small">five_colour_tetra_3d</text>
+<text x="552" y="788" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="807" width="102.50000" height="22" fill="#597ce7"/><rect x="654.50000" y="807" width="102.50000" height="22" fill="#b1b3ca"/><rect x="757.00000" y="807" width="205.00000" height="22" fill="#f3aa7c"/><text x="552" y="849" class="small">1: 1/4  3: 1/4  4: 1/2</text>
+<rect x="552.00000" y="877" width="123.00000" height="22" fill="#597ce7"/><rect x="675.00000" y="877" width="41.00000" height="22" fill="#7cdae7"/><rect x="716.00000" y="877" width="235.75000" height="22" fill="#f3aa7c"/><rect x="951.75000" y="877" width="10.25000" height="22" fill="#da59bc"/><text x="552" y="919" class="small">1: 3/10  2: 1/10  4: 23/40  5: 1/40</text>
+<text x="34" y="944" class="small">srgb8 #c9a2b2 -&gt; [49.63%, 60.69%] conservative</text>
+<text x="34" y="971" class="small">linear8 #955c72 -&gt; [49.60%, 60.57%] conservative</text>
+<text x="552" y="982" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1020" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1050" class="heading">S4 / 3D Pure Stop L3 (Tail)</text>
+<text x="34" y="1076" class="label">P(Level &gt;= 4)  [0, 2/5]  BOUNDED</text>
+<rect x="34" y="1097" width="92" height="76" fill="#b1b3ca" stroke="#526776"/>
+<text x="34" y="1198" class="small">#b1b3ca</text>
+<text x="144" y="1114" class="label">Displayed sRGB8</text>
+<text x="144" y="1140" class="small">five_colour_tetra_3d</text>
+<text x="552" y="1078" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1097" width="410.00000" height="22" fill="#b1b3ca"/><text x="552" y="1139" class="small">3: 1</text>
+<rect x="552.00000" y="1167" width="82.00000" height="22" fill="#597ce7"/><rect x="634.00000" y="1167" width="164.00000" height="22" fill="#7cdae7"/><rect x="798.00000" y="1167" width="123.00000" height="22" fill="#f3aa7c"/><rect x="921.00000" y="1167" width="41.00000" height="22" fill="#da59bc"/><text x="552" y="1209" class="small">1: 1/5  2: 2/5  4: 3/10  5: 1/10</text>
+<text x="34" y="1234" class="small">srgb8 #b1b3ca -&gt; [0.00%, 40.97%] conservative</text>
+<text x="34" y="1261" class="small">linear8 #707396 -&gt; [0.00%, 40.31%] conservative</text>
+<text x="552" y="1272" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1310" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1340" class="heading">S5 / 1D Ramp Midpoint</text>
+<text x="34" y="1366" class="label">P(Level &gt;= 4)  [0, 2/3]  BOUNDED</text>
+<rect x="34" y="1387" width="92" height="76" fill="#bccfcf" stroke="#526776"/>
+<text x="34" y="1488" class="small">#bccfcf</text>
+<text x="144" y="1404" class="label">Displayed sRGB8</text>
+<text x="144" y="1430" class="small">five_colour_ramp</text>
+<text x="552" y="1368" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1387" width="410.00000" height="22" fill="#bccfcf"/><text x="552" y="1429" class="small">3: 1</text>
+<rect x="552.00000" y="1457" width="136.66667" height="22" fill="#f8f8f0"/><rect x="688.66667" y="1457" width="273.33333" height="22" fill="#91b6bc"/><text x="552" y="1499" class="small">1: 1/3  4: 2/3</text>
+<text x="34" y="1524" class="small">srgb8 #bccfcf -&gt; [0.00%, 66.69%] conservative</text>
+<text x="34" y="1551" class="small">linear8 #809f9f -&gt; [0.00%, 66.67%] conservative</text>
+<text x="552" y="1562" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1600" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1630" class="heading">S6 / Held-Out: Stop L3 (Mid)</text>
+<text x="34" y="1656" class="label">P(Level = 3)  [0, 1]  UNIDENTIFIABLE</text>
+<rect x="34" y="1677" width="92" height="76" fill="#b1b3ca" stroke="#526776"/>
+<text x="34" y="1778" class="small">#b1b3ca</text>
+<text x="144" y="1694" class="label">Displayed sRGB8</text>
+<text x="144" y="1720" class="small">five_colour_tetra_3d</text>
+<text x="552" y="1658" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1677" width="82.00000" height="22" fill="#597ce7"/><rect x="634.00000" y="1677" width="164.00000" height="22" fill="#7cdae7"/><rect x="798.00000" y="1677" width="123.00000" height="22" fill="#f3aa7c"/><rect x="921.00000" y="1677" width="41.00000" height="22" fill="#da59bc"/><text x="552" y="1719" class="small">1: 1/5  2: 2/5  4: 3/10  5: 1/10</text>
+<rect x="552.00000" y="1747" width="410.00000" height="22" fill="#b1b3ca"/><text x="552" y="1789" class="small">3: 1</text>
+<text x="34" y="1814" class="small">srgb8 #b1b3ca -&gt; [0.00%, 100.00%] conservative</text>
+<text x="34" y="1841" class="small">linear8 #707396 -&gt; [0.00%, 100.00%] conservative</text>
+<text x="552" y="1852" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="1890" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="1920" class="heading">S7 / Held-out rational mixture</text>
+<text x="34" y="1946" class="label">P(Level &gt;= 4)  [2/7, 4/7]  BOUNDED</text>
+<rect x="34" y="1967" width="92" height="76" fill="#c5acbc" stroke="#526776"/>
+<text x="34" y="2068" class="small">#c5acbc</text>
+<text x="144" y="1984" class="label">Displayed sRGB8</text>
+<text x="144" y="2010" class="small">five_colour_tetra_3d</text>
+<text x="552" y="1948" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="1967" width="292.85714" height="22" fill="#b1b3ca"/><rect x="844.85714" y="1967" width="87.85714" height="22" fill="#f3aa7c"/><rect x="932.71429" y="1967" width="29.28571" height="22" fill="#da59bc"/><text x="552" y="2009" class="small">3: 5/7  4: 3/14  5: 1/14</text>
+<rect x="552.00000" y="2037" width="58.57143" height="22" fill="#597ce7"/><rect x="610.57143" y="2037" width="117.14286" height="22" fill="#7cdae7"/><rect x="727.71429" y="2037" width="175.71429" height="22" fill="#f3aa7c"/><rect x="903.42857" y="2037" width="58.57143" height="22" fill="#da59bc"/><text x="552" y="2079" class="small">1: 1/7  2: 2/7  4: 3/7  5: 1/7</text>
+<text x="34" y="2104" class="small">srgb8 #c5acbc -&gt; [28.04%, 58.81%] conservative</text>
+<text x="34" y="2131" class="small">linear8 #8e6a80 -&gt; [27.66%, 57.90%] conservative</text>
+<text x="552" y="2142" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="2180" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="2210" class="heading">S8 / Binary low endpoint</text>
+<text x="34" y="2236" class="label">P(High)  [0, 0]  EXACT</text>
+<rect x="34" y="2257" width="92" height="76" fill="#6389e1" stroke="#526776"/>
+<text x="34" y="2358" class="small">#6389e1</text>
+<text x="144" y="2274" class="label">Displayed sRGB8</text>
+<text x="144" y="2300" class="small">two_colour_diverging</text>
+<text x="552" y="2238" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="2257" width="410.00000" height="22" fill="#6389e1"/><text x="552" y="2299" class="small">1: 1</text>
+<rect x="552.00000" y="2327" width="410.00000" height="22" fill="#6389e1"/><text x="552" y="2369" class="small">1: 1</text>
+<text x="34" y="2394" class="small">srgb8 #6389e1 -&gt; [0.00%, 0.14%] conservative</text>
+<text x="34" y="2421" class="small">linear8 #2040bf -&gt; [0.00%, 0.33%] conservative</text>
+<text x="552" y="2432" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="2470" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="2500" class="heading">S9 / Binary high endpoint</text>
+<text x="34" y="2526" class="label">P(High)  [1, 1]  EXACT</text>
+<rect x="34" y="2547" width="92" height="76" fill="#f0a563" stroke="#526776"/>
+<text x="34" y="2648" class="small">#f0a563</text>
+<text x="144" y="2564" class="label">Displayed sRGB8</text>
+<text x="144" y="2590" class="small">two_colour_diverging</text>
+<text x="552" y="2528" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="2547" width="410.00000" height="22" fill="#f0a563"/><text x="552" y="2589" class="small">2: 1</text>
+<rect x="552.00000" y="2617" width="410.00000" height="22" fill="#f0a563"/><text x="552" y="2659" class="small">2: 1</text>
+<text x="34" y="2684" class="small">srgb8 #f0a563 -&gt; [99.82%, 100.00%] conservative</text>
+<text x="34" y="2711" class="small">linear8 #df6020 -&gt; [99.67%, 100.00%] conservative</text>
+<text x="552" y="2722" class="small">Segment labels: stop number : exact probability</text>
+<rect x="18" y="2760" width="1004" height="276" rx="10" fill="white"/>
+<text x="34" y="2790" class="heading">S10 / Certain event control</text>
+<text x="34" y="2816" class="label">P(Any level)  [1, 1]  EXACT</text>
+<rect x="34" y="2837" width="92" height="76" fill="#b6a4c8" stroke="#526776"/>
+<text x="34" y="2938" class="small">#b6a4c8</text>
+<text x="144" y="2854" class="label">Displayed sRGB8</text>
+<text x="144" y="2880" class="small">five_colour_tetra_3d</text>
+<text x="552" y="2818" class="label">Explicit distributions at exact lower / upper bounds</text>
+<rect x="552.00000" y="2837" width="41.00000" height="22" fill="#597ce7"/><rect x="593.00000" y="2837" width="287.00000" height="22" fill="#b1b3ca"/><rect x="880.00000" y="2837" width="20.50000" height="22" fill="#f3aa7c"/><rect x="900.50000" y="2837" width="61.50000" height="22" fill="#da59bc"/><text x="552" y="2879" class="small">1: 1/10  3: 7/10  4: 1/20  5: 3/20</text>
+<rect x="552.00000" y="2907" width="41.00000" height="22" fill="#597ce7"/><rect x="593.00000" y="2907" width="287.00000" height="22" fill="#b1b3ca"/><rect x="880.00000" y="2907" width="20.50000" height="22" fill="#f3aa7c"/><rect x="900.50000" y="2907" width="61.50000" height="22" fill="#da59bc"/><text x="552" y="2949" class="small">1: 1/10  3: 7/10  4: 1/20  5: 3/20</text>
+<text x="34" y="2974" class="small">srgb8 #b6a4c8 -&gt; [100.00%, 100.00%] conservative</text>
+<text x="34" y="3001" class="small">linear8 #775e93 -&gt; [100.00%, 100.00%] conservative</text>
+<text x="552" y="3012" class="small">Segment labels: stop number : exact probability</text>
 </svg>
