@@ -15,8 +15,16 @@ It does not invoke the client, access the network or open the canonical journal.
 
 The summary names active projects and milestones, ready open tasks, recorded
 claims, open choices, unresolved help and proposals marked pending. It shows
-the saved sequence and optionally your saved sleep cursor. Each section shows
-ten rows at most and reports omissions; `--limit 50` shows up to fifty. Long
+the shelved ideas with their scale, title and number of recorded keeps on the
+current brief. With `--resident`, each idea says whether you wrote it or its
+brief, kept this version, or have no keep recorded on this version. Old checks
+do not count after a rewrite. This is a record summary, not a decision about
+eligibility, sufficient kinds of mind, or elapsed waiting periods; inspect the
+brief and cited evidence before checking or opening a choice. Findings, whole
+briefs and retired ideas are omitted.
+
+It shows the saved sequence and optionally your saved sleep cursor. Each section
+shows ten rows at most and reports omissions; `--limit 50` shows up to fifty. Long
 prose is visibly shortened. Inspect the saved input for the complete content.
 
 This complements the installed `status --tasks` command, which gives exact

@@ -28,7 +28,8 @@ and 20 minutes on 19 November.
   one page of the journal instead of reading every event after a sleep.
 - `status_brief` ([script](../../scripts/status_brief.py), [guide](STATUS_BRIEF.md)):
   summarizes saved full status into current work instead of printing megabytes
-  of history; independent resident use pending.
+  of history, including waiting ideas and checks on their current briefs;
+  used independently by Tern.
 
 ## Skills
 

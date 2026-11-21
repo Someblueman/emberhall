@@ -25,6 +25,7 @@ def snapshot():
             "finished-secret": {"status": "done", "result": "DO NOT PRINT HISTORY"},
         },
         "shelf": {"record": {
+            "ideas": {},
             "projects": {
                 "research": {"status": "active", "slot": "great", "owner": "another", "stage": 1,
                              "milestones": [{}, {}, {}], "milestone": "Prove the result."},
@@ -75,6 +76,9 @@ class StatusBriefTests(unittest.TestCase):
             data = snapshot()
             data[field] = value
             invalid.append(data)
+        missing_ideas = snapshot()
+        del missing_ideas["shelf"]["record"]["ideas"]
+        invalid.append(missing_ideas)
         for data in invalid:
             with self.subTest(data=data), self.assertRaises(ValueError):
                 summarize(data)
@@ -83,6 +87,33 @@ class StatusBriefTests(unittest.TestCase):
                 summarize(snapshot(), limit=limit)
         with self.assertRaisesRegex(ValueError, "resident not in snapshot"):
             summarize(snapshot(), resident="absent")
+
+    def test_shelf_uses_current_brief_and_names_resident_relationship(self):
+        data = snapshot()
+        ideas = data["shelf"]["record"]["ideas"]
+        ideas["waiting"] = {"status": "shelved", "scale": "great", "title": "A result",
+                            "author": "writer", "brief": {"sequence": 40, "author": "editor"},
+                            "seconds": [{"brief": 39, "author": "fern", "finding": "OLD SECRET"},
+                                        {"brief": 40, "author": "other", "finding": "NEW SECRET"}]}
+        ideas["hidden"] = {"status": "graveyard", "title": "HIDDEN HISTORY"}
+        ideas["unbriefed"] = {"status": "shelved", "author": "fern"}
+        result = summarize(data, resident="fern")
+        for expected in ("Shelved ideas (2)", "brief 40; recorded keeps 1",
+                         "no keep by you on this brief", "no brief; you wrote the idea or brief",
+                         "Selection eligibility and waiting periods are not assessed"):
+            self.assertIn(expected, result)
+        for hidden in ("HIDDEN HISTORY", "OLD SECRET", "NEW SECRET"):
+            self.assertNotIn(hidden, result)
+        ideas["waiting"]["seconds"].append({"brief": 40, "author": "fern"})
+        self.assertIn("recorded keeps 2; you kept this brief", summarize(data, resident="fern"))
+        ideas["waiting"]["brief"]["author"] = "fern"
+        self.assertIn("recorded keeps 2; you wrote the idea or brief", summarize(data, resident="fern"))
+        self.assertIn("1 more omitted", summarize(data, limit=1))
+        self.assertNotIn("no keep by you", summarize(data))
+        for bad in (None, {}, [None], [{"brief": 40}]):
+            ideas["waiting"]["seconds"] = bad
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                summarize(data)
 
     def test_file_and_stdin_cli_agree_and_malformed_input_fails(self):
         text = json.dumps(snapshot())
