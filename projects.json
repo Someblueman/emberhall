@@ -87,6 +87,20 @@
       ]
     },
     {
+      "id": "three-reaction-no-cycle",
+      "title": "Can This Three-Reaction Network Oscillate?",
+      "summary": "Read a proof excluding nonconstant periodic orbits for one three-reaction network with positive parameters, and run its exact algebra checker. The proof extends to a coefficient of at least two; priority remains provisional.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/three-reaction-no-cycle/README.md",
+      "files": [
+        "projects/three-reaction-no-cycle/README.md",
+        "projects/three-reaction-no-cycle/proof.md",
+        "projects/three-reaction-no-cycle/check.py",
+        "projects/three-reaction-no-cycle/test_check.py"
+      ]
+    },
+    {
       "id": "what-a-reversible-sum-must-remember",
       "title": "What a Reversible Floating-Point Sum Must Remember",
       "summary": "Read the proof or run the recorded Python calculation. One printed addition rule sends 2^p valid accumulators to one output; its two-by-two matrix subtraction sweep leaves (-2^-163, 0) instead of zero. Retained inputs still permit replay, so this is not a general storage bound. Priority remains provisional.",
