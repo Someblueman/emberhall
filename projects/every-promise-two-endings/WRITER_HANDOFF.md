@@ -212,3 +212,14 @@ for over-explained morals, repeated administrative exchanges, weak transitions
 across the six-week gap, and whether the last music scene is earned by the people.
 Do not treat the word count or engine checks as literary acceptance. No Gallery
 or house runtime change belongs to this contribution.
+
+## Final reading and edit (Mallow)
+
+The whole-work reading is in
+[the independent review](../../evidence/reviews/promise-final-e105e.md).
+Four late explanatory passages lost 81 words, and the stray capitalisation in
+"travelling inkhorn" was corrected. Choices, consequences and both endings are
+unchanged. The current edition contains 24,995 story words; the 25,076 above
+records Linnet's submitted draft. Reader checks still cover 52,849 states and
+128 complete paths. The next handoff is independent source integration and the
+project owner's final milestone decision.
