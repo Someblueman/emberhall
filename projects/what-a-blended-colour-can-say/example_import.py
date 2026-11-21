@@ -1,38 +1,50 @@
-"""Minimal example importing blended_colour and render_legend to compute a bound
-and render a custom legend directory.
+"""A real caller: declare a palette, certify its blend, import the SVG renderer.
+
+Run directly, or let render_legend.py regenerate this output alongside the atlas.
 """
 
-from fractions import Fraction
+from fractions import Fraction as F
+import json
 from pathlib import Path
-import sys
 import tempfile
 
-PROJECT_DIR = Path(__file__).resolve().parent
-if str(PROJECT_DIR) not in sys.path:
-    sys.path.insert(0, str(PROJECT_DIR))
-
 import blended_colour as bc
+import display_colour as dc
+import quantized_bounds as qb
 import render_legend as rl
 
 
 def run_example(out_dir: Path | None = None) -> dict:
-    palette = bc.builtin_palettes()["five_colour_tetra_3d"]
-    weights = (Fraction(1, 4), Fraction(0), Fraction(1, 4), Fraction(1, 2), Fraction(0))
-    rgb = bc.blend_colour(palette, weights)
-    cert = bc.solve_event_bounds(palette, rgb, event_indices=(3, 4))
-    bc.verify_certificate(palette, rgb, (3, 4), cert)
+    palette = bc.Palette(
+        'survey-risk', ('None', 'Low', 'Middle', 'High', 'Extreme'),
+        tuple(F(i) for i in range(5)),
+        ((F(0), F(0), F(0)), (F(1), F(0), F(0)),
+         (F(2, 5), F(3, 10), F(1, 10)), (F(0), F(1), F(0)), (F(0), F(0), F(1))),
+    )
+    case = rl.Case('Survey', 'A caller-defined risk palette', palette.name,
+                   (F(1, 4), F(0), F(1, 4), F(1, 2), F(0)), (3, 4), 'P(High or Extreme)')
+    rgb = bc.blend_colour(palette, case.weights)
+    exact = bc.solve_event_bounds(palette, rgb, case.event_indices)
+    bc.verify_certificate(palette, rgb, case.event_indices, exact)
+    observed = dc.encode_rgb(rgb)
+    quantized = qb.solve_observation(palette, observed, case.event_indices)
+    qb.verify_observation(palette, observed, case.event_indices, quantized)
+    rendered = rl.render_atlas({palette.name: palette}, (case,))
+    # Temporary directory only when called without a destination (e.g. unit tests).
+    with tempfile.TemporaryDirectory() as temporary:
+        target = out_dir if out_dir is not None else Path(temporary)
+        target.mkdir(parents=True, exist_ok=True)
+        (target / 'example.svg').write_text(rendered['svg'], encoding='utf-8')
+        (target / 'example-certificates.json').write_text(rendered['witnesses'], encoding='utf-8')
+        return dict(palette=palette.name, hex=dc.hex_rgb(observed), p_min=str(exact.p_min),
+                    p_max=str(exact.p_max), status=exact.status,
+                    srgb8_min=str(quantized.p_min), srgb8_max=str(quantized.p_max),
+                    svg_bytes=(target / 'example.svg').stat().st_size)
 
-    with tempfile.TemporaryDirectory() as tmp:
-        target = out_dir or Path(tmp)
-        manifest = rl.generate_all(target)
-        return {
-            "hex": bc.rgb_to_hex(rgb),
-            "p_min": str(cert.p_min),
-            "p_max": str(cert.p_max),
-            "status": cert.status,
-            "svg_bytes": Path(manifest["svg"]).stat().st_size,
-        }
 
-
-if __name__ == "__main__":
-    print(run_example())
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, default=Path(__file__).resolve().parent / 'legends')
+    args = parser.parse_args()
+    print(json.dumps(run_example(args.out), indent=2, sort_keys=True))

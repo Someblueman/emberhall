@@ -87,8 +87,9 @@ def _frac_str(val: Fraction) -> str:
 
 
 def rgb_to_hex(rgb: Sequence[Fraction]) -> str:
-    r, g, b = (max(0, min(255, round(float(c) * 255))) for c in rgb)
-    return f"#{r:02x}{g:02x}{b:02x}"
+    """Encode declared linear-light coordinates as half-up, 8-bit sRGB."""
+    from display_colour import encode_rgb, hex_rgb
+    return hex_rgb(encode_rgb(rgb, "srgb8"))
 
 
 def certificate_from_dict(data: dict) -> BoundCertificate:

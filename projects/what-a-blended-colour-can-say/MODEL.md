@@ -1,6 +1,6 @@
 # Finite-Palette Weighted-Average Colour Model
 
-This document establishes the exact Milestone 1 mathematical model for **What a Blended Colour Can Say**, implemented in `blended_colour.py` over exact rationals (`fractions.Fraction`).
+This document establishes the exact mathematical model for **What a Blended Colour Can Say**, implemented in `blended_colour.py` over exact rationals (`fractions.Fraction`). See [DISPLAY.md](DISPLAY.md) for M2's display transfer and rational outer-box observation bounds.
 
 ## 1. Model Definition and Premises
 
@@ -14,7 +14,7 @@ $$\bar{c}(p) = \sum_{i=0}^{n-1} p_i c_i \in \mathbb{Q}^3.$$
 
 **Declared scope and limits (Milestone 1):**
 - Averaging is linear in the three declared colour channels (matching additive linear-light compositing or pixel-space averaging on linear values).
-- Gamma-encoded sRGB non-linearity and 8-bit integer quantization ($\{0,\dots,255\}^3$) are explicitly deferred to Milestone 2 after Milestone 1 acceptance.
+- M1 deferred encoded sRGB and 8-bit quantization. M2 adds explicit sRGB8 and linear8 observations in [DISPLAY.md](DISPLAY.md), preserving this exact point-colour model.
 - The goal is design auditing and legend construction from a known palette, not decoding arbitrary compressed screenshots.
 
 ## 2. Affine Dimension and Identifiability
@@ -54,11 +54,11 @@ An event $E$ is **completely unidentifiable** ($P_{\min} = 0$ and $P_{\max} = 1$
 
 $$y \in \operatorname{conv}(\{c_i : i \in E\}) \cap \operatorname{conv}(\{c_i : i \notin E\}).$$
 
-In the Milestone 1 palette `five_colour_tetra_3d`, stop $c_3$ (`L3 Medium`, `#707396`) is chosen strictly inside the tetrahedron $\operatorname{conv}(c_1, c_2, c_4, c_5)$:
+In the Milestone 1 palette `five_colour_tetra_3d`, stop $c_3$ (`L3 Medium`, `#b1b3ca`) is chosen strictly inside the tetrahedron $\operatorname{conv}(c_1, c_2, c_4, c_5)$:
 
 $$c_3 = \tfrac{1}{5} c_1 + \tfrac{2}{5} c_2 + \tfrac{3}{10} c_4 + \tfrac{1}{10} c_5.$$
 
 Consequently, at the exact stop colour $y = c_3$:
-- For $E = \{L4, L5\}$: $P(\text{Level} \ge 4) \in [0, \tfrac{2}{5}]$ (`BOUNDED`: a viewer reading a discrete legend sees "100% L3", yet up to 40% high-level mass can be hidden inside `#707396`).
-- For $E' = \{L3\}$: $P(\text{Level} = 3) \in [0, 1]$ (`UNIDENTIFIABLE`: $p_A = (0,0,1,0,0)$ and $p_B = (\frac{1}{5}, \frac{2}{5}, 0, \frac{3}{10}, \frac{1}{10})$ blend to the exact same `#707396`).
+- For $E = \{L4, L5\}$: $P(\text{Level} \ge 4) \in [0, \tfrac{2}{5}]$ (`BOUNDED`: a viewer reading a discrete legend sees "100% L3", yet up to 40% high-level mass can be hidden inside `#b1b3ca`).
+- For $E' = \{L3\}$: $P(\text{Level} = 3) \in [0, 1]$ (`UNIDENTIFIABLE`: $p_A = (0,0,1,0,0)$ and $p_B = (\frac{1}{5}, \frac{2}{5}, 0, \frac{3}{10}, \frac{1}{10})$ blend to the exact same `#b1b3ca`).
 - By contrast, on an outer boundary blend (`S2`: `conv(L1, L2, L4)`), $P(\text{Level} \ge 4) = \tfrac{3}{5}$ is `EXACT`, and on a near-outer blend (`S3`), $P(\text{Level} \ge 4) \in [\tfrac{1}{2}, \tfrac{3}{5}]$ spans just 10 percentage points—whereas the 1D collinear ramp midpoint (`S5`) widens to $[0, \tfrac{2}{3}]$.
