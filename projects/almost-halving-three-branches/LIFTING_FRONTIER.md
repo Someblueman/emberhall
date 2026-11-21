@@ -5,6 +5,9 @@ The support obstruction excludes every colouring with two zero-modulo-four
 holes. The continuation below constructs coarse witnesses for all remaining
 supports and proves that each part of an exact pair must contain at least
 two vertices of each depth parity.
+Hawthorn's continuation below excludes every colouring for a further
+family of interior-hole supports, including seven further supports
+at every parameter of the long frontier.
 None of these results excludes all remaining colourings. Priority remains provisional under
 [PRIORITY_REFRESH.md](PRIORITY_REFRESH.md). The default construction command,
 accepted finite results, and earlier formulas are unchanged.
@@ -524,6 +527,161 @@ checks and the positive control validate the implementation; the affine
 reduction is what proves the statement for unbounded t. The remaining
 all-pairs gap is mixed-parity colourings with at least two vertices of
 both parities in both sets, over all surviving supports.
+
+## All-colouring obstruction for a family of interior holes
+
+Hawthorn, 21 November 2026. This is an additional uniform restriction,
+**not an infinite all-pairs obstruction**. The other supports and their
+larger mixed colourings remain open. Priority remains provisional.
+
+**Theorem.** Let a>=b>=c be positive integers all congruent to 3 modulo 8.
+Set A=(a-3)/8, B=(b-3)/8, C=(c-3)/8. For any integer P with
+0<=P<=B-C, put q=8P+1. In the original tripod T(a,b,c), omit
+
+    h1 = (1,a-q),       h2 = (2,b-q).
+
+The remaining a+b+c-1 vertices cannot be partitioned into homometric
+sets of size m=(a+b+c-1)/2. Both holes are strictly interior because
+1<=q<=b-c+1<=b-2 and a>=b. Equal arm lengths are allowed.
+The statement covers every colouring of this support,
+including arbitrarily large minorities of both depth parities.
+
+In particular, for **every** integer t>=0 in the assigned frontier, this
+excludes all eight aligned pairs
+
+    (1,226+7560t-8P), (2,66+7560t-8P), P=0,...,7.
+
+They both have depth 2 modulo 8, so the earlier zero-modulo-four support
+exclusion does not cover them. P=0 is the already excluded penultimate
+pair; P=1,...,7 supply seven further supports for every t. The default
+P=7 puts both holes 57 edges from their respective tips. This result
+does not settle the other surviving supports.
+
+### A graph of selected original distances
+
+Set M=a+b-q. Join two retained vertices when their positive original
+distance d has a residue in the following sets:
+
+| Modulus g | d<=M: residues R | d>M: residues S |
+|---:|---|---|
+| 8 | 6 | 0,3,4,6,7 |
+
+Write x=(a-b)/8 and z=(c-3)/8. The two elementary graph facts needed are:
+every vertex has degree parity (x+z) modulo 2, and the sum of all degrees
+is 2 modulo 4. Thus its edge
+count e is odd. For any partition into A,B, identity (1) gives
+
+    e(A)-e(B) = sum_(v in A) degree(v) - e.
+
+Here m is even, so the right side is odd. Homometry would give e(A)=e(B),
+because the graph selects the same set of distances in either part.
+This contradiction proves the theorem once the two degree facts are checked.
+
+### Direct proof of the degree and edge counts
+
+Write a=8A+3, b=8B+3, c=8C+3, K=A+B+C. First take
+only the baseline graph G0 joining distances 6 modulo 8, before omissions.
+On the path consisting of the centre and one arm of length 8Q+3, every
+vertex has exactly Q such neighbours: for depth 8q+r the numbers on its
+two sides are q+[r>=6] and Q-q-[r>=6]. For a noncentral vertex of
+residue r, each other arm contributes its quotient plus [r in {3,4,5}].
+Thus its full degree is K+2[r in {3,4,5}], and the centre's degree is K.
+All full baseline degrees have parity K.
+
+Both holes have depth 2 modulo 8, hence each has full baseline degree K.
+They are not adjacent in G0: their cross-arm distance is 4 modulo 8.
+For a vertex on arm 3, its two hole-neighbour indicators are identical,
+so deleting the holes preserves degree parity. The centre is adjacent
+to neither. On arm 1 or arm 2, let h be that arm's hole. Below h, the
+own-arm and cross-arm hole indicators are both [r=4], so they cancel.
+Above h, they are [r=0] and [r=4]. Thus deletion changes parity exactly
+for vertices above their arm's hole with residue 0 or 4.
+
+Now add the graph J consisting of distances greater than M whose residues
+are 0,3,4,7 modulo 8. These are exactly the extra edges in the selected
+graph. No same-arm distance exceeds M. The only cross-arm distances
+outside arms 1 and 2 that can exceed M equal M+1=a+c, and their residue
+is 6, so they are not in J. This includes the case a=b.
+
+For a vertex of arm 1 or 2, let u be its distance from its arm's tip.
+An edge of J joins two such deficits u,v precisely when
+
+    u+v <= 8P,       u+v modulo 8 is in {2,3,6,7}.
+
+Each hole has deficit 8P+1, so neither deletion affects J. For u>8P
+there are no J neighbours. Otherwise its degree counts integers in
+[u,8P] with residues 2,3,6,7. A full block contains four, and the
+cumulative count through u-1 is odd exactly when u is 3 or 7 modulo 8.
+Consequently the J-degree is odd exactly for residues u in {3,7}, or
+original-depth residues r in {0,4}, above the hole. This cancels precisely
+the deletion's parity change. Every retained selected-graph degree has
+parity K. This argument covers all vertices, not just chosen colours.
+
+The edge count is equally explicit. In G0, the centre and an arm of
+quotient Q contribute 2Q(2Q+1) edges. Cross arms of quotients Q,R
+contribute 8QR+3(Q+R)+1: each depth residue has its quotient many
+vertices, with one extra in residues 1,2,3, and only 3+3 is 6 modulo 8.
+Summing all arms and pairs gives
+
+    e(G0) = 4K^2+8K+3.
+
+Deleting the two nonadjacent degree-K holes removes 2K edges. For J,
+each deficit sum s has s+1 pairs; the deficits never reach a centre,
+since 8P<=b-c<=b-3<a. Its edge count is
+
+    sum_(j=0..P-1) [(8j+3)+(8j+4)+(8j+7)+(8j+8)]
+      = 2P(8P+3).
+
+For P=0 the sum is empty and zero. Therefore the retained selected graph has
+
+    e = 4K^2+6K+3+2P(8P+3),                         (15)
+
+which is odd. Finally m=4K+4 is even. This proves both graph facts and
+the obstruction directly for all A>=B>=C>=0. No parameter census or
+computer algebra result is needed for the argument.
+
+The support restriction is essential, even in this length domain.
+On T(3,3,3), omitting leaves (2,3),(3,3) gives the target-sized pair
+`{(0,0),(2,2),(3,1),(3,2)}` and `{(1,1),(1,2),(1,3),(2,1)}`.
+Both distance profiles are `{1:2,2:2,3:1,4:1}`. Independent original-tree
+tests verify this positive control and reject a certificate altered to
+claim those holes are covered. This theorem alone cannot refute the
+target for every tree with lengths 3 modulo 8.
+
+### Reproduction and limits
+
+```sh
+python3 projects/almost-halving-three-branches/lifting_frontier.py --interior-obstruction --audit
+python3 projects/almost-halving-three-branches/lifting_frontier.py --interior-obstruction --parameter 1000000 --tail-blocks 1
+```
+
+The first command records 306 original vertices, 304 retained vertices,
+and **6,527 selected edges**. The degree counts modulo four are
+`[0,185,0,119]`; an even-sized part has even degree sum but the edge count
+is odd. The default command is unchanged. `--lengths A B C` selects any
+tree in the wider theorem domain. `--tail-blocks P` chooses any permitted
+P, defaulting to (b-c)/8. `--verify FILE` reconstructs the full
+certificate, including the closed edge formula, before any optional
+original-tree audit. The audit refuses trees above 512 vertices.
+
+The checker counts degree residues in eight intervals cut at the holes
+and tips. Within each interval, the prefix counts modulo four have period
+32, so at most 32 representatives are needed. At coincident arm endpoints,
+the only additional cutoff value is M+1, whose residue 6 occurs in both
+distance selections. This counts the displayed histogram without expanding
+large trees; the closed proof above does not depend on that compression.
+
+Tests independently traverse original trees in all 64 parameter residue
+cases at x,y,z in {0,1,2,3}, including equal arms and T(3,3,3). Here
+x=(a-b)/8, y=(b-c)/8 and z=(c-3)/8. Trying every P=0,...,y gives
+160 independently traversed supports. They recount the
+selected graph from original distances, check the long-frontier audit,
+exercise arbitrarily large parameters without expansion, and reject altered
+holes, residue evidence and verdicts through the real command. The old
+positive one-swap control remains in the suite. The checker is now larger
+than the advisory module threshold; this addition stays in its assigned
+file because it is another certificate for the same frontier, sharing its
+validation and command. No new dependency or general proof framework is used.
 
 ## Reproduce
 

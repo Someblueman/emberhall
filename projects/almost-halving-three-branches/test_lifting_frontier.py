@@ -16,6 +16,8 @@ from lifting_frontier import (audit_original_tree, certificate, frontier_lengths
                               swap_adjacency_certificate, verify_swap_adjacency_certificate,
                               _adjacent_swap_systems, one_swap_obstruction_certificate,
                               verify_one_swap_obstruction)
+from lifting_frontier import (interior_obstruction, verify_interior_obstruction,
+                              audit_interior_obstruction)
 
 
 def graph_distances(lengths):
@@ -372,6 +374,93 @@ class OneSwapObstructionTests(unittest.TestCase):
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 2)
             self.assertIn('differs from the reconstructed proof', result.stderr)
+
+
+class InteriorObstructionTests(unittest.TestCase):
+    def test_same_length_domain_has_a_positive_other_support(self):
+        _, distances = graph_distances((3, 3, 3))
+        left = [(0, 0), (2, 2), (3, 1), (3, 2)]
+        right = [(1, 1), (1, 2), (1, 3), (2, 1)]
+        self.assertFalse(set(left) & set(right))
+        self.assertEqual(histogram(left, distances), Counter({1: 2, 2: 2, 3: 1, 4: 1}))
+        self.assertEqual(histogram(left, distances), histogram(right, distances))
+        saved = interior_obstruction((3, 3, 3))
+        saved['holes'] = [[2, 3], [3, 3]]
+        with self.assertRaises(ValueError):
+            verify_interior_obstruction(saved)
+
+    def test_independent_original_tree_degrees_in_every_parameter_parity(self):
+        checked = 0
+        for x, y, z in product(range(4), repeat=3):
+            c, odd = 8*z+3, (x+z) % 2
+            b, a = c+8*y, c+8*y+8*x
+            vertices, distances = graph_distances((a, b, c))
+            for tail_blocks in range(y+1):
+                saved = interior_obstruction((a, b, c), tail_blocks)
+                retained = [v for v in vertices if list(v) not in saved['holes']]
+                degrees = []
+                for u in retained:
+                    degree = 0
+                    for v in retained:
+                        d = distances[u, v]
+                        residues = saved['low_residues'] if d <= saved['distance_cutoff'] else saved['high_residues']
+                        degree += u != v and d % saved['distance_modulus'] in residues
+                    degrees.append(degree)
+                self.assertEqual(Counter(d % 4 for d in degrees),
+                                 Counter({i: n for i, n in enumerate(saved['degree_counts_mod_four']) if n}))
+                self.assertEqual({d % 2 for d in degrees}, {odd})
+                self.assertEqual(sum(degrees) % 4, 2)
+                self.assertEqual(sum(degrees)//2, saved['selected_edges'])
+                self.assertEqual(len(retained)//2 % 2, 0)
+                checked += 1
+        self.assertEqual(checked, 160)
+
+    def test_closed_edge_formula_and_enormous_frontier(self):
+        for t in (0, 1, 2, 3, 10**60, 10**60+1):
+            saved = interior_obstruction(frontier_lengths(t))
+            self.assertEqual(verify_interior_obstruction(saved), saved)
+            self.assertEqual(saved['holes'], [[1, 170+7560*t], [2, 10+7560*t]])
+            self.assertEqual(saved['common_degree_parity'], 1-t % 2)
+            self.assertEqual(sum(saved['degree_counts_mod_four']), 304+22680*t)
+            k = sum((n-3)//8 for n in frontier_lengths(t))
+            self.assertEqual(saved['selected_edges'], 4*k*k+6*k+829)
+            self.assertFalse(saved['all_omissions_obstructed'])
+        audit = audit_interior_obstruction(interior_obstruction(frontier_lengths(0)))
+        self.assertEqual(audit['selected_edges'], 6527)
+        with self.assertRaisesRegex(ValueError, 'vertex limit'):
+            audit_interior_obstruction(interior_obstruction(frontier_lengths(1)))
+
+    def test_corruption_domain_and_real_cli(self):
+        saved = interior_obstruction(frontier_lengths(0))
+        for field in ('selected_edge_parity', 'all_omissions_obstructed', 'target_size'):
+            broken = deepcopy(saved)
+            broken[field] = not broken[field] if type(broken[field]) is bool else broken[field]+1
+            with self.assertRaisesRegex(ValueError, 'differs'):
+                verify_interior_obstruction(broken)
+        broken = deepcopy(saved)
+        broken['holes'][0][1] += 2
+        with self.assertRaises(ValueError):
+            audit_interior_obstruction(broken)
+        for lengths in ((7, 5, 3), (19, 35, 11), (35, 19, 5), (35, 19, True)):
+            with self.assertRaises(ValueError):
+                interior_obstruction(lengths)
+        for tail in (-1, 8, True, 0.5):
+            with self.assertRaises(ValueError):
+                interior_obstruction(frontier_lengths(0), tail)
+        cli = Path(__file__).with_name('lifting_frontier.py')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'interior.json'
+            path.write_text(json.dumps(saved))
+            run = subprocess.run([sys.executable, str(cli), '--interior-obstruction',
+                                  '--verify', str(path), '--audit'], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            self.assertEqual(json.loads(run.stdout)['audit']['selected_edges'], 6527)
+            saved['extra_edges'] += 1
+            path.write_text(json.dumps(saved))
+            run = subprocess.run([sys.executable, str(cli), '--interior-obstruction',
+                                  '--verify', str(path)], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 2)
+            self.assertIn('differs from the reconstructed proof', run.stderr)
 
 
 if __name__ == '__main__':

@@ -540,6 +540,133 @@ def verify_one_swap_obstruction(saved):
     return expected
 
 
+def _interior_degree_classes(lengths, tail_blocks):
+    """Count degrees modulo four in eight intervals, without expanding a tree.
+
+    Prefix counts change by multiples of four after 32 steps on either
+    side of the cutoff. Each interval fixes the distance branches.
+    """
+    a, b, c = lengths
+    odd = ((a-b+c-3)//8) % 2
+    modulus, low, high = 8, {6}, {0, 3, 4, 6, 7}
+    tail = 8*tail_blocks+1
+    cutoff = a+b-tail
+    holes = ((1, a-tail), (2, b-tail))
+
+    def prefix(n, residues):
+        if n <= 0:
+            return 0
+        q, r = divmod(n, modulus)
+        return q*len(residues) + sum(0 < s <= r for s in residues)
+
+    def weight(d):
+        return int(d > 0 and d % modulus in (low if d <= cutoff else high))
+
+    def total(n):
+        cut = min(n, cutoff)
+        return prefix(cut, low) + prefix(n, high) - prefix(cut, high)
+
+    def degree(arm, d):
+        if arm == 0:
+            return sum(total(n) for n in lengths) - sum(weight(h) for _, h in holes)
+        value = total(d-1) + total(lengths[arm-1]-d) + weight(d) - 2*total(d)
+        value += sum(total(d+n) for j, n in enumerate(lengths, 1) if j != arm)
+        return value - sum(weight(abs(d-h) if arm == j else d+h) for j, h in holes)
+
+    intervals = [(1, 1, holes[0][1]-1), (1, holes[0][1]+1, a-1), (1, a, a),
+                 (2, 1, holes[1][1]-1), (2, holes[1][1]+1, b-1),
+                 (2, b, b), (3, 1, c-1), (3, c, c)]
+    counts = [0]*4
+    counts[degree(0, 0) % 4] = 1
+    for arm, lo, hi in intervals:
+        for residue in range(32):
+            first = lo + (residue-lo) % 32
+            if first <= hi:
+                value = degree(arm, first) % 4
+                counts[value] += (hi-first)//32 + 1
+    return {"holes": [list(h) for h in holes], "distance_cutoff": cutoff,
+            "distance_modulus": modulus, "low_residues": sorted(low),
+            "high_residues": sorted(high), "degree_counts_mod_four": counts,
+            "common_degree_parity": odd}
+
+
+def interior_obstruction(lengths, tail_blocks=None):
+    """Exclude all colourings for an interval of aligned interior holes."""
+    lengths = validate_lengths(lengths)
+    a, b, c = lengths
+    if not a >= b >= c or any(n % 8 != 3 for n in lengths):
+        raise ValueError('require a>=b>=c, all three lengths three modulo eight')
+    limit = (b-c)//8
+    if tail_blocks is None:
+        tail_blocks = limit
+    if type(tail_blocks) is not int or not 0 <= tail_blocks <= limit:
+        raise ValueError('tail blocks must be an integer between zero and (b-c)/8')
+    data = _interior_degree_classes(lengths, tail_blocks)
+    counts = data['degree_counts_mod_four']
+    odd = data['common_degree_parity']
+    quotients = [(n-3)//8 for n in lengths]
+    k = sum(quotients)
+    baseline_edges = 4*k*k+8*k+3
+    extra_edges = 2*tail_blocks*(8*tail_blocks+3)
+    edges = baseline_edges-2*k+extra_edges
+    size = (a+b+c-1)//2
+    if (sum(counts) != 2*size or size % 2
+            or any(counts[i] for i in range(4) if i % 2 != odd)
+            or sum(i*n for i, n in enumerate(counts)) % 4 != 2):
+        raise AssertionError('the interior degree obstruction failed')
+    return {"lengths": list(lengths), **data, "tail_blocks": tail_blocks, "target_size": size,
+            "selected_edge_parity": 1, "required_edge_parity": 0,
+            "arm_quotients": quotients, "baseline_edges": baseline_edges,
+            "removed_degree_sum": 2*k, "extra_edges": extra_edges,
+            "selected_edges": edges,
+            "every_colouring_of_this_support_excluded": True,
+            "all_omissions_obstructed": False}
+
+
+def verify_interior_obstruction(saved):
+    if not isinstance(saved, dict) or 'lengths' not in saved or 'tail_blocks' not in saved:
+        raise ValueError('interior certificate must contain lengths and tail blocks')
+    expected = interior_obstruction(saved['lengths'], saved['tail_blocks'])
+    if json.dumps(saved, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError('interior certificate differs from the reconstructed proof')
+    return expected
+
+
+def audit_interior_obstruction(saved, max_vertices=512):
+    """BFS uses the original tree, including both omitted path vertices."""
+    saved = verify_interior_obstruction(saved)
+    if type(max_vertices) is not int or max_vertices < 1 or 1+sum(saved['lengths']) > max_vertices:
+        raise ValueError('original-tree audit exceeds its positive vertex limit')
+    graph = {(0, 0): []}
+    for arm, length in enumerate(saved['lengths'], 1):
+        previous = (0, 0)
+        for depth in range(1, length+1):
+            vertex = (arm, depth)
+            graph[vertex] = [previous]
+            graph[previous].append(vertex)
+            previous = vertex
+    retained = [v for v in graph if list(v) not in saved['holes']]
+    counts, degree_sum = [0]*4, 0
+    for source in retained:
+        distances, queue = {source: 0}, deque([source])
+        while queue:
+            vertex = queue.popleft()
+            for neighbor in graph[vertex]:
+                if neighbor not in distances:
+                    distances[neighbor] = distances[vertex]+1
+                    queue.append(neighbor)
+        degree = sum(v != source and distances[v] % saved['distance_modulus'] in
+                     (saved['low_residues'] if distances[v] <= saved['distance_cutoff']
+                      else saved['high_residues']) for v in retained)
+        counts[degree % 4] += 1
+        degree_sum += degree
+    if (counts != saved['degree_counts_mod_four'] or degree_sum % 4 != 2
+            or degree_sum//2 != saved['selected_edges']):
+        raise ValueError('original-tree audit contradicts the interior certificate')
+    return {"original_vertices": len(graph), "retained_vertices": len(retained),
+            "selected_edges": degree_sum//2, "original_tree_distances_checked": True}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parameter", type=int, default=0,
@@ -549,6 +676,10 @@ def main(argv=None):
     parser.add_argument("--holes", nargs=2, default=["0:0", "1:4"],
                         help="two arm:depth vertices (centre is 0:0)")
     parser.add_argument("--verify", type=Path, help="verify a saved JSON certificate")
+    parser.add_argument("--interior-obstruction", action="store_true",
+                        help="exclude every colouring for the interior-hole family")
+    parser.add_argument("--tail-blocks", type=int,
+                        help="aligned hole deficit is 8 times this number plus 1")
     parser.add_argument("--one-swap-obstruction", action="store_true",
                         help="exclude every one-swap partition on the entire frontier")
     parser.add_argument("--swap-adjacency", action="store_true",
@@ -560,7 +691,17 @@ def main(argv=None):
     parser.add_argument("--audit", action="store_true", help="BFS check, up to 512 vertices")
     args = parser.parse_args(argv)
     try:
-        if args.one_swap_obstruction:
+        if args.tail_blocks is not None and (not args.interior_obstruction or args.verify):
+            parser.error('--tail-blocks requires --interior-obstruction without --verify')
+        if args.interior_obstruction:
+            if args.one_swap_obstruction or args.swap_adjacency or args.parity_obstruction or args.coarse:
+                parser.error('--interior-obstruction cannot be combined with other proof modes')
+            if args.holes != ["0:0", "1:4"]:
+                parser.error('--interior-obstruction fixes its two holes from the arm lengths')
+            result = (verify_interior_obstruction(json.loads(args.verify.read_text())) if args.verify
+                      else interior_obstruction(args.lengths or frontier_lengths(args.parameter),
+                                                args.tail_blocks))
+        elif args.one_swap_obstruction:
             if args.swap_adjacency or args.parity_obstruction or args.coarse or args.audit or args.lengths:
                 parser.error("--one-swap-obstruction accepts only --verify")
             result = (verify_one_swap_obstruction(json.loads(args.verify.read_text()))
@@ -583,7 +724,8 @@ def main(argv=None):
             holes = [tuple(map(int, value.split(":"))) for value in args.holes]
             result = (coarse_certificate(lengths, holes) if args.coarse else certificate(lengths, holes))
         if args.audit:
-            audit = (audit_coarse_certificate(result) if args.coarse else audit_original_tree(result))
+            audit = (audit_interior_obstruction(result) if args.interior_obstruction else
+                     audit_coarse_certificate(result) if args.coarse else audit_original_tree(result))
             print(json.dumps({"certificate": result, "audit": audit}, indent=2))
         else:
             print(json.dumps(result, indent=2))
