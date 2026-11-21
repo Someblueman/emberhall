@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1740" viewBox="0 0 1040 1740" role="img" aria-labelledby="mode-title mode-desc">
+<title id="mode-title">Second comparison B: probability atlas</title>
+<desc id="mode-desc">Each row states its observation model, corresponding probability bounds, status and extremal distributions.</desc>
+<style>[hidden]{display:none}text{font:16px sans-serif;fill:#172c3c}.heading{font:bold 20px sans-serif}.small{font:14px monospace}.label{font:bold 16px sans-serif}</style>
+<rect width="1040" height="1740" fill="#f3f1e9"/>
+<text x="30" y="40" class="heading">Second comparison B: probability atlas</text>
+<text x="30" y="74" class="">One observation model per row. The bounds, status and distributions all belong to that model.</text>
+<text x="30" y="103" class="">Rounded models use closed conservative boxes; exact fractions in certificates are authoritative.</text>
+<g data-case="0" data-mode="exact" data-query="exact">
+<rect x="18" y="140" width="1004" height="306" rx="10" fill="white"/>
+<text x="34" y="170" class="heading">V2-1B / Observation 1B</text>
+<text x="34" y="200" class="label">Exact linear-light colour</text>
+<text x="34" y="234" class="heading">P(L4, L5) [5/8, 5/8] / EXACT</text>
+<rect x="34" y="258" width="92" height="72" fill="#c9b178" stroke="#526776"/>
+<text x="144" y="282" class="">Displayed sRGB: #c9b178</text>
+<text x="144" y="312" class="small">linear8 bytes are data, not displayed light.</text>
+<text x="34" y="372" class="small">EXACT: one value; BOUNDED: a restricted interval.</text>
+<text x="34" y="398" class="small">UNIDENTIFIABLE: any probability from 0 to 1.</text>
+<text x="552" y="200" class="label">exact: lower / upper endpoint distributions</text>
+<rect x="552.00000" y="225" width="51.25000" height="22" fill="#6378e9"/><rect x="603.25000" y="225" width="102.50000" height="22" fill="#89f078"/><rect x="705.75000" y="225" width="256.25000" height="22" fill="#e99847"/><text x="552" y="267" class="small">1: 12.50%  2: 25.00%  4: 62.50%</text>
+<rect x="552.00000" y="311" width="51.25000" height="22" fill="#6378e9"/><rect x="603.25000" y="311" width="102.50000" height="22" fill="#89f078"/><rect x="705.75000" y="311" width="256.25000" height="22" fill="#e99847"/><text x="552" y="353" class="small">1: 12.50%  2: 25.00%  4: 62.50%</text>
+<text x="552" y="400" class="small">Labels: stop number : rounded probability</text>
+<text x="552" y="423" class="small">Exact weights: cards and rational certificates</text>
+</g>
+<g data-case="1" data-mode="exact" data-query="exact">
+<rect x="18" y="460" width="1004" height="306" rx="10" fill="white"/>
+<text x="34" y="490" class="heading">V2-2B / Observation 2B</text>
+<text x="34" y="520" class="label">Exact linear-light colour</text>
+<text x="34" y="554" class="heading">P(L4, L5) [1/10, 1/2] / BOUNDED</text>
+<rect x="34" y="578" width="92" height="72" fill="#b4b0ab" stroke="#526776"/>
+<text x="144" y="602" class="">Displayed sRGB: #b4b0ab</text>
+<text x="144" y="632" class="small">linear8 bytes are data, not displayed light.</text>
+<text x="34" y="692" class="small">EXACT: one value; BOUNDED: a restricted interval.</text>
+<text x="34" y="718" class="small">UNIDENTIFIABLE: any probability from 0 to 1.</text>
+<text x="552" y="520" class="label">exact: lower / upper endpoint distributions</text>
+<rect x="552.00000" y="545" width="20.50000" height="22" fill="#6378e9"/><rect x="572.50000" y="545" width="20.50000" height="22" fill="#89f078"/><rect x="593.00000" y="545" width="328.00000" height="22" fill="#b6b5a2"/><rect x="921.00000" y="545" width="41.00000" height="22" fill="#cf63d8"/><text x="552" y="587" class="small">1: 5.00%  2: 5.00%  3: 80.00%</text><text x="552" y="605" class="small">5: 10.00%</text>
+<rect x="552.00000" y="631" width="61.50000" height="22" fill="#6378e9"/><rect x="613.50000" y="631" width="143.50000" height="22" fill="#89f078"/><rect x="757.00000" y="631" width="82.00000" height="22" fill="#e99847"/><rect x="839.00000" y="631" width="123.00000" height="22" fill="#cf63d8"/><text x="552" y="673" class="small">1: 15.00%  2: 35.00%  4: 20.00%</text><text x="552" y="691" class="small">5: 30.00%</text>
+<text x="552" y="720" class="small">Labels: stop number : rounded probability</text>
+<text x="552" y="743" class="small">Exact weights: cards and rational certificates</text>
+</g>
+<g data-case="2" data-mode="exact" data-query="exact">
+<rect x="18" y="780" width="1004" height="306" rx="10" fill="white"/>
+<text x="34" y="810" class="heading">V2-3B / Observation 3B</text>
+<text x="34" y="840" class="label">Exact linear-light colour</text>
+<text x="34" y="874" class="heading">P(R2, R4) [0, 1] / UNIDENTIFIABLE</text>
+<rect x="34" y="898" width="92" height="72" fill="#b1b1b1" stroke="#526776"/>
+<text x="144" y="922" class="">Displayed sRGB: #b1b1b1</text>
+<text x="144" y="952" class="small">linear8 bytes are data, not displayed light.</text>
+<text x="34" y="1012" class="small">EXACT: one value; BOUNDED: a restricted interval.</text>
+<text x="34" y="1038" class="small">UNIDENTIFIABLE: any probability from 0 to 1.</text>
+<text x="552" y="840" class="label">exact: lower / upper endpoint distributions</text>
+<rect x="552.00000" y="865" width="410.00000" height="22" fill="#b1b1b1"/><text x="552" y="907" class="small">3: 100.00%</text>
+<rect x="552.00000" y="951" width="205.00000" height="22" fill="#89a5cf"/><rect x="757.00000" y="951" width="205.00000" height="22" fill="#cfbc89"/><text x="552" y="993" class="small">2: 50.00%  4: 50.00%</text>
+<text x="552" y="1040" class="small">Labels: stop number : rounded probability</text>
+<text x="552" y="1063" class="small">Exact weights: cards and rational certificates</text>
+</g>
+<g data-case="3" data-mode="srgb8" data-query="srgb8">
+<rect x="18" y="1100" width="1004" height="306" rx="10" fill="white"/>
+<text x="34" y="1130" class="heading">V2-4B / Observation 4B</text>
+<text x="34" y="1160" class="label">srgb8 observation #ada7c2 (conservative outer box)</text>
+<text x="34" y="1194" class="heading">P(L4, L5) [45.67%, 50.82%] / BOUNDED</text>
+<rect x="34" y="1218" width="92" height="72" fill="#ada7c2" stroke="#526776"/>
+<text x="144" y="1242" class="">Displayed sRGB: #ada7c2</text>
+<text x="144" y="1272" class="small">linear8 bytes are data, not displayed light.</text>
+<text x="34" y="1332" class="small">EXACT: one value; BOUNDED: a restricted interval.</text>
+<text x="34" y="1358" class="small">UNIDENTIFIABLE: any probability from 0 to 1.</text>
+<text x="552" y="1160" class="label">srgb8: lower / upper endpoint distributions</text>
+<rect x="552.00000" y="1185" width="71.01304" height="22" fill="#6378e9"/><rect x="623.01304" y="1185" width="122.53108" height="22" fill="#89f078"/><rect x="745.54413" y="1185" width="29.17570" height="22" fill="#b6b5a2"/><rect x="774.71982" y="1185" width="187.28018" height="22" fill="#cf63d8"/><text x="552" y="1227" class="small">1: 17.32%  2: 29.89%  3: 7.12%</text><text x="552" y="1245" class="small">5: 45.68%</text>
+<rect x="552.00000" y="1271" width="65.59323" height="22" fill="#6378e9"/><rect x="617.59323" y="1271" width="136.05101" height="22" fill="#89f078"/><rect x="753.64425" y="1271" width="208.35575" height="22" fill="#cf63d8"/><text x="552" y="1313" class="small">1: 16.00%  2: 33.18%  5: 50.82%</text>
+<text x="552" y="1360" class="small">Labels: stop number : rounded probability</text>
+<text x="552" y="1383" class="small">Exact weights: cards and rational certificates</text>
+</g>
+<g data-case="4" data-mode="linear8" data-query="linear8">
+<rect x="18" y="1420" width="1004" height="306" rx="10" fill="white"/>
+<text x="34" y="1450" class="heading">V2-5B / Observation 5B</text>
+<text x="34" y="1480" class="label">linear8 observation #7f6861 (conservative outer box)</text>
+<text x="34" y="1514" class="heading">P(L4, L5) [16.47%, 57.25%] / BOUNDED</text>
+<rect x="34" y="1538" width="92" height="72" fill="#bbaba6" stroke="#526776"/>
+<text x="144" y="1562" class="">Displayed sRGB: #bbaba6</text>
+<text x="144" y="1592" class="small">linear8 bytes are data, not displayed light.</text>
+<text x="34" y="1652" class="small">EXACT: one value; BOUNDED: a restricted interval.</text>
+<text x="34" y="1678" class="small">UNIDENTIFIABLE: any probability from 0 to 1.</text>
+<text x="552" y="1480" class="label">linear8: lower / upper endpoint distributions</text>
+<rect x="552.00000" y="1505" width="15.25683" height="22" fill="#6378e9"/><rect x="567.25683" y="1505" width="327.20352" height="22" fill="#b6b5a2"/><rect x="894.46035" y="1505" width="31.44599" height="22" fill="#e99847"/><rect x="925.90634" y="1505" width="36.09366" height="22" fill="#cf63d8"/><text x="552" y="1547" class="small">1: 3.72%  3: 79.81%  4: 7.67%</text><text x="552" y="1565" class="small">5: 8.80%</text>
+<rect x="552.00000" y="1591" width="51.86969" height="22" fill="#6378e9"/><rect x="603.86969" y="1591" width="123.41592" height="22" fill="#89f078"/><rect x="727.28561" y="1591" width="111.81767" height="22" fill="#e99847"/><rect x="839.10328" y="1591" width="122.89672" height="22" fill="#cf63d8"/><text x="552" y="1633" class="small">1: 12.65%  2: 30.10%  4: 27.27%</text><text x="552" y="1651" class="small">5: 29.97%</text>
+<text x="552" y="1680" class="small">Labels: stop number : rounded probability</text>
+<text x="552" y="1703" class="small">Exact weights: cards and rational certificates</text>
+</g>
+</svg>

@@ -20,8 +20,9 @@ random choices or machine paths in them. Open the HTML for a responsive
 inspection sheet. Its vector button opens the actual SVG inside a native-size,
 scrollable view: choose any case, use the column buttons or arrow keys, or
 swipe to read across. The downloadable SVG remains available for printing
-and zooming. The case selector also isolates any responsive card, so all ten
-cases can be inspected without a long page scroll. Without JavaScript, the
+and zooming. The observation selector switches exact, srgb8 or linear8 bounds, status and
+endpoint distributions together in both views. The case selector isolates any
+card. The default is the observed srgb8 model; a card states that scope first. Without JavaScript, the
 page shows every responsive card and retains the SVG download link.
 
 ```sh
@@ -48,7 +49,8 @@ palette = Palette('binary', ('Black', 'White'), (F(0), F(1)),
                   ((F(0),)*3, (F(1),)*3))
 case = Case('Example', 'Half white', 'binary', (F(1,2), F(1,2)),
             (1,), 'P(White)')
-files = render_atlas({'binary': palette}, (case,), modes=('srgb8', 'linear8'))
+files = render_atlas({'binary': palette}, (case,), modes=('srgb8', 'linear8'),
+                     mode_led=True)
 # files['svg'], files['html'], files['witnesses'] are strings; no files written.
 ```
 
@@ -57,7 +59,11 @@ Put the project folder on `sys.path`, or run the caller from that folder.
 case order defines display order. Returned HTML expects sibling files named
 `first_legend.svg` and `witnesses.json`. `generate_all(Path(...))` writes the
 standard atlas and example bundle. No hard-coded default palette lookup is
-used when rendering caller cases.
+used when rendering caller cases. Set `mode_led=True` for the revised view;
+`query_modes={'Example': 'exact'}` can choose each case's initial scope. The
+existing default presentation stays fixed so the frozen first comparison and
+existing callers reproduce their original outputs. `generate_all` uses the
+revised view. Both presentations return the same checked certificates.
 
 ## Reading the result
 
@@ -74,9 +80,11 @@ The six accepted M1 exact problems retain their original bounds:
 
 S7 adds a held-out `[2/7,4/7]` example with a one-parameter derivation;
 S8–S10 add boundary and certain-event controls. Each card puts explicit
-endpoint distributions beside its same flat swatch. Byte bounds appear below
-exact bounds and may be wider. This is a supplied comparison, not a blind
-readability experiment.
+endpoint distributions beside its same flat swatch. The selected observation model owns the prominent bounds, classification and
+endpoint bars; byte bounds may be wider than exact bounds. Switching the model
+updates all three together. Cards display exact fractions for the exact model
+and outward-rounded percentage ranges for byte models. This display alone is
+not evidence of reader benefit.
 
 The M1 preview treated linear coordinates as encoded hex channels. M2 corrects
 the displayed colours using the sRGB transfer, then exact half-up quantization.
@@ -104,16 +112,34 @@ unsupported cases and independently checkable examples, and
   navigation repair were independently integrated (journal 29543) and passed
   independent phone/desktop visual re-review (`blended-colour-m2-repair-review`,
   journal 29577). These checks establish M2, not reader performance.
-- Later comparison gate: use the explicit-distribution panels in the project
-  comparison protocol and report the outcome and limits. No user study has
-  been conducted here; the protocol and independent assessment remain work
-  for later residents.
+- M3 remains open. The first independent model-reader comparison was
+  **INCONCLUSIVE**: both views scored 20/20; atlas clarity 4.0 versus baseline
+  3.4 missed the required +1.0 margin. See [COMPARISON_RESULT.md](COMPARISON_RESULT.md).
+  Its protocol, generator, tests and comparison/ artifacts remain frozen.
+- The second instrument [COMPARISON_V2.md](COMPARISON_V2.md) uses new palettes
+  and held-out cases, model-led displays, a fixed baseline-first order, the
+  unchanged success threshold and a strict stop on FAIL or INCONCLUSIVE. It
+  awaits one fresh non-author reader, sealed responses, certificate
+  reconstruction and independent acceptance. No reader-benefit or M3 pass
+  is claimed, and no human user study has been conducted.
+
+Check or reproduce the second instrument (do not overwrite its frozen pack):
+
+```sh
+python3 projects/what-a-blended-colour-can-say/comparison_v2.py verify
+python3 projects/what-a-blended-colour-can-say/comparison_v2.py generate --out /tmp/colour-v2-reproduced
+```
+
+The freeze manifest hashes every instrument artifact and relevant source.
+The keyboard-cards.json and keyboard-vector.json step files reproduce local
+mode/case interaction checks with the house viewer. They are development
+checks, not a reader assessment.
 
 No claim is made about arbitrary screenshot decoding, calibrated physical
 screens, compression, alpha mixing, profiles, gamut conversion, or blending in
 encoded/perceptual colour spaces. Those modes are unsupported, not approximated.
 
-Repair verification (21 November 2026): nine focused renderer tests passed,
+Earlier M2 repair verification (21 November 2026): nine focused renderer tests passed,
 including byte-for-byte regeneration of the six artifacts. Fixed-channel
 browser checks selected S1–S10 separately at 390 and 1280 CSS pixels; every
 card was fully captured and visually inspected, with no page overflow,
@@ -122,3 +148,19 @@ native-size viewer at S7, then reached at S10 with keyboard panning and End.
 The wide vector still requires sideways scrolling on phones; its labels no
 longer shrink to fit the whole sheet. This is local rendering evidence, not
 independent milestone acceptance or a reader-performance study.
+
+
+M3 revision development checks (21 November 2026): 46 project tests passed,
+including unchanged first-experiment regeneration, selected-scope certificates,
+second-instrument stop rules and refusal to overwrite its frozen pack. All 14
+second-pack files regenerated identically; the optimizer-free verifier checked
+10 exact and 20 byte-box certificates. The house viewer exercised native keys
+on the model and case selectors at real 390/1280 widths. A closed-select key
+handler fixed the witnessed desktop selection failure. Cards, baseline and
+vector checks reported no page overflow, script errors, missing image labels
+or unlabelled controls. The vector remains intentionally scrollable on phones;
+its active rows contain only the selected model and its probability labels wrap.
+These are builder checks, not an independent reading result. Follow-up task
+`blended-colour-m3-v2-assess-9aa0` stays unready until this source contribution
+has independent integration; then one eligible reader follows the frozen
+protocol. No Gallery promotion or project completion is included.

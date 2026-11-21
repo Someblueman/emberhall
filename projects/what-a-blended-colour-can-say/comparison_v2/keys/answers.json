@@ -1,0 +1,85 @@
+{
+  "cases": {
+    "V2-1A": {
+      "p_max": "9/20",
+      "p_min": "9/20",
+      "q4_answer": "NO",
+      "query_mode": "exact",
+      "set": "A",
+      "status": "EXACT"
+    },
+    "V2-1B": {
+      "p_max": "5/8",
+      "p_min": "5/8",
+      "q4_answer": "NO",
+      "query_mode": "exact",
+      "set": "B",
+      "status": "EXACT"
+    },
+    "V2-2A": {
+      "p_max": "1/2",
+      "p_min": "3/32",
+      "q4_answer": "YES",
+      "query_mode": "exact",
+      "set": "A",
+      "status": "BOUNDED"
+    },
+    "V2-2B": {
+      "p_max": "1/2",
+      "p_min": "1/10",
+      "q4_answer": "NO",
+      "query_mode": "exact",
+      "set": "B",
+      "status": "BOUNDED"
+    },
+    "V2-3A": {
+      "p_max": "1",
+      "p_min": "0",
+      "q4_answer": "YES",
+      "query_mode": "exact",
+      "set": "A",
+      "status": "UNIDENTIFIABLE"
+    },
+    "V2-3B": {
+      "p_max": "1",
+      "p_min": "0",
+      "q4_answer": "YES",
+      "query_mode": "exact",
+      "set": "B",
+      "status": "UNIDENTIFIABLE"
+    },
+    "V2-4A": {
+      "p_max": "65334126559951741969/129127208515966861312",
+      "p_min": "228084403782559373927/544178950174431772672",
+      "q4_answer": "YES",
+      "query_mode": "srgb8",
+      "set": "A",
+      "status": "BOUNDED"
+    },
+    "V2-4B": {
+      "p_max": "6591342792022371877/12970366926827028480",
+      "p_min": "33704483161712229775/73786976294838206464",
+      "q4_answer": "NO",
+      "query_mode": "srgb8",
+      "set": "B",
+      "status": "BOUNDED"
+    },
+    "V2-5A": {
+      "p_max": "6121/12036",
+      "p_min": "2734/45135",
+      "q4_answer": "NO",
+      "query_mode": "linear8",
+      "set": "A",
+      "status": "BOUNDED"
+    },
+    "V2-5B": {
+      "p_max": "16817/29376",
+      "p_min": "72587/440640",
+      "q4_answer": "YES",
+      "query_mode": "linear8",
+      "set": "B",
+      "status": "BOUNDED"
+    }
+  },
+  "schema": "blended-comparison-v2-keys"
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "focus": "#case-choice"
+  },
+  {
+    "press": "Home"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "Enter"
+  },
+  {
+    "focus": "#mode-choice"
+  },
+  {
+    "press": "Home"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "ArrowDown"
+  },
+  {
+    "press": "Enter"
+  },
+  {
+    "focus": "#vector-toggle"
+  },
+  {
+    "press": "Space"
+  },
+  {
+    "focus": "#vector-window"
+  },
+  {
+    "press": "ArrowRight"
+  },
+  {
+    "press": "ArrowRight"
+  },
+  {
+    "press": "ArrowRight"
+  },
+  {
+    "focus": "#vector-right"
+  },
+  {
+    "press": "Enter"
+  }
+]
