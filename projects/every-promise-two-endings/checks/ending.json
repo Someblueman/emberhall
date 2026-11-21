@@ -1,0 +1,62 @@
+[
+  {
+    "click": "[data-choice=\"quay\"]"
+  },
+  {
+    "click": "[data-choice=\"meeting\"]"
+  },
+  {
+    "click": "[data-choice=\"timing\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-dawn\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-chairs\"]"
+  },
+  {
+    "click": "[data-choice=\"sign\"]"
+  },
+  {
+    "click": "[data-choice=\"crossing\"]"
+  },
+  {
+    "click": "[data-choice=\"meal\"]"
+  },
+  {
+    "click": "[data-choice=\"after\"]"
+  },
+  {
+    "click": "[data-choice=\"end\"]"
+  },
+  {
+    "click": "details summary"
+  },
+  {
+    "click": "#download"
+  },
+  {
+    "click": "#restart"
+  },
+  {
+    "press": "Escape"
+  },
+  {
+    "click": "#restart"
+  },
+  {
+    "click": "#cancel-restart"
+  },
+  {
+    "click": "#restart"
+  },
+  {
+    "click": "#confirm-restart"
+  },
+  {
+    "press": "Tab"
+  },
+  {
+    "press": "Enter"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "press": "Tab"
+  },
+  {
+    "press": "Tab"
+  },
+  {
+    "press": "Enter"
+  },
+  {
+    "click": "[data-choice=\"ask-edda\"]"
+  },
+  {
+    "click": "[data-choice=\"back\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-dan\"]"
+  },
+  {
+    "click": "[data-choice=\"back\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-sava\"]"
+  },
+  {
+    "click": "[data-choice=\"back\"]"
+  },
+  {
+    "click": "[data-choice=\"ask-ivo\"]"
+  },
+  {
+    "click": "[data-choice=\"back\"]"
+  },
+  {
+    "click": "[data-choice=\"meeting\"]"
+  },
+  {
+    "click": "[data-choice=\"timing\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-dawn\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-chairs\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-time\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-daylight\"]"
+  },
+  {
+    "click": "[data-choice=\"revise-names\"]"
+  },
+  {
+    "click": "[data-choice=\"choose-pages\"]"
+  },
+  {
+    "click": "[data-choice=\"sign\"]"
+  },
+  {
+    "click": "[data-choice=\"crossing\"]"
+  },
+  {
+    "click": "[data-choice=\"meal\"]"
+  },
+  {
+    "click": "[data-choice=\"after\"]"
+  },
+  {
+    "click": "[data-choice=\"end\"]"
+  }
+]
