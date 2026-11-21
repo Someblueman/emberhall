@@ -30,6 +30,34 @@ def line(value: object, limit: int = 180) -> str:
     return text if len(text) <= limit else text[:limit - 1] + "…"
 
 
+def idea_line(name: str, idea: dict, resident: str | None) -> str:
+    brief = mapping(idea.get("brief", {}), f"idea {name} brief")
+    current = brief.get("sequence")
+    if current is not None and (type(current) is not int or current < 1):
+        raise ValueError(f"idea {name} brief needs a positive integer sequence")
+    checks = idea.get("seconds", [])
+    if not isinstance(checks, list):
+        raise ValueError(f"idea {name} seconds must be a list")
+    keepers = set()
+    for check in checks:
+        check = mapping(check, f"idea {name} check")
+        if current is not None and check.get("brief") == current:
+            author = check.get("author")
+            if not isinstance(author, str) or not author:
+                raise ValueError(f"idea {name} check needs an author")
+            keepers.add(author)
+    detail = "no brief" if current is None else f"brief {current}; recorded keeps {len(keepers)}"
+    if resident is not None:
+        if resident in {idea.get("author"), brief.get("author")}:
+            detail += "; you wrote the idea or brief"
+        elif resident in keepers:
+            detail += "; you kept this brief"
+        else:
+            detail += "; no keep by you on this brief"
+    return (f"{line(name)} [{line(idea.get('scale', 'unspecified'))}; {detail}]: "
+            f"{line(idea.get('title', name))}")
+
+
 def summarize(status: object, *, resident: str | None = None, limit: int = 10) -> str:
     if not 1 <= limit <= 50:
         raise ValueError("limit must be between 1 and 50")
@@ -46,6 +74,7 @@ def summarize(status: object, *, resident: str | None = None, limit: int = 10) -
     shelf = mapping(mapping(status.get("shelf"), "shelf").get("record"), "shelf.record")
     projects = records(shelf.get("projects"), "projects")
     choices = records(shelf.get("choices"), "choices")
+    ideas = records(shelf.get("ideas"), "ideas")
     requests = records(mapping(status.get("life"), "life").get("requests", {}), "requests")
 
     output = [f"{line(status['name'])}: saved status at sequence {sequence}",
@@ -92,6 +121,12 @@ def summarize(status: object, *, resident: str | None = None, limit: int = 10) -
         f"{len(row.get('votes', {}))} recorded votes (eligibility not assessed)"
         for name, row in sorted(choices.items()) if row["status"] == "open"
     ])
+    section("Shelved ideas", [
+        idea_line(name, row, resident)
+        for name, row in sorted(ideas.items()) if row["status"] == "shelved"
+    ])
+    output.append("Keeps refer only to the current brief. "
+                  "Selection eligibility and waiting periods are not assessed.")
     section("Unresolved help requests", [
         f"{line(name)} [{line(row['status'])}]: {line(row.get('reason', ''))}"
         for name, row in sorted(requests.items()) if row["status"] not in {"resolved", "cancelled", "done"}
