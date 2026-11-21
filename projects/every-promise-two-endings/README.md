@@ -1,16 +1,16 @@
 # Every Promise Has Two Endings
 
-A complete playable draft of a four-act literary game about Iris, two flooded
+A complete four-act literary game about Iris, two flooded
 towns, and promises that have to survive what people do with them. Eight chapters
 follow the first crossing, the return of belongings, and the lives people try to
 resume afterward. The final agreement has two endings; earlier promises continue
 to change particular people's actions.
 
-**25,076 edited story words across alternate passages.** One complete reading
+**24,995 edited story words across alternate passages.** One complete reading
 with the optional conversations is about 19,000 words. Contains grief, missing
 family members, displacement and the aftermath of a flood. There are no timed
-choices, sound, scores or designated correct endings. The new final acts await
-one independent whole-work literary and accessibility reading.
+choices, sound, scores or designated correct endings. Mallow independently read
+the whole story and both endings, then edited four repetitive passages.
 
 ## Read
 
@@ -69,27 +69,29 @@ Recorded development result, 21 November 2026:
 ```text
 PASS: 52849 reachable states; 69 scenes; revisions, restart and bookmarks.
 Final acts: 128 complete paths; both endings and legacy restores pass.
-Edited story: 25076 words in 585 distinct prose paragraphs.
+Edited story: 24995 words in 585 distinct prose paragraphs.
 ```
 
 The fixed house viewer has repeatable routes in [checks/](checks/), including
 `final-hours.json`, `final-handover.json` and `final-revision.json`. These exercise
 the new ending routes and keyboard revision on phone and desktop. All three
 passed at 390px and 1280px with no script errors, unlabelled controls, missing
-image descriptions or horizontal overflow. The final handover ending screenshots
-were inspected on both sizes, including the focused return control and footer.
-Earlier opening and middle-chapter checks remain available.
+image descriptions or horizontal overflow. Mallow independently repeated both
+ending routes and the keyboard revision route on both sizes, inspecting the phone
+typography and desktop ending controls.
+Real Tab/Enter returned to the final choice heading. These are keyboard and layout
+checks; no screen-reader trial is claimed. Earlier opening and middle-chapter
+checks remain available.
 
-## Read independently
+## Independent reading
 
-Read the story before [the writer's handoff](WRITER_HANDOFF.md), which contains
-spoilers. The first four chapters were independently accepted (opening: journal
-28073; chapters two–three: 28426/28436; chapter four: 28632/28637). Engine tests and
-a builder's browser inspection do not establish literary acceptance of the ending.
+Mallow read every scene and conditional passage and followed both endings,
+then trimmed four explanatory passages whose surrounding scenes already made
+the point. The complete final result is recorded in
+[the independent review](../../evidence/reviews/promise-final-e105e.md), including
+specific consequences, character motives and browser checks. The first four
+chapters had already been independently accepted (opening: journal 28073;
+chapters two–three: 28426/28436; chapter four: 28632/28637).
 
-The final reader should follow both endings, trace an earlier promise into a
-specific later action, and judge the whole arc: do people retain their motives,
-can Iris have a life beyond administering agreements, and does the unresolved
-absence remain honest? Report tedious or repetitive passages as well as missing
-choices, arbitrary consequences and accessibility failures. The project owner
-closes the final milestone only after that non-author reading.
+[The writer's handoff](WRITER_HANDOFF.md) contains continuity notes and spoilers.
+Read the story before it if you want to meet the people before the construction.
