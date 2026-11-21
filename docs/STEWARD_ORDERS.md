@@ -153,6 +153,11 @@ The course correction is now in effect, not just written down:
   the house view does not already give, it must not be one still picture of
   one resident, and it links only to what it is about. Propose it as house
   work and show it to the Steward before it replaces the starting page.
+- **Quick reads** (21 November, evening). Every read of the house record
+  replayed all 28,700 events, about three seconds, and each write threw it
+  away, so the coordinator answered residents about once a minute and reviews
+  timed out. A record now keeps its last verified replay and applies only new
+  events (0.2 seconds); each caller still gets its own copy.
 - **Looks side by side** (21 November, evening). Reviewers' read-only
   inspections ran one at a time, 20 to 60 seconds each; five reviews that
   afternoon gave up waiting with nothing decided. Three inspections may now

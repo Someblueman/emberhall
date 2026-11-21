@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 import fcntl
 import hashlib
 import json
@@ -78,12 +79,37 @@ class Record:
         return self.git(*args, data=f"house: {event['op']} {event['id']}\n".encode()).decode().strip()
 
     def read(self) -> tuple[dict, list[dict], str]:
+        """Replay the verified journal. Each caller gets its own copy of the state and events.
+
+        Every read used to replay all events from the foundation: about three seconds at 28,700 events, and
+        each write threw that away, so the coordinator answered residents about once a minute (21 November).
+        A Record now keeps its own last verified replay, never handed out, and applies only the commits that
+        extend it; any other history is replayed from the foundation, and any failure discards the replay."""
         head = self.ref(REF)
         anchor = self.ref(ANCHOR)
         require(bool(head and anchor), "house not founded/restored; read AGENTS.md")
         commits = self.git("rev-list", "--reverse", "--first-parent", head).decode().splitlines()
         require(bool(commits) and commits[0] == anchor, "foundation anchor mismatch")
-        queries = [value for oid in commits for value in (oid, f"{oid}:event.json")]
+        kept = getattr(self, "_replay", None)
+        self._replay = None
+        if (kept is not None and len(kept["commits"]) <= len(commits)
+                and commits[len(kept["commits"]) - 1] == kept["commits"][-1]
+                and commits[:len(kept["commits"])] == kept["commits"]):
+            done, state, events = len(kept["commits"]), kept["state"], kept["events"]
+        else:
+            done, state, events = 0, None, []
+        state, events = self._replay_from(commits, done, state, events)
+        self._replay = {"commits": commits, "state": state, "events": events}
+        return copy.deepcopy(state), copy.deepcopy(events), head
+
+    def _replay_from(self, commits: list[str], done: int, state: dict | None,
+                     events: list[dict]) -> tuple[dict, list[dict]]:
+        """Verify and apply commits[done:] on top of a replay of commits[:done]."""
+        parent = commits[done - 1] if done else None
+        if done == len(commits):
+            assert state is not None
+            return state, events
+        queries = [value for oid in commits[done:] for value in (oid, f"{oid}:event.json")]
         packed = self.git("cat-file", "--batch", data=("\n".join(queries) + "\n").encode())
         objects = []
         offset = 0
@@ -99,10 +125,7 @@ class Record:
             objects.append((kind, content))
             offset = end + size + 2
         require(offset == len(packed), "invalid Git object stream")
-        events = []
-        state = None
-        parent = None
-        for index, oid in enumerate(commits):
+        for index, oid in enumerate(commits[done:]):
             commit_kind, commit = objects[2 * index]
             event_kind, raw = objects[2 * index + 1]
             require(commit_kind == b"commit" and event_kind == b"blob", "invalid object types")
@@ -120,7 +143,7 @@ class Record:
             events.append(event)
             parent = oid
         assert state is not None
-        return state, events, head
+        return state, events
 
     def found(self, name: str, rules: str, owner_key: str = "") -> dict:
         with self.locked():
