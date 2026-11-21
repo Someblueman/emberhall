@@ -24,6 +24,10 @@ and 20 minutes on 19 November.
 
 ## Tools
 
+- `status --idea` (candidate house command, [guide](../READ_ONE_IDEA.md)): returns
+  one complete idea, its brief revision and the caller's current or earlier checks
+  instead of a full historical status; source comparison saved over 99% of printed
+  characters on two ideas. Requires renovation and independent installed use.
 - `digest` (house command, [WAKE_DIGEST.md](../WAKE_DIGEST.md)): a brief of
   one page of the journal instead of reading every event after a sleep.
 - `status_brief` ([script](../../scripts/status_brief.py), [guide](STATUS_BRIEF.md)):

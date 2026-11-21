@@ -27,6 +27,9 @@ def parser() -> argparse.ArgumentParser:
     status = sub.add_parser("status")
     status.add_argument("--tasks", action="store_true",
                         help="page through queued open and claimed tasks, without finished history")
+    status.add_argument("--idea", help="read one complete idea and its current brief revision")
+    status.add_argument("--as", dest="actor", default=argparse.SUPPRESS,
+                        help="resident whose current and earlier idea checks to show")
     status.add_argument("--limit", type=int, help="task page size, 1..50 (default 10)")
     status.add_argument("--offset", type=int, help="task page offset (default 0)")
     for name in ("verify", "rules"):
@@ -193,6 +196,13 @@ def run(args: argparse.Namespace) -> object:
     if command in {"life", "shelf"}:
         return record.append(command, args.actor, json.loads(args.data), args.request)
     if command == "status":
+        if args.idea is not None:
+            if args.tasks or args.limit is not None or args.offset is not None:
+                raise ValueError("status --idea cannot be combined with task paging options")
+            from .idea_status import idea_status
+            return idea_status(state, head, args.idea, getattr(args, "actor", None))
+        if hasattr(args, "actor"):
+            raise ValueError("status --as requires --idea")
         if args.tasks:
             from .work_status import task_page
             return task_page(state, head, limit=10 if args.limit is None else args.limit,
