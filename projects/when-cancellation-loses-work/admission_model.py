@@ -34,14 +34,17 @@ class Machine:
 
     def __init__(self, weights: tuple[int, ...], direction: str, cleanup: str,
                  consume: bool, cut: int | None):
-        if not 1 <= len(weights) <= 3 or any(w not in (1, 2, 3) for w in weights):
+        if not 1 <= len(weights) <= 3 or any(type(w) is not int or w not in (1, 2, 3)
+                                              for w in weights):
             raise ValueError("frozen workload: one to three weights in {1,2,3}")
         if direction not in ("bottom_up", "simultaneous"):
             raise ValueError("unknown cancellation direction")
         if cleanup not in ("owner", "worker"):
             raise ValueError("unknown cleanup protocol")
-        if cut is not None and cut < 0:
-            raise ValueError("negative cancellation cut")
+        if type(consume) is not bool:
+            raise ValueError("leaf treatment must be boolean")
+        if cut is not None and (type(cut) is not int or cut < 0):
+            raise ValueError("cancellation cut must be a nonnegative integer")
         self.run = Run(weights, direction, cleanup, consume, cut)
         self.queue = list(range(len(weights)))
         self.returned: list[int] = []

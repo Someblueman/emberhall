@@ -85,11 +85,14 @@ class ModelTests(unittest.TestCase):
             self.assertEqual(started.final["returned"], [0])
 
     def test_frozen_boundary_rejects_unregistered_inputs(self):
-        for weights in ((), (4,), (1, 2, 3, 1)):
+        for weights in ((), (4,), (1, 2, 3, 1), (True,), (1.0,)):
             with self.assertRaises(ValueError):
                 execute(weights)
+        for cut in (500, True, 1.5, -1):
+            with self.assertRaises(ValueError):
+                execute((1,), cut=cut)
         with self.assertRaises(ValueError):
-            execute((1,), cut=500)
+            execute((1,), consume="false")
 
 
 if __name__ == "__main__":
