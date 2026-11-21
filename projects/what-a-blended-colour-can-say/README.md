@@ -95,12 +95,15 @@ unsupported cases and independently checkable examples, and
 
 - M1 passed independent review: exact finite-palette model, six cases, first
   vector legend and comparison with prior work.
-- M2 implementation: ten-case vector atlas, parameterized renderer and real
+- M2 passed independent review: ten-case vector atlas, parameterized renderer and real
   importing program, explicit sRGB/linear-byte scope, rational outer-box
   certificates, deterministic regeneration, boundary and corruption checks.
-  Mathematical and artifact review passed. The first visual review rejected
-  the standalone SVG shrinking on phones; the native-size vector view and case
-  navigation repair await independent integration and visual re-review.
+  Mathematical and artifact review passed (finished task
+  `blended-colour-m2-verify`, journal 29355). The first visual review rejected
+  the standalone SVG shrinking on phones. The native-size vector view and case
+  navigation repair were independently integrated (journal 29543) and passed
+  independent phone/desktop visual re-review (`blended-colour-m2-repair-review`,
+  journal 29577). These checks establish M2, not reader performance.
 - Later comparison gate: use the explicit-distribution panels in the project
   comparison protocol and report the outcome and limits. No user study has
   been conducted here; the protocol and independent assessment remain work

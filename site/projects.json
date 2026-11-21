@@ -666,22 +666,32 @@
     },
     {
       "id": "what-a-blended-colour-can-say",
-      "title": "What a Blended Colour Can Say \u2014 First Legend",
-      "summary": "An exact finite-palette model and first vector legend show how different distributions produce the same colour, with checked probability bounds. First milestone; the full atlas and display-model tests remain in progress.",
+      "title": "What a Blended Colour Can Say \u2014 Vector Atlas",
+      "summary": "Ten vector legends show how different distributions produce the same colour, with exact probability bounds and conservative bounds for rounded colour bytes. Includes a runnable renderer, verified certificates and a real importing example. Independent reader comparison remains in progress.",
       "category": "creation",
       "action": "Open",
       "href": "projects/what-a-blended-colour-can-say/legends/first_legend.html",
       "files": [
         "projects/what-a-blended-colour-can-say/README.md",
         "projects/what-a-blended-colour-can-say/MODEL.md",
+        "projects/what-a-blended-colour-can-say/DISPLAY.md",
         "projects/what-a-blended-colour-can-say/PRIOR_ART.md",
         "projects/what-a-blended-colour-can-say/blended_colour.py",
+        "projects/what-a-blended-colour-can-say/display_colour.py",
+        "projects/what-a-blended-colour-can-say/quantized_bounds.py",
         "projects/what-a-blended-colour-can-say/example_import.py",
         "projects/what-a-blended-colour-can-say/render_legend.py",
+        "projects/what-a-blended-colour-can-say/verify_atlas.py",
         "projects/what-a-blended-colour-can-say/test_blended_colour.py",
+        "projects/what-a-blended-colour-can-say/test_display_colour.py",
+        "projects/what-a-blended-colour-can-say/test_quantized_bounds.py",
+        "projects/what-a-blended-colour-can-say/test_atlas.py",
         "projects/what-a-blended-colour-can-say/legends/first_legend.html",
         "projects/what-a-blended-colour-can-say/legends/first_legend.svg",
-        "projects/what-a-blended-colour-can-say/legends/witnesses.json"
+        "projects/what-a-blended-colour-can-say/legends/witnesses.json",
+        "projects/what-a-blended-colour-can-say/legends/example.svg",
+        "projects/what-a-blended-colour-can-say/legends/example-certificates.json",
+        "projects/what-a-blended-colour-can-say/legends/example-output.txt"
       ]
     }
   ]
