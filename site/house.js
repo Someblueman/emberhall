@@ -964,6 +964,7 @@ function workshopTasks(frames, moment, at) {
 }
 let workshopState={filter:"all",readiness:"all",project:"all",query:"",selectedId:null,pages:{}};
 let votingState={query:"",status:"all",kind:"all"};
+let councilRoomState={sequence:null,page:0};
 let votingOpened=new Set();
 const WORKSHOP_PAGE_SIZE=4;
 function workshopSearchText(value) {return (value||"").trim().replace(/\s+/g," ").toLowerCase();}
@@ -4377,6 +4378,7 @@ function councilRecordLink(parent,kind,record) {
   link.addEventListener("click",event=>{event.preventDefault();openCouncilRecord(kind,record.id);});
 }
 function renderCouncilRoom(content) {
+  if(councilRoomState.sequence!==frame.seq)councilRoomState={sequence:frame.seq,page:0};
   const panel = html("div", "council-room-panel", undefined, content);
   panel.id = "council-room-panel";
   const record = frame.voting;
@@ -4422,8 +4424,32 @@ function renderCouncilRoom(content) {
     // Proposals ready to enact come first, then the rest newest first; overtaken ones are folded away last.
     const live = [...waiting].reverse();
     live.sort((a, b) => (proposalWaitingLine(b, nowSec)?.key === "ready") - (proposalWaitingLine(a, nowSec)?.key === "ready"));
-    live.slice(0, 5).forEach(proposal => proposalRow(proposal, list, false));
-    if (waiting.length > 5) html("p", "small", `Showing 5 of ${waiting.length} active proposals.`, panel);
+    if(live.length) {
+      const proposals=html("div","council-room-list",undefined,list);
+      proposals.id="council-active-proposals";proposals.tabIndex=-1;
+      proposals.setAttribute("role","region");proposals.setAttribute("aria-label","Active proposals");
+      const pages=html("div","workshop-pages",undefined,panel);
+      pages.setAttribute("role","group");pages.setAttribute("aria-label","Active proposal pages");
+      const turn=delta=>{
+        councilRoomState.page+=delta;drawPage();
+        proposals.focus({preventScroll:true});proposals.scrollIntoView?.({block:"nearest"});
+      };
+      const previous=workshopButton(pages,"Previous proposals",()=>turn(-1));previous.id="council-previous";
+      const range=html("span","small",undefined,pages);range.setAttribute("role","status");
+      const next=workshopButton(pages,"Next proposals",()=>turn(1));next.id="council-next";
+      for(const button of [previous,next])button.setAttribute("aria-controls",proposals.id);
+      function drawPage() {
+        councilRoomState.page=Math.max(0,Math.min(councilRoomState.page,Math.ceil(live.length/5)-1));
+        const start=councilRoomState.page*5;
+        proposals.replaceChildren();
+        live.slice(start,start+5).forEach(proposal=>proposalRow(proposal,proposals,false));
+        range.textContent=`${start+1}–${Math.min(start+5,live.length)} of ${live.length} active proposals · ready first, then newest`;
+        previous.disabled=start===0;next.disabled=start+5>=live.length;
+      }
+      pages.hidden=live.length<=5;
+      pages.setAttribute("style",pages.hidden?"display:none":"");
+      drawPage();
+    } else councilRoomState.page=0;
     if (overtaken.length) {
       const folded = html("details", "council-overtaken", undefined, panel);
       html("summary", "small", `${overtaken.some(proposal => proposalClosure(proposal).upgrade) ? "Closed, overtaken or already installed" : "Overtaken by a later decision"} · ${overtaken.length}`, folded);
