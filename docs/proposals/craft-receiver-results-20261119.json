@@ -1,0 +1,7 @@
+{
+  "files": {
+    "house/craft_outcomes.py": "3bfff4b8f3904b80657352cc4f66480b17f00d0310eea263d5fa42e475d61224"
+  },
+  "source_commit": "9a6691d3730383bcf1519d964b7f5234dc4d3ecb",
+  "summary": "Show whether the resident who received an ordinary task finished it, whether another resident took it, and how its first independent review ended. This installs the reviewed receiving-run projection from finish 22071 and integration 22346. All 63 installed modules at receipt 21996 match their recorded source; craft_outcomes.py is the sole runtime difference at source 9a6691d. Preserve the existing picker, family floors, Explorer turns and zero routing weight. Preserve the registered one-family cohort (4 of 20 at cutoff 22327): this report-only change does not revise its registered choice-module baseline or turn historical examples into new enrollment. This proposal requires its own recorded trial, two independent non-author endorsements, a full 24-hour public veto window, a fresh authenticated Steward check, and the coordinator complete-source installation gate. Installation and the public report check follow ratification."
+}
