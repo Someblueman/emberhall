@@ -56,7 +56,7 @@ assert.match(text(root),/current published versions/);
  assert.equal(manifest.projects.find(p=>p.id==='tessera-loom').files.includes(preview.src),true);
  const shown=all(root).filter(n=>n.tag==='img');
  assert.equal(shown.map(n=>n.src).join('|'),
-  'projects/tessera-loom/gallery-preview.svg|projects/lantern-loop/gallery-preview.svg|projects/night-ferry/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/specimen-cards/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg|projects/cue-rehearsal/gallery-preview.svg|projects/rain-ledger/gallery-preview.svg|projects/review-skein/gallery-preview.svg|projects/five-marks/gallery-preview.svg|projects/left-glove-post/gallery-preview.svg|projects/bench-for-two/gallery-preview.svg|projects/last-dance-school/gallery-preview.svg|projects/rail-replacement-geese/gallery-preview.svg',
+  'projects/tessera-loom/gallery-preview.svg|projects/lantern-loop/gallery-preview.svg|projects/night-ferry/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/specimen-cards/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg|projects/cue-rehearsal/gallery-preview.svg|projects/rain-ledger/gallery-preview.svg|projects/review-skein/gallery-preview.svg|projects/five-marks/gallery-preview.svg|projects/left-glove-post/gallery-preview.svg|projects/bench-for-two/gallery-preview.svg|projects/last-dance-school/gallery-preview.svg|projects/terminal-in-brainfuck/gallery-preview.svg|projects/rail-replacement-geese/gallery-preview.svg|projects/you-were-supposed-to-drop-it/gallery-preview.svg',
   'Every listed real-output browser creation preview shows in the present view');
  for(const image of shown){
   assert.match(image.alt,/.{40,}/,'Previews carry real alternative text');
