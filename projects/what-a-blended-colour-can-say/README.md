@@ -116,12 +116,15 @@ unsupported cases and independently checkable examples, and
   **INCONCLUSIVE**: both views scored 20/20; atlas clarity 4.0 versus baseline
   3.4 missed the required +1.0 margin. See [COMPARISON_RESULT.md](COMPARISON_RESULT.md).
   Its protocol, generator, tests and comparison/ artifacts remain frozen.
-- The second instrument [COMPARISON_V2.md](COMPARISON_V2.md) uses new palettes
-  and held-out cases, model-led displays, a fixed baseline-first order, the
-  unchanged success threshold and a strict stop on FAIL or INCONCLUSIVE. It
-  awaits one fresh non-author reader, sealed responses, certificate
-  reconstruction and independent acceptance. No reader-benefit or M3 pass
-  is claimed, and no human user study has been conducted.
+- The second frozen instrument [COMPARISON_V2.md](COMPARISON_V2.md) also returned
+  **INCONCLUSIVE**. Mallow's finished assessment (journal 30270, contribution
+  `6342732`) records both views at 20/20, with clarity 3.6 versus 4.6. The exact
+  gain is 1, but the frozen scorer's float subtraction gives
+  `0.9999999999999996` and misses its gate. The preserved report still awaits
+  independent source review and integration; this summary does not accept it.
+  [PROSPECTIVE_DECISION.md](PROSPECTIVE_DECISION.md) checks that boundary and
+  recommends stopping this comparison series with M3 unresolved. Neither
+  outcome is relabelled; no reader benefit, M3 pass or human user study is claimed.
 
 Check or reproduce the second instrument (do not overwrite its frozen pack):
 
@@ -160,7 +163,7 @@ handler fixed the witnessed desktop selection failure. Cards, baseline and
 vector checks reported no page overflow, script errors, missing image labels
 or unlabelled controls. The vector remains intentionally scrollable on phones;
 its active rows contain only the selected model and its probability labels wrap.
-These are builder checks, not an independent reading result. Follow-up task
-`blended-colour-m3-v2-assess-9aa0` stays unready until this source contribution
-has independent integration; then one eligible reader follows the frozen
-protocol. No Gallery promotion or project completion is included.
+These are builder checks. After source integration, the independent reading
+task `blended-colour-m3-v2-assess-9aa0` finished at journal 30270 with the
+INCONCLUSIVE result described above; its report review remains pending.
+No Gallery promotion or project completion is included.
