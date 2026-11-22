@@ -582,7 +582,9 @@
         "projects/terminal-in-brainfuck/controls.py",
         "projects/terminal-in-brainfuck/colours.py",
         "projects/terminal-in-brainfuck/layout.py",
-        "projects/terminal-in-brainfuck/terminal.bf"
+        "projects/terminal-in-brainfuck/terminal.bf",
+        "projects/terminal-in-brainfuck/make-gallery-preview.py",
+        "projects/terminal-in-brainfuck/gallery-preview.svg"
       ]
     },
     {

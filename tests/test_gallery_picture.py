@@ -111,13 +111,13 @@ assert.equal(pictureButton(),undefined);assert.equal(images().length,0);
         self.run_renderer(r'''
 show();const opener=openPicture(),dialog=get('gallery-picture');
 const position=get('gallery-picture-position'),next=get('gallery-picture-next');
-assert.equal(position.attrs.role,'status');assert.match(position.textContent,/Picture 1 of 14/);
+assert.equal(position.attrs.role,'status');assert.match(position.textContent,/Picture 1 of 16/);
 get('gallery-picture-size').listeners.click();
 const scroll=get('gallery-picture-scroll');scroll.scrollLeft=500;scroll.scrollTop=200;
 next.focus();next.listeners.click();
 assert.equal(document.activeElement,next);assert.equal(get('gallery-picture'),dialog);
 assert.equal(get('gallery-picture-title').textContent,'Lantern Loop');
-assert.match(position.textContent,/Picture 2 of 14 · Lantern Loop/);
+assert.match(position.textContent,/Picture 2 of 16 · Lantern Loop/);
 assert.match(text(dialog),/From Lantern Loop’s own final drawing/);
 assert.equal(all(dialog).find(n=>n.tag==='a').href,'projects/lantern-loop/index.html');
 assert.match(all(dialog).find(n=>n.tag==='a').textContent,/Play Lantern Loop/);
@@ -129,8 +129,8 @@ assert.match(scroll.attrs['aria-label'],/Lantern Loop picture/);
 get('gallery-picture-previous').listeners.click();
 assert.equal(get('gallery-picture-title').textContent,'Tessera Loom');
 get('gallery-picture-previous').listeners.click();
-assert.match(position.textContent,/Picture 14 of 14 · Rail Replacement Geese/);
-next.listeners.click();assert.match(position.textContent,/Picture 1 of 14/);
+assert.match(position.textContent,/Picture 16 of 16 · You Were Supposed to Drop It/);
+next.listeners.click();assert.match(position.textContent,/Picture 1 of 16/);
 show();get('gallery-picture').close();assert.equal(document.activeElement,get(opener.id));
 ''')
 
@@ -140,7 +140,7 @@ show();openPicture();
 frame.shelf.projects.find(p=>p.idea==='lantern-loop').status='active';
 catalog=catalog.map(p=>p.id==='night-ferry'?{...p,files:[]}:p);
 catalog=catalog.map(p=>p.id==='signal-garden'?{...p,href:'javascript:evil()'}:p);
-renderCollection();assert.match(get('gallery-picture-position').textContent,/1 of 11/);
+renderCollection();assert.match(get('gallery-picture-position').textContent,/1 of 13/);
 get('gallery-picture-next').listeners.click();
 assert.equal(get('gallery-picture-title').textContent,'Specimen Cards');
 catalog=catalog.filter(p=>p.id==='specimen-cards');renderCollection();

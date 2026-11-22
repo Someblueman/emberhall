@@ -104,5 +104,8 @@ assert.match(text(root),/Completed first legend · Longer work continues/);
 assert.match(text(root),/Milestone completion record/);
 assert.doesNotMatch(text(root),/Completed opening chapter/);
 assert.equal(all(root).find(n=>n.className==='creation-action').href,legend.href);
+const preview=all(root).find(n=>n.tag==='img');
+assert(preview,'The first colour legend should display its verified example SVG');
+assert.equal(preview.src,'projects/what-a-blended-colour-can-say/legends/example.svg');
 frame.seq=79;assert.equal(completedCatalog().length,0,'No receipt appears before it happened');
 ''')

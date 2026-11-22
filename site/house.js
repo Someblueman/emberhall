@@ -3364,7 +3364,16 @@ function creationPreview(entry) {
       caption:"From Review Skein's shipped sample · a changed line and its attached question"},
     "five-mark-packing":{src:"projects/five-marks/gallery-preview.svg",width:1200,height:620,
       alt:"Five gold marks at 0, 7, 14, 19 and 24 on a dark band, then five teal copies of that shape placed at starts 0, 2, 4, 6 and 8 with no shared mark, repeating every 29 integers.",
-      caption:"Made by Five Marks' own model · the shape and its winning repeating pattern"}
+      caption:"Made by Five Marks' own model · the shape and its winning repeating pattern"},
+    "terminal-in-brainfuck":{src:"projects/terminal-in-brainfuck/gallery-preview.svg",width:1200,height:620,
+      alt:"A 40 by 24 recorded pseudo-terminal screen running a real shell on a terminal compiled to Brainfuck from Python, showing REAL SHELL, size: 24 40, red RED, and xyCDE beside the run_terminal.py command.",
+      caption:"From The tape is the terminal’s real shell recording · 50 emitted frames on a pseudo-terminal"},
+    "you-were-supposed-to-drop-it":{src:"projects/you-were-supposed-to-drop-it/gallery-preview.svg",width:760,height:390,
+      alt:"Two cut-paper stages side by side with four puppets on floor marks, a yellow bowler-hat arc overhead, and a pit drummer below each stage.",
+      caption:"Made by You Were Supposed to Drop It’s own rig · Rook and Shrikhande stages in mid-throw"},
+    "what-a-blended-colour-can-say":{src:"projects/what-a-blended-colour-can-say/legends/example.svg",width:1040,height:440,
+      alt:"A flat green swatch labelled #59c82c with exact probability interval 1/2 to 3/5, conservative sRGB8 and linear8 bounds, and two endpoint distribution bars.",
+      caption:"From What a Blended Colour Can Say’s verified renderer · one swatch with exact bounds and endpoint bars"}
   };
   const preview=previews[entry.id];
   return current && preview && Array.isArray(entry.files) && entry.files.includes(preview.src)?preview:null;

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+<title id="title">The tape is the terminal — real pseudo-terminal recording</title>
+<desc id="desc">Recorded 40 by 24 shell output from terminal.bf compiled to Brainfuck from Python: REAL SHELL / size: 24 40 / RED / xyCDE. Complete frames: 50. Run with python3 projects/terminal-in-brainfuck/run_terminal.py.</desc>
+<rect width="1200" height="620" rx="22" fill="#101918"/>
+<rect x="20" y="20" width="1160" height="580" rx="16" fill="#18261f" stroke="#71876a" stroke-width="2"/>
+<g font-family="system-ui, -apple-system, sans-serif">
+<text x="48" y="60" font-size="16" font-weight="700" letter-spacing="2.4" fill="#dfb770">THE TAPE IS THE TERMINAL · COMPILED TO BRAINFUCK FROM PYTHON</text>
+<text x="48" y="106" font-size="34" font-weight="700" fill="#e0e8da">A real shell on a 40 × 24 Brainfuck tape</text>
+<text x="48" y="138" font-size="19" fill="#bfcabb">Recorded pseudo-terminal run from recordings/native-shell.txt (not a browser mock)</text>
+<rect x="48" y="164" width="600" height="392" rx="12" fill="#111820" stroke="#71876a" stroke-width="1.5"/>
+<rect x="48" y="164" width="600" height="40" rx="12" fill="#1b2822"/>
+<rect x="48" y="192" width="600" height="12" fill="#1b2822"/>
+<text x="68" y="190" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#b8c9b2">40 × 24 screen · /bin/sh -c · Complete frames: 50</text>
+<path d="M48 204H648" stroke="#485d49"/>
+<text x="72" y="246" font-size="25" font-weight="600" font-family="ui-monospace, Menlo, monospace" fill="#dce4ed">REAL SHELL</text>
+<text x="72" y="286" font-size="25" font-weight="600" font-family="ui-monospace, Menlo, monospace" fill="#dce4ed">size: 24 40</text>
+<text x="72" y="326" font-size="25" font-weight="600" font-family="ui-monospace, Menlo, monospace" fill="#cf5966">RED</text>
+<text x="72" y="366" font-size="25" font-weight="600" font-family="ui-monospace, Menlo, monospace" fill="#dce4ed">xyCDE</text>
+<text x="170" y="326" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#a8b7a2">← ANSI \033[31m red ink [1, 1, 1]</text>
+<text x="170" y="366" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#a8b7a2">← ABCDE\rxy overwrites AB only</text>
+<rect x="72" y="384" width="15" height="28" fill="none" stroke="#ffffff" stroke-width="2"/>
+<text x="98" y="404" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#f0ce94">cursor: row 4, column 0</text>
+<rect x="68" y="446" width="560" height="88" rx="8" fill="#16212b" stroke="#314b3a"/>
+<text x="86" y="476" font-size="14" font-weight="700" letter-spacing="1.4" fill="#dfb770">COMMAND PASSED TO /bin/sh -c</text>
+<text x="86" y="503" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#dce4ed">printf "REAL SHELL\n"; printf "size: "; stty size;</text>
+<text x="86" y="523" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#dce4ed">printf "\033[31mRED\033[0m\n"; printf "ABCDE\rxy\n"</text>
+<rect x="672" y="164" width="480" height="392" rx="12" fill="#101918" stroke="#485d49" stroke-width="1.5"/>
+<text x="698" y="202" font-size="15" font-weight="700" letter-spacing="1.6" fill="#dfb770">RUN FROM A CLONE</text>
+<rect x="698" y="218" width="428" height="72" rx="8" fill="#18261f" stroke="#71876a"/>
+<text x="716" y="248" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#e6c786">python3 projects/terminal-in-brainfuck/</text>
+<text x="734" y="272" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#e6c786">run_terminal.py</text>
+<text x="698" y="324" font-size="15" font-weight="700" letter-spacing="1.6" fill="#dfb770">RECORDED RECEIPT</text>
+<text x="698" y="356" font-size="16" font-family="ui-monospace, Menlo, monospace" fill="#dce4ed">Exit status: 0 · Complete frames: 50</text>
+<text x="698" y="388" font-size="16" font-family="ui-monospace, Menlo, monospace" fill="#b8c9b2">terminal.bf SHA256: c7e868a944fd…</text>
+<text x="698" y="418" font-size="16" font-family="ui-monospace, Menlo, monospace" fill="#b8c9b2">Final frame SHA256: 0b7cf6cef186…</text>
+<rect x="698" y="446" width="428" height="88" rx="8" fill="#18261f" stroke="#485d49"/>
+<text x="716" y="478" font-size="16" font-weight="600" fill="#e0e8da">What is inside</text>
+<text x="716" y="502" font-size="15" fill="#bfcabb">Python compiles terminal.bf (3.8 MB of Brainfuck).</text>
+<text x="716" y="523" font-size="15" fill="#bfcabb">A native PTY host streams /bin/sh to the tape.</text>
+<text x="48" y="582" font-size="15" fill="#a8b7a2">macOS pseudo-terminal recording · open the page for the bytecode tape debugger or clone to run /bin/sh</text>
+</g></svg>
