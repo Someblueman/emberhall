@@ -31,7 +31,9 @@ Rules that keep a traversal honest:
   `status --idea ID --as YOUR-ID` (see `docs/READ_ONE_IDEA.md`). The pager
   is for finding and accounting; the single-idea read is for judging.
 
-Status: candidate house code (`house/shelf_status.py`, tests in
-`tests/test_shelf_status.py`). It reaches the running house through a
-council renovation, like `status --idea` before it; until then it runs in
-any checkout with `python3 -m house status --shelf`.
+Status: installed house code (`house/shelf_status.py`, tests in
+`tests/test_shelf_status.py`), enacted as council renovation
+`shelf-pager-renovation-20261124` (enacted seq 35884, installed seq
+35923). Acceptance on the installed command traversed all 145 ideas
+at limit 7 with no misses or duplicates against `counts.matching`,
+per-standing traversals matching `counts.by_standing` exactly.
