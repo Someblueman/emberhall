@@ -15,7 +15,12 @@ only pairs omitting exactly those vertices, and supports outside the
 pool are untried.
 
 Usage: python3 exact_completion.py A B C [--max-free N] [--no-pool]
-       [--out WITNESS.json]
+       [--per-support SECONDS] [--out WITNESS.json]
+
+``--per-support`` caps the wall-clock time spent on any one support
+(SIGALRM, main thread only); an overrun support is counted
+``timed_out`` and skipped. That is inconclusive for that support,
+never an obstruction. Without the flag behaviour is unchanged.
 Standard library only. See EXACT_COMPLETION_TOOL.md.
 """
 from __future__ import annotations
@@ -24,7 +29,9 @@ import argparse
 from itertools import combinations
 import json
 from pathlib import Path
+import signal
 import sys
+import threading
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -58,18 +65,62 @@ def supports_in_order(lengths, use_pool=True):
             yield list(holes)
 
 
-def attempt(lengths, max_free=40, use_pool=True, pool_max_free=22):
+class _SupportTimeout(Exception):
+    pass
+
+
+def _validate_cap(per_support_seconds):
+    if per_support_seconds is None:
+        return
+    if (isinstance(per_support_seconds, bool)
+            or not isinstance(per_support_seconds, (int, float))
+            or not per_support_seconds > 0):
+        raise ValueError("per-support cap must be a positive number of seconds")
+    if not hasattr(signal, "SIGALRM") or not hasattr(signal, "setitimer"):
+        raise ValueError("per-support cap requires SIGALRM (unsupported here)")
+    if threading.current_thread() is not threading.main_thread():
+        raise ValueError("per-support cap requires the main thread")
+
+
+def _complete(lengths, omitted, cap_free, per_support_seconds):
+    """complete_support under the optional cap; None means timed out."""
+    if per_support_seconds is None:
+        return complete_support(lengths, omitted, cap_free)
+
+    def raise_timeout(signum, frame):
+        raise _SupportTimeout
+
+    previous = signal.signal(signal.SIGALRM, raise_timeout)
+    signal.setitimer(signal.ITIMER_REAL, per_support_seconds)
+    try:
+        return complete_support(lengths, omitted, cap_free)
+    except _SupportTimeout:
+        return None
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
+
+
+def attempt(lengths, max_free=40, use_pool=True, pool_max_free=22,
+            per_support_seconds=None):
     """Return a summary dict; witness summaries include the payload."""
     lengths = validate_lengths(lengths)
+    _validate_cap(per_support_seconds)
     k = target_size(lengths)
     if k < 1:
         raise ValueError("lengths too small: target size is not positive")
     tried = 0
     verdicts = {"support_obstructed": 0, "inconclusive": 0}
+    if per_support_seconds is not None:
+        verdicts["timed_out"] = 0
     for index, omitted in enumerate(supports_in_order(lengths, use_pool)):
         tried += 1
-        report = complete_support(
-            lengths, omitted, max_free if index == 0 else pool_max_free)
+        report = _complete(
+            lengths, omitted, max_free if index == 0 else pool_max_free,
+            per_support_seconds)
+        if report is None:
+            verdicts["timed_out"] += 1
+            continue
         status = report.get("status")
         if status == "witness":
             payload = {"lengths": list(lengths),
@@ -102,12 +153,17 @@ def main(argv=None):
                         help="free-bit cap for pool supports (default 22)")
     parser.add_argument("--no-pool", action="store_true",
                         help="try only the tip-omitted support")
+    parser.add_argument("--per-support", type=float, default=None,
+                        metavar="SECONDS",
+                        help="wall-clock cap per support; an overrun support "
+                             "is counted timed_out and skipped")
     parser.add_argument("--out", type=Path, metavar="WITNESS.json",
                         help="write the witness payload here on success")
     args = parser.parse_args(argv)
     try:
         summary = attempt(args.lengths, args.max_free,
-                          not args.no_pool, args.pool_max_free)
+                          not args.no_pool, args.pool_max_free,
+                          args.per_support)
     except (ValueError, ArithmeticError) as error:
         parser.error(str(error))
     payload = summary.pop("payload", None)
