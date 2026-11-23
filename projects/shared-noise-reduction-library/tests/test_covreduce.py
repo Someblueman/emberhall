@@ -46,6 +46,27 @@ class TestCore(unittest.TestCase):
         for w in ((1, 0, 0), (0.2, -0.5, 0.9), (-1, -2, 0.3)):
             self.assertGreaterEqual(y.quadratic_form(w), -1e-12)
 
+    def test_large_dense_non_psd_rejected(self):
+        n = 65
+        cov = [[0.0] * n for _ in range(n)]
+        for i in range(n):
+            cov[i][i] = 1.0
+        cov[0][1] = cov[1][0] = 2.0  # indefinite: eigenvalues 3 and -1
+        with self.assertRaises(ValueError):
+            bins([0.0] * n, cov)
+
+    def test_large_diagonal_covariance_accepted(self):
+        x = bins([0.0] * 200, [1.0] * 200)
+        self.assertEqual(x.variance[:2], [1.0, 1.0])
+
+    def test_booleans_are_not_numbers(self):
+        with self.assertRaises(TypeError):
+            bins([True, 2.0], [1.0, 1.0])
+        with self.assertRaises(TypeError):
+            source(1.0, True)
+        with self.assertRaises(TypeError):
+            bins([1.0, 2.0], [[True, 0.0], [0.0, 1.0]])
+
     def test_negative_weights_moving_window(self):
         x = bins([1.0, 2.0, 4.0, 8.0], [0.1, 0.2, 0.3, 0.4])
         out = moving_window(x, "bin", (-1.0, 1.0))

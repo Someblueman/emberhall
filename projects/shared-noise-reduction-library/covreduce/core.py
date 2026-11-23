@@ -21,6 +21,12 @@ class UnsupportedOperationError(ValueError):
     """Raised for operations outside the first-order linear contract."""
 
 
+def _real(value) -> float:
+    if isinstance(value, bool):
+        raise TypeError("values must be real numbers, not booleans")
+    return float(value)
+
+
 def _shape_and_flat(values) -> tuple[tuple[int, ...], tuple[float, ...]]:
     if isinstance(values, CovArray):
         raise TypeError("use an existing CovArray directly, not as primitive values")
@@ -38,7 +44,7 @@ def _shape_and_flat(values) -> tuple[tuple[int, ...], tuple[float, ...]]:
         if any(shape != child_shapes[0] for shape in child_shapes[1:]):
             raise DimensionMismatchError("array values must be rectangular")
         return (len(values),) + child_shapes[0], tuple(flat)
-    return (), (float(values),)
+    return (), (_real(values),)
 
 
 def _flat_index(index: Sequence[int], shape: Sequence[int]) -> int:
@@ -93,7 +99,7 @@ def _merge(destination: dict[int, float], source: Mapping[int, float], factor=1.
 
 
 def _cholesky_psd(matrix: Sequence[float], n: int) -> bool:
-    # Small dense primitive matrices are checked eagerly.  Large diagonal
+    # Every dense primitive matrix is checked, at any size.  Diagonal
     # matrices need only their diagonal check, avoiding an O(n^3) setup cost.
     lower = [[0.0] * n for _ in range(n)]
     for i in range(n):
@@ -116,19 +122,21 @@ def _cholesky_psd(matrix: Sequence[float], n: int) -> bool:
 def _covariance_matrix(covariance, n: int) -> tuple[float, ...]:
     if covariance is None:
         return (0.0,) * (n * n)
+    if isinstance(covariance, bool):
+        raise TypeError("covariance must be real numbers, not booleans")
     if isinstance(covariance, (int, float)):
         if covariance < 0:
             raise ValueError("variance cannot be negative")
         matrix = [0.0] * (n * n)
         for i in range(n):
-            matrix[i * n + i] = float(covariance)
+            matrix[i * n + i] = _real(covariance)
         return tuple(matrix)
     if isinstance(covariance, Sequence) and covariance and isinstance(covariance[0], Sequence):
         if len(covariance) != n or any(len(row) != n for row in covariance):
             raise DimensionMismatchError("covariance must be n by n")
-        matrix = tuple(float(x) for row in covariance for x in row)
+        matrix = tuple(_real(x) for row in covariance for x in row)
     else:
-        flat = tuple(float(x) for x in covariance)
+        flat = tuple(_real(x) for x in covariance)
         if len(flat) == n:
             matrix = [0.0] * (n * n)
             for i, value in enumerate(flat):
@@ -144,7 +152,8 @@ def _covariance_matrix(covariance, n: int) -> tuple[float, ...]:
         for j in range(i):
             if abs(matrix[i * n + j] - matrix[j * n + i]) > 1e-9:
                 raise ValueError("covariance must be symmetric")
-    if n <= 64 and not _cholesky_psd(matrix, n):
+    dense = any(matrix[i * n + j] for i in range(n) for j in range(i))
+    if dense and not _cholesky_psd(matrix, n):
         raise ValueError("covariance must be positive semidefinite")
     return matrix
 
@@ -250,7 +259,7 @@ class CovArray:
 
     def quadratic_form(self, weights: Sequence[float]) -> float:
         """Return w^T C w without materialising the output covariance."""
-        weights = tuple(float(w) for w in weights)
+        weights = tuple(_real(w) for w in weights)
         if len(weights) != self.size:
             raise DimensionMismatchError("quadratic-form weights have the wrong length")
         total = 0.0
@@ -265,7 +274,7 @@ class CovArray:
         return total
 
     def _constant(self, value: float):
-        return CovArray._from_parts((float(value),), (), (), {}, {})
+        return CovArray._from_parts((_real(value),), (), (), {}, {})
 
     def _coerce(self, other):
         return other if isinstance(other, CovArray) else self._constant(other)
@@ -551,7 +560,7 @@ def moving_window(array: CovArray, dim: str, weights: Sequence[float], *, mode="
     ``valid`` returns only complete windows.  ``same`` zero-pads the input and
     keeps the input length.  Negative and non-normalised weights are allowed.
     """
-    weights = tuple(float(w) for w in weights)
+    weights = tuple(_real(w) for w in weights)
     if not weights:
         raise ValueError("moving-window weights cannot be empty")
     axis = array.dims.index(dim)
@@ -576,8 +585,8 @@ def moving_window(array: CovArray, dim: str, weights: Sequence[float], *, mode="
 
 def _centres_to_edges(centres):
     if len(centres) == 1:
-        return (float(centres[0]) - 0.5, float(centres[0]) + 0.5)
-    centres = tuple(float(x) for x in centres)
+        return (_real(centres[0]) - 0.5, _real(centres[0]) + 0.5)
+    centres = tuple(_real(x) for x in centres)
     edges = [centres[0] - (centres[1] - centres[0]) / 2]
     edges.extend((a + b) / 2 for a, b in zip(centres, centres[1:]))
     edges.append(centres[-1] + (centres[-1] - centres[-2]) / 2)
@@ -611,8 +620,8 @@ def rebin(array: CovArray, dim: str, *args, intensive=False, extensive=None,
     if old_edges is None:
         coordinate = array.coords[dim]
         old_edges = coordinate if len(coordinate) == n + 1 else _centres_to_edges(coordinate)
-    old_edges = tuple(float(x) for x in old_edges)
-    new_edges = tuple(float(x) for x in new_edges)
+    old_edges = tuple(_real(x) for x in old_edges)
+    new_edges = tuple(_real(x) for x in new_edges)
     if len(old_edges) != n + 1 or len(new_edges) < 2:
         raise DimensionMismatchError("bin edges must have n+1 entries")
     if any(b <= a for a, b in zip(old_edges, old_edges[1:])) or any(
