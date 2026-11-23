@@ -1,7 +1,9 @@
 """Scale evidence: sparse Jacobians vs dense covariance vs Monte Carlo.
 
 A 40x50 (2000-element) field of counts shares one monitor and one
-background.  The quantity of interest is one downstream quadratic form
+background level: a single scalar source subtracted from every bin, so
+its uncertainty is fully correlated across the field.  The quantity of
+interest is one downstream quadratic form
 ``w^T C w``.  covreduce contracts the sparse per-source Jacobians without
 ever forming the 2000x2000 covariance; the dense route materialises it;
 Monte Carlo estimates it from seeded draws.  Run directly:
@@ -27,8 +29,7 @@ def build_field(rows=ROWS, cols=COLS):
                      for r in range(rows)],
                     [2.0 + (i % 5) * 0.1 for i in range(n)],
                     dims=("row", "col"))
-    background = source([[3.0] * cols for _ in range(rows)],
-                        [0.05] * n, dims=("row", "col"))
+    background = source(3.0, 0.05)  # one shared level for the whole field
     rates = counts / monitor - background / monitor
     weights = tuple(1.0 / n for _ in range(n))
     return monitor, counts, background, rates, weights
@@ -59,16 +60,16 @@ def run_comparison(rows=ROWS, cols=COLS, draws=300, seed=7):
     def monte_carlo():
         rng = random.Random(seed)
         mon_v, mon_sd = monitor.value, monitor.variance ** 0.5
-        cnt_v, bkg_v = list(counts.values), list(background.values)
+        cnt_v = list(counts.values)
         cnt_sd = [v ** 0.5 for v in counts.variance]
-        bkg_sd = [v ** 0.5 for v in background.variance]
+        bkg_v, bkg_sd = background.value, background.variance ** 0.5
         vals = []
         for _ in range(draws):
             m = rng.gauss(mon_v, mon_sd)
-            vals.append(sum(w * ((c + rng.gauss(0, s)) / m
-                                 - (b + rng.gauss(0, t)) / m)
-                            for w, c, s, b, t in
-                            zip(weights, cnt_v, cnt_sd, bkg_v, bkg_sd)))
+            b = rng.gauss(bkg_v, bkg_sd)  # one shared draw for every bin
+            vals.append(sum(w * ((c + rng.gauss(0, s)) / m - b / m)
+                            for w, c, s in
+                            zip(weights, cnt_v, cnt_sd)))
         mean = sum(vals) / draws
         return sum((v - mean) ** 2 for v in vals) / (draws - 1)
 

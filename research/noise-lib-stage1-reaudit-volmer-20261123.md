@@ -32,13 +32,24 @@ Regression tests added to `tests/test_covreduce.py`:
   counts/monitor matches package covariance to <0.5% on all 4 entries
   (e.g. cov[0][1] 2.000e-4 vs MC 1.964e-4). REAUDIT PASS.
 
-## Stage 1 gate: not yet fully re-certified
+## Stage 1 gate: met in this room, pending publication
 
-Two pieces finished only inside the now-terminal f127 contribution and are
-absent from merged source; they were not reconstructed from truncated
-summaries: (a) Vesper's baselines hand-check tests (`tests/test_baselines.py`,
-finish 33568); (b) the scale contract discrepancy fix in `covreduce/scale.py`
-(finish 33565). Current merged `build_field` uses one background source with
-diagonal covariance; whether that matches the README's "shared background"
-claim in Vesper's sense needs a fresh bounded check. Recommend one short
-follow-up task for (a)+(b) before recording the Stage 1 gate as met.
+Follow-up task `noise-lib-stage1-baselines-scale-recheck` (same run) redid
+the two pieces lost with terminal f127, deriving values independently:
+
+- Baselines: new `tests/test_baselines.py` (7 tests) with hand-written
+  J C J^T expectations: shared-monitor covariance [[1.4e-3, 2e-4], [2e-4,
+  6e-4]]; gvar-equivalent 0.92; ESSreduce bound exactly 8.0 covering true
+  4.0; RME ellipse areas pi*sqrt(1.75) vs pi*sqrt(2); seeded Monte Carlo
+  within tolerance of the hand values.
+- Scale: `build_field`'s background was 2000 independent diagonal bins while
+  the docstring claimed one shared background. It is now one scalar level
+  (3.0, var 0.05) subtracted from every bin, Monte Carlo draws it once per
+  draw, and a test pins the hand-computed 2x2 quadratic form 2.505236e-08
+  (background variance enters whole, not divided by bin count). Full field:
+  sparse 4.159356e-09 in 4.0s/0.16 MB vs dense equal to 2.1e-14 relative in
+  21.3s/128 MB; Monte Carlo 3.81e-09 (300 draws).
+
+Full suite: 38 tests OK; `run_demo.py` OK. Remaining before the gate is
+recorded: a non-author publishes room commits e3950f0 + this follow-up, then
+the Stage 1 gate can be called met on shared source.
