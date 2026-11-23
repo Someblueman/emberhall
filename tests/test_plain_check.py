@@ -34,6 +34,31 @@ class PlainCheckTests(unittest.TestCase):
         issues = problems("The CLI guide covers the JSON shapes today.")
         self.assertTrue(any("capitals" in i for i in issues))
 
+    def test_raw_length_over_with_extra_spaces_fails(self):
+        base = ("A bigger helper tells you whether a task line is ready to send "
+                "for every person here today and every visitor who passes the door often now.")
+        self.assertEqual(problems(base), [])
+        raw = "    ".join(base.split())
+        self.assertGreater(len(raw), 200)
+        self.assertLessEqual(len(" ".join(raw.split())), 200)
+        issues = problems(raw)
+        self.assertTrue(any("outside 30 to 200" in issue for issue in issues))
+
+    def test_everyday_year_and_hex_word_are_ready(self):
+        self.assertEqual(problems(
+            "A change in 2020 made the lane brighter for everyone who passes the door daily."), [])
+        self.assertEqual(problems(
+            "The defaced wall needed fresh paint for everyone to see clearly each day now."), [])
+
+    def test_real_hex_token_still_fails(self):
+        issues = problems(
+            "The token abc1234 covers the lane for every person who passes the door daily.")
+        self.assertTrue(any("record numbers" in issue for issue in issues))
+
+    def test_decimal_line_is_ready(self):
+        self.assertEqual(problems(
+            "A lane widens to 1.5 meters and feels brighter for everyone passing daily now."), [])
+
     def test_cli_exit_codes(self):
         ok = subprocess.run([sys.executable, str(SCRIPT), GOOD],
                             capture_output=True, text=True)

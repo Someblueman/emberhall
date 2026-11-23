@@ -22,15 +22,49 @@ import sys
 EXTENSIONS = (".py", ".md", ".json", ".js", ".css", ".html", ".txt",
               ".yml", ".yaml", ".toml", ".git", ".sh")
 RECORD = re.compile(r"(?i)\b(?:seq\s*\d+|#\d+|\d{4,})\b|\b[0-9a-f]{7,}\b")
+SEQ_RECORD = re.compile(r"(?i)\bseq\s*\d+|#\d+")
+LONG_DIGITS = re.compile(r"\b\d{4,}\b")
+HEX_TOKEN = re.compile(r"(?i)\b[0-9a-f]{7,}\b")
 SHOUT = re.compile(r"\b[A-Z]{2,}\b")
+
+
+def _has_record_number(text: str) -> bool:
+    if SEQ_RECORD.search(text):
+        return True
+    for match in LONG_DIGITS.finditer(text):
+        token = match.group(0)
+        start, end = match.span()
+        # Every-day decimals: a digit run touching a decimal point is not a record.
+        if start >= 2 and text[start - 1] == "." and text[start - 2].isdigit():
+            continue
+        if end + 1 < len(text) and text[end] == "." and text[end + 1].isdigit():
+            continue
+        # Every-day years: a bare 1900-2099 is not a record.
+        if len(token) == 4 and 1900 <= int(token) <= 2099:
+            continue
+        return True
+    for match in HEX_TOKEN.finditer(text):
+        token = match.group(0)
+        # Pure-letter hex words such as defaced are ordinary words, not tokens.
+        if not any(char.isdigit() for char in token):
+            continue
+        return True
+    return False
 
 
 def problems(sentence: str) -> list[str]:
     text = " ".join(sentence.split())
     found: list[str] = []
-    if not 30 <= len(text) <= 200:
-        found.append(f"length {len(text)} is outside 30 to 200 characters")
-    marks = [c for c in text if c in ".!?"]
+    # Match house/model.py: raw length <= 200 and stripped length in 30..200.
+    raw_len = len(sentence)
+    stripped_len = len(sentence.strip())
+    if raw_len > 200 or not 30 <= stripped_len <= 200:
+        reported = raw_len if raw_len > 200 else stripped_len
+        found.append(f"length {reported} is outside 30 to 200 characters")
+    marks = [c for i, c in enumerate(text)
+             if c in ".!?" and not (
+                 c == "." and 0 < i < len(text) - 1
+                 and text[i - 1].isdigit() and text[i + 1].isdigit())]
     if len(marks) != 1 or (text and text[-1] not in ".!?"):
         found.append("needs exactly one sentence")
     if "`" in text:
@@ -42,7 +76,7 @@ def problems(sentence: str) -> list[str]:
             found.append(f"file name {word!r}")
         elif stripped.lower().endswith(EXTENSIONS) and "." in stripped:
             found.append(f"file name {word!r}")
-    if RECORD.search(text):
+    if _has_record_number(text):
         found.append("no record numbers")
     if SHOUT.search(text):
         found.append("no abbreviations in capitals")
@@ -57,17 +91,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.text is None or args.text == "-":
-            text = sys.stdin.read()
+            raw = sys.stdin.read()
         else:
-            text = args.text
+            raw = args.text
     except OSError as exc:
         print(f"plain_check: {exc}", file=sys.stderr)
         return 2
-    text = text.strip()
-    if not text:
+    if not raw.strip():
         print("plain_check: empty input", file=sys.stderr)
         return 2
-    issues = problems(text)
+    issues = problems(raw)
     if issues:
         print("not ready:")
         for issue in issues:
