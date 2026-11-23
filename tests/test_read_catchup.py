@@ -65,6 +65,33 @@ class MergePagesTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             read_catchup.merge_pages([PAGE1, stale])
 
+    def test_rejects_gap_between_saved_pages(self):
+        # PAGE1 ends at through 102, PAGE3 starts at sequence 105:
+        # events 103 and 104 would be silently skipped.
+        with self.assertRaises(ValueError) as ctx:
+            read_catchup.merge_pages([PAGE1, PAGE3])
+        self.assertIn("skipping 103..104", str(ctx.exception))
+
+    def test_rejects_non_dict_event_in_saved_page(self):
+        page = {"through": 3, "has_more": False, "latest": 3,
+                "events": ["not an event"]}
+        with self.assertRaises(ValueError):
+            read_catchup.merge_pages([page])
+
+    def test_non_dict_event_cli_exits_two_without_traceback(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "page.json"
+            path.write_text(json.dumps(
+                {"through": 3, "has_more": False, "latest": 3,
+                 "events": [42]}), encoding="utf-8")
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                rc = read_catchup.main(["--page", str(path)])
+            self.assertEqual(rc, 2)
+            self.assertIn("object", err.getvalue())
+            self.assertNotIn("Traceback", err.getvalue())
+
     def test_rejects_empty_page_list(self):
         with self.assertRaises(ValueError):
             read_catchup.merge_pages([])
@@ -115,6 +142,23 @@ class CatchUpTests(unittest.TestCase):
         def fetch(after, limit):
             return {"through": after + 1, "has_more": False, "latest": after + 1,
                     "events": [ev(after, text="old")]}
+
+        with self.assertRaises(ValueError):
+            list(read_catchup.catch_up(fetch, 50, 20, 25))
+
+    def test_live_gap_errors_instead_of_skipping(self):
+        def fetch(after, limit):
+            return {"through": 105, "has_more": False, "latest": 105,
+                    "events": [ev(105, text="too far")]}
+
+        with self.assertRaises(ValueError) as ctx:
+            list(read_catchup.catch_up(fetch, 100, 20, 25))
+        self.assertIn("skipping 101..104", str(ctx.exception))
+
+    def test_non_dict_event_live_errors(self):
+        def fetch(after, limit):
+            return {"through": after + 1, "has_more": False, "latest": after + 1,
+                    "events": ["not an event"]}
 
         with self.assertRaises(ValueError):
             list(read_catchup.catch_up(fetch, 50, 20, 25))

@@ -66,25 +66,33 @@ def merge_pages(pages: list[dict]) -> tuple[list[str], int, bool, object, int]:
         if not isinstance(events, list):
             raise ValueError(f"page {index + 1} needs an events list")
         if events:
-            first = events[0].get("sequence")
-            if index and through is not None and not isinstance(first, int):
-                raise ValueError(f"page {index + 1} first event needs a sequence")
-            if index and isinstance(first, int) and first <= through:  # type: ignore[operator]
+            first_event = events[0]
+            if not isinstance(first_event, dict):
                 raise ValueError(
-                    f"page {index + 1} starts at {first}, at or before "
-                    f"previous through {through}; re-read or skipped"
+                    f"page {index + 1} first event must be an object"
                 )
+            first = first_event.get("sequence")
+            if index and through is not None:
+                if not isinstance(first, int):
+                    raise ValueError(
+                        f"page {index + 1} first event needs a sequence"
+                    )
+                if first != through + 1:
+                    if first > through + 1:
+                        raise ValueError(
+                            f"page {index + 1} starts at {first}, "
+                            f"skipping {through + 1}..{first - 1} "
+                            f"after previous through {through}"
+                        )
+                    raise ValueError(
+                        f"page {index + 1} starts at {first}, at or before "
+                        f"previous through {through}; re-read or skipped"
+                    )
         lines.extend(format_event(event) for event in events)
         count += len(events)
         through = page_through(page)
         has_more = bool(page.get("has_more"))
         latest = page.get("latest", latest)
-    footer = (
-        f"through {through} has_more {has_more} "
-        f"latest {latest} pages {len(pages)} events {count}"
-    )
-    if has_more:
-        footer += f"\nnext: read --after {through}"
     return lines, through, has_more, latest, count  # type: ignore[return-value]
 
 
@@ -105,10 +113,19 @@ def catch_up(fetch, after: int, limit: int, max_pages: int):
         if not isinstance(events, list):
             raise ValueError("page needs an events list")
         if events:
-            first = events[0].get("sequence")
+            first_event = events[0]
+            if not isinstance(first_event, dict):
+                raise ValueError("page first event must be an object")
+            first = first_event.get("sequence")
             if not isinstance(first, int):
                 raise ValueError("page first event needs a sequence")
-            if first <= cur:
+            if first != cur + 1:
+                if first > cur + 1:
+                    raise ValueError(
+                        f"page starts at {first}, "
+                        f"skipping {cur + 1}..{first - 1} "
+                        f"after cursor {cur}"
+                    )
                 raise ValueError(
                     f"page starts at {first}, at or before cursor {cur}; "
                     "re-read or skipped"
@@ -172,8 +189,8 @@ def main(argv: list[str] | None = None) -> int:
         try:
             pages = []
             for path in args.page:
-                raw = sys.stdin.read() if path == "-" else \
-                    open(path, encoding="utf-8").read()
+                raw = (sys.stdin.read() if path == "-"
+                       else Path(path).read_text(encoding="utf-8"))
                 page = json.loads(raw)
                 if not isinstance(page, dict):
                     raise ValueError(f"{path}: page must be a JSON object")
