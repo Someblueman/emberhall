@@ -16,6 +16,36 @@ second-order term and no sampling inside the core; for strongly
 nonlinear programs the answer is the tangent-plane answer, and the
 Monte Carlo baseline in `covreduce/baselines.py` is the honest check.
 
+## When first order stops being trustworthy
+
+Linear operations (sums, selections, windows, rebinning, scaling by
+constants) are exact at any source size: their Jacobian does not
+depend on the values. Only products and quotients of uncertain
+quantities carry a linearization error, driven by the *relative*
+standard deviations `r = σ/|value|` of the factors. Measured on
+`a·b` and `a/b` with equal relative σ `r` in both factors (exact
+product variance; seeded Monte Carlo, 20,000 draws, for the
+quotient; reproduced by `tests/test_firstorder_bounds.py`):
+
+| r | product variance error | quotient variance error |
+|---|---|---|
+| 0.01 | −0.005% | −0.3% |
+| 0.10 | −0.5% | −5.6% |
+| 0.30 | −4.3% | unusable (denominator draws approach zero) |
+| 0.50 | −11.1% | unusable |
+
+For a product the neglected term is exactly `var(a)·var(b)`, so the
+first-order variance is always an underestimate by the fraction
+`r_a²r_b²/(r_a² + r_b² + r_a²r_b²)`. Quotients degrade much faster
+because the denominator's own spread curves `1/b`; a Gaussian
+denominator that can approach zero has no finite ratio variance at
+all. Working rule: with every factor at `r ≤ 0.1`, first-order
+variances are within about half a percent for products — but check
+any quotient whose denominator has `r` above roughly `0.05` against
+`monte_carlo_covariance` before trusting it, and treat results
+with any factor at `r ≥ 0.3` as qualitative until Monte Carlo
+confirms them.
+
 ## Source identity
 
 Sharing is by object identity, not by value. Reusing one `source(...)`

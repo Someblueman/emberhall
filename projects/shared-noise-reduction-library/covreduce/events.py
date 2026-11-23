@@ -73,10 +73,11 @@ def benchmark_100k_events(n_events=100_000, n_bins=128):
         for i in range(n_events):
             yield {"bin": i % n_bins, "weight": 1.0 + (i % 7) * 0.01,
                    "variance": 0.25, "group": i % 4}
+    # Measure from before source construction so the peak includes setup.
+    tracemalloc.start()
     scales = {g: source(1.0 + 0.01 * g, 0.0004) for g in range(4)}
     monitor = source(1000.0, 25.0)
     background = source([0.5] * n_bins, [0.01] * n_bins, dims=("bin",))
-    tracemalloc.start()
     start = time.perf_counter()
     result = reduce_events_to_bins(stream(), n_bins, group_scales=scales,
                                    monitor=monitor, background=background)
