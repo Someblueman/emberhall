@@ -1,4 +1,4 @@
-"""Exact two-row lift classifications for T(a,b,1), b in {2,4,6}, even a>b.
+"""Exact two-row lift classifications for T(a,b,1), b in {2,4,6,8}, even a>b.
 
 This classifies a subdivision template, not arbitrary homometric partitions.
 Python standard library only. See SHORT_ARM_LIFTS.md for the proof.
@@ -49,6 +49,35 @@ def elimination(b, x, y, p, q):
         {z: c for (z, u), c in n.items() if u == 0} for n in nums]
 
 
+def period_bound_certificate(b):
+    """Verify P divides (1-z^T)^2, T=b(b-1), by exact integer division."""
+    if type(b) is not int or b < 2 or b % 2:
+        raise ValueError("require even b>=2")
+    T = b*(b-1)
+    P = Counter()
+    for i, ci in ((0, -1), (1, 1)):
+        for j, cj in ((0, 1), (b, -1)):
+            for k, ck in ((0, 1), (b-1, 1)):
+                P[i+j+k] += ci*cj*ck
+    P = {k: v for k, v in P.items() if v}
+    remainder = {0: 1, T: -2, 2*T: 1}
+    degree, quotient = max(P), {}
+    while remainder and max(remainder) >= degree:
+        shift = max(remainder)-degree
+        coeff = remainder[max(remainder)]//P[degree]
+        quotient[shift] = coeff
+        for k, v in P.items():
+            pos = k+shift
+            remainder[pos] = remainder.get(pos, 0)-coeff*v
+            if not remainder[pos]:
+                del remainder[pos]
+    if remainder:
+        raise ArithmeticError("period annihilator division failed")
+    return {"proof": "PASS", "period_multiple": T,
+            "quotient_degree": max(quotient), "remainder_terms": 0,
+            "stream_check_bound": 3*T+2*b+2}
+
+
 def forced_stream(b, x, y, p=1, q=1):
     """Exact recurrence until first invalid sign or witnessed periodic state.
 
@@ -60,8 +89,10 @@ def forced_stream(b, x, y, p=1, q=1):
         raise ArithmeticError("elimination constant must be -1")
     seq, seen = [[], []], {}
     start = max(max(n, default=0) for n in nums) + 2*b
-    # At most 2^(4b) valid binary states, plus the nonhomogeneous prefix.
-    for k in range(start + (1 << (4*b)) + 2):
+    # P divides (1-z^(b(b-1)))^2. Beyond the numerator each
+    # residue subsequence is affine; three valid signs force zero slope.
+    # The proved quadratic bound includes a full repeated 2b-word window.
+    for k in range(3*b*(b-1)+2*b+2):
         for s, n in zip(seq, nums):
             s.append(-(n.get(k, 0) - sum(c*s[k-j] for j, c in P.items() if 0 < j <= k)))
         if any(s[-1] not in (-1, 1) for s in seq):
@@ -130,8 +161,8 @@ def _solve_branches(a, b, source):
 
 
 def solve(a, b=4):
-    if type(a) is not int or type(b) is not int or b < 2 or b > 6 or a <= b or a % 2 or b % 2:
-        raise ValueError("require even a>b, with even b between 2 and 6")
+    if type(a) is not int or type(b) is not int or b < 2 or b > 8 or a <= b or a % 2 or b % 2:
+        raise ValueError("require even a>b, with even b between 2 and 8")
     return _solve_branches(a, b, branches(b))
 
 
@@ -169,8 +200,9 @@ def cancellation_indices(poly, period):
 
 def prove_fixed_middle(b=4):
     """Exhaust boundary states, then certify every eventual length symbolically."""
-    if b not in (2, 4, 6):
-        raise ValueError("proved middle lengths are 2,4,6")
+    if b not in (2, 4, 6, 8):
+        raise ValueError("proved middle lengths are 2,4,6,8")
+    period_certificate = period_bound_certificate(b)
     counts, periodic, relevant_bad, latest_bad = Counter(), [], [], -1
     for x, y, q, seq, info in branches(b):
         counts[info["kind"]] += 1
@@ -213,6 +245,9 @@ def prove_fixed_middle(b=4):
         6: (8159, 33, 30, {8: 2, 10: 1, 12: 40, 20: 1, 30: 1},
             "a divisible by 10, or a=8 or a=12"),
     }
+    expected[8] = (130943, 129, 56,
+                   {10: 2, 12: 10, 14: 1, 16: 160, 28: 1, 42: 1, 56: 1},
+                   "a divisible by 14, or a=10 or a=12 or a=16")
     invalid, cycles, bad, positive, criterion = expected[b]
     if (counts != {"invalid": invalid, "periodic": cycles} or latest_bad != bad
             or {a: n for a, n in initial.items() if n} != positive
@@ -221,6 +256,7 @@ def prove_fixed_middle(b=4):
     return {"proof": "PASS", "scope": f"two-row E1=E2=0 on T(a,{b},1), even a>{b}",
             "criterion": criterion, "boundary_choices_up_to_sign": 2**(2*b+1),
             "invalid": invalid, "latest_invalid_coefficient": bad,
+            "stream_check_bound": period_certificate["stream_check_bound"],
             "periodic": cycles, "period": period, "tail_starts_at": threshold,
             "tail_solution_counts_up_to_sign": tail_counts, "initial_counts_up_to_sign": initial}
 
@@ -241,17 +277,99 @@ def construct(a, g, summary=False, b=4):
     return _apply_lift((a, b, 1), words, g, summary)
 
 
+def prove_uniform_family():
+    """Exact independent-variable certificate for a=2k(b-1), even b."""
+    one = {(0, 0, 0): 1}
+    z, R, A = {(1, 0, 0): 1}, {(0, 1, 0): 1}, {(0, 0, 1): 1}
+    B = mul(z, R)
+    D = mul(add(one, neg(z)), add(one, R))
+    N = [neg(mul(add(one, neg(R)), add(one, neg(A)))),
+         neg(mul(add(one, neg(B)), add(one, R))), D]
+    ends = [A, B, z]
+    def residual(numerators):
+        out = {}
+        for i in range(3):
+            factor = add(one, *[neg(ends[j]) for j in range(3) if j != i])
+            out = add(out, mul(numerators[i], factor),
+                      neg(mul(mul(ends[i], R), star(numerators[i]))))
+        return out
+    answer = residual(N)
+    corrupt = residual([N[0], N[1], neg(N[2])])
+    reflection = add(mul(B, star(D)), D)
+    if answer or reflection or not corrupt:
+        raise ArithmeticError("uniform family certificate failed")
+    return {"proof": "PASS", "ring": "Z[z,z^-1,R,R^-1,A,A^-1]",
+            "e1_terms": len(answer), "e2_terms": len(answer),
+            "denominator_reflection_terms": len(reflection),
+            "corrupt_short_word_terms": len(corrupt),
+            "scope": "even b>=2, k>=1, a=2k(b-1)>b; every odd g>=3"}
+
+
+def construct_uniform(b, k, g, summary=False):
+    """Uniform construction for arbitrary even middle length, no enumeration."""
+    from two_param_lifts import _apply_lift
+    if type(b) is not int or b < 2 or b % 2 or type(k) is not int or k < 1:
+        raise ValueError("require even b>=2 and integer k>=1")
+    a = 2*k*(b-1)
+    if a <= b:
+        raise ValueError("require 2k(b-1)>b")
+    X = (("-"*(b-1)+"+"*(b-1))*k, "-"*b, "+")
+    Y = tuple("".join("-" if c == "+" else "+" for c in word) for word in X)
+    return _apply_lift((a, b, 1), tuple(zip(X, Y)), g, summary)
+
+
+def prove_double_family():
+    """Independent z,B certificate for T(2b,b,1), every even b>=4."""
+    one, z, B = mon(), mon(1), mon(u=1)
+    D = add(one, neg(z))
+    X = [{(0, 0): 1, (-1, 1): -2, (1, 1): 2, (0, 2): -1},
+         add(neg(one), B), D]
+    Y = [{(0, 0): 1, (1, 0): -2, (-2, 1): 2, (-1, 1): -2,
+          (-2, 2): 2, (0, 2): -1},
+         {(0, 0): -1, (1, 0): 2, (-2, 1): -2, (0, 1): 1}, D]
+    ends = [mul(B, B), B, z]
+    answer = _residual_polys(ends, X, Y, reflected_scale=1)
+    corrupt = _residual_polys(ends, [X[0], X[1], neg(D)], Y, reflected_scale=1)
+    if any(answer) or not any(corrupt):
+        raise ArithmeticError("double family certificate failed")
+    return {"proof": "PASS", "ring": "Z[z,z^-1,B,B^-1]",
+            "e1_terms": len(answer[0]), "e2_terms": len(answer[1]),
+            "corrupt_short_word_terms": sum(map(len, corrupt)),
+            "scope": "every even b>=4 and every odd g>=3 on T(2bg,bg,g)"}
+
+
+def construct_double(b, g, summary=False):
+    from two_param_lifts import _apply_lift
+    if type(b) is not int or b < 4 or b % 2:
+        raise ValueError("require even b>=4")
+    X = ("+"*(b-1)+"--"+"+"*(b-1), "-"*b, "+")
+    Y = ("+"+"-"*(b-3)+"+"+"-"*(b-1)+"++", "-"+"+"*(b-3)+"--", "+")
+    return _apply_lift((2*b, b, 1), tuple(zip(X, Y)), g, summary)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--prove", action="store_true")
     group.add_argument("--solve", type=int, nargs=2, metavar=("A", "B"))
+    group.add_argument("--uniform", type=int, nargs=3, metavar=("B", "K", "G"))
+    group.add_argument("--prove-uniform", action="store_true")
+    group.add_argument("--double", type=int, nargs=2, metavar=("B", "G"))
+    group.add_argument("--prove-double", action="store_true")
     group.add_argument("--construct", type=int, nargs=2, metavar=("A", "G"))
     parser.add_argument("--summary", action="store_true")
-    parser.add_argument("--middle", type=int, choices=(2,4,6), default=4)
+    parser.add_argument("--middle", type=int, choices=(2,4,6,8), default=4)
     args = parser.parse_args()
     try:
-        if args.prove:
+        if args.prove_double:
+            result = prove_double_family()
+        elif args.double:
+            result = construct_double(*args.double, summary=args.summary)
+        elif args.prove_uniform:
+            result = prove_uniform_family()
+        elif args.uniform:
+            result = construct_uniform(*args.uniform, summary=args.summary)
+        elif args.prove:
             result = prove_fixed_middle(args.middle)
         elif args.construct:
             result = construct(*args.construct, summary=args.summary, b=args.middle)

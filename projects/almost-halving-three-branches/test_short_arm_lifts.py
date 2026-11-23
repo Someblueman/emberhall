@@ -4,7 +4,7 @@ from fractions import Fraction
 from itertools import product
 import unittest
 
-from short_arm_lifts import (branches, construct, elimination, extend, forced_stream,
+from short_arm_lifts import (period_bound_certificate, construct_double, prove_double_family, construct_uniform, prove_uniform_family, branches, construct, elimination, extend, forced_stream,
                              prove_four_arm, prove_fixed_middle, residuals, solve, cancellation_indices)
 from two_row_subdivision import _build_two_row_matrix
 
@@ -59,6 +59,14 @@ class ShortArmLiftsTest(unittest.TestCase):
         for a in (32, 34, 36, 38, 40, 50):
             self.assertEqual(len(solve(a, 6)), int(a % 10 == 0))
 
+    def test_middle_eight_certificate(self):
+        proof = prove_fixed_middle(8)
+        self.assertEqual(proof["boundary_choices_up_to_sign"], 131072)
+        self.assertEqual(proof["tail_solution_counts_up_to_sign"],
+                         {r: int(r == 0) for r in range(0, 14, 2)})
+        # Independent full-matrix Q elimination at an exceptional length.
+        self.assertEqual(rational_count(12, 8), 10)
+
     def test_last_coefficient_boundary_correction(self):
         # A term z^(a-1) survives elimination. Omitting its correction
         # incorrectly rejects even the known gap-two solution at a=6.
@@ -79,6 +87,15 @@ class ShortArmLiftsTest(unittest.TestCase):
                 self.assertEqual(residuals(a, 4, X[0], Y[0], X[1], Y[1], X[2][0], Y[2][0]), [{}, {}])
                 X[0][0] *= -1
                 self.assertTrue(any(residuals(a, 4, X[0], Y[0], X[1], Y[1], 1, Y[2][0])))
+
+    def test_quadratic_stream_bound(self):
+        for b in (2, 4, 6, 8, 10, 12):
+            proof = period_bound_certificate(b)
+            self.assertEqual(proof["period_multiple"], b*(b-1))
+            self.assertEqual(proof["remainder_terms"], 0)
+            self.assertEqual(proof["quotient_degree"], 2*b*(b-1)-2*b)
+        with self.assertRaises(ValueError):
+            period_bound_certificate(3)
 
     def test_elimination_denominator_factorization(self):
         for b in (2, 4, 6):
@@ -127,8 +144,35 @@ class ShortArmLiftsTest(unittest.TestCase):
                 return out
             self.assertEqual(profile(left), profile(right))
 
+    def test_uniform_family_outside_enumeration_cap(self):
+        proof = prove_uniform_family()
+        self.assertEqual(proof["e1_terms"], 0)
+        self.assertEqual(proof["e2_terms"], 0)
+        self.assertGreater(proof["corrupt_short_word_terms"], 0)
+        for b, k, g in ((2, 3, 3), (10, 1, 3), (12, 2, 5)):
+            pair = construct_uniform(b, k, g)
+            self.assertTrue(pair["homometric"])
+            self.assertEqual(pair["lengths"], [2*k*(b-1)*g, b*g, g])
+            self.assertEqual(2*pair["size"], 1+sum(pair["lengths"]))
+        for b, k, g in ((3, 1, 3), (2, 1, 3), (4, 0, 3), (4, 1, 4)):
+            with self.assertRaises(ValueError):
+                construct_uniform(b, k, g)
+
+    def test_double_family(self):
+        proof = prove_double_family()
+        self.assertEqual((proof["e1_terms"], proof["e2_terms"]), (0, 0))
+        self.assertGreater(proof["corrupt_short_word_terms"], 0)
+        for b in (4, 6, 10, 12):
+            w = construct_double(b, 3)
+            self.assertTrue(w["homometric"])
+            self.assertEqual(w["lengths"], [6*b, 3*b, 3])
+            self.assertEqual(2*w["size"], 1+sum(w["lengths"]))
+        for b in (2, 5, True):
+            with self.assertRaises(ValueError):
+                construct_double(b, 3)
+
     def test_invalid_inputs_and_scope(self):
-        for a, b in ((4, 4), (7, 4), (12, 3), (12, 8), (True, 4)):
+        for a, b in ((4, 4), (7, 4), (12, 3), (12, 10), (True, 4)):
             with self.assertRaises(ValueError):
                 solve(a, b)
         with self.assertRaisesRegex(ValueError, 'arbitrary partitions'):
