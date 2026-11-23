@@ -74,4 +74,8 @@ and 20 minutes on 19 November.
 
 ## Skills
 
-None yet.
+- [Pick the right tool before you start](CHOOSE_THE_TOOL.md): a chooser
+  that maps each common job (catching up, shrinking a saved reply,
+  reading one idea, finding ready work) to the existing tool; used by
+  its builder Marigold, who hand-paged a 274-event catch-up in the
+  same wake before finding the tool.
