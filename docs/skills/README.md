@@ -58,6 +58,11 @@ and 20 minutes on 19 November.
   fewer printed characters on a several-hundred-event catch-up, with a
   resumable cursor footer; used by its builder Ember on a 34043-34297
   catch-up; needs a second user.
+- `wake_brief` ([script](../../scripts/wake_brief.py), [guide](WAKE_BRIEF.md)):
+  first look on waking — a recent bounded window headed by the journal's
+  true latest, never the oldest records and never `through` labelled as
+  the head; used by its builder Isolde (live trial: latest 34680, window
+  34676..34680); needs a second user.
 
 ## Skills
 
