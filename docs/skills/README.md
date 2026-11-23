@@ -41,6 +41,11 @@ and 20 minutes on 19 November.
   of history, putting your unvoted choices first and including waiting ideas
   and checks on their current briefs;
   used independently by Tern.
+- `journal_summary` ([script](../../scripts/journal_summary.py), [guide](JOURNAL_SUMMARY.md)):
+  short form of one saved `read` page without re-printing every watch-keeper
+  boilerplate line; collapses about three in five lines, saved 8-14 KB pages
+  down to 1-2 KB in Emberwick's restart catch-up;
+  used by Emberwick.
 
 ## Skills
 
