@@ -42,8 +42,14 @@ def module_name(path: str) -> str | None:
     return ".".join(parts) if parts else None
 
 
-def _resolve(imported: str, known: set[str]) -> str | None:
+def _resolve(imported: str, known: set[str], aliases: dict[str, str] | None = None) -> str | None:
     """Longest known module that is a prefix of the imported dotted name."""
+    # Scripts are imported by bare stem here (`import wake_brief` with
+    # scripts/ on sys.path), so a first-component alias wins first.
+    if aliases:
+        head = imported.split(".", 1)[0]
+        if head in aliases:
+            return aliases[head]
     parts = imported.split(".")
     for end in range(len(parts), 0, -1):
         candidate = ".".join(parts[:end])
@@ -87,6 +93,8 @@ class Graph:
         self.deps: dict[str, set[str]] = {}
         self.literals: dict[str, set[str]] = {}
         known = {name for p in sources if (name := module_name(p))}
+        aliases = {Path(p).stem: module_name(p) for p in sources
+                   if p.startswith("scripts/") and module_name(p)}
         for path, source in sources.items():
             name = module_name(path)
             if name is None:
@@ -94,7 +102,7 @@ class Graph:
             package = name if path.endswith("__init__.py") else name.rpartition(".")[0]
             imports, literals = parse_source(source, package)
             self.literals[name] = literals
-            self.deps[name] = {r for i in imports if (r := _resolve(i, known)) and r != name}
+            self.deps[name] = {r for i in imports if (r := _resolve(i, known, aliases)) and r != name}
         self.house_modules = {n: d for n, d in self.deps.items() if n == "house" or n.startswith("house.")}
         self.test_imports = {n: d for n, d in self.deps.items()
                              if n.startswith("tests.test_") or n.startswith("tests.") and ".test_" in n}
@@ -122,8 +130,21 @@ class Graph:
 
     def tests_referencing(self, path: str) -> set[str]:
         base = path.rsplit("/", 1)[-1].lower()
+
+        def names_path(lit: str) -> bool:
+            if path in lit or (base not in GENERIC_BASENAMES and base in lit):
+                return True
+            # A literal naming a containing directory ("docs/skills/", even
+            # inside a longer sentence) covers files under it: globbing
+            # tests name the directory, not the file. Single-component
+            # ancestors ("docs") do not count; those stay unmapped -> full.
+            parts = path.split("/")[:-1]
+            clean = lit.strip().rstrip("/")
+            return any(clean == "/".join(parts[:i]) or "/".join(parts[:i]) + "/" in lit
+                       for i in range(2, len(parts) + 1))
+
         hits = {name for name, literals in self.literals.items()
-                if any(path in lit or (base not in GENERIC_BASENAMES and base in lit) for lit in literals)}
+                if any(names_path(lit) for lit in literals)}
         found = {name for name in hits if name in self.test_closure}
         for hit in hits:
             found |= self.tests_for(hit)
@@ -159,6 +180,14 @@ def select(graph: Graph, changed: list[tuple[str, str]]) -> dict:
             else:
                 full_reasons.append(f"{path}: no test imports it")
                 reasons[path] = "unmapped house module -> full suite"
+        elif path.startswith("scripts/") and name and not deleted:
+            tests = graph.tests_for(name) | graph.tests_referencing(path)
+            if tests:
+                selected |= tests
+                reasons[path] = f"{len(tests)} test module(s) import or name this script"
+            else:
+                full_reasons.append(f"{path}: unmapped")
+                reasons[path] = "unmapped script -> full suite"
         else:
             tests = set() if deleted else graph.tests_referencing(path)
             if tests:
@@ -288,6 +317,7 @@ def replay(count: int) -> dict:
             "selected": total_tests if result["full"] else len(result["tests"]),
             "test_modules": total_tests,
             "misses": misses,
+            "full_reasons": result["full_reasons"],
         })
     subset_sizes = sorted(r["selected"] for r in rows if not r["full"])
     return {

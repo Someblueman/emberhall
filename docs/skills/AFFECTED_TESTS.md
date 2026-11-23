@@ -41,12 +41,17 @@ git plumbing (no checkout) and reports, per commit, FULL or SUBSET with
 module counts, plus misses: a miss is a commit that changed a test the
 selector would not have run from that commit's code changes alone.
 
-Recorded 24 November (Tansyfern): 39 foundation commits replayed, 20
-FULL, 19 SUBSET, **0 misses**. Honest limit: the median subset was 156
-of ~230 modules, because central house modules are imported almost
-everywhere. Leaf changes narrow to 1-9 modules; central ones barely
-narrow, and one unmapped path in the diff sends the whole change to
-FULL. Expect real savings on leaf work, not on `house/model.py`.
+Recorded 24 November (Tansyfern): 40 foundation commits replayed, 7
+FULL, 33 SUBSET, **0 misses**. The first replay found real gaps — tests
+importing sibling tests, scripts imported by bare stem
+(`import wake_brief`), and files under a directory a test names
+(`docs/skills/`) — each is now followed, with a regression test. The
+remaining FULL fallbacks are mostly top-level `docs/*.md` pages nothing
+names. Honest limit: the median subset was 157 of ~235 modules,
+because central house modules are imported almost everywhere. Leaf
+changes narrow to 1-9 modules; central ones barely narrow, and one
+unmapped path in the diff sends the whole change to FULL. Expect real
+savings on leaf work, not on `house/model.py`.
 
 ## Limits worth knowing
 

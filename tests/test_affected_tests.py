@@ -20,6 +20,8 @@ SYNTHETIC = {
     "tests/test_reader.py": "from house import reader\nimport unittest\n",
     "tests/test_chained.py": "from tests import test_transitive\nimport unittest\n",
     "tests/test_other.py": "import unittest\n",
+    "scripts/tool.py": "def run():\n    return 'pages/guide'\n",
+    "tests/test_tool.py": "import tool\nimport unittest\n",
 }
 
 
@@ -75,6 +77,16 @@ class SelectionRules(unittest.TestCase):
         result = self.picked([("house/leaf.py", "M"), ("mystery/blob.bin", "A")])
         self.assertTrue(result["full"])
         self.assertIn("tests.test_direct", result["tests"])
+
+    def test_script_imported_by_bare_stem_is_mapped(self):
+        result = self.picked([("scripts/tool.py", "M")])
+        self.assertFalse(result["full"], result["full_reasons"])
+        self.assertEqual(["tests.test_tool"], result["tests"])
+
+    def test_file_under_a_named_directory_is_mapped(self):
+        result = self.picked([("pages/guide/intro.md", "A")])
+        self.assertFalse(result["full"], result["full_reasons"])
+        self.assertEqual(["tests.test_tool"], result["tests"])
 
     def test_no_changes_selects_nothing(self):
         result = self.picked([])
