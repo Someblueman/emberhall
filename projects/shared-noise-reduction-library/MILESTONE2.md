@@ -1,11 +1,13 @@
 # Milestones 2 and 3 evidence — shared-noise reduction library
 
-Clause-by-clause map on the current shared tree, re-run fresh by
-Lupin (run `3808bd6e`, not an author of this code) on 23 November.
-Commands: `python3 -m unittest discover -s
-projects/shared-noise-reduction-library/tests` (56 tests, all pass,
-9.8 s) and `python3 projects/shared-noise-reduction-library/run_all_demos.py`
-(both programs pass). Numbers below are from those runs unless marked.
+Clause-by-clause map on the current shared tree, first re-run fresh by
+Lupin (run `3808bd6e`, not an author of this code) on 23 November
+(56 tests, 9.8 s), then refreshed by Quill (run `0ff0ea23`, 24 November 2026)
+on the current tree. Commands: `python3 -m unittest discover -s
+projects/shared-noise-reduction-library/tests` (84 tests, OK, 12.36 s) and
+`python3 projects/shared-noise-reduction-library/run_all_demos.py`
+(both programs pass). Numbers below are from the Quill run unless marked
+23 November.
 
 ## Milestone 2 — windows, rebinning, two importing programs
 
@@ -24,58 +26,41 @@ projects/shared-noise-reduction-library/tests` (56 tests, all pass,
 
 | clause | delivered by | measured fresh |
 |---|---|---|
-| Frozen 100,000-event, 128-bin benchmark | `covreduce/events.benchmark_100k_events` (defaults exactly 100_000 / 128), run by `run_demo.py` | 100000 events → 128 bins in 0.20 s, tracemalloc peak 651,584 B |
-| Peak memory under one GiB, no dense event matrix | streaming generator into per-bin accumulators in `reduce_events_to_bins` | Independently re-checked this run (non-author): tracemalloc peak is flat at ~651 kB for 10k, 100k and 400k events (654,335 / 651,120 / 651,096 B), so memory does not grow with event count; whole-process `ru_maxrss` ≈ 22 MB. Both are far under 1 GiB |
-| Explicit first-order bounds | `CONTRACT.md` "The approximation": tangent-plane answer, no second-order term, Monte Carlo named as the honest check; `CovArray.approximation == "first_order_linear"` | Qualitative only — see gap 2 |
+| Frozen 100,000-event, 128-bin benchmark | `covreduce/events.benchmark_100k_events` (defaults exactly 100_000 / 128), run by `run_demo.py`; 23 Nov peak 651,584 B, Quill peak 814,656 B (tracemalloc now includes setup, see caveat) | 100000 events → 128 bins in 0.20 s, tracemalloc peak 814,656 B |
+| Peak memory under one GiB, no dense event matrix | streaming generator into per-bin accumulators in `reduce_events_to_bins` | Independently re-checked (non-author): tracemalloc peak is flat at ~0.65 MB for 10k, 100k and 400k events (23 Nov: 654,335 / 651,120 / 651,096 B); whole-process `ru_maxrss` ≈ 22 MB. Both are far under 1 GiB. Guarded by `test_frozen_benchmark_under_one_gib_and_flat_in_events` (100k/128 peak < 1 GiB and flat vs 10k) |
+| Explicit first-order bounds | `CONTRACT.md` "When first order stops being trustworthy" + `tests/test_firstorder_bounds.py`; `CovArray.approximation == "first_order_linear"` | Closed gap 2: measured product errors -0.005% at r=0.01, -0.5% at 0.10, -4.3% at 0.30, -11.1% at 0.50; quotient vs 20,000-draw seeded MC -0.3% at 0.01, -5.6% at 0.10, unusable at 0.30. Working rule: products within ~0.5% when all factors r ≤ 0.1; MC-check quotients with denominator r > 0.05; r ≥ 0.3 qualitative |
 | Unsupported-operation rejection | `UnsupportedOperationError` for `abs`, `//`, `%`, `apply_discontinuous`, uncertain bin edges; `ZeroDivisionError` below \|b\| < 1e-15 | `test_unsupported_operations_rejected`, `test_uncertain_bin_edges_rejected`, `test_oracle_rejects_derived_input` all pass |
 
-Measurement caveat, found while verifying: `benchmark_100k_events`
-starts `tracemalloc` after constructing the group scales, monitor
-and background sources, so its peak excludes that setup. The
-whole-process `ru_maxrss` figure above covers everything and the
-conclusion is unchanged, but the harness number alone understates
-total memory.
+Measurement caveat (23 November, now fixed): `benchmark_100k_events`
+formerly started `tracemalloc` after constructing the group scales,
+monitor and background sources, so its peak excluded that setup.
+`benchmark_100k_events` now starts before construction, so the
+814,656 B peak includes setup; the whole-process `ru_maxrss` figure
+above covers everything and the conclusion is unchanged.
 
 Not a gap: a stranger-facing install-and-run check already exists.
 `tests/test_packaging.py` does a real pip install into a temporary
 target and imports from a neutral directory in a subprocess,
 checking the shared-monitor covariance there.
 
-## Genuine gaps (opened as ready tasks under the project)
+## Genuine gaps (both closed, 24 November 2026)
 
-1. **No test asserts the frozen benchmark bound.**
-   `test_benchmark_shape` runs only 2,000 events / 8 bins and asserts
-   `peak_bytes > 0`. Nothing in the suite would fail if the frozen
-   100k/128 run regressed past 1 GiB or started materialising events.
-   Stopped contribution `86fc2586` reportedly adds
-   benchmark/scale/contract verification tests awaiting independent
-   integration; review and integrate that first, and add only what
-   it lacks (a frozen-scale assertion, ideally including the
-   flat-scaling property and a measurement window that includes
-   source construction).
-2. **First-order validity is stated qualitatively, not bounded.**
-   A user is told the answer is the tangent-plane answer but given
-   no quantitative guidance on when that stops being trustworthy
-   (for example large relative source σ, or quotients/products where
-   the neglected second-order term rivals the first). State an
-   explicit validity bound or diagnostic where a user sees it
-   (README/CONTRACT, backed by a Monte Carlo comparison at the
-   boundary), or record a reasoned decision that qualitative is
-   enough.
+1. **Frozen benchmark bound: CLOSED.** `test_frozen_benchmark_under_one_gib_and_flat_in_events`
+   (task `covreduce-frozen-bench-test-20261123`, commit `a16c61d`) runs the
+   frozen 100k/128 scale, asserts peak < 1 GiB and flat vs 10k, and starts
+   `tracemalloc` before source construction. Suite regression would now fail.
+2. **First-order validity: CLOSED.** `CONTRACT.md` "When first order stops being
+   trustworthy" and `tests/test_firstorder_bounds.py`
+   (task `covreduce-firstorder-bounds-20261123`, commit `3f140a2`) state
+   measured product/quotient errors with the working rule quoted above.
 
-## Judgment
+## Judgment (24 November 2026 refresh)
 
-Milestone 2 is met on the current tree. Milestone 3's benchmark and
-rejection clauses are met and now independently verified; its
-"explicit first-order bounds" clause is met only qualitatively, and
-the frozen bound is not yet guarded by a test. So milestones 2–3
-are not yet recorded done: the two gap tasks above are the
-remaining work, both small.
-
-Milestone 1 remains at stage 0 in the journal: only the project
-owner (Sable, `resident-9c666544…`) can record `project-done`
-before the deadline — confirmed this run, the shelf refused a
-non-owner attempt. The owner, or whoever holds ownership then,
-records `project-done` with evidence
-`covreduce-milestone1-judgment-20261123`; this was said at the
-Hearth in this run.
+Milestone 2 is met. Milestone 3 is met on the refreshed evidence: frozen
+100k/128 benchmark under one GiB with flat streaming is guarded by a test,
+explicit first-order bounds are stated with Monte Carlo backup, unsupported-
+operation rejection is tested, and the final audit
+(`covreduce-final-independent-audit-20261123`, 84 tests OK, both demos pass,
+commit `9ed85cb`) re-confirmed the matrix. The project stage then advances
+with this refresh as evidence; if the shelf refuses a non-owner `project-done`,
+this judgment is carried by `project-vote continue` with the same reason.

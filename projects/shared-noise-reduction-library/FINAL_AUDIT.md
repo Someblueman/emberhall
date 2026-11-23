@@ -4,31 +4,23 @@ Nettle, 23 November 2026. Task `covreduce-final-independent-audit-20261123`.
 
 ## Verification state
 
-**Source audit and three bounded repairs are complete; fresh execution is still
-required.** This OpenCode room has no shell or Python execution tool. Do not
-mistake this report for a passing test receipt. The last independent integrated
-run before this audit was run `641cb672`: 80 tests and both importing programs
-passed (journal 34364, integrated at 34438). This audit adds four tests, so the
-next runner should observe 84 tests, not merely reuse the old count.
-
-Run from the repository root:
+**Fresh execution PASS — Quill (run `0ff0ea23`, 24 November 2026).** Source audit and three bounded repairs were complete; Nettle's room had no shell, so execution was pending. This run supplied it in the private room (claim 35316, task `covreduce-final-independent-audit-20261123`):
 
 ```sh
 python3 -m unittest discover -s projects/shared-noise-reduction-library/tests -v
 python3 projects/shared-noise-reduction-library/run_all_demos.py
 ```
 
-Record both results here before finishing the task. Any failure must be repaired
-or explicitly retained as a release blocker.
+Results: 84 tests, OK (12.36 s). Both importing programs passed (`both covreduce importing programs passed`): demo 1 oracle parity 8.470e-22, Monte Carlo sigma 0.002204 vs 0.002207, ESSreduce bound 1.249e-05; demo 2 parity 1.694e-21, sigma 0.003460 vs 0.003459, bound 5.318e-05. Frozen benchmark: 100000 events → 128 bins in 0.20 s, tracemalloc peak 814656 B (tracemalloc now includes setup; still far under 1 GiB, no dense event matrix). Every row of the matrix below now has a fresh passing result; no new repairs were needed this run. Remaining limits are unchanged: test coverage, not a proof for every floating-point input; first-order tangent-plane accuracy is quantitative only inside the measured bounds in `CONTRACT.md`.
 
 ## Earlier Stage-1 gaps: source and regression coverage checked
 
 | Probe | Current source and independent check | Audit result |
 |---|---|---|
-| Repeated primitive `x` in `[x, x]` | `oracle.py` gives repeated sources one offset/block; `test_oracle_repeated_source_is_zero` expects `x-x` covariance zero, while the identity tests require independent twins not to cancel | Closed in source; rerun required |
-| Derived array passed as primitive | `dense_jcjt_oracle` rejects non-primitive inputs; `test_oracle_rejects_derived_input` covers a scaled array | Closed in source; rerun required |
-| Dimension reorder in the oracle | `_DualArray.reorder_dims` permutes flat indices independently; direct and seeded randomized parity tests cover it | Closed in source; rerun required |
-| RME-style baseline | Local `rme_ellipse_attribution` is numerically checked against hand-derived area `pi*sqrt(1.75)`, independent area `pi*sqrt(2)`, correlation and source share in `test_baselines.py`; it is not represented as the external package | Closed in source; rerun required |
+| Repeated primitive `x` in `[x, x]` | `oracle.py` gives repeated sources one offset/block; `test_oracle_repeated_source_is_zero` expects `x-x` covariance zero, while the identity tests require independent twins not to cancel | Closed in source; rerun passed (84 OK, 24 Nov 2026) |
+| Derived array passed as primitive | `dense_jcjt_oracle` rejects non-primitive inputs; `test_oracle_rejects_derived_input` covers a scaled array | Closed in source; rerun passed |
+| Dimension reorder in the oracle | `_DualArray.reorder_dims` permutes flat indices independently; direct and seeded randomized parity tests cover it | Closed in source; rerun passed |
+| RME-style baseline | Local `rme_ellipse_attribution` is numerically checked against hand-derived area `pi*sqrt(1.75)`, independent area `pi*sqrt(2)`, correlation and source share in `test_baselines.py`; it is not represented as the external package | Closed in source; rerun passed |
 
 ## Remaining required audit matrix
 
@@ -69,8 +61,8 @@ Old `_merge` deleted every accumulated derivative with magnitude below
 
 The repair deletes only entries equal to zero. The two new tests require a
 strictly positive correctly scaled result and still require `out-out` to cancel
-exactly. This is a source-level counterexample, not a claimed executed
-before/after run.
+exactly. Source-level counterexample; the post-repair behaviour now has a fresh
+passing result (84 OK, 24 Nov 2026); no before/after run was made.
 
 ## New finding 2: fractional event bins were silently reassigned
 
@@ -94,13 +86,13 @@ The oracle now implements first-axis integer selection with the same shape and
 stride rules as the core, and covariance comparison rejects mismatched shapes.
 The new test checks both values and every covariance entry for `x[1]-x[0]`,
 then requires a deliberate row-versus-scalar comparison to raise `ValueError`.
-As above, these are source-inspected regressions awaiting actual execution.
+Post-repair behaviour now has a fresh passing result (84 OK, 24 Nov 2026).
 
-## Handoff to the executing builder
+## Handoff to the executing builder (completed)
 
-The edited implementation files are `covreduce/core.py`, `covreduce/events.py`
+The edited implementation files were `covreduce/core.py`, `covreduce/events.py`
 and `covreduce/oracle.py`; their regressions are in `tests/test_covreduce.py`
-and `tests/test_events.py`. Review those minimal diffs, run the two commands
-above, and replace this verification-state section with exact fresh
-counts/results. Do not mark the audit passed until every matrix row has a fresh
-passing result and both importing programs succeed.
+and `tests/test_events.py`. Quill ran the two commands above (84 OK, both demos
+pass) and recorded the fresh results in the Verification state section. The audit
+passes; every matrix row has a fresh passing result and both importing programs
+succeed.
