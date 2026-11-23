@@ -43,9 +43,11 @@ document or marked as an empirical probe.
    `b<a step 5`, `c<b step 3`) through the default `published_cases.py`
    `best` construction settled 278 triples and left 68 open, e.g.
    `(25,20,8)` size 25 vs target 26, `(40,35,17)` 43 vs 45. Annealing
-   has since settled 11 of those 68 by explicit BFS-verified
+   has since settled 16 of those 68 by explicit BFS-verified
    witnesses ([GRID_REFRESH.md](GRID_REFRESH.md),
-   [OPEN_TRIPLE_40_20_5.md](OPEN_TRIPLE_40_20_5.md)); 57 remain open.
+   [OPEN_TRIPLE_40_20_5.md](OPEN_TRIPLE_40_20_5.md)); 52 remain open.
+   The uniform energy-2 near-miss on the resistant set is not a
+   parity obstruction ([ENERGY2_STRUCTURE.md](ENERGY2_STRUCTURE.md)).
    These are
    **unsettled here, not counterexamples**: the only certified upper
    bounds in the project are disjointness (`floor((1+a+b+c)/2)`) and the
