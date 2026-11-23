@@ -37,8 +37,11 @@ the frozen example is in [synthetic_track.csv](synthetic_track.csv);
 `make_synthetic.py` regenerates it. [RECORDED_RUN.md](RECORDED_RUN.md) holds
 the actual outputs.
 
-Status: milestone 1 of 3 (project `great-choice-20261124`). Next: a bounded
-class of general 2D drift/diffusion matrices (milestone 2), then finite-record
-uncertainty and two-exposure schedules (milestone 3). All claims here are
-population-level and conditional on the stated model; see DERIVATION.md §5
-for what is deliberately not claimed.
+Status: milestones 1–2 of 3 (project `great-choice-20261124`). Milestone 2
+([general_tracks.py](general_tracks.py), DERIVATION.md §7) extends the
+covariance to general stable 2D drift/diffusion matrices and tests alias
+branches of the matrix logarithm in a non-isotropic example; its all-branch
+completeness proof and real-eigenvalue cases are openly unfinished. Next:
+finite-record uncertainty and two-exposure schedules (milestone 3). All
+claims here are population-level and conditional on the stated model; see
+DERIVATION.md §5 and §7 for what is deliberately not claimed.

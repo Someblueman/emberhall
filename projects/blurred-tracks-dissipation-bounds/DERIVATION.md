@@ -200,3 +200,42 @@ exposure, usually treated as a nuisance, is what breaks the alias.
 - **Under-resolved rotation:** the frozen example itself (`ωΔ = 3.9`);
   the principal-branch fit has the wrong sign and a third of the true `σ`.
 
+## 7. Milestone 2: general stable 2D drift and diffusion
+
+Implemented in [general_tracks.py](general_tracks.py), checked by
+[verify_general.py](verify_general.py). For `dX = AX dt + sqrt(2) B dW` with
+any stable real `2×2` drift `A` and SPD diffusion matrix `Dm = BBᵀ`
+(declared numerical class: `‖A‖Δ ≤ 50`), `Σ` solves
+`AΣ + ΣAᵀ + 2Dm = 0`, `C(τ) = e^{Aτ}Σ`, and
+`σ = tr(Dm⁻¹ M Σ Mᵀ)` with `M = A + Dm Σ⁻¹`. With
+`U = ∫₀^ε e^{Au}du`, `W = ∫₀^ε e^{-Av}dv`, `U2 = ∫₀^ε (ε-τ)e^{Aτ}dτ`
+(augmented matrix exponentials):
+
+```
+Γ_k = e^{AkΔ} U W Σ / ε²   (k ≥ 1),    Γ_0 = [U2Σ + (U2Σ)ᵀ]/ε² + ℓ²I.
+```
+
+Quadrature of the defining integrals agrees to `2.1e-07`; the milestone-1
+isotropic formulas are recovered to machine precision.
+
+**Branches, general case.** Since `Γ_k = e^{AkΔ} G` with `k`-independent
+`G`, the propagator `Φ = e^{AΔ} = Γ_2Γ_1⁻¹` is identified (when `Γ_1` is
+invertible). Candidate drifts are the real logarithms of `Φ`. For a complex
+eigenvalue pair `re^{±iθ}` these are `A_m` with log-eigenvalues
+`ln r ± i(θ + 2πm)`, all sharing `Φ`'s eigenvectors. Each `A_m` needs a
+*unique* candidate `Σ_m = ε²(U_mW_m)⁻¹Φ⁻¹Γ_1`; compatibility then requires:
+`Σ_m` symmetric, `Σ_m ≻ 0`, implied `Dm_m = -(A_mΣ_m + Σ_mA_mᵀ)/2 ≻ 0`, and
+zero lag matching with a single `ℓ² ≥ 0`. In the frozen non-isotropic
+example (`A = [[-1.2, -2.0], [0.8, -0.7]]`, `Dm = [[1, 0.3], [0.3, 0.6]]`,
+`Δ = 0.9, ε = 0.45, ℓ² = 0.03`, true `σ = 4.770`), exactly the true branch
+passes among `m ∈ [-60, 60]`; every other branch already fails `Σ_m`
+symmetry by at least `0.576` in absolute entry units.
+
+**Open, stated plainly:** unlike §5 there is no completeness proof over all
+`m` yet (the window is `|m| ≤ 60`; symmetry residuals there grow rather
+than shrink, but that is observation, not proof); real-eigenvalue `Φ`
+(including negative real eigenvalues, where real logarithms may fail to
+exist or come in non-eigenvector-sharing families) is not implemented;
+singular `Γ_1` and singular `U_mW_m` cases are unhandled. These are the
+next mathematical work, before milestone 3's finite-record study.
+

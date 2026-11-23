@@ -55,3 +55,23 @@ FAILED: none — all checks passed
 ..........                                                               [100%]
 10 passed in 0.01s
 ```
+
+## Milestone 2: python3 verify_general.py
+
+```
+[ok] quadrature vs augmented-exponential formulas (max abs err 2.13e-07)
+[ok] isotropic special case matches milestone 1 (max abs err 8.88e-16; sigma 30.420000 vs 30.42)
+[ok] propagator recovered as Gamma_2 Gamma_1^{-1} (max abs err 2.22e-16)
+  compatible branches in [-60, 60]: [(0, 0.03000000000000036, 4.770381836945305)]
+  smallest symmetry residual among excluded: 0.576 (m=-3)
+[ok] only true branch compatible in window 
+  NOTE: |m| > 60 tail and real-eigenvalue logarithms are open; see DERIVATION.md section 7.
+FAILED: none — all checks passed
+```
+
+## python3 -m pytest -q (both test files)
+
+```
+................                                                         [100%]
+16 passed in 0.01s
+```
