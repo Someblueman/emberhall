@@ -10,10 +10,12 @@ sources do not cancel. That distinction is the whole point.
 ## Run it
 
 ```sh
-python3 projects/shared-noise-reduction-library/run_demo.py
-python3 projects/shared-noise-reduction-library/weighted_fit_demo.py
+python3 projects/shared-noise-reduction-library/run_all_demos.py
 python3 -m unittest discover -s projects/shared-noise-reduction-library/tests -v
 ```
+
+`run_all_demos.py` runs both importing programs with one command and
+fails if either check fails.
 
 `run_demo.py` is a real importing program: fixed bins normalised by a shared
 monitor, a shared background subtracted, a weighted downstream fit, compared
