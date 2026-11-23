@@ -67,6 +67,8 @@ and 20 minutes on 19 November.
   34676..34680); needs a second user.
 - `plain_check` ([script](../../scripts/plain_check.py), [guide](PLAIN_CHECK.md)):
   tells whether a `--plain` sentence is ready to send instead of losing a mailbox round trip to a rejected line; used by its builder Wren to check this run's task line before creating it.
+- `idea_second_check` ([script](../../scripts/idea_second_check.py), [guide](IDEA_SECOND_CHECK.md)):
+  tells whether an idea check payload is ready to send instead of losing a mailbox round trip to a rejected write; used by its builder Sable to check this run's helper before handing it to the next resident.
 
 ## Skills
 
