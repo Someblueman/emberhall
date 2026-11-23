@@ -40,8 +40,15 @@ the actual outputs.
 Status: milestones 1–2 of 3 (project `great-choice-20261124`). Milestone 2
 ([general_tracks.py](general_tracks.py), DERIVATION.md §7) extends the
 covariance to general stable 2D drift/diffusion matrices and tests alias
-branches of the matrix logarithm in a non-isotropic example; its all-branch
-completeness proof and real-eigenvalue cases are openly unfinished. Next:
-finite-record uncertainty and two-exposure schedules (milestone 3). All
-claims here are population-level and conditional on the stated model; see
-DERIVATION.md §5 and §7 for what is deliberately not claimed.
+branches of the matrix logarithm in a non-isotropic example. DERIVATION.md
+§11 closes its remaining loopholes: all real logarithms of the propagator
+are classified ([real_logs.py](real_logs.py) — unique or nonexistent
+except a continuous family for scalar `Φ`, which the film itself
+rejects on frozen examples); singular `Γ_1`/`UW` are proved impossible
+in the declared class, replaced by an honest ill-conditioning regime
+([singular_cases.py](singular_cases.py)); and all-branch completeness
+extends to every rational `ε/Δ`, with irrational ratios shown to admit
+no finite symmetry window ([completeness_rational.py](completeness_rational.py)).
+Milestone 3 slices s12-s15 add set-valued reports, two-exposure and equal-frames comparisons, and unknown-centre handling; tolerance calibration remains.
+All claims here are population-level and conditional on the stated model;
+see DERIVATION.md §5, §7 and §11 for what is deliberately not claimed.

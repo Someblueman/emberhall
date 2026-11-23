@@ -119,3 +119,148 @@ FAILED: none — all checks passed
        3/4                  [1]                     0.0642
          1                  [1]                     0.3062
 ```
+
+## Section 11 loopholes: python3 real_logs.py && python3 singular_cases.py && python3 completeness_rational.py
+
+[ok] distinct positive: unique real log recovers A (max err 2.7e-15)
+[ok] no real logarithm: mixed signs (a negative eigenvalue has no conjugation-closed branch)
+[ok] no real logarithm: both negative distinct (a negative eigenvalue has no conjugation-closed branch)
+[ok] no real logarithm: negative Jordan block (single Jordan block on a negative eigenvalue)
+[ok] defective positive: unique real log recovers A and fits (max err 8.9e-16)
+[ok] scalar negative (beta=pi truth): Phi is scalar (Phi00=-0.3679, offdiag 8.7e-19)
+[ok] scalar negative (beta=pi truth): true drift passes compatibility (sigma 24.7708)
+[ok] scalar negative (beta=pi truth): every scanned family member is a real log of Phi (exp(A_c Delta) = Phi asserted on the grid)
+[ok] scalar negative (beta=pi truth): only the true drift passes on grid (12 passes; min rival symmetry residual 0.0120)
+[ok] scalar positive (beta=2pi truth): Phi is scalar (Phi00=+0.3679, offdiag 2.8e-17)
+[ok] scalar positive (beta=2pi truth): true drift passes compatibility (sigma 99.0831)
+[ok] scalar positive (beta=2pi truth): every scanned family member is a real log of Phi (exp(A_c Delta) = Phi asserted on the grid)
+[ok] scalar positive (beta=2pi truth): only the true drift passes on grid (12 passes; min rival symmetry residual 0.0419)
+FAILED: none — all checks passed
+[ok] det(UW) = f(mu1) f(mu2) and |f| closed form (max err 4.4e-16, incl. a defective A)
+[ok] all branch candidates m in [-60,60] have nonsingular U_m W_m (min |f(mu_m)| 2.770e-06; > 0 for all m by Re mu < 0)
+[ok] seeded sweep of stable drifts: det Gamma_1 never 0 (min |det Gamma_1| 7.768e-04 over the sweep)
+[ok] near-singular regime is conditioning, not singularity (|f| 2.60e-06 at kappa*eps=0.0225, omega*eps=2pi; |det Gamma_1| 6.01e-08 > 0)
+[ok] manufactured singular Gamma_1 is refused with a reason 
+FAILED: none — all checks passed
+[ok] eps/Delta=1/3: eigenbasis R matches direct route (max err 3.5e-12, period 3 residue classes)
+[ok] class 0 mod 3: R quadratic, A2 != 0 (rel err 4.5e-12, A2=35.20169)
+[ok] class 1 mod 3: R quadratic, A2 != 0 (rel err 1.0e-12, A2=0.25529)
+[ok] class 2 mod 3: R quadratic, A2 != 0 (rel err 1.9e-12, A2=-0.74332)
+[ok] eps/Delta=1/3: only integer root of R over all m is the truth (integer roots [0])
+[ok] irrational rho: R changes sign at arbitrarily large m (15278 sign changes up to m=20000, last at m=19999)
+[ok] irrational rho: |R(m)|/m^2 arbitrarily small for large m (min over m>10000 is 1.62e-05 at m=17524; no finite window)
+  absolute min |R| by window: 1-100: 3.7, 100-1000: 113.2, 1000-5000: 5238.3
+  reading: symmetry alone admits no finite candidate list and no
+  uniform (relative) margin at irrational eps/Delta; absolute
+  residuals here still grow (~m), because the golden ratio is
+  badly approximable -- the finite-window question at fixed
+  absolute tolerance is Diophantine in rho, not settled here;
+  exact large-m roots would be codimension-one coincidences, not
+  excluded by finiteness -- recorded as the honest remainder.
+FAILED: none — all checks passed
+
+## Tests: python3 -m pytest -q
+25 passed
+
+## Milestone 3a branch sets: python3 branch_sets.py
+
+Frozen s8 design: R=24, N in (1000, 4000, 16000), seed base 424242; true branch m=1, sigma=30.42
+N=1000: (true-branch estimated ell2 < 0 in 4/24)
+  [phase-only]       tau=0.01 (tau=0.0100 rad): coverage 21/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only]       tau=0.03 (tau=0.0300 rad): coverage 21/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only]        tau=0.1 (tau=0.1000 rad): coverage 23/24, median set size 1 (max 2), median rel. sigma spread 0.000
+  [phase-only] tau=1.0/sqrt(N) (tau=0.0316 rad): coverage 21/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only] tau=3.0/sqrt(N) (tau=0.0949 rad): coverage 23/24, median set size 1 (max 2), median rel. sigma spread 0.000
+  [ell2>=0]       tau=0.01 (tau=0.0100 rad): coverage 17/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]       tau=0.03 (tau=0.0300 rad): coverage 17/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]        tau=0.1 (tau=0.1000 rad): coverage 19/24, median set size 1 (max 2), median rel. sigma spread 0.000
+  [ell2>=0] tau=1.0/sqrt(N) (tau=0.0316 rad): coverage 17/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0] tau=3.0/sqrt(N) (tau=0.0949 rad): coverage 19/24, median set size 1 (max 2), median rel. sigma spread 0.000
+  [ell2>=-0.02]       tau=0.01 (tau=0.0100 rad): coverage 19/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]       tau=0.03 (tau=0.0300 rad): coverage 19/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]        tau=0.1 (tau=0.1000 rad): coverage 21/24, median set size 1 (max 2), median rel. sigma spread 0.000
+  [ell2>=-0.02] tau=1.0/sqrt(N) (tau=0.0316 rad): coverage 19/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02] tau=3.0/sqrt(N) (tau=0.0949 rad): coverage 21/24, median set size 1 (max 2), median rel. sigma spread 0.000
+N=4000: (true-branch estimated ell2 < 0 in 4/24)
+  [phase-only]       tau=0.01 (tau=0.0100 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only]       tau=0.03 (tau=0.0300 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only]        tau=0.1 (tau=0.1000 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only] tau=1.0/sqrt(N) (tau=0.0158 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only] tau=3.0/sqrt(N) (tau=0.0474 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]       tau=0.01 (tau=0.0100 rad): coverage 20/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]       tau=0.03 (tau=0.0300 rad): coverage 20/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]        tau=0.1 (tau=0.1000 rad): coverage 20/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0] tau=1.0/sqrt(N) (tau=0.0158 rad): coverage 20/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0] tau=3.0/sqrt(N) (tau=0.0474 rad): coverage 20/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]       tau=0.01 (tau=0.0100 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]       tau=0.03 (tau=0.0300 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]        tau=0.1 (tau=0.1000 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02] tau=1.0/sqrt(N) (tau=0.0158 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02] tau=3.0/sqrt(N) (tau=0.0474 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+N=16000: (true-branch estimated ell2 < 0 in 0/24)
+  [phase-only]       tau=0.01 (tau=0.0100 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only]       tau=0.03 (tau=0.0300 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only]        tau=0.1 (tau=0.1000 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only] tau=1.0/sqrt(N) (tau=0.0079 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [phase-only] tau=3.0/sqrt(N) (tau=0.0237 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]       tau=0.01 (tau=0.0100 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]       tau=0.03 (tau=0.0300 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0]        tau=0.1 (tau=0.1000 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0] tau=1.0/sqrt(N) (tau=0.0079 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=0] tau=3.0/sqrt(N) (tau=0.0237 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]       tau=0.01 (tau=0.0100 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]       tau=0.03 (tau=0.0300 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02]        tau=0.1 (tau=0.1000 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02] tau=1.0/sqrt(N) (tau=0.0079 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+  [ell2>=-0.02] tau=3.0/sqrt(N) (tau=0.0237 rad): coverage 24/24, median set size 1 (max 1), median rel. sigma spread 0.000
+
+## Milestone 3b two exposures: python3 two_exposures.py
+
+Population level:
+eps/Delta=0.333: nearest rival m=11 |residual|=0.0023 rad; tau=0.01 set = [1]
+eps/Delta=0.500: nearest rival m=0 |residual|=0.2742 rad; tau=0.01 set = [1]
+intersection of tau=0.01 sets: [1]
+combined margin (min over rivals of max residual): 0.2742 rad
+Finite records:
+N=1000:
+  tau=0.03: eps/Delta=1/3 [coverage 9/24, median size 1 (max 5)]; 1/2 [coverage 13/24, median size 1 (max 2)]; intersection [coverage 6/24, median size 0 (max 1)], empty 14/24; joint-max [coverage 12/24, median size 1 (max 1)], empty 7/24
+  tau=0.1: eps/Delta=1/3 [coverage 13/24, median size 2 (max 10)]; 1/2 [coverage 14/24, median size 1 (max 2)]; intersection [coverage 9/24, median size 1 (max 1)], empty 10/24; joint-max [coverage 12/24, median size 1 (max 2)], empty 7/24
+N=4000:
+  tau=0.03: eps/Delta=1/3 [coverage 16/24, median size 1 (max 7)]; 1/2 [coverage 21/24, median size 1 (max 2)]; intersection [coverage 15/24, median size 1 (max 1)], empty 8/24; joint-max [coverage 18/24, median size 1 (max 2)], empty 3/24
+  tau=0.1: eps/Delta=1/3 [coverage 21/24, median size 2 (max 10)]; 1/2 [coverage 21/24, median size 1 (max 2)]; intersection [coverage 18/24, median size 1 (max 2)], empty 6/24; joint-max [coverage 18/24, median size 1 (max 2)], empty 3/24
+N=16000:
+  tau=0.03: eps/Delta=1/3 [coverage 24/24, median size 1 (max 5)]; 1/2 [coverage 24/24, median size 1 (max 1)]; intersection [coverage 24/24, median size 1 (max 1)], empty 0/24; joint-max [coverage 24/24, median size 1 (max 1)], empty 0/24
+  tau=0.1: eps/Delta=1/3 [coverage 24/24, median size 1 (max 8)]; 1/2 [coverage 24/24, median size 1 (max 1)]; intersection [coverage 24/24, median size 1 (max 1)], empty 0/24; joint-max [coverage 24/24, median size 1 (max 1)], empty 0/24
+
+## Milestone 3c unknown mean: python3 unknown_mean.py
+
+true centre 0:
+  N= 1000  raw (assumes 0): true wins 21/24, median rel. sigma err 0.109, median kappa err -0.020
+  N= 1000         demeaned: true wins 21/24, median rel. sigma err 0.108, median kappa err -0.019
+  N= 4000  raw (assumes 0): true wins 24/24, median rel. sigma err 0.035, median kappa err +0.007
+  N= 4000         demeaned: true wins 24/24, median rel. sigma err 0.035, median kappa err +0.008
+  N=16000  raw (assumes 0): true wins 24/24, median rel. sigma err 0.026, median kappa err -0.010
+  N=16000         demeaned: true wins 24/24, median rel. sigma err 0.026, median kappa err -0.010
+centre offset (0.7+0.4j):
+  N= 1000  raw (assumes 0): estimator refused all 24 replicates (|phi| outside (0,1))
+  N= 1000         demeaned: true wins 21/24, median rel. sigma err 0.108, median kappa err -0.019
+  N= 4000  raw (assumes 0): estimator refused all 24 replicates (|phi| outside (0,1))
+  N= 4000         demeaned: true wins 24/24, median rel. sigma err 0.035, median kappa err +0.008
+  N=16000  raw (assumes 0): estimator refused all 24 replicates (|phi| outside (0,1))
+  N=16000         demeaned: true wins 24/24, median rel. sigma err 0.026, median kappa err -0.010
+
+## Milestone 3d equal frames: python3 equal_frames.py
+
+Equal total frames T=2N; R=24; true m=1, sigma=30.42
+T=1000:
+            2N @ 1/2: true wins 17/24 (24 usable), median rel. sigma err 0.149
+            2N @ 1/3: true wins  7/24 (24 usable), median rel. sigma err 2.262
+   N @ 1/3 + N @ 1/2: true wins 16/24 (24 usable), median rel. sigma err 0.245
+T=4000:
+            2N @ 1/2: true wins 24/24 (24 usable), median rel. sigma err 0.054
+            2N @ 1/3: true wins 13/24 (24 usable), median rel. sigma err 0.079
+   N @ 1/3 + N @ 1/2: true wins 22/24 (24 usable), median rel. sigma err 0.048
+T=16000:
+            2N @ 1/2: true wins 24/24 (24 usable), median rel. sigma err 0.026
+            2N @ 1/3: true wins 18/24 (24 usable), median rel. sigma err 0.036
+   N @ 1/3 + N @ 1/2: true wins 24/24 (24 usable), median rel. sigma err 0.052

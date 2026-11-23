@@ -245,13 +245,15 @@ root is `m = 0`. Since symmetry of `Σ_m` is necessary for compatibility,
 no other branch — at any `|m|` — fits this film, within the
 complex-eigenvalue, `ε/Δ = 1/2` setting.
 
-**Still open, stated plainly:** real-eigenvalue `Φ` (negative eigenvalues,
-and non-primary real logarithms for positive spectrum, which need not share
-`Φ`'s eigenvectors); irrational or general rational `ε/Δ` in the general
-case; singular `Γ_1` and singular `U_mW_m`. The primary-logarithm subcase
+**Closed in §11:** all real logarithms of a real-spectrum `Φ` are now
+classified (the feared non-primary families for distinct positive
+eigenvalues do not exist; only scalar `Φ = λI` has extra real logarithms,
+a continuous family, tested against the film); singular `Γ_1`/`U_mW_m`
+are proved impossible in the declared class; and completeness over all
+`m` extends to every rational `ε/Δ`, with the irrational case shown to
+admit no finite window from symmetry alone. The primary-logarithm subcase
 for distinct positive eigenvalues is implemented and tested in
-[real_eigenvalue.py](real_eigenvalue.py) (§9), without claiming the
-non-primary families.
+[real_eigenvalue.py](real_eigenvalue.py) (§9).
 
 ## 8. Milestone-3 pilot: finite records
 
@@ -287,10 +289,10 @@ gives the primary real `log Φ`, and in the frozen example
 `σ = 0.0710 > 0` despite no rotation in `A` — dissipation comes from
 `A` and `Dm` not commuting) it recovers `A, Σ, Dm, ℓ², σ` exactly.
 A negative-eigenvalue `Φ` is refused rather than silently assigned a
-logarithm. Non-primary real logarithms for positive spectrum — which need
-not share `Φ`'s eigenvectors or be polynomials in `Φ` — are **not**
-enumerated yet, so uniqueness in the real-eigenvalue case is not claimed;
-only exact recovery of the primary branch is.
+logarithm. §11 upgrades this section: the primary logarithm is in fact
+the *only* real logarithm whenever the positive eigenvalues are distinct
+(or defective), so exact recovery here is also uniqueness; genuine
+non-primary real logarithms exist only for scalar `Φ = λI`.
 
 ## 10. Exposure ratio matters: margins at other `ε/Δ`
 
@@ -316,5 +318,207 @@ and the finite-record study of §8 would need far more frames there. Choice
 of exposure fraction is an experimental design variable, not just a
 nuisance — and comparing two exposure schedules (milestone 3) is promising
 precisely because near-aliases sit at different branches for different
-ratios. Irrational `ε/Δ` remains outside the complete accounting (§5).
+ratios. Irrational `ε/Δ` remains outside the complete accounting (§5);
+§11 shows this is intrinsic, not a gap in effort.
+
+## 11. Closing the §7 loopholes
+
+**All real logarithms of `Φ` ([real_logs.py](real_logs.py)).** Any
+logarithm `L` of `Φ` commutes with `Φ = e^L`. Unless `Φ = λI` is scalar,
+`Φ` is non-derogatory and its centralizer is `{aI + bΦ}`; so every
+logarithm is a polynomial in `Φ`, fixed by scalar log branches on the
+eigenvalues, and a *real* `L` needs a conjugation-closed spectrum. That
+one argument settles every real-spectrum case:
+
+- distinct positive `λ₁ ≠ λ₂`: pairing `ln λ₁ + 2πik` with its conjugate
+  would force `λ₁ = λ₂`, so the only real logarithm is the primary one
+  (§9's recovery is uniqueness, not just a subcase);
+- any negative eigenvalue among distinct reals, or a single Jordan block
+  on `λ < 0`: the branch imaginary parts are odd multiples of `π`, never
+  real and never conjugate-pairable — **no real logarithm exists**, even
+  with both eigenvalues negative. An observed such `Φ` has no latent
+  motion in the class at all;
+- defective `λ > 0`: unique real log `ln λ · I + (Φ − λI)/λ` (tested:
+  recovers a Jordan drift exactly);
+- scalar `Φ = λI`: the centralizer is everything, and there *are* extra
+  compatible-with-`Φ` motions — a continuous family
+  `L = ln|λ| I + N`, `N² = −β²I`, with `β = 2πk` (`λ > 0`) or
+  `β = π(2k+1)` (`λ < 0`). These are genuine counterexamples to
+  "`Φ` determines the drift", so the film must do the rejecting. In two
+  frozen scalar examples (truth a rotation completing a half/full turn
+  per frame, non-isotropic `Dm`), every member of a (stretch, rotation,
+  `β`) grid is verified to exponentiate to the same `Φ`, yet only the
+  true drift passes compatibility; the nearest rival already fails
+  `Σ`-symmetry by `0.012` (resp. `0.042`). Dimension count says why this
+  is generic: the family is 2-dimensional per `β`, while symmetry,
+  zero-lag off-diagonal and equal-`ℓ²` impose 3 conditions. A proof for
+  all parameters (rather than grids on frozen examples) is **not**
+  claimed; neither is a compatible extra motion exhibited — constructing
+  one would need those 3 conditions solved simultaneously, a
+  codimension-one coincidence in the remaining parameters.
+
+**Singular cases cannot occur ([singular_cases.py](singular_cases.py)).**
+`U, W` are functions of `A`, so `UW = f(A)` with
+`f(μ) = (e^{με} + e^{−με} − 2)/μ²` and the closed form
+`|f(μ)| = (2 cosh(Re με) − 2 cos(Im με))/|μ|² ≥ (2 cosh(Re με) − 2)/|μ|²`,
+strictly positive whenever `Re μ ≠ 0`. Stability gives `Re μ < 0` for the
+true drift and for every branch `A_m` (`Re μ_m = ln r/Δ`), `Φ` is
+invertible, and `Σ ≻ 0` because `Dm ≻ 0`; hence
+`Γ_1 = Φ U W Σ/ε²` is nonsingular for every latent motion and every
+branch in the declared class. An observed singular `Γ_1` certifies data
+outside the class (or finite-sample noise) and is refused as such. The
+real phenomenon near the boundary is *conditioning*: at
+`κε = 0.0225, ωε = 2π`, `|f| = 2.6e-06` and `|det Γ_1| = 6.0e-08 > 0` —
+weakly damped rotation completing whole turns inside one exposure makes
+`Γ_1` nearly singular and branch recovery ill-conditioned, honestly a
+regime to avoid or to report with errors, not a singularity to handle.
+
+**Rational `ε/Δ` in the general case; the irrational obstruction
+([completeness_rational.py](completeness_rational.py)).** For
+`ρ = ε/Δ = p/q`, `e^{μ_m ε} = r^ρ e^{i(θ+2πm)ρ}` has period
+`q/gcd(p,q)` in `m`, so §7's symmetry residual `R(m)` is an exact
+quadratic polynomial on each of finitely many residue classes and all
+integer roots are enumerable: completeness over all `m` at any rational
+ratio (verified at `ρ = 1/3` on the frozen general example: only root
+`m = 0`). For irrational `ρ` this fails intrinsically. The denominator
+of `d_m`, as its phase traverses the circle, traces an ellipse centred
+at `−2` with semi-axes `a + a⁻¹ > 2` and `a⁻¹ − a` (`a = r^ρ`), which
+encloses the origin; hence the normalized limit function of `R(m)/m²`
+takes both signs (its coefficient `α ≠ 0` in these examples; the
+degenerate `α = 0` case, where symmetry is automatic, is not treated).
+Dense phases then give: `R` changes sign at arbitrarily large `m`
+(15,278 sign changes up to `m = 20000` at `ρ = (√5−1)/2`) and
+`|R(m)|/m²` is arbitrarily small infinitely often (min `1.6e-05` over
+`m > 10000`). So no finite window and no uniform *relative* margin
+exist from symmetry alone at irrational ratio. Two honest qualifications:
+absolute residuals at the golden ratio still grow (`min|R|` is `3.7`,
+`113`, `5238` over `m < 100`, `< 1000`, `< 5000`), because it is badly
+approximable — whether a fixed absolute tolerance admits an effective
+finite window is a Diophantine question about `ρ`, not settled here; and
+exact roots `R(m) = 0` at large `m` remain codimension-one coincidences,
+generically absent but not excludable by any finite symmetry check.
+
+**What remains open after §11, plainly:** a parameter-free proof (or a
+compatible counterexample) for the scalar-`Φ` family; the `α = 0`
+degenerate symmetry case; effective irrational-ratio windows via
+Diophantine data; and everything finite-sample in milestone 3
+(set-valued branches, two exposures, noise budgets).
+
+## 12. Milestone 3a: set-valued branch reports, and a filter that bites
+
+[branch_sets.py](branch_sets.py) reruns the §8 design (same seeds) but
+reports, per replicate, the *set* of branches with phase residual within
+`τ` of the best, for `τ ∈ {0.01, 0.03, 0.1}` rad and `τ = c/√N`,
+`c ∈ {1, 3}`. Two findings, the second more useful than the first:
+
+- **The sets are singletons.** Median (and maximum) set size is 1 at
+  every `N` and `τ` tried: in this design the population gap (`0.274`
+  rad) is so large relative to phase noise that no rival ever enters
+  the tolerance band. Set-valued reporting on phase alone therefore
+  adds nothing here — it would matter at the near-alias ratios of §10
+  (margin `0.0023` rad at `ε/Δ = 1/3`), which is where a later slice
+  should test it. Coverage failures at `N = 1000` (21–23/24 phase-only)
+  are winner errors: the true residual occasionally sits further than
+  `τ` from the best (largest gap `0.187` rad).
+- **The population test's hard `ℓ² ≥ 0` filter discards the truth at
+  finite `N`.** The true branch's *estimated* `ℓ²` is negative in 4/24
+  replicates at both `N = 1000` and `N = 4000` (true `ℓ² = 0.04` is
+  small against estimator noise). With the hard filter, coverage at
+  `N = 4000` drops to 20/24 even though the true branch has the best
+  phase residual in 24/24; a slack of `0.02` restores 24/24. Lesson for
+  any finite-record version of the §5/§7 test: eligibility conditions
+  that are exact at population level (`ℓ² ≥ 0`, and by analogy
+  `Σ ≻ 0`, `Dm ≻ 0` in §7) must be softened by an `N`-dependent slack
+  or turned into reported residuals — applied hard, they delete the
+  correct motion before the phase evidence is even consulted.
+
+Descriptive only, one frozen design, tolerances not calibrated from a
+sampling theory; no coverage guarantee. Milestone 3 still needs:
+tolerance calibration, set-valued tests at near-alias ratios,
+unknown-mean handling, two-exposure schedules, noise/light budgets.
+
+## 13. Milestone 3b: two exposures — population win, finite-N caution
+
+[two_exposures.py](two_exposures.py) tests §10's suggestion on the
+frozen vortex at `ε/Δ ∈ {1/3, 1/2}` (branches `m ∈ [−15, 15]`,
+`ℓ²` slack `0.02` per §12). At population level the idea works exactly
+as hoped, with one refinement: the `1/3` near-alias `m = 11`
+(`|phase residual| = 0.0023` rad, would claim `σ = 8906`) is already
+killed at that single ratio by zero lag (`ℓ² = −0.051`), and the
+combined margin — min over rivals of the max residual across the two
+exposures — is `0.274` rad, versus `0.0023` rad for `1/3` alone on
+phase. Different ratios put their weak spots at different branches;
+the max-residual combination inherits the better margin.
+
+Finite records (24 seeded replicates per exposure, independent tracks)
+are a caution against naive combination rules. Intersecting the two
+plug-in tolerance sets is *worse* than the better single exposure at
+`N ≤ 4000`: independent winner errors make the intersection empty in
+14/24 replicates at `N = 1000, τ = 0.03` (coverage 6/24 vs 13/24 for
+`1/2` alone). A joint rule — rank branches by the max residual across
+exposures, keep those within `τ` of the best — does better than
+intersection (12/24, empty 7/24, where emptiness now means the
+slackened `ℓ²` eligibility shares no branch across exposures) but
+still does not beat the good single exposure at small `N`. At
+`N = 16000` every variant covers 24/24 with singleton sets. Two more
+honest observations: at `1/3` the sets are genuinely non-singleton
+(median size 2, max 10 at `τ = 0.1`) — set-valued reporting earns its
+keep exactly where §12 predicted, at near-alias ratios; and widening
+the search window from `m ∈ [−5, 5]` (§8/§12) to `[−15, 15]` visibly
+costs coverage at small `N` (more rivals, more chances to win by
+noise), so the §11 complete candidate accounting matters practically,
+not just in principle. What milestone 3 still needs: tolerance/slack
+calibration from estimator sampling theory (or a bootstrap), a
+combination rule derived rather than guessed, unknown-mean handling,
+and the light/noise budget accounting — whether two short films at two
+exposures beat one long film at the better exposure, at equal total
+frames, is the design question §13 leaves open: on this evidence, at
+small `N`, they do not.
+
+## 14. Milestone 3c: unknown trap centre costs nothing (in this design)
+
+[unknown_mean.py](unknown_mean.py) removes §8's known-zero-mean
+assumption. With the true centre at zero, demeaning by the sample mean
+changes nothing measurable (true-branch wins 21/24, 24/24, 24/24 and
+median relative `σ` errors 0.108/0.035/0.026 at `N = 1000/4000/16000`,
+identical to the raw estimator to three decimals; median `κ` error
+within `0.001` of raw) — the feared demeaning bias from correlated
+frames is below the estimator noise everywhere in this design. With
+an unknown centre offset `μ₀ = 0.7 + 0.4i` (stationary sd per
+coordinate is 1), the raw-moment estimator fails outright: it refuses
+all 24 replicates at every `N` because the offset inflates every lag
+by `|μ₀|²` and drives `|φ̂|` out of `(0, 1)` — a loud failure, not a
+silent wrong answer, but total. The demeaned estimator reproduces the
+zero-centre numbers exactly (the offset cancels in floating point at
+these seeds). So: always demean; in this design it is free insurance.
+Caveats: one offset size, one design; a *drifting* centre (stage drift)
+is a different, harder problem not touched here. Milestone 3's
+remaining pieces are now tolerance/slack calibration and the
+equal-frames light-budget comparison of §13.
+
+## 15. Milestone 3d: equal frames — spend them at the good exposure
+
+[equal_frames.py](equal_frames.py) answers §13's design question on
+the frozen vortex: total budget `T = 2N` frames as (a) `2N` at
+`ε/Δ = 1/2`, (b) `2N` at `1/3`, (c) `N + N` split across both, combined
+by §13's joint max-residual ranking (all demeaned, slack `0.02`,
+branches `[−15, 15]`, 24 seeded replicates):
+
+| T | 2N @ 1/2 wins (σ err) | 2N @ 1/3 wins (σ err) | split wins (σ err) |
+|---|---|---|---|
+| 1000 | 17/24 (0.149) | 7/24 (2.262) | 16/24 (0.245) |
+| 4000 | 24/24 (0.054) | 13/24 (0.079) | 22/24 (0.048) |
+| 16000 | 24/24 (0.026) | 18/24 (0.036) | 24/24 (0.052) |
+
+Splitting never beats concentrating at the good exposure on branch
+identification; its only edge is a slightly smaller median `σ` error
+at `T = 4000` (0.048 vs 0.054) bought with two lost replicates. And
+`1/3` alone stays unreliable even at `T = 16000` (18/24): §10's margin
+table is not a curiosity, it is the design variable that decides
+whether finite films work at all. Verdict for this design: choose the
+exposure fraction with a healthy margin (§10) and spend the whole
+light budget there; a second exposure is insurance against an unknown
+bad ratio, not an improvement over a known good one. What milestone 3
+still owes: principled tolerance/slack calibration, and any claim at
+all outside this frozen design family.
 
