@@ -9,7 +9,6 @@ from mpmath import mp, mpf
 import ostrowski_liminf as ol
 import window_constant as wc
 
-mp.dps = 80
 
 
 class TestExactIdentities(unittest.TestCase):
@@ -37,6 +36,7 @@ class TestExactIdentities(unittest.TestCase):
 class TestGammaAndDigits(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        mp.dps = 80
         cls.cases = {}
         for name, a, _d, _rq in ol.CASES:
             rho = (mp.sqrt(5) - 1) / 2 if name == "golden" else mp.sqrt(2) - 1

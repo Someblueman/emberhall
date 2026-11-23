@@ -935,3 +935,32 @@ these two ratios any absolute tolerance `τ` below the bounds above
 cannot be certified by a finite branch window on this truth, and
 the honest per-truth constants are now `≤ 0.079` / `≤ 0.0052`, not
 `0.155` / `0.202`. Frozen truth and two quadratic `ρ` only.
+
+## 27. Scalar-`Φ` rivals: the determinant step toward a proof
+
+[scalar_phi_proof.py](scalar_phi_proof.py) takes one bounded step
+past §22's search, on its closest truth (`2π`/short-shutter, nearest
+rival `J = 1.08·10⁻³`). **The reduction (proof).** For branch
+`β ≠ 0`, `A_c(t, φ) = R(φ)A_c(t, 0)R(φ)ᵀ`, and §11's compatibility
+ingredients are conjugation-covariant with `Φ` scalar, so the three
+signed residuals are exactly `A_i(t) + B_i(t)cos2φ + C_i(t)sin2φ`
+(verified at `10⁻⁶⁸`). A common zero forces `det M(t) = 0` for the
+`3×3` coefficient matrix (`t ≠ 0`; at `t = 0` the `φ`-family
+collapses to one drift per branch, checked directly, residuals
+`≥ 0.07`). **The determinant in closed form (70-digit computation,
+exact-interpolation checks).** `det M = (w−2)S(w)`,
+`w = e^{2t} + e^{−2t}`, with `S` quadratic and `S(−2) = 0` on every
+branch — i.e. `det M ∝ (w²−4)(w − w*)` for a single number `w*`.
+Real `t ≠ 0` needs `w > 2`. Here `w* = 1.029` (`β = 4π`) and
+`0.625` (`β = 6π`): **no admissible `t` exists on either rival
+branch, over the whole `(t, φ)` cylinder.** `β = 0` is one drift
+with `J = 1.084·10⁻³` (recomputed at 70 digits). On the same branch
+`β = 2π`, `w* = 2.162` gives `t = ±0.2` and the null vector
+recovers exactly the true drift — the branch's only compatible
+motion, no exclusion ball needed. **Scope:** one truth, branches
+`β ∈ {0, 2π, 4π, 6π}` as enumerated in §22; the reduction is
+general but `w*` is a truth-specific transcendental, so this is a
+verified exclusion for the sweep's hardest truth, not yet the
+parameter-free theorem — whose remaining content is now sharply
+visible: show `w*(truth) ≤ 2` on every rival branch as the truth
+ranges over the scalar-`Φ` class, or find where it crosses.

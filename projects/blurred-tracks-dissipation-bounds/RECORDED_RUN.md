@@ -526,3 +526,20 @@ FAILED: none -- all checks passed
 
 ## Tests after s26: python3 -m pytest -q
 61 passed in 2.82s (55 after s25 merge + 6 new in test_ostrowski_liminf.py)
+
+## Milestone 3l s27: python3 scalar_phi_proof.py
+[ok] truth setup: Phi = e^alpha I (scalar), alpha recovered (err 4.6e-71)
+[ok] truth control: residuals vanish at the true drift (max 4.5e-72)
+[ok] signed residuals are A + B cos(2phi) + C sin(2phi) exactly (worst fit err 6.3e-68)
+[ok] beta=0 rival: single drift with J = 1.084e-3 > 0 (J = 0.001084, s22 search value)
+[ok] same branch 2pi: det M = (w-2) S(w), S quadratic, S(-2)=0 (fit rel err 1.7e-69, max|resid| at t=0 0.0701)
+[ok] same branch 2pi: only admissible root w*=2.1621447 gives t=+-0.2 and recovers the true drift (drift err 6.3e-68, phi* 0.3 vs true 0.3 mod pi/2 twin)
+[ok] rival 4pi: det M = (w-2) S(w), S quadratic, S(-2)=0 (fit rel err 5.5e-69, max|resid| at t=0 0.156)
+[ok] rival 4pi: w* = 1.0291307 < 2, so det M(t) != 0 for all real t != 0: no rival on this branch (discriminant 5.73e-5; other root w=-2)
+[ok] rival 6pi: det M = (w-2) S(w), S quadratic, S(-2)=0 (fit rel err 1.1e-68, max|resid| at t=0 0.291)
+[ok] rival 6pi: w* = 0.62511728 < 2, so det M(t) != 0 for all real t != 0: no rival on this branch (discriminant 0.00277; other root w=-2)
+
+FAILED: none -- all checks passed
+
+## Tests after s27: python3 -m pytest -q
+66 passed (61 after s26 + 5 new in test_scalar_phi_proof.py)
