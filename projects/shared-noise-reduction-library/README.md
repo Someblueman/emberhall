@@ -11,6 +11,7 @@ sources do not cancel. That distinction is the whole point.
 
 ```sh
 python3 projects/shared-noise-reduction-library/run_demo.py
+python3 projects/shared-noise-reduction-library/weighted_fit_demo.py
 python3 -m unittest discover -s projects/shared-noise-reduction-library/tests -v
 ```
 
@@ -19,7 +20,10 @@ monitor, a shared background subtracted, a weighted downstream fit, compared
 against an independent dense `J C J^T` oracle, seeded Monte Carlo, an
 independent-variance baseline, an ESSreduce-style upper bound, a dense
 gvar-equivalent check, and an RME-style error-ellipse attribution, plus a
-100,000-event streaming benchmark.
+100,000-event streaming benchmark. `weighted_fit_demo.py` is a second one:
+a sharpened spectrum (overlapping moving-window stencil with negative
+side lobes, mode `same`) and a peak fit with negative flanks, checked
+against the same oracle, bound and Monte Carlo, plus rebin conservation.
 
 ## Use it
 
