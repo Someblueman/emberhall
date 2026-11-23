@@ -41,6 +41,18 @@ assert(text.includes('Ash · replaced by a later lesson'));
 // Public conversation deduplicates repeated snapshot messages, newest first.
 assert.deepEqual(run(`hearthConversation([{seq:5,hearth:[{seq:1,text:'First.'},{seq:5,text:'Second.'}]}],
   {seq:5,hearth:[{seq:5,text:'Second.'}]}).map(v=>v.text)`),['Second.','First.']);
+// The quieter rooms say what they hold, from the same record their panels show.
+// A snapshot without kept words gets no invented message count.
+assert.equal(run(`roomFact('hearth')`),'');
+assert.equal(run(`frame.hearth=[{seq:4,text:'First.'},{seq:6,text:'Second.'}];roomFact('hearth')`),'2 public messages kept');
+assert.equal(run(`frame.rooms=[{id:'door',history:[{sequence:1},{sequence:2}]},{id:'study',history:[{sequence:3}]},{id:'assay'}];roomFact('chronicle')`),'3 room entries');
+// The Parlor lead counts exactly the changes its catch-up sections list.
+assert.equal(run(`(()=>{const d=buildCatchupDigest(data.frames,index,catchupStartSeq);const n=d.tasks.length+d.rooms.length+d.projects.length;return roomFact('parlor')===n+' changes to catch up on';})()`),true);
+// Rooms with no honest record count stay blank instead of guessing.
+assert.deepEqual(run(`[roomFact('door'),roomFact('salvage')]`),['','']);
+// Every open room has a fallback description for moments without a recorded purpose.
+assert.deepEqual(run(`['door','hearth','workshop','archive','council','bedroom','study','parlor','gallery','chronicle','counting','assay','salvage'].map(id=>typeof descriptions[id])`),
+  ['string','string','string','string','string','string','string','string','string','string','string','string','string']);
 '''
 
 
