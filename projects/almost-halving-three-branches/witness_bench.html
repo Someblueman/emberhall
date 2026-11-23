@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Witness bench — almost halving a three-branched tree</title>
+<style>
+  :root {
+    --ink: #16191d;
+    --paper: #fbfaf7;
+    --rule: #d8d3c8;
+    --a: #1f6f8b;      /* left set  */
+    --b: #b4541e;      /* right set */
+    --hole: #b9b3a6;   /* omitted vertex */
+    --muted: #6b6459;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 1.1rem 1rem 3rem;
+    font: 16px/1.55 "Iowan Old Style", Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: var(--paper);
+    max-width: 60rem;
+  }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 .35rem; }
+  h2 { font-size: 1.02rem; margin: 1.5rem 0 .4rem; letter-spacing: .02em; }
+  p { margin: .5rem 0; }
+  .lede { color: var(--muted); max-width: 46rem; }
+  .made { color: var(--muted); font-size: .88rem; border-left: 3px solid var(--rule); padding-left: .7rem; }
+  .panel { border: 1px solid var(--rule); border-radius: 6px; padding: .7rem .85rem; margin: .8rem 0; background: #fff; }
+  table { border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: .15rem .55rem .15rem 0; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .ok { color: #1c6b3a; font-weight: 600; }
+  .warn { color: #8a4b12; font-weight: 600; }
+  .swatch { display: inline-block; width: .8rem; height: .8rem; border-radius: 50%; vertical-align: -1px; margin-right: .3rem; }
+  .strip { overflow-x: auto; max-width: 100%; border: 1px solid var(--rule); border-radius: 4px; background: #fff; }
+  .strip svg { display: block; }
+  .striprow { display: flex; align-items: baseline; gap: .5rem; margin: .2rem 0; }
+  .label { font-size: .82rem; color: var(--muted); white-space: nowrap; }
+  .controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+  input[type=range] { width: 10rem; }
+  button {
+    font: inherit; font-size: .92rem; padding: .22rem .55rem; cursor: pointer;
+    border: 1px solid var(--rule); border-radius: 4px; background: #fff; color: var(--ink);
+  }
+  button:hover { background: #f1ede4; }
+  button[aria-pressed="true"] { border-color: var(--ink); background: #efe9dc; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .86rem; }
+  pre { background: #fff; border: 1px solid var(--rule); border-radius: 4px; padding: .6rem; overflow-x: auto; font-size: .84rem; }
+  ul { padding-left: 1.1rem; }
+  li { margin: .2rem 0; }
+  .tiny { font-size: .84rem; color: var(--muted); }
+  .chart { max-width: 100%; }
+  .scroll { overflow-x: auto; max-width: 100%; }
+  .scroll table { font-size: .82rem; }
+</style>
+</head>
+<body>
+
+<h1>Almost halving a three-branched tree</h1>
+<p class="lede">
+  A tree with three arms of different lengths. We want to split its vertices into two
+  sets of the same size whose <em>distance profiles</em> are identical: for every
+  distance <em>d</em>, the left set has exactly as many pairs of vertices at distance
+  <em>d</em> as the right set. The best possible split is half the tree, less one.
+</p>
+<p class="made">
+  Made in JavaScript, in the browser: this page is a port of the house's own Python
+  construction (<code>projects/almost-halving-three-branches/</code>). No Python runs
+  here, and nothing is precomputed. The page rebuilds the witness from the arm lengths
+  and then recounts both distance profiles from scratch, in your browser, by brute force.
+</p>
+
+<div class="panel controls">
+  <label for="scale">Scale <em>t</em></label>
+  <input type="range" id="scale" min="1" max="12" value="1">
+  <output id="scaleOut">1</output>
+  <span id="scaleButtons"></span>
+  <button id="audit" type="button">Recount every scale 1&ndash;12</button>
+  <span class="tiny">The tree is <code>T(99t,&nbsp;79t,&nbsp;23t)</code>.</span>
+</div>
+
+<h2>This scale</h2>
+<div class="panel" id="summary"></div>
+
+<h2>Export this witness</h2>
+<div class="panel">
+  <p class="tiny">
+    The house's own checker reads this JSON:
+    <code>python3 projects/almost-halving-three-branches/bench_check.py --compare witness.json</code>.
+    Save the text below as <code>witness.json</code> and the checker will confirm that this
+    split is the project's own, recounted independently.
+  </p>
+  <p><button id="export" type="button">Export the witness as JSON</button></p>
+  <textarea id="exportBox" rows="6" readonly aria-label="The witness as JSON, for the house's checker" style="width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem"></textarea>
+</div>
+
+<h2>The tree, drawn</h2>
+<div class="panel" id="drawing"></div>
+
+<h2>Both distance profiles, recounted live</h2>
+<div class="panel" id="profiles"></div>
+
+<h2>Every scale, recounted</h2>
+<div class="panel" id="auditOut"><p class="tiny">Press the button above.</p></div>
+
+<h2>Check this page against the project's source file</h2>
+<div class="panel">
+  <p class="tiny">
+    The <em>t</em>&nbsp;=&nbsp;1 certificate is three literal sign rows copied from
+    <code>fixed_difference_family.py</code>. This button reads that file next to this
+    page and compares every row with the copy this page uses. It needs a browser
+    that will read a neighbouring file; if yours will not, the fidelity table above
+    still checks the same three rules by hand.
+  </p>
+  <p><button id="sourceCheck" type="button">Compare with fixed_difference_family.py</button></p>
+  <div id="sourceResult"><p class="tiny">Not checked yet.</p></div>
+</div>
+
+<h2>What this is, and what it is not</h2>
+<div class="panel">
+  <ul>
+    <li>The construction and its proof live in the project's own documents:
+      <code>GAP_99_79_23.md</code> (the (99,79,23) case and its scaling family),
+      <code>RATIO_51_33_10.md</code> (the palindromic-cell method) and
+      <code>FIXED_DIFFERENCE_FAMILY.md</code> (the <em>t</em>&nbsp;=&nbsp;1 certificate).</li>
+    <li>What this page adds is a live re-check: it rebuilds the same witness and
+      recounts both profiles independently, so the claim can be watched rather than
+      taken on trust. A browser recount is a re-check of the construction, not a new
+      theorem.</li>
+    <li>The recount is quadratic in the size of each set, so it stops at moderate
+      scales. The project's own command has no such limit.</li>
+    <li><strong>The open class.</strong> Every scale except
+      <em>t</em>&nbsp;&equiv;&nbsp;1 (mod&nbsp;2660) is attained by a full-prefix
+      construction. At <em>t</em>&nbsp;&equiv;&nbsp;1 (mod&nbsp;2660) with
+      <em>t</em>&nbsp;&gt;&nbsp;1 no full-prefix pair attains the target at all, and
+      whether some other pair does is <strong>open</strong> — the first such scale is
+      <em>t</em>&nbsp;=&nbsp;2661. This page will not claim otherwise.</li>
+    <li>Reproduce any scale with the project's own command:
+      <code>python3 projects/almost-halving-three-branches/gap_99_79_23.py --witness &lt;t&gt;</code>,
+      and check the witness against an independent breadth-first recount with
+      <code>python3 projects/almost-halving-three-branches/bfs_verify.py -</code>.</li>
+  </ul>
+</div>
+
+<h2>The project's own recorded run</h2>
+<div class="panel">
+  <p class="tiny">From <code>RUN_LOG_20261124.md</code>, 24 November 2026. The page's own numbers should agree with these.</p>
+<pre>$ python3 projects/almost-halving-three-branches/gap_99_79_23.py --witness 1 --summary
+{
+  "branch": "interior-certificate",
+  "difference": {},
+  "homometric": true,
+  "lengths": [99, 79, 23],
+  "meets_target": true,
+  "pairs_per_side": 4950,
+  "size": 100,
+  "source": "fixed_difference_family.construct(23)",
+  "t": 1,
+  "target": 100
+}
+exit=0
+
+$ python3 projects/almost-halving-three-branches/gap_99_79_23.py --witness 3 \
+  | python3 projects/almost-halving-three-branches/bfs_verify.py -
+{"difference": {}, "ok": true, "size": 301}
+exit=0</pre>
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+ * The house's construction, ported from the project's own Python. Each
+ * function names the file and function it comes from, so a reader can
+ * check the port against the source.
+ * ------------------------------------------------------------------ */
+
+const BASE = [99, 79, 23];          // gap_99_79_23.py:29  BASE = (99, 79, 23)
+const RESISTANT_MODULUS = 2660;     // gap_99_79_23.py:30  4 * 5 * 7 * 19
+const BOUNDARY = -1;                // ratio_51_33_10.py:20 BOUNDARY = -1
+
+function gcd(a, b) {                 // math.gcd
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { const t = a % b; a = b; b = t; }
+  return a;
+}
+
+/* gap_99_79_23.py:37  def target(t) */
+function target(t) {
+  return Math.floor((1 + 201 * t) / 2) - 1;
+}
+
+/* ratio_51_33_10.py:45  def classify(lengths) */
+function classifyCells(cells) {
+  const divisor = gcd(cells[0] - cells[1], cells[1] - cells[2]);
+  let reason = null;
+  if (!divisor) {
+    reason = "three equal cell lengths give an odd coefficient sum";
+  } else if (cells.some((n) => n % divisor !== 0)) {
+    reason = "residue populations have both parities";
+  } else if (cells.reduce((a, b) => a + b, 0) / divisor % 2 !== 0) {
+    reason = "each residue population is odd";
+  }
+  return { divisor: divisor, admitted: reason === null, reason: reason };
+}
+
+/* gap_99_79_23.py:48  def cells_admissible(cells) */
+function cellsAdmissible(cells) {
+  if (cells.length !== 3 || new Set(cells).size === 1 || Math.min.apply(null, cells) < 1) return false;
+  const g = gcd(cells[0] - cells[1], cells[1] - cells[2]);
+  const sum = cells.reduce((a, b) => a + b, 0);
+  return g > 0 && sum % 2 === 0 && cells.every((n) => n % g === 0) && (sum / g) % 2 === 0;
+}
+
+/* ratio_51_33_10.py:62  def cell_graph(lengths) */
+function cellGraph(cells) {
+  const total = cells.reduce((a, b) => a + b, 0);
+  const edges = [], variables = [];
+  for (let arm = 0; arm < 3; arm++) {
+    const length = cells[arm];
+    for (let j = 0; j < Math.floor((length + 1) / 2); j++) {
+      const positions = Array.from(new Set([j, length - 1 - j])).sort((a, b) => a - b);
+      const counts = new Map();
+      for (const p of positions) {
+        for (let other = 0; other < 3; other++) {
+          if (other === arm) continue;
+          const n = cells[other];
+          const v = Math.min(p + n, total - 1 - p - n);
+          counts.set(v, (counts.get(v) || 0) + 1);
+        }
+      }
+      for (const count of counts.values()) {
+        if (count % 2) throw new Error("a reflected degree pair failed to fold");
+      }
+      const ends = [];
+      for (const degree of Array.from(counts.keys()).sort((a, b) => a - b)) {
+        const count = counts.get(degree);
+        for (let k = 0; k < count / 2; k++) ends.push(degree);
+      }
+      if (ends.length === 1) ends.push(BOUNDARY);
+      if (ends.length !== 2) throw new Error("a cell variable is not an edge or half-edge");
+      edges.push(ends);
+      variables.push([arm, positions]);
+    }
+  }
+  return { edges: edges, variables: variables };
+}
+
+/* ratio_51_33_10.py:23  def cell_identity(words) */
+function cellIdentity(words) {
+  const lengths = words.map((w) => w.length);
+  const result = new Map();
+  for (let arm = 0; arm < 3; arm++) {
+    for (let other = 0; other < 3; other++) {
+      if (arm === other) continue;
+      const word = words[arm];
+      for (let depth = 0; depth < word.length; depth++) {
+        const degree = depth + lengths[other];
+        const step = word[depth] === "+" ? 1 : -1;
+        result.set(degree, (result.get(degree) || 0) + step);
+      }
+    }
+  }
+  const residual = {};
+  for (const degree of Array.from(result.keys()).sort((a, b) => a - b)) {
+    const coefficient = result.get(degree);
+    if (coefficient) residual[degree] = coefficient;
+  }
+  return residual;
+}
+
+/* ratio_51_33_10.py:39  def verify_template(words) */
+function verifyTemplate(words) {
+  const residual = cellIdentity(words);
+  const palindromic = words.every((w) => w === Array.from(w).reverse().join(""));
+  const first = words.reduce((a, w) => a + (w[0] === "+" ? 1 : -1), 0);
+  return Object.keys(residual).length === 0 && palindromic && Math.abs(first) === 1;
+}
+
+/* ratio_51_33_10.py:88  def template(lengths) */
+function template(cells) {
+  const built = cellGraph(cells);
+  const edges = built.edges, variables = built.variables;
+  const adjacency = new Map();
+  const touch = (vertex, edge) => {
+    if (!adjacency.has(vertex)) adjacency.set(vertex, []);
+    adjacency.get(vertex).push(edge);
+  };
+  edges.forEach(([u, v], id) => { touch(u, id); touch(v, id); });
+  for (const [vertex, incident] of adjacency) {
+    if (vertex !== BOUNDARY && incident.length % 2) {
+      throw new Error("an interior cell-graph degree is odd");
+    }
+  }
+  const used = new Set(), signs = new Map(), components = [];
+  const starts = (adjacency.has(BOUNDARY) ? [BOUNDARY] : [])
+    .concat(Array.from(adjacency.keys()).filter((v) => v !== BOUNDARY).sort((a, b) => a - b));
+  for (const start of starts) {
+    const startEdges = adjacency.get(start) || [];
+    if (startEdges.every((e) => used.has(e))) continue;
+    const stack = [[start, null]];
+    const tour = [];
+    while (stack.length) {
+      const [vertex, arrival] = stack[stack.length - 1];
+      const list = adjacency.get(vertex) || [];
+      while (list.length && used.has(list[list.length - 1])) list.pop();
+      if (!list.length) {
+        stack.pop();
+        if (arrival !== null) tour.push(arrival);
+      } else {
+        const edge = list.pop();
+        used.add(edge);
+        const [u, v] = edges[edge];
+        stack.push([u === vertex ? v : u, edge]);
+      }
+    }
+    tour.reverse();
+    const hasBoundary = start === BOUNDARY;
+    components.push({ edgeCount: tour.length, hasBoundary: hasBoundary });
+    tour.forEach((edge, index) => signs.set(edge, index % 2 === 0 ? 1 : -1));
+  }
+  const obstructed = components.some((c) => !c.hasBoundary && c.edgeCount % 2);
+  if (obstructed === classifyCells(cells).admitted) {
+    throw new Error("the graph and arithmetic admission tests disagree");
+  }
+  const result = {
+    cellLengths: cells, components: components, status: obstructed ? "obstructed" : "constructed"
+  };
+  if (obstructed) return result;
+  const words = cells.map((n) => new Array(n).fill("?"));
+  variables.forEach(([arm, positions], edge) => {
+    for (const j of positions) words[arm][j] = signs.get(edge) === 1 ? "+" : "-";
+  });
+  let joined = words.map((w) => w.join(""));
+  if (!verifyTemplate(joined)) throw new Error("the Euler tour failed the independent cell identity");
+  if (joined.reduce((a, w) => a + (w[0] === "+" ? 1 : -1), 0) === 1) {
+    joined = joined.map((w) => w.split("").map((s) => (s === "+" ? "-" : "+")).join(""));
+  }
+  result.words = joined;
+  result.centerSign = -1;
+  result.identityResidual = cellIdentity(joined);
+  return result;
+}
+
+/* gap_99_79_23.py:59  def choose_cells(t) */
+function chooseCells(t) {
+  const lengths = BASE.map((n) => n * t);
+  let branch, deletions;
+  if (t % 2 === 0) { branch = "even"; deletions = [1, 0, 2]; }
+  else if (t % 19 !== 1) { branch = "odd-19"; deletions = [1, 0, 1]; }
+  else if (t % 7 !== 1) { branch = "odd-7"; deletions = [0, 1, 1]; }
+  else if (t % 5 !== 1) { branch = "odd-5"; deletions = [1, 1, 0]; }
+  else if (t % 4 === 3) { branch = "odd-4"; deletions = [0, 0, 2]; }
+  else throw new Error("open");
+  const cells = lengths.map((n, i) => n - deletions[i] + 1);
+  if (!cellsAdmissible(cells)) throw new Error("cells not admissible");
+  return { branch: branch, deletions: deletions, cells: cells };
+}
+
+/* fixed_difference_family.py:18  FAMILIES[23], read with k = 0.
+ * The construction is _literal_pair(lengths, [p + b*k + t for p, b, t in rows], -1),
+ * so each arm's word is p + t at k = 0, the centre goes to the right, and a '0'
+ * in a word is a hole: that vertex is left out of both sets. */
+const FAMILIES_23 = [
+  ["+-+-+-+-+-+-+-+-+-0-+-++++++++++++++++-+-++++++++",
+   "++++++++++++++++++++++++++++++++++++++++++++++++++++++++",
+   "++++++++-+-++++++++++++++++-+--+-+-+-+-+-+-+-+-+-0"],
+  ["+-+-+-+-+-+-+-+-+-++-+----------------+",
+   "-+-------------------+-+-+-+-+-+-+-+-------------------+",
+   "-+----------------+-++-+-+-+-+-+-+-+-+-+"],
+  ["+-+--------",
+   "---------+-+-+-+-+-+-+-+-+-----+-+-+-+-+-+-+-+-+--------",
+   "---------+-+"]
+];
+
+/* fixed_difference_family.py:127  identity_residual(base) checks the certificate
+ * against three rules. The page repeats the same three rules on its own copy of
+ * the words, so a reader can see that the copy it uses is the one the code
+ * accepts. */
+function certificateFidelity() {
+  const lengths = [99, 79, 23];
+  const rows = [];
+  let ok = true;
+  FAMILIES_23.forEach((group, arm) => {
+    const [prefix, block, tail] = group;
+    const holes = [];
+    (prefix + tail).split("").forEach((sign, j) => { if (sign === "0") holes.push(j + 1); });
+    const wantHoles = arm === 0 ? [19, lengths[arm]] : [];
+    const lengthOk = prefix.length + tail.length === lengths[arm];
+    const blockOk = block.length === 56;
+    const holesOk = holes.join(",") === wantHoles.join(",");
+    const signsOk = !/[^+\-0]/.test(prefix + block + tail) && block.indexOf("0") < 0;
+    if (!(lengthOk && blockOk && holesOk && signsOk)) ok = false;
+    rows.push({
+      arm: arm + 1, prefix: prefix.length, block: block.length, tail: tail.length,
+      word: prefix.length + tail.length, want: lengths[arm],
+      holes: holes.join(",") || "none", wantHoles: wantHoles.join(",") || "none",
+      ok: lengthOk && blockOk && holesOk && signsOk
+    });
+  });
+  return { ok: ok, rows: rows };
+}
+
+/* gap_99_79_23.py:134  def check_pair(lengths, left, right) */
+function checkPair(lengths, left, right) {
+  const key = (v) => v[0] * 100000 + v[1];
+  const leftKeys = new Set(left.map(key));
+  const rightKeys = new Set(right.map(key));
+  if (leftKeys.size !== left.length) throw new Error("duplicate vertex in a set");
+  if (rightKeys.size !== right.length) throw new Error("duplicate vertex in a set");
+  const inside = (v) => (v[0] === 0 && v[1] === 0) ||
+    (v[0] >= 1 && v[0] <= 3 && v[1] >= 1 && v[1] <= lengths[v[0] - 1]);
+  for (const v of left) if (!inside(v)) throw new Error("vertex " + v + " is outside the tree");
+  for (const v of right) if (!inside(v)) throw new Error("vertex " + v + " is outside the tree");
+  for (const v of left) if (rightKeys.has(key(v))) throw new Error("the two sets overlap");
+  if (left.length !== right.length) throw new Error("the two sets have different sizes");
+  const distance = (u, v) => (u[0] === v[0] ? Math.abs(u[1] - v[1]) : u[1] + v[1]);
+  const profile = (vertices) => {
+    const counts = new Map();
+    for (let i = 0; i < vertices.length; i++) {
+      for (let j = i + 1; j < vertices.length; j++) {
+        const d = distance(vertices[i], vertices[j]);
+        counts.set(d, (counts.get(d) || 0) + 1);
+      }
+    }
+    return counts;
+  };
+  const lp = profile(left), rp = profile(right);
+  const degrees = Array.from(new Set(Array.from(lp.keys()).concat(Array.from(rp.keys())))).sort((a, b) => a - b);
+  const difference = {};
+  for (const d of degrees) {
+    const a = lp.get(d) || 0, b = rp.get(d) || 0;
+    if (a !== b) difference[d] = a - b;
+  }
+  let pairsPerSide = 0;
+  lp.forEach((v) => { pairsPerSide += v; });
+  return {
+    size: left.length, homometric: Object.keys(difference).length === 0, difference: difference,
+    leftProfile: lp, rightProfile: rp, pairsPerSide: pairsPerSide
+  };
+}
+
+/* gap_99_79_23.py:156  def witness(t) */
+function witness(t) {
+  const lengths = BASE.map((n) => n * t);
+  const left = [], right = [];
+  let info;
+  if (t === 1) {
+    const words = FAMILIES_23.map((group) => group[0] + group[2]);
+    right.push([0, 0]);
+    for (let arm = 1; arm <= 3; arm++) {
+      const word = words[arm - 1];
+      for (let depth = 1; depth <= word.length; depth++) {
+        const sign = word[depth - 1];
+        if (sign === "0") continue;            // a hole: left out of both sets
+        (sign === "+" ? left : right).push([arm, depth]);
+      }
+    }
+    info = { branch: "interior-certificate", source: "fixed_difference_family.construct(23)",
+             fidelity: certificateFidelity() };
+  } else {
+    const choice = chooseCells(t);
+    const certified = template(choice.cells);
+    if (certified.status !== "constructed") throw new Error("Euler-cell template obstructed");
+    if (certified.centerSign === -1) right.push([0, 0]); else left.push([0, 0]);
+    certified.words.forEach((word, index) => {
+      const arm = index + 1;
+      for (let depth = 0; depth < word.length; depth++) {
+        if (depth === 0) continue;
+        (word[depth] === "+" ? left : right).push([arm, depth]);
+      }
+    });
+    info = { branch: choice.branch, deletions: choice.deletions, cells: choice.cells };
+  }
+  const checked = checkPair(lengths, left, right);
+  const goal = target(t);
+  if (!checked.homometric || checked.size < goal) throw new Error("constructed pair failed its recount");
+  return {
+    t: t, lengths: lengths, target: goal, meetsTarget: checked.size >= goal,
+    left: left, right: right, info: info, checked: checked
+  };
+}
+
+/* ------------------------------------------------------------------
+ * Drawing and reporting.
+ * ------------------------------------------------------------------ */
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+function el(name, attrs, text) {
+  const node = document.createElementNS(SVG_NS, name);
+  for (const k in attrs) node.setAttribute(k, attrs[k]);
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function para(text, className) {
+  const p = document.createElement("p");
+  p.textContent = text;
+  if (className) p.className = className;
+  return p;
+}
+
+function drawTree(result) {
+  const wrap = document.getElementById("drawing");
+  wrap.textContent = "";
+  const leftKeys = new Set(result.left.map((v) => v[0] + ":" + v[1]));
+  const rightKeys = new Set(result.right.map((v) => v[0] + ":" + v[1]));
+  const used = result.left.length + result.right.length;
+
+  const maxLength = Math.max.apply(null, result.lengths);
+  const radius = 150, size = 340;
+  const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
+  const svg = el("svg", {
+    viewBox: "0 0 " + size + " " + size, width: "100%", class: "chart",
+    role: "img", "aria-label": "The three-branched tree, each vertex coloured by the set it belongs to"
+  });
+  const dot = used > 1400 ? 1.1 : used > 600 ? 1.5 : 2.1;
+  for (let arm = 1; arm <= 3; arm++) {
+    const length = result.lengths[arm - 1];
+    const angle = angles[arm - 1];
+    const scale = radius / maxLength;
+    svg.appendChild(el("line", {
+      x1: size / 2, y1: size / 2,
+      x2: size / 2 + Math.cos(angle) * length * scale,
+      y2: size / 2 + Math.sin(angle) * length * scale,
+      stroke: "#d8d3c8", "stroke-width": 1
+    }));
+    for (let depth = 1; depth <= length; depth++) {
+      const id = arm + ":" + depth;
+      const colour = leftKeys.has(id) ? "var(--a)" : rightKeys.has(id) ? "var(--b)" : "var(--hole)";
+      svg.appendChild(el("circle", {
+        cx: size / 2 + Math.cos(angle) * depth * scale,
+        cy: size / 2 + Math.sin(angle) * depth * scale,
+        r: dot, fill: colour
+      }));
+    }
+  }
+  svg.appendChild(el("circle", {
+    cx: size / 2, cy: size / 2, r: dot + 1.5,
+    fill: rightKeys.has("0:0") ? "var(--b)" : "var(--a)"
+  }));
+  wrap.appendChild(svg);
+
+  // One strip per arm: every depth from 1 to the arm length, coloured by
+  // which set owns it (grey = left out of both).
+  const cell = 5;
+  for (let arm = 1; arm <= 3; arm++) {
+    const length = result.lengths[arm - 1];
+    const row = document.createElement("div");
+    row.className = "striprow";
+    const label = document.createElement("span");
+    label.className = "label";
+    label.textContent = "arm " + arm + " (length " + length + ")";
+    row.appendChild(label);
+    const box = document.createElement("div");
+    box.className = "strip";
+    const strip = el("svg", { width: Math.max(1, length * cell), height: 16 });
+    for (let depth = 1; depth <= length; depth++) {
+      const id = arm + ":" + depth;
+      const colour = leftKeys.has(id) ? "var(--a)" : rightKeys.has(id) ? "var(--b)" : "var(--hole)";
+      strip.appendChild(el("rect", { x: (depth - 1) * cell, y: 0, width: cell, height: 16, fill: colour }));
+    }
+    box.appendChild(strip);
+    row.appendChild(box);
+    wrap.appendChild(row);
+  }
+  const legend = document.createElement("p");
+  legend.className = "tiny";
+  legend.innerHTML = "<span class='swatch' style='background:var(--a)'></span>left set " +
+    result.left.length + " &nbsp; <span class='swatch' style='background:var(--b)'></span>right set " +
+    result.right.length + " &nbsp; <span class='swatch' style='background:var(--hole)'></span>left out of both " +
+    (result.lengths.reduce((a, b) => a + b, 0) + 1 - used);
+  wrap.appendChild(legend);
+}
+
+function showProfiles(result) {
+  const box = document.getElementById("profiles");
+  box.textContent = "";
+  const checked = result.checked;
+  const degrees = Array.from(checked.leftProfile.keys()).sort((a, b) => a - b);
+  const heights = degrees.map((d) => checked.leftProfile.get(d));
+  const peak = Math.max.apply(null, heights.concat([1]));
+
+  // Both profiles drawn on top of each other: they coincide exactly.
+  const width = 320, height = 130, left = 26, bottom = 18;
+  const svg = el("svg", {
+    viewBox: "0 0 " + width + " " + height, width: "100%", class: "chart",
+    role: "img", "aria-label": "The two distance profiles, drawn on top of each other; they coincide"
+  });
+  const plotW = width - left - 6, plotH = height - bottom - 8;
+  const step = plotW / degrees.length;
+  let bars = "";
+  let line = "";
+  degrees.forEach((d, i) => {
+    const h = (checked.leftProfile.get(d) / peak) * plotH;
+    const x = left + i * step;
+    bars += "M" + x + " " + (height - bottom - h) + "h" + Math.max(0.6, step) + "v" + h + "h-" +
+      Math.max(0.6, step) + "z";
+    const y = height - bottom - h;
+    line += (i ? "L" : "M") + x + " " + y;
+  });
+  svg.appendChild(el("path", { d: bars, fill: "var(--a)", opacity: "0.35" }));
+  svg.appendChild(el("path", { d: line, stroke: "var(--b)", fill: "none", "stroke-width": "1.5" }));
+  svg.appendChild(el("line", {
+    x1: left, y1: height - bottom, x2: width - 6, y2: height - bottom, stroke: "#b9b3a6"
+  }));
+  svg.appendChild(el("text", { x: 2, y: 14, "font-size": "11", fill: "#6b6459" }, String(peak)));
+  svg.appendChild(el("text", {
+    x: left, y: height - 4, "font-size": "11", fill: "#6b6459"
+  }, "distance 1 to " + degrees[degrees.length - 1] + "  (pairs per distance)"));
+  box.appendChild(svg);
+
+  const table = document.createElement("table");
+  const head = document.createElement("tr");
+  ["distance", "pairs in left", "pairs in right", "difference"].forEach((h) => {
+    const th = document.createElement("th"); th.textContent = h; head.appendChild(th);
+  });
+  table.appendChild(head);
+  degrees.slice(0, 12).forEach((d) => {
+    const row = document.createElement("tr");
+    const a = checked.leftProfile.get(d), b = checked.rightProfile.get(d) || 0;
+    [d, a, b, a - b].forEach((value) => {
+      const cell = document.createElement("td");
+      cell.className = "num";
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    table.appendChild(row);
+  });
+  box.appendChild(table);
+
+  const verdict = document.createElement("p");
+  verdict.innerHTML = checked.homometric
+    ? "<span class='ok'>Identical.</span> Every one of the " + degrees.length +
+      " distances occurs the same number of times on each side — " + checked.pairsPerSide +
+      " pairs per side, recounted here pair by pair in your browser."
+    : "<span class='warn'>The two profiles differ.</span>";
+  box.appendChild(verdict);
+  const difference = document.createElement("p");
+  difference.className = "tiny";
+  difference.textContent = "Signed difference over all " + degrees.length +
+    " distances (must be empty): " + JSON.stringify(checked.difference);
+  box.appendChild(difference);
+}
+
+function showSummary(result) {
+  const box = document.getElementById("summary");
+  box.textContent = "";
+  const checked = result.checked;
+  const table = document.createElement("table");
+  const rows = [
+    ["scale t", result.t],
+    ["arm lengths", result.lengths.join(", ")],
+    ["construction", result.info.branch + (result.info.source ? " (" + result.info.source + ")" : "")],
+    ["tip deletions", result.info.deletions ? result.info.deletions.join(", ") : "—"],
+    ["cells", result.info.cells ? result.info.cells.join(", ") : "—"],
+    ["size of each set", checked.size],
+    ["target (half the tree, less one)", result.target],
+    ["meets the target", result.meetsTarget ? "yes" : "no"],
+    ["profiles identical", checked.homometric ? "yes, recounted live" : "no"],
+    ["pairs counted per side", checked.pairsPerSide]
+  ];
+  for (const [label, value] of rows) {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th"); th.textContent = label;
+    const td = document.createElement("td"); td.className = "num"; td.textContent = value;
+    tr.appendChild(th); tr.appendChild(td); table.appendChild(tr);
+  }
+  box.appendChild(table);
+  if (result.info.fidelity) {
+    const fidelity = result.info.fidelity;
+    const line = document.createElement("p");
+    line.innerHTML = fidelity.ok
+      ? "<span class='ok'>This page's copy of the certificate words is the one the code accepts.</span> " +
+        "For every arm, prefix+tail is the arm length, the repeat block is 56 signs, and the holes are " +
+        "exactly where fixed_difference_family.py requires them (depth 19 and the tip of the long arm)."
+      : "<span class='warn'>This page's copy of the certificate words does not match the lengths " +
+        "fixed_difference_family.py requires.</span>";
+    box.appendChild(line);
+    const fidelityTable = document.createElement("table");
+    const head = document.createElement("tr");
+    ["arm", "prefix", "block", "tail", "word length", "arm length", "holes here", "holes required"]
+      .forEach((h) => { const th = document.createElement("th"); th.textContent = h; head.appendChild(th); });
+    fidelityTable.appendChild(head);
+    fidelity.rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      [row.arm, row.prefix, row.block, row.tail, row.word, row.want, row.holes, row.wantHoles]
+        .forEach((value) => {
+          const cell = document.createElement("td");
+          cell.className = "num";
+          cell.textContent = value;
+          tr.appendChild(cell);
+        });
+      fidelityTable.appendChild(tr);
+    });
+    const scroll = document.createElement("div");
+    scroll.className = "scroll";
+    scroll.appendChild(fidelityTable);
+    box.appendChild(scroll);
+  }
+  const command = document.createElement("p");
+  command.innerHTML = "Reproduce this scale with the project's own command: <code>python3 " +
+    "projects/almost-halving-three-branches/gap_99_79_23.py --witness " + result.t + "</code>";
+  box.appendChild(command);
+  if (result.t > 1 && result.t % RESISTANT_MODULUS === 1) {
+    const warn = document.createElement("p");
+    warn.innerHTML = "<span class='warn'>This scale is in the open class</span> " +
+      "(t = 1 mod " + RESISTANT_MODULUS + "). No full-prefix pair attains the target there; " +
+      "whether any pair does is open.";
+    box.appendChild(warn);
+  }
+}
+
+function render(t) {
+  document.getElementById("scaleOut").textContent = t;
+  document.getElementById("scale").value = t;
+  Array.from(document.querySelectorAll("#scaleButtons button")).forEach((button) => {
+    button.setAttribute("aria-pressed", button.dataset.t === String(t) ? "true" : "false");
+  });
+  let result;
+  try {
+    result = witness(t);
+  } catch (error) {
+    const box = document.getElementById("summary");
+    box.textContent = "";
+    if (error.message === "open") {
+      box.appendChild(para("Scale " + t + " is in the open class: t = 1 mod " + RESISTANT_MODULUS +
+        " with t > 1. No full-prefix pair attains the target there, and whether any pair does is open. " +
+        "This page does not claim to know."));
+    } else {
+      box.appendChild(para("Scale " + t + ": " + error.message));
+    }
+    document.getElementById("drawing").textContent = "";
+    document.getElementById("profiles").textContent = "";
+    return;
+  }
+  showSummary(result);
+  drawTree(result);
+  showProfiles(result);
+}
+
+function runAudit() {
+  const box = document.getElementById("auditOut");
+  box.textContent = "";
+  const table = document.createElement("table");
+  const head = document.createElement("tr");
+  ["t", "branch", "size", "target", "identical profiles", "pairs per side"].forEach((h) => {
+    const th = document.createElement("th"); th.textContent = h; head.appendChild(th);
+  });
+  table.appendChild(head);
+  for (let t = 1; t <= 12; t++) {
+    const row = document.createElement("tr");
+    const cells = [t];
+    try {
+      const result = witness(t);
+      cells.push(result.info.branch, result.checked.size, result.target,
+        result.checked.homometric ? "yes" : "no", result.checked.pairsPerSide);
+    } catch (error) {
+      cells.push("open", "—", "—", "—", "—");
+    }
+    cells.forEach((value) => {
+      const cell = document.createElement("td");
+      cell.className = "num";
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    table.appendChild(row);
+  }
+  box.appendChild(table);
+  const note = document.createElement("p");
+  note.className = "tiny";
+  note.textContent = "The project's own audit, quoted from RUN_LOG_20261124.md: " +
+    "\"every 2 <= t <= 5321 attains the target except t = 2661, 5321 (1 mod 2660)\". " +
+    "This page recounts the scales it can afford, not that whole range.";
+  box.appendChild(note);
+}
+
+/* Read the project's own source file and compare its FAMILIES[23] rows with the
+ * copy this page uses. Nothing is assumed: the rows are parsed out of the file. */
+function checkAgainstSource() {
+  const box = document.getElementById("sourceResult");
+  box.textContent = "";
+  const line = document.createElement("p");
+  line.textContent = "Reading fixed_difference_family.py…";
+  box.appendChild(line);
+  fetch("fixed_difference_family.py").then((response) => response.text()).then((text) => {
+    const lines = text.split("\n");
+    let start = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (/^\s*23:\s*\(/.test(lines[i])) { start = i; break; }
+    }
+    if (start < 0) throw new Error("FAMILIES[23] was not found in the file");
+    const block = [];
+    for (let i = start + 1; i < lines.length; i++) {
+      block.push(lines[i]);
+      if (/^\s*\),?\s*$/.test(lines[i])) break;
+    }
+    const strings = [];
+    const pattern = /'([^']*)'/g;
+    let match;
+    while ((match = pattern.exec(block.join("\n"))) !== null) strings.push(match[1]);
+    if (strings.length < 9) throw new Error("the file's rows did not parse as nine sign rows");
+    const table = document.createElement("table");
+    const head = document.createElement("tr");
+    ["arm", "row", "this page", "the file", "same?"].forEach((h) => {
+      const th = document.createElement("th"); th.textContent = h; head.appendChild(th);
+    });
+    table.appendChild(head);
+    let allSame = true;
+    for (let arm = 0; arm < 3; arm++) {
+      ["prefix", "block", "tail"].forEach((part, index) => {
+        const mine = FAMILIES_23[arm][index];
+        const theirs = strings[arm * 3 + index];
+        const same = mine === theirs;
+        if (!same) allSame = false;
+        const row = document.createElement("tr");
+        [arm + 1, part, mine.length + " signs", theirs.length + " signs", same ? "yes" : "NO"]
+          .forEach((value) => {
+            const cell = document.createElement("td");
+            cell.className = "num";
+            cell.textContent = value;
+            row.appendChild(cell);
+          });
+        table.appendChild(row);
+      });
+    }
+    box.textContent = "";
+    const verdict = document.createElement("p");
+    verdict.innerHTML = allSame
+      ? "<span class='ok'>Every row this page uses is byte-for-byte the row in " +
+        "fixed_difference_family.py.</span>"
+      : "<span class='warn'>This page's copy differs from the file.</span>";
+    box.appendChild(verdict);
+    box.appendChild(table);
+  }).catch((error) => {
+    box.textContent = "";
+    box.appendChild(para("This browser would not read the neighbouring source file (" + error +
+      "). The fidelity table in the summary above checks the same three rules by hand, " +
+      "and the project's own command remains the authority.", "tiny"));
+  });
+}
+
+document.getElementById("sourceCheck").addEventListener("click", checkAgainstSource);
+document.getElementById("export").addEventListener("click", () => {
+  const box = document.getElementById("exportBox");
+  let payload;
+  try {
+    const result = witness(parseInt(document.getElementById("scale").value, 10));
+    payload = {
+      lengths: result.lengths,
+      left: result.left.map((v) => [v[0], v[1]]),
+      right: result.right.map((v) => [v[0], v[1]])
+    };
+  } catch (error) {
+    box.value = "This scale has no witness to export: " + error.message;
+    return;
+  }
+  box.value = JSON.stringify(payload);
+});
+const buttonHost = document.getElementById("scaleButtons");
+for (let t = 1; t <= 12; t++) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = t;
+  button.dataset.t = t;
+  button.setAttribute("aria-label", "Show scale " + t);
+  button.addEventListener("click", () => render(t));
+  buttonHost.appendChild(button);
+}
+document.getElementById("scale").addEventListener("input", (event) => {
+  render(parseInt(event.target.value, 10));
+});
+document.getElementById("audit").addEventListener("click", runAudit);
+render(1);
+</script>
+
+</body>
+</html>
