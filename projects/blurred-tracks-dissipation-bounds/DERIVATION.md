@@ -231,13 +231,27 @@ example (`A = [[-1.2, -2.0], [0.8, -0.7]]`, `Dm = [[1, 0.3], [0.3, 0.6]]`,
 passes among `m ∈ [-60, 60]`; every other branch already fails `Σ_m`
 symmetry by at least `0.576` in absolute entry units.
 
-**Open, stated plainly:** unlike §5 there is no completeness proof over all
-`m` yet (the window is `|m| ≤ 60`; symmetry residuals there grow rather
-than shrink, but that is observation, not proof); real-eigenvalue `Φ`
-(including negative real eigenvalues, where real logarithms may fail to
-exist or come in non-eigenvector-sharing families) is not implemented;
-singular `Γ_1` and singular `U_mW_m` cases are unhandled. These are the
-next mathematical work, before milestone 3's finite-record study.
+**Completeness for the frozen example (all `m`).**
+[completeness_general.py](completeness_general.py) closes the window: all
+branches share `Φ`'s eigenvectors, so in that eigenbasis
+`Σ_m = ε² P diag(d_m, d̄_m) Ĝ P⁻¹` with `Ĝ` fixed and
+`d_m = μ_m²/(e^{μ_m ε} + e^{-μ_m ε} - 2)`. At `ε/Δ = 1/2` the denominator
+depends only on the parity of `m` while `μ_m²` is quadratic in `m`; the
+symmetry residual `R(m) = (Σ_m)₀₁ - (Σ_m)₁₀`, a fixed real linear form in
+`(d_m, d̄_m)`, is therefore an exact quadratic polynomial in `m` per parity.
+Both parity quadratics have nonzero leading coefficients (verified against
+direct evaluation at `|m| = 1000` in the eigenbasis), and their only integer
+root is `m = 0`. Since symmetry of `Σ_m` is necessary for compatibility,
+no other branch — at any `|m|` — fits this film, within the
+complex-eigenvalue, `ε/Δ = 1/2` setting.
+
+**Still open, stated plainly:** real-eigenvalue `Φ` (negative eigenvalues,
+and non-primary real logarithms for positive spectrum, which need not share
+`Φ`'s eigenvectors); irrational or general rational `ε/Δ` in the general
+case; singular `Γ_1` and singular `U_mW_m`. The primary-logarithm subcase
+for distinct positive eigenvalues is implemented and tested in
+[real_eigenvalue.py](real_eigenvalue.py) (§9), without claiming the
+non-primary families.
 
 ## 8. Milestone-3 pilot: finite records
 
@@ -263,4 +277,18 @@ or robustness outside the stated model is claimed. Milestone 3 proper still
 needs: set-valued reporting with calibrated tolerances, unknown-mean
 handling, held-out two-exposure schedules, and the light/noise budget
 accounting the brief asks for.
+
+## 9. Real-eigenvalue propagators: primary logarithm
+
+[real_eigenvalue.py](real_eigenvalue.py) handles the subcase where
+`Φ = Γ_2Γ_1⁻¹` has distinct positive real eigenvalues: Sylvester's formula
+gives the primary real `log Φ`, and in the frozen example
+(`A = [[-1.5, 0.4], [0.4, -0.8]]` symmetric, `Dm = [[1, 0.5], [0.5, 1]]`,
+`σ = 0.0710 > 0` despite no rotation in `A` — dissipation comes from
+`A` and `Dm` not commuting) it recovers `A, Σ, Dm, ℓ², σ` exactly.
+A negative-eigenvalue `Φ` is refused rather than silently assigned a
+logarithm. Non-primary real logarithms for positive spectrum — which need
+not share `Φ`'s eigenvectors or be polynomials in `Φ` — are **not**
+enumerated yet, so uniqueness in the real-eigenvalue case is not claimed;
+only exact recovery of the primary branch is.
 

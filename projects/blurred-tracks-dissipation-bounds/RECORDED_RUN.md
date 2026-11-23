@@ -85,3 +85,25 @@ Frozen: R=24 tracks x N in (1000, 4000, 16000), seed base 424242, substeps=20/ex
    4000   24/24                0.250                  0.035
   16000   24/24                0.268                  0.026
 ```
+
+## Completeness + real-eigenvalue: python3 completeness_general.py && python3 real_eigenvalue.py
+
+```
+[ok] eigenbasis Sigma_m matches augmented-exponential route (max abs err 3.50e-11, m in [-6,6])
+[ok] parity 0: R is quadratic in m (rel err 1.36e-12; A2=35.201691)
+[ok] parity 0: leading coefficient nonzero 
+  parity 0: real roots ['-0.2819', '-0.0000']
+[ok] parity 1: R is quadratic in m (rel err 6.20e-13; A2=-0.369865)
+[ok] parity 1: leading coefficient nonzero 
+  parity 1: real roots ['-0.1721', '-3.5505']
+  integer roots of R over all m: [0]
+[ok] only the true branch m=0 has R(m)=0 over all integers 
+FAILED: none — all checks passed
+frozen real-eigenvalue example: sigma = 0.071014
+[ok] dissipates despite symmetric drift 
+[ok] primary log recovers A (eigenvalues 0.5731, 0.2202; max err 2.66e-15)
+[ok] exp(log Phi) = Phi (max err 1.11e-16)
+[ok] Sigma, Dm, ell^2, sigma all reconstructed (sigma_rec 0.071014)
+[ok] negative eigenvalue refused, not silently logged 
+FAILED: none — all checks passed
+```
