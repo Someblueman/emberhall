@@ -94,7 +94,9 @@ def _merge(destination: dict[int, float], source: Mapping[int, float], factor=1.
         value *= factor
         if value:
             destination[key] = destination.get(key, 0.0) + value
-            if abs(destination[key]) < 1e-18:
+            # Remove only exact cancellation.  A nonzero derivative, however
+            # small, still contributes to covariance at its own scale.
+            if destination[key] == 0.0:
                 del destination[key]
 
 

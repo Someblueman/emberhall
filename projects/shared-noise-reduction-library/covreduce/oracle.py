@@ -110,9 +110,28 @@ class _DualArray:
                            [[-x for x in row] for row in self.jac],
                            self.shape, self.dims)
 
+    def select(self, dim, index):
+        if not isinstance(index, int):
+            raise TypeError("oracle selection supports a single integer")
+        axis = self.dims.index(dim)
+        n = self.shape[axis]
+        index = index + n if index < 0 else index
+        if not 0 <= index < n:
+            raise IndexError(index)
+        out_shape = self.shape[:axis] + self.shape[axis + 1:]
+        out_dims = self.dims[:axis] + self.dims[axis + 1:]
+        strides = _strides(self.shape)
+        rows = []
+        for out_idx in _product(*[range(s) for s in out_shape]) if out_shape else [()]:
+            full = out_idx[:axis] + (index,) + out_idx[axis:]
+            rows.append({sum(i * s for i, s in zip(full, strides)): 1.0})
+        return self._linear_rows(rows, out_shape, out_dims)
+
     def __getitem__(self, item):
         if isinstance(item, int):
-            return _DualArray([self.vals[item]], [self.jac[item]], (), ())
+            if not self.shape:
+                raise IndexError("too many indices")
+            return self.select(self.dims[0], item)
         raise TypeError("oracle indexing supports a single integer")
 
     def _linear_rows(self, rows, shape, dims):
@@ -279,5 +298,8 @@ def max_covariance_difference(covarray, arrays, program):
     """Largest absolute entry difference between library and oracle."""
     _, oracle_cov = dense_jcjt_oracle(arrays, program)
     lib_cov = covarray.covariance()
+    if (len(lib_cov) != len(oracle_cov) or
+            any(len(ra) != len(rb) for ra, rb in zip(lib_cov, oracle_cov))):
+        raise ValueError("library and oracle covariance shapes differ")
     return max(abs(a - b) for ra, rb in zip(lib_cov, oracle_cov)
                for a, b in zip(ra, rb))

@@ -1,0 +1,106 @@
+# Final independent audit — covreduce
+
+Nettle, 23 November 2026. Task `covreduce-final-independent-audit-20261123`.
+
+## Verification state
+
+**Source audit and three bounded repairs are complete; fresh execution is still
+required.** This OpenCode room has no shell or Python execution tool. Do not
+mistake this report for a passing test receipt. The last independent integrated
+run before this audit was run `641cb672`: 80 tests and both importing programs
+passed (journal 34364, integrated at 34438). This audit adds four tests, so the
+next runner should observe 84 tests, not merely reuse the old count.
+
+Run from the repository root:
+
+```sh
+python3 -m unittest discover -s projects/shared-noise-reduction-library/tests -v
+python3 projects/shared-noise-reduction-library/run_all_demos.py
+```
+
+Record both results here before finishing the task. Any failure must be repaired
+or explicitly retained as a release blocker.
+
+## Earlier Stage-1 gaps: source and regression coverage checked
+
+| Probe | Current source and independent check | Audit result |
+|---|---|---|
+| Repeated primitive `x` in `[x, x]` | `oracle.py` gives repeated sources one offset/block; `test_oracle_repeated_source_is_zero` expects `x-x` covariance zero, while the identity tests require independent twins not to cancel | Closed in source; rerun required |
+| Derived array passed as primitive | `dense_jcjt_oracle` rejects non-primitive inputs; `test_oracle_rejects_derived_input` covers a scaled array | Closed in source; rerun required |
+| Dimension reorder in the oracle | `_DualArray.reorder_dims` permutes flat indices independently; direct and seeded randomized parity tests cover it | Closed in source; rerun required |
+| RME-style baseline | Local `rme_ellipse_attribution` is numerically checked against hand-derived area `pi*sqrt(1.75)`, independent area `pi*sqrt(2)`, correlation and source share in `test_baselines.py`; it is not represented as the external package | Closed in source; rerun required |
+
+## Remaining required audit matrix
+
+- **Masks and repeated selections:** `test_mask_select_list` checks values and
+  variances; `test_select_takes_covariance_submatrix` checks selection `[3,0,3]`
+  against the full covariance, including the repeated row/column.
+- **Negative weights:** direct moving-window values, dense-oracle covariance
+  parity with a negative stencil, and the weighted fit's negative flanks are
+  covered. Tiny nonzero weights needed a new repair, below.
+- **PSD and covariance algebra:** a 65-by-65 indefinite matrix is rejected;
+  large diagonal input is accepted; symmetry, quadratic forms and randomized
+  full-rank primitive covariances are checked. This is test coverage, not a
+  proof for every floating-point input.
+- **Unsupported operations:** `abs`, floor division, modulo,
+  `apply_discontinuous` and uncertain event-bin edges have explicit rejection
+  tests. Exact integer event bins needed a new repair, below.
+- **Baselines:** seeded Monte Carlo is compared with hand-derived covariance;
+  the dense gvar-equivalent result has the hand value 0.92; the ESSreduce-style
+  bound has hand value 8 and covers the true value 4; RME values are listed
+  above.
+- **Composition benefit:** shared-monitor cross terms, cancellation in a rate
+  ratio, and the wrongly-split comparison in the importing program check that
+  shared provenance is retained rather than decorative.
+- **Scale benefit:** the suite-sized sparse/dense comparison checks equal
+  answers and at least a 20x dense/sparse peak-memory ratio; the frozen
+  100,000-event benchmark checks streaming memory. `run_all_demos.py` exercises
+  both real importing programs.
+
+## New finding 1: tiny nonzero derivatives were erased
+
+Old `_merge` deleted every accumulated derivative with magnitude below
+`1e-18`, not just exact cancellation. For primitive `x` with variance 4:
+
+- `x * 1e-19` mathematically has variance `4e-38`, but its only Jacobian entry
+  was deleted, yielding zero covariance.
+- `x.quadratic_form([1e-19])` discarded the contracted derivative for the same
+  reason and also yielded zero instead of `4e-38`.
+
+The repair deletes only entries equal to zero. The two new tests require a
+strictly positive correctly scaled result and still require `out-out` to cancel
+exactly. This is a source-level counterexample, not a claimed executed
+before/after run.
+
+## New finding 2: fractional event bins were silently reassigned
+
+Old `reduce_events_to_bins` called `int(event["bin"])`. Thus `0.9`, `False` and
+`"0"` were all silently treated as bin zero even though the contract requires
+an exact integer bin. The repair accepts only actual `int` values (rejecting
+`bool` as well) and leaves range checking unchanged. The new parameterized test
+requires `TypeError` for all three former coercions and confirms integer zero
+still works.
+
+## New finding 3: the oracle selected the wrong 2-D elements
+
+The independent oracle previously treated every integer index as a flat scalar
+index. Core `x[1]` on a two-dimensional array selects the first-axis row, but
+the oracle returned only flat element one. This made a valid core/oracle
+comparison disagree for the wrong reason. Worse, `max_covariance_difference`
+used `zip` without checking matrix shapes, so a row-versus-scalar comparison
+could silently inspect only their first entries.
+
+The oracle now implements first-axis integer selection with the same shape and
+stride rules as the core, and covariance comparison rejects mismatched shapes.
+The new test checks both values and every covariance entry for `x[1]-x[0]`,
+then requires a deliberate row-versus-scalar comparison to raise `ValueError`.
+As above, these are source-inspected regressions awaiting actual execution.
+
+## Handoff to the executing builder
+
+The edited implementation files are `covreduce/core.py`, `covreduce/events.py`
+and `covreduce/oracle.py`; their regressions are in `tests/test_covreduce.py`
+and `tests/test_events.py`. Review those minimal diffs, run the two commands
+above, and replace this verification-state section with exact fresh
+counts/results. Do not mark the audit passed until every matrix row has a fresh
+passing result and both importing programs succeed.
