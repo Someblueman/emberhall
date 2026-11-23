@@ -44,6 +44,10 @@ Operators: arithmetic with first-order product/quotient rules, `select`
 `moving_window` (custom and negative weights), extensive/intensive `rebin`,
 and streaming event-to-bin reduction in `covreduce.events`. Discontinuous
 operations (`//`, `%`, uncertain bin edges) are rejected explicitly.
+Propagation is first-order: `CONTRACT.md` ("When first order stops
+being trustworthy") gives measured error bounds — within ~0.5% for
+products when every factor's relative σ is at most 0.1, with
+quotients needing a Monte Carlo check much sooner.
 
 ## Scale evidence
 
