@@ -135,97 +135,155 @@ class Template320Tests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
 
 
+# Core-certificate tests ported from preserved contribution 47252b6 and
+# rebased onto the 372-row core of preserved contribution 1425cabb
+# (commit 51525046). They are unittest methods on purpose: the house
+# gate discovers this project with unittest, so module-level pytest
+# functions would never be executed by the gate.
+
+
+class CoreCertificateTests(unittest.TestCase):
+    def test_template_shape_and_rows(self):
+        rows, variables = decision.compiled_rows()
+        self.assertEqual(decision.PERIOD, 320)
+        self.assertEqual(decision.BASE, (427, 267, 211))
+        self.assertEqual(decision.CUTS, (213, 133, 105))
+        self.assertEqual(len(rows), 1981)
+        self.assertEqual(len(variables), 1864)
+        self.assertEqual(decision.rows_sha256(rows), decision.ROWS_SHA256)
+        self.assertTrue(0 < len(decision.CORE_ROWS) < len(rows))
+        self.assertEqual(list(decision.CORE_ROWS),
+                         sorted(set(decision.CORE_ROWS)))
+
+
+    def test_certificate_fields(self):
+        cert = decision.certificate()
+        self.assertIn("no signing", cert["external_exact_decision"])
+        self.assertFalse(cert["template_existence_decided"])
+        self.assertFalse(cert["general_target_decided"])
+        self.assertEqual(cert["core_row_count"], len(decision.CORE_ROWS))
+        self.assertEqual(cert["core_row_count"], 372)
+        self.assertEqual(cert["core_variables"], 763)
+        self.assertIn("468-row core", cert["core_provenance"])
+
+    def test_random_signings_violate_core_rows_directly(self):
+        # Independent of IntegerSearch: evaluate the integer rows by hand.
+        rows, variables = decision.compiled_rows()
+        ordered = list(rows.values())
+        rng = random.Random(320)
+        for _ in range(25):
+            signs = [rng.choice((-1, 1)) for _ in variables]
+            self.assertTrue(any(
+                sum(a * signs[i] for i, a in ordered[j].items())
+                for j in decision.CORE_ROWS))
+
+    def test_original_tree_audit_rejects_fabricated_word(self):
+        # A made-up word for this shape must fail coupled_word_completion's
+        # independent original-tree distance audit, not only the row system.
+        arms = []
+        for length, cut in zip(decision.BASE, decision.CUTS):
+            rest = length - cut
+            arms.append([{"literal": "+" * cut}, {"repeat": "+" * decision.PERIOD},
+                         {"literal": "+" * (rest - 1)}])
+        # Match SHAPES segment sizes exactly: rebuild from SHAPES.
+        arms = [[{kind: "+" * size} for kind, size in arm]
+                for arm in decision.SHAPES]
+        word = {"format": coupled.FORMAT, "centre": 1,
+                "period": decision.PERIOD, "arms": arms}
+        with self.assertRaises(ValueError):
+            coupled.verify_word(word)
+        with self.assertRaises(ValueError):
+            coupled.audit_word(word, 0)
+        # The known control word still passes the same machinery.
+        self.assertIs(coupled.verify_word(coupled.control())["valid"], True)
+        self.assertTrue(coupled.audit_word(coupled.control(), 1)
+                        ["equal_distance_multisets"])
+
+    def test_tampered_certificates_rejected(self):
+        cert = decision.certificate()
+        tampers = []
+        bad = copy.deepcopy(cert); bad["template_existence_decided"] = True
+        tampers.append(bad)
+        bad = copy.deepcopy(cert); bad["rows_sha256"] = "0" * 64; tampers.append(bad)
+        bad = copy.deepcopy(cert); bad["core_rows"] = bad["core_rows"][:-1]
+        bad["core_row_count"] -= 1; tampers.append(bad)
+        bad = copy.deepcopy(cert); bad["general_target_decided"] = True
+        tampers.append(bad)
+        bad = copy.deepcopy(cert); bad["period"] = 321; tampers.append(bad)
+        bad = copy.deepcopy(cert); bad["replay"]["conflicts"] += 1; tampers.append(bad)
+        for bad in tampers:
+            with self.assertRaises(ValueError):
+                decision.verify_certificate(bad)
+
+    def test_full_replay_matches_recorded_cap(self):
+        result = decision.verify_certificate(decision.certificate())
+        self.assertIs(result["valid"], True)
+        self.assertEqual(result["status"], "resource_limit")
+        self.assertFalse(result["template_existence_decided"])
+        self.assertFalse(result["general_target_decided"])
+
+    # The 372-row core and its exact replay anchor, rebased from the
+    # preserved contribution 1425cabb (commit 51525046).
+
+    def test_core_rows_are_sorted_unique_subset(self):
+        self.assertEqual(len(decision.CORE_ROWS), 372)
+        self.assertEqual(tuple(sorted(set(decision.CORE_ROWS))),
+                         decision.CORE_ROWS)
+        declared = decision.core_rows_declared()
+        rows, _, _, _ = decision.rows_for_template()
+        keys = list(rows)
+        self.assertEqual(declared, [keys[j] for j in decision.CORE_ROWS])
+        core_vars = {i for d in declared for i in rows[d]}
+        self.assertEqual(len(core_vars), 763)
+
+    def test_core_replay_anchor_is_deterministic(self):
+        report = decision.certificate()
+        self.assertEqual(report["format"], decision.CORE_FORMAT)
+        self.assertEqual(report["core_row_count"], 372)
+        self.assertEqual(report["core_variables"], 763)
+        self.assertEqual(report["replay"], decision.REPLAY)
+        self.assertEqual(report["replay"]["max_conflicts"], 20000)
+        self.assertEqual(report["replay"]["conflicts"], 20000)
+        self.assertEqual(report["replay"]["decisions"], 28144)
+        self.assertEqual(report["replay"]["maximum_depth"], 46)
+        self.assertEqual(report["replay"]["integer_reasons"], 461782)
+        self.assertFalse(report["template_existence_decided"])
+        self.assertFalse(report["general_target_decided"])
+        self.assertEqual(decision.certificate(), report)
+
+    def test_core_reject_tampered_fields(self):
+        report = decision.certificate()
+        for key, value in (("core_row_count", 467),
+                           ("core_variables", 1101),
+                           ("base_lengths", [427, 267, 212]),
+                           ("rows_sha256", "0" * 64),
+                           ("core_provenance", "edited")):
+            damaged = dict(report, **{key: value})
+            with self.assertRaises(ValueError):
+                decision.verify_certificate(damaged)
+
+    def test_real_cli_core_replay(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "core.json"
+            command = [sys.executable, str(Path(decision.__file__))]
+            result = subprocess.run(
+                command + ["--core", "--write", str(path)],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            saved = json.loads(path.read_text())
+            self.assertEqual(saved["replay"], decision.REPLAY)
+            self.assertEqual(saved["core_row_count"], 372)
+            result = subprocess.run(
+                command + ["--verify-core", str(path)],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            saved["replay"]["conflicts"] = 0
+            path.write_text(json.dumps(saved))
+            result = subprocess.run(
+                command + ["--verify-core", str(path)],
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 1)
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-# Core-certificate tests ported from preserved contribution 47252b6.
-
-
-def test_template_shape_and_rows():
-    rows, variables = decision.compiled_rows()
-    assert decision.PERIOD == 320
-    assert decision.BASE == (427, 267, 211)
-    assert decision.CUTS == (213, 133, 105)
-    assert len(rows) == 1981
-    assert len(variables) == 1864
-    assert decision.rows_sha256(rows) == decision.ROWS_SHA256
-    assert 0 < len(decision.CORE_ROWS) < len(rows)
-    assert list(decision.CORE_ROWS) == sorted(set(decision.CORE_ROWS))
-
-
-def test_certificate_fields():
-    cert = decision.certificate()
-    assert "no signing" in cert["external_exact_decision"]
-    assert cert["template_existence_decided"] is False
-    assert cert["general_target_decided"] is False
-    assert cert["core_row_count"] == len(decision.CORE_ROWS)
-
-
-def test_random_signings_violate_core_rows_directly():
-    # Independent of IntegerSearch: evaluate the integer rows by hand.
-    rows, variables = decision.compiled_rows()
-    ordered = list(rows.values())
-    rng = random.Random(320)
-    for _ in range(25):
-        signs = [rng.choice((-1, 1)) for _ in variables]
-        assert any(sum(a * signs[i] for i, a in ordered[j].items())
-                   for j in decision.CORE_ROWS)
-
-
-def test_original_tree_audit_rejects_fabricated_word():
-    # A made-up word for this shape must fail coupled_word_completion's
-    # independent original-tree distance audit, not only the row system.
-    arms = []
-    for length, cut in zip(decision.BASE, decision.CUTS):
-        rest = length - cut
-        arms.append([{"literal": "+" * cut}, {"repeat": "+" * decision.PERIOD},
-                     {"literal": "+" * (rest - 1)}])
-    # Match SHAPES segment sizes exactly: rebuild from SHAPES.
-    arms = [[{kind: "+" * size} for kind, size in arm]
-            for arm in decision.SHAPES]
-    word = {"format": coupled.FORMAT, "centre": 1,
-            "period": decision.PERIOD, "arms": arms}
-    try:
-        coupled.verify_word(word)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("fabricated all-plus word passed verify_word")
-    try:
-        coupled.audit_word(word, 0)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("fabricated word passed the original-tree audit")
-    # The known control word still passes the same machinery.
-    assert coupled.verify_word(coupled.control())["valid"] is True
-    assert coupled.audit_word(coupled.control(), 1)["equal_distance_multisets"]
-
-
-def test_tampered_certificates_rejected():
-    cert = decision.certificate()
-    tampers = []
-    bad = copy.deepcopy(cert); bad["template_existence_decided"] = True
-    tampers.append(bad)
-    bad = copy.deepcopy(cert); bad["rows_sha256"] = "0" * 64; tampers.append(bad)
-    bad = copy.deepcopy(cert); bad["core_rows"] = bad["core_rows"][:-1]
-    bad["core_row_count"] -= 1; tampers.append(bad)
-    bad = copy.deepcopy(cert); bad["general_target_decided"] = True
-    tampers.append(bad)
-    bad = copy.deepcopy(cert); bad["period"] = 321; tampers.append(bad)
-    bad = copy.deepcopy(cert); bad["replay"]["conflicts"] += 1; tampers.append(bad)
-    for bad in tampers:
-        try:
-            decision.verify_certificate(bad)
-        except ValueError:
-            continue
-        raise AssertionError("tampered certificate accepted")
-
-
-def test_full_replay_matches_recorded_cap():
-    result = decision.verify_certificate(decision.certificate())
-    assert result["valid"] is True
-    assert result["status"] == "resource_limit"
-    assert result["template_existence_decided"] is False
-    assert result["general_target_decided"] is False

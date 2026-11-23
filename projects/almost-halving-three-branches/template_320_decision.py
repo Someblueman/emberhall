@@ -9,9 +9,12 @@ integer search. The general tripod target stays undecided.
 
 External exact solvers decide that no signing exists: CP-SAT proved the
 full system infeasible and Z3 proved a CNF encoding of the 468-row core
-below unsatisfiable (Vesper, preserved run 7e983be7; the core was also
+unsatisfiable (Vesper, preserved run 7e983be7; that core was also
 rechecked infeasible under an independently written CP-SAT encoding).
-That evidence is recorded, not counted as a house certificate: the core
+The 468-row core was the accepted 23 November port; this module now
+carries the smaller 372-row core shrunk from it by chunk deletion
+(CORE_SHRINK.md), itself rechecked INFEASIBLE under CP-SAT. That
+evidence is recorded, not counted as a house certificate: the core
 certificate's standard-library replay reaches its 20,000-conflict cap
 (resource_limit), so template_existence_decided stays False. See
 TEMPLATE_320_DECISION.md.
@@ -40,25 +43,22 @@ if SHAPES != prior.SHAPES or PERIOD != prior.PERIOD:
 if BASE != prior.BASE or CUTS != prior.CUTS:
     raise AssertionError("320 lengths drifted from integer_template_decision")
 
-# Filled from the recorded minimization run; indices into the row list of
-# coupled.compile_shape(PERIOD, SHAPES) in its (sorted-degree) order.
+# Indices into the row list of coupled.compile_shape(PERIOD, SHAPES) in its
+# (sorted-degree) order. These 372 rows are infeasible by themselves, so
+# the full 1,981-row system inherits the contradiction. They were shrunk
+# from the 468-row core accepted on 23 November (preserved contribution
+# 47252b6, run 7e983be7, ported in f035da23) by chunk deletion with an
+# external CP-SAT oracle; see CORE_SHRINK.md. That 468-row core and its
+# own replay anchor stay the recorded provenance of this smaller core.
 CORE_ROWS = (
     0, 1, 2, 4, 5, 6, 50, 51, 52, 53, 54, 55,
     56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 68,
-    69, 70, 71, 73, 74, 75, 76, 77, 78, 79, 80, 82,
-    84, 85, 86, 87, 88, 89, 91, 92, 94, 95, 96, 97,
-    99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-    111, 112, 113, 114, 115, 116, 117, 119, 204, 205, 206, 207,
-    208, 209, 210, 211, 212, 213, 215, 216, 217, 218, 219, 220,
-    222, 312, 313, 314, 315, 316, 317, 319, 320, 321, 322, 323,
-    324, 325, 326, 327, 328, 330, 332, 334, 336, 338, 340, 342,
-    344, 346, 348, 352, 354, 356, 358, 360, 362, 366, 368, 372,
-    374, 376, 378, 380, 382, 386, 388, 392, 394, 396, 402, 404,
-    406, 408, 410, 412, 414, 416, 418, 419, 420, 421, 423, 424,
-    425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436,
-    438, 440, 442, 444, 446, 448, 450, 452, 454, 456, 458, 460,
-    462, 466, 468, 470, 472, 476, 478, 480, 482, 486, 488, 490,
-    492, 494, 496, 502, 504, 506, 508, 510, 512, 516, 518, 520,
+    69, 70, 71, 73, 74, 75, 76, 77, 115, 116, 117, 119,
+    204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 215, 216,
+    217, 218, 219, 220, 222, 312, 313, 314, 315, 316, 317, 319,
+    320, 321, 322, 323, 394, 396, 402, 404, 406, 408, 410, 412,
+    414, 416, 418, 419, 420, 421, 423, 424, 425, 426, 427, 428,
+    429, 430, 431, 432, 433, 434, 435, 436, 438, 440, 442, 444,
     522, 524, 526, 528, 529, 530, 531, 532, 533, 534, 536, 645,
     648, 651, 654, 657, 658, 659, 660, 661, 662, 663, 664, 666,
     667, 668, 669, 670, 673, 675, 676, 679, 681, 807, 810, 813,
@@ -83,8 +83,8 @@ CORE_ROWS = (
     1867, 1868, 1869, 1870, 1871, 1872, 1874, 1875, 1920, 1921, 1922, 1923,
     1924, 1925, 1926, 1928, 1929, 1931, 1974, 1975, 1976, 1977, 1978, 1980,
 )
-REPLAY = {"max_conflicts": 20000, "conflicts": 20000, "decisions": 26635,
-          "maximum_depth": 47, "integer_reasons": 554248}
+REPLAY = {"max_conflicts": 20000, "conflicts": 20000, "decisions": 28144,
+          "maximum_depth": 46, "integer_reasons": 461782}
 ROWS_SHA256 = "9301c4b82acb6fd95c1e4c2027d26a176fd81372961f8daafdb9c1630ecf8a01"
 
 
@@ -114,6 +114,16 @@ def rows_sha256(rows):
     return digest.hexdigest()
 
 
+def core_rows_declared():
+    """Validate the declared core against the recompiled 1,981 rows."""
+    if tuple(sorted(set(CORE_ROWS))) != tuple(CORE_ROWS):
+        raise AssertionError("core rows must be sorted unique indices")
+    if any(type(j) is not int or not 0 <= j < 1981 for j in CORE_ROWS):
+        raise AssertionError("core row index out of range")
+    keys = list(rows_for_template()[0])
+    return [keys[j] for j in CORE_ROWS]
+
+
 def replay_core(rows, variables, core_rows, max_conflicts):
     keys = list(rows.keys())
     subset = {keys[j]: rows[keys[j]] for j in core_rows}
@@ -128,22 +138,32 @@ def replay_core(rows, variables, core_rows, max_conflicts):
 
 def certificate():
     rows, variables = compiled_rows()
-    core_vars = {i for j in CORE_ROWS for i in list(rows.values())[j]}
+    keys = list(rows)
+    core_vars = {i for j in CORE_ROWS for i in rows[keys[j]]}
     return {"format": CORE_FORMAT, "period": PERIOD,
             "base_lengths": list(BASE), "prefix_lengths": list(CUTS),
             "rows_sha256": ROWS_SHA256, "coefficient_rows": len(rows),
             "sign_variables": len(variables), "core_rows": list(CORE_ROWS),
             "core_row_count": len(CORE_ROWS),
             "core_variables": len(core_vars), "replay": dict(REPLAY),
+            "core_provenance": ("372-row core shrunk from the 468-row core "
+                                "of 23 November (preserved contribution "
+                                "47252b6, run 7e983be7, ported f035da23); "
+                                "the 468-row core and its own replay anchor "
+                                "remain the recorded provenance; see "
+                                "CORE_SHRINK.md"),
             "external_exact_decision": "no signing (CP-SAT full system "
-            "INFEASIBLE; Z3 SAT on a CNF encoding UNSAT; core rechecked)",
+            "INFEASIBLE; CP-SAT 372-row core INFEASIBLE, 769k conflicts; "
+            "Z3 SAT on a CNF encoding of the 468-row core UNSAT; core "
+            "rechecked)",
             "template_existence_decided": False,
             "general_target_decided": False,
             "all_hole_supports_excluded": False,
-            "method": "infeasible row core located by external CP-SAT; "
-                      "stdlib IntegerSearch replay recorded to its cap "
-                      "(resource_limit) as a deterministic anchor, not yet "
-                      "a complete stdlib refutation"}
+            "method": "infeasible row core located by external CP-SAT and "
+                      "shrunk by chunk deletion; stdlib IntegerSearch replay "
+                      "recorded to its cap (resource_limit) as a "
+                      "deterministic anchor, not yet a complete stdlib "
+                      "refutation"}
 
 
 def verify_certificate(saved):
@@ -306,16 +326,30 @@ def verify(saved):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--solve", action="store_true")
-    group.add_argument("--certificate", action="store_true")
-    group.add_argument("--verify", type=Path)
+    group.add_argument("--solve", action="store_true",
+                       help="exact decision on the full 1,981 rows")
+    group.add_argument("--certificate", action="store_true",
+                       help="write the infeasible core certificate")
+    group.add_argument("--core", action="store_true",
+                       help="same core certificate as --certificate")
+    group.add_argument("--verify", type=Path,
+                       help="verify a saved receipt or core certificate")
+    group.add_argument("--verify-core", type=Path,
+                       help="verify a saved core certificate")
     parser.add_argument("--max-conflicts", type=int, default=None)
     parser.add_argument("--write", type=Path)
     parser.add_argument("--audit-repeat", type=int, default=None)
     args = parser.parse_args(argv)
     try:
+        if args.verify_core:
+            saved = json.loads(args.verify_core.read_text())
+            report = verify_certificate(saved)
+            if args.write:
+                args.write.write_text(json.dumps(saved, indent=2) + "\n")
+            print(json.dumps(report, sort_keys=True))
+            return 0
         saved = (json.loads(args.verify.read_text()) if args.verify
-                 else certificate() if args.certificate
+                 else certificate() if (args.certificate or args.core)
                  else solve_exact(args.max_conflicts))
         if args.verify:
             report = verify(saved)
