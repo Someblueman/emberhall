@@ -204,3 +204,16 @@ def test_exact_simulator_population_lags_and_full_exposure_boundary():
         for d, e, n in ((Delta, 0., 10), (Delta, Delta+1, 10), (Delta, eps, 0)):
             with pytest.raises(ValueError):
                 nm.simulate_latent_exact(g, d, e, n, 1)
+
+
+def test_monte_carlo_uncertainty_does_not_vanish_at_endpoints():
+    lo, hi = nm.coverage_interval(24, 24)
+    assert lo == pytest.approx(.8620238, abs=1e-6)
+    assert hi == pytest.approx(1.)
+    lo0, hi0 = nm.coverage_interval(0, 24)
+    assert lo0 == pytest.approx(0.) and hi0 == pytest.approx(1-lo)
+    lo, hi = nm.coverage_interval(12, 24)
+    assert lo < .5 < hi and lo == pytest.approx(1-hi)
+    for x, n in ((1, 0), (-1, 10), (11, 10)):
+        with pytest.raises(ValueError):
+            nm.coverage_interval(x, n)

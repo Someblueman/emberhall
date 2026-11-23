@@ -30,7 +30,20 @@ bootstrap uses observed moments. Both are first-order approximations.
 Latent exposure integration samples the exact joint Gaussian endpoint and
 integral (up to matrix floating-point error); nonlinear finite-record bias
 remains. Monte Carlo rates are
-descriptive, with their binomial standard errors, not calibrated guarantees.
+descriptive, with binomial Wilson intervals, not calibrated guarantees.
+
+Recorded 23 November 2026: default command, all six designs/laws had 24/24
+usable fits and bootstraps; true symmetry eligibility was 21..24/24 versus
+3..6/24 after isotropic-noise gates. FAILED: none; project pytest: 92 passed.
+Stress command: --noise-scale 8 --reps 96 --boot 120 (N=4000, block=16).
+For blink noise, isotropic eq_ell/off coverage was Isserlis 84/78 of 96,
+fourth-moment oracle 89/88, block bootstrap 93/90. General eq_ell/off was
+80/84, 92/90, 92/89 respectively. Symmetry coverage (not positivity-gated)
+was isotropic 87/92 and general 86/89 for Isserlis/block. Only 94/96 films
+had usable bootstraps in each blink arm; these failures count as misses.
+All extra isotropic gates rejected the true branch in the six stress arms.
+These measured improvements do not establish nominal coverage, and even
+Gaussian noise showed finite-record undercoverage in this stronger design.
 """
 from __future__ import annotations
 
@@ -338,6 +351,17 @@ def population_checks():
     return failures
 
 
+def coverage_interval(successes, trials):
+    """Wilson 95% interval for the Monte Carlo success probability."""
+    if trials < 1 or not 0 <= successes <= trials:
+        raise ValueError('invalid binomial counts')
+    p = successes/trials
+    denominator = 1+Z**2/trials
+    center = (p+Z**2/(2*trials))/denominator
+    half = Z*math.sqrt(p*(1-p)/trials+Z**2/(4*trials**2))/denominator
+    return max(0., center-half), min(1., center+half)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--reps', type=int, default=24)
@@ -358,6 +382,7 @@ def main():
     Q = scale(NOISE, args.noise_scale)
     print('White-noise population invariance; t5 and 2% blink, covariance', Q)
     print('Marginal 95% normal intervals; known mean; failures count as misses.')
+    print('Brackets give 95% Wilson intervals for Monte Carlo coverage probabilities.')
     print(f'N={args.frames}, reps={args.reps}, B={args.boot}; exact exposure; seeds=440100+r')
     for name, (g, Delta, eps) in designs().items():
         for law in ('gaussian', 'student-t5', 'blink-2pct'):
@@ -367,9 +392,11 @@ def main():
                   f'bootstrap={result["bootfits"]}/{args.reps}, block={result["block"]}; '
                   f'symmetry={result["symmetry"]}, +isotropic gates={result["isotropic_gates"]}')
             for method, counts in result['counts'].items():
-                summary = ', '.join(f'{key}={v}/{args.reps} '
-                    f'(SE {math.sqrt(v/args.reps*(1-v/args.reps)/args.reps):.3f})'
-                    for key, v in counts.items())
+                pieces = []
+                for key, v in counts.items():
+                    low, high = coverage_interval(v, args.reps)
+                    pieces.append(f'{key}={v}/{args.reps} [{low:.3f},{high:.3f}]')
+                summary = ', '.join(pieces)
                 print(' ', method, summary)
             if result['fits'] == 0 or result['bootfits'] == 0:
                 failures.append(name+'/'+law+' no usable fits')
