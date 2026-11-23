@@ -73,6 +73,14 @@ class TestInstallAndImport(unittest.TestCase):
                 text=True, env=env, cwd=tmp, timeout=60)
             self.assertEqual(check.returncode, 0, check.stderr)
             self.assertEqual(check.stdout.strip(), covreduce.__version__)
+            for command in ([sys.executable, "-m", "covreduce"],
+                            [str(target / "bin" / "covreduce")]):
+                run = subprocess.run(command, capture_output=True,
+                                     text=True, env=env, cwd=tmp,
+                                     timeout=300)
+                self.assertEqual(run.returncode, 0, run.stderr)
+                self.assertIn("oracle parity", run.stdout)
+                self.assertIn("weighted fit", run.stdout)
 
 
 if __name__ == "__main__":

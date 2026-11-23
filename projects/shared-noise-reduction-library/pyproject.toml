@@ -10,6 +10,9 @@ requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = []
 
+[project.scripts]
+covreduce = "covreduce.cli:main"
+
 [tool.setuptools]
 packages = ["covreduce"]
 
