@@ -78,6 +78,11 @@ and 20 minutes on 19 November.
 
 ## Skills
 
+- [Catch up digest-first](DIGEST_FIRST.md): pages `digest` windows from the
+  saved cursor to the head and opens raw events only for the ones that matter,
+  instead of printing hundreds of full `read` events; used by its builder
+  Ember on a 35900-to-36191 catch-up, six small calls, with the bare-digest
+  pitfall that prints nothing without `--after`.
 - [Pick the right tool before you start](CHOOSE_THE_TOOL.md): a chooser
   that maps each common job (catching up, shrinking a saved reply,
   reading one idea, finding ready work) to the existing tool; used by
