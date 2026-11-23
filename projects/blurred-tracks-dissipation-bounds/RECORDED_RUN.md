@@ -405,3 +405,38 @@ FAILED: none -- all checks passed
 
 ## Tests after s21: python3 -m pytest -q
 41 passed in 6.66s (verify_blurred.py and verify_general.py: FAILED: none)
+
+## s22 scalar-Phi search: python3 scalar_phi_search.py
+(s22-s24 landed by rebase of rejected contribution cb9860eb commit
+a8d78c8 onto the tree after s21, renumbered from the candidate's
+s20-s22; script outputs below re-verified on this tree.)
+[ok] pi/mixed: truth control J~0, other branches separated (J_true=3.0e-32, min other-branch J=4.763e+01 at beta=+9.425)
+[ok] 2pi/mixed: truth control J~0, other branches separated (J_true=3.1e-32, min other-branch J=4.534e-02 at beta=+0.000)
+[ok] pi/isotropic: truth control J~0, other branches separated (J_true=3.1e-33, min other-branch J=7.606e+01 at beta=+9.425)
+[ok] 2pi/isotropic: truth control J~0, other branches separated (J_true=1.3e-32, min other-branch J=3.754e-02 at beta=+0.000)
+[ok] pi/aniso stretched truth: truth control J~0, other branches separated (J_true=2.5e-31, min other-branch J=4.980e+01 at beta=+9.425)
+[ok] 3pi/rotated: truth control J~0, other branches separated (J_true=1.6e-32, min other-branch J=2.691e-03 at beta=+3.142)
+[ok] 2pi/short shutter: truth control J~0, other branches separated (J_true=5.2e-32, min other-branch J=1.084e-03 at beta=+0.000)
+[ok] pi/full shutter: truth control J~0, other branches separated (J_true=8.4e-32, min other-branch J=1.027e+02 at beta=+9.425)
+[ok] no compatible other-branch rival in sweep (all minima > 1e-4) (smallest other-branch minimum 1.084e-03)
+FAILED: none -- all checks passed
+
+
+## s23 alpha=0 is empty: python3 alpha_zero.py
+[ok] frozen general: formula (1) matches definition (|diff| 3.5e-18)
+[ok] frozen general: factorization (3) Shat bracket = Sigma bracket (|diff| 1.1e-16)
+[ok] frozen general: alpha*d0/i real and nonzero, adjugate bracket > 0 (t=+1.8252, bracket=0.8083, |alpha|=0.3657)
+[ok] isotropic: alpha*d0/i real and nonzero, adjugate bracket > 0 (t=+2.0000, bracket=1.0000, |alpha|=0.3851)
+[ok] random sweep (200 truths): t != 0 and bracket > 0 throughout (min |t| 0.2015, min bracket 0.0900)
+[ok] random sweep: formula (1) matches definition (max |diff| 1.5e-14)
+FAILED: none -- all checks passed
+
+
+## s24 Diophantine windows: python3 diophantine_windows.py
+[ok] golden (sqrt5-1)/2, badly approximable: min |R(m)|/m bounded below (min 0.1553 at m=92549)
+[ok] sqrt2-1, badly approximable: min |R(m)|/m bounded below (min 0.2024 at m=20674)
+[ok] engineered [0;9,11,1000,7,3]: min |R(m)|/m collapses (min 0.0049 at m=169777)
+FAILED: none -- all checks passed
+
+## Tests after s22-s24: python3 -m pytest -q
+48 passed
