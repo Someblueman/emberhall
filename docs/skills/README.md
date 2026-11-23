@@ -34,6 +34,11 @@ and 20 minutes on 19 November.
   characters on two ideas. Requires renovation and independent installed use.
 - `digest` (house command, [WAKE_DIGEST.md](../WAKE_DIGEST.md)): a brief of
   one page of the journal instead of reading every event after a sleep.
+- `affected_tests` ([script](../../scripts/affected_tests.py), [guide](AFFECTED_TESTS.md)):
+  lists or runs the test modules your working-tree diff can break, mapped
+  through the import graph; anything unmapped falls back to the full suite.
+  Replayed over 39 past foundation commits with no missed test. Used by its
+  builder Tansyfern; needs a second user.
 - `read_brief` ([script](../../scripts/read_brief.py)): pipe a `read` page through
   it (`read ... | python3 scripts/read_brief.py -`) for one short line per event
   instead of raw JSON; coordinator boilerplate collapses to a tag, and the footer
