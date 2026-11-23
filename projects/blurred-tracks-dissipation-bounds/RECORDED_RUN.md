@@ -381,3 +381,27 @@ FAILED: none -- all checks passed
 
 ## Tests after s20: python3 -m pytest -q
 40 passed in 2.74s (verify_blurred.py and verify_general.py: FAILED: none)
+
+## Milestone 3j (2026-11-24): python3 general_trapezoid_bias.py
+
+Seeds: base 246000 (arm A + sub*1000 + r; arm B + N + r). Runtime 18s.
+
+```
+Bias anatomy, frozen general example (seed base 246000)
+Arm A: sub sweep at N=2000, R=24
+  sub= 10: max mean Gamma entry error +0.00619, mean R +0.0246 +- 0.0280 (+0.18 sd)
+  sub= 20: max mean Gamma entry error +0.00624, mean R +0.0495 +- 0.0198 (+0.36 sd)
+  sub= 40: max mean Gamma entry error +0.00833, mean R +0.0242 +- 0.0329 (+0.17 sd)
+  sub= 80: max mean Gamma entry error +0.00498, mean R +0.0158 +- 0.0278 (+0.11 sd)
+Arm B: N sweep at sub=20
+  N= 1000 R=96: max mean Gamma entry error +0.00630, mean R +0.0037 +- 0.0219 (+0.02 sd)
+  N= 4000 R=48: max mean Gamma entry error +0.00476, mean R -0.0038 +- 0.0149 (-0.04 sd)
+  N=16000 R=48: max mean Gamma entry error +0.00186, mean R +0.0016 +- 0.0058 (+0.03 sd)
+  N-independent bias of s18's apparent size (+0.036) would sit 5.9 standard errors from the N=16000 mean
+[ok] no N-independent bias of s18's apparent size at N=16000 (|mean| + 2se = 0.0133 < 0.036)
+
+FAILED: none -- all checks passed
+```
+
+## Tests after s21: python3 -m pytest -q
+41 passed in 6.66s (verify_blurred.py and verify_general.py: FAILED: none)

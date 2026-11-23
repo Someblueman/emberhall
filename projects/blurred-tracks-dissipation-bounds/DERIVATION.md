@@ -696,3 +696,27 @@ guarantee is claimed, and every number here is inside the frozen
 general design. Milestone 3 still owes any claim outside the two
 frozen designs and §11's population remainders.
 
+
+## 21. Milestone 3j: the leaning means were noise, bounded
+
+[general_trapezoid_bias.py](general_trapezoid_bias.py) sizes the
+two means §18–§19 reported without error bars (residual mean
+`+0.036` at `N = 1000` from 48 films; off-diagonal mean `−0.011`),
+which were attributed to the trapezoid simulator. With standard
+errors attached, the attribution does not survive: across
+`sub ∈ {10, 20, 40, 80}` at `N = 2000` the mean residual shows no
+`1/sub²` quadrature pattern (all within ~2 se of zero), and across
+`N ∈ {1000, 4000, 16000}` at `sub = 20` with 96/48/48 films the
+means are `+0.004 ± 0.022`, `−0.004 ± 0.015`, `+0.002 ± 0.006` —
+§18's `+0.036` was a ~1.3σ fluctuation of its 48-film mean. The
+decisive bound: an `N`-independent (quadrature) bias of `+0.036`
+would sit 5.9 standard errors from the `N = 16000` mean, so any
+real bias at the `N` where §18/§20 tolerances are used is at most
+about `0.013` (under `0.07·sd(R)` at `N = 1000`, less elsewhere) —
+small next to the `τ` values in play, and no correction is
+warranted. What this does not do: bound bias below `~0.01`,
+exclude a finite-`N` estimator bias of order `1/N` (indistinguishable
+from zero at these precisions, and harmless at the same order), or
+say anything outside the frozen general design. The isotropic
+design's §16 ell² mean (`0.019` vs population `0.04`) is a
+different, larger effect and is not touched here.
