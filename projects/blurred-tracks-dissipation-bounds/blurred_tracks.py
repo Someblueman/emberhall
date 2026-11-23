@@ -154,6 +154,58 @@ def branches_from_covariances(g0: float, g1: complex, g2: complex,
     return kappa, phi, out
 
 
+def all_branch_candidates(g1: complex, g2: complex, Delta: float,
+                          eps: float, ratio) -> list[int]:
+    """Every m (over all integers) that can satisfy the phase identity,
+    for rational eps/Delta = ratio (a fractions.Fraction, in lowest terms).
+
+    sinh(lam_m eps/2) is periodic in m with period
+    P = 2q / gcd(p, 2q) for ratio p/q, and within each residue class mod P
+    the unwrapped arg F_m is strictly increasing in m over an open interval
+    of length 2 pi, so at most one m per class can match the target phase;
+    bisection finds each class's candidate (with bracket neighbours).
+    """
+    phi = g2 / g1
+    kappa = -math.log(abs(phi)) / Delta
+    theta = cmath.phase(phi)
+    target = cmath.phase(g1 / phi)
+    p, q = ratio.numerator, ratio.denominator
+    P = 2 * q // math.gcd(p, 2 * q)
+
+    def omega_of(m: int) -> float:
+        return (theta + 2.0 * math.pi * m) / Delta
+
+    found: list[int] = []
+    for r in range(P):
+        m0 = r - P if r > P // 2 else r
+        lam0 = complex(kappa, -omega_of(m0))
+        A = cmath.phase(cmath.sinh(lam0 * eps / 2.0))
+
+        def phase_unwrapped(m: int) -> float:
+            return 2.0 * A - 2.0 * math.atan2(-omega_of(m), kappa)
+
+        lo_lim, hi_lim = 2.0 * A - math.pi, 2.0 * A + math.pi
+        js = [j for j in range(-3, 4)
+              if lo_lim < target + 2.0 * math.pi * j < hi_lim]
+        if not js:
+            continue
+        want = target + 2.0 * math.pi * js[0]
+        t_lo, t_hi = -1, 1
+        while phase_unwrapped(m0 + P * t_lo) > want:
+            t_lo *= 2
+        while phase_unwrapped(m0 + P * t_hi) < want:
+            t_hi *= 2
+        while t_hi - t_lo > 1:
+            t_mid = (t_lo + t_hi) // 2
+            if phase_unwrapped(m0 + P * t_mid) <= want:
+                t_lo = t_mid
+            else:
+                t_hi = t_mid
+        for t in (t_lo - 1, t_lo, t_hi, t_hi + 1):
+            found.append(m0 + P * t)
+    return sorted(set(found))
+
+
 # Frozen milestone-1 example (see DERIVATION.md, section 5).
 FROZEN = {
     "vortex": Vortex(kappa=1.0, omega=3.9, D=1.0),

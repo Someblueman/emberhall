@@ -4,7 +4,10 @@ import cmath
 import math
 import unittest
 
-from blurred_tracks import (Camera, Vortex, blur_factor_F, blur_factor_Z,
+from fractions import Fraction
+
+from blurred_tracks import (Camera, Vortex, all_branch_candidates,
+                            blur_factor_F, blur_factor_Z,
                             branches_from_covariances, observed_cov_complex,
                             observed_cov_matrix)
 
@@ -78,6 +81,22 @@ class TestBranches(unittest.TestCase):
 
     def test_dissipation_formula(self):
         self.assertAlmostEqual(Vortex(0.5, 3.0, 9.9).dissipation(), 36.0)
+
+    def test_all_candidates_cover_window_scan(self):
+        v = Vortex(kappa=1.0, omega=3.9, D=1.0)
+        for ratio in (Fraction(1, 3), Fraction(2, 5), Fraction(1, 2),
+                      Fraction(1, 1)):
+            eps = float(ratio)
+            cam = Camera(Delta=1.0, eps=eps, ell2=0.04)
+            gs = [observed_cov_complex(v, cam, k) for k in range(3)]
+            cands = set(all_branch_candidates(gs[1], gs[2], 1.0, eps, ratio))
+            _, _, bs = branches_from_covariances(
+                gs[0].real, gs[1], gs[2], 1.0, eps, range(-300, 301))
+            ok_window = {b.m for b in bs if b.compatible()}
+            self.assertTrue(ok_window <= cands)
+            _, _, bc = branches_from_covariances(
+                gs[0].real, gs[1], gs[2], 1.0, eps, sorted(cands))
+            self.assertEqual([b.m for b in bc if b.compatible()], [1])
 
 
 if __name__ == "__main__":

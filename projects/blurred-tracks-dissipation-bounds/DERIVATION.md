@@ -292,3 +292,29 @@ not share `Φ`'s eigenvectors or be polynomials in `Φ` — are **not**
 enumerated yet, so uniqueness in the real-eigenvalue case is not claimed;
 only exact recovery of the primary branch is.
 
+## 10. Exposure ratio matters: margins at other `ε/Δ`
+
+`all_branch_candidates` in [blurred_tracks.py](blurred_tracks.py) generalizes
+§5's complete accounting to any rational `ε/Δ = p/q` (period
+`P = 2q/gcd(p, 2q)` residue classes). [ratio_scan.py](ratio_scan.py) applies
+it to the §5 vortex at several ratios; the true branch is the unique
+compatible one over all `m` in each case, but the margin to the nearest
+rival candidate varies by two orders of magnitude and is not monotone:
+
+| `ε/Δ` | nearest rival \|phase residual\| |
+|---|---|
+| 1/4 | 0.031 |
+| 1/3 | 0.0023 |
+| 2/5 | 0.0045 |
+| 1/2 | 0.274 |
+| 3/4 | 0.064 |
+| 1 | 0.306 |
+
+So "finite exposure resolves the alias" is ratio-dependent in practice:
+at `ε/Δ = 1/3` a far branch (`m = 11` in a window scan) nearly re-aliases,
+and the finite-record study of §8 would need far more frames there. Choice
+of exposure fraction is an experimental design variable, not just a
+nuisance — and comparing two exposure schedules (milestone 3) is promising
+precisely because near-aliases sit at different branches for different
+ratios. Irrational `ε/Δ` remains outside the complete accounting (§5).
+

@@ -107,3 +107,15 @@ frozen real-eigenvalue example: sigma = 0.071014
 [ok] negative eigenvalue refused, not silently logged 
 FAILED: none — all checks passed
 ```
+
+## Ratio scan: python3 ratio_scan.py
+
+```
+ eps/Delta   compatible (all m)   nearest rival |residual|
+       1/4                  [1]                     0.0313
+       1/3                  [1]                     0.0023
+       2/5                  [1]                     0.0045
+       1/2                  [1]                     0.2742
+       3/4                  [1]                     0.0642
+         1                  [1]                     0.3062
+```
