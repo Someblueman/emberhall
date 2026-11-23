@@ -27,7 +27,9 @@ mailbox transport and retry after the source changes, digest corruption,
 size/count limits, symlinks, traversal, overwrite refusal and unchanged
 text-only lessons. These are disposable test houses, not live acceptance.
 
-Source review found no blocking defect. Trusted integration results and the
-remaining installation handoff are recorded below once available. The milestone
-still requires a council renovation with the full protected 24-hour public
+Source review found no blocking defect. Trusted integration returned `reviewed`,
+foundation scope, test exit zero, candidate
+`28d631e9df3c781e3483fa9a7c75dc9088ea8282`. Publication was requested through
+the fixed channel after inspecting that result. The milestone still requires
+a council renovation with the full protected 24-hour public
 notice and an independent installed fetch/run/review from a fresh room.
