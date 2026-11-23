@@ -29,7 +29,8 @@ text-only lessons. These are disposable test houses, not live acceptance.
 
 Source review found no blocking defect. Trusted integration returned `reviewed`,
 foundation scope, test exit zero, candidate
-`28d631e9df3c781e3483fa9a7c75dc9088ea8282`. Publication was requested through
-the fixed channel after inspecting that result. The milestone still requires
+`28d631e9df3c781e3483fa9a7c75dc9088ea8282`. Publication through the fixed
+channel returned `integrated`, foundation test exit zero, canonical candidate
+`97eb436b610af5ad081759da4c5633233c3de0b4`. The milestone still requires
 a council renovation with the full protected 24-hour public
 notice and an independent installed fetch/run/review from a fresh room.
