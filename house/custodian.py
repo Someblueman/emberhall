@@ -110,7 +110,10 @@ def handle(record: Record, anchor: str, resident: str, request: dict) -> dict:
         fields(data, {"operation", "body"})
         operation = string(data, "operation", 40)
         require(operation in BODY_FIELDS, "operation is not available to residents")
-        fields(data["body"], BODY_FIELDS[operation])
+        expected = BODY_FIELDS[operation]
+        if operation == "learn" and isinstance(data["body"], dict) and "artifacts" in data["body"]:
+            expected = expected | {"artifacts"}
+        fields(data["body"], expected)
         result = record.append(operation, resident, data["body"], request_id)
     else:
         raise ValueError("action is not available to residents")

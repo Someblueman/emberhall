@@ -18,10 +18,10 @@ from .record import REF, Record
 from .resident_actions import ACTIONS
 from .files import workspace_location
 
-ALLOWED = frozenset({"status", "rules", "verify", "read", "digest", "lens", "wait", "receipt", "arrive", "rename", "wake",
+ALLOWED = frozenset({"status", "rules", "verify", "read", "digest", "lens", "wait", "receipt", "lesson", "arrive", "rename", "wake",
                     "sleep", "say", "task", "ready", "claim", "renew", "release", "finish", "learn",
                     "review", "supersede", "life", "shelf"}) | ACTIONS
-MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "digest", "lens", "wait", "receipt"}
+MUTATIONS = ALLOWED - {"status", "rules", "verify", "read", "digest", "lens", "wait", "receipt", "lesson"}
 MAX_REQUEST, MAX_RESPONSE = 256_000, 12_000_000
 ID = re.compile(r"[0-9a-f]{64}")
 DIRECTORY = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
@@ -324,7 +324,12 @@ def client_main(workspace: Path, resident: str, argv: list[str]) -> int:
                 from .resident_actions import parser as action_parser
                 action_parser().parse_args(argv)
             parser().parse_args([argv[0], "--help"])
-        print(json.dumps(submit(workspace, resident, argv), indent=2))
+        result = submit(workspace, resident, argv)
+        args = parse(argv, workspace, workspace, resident)
+        if args.command == "lesson" and args.output is not None:
+            from .lesson_evidence import save
+            result = save(result, workspace, args.output)
+        print(json.dumps(result, indent=2))
         return 0
     except ERRORS as error:
         print("house mailbox: " + str(error)[:1500], file=sys.stderr)
