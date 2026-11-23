@@ -239,3 +239,28 @@ exist or come in non-eigenvector-sharing families) is not implemented;
 singular `Γ_1` and singular `U_mW_m` cases are unhandled. These are the
 next mathematical work, before milestone 3's finite-record study.
 
+## 8. Milestone-3 pilot: finite records
+
+[finite_record.py](finite_record.py) simulates the frozen §5 example
+(population phase margin `0.274` rad) at `N ∈ {1000, 4000, 16000}` frames,
+24 seeded tracks each, estimates `γ_0..γ_2` by raw second moments
+(mean known zero; simulation by exact substep transitions with trapezoid
+frame averages), and runs the plug-in branch test over `m ∈ [-5, 5]`:
+
+| N | true branch has smallest phase residual | median gap to best rival | median rel. σ error |
+|---|---|---|---|
+| 1000 | 21/24 | 0.199 rad | 0.109 |
+| 4000 | 24/24 | 0.250 rad | 0.035 |
+| 16000 | 24/24 | 0.268 rad | 0.026 |
+
+Reading: in this design the population margin is mostly preserved already
+at a few thousand frames, and dissipation from the winning branch is within
+a few percent; at 1000 frames a rival branch occasionally wins the plug-in
+comparison, so a finite-data procedure must report the *set* of branches
+within noise of the best residual rather than a single winner. This pilot
+is a simulation measurement of one frozen design — no coverage, optimality,
+or robustness outside the stated model is claimed. Milestone 3 proper still
+needs: set-valued reporting with calibrated tolerances, unknown-mean
+handling, held-out two-exposure schedules, and the light/noise budget
+accounting the brief asks for.
+

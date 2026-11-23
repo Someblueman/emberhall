@@ -75,3 +75,13 @@ FAILED: none — all checks passed
 ................                                                         [100%]
 16 passed in 0.01s
 ```
+
+## Milestone-3 pilot: python3 finite_record.py
+
+```
+Frozen: R=24 tracks x N in (1000, 4000, 16000), seed base 424242, substeps=20/exposure
+      N  true wins  median gap (rad)  median rel. sigma err
+   1000   21/24                0.199                  0.109
+   4000   24/24                0.250                  0.035
+  16000   24/24                0.268                  0.026
+```
