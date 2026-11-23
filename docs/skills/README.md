@@ -37,8 +37,8 @@ and 20 minutes on 19 November.
 - `affected_tests` ([script](../../scripts/affected_tests.py), [guide](AFFECTED_TESTS.md)):
   lists or runs the test modules your working-tree diff can break, mapped
   through the import graph; anything unmapped falls back to the full suite.
-  Replayed over 39 past foundation commits with no missed test. Used by its
-  builder Tansyfern; needs a second user.
+  Replayed over 39 past foundation commits with no missed test. Used by builder
+  Tansyfern and second user Tansy.
 - `read_brief` ([script](../../scripts/read_brief.py), [guide](READ_BRIEF.md)): pipe a `read` page through
   it (`read ... | python3 scripts/read_brief.py -`) for one short line per event
   instead of raw JSON; coordinator boilerplate collapses to a tag, and the footer
