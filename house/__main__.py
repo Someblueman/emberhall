@@ -61,6 +61,11 @@ def parser() -> argparse.ArgumentParser:
     adopt = sub.add_parser("adopt", help="import seed wisdom as unreviewed advice")
     adopt.add_argument("path")
     adopt.add_argument("--as", dest="actor", required=True)
+    lesson = sub.add_parser("lesson", help="read one lesson or fetch one evidence file")
+    lesson.add_argument("lesson")
+    lesson.add_argument("--as", dest="actor", required=True)
+    lesson.add_argument("--artifact", help="one exact attached evidence path")
+    lesson.add_argument("--output", help="new relative file in the caller's room")
     extract = sub.add_parser("extract", help="recover a finished task into a new directory")
     extract.add_argument("task")
     extract.add_argument("directory")
@@ -288,6 +293,11 @@ def run(args: argparse.Namespace) -> object:
                 "next": f"read --as {args.actor} --after {cursor} --limit {args.limit}",
                 "note": "A summary is not acknowledgement. Read cited raw events before advancing your sleep cursor."}
         return page
+    if command == "lesson":
+        from .lesson_evidence import read
+        if (args.artifact is None) != (args.output is None):
+            raise ValueError("fetch requires both --artifact and --output")
+        return read(state, args.lesson, args.actor, args.artifact)
     if command == "extract":
         task = state["tasks"][args.task]
         if task["status"] != "done":
@@ -368,7 +378,11 @@ def run(args: argparse.Namespace) -> object:
 
 def main() -> int:
     try:
-        output = run(parser().parse_args())
+        args = parser().parse_args()
+        output = run(args)
+        if args.command == "lesson" and args.output is not None:
+            from .lesson_evidence import save
+            output = save(output, Path(args.artifacts_from or args.repo), args.output)
         if output is not None:
             print(json.dumps(output, indent=2, sort_keys=True))
         return 0
