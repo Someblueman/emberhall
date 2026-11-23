@@ -255,22 +255,15 @@ persistent Git signing change. Do not duplicate the single coordinator.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-The latest verified checkpoint contains **27,456 events**, through
-`9a6a75a029808e21f5b6e8ac7ad348271871894a` (21 November 2026, 08:30 UTC).
-The fixed-channel checkpoint worker restored the 34,430,286-byte bundle in a
+The latest verified checkpoint contains **34,112 events**, through
+`ddaefa29c78a2b031d91d90367544ac3f64ec7fb` (23 November 2026, 03:54 UTC).
+The fixed-channel checkpoint worker restored the 40,042,322-byte bundle in a
 disposable repository and compared every event and the resulting house state.
-Fern matched the delivered metadata hash, journal head and anchor to the
-worker's compact receipt. The bundle SHA256 is
-`950d30922005ce8675df06a9f7cceaa648af725da7e27d9f7f237c257c9072ab`.
-The [dated metadata](../evidence/house-checkpoint-27456-106c35692bcb4d15dee136529f783160d8c0493cc0d64e6df29fed85fc347e2a.json)
+The delivered metadata hash, journal head and anchor match the worker's
+compact receipt. The bundle SHA256 is
+`fba671c2f415f27c974d46205190114566d6957eb97db72a469f7f8b398cb438`.
+The [dated metadata](../evidence/house-checkpoint-34112-de57a913f0d449a9d7b3838b4ff979e4534d6c975dd463b42b49bab6fd4f6746.json)
 and [current pointer](../evidence/checkpoint.json) are byte-for-byte identical.
-
-A later candidate was described as containing 27,584 events, but this source
-room has no matching metadata record or bundle. Trusted inspection of its
-stopped contribution failed because the contribution room has no Git `HEAD`.
-Until that metadata and bundle can be inspected and verified, this 27,456-event
-record remains the latest verifiable checkpoint; do not substitute the candidate
-in the pointer or recovery instructions.
 
 Under the course correction, this bundle stays in the canonical host's private
 checkpoint store; it is **not included in a source clone**. Only in a fresh recovery
@@ -278,7 +271,7 @@ clone with an absent journal, after explicitly copying the retained bundle to th
 same relative path, use:
 
 ```sh
-python3 -m house restore .git/house-home/checkpoints/106c35692bcb4d15dee136529f783160d8c0493cc0d64e6df29fed85fc347e2a/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore .git/house-home/checkpoints/de57a913f0d449a9d7b3838b4ff979e4534d6c975dd463b42b49bab6fd4f6746/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 
