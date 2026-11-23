@@ -39,17 +39,40 @@ support whose first witness is late — or absent — can enumerate for a
 long time when its free-bit count is large. `(100,63,29)` did not
 finish in 60 s at the default cap in this session. Lower `--max-free`
 (and `--pool-max-free`) to trade completeness for a prompt
-`inconclusive`:
+`inconclusive`, or cap wall-clock per support with `--per-support
+SECONDS` (SIGALRM, main thread; a clear error where unsupported): an
+overrun support is counted `timed_out` and skipped, which is
+inconclusive for that support and never an obstruction. Without the
+flag, behaviour and output are unchanged. Recorded runs (Lupin,
+November 2026; see also
+[BROADER_SUPPORT_SWEEP.md](BROADER_SUPPORT_SWEEP.md), whose winners
+needed 42–65 free bits against the shipped caps of 40/22):
+
+```text
+$ python3 exact_completion.py 80 70 50 --max-free 80 --no-pool --per-support 5
+{"all_omissions_obstructed": false, "lengths": [80, 70, 50], "size": 99, "status": "no_witness_on_tried_supports", "supports_tried": 1, "verdicts": {"inconclusive": 0, "support_obstructed": 0, "timed_out": 1}}
+```
+
+(The uncapped tip support of `(80,70,50)` finds its witness at about
+17 s, so a 5 s cap honestly loses it.) With raised free-bit caps and a
+2 s per-support cap, the CLI walks past slow pool supports to the same
+witness the rim-4 sweep found, at small-pool support 124, in 140 s:
+
+```text
+$ python3 exact_completion.py 100 80 50 --max-free 80 --pool-max-free 80 --per-support 2 --out /tmp/w100_cli.json
+{"bfs_ok": true, "free_bits": 50, "lengths": [100, 80, 50], "omitted": [[2, 80], [3, 50], [3, 49]], "parity_rank": 177, "size": 114, "status": "witness", "supports_tried": 124, "wrote": "/tmp/w100_cli.json"}
+```
 
 ```text
 $ python3 exact_completion.py 100 63 29 --max-free 20 --no-pool
 {"all_omissions_obstructed": false, "lengths": [100, 63, 29], "size": 95, "status": "no_witness_on_tried_supports", "supports_tried": 1, "verdicts": {"inconclusive": 1, "support_obstructed": 0}}
 ```
 
-Tests: `python3 -m unittest test_exact_completion -v` (4 tests, recorded
-OK in this session) cover a tip-support witness, the `(50,30,5)` pool
-fallback, support ordering without repeats, CLI writing, and rejection
-of non-positive lengths.
+Tests: `python3 -m unittest test_exact_completion -v` (7 tests, recorded
+OK November 2026) cover a tip-support witness, the `(50,30,5)` pool
+fallback, support ordering without repeats, CLI writing, rejection
+of non-positive lengths, and the per-support cap (firing and counting
+`timed_out`, leaving fast supports alone, rejecting bad values).
 
 Finite witnesses settle single triples. This tool is a cheaper first
 exact step than annealing for a named triple; the general construction

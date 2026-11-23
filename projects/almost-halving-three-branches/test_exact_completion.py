@@ -1,12 +1,16 @@
 import json
 from pathlib import Path
+import signal
 import sys
 import tempfile
+import time
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from bfs_verify import verify
+import exact_completion
 from exact_completion import attempt, main, supports_in_order, target_size
 
 
@@ -38,6 +42,37 @@ class ExactCompletionTests(unittest.TestCase):
         self.assertEqual(supports[0], [(1, 10), (2, 7)])
         as_tuples = [tuple(s) for s in supports]
         self.assertEqual(len(as_tuples), len(set(as_tuples)))
+
+    @unittest.skipUnless(hasattr(signal, "SIGALRM"), "needs SIGALRM")
+    def test_per_support_cap_counts_timed_out_and_moves_on(self):
+        def slow(lengths, omitted, max_free):
+            time.sleep(30)
+            return {"status": "inconclusive"}  # pragma: no cover
+
+        started = time.time()
+        with mock.patch.object(exact_completion, "complete_support", slow):
+            summary = attempt((10, 7, 4), use_pool=False,
+                              per_support_seconds=0.05)
+        self.assertLess(time.time() - started, 5)
+        self.assertEqual(summary["status"], "no_witness_on_tried_supports")
+        self.assertEqual(summary["supports_tried"], 1)
+        self.assertEqual(summary["verdicts"]["timed_out"], 1)
+        self.assertFalse(summary["all_omissions_obstructed"])
+
+    @unittest.skipUnless(hasattr(signal, "SIGALRM"), "needs SIGALRM")
+    def test_per_support_cap_leaves_fast_supports_alone(self):
+        summary = attempt((50, 30, 5), use_pool=False,
+                          per_support_seconds=30)
+        self.assertEqual(summary["verdicts"], {"support_obstructed": 1,
+                                               "inconclusive": 0,
+                                               "timed_out": 0})
+
+    def test_per_support_cap_rejects_bad_values(self):
+        for bad in (0, -1, 0.0, "20", True):
+            with self.assertRaises(ValueError):
+                attempt((10, 7, 4), per_support_seconds=bad)
+        with self.assertRaises(SystemExit):
+            main(["10", "7", "4", "--per-support", "0"])
 
     def test_cli_writes_witness_and_rejects_bad_lengths(self):
         with tempfile.TemporaryDirectory() as tmp:
