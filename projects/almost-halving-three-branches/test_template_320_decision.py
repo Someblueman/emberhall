@@ -2,6 +2,7 @@
 import copy
 from itertools import product
 import json
+import random
 from pathlib import Path
 import subprocess
 import sys
@@ -136,3 +137,95 @@ class Template320Tests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# Core-certificate tests ported from preserved contribution 47252b6.
+
+
+def test_template_shape_and_rows():
+    rows, variables = decision.compiled_rows()
+    assert decision.PERIOD == 320
+    assert decision.BASE == (427, 267, 211)
+    assert decision.CUTS == (213, 133, 105)
+    assert len(rows) == 1981
+    assert len(variables) == 1864
+    assert decision.rows_sha256(rows) == decision.ROWS_SHA256
+    assert 0 < len(decision.CORE_ROWS) < len(rows)
+    assert list(decision.CORE_ROWS) == sorted(set(decision.CORE_ROWS))
+
+
+def test_certificate_fields():
+    cert = decision.certificate()
+    assert "no signing" in cert["external_exact_decision"]
+    assert cert["template_existence_decided"] is False
+    assert cert["general_target_decided"] is False
+    assert cert["core_row_count"] == len(decision.CORE_ROWS)
+
+
+def test_random_signings_violate_core_rows_directly():
+    # Independent of IntegerSearch: evaluate the integer rows by hand.
+    rows, variables = decision.compiled_rows()
+    ordered = list(rows.values())
+    rng = random.Random(320)
+    for _ in range(25):
+        signs = [rng.choice((-1, 1)) for _ in variables]
+        assert any(sum(a * signs[i] for i, a in ordered[j].items())
+                   for j in decision.CORE_ROWS)
+
+
+def test_original_tree_audit_rejects_fabricated_word():
+    # A made-up word for this shape must fail coupled_word_completion's
+    # independent original-tree distance audit, not only the row system.
+    arms = []
+    for length, cut in zip(decision.BASE, decision.CUTS):
+        rest = length - cut
+        arms.append([{"literal": "+" * cut}, {"repeat": "+" * decision.PERIOD},
+                     {"literal": "+" * (rest - 1)}])
+    # Match SHAPES segment sizes exactly: rebuild from SHAPES.
+    arms = [[{kind: "+" * size} for kind, size in arm]
+            for arm in decision.SHAPES]
+    word = {"format": coupled.FORMAT, "centre": 1,
+            "period": decision.PERIOD, "arms": arms}
+    try:
+        coupled.verify_word(word)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("fabricated all-plus word passed verify_word")
+    try:
+        coupled.audit_word(word, 0)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("fabricated word passed the original-tree audit")
+    # The known control word still passes the same machinery.
+    assert coupled.verify_word(coupled.control())["valid"] is True
+    assert coupled.audit_word(coupled.control(), 1)["equal_distance_multisets"]
+
+
+def test_tampered_certificates_rejected():
+    cert = decision.certificate()
+    tampers = []
+    bad = copy.deepcopy(cert); bad["template_existence_decided"] = True
+    tampers.append(bad)
+    bad = copy.deepcopy(cert); bad["rows_sha256"] = "0" * 64; tampers.append(bad)
+    bad = copy.deepcopy(cert); bad["core_rows"] = bad["core_rows"][:-1]
+    bad["core_row_count"] -= 1; tampers.append(bad)
+    bad = copy.deepcopy(cert); bad["general_target_decided"] = True
+    tampers.append(bad)
+    bad = copy.deepcopy(cert); bad["period"] = 321; tampers.append(bad)
+    bad = copy.deepcopy(cert); bad["replay"]["conflicts"] += 1; tampers.append(bad)
+    for bad in tampers:
+        try:
+            decision.verify_certificate(bad)
+        except ValueError:
+            continue
+        raise AssertionError("tampered certificate accepted")
+
+
+def test_full_replay_matches_recorded_cap():
+    result = decision.verify_certificate(decision.certificate())
+    assert result["valid"] is True
+    assert result["status"] == "resource_limit"
+    assert result["template_existence_decided"] is False
+    assert result["general_target_decided"] is False
