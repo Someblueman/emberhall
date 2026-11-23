@@ -33,7 +33,9 @@ def reduce_events_to_bins(events, n_bins, *, group_scales=None, monitor=None,
     scale_forms: dict[object, list[float]] = {}
     group_scales = group_scales or {}
     for event in events:
-        idx = int(event["bin"])
+        idx = event["bin"]
+        if type(idx) is not int:
+            raise TypeError("event bin must be an exact integer")
         if not 0 <= idx < n_bins:
             raise IndexError("event bin out of range")
         weight = float(event.get("weight", 1.0))

@@ -28,6 +28,19 @@ class TestCore(unittest.TestCase):
         y = bins([10.0], [2.0])
         self.assertAlmostEqual((x - y).variance, 4.0)
 
+    def test_tiny_nonzero_derivative_is_not_discarded(self):
+        x = source(10.0, 4.0)
+        out = x * 1e-19
+        self.assertGreater(out.variance, 0.0)
+        self.assertAlmostEqual(out.variance / 4e-38, 1.0, places=15)
+        self.assertEqual((out - out).variance, 0.0)
+
+    def test_quadratic_form_preserves_tiny_nonzero_weight(self):
+        x = source(10.0, 4.0)
+        got = x.quadratic_form([1e-19])
+        self.assertGreater(got, 0.0)
+        self.assertAlmostEqual(got / 4e-38, 1.0, places=15)
+
     def test_shared_monitor_cross_terms(self):
         monitor = source(100.0, 4.0)
         counts = bins([100.0, 50.0], [10.0, 5.0])
@@ -139,6 +152,22 @@ class TestOracle(unittest.TestCase):
         diff = max_covariance_difference(
             out, [x], lambda a: a[0].reorder_dims("col", "row") * 1.5)
         self.assertLess(diff, 1e-12)
+
+    def test_oracle_2d_integer_selection_and_shape_mismatch(self):
+        x = source([[1.0, 2.0], [3.0, 4.0]],
+                   [[1.0, 0.1, 0.0, 0.0], [0.1, 2.0, 0.2, 0.0],
+                    [0.0, 0.2, 3.0, 0.3], [0.0, 0.0, 0.3, 4.0]],
+                   dims=("row", "col"))
+        out = x[1] - x[0]
+        values, oracle_cov = dense_jcjt_oracle(
+            [x], lambda a: a[0][1] - a[0][0])
+        self.assertEqual(values, out.values)
+        for got_row, expected_row in zip(oracle_cov, out.covariance()):
+            for got, expected in zip(got_row, expected_row):
+                self.assertAlmostEqual(got, expected, places=12)
+        with self.assertRaises(ValueError):
+            max_covariance_difference(
+                out, [x], lambda a: a[0][0][0])
 
     def test_oracle_moving_window_negative_weights(self):
         x = bins([1.0, 2.0, 4.0, 8.0], [[0.4, 0.1, 0.0, 0.0],

@@ -41,6 +41,14 @@ class TestEvents(unittest.TestCase):
         with self.assertRaises(UnsupportedOperationError):
             reduce_events_to_bins(iter([]), 2, bin_edges=(0.0, 1.0, 2.0))
 
+    def test_event_bin_must_be_exact_integer(self):
+        for bad in (0.9, False, "0"):
+            with self.subTest(bin=bad):
+                with self.assertRaises(TypeError):
+                    reduce_events_to_bins(iter([{"bin": bad}]), 2)
+        out = reduce_events_to_bins(iter([{"bin": 0}]), 2)
+        self.assertEqual(out.values, (1.0, 0.0))
+
     def test_benchmark_shape(self):
         result = benchmark_100k_events(n_events=2000, n_bins=8)
         self.assertEqual(result["events"], 2000)
