@@ -49,6 +49,20 @@ in the declared class, replaced by an honest ill-conditioning regime
 ([singular_cases.py](singular_cases.py)); and all-branch completeness
 extends to every rational `ε/Δ`, with irrational ratios shown to admit
 no finite symmetry window ([completeness_rational.py](completeness_rational.py)).
-Milestone 3 slices s12-s20 add set-valued reports, two-exposure and equal-frames comparisons, unknown-centre handling, and derived (Isserlis + delta-method) tolerance/slack calibration with a derived chi^2 two-exposure combination rule ([tolerance_calibration.py](tolerance_calibration.py), s16), plus per-film parametric-bootstrap versions of the same tolerances for both the isotropic vortex ([bootstrap_calibration.py](bootstrap_calibration.py), s17) and the general non-isotropic symmetry-residual test ([general_finite_record.py](general_finite_record.py), s18-s19; [general_bootstrap.py](general_bootstrap.py), s20).
+Milestone 3 slices s12-s21 add set-valued reports, two-exposure and equal-frames comparisons, unknown-centre handling, and derived (Isserlis + delta-method) tolerance/slack calibration with a derived chi^2 two-exposure combination rule ([tolerance_calibration.py](tolerance_calibration.py), s16), plus per-film parametric-bootstrap versions of the same tolerances for both the isotropic vortex ([bootstrap_calibration.py](bootstrap_calibration.py), s17) and the general non-isotropic symmetry-residual test ([general_finite_record.py](general_finite_record.py), s18-s19; [general_bootstrap.py](general_bootstrap.py), s20), and a bound showing the general test's leaning means were noise ([general_trapezoid_bias.py](general_trapezoid_bias.py), s21).
+Slices s22-s24 close two of §11's population remainders: a continuous
+search finds no scalar-`Φ` rival motion compatible with the film across
+an 8-truth sweep ([scalar_phi_search.py](scalar_phi_search.py), s22);
+the `α = 0` case where symmetry would be automatic is proved empty —
+`α = it/d_0` with bracket `z†adj(Σ)z > 0`
+([alpha_zero.py](alpha_zero.py), s23); and the irrational-ratio window
+question is exhibited as Diophantine: `min |R(m)|/m` stays above `0.15`
+at golden-ratio `ε/Δ` but collapses to `0.005` at a ratio with one huge
+partial quotient ([diophantine_windows.py](diophantine_windows.py), s24).
+Each script runs standalone (`python3 <script>.py`) and all results are
+recorded in RECORDED_RUN.md; `python3 -m pytest -q` runs the test suite
+(48 tests). Still open, plainly: a parameter-free scalar-`Φ` proof (s22
+is a search), an explicit window constant `c(ρ)`, and claims outside the
+frozen designs.
 All claims here are population-level and conditional on the stated model;
 see DERIVATION.md §5, §7 and §11 for what is deliberately not claimed.

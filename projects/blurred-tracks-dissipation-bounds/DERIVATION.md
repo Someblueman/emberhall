@@ -720,3 +720,68 @@ from zero at these precisions, and harmless at the same order), or
 say anything outside the frozen general design. The isotropic
 design's §16 ell² mean (`0.019` vs population `0.04`) is a
 different, larger effect and is not touched here.
+
+## 22. Scalar-`Φ` rivals: a continuous search finds no coincidence
+
+[scalar_phi_search.py](scalar_phi_search.py) attacks §11's first
+population remainder. When `Φ` is scalar, each rival winding branch
+carries a 2-parameter family `(t, φ)` of genuine extra logarithms,
+and §11 only excluded them on a coarse grid over two frozen truths.
+Here eight truths sweep `β_true ∈ {π, 2π, 3π}`, drift stretch and
+orientation, four diffusion shapes (including isotropic), and
+shutter fractions `0.15–0.95`; for every rival branch the joint
+residual `J = sym² + offdiag² + ell_split²` (covariance-scaled) is
+minimized continuously over `(t, φ)` by grid plus pattern search.
+
+The true drift is the control at `J ≈ 1e-32`. The smallest
+other-branch minimum over the whole sweep is `J = 1.08e-03`
+(scalar rival `β = 0` against a `2π` short-shutter truth), and most
+branches sit at `J ≥ 1e-2`; several minima also fail positivity.
+Same-branch minima outside a `0.25` ball around the truth are
+reported only for scale: they sit on the ball boundary by
+continuity and are not distinct motions. So on this truth family
+the codimension-one coincidence §11 could not exclude does not
+occur, and the film separates every rival motion by a wide margin.
+**Scope, plainly:** this is a verified search over a stated
+8-truth family, not a parameter-free proof; §11's remaining items
+(`α = 0` degenerate symmetry — closed in §23 below — and effective
+irrational-ratio windows) and a proof for all scalar-`Φ`
+parameters stay open.
+
+## 23. The `α = 0` case is empty: symmetry is never automatic
+
+[alpha_zero.py](alpha_zero.py) closes §11's untreated caveat.
+Extracting the residual's linear form in the eigenbasis
+`P = [z, z̄]` of `Φ` (`z = (p, q)`, `Im λ > 0`) gives
+`α = iε²[(z†z)Ĝ₁₁ − (zᵀz)Ĝ₁₂] / (−Im(p̄q))` with
+`Ĝ = P⁻¹Φ⁻¹Γ₁P`, verified against the definition to `1e-14` on
+200 random truths. At the true branch both first-row entries of
+`Ĝ` share the factor `1/(ε²d₀)`, so `α = it/d₀` with `t` real,
+and the bracket in `t` collapses (symbolic factorization,
+re-verified numerically) to the adjugate form
+`z† adj(Σ) z = Σ₁₁|q|² − 2Σ₁₂Re(pq̄) + Σ₂₂|p|²`. Since
+`Σ ≻ 0` implies `adj(Σ) ≻ 0` in two dimensions and
+`Im(p̄q) ≠ 0` for a genuinely complex eigenvector, `t ≠ 0`:
+**`α = 0` occurs for no latent motion in the class.** The
+irrational-ratio obstruction of §11 therefore applies without
+exception. Isolated exact roots `R(m) = 0` at single `m` remain
+possible coincidences; only `R ≡ 0` is ruled out. What §11 still
+owes after §23: effective irrational-ratio windows via
+Diophantine data on `ρ` (exhibited in §24), and a
+parameter-free scalar-`Φ` proof (§22 is a search).
+
+## 24. Irrational windows are Diophantine, exhibited
+
+[diophantine_windows.py](diophantine_windows.py) answers §11's
+"Diophantine question about `ρ`" on the frozen general example.
+Near a zero `ψ*` of the limit function, `R(m) ~ Cm²·dist(ψ_m, ψ*)`
+with `ψ_m = frac((θ/2π + m)ρ)`, so `min |R(m)|/m` is an
+inhomogeneous-approximation quantity. Over `m ∈ [100, 200000]`:
+golden-ratio `ρ` gives `min |R|/m = 0.155` and `√2−1` gives
+`0.202` (badly approximable: bounded below, absolute residual
+minima grow linearly, a finite window works for any fixed
+tolerance), while an engineered `ρ = [0; 9, 11, 1000, 7, 3]`
+with one huge partial quotient collapses to `0.0049` at
+`m = 169777`. Scope: one frozen truth, float `ρ`; an explicit
+constant `c(ρ)` from partial quotients for all truths is the
+remaining theorem, not claimed here.
