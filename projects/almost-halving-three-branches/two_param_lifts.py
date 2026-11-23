@@ -114,8 +114,8 @@ def _eval_cleared_e1_e2(
     return e1, e2
 
 
-def prove_family1_symbolic() -> dict:
-    """Prove E1 = E2 = 0 for Family 1 in Z[Z,Z^-1, M,M^-1] (M = Z^(2m))."""
+def family1_certificate() -> tuple:
+    """Return A_i, D X_i, D Y_i and deg D; M = Z^(2m)."""
     ONE = {(0, 0): 1}
     Z = {(1, 0): 1}
     Z2 = {(2, 0): 1}
@@ -130,7 +130,14 @@ def prove_family1_symbolic() -> dict:
     A = [M, _l_mul(M, ZINV2), Z]
     NX = [_l_neg(_l_mul(opz, one_minus_M)), _l_mul(opz, one_minus_MZ2), D]
     NY = [_l_mul(omz, one_minus_M), _l_neg(_l_mul(omz, one_minus_MZ2)), D]
-    e1, e2 = _eval_cleared_e1_e2(A, NX, NY, 2)
+    return A, NX, NY, 2
+
+
+def prove_family1_symbolic() -> dict:
+    """Verify the parameter identity, including a nonzero corruption control."""
+    A, NX, NY, degree = family1_certificate()
+    D = {(0, 0): 1, (2, 0): -1}
+    e1, e2 = _eval_cleared_e1_e2(A, NX, NY, degree)
     bad_e1, _ = _eval_cleared_e1_e2(A, [NX[0], NX[1], _l_neg(D)], NY, 2)
     if e1 or e2 or not bad_e1:
         raise ArithmeticError("Family 1 symbolic proof or corruption control failed")
@@ -143,8 +150,8 @@ def prove_family1_symbolic() -> dict:
     }
 
 
-def prove_family2_symbolic() -> dict:
-    """Prove E1 = E2 = 0 for Family 2 in Z[Z,Z^-1, M,M^-1] (M = Z^(4m))."""
+def family2_certificate() -> tuple:
+    """Return A_i, D X_i, D Y_i and deg D; M = Z^(4m)."""
     ONE = {(0, 0): 1}
     Z = {(1, 0): 1}
     Z2 = {(2, 0): 1}
@@ -174,7 +181,13 @@ def prove_family2_symbolic() -> dict:
         _l_mul(D, {(0, 0): 1, (1, 0): 1, (2, 0): 1, (3, 0): 1}),
         _l_mul(D, {(0, 0): -1, (1, 0): -1}),
     ]
-    e1, e2 = _eval_cleared_e1_e2(A, NX, NY, 4)
+    return A, NX, NY, 4
+
+
+def prove_family2_symbolic() -> dict:
+    """Verify the parameter identity, including a nonzero corruption control."""
+    A, NX, NY, degree = family2_certificate()
+    e1, e2 = _eval_cleared_e1_e2(A, NX, NY, degree)
     bad_e1, _ = _eval_cleared_e1_e2(A, [NX[0], NX[1], _l_neg(NX[2])], NY, 4)
     if e1 or e2 or not bad_e1:
         raise ArithmeticError("Family 2 symbolic proof or corruption control failed")
@@ -185,6 +198,38 @@ def prove_family2_symbolic() -> dict:
         "e2_terms": len(e2),
         "corrupt_x3_terms": len(bad_e1),
     }
+
+
+
+def prove_subdivision_symbolic() -> dict:
+    """Verify the universal reflection/factorization in Z[z^+-1,H^+-1].
+
+    H=z^h, B=z H^2=z^(2h+1). J1=sum(z^j,1<=j<=h),
+    J2=sum(z^j,h+1<=j<=2h). Independent H makes this an identity,
+    rather than a finite check of subdivision factors.
+    """
+    one, z, H, B = ({(0, 0): 1}, {(1, 0): 1},
+                     {(0, 1): 1}, {(1, 2): 1})
+    j1 = _l_mul(z, _l_add(one, _l_neg(H)))  # (1-z) J1
+    j2 = _l_mul(H, j1)                     # (1-z) J2
+    reflected = [
+        _l_add(_l_mul(_l_mul(z, B), _l_star(j1)), j2),
+        _l_add(_l_mul(_l_mul(z, B), _l_star(j2)), j1),
+    ]
+    # Q_inserted=J1 E1(B)+J2 E2(B). Check its coefficients
+    # of the independent formal symbols X_i,Y_i,X_i*,Y_i*.
+    # The forward coefficients agree by definition. Reflection requires
+    # -J1*=-J2/B and -J2*=-J1/B; the numerators above prove both.
+    if any(reflected):
+        raise ArithmeticError("subdivision reflection failed")
+    corrupt = _l_add(_l_mul(_l_mul(z, B), _l_star(j1)), _l_neg(j2))
+    if not corrupt:
+        raise ArithmeticError("subdivision corruption control failed")
+    return {"proof": "PASS", "ring": "Z[z,z^-1,H,H^-1]",
+            "reflection_terms": [len(p) for p in reflected],
+            "corrupt_reflection_terms": len(corrupt),
+            "identity": "Q_inserted = J1 E1(B) + J2 E2(B)",
+            "scope": "every odd g=2h+1>=3"}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -202,6 +247,7 @@ def main(argv: list[str] | None = None) -> int:
                 "proof": "PASS",
                 "family1": prove_family1_symbolic(),
                 "family2": prove_family2_symbolic(),
+                "subdivision": prove_subdivision_symbolic(),
             }
         elif args.family1 is not None:
             result = construct_family1(*args.family1, summary=args.summary)

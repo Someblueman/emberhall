@@ -10,6 +10,9 @@ from pathlib import Path
 
 from two_param_lifts import (
     check_pair,
+    family1_certificate,
+    family2_certificate,
+    prove_subdivision_symbolic,
     construct_family1,
     construct_family2,
     prove_family1_symbolic,
@@ -69,20 +72,73 @@ class TwoParamLiftsTest(unittest.TestCase):
         self.assertEqual(r2["e2_terms"], 0)
         self.assertGreater(r2["corrupt_x3_terms"], 0)
 
+    def test_universal_subdivision_identity(self):
+        proof = prove_subdivision_symbolic()
+        self.assertEqual(proof["reflection_terms"], [0, 0])
+        self.assertGreater(proof["corrupt_reflection_terms"], 0)
+
+    def test_parameter_certificates_match_edge_words(self):
+        # Independent one-variable substitution and direct convolution.
+        # This ties formal identities to the emitted word formulas.
+        def specialize(poly, power):
+            result = Counter()
+            for (z, m), coeff in poly.items():
+                result[z + power * m] += coeff
+            return {k: v for k, v in result.items() if v}
+
+        def cleared_word(word, degree):
+            result = Counter()
+            for k, ch in enumerate(word):
+                sign = 1 if ch == "+" else -1
+                result[k] += sign
+                result[k + degree] -= sign
+            return {k: v for k, v in result.items() if v}
+
+        for m in (2, 3, 7, 20):
+            A, NX, NY, degree = family1_certificate()
+            xs = ("-" * (2*m), "+" * (2*m-2), "+")
+            ys = ("+-" * m, "-+" * (m-1), "+")
+            for i, (x, y) in enumerate(zip(xs, ys)):
+                self.assertEqual(specialize(A[i], 2*m), {len(x): 1})
+                self.assertEqual(specialize(NX[i], 2*m), cleared_word(x, degree))
+                self.assertEqual(specialize(NY[i], 2*m), cleared_word(y, degree))
+        for m in (1, 2, 7, 20):
+            A, NX, NY, degree = family2_certificate()
+            xs = ("--+" + "+--+" * m, "+-+-", "-+")
+            ys = ("+--+" * m + "+--", "++++", "--")
+            for i, (x, y) in enumerate(zip(xs, ys)):
+                self.assertEqual(specialize(A[i], 4*m), {len(x): 1})
+                self.assertEqual(specialize(NX[i], 4*m), cleared_word(x, degree))
+                self.assertEqual(specialize(NY[i], 4*m), cleared_word(y, degree))
+
     def test_family1_and_family2_bfs(self):
         for m in (2, 3, 4):
-            for g in (3, 5):
+            for g in (3, 5, 7):
                 w = construct_family1(m, g)
                 self.assertEqual(w["lengths"], [2 * m * g, (2 * m - 2) * g, g])
                 self.assertTrue(w["homometric"])
+                left, right = set(map(tuple, w["left"])), set(map(tuple, w["right"]))
+                all_vertices = {(0, 0)} | {(arm, d)
+                    for arm, length in enumerate(w["lengths"], 1)
+                    for d in range(1, length+1)}
+                self.assertFalse(left & right)
+                self.assertEqual(left | right, all_vertices)
+                self.assertEqual(len(left), len(right))
                 self.assertEqual(w["size"], (1 + sum(w["lengths"])) // 2)
                 self.assertEqual(_bfs_profile(w["lengths"], w["left"]),
                                  _bfs_profile(w["lengths"], w["right"]))
         for m in (1, 2, 3):
-            for g in (3, 5):
+            for g in (3, 5, 7):
                 w = construct_family2(m, g)
                 self.assertEqual(w["lengths"], [(4 * m + 3) * g, 4 * g, 2 * g])
                 self.assertTrue(w["homometric"])
+                left, right = set(map(tuple, w["left"])), set(map(tuple, w["right"]))
+                all_vertices = {(0, 0)} | {(arm, d)
+                    for arm, length in enumerate(w["lengths"], 1)
+                    for d in range(1, length+1)}
+                self.assertFalse(left & right)
+                self.assertEqual(left | right, all_vertices)
+                self.assertEqual(len(left), len(right))
                 self.assertEqual(w["size"], (1 + sum(w["lengths"])) // 2)
                 self.assertEqual(_bfs_profile(w["lengths"], w["left"]),
                                  _bfs_profile(w["lengths"], w["right"]))
