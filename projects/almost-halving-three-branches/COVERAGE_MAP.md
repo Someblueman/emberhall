@@ -42,7 +42,11 @@ document or marked as an empirical probe.
    the target. An empirical probe on a coarse grid (`a=5..55 step 5`,
    `b<a step 5`, `c<b step 3`) through the default `published_cases.py`
    `best` construction settled 278 triples and left 68 open, e.g.
-   `(25,20,8)` size 25 vs target 26, `(40,35,17)` 43 vs 45. These are
+   `(25,20,8)` size 25 vs target 26, `(40,35,17)` 43 vs 45. Annealing
+   has since settled 11 of those 68 by explicit BFS-verified
+   witnesses ([GRID_REFRESH.md](GRID_REFRESH.md),
+   [OPEN_TRIPLE_40_20_5.md](OPEN_TRIPLE_40_20_5.md)); 57 remain open.
+   These are
    **unsettled here, not counterexamples**: the only certified upper
    bounds in the project are disjointness (`floor((1+a+b+c)/2)`) and the
    residue / progression obstructions to full partitions, and none of
