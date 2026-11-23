@@ -1,6 +1,6 @@
 import itertools
 import unittest
-from t2661_joint_lift import actual_pair_bins, vertices, verify, sparse_rows, divisibility_refinement, divided_equation, parity_analysis, branch_probe, refinement_report
+from t2661_joint_lift import actual_pair_bins, vertices, verify, sparse_rows, divisibility_refinement, divided_equation, parity_analysis, branch_probe, refinement_report, even_scale_allocation, joint_allocation, alternating_kernel
 from t2661_joint_residue import reduction, bounded_allocation
 
 
@@ -105,6 +105,39 @@ class JointLiftTests(unittest.TestCase):
                 for j in range(5):
                     self.assertEqual(sum(rows[i][j] for i in range(6)
                                          if source >> i & 1) % 2, 0)
+
+    def test_inherited_even_scale_positive_control(self):
+        for k in (2, 4, 10):
+            system, counts = even_scale_allocation(k)
+            self.assertTrue(bounded_allocation(system, counts))
+            self.assertEqual(sum(counts), (201*(2660*k+1)-1)//2)
+        for k in (0, 1, 3, True):
+            with self.assertRaises(ValueError):
+                even_scale_allocation(k)
+
+    def test_all_scale_construction_and_arm_kernels(self):
+        from t2661_joint_residue import lhs
+        for k in (1, 2, 3, 4, 7, 31):
+            system, counts = joint_allocation(k)
+            self.assertTrue(bounded_allocation(system, counts))
+            self.assertEqual(sum(counts), (201*(2660*k+1)-1)//2)
+            for arm in (None, 0, 1, 2):
+                self.assertEqual(lhs(system, alternating_kernel(system, arm)),
+                                 [0]*len(system['rhs']))
+
+    def test_actual_joint_witness_and_full_distance_boundary(self):
+        system, counts = joint_allocation(1)
+        result = verify(system, counts, full=True)
+        self.assertTrue(result['valid'])
+        self.assertTrue(result['actual_counter'])
+        self.assertEqual(result['size_each'], 267430)
+        self.assertEqual(result['full_distance_check']['first_difference'], (1, -1))
+        self.assertFalse(result['full_distance_check']['equal'])
+        altered = list(counts)
+        altered[0] -= 1
+        altered[19] += 1
+        self.assertEqual(sum(altered), sum(counts))
+        self.assertFalse(verify(system, altered)['valid'])
 
     def test_large_divisibility_frontier(self):
         from t2661_joint_residue import family

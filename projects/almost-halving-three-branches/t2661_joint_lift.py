@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact bounded allocation checks and literal-vertex distance-bin counting.
+"""Explicit bounded joint-modulus allocations and literal-vertex pair counting.
 
 The integer polynomial counter uses no sparse-shell equations and no numerical
 FFT. A passing modular allocation does not establish full homometry.
@@ -94,7 +94,7 @@ def actual_pair_bins(lengths, selected, modulus):
     return out
 
 
-def verify(system, counts, actual=True):
+def verify(system, counts, actual=True, full=False):
     """Check bounds/equations, then independently count the realized pair."""
     if not bounded_allocation(system, counts):
         return {'valid': False, 'reason': 'bounds or exact integer equations'}
@@ -106,9 +106,20 @@ def verify(system, counts, actual=True):
         raise ArithmeticError('allocation realization is not a balanced partition')
     result = {'valid': True, 'size_each': len(positive), 'modulus': system['modulus'],
               'actual_counter': False, 'full_homometry_claimed': False}
-    if actual:
-        a = actual_pair_bins(system['lengths'], positive, system['modulus'])
-        b = actual_pair_bins(system['lengths'], negative, system['modulus'])
+    if actual or full:
+        p = sum(sorted(system['lengths'])[-2:])+1 if full else system['modulus']
+        a = actual_pair_bins(system['lengths'], positive, p)
+        b = actual_pair_bins(system['lengths'], negative, p)
+        if full:
+            differences = [(i, x-y) for i, (x, y) in enumerate(zip(a, b)) if x != y]
+            result['full_distance_check'] = {
+                'equal': not differences, 'unequal_distances': len(differences),
+                'first_difference': differences[0] if differences else None}
+            folded_a, folded_b = [0]*system['modulus'], [0]*system['modulus']
+            for i, (x, y) in enumerate(zip(a, b)):
+                folded_a[i % system['modulus']] += x
+                folded_b[i % system['modulus']] += y
+            a, b = folded_a, folded_b
         if a != b:
             raise ArithmeticError('actual pair counter disagrees with sparse system')
         result['actual_counter'] = True
@@ -274,6 +285,50 @@ def branch_probe(system, max_levels=16, initial_bits=None):
             'all_parity_branches_examined': False}
 
 
+def alternating_kernel(system, arm=None):
+    """Zero on tiny classes; alternating depth residues on each large arm.
+
+    This kernel is proved for the odd-hole family, not arbitrary systems.
+    """
+    return [0 if g['arm'] is None or (g['arm'] == 0 and g['first'] < 19)
+            or (arm is not None and g['arm'] != arm)
+            else (-1 if g['first'] % 2 else 1) for g in system['groups']]
+
+
+def joint_allocation(k=1):
+    """Bounded joint-modulus witness for every positive k, odd holes only.
+
+    x = seed_negative + (k*arm_base + (k mod 2)*alternating_kernel)/2
+    on the large classes. Tiny classes keep the exact FRONTIER seed signs.
+    See T2661_JOINT_LIFT.md for the all-k proof and full-homometry limitation.
+    """
+    from t2661_same_parity import BASE, FRONTIER
+    system = family(k, 'odd')
+    kernel = alternating_kernel(system)
+    counts = []
+    for j, group in enumerate(system['groups']):
+        arm, first = group['arm'], group['first']
+        if arm is None:
+            counts.append(1)  # FRONTIER centre is negative.
+        elif arm == 0 and first < 19:
+            counts.append(int(FRONTIER[arm][first-1] == '-'))
+        else:
+            residue = first % 2660
+            seed_present = (20 <= residue < 99) if arm == 0 else 1 <= residue <= BASE[arm]
+            seed_negative = seed_present and FRONTIER[arm][residue-1] == '-'
+            counts.append((k*BASE[arm]+(k % 2)*kernel[j])//2+int(seed_negative))
+    if not bounded_allocation(system, counts):
+        raise ArithmeticError('joint allocation failed exact equations or bounds')
+    return system, counts
+
+
+def even_scale_allocation(k):
+    """Inherited special case: no alternating correction is needed at even k."""
+    if type(k) is not int or k < 2 or k % 2:
+        raise ValueError('positive even k required for the inherited joint control')
+    return joint_allocation(k)
+
+
 def known_control(parity='odd'):
     """Recount the earlier mod-4 witness at joint modulus 2660."""
     from t2661_mod4_aggregate import allocation, materialize
@@ -297,6 +352,9 @@ def known_control(parity='odd'):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--full', action='store_true', help='also check every original distance, without folding')
+    parser.add_argument('--construct', action='store_true', help='construct and independently verify the odd-hole witness (default)')
+    parser.add_argument('--even-scale', action='store_true', help='verify the inherited joint positive control at positive even k')
     parser.add_argument('--control', action='store_true', help='independently count a known large mod-4 witness')
     parser.add_argument('--branch', action='store_true', help='probe one parity prefix, with tiny-class bounds')
     parser.add_argument('--refine', action='store_true', help='report branch-independent mod-4 restrictions')
@@ -308,7 +366,14 @@ def main():
     args = parser.parse_args()
     start = time.perf_counter()
     system = family(args.k, args.parity)
-    if args.control:
+    if args.even_scale:
+        if args.parity != 'odd':
+            parser.error('--even-scale uses odd holes')
+        system, counts = even_scale_allocation(args.k)
+        result = {'inherited_positive_control': True, **verify(system, counts, full=args.full)}
+        if args.output is not None:
+            args.output.write_text(json.dumps(counts)+'\n')
+    elif args.control:
         if args.k != 1:
             parser.error('--control uses k=1')
         result = known_control(args.parity)
@@ -316,7 +381,7 @@ def main():
         result = branch_probe(system, initial_bits=parity_test(system)['solution_bits'])
         if 'counts' in result:
             counts = result.pop('counts')
-            result['verification'] = verify(system, counts)
+            result['verification'] = verify(system, counts, full=args.full)
             result['allocation_sha256'] = hashlib.sha256(json.dumps(counts).encode()).hexdigest()
             if args.output is not None:
                 args.output.write_text(json.dumps(counts)+'\n')
@@ -324,9 +389,14 @@ def main():
     elif args.refine:
         result = refinement_report(system)
     elif args.allocation is not None:
-        result = verify(system, json.loads(args.allocation.read_text()))
+        result = verify(system, json.loads(args.allocation.read_text()), full=args.full)
     else:
-        parser.error('choose --control, --refine, --branch or --allocation')
+        if args.parity != 'odd':
+            parser.error('the construction currently uses odd holes')
+        system, counts = joint_allocation(args.k)
+        result = verify(system, counts, full=args.full)
+        if args.output is not None:
+            args.output.write_text(json.dumps(counts)+'\n')
     print(json.dumps({**result, 'seconds': round(time.perf_counter()-start, 3)}, indent=2))
     return 0 if result.get('valid', True) else 1
 

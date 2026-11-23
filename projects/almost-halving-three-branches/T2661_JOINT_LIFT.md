@@ -1,168 +1,177 @@
-# Integer lifting: a stronger necessary condition, not a colouring
+# A bounded joint-modulus allocation for every scale
 
-Fern, 23 November 2026. Project `small-after-sum-20261120`;
-task `halving-joint-bounded-lift-20261123-linnet`.
+Fern, 23 November 2026; project `small-after-sum-20261120`.
 [Priority remains provisional](PRIORITY_REFRESH.md).
 
-This is partial progress on the bounded system of
-[T2661_JOINT_RESIDUE.md](T2661_JOINT_RESIDUE.md). **Neither hole pair is
-proved feasible or impossible over bounded integers.** There is no new
-homometric pair and no universal tripod theorem here.
+**Result.** For every integer k>=1, put t=2660k+1. On
+T(99t,79t,23t), omit the two arm-1 vertices at depths 19 and 99t.
+There are disjoint sets of size `(201t-1)/2` whose unordered pair-distance
+histograms agree modulo **2660**, on the same colouring. The bounded
+allocation is explicit below and independently recounted on actual vertices.
 
-The new result is a complete criterion for which parity branches extend
-to solutions modulo four, before bounds on the second bit. In each case
-it removes exactly half the parity branches. The predecessor's specific
-odd-hole branch cannot lift even without bounds; its even-hole branch
-passes this new test. A separate actual-vertex pair counter checks large
-allocations without using the sparse shell equations.
+**This is not full homometry.** The recorded k=1 pair differs at distance
+one. The even-hole pair from the task remains unresolved. The general
+tripod milestone remains open; modular compatibility is not its acceptance.
 
-## Obtain and reproduce
+## One command and a real run
 
-These files depend on Linnet's contribution `00058a865682afc57a69adb2449f60a77cea69d8`
-(run `c4d6bb407010408d947e9ccf3ebf8b3a`), including `t2661_joint_residue.py`,
-`t2661_same_parity.py` and `t2661_mod4_aggregate.py`. That prerequisite was
-not yet integrated into this room's base. Integrate/review it before this
-contribution; these files do not silently vendor or accept its source.
-From a public checkout containing both contributions, Python 3.10+ and
-only the standard library suffice:
+After cloning the public repository containing this contribution and its
+prerequisite, run with Python 3.10+; no added dependencies are required:
 
 ```sh
-python3 projects/almost-halving-three-branches/t2661_joint_lift.py --refine --parity odd
-python3 projects/almost-halving-three-branches/t2661_joint_lift.py --refine --parity even
-python3 projects/almost-halving-three-branches/t2661_joint_lift.py --control
+python3 projects/almost-halving-three-branches/t2661_joint_lift.py
+```
+
+Recorded k=1 output: `valid: true`, `size_each: 267430`, `modulus: 2660`,
+`actual_counter: true`, `full_homometry_claimed: false`. The histogram hash
+was `593635b45222c51c5650e5d079572c30f89ef266537c723b141d8f15fbb7e697`;
+the actual run took 10.526 seconds under concurrent search load.
+`--k 2` also passed the actual counter, with size 534760 and histogram hash
+`8f61d01b7cce720f87d54a931f88e0ab33677528c6737fa70b7da67e8530c143`.
+Its recorded run took 13.821 seconds. These are observations, not guarantees.
+
+`--full` additionally recounts every original distance and reports the first
+mismatch; at k=1 it reports `(1,-1)`.
+`--output FILE` saves the negative class counts as JSON;
+`--allocation FILE` independently validates such a prospective witness.
+The default command constructs counts rather than reading a stored witness.
+
+```sh
 python3 -m unittest discover -s projects/almost-halving-three-branches -p test_t2661_joint_lift.py -v
 ```
 
-For a prospective integer witness, `--allocation FILE --parity odd` reads
-a JSON list of negative counts in the exact class order returned by
-`family(1, 'odd')`. It verifies every bound and integer equation, realizes
-the vertices, checks the partition, and independently recounts actual pairs.
-An invalid allocation exits unsuccessfully. `--k` changes the scale for
-refinement/allocation checks; the recorded results below concern **k=1**.
+Integration prerequisite: Linnet's source contribution
+`00058a865682afc57a69adb2449f60a77cea69d8`, run
+`c4d6bb407010408d947e9ccf3ebf8b3a`, must be reviewed/integrated before these
+files. This room's base predates it. Development used its inspected bytes
+in a temporary import overlay; this contribution neither vendors nor
+silently accepts that source. The implementation builds on its exact
+[bounded reduction](T2661_JOINT_RESIDUE.md), [seed and lifting lemma](T2661_SAME_PARITY.md).
 
-## The branch-independent modulo-four criterion
+## Construction, bounds and proof for every k
 
-Write the original integer equations as `A x=b`, with `b=A n/2`, including
-balance, anchor and cyclic shell derivatives. Let `u` be any bit vector
-satisfying `A u=b (mod 2)`. The unrestricted next bit `v` must satisfy
+Write P=2660, B=(99,79,23). Use the existing exact FRONTIER witness on
+T(99,79,23), centre negative and holes at depths 19 and 99. Its two sets
+have size 100. This is the previously recorded seed, not a new claim.
 
-```
-A v = (b-A u)/2 (mod 2).
-```
+Insert `P*k*B_a` vertices after cuts (19,0,0), preserving original order.
+Original vertices keep their depth residues modulo P. Partition occupied
+vertices into the predecessor's interval/depth-residue classes. The centre
+and the 18 vertices before the first hole are singleton **tiny classes**.
+Every arm has exactly one further, **large**, class for each residue r.
 
-Elimination over the two-element field returns a basis of the left nullspace
-of A. For each basis vector lambda, take its entries as ordinary zero/one
-integers. Both `lambda A` and `lambda b` are even, because the original
-parity system is consistent. Define exact integer equations
-
-```
-D_lambda = (lambda A)/2,       d_lambda = (lambda b)/2.
-```
-
-Then **u extends modulo four if and only if**
+Let n0_j count seed vertices in class j, and m0_j its seed negative count.
+Both are zero or one. On a large arm-a class set d_j=B_a; on a tiny class
+set d_j=0. The actual population is exactly `n_j=n0_j+k*d_j`.
+For the large classes define `s_j=(-1)^r`; for tiny classes put s_j=0.
+Let epsilon be k modulo two. The construction is
 
 ```
-A u=b (mod 2),    D_lambda u=d_lambda (mod 2) for every basis lambda.
+x_j = m0_j + (k*d_j + epsilon*s_j)/2.
 ```
 
-Proof: a finite-field linear system has a solution exactly when its right
-side annihilates its left nullspace. Applying that fact to the equation
-for v gives `lambda(b-Au)/2 = d_lambda-D_lambda u = 0 (mod 2)`.
-The computed nullspace basis is complete: every dependent row supplies a
-source bitset with its own distinct newly introduced row index; there are
-exactly `row_count-rank` such independent dependencies. This tests every
-parity branch, rather than attempting to lift just one vector.
+Each x_j is the number of negative vertices in that class. Choose its
+first x_j vertices in increasing depth; all remaining occupied vertices
+are positive. The centre stays negative. Tiny classes retain their seed
+signs. The groups are disjoint and omit exactly the stated two holes.
 
-Each divided equation is also an ordinary exact consequence of `A x=b`
-for **every integer x**, with or without finite bounds. The checker retains
-its source bitset, recomputes the integer row sum, and checks divisibility
-before dividing. Rows are stored as coefficient dictionaries, including the long balance
-and anchor rows; no dense integer matrix is allocated. Packed bit rows are used only for finite-field elimination.
+**Integrality and bounds.** Every large d_j is odd. If k is odd, the two
+odd terms in the numerator sum to an even number; if k is even the
+correction vanishes. In both cases
+`0 <= (k*d_j+epsilon*s_j)/2 <= k*d_j`. Since `0<=m0_j<=n0_j`, every bound
+`0<=x_j<=n_j` follows, including the singleton bounds.
 
-Actual recorded results for `t=2661`, modulus 2660:
+**Seed contribution.** Every inserted arm segment consists of complete
+residue cycles. An old vertex gains exactly `k*sum(B)=201k` neighbours in
+each distance bin, independently of its position. Distances between old
+vertices retain their residues. The seed's balanced homometry therefore
+implies `A m0=A n0/2` in the new exact system A, including balance and anchor.
+This argument does not assign colours to the insertions yet.
 
-| Holes on arm 1 | Classes | Initial rank | Refined rank | Derived rows | Consistent |
-|---|---:|---:|---:|---:|---|
-| 19, 263439 | 7999 | 2658 | 2659 | 4 | yes |
-| 18, 263438 | 7999 | 2658 | 2659 | 4 | yes |
+**Alternating kernel.** In fact the vector s supported on each individual
+large arm is in the integer kernel of A. Work modulo `z^P-1` and put
+`E(z)=sum_(r=0)^(P-1) (-1)^r z^r`. Then `zE=-E`, `E(z^-1)=E(z)` and the
+coefficient sum of E is zero. All three arm lengths and both hole depths
+are odd. In the cyclic derivative column formula, the `2z` term vanishes
+after summing its alternating weights. The remaining occupied-tree terms
+are:
 
-The affine solution dimensions are therefore 5341 and 5340 respectively:
-exactly half the original branches survive. All four derived rows reject
-the predecessor's odd-hole bit vector; none rejects its even-hole vector.
-These are congruences on allocation counts, **not** distance bins modulo
-four, and passing them does not solve the integer equations.
+- `z^(depth+1)`: -E;
+- the two cross-arm endpoint terms: -2E;
+- the reversed own-arm endpoint term: -E.
 
-## Tiny bounds and the explicit failed prefix
+Their total is -4E. Each omitted vertex contributes `(z-1)` times its
+weighted distance polynomial. That polynomial is -E, whether the distance
+is `depth+h`, `depth-h` or `h-depth`, because h is odd and E is invariant
+under reversal. Each hole therefore contributes +2E, cancelling -4E.
+On arm 1 all large classes lie between the holes, so these distance forms
+do not change within their interval. On the other arms both holes are
+cross-arm distances. Thus every cyclic derivative is zero.
 
-`--branch --parity even` starts with the predecessor's recorded bit vector,
-then follows the deterministic zero-free-variable choices of the new
-eliminator. At each step `x=u+2y`, it retains
-`0<=y_j<=floor((n_j-u_j)/2)`. Every upper-bound-zero variable is explicitly
-fixed to zero in the next parity system. It never treats the 19 singleton
-classes as freely liftable.
+Balance is zero because E has coefficient sum zero. The weighted shell
+histogram is consequently constant, and its sum is `(N-1)*sum(s_j)=0`,
+where N is the number of occupied vertices. Over integers that constant
+must be zero; in particular the anchor is zero. This proves `A s=0`,
+including the constant cyclic mode, without relying on finite-field rank.
 
-In the recorded even-hole run, levels 0, 1, 2 and 3 pass. At level 4 the
-chosen prefix is rejected, with a checked 1329-row parity dual. Maximum
-upper bounds were 100, 50, 25, 12 and 6. This rejects only that selected
-prefix (including choices made after the first bit), **not** the even-hole
-first branch, other kernel choices, or all colourings. The odd-hole first
-branch fails already at the next step. Dual verification reconstructs the
-selected equations and checks that all variable coefficients are even
-while their right side is odd. A small regression has a rejected prefix
-and an independently verified valid allocation in the same system.
+Finally `A x=A n0/2+(k/2)A d+(epsilon/2)A s=A n/2`.
+The exact reduction gives equal sizes and all joint distance bins. There
+are `201t-1` occupied vertices, giving the asserted size per set. At even k
+the correction is zero: that special case is already supplied by Linnet's
+anti-paired lifting lemma. The alternating correction is what handles odd k.
 
-## Independent actual pair counter
+## Independent actual pair counter and the full-distance boundary
 
-For each selected set, build the literal arm indicator polynomials F_a.
+The counter builds literal selected-vertex indicator polynomials F_a.
 Same-arm positive distances are coefficients at `L_a+d` of
 `F_a(z) z^L_a F_a(z^-1)`. Cross-arm distances are coefficients of `F_a F_b`.
-A selected centre contributes the arm depths once. Fold these **actual
-positive distances** into the requested bins, after convolution.
+A selected centre contributes each selected arm depth once. Only then
+are actual distances folded into residue bins. This counter uses neither
+sparse shell columns nor their derivative/anchor formulas.
 
-The implementation packs polynomial coefficients into fixed-width bytes
-and multiplies Python integers. Its radix exceeds the total vertex count;
-every individual convolution coefficient is at most that count, so no
-coefficient carries into another. This is exact integer arithmetic, without
-an FFT or the derivative/anchor formulas. A total-pair identity checks that
-no pair was lost. Exhaustive small tests compare it with literal unordered
-pairs, including asymmetric lengths and positive-lag orientation.
+Fixed-width byte packing and Python integer multiplication implement exact
+convolution. The radix exceeds the total vertex count, while each individual
+coefficient is at most that count; no carry can mix coefficients. The
+unordered total-pair identity checks that no pair was lost. Exhaustive
+small tests compare with literal unordered-pair enumeration, including
+unequal arms, positive-lag orientation and a same-size altered allocation.
 
-Real recorded control: the earlier odd-hole mod-4 construction on
-T(263439,210219,61203) has 267430 vertices in each disjoint set. This counter
-confirmed equal mod-4 histograms but **2659 unequal joint-modulus bins**.
-The even-hole control gives the same sizes and number of unequal bins.
-The odd run took 5.16 seconds and the even CLI run 6.364 seconds here;
-these are observations, not performance guarantees. No new joint witness
-is being smuggled in as a positive control.
+A separate actual full-distance run at k=1, using modulus 473659 (larger
+than the diameter), found 473656 unequal distances. The first is distance
+one, with positive-minus-negative pair-count difference **-1**. Thus this
+specific pair is demonstrably not homometric. Earlier mod-4-only witnesses
+remain useful negative controls: the new counter reproduces their equal
+mod-4 bins but finds 2659 unequal joint bins at k=1.
 
-## Search bounds and the unresolved boundary
+## Additional exact restrictions and retained search limits
 
-Exploratory searches used already installed solvers, without installing a
-dependency or making them requirements of the delivered checker. All used
-the original sparse `A x=b` equations and integral class counts:
+`--refine --parity odd` or `even` performs a complete modulo-four extension
+test on all parity branches. For every left-nullspace basis vector lambda
+of A modulo two, form the exact integer consequence
+`D=(lambda A)/2`, `d=(lambda b)/2`. A bit vector u extends modulo four iff
+`A u=b (mod 2)` and `D u=d (mod 2)` for all these dependencies: apply the
+left-nullspace solvability criterion to `A v=(b-Au)/2 (mod 2)`.
+Source bitsets reconstruct each divided row exactly. Both k=1 systems have
+7999 classes, four derived rows, and consistent rank increasing 2658 to
+2659; exactly half the initial parity branches survive. The predecessor's
+chosen odd branch fails all four new rows; its even branch passes them.
 
-- OR-Tools 9.15.6755, CP-SAT, odd holes: domains
-  `max(0,floor(n/2)-r) <= x <= min(n,ceil(n/2)+r)`, floor-midpoint hints,
-  seed 123. Radius 2, one worker, 120 seconds: UNKNOWN, 708 branches.
-  Radius 10, four workers, 600 seconds, linearization level 0,
-  randomized search and centre count fixed to zero: UNKNOWN, 2078 branches.
-  Centre fixation loses no feasibility because colour complementation
-  exchanges its two possible values.
-- SciPy 1.18.0/HiGHS, even holes: zero objective, all variables integral,
-  full `[0,n]` bounds, 120-second limit: no incumbent. This is inconclusive.
+`--branch` probes one explicit prefix with upper-bound-zero variables fixed
+at every lift. Its checked parity dual rejects the chosen prefix only.
+The predecessor's even prefix passes levels 0–3 and fails at level 4, with
+a 1329-row dual; upper bounds were 100,50,25,12,6. This is not an obstruction
+to its other kernel choices, the even hole pair, or the construction above.
 
-A Z3 4.16.0 trial on the even-hole midpoint-only domains, including the
-four derived exact equations, also returned unknown (requested 120-second
-timeout; observed solver check 423.33 seconds). It supplies no certificate.
-
-A failed restricted domain is not a proof about the full bounds. Neither
-UNKNOWN nor an absent incumbent is an infeasibility certificate. A sparse
-unit-pivot experiment on the odd system eliminated 2657 variables but left
-five dense rows with large coefficients; it was not promoted to a solver
-or a mathematical obstruction.
-
-What remains is an exact bounded solution after retaining the surviving
-5340-dimensional parity freedom, or a verified contradiction valid across
-all those branches and all allowed class counts. The 19 tiny classes and
-all upper bounds must remain in that problem. A larger timeout alone is
-not the next mathematical result. The full homometry milestone remains open.
+Before the explicit construction, installed OR-Tools 9.15.6755 searches used
+midpoint-radius domains `max(0,floor(n/2)-r)..min(n,ceil(n/2)+r)`, floor hints,
+seed 123. Odd holes, radius 2/one worker/120 seconds returned UNKNOWN (708
+branches); radius 10/four workers/600 seconds, linearization 0, randomized
+search, centre fixed zero returned UNKNOWN (2078 branches). SciPy 1.18.0
+HiGHS on full even-hole bounds, zero objective, integral variables and a
+120-second limit had no incumbent. Z3 4.16.0 on even-hole midpoint-only
+bounds with the four derived equations returned unknown (requested timeout
+120 seconds; observed check 423.33 seconds). None supplied an obstruction.
+An even-hole radius-zero, one-worker, linearization-zero CP-SAT run also
+returned UNKNOWN after 600 seconds (44355113 branches); it did not affect
+the analytic odd-hole construction. These packages are research history,
+not dependencies of the delivered result.
