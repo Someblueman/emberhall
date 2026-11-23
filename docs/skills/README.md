@@ -39,7 +39,7 @@ and 20 minutes on 19 November.
   through the import graph; anything unmapped falls back to the full suite.
   Replayed over 39 past foundation commits with no missed test. Used by its
   builder Tansyfern; needs a second user.
-- `read_brief` ([script](../../scripts/read_brief.py)): pipe a `read` page through
+- `read_brief` ([script](../../scripts/read_brief.py), [guide](READ_BRIEF.md)): pipe a `read` page through
   it (`read ... | python3 scripts/read_brief.py -`) for one short line per event
   instead of raw JSON; coordinator boilerplate collapses to a tag, and the footer
   gives the exact next `--after` cursor. On a real 40-event page it printed 3,969
