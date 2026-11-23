@@ -522,3 +522,201 @@ bad ratio, not an improvement over a known good one. What milestone 3
 still owes: principled tolerance/slack calibration, and any claim at
 all outside this frozen design family.
 
+## 16. Milestone 3e: tolerances derived, not guessed
+
+[tolerance_calibration.py](tolerance_calibration.py) removes the last
+guessed numbers of milestone 3. The frame series is a proper complex
+Gaussian stationary series with known population autocovariance
+`γ_h`, so Isserlis' theorem gives the estimators' exact asymptotic
+covariances, `N·Cov(γ̂_k, conj γ̂_l) → Σ_h γ_h γ_{k−l−h}` and
+`N·Cov(γ̂_k, γ̂_l) → Σ_h γ_{k−h} γ_{l+h}` (geometric sums, evaluated at
+the design). The true branch's phase residual `R` and implied `ℓ²`
+are smooth in `(γ̂₀, γ̂₁, γ̂₂)`; the delta method gives
+`sd(R)·√N = 3.935` rad and `sd(ℓ²)·√N = 2.209`, hence
+`τ₉₅(N) = 1.96·sd(R) = 0.244 / 0.122 / 0.061` rad and `ℓ²` slack
+`0.137 / 0.068 / 0.034` at `N = 1000 / 4000 / 16000`. Because the set
+keeps branches within `τ` of the *best* residual, `|R_true| ≤ τ` is
+sufficient for retention, so coverage is asymptotically ≥ 95% inside
+the model. Monte Carlo on fresh seeds confirms the standard
+deviations (0.126 vs 0.124 rad; 0.065 vs 0.070). Measured coverage on
+the original §8 seeds is 24/24 at every `N` — against 21–23/24 for
+the guessed tolerances of §12 — and the honest price shows at
+`N = 1000`, where `τ₉₅ = 0.244` rad is close to the population
+margin (0.274 rad): median set size 2, median relative `σ` spread
+0.57. §12's guessed slack 0.02 was 2–7× too small; it appeared to
+work only because the `ℓ²` dips at those seeds were shallow.
+
+Two exposures get a derived combination rule: independent films give
+independent, asymptotically Gaussian residuals, so rank branches by
+the standardized quadratic form `Q_m = Σ_j R²_{j,m}/(v_j/N_j)`
+(`χ²₂` at the true branch), not by §13's guessed max-residual. On
+§13's exact seeds (whose joint-max numbers this slice reproduces:
+12/24 and 18/24 at `N = 1000, 4000`), the relative cutoff
+`Q_m ≤ Q_min + 5.99` covers 23/24, 23/24, 24/24 — better than or
+equal to every rule tried in §13–§15 at every `N`. The absolute
+cutoff `Q_m ≤ 5.99` covers only 21/24 at `N = 16000` with 3 empty
+sets: it is detecting the trapezoid simulator's bias (mean estimated
+`ℓ²` 0.019 vs population 0.04 at `N = 1000`; raw moment variances
+inflated ~25% at substep 20, ~0% at substep 80), which does not
+shrink with `N` while the noise does. So the absolute form is a
+model check, the relative form the report — and §13's "emptiness"
+pathologies were an artefact of combining unstandardized residuals
+with a guessed tolerance, not of two exposures themselves; §15's
+equal-frames verdict (spend frames at the good exposure) is
+unchanged, since it compared winners, not calibrated sets.
+
+**What remains unproved, plainly:** the calibration is first-order
+asymptotic and in-model — 24 replicates cannot distinguish 95%
+coverage from 88% (the two-exposure absolute rule's 21–22/24 is
+consistent with both, plus simulator bias); nothing is claimed for
+non-Gaussian films, drifting centres (§14), or designs other than
+the frozen family; and the delta-method variance is evaluated at
+population parameters a real user must first estimate (a parametric
+bootstrap from the winning branch is the natural next slice).
+Milestone 3's finite-record programme is otherwise complete on this
+design: set-valued reports with derived tolerances, derived
+two-exposure combination, unknown-centre handling, and the
+equal-frames light-budget verdict.
+
+## 17. Milestone 3f: the same tolerances from one film (bootstrap)
+
+[bootstrap_calibration.py](bootstrap_calibration.py) closes §16's
+plug-in gap. From a single film: take the winning branch's implied
+`(κ, ω*, s*, ℓ²*)`, simulate `B = 24` bootstrap films of the same
+length from that fitted motion, and set `τ_boot = 1.96·sd(R*)` over
+the bootstrap worlds (where the fitted branch is true by
+construction), with a one-sided bootstrap `ℓ²` slack. On the §8
+seeds the bootstrap needs no population knowledge and loses almost
+nothing: coverage 24/24 at every `N` (matching §16), median set
+sizes identical (2 at `N = 1000`, else 1), and median
+`τ_boot/τ_population = 0.94 / 0.93 / 0.96`. Even the 3 replicates at
+`N = 1000` whose plug-in winner is the wrong branch still cover —
+at that length `τ` is wide enough that the true branch sits inside
+the wrongly-centred set — but this is luck of a wide tolerance, not
+a guarantee: a bootstrap centred on a wrong winner calibrates for a
+film that was not taken, and at a near-alias ratio (§10) with a
+narrower margin it would fail silently. Cost is real: the recorded
+run (24 films × 24 bootstraps × 3 lengths) takes about two minutes
+in pure Python, against seconds for §16's closed form. Verdict:
+§16's formula when a design's parameters are known or can be
+estimated once and reused; the bootstrap as the per-film fallback
+that asks the data only. What remains unproved is unchanged from
+§16 (first-order, in-model, one frozen family) plus the bootstrap's
+own plug-in bias, unmeasured beyond the τ ratios above.
+
+## 18. Milestone 3g: finite records in the general case
+
+[general_finite_record.py](general_finite_record.py) repeats §16's
+construction for the general (non-isotropic) test of §7/§11, where
+the scalar evidence per branch is the symmetry residual
+`R(m) = (Σ_m)₀₁ − (Σ_m)₁₀`. On the frozen general example
+(`A = [[−1.2, −2.0], [0.8, −0.7]]`, true branch `m = 0`, nearest
+rival `|R| = 0.576` in `m ∈ [−5, 5]`), Isserlis' theorem for the
+real Gaussian vector series gives the 11×11 asymptotic covariance
+of `(Γ̂₀, Γ̂₁, Γ̂₂)`, and the delta method through the branch
+construction gives `sd(R)·√N = 6.194`, i.e.
+`τ₉₅ = 0.384 / 0.192 / 0.096` at `N = 1000 / 4000 / 16000`. Monte
+Carlo agrees to 1% (0.198 vs 0.196 at `N = 1000`, 48 fresh seeds;
+mean residual `+0.036`, a finite-sample/simulator bias of about
+0.18 sd, reported not corrected). Calibrated sets cover 24/24 at
+every `N`, with the true branch the outright winner in 22/24,
+23/24, 24/24 — the set report earns its keep exactly in the
+replicates where the winner is wrong. Scope: only the symmetry
+residual is calibrated. The general test's remaining population
+conditions (`Σ, Dm ≻ 0`, zero-lag off-diagonal, equal-`ℓ²`
+diagonals) still need their finite-`N` slacks derived — each is
+another smooth function of the same 11 coordinates, so the
+machinery above applies unchanged, and §12's lesson says applying
+them hard would delete the truth. That, a general-case bootstrap,
+and any claim outside the two frozen designs are what milestone 3
+still owes; the population-level remainders of §11 (scalar-`Φ`
+proof, `α = 0`, irrational-ratio windows) are untouched by this
+finite-record work.
+
+## 19. Milestone 3h: general eligibility — hard filters bite, joint slacks matter
+
+The second half of [general_finite_record.py](general_finite_record.py)
+derives slacks for §18's remaining conditions by the same
+11-coordinate delta method (all Monte-Carlo checked; the
+`λ_min` standard deviations are first-order overestimates —
+0.113 predicted vs 0.078 simulated for `Σ` — because `λ_min` is
+concave, which errs on the safe side for a slack). Three
+measurements on the §18 replicates:
+
+- **Hard sign-filters are disastrous in the general case too.**
+  Requiring `λ_min(Σ), λ_min(Dm) > 0`, `ℓ̂² ≥ 0` deletes the true
+  branch in 9/24 films at `N = 1000` and 5/24 at `N = 4000`
+  (coverage 15/24 and 19/24) — worse than §12's isotropic filter,
+  because five noisy conditions each get a vote.
+- **Per-condition 95% slacks undercover jointly** (21/20/21 of
+  24): five conditions at 95% each retain the truth only about
+  `0.95⁵ ≈ 77%` of the time if independent. Calibration must be
+  joint, not per-condition — the union bound is not optional.
+- **Bonferroni 99% slacks** (per-condition `z = 2.576`) recover
+  22/24, 24/24, 23/24 against symmetry-only's 24/24 everywhere,
+  and trim the median set at `N = 1000` from 2 to 1: eligibility
+  buys smaller sets at a small coverage price. The residual gap
+  at `N = 16000` tracks the simulator's off-diagonal bias
+  (mean `−0.011` at `N = 1000`, not shrinking with `N`), the same
+  effect §16's absolute cutoffs detected.
+
+So the finite-record general test now has every tolerance derived:
+symmetry `τ` (§18) and joint eligibility slacks (here), with the
+honest recommendation to report symmetry sets with Bonferroni
+eligibility as a trimming step, never as a gate. What milestone 3
+still owes after §19: a general-case parametric bootstrap (§17
+analogue, done in §20), any claim outside the two frozen designs,
+and §11's population remainders.
+
+## 20. Milestone 3i: the general tolerances from one film (bootstrap)
+
+[general_bootstrap.py](general_bootstrap.py) repeats §17's
+construction for the general test: from one film's `Γ̂₀..₂` take
+the winning branch `m*` (smallest `|R|`) and its fitted motion
+`(A*, Σ*, Dm*, ℓ*)`, simulate `B = 24` bootstrap films of the same
+length, and set `τ_boot = 1.96·sd(R*)` from the bootstrap branch-`m*`
+residuals. On the §18 seeds the bootstrap tracks §18's population
+tolerance closely (median `τ_boot/τ_population` = 1.04 / 0.97 / 0.99
+at `N = 1000 / 4000 / 16000`), and conditional on producing an
+answer it covers the true branch in every usable replicate
+(22/22, 23/23, 24/24; the plug-in winner is never wrong in a usable
+replicate — the general example's population margin `0.576` is
+wide). The honest cost is *unfittable* replicates: in 2/24 films at
+`N = 1000` and 1/24 at `N = 4000` the winning fit's `Σ*` or `Dm*`
+is not positive definite, the fitted motion cannot be simulated,
+and the procedure declines to answer (counted as non-coverage:
+22/24, 23/24, 24/24 overall). This is the general case's version
+of §17's wrong-winner weakness, and arguably the better failure
+mode: where the isotropic bootstrap silently centres on a wrong
+motion, the general bootstrap's extra fitted structure refuses
+outright. What remains unproved is unchanged in kind: `B = 24`
+makes `sd(R*)` itself noisy, the bootstrap inherits the trapezoid
+simulator and the branch window `m ∈ [−5, 5]`, no coverage
+guarantee is claimed, and every number here is inside the frozen
+general design. Milestone 3 still owes any claim outside the two
+frozen designs and §11's population remainders.
+
+
+## 21. Milestone 3j: the leaning means were noise, bounded
+
+[general_trapezoid_bias.py](general_trapezoid_bias.py) sizes the
+two means §18–§19 reported without error bars (residual mean
+`+0.036` at `N = 1000` from 48 films; off-diagonal mean `−0.011`),
+which were attributed to the trapezoid simulator. With standard
+errors attached, the attribution does not survive: across
+`sub ∈ {10, 20, 40, 80}` at `N = 2000` the mean residual shows no
+`1/sub²` quadrature pattern (all within ~2 se of zero), and across
+`N ∈ {1000, 4000, 16000}` at `sub = 20` with 96/48/48 films the
+means are `+0.004 ± 0.022`, `−0.004 ± 0.015`, `+0.002 ± 0.006` —
+§18's `+0.036` was a ~1.3σ fluctuation of its 48-film mean. The
+decisive bound: an `N`-independent (quadrature) bias of `+0.036`
+would sit 5.9 standard errors from the `N = 16000` mean, so any
+real bias at the `N` where §18/§20 tolerances are used is at most
+about `0.013` (under `0.07·sd(R)` at `N = 1000`, less elsewhere) —
+small next to the `τ` values in play, and no correction is
+warranted. What this does not do: bound bias below `~0.01`,
+exclude a finite-`N` estimator bias of order `1/N` (indistinguishable
+from zero at these precisions, and harmless at the same order), or
+say anything outside the frozen general design. The isotropic
+design's §16 ell² mean (`0.019` vs population `0.04`) is a
+different, larger effect and is not touched here.

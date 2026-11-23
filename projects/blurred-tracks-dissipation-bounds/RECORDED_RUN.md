@@ -264,3 +264,144 @@ T=16000:
             2N @ 1/2: true wins 24/24 (24 usable), median rel. sigma err 0.026
             2N @ 1/3: true wins 18/24 (24 usable), median rel. sigma err 0.036
    N @ 1/3 + N @ 1/2: true wins 24/24 (24 usable), median rel. sigma err 0.052
+
+## Milestone 3e tolerance calibration: python3 tolerance_calibration.py
+
+Frozen s8 design (eps/Delta=1/2): delta method gives sd(R)*sqrt(N) = 3.9353 rad, sd(ell2)*sqrt(N) = 2.2089
+  N= 1000: tau_95 = 0.2439 rad, ell2 slack_95 = 0.1369 (s12 guessed slack 0.02 at every N)
+  N= 4000: tau_95 = 0.1220 rad, ell2 slack_95 = 0.0685 (s12 guessed slack 0.02 at every N)
+  N=16000: tau_95 = 0.0610 rad, ell2 slack_95 = 0.0342 (s12 guessed slack 0.02 at every N)
+[ok] delta-method sd(R) matches Monte Carlo (MC 0.1264 vs delta 0.1244, 48 fresh seeds at N=1000; MC mean R +0.0130)
+[ok] delta-method sd(ell2) matches Monte Carlo (MC 0.0646 vs delta 0.0699; MC mean ell2 0.0186 vs population 0.04 -- the trapezoid simulator biases ell2 low, shared by all of milestone 3)
+
+Calibrated branch sets on s8 seeds (R=24, seed base 424242, branches [-5, 5]):
+  N= 1000 tau=0.2439 slack=0.1369: coverage phase-only 24/24, with calibrated ell2 slack 24/24; median set size 2 (max 4), median rel. sigma spread 0.573
+  N= 4000 tau=0.1220 slack=0.0685: coverage phase-only 24/24, with calibrated ell2 slack 24/24; median set size 1 (max 1), median rel. sigma spread 0.000
+  N=16000 tau=0.0610 slack=0.0342: coverage phase-only 24/24, with calibrated ell2 slack 24/24; median set size 1 (max 1), median rel. sigma spread 0.000
+
+Two exposures (eps/Delta in {1/3, 1/2}, branches [-15, 15], R=24 independent pairs):
+  exposure 1 eps/Delta=0.333: sd(R)*sqrt(N) = 4.1262 rad
+  exposure 2 eps/Delta=0.500: sd(R)*sqrt(N) = 3.9353 rad
+  N= 1000 per exposure: derived chi2 absolute coverage 22/24 (empty 0, median size 2); chi2 relative-to-best coverage 23/24; joint-max tau=0.03 coverage 12/24 (empty 7); per-exposure taus 0.256/0.244 rad
+  N= 4000 per exposure: derived chi2 absolute coverage 21/24 (empty 2, median size 1); chi2 relative-to-best coverage 23/24; joint-max tau=0.03 coverage 18/24 (empty 3); per-exposure taus 0.128/0.122 rad
+  N=16000 per exposure: derived chi2 absolute coverage 21/24 (empty 3, median size 1); chi2 relative-to-best coverage 24/24; joint-max tau=0.03 coverage 24/24 (empty 0); per-exposure taus 0.064/0.061 rad
+
+FAILED: none -- all checks passed
+
+## Tests after s16: python3 -m pytest -q
+32 passed in 0.69s
+
+## Milestone 3f bootstrap calibration: python3 bootstrap_calibration.py (about 2 minutes)
+
+Parametric bootstrap (B=24) on s8 seeds (R=24, seed base 424242); bootstrap seed base 555000; branches [-5, 5]
+  N= 1000: bootstrap coverage 24/24 (24 usable, plug-in winner wrong in 3); median set size 2 (max 4), median rel. sigma spread 0.241; median tau_boot/tau_population 0.94 (tau_population 0.2439 rad, s16 coverage 24/24)
+[ok] N=1000: bootstrap tau tracks population tau (median ratio 0.94)
+  N= 4000: bootstrap coverage 24/24 (24 usable, plug-in winner wrong in 0); median set size 1 (max 1), median rel. sigma spread 0.000; median tau_boot/tau_population 0.93 (tau_population 0.1220 rad, s16 coverage 24/24)
+[ok] N=4000: bootstrap tau tracks population tau (median ratio 0.93)
+  N=16000: bootstrap coverage 24/24 (24 usable, plug-in winner wrong in 0); median set size 1 (max 1), median rel. sigma spread 0.000; median tau_boot/tau_population 0.96 (tau_population 0.0610 rad, s16 coverage 24/24)
+[ok] N=16000: bootstrap tau tracks population tau (median ratio 0.96)
+
+FAILED: none -- all checks passed
+
+## Tests after s17: python3 -m pytest -q
+34 passed in 0.87s
+
+## Milestone 3g general finite records: python3 general_finite_record.py
+
+Frozen general example: true m=0, population R(0) = -6.94e-17, nearest rival |R| = 0.5758 in m in [-5, 5]; sigma = 4.7704
+Delta method: sd(R)*sqrt(N) = 6.1938
+  N= 1000: tau_95 = 0.3839
+  N= 4000: tau_95 = 0.1919
+  N=16000: tau_95 = 0.0960
+[ok] delta-method sd(R) matches Monte Carlo (general case) (MC 0.1984 vs delta 0.1959, 48/48 usable, MC mean R +0.0359)
+
+Calibrated symmetry-residual sets (R=24, seed base 424242, branches [-5, 5]):
+  N= 1000 tau=0.3839: coverage 24/24 (24 usable), true branch wins 22/24, median set size 2 (max 2)
+  N= 4000 tau=0.1919: coverage 24/24 (24 usable), true branch wins 23/24, median set size 1 (max 2)
+  N=16000 tau=0.0960: coverage 24/24 (24 usable), true branch wins 24/24, median set size 1 (max 2)
+
+FAILED: none -- all checks passed
+
+## Tests after s18: python3 -m pytest -q
+37 passed in 1.42s
+
+## Milestones 3g-3h general finite records + eligibility slacks (extended script, supersedes the s18-only run above): python3 general_finite_record.py
+
+Frozen general example: true m=0, population R(0) = -6.94e-17, nearest rival |R| = 0.5758 in m in [-5, 5]; sigma = 4.7704
+Delta method: sd(R)*sqrt(N) = 6.1938
+  N= 1000: tau_95 = 0.3839
+  N= 4000: tau_95 = 0.1919
+  N=16000: tau_95 = 0.0960
+[ok] delta-method sd(R) matches Monte Carlo (general case) (MC 0.1984 vs delta 0.1959, 48/48 usable, MC mean R +0.0359)
+
+Calibrated symmetry-residual sets (R=24, seed base 424242, branches [-5, 5]):
+  N= 1000 tau=0.3839: coverage 24/24 (24 usable), true branch wins 22/24, median set size 2 (max 2)
+  N= 4000 tau=0.1919: coverage 24/24 (24 usable), true branch wins 23/24, median set size 1 (max 2)
+  N=16000 tau=0.0960: coverage 24/24 (24 usable), true branch wins 24/24, median set size 1 (max 2)
+
+Eligibility slacks (delta method at true branch):
+  off: population +0.0000, sd*sqrt(N) = 2.4409
+  eq_ell: population +0.0000, sd*sqrt(N) = 3.4383
+  ell: population +0.0300, sd*sqrt(N) = 1.6128
+  lam_S: population +0.7361, sd*sqrt(N) = 3.5840
+  lam_D: population +0.4394, sd*sqrt(N) = 4.1263
+[ok] delta sd(off) matches Monte Carlo (MC 0.0751 vs delta 0.0772; MC mean -0.0110 vs population +0.0000)
+[ok] delta sd(eq_ell) matches Monte Carlo (MC 0.1296 vs delta 0.1087; MC mean +0.0049 vs population +0.0000)
+[ok] delta sd(ell) matches Monte Carlo (MC 0.0464 vs delta 0.0510; MC mean +0.0201 vs population +0.0300)
+[ok] delta sd(lam_S) matches Monte Carlo (MC 0.0780 vs delta 0.1133; MC mean +0.7104 vs population +0.7361)
+[ok] delta sd(lam_D) matches Monte Carlo (MC 0.1183 vs delta 0.1305; MC mean +0.4345 vs population +0.4394)
+
+Hard eligibility vs calibrated slacks (same replicates):
+  N= 1000: hard sign-filters delete the true branch in 9/24 replicates; coverage hard 15/24, per-condition 95% slacks 21/24, Bonferroni 99% slacks 22/24 (symmetry-only 24/24; median set size 1)
+  N= 4000: hard sign-filters delete the true branch in 5/24 replicates; coverage hard 19/24, per-condition 95% slacks 20/24, Bonferroni 99% slacks 24/24 (symmetry-only 24/24; median set size 1)
+  N=16000: hard sign-filters delete the true branch in 0/24 replicates; coverage hard 24/24, per-condition 95% slacks 21/24, Bonferroni 99% slacks 23/24 (symmetry-only 24/24; median set size 1)
+
+FAILED: none -- all checks passed
+
+## Tests after s19: python3 -m pytest -q
+38 passed in 1.51s
+
+## Milestone 3i (2026-11-24): python3 general_bootstrap.py
+
+Seeds: films SEED0=424242 scheme of s8/s18 (seed = 424242 + 1000*N + r);
+bootstrap films seed base 777000 (+ 1000*N + 100*r + b). B=24, branches
+[-5, 5]. Runtime 2m26s on the recording machine.
+
+```
+Parametric bootstrap, general case (B=24) on s18 seeds (R=24, seed base 424242); bootstrap seed base 777000; branches [-5, 5]; true m=0
+  N= 1000: bootstrap coverage 22/24 (22 usable, 2 unfittable, plug-in winner wrong in 0); median set size 1 (max 3); median tau_boot/tau_population 1.04 (tau_population 0.3839, s18 coverage 24/24)
+[ok] N=1000: bootstrap tau tracks population tau (general) (median ratio 1.04)
+  N= 4000: bootstrap coverage 23/24 (23 usable, 1 unfittable, plug-in winner wrong in 0); median set size 1 (max 2); median tau_boot/tau_population 0.97 (tau_population 0.1919, s18 coverage 24/24)
+[ok] N=4000: bootstrap tau tracks population tau (general) (median ratio 0.97)
+  N=16000: bootstrap coverage 24/24 (24 usable, 0 unfittable, plug-in winner wrong in 0); median set size 1 (max 2); median tau_boot/tau_population 0.99 (tau_population 0.0960, s18 coverage 24/24)
+[ok] N=16000: bootstrap tau tracks population tau (general) (median ratio 0.99)
+
+FAILED: none -- all checks passed
+```
+
+## Tests after s20: python3 -m pytest -q
+40 passed in 2.74s (verify_blurred.py and verify_general.py: FAILED: none)
+
+## Milestone 3j (2026-11-24): python3 general_trapezoid_bias.py
+
+Seeds: base 246000 (arm A + sub*1000 + r; arm B + N + r). Runtime 18s.
+
+```
+Bias anatomy, frozen general example (seed base 246000)
+Arm A: sub sweep at N=2000, R=24
+  sub= 10: max mean Gamma entry error +0.00619, mean R +0.0246 +- 0.0280 (+0.18 sd)
+  sub= 20: max mean Gamma entry error +0.00624, mean R +0.0495 +- 0.0198 (+0.36 sd)
+  sub= 40: max mean Gamma entry error +0.00833, mean R +0.0242 +- 0.0329 (+0.17 sd)
+  sub= 80: max mean Gamma entry error +0.00498, mean R +0.0158 +- 0.0278 (+0.11 sd)
+Arm B: N sweep at sub=20
+  N= 1000 R=96: max mean Gamma entry error +0.00630, mean R +0.0037 +- 0.0219 (+0.02 sd)
+  N= 4000 R=48: max mean Gamma entry error +0.00476, mean R -0.0038 +- 0.0149 (-0.04 sd)
+  N=16000 R=48: max mean Gamma entry error +0.00186, mean R +0.0016 +- 0.0058 (+0.03 sd)
+  N-independent bias of s18's apparent size (+0.036) would sit 5.9 standard errors from the N=16000 mean
+[ok] no N-independent bias of s18's apparent size at N=16000 (|mean| + 2se = 0.0133 < 0.036)
+
+FAILED: none -- all checks passed
+```
+
+## Tests after s21: python3 -m pytest -q
+41 passed in 6.66s (verify_blurred.py and verify_general.py: FAILED: none)

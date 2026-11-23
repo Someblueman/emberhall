@@ -49,6 +49,6 @@ in the declared class, replaced by an honest ill-conditioning regime
 ([singular_cases.py](singular_cases.py)); and all-branch completeness
 extends to every rational `ε/Δ`, with irrational ratios shown to admit
 no finite symmetry window ([completeness_rational.py](completeness_rational.py)).
-Milestone 3 slices s12-s15 add set-valued reports, two-exposure and equal-frames comparisons, and unknown-centre handling; tolerance calibration remains.
+Milestone 3 slices s12-s20 add set-valued reports, two-exposure and equal-frames comparisons, unknown-centre handling, and derived (Isserlis + delta-method) tolerance/slack calibration with a derived chi^2 two-exposure combination rule ([tolerance_calibration.py](tolerance_calibration.py), s16), plus per-film parametric-bootstrap versions of the same tolerances for both the isotropic vortex ([bootstrap_calibration.py](bootstrap_calibration.py), s17) and the general non-isotropic symmetry-residual test ([general_finite_record.py](general_finite_record.py), s18-s19; [general_bootstrap.py](general_bootstrap.py), s20).
 All claims here are population-level and conditional on the stated model;
 see DERIVATION.md §5, §7 and §11 for what is deliberately not claimed.
