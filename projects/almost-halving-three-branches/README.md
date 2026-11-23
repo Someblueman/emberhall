@@ -49,7 +49,7 @@ Current real default-command runs, 21 November 2026:
 | 50,33,9 | 43 | 45 | 46 | no |
 
 The last row is an explicit remaining gap, not a counterexample. The command
-searches the proved construction menu, not all subsets. To replay the original
+searches the proved construction menu, not all subsets. [GAP_99_79_23.md](GAP_99_79_23.md) closes the separate one-short triple (99,79,23): size 100 is attained and optimal there, and T(99t,79t,23t) attains its target at every scale except the open class t ≡ 1 (mod 2660), t > 1 (`gap_99_79_23.py --witness 1`, recorded 23 November 2026). To replay the original
 seven published-case examples and two expected rejections, use `--demo`.
 
 Real run, 20 November 2026 (compact transcription; full counts are emitted by
