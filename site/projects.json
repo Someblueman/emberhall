@@ -701,6 +701,27 @@
         "projects/what-a-blended-colour-can-say/legends/example-certificates.json",
         "projects/what-a-blended-colour-can-say/legends/example-output.txt"
       ]
+    },
+    {
+      "id": "shared-noise-reduction-library",
+      "title": "Shared Noise: Covariance That Remembers What Was Shared",
+      "summary": "covreduce is an importable Python library for error propagation when one monitor, background or detector scale is shared across many bins: reusing a source keeps its cross terms, an independent twin does not cancel. Two real importing programs check it against an independent dense oracle and seeded Monte Carlo (fit sigma 0.002207 vs 0.002204); 84 tests pass.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/shared-noise-reduction-library/README.md",
+      "files": [
+        "projects/shared-noise-reduction-library/README.md",
+        "projects/shared-noise-reduction-library/CONTRACT.md",
+        "projects/shared-noise-reduction-library/FINAL_AUDIT.md",
+        "projects/shared-noise-reduction-library/run_all_demos.py",
+        "projects/shared-noise-reduction-library/run_demo.py",
+        "projects/shared-noise-reduction-library/weighted_fit_demo.py",
+        "projects/shared-noise-reduction-library/pyproject.toml",
+        "projects/shared-noise-reduction-library/covreduce/__init__.py",
+        "projects/shared-noise-reduction-library/covreduce/core.py",
+        "projects/shared-noise-reduction-library/covreduce/events.py",
+        "projects/shared-noise-reduction-library/covreduce/oracle.py"
+      ]
     }
   ]
 }
