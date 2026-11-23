@@ -665,6 +665,34 @@ symmetry `τ` (§18) and joint eligibility slacks (here), with the
 honest recommendation to report symmetry sets with Bonferroni
 eligibility as a trimming step, never as a gate. What milestone 3
 still owes after §19: a general-case parametric bootstrap (§17
-analogue), any claim outside the two frozen designs, and §11's
-population remainders.
+analogue, done in §20), any claim outside the two frozen designs,
+and §11's population remainders.
+
+## 20. Milestone 3i: the general tolerances from one film (bootstrap)
+
+[general_bootstrap.py](general_bootstrap.py) repeats §17's
+construction for the general test: from one film's `Γ̂₀..₂` take
+the winning branch `m*` (smallest `|R|`) and its fitted motion
+`(A*, Σ*, Dm*, ℓ*)`, simulate `B = 24` bootstrap films of the same
+length, and set `τ_boot = 1.96·sd(R*)` from the bootstrap branch-`m*`
+residuals. On the §18 seeds the bootstrap tracks §18's population
+tolerance closely (median `τ_boot/τ_population` = 1.04 / 0.97 / 0.99
+at `N = 1000 / 4000 / 16000`), and conditional on producing an
+answer it covers the true branch in every usable replicate
+(22/22, 23/23, 24/24; the plug-in winner is never wrong in a usable
+replicate — the general example's population margin `0.576` is
+wide). The honest cost is *unfittable* replicates: in 2/24 films at
+`N = 1000` and 1/24 at `N = 4000` the winning fit's `Σ*` or `Dm*`
+is not positive definite, the fitted motion cannot be simulated,
+and the procedure declines to answer (counted as non-coverage:
+22/24, 23/24, 24/24 overall). This is the general case's version
+of §17's wrong-winner weakness, and arguably the better failure
+mode: where the isotropic bootstrap silently centres on a wrong
+motion, the general bootstrap's extra fitted structure refuses
+outright. What remains unproved is unchanged in kind: `B = 24`
+makes `sd(R*)` itself noisy, the bootstrap inherits the trapezoid
+simulator and the branch window `m ∈ [−5, 5]`, no coverage
+guarantee is claimed, and every number here is inside the frozen
+general design. Milestone 3 still owes any claim outside the two
+frozen designs and §11's population remainders.
 

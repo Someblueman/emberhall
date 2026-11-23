@@ -360,3 +360,24 @@ FAILED: none -- all checks passed
 
 ## Tests after s19: python3 -m pytest -q
 38 passed in 1.51s
+
+## Milestone 3i (2026-11-24): python3 general_bootstrap.py
+
+Seeds: films SEED0=424242 scheme of s8/s18 (seed = 424242 + 1000*N + r);
+bootstrap films seed base 777000 (+ 1000*N + 100*r + b). B=24, branches
+[-5, 5]. Runtime 2m26s on the recording machine.
+
+```
+Parametric bootstrap, general case (B=24) on s18 seeds (R=24, seed base 424242); bootstrap seed base 777000; branches [-5, 5]; true m=0
+  N= 1000: bootstrap coverage 22/24 (22 usable, 2 unfittable, plug-in winner wrong in 0); median set size 1 (max 3); median tau_boot/tau_population 1.04 (tau_population 0.3839, s18 coverage 24/24)
+[ok] N=1000: bootstrap tau tracks population tau (general) (median ratio 1.04)
+  N= 4000: bootstrap coverage 23/24 (23 usable, 1 unfittable, plug-in winner wrong in 0); median set size 1 (max 2); median tau_boot/tau_population 0.97 (tau_population 0.1919, s18 coverage 24/24)
+[ok] N=4000: bootstrap tau tracks population tau (general) (median ratio 0.97)
+  N=16000: bootstrap coverage 24/24 (24 usable, 0 unfittable, plug-in winner wrong in 0); median set size 1 (max 2); median tau_boot/tau_population 0.99 (tau_population 0.0960, s18 coverage 24/24)
+[ok] N=16000: bootstrap tau tracks population tau (general) (median ratio 0.99)
+
+FAILED: none -- all checks passed
+```
+
+## Tests after s20: python3 -m pytest -q
+40 passed in 2.74s (verify_blurred.py and verify_general.py: FAILED: none)
