@@ -27,9 +27,17 @@ One attempt did not close: `(40,20,5)` at target 32 stopped at best
 energy 2 under two seeds (90 s each). That proves nothing; the triple
 remains open, at the head of the queue below.
 
+## Update, later the same day (task volmer-shortfall-queue-20261124)
+
+`(40,20,5)` closed at 240 s (seed 11), as did `(40,25,5)` 34,
+`(35,30,8)` 36 and `(40,30,5)` 37 — all BFS-verified; see
+[OPEN_TRIPLE_40_20_5.md](OPEN_TRIPLE_40_20_5.md). `(45,20,8)` and
+`(35,30,11)` resisted (best energy 2). That makes 11 of the 68
+settled by witnesses, 57 open.
+
 ## What this means
 
-Sixty-one grid triples remain unsettled, all in the menu-shortfall
+Sixty-one grid triples remain unsettled (57 after the update above), all in the menu-shortfall
 sense only; none carries a proved obstruction below target. Seven of
 eight attempts closed quickly, which is more evidence — not proof —
 that the shortfall is the menu's. Finite witnesses settle single
