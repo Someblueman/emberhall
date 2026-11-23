@@ -18,7 +18,7 @@ from .record import REF
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Emberhall — a home for discontinuous minds")
     p.add_argument("--repo", default=".")
-    p.add_argument("--artifacts-from", help="explicit private source checkout for finish artifacts")
+    p.add_argument("--artifacts-from", help="explicit private source checkout for evidence artifacts")
     sub = p.add_subparsers(dest="command", required=True)
     init = sub.add_parser("found", help="found a new house, never replace one")
     init.add_argument("--name", required=True)
@@ -126,6 +126,8 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("proposal")
             cmd.add_argument("--signature", required=True)
         elif name == "learn":
+            cmd.add_argument("--artifact", action="append",
+                             help="repo-relative evidence file; immutable copy stored with lesson")
             for key in ("lesson", "key", "claim", "evidence"):
                 cmd.add_argument("--" + key, required=True)
         elif name == "review":
@@ -165,8 +167,14 @@ def briefing(state: dict) -> dict:
     for task in tasks.values():
         task["available"] = task["status"] == "open" or (
             task["status"] == "claimed" and task["until"] <= time.time())
+    lessons = {}
+    for key, lesson in state["lessons"].items():
+        lessons[key] = {k: v for k, v in lesson.items() if k != "artifacts"}
+        if "artifacts" in lesson:
+            lessons[key]["artifacts"] = {name: {"sha256": item["sha256"]}
+                                         for name, item in lesson["artifacts"].items()}
     return {key: state[key] for key in ("house_id", "name", "sequence", "residents",
-            "rule_revision", "lessons")} | {"tasks": tasks,
+            "rule_revision")} | {"tasks": tasks, "lessons": lessons,
             "proposals": {k: {field: value for field, value in v.items() if field != "text"}
                           for k, v in state["proposals"].items()},
             "life": state.get("life", {}),
@@ -347,9 +355,11 @@ def run(args: argparse.Namespace) -> object:
         data["text"] = Path(data.pop("file")).read_text()
     if command == "ratify":
         data["signature"] = Path(data["signature"]).read_text()
-    if command == "finish":
+    if command in ("finish", "learn"):
+        names = data.pop("artifact")
         source = Path(args.artifacts_from).resolve() if args.artifacts_from else record.root
-        data["artifacts"] = {name: artifact(source, name) for name in data.pop("artifact")}
+        if names is not None:
+            data["artifacts"] = {name: artifact(source, name) for name in names}
     result = record.append(command, args.actor, data, args.request)
     if command == "wake":
         result["next"] = f"python3 -m house read --as {args.actor}"

@@ -17,6 +17,22 @@ def require(condition: bool, reason: str) -> None:
         raise ValueError(reason)
 
 
+def validate_artifacts(artifacts: object) -> None:
+    """Validate the immutable file envelope shared by finishes and lessons."""
+    require(isinstance(artifacts, dict) and 0 < len(artifacts) <= 32,
+            "requires 1 to 32 immutable artifacts")
+    for name, artifact in artifacts.items():
+        require(isinstance(name, str) and name and not name.startswith("/") and
+                all(p not in ("..", ".", "") for p in name.split("/")) and
+                "\\" not in name, "invalid artifact path")
+        require(isinstance(artifact, dict) and set(artifact) == {"sha256", "base64"},
+                "invalid artifact")
+        content = base64.b64decode(artifact["base64"], validate=True)
+        require(len(content) <= 1000000, "artifact exceeds 1 MB")
+        require(hashlib.sha256(content).hexdigest() == artifact["sha256"],
+                "artifact digest mismatch")
+
+
 def string(data: dict, key: str, limit: int = 20000) -> str:
     value = data.get(key)
     require(isinstance(value, str) and 0 < len(value) <= limit, f"invalid {key}")
@@ -241,18 +257,7 @@ def apply_event(previous: dict | None, event: dict) -> dict:
             else:
                 string(data, "result")
                 artifacts = data.get("artifacts", {})
-                require(isinstance(artifacts, dict) and 0 < len(artifacts) <= 32,
-                        "finish requires immutable artifacts")
-                for name, artifact in artifacts.items():
-                    require(isinstance(name, str) and name and not name.startswith("/") and
-                            all(p not in ("..", ".", "") for p in name.split("/")) and
-                            "\\" not in name, "invalid artifact path")
-                    require(isinstance(artifact, dict) and set(artifact) == {"sha256", "base64"},
-                            "invalid artifact")
-                    content = base64.b64decode(artifact["base64"], validate=True)
-                    require(len(content) <= 1000000, "artifact exceeds 1 MB")
-                    require(hashlib.sha256(content).hexdigest() == artifact["sha256"],
-                            "artifact digest mismatch")
+                validate_artifacts(artifacts)
                 task.update(status="done", until=0, result=data["result"],
                             artifacts={name: dict(value) for name, value in artifacts.items()},
                             finished_at=seq)
@@ -284,6 +289,10 @@ def apply_event(previous: dict | None, event: dict) -> dict:
             evidence = string(data, "evidence")
             state["lessons"][lesson] = {"key": key, "claim": string(data, "claim"),
                 "evidence": evidence, "status": "observed", "reviews": [], "author": actor}
+            if "artifacts" in data:
+                validate_artifacts(data["artifacts"])
+                state["lessons"][lesson]["artifacts"] = {
+                    name: dict(value) for name, value in data["artifacts"].items()}
             peers = [v for v in state["lessons"].values()
                      if v["key"] == key and v["status"] != "superseded"]
             if len(peers) > 1:
