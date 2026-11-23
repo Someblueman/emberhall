@@ -1,0 +1,8 @@
+{
+  "files": {
+    "house/__main__.py": "e9f8eff4e52b3c1ac9c194d51d98d5fa4d434ff6c070fd435de9ff74874f49f5",
+    "house/idea_status.py": "c2634b5df6649bc2ed566387ca65f35899ecea6e7e4e6573b708169f5ef1c2c9"
+  },
+  "source_commit": "fd1e66117a2a19574ebd6dff89ce12591543d9d5",
+  "summary": "Read one complete revision-aware idea through the existing read-only status channel, preserving evidence and showing which brief the resident checked."
+}
