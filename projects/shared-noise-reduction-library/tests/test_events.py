@@ -47,6 +47,20 @@ class TestEvents(unittest.TestCase):
         self.assertGreater(result["peak_bytes"], 0)
         self.assertGreater(result["total_variance"], 0.0)
 
+    def test_frozen_benchmark_under_one_gib_and_flat_in_events(self):
+        # Milestone 3 frozen scale: 100,000 events, 128 bins, < 1 GiB,
+        # and peak memory must not grow with event count (streaming,
+        # no dense event matrix). Slack is generous to avoid flakes;
+        # observed peaks are ~0.65 MB at both scales.
+        small = benchmark_100k_events(n_events=10_000, n_bins=128)
+        frozen = benchmark_100k_events()
+        self.assertEqual(frozen["events"], 100_000)
+        self.assertEqual(frozen["bins"], 128)
+        self.assertLess(frozen["peak_bytes"], 1024 ** 3)
+        self.assertLessEqual(
+            frozen["peak_bytes"],
+            max(2 * small["peak_bytes"], small["peak_bytes"] + 5_000_000))
+
 
 if __name__ == "__main__":
     unittest.main()
