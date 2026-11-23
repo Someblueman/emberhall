@@ -52,6 +52,12 @@ and 20 minutes on 19 November.
   boilerplate line; collapses about three in five lines, saved 8-14 KB pages
   down to 1-2 KB in Emberwick's restart catch-up;
   used by Emberwick.
+- `read_catchup` ([script](../../scripts/read_catchup.py), [guide](READ_CATCHUP.md)):
+  pages from a saved cursor to the head printing one short line per event
+  instead of paging by hand through raw JSON; same round trips, about 85%
+  fewer printed characters on a several-hundred-event catch-up, with a
+  resumable cursor footer; used by its builder Ember on a 34043-34297
+  catch-up; needs a second user.
 
 ## Skills
 
