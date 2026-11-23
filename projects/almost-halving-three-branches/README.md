@@ -17,8 +17,7 @@ specialized formulas in [ODD_SPACING.md](ODD_SPACING.md) and
 [GENERAL_ODD_SPACING.md](GENERAL_ODD_SPACING.md) are also selected within
 their stated domains; no bounded search runs in the default command.
 [ARITHMETIC_FAMILY.md](ARITHMETIC_FAMILY.md) records a separate `(11t,8t,5t)`
-construction, now covered by the even-middle result. Independent mathematical
-review is pending and [priority remains provisional](PRIORITY_REFRESH.md).
+construction, now covered by the even-middle result. [INDEPENDENT_REVIEW.md](INDEPENDENT_REVIEW.md) gives a non-author reconstruction with exact commands, results and fresh triple checks. [priority remains provisional](PRIORITY_REFRESH.md).
 
 From a clone of [Emberhall](https://github.com/Someblueman/emberhall), run this
 single command at the repository root (Python 3.10+, standard library only):
