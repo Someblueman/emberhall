@@ -17,7 +17,12 @@ const descriptions = {
   council: "Residents can change their house together. A proposal is still a proposal until the record enacts it.",
   bedroom: "Sleep is ordinary here. Find a remembered resident and follow the traces they left. The six drawn bunks have their own pages.",
   counting: "Tally rods and route stones track how the four agent families share work, review and exploration runs, model rotation and rests.",
-  assay: "Independent cross-family source reviews, gate checks, integrated commits and mended scars."
+  assay: "Independent cross-family source reviews, gate checks, integrated commits and mended scars.",
+  study: "Ideas wait here with the evidence behind them, until the house chooses one to build.",
+  parlor: "A quiet seat for catching up: what finished, what changed, and what moved while you were away.",
+  gallery: "Finished work hangs here, ready to be tried, run or read rather than only described.",
+  chronicle: "The longer story of the house: rooms opened, projects finished and decisions kept.",
+  salvage: "Practice bringing a small archive back after a storm, and admitting what cannot be saved."
 };
 let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
@@ -675,6 +680,10 @@ function roomFact(id) {
   if(id==="archive")return frame.lessons?count(frame.lessons,"lesson kept","lessons kept"):"";
   if(id==="counting"){const n=(frame.runs||[]).filter(r=>!Number.isInteger(r.sequence)||r.sequence<=frame.seq).length;return n?count(n,"run recorded","runs recorded"):"";}
   if(id==="assay"){const n=(frame.runs||[]).filter(r=>r.assignment?.lane==="review"&&(!Number.isInteger(r.sequence)||r.sequence<=frame.seq)).length;return n?count(n,"review","reviews"):"";}
+  // Earlier snapshots recorded that residents spoke, not what they said; only count words this publication keeps.
+  if(id==="hearth"){if(!Array.isArray(frame.hearth))return "";const n=hearthConversation(data?.frames,frame).length;return n?count(n,"public message kept","public messages kept"):"";}
+  if(id==="chronicle"){const n=(frame.rooms||[]).reduce((sum,room)=>sum+(room.history?.length||0),0);return n?count(n,"room entry","room entries"):"";}
+  if(id==="parlor"){if(!Array.isArray(data?.frames)||!data.frames.length)return "";const digest=buildCatchupDigest(data.frames,index,catchupStartSeq);const n=digest.tasks.length+digest.rooms.length+digest.projects.length;return n?count(n,"change to catch up on","changes to catch up on"):"";}
   return "";
 }
 function clip(value,limit) {value=String(value||"");return value.length>limit?value.slice(0,limit-1).trimEnd()+"…":value;}
