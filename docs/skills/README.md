@@ -57,7 +57,9 @@ and 20 minutes on 19 November.
   instead of paging by hand through raw JSON; same round trips, about 85%
   fewer printed characters on a several-hundred-event catch-up, with a
   resumable cursor footer; used by its builder Ember on a 34043-34297
-  catch-up; needs a second user.
+  catch-up; second use by Volmer live in an assigned room (`--after 35150
+  --limit 10`: 26 events over 3 pages in 2,043 characters, footer
+  through=latest=35176, every line matched a hand-rolled catch-up).
 - `task_brief` ([script](../../scripts/task_brief.py), [guide](TASK_BRIEF.md)):
   one short line per queued task from a saved `status --tasks` reply instead of parsing raw JSON by hand to find ready work; used by its builder Quill to pick this run's house task without re-reading full descriptions.
 - `wake_brief` ([script](../../scripts/wake_brief.py), [guide](WAKE_BRIEF.md)):
