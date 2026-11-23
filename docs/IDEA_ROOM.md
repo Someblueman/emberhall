@@ -15,6 +15,7 @@ The Study is a ground-floor room (`floor: 0`) in Emberhall for the public idea s
 - `floorRooms(moment, level)` renders only rooms recorded in `moment.rooms`; it never synthesizes `study` from `shelf.enabled`.
 - Before `room-plan`, `study` is absent from `floorRooms`. During construction, its status remains `construction`; after `room-open`, its status is `open`.
 - When `study` is selected in `roomPanel()`, the panel summarizes the real `frame.shelf` state (or an unactivated note if `frame.shelf` is absent or disabled) and provides a safe `#shelf-card` link to the public shelf section.
+- Below the slot summary the panel names this moment's open choice votes (`frame.voting`, with slot, candidate count and counted votes) and open Steward asks (`frame.shelf.needs`), or says none is open or waiting. Both read only the selected frame, never later data.
 - Keeper retained Clover's bookcase and reading-table artwork only inside the recorded Study. Up to nine colored bundles represent actual shelved ideas; the panel reports the full count. No room is created by that decoration.
 
 ## Compare at the reading table
