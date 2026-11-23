@@ -440,3 +440,47 @@ FAILED: none -- all checks passed
 
 ## Tests after s22-s24: python3 -m pytest -q
 48 passed
+
+## Milestone 3k s25 (2026-11-24): python3 window_constant.py
+
+Runtime ~5s. Full output:
+
+```
+[ok] golden [0;1,1,...]: R = m^2 h + m h1 + h0 exact (rel err vs eigen 6.4e-13 for m<=1000, h-level err 8.1e-09 at m~1e5, abs err vs direct 4.3e-12; alpha=0.1094+1.7928j, a=r^rho=0.5895)
+[ok] golden [0;1,1,...]: h has exactly two zeros, both simple (psi* = ['0.01574', '3.37656'], h' = ['366.3831', '-1.6746'])
+[ok] sqrt2-1 [0;2,2,...]: R = m^2 h + m h1 + h0 exact (rel err vs eigen 1.7e-13 for m<=1000, h-level err 8.1e-09 at m~1e5, abs err vs direct 1.4e-12; alpha=0.0495+1.8113j, a=r^rho=0.7018)
+[ok] sqrt2-1 [0;2,2,...]: h has exactly two zeros, both simple (psi* = ['0.00479', '3.29720'], h' = ['552.3639', '-0.5274'])
+[ok] engineered [0;9,11,1000,7,3]: R = m^2 h + m h1 + h0 exact (rel err vs eigen 3.4e-13 for m<=1000, h-level err 4.4e-10 at m~1e5, abs err vs direct 2.4e-15; alpha=0.0035+1.8242j, a=r^rho=0.9102)
+[ok] engineered [0;9,11,1000,7,3]: h has exactly two zeros, both simple (psi* = ['0.00009', '3.18254'], h' = ['2094.9785', '-0.0102'])
+[ok] golden [0;1,1,...]: s24 control min|R(m)|/m over m<=200000 (got 0.1553 at m=92549, s24 0.1553)
+[ok] golden [0;1,1,...]: derived bound B <= brute min on [M0,M], B > 0 (M0=1000, B=0.12315, brute=0.15526 at m=92549, ratio 1.26; brute below M0: 0.31229 at m=12)
+    psi*=0.0157 gamma=0.89274 xi*=-0.0112 2pi|h'|=2302.0527 (per eps^2: 7440.56) D_j=0.04209 at m=70339 B_near=95.02932 pred~96.89231
+    psi*=3.3766 gamma=0.42763 xi*=-0.1656 2pi|h'|=10.5219 (per eps^2: 34.01) D_j=0.01476 at m=92549 B_near=0.12315 pred~0.15525
+    convergents q_k<=200000: 27; argmin m=92549 in block [q_k=75025, q_next=121393) (next partial quotient 1)
+[ok] sqrt2-1 [0;2,2,...]: s24 control min|R(m)|/m over m<=200000 (got 0.2024 at m=20674, s24 0.2024)
+[ok] sqrt2-1 [0;2,2,...]: derived bound B <= brute min on [M0,M], B > 0 (M0=1505, B=0.18941, brute=0.20239 at m=20674, ratio 1.07; brute below M0: 0.65422 at m=1073)
+    psi*=0.0048 gamma=0.92719 xi*=-0.0076 2pi|h'|=3470.6050 (per eps^2: 24973.05) D_j=0.12908 at m=81593 B_near=442.78618 pred~447.98874
+    psi*=3.2972 gamma=0.45120 xi*=-0.2457 2pi|h'|=3.3134 (per eps^2: 23.84) D_j=0.06108 at m=20674 B_near=0.18941 pred~0.20239
+    convergents q_k<=200000: 15; argmin m=20674 in block [q_k=13860, q_next=33461) (next partial quotient 2)
+[ok] engineered [0;9,11,1000,7,3]: s24 control min|R(m)|/m over m<=200000 (got 0.0049 at m=169777, s24 0.0049)
+[ok] engineered [0;9,11,1000,7,3]: derived bound B <= brute min on [M0,M], B > 0 (M0=80356, B=0.00471, brute=0.00494 at m=169777, ratio 1.05; brute below M0: 0.00577 at m=69668)
+    psi*=0.0001 gamma=0.98048 xi*=-0.0020 2pi|h'|=13163.1380 (per eps^2: 1343037.86) D_j=0.33525 at m=104827 B_near=4084.93164 pred~4412.94396
+    psi*=3.1825 gamma=0.48698 xi*=-0.9214 2pi|h'|=0.0642 (per eps^2: 6.55) D_j=0.07691 at m=169777 B_near=0.00471 pred~0.00494
+    convergents q_k<=200000: 4; argmin m=169777 in block [q_k=100009, q_next=700163) (next partial quotient 7)
+  golden [0;1,1,...]: D_j(M) search: M=10000: 0.03096, M=200000: 0.01476, M=1000000: 0.01476  (saturation would mean xi* off the limit set Xi_j)
+  sqrt2-1 [0;2,2,...]: D_j(M) search: M=10000: 0.19742, M=200000: 0.06108, M=1000000: 0.06056  (saturation would mean xi* off the limit set Xi_j)
+  engineered [0;9,11,1000,7,3]: D_j(M) search: M=10000: 0.18067, M=200000: 0.07691, M=1000000: 0.07691  (saturation would mean xi* off the limit set Xi_j)
+[ok] golden: homogeneous CF bound m||m rho|| >= 1/(A+2) (min over m<=200000 is 0.3820, bound 0.3333, A=1)
+[ok] sqrt2-1: homogeneous CF bound m||m rho|| >= 1/(A+2) (min over m<=200000 is 0.3431, bound 0.2500, A=2)
+[ok] quotient swap: engineered 1000 -> 1s lowers the minimum ([0;9,11,1,...] 0.00139 at 190394 < engineered 0.00494 at 169777)
+[ok] quotient swap: inserting 1000 into golden raises the minimum ([0;1x6,1000,1...] 0.69339 at 33360 > golden 0.15526 at 92549)
+  reading: no closed c(partial quotients) orders these minima;
+  the arithmetic factor is dist(xi*, Xi) for the truth's own
+  gamma (its Ostrowski position), times eps^2 geometry in h'.
+[ok] parameter level: rotating arg alpha zeroes R(m0) exactly (m0=1000, t*=1.0391, R=3.58e-09; so no c(rho) uniform over (alpha, theta, r) exists)
+[ok] in-model family: a genuine truth with |R(m)|/m ~ 0 at golden rho (A=[[-0.6,-w],[w,-1.2]], w*=2.90000151, m=96, |R|/m=1.10e-11, r=0.4449<1, theta=2.5960)
+FAILED: none -- all checks passed
+```
+
+## Tests after s25: python3 -m pytest -q
+tests re-verified on the merged s22-s24+s25 tree in the s26 slice below

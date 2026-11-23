@@ -785,3 +785,74 @@ with one huge partial quotient collapses to `0.0049` at
 `m = 169777`. Scope: one frozen truth, float `ρ`; an explicit
 constant `c(ρ)` from partial quotients for all truths is the
 remaining theorem, not claimed here.
+
+## 25. Milestone 3k: the explicit window constant — exact form, no uniform `c(ρ)`
+
+[window_constant.py](window_constant.py) takes up §24's open constant.
+**Exact decomposition (proof).** In §11's notation
+`R(m) = ε² Re(α μ_m²/D(ψ_m))`, `D(φ) = a e^{iφ} + a⁻¹ e^{−iφ} − 2`,
+`a = r^ρ`, `ψ_m = (θ+2πm)ρ`. Since `μ_m²` is exactly quadratic in `m`
+(`c₂ = −(2π/Δ)²`, `c₁ = (4π/Δ²)(i ln r − θ)`, `c₀ = (ln r + iθ)²/Δ²`),
+with `h_j(φ) = ε² Re(α c_j/D(φ))` and `h = h₂`:
+`R(m) = m²h(ψ_m) + m h₁(ψ_m) + h₀(ψ_m)` for *every* `m` (checked against
+both the eigenbasis and direct routes). `D` traces an ellipse about
+`−2` enclosing the origin, `arg D(φ)` is strictly monotone, so `h` has
+exactly two zeros `ψ*_j`; both are simple on the frozen truth at all
+three ratios below. Near `ψ*_j`, with
+`γ_j = ψ*_j/2π − ρθ/2π`, `ξ_m = m(mρ − γ_j − n_m)` (`n_m` nearest
+integer) and `ξ*_j = −h₁(ψ*_j)/(2πh′(ψ*_j))`:
+`R(m)/m = 2πh′(ψ*_j)(ξ_m − ξ*_j) + o(1)` as `ψ_m → ψ*_j`. A short
+argument (a subsequence realising the liminf must have `ψ_m → ψ*_j` and
+`ξ_m` bounded, else `|R|/m → ∞`; bounded `ξ_m` subsequences exist by
+the inhomogeneous Dirichlet theorem) gives the **exact dependence on
+the truth**:
+`liminf_{m→∞} |R(m)|/m = 2π · min_j |h′(ψ*_j)| · dist(ξ*_j, Ξ_j)`,
+`Ξ_j` the finite limit points of `ξ_m`. The "(C, ψ*)" of §24 is
+`(h′(ψ*_j), ξ*_j)`; only one zero (near `π`) is active in practice —
+at the other, `2π|h′| ≥ 2302` makes its contribution inert.
+
+**No truth-uniform `c(ρ)` exists (proof + exhibit).** At any fixed
+`m₀`, `R(m₀)` as a function of `arg α` is a sinusoid and has an exact
+zero, so no constant depending on `ρ` alone bounds `|R(m)|/m` below
+over the residual's parameters `(α, θ, r)`. In-model, the genuine
+family `A(w) = [[−0.6,−w],[w,−1.2]]` (eigenvalues `−0.9 ± i√(w²−0.09)`,
+stable) at golden `ρ` has, by bisection, `w* = 2.90000151` with
+`|R(96)|/96 = 1.1e-11` — a real latent motion whose symmetry residual
+at branch 96 vanishes to working precision. Nor do partial quotients
+alone order finite-range minima (**search**): replacing the engineered
+quotient `1000` by `1`s *lowers* the minimum over `m ≤ 200000`
+(`0.00139` vs `0.00494`), and inserting `1000` into the golden ratio
+(`[0;1⁶,1000,1…]`) *raises* it (`0.693` vs `0.155`). What continued
+fractions give in closed form is the homogeneous side:
+`m‖mρ‖ ≥ 1/(A+2)` for max partial quotient `A` (best approximation plus
+`|ρ − p_k/q_k| > 1/(q_k(q_k+q_{k+1}))`; checked: minima `0.382 ≥ 1/3`
+golden, `0.343 ≥ 1/4` for `√2−1`). The inhomogeneous factor
+`dist(ξ*_j, Ξ_j)` is decided by `γ_j`'s Ostrowski position relative to
+the quotients — truth data, not `ρ` data. A correction to §24's
+framing falls out: its three minima are dominated by `ε²` geometry in
+`h′` (`2π|h′|/ε² = 34.0, 23.8, 6.55`), while the arithmetic factors
+`D_j` are `0.0148, 0.0611, 0.0769` — the engineered ratio's is the
+*largest*; its small minimum is mostly its small exposure.
+
+**Effective finite bound (computed bound, checked).** For
+`M₀ ≤ m ≤ M = 200000`, `min |R(m)|/m ≥ B = min(B_far, B_near_j)` with
+`B_near_j = 2π b_j D_j − E_j − H₀/M₀`: `b_j` bounds `|h′|` near
+`ψ*_j`, `E_j` the expansion's variation, `D_j = min|ξ_m − ξ*_j|` over
+the range (computed by `ξ`-scan; convergent blocks reported). Grid
+extrema carry analytic Lipschitz padding; this is a computed bound in
+float arithmetic, not interval proof. Results (brute argmin in every
+case at the `m` realising `D_j`): golden `M₀ = 1000`,
+`B = 0.12315 ≤ 0.15526` (m = 92549, block `q_k = 75025`);
+`√2−1` `M₀ = 1505`, `B = 0.18941 ≤ 0.20239` (20674, block 13860);
+engineered `M₀ = 80356`, `B = 0.00471 ≤ 0.00494` (169777, block
+100009 — the convergent after quotient 1000). §24's controls
+`0.1553/0.2024/0.0049` are reproduced. Below `M₀` the window remains
+finite enumeration, as in §11. **Scope, plainly:** proof — the
+decomposition, two-zero structure given `α ≠ 0`, the liminf formula,
+non-existence of a truth-uniform constant, the homogeneous CF bound;
+computed bound — `B` above; search — brute minima, quotient swaps, and
+`D_j(M)` unchanged from `M = 2·10⁵` to `10⁶` at golden and engineered
+`ρ` (suggesting `ξ*_j ∉ Ξ_j`, i.e. a positive per-truth liminf, for
+this frozen truth — not decided here; an Ostrowski-digit computation
+for quadratic `ρ` could in principle decide it). One frozen truth,
+population level, symmetry residual only, as throughout §11.
