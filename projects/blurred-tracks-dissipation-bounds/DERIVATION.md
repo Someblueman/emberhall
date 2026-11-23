@@ -785,3 +785,182 @@ with one huge partial quotient collapses to `0.0049` at
 `m = 169777`. Scope: one frozen truth, float `ρ`; an explicit
 constant `c(ρ)` from partial quotients for all truths is the
 remaining theorem, not claimed here.
+
+## 25. Milestone 3k: the explicit window constant — exact form, no uniform `c(ρ)`
+
+[window_constant.py](window_constant.py) takes up §24's open constant.
+**Exact decomposition (proof).** In §11's notation
+`R(m) = ε² Re(α μ_m²/D(ψ_m))`, `D(φ) = a e^{iφ} + a⁻¹ e^{−iφ} − 2`,
+`a = r^ρ`, `ψ_m = (θ+2πm)ρ`. Since `μ_m²` is exactly quadratic in `m`
+(`c₂ = −(2π/Δ)²`, `c₁ = (4π/Δ²)(i ln r − θ)`, `c₀ = (ln r + iθ)²/Δ²`),
+with `h_j(φ) = ε² Re(α c_j/D(φ))` and `h = h₂`:
+`R(m) = m²h(ψ_m) + m h₁(ψ_m) + h₀(ψ_m)` for *every* `m` (checked against
+both the eigenbasis and direct routes). `D` traces an ellipse about
+`−2` enclosing the origin, `arg D(φ)` is strictly monotone, so `h` has
+exactly two zeros `ψ*_j`; both are simple on the frozen truth at all
+three ratios below. Near `ψ*_j`, with
+`γ_j = ψ*_j/2π − ρθ/2π`, `ξ_m = m(mρ − γ_j − n_m)` (`n_m` nearest
+integer) and `ξ*_j = −h₁(ψ*_j)/(2πh′(ψ*_j))`:
+`R(m)/m = 2πh′(ψ*_j)(ξ_m − ξ*_j) + o(1)` as `ψ_m → ψ*_j`. A short
+argument (a subsequence realising the liminf must have `ψ_m → ψ*_j` and
+`ξ_m` bounded, else `|R|/m → ∞`; bounded `ξ_m` subsequences exist by
+the inhomogeneous Dirichlet theorem) gives the **exact dependence on
+the truth**:
+`liminf_{m→∞} |R(m)|/m = 2π · min_j |h′(ψ*_j)| · dist(ξ*_j, Ξ_j)`,
+`Ξ_j` the finite limit points of `ξ_m`. The "(C, ψ*)" of §24 is
+`(h′(ψ*_j), ξ*_j)`; only one zero (near `π`) is active in practice —
+at the other, `2π|h′| ≥ 2302` makes its contribution inert.
+
+**No truth-uniform `c(ρ)` exists (proof + exhibit).** At any fixed
+`m₀`, `R(m₀)` as a function of `arg α` is a sinusoid and has an exact
+zero, so no constant depending on `ρ` alone bounds `|R(m)|/m` below
+over the residual's parameters `(α, θ, r)`. In-model, the genuine
+family `A(w) = [[−0.6,−w],[w,−1.2]]` (eigenvalues `−0.9 ± i√(w²−0.09)`,
+stable) at golden `ρ` has, by bisection, `w* = 2.90000151` with
+`|R(96)|/96 = 1.1e-11` — a real latent motion whose symmetry residual
+at branch 96 vanishes to working precision. Nor do partial quotients
+alone order finite-range minima (**search**): replacing the engineered
+quotient `1000` by `1`s *lowers* the minimum over `m ≤ 200000`
+(`0.00139` vs `0.00494`), and inserting `1000` into the golden ratio
+(`[0;1⁶,1000,1…]`) *raises* it (`0.693` vs `0.155`). What continued
+fractions give in closed form is the homogeneous side:
+`m‖mρ‖ ≥ 1/(A+2)` for max partial quotient `A` (best approximation plus
+`|ρ − p_k/q_k| > 1/(q_k(q_k+q_{k+1}))`; checked: minima `0.382 ≥ 1/3`
+golden, `0.343 ≥ 1/4` for `√2−1`). The inhomogeneous factor
+`dist(ξ*_j, Ξ_j)` is decided by `γ_j`'s Ostrowski position relative to
+the quotients — truth data, not `ρ` data. A correction to §24's
+framing falls out: its three minima are dominated by `ε²` geometry in
+`h′` (`2π|h′|/ε² = 34.0, 23.8, 6.55`), while the arithmetic factors
+`D_j` are `0.0148, 0.0611, 0.0769` — the engineered ratio's is the
+*largest*; its small minimum is mostly its small exposure.
+
+**Effective finite bound (computed bound, checked).** For
+`M₀ ≤ m ≤ M = 200000`, `min |R(m)|/m ≥ B = min(B_far, B_near_j)` with
+`B_near_j = 2π b_j D_j − E_j − H₀/M₀`: `b_j` bounds `|h′|` near
+`ψ*_j`, `E_j` the expansion's variation, `D_j = min|ξ_m − ξ*_j|` over
+the range (computed by `ξ`-scan; convergent blocks reported). Grid
+extrema carry analytic Lipschitz padding; this is a computed bound in
+float arithmetic, not interval proof. Results (brute argmin in every
+case at the `m` realising `D_j`): golden `M₀ = 1000`,
+`B = 0.12315 ≤ 0.15526` (m = 92549, block `q_k = 75025`);
+`√2−1` `M₀ = 1505`, `B = 0.18941 ≤ 0.20239` (20674, block 13860);
+engineered `M₀ = 80356`, `B = 0.00471 ≤ 0.00494` (169777, block
+100009 — the convergent after quotient 1000). §24's controls
+`0.1553/0.2024/0.0049` are reproduced. Below `M₀` the window remains
+finite enumeration, as in §11. **Scope, plainly:** proof — the
+decomposition, two-zero structure given `α ≠ 0`, the liminf formula,
+non-existence of a truth-uniform constant, the homogeneous CF bound;
+computed bound — `B` above; search — brute minima, quotient swaps, and
+`D_j(M)` unchanged from `M = 2·10⁵` to `10⁶` at golden and engineered
+`ρ` (suggesting `ξ*_j ∉ Ξ_j`, i.e. a positive per-truth liminf, for
+this frozen truth — not decided here; an Ostrowski-digit computation
+for quadratic `ρ` could in principle decide it). One frozen truth,
+population level, symmetry residual only, as throughout §11.
+
+## 26. Milestone 3l: the per-truth liminf — Ostrowski decides what it can
+
+[ostrowski_liminf.py](ostrowski_liminf.py) takes up §25's closing
+parenthesis for the two quadratic ratios there (golden
+`ρ = (√5−1)/2 = [0;1,1,…]` and `√2−1 = [0;2,2,…]`; write `a` for the
+period). The outcome is threefold: an exact parametrization of `Ξ_j`
+(proof), certified upper bounds on `dist(ξ*_j, Ξ_j)` that refute
+positivity at §25's scan level, and a proof-shaped reason that exact
+positivity is not decidable by finite windows.
+
+**Ostrowski framework (proof, mostly exact).** With convergents
+`p_k/q_k` (`q_0 = 1`, `q_1 = a`), `δ_k := q_kρ − p_k = (−1)^kρ^{k+1}`
+exactly in `ℚ(√d)` (induction from `ρ² + aρ = 1`; checked with exact
+fractions). Every `m ≥ 0` has unique legal digits `b_k`
+(`0 ≤ b_k ≤ a`, `b_k = a ⇒ b_{k−1} = 0`); `γ_j` has digits `c_k` in
+the same system — the *predecessor digits*, `c_{<K}` being the digits
+of the integer `j_K < q_K` whose `{j_Kρ}` is the largest partition
+point `≤ γ_j` — with `γ_j = e + Σ_k c_kδ_k`, `e ∈ {0,1}`, tails
+`O(ρ^K)`. Let `J(m)` be the first index where `b` and `c` differ.
+Then `ξ_m = m·S_m` with `S_m = Σ_{k≥J}(b_k−c_k)δ_k` *exactly* for
+`J ≥ J₀` (`4` golden, `3` for `√2−1`), with no integer wrap: legal
+tails from `J` have `|Σ| ≤ 0.146` resp. `0.071` (digit DP), so
+`|S_m| < 1/2` and the nearest integer in `ξ_m`'s definition is
+forced. The prefix integers `A_K = Σ_{k<K} c_kq_k` give the exact
+subsequence `ξ_{A_K} = −A_KR_K`, `R_K = Σ_{k≥K} c_kδ_k`. Limit
+points factor as `(m/q_J)(q_Jδ_J)(S_m/δ_J)` with
+`|q_Jδ_J| → L = ρ/(1+ρ²)` (`1/√5`, `1/(2√2)`), the three factors
+read off `γ`'s digit windows at `J`: past digits give `m/q_J`'s
+bounded part, future digit differences give `S_m/δ_J`.
+
+**Window-only positivity is impossible.** If the windows range over
+*all* legal digit strings, the resulting value set brackets both
+active `ξ*_j` within `0.0006` already at window length 22 (seeded
+exhibit in the script; behind it stands the surjectivity of the
+past-value map `Σd_iρ^i` onto `[0,1]` — the tail intervals tile
+exactly, as the DP endpoints show). So any proof of
+`dist(ξ*_j, Ξ_j) > 0` must use `γ_j`'s digit orbit at *all* scales,
+not any finite window data.
+
+**Computation (certified upper bounds; the rest is search).**
+`γ_j, ξ*_j` are recomputed from the frozen matrices in 185-digit
+mpmath by an independent route (zeros of `h` in closed form:
+`Re(αc₂/D(φ)) = 0 ⟺ D(φ) ∥ −iαc₂` on the ellipse), agreeing with
+§25's floats to `10⁻¹¹`. `γ_j`'s digits are extracted to `k = 430`
+by an exact integer predecessor algorithm
+(`{jρ} = (s_j + jδ_K)/q_K`, `p_K⁻¹ ≡ (−1)^{K−1}q_{K−1}`; verified
+against brute force and by stabilization). Evaluating `ξ_{A_K}`
+exactly through the `S`-sum, the record lows of `|ξ_{A_K} − ξ*_j|`
+at the active zero are: golden `0.014756` at `K = 25` — this *is*
+§25's scan minimum, at its own `m = A_25 = 92549` — then `0.007503`
+at `K = 363`; `√2−1`: `0.061082` at `K = 12` (again §25's value),
+then `0.014807, 0.009272, 0.005877, 0.005323, 0.001558` at
+`K = 30, 97, 204, 209, 268`. A digit-pattern DFS (`J ≤ 150`, depth
+24) found nothing better. Hence, for the active zero,
+
+`liminf |R(m)|/m ≤ 10.522 × 0.007503 = 0.0789` (golden),
+`liminf |R(m)|/m ≤ 3.313 × 0.001558 = 0.00517` (`√2−1`),
+
+at most half resp. `39×` below what §25's scan suggested (`0.155`,
+`0.202`); the inactive zeros contribute `≤ 6.9` resp. `≤ 5.2` to
+their terms and do not attain the minimum in these bounds. §25's
+flat `D_j(M)` was a finite-range effect: already the prefix family
+alone (a subsequence of density zero, invisible as "saturation" to
+a scan that reaches only `J ≲ 30`) keeps improving.
+
+**Decision, with scope.** Positive liminf at §25's level is refuted
+for this truth. Whether `dist(ξ*_j, Ξ_j)` is exactly `0` — the
+record-low decay is consistent with it — is equivalent to a
+digit-density property of this specific `γ_j` (its windows
+accumulating on the level set through `ξ*_j`), which no finite
+computation settles and which badly-approximable `ρ` alone does not
+control: bad approximability bounds the *homogeneous* problem
+(§25's `m‖mρ‖ ≥ 1/(A+2)`), not this shifted inhomogeneous one.
+That is the named open core. What survives for window practice: at
+these two ratios any absolute tolerance `τ` below the bounds above
+cannot be certified by a finite branch window on this truth, and
+the honest per-truth constants are now `≤ 0.079` / `≤ 0.0052`, not
+`0.155` / `0.202`. Frozen truth and two quadratic `ρ` only.
+
+## 27. Scalar-`Φ` rivals: the determinant step toward a proof
+
+[scalar_phi_proof.py](scalar_phi_proof.py) takes one bounded step
+past §22's search, on its closest truth (`2π`/short-shutter, nearest
+rival `J = 1.08·10⁻³`). **The reduction (proof).** For branch
+`β ≠ 0`, `A_c(t, φ) = R(φ)A_c(t, 0)R(φ)ᵀ`, and §11's compatibility
+ingredients are conjugation-covariant with `Φ` scalar, so the three
+signed residuals are exactly `A_i(t) + B_i(t)cos2φ + C_i(t)sin2φ`
+(verified at `10⁻⁶⁸`). A common zero forces `det M(t) = 0` for the
+`3×3` coefficient matrix (`t ≠ 0`; at `t = 0` the `φ`-family
+collapses to one drift per branch, checked directly, residuals
+`≥ 0.07`). **The determinant in closed form (70-digit computation,
+exact-interpolation checks).** `det M = (w−2)S(w)`,
+`w = e^{2t} + e^{−2t}`, with `S` quadratic and `S(−2) = 0` on every
+branch — i.e. `det M ∝ (w²−4)(w − w*)` for a single number `w*`.
+Real `t ≠ 0` needs `w > 2`. Here `w* = 1.029` (`β = 4π`) and
+`0.625` (`β = 6π`): **no admissible `t` exists on either rival
+branch, over the whole `(t, φ)` cylinder.** `β = 0` is one drift
+with `J = 1.084·10⁻³` (recomputed at 70 digits). On the same branch
+`β = 2π`, `w* = 2.162` gives `t = ±0.2` and the null vector
+recovers exactly the true drift — the branch's only compatible
+motion, no exclusion ball needed. **Scope:** one truth, branches
+`β ∈ {0, 2π, 4π, 6π}` as enumerated in §22; the reduction is
+general but `w*` is a truth-specific transcendental, so this is a
+verified exclusion for the sweep's hardest truth, not yet the
+parameter-free theorem — whose remaining content is now sharply
+visible: show `w*(truth) ≤ 2` on every rival branch as the truth
+ranges over the scalar-`Φ` class, or find where it crosses.
