@@ -30,6 +30,37 @@ certificate and is not counted as an accepted obstruction. No
 dependency was added; the exploratory code and its output are outside
 the repository.
 
+## External decision and the 468-row core (ported 23 November)
+
+External exact solvers do decide this template: **no `{-1,+1}` signing
+exists**. This is recorded evidence, not an accepted house certificate:
+`template_existence_decided` and `general_target_decided` stay `false`
+until a standard-library refutation exists. The record, ported from
+Vesper's preserved contribution `47252b6` (run `7e983be7`, rejected at
+integration only for an add/add conflict with this file's first version):
+
+- CP-SAT (OR-Tools 9.15) on the full pseudo-Boolean system:
+  **INFEASIBLE**, 26.6 s, 408,639 conflicts; single worker also
+  infeasible. Isolde independently re-encoded the 468-row core in
+  CP-SAT and also got INFEASIBLE (591,044 conflicts).
+- Assumption core of 737 rows, shrunk to the **468 rows** in `CORE_ROWS`
+  (1,102 variables, one component, GF(2) rank 449), rechecked
+  INFEASIBLE. Z3 SAT on a CNF encoding of that core: **UNSATISFIABLE**
+  (its DRAT proof is 163 MB, too large to embed).
+- Standard-library routes tried on the core all stopped short:
+  `IntegerSearch` replay reached 400k conflicts (327 s) undecided,
+  mod-4/mod-8 lambda certificates were not found, bounds-propagation
+  DPLL did not close in 200k nodes.
+
+The checker's `--certificate` mode emits that core, the SHA-256 of the
+recompiled 1,981 rows, and a recorded 20,000-conflict `IntegerSearch`
+replay anchor (26,635 decisions, depth 47, 554,248 integer reasons).
+`--verify` on it prints `status: resource_limit` with
+`template_existence_decided: false`: the replay anchors the core
+deterministically but is not yet a stdlib proof. A complete proof
+needs a faster exact reasoner that refutes the core in reasonable
+time, a much smaller core, or a modular lambda certificate.
+
 The z exponents lie in `[0,1014]`, so `n>=4` already separates the
 shifted polynomials. An accepted full integer contradiction would
 therefore exclude this template at the targets `t=1+8u`, `n=23+189u`,
@@ -49,7 +80,9 @@ library suffice:
 ```sh
 python3 projects/almost-halving-three-branches/template_320_decision.py --solve --max-conflicts 1 --write /tmp/template320.json
 python3 projects/almost-halving-three-branches/template_320_decision.py --verify /tmp/template320.json
-python3 -m unittest discover -s projects/almost-halving-three-branches -p test_template_320_decision.py
+python3 projects/almost-halving-three-branches/template_320_decision.py --certificate --write /tmp/template320core.json
+python3 projects/almost-halving-three-branches/template_320_decision.py --verify /tmp/template320core.json
+python3 -m pytest projects/almost-halving-three-branches/test_template_320_decision.py -q
 ```
 
 An exact command has no conflict limit, but its runtime is unbounded
@@ -58,8 +91,10 @@ exhaustive sign enumeration on 60 small integer systems and with
 independent breadth-first original-tree distance censuses on fresh
 unequal triples. They audit the control word at repetition counts 0, 1
 and 4, reject a size-preserving sign swap, and reject altered limit
-receipts. All 6 focused tests pass; the prior 7 integer-template tests
-also pass.
+receipts. The 6 original focused tests plus the 6 ported
+core-certificate tests (row hash, direct core-row evaluation on random
+signings, tamper rejection, exact 20,000-conflict replay) all pass; the
+prior 7 integer-template tests also pass.
 
 ## Remaining scope
 
