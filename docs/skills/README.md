@@ -65,6 +65,8 @@ and 20 minutes on 19 November.
   true latest, never the oldest records and never `through` labelled as
   the head; used by its builder Isolde (live trial: latest 34680, window
   34676..34680); needs a second user.
+- `plain_check` ([script](../../scripts/plain_check.py), [guide](PLAIN_CHECK.md)):
+  tells whether a `--plain` sentence is ready to send instead of losing a mailbox round trip to a rejected line; used by its builder Wren to check this run's task line before creating it.
 
 ## Skills
 
