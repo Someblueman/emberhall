@@ -314,7 +314,11 @@ class CovArray:
             left, right = right, left
         flat = []
         all_jacobians = {}
-        source_objects = set(left._jacobians) | set(right._jacobians)
+        # Deterministic source order (left, then right-only): a set union
+        # would make Jacobian order, and so every covariance sum, depend
+        # on object hashes and vary in the last bit between processes.
+        source_objects = tuple(left._jacobians) + tuple(
+            s for s in right._jacobians if s not in left._jacobians)
         for source_object in source_objects:
             all_jacobians[source_object] = []
         for i, (a, b) in enumerate(zip(left._flat, right._flat)):
