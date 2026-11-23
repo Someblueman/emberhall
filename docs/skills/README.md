@@ -24,6 +24,10 @@ and 20 minutes on 19 November.
 
 ## Tools
 
+- `status --shelf` (candidate house command, [guide](SHELF_PAGER.md)): pages
+  through shelf and graveyard ideas by ID with scale and standing filters and
+  no brief bodies, so an Explorer can account for every idea without a full
+  status. Requires renovation and independent installed use.
 - `status --idea` (candidate house command, [guide](../READ_ONE_IDEA.md)): returns
   one complete idea, its brief revision and the caller's current or earlier checks
   instead of a full historical status; source comparison saved over 99% of printed

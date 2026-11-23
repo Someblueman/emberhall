@@ -30,8 +30,13 @@ def parser() -> argparse.ArgumentParser:
     status.add_argument("--idea", help="read one complete idea and its current brief revision")
     status.add_argument("--as", dest="actor", default=argparse.SUPPRESS,
                         help="resident whose current and earlier idea checks to show")
-    status.add_argument("--limit", type=int, help="task page size, 1..50 (default 10)")
+    status.add_argument("--limit", type=int, help="task or shelf page size, 1..50 (default 10)")
     status.add_argument("--offset", type=int, help="task page offset (default 0)")
+    status.add_argument("--shelf", action="store_true",
+                        help="page through shelf and graveyard ideas, without brief bodies")
+    status.add_argument("--after", help="shelf page cursor: last idea ID already seen")
+    status.add_argument("--scale", help="shelf filter: idea scale (great, small or house)")
+    status.add_argument("--standing", help="shelf filter: shelved, graveyard or project")
     for name in ("verify", "rules"):
         sub.add_parser(name)
     life = sub.add_parser("life", help="record a place, ambition, identity or help request")
@@ -197,18 +202,26 @@ def run(args: argparse.Namespace) -> object:
         return record.append(command, args.actor, json.loads(args.data), args.request)
     if command == "status":
         if args.idea is not None:
-            if args.tasks or args.limit is not None or args.offset is not None:
-                raise ValueError("status --idea cannot be combined with task paging options")
+            if args.tasks or args.shelf or args.limit is not None or args.offset is not None:
+                raise ValueError("status --idea cannot be combined with paging options")
             from .idea_status import idea_status
             return idea_status(state, head, args.idea, getattr(args, "actor", None))
         if hasattr(args, "actor"):
             raise ValueError("status --as requires --idea")
+        if args.shelf:
+            if args.tasks or args.offset is not None:
+                raise ValueError("status --shelf cannot be combined with --tasks or --offset")
+            from .shelf_status import shelf_page
+            return shelf_page(state, head, limit=10 if args.limit is None else args.limit,
+                              after=args.after, scale=args.scale, standing=args.standing)
+        if args.after is not None or args.scale is not None or args.standing is not None:
+            raise ValueError("status --after, --scale and --standing require --shelf")
         if args.tasks:
             from .work_status import task_page
             return task_page(state, head, limit=10 if args.limit is None else args.limit,
                              offset=0 if args.offset is None else args.offset)
         if args.limit is not None or args.offset is not None:
-            raise ValueError("status --limit and --offset require --tasks")
+            raise ValueError("status --limit and --offset require --tasks or --shelf")
         return briefing(state)
     if command == "verify":
         return {"valid": True, "events": len(events), "head": head,
