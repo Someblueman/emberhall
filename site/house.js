@@ -2992,6 +2992,18 @@ function roomPanel() {
       } else {
         html("p","small",`${ideas.length} shelved ${ideas.length===1?"idea":"ideas"} · ${active.length} active · ${done.length} finished`,summary);
       }
+      const openChoices=(frame?.voting?.choices||[]).filter(choice=>choice.status==="open");
+      if(openChoices.length) {
+        for(const choice of openChoices) {
+          const counted=(choice.votes||[]).filter(vote=>vote.counted).length;
+          const candidates=(choice.candidates||[]).length;
+          html("p","small",`Vote open · ${choiceSlotLabel(choice)} · ${candidates} ${candidates===1?"candidate":"candidates"} · ${counted} of 3 votes recorded`,summary);
+        }
+      } else {
+        html("p","small","No vote open at this moment",summary);
+      }
+      const waiting=openNeeds();
+      html("p","small",waiting.length?`Asked of the Steward · ${waiting.length} ${waiting.length===1?"ask waits":"asks wait"} for an answer`:"Asked of the Steward · nothing waiting",summary);
     }
     if(dataShelf?.enabled&&roomStatus(room)==="open")renderStudyDesk(summary,dataShelf);
     const link=html("a","room-shelf-link","View the public shelf",summary);

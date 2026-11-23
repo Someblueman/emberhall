@@ -3,7 +3,10 @@
 The Study already owns the idea shelf. All thirteen rooms were open when this
 work began; no separate research room or empty construction was warranted.
 Its room panel now holds the ideas themselves, alongside its existing slot
-summary and link to the full shelf.
+summary and link to the full shelf. Below the slot summary it names this
+moment's open choice votes and open Steward asks (or says none), read only
+from the selected frame, so a visitor in the Study can see whether to vote
+or whether the house is waiting for an answer.
 
 Search titles, purposes and resident names, choose a research status, and page
 through four ideas at a time. Open an idea to read its brief, quoted requests,

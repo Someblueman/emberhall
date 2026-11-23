@@ -123,6 +123,30 @@ assert.match(text(nodes['room-content']),/not activated/);
 frame.rooms=[];roomPanel();assert.doesNotMatch(text(nodes['room-content']),/Read the ideas/);
 ''')
 
+    def test_vote_and_asks_lines_use_this_moment_only(self):
+        self.run_js(r'''
+for(const id of ['room-content','room-kicker','room-title','room-description','room-context']){
+ const node=new Element('div');node.id=id;
+}
+const study={id:'study',name:'The Study',status:'open'};
+frame={...frame,rooms:[study],shelf:shelfData,scars:[],tasks:[],runs:[],
+ voting:{choices:[{id:'c1',status:'open',slot:'house',
+  candidates:[{id:'a',title:'A'},{id:'b',title:'B'},{id:'c',title:'C'}],
+  votes:[{counted:true},{counted:false}]}]}};
+selected='study';roomPanel();
+assert.match(text(nodes['room-content']),/Vote open · House work choice · 3 candidates · 1 of 3 votes recorded/);
+assert.match(text(nodes['room-content']),/Asked of the Steward · nothing waiting/);
+frame.shelf={...shelfData,needs:[{id:'n1',status:'open'},{id:'n2',status:'granted'}]};
+roomPanel();
+assert.match(text(nodes['room-content']),/Asked of the Steward · 1 ask waits for an answer/);
+frame.voting={choices:[{id:'c1',status:'closed',slot:'house',candidates:[{id:'a',title:'A'}],votes:[]}]};
+frame.shelf={...shelfData,needs:[]};
+roomPanel();
+assert.match(text(nodes['room-content']),/No vote open at this moment/);
+assert.doesNotMatch(text(nodes['room-content']),/Vote open/);
+assert.match(text(nodes['room-content']),/Asked of the Steward · nothing waiting/);
+''')
+
     def test_search_plain_field_scale_filter_and_reset(self):
         self.run_js(r'''
 ideas[0].plain='Compose two magic tricks that share one card deal.';
