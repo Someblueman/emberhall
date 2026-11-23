@@ -66,14 +66,18 @@ inhomogeneous-Diophantine distance `dist(ξ*, Ξ)`, proves no constant
 depending on `ε/Δ` alone works for all truths, and checks an effective
 finite-range bound against brute force to branch 200000 at three ratios.
 Slice s26 ([ostrowski_liminf.py](ostrowski_liminf.py), DERIVATION.md §26)
-decides that distance on the frozen truth at the golden ratio and
-`√2−1` from the Ostrowski expansion of `γ`: the limit set `Ξ` is an
-explicit finite union of intervals and `ξ*` lies outside it, so the
-frozen truth's `liminf |R(m)|/m` is positive with rigorous bounds.
+attacks that distance on the frozen truth at the golden ratio and
+`√2−1` via the Ostrowski expansion of `γ`: an exact digit
+parametrization of `Ξ`, plus certified values along the prefix
+subsequence, show s25's flat scan minima were finite-range effects —
+the liminf is at most `0.079` (golden) resp. `0.0052` (`√2−1`), not
+`0.155`/`0.202` — and that no finite-window argument can prove the
+distance positive; exact positivity is a digit-density property of
+`γ`, named as the open core.
 Each script runs standalone (`python3 <script>.py`) and all results are
 recorded in RECORDED_RUN.md; `python3 -m pytest -q` runs the test suite
-(55 tests before s26's additions). Still open, plainly: a parameter-free
-scalar-`Φ` proof (s22 is a search), the per-truth liminf at non-quadratic
-`ρ`, and claims outside the frozen designs.
+(61 tests). Still open, plainly: a parameter-free scalar-`Φ` proof (s22
+is a search), whether `dist(ξ*, Ξ)` is exactly zero (s26), the per-truth
+liminf at non-quadratic `ρ`, and claims outside the frozen designs.
 All claims here are population-level and conditional on the stated model;
 see DERIVATION.md §5, §7 and §11 for what is deliberately not claimed.

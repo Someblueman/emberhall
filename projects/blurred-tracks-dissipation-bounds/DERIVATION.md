@@ -856,3 +856,82 @@ computed bound — `B` above; search — brute minima, quotient swaps, and
 this frozen truth — not decided here; an Ostrowski-digit computation
 for quadratic `ρ` could in principle decide it). One frozen truth,
 population level, symmetry residual only, as throughout §11.
+
+## 26. Milestone 3l: the per-truth liminf — Ostrowski decides what it can
+
+[ostrowski_liminf.py](ostrowski_liminf.py) takes up §25's closing
+parenthesis for the two quadratic ratios there (golden
+`ρ = (√5−1)/2 = [0;1,1,…]` and `√2−1 = [0;2,2,…]`; write `a` for the
+period). The outcome is threefold: an exact parametrization of `Ξ_j`
+(proof), certified upper bounds on `dist(ξ*_j, Ξ_j)` that refute
+positivity at §25's scan level, and a proof-shaped reason that exact
+positivity is not decidable by finite windows.
+
+**Ostrowski framework (proof, mostly exact).** With convergents
+`p_k/q_k` (`q_0 = 1`, `q_1 = a`), `δ_k := q_kρ − p_k = (−1)^kρ^{k+1}`
+exactly in `ℚ(√d)` (induction from `ρ² + aρ = 1`; checked with exact
+fractions). Every `m ≥ 0` has unique legal digits `b_k`
+(`0 ≤ b_k ≤ a`, `b_k = a ⇒ b_{k−1} = 0`); `γ_j` has digits `c_k` in
+the same system — the *predecessor digits*, `c_{<K}` being the digits
+of the integer `j_K < q_K` whose `{j_Kρ}` is the largest partition
+point `≤ γ_j` — with `γ_j = e + Σ_k c_kδ_k`, `e ∈ {0,1}`, tails
+`O(ρ^K)`. Let `J(m)` be the first index where `b` and `c` differ.
+Then `ξ_m = m·S_m` with `S_m = Σ_{k≥J}(b_k−c_k)δ_k` *exactly* for
+`J ≥ J₀` (`4` golden, `3` for `√2−1`), with no integer wrap: legal
+tails from `J` have `|Σ| ≤ 0.146` resp. `0.071` (digit DP), so
+`|S_m| < 1/2` and the nearest integer in `ξ_m`'s definition is
+forced. The prefix integers `A_K = Σ_{k<K} c_kq_k` give the exact
+subsequence `ξ_{A_K} = −A_KR_K`, `R_K = Σ_{k≥K} c_kδ_k`. Limit
+points factor as `(m/q_J)(q_Jδ_J)(S_m/δ_J)` with
+`|q_Jδ_J| → L = ρ/(1+ρ²)` (`1/√5`, `1/(2√2)`), the three factors
+read off `γ`'s digit windows at `J`: past digits give `m/q_J`'s
+bounded part, future digit differences give `S_m/δ_J`.
+
+**Window-only positivity is impossible.** If the windows range over
+*all* legal digit strings, the resulting value set brackets both
+active `ξ*_j` within `0.0006` already at window length 22 (seeded
+exhibit in the script; behind it stands the surjectivity of the
+past-value map `Σd_iρ^i` onto `[0,1]` — the tail intervals tile
+exactly, as the DP endpoints show). So any proof of
+`dist(ξ*_j, Ξ_j) > 0` must use `γ_j`'s digit orbit at *all* scales,
+not any finite window data.
+
+**Computation (certified upper bounds; the rest is search).**
+`γ_j, ξ*_j` are recomputed from the frozen matrices in 185-digit
+mpmath by an independent route (zeros of `h` in closed form:
+`Re(αc₂/D(φ)) = 0 ⟺ D(φ) ∥ −iαc₂` on the ellipse), agreeing with
+§25's floats to `10⁻¹¹`. `γ_j`'s digits are extracted to `k = 430`
+by an exact integer predecessor algorithm
+(`{jρ} = (s_j + jδ_K)/q_K`, `p_K⁻¹ ≡ (−1)^{K−1}q_{K−1}`; verified
+against brute force and by stabilization). Evaluating `ξ_{A_K}`
+exactly through the `S`-sum, the record lows of `|ξ_{A_K} − ξ*_j|`
+at the active zero are: golden `0.014756` at `K = 25` — this *is*
+§25's scan minimum, at its own `m = A_25 = 92549` — then `0.007503`
+at `K = 363`; `√2−1`: `0.061082` at `K = 12` (again §25's value),
+then `0.014807, 0.009272, 0.005877, 0.005323, 0.001558` at
+`K = 30, 97, 204, 209, 268`. A digit-pattern DFS (`J ≤ 150`, depth
+24) found nothing better. Hence, for the active zero,
+
+`liminf |R(m)|/m ≤ 10.522 × 0.007503 = 0.0789` (golden),
+`liminf |R(m)|/m ≤ 3.313 × 0.001558 = 0.00517` (`√2−1`),
+
+at most half resp. `39×` below what §25's scan suggested (`0.155`,
+`0.202`); the inactive zeros contribute `≤ 6.9` resp. `≤ 5.2` to
+their terms and do not attain the minimum in these bounds. §25's
+flat `D_j(M)` was a finite-range effect: already the prefix family
+alone (a subsequence of density zero, invisible as "saturation" to
+a scan that reaches only `J ≲ 30`) keeps improving.
+
+**Decision, with scope.** Positive liminf at §25's level is refuted
+for this truth. Whether `dist(ξ*_j, Ξ_j)` is exactly `0` — the
+record-low decay is consistent with it — is equivalent to a
+digit-density property of this specific `γ_j` (its windows
+accumulating on the level set through `ξ*_j`), which no finite
+computation settles and which badly-approximable `ρ` alone does not
+control: bad approximability bounds the *homogeneous* problem
+(§25's `m‖mρ‖ ≥ 1/(A+2)`), not this shifted inhomogeneous one.
+That is the named open core. What survives for window practice: at
+these two ratios any absolute tolerance `τ` below the bounds above
+cannot be certified by a finite branch window on this truth, and
+the honest per-truth constants are now `≤ 0.079` / `≤ 0.0052`, not
+`0.155` / `0.202`. Frozen truth and two quadratic `ρ` only.

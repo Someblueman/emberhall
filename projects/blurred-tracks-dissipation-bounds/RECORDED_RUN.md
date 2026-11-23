@@ -484,3 +484,45 @@ FAILED: none -- all checks passed
 
 ## Tests after s25: python3 -m pytest -q
 tests re-verified on the merged s22-s24+s25 tree in the s26 slice below
+
+## Milestone 3l s26: python3 ostrowski_liminf.py
+(Ostrowski digits of gamma at golden rho and sqrt(2)-1; s25 merged onto s22-s24 as base in the same landing.)
+[ok] golden: delta_k = (-1)^k rho^(k+1) exact in Q(sqrt5), rho^2 + 1 rho = 1 
+[ok] golden: integer Ostrowski digits legal and reconstruct m<q_10 
+[ok] sqrt2-1: delta_k = (-1)^k rho^(k+1) exact in Q(sqrt2), rho^2 + 2 rho = 1 
+[ok] sqrt2-1: integer Ostrowski digits legal and reconstruct m<q_10 
+[ok] golden: mpmath gamma/xi*/2pi|h'| agree with s25 floats (active 2pi|h'| = 10.5219)
+[ok] golden/active: gamma digits (pred vs brute, series, stable) (e=1, c[0:24]=010101001001001010101000)
+[ok] golden/active: xi_m via S-decomposition = direct (worst 3.6e-86)
+[ok] golden/active: |S_m| < 1/2 for J(m) >= 4 (no wrap) (2*tail bound = 0.2918)
+[ok] golden/active: xi_(A_K) = -A_K R_K 
+    golden/active: prefix record lows K=2:0.355995, K=4:0.343624, K=6:0.030961, K=21:0.026981, K=25:0.014756, K=363:0.007503 | DFS best 0.056402
+[ok] golden/inactive: gamma digits (pred vs brute, series, stable) (e=1, c[0:24]=000100100010010010100101)
+[ok] golden/inactive: xi_m via S-decomposition = direct (worst 2.2e-85)
+[ok] golden/inactive: |S_m| < 1/2 for J(m) >= 4 (no wrap) (2*tail bound = 0.2918)
+[ok] golden/inactive: xi_(A_K) = -A_K R_K 
+    golden/inactive: prefix record lows K=4:0.104706, K=7:0.055871, K=24:0.042089, K=72:0.038001, K=163:0.007909, K=227:0.002990 | DFS: none within filter
+[ok] sqrt2-1: mpmath gamma/xi*/2pi|h'| agree with s25 floats (active 2pi|h'| = 3.3134)
+[ok] sqrt2-1/active: gamma digits (pred vs brute, series, stable) (e=0, c[0:24]=101101001011100201000102)
+[ok] sqrt2-1/active: xi_m via S-decomposition = direct (worst 4.1e-160)
+[ok] sqrt2-1/active: |S_m| < 1/2 for J(m) >= 3 (no wrap) (2*tail bound = 0.1421)
+[ok] sqrt2-1/active: xi_(A_K) = -A_K R_K 
+    sqrt2-1/active: prefix record lows K=2:0.208731, K=9:0.197424, K=12:0.061082, K=30:0.014807, K=97:0.009272, K=204:0.005877, K=209:0.005323, K=268:0.001558 | DFS best 0.029675
+[ok] sqrt2-1/inactive: gamma digits (pred vs brute, series, stable) (e=1, c[0:24]=011020210000010200001020)
+[ok] sqrt2-1/inactive: xi_m via S-decomposition = direct (worst 4.2e-160)
+[ok] sqrt2-1/inactive: |S_m| < 1/2 for J(m) >= 3 (no wrap) (2*tail bound = 0.1421)
+[ok] sqrt2-1/inactive: xi_(A_K) = -A_K R_K 
+    sqrt2-1/inactive: prefix record lows K=2:0.189940, K=3:0.186296, K=8:0.012349, K=16:0.005583, K=47:0.001503 | DFS: none within filter
+[ok] golden active: dist upper bound (prefix K=25 is s25's 0.01476) (dist <= 0.007503, s25 scan 0.01476)
+[ok] sqrt2-1 active: dist upper bound (s25 scan was 0.06056) (dist <= 0.001558, s25 scan 0.06056)
+    golden: liminf |R(m)|/m <= 10.5219 * 0.007503 = 0.078941 (active zero); inactive term <= 6.883
+    sqrt2-1: liminf |R(m)|/m <= 3.3134 * 0.001558 = 0.005162 (active zero); inactive term <= 5.215
+[ok] golden: liminf |R(m)|/m <= 0.0789 (s25 scan-level 0.1553 refuted) 
+[ok] sqrt2-1: liminf |R(m)|/m <= 0.00517 (s25 scan-level 0.2024 refuted) 
+[ok] golden: all-windows Xi brackets xi* within 0.005 (bracket width 0.00063; window-only positivity proofs are impossible)
+[ok] sqrt2-1: all-windows Xi brackets xi* within 0.005 (bracket width 0.00049; window-only positivity proofs are impossible)
+
+FAILED: none -- all checks passed
+
+## Tests after s26: python3 -m pytest -q
+61 passed in 2.82s (55 after s25 merge + 6 new in test_ostrowski_liminf.py)
