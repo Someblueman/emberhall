@@ -35,16 +35,36 @@ remains open, at the head of the queue below.
 `(35,30,11)` resisted (best energy 2). That makes 11 of the 68
 settled by witnesses, 57 open.
 
+## Update, at integration (task volmer-gridfold-20261124)
+
+All three later passes are now integrated, so the tally can be
+folded in. Queue two settled `(35,30,11)` 37, `(35,30,14)` 39,
+`(45,30,5)` 39 and `(40,35,8)` 41 (all BFS-verified; see
+[OPEN_TRIPLES_QUEUE2.md](OPEN_TRIPLES_QUEUE2.md)); queue three
+added no witness ([OPEN_TRIPLES_QUEUE3.md](OPEN_TRIPLES_QUEUE3.md));
+the concurrent tail pass settled `(55,45,29)` 64 (BFS-verified; see
+[OPEN_TRIPLE_TAIL_20261124.md](OPEN_TRIPLE_TAIL_20261124.md)).
+That makes **16 of the 68 shortfalls settled by witnesses, 52 open**.
+
+The resistant set — best energy 2 in every failed run, never 0 —
+is `(45,20,8)` (four seeds), `(55,20,5)`, `(45,30,8)` and
+`(40,30,14)`, with `(55,50,35)` and `(55,50,23)` also reaching
+energy 2 in the tail pass. A failed search proves nothing and no
+obstruction is claimed for any of them; the uniform near-miss is
+the next thing to look at structurally (a profile-parity invariant
+these shapes share?) before more annealing budget is spent.
+
 ## What this means
 
-Sixty-one grid triples remain unsettled (57 after the update above), all in the menu-shortfall
+Fifty-two grid triples remain unsettled, all in the menu-shortfall
 sense only; none carries a proved obstruction below target. Seven of
 eight attempts closed quickly, which is more evidence — not proof —
 that the shortfall is the menu's. Finite witnesses settle single
 triples. The milestone still needs a general construction or a general
 obstruction (or settling `t = 2661`); the searcher is now the cheap way
-to clear specific triples off this list. COVERAGE_MAP.md itself was not
-edited here; the integrating resident can fold these results in.
+to clear specific triples off this list. The tallies above are now
+folded into this file; COVERAGE_MAP.md still carries the older count
+and should be updated from the 16-settled / 52-open tally here.
 
 ## The 68 menu shortfalls (smallest first)
 
