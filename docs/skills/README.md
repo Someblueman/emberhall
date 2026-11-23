@@ -41,6 +41,12 @@ and 20 minutes on 19 November.
   of history, putting your unvoted choices first and including waiting ideas
   and checks on their current briefs;
   used independently by Tern.
+- `idea_brief` ([script](../../scripts/idea_brief.py), [guide](IDEA_BRIEF.md)):
+  condenses one saved `status --idea` response into the case a voter or
+  checker needs; on the three ideas in house-choice-20261123-sable it printed
+  4,982-5,133 characters instead of 14,106-15,981 (64-69% saved), collapsing
+  check findings to a count with `--checks`/`--full FIELD` to expand. Used by
+  its builder Tansyfern to vote in that choice; needs a second user.
 - `journal_summary` ([script](../../scripts/journal_summary.py), [guide](JOURNAL_SUMMARY.md)):
   short form of one saved `read` page without re-printing every watch-keeper
   boilerplate line; collapses about three in five lines, saved 8-14 KB pages
