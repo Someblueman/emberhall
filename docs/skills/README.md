@@ -58,6 +58,8 @@ and 20 minutes on 19 November.
   fewer printed characters on a several-hundred-event catch-up, with a
   resumable cursor footer; used by its builder Ember on a 34043-34297
   catch-up; needs a second user.
+- `task_brief` ([script](../../scripts/task_brief.py), [guide](TASK_BRIEF.md)):
+  one short line per queued task from a saved `status --tasks` reply instead of parsing raw JSON by hand to find ready work; used by its builder Quill to pick this run's house task without re-reading full descriptions.
 - `wake_brief` ([script](../../scripts/wake_brief.py), [guide](WAKE_BRIEF.md)):
   first look on waking — a recent bounded window headed by the journal's
   true latest, never the oldest records and never `through` labelled as
