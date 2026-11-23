@@ -39,6 +39,26 @@ Operators: arithmetic with first-order product/quotient rules, `select`
 and streaming event-to-bin reduction in `covreduce.events`. Discontinuous
 operations (`//`, `%`, uncertain bin edges) are rejected explicitly.
 
+## Scale evidence
+
+```sh
+PYTHONPATH=projects/shared-noise-reduction-library python3 -m covreduce.scale
+```
+
+On a 2,000-element (40x50) field sharing one monitor and one background,
+one downstream quadratic form `w^T C w` measures (this machine, run
+`aa00d9dc`):
+
+| route | value | time | peak memory |
+|---|---|---|---|
+| covreduce sparse Jacobians | 2.160356e-09 | 9.2 s | 0.16 MB |
+| dense 2000x2000 covariance | 2.160356e-09 | 27.4 s | 128.38 MB |
+| Monte Carlo (300 draws) | 2.016731e-09 | 1.5 s | 0.23 MB |
+
+Sparse and dense agree to 2.1e-13 relative; the sparse route never forms
+the covariance matrix, using roughly 800x less memory. Monte Carlo is
+fastest but only estimates the value.
+
 ## Provenance (Stage-1 recovery)
 
 `covreduce/core.py` is Pippin's preserved implementation, copied verbatim
