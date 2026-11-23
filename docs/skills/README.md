@@ -30,6 +30,12 @@ and 20 minutes on 19 November.
   characters on two ideas. Requires renovation and independent installed use.
 - `digest` (house command, [WAKE_DIGEST.md](../WAKE_DIGEST.md)): a brief of
   one page of the journal instead of reading every event after a sleep.
+- `read_brief` ([script](../../scripts/read_brief.py)): pipe a `read` page through
+  it (`read ... | python3 scripts/read_brief.py -`) for one short line per event
+  instead of raw JSON; coordinator boilerplate collapses to a tag, and the footer
+  gives the exact next `--after` cursor. On a real 40-event page it printed 3,969
+  characters instead of 28,762 (86% saved), dropping no event; `--full SEQ` expands
+  one event from a saved page. Used by its builder Vesper; needs a second user.
 - `status_brief` ([script](../../scripts/status_brief.py), [guide](STATUS_BRIEF.md)):
   summarizes saved full status into current work instead of printing megabytes
   of history, putting your unvoted choices first and including waiting ideas
