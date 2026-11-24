@@ -14,6 +14,293 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_residue_groups_against_every_direct_column(self):
+        for lengths in ((3, 5, 7), (8, 6, 3), (15, 3, 7)):
+            vertices = [(0, 0)]+[(a, d) for a, n in enumerate(lengths, 1)
+                                 for d in range(1, n+1)]
+            for holes in itertools.combinations(vertices, 2):
+                for period in (1, 4, 7):
+                    expected = defaultdict(int)
+                    for vertex in set(vertices)-set(holes):
+                        column = [0]*period
+                        for exponent, value in fc.shell_column(lengths, holes, vertex).items():
+                            column[exponent % period] += value
+                        expected[tuple(column)] += 1
+                    self.assertEqual(rs.residue_shell_groups(lengths, holes, period), expected)
+        with self.assertRaises(ValueError): rs.residue_shell_groups((3, 5, 7), (), 0)
+
+    def test_fourth_root_states_against_all_literal_assignments(self):
+        rng = random.Random(76251)
+        for _ in range(60):
+            columns = [tuple(rng.randrange(-3, 4) for _ in range(4))
+                       for _ in range(rng.randrange(1, 9))]
+            groups = defaultdict(int)
+            for column in columns:
+                groups[column] += 1
+            direct = {tuple(sum(s*c[r] for s, c in zip(signs, columns)) % 8
+                            for r in range(4))
+                      for signs in itertools.product((-1, 1), repeat=len(columns))}
+            self.assertEqual(rs.fourth_root_mod8_states(groups), direct)
+        # Multiplicity saturation is essential; four copies are not one sign.
+        column = (1, 0, 0, 0)
+        self.assertIn((0, 0, 0, 0), rs.fourth_root_mod8_states({column: 4}))
+        self.assertNotIn((0, 0, 0, 0), rs.fourth_root_mod8_states({column: 1}))
+
+    def test_gap_cover_against_all_actual_hole_placements(self):
+        def signature(lengths, holes):
+            return tuple(sorted((c, n % 8, min(n, 3))
+                                for c, n in rs.residue_shell_groups(lengths, holes).items()))
+        # Exceeds the reduction threshold: these actual placements include
+        # short/long gaps on both sides and between two holes.
+        for length in (45, 153):
+            lengths = (length, 3, 7)
+            for count in (1, 2):
+                def support(depths):
+                    return {(1, d) for d in depths} | ({(0, 0)} if count == 1 else set())
+                actual = {signature(lengths, support(depths))
+                          for depths in itertools.combinations(range(1, length+1), count)}
+                covered = {signature(lengths, support(depths))
+                           for depths in rs.residue_gap_representatives(length, count)}
+                self.assertEqual(actual, covered)
+        with self.assertRaises(ValueError): list(rs.residue_gap_representatives(3, 3))
+
+    def test_fourth_root_congruence_all_scale_phases(self):
+        result = rs.fourth_root_mod8_census()
+        self.assertTrue(result['complete'])
+        self.assertFalse(result['all_pairs_decided'])
+        self.assertEqual(result['representatives'], 139200)
+        self.assertEqual(result['counts'], dict(odd_shell_refused=69600, compatible=69600,
+                                               additional_exact_refusal=13260, not_decided=56340))
+        self.assertEqual({p['scale_residue'] for p in result['phases']}, set(range(1, 32, 4)))
+
+    def test_odd_group_certificates_against_literal_signings_and_tampering(self):
+        rng = random.Random(52919)
+        found = 0
+        for _ in range(100):
+            columns = [tuple(rng.randrange(-2, 3) for _ in range(4))
+                       for _ in range(rng.randrange(1, 9))]
+            groups = defaultdict(int)
+            for column in columns:
+                groups[column] += 1
+            certificate = rs.residue_zero_certificate(groups)
+            if certificate is None:
+                continue
+            found += 1
+            self.assertTrue(rs.verify_residue_zero_certificate(groups, certificate))
+            self.assertFalse(any(all(sum(s*c[r] for s, c in zip(signs, columns)) == 0
+                                     for r in range(4))
+                                 for signs in itertools.product((-1, 1), repeat=len(columns))))
+            damaged = dict(certificate, coefficient=certificate['coefficient']+1)
+            with self.assertRaises(ValueError): rs.verify_residue_zero_certificate(groups, damaged)
+            damaged = dict(certificate, count=certificate['count']+2)
+            with self.assertRaises(ValueError): rs.verify_residue_zero_certificate(groups, damaged)
+        self.assertGreater(found, 10)
+
+    def test_even_hole_theorems_with_arbitrary_arm_and_depth_choices(self):
+        for scale in (1, 5, 9, 13, 7981, 15961):
+            lengths = (99*scale, 79*scale, 23*scale)
+            for holes in ({(1, 4), (1, 8)}, {(0, 0), (3, 4)}, {(1, 8), (2, 20)},
+                          {(1, 4), (2, 2)}, {(0, 0), (3, 6)}, {(1, 12), (1, 18)}):
+                zero_holes = sum(depth % 4 == 0 for _, depth in holes)
+                groups = rs.residue_shell_groups(lengths, holes)
+                if zero_holes == 2:
+                    column, weights = (-5, 3, 0, 0), [-7, -1, -3, -5]
+                    count = (201*scale-13)//4
+                    refused = scale % 8 == 1
+                else:
+                    column, weights = (-4, 2, -1, 1), [-9, 1, -1, -7]
+                    count = (201*scale-9)//4
+                    refused = scale % 8 == 5
+                self.assertEqual(groups[column], count)
+                self.assertTrue(all(sum(a*b for a, b in zip(weights, other))
+                                    == (32 if other == column else 0) for other in groups))
+                self.assertEqual(count % 2 == 1, refused)
+                certificate = dict(column=list(column), count=count, weights=weights, coefficient=32)
+                if refused:
+                    self.assertTrue(rs.verify_residue_zero_certificate(groups, certificate))
+                else:
+                    with self.assertRaises(ValueError): rs.verify_residue_zero_certificate(groups, certificate)
+
+    def test_saved_unrestricted_support_refusal(self):
+        holes = [[1, 4], [2, 2]]
+        groups = rs.residue_shell_groups((790119, 630499, 183563), holes)
+        saved = dict(mode='residue_zero', t=7981, period=4, holes=holes,
+                     status='support_refused_by_odd_group',
+                     certificate=rs.residue_zero_certificate(groups))
+        result = rs.verify_saved(saved)
+        self.assertTrue(result['verified'])
+        self.assertFalse(result['all_pairs_decided'])
+        for changed in (dict(saved, t=7982), dict(saved, period=1),
+                        dict(saved, holes=holes+holes[:1]), dict(saved, status='unknown')):
+            with self.assertRaises(ValueError): rs.verify_saved(changed)
+
+    def test_eighth_root_fixed_holes_infinite_obstruction(self):
+        target = (-2, 1, -1, 1, -2, 1, 0, 0)
+        weights = [-25, -15, -1, 25, 7, 17, -1, -39]
+        holes = {(1, 2), (1, 4)}
+        expected_columns = {
+            target, (-2,1,0,0,-2,1,-1,1), (-1,1,-3,1,0,0,-1,1),
+            (0,-3,2,-2,1,0,0,0), (0,-1,1,-1,1,-2,1,-1),
+            (0,0,-1,1,-1,1,-3,1), (1,-2,1,-2,1,0,0,-1),
+            (1,-2,1,-1,0,-1,1,-1), (1,0,0,-1,1,-2,1,-2)}
+        for scale in (1, 9, 17, 25, 33, 31921):
+            lengths = (99*scale, 79*scale, 23*scale)
+            # These classes exhaust all columns symbolically for t=1 mod8:
+            # centre, the two retained vertices before/among the holes,
+            # then eight residues beyond them, and eight on each other arm.
+            classes = [(0, 0), (1, 1), (1, 3)]
+            classes += [(1, d) for d in range(5, 13)]
+            classes += [(a, d) for a in (2, 3) for d in range(1, 9)]
+            columns = set()
+            for vertex in classes:
+                column = [0]*8
+                for exponent, value in fc.shell_column(lengths, holes, vertex).items():
+                    column[exponent % 8] += value
+                columns.add(tuple(column))
+            self.assertEqual(columns, expected_columns)
+            groups = rs.residue_shell_groups(lengths, holes, 8)
+            self.assertEqual(set(groups), expected_columns)
+            count = (201*scale-17)//8
+            self.assertEqual(groups[target], count)
+            self.assertTrue(all(sum(a*b for a, b in zip(weights, column))
+                                == (64 if column == target else 0) for column in groups))
+            certificate = dict(column=list(target), count=count, weights=weights, coefficient=64)
+            if scale % 16 == 1:
+                self.assertTrue(rs.verify_residue_zero_certificate(groups, certificate))
+                saved = dict(mode='residue_zero', t=scale, period=8,
+                             holes=sorted(holes), status='support_refused_by_odd_group',
+                             certificate=certificate)
+                self.assertTrue(rs.verify_saved(saved)['verified'])
+            else:
+                with self.assertRaises(ValueError): rs.verify_residue_zero_certificate(groups, certificate)
+
+    def test_integer_residue_parities_against_exhaustive_small_lattices(self):
+        rng = random.Random(92753)
+        for _ in range(150):
+            period, size = rng.randrange(1, 4), rng.randrange(1, 4)
+            groups = {}
+            while len(groups) < size:
+                groups[tuple(rng.randrange(-2, 3) for _ in range(period))] = rng.randrange(1, 4)
+            items = sorted(groups.items())
+            # In <=3 variables with entries <=2, rank-two primitive kernel
+            # coordinates are 2x2 minors of magnitude <=8; rank one needs
+            # no larger coordinates. Thus this is a complete tiny control.
+            truth = any(all(sum(column[r]*value for (column, _), value in zip(items, values)) == 0
+                            for r in range(period))
+                        for values in itertools.product(*(range(-8+count%2, 9, 2)
+                                                          for _, count in items)))
+            result = rs.residue_integer_parity(groups, seconds=5)
+            self.assertNotEqual(result['status'], 'unknown')
+            self.assertEqual(result['status'] == 'compatible_unbounded_aggregates', truth)
+            self.assertFalse(result['all_pairs_decided'])
+            if not truth:
+                self.assertTrue(rs.verify_residue_parity_certificate(groups, result['certificate']))
+            dyadic = rs.residue_dyadic_parity(groups, seconds=5, retain_witness=True)
+            self.assertEqual(dyadic['status'], result['status'])
+            if not truth:
+                certificate = dyadic['certificate']
+                self.assertTrue(rs.verify_residue_parity_certificate(groups, certificate))
+                self.assertLessEqual(max(abs(w) for w in certificate['weights']), certificate['divisor'])
+            else:
+                self.assertTrue(rs.verify_residue_aggregate_witness(groups,dyadic['witness']))
+        # Compatibility allows group sums outside their physical bounds.
+        groups = {(1,): 1, (3,): 1}
+        self.assertEqual(rs.residue_integer_parity(groups)['status'], 'compatible_unbounded_aggregates')
+        self.assertFalse(any(a+3*b == 0 for a, b in itertools.product((-1, 1), repeat=2)))
+
+    def test_integer_residue_certificates_and_resource_limits(self):
+        holes, scale = [(1, 2), (1, 4)], 31921
+        groups = rs.residue_shell_groups((99*scale, 79*scale, 23*scale), holes, 16)
+        # Finer groups hide the earlier single-group zero, but its parity
+        # consequence must survive refinement of the residue quotient.
+        self.assertIsNone(rs.residue_zero_certificate(groups))
+        result = rs.residue_integer_parity(groups)
+        self.assertEqual(result['status'], 'support_refused_by_residue_parity')
+        certificate = result['certificate']
+        saved = dict(result, mode='residue_parity', t=scale, period=16, holes=holes)
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        for damaged in (dict(certificate, divisor=0),
+                        dict(certificate, divisor=certificate['divisor']*2),
+                        dict(certificate, weights=[0]*16), dict(certificate, weights=[1])):
+            with self.assertRaises(ValueError): rs.verify_residue_parity_certificate(groups, damaged)
+        limited = rs.residue_integer_parity(groups, max_bits=1)
+        self.assertEqual(limited['status'], 'unknown')
+        self.assertEqual(limited['reason'], 'coefficient_limit')
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            limited = rs.residue_integer_parity(groups, seconds=0.1)
+        self.assertEqual(limited['status'], 'unknown')
+        self.assertEqual(limited['reason'], 'time_limit')
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(limited, mode='residue_parity', t=scale, period=16, holes=holes))
+        with self.assertRaises(ValueError): rs.residue_integer_parity(groups, seconds=0)
+
+    def test_dyadic_saturation_and_large_coefficient_differential_controls(self):
+        # Every equation is zero modulo 2**30, but dividing out the common
+        # power exposes an impossible parity. A small fixed modulus misses it.
+        groups = {(1 << 30,): 1, (1 << 31,): 2}
+        result = rs.residue_dyadic_parity(groups)
+        self.assertEqual(result['status'], 'support_refused_by_residue_parity')
+        self.assertTrue(rs.verify_residue_parity_certificate(groups, result['certificate']))
+        self.assertGreater(result['modulus_bits'], 30)
+        self.assertEqual(rs.residue_dyadic_parity(groups, max_bits=8)['status'], 'unknown')
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            self.assertEqual(rs.residue_dyadic_parity(groups, seconds=0.1)['status'], 'unknown')
+        rng = random.Random(56420)
+        for _ in range(100):
+            groups = {}
+            while len(groups) < 4:
+                groups[tuple(rng.randrange(-32, 33) for _ in range(4))] = rng.randrange(1, 5)
+            exact = rs.residue_integer_parity(groups, seconds=5)
+            dyadic = rs.residue_dyadic_parity(groups, seconds=5)
+            self.assertNotEqual(exact['status'], 'unknown')
+            self.assertEqual(exact['status'], dyadic['status'])
+            if 'certificate' in dyadic:
+                self.assertTrue(rs.verify_residue_parity_certificate(groups, dyadic['certificate']))
+
+    def test_resistant_residue_phase_cover_and_unknowns(self):
+        for period in (4, 8, 16, 32):
+            for m in (1, 2, 3):
+                scale = 7980*m+1
+                for moving in (False, True):
+                    def signature(t):
+                        holes = {(1,19*t if moving else 19),(1,99*t)}
+                        groups = rs.residue_shell_groups((99*t,79*t,23*t),holes,period)
+                        return {(column,count%2) for column,count in groups.items()}
+                    self.assertEqual(signature(scale), signature(scale+2*period))
+        result = rs.resistant_residue_audit(16, seconds=20)
+        self.assertTrue(result['complete'])
+        self.assertEqual([r['cases'] for r in result['reports']], [4, 8, 16])
+        self.assertTrue(all(r['compatible'] == r['cases'] for r in result['reports']))
+        limited = rs.resistant_residue_audit(4, seconds=20, max_bits=1)
+        self.assertFalse(limited['complete'])
+        self.assertEqual(limited['reports'][0]['unknown'], 4)
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            self.assertFalse(rs.resistant_residue_audit(4, seconds=0.1)['complete'])
+        with self.assertRaises(ValueError): rs.resistant_residue_audit(3)
+        with self.assertRaises(ValueError): rs.resistant_residue_audit(512)
+
+    def test_independent_aggregate_witness_and_saved_scope(self):
+        groups = {(1,):1,(3,):1}
+        result = rs.residue_dyadic_parity(groups,retain_witness=True)
+        witness = result['witness']
+        self.assertTrue(rs.verify_residue_aggregate_witness(groups,witness))
+        changed = witness['aggregate_residues'][:]
+        changed[0] ^= 2  # parity preserved, equation broken
+        for damaged in (dict(witness,modulus_bits=witness['modulus_bits']-1),
+                        dict(witness,aggregate_residues=changed),
+                        dict(witness,aggregate_residues=witness['aggregate_residues'][:-1])):
+            with self.assertRaises(ValueError): rs.verify_residue_aggregate_witness(groups,damaged)
+        scale, holes = 7981, [(1,19),(1,790119)]
+        groups = rs.residue_shell_groups((99*scale,79*scale,23*scale),holes,16)
+        result = rs.residue_dyadic_parity(groups,retain_witness=True)
+        saved = dict(result,mode='residue_parity',t=scale,period=16,holes=holes)
+        verified = rs.verify_saved(saved)
+        self.assertTrue(verified['verified'])
+        self.assertIn('no literal signing',verified['claim'])
+        self.assertFalse(verified['all_pairs_decided'])
+        del saved['witness']
+        with self.assertRaises(ValueError): rs.verify_saved(saved)
+
     def test_parity_quotient_against_every_literal_solution(self):
         rng = random.Random(428)
         for size in range(1,8):

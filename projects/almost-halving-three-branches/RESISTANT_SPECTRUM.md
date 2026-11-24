@@ -693,3 +693,279 @@ holes of the same colour, without a common proper period dividing t-1 on
 the moving coarse-hole supports. Arbitrary inserted words, other hole depths
 and holes on different arms have not been excluded. No all-pairs upper bound
 strictly below the target, and no infinite positive family, has been obtained.
+
+### Linnet: unrestricted even-hole refusals from exact fourth-root rows
+
+24 November 2026. **The all-pairs acceptance is still unmet.** This step
+excludes two classes of supports without prescribing any word or period.
+For t=1 modulo 4, let the two holes have even depths (the centre has depth
+zero). Then no target pair on that support exists in either case:
+
+* t=1 modulo 8 and both hole depths are zero modulo 4;
+* t=5 modulo 8 and one hole depth is zero modulo 4, the other two modulo 4.
+
+The holes may be on any arms, at any permitted depths, including the centre.
+Thus for the resistant t=7980m+1 family, even m excludes the first class and
+odd m excludes the second. This is a support obstruction, **not an all-pairs
+obstruction**: for example the previously studied odd-depth holes are untouched.
+
+Here is a short algebraic proof. Reduce the exact physical shell polynomial
+modulo z^4-1, over the rationals. Its four coefficients must all vanish. Since
+all three L_i+1 are divisible by four, the full column of a depth-d vertex is
+
+    (z-2) z^d - z^(-d).
+
+This formula also holds for the centre. Each removed hole adds
+(z-1) z^distance to every retained column. Write coefficient vectors in order
+z^0,z^1,z^2,z^3. For even holes every odd-depth vertex has one of these columns:
+
+    (0,-4,3,-1), (1,-3,2,-2), (2,-2,1,-3), (3,-1,0,-4).
+
+The choice depends on the arms and order of the holes, but both weight vectors
+below annihilate **all four** possibilities. Even-depth columns do not depend
+on those choices, because negating an even residue preserves it modulo four:
+
+| Hole residues | Depth-zero column | Depth-two column | Row weights |
+| --- | --- | --- | --- |
+| 0,0 | (-5,3,0,0) | (0,0,-5,3) | (-7,-1,-3,-5) |
+| 0,2 | (-4,2,-1,1) | (-1,1,-4,2) | (-9,1,-1,-7) |
+
+Each listed weight vector has dot product 32 with its depth-zero column and
+zero with every other possible column. Therefore the sum of signs on retained
+vertices at depth zero modulo four must be zero. Before removing holes that
+class has 1+sum floor(L_i/4)=(201t-5)/4 vertices. Its retained size is
+(201t-13)/4 in the first row, or (201t-9)/4 in the second. That size is odd
+in exactly the two cases stated above. A sum of an odd number of signs cannot
+be zero. No search, repeated-word assumption or large-scale limit enters this
+proof.
+
+The implementation returns integer row-combination certificates for any odd
+column group isolated by rational elimination. A separate checker verifies
+every column dot product and its odd multiplicity; it does not trust the
+elimination. `residue_shell_groups` compiles arbitrary supports in time
+independent of arm length: between successive holes the distance exponents
+are affine with slope plus or minus one, so their residue columns repeat
+every four depths. Tests compare this compilation with every original column
+for all two-hole supports of several small unequal trees, check certificates
+against exhaustive literal assignments, reject altered certificates and verify
+the displayed weights at ordinary and resistant scales.
+
+A broader finite classification is also replayable:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --fourth-root-census
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-zero 7981 --holes 1:4 2:2 --period 4 --write /tmp/support-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/support-refusal.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -q
+```
+
+This replay covers **all hole placements**, t>=9 and t=1 modulo 4, using finite
+representatives. On an arm with k holes, split the retained depths into k+1
+nonnegative gaps. Reducing any gap g>=12 to 12+(g-12) modulo 32 preserves all
+column vectors, their multiplicities modulo eight, and each group's available
+signed sums modulo eight: each residue occurs at least three times, and adding
+32 adds eight copies of each column. Every reduced gap lies in 0..43. Conversely,
+a reduced tuple lifts to the desired length by adding the remaining multiple
+of 32 to a gap at least 12. With at most two holes, reduced total length is at
+most 131. All actual arms here exceed it. Thus the representative types depend
+only on arm lengths modulo 32, covered by the eight t residues 1,5,...,29.
+The program includes same-arm, different-arm and centre-hole supports.
+
+Recorded replay: 139,200 representatives, 20,706 congruence signatures.
+The modulo-eight version of the four residue equations refuses 69,600, exactly
+those already refused by the odd-distance shell. **Congruence compatibility
+misses an exact obstruction:** rational row combinations refuse another 13,260
+representatives, leaving 56,340 undecided by this method. These numbers count
+representatives, not actual supports or proportions of pairs. The proof above
+is independent of the census. The remaining obstacle is construction or an
+obstruction for all surviving supports; neither rational compatibility nor a
+finite support census decides unrestricted homometry.
+
+The portable example at t=7981 isolates 401,043 retained depth-zero vertices
+with row weights (-9,1,-1,-7), coefficient 32. Its verifier rebuilds the exact
+support before checking the certificate. Unknown searches are not accepted as
+certificates. The 35 focused tests pass, including JSON-shaped hole coordinates
+and saved-certificate mutations. The census and certificate checks use only the
+standard library and take seconds, independently of the physical scale.
+
+#### A further unrestricted refusal at eighth roots
+
+The same checker yields another infinite support obstruction. On
+T(99t,79t,23t), **holes (1,2),(1,4) cannot attain the target when t=1 modulo
+16**, with arbitrary signs on every retained vertex. In the resistant family
+this covers m=0 modulo 4. The fourth-root mixed-hole proof above leaves these
+scales open, so this is an additional refusal, not a repeat of that result.
+
+For t=1 modulo 8 the arm lengths have residues 3,7,7. Reducing their physical
+columns modulo z^8-1 gives exactly these nine vectors:
+
+```text
+(-2, 1,-1, 1,-2, 1, 0, 0)  target
+(-2, 1, 0, 0,-2, 1,-1, 1)
+(-1, 1,-3, 1, 0, 0,-1, 1)
+( 0,-3, 2,-2, 1, 0, 0, 0)
+( 0,-1, 1,-1, 1,-2, 1,-1)
+( 0, 0,-1, 1,-1, 1,-3, 1)
+( 1,-2, 1,-2, 1, 0, 0,-1)
+( 1,-2, 1,-1, 0,-1, 1,-1)
+( 1, 0, 0,-1, 1,-2, 1,-2)
+```
+
+This is a bounded symbolic calculation: substitute the length residues into
+the physical column formula, treating the centre, first-arm depths 1 and 3,
+first-arm depths at least 5 in eight residue classes, and the eight classes
+on each other arm. Those classes exhaust the vertices; beyond depth 4 both
+hole distances are affine, so adding eight changes no column.
+
+Weights (-25,-15,-1,25,7,17,-1,-39) have dot product 64 with the target and
+zero with all eight other columns. The target group consists of the centre,
+long-arm depths 4 modulo 8 except the removed depth 4, and depths 0 modulo 8
+on the other arms. Its size is
+
+    1 + (99t-11)/8 + (79t-7)/8 + (23t-7)/8 = (201t-17)/8.
+
+It is odd exactly when t=1 modulo 16. Its forced zero sign sum is impossible.
+This proof is independent of larger-root searches and assumes no word period.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-zero 31921 --holes 1:2 1:4 --period 8 --write /tmp/eighth-root-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/eighth-root-refusal.json
+```
+
+The additional test checks every symbolic column class, its multiplicity and
+all dot products at both parities of t=1 modulo 8, rejects the even-count
+certificate, and verifies a portable refusal on a resistant scale. No surviving
+support is thereby constructed or ruled out; the global task remains open.
+
+Both contributions pass all 36 focused tests. An exploratory integer-lattice
+probe at 32nd roots was interrupted before its first scale phase completed;
+it supplies no classification or impossibility result and is not part of the
+shipped checker. Increasing the root order alone has not resolved the remaining
+odd-hole supports, including the original shallow-hole and long-tip support.
+
+#### Complete integer-parity relaxation with bounded arithmetic
+
+The checker now separates three questions: a zero group; an integer aggregate
+solution with the required parities; and a literal physical signing. Only the
+last would construct a pair. The new integer relaxation deliberately omits
+|S_j|<=n_j, where S_j is the sum of signs in a column group of multiplicity n_j.
+For example S_1+3S_2=0 admits odd aggregates (-3,1), but two singleton groups
+cannot realize them. Every output retains `all_pairs_decided: false`.
+
+For a residue-column matrix C, ask C*S=0 with S congruent to n modulo two.
+Integer Euclidean row and column operations give U*C*V=D with U,V unimodular
+and D diagonal (ordering the diagonal divisors is unnecessary). For pivot d,
+the original row combination U_i*C has gcd |d|. Its primitive coefficients
+must have even dot product with n. This is also sufficient for **unbounded**
+aggregates: the pivot coordinates of V^-1*n are even, so they can be changed
+to zero by adding twice an integer vector. Free coordinates impose no equation.
+`residue_integer_parity` checks this exact criterion. Large coefficients or an
+expired work budget yield unknown, never compatibility or refusal by exhaustion.
+
+`residue_dyadic_parity` computes the same criterion with bounded arithmetic.
+Let H be the largest squared column norm, r=min(number of rows,number of
+columns), and B=1+r*ceil(bit_length(H)/2). Hadamard bounds every nonzero minor
+strictly below 2^B. Consequently every nonzero Smith divisor has two-adic
+valuation below B. Elimination modulo 2^B chooses an entry of least valuation,
+normalizes its odd factor by modular inversion, and clears its row and column.
+No hidden nonzero divisor can be lost modulo this modulus. Every visible pivot
+forces its transformed aggregate coordinate even; these parity conditions are
+therefore exactly the integer conditions above, not merely a small-modulus
+probe. The all-zero matrix is harmless. Required B exceeding the bit budget,
+or time exhaustion, still returns unknown.
+
+A refusal in either algorithm consists only of integer row weights w and a
+positive divisor d. The independent verifier checks d divides **every exact**
+column dot product w*C_j, then checks sum((w*C_j/d)*n_j) is odd. This proves
+the contradiction without trusting either elimination, its rank or its modulus.
+Weights are reduced into [-d,d) modulo 2d; this preserves divisibility and the
+primitive parity, and keeps the portable proof short even when elimination
+used large integers.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 31921 --holes 1:2 1:4 --period 16 --dyadic --seconds 30 --write /tmp/integer-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/integer-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 7981 --holes 1:19 1:790119 --period 256 --dyadic --seconds 30
+```
+
+The finer period-sixteen grouping has no individually forced odd zero group,
+but the integer checker recovers the eighth-root parity contradiction. On the
+original odd-hole support at t=7981, the Euclidean version with a 256-bit limit
+returns unknown at orders 64,128,256. The bounded modular version completes
+all three, including order 256 in about 3.4 seconds in the recorded probe, and
+reports compatible **unbounded aggregates**. This is a limitation result for
+that relaxation, not a physical signing.
+
+Controls compare both algorithms with complete tiny integer-lattice enumeration,
+compare them on larger random integer matrices, independently verify every
+refusal, reject altered divisors and weights, and check resource-limit results.
+A deliberately scaled equation invisible modulo 2^30 still refuses after the
+Hadamard-sized saturation, guarding against treating a fixed small modulus as
+complete. The full physical shell equations and literal bounds remain necessary.
+
+Compatibility can now be independently checked as well. With
+`--retain-residue-witness --write FILE`, the dyadic solver records a vector
+of aggregate residues modulo 2^B. The small verifier recomputes the Hadamard
+bound, checks every aggregate parity and every modular row, and never runs
+elimination. This is sufficient for an exact **unbounded integer** solution:
+in integral Smith coordinates, d_i*y_i=0 modulo 2^B and v_2(d_i)<B force
+every constrained y_i even. Set those coordinates to zero and retain the free
+coordinate parities; the inverse unimodular change of coordinates gives an
+exact integer kernel vector with the required original parities. This argument
+asserts no bounds on its coordinates and does not round it to literal signs.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 7981 --holes 1:19 1:790119 --period 256 --dyadic --seconds 30 --retain-residue-witness --write /tmp/unbounded-aggregates.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/unbounded-aggregates.json
+```
+
+Recorded: 513-bit modulus, 784 aggregate residues, independent verification
+passes. The CLI prints a short summary and keeps the vector in the requested
+file. All 41 focused tests pass, including compatibility-witness mutations and
+saved status/scope checks. No large certificate or transcript is added to Git.
+
+The bounded family audit runs the same relaxation for both named supports,
+(1,19),(1,99t) and (1,19t),(1,99t), across every resistant scale phase:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --audit-resistant-residues --period 256 --seconds 900 --max-bits 1024 --write /tmp/resistant-residue-audit.json
+```
+
+For each listed root order p, the scale phases are exactly
+2p/gcd(7980,2p), represented by t=7980m+1 with m from one through that count.
+Increasing t by 2p preserves all physical column exponents modulo p. For the
+fixed shallow hole, its short patch is unchanged and the long interval grows
+by 198p. For the moving hole, the long-arm intervals grow by 38p and 160p;
+the other two arms grow by 158p and 46p in either case. Thus each residue
+column gains an even number of copies. All varying intervals already exceed
+p in these representatives (p<=256), so no new column type appears. Both the
+column set and its multiplicities modulo two are invariant. This is an exact
+finite covering of the integer relaxation for every m>=1, not an inference
+from a list of consecutive scales. It excludes neither support by itself.
+
+Each order's expected case count is twice its scale-phase count. A full order
+with every case compatible establishes only the failure of this particular
+integer relaxation to refute those two supports. Unknown cases or a work-limit
+exit leave that order undecided. No finite list of orders is a theorem about
+all orders, and no compatible aggregate vector is a homometric pair.
+
+Recorded 900-second family audit, 24 November 2026:
+
+| Root order | Expected cases | Compatible | Unknown | Not run |
+| ---: | ---: | ---: | ---: | ---: |
+| 4 | 4 | 4 | 0 | 0 |
+| 8 | 8 | 8 | 0 | 0 |
+| 16 | 16 | 16 | 0 | 0 |
+| 32 | 32 | 32 | 0 | 0 |
+| 64 | 64 | 64 | 0 | 0 |
+| 128 | 128 | 128 | 0 | 0 |
+| 256 | 256 | 188 | 1 | 67 |
+
+No refusal was found. The complete first six rows establish that **neither
+named odd-hole support can be excluded by the unbounded integer residue
+relaxations at orders 4,8,16,32,64,128, for any resistant m>=1**. This is a
+method limitation, not existence. The order-256 row is incomplete; its timeout
+and unrun cases have no mathematical outcome. It should not be repeated merely
+to turn this partial table into a larger census. The original all-pairs target
+requires a literal construction or an obstruction stronger than these completed
+relaxations. No project or task acceptance is claimed.
