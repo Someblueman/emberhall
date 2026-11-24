@@ -1391,6 +1391,152 @@ recount passed at six scales, checking 23,712 complete columns; the permanent
 column test now includes these three cases as well. This closes a test gap in
 the geometric endpoint handling, without changing the compiler or its scope.
 
+### Shifted holes and an endpoint refusal for every piece count
+
+Fern, 24 November 2026. The split-edge compiler now allows the shallow
+hole to be `1:(ht+delta)` instead of requiring it to be an old vertex.
+The other hole remains `1:99t`. Require integer `|delta|<=w`, where w is
+the independent patch width at each end of each piece. Every old sign is
+free except an old vertex that actually is a hole; a shifted hole removes
+its own patch sign instead. This is a larger construction ansatz, **not
+an unrestricted all-pairs reduction**.
+
+Here t=pL+1, p>=2, the independent interior word length q divides L and
+2w, and L>=2w+q. The formulas above still compile `(1-z^q)K` exactly.
+An interval's distance to the shifted hole has one slope: all non-singleton
+intervals lie beyond its endpoint patch. The compiler proves this ordering
+for every L>=2w+q by checking that the affine distance difference AL+B
+has A>=0 and A(2w+q)+B>0. It omits the hole before forming its column.
+The direct tests also establish that the coordinate groups partition all
+201t-1 retained physical vertices, with no duplicate or missing vertex.
+
+**Uniform endpoint obstruction.** For h=19, q=2, w=4 and either
+`delta=-2` or `delta=2`, no such signing exists for **any** p>=2 and any
+even L>=190. In particular this excludes the ansatz at every resistant
+scale t=7980m+1 for which p divides 7980m and L=7980m/p is even and
+at least 190. It excludes neither larger patches nor other supports.
+
+Here is why a single finite certificate covers all piece counts. Retain
+only formal rows whose coefficient of L is divisible by p, and divide
+that coefficient by p. An interior piece with index r=0,...,p-1 has forward
+endpoint slopes congruent to r and r+1 modulo p; reflected endpoints
+have slopes -r and -r-1. Single patch signs have the corresponding one
+endpoint slope. Thus only the first piece's outer patch and first word
+endpoint, and the last piece's outer patch and last word endpoint, can
+enter a retained row. Old vertices and both holes have slope divisible
+by p, including the fixed offset delta. Relabel these two pieces as
+first/last. Their entire retained row system is exactly the p=2 system,
+including constants and coefficients; the middle pieces contribute nothing.
+No assumption about their independent words has been added.
+
+For the two shifts the necessary binary rows have a verified contradiction:
+substituting s_i=2b_i-1 and summing the named rows gives 0=1 modulo two.
+To pass from formal coefficients to physical shells, collect the raw
+constant exponents *before cancellation*. Their set is independent of p
+by the column formulas above, and its span is 189. For L>=190, distinct
+integer pairs (A,B) cannot specialize to the same exponent AL+B: a nonzero
+slope difference has magnitude at least L, larger than every constant
+difference. Physical K=0 therefore forces every formal coefficient of
+`(1-z^q)K` to vanish. Its endpoint subsystem contradicts the certificate.
+The threshold is rounded upward to a multiple of q by the portable checker;
+tampering with it is rejected.
+
+Replay either sign of the shift using standard-library Python:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-endpoints --edge-patch 4 --piece-period 2 --hole-offset -2 --write /tmp/shifted-endpoints.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/shifted-endpoints.json
+```
+
+The negative-shift run has 2,494 endpoint rows on 4,220 coordinate slots,
+with raw constant span 189 and minimum even L=190. The positive-shift
+run has the same threshold. Tests compare the whole normalized endpoint
+system at p=2,3,7 for four word/patch/hole configurations, including odd
+shifts and q not dividing w, and compare the raw constant sets. Independent
+physical-column controls cover eight shifted-hole configurations at two
+scales each, including both patch extremes and h=1,98. Invalid offsets,
+empty refusals, incorrect specialization thresholds and unknown saved
+results are rejected.
+
+This refusal does not persist under arbitrary patch enlargement: q=2,
+w=8, delta=-2 is binary compatible (104 free binary coordinates before
+joint-field reductions). A full exact search of that case is recorded below; compatibility alone
+is no witness. The main task's
+infinite-family acceptance and the arbitrary-triple milestone remain open.
+
+### Holes at internal piece boundaries; exact small-fibre exhaustion
+
+The compiler also accepts `--hole-piece r`, 0<=r<p. Its shallow hole is
+`1:(ht+rL+delta)`. This genuinely adds supports inside a subdivided old
+edge. At r>0 require w>=1 and 1-w<=delta<=w: the previous piece ends at
+ht+rL, so its last w vertices start at ht+rL-w+1. This differs by one
+from the patch next to an old singleton. A direct-column test caught the
+invalid delta=-w case; it is now rejected rather than silently grouping a
+hole with retained interior vertices. The old-boundary convention at r=0
+remains -w<=delta<=w. The uniform-p endpoint theorem above concerns r=0;
+internal holes do not have its divisible-by-p slope and are not covered.
+
+For h=19, r=1, p=2, q=2, w=2, delta=0, the necessary binary system has
+exactly ten free coordinates. Enumerating all 1,024 assignments and checking
+every recovered signing against the original integer rows leaves zero
+solutions. The portable refusal therefore excludes this ansatz at every
+even L>=186, including the resistant scales with L=3990m. It is another
+scoped obstruction, not an all-pairs obstruction. The raw constant span is
+185; the injective-specialization requirement is essential for a negative
+formal result. Positive formal zeroes still specialize at the smaller
+geometric threshold L>=2w+q.
+
+`enumerate_binary_fibre` recovers pivot bits in increasing pivot order:
+each pivot is the greatest index in its echelon equation, so only already
+recovered pivots and chosen free bits occur on its right. This enumerates
+the whole necessary binary fibre exactly once. Literal signs are then
+checked in every untouched integer equation. Search uses this route for
+at most 16 free coordinates before expensive rational reduction. A time
+limit produces **unknown**, never a refusal. Verification rebuilds the
+system and repeats the full enumeration; it rejects changed counts or
+specialization thresholds.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-edge --edge-pieces 2 --piece-period 2 --edge-patch 2 --hole-piece 1 --write /tmp/internal-hole.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/internal-hole.json
+```
+
+The exact run takes about half a second on this room, compared with the
+previous joint-field refusal in 108.560 seconds. It has 2,612 sign slots
+and 2,850 integer rows. Exhaustion is also compared with full literal
+enumeration on 72 random small integer systems and 72 separate systems
+with planted solutions. The original random seed produced no positive cases;
+the planted controls close that verification gap. Direct
+physical-column and complete-support tests now include four internal-hole
+configurations at two scales each; they retain the original shifted-hole
+and uniform-endpoint controls. The main task's acceptance remains unmet.
+
+The wider shifted-hole attempt also produced no construction. The q=2,
+w=8, delta=-2, p=2, h=19 run reported
+`ansatz_refused_by_joint_fields` after 1,554.373 seconds, before branching.
+Its first joint round reduced 7,436 signs to 2,020, with rational nullity
+100, binary free dimension 100, ternary nullity 18 and 2,244 ternary signed
+relations. A later reduction found a conflict. This is the exact-field
+solver's diagnostic refusal, **not a standalone portable refusal file**;
+`--verify` intentionally does not accept this status. Do not confuse it
+with either independently replayable certificate above. Any physical
+negative claim for this formal ansatz also requires even L>=198 (raw
+constant span 197), rather than just its geometric minimum L=18.
+
+Replay the computation, allowing the full reduction budget:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-edge --edge-pieces 2 --piece-period 2 --edge-patch 8 --hole-offset -2 --seconds 1800 --nodes 10000000 --write /tmp/wide-shifted-hole.json
+```
+
+The final retained implementation passed all 53 focused tests (36.252s);
+the strengthened positive/negative fibre control also passed separately
+(1.616s). No large solver output is committed. The remaining obstacle is
+still an exact construction with freer signs/supports, or a genuinely
+unrestricted obstruction. Neither the scoped refusals nor their enlarged
+compiler decide all pairs on the resistant family, so the main task stays
+open and priority stays provisional.
+
 ### The growing-block lift is far from an exact pair on its support
 
 Sorrel, 24 November 2026. This is a limitation of a construction, **not an

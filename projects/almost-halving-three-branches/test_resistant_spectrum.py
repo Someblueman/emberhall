@@ -156,6 +156,134 @@ class SpectrumTests(unittest.TestCase):
         for period in (0,-1,1.5,3):
             with self.assertRaises(ValueError):rs.split_edge_system(patch=1,word_period=period)
 
+    def test_offset_holes_against_physical_columns(self):
+        for hole,width,pieces,period,offset,hole_piece in (
+                (19,1,2,1,-1,0),(19,1,2,1,1,0),
+                (19,2,2,2,-2,0),(19,2,2,2,2,0),
+                (7,2,3,4,-1,0),(7,2,3,4,1,0),
+                (98,3,2,3,-3,0),(1,3,2,3,3,0),
+                (19,2,2,2,-1,1),(19,2,2,2,0,1),
+                (19,2,2,2,2,1),(7,2,3,4,1,2)):
+            keys,rows=rs.split_edge_system(hole,width,pieces,period,offset,hole_piece=hole_piece)
+            for length in (2*width+period,2*width+2*period):
+                t=pieces*length+1
+                holes={(1,hole*t+hole_piece*length+offset),(1,99*t)}
+                actual=[defaultdict(int) for _ in keys]
+                for (q,c),row in rows.items():
+                    for i,value in row.items():actual[i][q*length+c]+=value
+                covered=set()
+                for i,key in enumerate(keys):
+                    if key[0]=='old':
+                        _,arm,q=key;depths=[q*t]
+                    else:
+                        _,arm,edge,piece,*rest=key
+                        lo=edge*t+1+piece*length;hi=lo+length-1
+                        if key[0]=='half':depths=range(lo+width,hi-width+1)
+                        elif key[0]=='word':
+                            j,=rest;depths=range(lo+width+j-1,hi-width+1,period)
+                        else:
+                            side,r=rest;depths=[lo+r if side==0 else hi-r]
+                    expected=defaultdict(int)
+                    for d in depths:
+                        vertex=(arm,d)
+                        self.assertNotIn(vertex,holes)
+                        self.assertNotIn(vertex,covered)
+                        covered.add(vertex)
+                        for e,c in fc.shell_column([99*t,79*t,23*t],holes,vertex).items():
+                            expected[e]+=c;expected[e+period]-=c
+                    self.assertEqual({e:c for e,c in actual[i].items() if c},
+                                     {e:c for e,c in expected.items() if c},(key,t,offset,hole_piece))
+                self.assertEqual(len(covered),201*t-1)
+                self.assertIn((0,0),covered)
+                self.assertTrue(all(0<=a<=3 and (d==0 if a==0 else 1<=d<=[0,99*t,79*t,23*t][a])
+                                    for a,d in covered))
+        for offset in (-3,3,True,1.5):
+            with self.assertRaises(ValueError):rs.split_edge_system(patch=2,hole_offset=offset)
+
+        for piece in (-1,2,True,1.5):
+            with self.assertRaises(ValueError):rs.split_edge_system(patch=2,hole_piece=piece)
+        with self.assertRaises(ValueError):rs.split_edge_system(hole_piece=1)
+        with self.assertRaises(ValueError):rs.split_edge_system(patch=2,hole_piece=1,hole_offset=-2)
+
+    def test_shifted_support_portable_refusal(self):
+        saved=rs.split_edge_search(patch=4,word_period=2,hole_offset=-2)
+        self.assertEqual(saved['status'],'ansatz_refused_by_parity')
+        self.assertEqual(saved['hole_offset'],-2)
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(saved,certificate=[]))
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(saved,hole_offset=-5))
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(saved,status='unknown',assignment=[]))
+
+    def test_word_endpoint_system_independent_of_piece_count(self):
+        for hole,width,period,offset in ((19,4,2,-2),(19,4,2,2),(7,2,4,1),(1,3,3,-3)):
+            keys,expected=rs.split_endpoint_system(hole,width,period,offset)
+            for pieces in (2,3,7):
+                all_keys,rows=rs.split_edge_system(hole,width,pieces,period,offset)
+                def relabel(key):
+                    if key[0]=='old':return key
+                    kind,arm,edge,r,*tail=key
+                    self.assertIn(r,(0,pieces-1))
+                    return (kind,arm,edge,int(r!=0),*tail)
+                actual={(q//pieces,c):{keys.index(relabel(all_keys[i])):v for i,v in row.items()}
+                        for (q,c),row in rows.items() if q%pieces==0}
+                self.assertEqual(actual,expected)
+                raw,reference=[],[]
+                rs.split_edge_system(hole,width,pieces,period,offset,raw)
+                rs.split_edge_system(hole,width,2,period,offset,reference)
+                self.assertEqual(set(raw),set(reference))
+        saved=rs.split_endpoint_refusal(19,4,2,-2)
+        checked=rs.verify_saved(saved)
+        self.assertGreater(checked['minimum_piece_length'],saved['exponent_constant_span'])
+        self.assertEqual(checked['minimum_piece_length']%2,0)
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(saved,minimum_piece_length=2))
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(saved,certificate=[]))
+        with self.assertRaises(ValueError):
+            rs.split_endpoint_refusal(19,8,2,-2)
+
+    def test_binary_fibre_exhaustion_against_all_signs(self):
+        generator=random.Random(731)
+        for size in range(1,7):
+            for repeat in range(12):
+                rows=[{i:c for i in range(size) if (c:=generator.randint(-2,2))}
+                      for row in range(4)]
+                solutions=[values for values in itertools.product((-1,1),repeat=size)
+                           if all(sum(c*values[i] for i,c in row.items())==0 for row in rows)]
+                audit=rs.enumerate_binary_fibre(size,rows,max_free=6)
+                self.assertTrue(audit['complete'])
+                self.assertEqual(audit['status']=='sat',bool(solutions))
+                if solutions:self.assertIn(tuple(audit['values']),solutions)
+        # Unconditioned random systems above are all unsatisfiable for this
+        # seed. Plant witnesses as a separate positive control.
+        for size in range(1,7):
+            for repeat in range(12):
+                witness=[generator.choice((-1,1)) for i in range(size)]
+                rows=[]
+                for row in range(4):
+                    coefficients={i:generator.randint(-2,2) for i in range(size-1)}
+                    coefficients[size-1]=-sum(c*witness[i] for i,c in coefficients.items())*witness[-1]
+                    rows.append({i:c for i,c in coefficients.items() if c})
+                solutions=[values for values in itertools.product((-1,1),repeat=size)
+                           if all(sum(c*values[i] for i,c in row.items())==0 for row in rows)]
+                audit=rs.enumerate_binary_fibre(size,rows,max_free=6)
+                self.assertEqual(audit['status'],'sat')
+                self.assertIn(tuple(audit['values']),solutions)
+        self.assertEqual(rs.enumerate_binary_fibre(5,[],max_free=4)['status'],'unknown')
+        with self.assertRaises(ValueError):rs.enumerate_binary_fibre(2,[],max_free=21)
+        with patch.object(rs.time,'monotonic',side_effect=[0,2]):
+            audit=rs.enumerate_binary_fibre(3,[],seconds=1)
+        self.assertEqual((audit['status'],audit['complete'],audit['enumerated']),('unknown',False,0))
+        saved=rs.split_edge_search(patch=2,word_period=2,hole_piece=1)
+        self.assertEqual(saved['status'],'ansatz_refused_by_binary_fibre')
+        self.assertEqual((saved['parity_free'],saved['enumerated']),(10,1024))
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        with self.assertRaises(ValueError):rs.verify_saved(dict(saved,enumerated=1023))
+        with self.assertRaises(ValueError):rs.verify_saved(dict(saved,minimum_piece_length=6))
+
     def test_uniform_flat_piece_endpoint_refusal(self):
         keys,expected=rs.split_endpoint_system()
         for pieces in (2,3,4,7,10,31):

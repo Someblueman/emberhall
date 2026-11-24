@@ -591,14 +591,18 @@ def fourth_root_mod8_census():
                 counts=dict(counts), phases=phase_counts)
 
 
-def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
+def split_edge_system(hole=19, patch=0, pieces=2, word_period=1, hole_offset=0,
+                      _constant_bounds=None, hole_piece=0):
     """Formal (1-z**word_period)K for t=pieces*L+1.
 
     Each piece has L vertices; its first/last patch vertices are independent.
     Each remaining piece repeats its own independent word of word_period
     signs. Require word_period|L, word_period|2*patch, L>=2*patch+word_period.
     Exponents are pairs (coefficient of L, constant), never sampled ranks.
-    Holes are old first-arm vertices hole*t and 99*t. This is an ansatz.
+    Holes are first-arm vertices hole*t+hole_offset and 99*t. The offset
+    is within a free endpoint patch; hole_piece shifts the hole by that
+    many whole piece lengths L. No repeated word crosses a hole.
+    This is an ansatz, not a reduction of every possible signing.
     """
     if type(hole) is not int or not 1 <= hole < 99:
         raise ValueError('require 1<=hole<99')
@@ -608,6 +612,11 @@ def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
         raise ValueError('require at least two pieces')
     if type(word_period) is not int or word_period < 1 or (2*patch)%word_period:
         raise ValueError('require a positive word period dividing twice the patch width')
+    if type(hole_offset) is not int or abs(hole_offset)>patch:
+        raise ValueError('require an integer hole offset within the endpoint patch')
+    if (type(hole_piece) is not int or not 0<=hole_piece<pieces
+            or (hole_piece and (not patch or hole_offset<1-patch))):
+        raise ValueError('require a valid hole piece and a hole inside its endpoint patch')
     lengths = (99,79,23)
     keys, rows = [], defaultdict(lambda:defaultdict(int))
 
@@ -615,26 +624,38 @@ def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
     def neg(a): return -a[0],-a[1]
     def old(q): return pieces*q,q
 
-    def terms(arm, edge, centre=False):
+    holes = (add(old(hole),(hole_piece,hole_offset)),old(99))
+    def before(left,right):
+        # Prove strict order for every admissible L, not just lexicographically.
+        slope,constant=add(right,neg(left))
+        return slope>=0 and slope*(2*patch+word_period)+constant>0
+
+    def terms(arm, lo, hi, centre=False):
         # Entries (slope in d, affine offset, coefficient) of a physical K column.
         if centre:
             out = [(0,(0,1),1)]+[(0,add(old(n),(0,1)),-1) for n in lengths]
         else:
             out = [(1,(0,1),1),(-1,add(old(lengths[arm-1]),(0,1)),-1)]
             out += [(1,add(old(n),(0,1)),-1) for a,n in enumerate(lengths,1) if a!=arm]
-        for h in (hole,99):
+        for h in holes:
             if centre:
-                slope,offset = 0,old(h)
-            elif arm==1 and edge<h:
-                slope,offset = -1,old(h)
+                slope,offset = 0,h
+            elif arm==1 and before(hi,h):
+                slope,offset = -1,h
+            elif arm==1 and before(h,lo):
+                slope,offset = 1,neg(h)
+            elif arm==1:
+                raise AssertionError('a repeated interval crosses a hole')
             else:
-                slope,offset = 1,neg(old(h)) if arm==1 else old(h)
+                slope,offset = 1,h
             out += [(slope,offset,-1),(slope,add(offset,(0,1)),1)]
         return out
 
     def column(key,arm,edge,lo,hi,single=False,centre=False):
+        if single and arm==1 and lo in holes:
+            return
         i=len(keys);keys.append(key)
-        for slope,offset,c in terms(arm,edge,centre):
+        for slope,offset,c in terms(arm,lo,hi,centre):
             if single:
                 e=add(tuple(slope*x for x in lo),offset)
                 ends=((e,c),(add(e,(0,word_period)),-c))
@@ -644,12 +665,13 @@ def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
                 ends=((add(neg(hi),offset),c),(add(add(neg(lo),offset),(0,word_period)),-c))
             else:
                 raise AssertionError('a run has constant distance')
+            if _constant_bounds is not None:
+                _constant_bounds.extend(e[1] for e,value in ends)
             for e,value in ends:rows[e][i]+=value
 
     column(('old',0,0),0,0,(0,0),(0,0),True,True)
     for arm,n in enumerate(lengths,1):
         for q in range(1,n+1):
-            if arm==1 and q in (hole,99):continue
             column(('old',arm,q),arm,q,old(q),old(q),True)
         for edge in range(n):
             for half in range(pieces):
@@ -667,15 +689,16 @@ def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
     return keys,{e:{i:c for i,c in row.items() if c} for e,row in rows.items() if any(row.values())}
 
 
-def split_endpoint_system():
-    """Fixed necessary endpoint rows for every number p>=2 of flat pieces.
+def split_endpoint_system(hole=19,patch=0,word_period=1,hole_offset=0):
+    """Fixed necessary endpoint rows for every number p>=2 of word pieces.
 
     Retain slope exponents divisible by p. Only the first and last pieces
     enter: a forward run contributes at r and r+1, a reflected run at -r-1
     and -r, modulo p. The p=2 extraction therefore defines the uniform map.
-    No endpoint patches are included in this relaxation.
+    Free patches and repeating words are allowed. Only the outermost patch
+    signs and words at the two edge ends occur in these rows.
     """
-    keys,formal=split_edge_system(19,0,2)
+    keys,formal=split_edge_system(hole,patch,2,word_period,hole_offset)
     rows={(q//2,c):row for (q,c),row in formal.items() if q%2==0}
     return keys,dict(sorted(rows.items()))
 
@@ -748,30 +771,87 @@ def split_bulk_refusal():
                 scope='all p>=2 constant interiors, arbitrary finite end patches and holes at old vertices')
 
 
-def split_endpoint_refusal():
-    keys,rows=split_endpoint_system()
+def split_endpoint_refusal(hole=19,patch=0,word_period=1,hole_offset=0):
+    keys,rows=split_endpoint_system(hole,patch,word_period,hole_offset)
     certificate,_=binary_elimination(list(rows.values()))
     if certificate is None or not verify_refusal(list(rows.values()),certificate):
-        raise AssertionError('uniform flat-piece endpoint refusal was not verified')
+        raise ValueError('the endpoint rows have no verified parity refusal')
+    constants=[]
+    split_edge_system(hole,patch,2,word_period,hole_offset,constants)
+    # Raw constants are independent of p; collect before any p-specific
+    # cancellations could hide a specialization collision.
+    span=max(constants)-min(constants)
+    minimum=max(2*patch+word_period,span+1)
+    minimum=((minimum+word_period-1)//word_period)*word_period
     return dict(mode='split_endpoints',status='ansatz_refused_by_parity',
+                hole=hole,patch=patch,word_period=word_period,hole_offset=hole_offset,
                 variables=len(keys),rows=len(rows),certificate=certificate,
-                scope='all p>=2 equal constant pieces, no patches, holes 19t and 99t',
+                exponent_constant_span=span,minimum_piece_length=minimum,
+                piece_length_divisor=word_period,
+                scope='all p>=2 equal pieces with these words, patches and shifted holes; L at least minimum_piece_length',
                 all_pairs_decided=False)
 
 
-def split_edge_search(hole=19,patch=0,seconds=30,nodes=10000,pieces=2,word_period=1):
+def enumerate_binary_fibre(size,rows,max_free=16,seconds=None):
+    """Exhaust the necessary parity fibre when it has few free coordinates.
+
+    The echelon pivot is the largest index in its row, so ascending pivots
+    recover each binary assignment uniquely. Every recovered signing is
+    checked against the untouched integer rows, not just their parities.
+    """
+    if type(max_free) is not int or not 0<=max_free<=20:
+        raise ValueError('require a free-coordinate limit between zero and twenty')
+    if seconds is not None and (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0):
+        raise ValueError('require a positive finite enumeration time')
+    deadline=None if seconds is None else time.monotonic()+seconds
+    certificate,basis=binary_elimination(rows)
+    if certificate is not None:
+        return dict(status='unsat',complete=True,enumerated=0,certificate=certificate)
+    free=sorted(set(range(size))-set(basis))
+    if len(free)>max_free:
+        return dict(status='unknown',complete=False,free=len(free),enumerated=0)
+    ordered=sorted(basis.items())
+    for choice in range(1<<len(free)):
+        if deadline is not None and time.monotonic()>=deadline:
+            return dict(status='unknown',complete=False,free=len(free),enumerated=choice)
+        bits=sum(1<<i for j,i in enumerate(free) if choice>>j&1)
+        for pivot,(mask,rhs) in ordered:
+            if rhs^((mask&bits).bit_count()&1):bits|=1<<pivot
+        if all(not sum(c*(1 if bits>>i&1 else -1) for i,c in row.items()) for row in rows):
+            return dict(status='sat',complete=True,free=len(free),enumerated=choice+1,
+                        values=[1 if bits>>i&1 else -1 for i in range(size)])
+    return dict(status='unsat',complete=True,free=len(free),enumerated=1<<len(free))
+
+
+def split_edge_search(hole=19,patch=0,seconds=30,nodes=10000,pieces=2,word_period=1,hole_offset=0,hole_piece=0):
     """Try literal edge-piece plateaus; a timeout has no mathematical outcome."""
     start=time.monotonic()
-    keys,formal=split_edge_system(hole,patch,pieces,word_period)
+    constants=[]
+    keys,formal=split_edge_system(hole,patch,pieces,word_period,hole_offset,constants,hole_piece)
     original=list(formal.values())
-    result=dict(mode='split_edge',hole=hole,patch=patch,pieces=pieces,word_period=word_period,
+    result=dict(mode='split_edge',hole=hole,hole_offset=hole_offset,hole_piece=hole_piece,patch=patch,pieces=pieces,word_period=word_period,
                 variables=len(keys),rows=len(original),minimum_piece_length=2*patch+word_period,
                 piece_length_divisor=word_period,all_pairs_decided=False,
                 scope='independent periodic edge-piece interiors with free endpoint patches')
-    def done(status,**extra):return dict(**result,status=status,elapsed=time.monotonic()-start,**extra)
+    def done(status,**extra):
+        answer=dict(**result,status=status,elapsed=time.monotonic()-start,**extra)
+        if status.startswith('ansatz_refused'):
+            minimum=max(2*patch+word_period,max(constants)-min(constants)+1)
+            answer['minimum_piece_length']=((minimum+word_period-1)//word_period)*word_period
+        return answer
     certificate,basis=binary_elimination(original)
     if certificate is not None:
         return done('ansatz_refused_by_parity',certificate=certificate)
+    if len(keys)-len(basis)<=16:
+        remaining=seconds-(time.monotonic()-start)
+        if remaining<=0:return done('unknown')
+        audit=enumerate_binary_fibre(len(keys),original,seconds=remaining)
+        result['parity_free']=audit['free']
+        result['enumerated']=audit['enumerated']
+        if audit['status']=='unsat':return done('ansatz_refused_by_binary_fibre')
+        if not audit['complete']:return done('unknown')
+        restored=audit['values']
+        return done('sat',assignment=[[list(k),v] for k,v in zip(keys,restored)])
     joint=joint_sign_closure(len(keys),original,seconds,short_recovery=True)
     result['closure']=joint['history']
     if joint['conflict']:return done('ansatz_refused_by_joint_fields')
@@ -2464,18 +2544,39 @@ def verify_saved(saved):
         return dict(verified=True,all_pairs_decided=False,
                     claim='only long flat interiors with arbitrary finite endpoint patches are refused')
     if saved.get('mode')=='split_endpoints':
-        _,rows=split_endpoint_system()
+        _,rows=split_endpoint_system(saved.get('hole',19),saved.get('patch',0),
+                                     saved.get('word_period',1),saved.get('hole_offset',0))
         if not verify_refusal(list(rows.values()),saved.get('certificate',[])):
             raise ValueError('invalid uniform flat-piece endpoint refusal')
-        return dict(verified=True,claim='only equal constant pieces on the named support are refused',
-                    all_pairs_decided=False)
+        expected=split_endpoint_refusal(saved.get('hole',19),saved.get('patch',0),
+                                        saved.get('word_period',1),saved.get('hole_offset',0))
+        for field in ('minimum_piece_length','piece_length_divisor','exponent_constant_span'):
+            if field in saved and saved[field]!=expected[field]:
+                raise ValueError('incorrect endpoint specialization threshold')
+        return dict(verified=True,claim='only the stated equal-piece word and patch ansatz is refused',
+                    minimum_piece_length=expected['minimum_piece_length'],
+                    piece_length_divisor=expected['piece_length_divisor'],all_pairs_decided=False)
     if saved.get('mode')=='split_edge':
         word_period=saved.get('word_period',1)
-        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'],word_period)
+        constants=[]
+        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'],word_period,saved.get('hole_offset',0),
+                                      constants,saved.get('hole_piece',0))
+        minimum=max(2*saved['patch']+word_period,max(constants)-min(constants)+1)
+        minimum=((minimum+word_period-1)//word_period)*word_period
         if saved.get('status')=='ansatz_refused_by_parity':
             if not verify_refusal(list(formal.values()),saved['certificate']):
                 raise ValueError('invalid split-edge parity refusal')
-            return dict(verified=True,claim='only the split-edge ansatz is refused',all_pairs_decided=False)
+            return dict(verified=True,claim='only the split-edge ansatz is refused',
+                        minimum_piece_length=minimum,piece_length_divisor=word_period,all_pairs_decided=False)
+        if saved.get('status')=='ansatz_refused_by_binary_fibre':
+            audit=enumerate_binary_fibre(len(keys),list(formal.values()))
+            if (audit['status']!='unsat' or not audit['complete']
+                    or audit.get('free')!=saved.get('parity_free')
+                    or audit['enumerated']!=saved.get('enumerated')
+                    or saved.get('minimum_piece_length')!=minimum):
+                raise ValueError('binary-fibre exhaustion did not verify')
+            return dict(verified=True,claim='only the stated split-edge ansatz is refused',
+                        minimum_piece_length=minimum,piece_length_divisor=word_period,all_pairs_decided=False)
         assignment=saved.get('assignment',[])
         if len(assignment)!=len(keys) or [tuple(k) for k,v in assignment]!=keys:
             raise ValueError('no complete split-edge assignment')
