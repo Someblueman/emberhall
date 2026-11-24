@@ -382,3 +382,57 @@ small solutions, compare the quadratic lift with every nonzero modular solution,
 compare reduced binary equations on every small bit assignment, and compare the
 new truth tables with independent full enumeration through width sixteen.
 Resource limits remain unknown; none of these controls is milestone acceptance.
+
+### Recorded integrated runs and a wider hole parameter
+
+The integrated `--joint-fields --reduced-xor --period 10 --seconds 300` run
+stopped unknown after 3,248 branch nodes and 304 seconds including setup. It
+retained 1,405 variables and 5,334 integer rows. Its three joint stages had
+sign counts 1,407, 1,405, 1,405 and ternary dimensions 75, 74, 74; deduplication
+and the dense-copy detector explain the different intermediate counts from the
+exploratory cycle above. The final dimension is the same. Applying the quadratic
+lift to that exploratory final fibre gave 2,702 product coordinates, 1,331
+nonzero rows, verified rank 1,331 and nullity 1,371. No forced zero or signed
+product relation, including dense copies, appeared, and no binary row was added.
+
+`--moving --hole h` now permits every old first-arm interior vertex h=1..98;
+the physical holes are ht and 99t. Default h=19 and old saved assignments retain
+their meaning. The formal column derivation is unchanged: each hole contributes
+its original-tree distance from every retained vertex. Tests additionally compare
+all physical shell columns for h=1,43,98, including holes beyond the old shallow
+range; that comparison uses explicit geometry rather than the shallow-recovery
+helper, whose domain deliberately ends at 20t-1.
+
+**Odd periods are impossible for this word ansatz, for every such h.** A formal
+solution extends to every k>=1. For odd p, take k=1, so t=p+1 is even. The
+retained support has 201t-1 vertices, an odd number. It cannot carry equally many
+plus and minus signs. The identity K=0 forces balance by evaluation at z=1,
+contradicting this count. Moreover at t>p+1 the formal/physical equivalence proved
+above means that even a solution at one sufficiently large scale would extend
+to this impossible scale. This excludes odd periods in this restricted ansatz,
+not arbitrary signings or hole placements. The finite period-one probe over all
+98 old hole positions independently encountered modular forced zeros; the
+parity argument, rather than that census, explains their uniform failure.
+
+The remaining obstacle is still the literal cube intersection, now with 74 free
+original coordinates for the period-ten attempt. A refusal there would still
+leave unrestricted inserted words and other supports open. No parametric
+construction or all-pairs obstruction has been delivered.
+
+A bounded additional support probe covered all 98 old holes at periods two
+through six: all 490 cases encountered a verified modular forced zero. This
+finite list does not prove a period-divisibility theorem. At period ten, a
+150-second sweep reached h=1..76: h=2,4 were refused by modular nonzero constraints,
+and the other 74 returned unknown under their two-second setup/search budgets.
+Holes 77..98 were not reached. No existence or universal support claim follows.
+
+The earlier 1,200-second requested joint search, before dense-copy grouping and
+the table-construction optimization, ended unknown after 163,875 nodes and
+1,229 seconds including setup. Its final 1,405-variable representation had
+6,472 rows and dimension 74. It used the triangular binary basis, so its node
+count is not a speed comparison with the later reduced-basis run. A final
+`--moving --joint-fields --reduced-xor --hole 1 --period 10 --seconds 120` run
+also ended unknown: 1,432 variables, 4,067 rows, dimension 79, 126 branch nodes,
+124 seconds including setup. Neither run supplied an assignment or exhausted
+its search tree. The deeper-hole compiler extension passes the same twenty-test
+suite. No scientific or task-completion claim is inferred from a timeout.

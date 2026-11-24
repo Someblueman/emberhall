@@ -111,11 +111,12 @@ class SpectrumTests(unittest.TestCase):
         self.assertEqual(result['aliases'][0][1],-result['aliases'][-1][1])
 
     def test_moving_compiler_against_every_physical_shell_column(self):
-        for period,k in ((1,2),(3,1),(3,2),(10,2)):
+        for period,k,hole in ((1,2,19),(3,1,19),(3,2,19),(10,2,19),
+                              (1,3,1),(2,2,43),(3,2,98)):
             t = period*k+1
-            keys,formal = rs.moving_periodic_system(period)
+            keys,formal = rs.moving_periodic_system(period,hole)
             positions = {v:i for i,v in enumerate(keys)}
-            lengths,holes = fc.geometry(t,19*t)
+            lengths,holes = [99*t,79*t,23*t],{(1,hole*t),(1,99*t)}
             expected = defaultdict(lambda:defaultdict(int))
             vertices = [(0,0)]+[(a,d) for a,n in enumerate(lengths,1)
                                 for d in range(1,n+1) if (a,d) not in holes]
@@ -135,6 +136,8 @@ class SpectrumTests(unittest.TestCase):
             self.assertEqual(clean(actual),clean(expected))
             self.assertEqual(len(keys),200+201*period)
         with self.assertRaises(ValueError): rs.moving_periodic_system(0)
+        for hole in (0,99,1.5):
+            with self.assertRaises(ValueError): rs.moving_periodic_system(1,hole)
 
     def test_hybrid_ternary_kernel_against_exhaustive_modular_solutions(self):
         rng = random.Random(39128)

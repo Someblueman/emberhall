@@ -14,8 +14,8 @@ import reduced_folded_fibre as rf
 from literal_shell_search import LiteralSearch
 
 
-def moving_periodic_system(period):
-    """Formal (1-z**period)*K for t=period*k+1; holes 19t and 99t.
+def moving_periodic_system(period,hole=19):
+    """Formal (1-z**period)*K for t=period*k+1; holes hole*t and 99t.
 
     A variable (arm,edge,r), 1<=r<=period, repeats at depths
     edge*t+r+j*period, 0<=j<k. r=0 denotes an old vertex at edge*t.
@@ -24,6 +24,7 @@ def moving_periodic_system(period):
     exponents 0<=c<=period+1 do not collide, so the converse holds too.
     """
     if type(period) is not int or period<1: raise ValueError('require a positive period')
+    if type(hole) is not int or not 1<=hole<99: raise ValueError('require 1<=hole<99')
     lengths = (99,79,23)
     keys,rows = [],defaultdict(lambda:defaultdict(int))
     def add(key,terms,coarse=False):
@@ -33,14 +34,14 @@ def moving_periodic_system(period):
             rows[q,c][i] += value
             if coarse: rows[q,c+period][i] -= value
     centre = [(0,1,1)]+[(n,1,-1) for n in lengths]
-    for h in (19,99): centre.extend(((h,0,-1),(h,1,1)))
+    for h in (hole,99): centre.extend(((h,0,-1),(h,1,1)))
     add((0,0,0),centre,True)
     for arm,n in enumerate(lengths,1):
         for d in range(1,n+1):
-            if arm==1 and d in (19,99): continue
+            if arm==1 and d in (hole,99): continue
             terms = [(d,1,1),(n-d,1,-1)]
             terms.extend((other+d,1,-1) for j,other in enumerate(lengths,1) if j!=arm)
-            for h in (19,99):
+            for h in (hole,99):
                 distance = abs(d-h) if arm==1 else d+h
                 terms.extend(((distance,0,-1),(distance,1,1)))
             add((arm,d,0),terms,True)
@@ -55,7 +56,7 @@ def moving_periodic_system(period):
                 shifted(neg,n-edge,1,-1)
                 for j,other in enumerate(lengths,1):
                     if j!=arm: shifted(pos,other+edge,1,-1)
-                for h in (19,99):
+                for h in (hole,99):
                     source = neg if arm==1 and edge<h else pos
                     distance = abs(edge-h) if arm==1 else edge+h
                     shifted(source,distance,0,-1)
@@ -752,18 +753,18 @@ def joint_sign_closure(size,original,seconds=30,steps=20):
     return result(False,stage='step_limit')
 
 
-def moving_search(period,seconds=30,nodes=10000,free_order='connected',closure_steps=20,rational=False,affine_shells=False,square_lift=False,joint_fields=False,reduced_xor=False):
+def moving_search(period,seconds=30,nodes=10000,free_order='connected',closure_steps=20,rational=False,affine_shells=False,square_lift=False,joint_fields=False,reduced_xor=False,hole=19):
     """Search one explicit all-scale moving-hole word ansatz, never all pairs."""
     if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
             or type(nodes) is not int or nodes<0 or type(closure_steps) is not int or closure_steps<0):
         raise ValueError('require positive finite time and nonnegative node/closure budgets')
     start = time.monotonic()
-    keys,formal = moving_periodic_system(period)
+    keys,formal = moving_periodic_system(period,hole)
     original = list(formal.values())
     rows,size = original,len(keys)
     aliases,history = [(i,1) for i in range(size)],[]
-    result = dict(mode='moving',period=period,all_pairs_decided=False,
-                  scope='holes 19t and 99t; each edge repeats one period; t=period*k+1')
+    result = dict(mode='moving',period=period,hole=hole,all_pairs_decided=False,
+                  scope=f'holes {hole}t and 99t; each edge repeats one period; t=period*k+1')
     def done(status,**details):
         return dict(**result,status=status,closure=history,variables=size,rows=len(rows),
                     elapsed=time.monotonic()-start,**details)
@@ -968,7 +969,7 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 def verify_saved(saved):
     if saved.get('mode')=='moving':
         if saved['status']!='sat': raise ValueError('no saved moving sign witness')
-        keys,formal = moving_periodic_system(saved['period'])
+        keys,formal = moving_periodic_system(saved['period'],saved.get('hole',19))
         supplied = saved['assignment']
         assignment = {tuple(k):v for k,v in supplied}
         if len(assignment)!=len(supplied) or set(assignment)!=set(keys):
@@ -1003,6 +1004,7 @@ def verify_saved(saved):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--hole',type=int,default=19,help='old first-arm vertex omitted in moving mode, 1..98')
     p.add_argument('--half',type=int,default=3990)
     p.add_argument('--period',type=int,default=1)
     p.add_argument('--patch-width',type=int,default=40)
@@ -1024,7 +1026,7 @@ def main():
     if (args.joint_fields or args.square_lift or args.rational or args.reduced_xor) and not args.moving:
         p.error('--joint-fields, --square-lift, --reduced-xor and --rational require --moving')
     if args.moving:
-        result = moving_search(args.period,args.seconds,args.nodes,args.free_order,rational=args.rational,affine_shells=args.affine_shells,square_lift=args.square_lift,joint_fields=args.joint_fields,reduced_xor=args.reduced_xor)
+        result = moving_search(args.period,args.seconds,args.nodes,args.free_order,rational=args.rational,affine_shells=args.affine_shells,square_lift=args.square_lift,joint_fields=args.joint_fields,reduced_xor=args.reduced_xor,hole=args.hole)
         if args.write:
             with open(args.write,'w') as f: json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k!='assignment'},sort_keys=True))
