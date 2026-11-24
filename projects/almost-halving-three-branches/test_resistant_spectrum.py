@@ -18,7 +18,8 @@ class SpectrumTests(unittest.TestCase):
         import full_shorter_coupling as physical
         for hole,patch,pieces,period in ((19,0,2,1),(7,1,2,1),(19,2,2,1),(19,0,3,1),
                                          (7,1,4,1),(19,0,10,1),(19,0,2,2),(19,2,2,2),
-                                         (19,4,2,2),(7,3,3,3)):
+                                         (19,4,2,2),(7,3,3,3),(19,1,2,2),
+                                         (7,2,3,4),(19,3,2,6)):
             keys,rows=rs.split_edge_system(hole,patch,pieces,period)
             for half_length in (2*patch+period,2*patch+3*period):
                 t=pieces*half_length+1

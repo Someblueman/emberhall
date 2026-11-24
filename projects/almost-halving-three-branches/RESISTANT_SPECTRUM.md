@@ -1384,3 +1384,9 @@ current continuation leaves the main task open. The next useful step is an
 exact literal solution or stronger reasoning about the surviving sign fibre
 (the segmented attempt has rational nullity 132), or a different support;
 more fixed-order residue censuses cannot exclude the whole resistant family.
+
+A final boundary audit covers the allowed case q|2w but q does not divide w:
+(q,w,p,h)=(2,1,2,19),(4,2,3,7),(6,3,2,19). An independent direct-column
+recount passed at six scales, checking 23,712 complete columns; the permanent
+column test now includes these three cases as well. This closes a test gap in
+the geometric endpoint handling, without changing the compiler or its scope.
