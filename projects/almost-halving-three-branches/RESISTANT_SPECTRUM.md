@@ -436,3 +436,260 @@ also ended unknown: 1,432 variables, 4,067 rows, dimension 79, 126 branch nodes,
 124 seconds including setup. Neither run supplied an assignment or exhausted
 its search tree. The deeper-hole compiler extension passes the same twenty-test
 suite. No scientific or task-completion claim is inferred from a timeout.
+
+
+## Mallow's continuation: desubdivision and a completed period-ten refusal
+
+24 November 2026. **The task acceptance is still unmet.** This continuation
+carries forward Linnet's preserved three-file contribution from private head
+`302f4e8`; the source room started from an older integrated version. The
+unrestricted support and word problem remains open. Priority is provisional.
+
+### A necessary condition that does apply to arbitrary words
+
+Colour a vertex black when its depth from the centre is even. Let a pair of
+size k have a black vertices in its first set and b in its second. Every odd
+distance joins opposite colours, so equality of the odd-distance counts gives
+
+    a(k-a) = b(k-b),  hence  (a-b)(k-a-b) = 0.
+
+Thus its retained black count a+b is even or equals k. This argument uses
+all odd distance shells together and makes no word or hole-location assumption.
+The helper `bipartition_support_obstruction` implements precisely this one
+necessary condition; passing it does not assert homometry.
+
+For t=7980m+1, put k=(201t-1)/2. Here k is even. The full tripod has k black
+and k+2 white vertices. A pair of size k leaves two holes. Those holes must
+have the same colour: removing one of each would leave the odd black count
+k-1, which is not k. Consequently the moving support ht,99t is impossible
+for even h, for **arbitrary signs**, not merely repeated words. This does
+not rule out the other same-colour supports, or a larger full partition.
+
+### Desubdivision lemma for the formal moving-word system
+
+Specialize Z=z in the formal equations, even though the earlier geometric
+argument stated only k>=1. Then every inserted column vanishes identically:
+
+    P_r = z^r - z*z^(r-1) = 0,
+    N_r = z^(-1)*z^(p+1-r) - z^(p-r) = 0.
+
+What remains is (1-z^p) times the physical old-tripod shell polynomial on
+T(99,79,23), with holes h and 99 and the old signs unchanged. The integral
+polynomial ring has no zero divisors, so those old signs must themselves
+form a homometric partition of the retained old support. This is necessary
+for **every period p** in the formal ansatz. It is not a desubdivision
+principle for unrestricted signings of a subdivided tree.
+
+`coarse_projection_audit` substitutes Z=z coefficient by coefficient, retaining
+every original formal column, and compares the result with independently
+constructed physical columns multiplied by 1-z^p. It checks exact equality,
+including cancellation of every inserted coordinate. At p=10, h=19 the audit
+cancels 2,010 inserted columns and leaves 200 old coordinates and 178 nonzero
+old physical rows. The earlier finite-graph path convention remains unchanged:
+L-41 appended levels check centres 21..L-21; endpoint rows complete 0..L.
+
+### An exhaustive four-way split, rather than another bounded branch run
+
+For h=19, exact rational/binary/ternary signed-copy reduction of the old support
+leaves 136 literal coordinates with a verified rational kernel of dimension
+20. Free coordinates are original signs. Fixing the first free sign positive
+leaves exactly 2^19 assignments. `kernel_sign_patterns` checks every one,
+using two half-sum tables for each denominator-cleared kernel expression.
+Only expressions equal to +1 or -1 survive. The verified kernel and reversible
+signed aliases give both directions: every old signing occurs, and every
+retained assignment lifts to an old signing. Normalizing the centre positive
+therefore removes exactly complementation, with no duplicate or missing pair.
+
+The recorded complete catalog has **four** centre-positive signings, each
+splitting the old support into two sets of size 100. Direct pairwise distance
+counters, independent of the shell equations, verify each of the four.
+`verify_saved` accepts a saved positive coarse assignment only with this direct
+check and explicitly calls its scope the original support, not an inflation.
+A two-sign alteration preserving size is rejected in each of the four controls.
+The catalog command completed in 0.94 seconds in this run; this is an observation,
+not a runtime guarantee. Dimension/time caps return incomplete, never refusal.
+
+Conditioning the original period-ten formal equations on each catalog entry
+now closes all four branches. Each branch's joint reduction reaches 1,187
+literal coordinates and a verified ternary forced zero. The integrated replay
+completed in 125.84 seconds, with no sign branching or search timeout. A separate
+branch-zero diagnostic found rational rank 2,154, then binary quotient size
+1,187 and ternary rank 1,179. Its one forced-zero quotient class contains the
+original coordinates (arm 1, edge 41, position 2) and the opposite of
+(arm 3, edge 0, position 10). A literal sign cannot be zero modulo three.
+This is a replayable computational refusal of this word ansatz, not a small
+standalone negative certificate; the saved verifier deliberately rejects it.
+
+For t=10k+1 with k>=2, formal and physical exponents do not collide, so this
+refusal excludes **all period-ten moving-word signings** with holes 19t,99t,
+including every resistant scale. It closes the 74-free-coordinate search left
+by the previous continuation, but only by disjoining all old-support signings.
+It does not cover other periods, independently free endpoint patches, arbitrary
+inserted words, other first-arm holes, holes on different arms, or full partitions.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --audit-coarse --period 10 --hole 19
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --coarse-catalog --hole 19 --seconds 30 --write /tmp/old-catalog.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --coarse --hole 19 --seconds 120 --nodes 1000000 --write /tmp/old-pair.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/old-pair.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --condition-coarse --period 10 --hole 19 --seconds 240
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -q
+```
+
+The remaining mathematical obstacle is to decide unrestricted words and every
+same-colour pair of holes (and larger full partitions), or to find a genuinely
+extendable alternative word period and then verify every original distance
+shell. No all-pairs upper bound or infinite positive family has been delivered.
+
+
+### Uniform endpoint proof: every period, not a longer census
+
+The old-support census is now complete for all h=1..98. Forty-nine even h
+are excluded by the odd-distance shell above. Exact rational-cube enumeration
+completes for the other 49. Only h=19 has any old signing: its four already
+verified entries. The integrated `--coarse-supports --seconds 300` run completed
+in 68.54 seconds, with no unknown support. This is a finite classification of
+old supports; the desubdivision lemma makes it a necessary condition for
+**every** formal word period, not just those tried in the earlier probes.
+The cube filter skips one-coordinate tautologies before enumeration and starts
+from a range rather than allocating all patterns first; a 24-free-coordinate
+cap suffices for this census. Exhaustion, rather than timeout, decides each case.
+
+It remains to exclude h=19 for all periods. This does not require any interior
+transfer, periodicity inference from a census, or increasing search budgets.
+Every term in an inserted column is a coarse monomial times z^u P_r or z^u N_r,
+where u is 0 or 1. In formal row c, the possible positions are therefore
+
+    from z^u P_r:  r=c-u or c-u+1;
+    from z^u N_r:  r=p+1+u-c or p+u-c.
+
+Keeping only c=0,1,p,p+1 sees positions 1,2,p-1,p. Relabel the first two as
+left endpoints and the last two by offsets -1,0 from p. Coarse columns have
+z exponents 0,1,p,p+1 as well. The powers of Z and all coefficients are then
+independent of p. For p>=4 these endpoints are distinct. At p=2,3 some signs
+are identified, which only restricts the same universal model. The row labels
+remain distinct for every p>=2. Period one is impossible separately: the
+specialization k=1 leaves 401 retained vertices, an odd support to partition.
+
+`moving_boundary_system` constructs this one universal endpoint relaxation:
+200 old signs, 804 independent endpoint signs, and 714 formal boundary rows.
+It extracts exponents symbolically as beta*p+offset, without choosing a
+representative period or assuming stabilization from examples.
+`moving_boundary_audit` checks the exact coefficient map into any requested
+p>=2, aggregating the identified signs at p=2,3 rather than silently dropping
+them. Controls cover p=2,3,4,5,6,10,20,37 and other holes, and reject a changed
+coefficient. These finite controls check the implementation; the displayed
+index formulas establish why the model is uniform for unbounded p.
+
+Conditioning these rows on each old catalog entry adds 199 homogeneous
+signed-copy equations to the centre. All four relaxations are inconsistent:
+branches 0,2,3 yield a verified ternary forced zero after the binary quotient
+(373 coordinates); branch 1 yields a binary contradiction (259 coordinates).
+The complete replay took 0.88 seconds including the old catalog. No short
+ternary lift, interior row, literal branching or timeout was needed. In the
+ternary cases the kernel is substituted back into every input row; a forced
+zero cannot represent a sign. The binary step is the necessary parity system
+of the integer equations. Thus these are exact algebraic refusals, not failed
+search branches.
+
+**Computer-assisted conclusion within this ansatz.** For every h=1..98 and
+every positive integer p there is no formal moving-word signing with holes
+ht,99t. For an actual scale t=pk+1 with k>=2, all formal exponents are distinct
+under Z=z^t, so this rules out the corresponding physical repeated-word pair.
+Consequently any actual target-size pair on those supports must have **no
+common proper period dividing t-1 across all 201 inserted edge words**. The
+four old signings exist, but none admits this uniform inflation.
+
+This does not apply to arbitrary words by taking p=t-1: then k=1 and c=t
+collides with c=0 in the next coarse row. The formal converse used above
+fails exactly there. Nor does it apply to the earlier folded ansatz, whose
+shallow hole is 19 rather than 19t. Other hole placements and larger full
+partitions remain outside this particular refusal; the next subsection handles
+full partitions by a different argument. The task's all-pairs acceptance is
+still unmet. Further moving-period searches in this rejected method are
+unnecessary; the remaining work must change the method or support.
+
+Fast replay of the universal h=19 refusal, plus the whole old-support census:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --audit-boundary --period 2
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --boundary-refusal --hole 19 --seconds 30
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --coarse-supports --seconds 300
+```
+
+These negative reports are fresh-replay diagnostics, not portable standalone
+certificates; saved-certificate verification rejects them. The positive old
+assignments remain independently checkable with direct distance counters.
+The period-eight and period-twelve full conditioned runs also refused all four
+branches (67.48 and 300.60 seconds respectively), but the uniform proof makes
+those runs logically redundant. The larger period-twenty run was intentionally
+interrupted after the uniform refusal appeared; it supplies no search result.
+
+An ancillary exact sign rule is available as `ternary_short_sign_rows`. If a
+verified modular recovery expresses a sign as three signed free signs, their
+sum cannot be +/-3 modulo three, so it must be +/-1 and equals the recovered
+sign over the integers. For two terms the corresponding integer equation is
+2x_i+sum=0. These rows may optionally augment `joint_sign_closure`; exhaustive
+small modular-sign and integer-cube controls preserve every solution. Width
+four is deliberately excluded, since sums +/-2 and +/-4 have different integer
+lifts. This rule was not needed for the uniform endpoint refusal.
+
+
+### An unrestricted full-partition upper bound by subdivision inheritance
+
+The remaining larger-pair case can be closed without any word assumption.
+For a full signing on T(a,b,c), the no-hole physical column of an arm vertex
+(i,d) has exponents
+
+    d+1,  L_i+1-d,  d+L_j+1 (j != i),
+
+with coefficients +1,-1,-1,-1; the centre column is z-sum(z^(L_i+1)).
+Let L_i=t*l_i. In shell rows e congruent to 1 modulo t, the first and last
+exponents require d congruent to 0, and so does the reflected exponent.
+No nongrid vertex can contribute. The old vertices d=t*q give exactly the
+base columns after relabelling e=t*(E-1)+1. Hence a zero full signed shell
+system on the subdivided tree induces a zero full signed shell system on
+T(l_1,l_2,l_3), with every induced coordinate still a sign. Evaluating the
+base identity at z=1 gives balance, so it really is a full homometric pair.
+
+Thus **nonexistence of a full partition is inherited by uniform subdivision**.
+This is a necessary reduction for arbitrary signs, not a periodic-word claim.
+For the base T(99,79,23), the established fourth-root argument applies:
+99+1,79+1,23+1 are 4*(25,20,6), whose quotient sum is 51, odd. Its signed
+total polynomial would have to vanish at every fourth root, including 1.
+Every depth-residue sum would then be zero, impossible because the four
+residue classes contain 49,51,51,51 vertices. This reconstructs the relevant
+case of [the full-partition obstruction](PUBLISHED_CASES.md#a-full-partition-obstruction-and-a-sharp-case).
+
+For every odd t the scaled tree has N=201t+1 even vertices, and therefore
+
+    h(T(99t,79t,23t)) <= N/2-1 = (201t-1)/2.
+
+The earlier root-of-unity test applied directly at the scaled lengths does
+not always give this bound. The inheritance proof does: it uses the fixed
+base obstruction. At t=7981 the command below reports upper bound 802090.
+This is exactly the project's lower target, so it does **not** refute or
+establish its attainment. It does eliminate every larger full partition,
+leaving exactly the two-hole case for every resistant scale.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --full-partition-bound 7981
+```
+
+`full_partition_subdivision_audit` independently reconstructs every finite
+scaled column at several small unequal bases and scales, checking both that
+all nongrid columns miss the chosen residue and that every coarse column
+matches the base. The returned upper bound is strengthened only when the
+base root obstruction applies and the scaled total is even. On odd totals
+it retains the ordinary floor(N/2) bound, since a one-hole pair is a different
+case. Twenty-eight focused tests now cover the new bounds, uniform boundary
+maps and refusals, cube enumeration, direct distance witnesses, and all prior
+spectrum controls.
+
+The precise open target is now a two-hole pair of the required size, with
+holes of the same colour, without a common proper period dividing t-1 on
+the moving coarse-hole supports. Arbitrary inserted words, other hole depths
+and holes on different arms have not been excluded. No all-pairs upper bound
+strictly below the target, and no infinite positive family, has been obtained.

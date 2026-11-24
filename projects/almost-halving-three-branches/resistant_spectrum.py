@@ -1,7 +1,7 @@
-"""Search periodic folded interiors with independently free endpoint patches.
+"""Exact sign reductions and endpoint checks for resistant tripod attempts.
 
-A failed search is unknown; even an exhaustive refusal excludes only this
-ansatz on the fixed holes (1,19),(1,99t). It never excludes arbitrary pairs.
+Search limits are unknown. Every refusal names its support and word scope;
+none of the reductions here decides arbitrary homometric pairs.
 """
 import argparse
 from collections import defaultdict
@@ -64,6 +64,456 @@ def moving_periodic_system(period,hole=19):
                 add((arm,edge,r),terms)
     return keys,{e:{i:c for i,c in row.items() if c}
                  for e,row in rows.items() if any(row.values())}
+
+
+def full_partition_subdivision_bound(lengths,scale):
+    """Inherit the base root-of-unity full-partition obstruction.
+
+    Without holes, shell rows e=1 mod scale see exactly the old vertices
+    at depths divisible by scale. Relabel e=(E-1)*scale+1: their columns
+    are precisely the base full-partition columns. Hence every full
+    signing at the scaled tree would induce one at the base tree.
+    """
+    if (len(lengths)!=3 or any(type(n) is not int or n<1 for n in lengths)
+            or type(scale) is not int or scale<1):
+        raise ValueError('require three positive arm lengths and a positive integer scale')
+    divisor = math.gcd(*(n+1 for n in lengths))
+    quotient_sum = sum((n+1)//divisor for n in lengths)
+    base_refused = divisor%2==0 and quotient_sum%2==1
+    total = 1+scale*sum(lengths)
+    inherited = base_refused and total%2==0
+    return dict(base=list(lengths),scale=scale,base_divisor=divisor,
+                base_quotient_sum=quotient_sum,full_partition_refused=inherited or total%2==1,
+                homometric_pair_upper_bound=total//2-int(inherited),
+                inherited_from_base=inherited,all_pairs_decided=False,
+                scope='full partitions only; no bound below half-minus-one')
+
+
+def full_partition_subdivision_audit(lengths,scale):
+    """Direct-column control of every residue at a finite scaled tree."""
+    full_partition_subdivision_bound(lengths,scale)
+    import full_shorter_coupling as physical
+    scaled = [scale*n for n in lengths]
+    vertices = [(0,0)]+[(a,d) for a,n in enumerate(scaled,1) for d in range(1,n+1)]
+    old_columns = nongrid_columns = 0
+    for a,d in vertices:
+        column = physical.shell_column(scaled,set(),(a,d))
+        selected = {e:c for e,c in column.items() if (e-1)%scale==0}
+        if d%scale:
+            if selected: raise AssertionError('a nongrid vertex entered a coarse shell row')
+            nongrid_columns += 1
+        else:
+            recovered = {(e-1)//scale+1:c for e,c in selected.items()}
+            if recovered!=physical.shell_column(lengths,set(),(a,d//scale)):
+                raise AssertionError('coarse full-partition column differs from base column')
+            old_columns += 1
+    return dict(verified=True,old_columns=old_columns,nongrid_columns=nongrid_columns)
+
+
+def bipartition_support_obstruction(lengths,holes=()):
+    """Exact obstruction from the odd-distance shell, for a fixed support.
+
+    If each set has k vertices and a,b black vertices, equality of odd
+    distances gives (a-b)*(k-a-b)=0. Thus the retained black count a+b
+    must be even or equal k. This is only one necessary shell condition.
+    """
+    if (len(lengths)!=3 or any(type(n) is not int or n<1 for n in lengths)):
+        raise ValueError('require three positive integer arm lengths')
+    holes = list(holes)
+    if len(set(holes))!=len(holes): raise ValueError('require distinct holes')
+    for a,d in holes:
+        if (type(a) is not int or type(d) is not int or
+                not ((a==0 and d==0) or (1<=a<=3 and 1<=d<=lengths[a-1]))):
+            raise ValueError('hole is not a tree vertex')
+    retained = 1+sum(lengths)-len(holes)
+    if retained%2: raise ValueError('require an even retained support')
+    k = retained//2
+    black = 1+sum(n//2 for n in lengths)-sum(d%2==0 for _,d in holes)
+    return dict(pair_size=k,retained_black=black,retained_white=retained-black,
+                obstructed=black%2==1 and black!=k,
+                scope='odd-distance shell on this exact support only',all_pairs_decided=False)
+
+
+def coarse_support_system(hole=19):
+    """Untwisted t=1 shell system, in moving-compiler coordinate order.
+
+    This is necessary for *every* formal moving-word period: specialize
+    Z=z, so each inserted geometric sum vanishes, and cancel 1-z**p.
+    It is not a necessary condition on unrestricted pairs at larger t.
+    """
+    import full_shorter_coupling as physical
+    if type(hole) is not int or not 1<=hole<99:
+        raise ValueError('require 1<=hole<99')
+    lengths,holes = (99,79,23),{(1,hole),(1,99)}
+    keys = [(0,0,0)]+[(a,d,0) for a,n in enumerate(lengths,1)
+                      for d in range(1,n+1) if (a,d) not in holes]
+    rows = defaultdict(dict)
+    for i,(a,d,_) in enumerate(keys):
+        for e,c in physical.shell_column(lengths,holes,(a,d)).items():
+            rows[e][i] = c
+    return keys,dict(rows)
+
+
+def coarse_projection_audit(period,hole=19):
+    """Check Z=z specialization against independent physical columns.
+
+    Keep zero coefficients out of both maps; every inserted-word column
+    must cancel, and the old columns must equal (1-z**p)*K_old exactly.
+    No sign-search or rank assumption enters this check.
+    """
+    keys,formal = moving_periodic_system(period,hole)
+    old_keys,old_rows = coarse_support_system(hole)
+    positions = {key:i for i,key in enumerate(keys)}
+    actual,expected = defaultdict(lambda:defaultdict(int)),defaultdict(lambda:defaultdict(int))
+    for (q,c),row in formal.items():
+        for i,value in row.items(): actual[q+c][i] += value
+    for e,row in old_rows.items():
+        for i,value in row.items():
+            j = positions[old_keys[i]]
+            expected[e][j] += value
+            expected[e+period][j] -= value
+    def clean(rows):
+        return {e:{i:c for i,c in row.items() if c} for e,row in rows.items()
+                if any(row.values())}
+    if clean(actual)!=clean(expected):
+        raise AssertionError('formal specialization does not equal the old physical shells')
+    return dict(period=period,hole=hole,verified=True,old_variables=len(old_keys),
+                old_rows=len(old_rows),inserted_columns_cancelled=len(keys)-len(old_keys))
+
+
+def coarse_search(hole=19,seconds=30,nodes=1000000):
+    """Search the necessary old support only; never an inflated signing."""
+    start = time.monotonic()
+    keys,formal = coarse_support_system(hole)
+    original = list(formal.values())
+    closure = joint_sign_closure(len(keys),original,seconds)
+    result = dict(mode='coarse',hole=hole,all_pairs_decided=False,
+                  scope='old tripod only; necessary for formal moving words',
+                  closure=closure['history'])
+    def done(status,**details):
+        return dict(**result,status=status,elapsed=time.monotonic()-start,**details)
+    if closure['conflict']: return done('coarse_refused_by_joint_fields')
+    remaining = seconds-(time.monotonic()-start)
+    if not closure['complete'] or remaining<=0: return done('unknown')
+    refusal,basis = binary_elimination(closure['rows'])
+    if refusal is not None: return done('coarse_refused_by_parity')
+    engine = make_engine(closure['size'],closure['rows'],basis,remaining,nodes,'connected')
+    i,s = closure['aliases'][0]
+    status,values = engine.run({i:s})
+    if values is None: return done(status,nodes=engine.nodes)
+    restored = [s*values[i] for i,s in closure['aliases']]
+    if any(sum(c*restored[i] for i,c in row.items()) for row in original):
+        raise AssertionError('old support signing fails original physical shells')
+    return done(status,nodes=engine.nodes,
+                assignment=[[list(k),v] for k,v in zip(keys,restored)])
+
+
+def kernel_sign_patterns(size,rows,seconds=30,max_free=22):
+    """Enumerate the literal cube of a verified rational kernel, up to sign.
+
+    Every free coordinate is an original coordinate, so it is a sign.
+    Fixing its first sign positive removes exactly global complementation.
+    Meet-in-the-middle sum tables filter all 2**(nullity-1) assignments;
+    this is exhaustive only when complete=True. The dimension cap bounds
+    allocation, not a mathematical restriction on the input equations.
+    """
+    if type(max_free) is not int or not 1<=max_free<=24:
+        raise ValueError('require 1<=max_free<=24')
+    start = time.monotonic()
+    kernel = rational_recovery(size,rows,seconds)
+    if not kernel['complete']: return dict(complete=False,stage='rational')
+    free = kernel['free']
+    n = len(free)
+    if n>max_free: return dict(complete=False,stage='dimension_limit',nullity=n)
+    if n==0: return dict(complete=True,free=[],patterns=[],forms={},nullity=0)
+    positions = {i:j for j,i in enumerate(free)}
+    forms = {}
+    for i,expression in kernel['expressions'].items():
+        denominator = math.lcm(*(c.denominator for c in expression.values()))
+        coefficients = [0]*n
+        for v,c in expression.items(): coefficients[positions[v]] = int(c*denominator)
+        forms[i] = coefficients,denominator
+    candidates = range(1,1<<n,2)
+    split = n//2
+    mask = (1<<split)-1
+    def sums(word):
+        values = [-sum(word)]*(1<<len(word))
+        for b in range(1,len(values)):
+            bit = b&-b
+            values[b] = values[b^bit]+2*word[bit.bit_length()-1]
+        return values
+    ordered = sorted(forms.values(),key=lambda form:(
+        sum(c!=0 for c in form[0]),-sum(abs(c) for c in form[0])))
+    for coefficients,denominator in ordered:
+        if time.monotonic()-start>=seconds:
+            return dict(complete=False,stage='cube_filter',nullity=n)
+        nonzero = [c for c in coefficients if c]
+        if len(nonzero)==1 and abs(nonzero[0])==denominator: continue
+        left,right = sums(coefficients[:split]),sums(coefficients[split:])
+        candidates = [b for b in candidates
+                      if abs(left[b&mask]+right[b>>split])==denominator]
+        if not candidates: break
+    return dict(complete=True,free=free,patterns=list(candidates),forms=forms,nullity=n)
+
+
+def coarse_catalog(hole=19,seconds=30,max_free=24):
+    """All centre-positive signings of one old support; no inflated claim."""
+    start = time.monotonic()
+    keys,formal = coarse_support_system(hole)
+    rows = list(formal.values())
+    joint = joint_sign_closure(len(keys),rows,seconds)
+    if joint['conflict']:
+        return dict(complete=True,hole=hole,keys=keys,assignments=[],count=0,all_pairs_decided=False)
+    remaining = seconds-(time.monotonic()-start)
+    if not joint['complete'] or remaining<=0:
+        return dict(complete=False,hole=hole,stage='closure')
+    cube = kernel_sign_patterns(joint['size'],joint['rows'],remaining,max_free)
+    if not cube['complete']:
+        return dict(complete=False,hole=hole,stage=cube['stage'],nullity=cube.get('nullity'))
+    assignments = []
+    for bits in cube['patterns']:
+        values = {i:sum(c*(1 if bits>>j&1 else -1) for j,c in enumerate(coefficients))//denominator
+                  for i,(coefficients,denominator) in cube['forms'].items()}
+        restored = [s*values[i] for i,s in joint['aliases']]
+        restored = [restored[0]*v for v in restored]
+        if any(v not in (-1,1) for v in restored) or any(
+                sum(c*restored[i] for i,c in row.items()) for row in rows):
+            raise AssertionError('catalog entry fails original old-support equations')
+        assignments.append(restored)
+    assignments.sort()
+    if len({tuple(v) for v in assignments})!=len(assignments):
+        raise AssertionError('global sign normalization duplicated a catalog entry')
+    return dict(complete=True,hole=hole,keys=keys,assignments=assignments,
+                count=len(assignments),nullity=cube['nullity'],
+                elapsed=time.monotonic()-start,all_pairs_decided=False)
+
+
+def moving_boundary_system(hole=19):
+    """Universal endpoint relaxation for every formal period p>=2.
+
+    Extract exponents symbolically as beta*p+offset, without selecting a
+    representative period. Rows c=0,1,p,p+1 see word positions 1,2,p-1,p.
+    Endpoints are independent here; identifying them at p=2,3 cannot rescue
+    a refusal. The coefficient map is checked against the full compiler.
+    """
+    old,_ = coarse_support_system(hole)
+    lengths = (99,79,23)
+    keys = [('old',a,d) for a,d,_ in old]
+    keys += [(side,a,edge,r) for a,n in enumerate(lengths,1)
+             for edge in range(n) for side,values in (('left',(1,2)),('right',(-1,0)))
+             for r in values]
+    positions = {key:i for i,key in enumerate(keys)}
+    rows = defaultdict(lambda:defaultdict(int))
+    def put(key,q,beta,offset,value):
+        if offset in (0,1):
+            if beta not in (0,1): raise AssertionError('unexpected period coefficient')
+            rows[q,'left' if beta==0 else 'right',offset][positions[key]] += value
+    for a,d,_ in old:
+        key = ('old',a,d)
+        if a==0:
+            terms = [(0,1,1)]+[(n,1,-1) for n in lengths]
+        else:
+            terms = [(d,1,1),(lengths[a-1]-d,1,-1)]
+            terms += [(d+n,1,-1) for j,n in enumerate(lengths,1) if j!=a]
+        for h in (hole,99):
+            distance = abs(d-h) if a==1 else d+h
+            terms += [(distance,0,-1),(distance,1,1)]
+        # Multiply each old physical column by 1-z**p.
+        for q,offset,value in terms:
+            put(key,q,0,offset,value)
+            put(key,q,1,offset,-value)
+    for a,n in enumerate(lengths,1):
+        for edge in range(n):
+            for side,ends in (('left',(1,2)),('right',(-1,0))):
+                for offset in ends:
+                    key = (side,a,edge,offset)
+                    beta = int(side=='right')
+                    # r=beta*p+offset. P and N are represented directly
+                    # in (Z exponent, p coefficient, offset, coefficient).
+                    forward = [(0,beta,offset,1),(1,beta,offset-1,-1)]
+                    reflected = [(-1,1-beta,1-offset,1),(0,1-beta,-offset,-1)]
+                    def shifted(source,q,u,factor):
+                        for dq,b,j,c in source: put(key,q+dq,b,j+u,c*factor)
+                    shifted(forward,edge,1,1)
+                    shifted(reflected,n-edge,1,-1)
+                    for j,other in enumerate(lengths,1):
+                        if j!=a: shifted(forward,other+edge,1,-1)
+                    for h in (hole,99):
+                        source = reflected if a==1 and edge<h else forward
+                        distance = abs(edge-h) if a==1 else edge+h
+                        shifted(source,distance,0,-1)
+                        shifted(source,distance,1,1)
+    return keys,{label:{i:c for i,c in row.items() if c}
+                 for label,row in rows.items() if any(row.values())}
+
+
+def moving_boundary_audit(period,hole=19):
+    """Exact coefficient check, allowing endpoint identifications at p=2,3."""
+    if type(period) is not int or period<2: raise ValueError('require period>=2')
+    keys,universal = moving_boundary_system(hole)
+    physical,formal = moving_periodic_system(period,hole)
+    positions = {key:i for i,key in enumerate(physical)}
+    image = []
+    for key in keys:
+        if key[0]=='old': _,a,d = key; target = (a,d,0)
+        else:
+            side,a,edge,r = key
+            target = (a,edge,r if side=='left' else period+r)
+        image.append(positions[target])
+    expected = {}
+    for (q,side,c),row in universal.items():
+        label = (q,c if side=='left' else period+c)
+        terms = defaultdict(int)
+        for i,value in row.items(): terms[image[i]] += value
+        expected[label] = {i:c for i,c in terms.items() if c}
+    actual = {label:row for label,row in formal.items() if label[1] in (0,1,period,period+1)}
+    expected = {label:row for label,row in expected.items() if row}
+    if expected!=actual: raise AssertionError('universal boundary columns differ from formal coefficients')
+    return dict(period=period,hole=hole,verified=True,universal_variables=len(keys),
+                boundary_rows=len(actual),endpoint_identifications=len(image)-len(set(image)))
+
+
+def moving_boundary_refusal(hole=19,seconds=30):
+    """Replay a necessary-boundary refusal uniform over every word period.
+
+    Period one is separately impossible by retained-support parity at k=1.
+    For every p>=2 the universal endpoint model is necessary. A compatible
+    relaxation reports unknown, never a construction or a negative claim.
+    """
+    start = time.monotonic()
+    catalog = coarse_catalog(hole,seconds)
+    report = dict(mode='boundary',hole=hole,all_pairs_decided=False,branches=[],
+                  scope='all formal moving-word periods; holes ht and 99t only')
+    def done(status,**details):
+        return dict(**report,status=status,elapsed=time.monotonic()-start,**details)
+    if not catalog['complete']: return done('unknown',stage='old_catalog')
+    report['coarse_count'] = catalog['count']
+    keys,formal = moving_boundary_system(hole)
+    positions = {key:i for i,key in enumerate(keys)}
+    for b,assignment in enumerate(catalog['assignments']):
+        remaining = seconds-(time.monotonic()-start)
+        if remaining<=0: return done('unknown',stage='boundary_budget')
+        rows = list(formal.values())+[
+            {positions['old',a,d]:1,positions['old',0,0]:-value}
+            for (a,d,_),value in zip(catalog['keys'],assignment) if a or d]
+        closure = joint_sign_closure(len(keys),rows,remaining/(catalog['count']-b))
+        report['branches'].append(dict(branch=b,complete=closure['complete'],
+                                       refused=closure['conflict'],stage=closure.get('stage'),
+                                       variables=closure['size']))
+        if not closure['complete'] or not closure['conflict']:
+            return done('unknown',stage='boundary_relaxation')
+    return done('every_formal_period_refused')
+
+
+def coarse_support_catalog(seconds=300):
+    """Classify the 98 old supports; never classify arbitrary inflated pairs."""
+    if type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0:
+        raise ValueError('require a positive finite time')
+    start = time.monotonic()
+    entries = []
+    for hole in range(1,99):
+        obstruction = bipartition_support_obstruction((99,79,23),((1,hole),(1,99)))
+        if obstruction['obstructed']:
+            entries.append(dict(hole=hole,complete=True,count=0,reason='odd_distance_shell'))
+            continue
+        remaining = seconds-(time.monotonic()-start)
+        if remaining<=0:
+            entries.append(dict(hole=hole,complete=False))
+            continue
+        catalog = coarse_catalog(hole,min(30,remaining))
+        entries.append({k:v for k,v in catalog.items()
+                        if k in ('hole','complete','count','nullity','stage')})
+    return dict(complete=all(e['complete'] for e in entries),
+                surviving_holes=[(e['hole'],e['count']) for e in entries if e.get('count')],
+                unknown_holes=[e['hole'] for e in entries if not e['complete']],
+                old_supports=98,colour_refusals=sum(e.get('reason')=='odd_distance_shell' for e in entries),
+                elapsed=time.monotonic()-start,all_pairs_decided=False,
+                scope='old tripod only; necessary for every formal moving-word period')
+
+
+def moving_coarse_search(period=10,hole=19,seconds=300,nodes=1000000,short_recovery=False):
+    """Disjoin the exhaustive old-support catalog before moving-word search.
+
+    Every branch is still only this formal word ansatz. A timeout or an
+    incomplete catalog can never become a refusal. Refusals are replayable
+    diagnostics, not saved certificates accepted by verify_saved.
+    """
+    start = time.monotonic()
+    # Validate the period and independently check the specialization first.
+    audit = coarse_projection_audit(period,hole)
+    if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
+            or type(nodes) is not int or nodes<0):
+        raise ValueError('require a positive finite time and nonnegative node budget')
+    catalog = coarse_catalog(hole,seconds)
+    result = dict(mode='moving_coarse',period=period,hole=hole,
+                  all_pairs_decided=False,projection_verified=audit['verified'],
+                  coarse_catalog_complete=True,branches=[])
+    def done(status,**details):
+        return dict(**result,status=status,elapsed=time.monotonic()-start,**details)
+    if not catalog['complete']: return done('unknown',stage='coarse_catalog')
+    result['coarse_count'] = catalog['count']
+    keys,formal = moving_periodic_system(period,hole)
+    positions = {key:i for i,key in enumerate(keys)}
+    for branch,assignment in enumerate(catalog['assignments']):
+        remaining = seconds-(time.monotonic()-start)
+        if remaining<=0: return done('unknown',stage='branch_budget')
+        budget = remaining/(catalog['count']-branch)
+        original = list(formal.values())
+        # Use centre as the homogeneous constant. Global complementation
+        # normalizes every true moving signing into exactly one old branch.
+        conditioned = original+[{positions[key]:1,0:-v}
+                                for key,v in zip(catalog['keys'],assignment) if key!=(0,0,0)]
+        branch_start = time.monotonic()
+        closure = joint_sign_closure(len(keys),conditioned,budget,short_recovery=short_recovery)
+        summary = dict(branch=branch,complete=closure['complete'],
+                       stage=closure.get('stage'),variables=closure['size'])
+        result['branches'].append(summary)
+        if closure['conflict']:
+            summary['status'] = 'refused_by_joint_fields'
+            continue
+        available = budget-(time.monotonic()-branch_start)
+        if not closure['complete'] or available<=0:
+            summary['status'] = 'unknown'
+            continue
+        refusal,basis = binary_elimination(closure['rows'])
+        if refusal is not None:
+            summary['status'] = 'refused_by_parity'
+            continue
+        engine = make_engine(closure['size'],closure['rows'],reduced_binary_basis(basis),
+                             available,nodes,'connected')
+        i,s = closure['aliases'][0]
+        status,values = engine.run({i:s})
+        summary.update(status=status,nodes=engine.nodes)
+        if values is not None:
+            restored = [s*values[i] for i,s in closure['aliases']]
+            if any(sum(c*restored[i] for i,c in row.items()) for row in conditioned):
+                raise AssertionError('conditioned moving solution fails an untouched equation')
+            return done('sat',assignment=[[list(k),v] for k,v in zip(keys,restored)])
+    if any(b['status']=='unknown' for b in result['branches']): return done('unknown')
+    return done('ansatz_refused_by_coarse_branches')
+
+
+def verify_coarse_assignment(hole,assignment):
+    """Independent direct distance counter for a saved original support."""
+    from collections import Counter
+    keys,_ = coarse_support_system(hole)
+    supplied = {tuple(k):v for k,v in assignment}
+    if len(supplied)!=len(assignment) or set(supplied)!=set(keys):
+        raise ValueError('require every original support coordinate once')
+    if any(type(v) is not int or v not in (-1,1) for v in supplied.values()):
+        raise ValueError('require literal signs')
+    if supplied[0,0,0]!=1: raise ValueError('require positive centre')
+    positive = [(a,d) for (a,d,_),s in supplied.items() if s==1]
+    negative = [(a,d) for (a,d,_),s in supplied.items() if s==-1]
+    def distances(vertices):
+        return Counter(abs(d-e) if a==b else d+e
+                       for i,(a,d) in enumerate(vertices) for b,e in vertices[:i])
+    if len(positive)!=len(negative) or distances(positive)!=distances(negative):
+        raise ValueError('original support pair fails size or distance multiplicities')
+    return dict(verified=True,pair_size=len(positive),
+                claim='original support only; no inflated construction',all_pairs_decided=False)
+
+
 
 
 def compile_system(half, period, patch_width=40):
@@ -563,6 +1013,34 @@ def ternary_nonzero_relations(kernel):
     return relations
 
 
+def ternary_short_sign_rows(kernel):
+    """Exact integer consequences of nonzero modular recoveries of width <=3.
+
+    For two signed terms the only nonzero sums mod 3 are +/-2, so
+    2*x_i+sum=0. For three terms +/-3 is forbidden by x_i!=0;
+    the surviving sums are +/-1, hence x_i=sum over the integers.
+    Width four has no such unambiguous lift and is deliberately omitted.
+    """
+    free,expressions = kernel['free'],kernel['expressions']
+    rows = []
+    for i,(one,two) in expressions.items():
+        mask = one|two
+        weight = mask.bit_count()
+        if not 1<=weight<=3: continue
+        terms = {}
+        while mask:
+            bit = mask&-mask
+            terms[free[bit.bit_length()-1]] = 1 if one&bit else -1
+            mask ^= bit
+        row = defaultdict(int,{i:2 if weight==2 else 1})
+        for j,c in terms.items(): row[j] += c if weight==2 else -c
+        row = {j:c for j,c in row.items() if c}
+        if row: rows.append(row)
+    return rows
+
+
+
+
 def ternary_copy_relations(kernel):
     """Include identical/opposite kernel expressions of arbitrary support."""
     relations = list(ternary_nonzero_relations(kernel))
@@ -696,7 +1174,7 @@ def rational_recovery(size,original,seconds=30):
                 normalized_rows=normalized,kernel_verified=True,elapsed=time.monotonic()-start)
 
 
-def joint_sign_closure(size,original,seconds=30,steps=20):
+def joint_sign_closure(size,original,seconds=30,steps=20,short_recovery=False):
     """Alternate exact rational recovery, binary copies and ternary copies.
 
     Every quotient records a reversible signed alias. Stopping with no new
@@ -738,6 +1216,21 @@ def joint_sign_closure(size,original,seconds=30,steps=20):
         modular = ternary_analysis(size,rows,remaining(),retain_kernel=True)
         if not modular['complete']: return result(False,stage='ternary')
         if modular['forced_zero_coordinates']: return result(True,True,stage='ternary_nonzero')
+        added = 0
+        if short_recovery:
+            def canonical(row):
+                entries = sorted((i,c) for i,c in row.items() if c)
+                if not entries: return ()
+                divisor = math.gcd(*(c for _,c in entries))
+                if entries[0][1]<0: divisor = -divisor
+                return tuple((i,c//divisor) for i,c in entries)
+            seen = {canonical(row) for row in rows}
+            for row in ternary_short_sign_rows(modular['kernel']):
+                key = canonical(row)
+                if key and key not in seen:
+                    rows.append(dict(key))
+                    seen.add(key)
+                    added += 1
         relations = ternary_copy_relations(modular['kernel'])
         quotient = sign_relation_quotient(size,rows,relations)
         if quotient['conflict']: return result(True,True,stage='ternary_nonzero')
@@ -745,12 +1238,14 @@ def joint_sign_closure(size,original,seconds=30,steps=20):
                             rational_nullity=before-rational['rank'],
                             binary_variables=binary['size'],binary_free=binary['free'],
                             ternary_nullity=modular['nullity'],ternary_relations=len(relations),
-                            variables_after=quotient['size']))
+                            variables_after=quotient['size'],short_recovery_rows=added))
         lift = quotient['aliases']
         aliases = [(lift[i][0],s*lift[i][1]) for i,s in aliases]
         size,rows = quotient['size'],quotient['rows']
-        if size==before: return result(True,stop='no_more_signed_merges')
+        if size==before and not added: return result(True,stop='no_more_signed_merges')
     return result(False,stage='step_limit')
+
+
 
 
 def moving_search(period,seconds=30,nodes=10000,free_order='connected',closure_steps=20,rational=False,affine_shells=False,square_lift=False,joint_fields=False,reduced_xor=False,hole=19):
@@ -967,6 +1462,11 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='coarse':
+        if saved.get('status')!='sat': raise ValueError('no saved coarse sign witness')
+        return verify_coarse_assignment(saved.get('hole',19),saved['assignment'])
+    if saved.get('mode') in ('moving_coarse','boundary'):
+        raise ValueError('replay diagnostic is not a standalone saved certificate')
     if saved.get('mode')=='moving':
         if saved['status']!='sat': raise ValueError('no saved moving sign witness')
         keys,formal = moving_periodic_system(saved['period'],saved.get('hole',19))
@@ -1022,7 +1522,49 @@ def main():
     p.add_argument('--affine-shells',action='store_true',help='derive binary equations from exact local sign patterns')
     p.add_argument('--rational',action='store_true',help='augment moving search with exact recovery equations')
     p.add_argument('--parity-quotient',action='store_true',help='merge parity-forced signs before ternary analysis')
+    p.add_argument('--audit-coarse',action='store_true',help='verify Z=z formal specialization against old physical shells')
+    p.add_argument('--coarse-catalog',action='store_true',help='enumerate all centre-positive signings of one old support')
+    p.add_argument('--coarse',action='store_true',help='search one old support')
+    p.add_argument('--condition-coarse',action='store_true',help='disjoin old-support catalog before moving-word search')
+    p.add_argument('--short-recovery',action='store_true',help='add exact width<=3 modular recovery equations in joint closure')
+    p.add_argument('--audit-boundary',action='store_true',help='verify universal endpoint model against formal moving system')
+    p.add_argument('--boundary-refusal',action='store_true',help='replay universal endpoint refusal over all old-support branches')
+    p.add_argument('--coarse-supports',action='store_true',help='classify all 98 old first-arm supports')
+    p.add_argument('--full-partition-bound',type=int,help='report inherited full-partition upper bound at a scale')
     args = p.parse_args()
+    if args.full_partition_bound is not None:
+        print(json.dumps(full_partition_subdivision_bound((99,79,23),args.full_partition_bound),sort_keys=True))
+        return
+    if args.audit_coarse:
+        print(json.dumps(coarse_projection_audit(args.period,args.hole),sort_keys=True))
+        return
+    if args.audit_boundary:
+        print(json.dumps(moving_boundary_audit(args.period,args.hole),sort_keys=True))
+        return
+    if args.boundary_refusal:
+        print(json.dumps(moving_boundary_refusal(args.hole,args.seconds),sort_keys=True))
+        return
+    if args.coarse_supports:
+        print(json.dumps(coarse_support_catalog(args.seconds),sort_keys=True))
+        return
+    if args.coarse_catalog:
+        result = coarse_catalog(args.hole,args.seconds)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k not in ('assignments','keys')},sort_keys=True))
+        return
+    if args.coarse:
+        result = coarse_search(args.hole,args.seconds,args.nodes)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k!='assignment'},sort_keys=True))
+        return
+    if args.condition_coarse:
+        result = moving_coarse_search(args.period,args.hole,args.seconds,args.nodes,args.short_recovery)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k!='assignment'},sort_keys=True))
+        return
     if (args.joint_fields or args.square_lift or args.rational or args.reduced_xor) and not args.moving:
         p.error('--joint-fields, --square-lift, --reduced-xor and --rational require --moving')
     if args.moving:
