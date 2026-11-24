@@ -2069,3 +2069,81 @@ These inspected affine hulls supply neither. Further repetition of the same
 rank-limited pair check cannot advance this fixed point; a larger or more
 structured joint constraint, an actual literal solution, or a new invariant
 is needed. The ready task and its acceptance are left open.
+
+### Hawthorn: retain nonlinear local relations instead of their affine hulls
+
+The task's infinite-family acceptance remains **unmet**. The previous paired
+hull fixed point does not mean that exact local relations carry no further
+information. `relational_shell_consistency` keeps every valid local assignment,
+then semijoins selected pairs on their entire shared binary linear-form space.
+It does not replace a relation by its affine hull.
+
+Here is the soundness argument. Write each original sign as
+`(-1)^(a_i.x+b_i)` using the original shell parity equations. For each row,
+choose independent generators for the span of its `a_i`, and enumerate exactly
+those generator assignments for which the **integer**, rather than modular,
+row sum vanishes. Every full literal solution projects into this relation.
+For two rows, tagged binary elimination computes a basis of the intersection
+of their generator spans: each returned pair of coefficient words denotes
+exactly the same linear form in the two coordinate systems. An assignment
+whose intersection projection occurs nowhere in the other relation cannot
+extend to a full solution. Deleting it is therefore sound, including after
+previous deletions. An empty relation or empty intersection projection refuses
+this compiled system; nonempty pairwise-consistent relations need not have
+any simultaneous global assignment. Skipping an oversized row only weakens
+the relaxation, and budget expiry returns incomplete, never refusal.
+
+This is genuinely stronger than the existing separate-row affine closure on
+a small nine-sign control included in the tests: the latter is compatible,
+but exact relational propagation detects an empty overlap. Exhaustive tests
+inspect every literal assignment of that control and sixty small integer-row
+systems; every genuine solution survives every retained relation. Another
+sixty independently generated pairs of binary spans verify that the tagged
+intersection is the entire shared space, by enumerating both spans directly.
+
+The resistant quotient uses the same deterministic 7,047 selected neighbor
+pairs as the preceding hull diagnostic, not all row pairs. Replay:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-relations --period 4 --hull-rank 12 --seconds 30
+```
+
+At h=19, L=3990, p=4, w=2, all 4,094 row relations fit rank twelve: **no row
+is skipped**. The first semijoin sweep deletes 246 local assignments; the next
+deletes zero. There are 546,304 surviving local assignments in total, not
+546,304 full solutions. The observed whole diagnostic takes 2.86 seconds.
+Taking the affine hull of each resulting relation in a separate diagnostic
+still gives binary rank 3,725 on the original 3,818 signs, hence 93 free
+parameters. The deletions are information that this affine projection loses.
+No contradiction or literal signing follows from that fact.
+
+`make_relational_engine` can retain these exact relations during the existing
+untouched-row search. Each generator gets an auxiliary bit linked by an exact
+binary equation to the original free coordinates. The convention matters:
+the local generator is parity of **negative** sign bits, while the search
+engine represents a positive sign by bit one. Thus for generator mask g,
+`aux XOR parity(positive & g) = popcount(g) mod 2`. Tests fix every original
+sign assignment of three small systems and check both generator parity offsets,
+also checking the rank-zero skipped-row fallback against the original rows.
+An explicit original-sign seed uses global reversal without assuming that
+all auxiliary bits reverse. Any returned signing is restored (including
+joint-field aliases when requested) and checked against untouched input rows.
+Replay a bounded search with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-relations --relation-search --period 4 --hull-rank 12 --seconds 600 --nodes 1000000
+```
+
+This is a finite ansatz search, not an unrestricted all-support decision.
+The relations remain usable without the search and add no dependency.
+
+A direct helper run, after compiling the relations, gave the search 600
+seconds and one million nodes. It returned **unknown** after 8,377 nodes;
+engine construction plus search took 600.68 seconds. It added 11,570 auxiliary
+bits to the 3,818 original signs. The CLI above charges preparation against
+its single time budget, so its node count need not match this helper run.
+This is no speedup claim: the auxiliary state has substantial overhead.
+All 72 focused tests pass (61.05 seconds observed while the bounded search
+also ran), and `git diff --check` is clean. The remaining obstacle is global
+compatibility of the surviving nonlinear relations, or an unrestricted
+argument across every permitted support. No infinite family has been decided.

@@ -2,6 +2,7 @@
 from collections import defaultdict
 import unittest
 import itertools
+import functools
 import random
 from unittest.mock import patch
 import resistant_spectrum as rs
@@ -14,6 +15,109 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_relational_shells_preserve_every_literal_solution(self):
+        rng = random.Random(43272)
+        systems = [(9,[{0:1,2:-1,4:1,8:1,3:1,5:-1},
+                       {1:1,5:1,0:1,7:1,2:-1,8:-1,6:-1,3:-1},
+                       {3:-1,7:1,8:1,5:1},
+                       {6:-1,5:1,3:-1,0:1,7:-1,1:1}])]
+        for size in range(2,8):
+            for _ in range(10):
+                rows = [{i:c for i in range(size) if (c:=rng.randrange(-2,3))}
+                        for _ in range(4)]
+                for row in rows:
+                    if sum(row.values())%2:
+                        row[0] = row.get(0,0)+1
+                        if not row[0]:del row[0]
+                systems.append((size,rows))
+        stronger_size,stronger_rows = systems[0]
+        self.assertFalse(rs.affine_shell_closure(stronger_size,stronger_rows)['conflict'])
+        self.assertTrue(rs.relational_shell_consistency(stronger_size,stronger_rows,
+                        list(itertools.combinations(range(4),2)))['conflict'])
+        for size,rows in systems:
+            report = rs.relational_shell_consistency(size,rows,
+                         list(itertools.combinations(range(len(rows)),2)))
+            self.assertTrue(report['complete'])
+            literal = [v for v in range(1<<size) if all(
+                not sum(c*(-1 if v>>i&1 else 1) for i,c in row.items()) for row in rows)]
+            if report['conflict']: self.assertFalse(literal)
+            # Reconstruct the necessary parity fibre independently with the
+            # public reduced basis, rather than the implementation's recursion.
+            refusal,basis = rs.binary_elimination(rows)
+            reduced = rs.reduced_binary_basis(basis)
+            for v in literal:
+                free = v & ~sum(1<<p for p in basis)
+                for i,(mask,rhs) in reduced.items():
+                    self.assertEqual((v>>i)&1,((free&mask).bit_count()%2)^rhs)
+                for table in report['tables'].values():
+                    local = sum(((free&m).bit_count()%2)<<j
+                                for j,m in enumerate(table['generators']))
+                    self.assertIn(local,table['valid'])
+        skipped = rs.relational_shell_consistency(4,[{i:1 for i in range(4)}],local_rank=0)
+        self.assertEqual(skipped['skipped'],[0])
+        self.assertFalse(skipped['conflict'])
+        self.assertEqual(rs.relational_shell_consistency(2,[],seconds=1e-30)['complete'],False)
+        for pairs in ([(0,)],[(0,True)],[(0,4)]):
+            with self.assertRaises(ValueError):
+                rs.relational_shell_consistency(4,[{0:1,1:1}],pairs)
+
+    def test_relational_search_checks_literal_signs_with_both_parity_offsets(self):
+        systems = [([{0:1,1:1,2:1,3:1}],4),
+                   ([{0:1,1:-1,2:1,3:-1},{1:1,2:1,4:1,5:1}],6),
+                   ([{1:-1,3:1,2:-1,4:-1},{4:-1,0:1,1:1,5:-1},
+                     {4:-1,5:-1,0:1,2:1}],6)]
+        offsets = set()
+        for rows,size in systems:
+            for rank in (0,12):
+                relations = rs.relational_shell_consistency(size,rows,local_rank=rank)
+                self.assertTrue(relations['complete'])
+                self.assertFalse(relations['conflict'])
+                offsets.update(m.bit_count()%2 for t in relations['tables'].values()
+                               for m in t['generators'])
+                engine = rs.make_relational_engine(size,rows,relations,seconds=5,nodes=10000)
+                status,values = engine.run({0:1})
+                self.assertEqual(status,'sat')
+                self.assertTrue(all(not sum(c*values[i] for i,c in row.items()) for row in rows))
+                for bits in range(1<<size):
+                    signs = [1 if bits>>i&1 else -1 for i in range(size)]
+                    literal = all(not sum(c*signs[i] for i,c in row.items()) for row in rows)
+                    engine = rs.make_relational_engine(size,rows,relations,seconds=5,nodes=10000)
+                    status,values = engine.run(dict(enumerate(signs)))
+                    self.assertEqual(status,'sat' if literal else 'unsat')
+                    if values is not None:self.assertEqual(values[:size],signs)
+        self.assertEqual(offsets,{0,1})
+        # The CLI uses the same compact report without retaining truth tables.
+        diagnostic = rs.folded_hull_diagnostic(period=1,seconds=5,exact_relations=True)
+        self.assertEqual(diagnostic['mode'],'folded_relations')
+        self.assertTrue(diagnostic['conflict'])
+
+    def test_binary_relation_overlap_is_the_entire_shared_span(self):
+        rng = random.Random(43273)
+        def span(generators):
+            return {functools.reduce(int.__xor__,(m for j,m in enumerate(generators)
+                    if v>>j&1),0) for v in range(1<<len(generators))}
+        for _ in range(60):
+            generators = []
+            for side in range(2):
+                basis = {}
+                for mask in (rng.randrange(1,64) for _ in range(4)):
+                    while mask:
+                        p = mask.bit_length()-1
+                        if p not in basis:
+                            basis[p] = mask
+                            break
+                        mask ^= basis[p]
+                generators.append(list(basis.values()))
+            left,right = generators
+            overlap = rs.binary_relation_overlap(left,right)
+            shared = []
+            for a,b in overlap:
+                x = functools.reduce(int.__xor__,(m for j,m in enumerate(left) if a>>j&1),0)
+                y = functools.reduce(int.__xor__,(m for j,m in enumerate(right) if b>>j&1),0)
+                self.assertEqual(x,y)
+                shared.append(x)
+            self.assertEqual(span(shared),span(left)&span(right))
+
     def test_joint_row_hulls_keep_correlations_and_all_literal_solutions(self):
         # Separately each balanced four-sign row spans the same parity plane.
         # Together they force opposite pairs, which that plane cannot express.

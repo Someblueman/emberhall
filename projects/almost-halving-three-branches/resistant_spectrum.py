@@ -2188,8 +2188,129 @@ def affine_shell_closure(size, original, seconds=30, rounds=20, local_rank=12, b
     return result(False,stage='round_limit')
 
 
+def binary_relation_overlap(left, right):
+    """Coordinate maps for the intersection of two independent GF(2) spans.
+
+    Each returned pair (a,b) denotes the same original linear form in the
+    left and right generators. These pairs form a basis of the intersection.
+    """
+    basis, overlap = {}, []
+    for side, generators in enumerate((left,right)):
+        for j,mask in enumerate(generators):
+            a,b = (1<<j,0) if side==0 else (0,1<<j)
+            while mask:
+                pivot = mask.bit_length()-1
+                if pivot not in basis:
+                    basis[pivot] = mask,a,b
+                    break
+                old,c,d = basis[pivot]
+                mask,a,b = mask^old,a^c,b^d
+            if not mask:
+                if side==0 or not a or not b:
+                    raise ValueError('generators must be independent')
+                overlap.append((a,b))
+    return overlap
+
+
+def relational_shell_consistency(size, original, pairs=(), seconds=30, local_rank=12):
+    """Keep exact local sign relations, then semijoin their shared linear forms.
+
+    Unlike affine hull closure this retains holes inside each local relation.
+    A deletion lacks a compatible assignment in another necessary relation,
+    so cannot remove a full literal solution. Empty means a scoped refusal;
+    a nonempty fixed point is only a relaxation, never a sign witness.
+    Only supplied row pairs are joined; oversized rows are safely skipped.
+    """
+    if (type(size) is not int or size<1 or type(seconds) not in (int,float)
+            or not math.isfinite(seconds) or seconds<=0 or type(local_rank) is not int
+            or not 0<=local_rank<=16):
+        raise ValueError('require positive size/time and local rank in 0..16')
+    original = list(original)
+    if any(type(i) is not int or not 0<=i<size or type(c) is not int
+           for row in original for i,c in row.items()):
+        raise ValueError('invalid integer shell row')
+    pairs = list(pairs)
+    if any(not isinstance(pair,(tuple,list)) or len(pair)!=2 or
+           any(type(i) is not int or not 0<=i<len(original) for i in pair)
+           for pair in pairs):
+        raise ValueError('require pairs of valid row indices')
+    start = time.monotonic()
+    tables,skipped,joins,history = {},[],[],[]
+    def expired(): return time.monotonic()-start>=seconds
+    def result(complete,conflict=False,**extra):
+        return dict(complete=complete,conflict=conflict,tables=tables,
+                    skipped=skipped,joins=len(joins),history=history,
+                    elapsed=time.monotonic()-start,**extra)
+    refusal,basis = binary_elimination(original)
+    if refusal is not None: return result(True,True,stage='initial_parity')
+    expressions = {}
+    for i in range(size):
+        if expired(): return result(False,stage='parameterization')
+        if i not in basis:
+            expressions[i] = 1<<i,0
+            continue
+        mask,rhs = basis[i]
+        mask ^= 1<<i
+        out = 0
+        while mask:
+            bit = mask&-mask
+            a,b = expressions[bit.bit_length()-1]
+            out,rhs = out^a,rhs^b
+            mask ^= bit
+        expressions[i] = out,rhs
+    for index,row in enumerate(original):
+        local_basis,generators,terms = {},[],defaultdict(int)
+        for i,c in row.items():
+            mask,rhs = expressions[i]
+            local = 0
+            while mask:
+                pivot = mask.bit_length()-1
+                if pivot not in local_basis:
+                    bit = 1<<len(generators)
+                    generators.append(mask)
+                    local_basis[pivot] = mask,bit
+                    local ^= bit
+                    break
+                old,b = local_basis[pivot]
+                mask,local = mask^old,local^b
+            terms[local] += c*(-1 if rhs else 1)
+        if len(generators)>local_rank:
+            skipped.append(index)
+            continue
+        terms = [(m,c) for m,c in terms.items() if c]
+        valid = []
+        for v in range(1<<len(generators)):
+            if expired(): return result(False,stage='enumeration')
+            if not sum(c*(-1 if (m&v).bit_count()%2 else 1) for m,c in terms):
+                valid.append(v)
+        tables[index] = dict(generators=generators,valid=valid)
+        if not valid: return result(True,True,stage='empty_row',row=index)
+    for i,j in sorted(set(tuple(sorted(pair)) for pair in pairs)):
+        if expired(): return result(False,stage='overlap')
+        if i==j or i not in tables or j not in tables: continue
+        overlap = binary_relation_overlap(tables[i]['generators'],tables[j]['generators'])
+        if overlap: joins.append((i,j,overlap))
+    def project(v,masks):
+        return sum(((v&m).bit_count()%2)<<k for k,m in enumerate(masks))
+    while True:
+        removed = 0
+        for i,j,overlap in joins:
+            if expired(): return result(False,stage='semijoin')
+            left,right = tables[i]['valid'],tables[j]['valid']
+            lp = [project(v,[a for a,b in overlap]) for v in left]
+            rp = [project(v,[b for a,b in overlap]) for v in right]
+            common = set(lp)&set(rp)
+            if not common: return result(True,True,stage='empty_overlap',pair=(i,j))
+            new_left = [v for v,p in zip(left,lp) if p in common]
+            new_right = [v for v,p in zip(right,rp) if p in common]
+            removed += len(left)+len(right)-len(new_left)-len(new_right)
+            tables[i]['valid'],tables[j]['valid'] = new_left,new_right
+        history.append(removed)
+        if not removed: return result(True,stage='fixed_point')
+
+
 def folded_hull_diagnostic(half=3990,period=4,patch=2,hole=19,seconds=600,
-                           local_rank=16,joint_fields=False):
+                           local_rank=16,joint_fields=False,exact_relations=False,relation_search=False,nodes=1000000):
     """Necessary joint-row hulls on one periodic moving-hole word system.
 
     Choose, for each row, the two rows sharing the most literal coordinates
@@ -2202,7 +2323,8 @@ def folded_hull_diagnostic(half=3990,period=4,patch=2,hole=19,seconds=600,
     start = time.monotonic()
     keys,rows = compile_moving_folded(half,period,patch,hole)
     size = len(keys)
-    report = dict(mode='folded_hulls',half=half,period=period,patch=patch,hole=hole,
+    source_rows = rows
+    report = dict(mode='folded_relations' if exact_relations else 'folded_hulls',half=half,period=period,patch=patch,hole=hole,
                   input_variables=size,input_rows=len(rows),local_rank=local_rank,
                   all_pairs_decided=False)
     def done(**extra):
@@ -2230,11 +2352,40 @@ def folded_hull_diagnostic(half=3990,period=4,patch=2,hole=19,seconds=600,
             return done(complete=False,stage='block_selection')
     remaining = seconds-(time.monotonic()-start)
     if remaining<=0:return done(complete=False,stage='block_selection')
-    hull = affine_shell_closure(size,rows,seconds=remaining,local_rank=local_rank,
-                               blocks=sorted(blocks))
+    if exact_relations:
+        hull = relational_shell_consistency(size,rows,pairs=sorted(blocks),
+                                           seconds=remaining,local_rank=local_rank)
+        if relation_search and hull['complete'] and not hull['conflict']:
+            remaining = seconds-(time.monotonic()-start)
+            if remaining<=0:
+                report['search'] = dict(status='unknown',nodes=0)
+            else:
+                engine = make_relational_engine(size,rows,hull,remaining,nodes)
+                remaining = seconds-(time.monotonic()-start)
+                if remaining<=0:
+                    report['search'] = dict(status='unknown',nodes=0)
+                else:
+                    engine.seconds = remaining
+                    status,values = engine.run({0:1})
+                    report['search'] = dict(status=status,nodes=engine.nodes,
+                                           auxiliaries=len(engine.values)-size)
+                    if values is not None:
+                        restored = ([sign*values[i] for i,sign in joint['aliases']]
+                                    if joint_fields else values[:size])
+                        if any(sum(c*restored[i] for i,c in row.items()) for row in source_rows):
+                            raise AssertionError('relational witness fails untouched rows')
+                        report['assignment'] = [[list(k),v] for k,v in zip(keys,restored)]
+        tables = hull.pop('tables')
+        hull['tables'] = len(tables)
+        hull['patterns'] = sum(len(t['valid']) for t in tables.values())
+        hull['skipped'] = len(hull['skipped'])
+    else:
+        hull = affine_shell_closure(size,rows,seconds=remaining,local_rank=local_rank,
+                                   blocks=sorted(blocks))
     report.update(variables=size,rows=len(rows),blocks=len(blocks))
     return done(analysis={k:v for k,v in hull.items() if k!='basis'},
-                complete=hull['complete'],conflict=hull['conflict'])
+                complete=hull['complete'] and report.get('search',{}).get('status')!='unknown',
+                conflict=hull['conflict'] or report.get('search',{}).get('status')=='unsat')
 
 
 def quadratic_sign_lift(kernel):
@@ -2901,6 +3052,48 @@ def make_engine(size,rows,basis,seconds,nodes,free_order='natural'):
     return engine
 
 
+def make_relational_engine(size,rows,relations,seconds=30,nodes=1000000):
+    """Add retained nonlinear relations to the exact untouched-row search.
+
+    Auxiliary positive bits encode parity of *negative* original free bits.
+    The offset below is essential for even-weight generators. Explicitly
+    fixing original sign zero uses the true global reversal symmetry; the
+    auxiliaries need not all reverse together.
+    """
+    refusal,basis = binary_elimination(rows)
+    if refusal is not None or relations['conflict'] or not relations['complete']:
+        raise ValueError('require completed compatible relations and parity fibre')
+    engine = make_engine(size,rows,basis,seconds,nodes,'connected')
+    masks = sorted({m for t in relations['tables'].values() for m in t['generators']})
+    index = {m:size+j for j,m in enumerate(masks)}
+    engine.values.extend([0]*len(masks))
+    engine.links.extend([] for _ in masks)
+    engine.long_links.extend([] for _ in masks)
+    engine.xor_links.extend([] for _ in masks)
+    for m,i in index.items():
+        rid = len(engine.xor_rows)
+        equation = m|(1<<i)
+        engine.xor_rows.append((equation,m.bit_count()%2))
+        while equation:
+            bit = equation&-equation
+            engine.xor_links[bit.bit_length()-1].append(rid)
+            equation ^= bit
+    for table in relations['tables'].values():
+        ids = [index[m] for m in table['generators']]
+        patterns = table['valid']
+        packed = [bytearray((len(patterns)+7)//8) for _ in ids]
+        for k,v in enumerate(patterns):
+            for j in range(len(ids)):
+                if v>>j&1: packed[j][k//8] |= 1<<(k%8)
+        columns = [int.from_bytes(p,'little') for p in packed]
+        full = (1<<len(patterns))-1
+        rid = len(engine.tables)
+        engine.tables.append((ids,columns,full))
+        engine.allowed.append(full)
+        for j,i in enumerate(ids): engine.links[i].append((rid,j))
+    return engine
+
+
 def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_order='natural'):
     keys,rows = compile_system(half,period,patch_width)
     certificate,basis = binary_elimination(rows)
@@ -3125,6 +3318,8 @@ def main():
     p.add_argument('--sparse-pivots',type=int,default=40000)
     p.add_argument('--moving',action='store_true',help='search moving holes 19t and 99t')
     p.add_argument('--moving-folded',action='store_true',help='search the radius-one moving-hole folded strip')
+    p.add_argument('--relation-search',action='store_true',help='with --folded-relations, search retained exact constraints against untouched rows')
+    p.add_argument('--folded-relations',action='store_true',help='retain exact local sign relations and semijoin shared binary forms')
     p.add_argument('--folded-hulls',action='store_true',help='diagnose joint row correlations in one periodic moving-hole strip')
     p.add_argument('--hull-rank',type=int,default=16,help='maximum local binary rank in folded hull diagnostics, 0..16')
     p.add_argument('--moving-strip-audit',type=int,metavar='SCALE',help='compare every moving-hole strip column with the physical shell matrix')
@@ -3163,10 +3358,13 @@ def main():
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
-    if args.folded_hulls:
+    if args.relation_search and not args.folded_relations:
+        p.error('--relation-search requires --folded-relations')
+    if args.folded_hulls or args.folded_relations:
         if not 0<=args.hull_rank<=16:p.error('--hull-rank must be in 0..16')
         result=folded_hull_diagnostic(args.half,args.period,args.folded_patch,args.hole,
-                                     args.seconds,args.hull_rank,args.joint_fields)
+                                     args.seconds,args.hull_rank,args.joint_fields,args.folded_relations,
+                                     args.relation_search,args.nodes)
         if args.write:
             with open(args.write,'w') as f:json.dump(result,f)
         print(json.dumps(result,sort_keys=True))
