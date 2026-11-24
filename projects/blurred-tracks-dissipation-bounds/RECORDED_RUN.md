@@ -1,6 +1,11 @@
-# Recorded run (milestone 1)
+# Recorded runs
 
-Commands run 2026-11-23 in this directory, Python 3.13.2, standard library only.
+Earlier sections retain the historical runs of individual research slices. Their
+local test counts and “open” notes describe that stage, not the current API.
+The current synthesis run is below; it supersedes any interpretation of branch
+calibration as a dissipation confidence guarantee.
+
+Initial commands run 2026-11-23 in this directory, Python 3.13.2, standard library only.
 
 ## python3 blurred_tracks.py
 
@@ -543,3 +548,120 @@ FAILED: none -- all checks passed
 
 ## Tests after s27: python3 -m pytest -q
 66 passed (61 after s26 + 5 new in test_scalar_phi_proof.py)
+
+
+## Current synthesis and repaired interface (2026-11-24)
+
+Python 3.13.2. Independently inspected contribution `f2ce532`, then tested all four
+complete inspected files against this checkout's unchanged project sources in a
+temporary copy. Trusted integration of run `f7c8db1f7ffa4d4688e347a73790248e`
+subsequently returned `integrated`, `test_exit=0`. No implementation was altered
+for this account. The current public entry point is the integrated module;
+the older per-slice experiments above remain historical results.
+
+From the repository root:
+
+```sh
+python3 projects/blurred-tracks-dissipation-bounds/dissipation_bounds.py
+```
+
+Actual output (exit 0):
+
+```
+[ok] explicit rational population example retains sigma=30.42
+[ok] float timing alone cannot certify all-m completeness
+[ok] exact one-third population example preserves true dissipation
+[ok] finite singleton is diagnostic, not a dissipation bound
+[ok] second exposure separates tested scalar rivals without a global claim
+0 failures
+```
+
+From the project directory:
+
+```sh
+python3 dissipation_bounds.py --csv synthetic_track.csv --json
+```
+
+Exit **1**; selected actual fields (the command prints additional diagnostics):
+
+```json
+{
+  "status": "uncertainty_unavailable",
+  "n_frames": 1000,
+  "search_complete": false,
+  "uncertainty": "unavailable",
+  "plugin_span": [12.453698941531425, 45.95827793002246],
+  "sigma_bounds": null
+}
+```
+
+This is a synthetic track diagnostic, not an interval with confidence coverage.
+A separate regression witness uses the frozen general model, 1000 frames,
+seed 12345, 20 substeps: finite and bootstrap modes retain the singleton
+plug-in value `11.4818297137227`, against truth `4.770381836945305`, and return
+no bounds. Both witnesses are checked in `test_dissipation_bounds.py`.
+
+```sh
+python3 -m pytest -q
+```
+
+Actual result: `114 passed in 7.84s` (exit 0). This includes pytest function tests
+as well as unittest classes. Boundary checks include exact versus near-rational
+timing, empty truncated searches, a branch outside the initial window, incomplete
+scalar sheets, two-exposure source ordering, unsupported finite joint uncertainty,
+bootstrap failure, and missing/duplicate/reordered CSV frame labels. The noise
+checks include independent Ito-integral quadrature for the joint exposure sampler
+and a direct fourth-cumulant tensor contraction.
+
+```sh
+python3 noise_misspecification.py
+```
+
+Actual default run: `N=4000`, 24 films per design/law, 80 bootstrap replicates,
+block length 16, exact Gaussian exposure integration, seeds `440100+r`,
+`Q=[[0.25,0.08],[0.08,0.06]]` (exit 0). Selected actual output:
+
+```
+isotropic/gaussian: fits=24/24, bootstrap=24/24, block=16; symmetry=23, +isotropic gates=6
+isotropic/student-t5: fits=24/24, bootstrap=24/24, block=16; symmetry=22, +isotropic gates=5
+isotropic/blink-2pct: fits=24/24, bootstrap=24/24, block=16; symmetry=22, +isotropic gates=4
+general/gaussian: fits=24/24, bootstrap=24/24, block=16; symmetry=24, +isotropic gates=4
+general/student-t5: fits=24/24, bootstrap=24/24, block=16; symmetry=22, +isotropic gates=4
+general/blink-2pct: fits=24/24, bootstrap=24/24, block=16; symmetry=21, +isotropic gates=3
+FAILED: none
+```
+
+For general/blink noise, marginal coverage counts `(R,eq_ell,off)` are
+`(21,23,22)/24` for Gaussian Isserlis, `(21,24,22)/24` with the known fourth-moment
+correction, and `(23,23,23)/24` for block bootstrap. These are descriptive,
+true-branch residual/gate coverage rates. They neither measure dissipation-bound
+coverage nor prove universal bootstrap improvement. The command prints a Wilson
+interval for each rate; even 24/24 has interval approximately `[0.862,1]`.
+Unavailable fits count as misses. The Isserlis comparison uses oracle population
+second moments, and the fourth-moment comparison knows the simulated noise law.
+
+The original documented commands were also rerun: `python3 blurred_tracks.py`,
+`python3 verify_blurred.py`, and `python3 verify_general.py`. The two verification
+scripts ended `FAILED: none — all checks passed`. Their finite-window notes
+remain local to those earlier scripts; they do not replace the current interface's
+explicit completeness status.
+
+Milestone synthesis: the population algorithm, incomplete-search semantics and
+noise-moment invariance are reproducible; finite-film continuous dissipation
+uncertainty, finite joint coverage, complete scalar sheets and irrational tails
+remain unresolved. Milestone closure requires an independent review of that
+limited account, not acceptance of universal calibrated bounds.
+
+
+The README's import example was executed unchanged against the inspected sources.
+It constructs exact synthetic population moments, supplies `Fraction(1,2)` only
+where the design declares it, and tests a second near-point exposure. Output:
+
+```
+unique True 30.42
+incomplete None
+unique True 30.42
+```
+
+This contrasts a complete numerical population search, an otherwise identical
+undeclared-timing search, and a joint population filter with one complete source.

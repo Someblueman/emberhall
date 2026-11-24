@@ -18,30 +18,109 @@ compatible with the exact observed covariances — over *all* alias branches,
 not a finite scan. Full derivation, frozen assumptions and honest limits:
 [DERIVATION.md](DERIVATION.md).
 
-From a clone of the repository, reproduce the result with one command
+From a clone, run the current population and finite-track boundary checks
 (Python 3.10+, standard library only):
 
 ```sh
-python3 projects/blurred-tracks-dissipation-bounds/blurred_tracks.py
+python3 projects/blurred-tracks-dissipation-bounds/dissipation_bounds.py
 ```
 
-Check it by routes that do not share the algebra (numerical quadrature of
-the defining integrals, Monte Carlo simulation, complete branch accounting):
+The original covariance example remains runnable with
+`python3 projects/blurred-tracks-dissipation-bounds/blurred_tracks.py`.
+For the supplied seeded synthetic track:
 
 ```sh
 cd projects/blurred-tracks-dissipation-bounds
-python3 verify_blurred.py
-python3 -m pytest -q test_blurred_tracks.py
-``` A seeded synthetic track of
-the frozen example is in [synthetic_track.csv](synthetic_track.csv);
-`make_synthetic.py` regenerates it. [RECORDED_RUN.md](RECORDED_RUN.md) holds
-the actual outputs.
+python3 dissipation_bounds.py --csv synthetic_track.csv --json
+```
 
-Status: milestones 1–2 of 3 (project `great-choice-20261124`). Milestone 2
+This exits **1**, deliberately: `status` is `uncertainty_unavailable`,
+`search_complete` is false and `sigma_bounds` is null. Its searched plug-in
+span is approximately `[12.4537, 45.9583]`; this is **not a confidence interval**.
+The CSV must contain `frame,y1,y2`, with consecutive nonnegative integer
+frame labels (any starting label), finite coordinates and at least three rows.
+`--Delta` is the time between consecutive frames; gaps, duplicates and reordered
+frames are refused. Missing observations outside the supplied interval cannot
+be detected. `--detrend 0` removes the sample mean; degrees 1–3 remove fitted
+polynomials and do not establish robustness to arbitrary drift.
+
+The API `certify_covariances` separates three questions:
+
+| Input/search | What the returned result supports |
+|---|---|
+| Population moments, complete numerical branch enumeration | Model-conditional `sigma_bounds`, subject to numerical tolerances |
+| Population moments, truncated enumeration | `status="incomplete"`, diagnostic `plugin_span`, no bounds |
+| Finite or bootstrap moments | Branch diagnostics, `status="uncertainty_unavailable"`, no bounds |
+
+Complex-pair all-integer elimination requires the caller to declare ideal exact
+timing with `exposure_ratio=Fraction(p, q)` from Python's `fractions` module.
+A float ratio alone never supplies that assumption. Excessive denominators
+(currently above 2000), degenerate or excessive residue searches remain
+incomplete. Scalar propagators use a finite winding-sheet search and are
+incomplete even when only one candidate survives. Population bounds use floating
+point, not interval-arithmetic proof enclosures.
+
+`certify_two_exposures` filters motions against both sets of population moments,
+with the same motion and localization-noise variance. A complete enumeration
+from either exposure can suffice; two incomplete searches cannot establish global
+uniqueness. Finite/bootstrap two-exposure uncertainty is currently refused.
+A tested scalar example loses a rival with a second exposure, but remains globally
+incomplete. See [DERIVATION.md §28](DERIVATION.md#28-current-algorithm-and-milestone-synthesis).
+
+A minimal import example, from the project directory, uses population moments
+constructed from a known motion. The rational timing declaration is an assumption
+about this synthetic design, not something inferred from the moments:
+
+```sh
+python3 - <<'PYTHON'
+from fractions import Fraction
+from dissipation_bounds import certify_covariances, certify_two_exposures
+from general_tracks import GeneralVortex
+
+g = GeneralVortex([[-1., -3.9], [3.9, -1.]], [[1., 0.], [0., 1.]])
+def exposure(eps):
+    return (*[g.observed_cov_matrix(1., eps, .04, k) for k in range(3)], 1., eps)
+half = exposure(.5)
+r = certify_covariances(*half, exposure_ratio=Fraction(1, 2))
+print(r['status'], r['search_complete'], round(r['sigma_bounds'][0], 6))
+r = certify_covariances(*half)
+print(r['status'], r['sigma_bounds'])
+r = certify_two_exposures(exposure(1e-4), half,
+                         exposure_ratios=(None, Fraction(1, 2)), tol=1e-5)
+print(r['status'], r['resolved_by_two_exposures'], round(r['sigma_bounds'][0], 6))
+PYTHON
+```
+
+This prints `unique True 30.42`, `incomplete None`, and `unique True 30.42`.
+
+Reproduce the independent checks and the camera-noise experiment:
+
+```sh
+python3 verify_blurred.py
+python3 verify_general.py
+python3 -m pytest -q
+python3 noise_misspecification.py
+```
+
+The implementation uses only the standard library; the test command needs pytest.
+The noise experiment studies marginal coverage of branch residuals and zero-lag
+gates, with known mean, not coverage of dissipation bounds. Independent white
+localization noise of arbitrary covariance preserves positive-lag drift information;
+unequal covariance can invalidate the extra isotropic-noise gates. Heavy tails
+can change those gates' first-order variance. Block bootstrap is an empirical
+comparison, not a universal repair; unavailable fits count as misses. Commands,
+outputs and limitations are in [RECORDED_RUN.md](RECORDED_RUN.md).
+
+Status: milestones 1–2 accepted; milestone 3 synthesis is ready for independent
+review, with finite-data dissipation uncertainty still unsupported. This is a
+runnable covariance/branch-analysis library and computation, not a universal
+finite-film dissipation estimator.
+
+Research history (project `great-choice-20261124`). Milestone 2
 ([general_tracks.py](general_tracks.py), DERIVATION.md §7) extends the
 covariance to general stable 2D drift/diffusion matrices and tests alias
 branches of the matrix logarithm in a non-isotropic example. DERIVATION.md
-§11 closes its remaining loopholes: all real logarithms of the propagator
+§11 addresses logarithm classification and singular cases: all real logarithms of the propagator
 are classified ([real_logs.py](real_logs.py) — unique or nonexistent
 except a continuous family for scalar `Φ`, which the film itself
 rejects on frozen examples); singular `Γ_1`/`UW` are proved impossible
@@ -82,9 +161,11 @@ complete verified exclusion (70-digit arithmetic) for s22's closest
 truth over the whole rival family.
 Each script runs standalone (`python3 <script>.py`) and all results are
 recorded in RECORDED_RUN.md; `python3 -m pytest -q` runs the test suite
-(66 tests). Still open, plainly: the parameter-free scalar-`Φ` theorem
+(historical count; current full run: 114 tests). Still open, plainly: the parameter-free scalar-`Φ` theorem
 (s27 settles one truth and names the remaining quantity `w*`), whether
 `dist(ξ*, Ξ)` is exactly zero (s26), the per-truth liminf at
 non-quadratic `ρ`, and claims outside the frozen designs.
-All claims here are population-level and conditional on the stated model;
-see DERIVATION.md §5, §7 and §11 for what is deliberately not claimed.
+The all-branch algebra concerns population covariances under the declared model.
+Finite-record experiments measure performance on frozen designs; branch inclusion
+is not dissipation confidence coverage. See DERIVATION.md §28 for the current
+contract and remaining limitations.

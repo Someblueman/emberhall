@@ -1,9 +1,12 @@
 # Blurred tracks: covariance and dissipation of a rotating linear diffusion
 
-Milestone 1 of *What a blurred particle track can prove*
+Research derivation for *What a blurred particle track can prove*
 (idea `blurred-tracks-dissipation-bounds`, project `great-choice-20261124`).
-Everything below is implemented in [blurred_tracks.py](blurred_tracks.py) and
-checked by independent routes in [verify_blurred.py](verify_blurred.py).
+The initial isotropic result is implemented in [blurred_tracks.py](blurred_tracks.py)
+and checked in [verify_blurred.py](verify_blurred.py); later sections name their
+own modules. **Read §28 for the current API contract.** Earlier finite-record
+sections report branch diagnostics and frozen simulation rates, not confidence
+intervals for physical dissipation.
 Notation is ours; the latent model and the dissipation definition follow the
 Brownian-vortex solvable model of Di Terlizzi, Baiesi & Ritort, *Variance sum
 rule: proofs and solvable models*, New J. Phys. (2024),
@@ -964,3 +967,129 @@ verified exclusion for the sweep's hardest truth, not yet the
 parameter-free theorem — whose remaining content is now sharply
 visible: show `w*(truth) ≤ 2` on every rival branch as the truth
 ranges over the scalar-`Φ` class, or find where it crosses.
+
+
+## 28. Current algorithm and milestone synthesis
+
+The runnable entry point is [dissipation_bounds.py](dissipation_bounds.py).
+This section distinguishes the exact population arguments above from the
+floating-point search and finite-record diagnostics exposed by that module.
+It supersedes any reading of earlier “calibration” or “set-valued” language as
+a finite-data dissipation confidence guarantee.
+
+### Population enumeration and finite search
+
+For nonsingular positive-lag covariance, the propagator is
+`Phi = Gamma_2 Gamma_1^{-1}`. Its real-log classification determines whether
+the search has a unique real drift, complex alias branches, or scalar winding
+sheets with continuous within-sheet parameters. Each candidate is checked for
+stationary covariance symmetry, positive diffusion and covariance, and an
+isotropic nonnegative localization-noise remainder at lag zero. Dissipation is
+computed for each surviving positive-definite motion.
+
+For an **explicitly declared exact rational** exposure ratio `p/q`, the
+complex-branch symmetry residual is quadratic on each residue class of the
+integer branch index (§11). The implementation enumerates the bounded numerical
+tolerance regions of these quadratics, then applies the other physical gates.
+This is all-integer elimination under that timing assumption, not rational
+approximation of a measured duration. The implementation fails to an incomplete
+search for unavailable/degenerate quadratics, excessive ranges or denominators
+above 2000. Floating-point tolerances remain numerical assumptions: a returned
+`search_complete=true` is not a rigorous rounding-error enclosure.
+
+Without the rational declaration, complex branches are searched only in
+`[-m_window,m_window]`. Scalar propagators use at most `max_scalar_sheets`
+winding sheets; regular-sheet algebra does not exclude unsearched sheets or
+singular continuous families. One surviving motion then means only one found
+motion. Zero found motions in an incomplete search is not a global model
+exclusion. Both cases return `status="incomplete"`, `sigma_bounds=None`.
+`plugin_span` is the extrema of searched surviving dissipation values only.
+
+With complete population enumeration, the returned `sigma_bounds` is the
+extrema over compatible motions within the numerical model. The frozen isotropic
+example gives `[30.42,30.42]`; the general example at exact `eps/Delta=1/3`
+gives approximately `[4.77038184,4.77038184]`. These statements condition on
+population moments, known timing, the latent linear stationary model and the
+observation assumptions. They are not confidence intervals for estimated moments.
+
+### Why a finite-film singleton is not a bound
+
+Finite/bootstrap modes estimate branch tolerances from a fitted model, but do
+not propagate continuous uncertainty in drift, diffusion and stationary
+covariance into dissipation. For the frozen general design, 1000 simulated frames,
+seed 12345 and 20 exposure substeps give one surviving plug-in dissipation
+`11.4818297137227`, while the generating dissipation is `4.770381836945305`.
+Even correct branch identification would not make a singleton contain its
+continuously varying target. Therefore both modes return
+`status="uncertainty_unavailable"`, `uncertainty="unavailable"`, and
+`sigma_bounds=None`. A plug-in span is diagnostic. Failed bootstrap replicates
+cannot establish zero calibration error. Non-complex propagator classes currently
+have no finite/bootstrap branch calibration in this interface.
+
+The supplied CSV has a different seeded track and gives the wider diagnostic
+span recorded in RECORDED_RUN.md. It cannot be passed as population data through
+`certify_track_csv`. Polynomial detrending is a preprocessing option, not a
+proof that arbitrary unmodelled drift has been removed without bias.
+
+### What a second exposure resolves
+
+`certify_two_exposures` enumerates population motions from each exposure and
+checks each source motion's three covariance matrices against the other film,
+assuming shared motion and shared scalar localization-noise variance. If either
+source enumeration is complete, filtering that source can establish joint
+numerical completeness. With the isotropic frozen truth, a near-point exposure
+`eps=1e-4` and an exact half-period exposure leave only dissipation `30.42`.
+This demonstrates how informative finite exposure can eliminate near-aliases.
+
+For the scalar example embedded in the entry point, one exposure at `eps=.691196`
+has two found motions and another at `eps=.5` removes one. Both scalar searches
+remain truncated, so the result stays incomplete and does not claim global
+resolution. Finite/bootstrap joint uncertainty is refused rather than inferred
+from intersecting plug-in sets. More exposure durations are not automatically
+more informative when their own searches or uncertainty are unresolved.
+
+### White camera noise beyond the declared isotropic model
+
+[noise_misspecification.py](noise_misspecification.py) isolates a useful exact
+invariance. If `Y_t = Xbar_t + eta_t`, with zero-mean noise independent of the
+latent process and independent across frames, covariance `Q`, then
+`Gamma_Y(k) = Gamma_Xbar(k) + 1[k=0] Q`. Thus `Phi`, each available logarithm,
+recovered `Sigma_m`, and the symmetry residual `R(m)` use unchanged positive-lag
+moments. At the true branch, the zero-lag remainder is `Q`: the isotropic gates
+instead see `eq_ell=Q00-Q11` and `off=Q01`. Failure of those gates can reflect
+unequal camera noise, without failure of the positive-lag motion model.
+
+For non-Gaussian independent frame noise, its fourth cumulant contributes to
+lag-product covariance only when all four noise times coincide, hence only to
+the zero-lag/zero-lag block. The gradient of `R` in zero-lag coordinates is zero;
+its first-order variance has no such correction. The zero-lag gates generally
+do. For the study's Gaussian scale mixtures, their correction is computed from
+the fourth moment and compared with a moving-block bootstrap of valid lag-product
+vectors. Resampling those vectors avoids inventing frame pairs at block joins.
+The latent exposure sampler draws the exact joint Gaussian endpoint and exposure
+integral up to floating-point matrix error, avoiding trapezoid bias in this study.
+
+The experiment estimates **marginal** coverage of population residuals at the
+known true branch, not simultaneous coverage, branch-selection coverage, or
+dissipation coverage. Isserlis uses oracle second moments; the fourth-moment
+comparison also uses the known noise law. Bootstrap uses the film. All are
+first-order normal approximations, with unavailable fits counted as misses.
+Wilson intervals quantify Monte Carlo sampling error, not a guarantee for a
+new film. The default six design/law combinations have only 24 films each.
+
+### Milestone account and remaining limits
+
+The project now supplies a re-runnable population covariance derivation,
+logarithm classification, rational all-branch elimination, explicit incomplete
+search states, a population two-exposure filter, and finite-record diagnostics
+that expose their missing uncertainty. The noise study identifies exactly which
+moment information survives arbitrary independent white localization noise.
+These are computations and model-conditional results another mind can check.
+
+Milestone 3 is ready for an independent decision about this **limited result**;
+it does not establish universal calibrated finite-data dissipation bounds.
+Remaining gaps are continuous-parameter dissipation uncertainty, joint finite-film
+coverage, complete scalar-sheet treatment, irrational all-branch exclusion and
+the open Diophantine questions in §§25–26. Time-correlated noise, overlapping
+exposures, arbitrary drift and departures from the linear stationary latent
+model are outside this result. Any project acceptance must retain these limits.
