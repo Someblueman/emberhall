@@ -15,6 +15,136 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_boolean_cubic_lift_matches_independent_macaulay_space(self):
+        rng=random.Random(3759)
+        for n in range(1,6):
+            monomials=[frozenset()]+[frozenset((i,)) for i in range(n)]
+            monomials += [frozenset((i,j)) for j in range(n) for i in range(j)]
+            cubic=monomials+[frozenset((i,j,k)) for k in range(n)
+                             for j in range(k) for i in range(j)]
+            positions={m:i for i,m in enumerate(cubic)}
+            for _ in range(12):
+                rows=[rng.getrandbits(len(monomials)) for _ in range(3)]
+                reference=[]
+                for row in rows:
+                    reference.append(row)
+                    for variable in range(n):
+                        multiplied=0
+                        for i,term in enumerate(monomials):
+                            if row>>i&1:multiplied ^= 1<<positions[term|{variable}]
+                        reference.append(multiplied)
+                basis={}
+                for row in reference:
+                    while row:
+                        pivot=row.bit_length()-1
+                        if pivot not in basis:basis[pivot]=row;break
+                        row ^= basis[pivot]
+                report=rs.boolean_cubic_lift(rows,n)
+                self.assertTrue(report['complete'])
+                self.assertEqual(report['status']=='refused',0 in basis)
+                if 0 not in basis:self.assertEqual(report['rank'],len(basis))
+                for value in range(1<<n):
+                    def evaluate(polynomial,terms):
+                        return sum(all(value>>j&1 for j in term)
+                                   for i,term in enumerate(terms) if polynomial>>i&1)%2
+                    if any(evaluate(row,monomials) for row in rows):continue
+                    self.assertNotEqual(report['status'],'refused')
+                    for row in report['linear_polynomials']:
+                        self.assertEqual(evaluate(row,cubic),0)
+
+    def test_boolean_cubic_detects_product_incompatibility_and_limits(self):
+        # xy=1, xz=0, yz=1 has compatible independent product values,
+        # but no binary x,y,z. Multiplication exposes the contradiction.
+        rows=[(1<<4)|1,1<<5,(1<<6)|1]
+        result=rs.boolean_cubic_lift(rows,3)
+        self.assertEqual(result['status'],'refused')
+        self.assertGreater(result['products'],0)
+        limited=rs.boolean_cubic_lift(rows,3,max_pivots=2)
+        self.assertEqual(limited['status'],'unknown')
+        self.assertFalse(limited['complete'])
+        with patch.object(rs.time,'monotonic',side_effect=itertools.count()):
+            result=rs.boolean_cubic_lift(rows,3,seconds=.5)
+        self.assertEqual(result['status'],'unknown')
+        for invalid in (-1,1<<7):
+            with self.assertRaises(ValueError):rs.boolean_cubic_lift([invalid],3)
+
+    def test_cubic_shell_consequences_preserve_literal_signs(self):
+        rows=[{0:1,1:1,2:1,3:1},{1:1,2:-1,4:1,5:-1}]
+        report=rs.cubic_shell_analysis(6,rows)
+        self.assertTrue(report['complete'])
+        for signs in itertools.product((-1,1),repeat=6):
+            if any(sum(c*signs[i] for i,c in row.items()) for row in rows):continue
+            self.assertNotEqual(report['status'],'refused')
+            value=sum((signs[i]<0)<<j for j,i in enumerate(report['free']))
+            for polynomial in report['linear_polynomials']:
+                self.assertEqual(((polynomial>>1&value).bit_count()^(polynomial&1))%2,0)
+
+    def test_boolean_quadratic_substitution_is_exact_on_every_assignment(self):
+        rng=random.Random(3980)
+        for n in range(1,7):
+            for _ in range(8):
+                # Compatible affine constraints are chosen through one
+                # witnessed point, independently of polynomial substitution.
+                witness=rng.randrange(1<<n)
+                linear=[]
+                for _ in range(n//2):
+                    mask=rng.randrange(1<<n)
+                    linear.append(mask<<1|((mask&witness).bit_count()%2))
+                free,expressions=rs.boolean_linear_substitution(n,linear)
+                rows=[rng.getrandbits(1+n+n*(n-1)//2) for _ in range(4)]
+                transformed=rs.substitute_boolean_quadratics(rows,expressions,len(free))
+                def evaluate(row,value,dimension):
+                    terms=[()]+[(i,) for i in range(dimension)]+[
+                        (i,j) for j in range(dimension) for i in range(j)]
+                    return sum(all(value>>i&1 for i in term) for j,term in enumerate(terms)
+                               if row>>j&1)%2
+                recovered=set()
+                for value in range(1<<len(free)):
+                    old=sum(evaluate(e,value,len(free))<<i for i,e in enumerate(expressions))
+                    recovered.add(old)
+                    self.assertTrue(all(not evaluate(row,old,n) for row in linear))
+                    for a,b in zip(rows,transformed):
+                        self.assertEqual(evaluate(a,old,n),evaluate(b,value,len(free)))
+                expected={v for v in range(1<<n) if all(not evaluate(row,v,n) for row in linear)}
+                self.assertEqual(recovered,expected)
+        with self.assertRaises(ValueError):rs.boolean_linear_substitution(2,[1])
+
+    def test_cubic_recovery_uses_negative_bits_and_search_positive_bits(self):
+        analysis=dict(free=[0,1,2],parameter_ids=[2],recovery=[1,3,2])
+        basis=rs.cubic_sign_basis(3,[],analysis)
+        for positive in range(8):
+            satisfies=all((positive&mask).bit_count()%2==rhs for mask,rhs in basis.values())
+            negative=positive^7
+            expected=not (positive&1) and ((negative>>1)&1)==(1^((negative>>2)&1))
+            self.assertEqual(satisfies,expected)
+        engine=rs.make_engine(3,[],basis,seconds=1,nodes=100)
+        status,values=engine.run({0:-1})
+        self.assertEqual(status,'sat')
+        self.assertEqual(values[0],-1)
+        self.assertEqual(values[1],-values[2])
+
+    def test_cubic_driver_witness_uses_untouched_row_verifier(self):
+        import contextlib
+        import io
+        import json
+        import tempfile
+        from pathlib import Path
+        keys=[('left',0,0,0),('left',1,1,0)]
+        rows=[{0:1,1:-1}]
+        with tempfile.TemporaryDirectory() as directory:
+            target=Path(directory)/'witness.json'
+            with patch.object(rs,'compile_moving_folded',return_value=(keys,rows)), \
+                    patch('sys.argv',['resistant_spectrum.py','--folded-cubic','--cubic-search',
+                                      '--period','4','--seconds','2','--write',str(target)]), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                rs.main()
+                saved=json.loads(target.read_text())
+                self.assertEqual(saved['status'],'sat')
+                self.assertEqual(saved['method'],'cubic_assisted')
+                self.assertTrue(rs.verify_saved(saved)['verified'])
+                saved['assignment'][1][1]*=-1
+                with self.assertRaises(ValueError):rs.verify_saved(saved)
+
     def test_relational_shells_preserve_every_literal_solution(self):
         rng = random.Random(43272)
         systems = [(9,[{0:1,2:-1,4:1,8:1,3:1,5:-1},

@@ -1940,6 +1940,207 @@ def binary_shell_quadratics(size, original, seconds=30, max_free=256):
                 product_coordinates=n*(n-1)//2,elapsed=time.monotonic()-started)
 
 
+def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000):
+    """Bounded degree-three Boolean ideal relaxation, with x*x=x.
+
+    Input monomials are constant, singletons, then colexicographic pairs.
+    Multiply an independent quadratic basis by every binary variable and
+    eliminate in constant/singleton/pair/triple order. A zero constant is a
+    necessary condition, not a witness. Resource stops are always unknown.
+    """
+    if (type(variables) is not int or not 0<=variables<=128
+            or type(max_pivots) is not int or max_pivots<1
+            or type(seconds) not in (int,float) or not math.isfinite(seconds)
+            or seconds<=0):
+        raise ValueError('require 0..128 variables and positive limits')
+    quadratics=list(quadratics)
+    terms=[()]+[(i,) for i in range(variables)]+list(
+        (i,j) for j in range(variables) for i in range(j))
+    width=len(terms)
+    if any(type(row) is not int or row<0 or row.bit_length()>width
+           for row in quadratics):
+        raise ValueError('invalid quadratic polynomial')
+    started=time.monotonic();basis={};processed=0;products=0
+    def result(status,stage):
+        linear=[row for p,row in sorted(basis.items()) if p<=variables]
+        return dict(status=status,complete=status!='unknown',stage=stage,
+                    variables=variables,rank=len(basis),products=products,
+                    processed=processed,linear_polynomials=linear,
+                    literal_existence_decided=False,
+                    elapsed=time.monotonic()-started)
+    def insert(row):
+        while row:
+            if time.monotonic()-started>=seconds:return 'time_limit'
+            p=row.bit_length()-1
+            if p not in basis:
+                if len(basis)>=max_pivots:return 'pivot_limit'
+                basis[p]=row
+                return 'conflict' if p==0 else None
+            row^=basis[p]
+        return None
+    for row in quadratics:
+        stop=insert(row);processed+=1
+        if stop:return result('refused' if stop=='conflict' else 'unknown',stop)
+    # Only quadratic pivots exist here. Their span equals the input span,
+    # so multiplying this basis generates the same truncated ideal space.
+    independent=list(basis.values())
+    def position(term):
+        if len(term)==1:return 1+term[0]
+        if len(term)==2:
+            i,j=term;return 1+variables+j*(j-1)//2+i
+        i,j,k=term
+        return width+k*(k-1)*(k-2)//6+j*(j-1)//2+i
+    # One multiplier map at a time bounds auxiliary memory independently
+    # of the number of products. All powers are reduced before elimination.
+    for variable in range(variables):
+        mapping=[1<<position(tuple(sorted(set(term+(variable,))))) for term in terms]
+        for polynomial in independent:
+            if time.monotonic()-started>=seconds:return result('unknown','time_limit')
+            row=0
+            while polynomial:
+                bit=polynomial&-polynomial
+                row^=mapping[bit.bit_length()-1]
+                polynomial^=bit
+            stop=insert(row);products+=1;processed+=1
+            if stop:return result('refused' if stop=='conflict' else 'unknown',stop)
+    return result('compatible_cubic_relaxation','complete')
+
+
+def boolean_linear_substitution(variables, linear):
+    """Parameterize binary linear zero-polynomials in free original bits."""
+    if type(variables) is not int or not 0<=variables<=128:
+        raise ValueError('require 0..128 binary variables')
+    linear=list(linear)
+    basis={}
+    for row in linear:
+        if type(row) is not int or row<0 or row.bit_length()>variables+1:
+            raise ValueError('invalid linear polynomial')
+        while row:
+            p=row.bit_length()-1
+            if p==0:raise ValueError('inconsistent linear polynomials')
+            if p not in basis:basis[p]=row;break
+            row^=basis[p]
+    free=[i for i in range(variables) if i+1 not in basis]
+    expressions={i:1<<(j+1) for j,i in enumerate(free)}
+    for p,row in sorted(basis.items()):
+        row^=1<<p
+        value=row&1;row>>=1
+        while row:
+            bit=row&-row;value^=expressions[bit.bit_length()-1];row^=bit
+        expressions[p-1]=value
+    # Every relation is checked as a polynomial identity.
+    for row in linear:
+        value=row&1;row>>=1
+        while row:
+            bit=row&-row;value^=expressions[bit.bit_length()-1];row^=bit
+        if value:raise AssertionError('linear recovery does not satisfy input')
+    return free,[expressions[i] for i in range(variables)]
+
+
+def substitute_boolean_quadratics(polynomials, expressions, new_variables):
+    """Exact polynomial substitution in F_2[x]/(x_i^2-x_i), degree<=2."""
+    if type(new_variables) is not int or not 0<=new_variables<=128:
+        raise ValueError('require 0..128 new variables')
+    expressions=list(expressions)
+    old_variables=len(expressions)
+    if any(type(e) is not int or e<0 or e.bit_length()>new_variables+1
+           for e in expressions):raise ValueError('invalid affine expression')
+    terms=[1]+list(expressions)
+    for j in range(old_variables):
+        for i in range(j):
+            left,right=expressions[i],expressions[j]
+            value=(left&1)*(right&1)
+            if left&1:value^=right&~1
+            if right&1:value^=left&~1
+            left>>=1;right>>=1
+            while left:
+                bit=left&-left;a=bit.bit_length()-1;left^=bit
+                rest=right
+                while rest:
+                    bit=rest&-rest;b=bit.bit_length()-1;rest^=bit
+                    if a==b:position=1+a
+                    else:
+                        lo,hi=sorted((a,b))
+                        position=1+new_variables+hi*(hi-1)//2+lo
+                    value^=1<<position
+            terms.append(value)
+    out=[]
+    for polynomial in polynomials:
+        if type(polynomial) is not int or polynomial<0 or polynomial.bit_length()>len(terms):
+            raise ValueError('invalid quadratic polynomial')
+        value=0
+        while polynomial:
+            bit=polynomial&-polynomial;value^=terms[bit.bit_length()-1];polynomial^=bit
+        out.append(value)
+    return out
+
+
+def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000):
+    """Lift necessary mod-eight shell quadratics; no arbitrary-support claim."""
+    started=time.monotonic()
+    compiled=binary_shell_quadratics(size,original,seconds,max_free=128)
+    if not compiled['complete']:return compiled
+    if compiled['parity_conflict']:
+        return dict(complete=True,status='refused_by_parity',literal_existence_decided=False)
+    remaining=seconds-(time.monotonic()-started)
+    if remaining<=0:return dict(complete=False,status='unknown',stage='compilation')
+    polynomials=[mask<<1|rhs for mask,rhs in compiled['quadratic_rows']]
+    variables=len(compiled['free']);history=[];parameter_ids=list(compiled['free'])
+    recovery=[1<<(i+1) for i in range(variables)]
+    while True:
+        remaining=seconds-(time.monotonic()-started)
+        if remaining<=0:
+            result=dict(complete=False,status='unknown',stage='substitution_time_limit')
+            break
+        result=boolean_cubic_lift(polynomials,variables,remaining,max_pivots)
+        history.append({k:v for k,v in result.items() if k!='linear_polynomials'})
+        if result['status']=='refused':break
+        linear=result['linear_polynomials']
+        if not linear:break
+        free,expressions=boolean_linear_substitution(variables,linear)
+        polynomials=substitute_boolean_quadratics(polynomials,expressions,len(free))
+        recovery=substitute_boolean_quadratics(recovery,expressions,len(free))
+        parameter_ids=[parameter_ids[i] for i in free]
+        variables=len(free)
+    result['history']=history
+    result['remaining_variables']=variables
+    result['recovery']=recovery
+    result['parameter_ids']=parameter_ids
+    result['literal_existence_decided']=False
+    result['free']=compiled['free']
+    result['elapsed']=time.monotonic()-started
+    return result
+
+
+def cubic_sign_basis(size, original, analysis):
+    """Retain cubic-derived affine recovery during untouched integer search.
+
+    Recovery uses negative-sign bits. The literal engine uses positive-sign
+    bits, so an equation's right side changes by its mask's cardinality.
+    """
+    certificate,basis=binary_elimination(original)
+    if certificate is not None:raise ValueError('inconsistent original parity')
+    if analysis.get('status')=='refused':raise ValueError('refused cubic system')
+    free=analysis['free'];parameters=analysis['parameter_ids']
+    recovery=analysis['recovery']
+    if (len(free)!=len(recovery) or any(type(i) is not int or not 0<=i<size
+            for i in free+parameters)):
+        raise ValueError('invalid cubic recovery coordinates')
+    for i,expression in zip(free,recovery):
+        if type(expression) is not int or expression<0 or expression.bit_length()>len(parameters)+1:
+            raise ValueError('invalid cubic recovery expression')
+        mask=1<<i
+        for j,p in enumerate(parameters):
+            if expression>>(j+1)&1:mask^=1<<p
+        rhs=(expression&1)^(mask.bit_count()%2)
+        while mask:
+            p=mask.bit_length()-1
+            if p not in basis:basis[p]=mask,rhs;break
+            old,c=basis[p];mask^=old;rhs^=c
+        if not mask and rhs:raise ValueError('conflicting cubic recovery')
+    return basis
+
+
 def dyadic_quadratic_analysis(size, original, seconds=30, max_free=256):
     """Linear consequences of the exact mod-eight quadratic equations.
 
@@ -3353,11 +3554,61 @@ def main():
     p.add_argument('--residue-parity',type=int,metavar='SCALE',help='decide the unbounded integer residue-aggregate relaxation')
     p.add_argument('--max-bits',type=int,default=1024,help='integer coefficient limit for residue-parity elimination')
     p.add_argument('--dyadic',action='store_true',help='use Hadamard-bounded powers-of-two residue elimination')
+    p.add_argument('--folded-cubic',action='store_true',help='bounded Boolean degree-three lift of folded shell equations')
+    p.add_argument('--cubic-pivots',type=int,default=20000,help='maximum stored Boolean lift pivots; reaching it is unknown')
+    p.add_argument('--cubic-search',action='store_true',help='reserve half the post-closure budget for exact integer search')
     p.add_argument('--bounded',action='store_true',help='seek exact residue sums within physical group bounds; failure is unknown')
     p.add_argument('--retain-residue-witness',action='store_true',help='save independently verifiable aggregate compatibility with --dyadic and --write')
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.folded_cubic:
+        if args.cubic_pivots<1 or not math.isfinite(args.seconds) or args.seconds<=0:
+            p.error('require positive --seconds and --cubic-pivots')
+        started=time.monotonic()
+        keys,rows=compile_moving_folded(args.half,args.period,args.folded_patch,args.hole)
+        source_rows=rows
+        size=len(keys);joint=None
+        if args.joint_fields:
+            remaining=args.seconds-(time.monotonic()-started)
+            joint=joint_sign_closure(size,rows,max(remaining,.000001),short_recovery=True)
+            if joint['complete'] and not joint['conflict']:
+                size,rows=joint['size'],joint['rows']
+        remaining=args.seconds-(time.monotonic()-started)
+        if joint is not None and joint['conflict']:
+            result=dict(status='refused_by_joint_fields',complete=True)
+        elif remaining<=0 or (joint is not None and not joint['complete']):
+            result=dict(status='unknown',stage='joint_fields',complete=False)
+        else:result=cubic_shell_analysis(size,rows,remaining/2 if args.cubic_search else remaining,args.cubic_pivots)
+        if args.cubic_search and 'recovery' in result and result.get('status')!='refused':
+            basis=cubic_sign_basis(size,rows,result)
+            remaining=args.seconds-(time.monotonic()-started)
+            if remaining>0:
+                engine=make_engine(size,rows,reduced_binary_basis(basis),remaining,args.nodes,'connected')
+                remaining=args.seconds-(time.monotonic()-started)
+                if remaining>0:
+                    engine.seconds=remaining
+                    index,sign=joint['aliases'][0] if joint is not None else (0,1)
+                    status,values=engine.run({index:sign})
+                    result['search']=dict(status=status,nodes=engine.nodes,parity_free=size-len(basis))
+                    if values is not None:
+                        restored=([s*values[i] for i,s in joint['aliases']] if joint is not None else values)
+                        if any(sum(c*restored[i] for i,c in row.items()) for row in source_rows):
+                            raise AssertionError('cubic-assisted signing fails untouched shell rows')
+                        result['assignment']=[[list(k),v] for k,v in zip(keys,restored)]
+        if joint is not None:result['joint_history']=joint['history']
+        result.update(mode='folded_cubic',half=args.half,period=args.period,
+                      patch=args.folded_patch,hole=args.hole,all_pairs_decided=False,
+                      literal_existence_decided=False,elapsed=time.monotonic()-started)
+        if 'assignment' in result:
+            result.update(mode='moving_folded',method='cubic_assisted',status='sat',
+                          minimum_half=2*args.folded_patch+4+args.period,
+                          half_residue=args.half%args.period)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k not in
+                          ('free','parameter_ids','recovery','linear_polynomials','assignment')},sort_keys=True))
+        return
     if args.relation_search and not args.folded_relations:
         p.error('--relation-search requires --folded-relations')
     if args.folded_hulls or args.folded_relations:
