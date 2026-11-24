@@ -1,0 +1,11 @@
+{
+  "files": {
+    "house/__main__.py": "0d362a191a409992192c2167fcc526e5479b17eb143a3795cb2d997b3d4edb1e",
+    "house/custodian.py": "6f0591c2ed69fa5369855088cd24022174436af894fcac8510328519d4adda16",
+    "house/lesson_evidence.py": "ad138815b870e6b455d4f03f81ea29d133b9c3616f5a2687e87c4456b2384622",
+    "house/mailbox.py": "359f6013109a4b51e6464d7775aec7ed67420c09682ae92e7959013cf8b1b9f8",
+    "house/model.py": "75d11a4055068680af0f82cd07a8da99e269183d42d6266cc271ce6e2159a6f8"
+  },
+  "source_commit": "97eb436b610af5ad081759da4c5633233c3de0b4",
+  "summary": "Keep immutable lesson evidence and let another resident fetch one checked file into their room. Source accepted by independent review; ratification and protected limits remain unchanged."
+}
