@@ -27,9 +27,9 @@ as unresolved, rather than discarding them from its requested denominator.
 Each archive receives a version of the same binary climate step: a specimen of
 material age `A` has positive-proxy probability .9 if `A <= tau_a`, otherwise .1.
 The targets are the two **latent climate times** `tau_A`, `tau_B`, and
-`delta = tau_B - tau_A`. Positive delta means A occurred at a smaller time
-coordinate than B. These are synthetic increasing time coordinates, not a claim
-about calendar direction or the interpretation of years before present.
+`delta = tau_B - tau_A`. Ages are years before a common synthetic reference epoch: larger values are
+older. Positive delta means B is older, so its climate step occurred earlier
+than A. The reference is synthetic, not a historical calendar reconstruction.
 
 * Independent `tau_A,tau_B ~ Uniform(850,1150)`; delta therefore has a triangular
   prior on [-300,300], not a uniform lag prior. Exact simultaneity has prior mass
@@ -132,6 +132,12 @@ identical event marginals changes order uncertainty, and retain numerical failur
 
 ## Recorded development run
 
+The default command on development index 0 returned `PASS_DIAGNOSTICS`,
+minimum batch ESS 3,044.9, delta mean 67.41 years, 90% interval
+[-42.89,175.75], and P(delta>0)=.8455. It therefore left event order unresolved
+at the frozen .95 declaration threshold. This is one synthetic run, not a
+historical lead-lag estimate.
+
 Python 3.13.2, development indices 0..31, guided proposal, 12,000 particles.
 These are builder observations, not independent review or held-out science.
 The three scenarios share 32 latent draws; do not pool them as 96 independent ones.
@@ -148,6 +154,21 @@ agreement rule. All five passed at 50,000 particles without relaxing any thresho
 budget development, not an unbiased success-rate estimate. The prospective
 held-out budget is therefore 50,000. Do not conclude that one count allocation
 is better from these development draws or from pass-only coverage.
+
+A second sweep used **50,000 particles for every one of the same 32 development
+cases**, not just the selected failures. All 32 cases passed in each scenario:
+
+| Scenario | Covered / requested | Declarations / wrong | Mean width, years | Approximate PIT KS |
+|---|---:|---:|---:|---:|
+| balanced | 27/32 | 9/0 | 190.21 | .0925 |
+| proxy-rich | 31/32 | 14/0 | 165.19 | .1184 |
+| date-rich | 29/32 | 4/0 | 223.99 | .1146 |
+
+The longest four-case batch took 50.54 seconds. No source changed within those
+batches. These are still development draws; neither 32 cases nor zero observed
+wrong declarations establishes precision for rare errors. The final output uses
+unambiguous older/younger age labels; this label clarification does not change
+any posterior arithmetic or the positive-delta definition.
 
 A separate **prior-only** development control used balanced indices 0..127 and
 2,000 particles: coverage 113/128, marginal approximate PIT KS .0843, but
@@ -203,5 +224,6 @@ Still missing: a held-out study with its compact results and precision audit;
 full age-varying calibration; finite-width likelihoods; continuous mixing priors;
 misspecified and simultaneous-event tests; a Gaussian timing comparison that
 actually targets the same latent event; and independent resident milestone review.
+Validation: 22 paired checks and all 74 project checks passed on Python 3.13.2.
 The code is a runnable paired model, not an empirical validation or final field
 result. Readiness depends on development failure counts as well as coverage.

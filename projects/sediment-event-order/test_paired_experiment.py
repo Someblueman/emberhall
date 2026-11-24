@@ -144,13 +144,13 @@ class PairedTests(unittest.TestCase):
         summary = paired.weighted_summary(rows)
         self.assertEqual(summary['delta_mean'], 10.)
         self.assertEqual(summary['delta_sd'], 0.)
-        self.assertEqual(summary['probability_tau_b_after_a'], 1.)
+        self.assertEqual(summary['probability_tau_b_older_than_a'], 1.)
         shuffled = [(a, b, 0.) for a, b in zip((0., 100., 200.), (110., 210., 10.))]
         # Identical A and B marginals, different event ordering distribution.
         broken = paired.weighted_summary(shuffled)
         self.assertEqual(summary['tau_means'], broken['tau_means'])
         self.assertGreater(broken['delta_sd'], 100.)
-        self.assertLess(broken['probability_tau_b_after_a'], 1.)
+        self.assertLess(broken['probability_tau_b_older_than_a'], 1.)
 
     def test_importance_correction_against_independent_event_integration(self):
         # Fixed-nuisance small case: independently integrate each event over
@@ -255,6 +255,17 @@ class PairedTests(unittest.TestCase):
         self.assertEqual(paired.evaluate(left, self.oracle)['order'], 'unresolved')
         self.assertIsNotNone(paired.evaluate(left, self.oracle)['approximate_pit'])
 
+    def test_order_labels_use_older_age_not_forward_calendar_direction(self):
+        posterior = {'delta_interval_90': [100., 250.], 'delta_mean': 200.,
+                     'probability_tau_b_older_than_a': .99}
+        truth = replace(self.oracle, latent_draw=replace(self.oracle.latent_draw, events=(900., 1100.)))
+        evaluation = paired.evaluate({'posterior': posterior}, truth)
+        self.assertEqual(evaluation['order'], 'B older than A')
+        self.assertFalse(evaluation['wrong_order'])
+        self.assertTrue(evaluation['covered'])
+        simultaneous = replace(truth, latent_draw=replace(truth.latent_draw, events=(1000., 1000.)))
+        self.assertTrue(paired.evaluate({'posterior': posterior}, simultaneous)['wrong_order'])
+
     def test_optional_ensemble_contains_paired_candidates_and_prospective_contract(self):
         result = paired.infer(self.public, particles=4000, retain_ensemble=True)
         self.assertEqual(result['status'], 'PASS_DIAGNOSTICS')
@@ -263,7 +274,7 @@ class PairedTests(unittest.TestCase):
             self.assertTrue(850. <= a <= 1150. and 850. <= b <= 1150.)
             self.assertTrue(math.isfinite(logweight))
         order = 1-paired.weighted_cdf(result['ensemble'], 0.)
-        self.assertAlmostEqual(order, result['posterior']['probability_tau_b_after_a'])
+        self.assertAlmostEqual(order, result['posterior']['probability_tau_b_older_than_a'])
         self.assertEqual(paired.protocol()['held_out_indices'], [1000, 1127])
         # Reject altered held-out budgets before drawing any held-out case.
         with self.assertRaises(ValueError):

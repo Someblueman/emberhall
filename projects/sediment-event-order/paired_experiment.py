@@ -39,7 +39,7 @@ NAMESPACES = ('development', 'contract-test', 'held-out')
 
 def protocol():
     """Prospective contract, exported without generating or exposing truth."""
-    return {'version': VERSION, 'target': 'tau_A, tau_B; delta=tau_B-tau_A in synthetic years',
+    return {'version': VERSION, 'target': 'event ages tau_A,tau_B; delta=tau_B-tau_A; positive means B is older',
             'event_prior': 'independent Uniform(850,1150)', 'mixing_priors': MIXING_PRIORS,
             'shared_calibration_sd': CAL_SD, 'independent_date_sd': DATE_SD,
             'depths': DEPTHS, 'scenarios_proxy_date_overlap': SCENARIOS,
@@ -308,7 +308,7 @@ def weighted_summary(rows):
     order_mcse = math.sqrt(math.fsum(w*w*((x > 0)-order_probability)**2
                                      for w, x in zip(weights, delta)))
     return {'ess': ess, 'tau_means': tau_means, 'tau_covariance': covariance,
-            'probability_tau_b_after_a': order_probability, 'order_probability_mcse': order_mcse,
+            'probability_tau_b_older_than_a': order_probability, 'order_probability_mcse': order_mcse,
             'delta_mean': mean, 'delta_sd': math.sqrt(variance),
             'delta_mcse': mcse, 'delta_interval_90': [quantile(.05), quantile(.95)]}
 
@@ -360,8 +360,8 @@ def infer(observation, namespace='development', index=0, particles=12000, second
     # A mean can agree while the tails disagree. Check CDFs at pooled endpoints.
     cdf_disagreement = max(abs(weighted_cdf(batches[0], x)-weighted_cdf(batches[1], x))
                            for x in pooled['delta_interval_90'])
-    order_disagreement = abs(summaries[0]['probability_tau_b_after_a']-
-                             summaries[1]['probability_tau_b_after_a'])
+    order_disagreement = abs(summaries[0]['probability_tau_b_older_than_a']-
+                             summaries[1]['probability_tau_b_older_than_a'])
     passed = (min(s['ess'] for s in summaries) >= 100 and disagreement <= 3*error
               and cdf_disagreement <= .05 and order_disagreement <= .05)
     if time.monotonic()-started > seconds:
@@ -424,9 +424,9 @@ def evaluate(result, oracle):
                 'interval_width': None, 'order_probability': None}
     delta = oracle.latent_draw.events[1]-oracle.latent_draw.events[0]
     lo, hi = posterior['delta_interval_90']
-    probability = posterior['probability_tau_b_after_a']
-    order = 'A before B' if probability >= .95 else 'B before A' if probability <= .05 else 'unresolved'
-    wrong = (delta <= 0 if order == 'A before B' else delta >= 0) if order != 'unresolved' else None
+    probability = posterior['probability_tau_b_older_than_a']
+    order = 'B older than A' if probability >= .95 else 'A older than B' if probability <= .05 else 'unresolved'
+    wrong = (delta <= 0 if order == 'B older than A' else delta >= 0) if order != 'unresolved' else None
     return {'covered': lo <= delta <= hi, 'squared_error': (posterior['delta_mean']-delta)**2,
             'order': order, 'wrong_order': wrong,
             'predicted_order_error': min(probability, 1-probability) if wrong is not None else None,
@@ -492,7 +492,10 @@ def benchmark(namespace, first_index, replicates, scenario, particles=12000, pro
         records.append({'index': index, 'status': result['status'], 'observed_group': observed_group(public),
                         **evaluate(result, oracle),
                         'minimum_batch_ess': min((d['ess'] for d in diagnostics), default=None),
-                        'endpoint_cdf_disagreement': result.get('endpoint_cdf_disagreement')})
+                        'endpoint_cdf_disagreement': result.get('endpoint_cdf_disagreement'),
+                        'order_probability_disagreement': result.get('order_probability_disagreement'),
+                        'mean_disagreement': result.get('mean_disagreement'),
+                        'three_mcse': result.get('three_mcse')})
     passed = [r for r in records if r['covered'] is not None]
     covered = sum(r['covered'] for r in passed)
     declared = [r for r in records if r['wrong_order'] is not None]
