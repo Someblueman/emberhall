@@ -14,6 +14,41 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_joint_row_hulls_keep_correlations_and_all_literal_solutions(self):
+        # Separately each balanced four-sign row spans the same parity plane.
+        # Together they force opposite pairs, which that plane cannot express.
+        rows = [{0:1,1:1,2:1,3:1},{0:1,1:1,2:-1,3:-1}]
+        single = rs.affine_shell_closure(4,rows,seconds=5)
+        joint = rs.affine_shell_closure(4,rows,seconds=5,blocks=[(0,1)])
+        self.assertEqual((single['rank'],joint['rank']),(1,2))
+        generator = random.Random(43097)
+        systems = [(4,rows)]
+        for size in range(2,7):
+            for _ in range(12):
+                systems.append((size,[{i:c for i in range(size)
+                                       if (c:=generator.randrange(-2,3))}
+                                      for _ in range(3)]))
+        for size,rows in systems:
+            report = rs.affine_shell_closure(size,rows,seconds=5,
+                                             blocks=[tuple(range(len(rows)))])
+            self.assertTrue(report['complete'])
+            literal = []
+            for bits in range(1<<size):
+                if all(not sum(c*(1 if bits>>i&1 else -1) for i,c in row.items())
+                       for row in rows):
+                    literal.append(bits)
+            self.assertEqual(report['conflict'],not bool(literal))
+            for bits in literal:
+                for mask,rhs in report['basis'].values():
+                    self.assertEqual((bits&mask).bit_count()%2,rhs)
+        skipped = rs.affine_shell_closure(4,systems[0][1],seconds=5,
+                                          local_rank=0,blocks=[(0,1)])
+        self.assertFalse(skipped['conflict'])
+        self.assertEqual(skipped['rank'],1)
+        for blocks in ([()],[(2,)],[(True,)],['bad']):
+            with self.assertRaises(ValueError):
+                rs.affine_shell_closure(4,systems[0][1],blocks=blocks)
+
     def test_moving_forced_tails_and_reduced_radius_one_strip(self):
         generator=random.Random(580)
         for scale,hole in ((9,1),(11,19),(15,42)):

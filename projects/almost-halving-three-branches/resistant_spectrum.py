@@ -2064,12 +2064,14 @@ def parity_sign_quotient(size,original,seconds=30):
                 rank=rank,free=len(free),binary_fibre_verified=True,elapsed=time.monotonic()-start)
 
 
-def affine_shell_closure(size, original, seconds=30, rounds=20, local_rank=12):
+def affine_shell_closure(size, original, seconds=30, rounds=20, local_rank=12, blocks=()):
     """Necessary binary closure using exact local sign-pattern affine hulls.
 
     All parameters remain binary coordinates of original signs. A local hull
     contains every locally valid assignment, so adding its equations never
     removes a literal solution. A compatible hull is not a sign witness.
+    Optional blocks are tuples of row indices tested simultaneously, retaining
+    correlations lost by taking the affine hull of each row separately.
     """
     if (type(size) is not int or size<1 or type(seconds) not in (int,float)
             or not math.isfinite(seconds) or seconds<=0 or type(rounds) is not int
@@ -2079,6 +2081,12 @@ def affine_shell_closure(size, original, seconds=30, rounds=20, local_rank=12):
     if any(type(i) is not int or not 0<=i<size or type(c) is not int
            for row in original for i,c in row.items()):
         raise ValueError('invalid integer shell row')
+    blocks = list(blocks)
+    if any(not isinstance(block,(list,tuple)) or not block or
+           any(type(i) is not int or not 0<=i<len(original) for i in block)
+           for block in blocks):
+        raise ValueError('require nonempty blocks of valid row indices')
+    clusters = [(i,) for i in range(len(original))]+[tuple(b) for b in blocks]
     start = time.monotonic()
     basis,cache,history = {},{},[]
     def add(mask,rhs):
@@ -2117,35 +2125,40 @@ def affine_shell_closure(size, original, seconds=30, rounds=20, local_rank=12):
                 mask ^= bit
             expressions[i] = out,rhs
         skipped = 0
-        for label,row in enumerate(original):
+        for label,cluster in enumerate(clusters):
             if time.monotonic()-start>=seconds: return result(False,stage='local_hulls')
-            local_basis,generators,terms = {},[],defaultdict(int)
-            for i,c in row.items():
-                mask,rhs = expressions[i]
-                local = 0
-                while mask:
-                    p = mask.bit_length()-1
-                    if p not in local_basis:
-                        bit = 1<<len(generators)
-                        generators.append(mask)
-                        local_basis[p] = mask,bit
-                        local ^= bit
-                        break
-                    m,b = local_basis[p]
-                    mask,local = mask^m,local^b
-                terms[local] += c*(-1 if rhs else 1)
+            local_basis,generators,conditions = {},[],[]
+            for row_index in cluster:
+                terms = defaultdict(int)
+                for i,c in original[row_index].items():
+                    mask,rhs = expressions[i]
+                    local = 0
+                    while mask:
+                        p = mask.bit_length()-1
+                        if p not in local_basis:
+                            bit = 1<<len(generators)
+                            generators.append(mask)
+                            local_basis[p] = mask,bit
+                            local ^= bit
+                            break
+                        m,b = local_basis[p]
+                        mask,local = mask^m,local^b
+                    terms[local] += c*(-1 if rhs else 1)
+                conditions.append(tuple(sorted((m,c) for m,c in terms.items() if c)))
             n = len(generators)
             if n>local_rank:
                 skipped += 1
                 continue
-            signature = n,tuple(sorted((m,c) for m,c in terms.items() if c))
+            signature = n,tuple(conditions)
             if signature not in cache:
                 valid = []
                 for v in range(1<<n):
                     if time.monotonic()-start>=seconds: return result(False,stage='local_enumeration')
-                    if not sum(c*(-1 if (m&v).bit_count()%2 else 1) for m,c in signature[1]):
+                    if all(not sum(c*(-1 if (m&v).bit_count()%2 else 1) for m,c in terms)
+                           for terms in signature[1]):
                         valid.append(v)
-                if not valid: return result(True,True,stage='empty_local_hull',row=label)
+                if not valid:
+                    return result(True,True,stage='empty_local_hull',row=label,block=cluster)
                 # Row-echelon span of differences gives the affine hull.
                 span = {}
                 for v in valid[1:]:
@@ -2168,10 +2181,60 @@ def affine_shell_closure(size, original, seconds=30, rounds=20, local_rank=12):
                 mask = 0
                 for j,g in enumerate(generators):
                     if local>>j&1: mask ^= g
-                if not add(mask,rhs): return result(True,True,stage='inconsistent_hulls',row=label)
+                if not add(mask,rhs):
+                    return result(True,True,stage='inconsistent_hulls',row=label,block=cluster)
         history.append(dict(round=iteration+1,added=len(basis)-before,skipped=skipped))
         if len(basis)==before: return result(True,fixed_point=True)
     return result(False,stage='round_limit')
+
+
+def folded_hull_diagnostic(half=3990,period=4,patch=2,hole=19,seconds=600,
+                           local_rank=16,joint_fields=False):
+    """Necessary joint-row hulls on one periodic moving-hole word system.
+
+    Choose, for each row, the two rows sharing the most literal coordinates
+    (ties by row index). This does not claim to inspect every row pair. A
+    complete fixed point may still skip blocks above the local rank limit.
+    """
+    if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
+            or type(local_rank) is not int or not 0<=local_rank<=16):
+        raise ValueError('require positive finite time and local rank in 0..16')
+    start = time.monotonic()
+    keys,rows = compile_moving_folded(half,period,patch,hole)
+    size = len(keys)
+    report = dict(mode='folded_hulls',half=half,period=period,patch=patch,hole=hole,
+                  input_variables=size,input_rows=len(rows),local_rank=local_rank,
+                  all_pairs_decided=False)
+    def done(**extra):
+        return dict(report,elapsed=time.monotonic()-start,**extra)
+    if joint_fields:
+        remaining = seconds-(time.monotonic()-start)
+        if remaining<=0:return done(complete=False,stage='compilation')
+        joint = joint_sign_closure(size,rows,remaining,short_recovery=True)
+        report['joint_history'] = joint['history']
+        if not joint['complete'] or joint['conflict']:
+            return done(complete=joint['complete'],conflict=joint['conflict'],stage='joint_fields')
+        size,rows = joint['size'],joint['rows']
+    links = defaultdict(list)
+    for j,row in enumerate(rows):
+        for i in row:links[i].append(j)
+    blocks = set()
+    for j,row in enumerate(rows):
+        neighbors = defaultdict(int)
+        for i in row:
+            for k in links[i]:
+                if k!=j:neighbors[k] += 1
+        for k in sorted(neighbors,key=lambda k:(-neighbors[k],k))[:2]:
+            blocks.add(tuple(sorted((j,k))))
+        if time.monotonic()-start>=seconds:
+            return done(complete=False,stage='block_selection')
+    remaining = seconds-(time.monotonic()-start)
+    if remaining<=0:return done(complete=False,stage='block_selection')
+    hull = affine_shell_closure(size,rows,seconds=remaining,local_rank=local_rank,
+                               blocks=sorted(blocks))
+    report.update(variables=size,rows=len(rows),blocks=len(blocks))
+    return done(analysis={k:v for k,v in hull.items() if k!='basis'},
+                complete=hull['complete'],conflict=hull['conflict'])
 
 
 def quadratic_sign_lift(kernel):
@@ -3062,6 +3125,8 @@ def main():
     p.add_argument('--sparse-pivots',type=int,default=40000)
     p.add_argument('--moving',action='store_true',help='search moving holes 19t and 99t')
     p.add_argument('--moving-folded',action='store_true',help='search the radius-one moving-hole folded strip')
+    p.add_argument('--folded-hulls',action='store_true',help='diagnose joint row correlations in one periodic moving-hole strip')
+    p.add_argument('--hull-rank',type=int,default=16,help='maximum local binary rank in folded hull diagnostics, 0..16')
     p.add_argument('--moving-strip-audit',type=int,metavar='SCALE',help='compare every moving-hole strip column with the physical shell matrix')
     p.add_argument('--moving-reduced',action='store_true',help='eliminate forced opposite tails in the moving strip audit, hole<=42')
     p.add_argument('--folded-patch',type=int,default=2,help='independent patch width in the moving folded strip')
@@ -3098,6 +3163,14 @@ def main():
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.folded_hulls:
+        if not 0<=args.hull_rank<=16:p.error('--hull-rank must be in 0..16')
+        result=folded_hull_diagnostic(args.half,args.period,args.folded_patch,args.hole,
+                                     args.seconds,args.hull_rank,args.joint_fields)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps(result,sort_keys=True))
+        return
     if args.moving_reduced and args.moving_strip_audit is None:
         p.error('--moving-reduced requires --moving-strip-audit')
     if args.moving_strip_audit is not None:

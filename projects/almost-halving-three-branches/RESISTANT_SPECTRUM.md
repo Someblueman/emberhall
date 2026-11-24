@@ -2013,3 +2013,59 @@ coordinates. The shipped 600-second whole-run command ended **unknown** after
 28,241 nodes and 600.515 seconds; no literal signing was produced. Both this
 phase and the h=19 phase still require a new exact construction or obstruction,
 not a claim inferred from the exhausted time budgets.
+
+### Rook: simultaneous local shell hulls
+
+The infinite-family acceptance remains unmet. `affine_shell_closure` now accepts
+explicit blocks of row indices. It expresses every sign in the same original
+binary parameters, enumerates assignments satisfying **all** rows of a block,
+and adds only equations of their affine hull. This preserves every literal
+solution. A block above the chosen rank bound is skipped, never declared
+inconsistent. A compatible hull is still only a necessary condition.
+
+This retains correlations that separate row hulls lose. For example,
+`a+b+c+d=0` and `a+b-c-d=0` separately give just the same four-bit parity;
+together they force `a=-b` and `c=-d`. Exhaustive controls compare complete
+blocks with every literal assignment on 61 small systems, including empty
+solution sets, and check every returned binary equation on every solution.
+
+The deterministic folded diagnostic pairs each row with its two neighbors
+sharing the most literal coordinates, breaking ties by row index and removing
+duplicate pairs. It does not inspect every row pair. Reproduce it with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-hulls --period 4 --seconds 600
+```
+
+For h=19, L=3990, p=4 and w=2 there are 3,818 signs, 4,094 rows and 7,047
+selected pairs. Single-row closure leaves 93 binary parameters. Pair closure
+at local rank twelve leaves the same 93 (2,860 skipped blocks; 3.67 seconds
+observed). Raising the bound to sixteen still leaves 93 (561 skipped blocks;
+65.83 seconds). Neither run finds a contradiction or a literal signing.
+The fixed-point flag concerns the inspected hulls, including the reported
+skips; it does not certify closure under larger blocks or all row pairs.
+
+`--joint-fields` applies the existing exact rational/binary/ternary reduction
+before selecting pairs. Its time budget includes that reduction, compilation
+and block selection. The diagnostic deliberately reports `all_pairs_decided`
+as false and saves only a compact summary, not a new claimed certificate.
+
+The joint-field run completes in 419.00 seconds observed. The existing
+reduction retains 2,392 signs, 6,963 rows and 86 binary parameters. Its
+13,202 selected pairs add no affine relation: the final binary rank is
+2,306. There are 14,089 skipped **blocks** (single rows and selected pairs
+together) above rank sixteen; 5,691 distinct local systems were enumerated.
+The hull stage alone takes 58.27 seconds. Replay with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-hulls --period 4 --joint-fields --seconds 1200
+```
+
+All 69 focused tests pass (39.71 seconds observed); the period-one diagnostic
+also reproduces its existing initial-parity conflict without claiming an
+all-support result. The remaining obstacle is nonlinear compatibility of
+the 86 parameters, or an unrestricted argument for all permitted supports.
+These inspected affine hulls supply neither. Further repetition of the same
+rank-limited pair check cannot advance this fixed point; a larger or more
+structured joint constraint, an actual literal solution, or a new invariant
+is needed. The ready task and its acceptance are left open.
