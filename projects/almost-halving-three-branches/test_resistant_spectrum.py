@@ -434,6 +434,196 @@ class SpectrumTests(unittest.TestCase):
         with self.assertRaises(ValueError): rs.verify_saved(saved)
         with self.assertRaises(ValueError): rs.verify_saved(dict(t=247,period=1,patch_width=40,status='unknown'))
 
+    def test_full_partition_subdivision_and_resistant_upper_bound(self):
+        for lengths,scale in (((1,2,3),2),((2,3,4),3),((99,79,23),3),((3,3,7),4)):
+            report = rs.full_partition_subdivision_audit(lengths,scale)
+            self.assertTrue(report['verified'])
+            self.assertEqual(report['old_columns'],1+sum(lengths))
+            self.assertEqual(report['nongrid_columns'],(scale-1)*sum(lengths))
+        for m in (1,2,5):
+            t = 7980*m+1
+            report = rs.full_partition_subdivision_bound((99,79,23),t)
+            self.assertEqual(report['base_divisor'],4)
+            self.assertEqual(report['base_quotient_sum'],51)
+            self.assertTrue(report['inherited_from_base'])
+            self.assertEqual(report['homometric_pair_upper_bound'],(201*t-1)//2)
+            self.assertFalse(report['all_pairs_decided'])
+        # No unsupported strengthening on an odd total or an unrefused base.
+        report = rs.full_partition_subdivision_bound((99,79,23),2)
+        self.assertFalse(report['inherited_from_base'])
+        self.assertEqual(report['homometric_pair_upper_bound'],201)
+        report = rs.full_partition_subdivision_bound((3,3,7),1)
+        self.assertFalse(report['full_partition_refused'])
+        self.assertEqual(report['homometric_pair_upper_bound'],7)
+        for scale in (0,1.5,True):
+            with self.assertRaises(ValueError): rs.full_partition_subdivision_bound((99,79,23),scale)
+
+    def test_universal_boundary_coefficients_and_uniform_refusal(self):
+        for period,hole in ((2,19),(3,19),(4,19),(11,19),(2,1),(3,43),(7,98)):
+            audit = rs.moving_boundary_audit(period,hole)
+            self.assertTrue(audit['verified'])
+            self.assertEqual(audit['universal_variables'],1004)
+            self.assertEqual(audit['endpoint_identifications'],201*max(0,4-period))
+        original = rs.moving_boundary_system
+        def damaged(hole):
+            keys,rows = original(hole)
+            row = next(iter(rows.values()))
+            i = next(iter(row))
+            row[i] += 1
+            return keys,rows
+        with patch.object(rs,'moving_boundary_system',side_effect=damaged):
+            with self.assertRaises(AssertionError): rs.moving_boundary_audit(3,19)
+        result = rs.moving_boundary_refusal(19,seconds=20)
+        self.assertEqual(result['status'],'every_formal_period_refused')
+        self.assertEqual(result['coarse_count'],4)
+        self.assertEqual(len(result['branches']),4)
+        self.assertTrue(all(b['complete'] and b['refused'] for b in result['branches']))
+        self.assertFalse(result['all_pairs_decided'])
+        with self.assertRaises(ValueError): rs.verify_saved(result)
+        with self.assertRaises(ValueError): rs.moving_boundary_audit(1)
+        # A compatible necessary relaxation must remain unknown.
+        catalog = rs.coarse_catalog(19,seconds=20)
+        compatible = dict(complete=True,conflict=False,size=1004)
+        with patch.object(rs,'coarse_catalog',return_value=catalog), patch.object(
+                rs,'joint_sign_closure',return_value=compatible):
+            self.assertEqual(rs.moving_boundary_refusal()['status'],'unknown')
+
+    def test_short_ternary_recovery_on_every_small_modular_signing(self):
+        rng = random.Random(241120)
+        for size in range(1,8):
+            for _ in range(15):
+                rows = [{i:rng.randrange(-3,4) for i in range(size)} for _ in range(3)]
+                analysis = rs.ternary_analysis(size,rows,retain_kernel=True)
+                extra = rs.ternary_short_sign_rows(analysis['kernel'])
+                for v in itertools.product((-1,1),repeat=size):
+                    if all(sum(c*v[i] for i,c in row.items())%3==0 for row in rows):
+                        self.assertTrue(all(sum(c*v[i] for i,c in row.items())==0 for row in extra))
+        # A genuinely new integer consequence of a modular three-term recovery.
+        kernel = dict(free=[1,2,3],expressions={0:(7,0),1:(1,0),2:(2,0),3:(4,0)})
+        self.assertEqual(rs.ternary_short_sign_rows(kernel),[{0:1,1:-1,2:-1,3:-1}])
+        # Four terms cannot be lifted this way: sums +/-2 and +/-4 are both allowed.
+        kernel = dict(free=[1,2,3,4],expressions={0:(15,0)})
+        self.assertEqual(rs.ternary_short_sign_rows(kernel),[])
+        for size in range(2,7):
+            for _ in range(8):
+                rows = [{i:rng.randrange(-2,3) for i in range(size)} for _ in range(3)]
+                truth = {v for v in itertools.product((-1,1),repeat=size)
+                         if all(sum(c*v[i] for i,c in row.items())==0 for row in rows)}
+                reduced = rs.joint_sign_closure(size,rows,seconds=5,short_recovery=True)
+                self.assertTrue(reduced['complete'])
+                if reduced['conflict']:
+                    self.assertFalse(truth)
+                    continue
+                lifted = set()
+                for v in itertools.product((-1,1),repeat=reduced['size']):
+                    if all(sum(c*v[i] for i,c in row.items())==0 for row in reduced['rows']):
+                        lifted.add(tuple(s*v[i] for i,s in reduced['aliases']))
+                self.assertEqual(lifted,truth)
+
+    def test_odd_distance_obstruction_matches_all_colour_splits(self):
+        for k in range(1,9):
+            for black in range(2*k+1):
+                feasible = any(a*(k-a)==(black-a)*(k-black+a)
+                               for a in range(k+1) if 0<=black-a<=k)
+                self.assertEqual(feasible,black%2==0 or black==k)
+        # Actual trees, checking odd distances directly rather than shell columns.
+        for lengths in ((1,1,1),(1,2,2),(1,3,3),(2,2,3)):
+            vertices = [(0,0)]+[(a,d) for a,n in enumerate(lengths,1)
+                                for d in range(1,n+1)]
+            for holes in itertools.combinations(vertices,2):
+                support = [v for v in vertices if v not in holes]
+                if len(support)%2: continue
+                report = rs.bipartition_support_obstruction(lengths,holes)
+                k = len(support)//2
+                feasible = False
+                def odd_pairs(word):
+                    return sum((abs(d-e) if a==b else d+e)%2
+                               for i,(a,d) in enumerate(word) for b,e in word[:i])
+                for positive in itertools.combinations(support,k):
+                    negative = [v for v in support if v not in positive]
+                    if odd_pairs(positive)==odd_pairs(negative): feasible = True
+                self.assertEqual(report['obstructed'],not feasible)
+        for m in (1,2,9):
+            t = 7980*m+1
+            lengths = (99*t,79*t,23*t)
+            for holes in (((1,99*t),(1,2*t)),((0,0),(3,1))):
+                self.assertTrue(rs.bipartition_support_obstruction(lengths,holes)['obstructed'])
+            self.assertFalse(rs.bipartition_support_obstruction(lengths,((1,99*t),(1,19*t)))['obstructed'])
+            self.assertFalse(rs.bipartition_support_obstruction(lengths,((0,0),(2,2)))['obstructed'])
+        with self.assertRaises(ValueError): rs.bipartition_support_obstruction((1,1,1),((0,1),))
+        with self.assertRaises(ValueError): rs.bipartition_support_obstruction((1,1,1),((0,0),(0,0)))
+
+    def test_desubdivision_projection_keeps_all_columns_and_holes(self):
+        for period,hole in ((1,1),(2,19),(10,19),(3,43),(4,98)):
+            audit = rs.coarse_projection_audit(period,hole)
+            self.assertTrue(audit['verified'])
+            self.assertEqual(audit['old_variables'],200)
+            self.assertEqual(audit['inserted_columns_cancelled'],201*period)
+        # An altered formal coefficient must fail the independent projection.
+        original = rs.moving_periodic_system
+        def damaged(period,hole):
+            keys,rows = original(period,hole)
+            row = next(iter(rows.values()))
+            i = next(iter(row))
+            row[i] += 1
+            return keys,rows
+        with patch.object(rs,'moving_periodic_system',side_effect=damaged):
+            with self.assertRaises(AssertionError): rs.coarse_projection_audit(2,19)
+
+    def test_rational_cube_filter_against_complete_small_sign_cubes(self):
+        rng = random.Random(241119)
+        for size in range(1,8):
+            for _ in range(12):
+                rows = [{i:rng.randrange(-3,4) for i in range(size)} for _ in range(3)]
+                truth = {v for v in itertools.product((-1,1),repeat=size)
+                         if all(sum(c*v[i] for i,c in row.items())==0 for row in rows)}
+                cube = rs.kernel_sign_patterns(size,rows,seconds=5)
+                self.assertTrue(cube['complete'])
+                restored = set()
+                for bits in cube['patterns']:
+                    values = tuple(sum(c*(1 if bits>>j&1 else -1)
+                                       for j,c in enumerate(cube['forms'][i][0]))
+                                   //cube['forms'][i][1] for i in range(size))
+                    restored.update((values,tuple(-v for v in values)))
+                self.assertEqual(restored,truth)
+        self.assertFalse(rs.kernel_sign_patterns(3,[],max_free=2)['complete'])
+        with patch.object(rs.time,'monotonic',side_effect=itertools.count()):
+            self.assertFalse(rs.kernel_sign_patterns(3,[],seconds=0.1)['complete'])
+
+    def test_coarse_catalog_and_independent_distance_verifier(self):
+        catalog = rs.coarse_catalog(19,seconds=20)
+        self.assertTrue(catalog['complete'])
+        self.assertEqual(catalog['count'],4)
+        self.assertEqual(catalog['nullity'],20)
+        self.assertEqual(rs.coarse_catalog(1,seconds=20)['count'],0)
+        for values in catalog['assignments']:
+            assignment = [[list(k),v] for k,v in zip(catalog['keys'],values)]
+            report = rs.verify_coarse_assignment(19,assignment)
+            self.assertEqual(report['pair_size'],100)
+            self.assertFalse(report['all_pairs_decided'])
+            saved = dict(mode='coarse',status='sat',hole=19,assignment=assignment)
+            self.assertTrue(rs.verify_saved(saved)['verified'])
+            # Flip a pair of opposite signs, preserving size and disjointness.
+            changed = [[k[:],v] for k,v in assignment]
+            i = next(i for i,(_,v) in enumerate(changed) if i and v==1)
+            j = next(i for i,(_,v) in enumerate(changed) if i and v==-1)
+            changed[i][1] *= -1
+            changed[j][1] *= -1
+            with self.assertRaises(ValueError): rs.verify_coarse_assignment(19,changed)
+            with self.assertRaises(ValueError): rs.verify_coarse_assignment(19,assignment+assignment[:1])
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(mode='coarse',status='unknown',hole=19))
+
+    def test_conditioned_search_cannot_refuse_unfinished_branches(self):
+        # Control flow only: mathematical closure is checked exhaustively above.
+        incomplete = dict(complete=False,stage='dimension_limit')
+        with patch.object(rs,'coarse_catalog',return_value=incomplete):
+            result = rs.moving_coarse_search(2,19,seconds=1)
+        self.assertEqual(result['status'],'unknown')
+        self.assertFalse(result['all_pairs_decided'])
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(mode='moving_coarse',status='ansatz_refused_by_coarse_branches',period=10))
+
     def test_scale_phase_and_resource_limit(self):
         # Equal phase, different lengths: exactly the same finite equations.
         for p in (1,3):
