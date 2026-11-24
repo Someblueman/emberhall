@@ -14,6 +14,181 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_moving_strip_complete_matrix_and_direct_distance_counts(self):
+        from collections import Counter
+        for scale,hole in ((9,19),(11,1),(15,98)):
+            audit=rs.moving_folded_audit(scale,hole)
+            self.assertEqual(audit['matched_physical_columns'],201*scale-1)
+            self.assertEqual(audit['path_edges'],scale//2-2)
+        scale,hole=9,19
+        vertices=[(0,0)]+[(a,d) for a,n in enumerate((99,79,23),1)
+                          for d in range(1,n*scale+1) if (a,d) not in ((1,hole*scale),(1,99*scale))]
+        random.Random(7391).shuffle(vertices)
+        first,second=vertices[:len(vertices)//2],vertices[len(vertices)//2:]
+        def distances(part):
+            return Counter(abs(d-e) if a==b else d+e
+                           for i,(a,d) in enumerate(part) for b,e in part[:i])
+        delta=distances(first)
+        delta.subtract(distances(second))
+        expected=defaultdict(int)
+        for d,c in delta.items():expected[d]+=2*c;expected[d+1]-=2*c
+        signs={v:1 for v in first};signs.update({v:-1 for v in second})
+        self.assertEqual(rs.moving_folded_residual(scale,signs,hole),
+                         {d:c for d,c in expected.items() if c})
+
+    def test_moving_folded_compiler_against_all_physical_columns_and_phases(self):
+        for half,period,width,hole in ((10,1,2,19),(12,2,2,1),(14,3,3,98),(18,4,2,7)):
+            keys,rows=rs.compile_moving_folded(half,period,width,hole)
+            scale=2*half+1
+            positions={key:i for i,key in enumerate(keys)}
+            expected=defaultdict(lambda:defaultdict(int))
+            covered=set()
+            for arm,n in enumerate((0,99*scale,79*scale,23*scale)):
+                for depth in (range(1,n+1) if arm else (0,)):
+                    if (arm,depth) in ((1,hole*scale),(1,99*scale)):continue
+                    if arm==0:key=('left',0,0,0)
+                    else:
+                        q,r=divmod(depth,scale)
+                        if not r:key=('left',arm,q,0)
+                        else:
+                            orientation=1
+                            if r>half:q+=1;r=scale-r;orientation=-1
+                            if r<=width:key=('left',arm,q,orientation*r)
+                            elif r>=half-width:key=('right',arm,q,orientation,r-half)
+                            else:key=('period',arm,q,orientation,r%period)
+                    covered.add(key)
+                    for e,c in fc.shell_column([99*scale,79*scale,23*scale],
+                                              {(1,hole*scale),(1,99*scale)},(arm,depth)).items():
+                        expected[e][positions[key]]+=c
+            self.assertEqual(covered,set(keys))
+            self.assertEqual(normalized(rows),normalized(expected.values()))
+            next_keys,next_rows=rs.compile_moving_folded(half+period,period,width,hole)
+            self.assertEqual(keys,next_keys)
+            self.assertEqual(normalized(rows),normalized(next_rows))
+        for half,period,width in ((10,0,2),(10,1,1),(3,1,2),(True,1,2)):
+            with self.assertRaises(ValueError):rs.compile_moving_folded(half,period,width)
+
+    def test_moving_folded_saved_refusal_and_witness_validation(self):
+        saved=rs.moving_folded_search(half=3990,period=2,patch=2)
+        self.assertEqual(saved['status'],'ansatz_refused_by_parity')
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        for damaged in (dict(saved,certificate=[]),dict(saved,minimum_half=1),
+                        dict(saved,half_residue=1),dict(saved,all_pairs_decided=True)):
+            with self.assertRaises(ValueError):rs.verify_saved(damaged)
+        # Planted positive control of the witness checker; the mocked two-sign
+        # system is not presented as a tripod witness or a family construction.
+        positive=dict(saved,status='sat',assignment=[[['u'],1],[['v'],-1]])
+        with patch.object(rs,'compile_moving_folded',return_value=([('u',),('v',)],[{0:1,1:1}])):
+            self.assertTrue(rs.verify_saved(positive)['verified'])
+            for bad in ([[['u'],1],[['v'],1]],[[['u'],1],[['v'],0]],[[['u'],True],[['v'],-1]]):
+                with self.assertRaises(ValueError):rs.verify_saved(dict(positive,assignment=bad))
+
+    def test_new_commands_round_trip_through_real_cli(self):
+        import json
+        from pathlib import Path
+        import subprocess
+        import sys
+        import tempfile
+        script=Path(rs.__file__)
+        with tempfile.TemporaryDirectory() as directory:
+            for flags in (['--moving-folded','--period','2'],
+                          ['--split-dyadic','--edge-patch','4','--piece-period','2','--hole-offset','-2']):
+                destination=Path(directory)/'result.json'
+                run=subprocess.run([sys.executable,str(script),*flags,'--write',str(destination)],
+                                   check=True,text=True,capture_output=True)
+                self.assertFalse(json.loads(run.stdout)['all_pairs_decided'])
+                run=subprocess.run([sys.executable,str(script),'--verify',str(destination)],
+                                   check=True,text=True,capture_output=True)
+                self.assertTrue(json.loads(run.stdout)['verified'])
+
+    def test_moving_unrestricted_strip_reconstructs_every_physical_row(self):
+        generator=random.Random(7980)
+        for scale,hole in ((9,1),(11,19),(15,98),(21,7),(25,19)):
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            coordinates={(0,0):generator.randint(-3,3)}
+            coordinates.update({(arm,d):generator.randint(-3,3)
+                                for arm,n in enumerate(lengths,1) for d in range(1,n+1)
+                                if (arm,d) not in holes})
+            self.assertEqual(rs.moving_folded_residual(scale,coordinates,hole),
+                             fc.shell_rows(lengths,holes,coordinates))
+        # Per-column controls prevent cancellation between mistakes in two
+        # source columns from being hidden by any one random signing.
+        scale,hole=9,19
+        vertices=[(0,0)]+[(a,d) for a,n in enumerate((99,79,23),1)
+                          for d in range(1,n*scale+1) if (a,d) not in ((1,hole*scale),(1,99*scale))]
+        for vertex in generator.sample(vertices,12):
+            coordinates=defaultdict(int,{vertex:1})
+            self.assertEqual(rs.moving_folded_residual(scale,coordinates,hole),
+                             fc.shell_column([99*scale,79*scale,23*scale],
+                                             {(1,hole*scale),(1,99*scale)},vertex))
+        for scale in (1,8,True):
+            with self.assertRaises(ValueError):rs.moving_folded_residual(scale,{})
+        with self.assertRaises(ValueError):rs.moving_folded_stencils(99)
+
+    def test_dyadic_quadratics_are_exact_mod_eight_on_every_binary_choice(self):
+        generator=random.Random(20261124)
+        for size in range(1,7):
+            for repeat in range(16):
+                # Plant a literal solution, while retaining arbitrary negative
+                # coefficients and coefficients divisible by two and four.
+                witness=[generator.choice((-1,1)) for _ in range(size)]
+                rows=[]
+                for _ in range(3):
+                    row={i:generator.randint(-4,4) for i in range(size-1)}
+                    row[size-1]=-sum(c*witness[i] for i,c in row.items())*witness[-1]
+                    rows.append(row)
+                compiled=rs.binary_shell_quadratics(size,rows)
+                self.assertTrue(compiled['complete'])
+                self.assertFalse(compiled['parity_conflict'])
+                n=len(compiled['free'])
+                seen=set()
+                for choice in range(1<<n):
+                    values=[(-1 if ((a&choice).bit_count()^b)&1 else 1)
+                            for a,b in (compiled['expressions'][i] for i in range(size))]
+                    seen.add(tuple(values))
+                    monomials=choice
+                    for b in range(n):
+                        for a in range(b):
+                            if choice>>a&1 and choice>>b&1:
+                                monomials|=1<<(n+b*(b-1)//2+a)
+                    for row,(mask,rhs) in zip(rows,compiled['quadratic_rows']):
+                        total=sum(c*values[i] for i,c in row.items())
+                        self.assertEqual(total%4,0)
+                        self.assertEqual((total//4)%2,((mask&monomials).bit_count()^rhs)&1)
+                # Independent enumeration verifies completeness of the affine
+                # fibre, including signs that fail the original integer rows.
+                expected={values for values in itertools.product((-1,1),repeat=size)
+                          if all(sum(c*values[i] for i,c in row.items())%4==0 for row in rows)}
+                self.assertEqual(seen,expected)
+
+    def test_dyadic_quadratic_consequences_and_refusals(self):
+        rows=[{0:1,1:1,2:4}]
+        self.assertIsNone(rs.binary_elimination(rows)[0])
+        report=rs.dyadic_quadratic_analysis(3,rows)
+        self.assertEqual(report['status'],'refused_by_quadratics')
+        proof=dict(mask=0,rhs=1,certificate=report['certificate'])
+        self.assertTrue(rs.verify_dyadic_consequence(3,rows,proof))
+        for damaged in (dict(proof,rhs=0),dict(proof,certificate=[]),
+                        dict(proof,certificate=[0,0]),dict(proof,certificate=[[]])):
+            with self.assertRaises(ValueError):rs.verify_dyadic_consequence(3,rows,damaged)
+        # This row is compatible modulo four, but modulo eight additionally
+        # forces its two free signs to be opposite: 2*s0+2*s1=0.
+        rows=[{0:2,1:2}]
+        report=rs.dyadic_quadratic_analysis(2,rows)
+        self.assertEqual(len(report['linear_relations']),1)
+        self.assertEqual((report['linear_relations'][0]['mask'],
+                          report['linear_relations'][0]['rhs']),(3,1))
+        self.assertTrue(rs.verify_dyadic_consequence(2,rows,report['linear_relations'][0]))
+        # Compatibility must never be promoted to a literal witness.
+        report=rs.dyadic_quadratic_analysis(2,[{0:4,1:4}])
+        self.assertEqual(report['status'],'compatible_product_relaxation')
+        self.assertFalse(report['literal_existence_decided'])
+        self.assertEqual(rs.dyadic_quadratic_analysis(1,[{0:2}])['status'],'refused_by_parity')
+        self.assertEqual(rs.binary_shell_quadratics(3,[],max_free=2)['stage'],'dimension_limit')
+        for size,rows in ((True,[]),(2,[{2:1}]),(1,[{0:0.5}])):
+            with self.assertRaises(ValueError):rs.binary_shell_quadratics(size,rows)
+
     def test_flat_any_holes_support_count_against_physical_columns(self):
         rng = random.Random(9309)
         for pieces,width,length in ((2,0,200),(2,1,60),(3,1,60)):

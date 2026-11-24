@@ -1580,6 +1580,181 @@ def verify_coarse_assignment(hole,assignment):
 
 
 
+def moving_folded_labels():
+    return [(a,q,s) for a,n in enumerate((99,79,23),1) for s in (1,-1) for q in (range(n) if s==1 else range(1,n+1))]
+def _moving_affine_column(a,q,alpha,beta,h=19):
+    if a==0:return [(0,0,1,1),(79,0,1,-1),(23,0,1,-1),(99,0,0,-1),(h,0,0,-1),(h,0,1,1)]
+    n=(99,79,23)[a-1]
+    out=[(q,alpha,beta+1,1)]+[(m+q,alpha,beta+1,-1) for j,m in enumerate((99,79,23),1) if j!=a and not (a!=1 and j==1)]
+    if a==1:
+        out.append((99-q,-alpha,-beta,-1))
+        before=q<h or(q==h and (alpha<0 or(alpha==0 and beta<0)))
+        if before:out.extend(((h-q,-alpha,-beta,-1),(h-q,-alpha,1-beta,1)))
+        else:out.extend(((q-h,alpha,beta,-1),(q-h,alpha,beta+1,1)))
+    else:out.extend(((n-q,-alpha,1-beta,-1),(99+q,alpha,beta,-1),(h+q,alpha,beta,-1),(h+q,alpha,beta+1,1)))
+    return out
+
+def moving_folded_stencils(h=19):
+    """All-word radius-one shell equations for holes (1,h*t),(1,99*t).
+
+    Left rows have folded level 0 or 1, interior rows 2..L-1, and
+    right rows L, where t=2L+1. This is not an existence decision.
+    """
+    if type(h) is not int or not 1<=h<99:raise ValueError("require 1<=h<99")
+    interior=defaultdict(lambda:defaultdict(int));left=defaultdict(lambda:defaultdict(int));right=defaultdict(lambda:defaultdict(int))
+    for a,q,s in moving_folded_labels():
+        for Q,u,c,v in _moving_affine_column(a,q,s,0,h):interior[Q,u][a,q,s,-u*c]+=v
+        for j in (-1,0):
+            for Q,u,c,v in _moving_affine_column(a,q,s,s*j,h):
+                if u==1:
+                    if c==0:row=Q,1
+                    elif c==1:row=Q+1,-1
+                    else:continue
+                else:
+                    if c==0:row=Q,-1
+                    elif c==-1:row=Q-1,1
+                    else:continue
+                right[row][a,q,s,j]+=v
+    sources=[(0,0,0)]
+    for a,n in enumerate((99,79,23),1):
+        for d in range(-2,3):
+            for q in (range(1,n+1) if d<=0 else range(n)):
+                if (a,q,d) not in ((1,h,0),(1,99,0)):sources.append((a,q,d))
+    for a,q,d in sources:
+        for Q,u,c,v in _moving_affine_column(a,q,0,d,h):
+            assert u==0
+            if abs(c)<=1:left[Q,c][a,q,d]+=v
+    def trim(rows):return {r:{k:c for k,c in row.items() if c} for r,row in rows.items() if any(row.values())}
+    return trim(left),trim(interior),trim(right)
+
+
+def moving_folded_residual(scale,coordinates,hole=19):
+    """Evaluate every exact physical shell row through the moving-hole strip."""
+    if type(scale) is not int or scale<9 or scale%2!=1:
+        raise ValueError('require odd scale>=9')
+    half=scale//2
+    left,interior,right=moving_folded_stencils(hole)
+    result={}
+    def put(exponent,value):
+        if value:result[exponent]=value
+    for (q,offset),row in left.items():
+        put(q*scale+offset,sum(c*coordinates[a,k*scale+d] for (a,k,d),c in row.items()))
+    for r in range(2,half):
+        for (q,s),row in interior.items():
+            put(q*scale+s*r,sum(c*coordinates[a,k*scale+u*(r+d)]
+                              for (a,k,u,d),c in row.items()))
+    for (q,s),row in right.items():
+        put(q*scale+s*half,sum(c*coordinates[a,k*scale+u*(half+j)]
+                             for (a,k,u,j),c in row.items()))
+    return result
+
+
+def moving_folded_audit(scale,hole=19):
+    """Compare the complete strip matrix with every original physical column."""
+    if type(scale) is not int or scale<9 or scale%2!=1:
+        raise ValueError('require odd scale>=9')
+    import full_shorter_coupling as physical
+    half=scale//2
+    left,interior,right=moving_folded_stencils(hole)
+    actual={}
+    def put(exponent,terms):
+        if exponent in actual:raise AssertionError('strip row partition overlaps')
+        row=defaultdict(int)
+        for vertex,c in terms:row[vertex]+=c
+        actual[exponent]={v:c for v,c in row.items() if c}
+    for (q,d),row in left.items():
+        put(q*scale+d,[((a,k*scale+j),c) for (a,k,j),c in row.items()])
+    for r in range(2,half):
+        for (q,s),row in interior.items():
+            put(q*scale+s*r,[((a,k*scale+u*(r+d)),c) for (a,k,u,d),c in row.items()])
+    for (q,s),row in right.items():
+        put(q*scale+s*half,[((a,k*scale+u*(half+j)),c) for (a,k,u,j),c in row.items()])
+    lengths=[n*scale for n in (99,79,23)]
+    holes={(1,hole*scale),(1,99*scale)}
+    vertices=[(0,0)]+[(a,d) for a,n in enumerate(lengths,1) for d in range(1,n+1)
+                      if (a,d) not in holes]
+    expected=defaultdict(dict)
+    for vertex in vertices:
+        for exponent,c in physical.shell_column(lengths,holes,vertex).items():
+            expected[exponent][vertex]=c
+    if {e:r for e,r in actual.items() if r}!=dict(expected):
+        raise AssertionError('moving strip differs from the physical shell matrix')
+    return dict(t=scale,hole=hole,matched_physical_columns=len(vertices),
+                matched_shell_rows=len(expected),slice_signs=402,row_radius=1,
+                stored_slice_signs=804,path_edges=half-2,
+                all_pairs_decided=False,literal_existence_decided=False)
+
+
+def compile_moving_folded(half,period,patch=2,h=19):
+    """Exact periodic-interior quotient of the all-word moving-hole strip.
+
+    End patches are independent. The result extends to every sufficiently
+    large half-length with the same residue modulo period, not other supports.
+    """
+    if (any(type(v) is not int for v in (half,period,patch,h)) or patch<2
+                    or period<1 or half<2*patch+4+period or not 1<=h<99):
+        raise ValueError('require patch>=2, period>=1, half>=2*patch+4+period and 1<=hole<99')
+    keys=[];positions={};rows=[]
+    def index(k):
+        if k not in positions:positions[k]=len(keys);keys.append(k)
+        return positions[k]
+    def coordinate(a,q,s,r):
+        if r<=patch:return 'left',a,q,s*r
+        if r>=half-patch:return 'right',a,q,s,r-half
+        return 'period',a,q,s,r%period
+    def add(terms):
+        row=defaultdict(int)
+        for k,c in terms:row[index(k)]+=c
+        row={i:c for i,c in row.items() if c}
+        if row:rows.append(row)
+    left,interior,right=moving_folded_stencils(h)
+    for terms in left.values():add([(('left',a,q,d),c) for (a,q,d),c in terms.items()])
+    levels=sorted(set(range(2,patch+2))|set(range(half-patch-1,half))|set(range(patch+2,patch+2+period)))
+    for r in levels:
+        for terms in interior.values():add([(coordinate(a,q,s,r+d),c) for (a,q,s,d),c in terms.items()])
+    for terms in right.values():add([(('right',a,q,s,j),c) for (a,q,s,j),c in terms.items()])
+    # Record every sign, even when its shell coefficient cancels.
+    for arm,n in enumerate((99,79,23),1):
+        for q in range(1,n+1):
+            if (arm,q) not in ((1,h),(1,99)):index(('left',arm,q,0))
+    for arm,q,orientation in moving_folded_labels():
+        for level in range(1,patch+1):index(coordinate(arm,q,orientation,level))
+        for offset in range(-patch,1):index(coordinate(arm,q,orientation,half+offset))
+        for residue in range(period):index(('period',arm,q,orientation,residue))
+    index(('left',0,0,0))
+    return keys,rows
+
+
+
+def moving_folded_search(half=3990,period=4,patch=2,hole=19,seconds=900,nodes=1000000):
+    """A bounded search on a named all-word strip quotient; limits are unknown."""
+    start=time.monotonic()
+    keys,rows=compile_moving_folded(half,period,patch,hole)
+    result=dict(mode='moving_folded',half=half,period=period,patch=patch,hole=hole,
+                variables=len(keys),rows=len(rows),minimum_half=2*patch+4+period,
+                half_residue=half%period,all_pairs_decided=False)
+    def done(status,**extra):return dict(result,status=status,elapsed=time.monotonic()-start,**extra)
+    certificate,basis=binary_elimination(rows)
+    if certificate is not None:return done('ansatz_refused_by_parity',certificate=certificate)
+    remaining=seconds-(time.monotonic()-start)
+    if remaining<=0:return done('unknown')
+    joint=joint_sign_closure(len(keys),rows,remaining,short_recovery=True)
+    result['closure']=joint['history']
+    if joint['conflict']:return done('ansatz_refused_by_joint_fields')
+    remaining=seconds-(time.monotonic()-start)
+    if not joint['complete'] or remaining<=0:return done('unknown')
+    certificate,basis=binary_elimination(joint['rows'])
+    if certificate is not None:return done('ansatz_refused_after_quotient')
+    engine=make_engine(joint['size'],joint['rows'],basis,remaining,nodes,'connected')
+    i,sign=joint['aliases'][keys.index(('left',0,0,0))]
+    status,values=engine.run({i:sign})
+    if values is None:return done(status,nodes=engine.nodes)
+    restored=[sign*values[i] for i,sign in joint['aliases']]
+    if any(sum(c*restored[i] for i,c in row.items()) for row in rows):
+        raise AssertionError('moving folded witness fails untouched rows')
+    return done('sat',nodes=engine.nodes,assignment=[[list(k),v] for k,v in zip(keys,restored)])
+
+
 def compile_system(half, period, patch_width=40):
     """Exact quotient of every reduced shell equation under this ansatz.
 
@@ -1667,6 +1842,145 @@ def reduced_binary_basis(basis):
 
 def parity_refusal(rows):
     return binary_elimination(rows)[0]
+
+
+def binary_shell_quadratics(size, original, seconds=30, max_free=256):
+    """Exact shell equations modulo eight on the complete parity fibre.
+
+    Write s_i=(-1)**(a_i*x+b_i). Parity makes every row divisible by
+    four for every x. Its quotient modulo two has degree at most two.
+    Product coordinates are relaxed independently only by the analyzer;
+    compilation itself is an identity on every binary choice of x.
+    """
+    if (type(size) is not int or size<1 or type(max_free) is not int
+            or not 0<=max_free<=256 or type(seconds) not in (int,float)
+            or not math.isfinite(seconds) or seconds<=0):
+        raise ValueError('require positive size/time and a free limit in 0..256')
+    started=time.monotonic()
+    original=list(original)
+    if any(type(i) is not int or not 0<=i<size or type(c) is not int
+           for row in original for i,c in row.items()):
+        raise ValueError('invalid integer shell row')
+    certificate,basis=binary_elimination(original)
+    if certificate is not None:
+        return dict(complete=True,parity_conflict=True,certificate=certificate)
+    free=[i for i in range(size) if i not in basis]
+    n=len(free)
+    if n>max_free:
+        return dict(complete=False,stage='dimension_limit',free_count=n)
+    expressions={i:(1<<j,0) for j,i in enumerate(free)}
+    for pivot,(mask,rhs) in sorted(basis.items()):
+        mask^=1<<pivot
+        value=0
+        while mask:
+            bit=mask&-mask
+            a,b=expressions[bit.bit_length()-1]
+            value^=a;rhs^=b;mask^=bit
+        expressions[pivot]=value,rhs
+    # Check the entire affine map, rather than samples of free assignments.
+    for row in original:
+        mask,rhs=0,sum(row.values())//2%2
+        for i,c in row.items():
+            if c%2:
+                a,b=expressions[i];mask^=a;rhs^=b
+        if mask or rhs:raise AssertionError('parity fibre fails an input row')
+    cache={}
+    def products(mask):
+        if mask not in cache:
+            value,left=0,mask
+            while left:
+                bit=left&-left
+                j=bit.bit_length()-1
+                # Pair (i,j), i<j, occupies n+j*(j-1)//2+i.
+                value^=(mask&(bit-1))<<(n+j*(j-1)//2)
+                left^=bit
+            cache[mask]=value
+        return cache[mask]
+    quadratic=[]
+    for row in original:
+        if time.monotonic()-started>=seconds:
+            return dict(complete=False,stage='quadratic_compilation',free_count=n)
+        constant,mask=0,0
+        linear=defaultdict(int)
+        for i,c in row.items():
+            a,b=expressions[i]
+            c*=(-1 if b else 1)
+            constant+=c
+            left=a
+            while left:
+                bit=left&-left
+                linear[bit.bit_length()-1]+=c
+                left^=bit
+            if c%2:mask^=products(a)
+        if constant%4 or any(c%2 for c in linear.values()):
+            raise AssertionError('row is not identically divisible by four')
+        for j,c in linear.items():
+            if c//2%2:mask^=1<<j
+        quadratic.append((mask,constant//4%2))
+    return dict(complete=True,parity_conflict=False,free=free,
+                expressions=expressions,quadratic_rows=quadratic,
+                product_coordinates=n*(n-1)//2,elapsed=time.monotonic()-started)
+
+
+def dyadic_quadratic_analysis(size, original, seconds=30, max_free=256):
+    """Linear consequences of the exact mod-eight quadratic equations.
+
+    XOR traces certify every consequence. A compatible product relaxation
+    is neither a binary quadratic solution nor a literal shell signing.
+    """
+    original=list(original)
+    started=time.monotonic()
+    compiled=binary_shell_quadratics(size,original,seconds,max_free)
+    if not compiled['complete']:return compiled
+    if compiled['parity_conflict']:
+        return dict(complete=True,status='refused_by_parity',
+                    certificate=compiled['certificate'])
+    basis={}
+    for label,(mask,rhs) in enumerate(compiled['quadratic_rows']):
+        trace=1<<label
+        while mask:
+            if time.monotonic()-started>=seconds:
+                return dict(complete=False,stage='quadratic_elimination')
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs,trace
+                break
+            a,b,c=basis[pivot];mask^=a;rhs^=b;trace^=c
+        if not mask and rhs:
+            return dict(complete=True,status='refused_by_quadratics',
+                        free=compiled['free'],certificate=[i for i in range(len(original))
+                                                         if trace>>i&1])
+    relations=[]
+    for pivot,(mask,rhs,trace) in sorted(basis.items()):
+        if pivot<len(compiled['free']):
+            relations.append(dict(mask=mask,rhs=rhs,
+                                  certificate=[i for i in range(len(original)) if trace>>i&1]))
+    return dict(complete=True,status='compatible_product_relaxation',
+                free=compiled['free'],quadratic_rank=len(basis),
+                product_coordinates=compiled['product_coordinates'],
+                linear_relations=relations,elapsed=time.monotonic()-started,
+                literal_existence_decided=False)
+
+
+def verify_dyadic_consequence(size, original, consequence):
+    """Rebuild the full fibre and XOR the named untouched quadratic rows."""
+    original=list(original)
+    compiled=binary_shell_quadratics(size,original,seconds=300)
+    if not compiled['complete'] or compiled.get('parity_conflict'):
+        raise ValueError('no complete compatible parity fibre')
+    certificate=consequence.get('certificate')
+    if (not isinstance(certificate,list)
+            or any(type(i) is not int or not 0<=i<len(original) for i in certificate)
+            or len(set(certificate))!=len(certificate)):
+        raise ValueError('invalid quadratic XOR trace')
+    mask,rhs=0,0
+    for i in certificate:
+        a,b=compiled['quadratic_rows'][i];mask^=a;rhs^=b
+    if (type(consequence.get('mask')) is not int or type(consequence.get('rhs')) is not int
+            or consequence['rhs'] not in (0,1)
+            or (mask,rhs)!=(consequence['mask'],consequence['rhs'])):
+        raise ValueError('quadratic consequence did not verify')
+    return True
 
 
 def parity_sign_quotient(size,original,seconds=30):
@@ -2527,6 +2841,53 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='moving_folded':
+        keys,rows=compile_moving_folded(saved['half'],saved['period'],saved['patch'],saved['hole'])
+        if (saved.get('minimum_half')!=2*saved['patch']+4+saved['period']
+                or saved.get('half_residue')!=saved['half']%saved['period']
+                or saved.get('all_pairs_decided') is not False):
+            raise ValueError('incorrect moving-folded family scope')
+        if saved.get('status')=='ansatz_refused_by_parity':
+            if not verify_refusal(rows,saved.get('certificate',[])):
+                raise ValueError('invalid moving-folded parity refusal')
+            return dict(verified=True,claim='only the named periodic-interior ansatz is refused',
+                        all_pairs_decided=False)
+        assignment=saved.get('assignment',[])
+        if (saved.get('status')!='sat' or len(assignment)!=len(keys)
+                or [tuple(k) for k,v in assignment]!=keys
+                or any(type(v) is not int or v not in (-1,1) for k,v in assignment)):
+            raise ValueError('no complete literal moving-folded witness')
+        values=[v for k,v in assignment]
+        if any(sum(c*values[i] for i,c in row.items()) for row in rows):
+            raise ValueError('moving-folded witness fails an untouched shell row')
+        return dict(verified=True,claim='literal moving-hole signing on the stated infinite half-length phase',
+                    all_pairs_decided=False)
+    if saved.get('mode')=='split_dyadic':
+        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'],
+                                     saved['word_period'],saved['hole_offset'],
+                                     hole_piece=saved['hole_piece'])
+        original=list(formal.values())
+        report=saved['analysis']
+        if not report.get('complete'):raise ValueError('incomplete dyadic analysis')
+        if report.get('status')=='refused_by_parity':
+            if not verify_refusal(original,report.get('certificate',[])):
+                raise ValueError('invalid initial parity refusal')
+        elif report.get('status')=='refused_by_quadratics':
+            verify_dyadic_consequence(len(keys),original,
+                                     dict(mask=0,rhs=1,certificate=report.get('certificate')))
+        elif report.get('status')=='compatible_product_relaxation':
+            rebuilt=dyadic_quadratic_analysis(len(keys),original,seconds=300)
+            for field in ('complete','status','free','quadratic_rank','product_coordinates'):
+                if report.get(field)!=rebuilt.get(field):
+                    raise ValueError('dyadic analysis did not reconstruct')
+            if [(v.get('mask'),v.get('rhs')) for v in report.get('linear_relations',[])]!=[
+                    (v['mask'],v['rhs']) for v in rebuilt.get('linear_relations',[])]:
+                raise ValueError('dyadic linear consequences differ')
+            for relation in report['linear_relations']:
+                verify_dyadic_consequence(len(keys),original,relation)
+        else:raise ValueError('unknown dyadic result')
+        return dict(verified=True,claim='necessary mod-eight constraints on the stated split-edge ansatz only',
+                    all_pairs_decided=False,literal_existence_decided=False)
     if saved.get('mode')=='growing_lift_repair_bound':
         expected = growing_lift_repair_bound(saved.get('t'))
         if json.dumps(saved,sort_keys=True)!=json.dumps(expected,sort_keys=True):
@@ -2669,6 +3030,8 @@ def main():
                    help='prove a sign-change lower bound for the growing-block modular lift')
     p.add_argument('--lift-index',type=int,default=1,help='positive index in the residue-lift subfamily')
     p.add_argument('--hole',type=int,default=19,help='old first-arm vertex omitted in moving mode, 1..98')
+    p.add_argument('--hole-offset',type=int,default=0,help='split-edge hole offset within an endpoint patch')
+    p.add_argument('--hole-piece',type=int,default=0,help='split-edge hole includes this many piece lengths')
     p.add_argument('--half',type=int,default=3990)
     p.add_argument('--period',type=int,default=1)
     p.add_argument('--patch-width',type=int,default=40)
@@ -2680,13 +3043,17 @@ def main():
     p.add_argument('--ternary',action='store_true',help='bounded modular rank diagnostic; not a sign search')
     p.add_argument('--sparse-pivots',type=int,default=40000)
     p.add_argument('--moving',action='store_true',help='search moving holes 19t and 99t')
+    p.add_argument('--moving-folded',action='store_true',help='search the radius-one moving-hole folded strip')
+    p.add_argument('--moving-strip-audit',type=int,metavar='SCALE',help='compare every moving-hole strip column with the physical shell matrix')
+    p.add_argument('--folded-patch',type=int,default=2,help='independent patch width in the moving folded strip')
     p.add_argument('--edge-patch',type=int,default=0,help='free endpoint vertices in moving or split-edge mode')
     p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
+    p.add_argument('--split-dyadic',action='store_true',help='derive exact quadratic mod-eight constraints for split-edge signs')
     p.add_argument('--edge-pieces',type=int,default=2,help='number of constant pieces per edge in split-edge mode')
     p.add_argument('--piece-period',type=int,default=1,help='independent repeating word length within each edge piece')
     p.add_argument('--flat-any-holes',type=int,metavar='PIECE_LENGTH',help='support-count obstruction to flat interiors with any two holes')
     p.add_argument('--split-bulk',action='store_true',help='uniform flat-interior refusal with arbitrary finite endpoint patches')
-    p.add_argument('--split-endpoints',action='store_true',help='portable endpoint refusal for every number of flat pieces')
+    p.add_argument('--split-endpoints',action='store_true',help='portable endpoint refusal for every piece count with the given words, patches and hole offset')
     p.add_argument('--reduced-xor',action='store_true',help='fully reduce moving-word binary equations before branching')
     p.add_argument('--joint-fields',action='store_true',help='alternate rational, binary and ternary sign quotients')
     p.add_argument('--square-lift',action='store_true',help='derive moving-word constraints from sign squares')
@@ -2712,6 +3079,35 @@ def main():
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.moving_strip_audit is not None:
+        print(json.dumps(moving_folded_audit(args.moving_strip_audit,args.hole),sort_keys=True))
+        return
+    if args.moving_folded:
+        result=moving_folded_search(args.half,args.period,args.folded_patch,args.hole,args.seconds,args.nodes)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k not in ('assignment','certificate')},sort_keys=True))
+        return
+    if args.hole_piece and not (args.split_edge or args.split_dyadic):
+        p.error('--hole-piece requires --split-edge or --split-dyadic')
+    if args.hole_offset and not (args.split_edge or args.split_endpoints or args.split_dyadic):
+        p.error('--hole-offset requires a split-edge analysis')
+    if args.split_dyadic:
+        keys,formal=split_edge_system(args.hole,args.edge_patch,args.edge_pieces,
+                                     args.piece_period,args.hole_offset,hole_piece=args.hole_piece)
+        analysis=dyadic_quadratic_analysis(len(keys),list(formal.values()),args.seconds)
+        result=dict(mode='split_dyadic',hole=args.hole,patch=args.edge_patch,
+                    pieces=args.edge_pieces,word_period=args.piece_period,
+                    hole_offset=args.hole_offset,hole_piece=args.hole_piece,
+                    analysis=analysis,all_pairs_decided=False)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        summary={k:v for k,v in analysis.items() if k not in ('free','certificate','linear_relations')}
+        summary.update(free_count=len(analysis.get('free',[])),
+                       necessary_linear_relations=len(analysis.get('linear_relations',[])),
+                       all_pairs_decided=False)
+        print(json.dumps(summary,sort_keys=True))
+        return
     if args.lift_repair_bound is not None:
         result = growing_lift_repair_bound(args.lift_repair_bound)
         if args.write:
@@ -2725,7 +3121,7 @@ def main():
         print(json.dumps({k:v for k,v in result.items() if k!='certificate'},sort_keys=True))
         return
     if args.split_endpoints:
-        result=split_endpoint_refusal()
+        result=split_endpoint_refusal(args.hole,args.edge_patch,args.piece_period,args.hole_offset)
         if args.write:
             with open(args.write,'w') as f:json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k!='certificate'},sort_keys=True))
@@ -2739,7 +3135,8 @@ def main():
     if args.edge_patch and not (args.moving or args.split_edge):
         p.error('--edge-patch requires --moving or --split-edge')
     if args.split_edge:
-        result=split_edge_search(args.hole,args.edge_patch,args.seconds,args.nodes,args.edge_pieces,args.piece_period)
+        result=split_edge_search(args.hole,args.edge_patch,args.seconds,args.nodes,args.edge_pieces,
+                                 args.piece_period,args.hole_offset,args.hole_piece)
         if args.write:
             with open(args.write,'w') as f:json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k not in ('assignment','certificate')},sort_keys=True))

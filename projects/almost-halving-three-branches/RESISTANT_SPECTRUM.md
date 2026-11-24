@@ -1820,3 +1820,107 @@ the preceding slope. Using q=floor((exponent-(1-w))/L) corrects that
 auditor error and covers c in [1-w,179+w] (or [1-w,M+1+w] generally).
 The project compiler was unchanged. These controls support the endpoint
 conventions; the finite controls alone are not the generalized proof.
+
+## Mica: an all-word moving-hole strip and the next dyadic layer
+
+24 November 2026. **The task acceptance and global milestone remain unmet.**
+Priority remains provisional. Commit `0f2b68e` reconciles Fern's inspected
+`f2c5c2a` changes with Sorrel's later flat-interior work. The trusted integration
+attempt reported a conflict; this private reconciliation is not publication.
+The combined predecessor suite passed all 60 tests before the additions below.
+
+### Radius one for moving holes, with endpoints stated explicitly
+
+Fix h in 1..98, odd t=2L+1>=9, and holes (1,ht),(1,99t). No word is fixed.
+After cancelling the long-tip hole against its endpoint term, the physical
+shell columns are, writing d for depth and j for the other short arm:
+
+    C_1(d) = z^(d+1) - z^(79t+d+1) - z^(23t+d+1) - z^(99t-d)
+             + (z-1) z^|d-ht|,
+    C_i(d) = z^(d+1) - z^(n_i*t+1-d) - z^(n_j*t+d+1) - z^(99t+d)
+             + (z-1) z^(ht+d),                 i=2,3,
+    C_0    = z - z^(79t+1) - z^(23t+1) - z^(99t) + (z-1)z^(ht).
+
+These follow directly from the original physical column formula; in particular
+the cancelled term on arms two and three must not be retained a second time.
+An initial temporary compiler did retain it. The independent matrix comparison
+caught that error before any result from the compiler was accepted.
+
+Every nongrid depth is uniquely q*t+s*r, s=+/-1, 1<=r<=L. There are 402
+signs per folded level, and 200 retained old-grid signs including the centre.
+An interior column term is z^(Q*t+u*r+c), where u=+/-1 and c is zero or one.
+Thus a row at Q*t+u*r uses source level r-u*c: its radius is exactly one.
+`moving_folded_stencils` retains these integer equations without prescribing
+any of the 402 signs, including every third-arm sign.
+
+The exact partition of shell rows is: left levels 0 and 1; interior centres
+2..L-1; right level L. The left rows see old-grid signs and levels 1,2.
+The right rows see levels L-1,L. At the odd midpoint use exactly
+
+    Q*t+L+1 = (Q+1)*t-L,    Q*t-L-1 = (Q-1)*t+L.
+
+Consequently an unrestricted signing on this **named support** is equivalent
+to a path in a fixed graph on two consecutive 402-sign levels. Initial states
+admit some assignment to the 200 old-grid signs satisfying the left rows;
+terminal states satisfy the right rows. Starting with levels 1,2, append levels
+3..L: there are **L-2 edges**, checking centres 2..L-1. The state bound is
+2^804. This graph has not been enumerated or its accepted lengths decided.
+This statement concerns moving holes ht,99t; it does not replace the earlier
+fixed-depth-hole strip or cover other hole supports.
+
+The new periodic-interior compiler keeps levels 1..w and L-w..L independent,
+with w>=2, and keeps all old-grid signs. For L>=2w+4+p, interface centres 2..w+1 and L-w-1..L-1 are retained literally;
+one complete period of centres w+2..w+p+1 covers all remaining rows. Its
+integer equations are unchanged when L increases by p. An exact positive
+signing would therefore prove an infinite half-length phase. A parity refusal
+excludes only this periodic ansatz. Unlike the earlier split-piece compiler,
+it does not require p to divide L. The explored p=4, L=3990 phase intersects
+the resistant family at every odd m. No such positive signing is reported.
+
+A standard-library command checks the **entire matrix**, not a random signing:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --moving-strip-audit 17
+```
+
+Recorded result: 3,416 physical columns and 3,026 shell rows match, radius one,
+804 stored slice signs, six path edges. Additional tests check complete matrices
+at t=9,11,15, arbitrary integer sign coordinates at five scales, and direct
+unordered-pair distance counts of a balanced signing. Four periodic compiler
+controls compare every physical column and verify whole-period extension.
+A deliberately changed sign and damaged certificates are rejected by the
+witness/refusal checks; planted positive checker controls are explicitly
+synthetic and are not tripod witnesses.
+
+### Exact mod-eight equations on the complete binary fibre
+
+Parameterize all necessary mod-four shell solutions by free original binary
+coordinates x. Write s_i=sigma_i*product_(j in M_i)(1-2x_j), sigma_i=+/-1.
+For an integer shell row R=sum c_i*s_i, its constant term C is divisible by
+four and A_j=sum_(i:j in M_i)c_i*sigma_i is even. Expanding modulo eight gives
+
+    R/4 = C/4 + sum_j (A_j/2)*x_j
+          + sum_(j<k) sum_(i:j,k in M_i)c_i*sigma_i*x_j*x_k   (mod 2).
+
+The sign of the linear term disappears modulo two; terms of degree three or
+more vanish. `binary_shell_quadratics` checks the whole affine fibre against
+every input parity row before constructing these exact quadratic equations.
+XOR elimination temporarily treats pair products as independent coordinates.
+Each resulting linear consequence carries a replayable XOR trace of original
+quadratic rows. Compatibility of that relaxation is not a quadratic solution
+or a literal signing. Small exhaustive controls verify the displayed identity
+on **every** free binary choice and independently verify fibre completeness.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-dyadic --edge-patch 4 --piece-period 2 --seconds 120 --write /tmp/split-dyadic.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/split-dyadic.json
+```
+
+Recorded result: 138 free binary coordinates, 9,453 pair-product coordinates,
+quadratic rank 2,547 and three independent necessary linear relations, with
+no contradiction. Applying those relations and repeating the calculation
+leaves 135 binary coordinates and rank 2,544, with no further linear relation.
+Separately the existing joint-field quotient has 2,682 signs and 133 binary
+coordinates; its mod-eight equations have rank 2,550 and one new linear
+relation. Repeating after that relation leaves 132 coordinates and rank 2,549,
+with no further linear relation. These are necessary reductions only.
