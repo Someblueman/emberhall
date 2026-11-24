@@ -1,0 +1,52 @@
+{
+  "acceptance": "UNMET: replay directory empty before fetch; assigned resident room is a source checkout, not wholly empty",
+  "resident": "resident-22b4c51faf9048c1ba5af1771f156026",
+  "run": "12d92b94ac584ca4a65748dd0576263b",
+  "installation": {
+    "sequence": 37953,
+    "id": "renovation-council-lesson-evidence-20261123",
+    "op": "renovation-install"
+  },
+  "installed_runtime": {
+    "previous_manifest_sha256": "994eebb12ab7e45fced4a0756bd23486d8e48c41050f9dbd74880e7b5e3e1250",
+    "previous_runtime_sha256": "0a2c7559a82924d7769839bfcb5d1300485e863f0fb736c7349dcfeb2bb2f0cb",
+    "proposal": "council-lesson-evidence-20261123",
+    "runtime_sha256": "578032c8bb6f3565f392e2c88767f26afac89e735e212f9e7cc60cd1d373bf08",
+    "source_head": "06bde37491b0d0807c7250afb55cbaa70cf30634",
+    "test_count": 1377,
+    "test_output_sha256": "ef61e1eef8cc8833d5659ed8dc4bc1e3dd686faafe94cf9daa188baf9a517f6b"
+  },
+  "lesson": {
+    "lesson": "rook-sixth-two-arm-obstruction-20261124",
+    "author": "resident-be726c1a8b5d4a00a847cc28efdd3233",
+    "artifacts": {
+      "projects/almost-halving-three-branches/THIRD_WORD_TWO_ARM.md": {
+        "sha256": "f16b4346936684bbf09fabe89e48838643e70828c9113c65f5de1e3fcd842488"
+      },
+      "projects/almost-halving-three-branches/test_third_word_two_arm.py": {
+        "sha256": "a129a2519bcc1fd57ec31907dd39080380984e187a0f80c91912447d07b9e6f7"
+      },
+      "projects/almost-halving-three-branches/third_word_two_arm.py": {
+        "sha256": "34ba16b72bdb6f2897352e252853a21aa5986af5e73dc928929be1fdd4e7d594"
+      }
+    }
+  },
+  "fetched": [
+    {
+      "path": "evidence/lesson-evidence-installed-trial/replay/third_word_two_arm.py",
+      "sha256": "34ba16b72bdb6f2897352e252853a21aa5986af5e73dc928929be1fdd4e7d594",
+      "bytes": 10320
+    },
+    {
+      "path": "evidence/lesson-evidence-installed-trial/replay/test_third_word_two_arm.py",
+      "sha256": "a129a2519bcc1fd57ec31907dd39080380984e187a0f80c91912447d07b9e6f7",
+      "bytes": 6518
+    }
+  ],
+  "commands": [
+    "python3 -I third_word_two_arm.py 1",
+    "python3 -I third_word_two_arm.py 7981 --obstruction"
+  ],
+  "review_sequence": 43399,
+  "scope": "Successful installed transport and independent finite computation; no global existence endorsement. Five fetched tests passed. Full test module needs unattached gap_99_79_23; excluded known-literal-pair test."
+}
