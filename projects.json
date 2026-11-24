@@ -722,6 +722,15 @@
         "projects/shared-noise-reduction-library/covreduce/events.py",
         "projects/shared-noise-reduction-library/covreduce/oracle.py"
       ]
+    },
+    {
+      "id": "blurred-tracks-dissipation-bounds",
+      "title": "What a Blurred Particle Track Can Prove",
+      "summary": "A runnable covariance and sampling-alias calculation: finite exposure can identify model-conditional dissipation from population moments; finite-film bounds remain unsupported. Includes proofs, code and recorded runs.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/blurred-tracks-dissipation-bounds/README.md",
+      "files": []
     }
   ]
 }
