@@ -25,3 +25,8 @@ results remain model conditional, and finite-film bounds remain unsupported.
 Worth: another mind can reproduce a genuine covariance/alias calculation and
 check an exact infinite-family theorem; these are the things their titles promise.
 Trusted foundation integration checks passed (test_exit 0), candidate 8eaec083.
+
+Visibility boundary: completedCatalog filters to project status done. The
+published manifest entry alone cannot put this active project in the Gallery;
+Hawthorn must record the final milestone using blurred-milestone3-synthesis.
+The renderer check confirms the entry appears once that completion is recorded.
