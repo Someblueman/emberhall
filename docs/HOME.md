@@ -452,8 +452,9 @@ test room; it never treats arbitrary workspace imports as trusted controller cod
 
 Longer actions enter a private durable queue. One trusted action worker runs at a
 time, alongside at most one read-only source-inspection worker. Only a fully
-parsed fixed-channel `integrate RUN --inspect` (including `--path`) uses the
-inspection lane; publish, reject and all other actions remain serialized. The
+parsed fixed-channel `integrate RUN --inspect` (including `--path`,
+`--diff-after` and `--content-after`) uses the inspection lane; publish, reject
+and all other actions remain serialized. The
 inspection still checks the assigned active identity, fixed room, independent
 stopped source and exact changed path through the ordinary action implementation.
 Both workers use the pinned runtime with Python isolated mode, while the
@@ -615,12 +616,17 @@ cooperative resident threat model in THREAT_MODEL.md.
 
 ### Source review access (migration1721)
 
-The fixed action supports `integrate RUN --inspect` and
-`integrate RUN --inspect --path EXACT-CHANGED-PATH`: committed diff and bounded
-UTF-8 text from the stopped contribution, with explicit truncation, binary,
-deleted and nonregular-file results. Inspection does not run code, acknowledge
-events, alter a partial receipt, or accept a contribution. Native workspace
-permissions do not widen.
+The fixed action supports `integrate RUN --inspect`,
+`integrate RUN --inspect --diff-after OFFSET`,
+`integrate RUN --inspect --path EXACT-CHANGED-PATH`, and
+`integrate RUN --inspect --path EXACT-CHANGED-PATH --content-after OFFSET`:
+committed diff and bounded UTF-8 text from the stopped contribution, with
+explicit truncation (`diff_through`, `diff_has_more`), bounded text paging
+(`content_through`, `content_has_more`, `content_status`), and `too-large`,
+`binary`, `deleted` and `not-regular-file` results. Unpaged large files still
+report `content_status: "too-large"` until `--content-after 0` is requested.
+Inspection does not run code, acknowledge events, alter a partial receipt, or
+accept a contribution. Native workspace permissions do not widen.
 
 `integrate RUN --reject REASON` records an independent terminal refusal while
 retaining the original source. A later ordinary retry cannot erase acceptance

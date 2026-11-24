@@ -302,3 +302,67 @@ class CouncilActionTests(MailboxCase):
             with self.assertRaisesRegex(ValueError, "trial"):
                 self.execute("enact", "rule-one", request="enact-fixture")
         self.assertEqual(self.approved.read()[0]["rule_revision"], original)
+
+
+class InspectionPagingJobTests(MailboxCase):
+    def setUp(self):
+        super().setUp()
+        self.arrive()
+        self.record._mailbox_runtime = self.runtime
+        self.author = "paging-author"
+        self.record.append("life", "watch-keeper", {"kind": "run-start", "run": self.author,
+            "resident": "author", "agent": "codex", "model": "gpt-6.1-sol",
+            "source_head": self.base, "workspace": "residents/" + self.author,
+            "policy_revision": "fixture", "mode": "work"})
+        self.record.append("arrive", "author", {"name": "Author"})
+        from house.home_work import contribution, git, room
+        author_room = room(self.record, self.private, self.author, self.base)
+        self.large_text = ("0123456789abcdef\n" * 5000) + "MAILBOX TAIL LINE\n"
+        (author_room / "big.txt").write_text(self.large_text, encoding="utf-8")
+        contribution(author_room, self.base, self.private / self.author / "contribution.json",
+                     journal_artifacts={})
+        self.record.append("life", "watch-keeper", {"kind": "run-finish", "run": self.author,
+            "outcome": "success", "exit_code": 0, "usage": {}, "elapsed_seconds": 1})
+
+    def test_paged_inspection_routes_to_inspection_lane_and_reconstructs_via_worker(self):
+        base = ["integrate", self.author, "--as", self.resident]
+        for extra in (["--inspect", "--diff-after", "0"],
+                      ["--inspect", "--path", "big.txt", "--content-after", "0"]):
+            self.assertEqual(mailbox_jobs.lane(self.record, {
+                "argv": base + extra, "run": self.run, "resident": self.resident, "lane": "worker"}),
+                "inspection")
+        for extra in (["--diff-after", "0"], ["--path", "big.txt", "--content-after", "0"]):
+            self.assertEqual(mailbox_jobs.lane(self.record, {
+                "argv": base + extra, "run": self.run, "resident": self.resident, "lane": "inspection"}),
+                "worker")
+
+        # Execute real resident_actions through the inspection lane and reconstruct big.txt.
+        chunks = []
+        cursor = 0
+        while True:
+            argv = base + ["--inspect", "--path", "big.txt", "--content-after", str(cursor)]
+            job = mailbox_jobs.enqueue(self.record, self.run, argv, f"page-{cursor}")
+            with patch("house.mailbox_jobs.group_members", return_value=[]), \
+                    patch("house.mailbox_jobs.group_stopped", return_value=True):
+                mailbox_jobs.tick(self.record)
+                child = self.record._mailbox_processes[job]
+                child.wait(timeout=10)
+                mailbox_jobs.tick(self.record)
+            result = mailbox_jobs.result(self.record, job)
+            self.assertTrue(result["ok"], result)
+            payload = result["result"]
+            chunks.append(payload["content"])
+            if not payload["content_has_more"]:
+                break
+            cursor = payload["content_through"]
+        self.assertEqual("".join(chunks), self.large_text)
+        self.assertIn("MAILBOX TAIL LINE\n", chunks[-1])
+
+        # Malformed cursor and missing --inspect / --path fail closed in resident_actions.
+        for bad in (["--inspect", "--path", "big.txt", "--content-after", "-1"],
+                    ["--inspect", "--content-after", "0"],
+                    ["--diff-after", "0"]):
+            with self.assertRaises(ValueError):
+                resident_actions.execute(self.record, self.workspace, self.resident, self.run,
+                                         base + bad, "bad-req")
+
