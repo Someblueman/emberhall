@@ -1240,3 +1240,85 @@ incomplete order-256 row alongside the candidate's new sections. No recorded
 failure was replaced. All 47 focused tests pass (26.826 seconds); the shared
 baseline's 41 tests had passed separately. This resolves source overlap only;
 the all-pairs acceptance and provisional priority remain unchanged.
+
+### Sorrel: flat pieces fail uniformly, even without a repeated word
+
+24 November 2026. **The all-pairs target remains open.** A different attempt
+lets every old edge have independently signed long constant pieces. This
+allows a word with just one change on an entire edge, so it is not the
+previous common-period ansatz. It too has an exact obstruction.
+
+**Scoped theorem.** Let p>=2 and L>=179 with pL even, and put t=pL+1. Omit first-arm
+vertices 19t and 99t. Subdivide each old edge's inserted vertices into p
+successive pieces of L vertices each. There is no target pair whose sign is
+constant within every such piece. Each old retained vertex and each piece
+can otherwise have its own independent sign, including every third-arm piece.
+For resistant t=7980m+1 this applies to every divisor p>=2 of 7980m for which
+L=7980m/p>=179. In particular two flat halves cannot attain the target for
+any m>=1. Arbitrary words, unaligned changes and other supports are untouched.
+
+**Exact equations.** Write a monomial as (q,c), meaning z^(qL+c).
+For an edge numbered e from zero, piece r=0,...,p-1 has depth interval
+
+    [(pe+r)L+e+1, (pe+r+1)L+e].
+
+Use the original physical K column, not an assumed transfer or rank formula.
+For a term a*z^(d+B*p*L+C), summing over this interval and multiplying by
+1-z leaves a at (p(e+B)+r,e+1+C) and -a at
+(p(e+B)+r+1,e+1+C). For a reflected term a*z^(-d+B*p*L+C),
+the two endpoints are a at (p(B-e)-r-1,C-e) and -a at
+(p(B-e)-r,C-e). The hole terms are of exactly these forms, because no old
+hole lies strictly inside an old edge. Old vertices use their single physical
+columns multiplied by 1-z; the centre is retained explicitly.
+`split_edge_system` implements these endpoint sums symbolically. It also
+allows independent patches at both ends of each piece, as a separate search
+method; the uniform theorem here uses patch width zero only.
+
+For the unpatched equations every constant offset lies in [1,179],
+independently of p. If L>178, distinct (q,c) cannot specialize to the same
+exponent: |c-c'|<=178<L. Consequently an actual zero shell polynomial in
+this ansatz must satisfy every separate formal coefficient equation. This
+converse is why the lower bound L>=179 matters; small-scale column tests
+alone would not establish it. Conversely any formal zero specializes to
+(1-z)K=0; cancellation in the polynomial ring gives K=0, including balance.
+
+**One fixed necessary system for every p.** Retain only formal rows with
+q divisible by p. The displayed endpoint formulas show that only r=0 and
+r=p-1 enter these rows. Rename those pieces first and last, and divide q
+by p. All their coefficients, every old sign and every retained row are now
+independent of p. The first/last pieces are distinct even at p=2. Thus the
+p=2 extraction in `split_endpoint_system` gives precisely the same necessary
+system for every integer p>=2: 602 signs and 535 nonzero rows.
+
+For each integer row sum(c_i*s_i)=0, set s_i=2b_i-1. An odd sum(c_i) is
+already a refusal; otherwise the necessary binary equation is
+sum((c_i mod 2)*b_i)=sum(c_i)/2 mod 2. The generated endpoint certificate
+XORs indexed binary rows to zero on every coordinate and one on the right.
+The independent verifier checks that contradiction using the untouched
+integer rows. It does not trust a rank, kernel, branch search or time limit.
+The endpoint formulas establish the unbounded-p identification; finite tests
+merely control its implementation.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-endpoints --write /tmp/flat-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/flat-refusal.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -q
+```
+
+The real run generated and independently accepted the parity refusal. All
+49 focused tests pass (27.169 seconds). New controls specialize every compiled
+column against sums of original physical columns at six piece/patch/hole
+configurations and two endpoint scales each, including coincident monomials.
+They compare the entire normalized endpoint system at p=2,3,4,7,10,31;
+reject an empty refusal and fabricated positive assignment; and retain all
+47 predecessor tests. No large certificate is committed.
+
+The two-piece attempt with one independent vertex at every piece end also
+has a directly verified formal parity refusal (1,406 variables, 1,603 rows).
+That extra observation is scoped to that patch width; it is not a theorem
+for arbitrary patches. The remaining mathematical obstacle is to make
+nonconstant words satisfy the exact shells, or to exclude all surviving
+supports without assuming flat pieces. Neither a project finish nor the
+main task's acceptance is claimed here.

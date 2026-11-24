@@ -14,6 +14,58 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_split_edge_columns_against_every_physical_shell(self):
+        import full_shorter_coupling as physical
+        for hole,patch,pieces in ((19,0,2),(7,1,2),(19,2,2),(19,0,3),(7,1,4),(19,0,10)):
+            keys,rows=rs.split_edge_system(hole,patch,pieces)
+            for half_length in (2*patch+1,2*patch+3):
+                t=pieces*half_length+1
+                actual=[defaultdict(int) for _ in keys]
+                for (q,c),row in rows.items():
+                    for i,value in row.items():actual[i][q*half_length+c]+=value
+                for i,key in enumerate(keys):
+                    if key[0]=='old':
+                        _,arm,q=key;depths=[q*t]
+                    else:
+                        _,arm,edge,half,*rest=key
+                        lo=edge*t+1+half*half_length
+                        hi=lo+half_length-1
+                        if key[0]=='half':depths=range(lo+patch,hi-patch+1)
+                        else:
+                            side,r=rest;depths=[lo+r if side==0 else hi-r]
+                    expected=defaultdict(int)
+                    for d in depths:
+                        for e,c in physical.shell_column([99*t,79*t,23*t],{(1,hole*t),(1,99*t)},(arm,d)).items():
+                            expected[e]+=c;expected[e+1]-=c
+                    self.assertEqual({e:c for e,c in actual[i].items() if c},
+                                     {e:c for e,c in expected.items() if c},(hole,patch,half_length,key))
+        for hole,patch in ((0,0),(99,0),(19,-1),(19,0.5)):
+            with self.assertRaises(ValueError):rs.split_edge_system(hole,patch)
+
+    def test_uniform_flat_piece_endpoint_refusal(self):
+        keys,expected=rs.split_endpoint_system()
+        for pieces in (2,3,4,7,10,31):
+            all_keys,rows=rs.split_edge_system(19,0,pieces)
+            def relabel(key):
+                if key[0]=='old':return key
+                kind,arm,edge,r=key
+                self.assertIn(r,(0,pieces-1))
+                return kind,arm,edge,int(r!=0)
+            actual={(q//pieces,c):{keys.index(relabel(all_keys[i])):v for i,v in row.items()}
+                    for (q,c),row in rows.items() if q%pieces==0}
+            self.assertEqual(actual,expected)
+            constants=[c for q,c in rows]
+            self.assertEqual(max(constants)-min(constants),178)
+        saved=rs.split_endpoint_refusal()
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        with self.assertRaises(ValueError):rs.verify_saved(dict(saved,certificate=[]))
+        for pieces in (0,1,2.5):
+            with self.assertRaises(ValueError):rs.split_edge_system(pieces=pieces)
+        keys,_=rs.split_edge_system()
+        bad=dict(mode='split_edge',hole=19,patch=0,pieces=2,
+                 assignment=[[list(k),1] for k in keys])
+        with self.assertRaises(ValueError):rs.verify_saved(bad)
+
     def test_moving_edge_patches_against_all_physical_columns(self):
         for period,width,hole in ((1,1,19),(2,4,19),(3,3,7),(4,4,19),(8,8,19)):
             keys,rows = rs.moving_periodic_system(period,hole,width)

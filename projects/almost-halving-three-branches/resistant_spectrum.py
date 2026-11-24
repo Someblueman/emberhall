@@ -591,6 +591,128 @@ def fourth_root_mod8_census():
                 counts=dict(counts), phases=phase_counts)
 
 
+def split_edge_system(hole=19, patch=0, pieces=2):
+    """Formal (1-z)K for t=pieces*L+1, independent constant edge pieces.
+
+    Each piece has L vertices; its first/last patch vertices are independent.
+    Every remaining piece is one independent sign. L>=2*patch+1 suffices.
+    Exponents are pairs (coefficient of L, constant), never sampled ranks.
+    Holes are old first-arm vertices hole*t and 99*t. This is an ansatz.
+    """
+    if type(hole) is not int or not 1 <= hole < 99:
+        raise ValueError('require 1<=hole<99')
+    if type(patch) is not int or patch < 0:
+        raise ValueError('require a nonnegative patch width')
+    if type(pieces) is not int or pieces < 2:
+        raise ValueError('require at least two pieces')
+    lengths = (99,79,23)
+    keys, rows = [], defaultdict(lambda:defaultdict(int))
+
+    def add(a,b): return a[0]+b[0],a[1]+b[1]
+    def neg(a): return -a[0],-a[1]
+    def old(q): return pieces*q,q
+
+    def terms(arm, edge, centre=False):
+        # Entries (slope in d, affine offset, coefficient) of a physical K column.
+        if centre:
+            out = [(0,(0,1),1)]+[(0,add(old(n),(0,1)),-1) for n in lengths]
+        else:
+            out = [(1,(0,1),1),(-1,add(old(lengths[arm-1]),(0,1)),-1)]
+            out += [(1,add(old(n),(0,1)),-1) for a,n in enumerate(lengths,1) if a!=arm]
+        for h in (hole,99):
+            if centre:
+                slope,offset = 0,old(h)
+            elif arm==1 and edge<h:
+                slope,offset = -1,old(h)
+            else:
+                slope,offset = 1,neg(old(h)) if arm==1 else old(h)
+            out += [(slope,offset,-1),(slope,add(offset,(0,1)),1)]
+        return out
+
+    def column(key,arm,edge,lo,hi,single=False,centre=False):
+        i=len(keys);keys.append(key)
+        for slope,offset,c in terms(arm,edge,centre):
+            if single:
+                e=add(tuple(slope*x for x in lo),offset)
+                ends=((e,c),(add(e,(0,1)),-c))
+            elif slope==1:
+                ends=((add(lo,offset),c),(add(add(hi,offset),(0,1)),-c))
+            elif slope==-1:
+                ends=((add(neg(hi),offset),c),(add(add(neg(lo),offset),(0,1)),-c))
+            else:
+                raise AssertionError('a run has constant distance')
+            for e,value in ends:rows[e][i]+=value
+
+    column(('old',0,0),0,0,(0,0),(0,0),True,True)
+    for arm,n in enumerate(lengths,1):
+        for q in range(1,n+1):
+            if arm==1 and q in (hole,99):continue
+            column(('old',arm,q),arm,q,old(q),old(q),True)
+        for edge in range(n):
+            for half in range(pieces):
+                lo=(pieces*edge+half,edge+1)
+                hi=(pieces*edge+half+1,edge)
+                for side in (0,1):
+                    for r in range(patch):
+                        d=add(lo,(0,r)) if side==0 else add(hi,(0,-r))
+                        column(('patch',arm,edge,half,side,r),arm,edge,d,d,True)
+                column(('half',arm,edge,half),arm,edge,add(lo,(0,patch)),add(hi,(0,-patch)))
+    return keys,{e:{i:c for i,c in row.items() if c} for e,row in rows.items() if any(row.values())}
+
+
+def split_endpoint_system():
+    """Fixed necessary endpoint rows for every number p>=2 of flat pieces.
+
+    Retain slope exponents divisible by p. Only the first and last pieces
+    enter: a forward run contributes at r and r+1, a reflected run at -r-1
+    and -r, modulo p. The p=2 extraction therefore defines the uniform map.
+    No endpoint patches are included in this relaxation.
+    """
+    keys,formal=split_edge_system(19,0,2)
+    rows={(q//2,c):row for (q,c),row in formal.items() if q%2==0}
+    return keys,dict(sorted(rows.items()))
+
+
+def split_endpoint_refusal():
+    keys,rows=split_endpoint_system()
+    certificate,_=binary_elimination(list(rows.values()))
+    if certificate is None or not verify_refusal(list(rows.values()),certificate):
+        raise AssertionError('uniform flat-piece endpoint refusal was not verified')
+    return dict(mode='split_endpoints',status='ansatz_refused_by_parity',
+                variables=len(keys),rows=len(rows),certificate=certificate,
+                scope='all p>=2 equal constant pieces, no patches, holes 19t and 99t',
+                all_pairs_decided=False)
+
+
+def split_edge_search(hole=19,patch=0,seconds=30,nodes=10000,pieces=2):
+    """Try literal edge-piece plateaus; a timeout has no mathematical outcome."""
+    start=time.monotonic()
+    keys,formal=split_edge_system(hole,patch,pieces)
+    original=list(formal.values())
+    result=dict(mode='split_edge',hole=hole,patch=patch,pieces=pieces,variables=len(keys),rows=len(original),
+                minimum_half_length=2*patch+1,all_pairs_decided=False,
+                scope='independent constant edge-piece interiors with free endpoint patches')
+    def done(status,**extra):return dict(**result,status=status,elapsed=time.monotonic()-start,**extra)
+    certificate,basis=binary_elimination(original)
+    if certificate is not None:
+        return done('ansatz_refused_by_parity',certificate=certificate)
+    joint=joint_sign_closure(len(keys),original,seconds,short_recovery=True)
+    result['closure']=joint['history']
+    if joint['conflict']:return done('ansatz_refused_by_joint_fields')
+    remaining=seconds-(time.monotonic()-start)
+    if not joint['complete'] or remaining<=0:return done('unknown')
+    certificate,basis=binary_elimination(joint['rows'])
+    if certificate is not None:return done('ansatz_refused_after_quotient')
+    engine=make_engine(joint['size'],joint['rows'],basis,remaining,nodes,'connected')
+    i,s=joint['aliases'][0]
+    status,values=engine.run({i:s})
+    if values is None:return done(status,nodes=engine.nodes)
+    restored=[sign*values[i] for i,sign in joint['aliases']]
+    if any(sum(c*restored[i] for i,c in row.items()) for row in original):
+        raise AssertionError('split-edge lift fails untouched formal rows')
+    return done(status,nodes=engine.nodes,assignment=[[list(k),v] for k,v in zip(keys,restored)])
+
+
 def moving_periodic_system(period,hole=19,edge_patch=0):
     """Formal (1-z**period)*K for t=period*k+1; holes hole*t and 99t.
 
@@ -2145,6 +2267,28 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='split_endpoints':
+        _,rows=split_endpoint_system()
+        if not verify_refusal(list(rows.values()),saved.get('certificate',[])):
+            raise ValueError('invalid uniform flat-piece endpoint refusal')
+        return dict(verified=True,claim='only equal constant pieces on the named support are refused',
+                    all_pairs_decided=False)
+    if saved.get('mode')=='split_edge':
+        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'])
+        if saved.get('status')=='ansatz_refused_by_parity':
+            if not verify_refusal(list(formal.values()),saved['certificate']):
+                raise ValueError('invalid split-edge parity refusal')
+            return dict(verified=True,claim='only the split-edge ansatz is refused',all_pairs_decided=False)
+        assignment=saved.get('assignment',[])
+        if len(assignment)!=len(keys) or [tuple(k) for k,v in assignment]!=keys:
+            raise ValueError('no complete split-edge assignment')
+        values=[v for k,v in assignment]
+        if any(type(v) is not int or v not in (-1,1) for v in values):
+            raise ValueError('require literal signs')
+        if any(sum(c*values[i] for i,c in row.items()) for row in formal.values()):
+            raise ValueError('split-edge shell equation fails')
+        return dict(verified=True,claim='formal split-edge shell equations vanish',
+                    minimum_half_length=2*saved['patch']+1,all_pairs_decided=False)
     if saved.get('mode')=='residue_lift':
         return verify_residue_lift(saved)
     if saved.get('mode') in ('residue_zero','residue_parity'):
@@ -2235,7 +2379,10 @@ def main():
     p.add_argument('--ternary',action='store_true',help='bounded modular rank diagnostic; not a sign search')
     p.add_argument('--sparse-pivots',type=int,default=40000)
     p.add_argument('--moving',action='store_true',help='search moving holes 19t and 99t')
-    p.add_argument('--edge-patch',type=int,default=0,help='free vertices at both ends of each moving old edge')
+    p.add_argument('--edge-patch',type=int,default=0,help='free endpoint vertices in moving or split-edge mode')
+    p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
+    p.add_argument('--edge-pieces',type=int,default=2,help='number of constant pieces per edge in split-edge mode')
+    p.add_argument('--split-endpoints',action='store_true',help='portable endpoint refusal for every number of flat pieces')
     p.add_argument('--reduced-xor',action='store_true',help='fully reduce moving-word binary equations before branching')
     p.add_argument('--joint-fields',action='store_true',help='alternate rational, binary and ternary sign quotients')
     p.add_argument('--square-lift',action='store_true',help='derive moving-word constraints from sign squares')
@@ -2261,8 +2408,20 @@ def main():
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
-    if args.edge_patch and not args.moving:
-        p.error('--edge-patch requires --moving')
+    if args.split_endpoints:
+        result=split_endpoint_refusal()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k!='certificate'},sort_keys=True))
+        return
+    if args.edge_patch and not (args.moving or args.split_edge):
+        p.error('--edge-patch requires --moving or --split-edge')
+    if args.split_edge:
+        result=split_edge_search(args.hole,args.edge_patch,args.seconds,args.nodes,args.edge_pieces)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k not in ('assignment','certificate')},sort_keys=True))
+        return
     if args.residue_lift is not None:
         result = residue_lift_plan(args.residue_lift,args.lift_index)
         if args.write:
