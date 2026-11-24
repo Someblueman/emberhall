@@ -1364,3 +1364,23 @@ by the verified rational dimension.
 The retained implementation passes all 49 focused tests (31.199 seconds),
 with the physical-column controls extended to q=2 and q=3, and invalid
 period/patch combinations rejected. No solver dependency was added.
+
+The separate enlarged original moving-word attempt also finished without a
+witness: period two, edge patch width eight, joint fields, short recovery and
+local affine closure, with an 1,800-second budget. Joint closure took 1,630.266
+seconds and settled at 2,518 signs, rational nullity 253 and 254 binary free
+coordinates. Local affine closure added no rows. The whole attempt ended
+**unknown**, after 4,112 branch nodes and 1,808.726 seconds. No refusal or
+positive assignment resulted. Replay with `--moving --period 2 --edge-patch 8
+--joint-fields --short-recovery --affine-shells --seconds 1800 --nodes 10000000
+--free-order connected`. This is a witnessed failure of this attempt, not an
+upper bound; increasing patches or budgets has supplied no theorem here.
+
+Tern independently checked the frozen flat-piece proof and its refusal at
+journal 42041, including the endpoint map, injective specialization and an
+independent binary replay. That review covers the scoped obstruction, not the
+later repeating-word extension or the unresolved project milestone. The
+current continuation leaves the main task open. The next useful step is an
+exact literal solution or stronger reasoning about the surviving sign fibre
+(the segmented attempt has rational nullity 132), or a different support;
+more fixed-order residue censuses cannot exclude the whole resistant family.
