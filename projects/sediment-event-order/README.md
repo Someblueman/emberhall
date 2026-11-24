@@ -1,5 +1,22 @@
 # Which Ancient Change Came First?
 
+Milestone-one development release, 24 November 2026. Start with the frozen
+[model contract and recorded acceptance result](MODEL_CONTRACT.md):
+
+```sh
+python3 projects/sediment-event-order/milestone_check.py
+```
+
+This command checks analytic limits, the published simulation-law control,
+fixed development calibration, failed controls and numerical accuracy in one
+bounded report. Python 3.10+, standard library only; allow a few minutes.
+`--json` retains every stage's diagnostics and source hashes. A successful exit
+means ready for independent milestone review. **The milestone is still open.**
+No held-out evaluation or historical climate reconstruction is claimed.
+The [paired executable](PAIRED_EXPERIMENT.md) is a later-stage foundation.
+
+## Single-archive foundation
+
 First executable foundation, 24 November 2026. This is a single-archive,
 finite-prior verification baseline for the selected sediment event-order
 project. It is **not yet the paired-archive scientific experiment**.
@@ -24,7 +41,7 @@ All ages are in years before an arbitrary reference, increasing into the past.
 The latent climate is a step: its younger regime applies at material age
 `a <= tau`. The event time `tau` is that climate boundary, before burial and
 mixing. It is neither a proxy midpoint nor a date assigned to a recovered
-specimen. A later paired experiment will compare two such latent boundaries;
+specimen. The later-stage paired foundation compares two such latent boundaries;
 an older boundary happened first. We make no causal claim from temporal order.
 
 The present focal layer ages are known exactly. They serve as a labelled
@@ -109,8 +126,8 @@ posterior `(16/43,27/43)`; a test checks these rational values. The executable
 also reports a larger synthetic example and its complete posterior.
 This reproduces a documented model, **not the historical coal data fit**,
 and is not Khider's climate termination method. It supplies a checked
-change-point calculation; mapping a climate baseline to the same event-time
-definition remains a milestone-one requirement.
+change-point calculation. The adopted same-event Gaussian working-model
+comparison is now specified and checked in [MODEL_CONTRACT.md](MODEL_CONTRACT.md).
 
 ## Calibration and controls
 
@@ -199,20 +216,22 @@ floating-point last digits may differ between platforms. A numerical or
 validation exception aborts visibly; no trial is skipped. `numerical_failures=0`
 means all requested trials completed, not that failed trials were omitted.
 
-## What remains before the first milestone is complete
+## Milestone status and next work
 
-1. Reproduce a published climate change-point example with its actual inputs,
-   and document whether its event definition agrees with the latent step.
-   The Poisson example here is a checked auxiliary baseline, not that result.
-2. Establish a matched climate baseline versus observation-aware inference.
-   The continuous calculation repairs the demonstrated point-grid failure,
-   but does not establish real-world identifiability or historical resolution.
-3. Independently inspect this model, sources and run at the milestone boundary.
+The adopted synthetic contract now supplies the first milestone's technical
+items: latent event definition, published mixing response, documented Gaussian
+simulation-law control, matched event-time comparison and own-law calibration.
+The corrected release report passes all 13 gates, including 74 project tests.
+See [MODEL_CONTRACT.md](MODEL_CONTRACT.md) for the recorded result, retained
+failures, sources and reproduction boundaries. **Independent milestone review
+and integration remain; the milestone is not closed.** No historical climate
+example or literal Khider reproduction is claimed under the owner's decision.
 
-Then build the paired experiment: monotone uncertain age-depth curves, shared
-and independent chronology errors, declared dating/proxy material ancestry,
-and joint ordering probabilities. Freeze that experiment, sampling budgets,
-precision and compute limit before held-out seeds. All positive and negative
-trial outcomes must remain available. Nothing in this first own-law check
-establishes performance on real cores or a new scientific result beyond the
-cited precedents.
+The [paired foundation](PAIRED_EXPERIMENT.md) already implements uncertain
+monotone chronologies, shared calibration error, specimen ancestry and joint
+ordering probabilities. Its development runs do not complete that later
+milestone. Next: independently review this release, then freeze the paired
+experiment, sampling budgets, precision and compute cap before prospective
+held-out evaluation. Retain failed and unattempted cases. A new scientific
+result beyond the cited precedents and any claim about real cores remain
+unestablished.
