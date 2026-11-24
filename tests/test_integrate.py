@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 from house.home_work import contribution, git, room
@@ -233,3 +234,246 @@ except BlockingIOError:
         self.assertTrue(any(p.returncode == 0 for p in processes))
         self.assertEqual(path.read_bytes(), original)
         self.assertEqual(self.record.read()[2], journal)
+
+
+class InspectionPagingTests(unittest.TestCase):
+    def setUp(self):
+        self.f = IntegrationTests()
+        self.f.setUp()
+        self.addCleanup(self.f.doCleanups)
+
+    def commit_files(self, room, files, message="Large contribution"):
+        for rel, content in files.items():
+            target = room / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if isinstance(content, bytes):
+                target.write_bytes(content)
+            else:
+                target.write_text(content, encoding="utf-8")
+        git(room, "add", "--all")
+        git(room, "-c", "commit.gpgsign=false", "-c", "user.name=Test",
+            "-c", "user.email=test@local", "commit", "-m", message)
+        report = self.f.private / "one/contribution.json"
+        data = json.loads(report.read_text())
+        data["commit"] = git(room, "rev-parse", "HEAD")
+        report.write_text(json.dumps(data))
+
+    def test_reconstructs_large_utf8_diff_and_content_across_nonoverlapping_pages(self):
+        from house.integrate import INSPECTION_LIMIT, inspect_contribution
+
+        f = self.f
+        room = f.candidate("one", "first\n")
+        # Place 4-byte UTF-8 emojis across INSPECTION_LIMIT and 2 * INSPECTION_LIMIT boundaries.
+        chunk = ("a" * (INSPECTION_LIMIT - 2)) + "😀" + ("b" * (INSPECTION_LIMIT - 2)) + "—"
+        large_text = chunk + "tail-section\nFINAL LINE\n"
+        extra_text = "x" * 2000 + "\nEXTRA FINAL\n"
+        self.commit_files(room, {"large.txt": large_text, "extra.txt": extra_text})
+
+        expected_full_diff = subprocess.run(
+            ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv",
+             "--no-renames", "--no-color", f.base, git(room, "rev-parse", "HEAD"), "--"],
+            cwd=room, capture_output=True, check=True, text=True).stdout
+        expected_file_diff = subprocess.run(
+            ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv",
+             "--no-renames", "--no-color", f.base, git(room, "rev-parse", "HEAD"), "--", "large.txt"],
+            cwd=room, capture_output=True, check=True, text=True).stdout
+
+        # Reconstruct cumulative diff across nonoverlapping pages.
+        diff_pages = []
+        cursor = None
+        while True:
+            page = inspect_contribution(f.record, "one", "alice", diff_after=cursor)
+            self.assertEqual(page["limit_bytes"], INSPECTION_LIMIT)
+            self.assertEqual(page["diff_after"], 0 if cursor is None else cursor)
+            self.assertLessEqual(len(page["diff"].encode("utf-8")), INSPECTION_LIMIT)
+            self.assertNotIn("\ufffd", page["diff"])
+            self.assertEqual(page["truncated"], page["diff_has_more"])
+            diff_pages.append(page)
+            if not page["diff_has_more"]:
+                break
+            self.assertGreater(page["diff_through"], page["diff_after"])
+            cursor = page["diff_through"]
+        self.assertGreater(len(diff_pages), 2)
+        reconstructed_diff = "".join(p["diff"] for p in diff_pages)
+        self.assertEqual(reconstructed_diff, expected_full_diff)
+        self.assertIn("EXTRA FINAL\n", reconstructed_diff)
+        self.assertIn("FINAL LINE\n", diff_pages[-1]["diff"])
+
+        # Reconstruct per-file diff across nonoverlapping pages.
+        file_diff_parts = []
+        cursor = 0
+        while True:
+            page = inspect_contribution(f.record, "one", "alice", "large.txt", diff_after=cursor)
+            self.assertEqual(page["diff_after"], cursor)
+            file_diff_parts.append(page["diff"])
+            if not page["diff_has_more"]:
+                end_diff = page["diff_through"]
+                break
+            cursor = page["diff_through"]
+        self.assertEqual("".join(file_diff_parts), expected_file_diff)
+        self.assertIn("FINAL LINE\n", file_diff_parts[-1])
+
+        # Exact EOF cursor returns empty slice and has_more=False.
+        eof_diff = inspect_contribution(f.record, "one", "alice", "large.txt", diff_after=end_diff)
+        self.assertEqual(eof_diff["diff"], "")
+        self.assertEqual(eof_diff["diff_after"], end_diff)
+        self.assertEqual(eof_diff["diff_through"], end_diff)
+        self.assertFalse(eof_diff["diff_has_more"])
+        self.assertFalse(eof_diff["truncated"])
+
+        # Without content_after, large text remains content_status='too-large' with no content.
+        unpaged = inspect_contribution(f.record, "one", "alice", "large.txt")
+        self.assertEqual(unpaged["content_status"], "too-large")
+        self.assertNotIn("content", unpaged)
+        self.assertEqual(unpaged["content_bytes"], len(large_text.encode("utf-8")))
+        self.assertTrue(unpaged["content_has_more"])
+
+        # Reconstruct regular text content across nonoverlapping pages.
+        content_pages = []
+        cursor = 0
+        while True:
+            page = inspect_contribution(f.record, "one", "alice", "large.txt", content_after=cursor)
+            self.assertEqual(page["content_status"], "partial")
+            self.assertEqual(page["content_after"], cursor)
+            self.assertLessEqual(len(page["content"].encode("utf-8")), INSPECTION_LIMIT)
+            self.assertNotIn("\ufffd", page["content"])
+            content_pages.append(page)
+            if not page["content_has_more"]:
+                end_content = page["content_through"]
+                break
+            self.assertGreater(page["content_through"], page["content_after"])
+            cursor = page["content_through"]
+        self.assertGreater(len(content_pages), 2)
+        self.assertEqual("".join(p["content"] for p in content_pages), large_text)
+        self.assertTrue(content_pages[-1]["content"].endswith("FINAL LINE\n"))
+
+        eof_content = inspect_contribution(f.record, "one", "alice", "large.txt", content_after=end_content)
+        self.assertEqual(eof_content["content"], "")
+        self.assertEqual(eof_content["content_through"], end_content)
+        self.assertFalse(eof_content["content_has_more"])
+        self.assertFalse((f.private / "one/integration.json").exists())
+
+    def test_paging_rejects_malformed_cursors_paths_and_authorization(self):
+        from house.integrate import INSPECTION_LIMIT, inspect_contribution
+
+        f = self.f
+        room = f.candidate("one", "first\n")
+        large_text = ("a" * (INSPECTION_LIMIT - 2)) + "😀tail\n"
+        self.commit_files(room, {"large.txt": large_text})
+
+        # Malformed cursor types and negative values.
+        for bad in (-1, True, False, "0", 1.5):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    inspect_contribution(f.record, "one", "alice", diff_after=bad)
+                with self.assertRaises(ValueError):
+                    inspect_contribution(f.record, "one", "alice", "large.txt", content_after=bad)
+
+        # content_after without path.
+        with self.assertRaisesRegex(ValueError, "path"):
+            inspect_contribution(f.record, "one", "alice", content_after=0)
+
+        # Out-of-range cursors.
+        content_len = len(large_text.encode("utf-8"))
+        with self.assertRaises(ValueError):
+            inspect_contribution(f.record, "one", "alice", "large.txt", content_after=content_len + 1)
+        with self.assertRaises(ValueError):
+            inspect_contribution(f.record, "one", "alice", "large.txt", diff_after=content_len + 10_000)
+
+        # Mid-UTF-8 character cursors.
+        emoji_offset = INSPECTION_LIMIT - 2
+        with self.assertRaisesRegex(ValueError, "UTF-8"):
+            inspect_contribution(f.record, "one", "alice", "large.txt", content_after=emoji_offset + 1)
+        page1 = inspect_contribution(f.record, "one", "alice", "large.txt", diff_after=0)
+        self.assertTrue(page1["diff_has_more"])
+        # The diff line has '+' before 'a's, so emoji starts at emoji_offset + header bytes; find its continuation byte.
+        full_diff = subprocess.run(
+            ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv",
+             "--no-renames", "--no-color", f.base, git(room, "rev-parse", "HEAD"), "--", "large.txt"],
+            cwd=room, capture_output=True, check=True).stdout
+        mid_diff = full_diff.index("😀".encode("utf-8")) + 1
+        with self.assertRaisesRegex(ValueError, "UTF-8"):
+            inspect_contribution(f.record, "one", "alice", "large.txt", diff_after=mid_diff)
+
+        # Exact changed-path validation preserved.
+        for bad_path in ("../large.txt", "/etc/passwd", ":(glob)*", "tests/test_document.py"):
+            with self.assertRaisesRegex(ValueError, "exact changed"):
+                inspect_contribution(f.record, "one", "alice", bad_path, diff_after=0)
+            with self.assertRaisesRegex(ValueError, "exact changed"):
+                inspect_contribution(f.record, "one", "alice", bad_path, content_after=0)
+
+        # Authorization & immutable contribution identity preserved across pages.
+        with self.assertRaisesRegex(ValueError, "different, awake"):
+            inspect_contribution(f.record, "one", "author-one", "large.txt", content_after=0)
+        self.f.record.append("sleep", "bob", {"through": 0, "note": "Rest"})
+        with self.assertRaisesRegex(ValueError, "different, awake"):
+            inspect_contribution(f.record, "one", "bob", "large.txt", content_after=0)
+        git(room, "-c", "commit.gpgsign=false", "-c", "user.name=Test",
+            "-c", "user.email=test@local", "commit", "--allow-empty", "-m", "Mutate candidate")
+        with self.assertRaisesRegex(ValueError, "identity changed"):
+            inspect_contribution(f.record, "one", "alice", "large.txt", content_after=page1["diff_through"])
+
+    def test_paging_preserves_binary_nonregular_and_deleted_protections(self):
+        from house.integrate import INSPECTION_LIMIT, inspect_contribution
+
+        f = self.f
+        room = f.candidate("one", "first\n")
+        (room / "late_binary.bin").write_bytes((b"x" * (INSPECTION_LIMIT + 10)) + b"\x00tail")
+        (room / "link").symlink_to("/etc/passwd")
+        (room / "document.txt").unlink()
+        self.commit_files(room, {})
+
+        # Binary tail past INSPECTION_LIMIT must still classify file as binary even on page 0.
+        for cursor in (0, INSPECTION_LIMIT):
+            res = inspect_contribution(f.record, "one", "alice", "late_binary.bin", content_after=cursor)
+            self.assertEqual(res["content_status"], "binary")
+            self.assertNotIn("content", res)
+        for path, status in (("link", "not-regular-file"), ("document.txt", "deleted")):
+            res = inspect_contribution(f.record, "one", "alice", path, content_after=0)
+            self.assertEqual(res["content_status"], status)
+            self.assertNotIn("content", res)
+            with self.assertRaises(ValueError):
+                inspect_contribution(f.record, "one", "alice", path, content_after=1)
+
+    def test_cli_and_resident_actions_paging_routing(self):
+        from house import integrate as integrate_mod
+        from house.resident_actions import parse
+
+        f = self.f
+        room = f.candidate("one", "first\n")
+        large_text = ("line\n" * 16_000) + "CLI FINAL LINE\n"
+        self.commit_files(room, {"large.txt": large_text})
+
+        args = parse(["integrate", "one", "--inspect", "--path", "large.txt",
+                      "--diff-after", "0", "--content-after", "10", "--as", "alice"], "alice")
+        self.assertEqual((args.diff_after, args.content_after), (0, 10))
+        with self.assertRaises(SystemExit):
+            parse(["integrate", "one", "--inspect", "--diff-after", "abc", "--as", "alice"], "alice")
+
+        # CLI main() reconstructs full content and rejects invalid combinations.
+        parts = []
+        cursor = 0
+        while True:
+            proc = subprocess.run(
+                [sys.executable, "-m", "house.integrate", "--repo", str(f.repo), "one",
+                 "--as", "alice", "--inspect", "--path", "large.txt", "--content-after", str(cursor)],
+                capture_output=True, text=True, check=True)
+            page = json.loads(proc.stdout)
+            parts.append(page["content"])
+            if not page["content_has_more"]:
+                break
+            cursor = page["content_through"]
+        self.assertEqual("".join(parts), large_text)
+
+        for bad_args in (
+            ["--inspect", "--content-after", "0"],
+            ["--diff-after", "0"],
+            ["--path", "large.txt", "--content-after", "0"],
+            ["--inspect", "--path", "large.txt", "--content-after", "-1"],
+        ):
+            proc = subprocess.run(
+                [sys.executable, "-m", "house.integrate", "--repo", str(f.repo), "one",
+                 "--as", "alice", *bad_args],
+                capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 2, (bad_args, proc.stdout, proc.stderr))
+

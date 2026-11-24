@@ -6,6 +6,7 @@ update or patch overwrite is used on the shared source checkout.
 from __future__ import annotations
 
 import argparse
+import codecs
 import fcntl
 import hashlib
 import json
@@ -66,50 +67,208 @@ def changed_paths(workspace: Path, base: str, commit: str) -> list[str]:
     return [p.decode("utf-8") for p in output.split(b"\0") if p]
 
 
-def inspect_contribution(record: Record, run: str, actor: str, path: str | None = None) -> dict:
+def validate_inspect_options(
+    *,
+    inspect: bool,
+    path: str | None,
+    diff_after: int | None,
+    content_after: int | None,
+) -> None:
+    """Validate CLI/action option combinations before dispatching inspection."""
+    if not inspect:
+        if path is not None:
+            raise ValueError("--path requires --inspect")
+        if diff_after is not None:
+            raise ValueError("--diff-after requires --inspect")
+        if content_after is not None:
+            raise ValueError("--content-after requires --inspect")
+    elif content_after is not None and path is None:
+        raise ValueError("--content-after requires --path")
+
+
+def _validate_cursor(value: int | None, name: str) -> int | None:
+    if value is None:
+        return None
+    if type(value) is not int or value < 0:
+        raise ValueError(f"{name} must be a non-negative integer")
+    return value
+
+
+def _utf8_char_start(buf: bytes, pos: int) -> int | None:
+    """Return the start index if pos falls inside a valid multi-byte UTF-8 character."""
+    if pos <= 0 or pos >= len(buf):
+        return None
+    for back in range(1, min(4, pos + 1)):
+        lead = buf[pos - back]
+        if 0xC2 <= lead <= 0xDF:
+            expected = 2
+        elif 0xE0 <= lead <= 0xEF:
+            expected = 3
+        elif 0xF0 <= lead <= 0xF4:
+            expected = 4
+        else:
+            continue
+        start = pos - back
+        if back < expected and start + expected <= len(buf):
+            try:
+                buf[start:start + expected].decode("utf-8", "strict")
+            except UnicodeDecodeError:
+                continue
+            return start
+    return None
+
+
+def _stream_bounded_slice(
+    command: list[str],
+    cwd: Path,
+    offset: int,
+    *,
+    check_utf8_text: bool,
+    terminate_early: bool,
+    unavailable_message: str,
+    cursor_label: str,
+) -> tuple[bytes, bool, bool, int]:
+    """Stream stdout and return (slice_bytes, has_more, is_binary, total_seen)."""
+    need_end = offset + INSPECTION_LIMIT + 4
+    prefix_tail = b""
+    window = bytearray()
+    total = 0
+    terminated = False
+    is_binary = False
+    decoder = codecs.getincrementaldecoder("utf-8")("strict") if check_utf8_text else None
+    with subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL) as proc:
+        while True:
+            if terminate_early and total >= need_end:
+                terminated = True
+                proc.terminate()
+                break
+            to_read = min(DIAGNOSTIC_CHUNK, need_end - total) if terminate_early else DIAGNOSTIC_CHUNK
+            chunk = proc.stdout.read(to_read)
+            if not chunk:
+                if decoder is not None:
+                    try:
+                        decoder.decode(b"", final=True)
+                    except UnicodeDecodeError:
+                        is_binary = True
+                break
+            if check_utf8_text:
+                if b"\0" in chunk:
+                    is_binary = True
+                else:
+                    try:
+                        decoder.decode(chunk, final=False)
+                    except UnicodeDecodeError:
+                        is_binary = True
+                if is_binary:
+                    terminated = True
+                    proc.terminate()
+                    break
+            chunk_start = total
+            chunk_end = total + len(chunk)
+            if chunk_start < offset and chunk_end > max(0, offset - 3):
+                slice_start = max(0, max(0, offset - 3) - chunk_start)
+                slice_end = min(len(chunk), offset - chunk_start)
+                prefix_tail = (prefix_tail + chunk[slice_start:slice_end])[-3:]
+            if chunk_end > offset and len(window) < INSPECTION_LIMIT + 4:
+                start_in_chunk = max(0, offset - chunk_start)
+                room = (INSPECTION_LIMIT + 4) - len(window)
+                window.extend(chunk[start_in_chunk:start_in_chunk + room])
+            total = chunk_end
+        code = proc.wait(timeout=30)
+        if code and not terminated:
+            raise ValueError(unavailable_message)
+    if is_binary:
+        return b"", False, True, total
+    if total < offset:
+        raise ValueError(f"{cursor_label} cursor exceeds size")
+    ctx = prefix_tail + bytes(window[:3])
+    if prefix_tail and window and _utf8_char_start(ctx, len(prefix_tail)) is not None:
+        raise ValueError(f"{cursor_label} cursor must align to a UTF-8 character boundary")
+    window_bytes = bytes(window)
+    end = min(INSPECTION_LIMIT, len(window_bytes))
+    if len(window_bytes) > end:
+        split = _utf8_char_start(window_bytes, end)
+        if split is not None:
+            end = split
+    has_more = (len(window_bytes) > end) or terminated
+    return window_bytes[:end], has_more, False, total
+
+
+def inspect_contribution(
+    record: Record,
+    run: str,
+    actor: str,
+    path: str | None = None,
+    *,
+    diff_after: int | None = None,
+    content_after: int | None = None,
+) -> dict:
     """Read committed bytes only; no acceptance, tests, receipt writes or host paths."""
+    diff_offset = _validate_cursor(diff_after, "diff_after")
+    content_offset = _validate_cursor(content_after, "content_after")
+    if content_offset is not None and path is None:
+        raise ValueError("content continuation requires an exact changed path")
     workspace, report = source(record, run, actor)
     paths = changed_paths(workspace, report["base"], report["commit"])
     if path is not None and path not in paths:
         raise ValueError("inspection path must be an exact changed contribution path")
+    diff_start = 0 if diff_offset is None else diff_offset
     result = {"run": run, "base": report["base"], "contribution": report["commit"],
               "paths": paths, "status": "inspection", "limit_bytes": INSPECTION_LIMIT}
     command = ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv", "--no-renames",
                "--no-color", report["base"], report["commit"], "--"]
     if path is not None:
         command.append(path)
-    # Stream a bounded prefix rather than buffering an arbitrarily large diff.
-    with subprocess.Popen(command, cwd=workspace, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL) as proc:
-        data = proc.stdout.read(INSPECTION_LIMIT + 1)
-        truncated = len(data) > INSPECTION_LIMIT
-        if truncated:
-            proc.terminate()
-        code = proc.wait(timeout=30)
-        if code and not truncated:
-            raise ValueError("contribution diff unavailable")
-    result.update(diff=data[:INSPECTION_LIMIT].decode("utf-8", errors="replace"), truncated=truncated)
+    diff_bytes, diff_has_more, _, _ = _stream_bounded_slice(
+        command, workspace, diff_start,
+        check_utf8_text=False, terminate_early=True,
+        unavailable_message="contribution diff unavailable", cursor_label="diff")
+    result.update(
+        diff=diff_bytes.decode("utf-8", errors="replace"),
+        truncated=diff_has_more,
+        diff_after=diff_start,
+        diff_through=diff_start + len(diff_bytes),
+        diff_has_more=diff_has_more,
+    )
     if path is not None:
         result["path"] = path
         tree = subprocess.run(["git", "--literal-pathspecs", "ls-tree", "-z", report["commit"], "--", path],
                               cwd=workspace, capture_output=True, check=True, timeout=30).stdout
         if not tree:
+            if content_offset is not None and content_offset > 0:
+                raise ValueError("content cursor exceeds size")
             result["content_status"] = "deleted"
         else:
             mode, kind, oid = tree.split(b"\t", 1)[0].split()
             if mode not in (b"100644", b"100755") or kind != b"blob":
+                if content_offset is not None and content_offset > 0:
+                    raise ValueError("content cursor exceeds size")
                 result["content_status"] = "not-regular-file"
-            elif int(git(workspace, "cat-file", "-s", oid.decode())) > INSPECTION_LIMIT:
-                result["content_status"] = "too-large"
             else:
-                blob = subprocess.run(["git", "cat-file", "blob", oid.decode()], cwd=workspace,
-                                      capture_output=True, check=True, timeout=30).stdout
-                try:
-                    content = blob.decode("utf-8")
-                    if "\0" in content:
-                        raise ValueError("binary")
-                    result.update(content_status="complete", content=content)
-                except (UnicodeDecodeError, ValueError):
-                    result["content_status"] = "binary"
+                size = int(git(workspace, "cat-file", "-s", oid.decode()))
+                if content_offset is not None and content_offset > size:
+                    raise ValueError("content cursor exceeds size")
+                if content_offset is None and size > INSPECTION_LIMIT:
+                    result.update(content_status="too-large", content_bytes=size, content_has_more=True)
+                else:
+                    start = 0 if content_offset is None else content_offset
+                    content_bytes, content_has_more, is_binary, _ = _stream_bounded_slice(
+                        ["git", "cat-file", "blob", oid.decode()], workspace, start,
+                        check_utf8_text=True, terminate_early=False,
+                        unavailable_message="contribution content unavailable", cursor_label="content")
+                    if is_binary:
+                        result["content_status"] = "binary"
+                    else:
+                        through = start + len(content_bytes)
+                        status = "complete" if (start == 0 and through == size) else "partial"
+                        result.update(
+                            content_status=status,
+                            content=content_bytes.decode("utf-8", "strict"),
+                            content_bytes=size,
+                            content_after=start,
+                            content_through=through,
+                            content_has_more=content_has_more,
+                        )
     return result
 
 
@@ -520,12 +679,18 @@ def main():
     mode.add_argument("--inspect", action="store_true", help="read bounded committed diff without running or accepting it")
     mode.add_argument("--reject", metavar="REASON", help="decline this candidate, preserving its source")
     parser.add_argument("--path", help="exact changed path to inspect, with committed text when small")
+    parser.add_argument("--diff-after", type=int, help="byte offset to continue reading committed diff")
+    parser.add_argument("--content-after", type=int, help="byte offset to continue reading committed text for --path")
     args = parser.parse_args()
     try:
-        if args.path is not None and not args.inspect:
-            raise ValueError("--path requires --inspect")
+        validate_inspect_options(
+            inspect=args.inspect, path=args.path,
+            diff_after=args.diff_after, content_after=args.content_after,
+        )
         record = Record(args.repo)
-        result = (inspect_contribution(record, args.run, args.actor, args.path) if args.inspect else
+        result = (inspect_contribution(record, args.run, args.actor, args.path,
+                                       diff_after=args.diff_after, content_after=args.content_after)
+                  if args.inspect else
                   integrate(record, args.run, args.actor, publish=args.publish, reject=args.reject))
         print(json.dumps(result, indent=2))
     except (ValueError, OSError, subprocess.SubprocessError) as error:

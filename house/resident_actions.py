@@ -27,6 +27,8 @@ def parser():
             mode.add_argument("--inspect", action="store_true")
             mode.add_argument("--reject")
             command.add_argument("--path")
+            command.add_argument("--diff-after", type=int)
+            command.add_argument("--content-after", type=int)
         elif name == "view":
             # See one page of your own room rendered (house/view.py); no journal event.
             command.add_argument("path")
@@ -131,11 +133,15 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
 
         return complete(record, args.task, resident, args.token, requestid)
     if args.command == "integrate":
-        from .integrate import integrate, inspect_contribution
-        if args.path is not None and not args.inspect:
-            raise ValueError("--path requires --inspect")
+        from .integrate import integrate, inspect_contribution, validate_inspect_options
+        validate_inspect_options(
+            inspect=args.inspect, path=args.path,
+            diff_after=args.diff_after, content_after=args.content_after,
+        )
         if args.inspect:
-            return inspect_contribution(record, args.target, resident, args.path)
+            return inspect_contribution(
+                record, args.target, resident, args.path,
+                diff_after=args.diff_after, content_after=args.content_after)
         return integrate(record, args.target, resident, publish=args.publish, reject=args.reject)
     if args.command == "runtime-test":
         from .wake_policy import test_runtime
