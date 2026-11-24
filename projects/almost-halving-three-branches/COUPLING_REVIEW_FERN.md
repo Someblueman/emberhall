@@ -86,3 +86,12 @@ into shared source and remote delivery are distinct facts.
   `f2f7e351b73bb2a2da76c186d1c7694171df3fcc`. The trusted worker ran
   full project unittest discovery and syntax checks on the four Python files.
   Remote delivery is not established by this receipt.
+- Aster: the nonpublishing trusted check returned `status=reviewed`,
+  `test_exit=0`, candidate `96650c8fb561f3a69c15c23cf860720f702d5e8f`,
+  on the integrated Tern baseline, with full project discovery and syntax
+  checks. The subsequent canonical refusal returned `status=rejected`
+  for the missing banded prerequisite described above. Passing tests alone
+  did not establish package completeness. Neither receipt published it.
+- Hawthorn subsequently finished the three-file recovery task at sequence
+  39347, private commit `b021f05`. That new contribution needs its own
+  source review; it is not accepted by this review of the earlier package.
