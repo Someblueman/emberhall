@@ -149,7 +149,7 @@ def verify_residue_parity_certificate(groups, certificate):
     return True
 
 
-def residue_integer_parity(groups, seconds=10, max_bits=1024):
+def residue_integer_parity(groups, seconds=10, max_bits=1024, retain_kernel=False):
     """Decide unbounded integer aggregate feasibility with prescribed parities.
 
     Integer Euclidean row/column operations diagonalize C to U*C*V=D,
@@ -171,6 +171,24 @@ def residue_integer_parity(groups, seconds=10, max_bits=1024):
     transform = [[int(i == j) for j in range(period)] for i in range(period)]
     peak_bits = max(abs(x).bit_length() for row in matrix for x in row)
     started, rank = time.monotonic(), 0
+    operations = []
+    parities = [n % 2 for _, n in items]
+
+    def swap_columns(a, b):
+        for row in matrix:
+            row[a], row[b] = row[b], row[a]
+        if retain_kernel:
+            operations.append(('swap', a, b))
+            parities[a], parities[b] = parities[b], parities[a]
+
+    if retain_kernel:
+        # Prefer large groups as pivots: their sums have room to absorb the
+        # small free sums. Record this permutation in the same reversible map.
+        order = list(range(size))
+        for k, target in enumerate(sorted(order, key=lambda j: (-items[j][1], j))):
+            j = order.index(target)
+            swap_columns(k, j)
+            order[k], order[j] = order[j], order[k]
 
     def limited():
         reason = ('coefficient_limit' if peak_bits > max_bits else
@@ -182,16 +200,19 @@ def residue_integer_parity(groups, seconds=10, max_bits=1024):
         stopped = limited()
         if stopped:
             return stopped
-        position = min(((abs(matrix[i][j]), i, j)
+        position = min(((abs(matrix[i][j]), j, i) if retain_kernel else
+                        (abs(matrix[i][j]), i, j)
                         for i in range(k, period) for j in range(k, size) if matrix[i][j]),
                        default=None)
         if position is None:
             break
-        _, i, j = position
+        if retain_kernel:
+            _, j, i = position
+        else:
+            _, i, j = position
         matrix[k], matrix[i] = matrix[i], matrix[k]
         transform[k], transform[i] = transform[i], transform[k]
-        for row in matrix:
-            row[k], row[j] = row[j], row[k]
+        swap_columns(k, j)
         while True:
             stopped = limited()
             if stopped:
@@ -213,9 +234,11 @@ def residue_integer_parity(groups, seconds=10, max_bits=1024):
                 for row in matrix:
                     row[j] -= quotient*row[k]
                     peak_bits = max(peak_bits, abs(row[j]).bit_length())
+                if retain_kernel:
+                    operations.append(('subtract', k, j, quotient))
+                    parities[k] = (parities[k]+quotient*parities[j]) % 2
                 if matrix[k][j]:
-                    for row in matrix:
-                        row[k], row[j] = row[j], row[k]
+                    swap_columns(k, j)
                 continue
             break
         rank += 1
@@ -230,8 +253,77 @@ def residue_integer_parity(groups, seconds=10, max_bits=1024):
             verify_residue_parity_certificate(groups, certificate)
             return dict(status='support_refused_by_residue_parity', certificate=certificate,
                         pivots=rank, all_pairs_decided=False)
-    return dict(status='compatible_unbounded_aggregates', pivots=rank,
-                all_pairs_decided=False)
+    result = dict(status='compatible_unbounded_aggregates', pivots=rank,
+                  all_pairs_decided=False)
+    if retain_kernel:
+        if any(parities[:rank]):
+            raise AssertionError('diagonal kernel parity disagrees with primitive rows')
+        result['kernel'] = dict(operations=operations, parities=parities, rank=rank)
+    return result
+
+
+def verify_bounded_residue_witness(groups, values):
+    """Check actual integer sums, their parity and their physical bounds.
+
+    Any accepted sums can be realized by signs independently within each
+    column group. This verifies the projected shell equations only.
+    """
+    items = sorted(groups.items())
+    if not items or len(values) != len(items):
+        raise ValueError('wrong aggregate count')
+    period = len(items[0][0])
+    for (column, count), value in zip(items, values):
+        if (not period or len(column) != period or any(type(c) is not int for c in column)
+                or type(count) is not int or count < 1
+                or type(value) is not int or abs(value) > count
+                or (value-count) % 2):
+            raise ValueError('invalid bounded aggregate')
+    if any(sum(column[r]*value for (column, _), value in zip(items, values))
+           for r in range(period)):
+        raise ValueError('aggregate sums do not cancel the exact residue rows')
+    return True
+
+
+def residue_bounded_search(groups, seconds=10, max_bits=1024, attempts=256):
+    """Search the exact integer kernel; failure is unknown, never refusal."""
+    if type(attempts) is not int or attempts < 1:
+        raise ValueError('require a positive attempt count')
+    started = time.monotonic()
+    result = residue_integer_parity(groups, seconds, max_bits, retain_kernel=True)
+    kernel = result.pop('kernel', None)
+    if kernel is None:
+        return result
+    # A fixed seed makes the probe reproducible without making its failure a proof.
+    import random
+    rng = random.Random(0)
+    parities, rank = kernel['parities'], kernel['rank']
+    for attempt in range(attempts):
+        if time.monotonic()-started >= seconds:
+            break
+        values = [0]*rank + [(p if attempt == 0 else
+                  rng.choice((-1, 1)) if p else rng.choice((-2, 0, 2)))
+                 for p in parities[rank:]]
+        limited = False
+        for index, operation in enumerate(reversed(kernel['operations'])):
+            kind, a, b, *rest = operation
+            if kind == 'swap':
+                values[a], values[b] = values[b], values[a]
+            else:
+                values[a] -= rest[0]*values[b]
+            if (max(abs(values[a]).bit_length(), abs(values[b]).bit_length()) > max_bits
+                    or index % 256 == 0 and time.monotonic()-started >= seconds):
+                limited = True
+                break
+        if limited:
+            continue
+        try:
+            verify_bounded_residue_witness(groups, values)
+        except ValueError:
+            continue
+        return dict(status='compatible_bounded_aggregates', aggregate_sums=values,
+                    attempts=attempt+1, all_pairs_decided=False)
+    return dict(status='unknown', reason='bounded_witness_not_found',
+                unbounded_compatible=True, all_pairs_decided=False)
 
 
 def verify_residue_aggregate_witness(groups, witness):
@@ -359,7 +451,7 @@ def residue_dyadic_parity(groups, seconds=10, max_bits=1024, retain_witness=Fals
     return result
 
 
-def resistant_residue_audit(max_period=256, seconds=900, max_bits=1024):
+def resistant_residue_audit(max_period=256, seconds=900, max_bits=1024, bounded=False):
     """Audit every resistant scale phase for fixed odd and moving odd holes.
 
     For period p, increasing t by 2p preserves all residue columns and
@@ -367,7 +459,9 @@ def resistant_residue_audit(max_period=256, seconds=900, max_bits=1024):
     chosen representatives exceed p; the fixed shallow patch is unchanged.
     The exact 2p/gcd(7980,2p) scale phases
     therefore cover every t=7980m+1, m>=1, at each listed period. This is
-    only an unbounded integer relaxation audit, never a literal signing.
+    only a residue relaxation audit, never a full physical signing. In bounded
+    mode group counts only increase along each phase, so a bounded witness
+    at its first scale stays valid at every later scale in that phase.
     """
     if (type(max_period) is not int or not 4 <= max_period <= 256 or max_period & (max_period-1)
             or not math.isfinite(seconds) or seconds <= 0):
@@ -387,12 +481,17 @@ def resistant_residue_audit(max_period=256, seconds=900, max_bits=1024):
                                 all_pairs_decided=False)
                 holes = [(1,shallow),(1,99*scale)]
                 groups = residue_shell_groups(lengths,holes,period)
-                key = tuple(sorted((column,count%2) for column,count in groups.items()))
+                key = tuple(sorted((column,count if bounded else count%2)
+                                   for column,count in groups.items()))
                 if key not in cache:
-                    cache[key] = residue_dyadic_parity(groups,remaining,max_bits)
+                    solver = residue_bounded_search if bounded else residue_dyadic_parity
+                    cache[key] = solver(groups,remaining,max_bits)
                 result = cache[key]
                 report['cases'] += 1
-                if result['status']=='compatible_unbounded_aggregates':
+                expected = 'compatible_bounded_aggregates' if bounded else 'compatible_unbounded_aggregates'
+                if result['status']==expected:
+                    if bounded:
+                        verify_bounded_residue_witness(groups,result['aggregate_sums'])
                     report['compatible'] += 1
                 elif result['status']=='support_refused_by_residue_parity':
                     report['refused'] += 1
@@ -409,7 +508,8 @@ def resistant_residue_audit(max_period=256, seconds=900, max_bits=1024):
         reports.append(report)
         period *= 2
     return dict(complete=complete,reports=reports,distinct_signatures=len(cache),
-                scope='unbounded integer aggregate parities on two named supports only',
+                scope=('bounded residue aggregates on two named supports only' if bounded else
+                       'unbounded integer aggregate parities on two named supports only'),
                 all_pairs_decided=False)
 
 
@@ -491,17 +591,153 @@ def fourth_root_mod8_census():
                 counts=dict(counts), phases=phase_counts)
 
 
-def moving_periodic_system(period,hole=19):
+def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
+    """Formal (1-z**word_period)K for t=pieces*L+1.
+
+    Each piece has L vertices; its first/last patch vertices are independent.
+    Each remaining piece repeats its own independent word of word_period
+    signs. Require word_period|L, word_period|2*patch, L>=2*patch+word_period.
+    Exponents are pairs (coefficient of L, constant), never sampled ranks.
+    Holes are old first-arm vertices hole*t and 99*t. This is an ansatz.
+    """
+    if type(hole) is not int or not 1 <= hole < 99:
+        raise ValueError('require 1<=hole<99')
+    if type(patch) is not int or patch < 0:
+        raise ValueError('require a nonnegative patch width')
+    if type(pieces) is not int or pieces < 2:
+        raise ValueError('require at least two pieces')
+    if type(word_period) is not int or word_period < 1 or (2*patch)%word_period:
+        raise ValueError('require a positive word period dividing twice the patch width')
+    lengths = (99,79,23)
+    keys, rows = [], defaultdict(lambda:defaultdict(int))
+
+    def add(a,b): return a[0]+b[0],a[1]+b[1]
+    def neg(a): return -a[0],-a[1]
+    def old(q): return pieces*q,q
+
+    def terms(arm, edge, centre=False):
+        # Entries (slope in d, affine offset, coefficient) of a physical K column.
+        if centre:
+            out = [(0,(0,1),1)]+[(0,add(old(n),(0,1)),-1) for n in lengths]
+        else:
+            out = [(1,(0,1),1),(-1,add(old(lengths[arm-1]),(0,1)),-1)]
+            out += [(1,add(old(n),(0,1)),-1) for a,n in enumerate(lengths,1) if a!=arm]
+        for h in (hole,99):
+            if centre:
+                slope,offset = 0,old(h)
+            elif arm==1 and edge<h:
+                slope,offset = -1,old(h)
+            else:
+                slope,offset = 1,neg(old(h)) if arm==1 else old(h)
+            out += [(slope,offset,-1),(slope,add(offset,(0,1)),1)]
+        return out
+
+    def column(key,arm,edge,lo,hi,single=False,centre=False):
+        i=len(keys);keys.append(key)
+        for slope,offset,c in terms(arm,edge,centre):
+            if single:
+                e=add(tuple(slope*x for x in lo),offset)
+                ends=((e,c),(add(e,(0,word_period)),-c))
+            elif slope==1:
+                ends=((add(lo,offset),c),(add(add(hi,offset),(0,word_period)),-c))
+            elif slope==-1:
+                ends=((add(neg(hi),offset),c),(add(add(neg(lo),offset),(0,word_period)),-c))
+            else:
+                raise AssertionError('a run has constant distance')
+            for e,value in ends:rows[e][i]+=value
+
+    column(('old',0,0),0,0,(0,0),(0,0),True,True)
+    for arm,n in enumerate(lengths,1):
+        for q in range(1,n+1):
+            if arm==1 and q in (hole,99):continue
+            column(('old',arm,q),arm,q,old(q),old(q),True)
+        for edge in range(n):
+            for half in range(pieces):
+                lo=(pieces*edge+half,edge+1)
+                hi=(pieces*edge+half+1,edge)
+                for side in (0,1):
+                    for r in range(patch):
+                        d=add(lo,(0,r)) if side==0 else add(hi,(0,-r))
+                        column(('patch',arm,edge,half,side,r),arm,edge,d,d,True)
+                for j in range(1,word_period+1):
+                    key=(('half',arm,edge,half) if word_period==1 else
+                         ('word',arm,edge,half,j))
+                    column(key,arm,edge,add(lo,(0,patch+j-1)),
+                           add(hi,(0,-patch-word_period+j)))
+    return keys,{e:{i:c for i,c in row.items() if c} for e,row in rows.items() if any(row.values())}
+
+
+def split_endpoint_system():
+    """Fixed necessary endpoint rows for every number p>=2 of flat pieces.
+
+    Retain slope exponents divisible by p. Only the first and last pieces
+    enter: a forward run contributes at r and r+1, a reflected run at -r-1
+    and -r, modulo p. The p=2 extraction therefore defines the uniform map.
+    No endpoint patches are included in this relaxation.
+    """
+    keys,formal=split_edge_system(19,0,2)
+    rows={(q//2,c):row for (q,c),row in formal.items() if q%2==0}
+    return keys,dict(sorted(rows.items()))
+
+
+def split_endpoint_refusal():
+    keys,rows=split_endpoint_system()
+    certificate,_=binary_elimination(list(rows.values()))
+    if certificate is None or not verify_refusal(list(rows.values()),certificate):
+        raise AssertionError('uniform flat-piece endpoint refusal was not verified')
+    return dict(mode='split_endpoints',status='ansatz_refused_by_parity',
+                variables=len(keys),rows=len(rows),certificate=certificate,
+                scope='all p>=2 equal constant pieces, no patches, holes 19t and 99t',
+                all_pairs_decided=False)
+
+
+def split_edge_search(hole=19,patch=0,seconds=30,nodes=10000,pieces=2,word_period=1):
+    """Try literal edge-piece plateaus; a timeout has no mathematical outcome."""
+    start=time.monotonic()
+    keys,formal=split_edge_system(hole,patch,pieces,word_period)
+    original=list(formal.values())
+    result=dict(mode='split_edge',hole=hole,patch=patch,pieces=pieces,word_period=word_period,
+                variables=len(keys),rows=len(original),minimum_piece_length=2*patch+word_period,
+                piece_length_divisor=word_period,all_pairs_decided=False,
+                scope='independent periodic edge-piece interiors with free endpoint patches')
+    def done(status,**extra):return dict(**result,status=status,elapsed=time.monotonic()-start,**extra)
+    certificate,basis=binary_elimination(original)
+    if certificate is not None:
+        return done('ansatz_refused_by_parity',certificate=certificate)
+    joint=joint_sign_closure(len(keys),original,seconds,short_recovery=True)
+    result['closure']=joint['history']
+    if joint['conflict']:return done('ansatz_refused_by_joint_fields')
+    remaining=seconds-(time.monotonic()-start)
+    if not joint['complete'] or remaining<=0:return done('unknown')
+    certificate,basis=binary_elimination(joint['rows'])
+    if certificate is not None:return done('ansatz_refused_after_quotient')
+    engine=make_engine(joint['size'],joint['rows'],basis,remaining,nodes,'connected')
+    i,s=joint['aliases'][0]
+    status,values=engine.run({i:s})
+    if values is None:return done(status,nodes=engine.nodes)
+    restored=[sign*values[i] for i,sign in joint['aliases']]
+    if any(sum(c*restored[i] for i,c in row.items()) for row in original):
+        raise AssertionError('split-edge lift fails untouched formal rows')
+    return done(status,nodes=engine.nodes,assignment=[[list(k),v] for k,v in zip(keys,restored)])
+
+
+def moving_periodic_system(period,hole=19,edge_patch=0):
     """Formal (1-z**period)*K for t=period*k+1; holes hole*t and 99t.
 
-    A variable (arm,edge,r), 1<=r<=period, repeats at depths
+    Without patches, (arm,edge,r), 1<=r<=period, repeats at depths
     edge*t+r+j*period, 0<=j<k. r=0 denotes an old vertex at edge*t.
+    With width w=edge_patch, the first and last w inserted vertices of
+    every old edge are independent. The repeated interior starts at w+1.
+    Require period|2w and t>=2w+period+1, t=1 mod period.
     Rows are coefficients of Z**q*z**c before substituting Z=z**t.
-    Thus formal solutions work for every k>=1. For t>period+1 the
-    exponents 0<=c<=period+1 do not collide, so the converse holds too.
+    Thus formal solutions work at every admissible scale. Without patches,
+    for t>period+1 the exponents 0<=c<=period+1 do not collide, so the
+    converse holds too. No converse for patched words is used here.
     """
     if type(period) is not int or period<1: raise ValueError('require a positive period')
     if type(hole) is not int or not 1<=hole<99: raise ValueError('require 1<=hole<99')
+    if type(edge_patch) is not int or edge_patch<0 or 2*edge_patch%period:
+        raise ValueError('require nonnegative edge patch with period dividing twice its width')
     lengths = (99,79,23)
     keys,rows = [],defaultdict(lambda:defaultdict(int))
     def add(key,terms,coarse=False):
@@ -523,9 +759,19 @@ def moving_periodic_system(period,hole=19):
                 terms.extend(((distance,0,-1),(distance,1,1)))
             add((arm,d,0),terms,True)
         for edge in range(n):
+            for r in range(1,edge_patch+1):
+                for q,c,side in ((edge,r,'prefix'),(edge+1,-r,'suffix')):
+                    terms = [(q,c+1,1),(n-q,1-c,-1)]
+                    terms.extend((other+q,c+1,-1) for j,other in enumerate(lengths,1) if j!=arm)
+                    for h in (hole,99):
+                        if arm!=1: dq,dc=q+h,c
+                        elif q<h or (q==h and c<0): dq,dc=h-q,-c
+                        else: dq,dc=q-h,c
+                        terms.extend(((dq,dc,-1),(dq,dc+1,1)))
+                    add((arm,edge,side,r),terms,True)
             for r in range(1,period+1):
-                pos = [(0,r,1),(1,r-1,-1)]
-                neg = [(-1,period+1-r,1),(0,period-r,-1)]
+                pos = [(0,edge_patch+r,1),(1,-edge_patch+r-1,-1)]
+                neg = [(-1,period+1+edge_patch-r,1),(0,period-edge_patch-r,-1)]
                 terms = []
                 def shifted(source,q,c,value):
                     terms.extend((a+q,b+c,s*value) for a,b,s in source)
@@ -541,6 +787,95 @@ def moving_periodic_system(period,hole=19):
                 add((arm,edge,r),terms)
     return keys,{e:{i:c for i,c in row.items() if c}
                  for e,row in rows.items() if any(row.values())}
+
+
+def residue_lift_sign(period, scale, vertex):
+    """A literal balanced lift, homometric only after reducing distances mod period.
+
+    Old vertices retain the recorded t=1 signs. In each old edge, inserted
+    vertices come in blocks of period plus signs, then period minus signs.
+    The theorem requires scale=1 mod (2*period); it claims no exact pair.
+    """
+    from residue_2660 import FRONTIER
+    if (type(period) is not int or period < 1 or type(scale) is not int
+            or scale < 1 or (scale-1) % (2*period)):
+        raise ValueError('require positive period and scale=1 modulo twice period')
+    if (not isinstance(vertex,(tuple,list)) or len(vertex)!=2
+            or any(type(v) is not int for v in vertex)):
+        raise ValueError('require an integer arm and depth')
+    arm,depth = vertex
+    if (arm,depth)==(0,0): return -1
+    if not 1<=arm<=3 or not 1<=depth<=scale*len(FRONTIER[arm-1]):
+        raise ValueError('vertex is outside the scaled tree')
+    old,remainder = divmod(depth,scale)
+    if not remainder:
+        return {'+':1,'-':-1,'0':0}[FRONTIER[arm-1][old-1]]
+    return 1 if ((remainder-1)//period)%2==0 else -1
+
+
+def residue_lift_plan(periods, index=1):
+    """An infinite resistant subfamily passing any finite list of residue tests.
+
+    This checks the small base by direct pair distances and checks every old
+    column after specialization. Inserted columns cancel in equal-residue
+    opposite-sign pairs; their number is represented without expanding t.
+    See RESISTANT_SPECTRUM.md for why balance upgrades the shell congruence
+    to equality of the distance profiles modulo z**period-1.
+    """
+    from residue_2660 import t1_witness, check_pair
+    import full_shorter_coupling as physical
+    if (not isinstance(periods,(tuple,list)) or not periods
+            or any(type(p) is not int or p<1 for p in periods)
+            or type(index) is not int or index<1):
+        raise ValueError('require nonempty positive integer periods and positive index')
+    periods = sorted(set(periods))
+    period = math.lcm(*periods)
+    stride = math.lcm(7980,2*period)
+    scale = 1+stride*index
+    base = t1_witness()
+    checked = check_pair(base['lengths'],base['left'],base['right'])
+    if not checked['homometric'] or checked['size']!=100:
+        raise AssertionError('the recorded base pair fails its direct distance counter')
+    lengths = [n*scale for n in base['lengths']]
+    holes = [(a,d*scale) for a,d in base['holes']]
+    residual = defaultdict(int)
+    for side,sign in (('left',1),('right',-1)):
+        for arm,depth in base[side]:
+            old_column = defaultdict(int)
+            for e,c in physical.shell_column(base['lengths'],base['holes'],(arm,depth)).items():
+                old_column[e%period] += c
+            scaled_column = defaultdict(int)
+            for e,c in physical.shell_column(lengths,holes,(arm,depth*scale)).items():
+                scaled_column[e%period] += c
+            if {e:c for e,c in old_column.items() if c}!={e:c for e,c in scaled_column.items() if c}:
+                raise AssertionError('an old column changed under residue specialization')
+            for e,c in scaled_column.items(): residual[e] += sign*c
+    if any(residual.values()): raise AssertionError('old columns do not cancel')
+    # In a balanced signing, twice the edge-profile difference is
+    # sum_v (degree_in_retained_support(v)-2)*sign(v). These are exactly
+    # its six exceptional vertices; all others have retained degree two.
+    exceptions = [(1,(0,0)),(-1,(2,79*scale)),(-1,(3,23*scale)),
+                  (-1,(1,19*scale-1)),(-1,(1,19*scale+1)),(-1,(1,99*scale-1))]
+    twice_edge_defect = sum(c*residue_lift_sign(period,scale,v) for c,v in exceptions)
+    if twice_edge_defect!=-2: raise AssertionError('distance-one defect changed')
+    return dict(mode='residue_lift',status='modular_profiles_only',periods=periods,
+                period=period,index=index,stride=stride,t=scale,lengths=lengths,
+                holes=[list(h) for h in holes],pair_size=(201*scale-1)//2,
+                inserted_opposite_pairs=201*(scale-1)//2,
+                block_pairs_per_old_edge=(scale-1)//(2*period),
+                base_pair_verified=True,old_residue_columns_verified=True,
+                distance_one_difference=-1,exact_homometric=False,
+                all_pairs_decided=False,
+                scope='literal balanced pair; distance multiplicities equal modulo each listed period only')
+
+
+def verify_residue_lift(saved):
+    expected = residue_lift_plan(saved.get('periods'),saved.get('index'))
+    # Strict JSON comparison also rejects booleans masquerading as integer data.
+    if json.dumps(saved,sort_keys=True)!=json.dumps(expected,sort_keys=True):
+        raise ValueError('saved residue-lift data do not match the checked construction')
+    return dict(verified=True,all_pairs_decided=False,
+                claim='balanced literal construction with equal modular distance profiles, but one fewer positive distance-one pair')
 
 
 def full_partition_subdivision_bound(lengths,scale):
@@ -1725,18 +2060,19 @@ def joint_sign_closure(size,original,seconds=30,steps=20,short_recovery=False):
 
 
 
-def moving_search(period,seconds=30,nodes=10000,free_order='connected',closure_steps=20,rational=False,affine_shells=False,square_lift=False,joint_fields=False,reduced_xor=False,hole=19):
+def moving_search(period,seconds=30,nodes=10000,free_order='connected',closure_steps=20,rational=False,affine_shells=False,square_lift=False,joint_fields=False,reduced_xor=False,hole=19,edge_patch=0,short_recovery=False):
     """Search one explicit all-scale moving-hole word ansatz, never all pairs."""
     if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
             or type(nodes) is not int or nodes<0 or type(closure_steps) is not int or closure_steps<0):
         raise ValueError('require positive finite time and nonnegative node/closure budgets')
     start = time.monotonic()
-    keys,formal = moving_periodic_system(period,hole)
+    keys,formal = moving_periodic_system(period,hole,edge_patch)
     original = list(formal.values())
     rows,size = original,len(keys)
     aliases,history = [(i,1) for i in range(size)],[]
-    result = dict(mode='moving',period=period,hole=hole,all_pairs_decided=False,
-                  scope=f'holes {hole}t and 99t; each edge repeats one period; t=period*k+1')
+    result = dict(mode='moving',period=period,hole=hole,edge_patch=edge_patch,
+                  minimum_scale=2*edge_patch+period+1,all_pairs_decided=False,
+                  scope=f'holes {hole}t and 99t; independent edge patches of width {edge_patch}; periodic interiors; t=1 mod period')
     def done(status,**details):
         return dict(**result,status=status,closure=history,variables=size,rows=len(rows),
                     elapsed=time.monotonic()-start,**details)
@@ -1759,7 +2095,7 @@ def moving_search(period,seconds=30,nodes=10000,free_order='connected',closure_s
     if joint_fields:
         remaining = seconds-(time.monotonic()-start)
         if remaining<=0: return done('unknown',stage='joint_fields')
-        joint = joint_sign_closure(size,rows,remaining)
+        joint = joint_sign_closure(size,rows,remaining,short_recovery=short_recovery)
         result['joint_fields'] = {k:v for k,v in joint.items() if k not in ('rows','aliases')}
         if joint['conflict']: return done('ansatz_refused_by_joint_fields')
         if not joint['complete']: return done('unknown',stage='joint_fields')
@@ -1939,11 +2275,38 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='split_endpoints':
+        _,rows=split_endpoint_system()
+        if not verify_refusal(list(rows.values()),saved.get('certificate',[])):
+            raise ValueError('invalid uniform flat-piece endpoint refusal')
+        return dict(verified=True,claim='only equal constant pieces on the named support are refused',
+                    all_pairs_decided=False)
+    if saved.get('mode')=='split_edge':
+        word_period=saved.get('word_period',1)
+        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'],word_period)
+        if saved.get('status')=='ansatz_refused_by_parity':
+            if not verify_refusal(list(formal.values()),saved['certificate']):
+                raise ValueError('invalid split-edge parity refusal')
+            return dict(verified=True,claim='only the split-edge ansatz is refused',all_pairs_decided=False)
+        assignment=saved.get('assignment',[])
+        if len(assignment)!=len(keys) or [tuple(k) for k,v in assignment]!=keys:
+            raise ValueError('no complete split-edge assignment')
+        values=[v for k,v in assignment]
+        if any(type(v) is not int or v not in (-1,1) for v in values):
+            raise ValueError('require literal signs')
+        if any(sum(c*values[i] for i,c in row.items()) for row in formal.values()):
+            raise ValueError('split-edge shell equation fails')
+        return dict(verified=True,claim='formal split-edge shell equations vanish',
+                    minimum_piece_length=2*saved['patch']+word_period,
+                    piece_length_divisor=word_period,all_pairs_decided=False)
+    if saved.get('mode')=='residue_lift':
+        return verify_residue_lift(saved)
     if saved.get('mode') in ('residue_zero','residue_parity'):
         parity = saved['mode']=='residue_parity'
         expected = 'support_refused_by_residue_parity' if parity else 'support_refused_by_odd_group'
         aggregate = parity and saved.get('status')=='compatible_unbounded_aggregates'
-        if saved.get('status')!=expected and not aggregate:
+        bounded = parity and saved.get('status')=='compatible_bounded_aggregates'
+        if saved.get('status')!=expected and not aggregate and not bounded:
             raise ValueError('no saved residue refusal')
         scale = saved['t']
         if type(scale) is not int or scale < 1:
@@ -1952,6 +2315,10 @@ def verify_saved(saved):
         if len(holes) != 2:
             raise ValueError('require exactly two holes')
         groups = residue_shell_groups([99*scale,79*scale,23*scale],holes,saved['period'])
+        if bounded:
+            verify_bounded_residue_witness(groups,saved['aggregate_sums'])
+            return dict(verified=True,claim='bounded residue aggregates exist; full shell equations remain unchecked',
+                        all_pairs_decided=False)
         if aggregate:
             if 'witness' not in saved:
                 raise ValueError('no saved aggregate compatibility witness')
@@ -1971,7 +2338,7 @@ def verify_saved(saved):
         raise ValueError('replay diagnostic is not a standalone saved certificate')
     if saved.get('mode')=='moving':
         if saved['status']!='sat': raise ValueError('no saved moving sign witness')
-        keys,formal = moving_periodic_system(saved['period'],saved.get('hole',19))
+        keys,formal = moving_periodic_system(saved['period'],saved.get('hole',19),saved.get('edge_patch',0))
         supplied = saved['assignment']
         assignment = {tuple(k):v for k,v in supplied}
         if len(assignment)!=len(supplied) or set(assignment)!=set(keys):
@@ -1981,7 +2348,8 @@ def verify_saved(saved):
             raise ValueError('require literal signs')
         if values[0]!=1 or any(sum(c*values[i] for i,c in row.items()) for row in formal.values()):
             raise ValueError('moving formal shell equation fails')
-        return dict(verified=True,claim='formal moving-hole construction for t=period*k+1, k>=1',
+        return dict(verified=True,claim='formal moving-hole construction for t=1 mod period at or above minimum_scale',
+                    minimum_scale=2*saved.get('edge_patch',0)+saved['period']+1,
                     all_pairs_decided=False)
     t,period,width = saved['t'],saved['period'],saved['patch_width']
     if type(t) is not int or t%2!=1: raise ValueError('require an odd scale')
@@ -2006,6 +2374,9 @@ def verify_saved(saved):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--residue-lift',nargs='+',type=int,metavar='ORDER',
+                   help='construct a resistant subfamily passing all listed distance-residue tests')
+    p.add_argument('--lift-index',type=int,default=1,help='positive index in the residue-lift subfamily')
     p.add_argument('--hole',type=int,default=19,help='old first-arm vertex omitted in moving mode, 1..98')
     p.add_argument('--half',type=int,default=3990)
     p.add_argument('--period',type=int,default=1)
@@ -2018,6 +2389,11 @@ def main():
     p.add_argument('--ternary',action='store_true',help='bounded modular rank diagnostic; not a sign search')
     p.add_argument('--sparse-pivots',type=int,default=40000)
     p.add_argument('--moving',action='store_true',help='search moving holes 19t and 99t')
+    p.add_argument('--edge-patch',type=int,default=0,help='free endpoint vertices in moving or split-edge mode')
+    p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
+    p.add_argument('--edge-pieces',type=int,default=2,help='number of constant pieces per edge in split-edge mode')
+    p.add_argument('--piece-period',type=int,default=1,help='independent repeating word length within each edge piece')
+    p.add_argument('--split-endpoints',action='store_true',help='portable endpoint refusal for every number of flat pieces')
     p.add_argument('--reduced-xor',action='store_true',help='fully reduce moving-word binary equations before branching')
     p.add_argument('--joint-fields',action='store_true',help='alternate rational, binary and ternary sign quotients')
     p.add_argument('--square-lift',action='store_true',help='derive moving-word constraints from sign squares')
@@ -2038,12 +2414,36 @@ def main():
     p.add_argument('--residue-parity',type=int,metavar='SCALE',help='decide the unbounded integer residue-aggregate relaxation')
     p.add_argument('--max-bits',type=int,default=1024,help='integer coefficient limit for residue-parity elimination')
     p.add_argument('--dyadic',action='store_true',help='use Hadamard-bounded powers-of-two residue elimination')
+    p.add_argument('--bounded',action='store_true',help='seek exact residue sums within physical group bounds; failure is unknown')
     p.add_argument('--retain-residue-witness',action='store_true',help='save independently verifiable aggregate compatibility with --dyadic and --write')
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.split_endpoints:
+        result=split_endpoint_refusal()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k!='certificate'},sort_keys=True))
+        return
+    if args.edge_patch and not (args.moving or args.split_edge):
+        p.error('--edge-patch requires --moving or --split-edge')
+    if args.split_edge:
+        result=split_edge_search(args.hole,args.edge_patch,args.seconds,args.nodes,args.edge_pieces,args.piece_period)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k not in ('assignment','certificate')},sort_keys=True))
+        return
+    if args.residue_lift is not None:
+        result = residue_lift_plan(args.residue_lift,args.lift_index)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps(result,sort_keys=True))
+        return
+    if args.bounded and (not (args.residue_parity is not None or args.audit_resistant_residues)
+                         or args.dyadic or args.retain_residue_witness):
+        p.error('--bounded requires residue parity analysis or audit, without dyadic witness mode')
     if args.audit_resistant_residues:
-        result = resistant_residue_audit(args.period,args.seconds,args.max_bits)
+        result = resistant_residue_audit(args.period,args.seconds,args.max_bits,args.bounded)
         if args.write:
             with open(args.write,'w') as f: json.dump(result,f)
         print(json.dumps(result,sort_keys=True))
@@ -2063,9 +2463,12 @@ def main():
                 raise ValueError('require arm:depth holes')
             groups = residue_shell_groups([99*scale,79*scale,23*scale],holes,args.period)
             if parity:
-                solver = residue_dyadic_parity if args.dyadic else residue_integer_parity
-                result = (solver(groups,args.seconds,args.max_bits,args.retain_residue_witness)
-                          if args.dyadic else solver(groups,args.seconds,args.max_bits))
+                if args.bounded:
+                    result = residue_bounded_search(groups,args.seconds,args.max_bits)
+                else:
+                    solver = residue_dyadic_parity if args.dyadic else residue_integer_parity
+                    result = (solver(groups,args.seconds,args.max_bits,args.retain_residue_witness)
+                              if args.dyadic else solver(groups,args.seconds,args.max_bits))
         except (ValueError,TypeError) as error:
             p.error(str(error))
         if parity:
@@ -2077,7 +2480,9 @@ def main():
                           certificate=certificate,all_pairs_decided=False)
         if args.write:
             with open(args.write,'w') as f: json.dump(result,f)
-        summary = {k:v for k,v in result.items() if k!='witness'}
+        summary = {k:v for k,v in result.items() if k not in ('witness','aggregate_sums')}
+        if 'aggregate_sums' in result:
+            summary['bounded_aggregates'] = len(result['aggregate_sums'])
         if 'witness' in result:
             summary['witness_residues'] = len(result['witness']['aggregate_residues'])
         print(json.dumps(summary,sort_keys=True))
@@ -2121,7 +2526,7 @@ def main():
     if (args.joint_fields or args.square_lift or args.rational or args.reduced_xor) and not args.moving:
         p.error('--joint-fields, --square-lift, --reduced-xor and --rational require --moving')
     if args.moving:
-        result = moving_search(args.period,args.seconds,args.nodes,args.free_order,rational=args.rational,affine_shells=args.affine_shells,square_lift=args.square_lift,joint_fields=args.joint_fields,reduced_xor=args.reduced_xor,hole=args.hole)
+        result = moving_search(args.period,args.seconds,args.nodes,args.free_order,rational=args.rational,affine_shells=args.affine_shells,square_lift=args.square_lift,joint_fields=args.joint_fields,reduced_xor=args.reduced_xor,hole=args.hole,edge_patch=args.edge_patch,short_recovery=args.short_recovery)
         if args.write:
             with open(args.write,'w') as f: json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k!='assignment'},sort_keys=True))
