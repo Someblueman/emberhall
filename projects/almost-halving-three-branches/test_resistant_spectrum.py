@@ -16,9 +16,11 @@ def normalized(rows):
 class SpectrumTests(unittest.TestCase):
     def test_split_edge_columns_against_every_physical_shell(self):
         import full_shorter_coupling as physical
-        for hole,patch,pieces in ((19,0,2),(7,1,2),(19,2,2),(19,0,3),(7,1,4),(19,0,10)):
-            keys,rows=rs.split_edge_system(hole,patch,pieces)
-            for half_length in (2*patch+1,2*patch+3):
+        for hole,patch,pieces,period in ((19,0,2,1),(7,1,2,1),(19,2,2,1),(19,0,3,1),
+                                         (7,1,4,1),(19,0,10,1),(19,0,2,2),(19,2,2,2),
+                                         (19,4,2,2),(7,3,3,3)):
+            keys,rows=rs.split_edge_system(hole,patch,pieces,period)
+            for half_length in (2*patch+period,2*patch+3*period):
                 t=pieces*half_length+1
                 actual=[defaultdict(int) for _ in keys]
                 for (q,c),row in rows.items():
@@ -31,16 +33,20 @@ class SpectrumTests(unittest.TestCase):
                         lo=edge*t+1+half*half_length
                         hi=lo+half_length-1
                         if key[0]=='half':depths=range(lo+patch,hi-patch+1)
+                        elif key[0]=='word':
+                            j,=rest;depths=range(lo+patch+j-1,hi-patch+1,period)
                         else:
                             side,r=rest;depths=[lo+r if side==0 else hi-r]
                     expected=defaultdict(int)
                     for d in depths:
                         for e,c in physical.shell_column([99*t,79*t,23*t],{(1,hole*t),(1,99*t)},(arm,d)).items():
-                            expected[e]+=c;expected[e+1]-=c
+                            expected[e]+=c;expected[e+period]-=c
                     self.assertEqual({e:c for e,c in actual[i].items() if c},
                                      {e:c for e,c in expected.items() if c},(hole,patch,half_length,key))
         for hole,patch in ((0,0),(99,0),(19,-1),(19,0.5)):
             with self.assertRaises(ValueError):rs.split_edge_system(hole,patch)
+        for period in (0,-1,1.5,3):
+            with self.assertRaises(ValueError):rs.split_edge_system(patch=1,word_period=period)
 
     def test_uniform_flat_piece_endpoint_refusal(self):
         keys,expected=rs.split_endpoint_system()

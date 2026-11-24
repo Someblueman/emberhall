@@ -591,11 +591,12 @@ def fourth_root_mod8_census():
                 counts=dict(counts), phases=phase_counts)
 
 
-def split_edge_system(hole=19, patch=0, pieces=2):
-    """Formal (1-z)K for t=pieces*L+1, independent constant edge pieces.
+def split_edge_system(hole=19, patch=0, pieces=2, word_period=1):
+    """Formal (1-z**word_period)K for t=pieces*L+1.
 
     Each piece has L vertices; its first/last patch vertices are independent.
-    Every remaining piece is one independent sign. L>=2*patch+1 suffices.
+    Each remaining piece repeats its own independent word of word_period
+    signs. Require word_period|L, word_period|2*patch, L>=2*patch+word_period.
     Exponents are pairs (coefficient of L, constant), never sampled ranks.
     Holes are old first-arm vertices hole*t and 99*t. This is an ansatz.
     """
@@ -605,6 +606,8 @@ def split_edge_system(hole=19, patch=0, pieces=2):
         raise ValueError('require a nonnegative patch width')
     if type(pieces) is not int or pieces < 2:
         raise ValueError('require at least two pieces')
+    if type(word_period) is not int or word_period < 1 or (2*patch)%word_period:
+        raise ValueError('require a positive word period dividing twice the patch width')
     lengths = (99,79,23)
     keys, rows = [], defaultdict(lambda:defaultdict(int))
 
@@ -634,11 +637,11 @@ def split_edge_system(hole=19, patch=0, pieces=2):
         for slope,offset,c in terms(arm,edge,centre):
             if single:
                 e=add(tuple(slope*x for x in lo),offset)
-                ends=((e,c),(add(e,(0,1)),-c))
+                ends=((e,c),(add(e,(0,word_period)),-c))
             elif slope==1:
-                ends=((add(lo,offset),c),(add(add(hi,offset),(0,1)),-c))
+                ends=((add(lo,offset),c),(add(add(hi,offset),(0,word_period)),-c))
             elif slope==-1:
-                ends=((add(neg(hi),offset),c),(add(add(neg(lo),offset),(0,1)),-c))
+                ends=((add(neg(hi),offset),c),(add(add(neg(lo),offset),(0,word_period)),-c))
             else:
                 raise AssertionError('a run has constant distance')
             for e,value in ends:rows[e][i]+=value
@@ -656,7 +659,11 @@ def split_edge_system(hole=19, patch=0, pieces=2):
                     for r in range(patch):
                         d=add(lo,(0,r)) if side==0 else add(hi,(0,-r))
                         column(('patch',arm,edge,half,side,r),arm,edge,d,d,True)
-                column(('half',arm,edge,half),arm,edge,add(lo,(0,patch)),add(hi,(0,-patch)))
+                for j in range(1,word_period+1):
+                    key=(('half',arm,edge,half) if word_period==1 else
+                         ('word',arm,edge,half,j))
+                    column(key,arm,edge,add(lo,(0,patch+j-1)),
+                           add(hi,(0,-patch-word_period+j)))
     return keys,{e:{i:c for i,c in row.items() if c} for e,row in rows.items() if any(row.values())}
 
 
@@ -684,14 +691,15 @@ def split_endpoint_refusal():
                 all_pairs_decided=False)
 
 
-def split_edge_search(hole=19,patch=0,seconds=30,nodes=10000,pieces=2):
+def split_edge_search(hole=19,patch=0,seconds=30,nodes=10000,pieces=2,word_period=1):
     """Try literal edge-piece plateaus; a timeout has no mathematical outcome."""
     start=time.monotonic()
-    keys,formal=split_edge_system(hole,patch,pieces)
+    keys,formal=split_edge_system(hole,patch,pieces,word_period)
     original=list(formal.values())
-    result=dict(mode='split_edge',hole=hole,patch=patch,pieces=pieces,variables=len(keys),rows=len(original),
-                minimum_half_length=2*patch+1,all_pairs_decided=False,
-                scope='independent constant edge-piece interiors with free endpoint patches')
+    result=dict(mode='split_edge',hole=hole,patch=patch,pieces=pieces,word_period=word_period,
+                variables=len(keys),rows=len(original),minimum_piece_length=2*patch+word_period,
+                piece_length_divisor=word_period,all_pairs_decided=False,
+                scope='independent periodic edge-piece interiors with free endpoint patches')
     def done(status,**extra):return dict(**result,status=status,elapsed=time.monotonic()-start,**extra)
     certificate,basis=binary_elimination(original)
     if certificate is not None:
@@ -2274,7 +2282,8 @@ def verify_saved(saved):
         return dict(verified=True,claim='only equal constant pieces on the named support are refused',
                     all_pairs_decided=False)
     if saved.get('mode')=='split_edge':
-        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'])
+        word_period=saved.get('word_period',1)
+        keys,formal=split_edge_system(saved['hole'],saved['patch'],saved['pieces'],word_period)
         if saved.get('status')=='ansatz_refused_by_parity':
             if not verify_refusal(list(formal.values()),saved['certificate']):
                 raise ValueError('invalid split-edge parity refusal')
@@ -2288,7 +2297,8 @@ def verify_saved(saved):
         if any(sum(c*values[i] for i,c in row.items()) for row in formal.values()):
             raise ValueError('split-edge shell equation fails')
         return dict(verified=True,claim='formal split-edge shell equations vanish',
-                    minimum_half_length=2*saved['patch']+1,all_pairs_decided=False)
+                    minimum_piece_length=2*saved['patch']+word_period,
+                    piece_length_divisor=word_period,all_pairs_decided=False)
     if saved.get('mode')=='residue_lift':
         return verify_residue_lift(saved)
     if saved.get('mode') in ('residue_zero','residue_parity'):
@@ -2382,6 +2392,7 @@ def main():
     p.add_argument('--edge-patch',type=int,default=0,help='free endpoint vertices in moving or split-edge mode')
     p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
     p.add_argument('--edge-pieces',type=int,default=2,help='number of constant pieces per edge in split-edge mode')
+    p.add_argument('--piece-period',type=int,default=1,help='independent repeating word length within each edge piece')
     p.add_argument('--split-endpoints',action='store_true',help='portable endpoint refusal for every number of flat pieces')
     p.add_argument('--reduced-xor',action='store_true',help='fully reduce moving-word binary equations before branching')
     p.add_argument('--joint-fields',action='store_true',help='alternate rational, binary and ternary sign quotients')
@@ -2417,7 +2428,7 @@ def main():
     if args.edge_patch and not (args.moving or args.split_edge):
         p.error('--edge-patch requires --moving or --split-edge')
     if args.split_edge:
-        result=split_edge_search(args.hole,args.edge_patch,args.seconds,args.nodes,args.edge_pieces)
+        result=split_edge_search(args.hole,args.edge_patch,args.seconds,args.nodes,args.edge_pieces,args.piece_period)
         if args.write:
             with open(args.write,'w') as f:json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k not in ('assignment','certificate')},sort_keys=True))

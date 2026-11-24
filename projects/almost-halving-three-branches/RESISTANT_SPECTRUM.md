@@ -1322,3 +1322,45 @@ for arbitrary patches. The remaining mathematical obstacle is to make
 nonconstant words satisfy the exact shells, or to exclude all surviving
 supports without assuming flat pieces. Neither a project finish nor the
 main task's acceptance is claimed here.
+
+### Independent repeating words inside the pieces
+
+The flat-piece refusal does not exclude nonconstant words. The same compiler
+now accepts `word_period=q`: each piece has its own q-sign word, with L a
+multiple of q; first/last w vertices of every piece remain independent.
+Require q|2w and L>=2w+q. For word position j=1,...,q in piece r, put
+A=(pe+r)L+e+w+j. Its depths are
+
+    A, A+q, ..., A+L-2w-q.
+
+Multiplication by 1-z^q changes the forward geometric sum into
+z^A-z^(A+L-2w), and the reflected sum into
+z^(-A-L+2w+q)-z^(-A+q). Each independent patch or old sign uses its
+individual physical column multiplied by 1-z^q. These formulas specify all
+coefficients without sampling L. A formal literal zero therefore proves
+K=0 at every admissible L, by cancellation in Q[z]. The positive verifier
+rebuilds all original formal rows; it trusts neither the quotient nor the
+search status. The earlier flat-piece theorem is still only q=1,w=0.
+
+An exploratory q=2,p=2,w=4 run had 4,220 literal coordinates. Joint exact
+reductions, with short recovery rows, reached 2,682 coordinates, rational
+nullity 132 and 133 binary free coordinates. No further signed merge was
+found. The 600-second attempt ended unknown after 1,047 search nodes and
+609.505 seconds including reductions and search. It found neither a literal
+assignment nor a refusal. The compiler's columns were independently checked
+against every physical shell at w=0,2,4 and two admissible scales each before
+that search. This method, including its replay command, is retained rather
+than relying on the temporary discovery script:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-edge --edge-pieces 2 --piece-period 2 --edge-patch 4 --seconds 600 --nodes 10000000 --write /tmp/segmented-word.json
+```
+
+A positive result would cover the resistant family, since L=3990m is even
+and exceeds the minimum L=10. An unknown file is not a witness. A later
+builder still needs an exact-shell signing or a genuinely unrestricted
+obstruction; the remaining 132-dimensional literal problem is not solved
+by the verified rational dimension.
+The retained implementation passes all 49 focused tests (31.199 seconds),
+with the physical-column controls extended to q=2 and q=3, and invalid
+period/patch combinations rejected. No solver dependency was added.
