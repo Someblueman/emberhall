@@ -8,10 +8,198 @@ from collections import defaultdict
 from fractions import Fraction
 import json
 import heapq
+import itertools
 import math
 import time
 import reduced_folded_fibre as rf
 from literal_shell_search import LiteralSearch
+
+
+def residue_shell_groups(lengths, holes, period=4):
+    """Exact column multiplicities after reducing shell exponents modulo period.
+
+    Signs remain unrestricted. Between consecutive holes on an arm, each
+    distance is affine in depth with slope +1 or -1; columns therefore repeat
+    every period. This compilation never visits every vertex of a long arm.
+    """
+    holes = [tuple(hole) for hole in holes]
+    bipartition_support_obstruction(lengths, holes)  # validate the support
+    if type(period) is not int or period < 1:
+        raise ValueError('require a positive residue period')
+    import full_shorter_coupling as physical
+    holes = set(holes)
+    groups = defaultdict(int)
+
+    def column(vertex):
+        out = [0]*period
+        for exponent, coefficient in physical.shell_column(lengths, holes, vertex).items():
+            out[exponent % period] += coefficient
+        return tuple(out)
+
+    if (0, 0) not in holes:
+        groups[column((0, 0))] += 1
+    for arm, length in enumerate(lengths, 1):
+        cuts = [0]+sorted(d for a, d in holes if a == arm)+[length+1]
+        for left, right in zip(cuts, cuts[1:]):
+            for depth in range(left+1, min(right, left+1+period)):
+                groups[column((arm, depth))] += (right-1-depth)//period+1
+    return dict(groups)
+
+
+def fourth_root_mod8_states(groups):
+    """All attainable four coefficient residues; an exact congruence relaxation.
+
+    A group of n identical columns contributes (n-2k)*column for 0<=k<=n.
+    Modulo eight only k modulo four matters. Compatibility is not a signing
+    of the original integer shell equations, or even of their root quotient.
+    """
+    states = {(0, 0, 0, 0)}
+    for column, count in sorted(groups.items()):
+        if len(column) != 4 or type(count) is not int or count < 1:
+            raise ValueError('require four-entry columns with positive multiplicities')
+        contributions = {tuple((count-2*k)*c % 8 for c in column)
+                         for k in range(min(count+1, 4))}
+        states = {tuple((a+b) % 8 for a, b in zip(state, contribution))
+                  for state in states for contribution in contributions}
+    return states
+
+
+def residue_zero_certificate(groups):
+    """Find an odd group forced to zero by exact rational residue equations.
+
+    Returns an integer combination of the residue rows supported on just
+    that group. Every column dot product is checked before returning it.
+    None means only that this particular necessary obstruction was absent.
+    """
+    items = sorted(groups.items())
+    if not items:
+        return None
+    period = len(items[0][0])
+    rows = [[Fraction(column[r]) for column, _ in items]
+            +[Fraction(i == r) for i in range(period)] for r in range(period)]
+    pivot_row = 0
+    for j in range(len(items)):
+        selected = next((i for i in range(pivot_row, period) if rows[i][j]), None)
+        if selected is None:
+            continue
+        rows[pivot_row], rows[selected] = rows[selected], rows[pivot_row]
+        factor = rows[pivot_row][j]
+        rows[pivot_row] = [x/factor for x in rows[pivot_row]]
+        for i in range(period):
+            if i != pivot_row and rows[i][j]:
+                factor = rows[i][j]
+                rows[i] = [x-factor*y for x, y in zip(rows[i], rows[pivot_row])]
+        pivot_row += 1
+        if pivot_row == period:
+            break
+    for row in rows[:pivot_row]:
+        support = [j for j, x in enumerate(row[:len(items)]) if x]
+        if len(support) != 1 or items[support[0]][1] % 2 == 0:
+            continue
+        j = support[0]
+        denominator = math.lcm(*(x.denominator for x in row))
+        weights = [int(x*denominator) for x in row[len(items):]]
+        coefficient = int(row[j]*denominator)
+        certificate = dict(column=list(items[j][0]), count=items[j][1],
+                           weights=weights, coefficient=coefficient)
+        verify_residue_zero_certificate(groups, certificate)
+        return certificate
+    return None
+
+
+def verify_residue_zero_certificate(groups, certificate):
+    """Check only integer dot products, without trusting Gaussian elimination."""
+    column = tuple(certificate['column'])
+    weights, coefficient = certificate['weights'], certificate['coefficient']
+    if (not groups or column not in groups or certificate['count'] != groups[column]
+            or groups[column] % 2 != 1 or type(coefficient) is not int or not coefficient
+            or len(weights) != len(column) or any(type(w) is not int for w in weights)):
+        raise ValueError('invalid odd-group certificate')
+    for other in groups:
+        if len(other) != len(weights):
+            raise ValueError('inconsistent residue dimensions')
+        actual = sum(a*b for a, b in zip(weights, other))
+        if actual != (coefficient if other == column else 0):
+            raise ValueError('row combination does not isolate the claimed group')
+    return True
+
+
+def residue_gap_representatives(length, hole_count):
+    """Cover every ordered placement of <=2 arm holes up to mod-eight columns.
+
+    Gaps count retained vertices. Replacing g>=12 by 12+(g-12)%32
+    preserves its column residues and each column's available signed sums
+    modulo eight. Reduced gaps lie in 0..43. Lift the first large gap to
+    recover the specified arm length. No representative means no placement.
+    """
+    if (type(length) is not int or length < 1 or
+            type(hole_count) is not int or not 0 <= hole_count <= min(2, length)):
+        raise ValueError('require a positive length and zero, one or two holes')
+    for gaps in itertools.product(range(44), repeat=hole_count+1):
+        extra = length-hole_count-sum(gaps)
+        if extra < 0 or extra % 32:
+            continue
+        lifted = list(gaps)
+        if extra:
+            large = next((j for j, gap in enumerate(gaps) if gap >= 12), None)
+            if large is None:
+                continue
+            lifted[large] += extra
+        depth, holes = 0, []
+        for gap in lifted[:-1]:
+            depth += gap+1
+            holes.append(depth)
+        yield tuple(holes)
+
+
+def fourth_root_mod8_census():
+    """Finite replay for all two-hole supports at t=1 mod 4, t>=9.
+
+    Each arm length exceeds 131, so representability of reduced gaps depends
+    only on length modulo 32. The eight scale phases below cover all cases.
+    This classifies a congruence and an exact forced-zero obstruction, not
+    homometric pairs. The two reports must not be conflated.
+    """
+    cache, zeros, counts, phase_counts = {}, {}, defaultdict(int), []
+    for scale in (33, 37, 9, 13, 17, 21, 25, 29):
+        lengths = [99*scale, 79*scale, 23*scale]
+        single = [list(residue_gap_representatives(n, 1)) for n in lengths]
+
+        def supports():
+            for arm, length in enumerate(lengths, 1):
+                for depths in residue_gap_representatives(length, 2):
+                    yield {(arm, d) for d in depths}
+                for depths in single[arm-1]:
+                    yield {(0, 0), (arm, depths[0])}
+            for a, b in itertools.combinations(range(1, 4), 2):
+                for da in single[a-1]:
+                    for db in single[b-1]:
+                        yield {(a, da[0]), (b, db[0])}
+
+        phase = defaultdict(int)
+        for holes in supports():
+            groups = residue_shell_groups(lengths, holes)
+            # n modulo eight and min(n,3) determine the available residues.
+            key = tuple(sorted((c, n % 8, min(n, 3)) for c, n in groups.items()))
+            if key not in cache:
+                cache[key] = (0, 0, 0, 0) in fourth_root_mod8_states(groups)
+                zeros[key] = residue_zero_certificate(groups) is not None
+            odd_refused = bipartition_support_obstruction(lengths, holes)['obstructed']
+            label = ('odd_shell_refused' if odd_refused else 'compatible')
+            if cache[key] == odd_refused:
+                raise AssertionError('fourth-root congruence differs from odd-shell condition')
+            phase[label] += 1
+            counts[label] += 1
+            if not odd_refused:
+                label = 'additional_exact_refusal' if zeros[key] else 'not_decided'
+                phase[label] += 1
+                counts[label] += 1
+        phase_counts.append(dict(scale_residue=scale % 32, **phase))
+    return dict(scope='fourth-root congruence and exact odd-group zero obstruction only',
+                scale_condition='t >= 9 and t = 1 modulo 4',
+                complete=True, all_pairs_decided=False, distinct_signatures=len(cache),
+                representatives=counts['odd_shell_refused']+counts['compatible'],
+                counts=dict(counts), phases=phase_counts)
 
 
 def moving_periodic_system(period,hole=19):
@@ -1462,6 +1650,19 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='residue_zero':
+        if saved.get('status')!='support_refused_by_odd_group':
+            raise ValueError('no saved residue refusal')
+        scale = saved['t']
+        if type(scale) is not int or scale < 1:
+            raise ValueError('require a positive integer scale')
+        holes = [tuple(hole) for hole in saved['holes']]
+        if len(holes) != 2:
+            raise ValueError('require exactly two holes')
+        groups = residue_shell_groups([99*scale,79*scale,23*scale],holes,saved['period'])
+        verify_residue_zero_certificate(groups,saved['certificate'])
+        return dict(verified=True,claim='this exact two-hole support is impossible for every word',
+                    all_pairs_decided=False)
     if saved.get('mode')=='coarse':
         if saved.get('status')!='sat': raise ValueError('no saved coarse sign witness')
         return verify_coarse_assignment(saved.get('hole',19),saved['assignment'])
@@ -1531,7 +1732,32 @@ def main():
     p.add_argument('--boundary-refusal',action='store_true',help='replay universal endpoint refusal over all old-support branches')
     p.add_argument('--coarse-supports',action='store_true',help='classify all 98 old first-arm supports')
     p.add_argument('--full-partition-bound',type=int,help='report inherited full-partition upper bound at a scale')
+    p.add_argument('--fourth-root-census',action='store_true',help='replay the unrestricted two-hole mod-eight method limitation')
+    p.add_argument('--residue-zero',type=int,metavar='SCALE',help='seek a portable unrestricted support refusal at this scale')
+    p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.residue_zero is not None:
+        if not args.holes:
+            p.error('--residue-zero requires --holes ARM:DEPTH ARM:DEPTH')
+        try:
+            holes = [tuple(map(int,text.split(':'))) for text in args.holes]
+            if any(len(hole)!=2 for hole in holes):
+                raise ValueError('require arm:depth holes')
+            groups = residue_shell_groups([99*args.residue_zero,79*args.residue_zero,
+                                           23*args.residue_zero],holes,args.period)
+        except (ValueError,TypeError) as error:
+            p.error(str(error))
+        certificate = residue_zero_certificate(groups)
+        result = dict(mode='residue_zero',t=args.residue_zero,holes=holes,period=args.period,
+                      status='support_refused_by_odd_group' if certificate else 'unknown',
+                      certificate=certificate,all_pairs_decided=False)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps(result,sort_keys=True))
+        return
+    if args.fourth_root_census:
+        print(json.dumps(fourth_root_mod8_census(),sort_keys=True))
+        return
     if args.full_partition_bound is not None:
         print(json.dumps(full_partition_subdivision_bound((99,79,23),args.full_partition_bound),sort_keys=True))
         return

@@ -693,3 +693,97 @@ holes of the same colour, without a common proper period dividing t-1 on
 the moving coarse-hole supports. Arbitrary inserted words, other hole depths
 and holes on different arms have not been excluded. No all-pairs upper bound
 strictly below the target, and no infinite positive family, has been obtained.
+
+### Linnet: unrestricted even-hole refusals from exact fourth-root rows
+
+24 November 2026. **The all-pairs acceptance is still unmet.** This step
+excludes two classes of supports without prescribing any word or period.
+For t=1 modulo 4, let the two holes have even depths (the centre has depth
+zero). Then no target pair on that support exists in either case:
+
+* t=1 modulo 8 and both hole depths are zero modulo 4;
+* t=5 modulo 8 and one hole depth is zero modulo 4, the other two modulo 4.
+
+The holes may be on any arms, at any permitted depths, including the centre.
+Thus for the resistant t=7980m+1 family, even m excludes the first class and
+odd m excludes the second. This is a support obstruction, **not an all-pairs
+obstruction**: for example the previously studied odd-depth holes are untouched.
+
+Here is a short algebraic proof. Reduce the exact physical shell polynomial
+modulo z^4-1, over the rationals. Its four coefficients must all vanish. Since
+all three L_i+1 are divisible by four, the full column of a depth-d vertex is
+
+    (z-2) z^d - z^(-d).
+
+This formula also holds for the centre. Each removed hole adds
+(z-1) z^distance to every retained column. Write coefficient vectors in order
+z^0,z^1,z^2,z^3. For even holes every odd-depth vertex has one of these columns:
+
+    (0,-4,3,-1), (1,-3,2,-2), (2,-2,1,-3), (3,-1,0,-4).
+
+The choice depends on the arms and order of the holes, but both weight vectors
+below annihilate **all four** possibilities. Even-depth columns do not depend
+on those choices, because negating an even residue preserves it modulo four:
+
+| Hole residues | Depth-zero column | Depth-two column | Row weights |
+| --- | --- | --- | --- |
+| 0,0 | (-5,3,0,0) | (0,0,-5,3) | (-7,-1,-3,-5) |
+| 0,2 | (-4,2,-1,1) | (-1,1,-4,2) | (-9,1,-1,-7) |
+
+Each listed weight vector has dot product 32 with its depth-zero column and
+zero with every other possible column. Therefore the sum of signs on retained
+vertices at depth zero modulo four must be zero. Before removing holes that
+class has 1+sum floor(L_i/4)=(201t-5)/4 vertices. Its retained size is
+(201t-13)/4 in the first row, or (201t-9)/4 in the second. That size is odd
+in exactly the two cases stated above. A sum of an odd number of signs cannot
+be zero. No search, repeated-word assumption or large-scale limit enters this
+proof.
+
+The implementation returns integer row-combination certificates for any odd
+column group isolated by rational elimination. A separate checker verifies
+every column dot product and its odd multiplicity; it does not trust the
+elimination. `residue_shell_groups` compiles arbitrary supports in time
+independent of arm length: between successive holes the distance exponents
+are affine with slope plus or minus one, so their residue columns repeat
+every four depths. Tests compare this compilation with every original column
+for all two-hole supports of several small unequal trees, check certificates
+against exhaustive literal assignments, reject altered certificates and verify
+the displayed weights at ordinary and resistant scales.
+
+A broader finite classification is also replayable:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --fourth-root-census
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-zero 7981 --holes 1:4 2:2 --period 4 --write /tmp/support-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/support-refusal.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -q
+```
+
+This replay covers **all hole placements**, t>=9 and t=1 modulo 4, using finite
+representatives. On an arm with k holes, split the retained depths into k+1
+nonnegative gaps. Reducing any gap g>=12 to 12+(g-12) modulo 32 preserves all
+column vectors, their multiplicities modulo eight, and each group's available
+signed sums modulo eight: each residue occurs at least three times, and adding
+32 adds eight copies of each column. Every reduced gap lies in 0..43. Conversely,
+a reduced tuple lifts to the desired length by adding the remaining multiple
+of 32 to a gap at least 12. With at most two holes, reduced total length is at
+most 131. All actual arms here exceed it. Thus the representative types depend
+only on arm lengths modulo 32, covered by the eight t residues 1,5,...,29.
+The program includes same-arm, different-arm and centre-hole supports.
+
+Recorded replay: 139,200 representatives, 20,706 congruence signatures.
+The modulo-eight version of the four residue equations refuses 69,600, exactly
+those already refused by the odd-distance shell. **Congruence compatibility
+misses an exact obstruction:** rational row combinations refuse another 13,260
+representatives, leaving 56,340 undecided by this method. These numbers count
+representatives, not actual supports or proportions of pairs. The proof above
+is independent of the census. The remaining obstacle is construction or an
+obstruction for all surviving supports; neither rational compatibility nor a
+finite support census decides unrestricted homometry.
+
+The portable example at t=7981 isolates 401,043 retained depth-zero vertices
+with row weights (-9,1,-1,-7), coefficient 32. Its verifier rebuilds the exact
+support before checking the certificate. Unknown searches are not accepted as
+certificates. The 35 focused tests pass, including JSON-shaped hole coordinates
+and saved-certificate mutations. The census and certificate checks use only the
+standard library and take seconds, independently of the physical scale.
