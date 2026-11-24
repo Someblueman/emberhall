@@ -1504,7 +1504,14 @@ Sum the necessary coefficient equations at slopes q with q mod 8 in
 integer equation has exactly 24 coefficients +2 and 25 coefficients -2;
 all other coefficients vanish. These counts follow just by evaluating the
 two displayed columns at the square-wave indicator for e=0..n_a-1, a
-finite integer calculation retained in `split_bulk_refusal`. Dividing by
+finite integer calculation retained in `split_bulk_refusal`. For a direct hand calculation, let f(q) be one when q mod 8 is in
+{4,5,6,7} and zero otherwise. The selected coefficient of a first sign is
+f(e)+f(n_a-e)-sum_(b!=a)f(e+n_b); for a last sign it is
+-f(e+1)-f(n_a-e-1)+sum_(b!=a)f(e+n_b+1). Both coefficients vanish
+identically on arms two and three. On arm one, the first coefficient is
+-2 for e=0 mod 8, +2 for e=4 mod 8 and zero otherwise; the last is
+-2 for e=3 mod 8, +2 for e=7 mod 8 and zero otherwise. Among e=0..98
+these give 13+12 negative and 12+12 positive terms. Dividing by
 two gives a sum of 49 signed odd integers equal to zero, which is
 impossible. Equivalently the selected binary rows XOR to 0=1. The
 portable verifier rebuilds the independent columns and checks that XOR;
@@ -1600,3 +1607,59 @@ scales without expanding the tree. New finite controls independently
 compare the support-count decomposition with physical columns, including
 an interior hole and a missing centre, and check both sides of the exact
 strict-inequality threshold. Saved altered bounds are rejected.
+
+
+The same hand calculation gives a structural extension: replace the old
+arm lengths by A=8u+3, B=8v+7, C=8r+7, for nonnegative integers u,v,r,
+in any arm order. The other two arms still vanish, and the distinguished
+arm contributes 4u+1 nonzero coefficients, all +/-2. Thus the same
+flat-interior obstruction holds. Put N=A+B+C and
+M=max(A+B,A+C,B+C). The aligned-old-hole threshold becomes L>=M+1+2w;
+the support-count argument for any two holes becomes
+
+    L >= M + 4Np + 16Npw + 4N + 25.
+
+Indeed there are Np intervals, N+1 old points, and at most one split per
+hole; the unavoidable plateau has length L-M. These are scoped theorems
+about the same aligned constant interiors. The command-line checker in
+this contribution deliberately reports only the original (99,79,23)
+case. This extension asserts no unrestricted homometric upper bound.
+
+### The nonconstant sign fibre remains unresolved
+
+The same building stretch pursued the surviving p=2, word-period-two,
+patch-width-four system. Joint closure again retained 2,682 signs, rational
+nullity 132 and 133 binary free coordinates; it completed in 435.379
+seconds. A separately recovered rational kernel and a second representation
+inferred from the retained recovery rows were both checked against the
+untouched formal equations. No numerical rank assumption was used.
+
+A temporary numerical local search chose 132 original coordinates as signs
+and penalized each recovered coordinate by (abs(value)-1)^2. A floating
+change of basis reduced its largest recovery coefficient from roughly
+70,000 to 1.287. Its final observed report, at 630 seconds, had visited
+31,930,344 sign flips over 639 restarts without finding a zero penalty;
+the attempt was then stopped. Those figures describe a heuristic attempt,
+not an exact minimum, an exhaustive refusal or evidence against other
+words. A numerical candidate would still have had to pass the untouched
+integer shell equations. No such candidate was produced.
+
+All 56 permanent focused tests pass (28.470 seconds). The temporary discovery
+programs add no dependency to the standard-library checker. The remaining
+obstacle is still a literal exact-shell signing of an infinite resistant
+family, or an obstruction allowing arbitrary nonconstant words and every
+permitted hole support. Wider flat patches and relocating the holes within
+the flat ansatz are now excluded under the stated bounds; that does not
+close the nonlinear periodic fibre or the main task.
+
+A separate discovery attempt used the already installed constraint solver on
+2,682 Boolean signs, 2,558 distinct untouched integer shell rows after the
+verified signed quotient, and 2,549 necessary binary echelon rows. It fixed
+the retained centre positive to remove global complementation. With two
+workers and a 1,050-second solve limit it returned **UNKNOWN**, after
+1,051.790 seconds overall, 18,680 branches and 258 conflicts. It produced
+neither a witness nor an exhaustive refusal. The solver was used only for
+temporary discovery; no solver dependency or solver status is accepted by
+the portable checker as a mathematical certificate. Neither this timeout
+nor the numerical search decides the surviving fibre. No further increase
+of their budgets is proposed here.
