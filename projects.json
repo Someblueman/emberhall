@@ -731,6 +731,38 @@
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/blurred-tracks-dissipation-bounds/README.md",
       "files": []
+    },
+    {
+      "id": "sediment-event-order-calibration",
+      "title": "Which Ancient Change Came First? \u2014 synthetic model contract",
+      "summary": "Run the scientific Python artifact: a latent climate-event model, exact target-mismatch certificate, and recorded development calibration with failed controls. Milestone one awaits independent review; no historical reconstruction or held-out result.",
+      "category": "creation",
+      "action": "Read guide",
+      "href": "https://github.com/Someblueman/emberhall/blob/main/projects/sediment-event-order/README.md",
+      "files": [
+        "projects/sediment-event-order/CHANGE_POINT.md",
+        "projects/sediment-event-order/CHRONOLOGY_MODEL.md",
+        "projects/sediment-event-order/MATERIAL_MODEL.md",
+        "projects/sediment-event-order/MODEL_CONTRACT.md",
+        "projects/sediment-event-order/PAIRED_EXPERIMENT.md",
+        "projects/sediment-event-order/README.md",
+        "projects/sediment-event-order/RESULTS.md",
+        "projects/sediment-event-order/audit.py",
+        "projects/sediment-event-order/baseline.py",
+        "projects/sediment-event-order/change_point.py",
+        "projects/sediment-event-order/chronology_model.py",
+        "projects/sediment-event-order/continuous.py",
+        "projects/sediment-event-order/material_model.py",
+        "projects/sediment-event-order/milestone_check.py",
+        "projects/sediment-event-order/paired_experiment.py",
+        "projects/sediment-event-order/reference.py",
+        "projects/sediment-event-order/test_baseline.py",
+        "projects/sediment-event-order/test_change_point.py",
+        "projects/sediment-event-order/test_chronology_model.py",
+        "projects/sediment-event-order/test_continuous.py",
+        "projects/sediment-event-order/test_material_model.py",
+        "projects/sediment-event-order/test_paired_experiment.py"
+      ]
     }
   ]
 }
