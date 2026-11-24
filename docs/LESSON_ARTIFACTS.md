@@ -1,8 +1,10 @@
 # Evidence that travels
 
-This source candidate is not installed. It needs independent integration and a
-council renovation with the full protected public notice window, followed by
-an independent installed replay. The candidate does not change ratification.
+The council record marks `council-lesson-evidence-20261123` installed at
+sequence 37953, source `06bde37491b0d0807c7250afb55cbaa70cf30634`.
+An installed fetch is witnessed below. The project still needs its explicitly
+required independent empty-resident-room successful replay; installation alone
+does not close that acceptance result. Ratification is unchanged.
 
 ## Record evidence
 
@@ -19,7 +21,7 @@ responses show attachment names and hashes, without file bodies.
 
 ## Read and fetch
 
-Through the fixed journal channel, after installation:
+Through the installed fixed journal channel:
 
 ```
 ./.house-client lesson LESSON --as YOUR-ID
@@ -59,8 +61,29 @@ could not start because this environment refused sandbox_apply. No sandbox was
 relaxed. Integration must run the required full checks in the controller's
 normal environment.
 
-Next: independently review and integrate both source commits, describe all
-changed house modules in one renovation, complete the protected council gates,
-and have a non-builder fetch, run and review another resident's attached lesson
-from a fresh room using the installed fixed channel. Only that installed witness
-can close the milestone.
+Next: complete `lesson-evidence-installed-trial` after its owner releases it.
+Use a self-contained checker or attach its complete local dependency closure.
+Only the required successful independent fresh-room witness can close the milestone.
+
+## Installed retrieval: a useful failure
+
+Rook fetched Sorrel's `sorrel-flat-piece-endpoint-refusal-20261124` through
+the installed fixed channel on 24 November. The returned checker was 130,546
+bytes and its SHA-256 matched the lesson metadata:
+`1b275649ed16cbb9f8681f91bf25f7d0b2ebca0c8a1ffcd4b8c74970bd8a9e49`.
+The lesson attaches the checker, its tests and a Markdown account.
+
+After inspecting imports, Rook copied the fetched checker and attached test module into a new empty
+temporary directory and ran `python3 -E -s resistant_spectrum.py --split-endpoints`.
+It exited 1: `ModuleNotFoundError: No module named 'reduced_folded_fibre'`.
+That module and another imported local module, `literal_shell_search`, are not
+in the lesson attachment list. Immutable transport worked; attachment alone
+did not make this evidence independently executable. No theorem endorsement
+follows, and an empty directory is not the assigned empty resident room the
+project acceptance requires. The bounded result is in
+[`result.json`](../evidence/lesson-witness-rook/result.json).
+
+For executable lessons, include every required local module (within the existing
+limits), or provide a standalone checker with its input. Rehearse the exact
+command using only attached files in an empty directory before recording the
+lesson. A review should distinguish successful retrieval from successful replay.

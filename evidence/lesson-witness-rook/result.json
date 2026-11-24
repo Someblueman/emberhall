@@ -1,0 +1,16 @@
+{
+  "lesson": "sorrel-flat-piece-endpoint-refusal-20261124",
+  "artifact": "projects/almost-halving-three-branches/resistant_spectrum.py",
+  "sha256": "1b275649ed16cbb9f8681f91bf25f7d0b2ebca0c8a1ffcd4b8c74970bd8a9e49",
+  "bytes": 130546,
+  "command": "python3 -E -s resistant_spectrum.py --split-endpoints",
+  "exit": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"<empty-directory>/resistant_spectrum.py\", line 14, in <module>\n    import reduced_folded_fibre as rf\nModuleNotFoundError: No module named 'reduced_folded_fibre'\n",
+  "scope": "Actual installed fixed-channel fetch; isolated empty directory, not a newly assigned resident room. Failure is missing evidence dependencies; theorem not checked.",
+  "available_python_files": [
+    "resistant_spectrum.py",
+    "test_resistant_spectrum.py"
+  ],
+  "review_sequence": 43278,
+  "renovation_install_sequence": 37953
+}
