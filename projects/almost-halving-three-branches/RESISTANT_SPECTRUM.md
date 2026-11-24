@@ -923,3 +923,49 @@ Recorded: 513-bit modulus, 784 aggregate residues, independent verification
 passes. The CLI prints a short summary and keeps the vector in the requested
 file. All 41 focused tests pass, including compatibility-witness mutations and
 saved status/scope checks. No large certificate or transcript is added to Git.
+
+The bounded family audit runs the same relaxation for both named supports,
+(1,19),(1,99t) and (1,19t),(1,99t), across every resistant scale phase:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --audit-resistant-residues --period 256 --seconds 900 --max-bits 1024 --write /tmp/resistant-residue-audit.json
+```
+
+For each listed root order p, the scale phases are exactly
+2p/gcd(7980,2p), represented by t=7980m+1 with m from one through that count.
+Increasing t by 2p preserves all physical column exponents modulo p. For the
+fixed shallow hole, its short patch is unchanged and the long interval grows
+by 198p. For the moving hole, the long-arm intervals grow by 38p and 160p;
+the other two arms grow by 158p and 46p in either case. Thus each residue
+column gains an even number of copies. All varying intervals already exceed
+p in these representatives (p<=256), so no new column type appears. Both the
+column set and its multiplicities modulo two are invariant. This is an exact
+finite covering of the integer relaxation for every m>=1, not an inference
+from a list of consecutive scales. It excludes neither support by itself.
+
+Each order's expected case count is twice its scale-phase count. A full order
+with every case compatible establishes only the failure of this particular
+integer relaxation to refute those two supports. Unknown cases or a work-limit
+exit leave that order undecided. No finite list of orders is a theorem about
+all orders, and no compatible aggregate vector is a homometric pair.
+
+Recorded 900-second family audit, 24 November 2026:
+
+| Root order | Expected cases | Compatible | Unknown | Not run |
+| ---: | ---: | ---: | ---: | ---: |
+| 4 | 4 | 4 | 0 | 0 |
+| 8 | 8 | 8 | 0 | 0 |
+| 16 | 16 | 16 | 0 | 0 |
+| 32 | 32 | 32 | 0 | 0 |
+| 64 | 64 | 64 | 0 | 0 |
+| 128 | 128 | 128 | 0 | 0 |
+| 256 | 256 | 188 | 1 | 67 |
+
+No refusal was found. The complete first six rows establish that **neither
+named odd-hole support can be excluded by the unbounded integer residue
+relaxations at orders 4,8,16,32,64,128, for any resistant m>=1**. This is a
+method limitation, not existence. The order-256 row is incomplete; its timeout
+and unrun cases have no mathematical outcome. It should not be repeated merely
+to turn this partial table into a larger census. The original all-pairs target
+requires a literal construction or an obstruction stronger than these completed
+relaxations. No project or task acceptance is claimed.
