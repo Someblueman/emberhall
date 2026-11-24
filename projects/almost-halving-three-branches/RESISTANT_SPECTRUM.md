@@ -1924,3 +1924,92 @@ Separately the existing joint-field quotient has 2,682 signs and 133 binary
 coordinates; its mod-eight equations have rank 2,550 and one new linear
 relation. Repeating after that relation leaves 132 coordinates and rank 2,549,
 with no further linear relation. These are necessary reductions only.
+
+### Forced tails reduce the all-word graph to 580 stored signs
+
+For 1<=h<=42 the same moving-hole strip has a smaller exact representation.
+In every shell row e>122t, the displayed columns contribute only
+
+    -x_(e-79t-1) - y_(e-99t).
+
+Indeed all third-arm and short-endpoint exponents are at most 122t, and the
+shallow-hole terms are at most (h+79)t+1<=122t. Thus for every full literal
+solution, without a word restriction,
+
+    x_(d+20t-1) = -y_d,          23t+1<=d<=79t.
+
+There are 56t pairs. Eliminate first-arm depths 43t..99t-1, keeping depths
+1..43t-1 except ht, and both other arms. A second-arm source in that tail
+now has column C_2(d)-C_1(d+20t-1). Its affine constants are still only
+-1,0,1. The reduced strip therefore retains radius one, the same row
+partition, and the same **L-2** edge convention. It has 290 signs per level,
+144 retained old-grid coordinates and a graph-state bound **2^580**.
+Balance concerns the restored full signing; the reduced coordinates alone
+must not be required to have zero sum. This reduction is asserted only for
+h<=42; it is not extended to h=43 or arbitrary holes.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --moving-strip-audit 17 --moving-reduced
+```
+
+Recorded result: all 3,416 original retained columns are accounted for in
+2,464 reduced source columns; 2,074 shell rows match, with 290 signs per
+slice and 580 stored signs. Tests independently inspect every high-distance
+row at (t,h)=(9,1),(11,19),(15,42), verify the complete reduced matrices,
+and expand arbitrary reduced signs back into every original physical shell.
+This is an exact all-word reduction on the named supports, **not** an accepted
+path, an infinite construction, or an all-pairs obstruction.
+
+### Recorded failures and independent reconciliation checks
+
+For the new period-four interior with w=2, h=19 and L=3990, compilation has
+3,818 signs and 4,094 nonzero rows. Its raw binary system has 93 free
+coordinates. Joint exact reduction completes with 2,392 signs, rational and
+ternary nullity 86, and 86 binary free coordinates (335.559 seconds observed).
+The following 600-second exact sign search ends **unknown**, after 55,251
+nodes; total observed elapsed time was 936.177 seconds. The untouched original
+rows are still required for a positive result. The shipped command counts its
+budget across both reduction and search, so allow both stages when replaying:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --moving-folded --period 4 --folded-patch 2 --seconds 1000 --nodes 10000000 --write /tmp/moving-folded.json
+```
+
+The same quotient's mod-eight product relaxation has rank 2,306 and no new
+linear relation. Its separate ternary sign-square lift completes: 86 free
+signs, 3,656 product coordinates, 2,306 rows, rank 2,306, nullity 1,350, original
+kernel checks passed, no forced-zero coordinate and no signed-copy relation.
+The observed elapsed time is 546.441 seconds. Equality of the two ranks is
+an observation, not an assumption or a sign solution.
+
+A temporary exact-parity-fibre energy search on the earlier two-piece,
+period-two, width-four system used the exact integer objective sum R^2.
+Every reported improvement was checked against untouched integer rows.
+After 900.172 seconds, 368 accepted flips and 143 restarts, its best objective
+was 29,728, not zero. A binary change of basis did not make its dense sign
+influences local. The temporary numerical search is discovery only, adds no
+runtime dependency and supplies no lower bound, witness or refusal.
+
+For Fern's internal-hole contribution I independently used **lowest** pivots,
+then recovered them in descending order, rather than calling the supplied
+highest-pivot fibre enumerator. All 1,024 assignments of its ten free bits
+were tested against untouched integer rows: zero literal solutions. Independent
+XOR replay of each shifted endpoint trace (offset -2 and +2) gives 0=1;
+both systems have 2,494 rows, raw constant span 189, and minimum even L=190.
+These checks support exactly the scoped claims retained in the reconciliation.
+
+All **68 focused tests pass** (51.227 seconds observed), including complete
+matrix reconstruction, direct distance multiplicities, whole-period extension,
+small exhaustive dyadic identities, CLI round trips and damaged certificates.
+No larger test suite was repeated. The precise remaining obstacle is a literal
+accepted strip path in a resistant half-length phase, or a rigorous obstruction
+allowing every word and every permitted two-hole support. Neither the product
+relaxations, the smaller graph, the failed searches nor this reconciliation
+constitutes the task's infinite-family acceptance or the milestone audit.
+
+The second moving-folded attempt used h=1 with the same L=3990, p=4 and w=2.
+Joint reduction retained 2,428 signs and 86 rational, binary and ternary free
+coordinates. The shipped 600-second whole-run command ended **unknown** after
+28,241 nodes and 600.515 seconds; no literal signing was produced. Both this
+phase and the h=19 phase still require a new exact construction or obstruction,
+not a claim inferred from the exhausted time budgets.

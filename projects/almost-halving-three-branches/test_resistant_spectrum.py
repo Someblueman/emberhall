@@ -14,6 +14,40 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_moving_forced_tails_and_reduced_radius_one_strip(self):
+        generator=random.Random(580)
+        for scale,hole in ((9,1),(11,19),(15,42)):
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            high=defaultdict(dict)
+            for arm,n in enumerate(lengths,1):
+                for d in range(1,n+1):
+                    if (arm,d) in holes:continue
+                    for e,c in fc.shell_column(lengths,holes,(arm,d)).items():
+                        if e>122*scale:high[e][arm,d]=c
+            for e in range(122*scale+1,178*scale+1):
+                self.assertEqual(high[e],{(1,e-79*scale-1):-1,(2,e-99*scale):-1})
+            audit=rs.moving_folded_audit(scale,hole,reduced=True)
+            self.assertEqual(audit['matched_source_columns'],145*scale-1)
+            self.assertEqual((audit['slice_signs'],audit['stored_slice_signs']),(290,580))
+            self.assertEqual(len(rs.moving_folded_labels(True)),290)
+            reduced={(0,0):1}
+            reduced.update({(a,d):generator.choice((-1,1))
+                            for a,n in enumerate((43*scale-1,79*scale,23*scale),1)
+                            for d in range(1,n+1) if (a,d) not in holes})
+            restored=dict(reduced)
+            restored.update({(1,d+20*scale-1):-reduced[2,d]
+                             for d in range(23*scale+1,79*scale+1)})
+            self.assertEqual(len(restored),201*scale-1)
+            self.assertEqual(rs.moving_folded_residual(scale,reduced,hole,reduced=True),
+                             fc.shell_rows(lengths,holes,restored))
+            # Every unshifted interior term stays at offset -1,0 or 1.
+            for a,q,s in rs.moving_folded_labels(True):
+                self.assertTrue(all(c in (-1,0,1) for Q,u,c,v in
+                                    rs._moving_strip_column(a,q,s,0,hole,True)))
+        # The tail proof is not extended beyond its stated hole range.
+        with self.assertRaises(ValueError):rs.moving_folded_stencils(43,reduced=True)
+
     def test_moving_strip_complete_matrix_and_direct_distance_counts(self):
         from collections import Counter
         for scale,hole in ((9,19),(11,1),(15,98)):

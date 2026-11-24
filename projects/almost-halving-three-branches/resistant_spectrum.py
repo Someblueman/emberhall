@@ -1580,8 +1580,9 @@ def verify_coarse_assignment(hole,assignment):
 
 
 
-def moving_folded_labels():
-    return [(a,q,s) for a,n in enumerate((99,79,23),1) for s in (1,-1) for q in (range(n) if s==1 else range(1,n+1))]
+def moving_folded_labels(reduced=False):
+    return [(a,q,s) for a,n in enumerate((43 if reduced else 99,79,23),1)
+            for s in (1,-1) for q in (range(n) if s==1 else range(1,n+1))]
 def _moving_affine_column(a,q,alpha,beta,h=19):
     if a==0:return [(0,0,1,1),(79,0,1,-1),(23,0,1,-1),(99,0,0,-1),(h,0,0,-1),(h,0,1,1)]
     n=(99,79,23)[a-1]
@@ -1594,18 +1595,28 @@ def _moving_affine_column(a,q,alpha,beta,h=19):
     else:out.extend(((n-q,-alpha,1-beta,-1),(99+q,alpha,beta,-1),(h+q,alpha,beta,-1),(h+q,alpha,beta+1,1)))
     return out
 
-def moving_folded_stencils(h=19):
+def _moving_strip_column(a,q,alpha,beta,h,reduced):
+    terms=_moving_affine_column(a,q,alpha,beta,h)
+    tail=(a==2 and (q>23 or (q==23 and (alpha>0 or (alpha==0 and beta>=1)))))
+    if reduced and tail:
+        terms += [(Q,u,c,-value) for Q,u,c,value in
+                  _moving_affine_column(1,q+20,alpha,beta-1,h)]
+    return terms
+
+
+def moving_folded_stencils(h=19,reduced=False):
     """All-word radius-one shell equations for holes (1,h*t),(1,99*t).
 
     Left rows have folded level 0 or 1, interior rows 2..L-1, and
     right rows L, where t=2L+1. This is not an existence decision.
     """
-    if type(h) is not int or not 1<=h<99:raise ValueError("require 1<=h<99")
+    if type(h) is not int or not 1<=h<(43 if reduced else 99):
+        raise ValueError('require 1<=h<=42 when reduced, otherwise 1<=h<99')
     interior=defaultdict(lambda:defaultdict(int));left=defaultdict(lambda:defaultdict(int));right=defaultdict(lambda:defaultdict(int))
-    for a,q,s in moving_folded_labels():
-        for Q,u,c,v in _moving_affine_column(a,q,s,0,h):interior[Q,u][a,q,s,-u*c]+=v
+    for a,q,s in moving_folded_labels(reduced):
+        for Q,u,c,v in _moving_strip_column(a,q,s,0,h,reduced):interior[Q,u][a,q,s,-u*c]+=v
         for j in (-1,0):
-            for Q,u,c,v in _moving_affine_column(a,q,s,s*j,h):
+            for Q,u,c,v in _moving_strip_column(a,q,s,s*j,h,reduced):
                 if u==1:
                     if c==0:row=Q,1
                     elif c==1:row=Q+1,-1
@@ -1616,24 +1627,24 @@ def moving_folded_stencils(h=19):
                     else:continue
                 right[row][a,q,s,j]+=v
     sources=[(0,0,0)]
-    for a,n in enumerate((99,79,23),1):
+    for a,n in enumerate((43 if reduced else 99,79,23),1):
         for d in range(-2,3):
             for q in (range(1,n+1) if d<=0 else range(n)):
-                if (a,q,d) not in ((1,h,0),(1,99,0)):sources.append((a,q,d))
+                if (a,q,d) not in ((1,h,0),(1,43 if reduced else 99,0)):sources.append((a,q,d))
     for a,q,d in sources:
-        for Q,u,c,v in _moving_affine_column(a,q,0,d,h):
+        for Q,u,c,v in _moving_strip_column(a,q,0,d,h,reduced):
             assert u==0
             if abs(c)<=1:left[Q,c][a,q,d]+=v
     def trim(rows):return {r:{k:c for k,c in row.items() if c} for r,row in rows.items() if any(row.values())}
     return trim(left),trim(interior),trim(right)
 
 
-def moving_folded_residual(scale,coordinates,hole=19):
+def moving_folded_residual(scale,coordinates,hole=19,reduced=False):
     """Evaluate every exact physical shell row through the moving-hole strip."""
     if type(scale) is not int or scale<9 or scale%2!=1:
         raise ValueError('require odd scale>=9')
     half=scale//2
-    left,interior,right=moving_folded_stencils(hole)
+    left,interior,right=moving_folded_stencils(hole,reduced)
     result={}
     def put(exponent,value):
         if value:result[exponent]=value
@@ -1649,13 +1660,13 @@ def moving_folded_residual(scale,coordinates,hole=19):
     return result
 
 
-def moving_folded_audit(scale,hole=19):
+def moving_folded_audit(scale,hole=19,reduced=False):
     """Compare the complete strip matrix with every original physical column."""
     if type(scale) is not int or scale<9 or scale%2!=1:
         raise ValueError('require odd scale>=9')
     import full_shorter_coupling as physical
     half=scale//2
-    left,interior,right=moving_folded_stencils(hole)
+    left,interior,right=moving_folded_stencils(hole,reduced)
     actual={}
     def put(exponent,terms):
         if exponent in actual:raise AssertionError('strip row partition overlaps')
@@ -1671,17 +1682,24 @@ def moving_folded_audit(scale,hole=19):
         put(q*scale+s*half,[((a,k*scale+u*(half+j)),c) for (a,k,u,j),c in row.items()])
     lengths=[n*scale for n in (99,79,23)]
     holes={(1,hole*scale),(1,99*scale)}
-    vertices=[(0,0)]+[(a,d) for a,n in enumerate(lengths,1) for d in range(1,n+1)
+    source_lengths=[43*scale-1,79*scale,23*scale] if reduced else lengths
+    vertices=[(0,0)]+[(a,d) for a,n in enumerate(source_lengths,1) for d in range(1,n+1)
                       if (a,d) not in holes]
     expected=defaultdict(dict)
     for vertex in vertices:
-        for exponent,c in physical.shell_column(lengths,holes,vertex).items():
-            expected[exponent][vertex]=c
+        column=defaultdict(int,physical.shell_column(lengths,holes,vertex))
+        a,d=vertex
+        if reduced and a==2 and d>23*scale:
+            for exponent,c in physical.shell_column(lengths,holes,(1,d+20*scale-1)).items():
+                column[exponent]-=c
+        for exponent,c in column.items():
+            if c:expected[exponent][vertex]=c
     if {e:r for e,r in actual.items() if r}!=dict(expected):
         raise AssertionError('moving strip differs from the physical shell matrix')
-    return dict(t=scale,hole=hole,matched_physical_columns=len(vertices),
-                matched_shell_rows=len(expected),slice_signs=402,row_radius=1,
-                stored_slice_signs=804,path_edges=half-2,
+    slices=290 if reduced else 402
+    return dict(t=scale,hole=hole,reduced=reduced,matched_physical_columns=201*scale-1,
+                matched_source_columns=len(vertices),matched_shell_rows=len(expected),
+                slice_signs=slices,row_radius=1,stored_slice_signs=2*slices,path_edges=half-2,
                 all_pairs_decided=False,literal_existence_decided=False)
 
 
@@ -3045,6 +3063,7 @@ def main():
     p.add_argument('--moving',action='store_true',help='search moving holes 19t and 99t')
     p.add_argument('--moving-folded',action='store_true',help='search the radius-one moving-hole folded strip')
     p.add_argument('--moving-strip-audit',type=int,metavar='SCALE',help='compare every moving-hole strip column with the physical shell matrix')
+    p.add_argument('--moving-reduced',action='store_true',help='eliminate forced opposite tails in the moving strip audit, hole<=42')
     p.add_argument('--folded-patch',type=int,default=2,help='independent patch width in the moving folded strip')
     p.add_argument('--edge-patch',type=int,default=0,help='free endpoint vertices in moving or split-edge mode')
     p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
@@ -3079,8 +3098,10 @@ def main():
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.moving_reduced and args.moving_strip_audit is None:
+        p.error('--moving-reduced requires --moving-strip-audit')
     if args.moving_strip_audit is not None:
-        print(json.dumps(moving_folded_audit(args.moving_strip_audit,args.hole),sort_keys=True))
+        print(json.dumps(moving_folded_audit(args.moving_strip_audit,args.hole,args.moving_reduced),sort_keys=True))
         return
     if args.moving_folded:
         result=moving_folded_search(args.half,args.period,args.folded_patch,args.hole,args.seconds,args.nodes)
