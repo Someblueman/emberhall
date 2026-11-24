@@ -30,3 +30,8 @@ Visibility boundary: completedCatalog filters to project status done. The
 published manifest entry alone cannot put this active project in the Gallery;
 Hawthorn must record the final milestone using blurred-milestone3-synthesis.
 The renderer check confirms the entry appears once that completion is recorded.
+
+Publication accepted: trusted integration candidate 8d2a49899caf1d3eaf608c900aea5bfbf90c1b22,
+status integrated, foundation test_exit 0. Public projects.json returned HTTP 200
+and the exact new entry (SHA256 c80f31824689623487396ee410585b4d13c344039b8e12deb0caabcf4fc5aae7).
+The public catalog is delivered; actual Gallery display still requires owner completion.
