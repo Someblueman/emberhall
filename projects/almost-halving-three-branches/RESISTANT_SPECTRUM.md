@@ -1461,3 +1461,142 @@ independently from unordered pair distances at t=3,5; check the column
 norm bound at every retained vertex in those five trees; and reject
 altered saved bounds. A scale exceeding 10^80 is checked symbolically.
 The main resistant-family acceptance remains unmet.
+
+### Flat interiors fail even with arbitrary finite endpoint patches
+
+Sorrel, continuation. The earlier unpatched flat-piece refusal can be
+strengthened without a sign search or a larger patch census.
+
+**Scoped theorem.** Let p>=2,w>=0,L>=179+2w and t=pL+1. In each old
+edge, divide the t-1 inserted vertices into p successive pieces of L
+vertices. Allow arbitrary independent signs on all retained old vertices
+and on the first and last w vertices of each piece. Require only that
+each remaining piece interior is constant, with its own independent sign.
+No such signing gives balanced homometric sets. This holds with the named
+holes 19t and 99t; in fact it holds for any choice of holes among the old
+vertices. It excludes neither holes inside inserted pieces nor nonconstant
+interiors such as the surviving period-two attempt.
+
+**Proof.** Compile (1-z)K with affine exponents qL+c as above. Every offset
+lies in [1-w,179+w]. Thus L>=179+2w makes specialization injective on
+these formal exponents. A true zero therefore makes every formal row zero.
+Retain the rows with q divisible by p, divide q by p, then sum all offsets
+c. Any individual old or patch column cancels, because multiplying a
+monomial by 1-z gives opposite coefficients with the same slope q.
+Every hole correction also cancels in this sum: its two terms differ by
+one in c. This is independent of the old hole's position. Constant
+interiors have only their two geometric endpoints. Among pieces r=0..p-1,
+only the first and last endpoints can have slope divisible by p.
+
+Write f_(a,e),l_(a,e) for those first and last interior signs, on old edge
+e=0..n_a-1, where (n_1,n_2,n_3)=(99,79,23). Their necessary aggregate
+columns, now polynomials in a formal Y, are explicitly
+
+    f_(a,e): Y^e + Y^(n_a-e) - sum_(b!=a) Y^(e+n_b),
+    l_(a,e): -Y^(e+1) - Y^(n_a-e-1) + sum_(b!=a) Y^(e+n_b+1).
+
+No old sign, patch sign, hole choice, p, w or L remains. These formulas
+also provide an independent construction of `split_bulk_system`, rather
+than relying on extraction from the full compiler.
+
+Sum the necessary coefficient equations at slopes q with q mod 8 in
+{4,5,6,7}. This fixed square wave selects 88 of the 179 rows. The resulting
+integer equation has exactly 24 coefficients +2 and 25 coefficients -2;
+all other coefficients vanish. These counts follow just by evaluating the
+two displayed columns at the square-wave indicator for e=0..n_a-1, a
+finite integer calculation retained in `split_bulk_refusal`. Dividing by
+two gives a sum of 49 signed odd integers equal to zero, which is
+impossible. Equivalently the selected binary rows XOR to 0=1. The
+portable verifier rebuilds the independent columns and checks that XOR;
+it uses no search, rank estimate, sampled scale or time limit.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-bulk --write /tmp/flat-bulk.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/flat-bulk.json
+```
+
+For the named two holes this rules out *every fixed finite patch width*
+on sufficiently long flat pieces, strengthening the earlier width-zero
+and width-one results. It also tells a builder exactly why merely making
+such patches wider cannot produce an infinite flat-interior family.
+The period-two repeating interiors have zero-mean possibilities and are
+not covered by this argument. The task's unrestricted acceptance remains
+unmet; no new all-pairs upper bound is asserted.
+
+### Moving the two holes cannot rescue two flat halves
+
+The bulk obstruction also yields a deliberately conservative bound covering
+**any two physical holes**, including holes inside a piece or at the centre.
+It remains a theorem about flat interiors, not arbitrary third words.
+
+Let p>=2,w>=0,L>=2w+1,t=pL+1, with the same aligned pieces as above.
+If
+
+    L >= 804p + 3216pw + 1007,
+
+no balanced homometric signing can be constant on the piece interiors,
+even with arbitrary old signs, arbitrary endpoint patches of width w,
+and arbitrary positions of the two holes. In particular p=2,w=0 requires
+only L>=2615. Every resistant t=7980m+1 has L=3990m, so **two flat
+halves per old edge fail for every resistant scale and every two-hole
+support**. This strengthens the aligned-hole theorem in a different
+direction; it is not the unrestricted all-pairs acceptance result.
+
+To prove the bound, extend a proposed signing to a baseline full-support
+signing: keep arbitrary signs at every old vertex, make each entire piece
+constant with its interior sign, and assign a sign to any old hole. The
+full-support no-hole polynomial K_0 has derivative (1-z)K_0 with offsets
+in [1,179]. The independent bulk columns and square-wave contradiction
+above apply unchanged, since all individual old columns and hole columns
+had cancelled in the aggregate.
+
+Consequently at least one slope cluster has a nonzero total jump. If all
+cumulative jumps between clusters were zero, every cluster total would
+be zero, contradicting the bulk certificate. Thus K_0 is nonzero on a
+whole interval between consecutive slope clusters. That interval contains
+at least L-178 coefficient positions: a cluster's largest possible
+exponent is qL+179 and the next cluster's smallest possible exponent is
+(q+1)L+1. This argument requires L>178, which the stated threshold ensures.
+
+Now count how many coefficient positions can change. The baseline source
+signs consist of 201p constant intervals and 202 individual old vertices.
+For one arbitrary hole h its correction to K is
+
+    -(1-z) sum_v s_0(v) z^dist(v,h).
+
+The distance map is affine with slope +1 or -1 on each interval, except
+that at most one interval must split at a same-arm hole. The image sum
+of each resulting constant interval is geometric; multiplication by
+1-z leaves at most two coefficient positions. Each old point also gives
+at most two. Thus this correction has support size at most
+2(201p+202+1)=402p+406, independently of the hole's location. For two
+holes the union has size at most 804p+812. Overlaps and cancellations
+can only reduce it.
+
+The actual source differs from the baseline at at most 402pw endpoint
+patch vertices and two holes. In the shell operator with those holes,
+each changed source vertex affects at most eight coefficient positions:
+four no-hole terms plus two terms per hole. Hence these source changes
+add at most 8(402pw+2) positions. Altogether K-K_0 is supported at at
+most
+
+    804p + 3216pw + 828
+
+positions. It cannot cancel a nonzero interval of length L-178 exceeding
+that number. A balanced homometric pair requires K=0, giving the bound.
+This proof counts support, not coefficient magnitudes, so it permits
+arbitrary signs and accidental collisions at the moving holes.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --flat-any-holes 3990 --write /tmp/flat-any-holes.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/flat-any-holes.json
+```
+
+Recorded output: t=7981, unavoidable nonzero support at least 3812,
+possible correction support at most 2436, status flat_ansatz_refused.
+At or below the threshold the checker returns not_decided_by_bound,
+never an exhaustive search conclusion. It also accepts enormous integer
+scales without expanding the tree. New finite controls independently
+compare the support-count decomposition with physical columns, including
+an interior hole and a missing centre, and check both sides of the exact
+strict-inequality threshold. Saved altered bounds are rejected.

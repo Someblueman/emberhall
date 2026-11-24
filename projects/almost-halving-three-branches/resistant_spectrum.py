@@ -680,6 +680,74 @@ def split_endpoint_system():
     return keys,dict(sorted(rows.items()))
 
 
+def split_bulk_system():
+    """Necessary aggregate rows for all flat pieces with finite end patches.
+
+    In (1-z)K retain q=0 mod p, then sum every constant offset c.
+    Single-vertex columns cancel; only the first/last long pieces survive.
+    Renaming these two signs gives the same rows for all p>=2,w>=0.
+    The physical-to-formal converse is valid when L>=179+2w.
+    """
+    lengths = (99,79,23)
+    keys = [('first' if side==0 else 'last',arm,edge)
+            for arm,n in enumerate(lengths,1) for edge in range(n) for side in (0,1)]
+    rows = defaultdict(lambda:defaultdict(int))
+    for i,(side,arm,e) in enumerate(keys):
+        n = lengths[arm-1]
+        if side=='first':
+            terms = [(e,1),(n-e,1)]+[(e+m,-1) for j,m in enumerate(lengths,1) if j!=arm]
+        else:
+            terms = [(e+1,-1),(n-e-1,-1)]+[(e+m+1,1) for j,m in enumerate(lengths,1) if j!=arm]
+        for q,value in terms: rows[q][i] += value
+    return keys,{q:{i:c for i,c in row.items() if c}
+                 for q,row in sorted(rows.items()) if any(row.values())}
+
+
+def flat_piece_any_holes_bound(piece_length,pieces=2,patch=0):
+    """Exclude sufficiently long flat interiors with ANY two physical holes.
+
+    A full-support flat signing has a nonzero K plateau of length L-178.
+    Two arbitrary holes and the patch changes affect at most the stated
+    number of coefficient positions. This support-count argument makes no
+    assumption about hole alignment. It is still only a flat-word theorem.
+    """
+    if (type(pieces) is not int or pieces<2 or type(patch) is not int or patch<0
+            or type(piece_length) is not int or piece_length<2*patch+1):
+        raise ValueError('require pieces>=2, patch>=0, and piece length>=2*patch+1')
+    split_bulk_refusal()  # fixed independent parity proof of a nonzero plateau
+    # 201p constant intervals, 202 old points, and at most one split per hole.
+    hole_correction_support = 2*(2*(201*pieces+202+1))
+    changed_vertices = 402*pieces*patch+2
+    correction_support = hole_correction_support+8*changed_vertices
+    plateau = max(0,piece_length-178)
+    refused = plateau>correction_support
+    return dict(mode='flat_any_holes',pieces=pieces,patch=patch,piece_length=piece_length,
+                t=pieces*piece_length+1,nonzero_plateau_lower_bound=plateau,
+                correction_support_upper_bound=correction_support,
+                minimum_refused_piece_length=804*pieces+3216*pieces*patch+1007,
+                status='flat_ansatz_refused' if refused else 'not_decided_by_bound',
+                all_pairs_decided=False,
+                scope='constant piece interiors with endpoint patches; any two physical holes')
+
+
+def split_bulk_refusal():
+    keys,rows = split_bulk_system()
+    original = list(rows.values())
+    # A fixed square wave gives a short human-readable parity argument:
+    # the selected sum has 24 coefficients +2 and 25 coefficients -2.
+    certificate = [i for i,q in enumerate(rows) if q%8>=4]
+    coefficients = defaultdict(int)
+    for i in certificate:
+        for j,c in original[i].items(): coefficients[j] += c
+    nonzero = [c for c in coefficients.values() if c]
+    if sorted(nonzero)!=[-2]*25+[2]*24 or not verify_refusal(original,certificate):
+        raise AssertionError('flat-interior bulk refusal was not verified')
+    return dict(mode='split_bulk',status='ansatz_refused_by_parity',
+                variables=len(keys),rows=len(rows),certificate=certificate,
+                minimum_piece_length='179+2*patch',all_pairs_decided=False,
+                scope='all p>=2 constant interiors, arbitrary finite end patches and holes at old vertices')
+
+
 def split_endpoint_refusal():
     keys,rows=split_endpoint_system()
     certificate,_=binary_elimination(list(rows.values()))
@@ -2384,6 +2452,17 @@ def verify_saved(saved):
         if json.dumps(saved,sort_keys=True)!=json.dumps(expected,sort_keys=True):
             raise ValueError('saved repair bound does not match the symbolic shell calculation')
         return dict(verified=True,all_pairs_decided=False,claim=expected['scope'])
+    if saved.get('mode')=='flat_any_holes':
+        expected = flat_piece_any_holes_bound(saved.get('piece_length'),saved.get('pieces'),saved.get('patch'))
+        if json.dumps(saved,sort_keys=True)!=json.dumps(expected,sort_keys=True):
+            raise ValueError('saved any-hole flat-piece bound differs from the proof')
+        return dict(verified=True,all_pairs_decided=False,status=expected['status'],claim=expected['scope'])
+    if saved.get('mode')=='split_bulk':
+        _,rows = split_bulk_system()
+        if not verify_refusal(list(rows.values()),saved.get('certificate',[])):
+            raise ValueError('invalid patched-flat-interior bulk refusal')
+        return dict(verified=True,all_pairs_decided=False,
+                    claim='only long flat interiors with arbitrary finite endpoint patches are refused')
     if saved.get('mode')=='split_endpoints':
         _,rows=split_endpoint_system()
         if not verify_refusal(list(rows.values()),saved.get('certificate',[])):
@@ -2504,6 +2583,8 @@ def main():
     p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
     p.add_argument('--edge-pieces',type=int,default=2,help='number of constant pieces per edge in split-edge mode')
     p.add_argument('--piece-period',type=int,default=1,help='independent repeating word length within each edge piece')
+    p.add_argument('--flat-any-holes',type=int,metavar='PIECE_LENGTH',help='support-count obstruction to flat interiors with any two holes')
+    p.add_argument('--split-bulk',action='store_true',help='uniform flat-interior refusal with arbitrary finite endpoint patches')
     p.add_argument('--split-endpoints',action='store_true',help='portable endpoint refusal for every number of flat pieces')
     p.add_argument('--reduced-xor',action='store_true',help='fully reduce moving-word binary equations before branching')
     p.add_argument('--joint-fields',action='store_true',help='alternate rational, binary and ternary sign quotients')
@@ -2536,11 +2617,23 @@ def main():
             with open(args.write,'w') as f: json.dump(result,f)
         print(json.dumps(result,sort_keys=True))
         return
+    if args.split_bulk:
+        result = split_bulk_refusal()
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps({k:v for k,v in result.items() if k!='certificate'},sort_keys=True))
+        return
     if args.split_endpoints:
         result=split_endpoint_refusal()
         if args.write:
             with open(args.write,'w') as f:json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k!='certificate'},sort_keys=True))
+        return
+    if args.flat_any_holes is not None:
+        result = flat_piece_any_holes_bound(args.flat_any_holes,args.edge_pieces,args.edge_patch)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps(result,sort_keys=True))
         return
     if args.edge_patch and not (args.moving or args.split_edge):
         p.error('--edge-patch requires --moving or --split-edge')
