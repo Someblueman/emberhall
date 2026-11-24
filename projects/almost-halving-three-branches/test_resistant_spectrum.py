@@ -14,6 +14,212 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_moving_edge_patches_against_all_physical_columns(self):
+        for period,width,hole in ((1,1,19),(2,4,19),(3,3,7),(4,4,19),(8,8,19)):
+            keys,rows = rs.moving_periodic_system(period,hole,width)
+            for repeats in (1,2):
+                scale = 2*width+period*repeats+1
+                columns = [defaultdict(int) for _ in keys]
+                for (q,c),row in rows.items():
+                    for i,value in row.items(): columns[i][q*scale+c] += value
+                for i,key in enumerate(keys):
+                    if len(key)==3:
+                        arm,edge,r = key
+                        depths = [edge*scale] if r==0 else range(
+                            edge*scale+width+r,(edge+1)*scale-width,period)
+                    else:
+                        arm,edge,side,r = key
+                        depths = [edge*scale+r if side=='prefix' else (edge+1)*scale-r]
+                    expected = defaultdict(int)
+                    for depth in depths:
+                        for e,c in fc.shell_column([99*scale,79*scale,23*scale],
+                                {(1,hole*scale),(1,99*scale)},(arm,depth)).items():
+                            expected[e] += c
+                            expected[e+period] -= c
+                    self.assertEqual({e:c for e,c in columns[i].items() if c},
+                                     {e:c for e,c in expected.items() if c},(period,width,key))
+        for period,width in ((2,-1),(3,1),(1,True)):
+            with self.assertRaises(ValueError): rs.moving_periodic_system(period,19,width)
+        keys,_ = rs.moving_periodic_system(2,19,4)
+        fake = dict(mode='moving',period=2,edge_patch=4,status='sat',
+                    assignment=[[list(k),1] for k in keys])
+        with self.assertRaises(ValueError): rs.verify_saved(fake)
+        unknown = rs.moving_search(4,edge_patch=4,seconds=5,nodes=0,closure_steps=0)
+        self.assertEqual(unknown['status'],'unknown')
+        self.assertEqual(unknown['minimum_scale'],13)
+        with self.assertRaises(ValueError): rs.verify_saved(unknown)
+
+    def test_general_tree_residue_lift_by_adjacency_bfs(self):
+        from collections import Counter,deque
+        edges = [(0,1),(1,2),(2,3),(1,4),(4,5),(4,6)]
+        def distances(edges):
+            adjacency = defaultdict(list)
+            for u,v in edges:
+                adjacency[u].append(v)
+                adjacency[v].append(u)
+            result = {}
+            for start in adjacency:
+                seen = {start:0}
+                queue = deque([start])
+                while queue:
+                    u = queue.popleft()
+                    for v in adjacency[u]:
+                        if v not in seen:
+                            seen[v] = seen[u]+1
+                            queue.append(v)
+                result[start] = seen
+            return result
+        def profile(group,metric,period=None):
+            return Counter(metric[u][v] if period is None else metric[u][v]%period
+                           for u,v in itertools.combinations(group,2))
+        base_metric = distances(edges)
+        for left,right in (([0,1],[4,5]),([0,2],[5,6]),([2,3],[4,5])):
+            # Only homometric base pairs are admitted; holes remain in the metric.
+            self.assertEqual(profile(left,base_metric),profile(right,base_metric))
+            for period in (1,2,3):
+                scale = 2*period+1
+                signs = {v:(1 if v in left else -1 if v in right else 0) for v in range(7)}
+                expanded = []
+                for edge,(u,v) in enumerate(edges):
+                    chain = [u]+[(edge,r) for r in range(1,scale)]+[v]
+                    expanded.extend(zip(chain,chain[1:]))
+                    for r in range(1,scale):
+                        signs[edge,r] = 1 if ((r-1)//period)%2==0 else -1
+                metric = distances(expanded)
+                positive = [v for v,s in signs.items() if s==1]
+                negative = [v for v,s in signs.items() if s==-1]
+                self.assertEqual(len(positive),len(left)+len(edges)*(scale-1)//2)
+                self.assertEqual(len(positive),len(negative))
+                self.assertEqual(profile(positive,metric,period),profile(negative,metric,period))
+
+    def test_residue_lift_direct_distance_profiles_and_edge_defect(self):
+        from collections import Counter
+        # Count actual unordered distances, independently of the shell compiler.
+        for period in (1,2,3,5):
+            for repetitions in (1,2):
+                scale = 2*period*repetitions+1
+                groups = {1:[], -1:[]}
+                zeros = []
+                vertices = [(0,0)]+[(a,d) for a,n in enumerate((99,79,23),1)
+                                     for d in range(1,n*scale+1)]
+                for vertex in vertices:
+                    sign = rs.residue_lift_sign(period,scale,vertex)
+                    if sign: groups[sign].append(vertex)
+                    else: zeros.append(vertex)
+                self.assertEqual(zeros,[(1,19*scale),(1,99*scale)])
+                self.assertEqual(len(groups[1]),(201*scale-1)//2)
+                self.assertEqual(len(groups[1]),len(groups[-1]))
+                def profile(group):
+                    return Counter(abs(d-e) if a==b else d+e
+                                   for i,(a,d) in enumerate(group) for b,e in group[:i])
+                left,right = profile(groups[1]),profile(groups[-1])
+                self.assertEqual(left[1]-right[1],-1)
+                def reduced(profile):
+                    result = Counter()
+                    for d,n in profile.items(): result[d%period] += n
+                    return result
+                self.assertEqual(reduced(left),reduced(right))
+
+    def test_residue_lift_all_orders_and_certificate_controls(self):
+        for m in (1,2,7,10**25):
+            growing = rs.residue_lift_plan([3990*m])
+            self.assertEqual(growing['t'],7980*m+1)
+            self.assertEqual(growing['block_pairs_per_old_edge'],1)
+            self.assertEqual(growing['distance_one_difference'],-1)
+        for periods in ([1],[4,8,16],[3,5,7,19],[2,3,5,16,19],[10**50+7]):
+            for index in (1,2,10**30):
+                plan = rs.residue_lift_plan(periods,index)
+                self.assertEqual((plan['t']-1)%7980,0)
+                self.assertTrue(all((plan['t']-1)%(2*p)==0 for p in periods))
+                self.assertEqual(plan['pair_size'],(201*plan['t']-1)//2)
+                self.assertEqual(plan['distance_one_difference'],-1)
+                self.assertFalse(plan['exact_homometric'])
+                self.assertTrue(rs.verify_saved(plan)['verified'])
+        import copy
+        plan = rs.residue_lift_plan([3,16,19])
+        for key,value in [('t',plan['t']+2),('pair_size',1),
+                          ('distance_one_difference',0),('exact_homometric',True),
+                          ('base_pair_verified',1),('all_pairs_decided',True)]:
+            damaged = copy.deepcopy(plan)
+            damaged[key] = value
+            with self.assertRaises(ValueError): rs.verify_saved(damaged)
+        for periods,index in (([],1),([True],1),([0],1),([3],False),([3],0)):
+            with self.assertRaises(ValueError): rs.residue_lift_plan(periods,index)
+        for period,scale,vertex in ((0,3,(0,0)),(2,3,(0,0)),(1,3,(True,1)),
+                                     (1,3,(0,1)),(1,3,(1,298))):
+            with self.assertRaises(ValueError): rs.residue_lift_sign(period,scale,vertex)
+
+    def test_bounded_aggregate_witness_against_tiny_complete_cubes(self):
+        rng = random.Random(67219)
+        for _ in range(80):
+            groups = {}
+            while len(groups) < 3:
+                groups[tuple(rng.randrange(-3, 4) for _ in range(2))] = rng.randrange(1, 4)
+            items = sorted(groups.items())
+            feasible = []
+            for values in itertools.product(*(range(-n, n+1, 2) for _, n in items)):
+                if all(sum(c[i]*v for (c, _), v in zip(items, values)) == 0 for i in range(2)):
+                    feasible.append(values)
+            result = rs.residue_bounded_search(groups, seconds=5, attempts=32)
+            if result['status'] == 'compatible_bounded_aggregates':
+                self.assertIn(tuple(result['aggregate_sums']), feasible)
+            if not feasible:
+                self.assertNotEqual(result['status'], 'compatible_bounded_aggregates')
+            # The retained integer operations must reconstruct exact kernel vectors,
+            # even when the heuristic never finds a bounded member.
+            exact = rs.residue_integer_parity(groups, retain_kernel=True)
+            if 'kernel' in exact:
+                kernel = exact['kernel']
+                values = [0]*kernel['rank']+kernel['parities'][kernel['rank']:]
+                for kind, a, b, *rest in reversed(kernel['operations']):
+                    if kind == 'swap': values[a], values[b] = values[b], values[a]
+                    else: values[a] -= rest[0]*values[b]
+                self.assertTrue(all((v-n) % 2 == 0 for (_, n), v in zip(items, values)))
+                self.assertTrue(all(sum(c[i]*v for (c, _), v in zip(items, values)) == 0
+                                    for i in range(2)))
+        # Unbounded compatibility alone cannot pass the bounded verifier.
+        groups = {(1,):1, (3,):1}
+        with self.assertRaises(ValueError): rs.verify_bounded_residue_witness(groups, [-3, 1])
+        self.assertEqual(rs.residue_bounded_search(groups)['status'], 'unknown')
+        for values in ([1, 1], [0, 0], [True, 1], [1]):
+            with self.assertRaises(ValueError): rs.verify_bounded_residue_witness(groups, values)
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            self.assertEqual(rs.residue_bounded_search(groups, seconds=0.1)['status'], 'unknown')
+        with self.assertRaises(ValueError): rs.residue_bounded_search(groups, attempts=0)
+
+    def test_bounded_resistant_phase_witnesses_and_lifts(self):
+        import math
+        for period in (4, 8, 16):
+            phases = 2*period//math.gcd(7980, 2*period)
+            for m in range(1, phases+1):
+                scale = 7980*m+1
+                for moving in (False, True):
+                    def groups_at(t):
+                        return rs.residue_shell_groups((99*t, 79*t, 23*t),
+                            [(1,19*t if moving else 19), (1,99*t)], period)
+                    groups = groups_at(scale)
+                    result = rs.residue_bounded_search(groups, seconds=5)
+                    self.assertEqual(result['status'], 'compatible_bounded_aggregates')
+                    values = result['aggregate_sums']
+                    self.assertTrue(rs.verify_bounded_residue_witness(groups, values))
+                    # Same columns, same parities, increasing counts: the identical
+                    # finite witness remains within bounds on the larger support.
+                    for step in (1, 7, 10**12):
+                        larger = groups_at(scale+7980*phases*step)
+                        self.assertEqual(set(groups), set(larger))
+                        self.assertTrue(all(larger[c] >= n and (larger[c]-n) % 2 == 0
+                                            for c, n in groups.items()))
+                        self.assertTrue(rs.verify_bounded_residue_witness(larger, values))
+        saved = dict(result, mode='residue_parity', t=scale, period=period,
+                     holes=[(1,19*scale), (1,99*scale)])
+        self.assertIn('full shell equations remain unchecked', rs.verify_saved(saved)['claim'])
+        saved['aggregate_sums'] = values[:-1]
+        with self.assertRaises(ValueError): rs.verify_saved(saved)
+        audit = rs.resistant_residue_audit(16, seconds=20, bounded=True)
+        self.assertTrue(audit['complete'])
+        self.assertEqual([r['compatible'] for r in audit['reports']], [4, 8, 16])
+        self.assertIn('bounded residue', audit['scope'])
+
     def test_residue_groups_against_every_direct_column(self):
         for lengths in ((3, 5, 7), (8, 6, 3), (15, 3, 7)):
             vertices = [(0, 0)]+[(a, d) for a, n in enumerate(lengths, 1)

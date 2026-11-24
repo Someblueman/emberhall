@@ -969,3 +969,274 @@ and unrun cases have no mathematical outcome. It should not be repeated merely
 to turn this partial table into a larger census. The original all-pairs target
 requires a literal construction or an obstruction stronger than these completed
 relaxations. No project or task acceptance is claimed.
+
+### Rook: retaining the aggregate bounds still leaves the low orders open
+
+24 November 2026. Recovered Linnet's exact three-file continuation from the
+trusted stopped-contribution inspection, preserving it separately in `e04ffd8`.
+**The task acceptance remains unmet.** This continuation changes the relaxation,
+not the target: it retains both integer parity and the physical bounds
+`|S_j| <= n_j` on each residue-column group's sign sum.
+
+`residue_bounded_search` records reversible integer column operations during
+Euclidean diagonalization. Starting with zero pivot coordinates and small free
+coordinates of the required parity, it reverses those operations to obtain an
+exact integer kernel vector. Large groups are preferred as pivots. This is a
+witness search: a missed witness, coefficient limit or timeout is unknown.
+The separate `verify_bounded_residue_witness` checks every original residue
+row, every parity and every physical bound using integer arithmetic alone.
+It trusts neither diagonalization nor the search. The distinction matters:
+`S_1+3S_2=0` with singleton groups passes the unbounded test but fails the
+bounded test; the new verifier rejects the unbounded witness `(-3,1)`.
+
+For both named supports, **the bounded residue relaxation is feasible at root
+orders 4, 8 and 16 for every resistant t=7980m+1, m>=1**. The audit checks
+4, 8 and 16 representative cases respectively, all with independently checked
+bounded witnesses and no unknown case. This is not a claim about other orders.
+For each order p the phase count is `2p/gcd(7980,2p)`. Within a phase, increasing
+t by that many increments of 7980 preserves the column set and its parities.
+Every growing interval gains an even number of copies of each column; the
+shallow fixed patch is unchanged. Counts therefore never decrease. The same
+bounded witness from the first scale stays within every later bound. This
+monotonicity, not sampling successive scales, extends the finite audit.
+
+Each accepted group sum is physically realizable: choose `(n_j+S_j)/2` of
+that group's vertices positive and the rest negative. The residue equations
+also force total sign sum zero, since every column sums to -2. Thus these
+are genuine equal-size sign partitions satisfying the *projected* equations.
+They need not satisfy the original individual distance shells. The saved
+verifier explicitly preserves that distinction and never claims homometry.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --audit-resistant-residues --period 16 --bounded --seconds 30
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 7981 --holes 1:19 1:790119 --period 16 --bounded --write /tmp/bounded-residues.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/bounded-residues.json
+```
+
+The first command completed in under a second in this room. The second saved
+58 exact sums, verified independently. Controls compare kernel reconstruction
+and accepted witnesses with exhaustive tiny bounded cubes, reject altered sums,
+wrong parity and excessive magnitudes, and reuse each phase witness at much
+larger scales. Larger-root probes were unknown for the shallow-hole support at
+orders 32 and 64; these are failed witness searches, not obstructions. The
+remaining obstacle is still a literal solution to every original distance shell
+or an all-pairs obstruction. Merely adding group bounds at orders through 16
+cannot provide that obstruction on either named support.
+
+All 43 focused tests pass; the saved bounded witness and the full bounded
+phase audit also pass through the command-line interface.
+
+### Tern: every fixed finite collection of residue tests has false positives
+
+24 November 2026. **The target remains open.** This is a method limitation
+with explicit literal colourings, not another proposed homometric family.
+The preceding continuation was recovered from Rook's inspected stopped run
+`a6c249aa8e1f4cf4b9eba981a5a68724`, including its complete test file; its
+43 focused tests passed before this extension. No publication is asserted.
+
+**Theorem.** Fix any finite nonempty collection of positive integers
+p_1,...,p_s. Put P=lcm(p_1,...,p_s), D=lcm(7980,2P). For every j>=1, set
+t=Dj+1. On T(99t,79t,23t) there are disjoint sets A,B, each of target size
+(201t-1)/2, whose pair-distance multiplicities agree after grouping distances
+modulo every p_i. Nevertheless A has exactly **one fewer pair at distance
+one** than B. In particular these are not homometric sets. Thus no fixed
+finite collection of root-of-unity/residue equations, even with literal signs,
+exact support, balance and group bounds enforced jointly, can rule out the
+entire resistant family. This does not assert compatibility for arbitrary
+scale-dependent orders, all orders together, or individual distance shells.
+
+There is also a growing-order corollary: **at every resistant scale**
+t=7980m+1, take P=3990m. The same construction passes the entire distance
+profile modulo P and hence modulo every divisor of P, yet still fails at
+distance one. Here the interior word on each old edge is just P plus signs
+followed by P minus signs. Thus even a residue order growing linearly with
+the scale can miss the defect. This covers these particular growing orders;
+it makes no claim about other scale-dependent tests or all orders together.
+
+**Construction.** Use the recorded, directly recounted t=1 pair from
+`residue_2660.t1_witness`: centre negative, holes 1:19 and 1:99, 100 vertices
+of each sign. Its two other leaves are positive. Multiply all old depths by
+t and keep their signs. On each of the 201 old edges, give its t-1 inserted
+vertices the word
+
+    (+ repeated P times, - repeated P times) repeated (t-1)/(2P) times.
+
+The only holes are 1:19t and 1:99t. Every inserted block is balanced, so
+both sets have 100+201(t-1)/2=(201t-1)/2 vertices. This specifies every
+vertex, with no free word, search, asymptotic assertion or omitted endpoint.
+`residue_lift_sign(P,t,(arm,depth))` evaluates any coordinate directly.
+
+**Proof of all modular profiles.** Let K be the exact signed shell polynomial
+used above and let Delta(z) be the difference of the two unordered
+pair-distance polynomials. Balance gives K=2(1-z)Delta. Work modulo z^P-1.
+Since t=1 modulo P, every old vertex column, including its hole-distance
+terms, is identical to its original t=1 column after reduction. Their signed
+sum is therefore zero. In each old edge, match an inserted vertex in a plus
+block to the vertex P depths later in the following minus block. Both are
+strictly inside the same old edge. All hole positions are old vertices, so
+each distance to a hole changes by either +P or -P, without crossing a hole.
+The no-hole column exponents also change by +/-P. The two complete columns
+are identical modulo z^P-1, and their opposite signs cancel. This covers
+every inserted vertex, proving K=0 in the quotient.
+
+Multiplication by 1-z has a one-dimensional kernel in Q[z]/(z^P-1):
+a reduced polynomial in that kernel has all P coefficients equal. Hence
+Delta modulo z^P-1 is a multiple of 1+z+...+z^(P-1). But Delta(1)=0,
+since the sets have equal sizes, so that multiple is zero. This balance
+step is essential; cancelling 1-z directly in this quotient would be invalid.
+Reduction modulo each z^p_i-1 follows because p_i divides P.
+
+**Proof of the exact failure.** In the induced retained tree, every vertex
+has degree two except the centre (degree three), the two retained leaves,
+and the three neighbours of the two holes (each degree one). Balance yields
+
+    2 Delta_1 = sum_v (degree(v)-2)*sign(v).
+
+The centre contributes -1, the two leaves contribute -2, the neighbours of
+1:19t have signs -,+ and contribute +1,-1, and the neighbour 1:(99t-1)
+has sign - and contributes +1. Thus 2 Delta_1=-2 for every index. This is
+a witnessed failure at an individual shell, despite exact compatibility of
+all the requested modular profiles. It supplies no upper bound on other pairs.
+
+**General tree form.** The modular construction also works on any finite
+base tree with a balanced homometric signing and any set of old holes. For a
+vertex v of a hole-free tree, let F_v(z) count the other vertices by distance.
+The sphere recurrence gives the exact identity
+
+    (1-z) F_v(z) - 2z = sum_u (degree(u)-2) z^(distance(v,u)+1).
+
+Indeed, beyond radius zero each vertex has one parent, so the next sphere
+minus the current sphere has size sum(degree(u)-2) over the current sphere;
+the radius-one coefficient is degree(v). Removing a hole h adds
+(z-1)z^distance(v,h) to the right side. Under uniform subdivision the new
+vertices have degree two and disappear from that sum. Only old vertices and
+old holes remain, all distances to which are affine with slope +/-1 inside
+an old edge. The same cancellation proof therefore applies unchanged.
+The new equal sizes are k+|E|(t-1)/2 when the old sizes were k. This is a
+statement about distance profiles modulo P; the distance-one failure proved
+above belongs to the particular tripod colouring, not to every base tree.
+A separate test builds a branched tree, subdivides its adjacency graph, and
+uses breadth-first distances for several base pairs and moduli to check this
+general form, including paths through old holes.
+
+A real compact run, from the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-lift 3 16 19 --write /tmp/residue-lift.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/residue-lift.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -q
+```
+
+Recorded output: t=63841, P=912, each set has 6,416,020 vertices, with
+6,415,920 inserted opposite pairs. Verification reports modular profile
+equality and one fewer positive distance-one pair. All 46 focused tests pass.
+
+The checker directly recounts the small base pair, compares all 200 old
+columns after specialization, and checks the six exceptional degrees without
+expanding the large scale. Tests separately materialize the construction at
+eight smaller period/scale combinations and count **every unordered pair**;
+all modular profiles agree and every distance-one difference is -1. They also
+check huge periods and indices with bounded-size arithmetic data and reject
+altered saved claims. This proof replaces further fixed-order probes as a
+route to excluding the whole family. The remaining obstacle is an exact-shell
+construction, or an obstruction covering all pairs on all surviving supports;
+this run obtains neither, and priority remains provisional.
+
+### A construction attempt with independent patches at every old edge end
+
+The uniform-word refusal does not apply if finite patches at **all 402 old
+edge ends** are independent. `moving_periodic_system(p,h,w)` now compiles
+that larger ansatz; the default w=0 preserves the previous compiler exactly.
+Holes remain ht,99t, but every other old sign is free. In each old edge the
+first and last w inserted signs are independent, and its middle repeats one
+independent p-sign word. Require p|2w and t=1 modulo p, t>=2w+p+1.
+This is a possible positive construction method, not an unrestricted reduction.
+
+For word position r=1..p, multiplying its geometric sum by 1-z^p gives
+
+    P_r = z^(w+r) - Z*z^(-w+r-1),
+    N_r = Z^(-1)*z^(p+1+w-r) - z^(p-w-r),   Z=z^t.
+
+Here P_r is the forward sum and N_r the reflected sum. Patch signs use
+individual physical columns, also multiplied by 1-z^p. All formal coefficients
+are retained, including negative constant offsets in the Laurent representation.
+A formal zero specializes to (1-z^p)K=0 at every admissible t. Cancelling that
+nonzero polynomial in Q[z] proves every shell vanishes; K(1)=-2 sum(signs)
+then gives balance and the target size. No converse or observed rank pattern
+is needed for this implication. Saved positive assignments rebuild and check
+all formal equations, and report the admissible minimum scale. Unknown search
+results are rejected by the verifier.
+
+The new column test compares every formal column, specialized at two scales,
+with the sum of all corresponding original physical columns times 1-z^p.
+It covers (p,w,h)=(1,1,19),(2,4,19),(3,3,7),(4,4,19),(8,8,19), including
+every old coordinate, both patches, each geometric endpoint and every word
+position. It rejects a fabricated positive assignment and keeps a zero-node
+search unknown. These checks control the compiler, not the target theorem.
+
+A bounded exact attempt (its budget includes reductions) is replayable as:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --moving --period 2 --edge-patch 4 --joint-fields --affine-shells --seconds 900 --nodes 10000000 --free-order connected --write /tmp/patched-moving.json
+```
+
+This patch mechanism differs from the earlier folded-level endpoint patches:
+it applies at every coarse edge, with the shallow hole moving to 19t. A
+refusal of this ansatz would still leave other words and other supports open.
+
+Recorded first run: p=2,w=4 compiles 2,210 signs and 2,138 formal rows.
+The ternary and joint-field quotients reached 1,358 signs and 69 binary free
+coordinates. Local shell closure added no binary rows. The command above
+returned **unknown** after 35,590 nodes and 906.47 seconds, including reductions.
+No refusal or positive certificate resulted. The existing `--short-recovery`
+option now also reaches moving-word joint closure; it had previously been
+passed only to the conditioned coarse-word route. Its exhaustive small-sign
+controls pass, as do all 47 focused tests after this wiring change.
+
+For discovery only, the already-installed CP-SAT solver was also given the
+exact quotient with short recovery rows: it reported infeasible after 19,357
+branches (222 seconds including quotient setup). This is **not a shipped
+portable refusal proof**, and concerns only p=2,w=4. Direct unreduced CP-SAT
+and Z3 attempts on the same ansatz each returned unknown at 600 seconds.
+Neither installed solver is a dependency of the delivered checker. No package
+was installed. A positive discovery would have to pass the standard-library
+verifier against every untouched formal shell before being used as a result.
+
+The standard-library replay with `--short-recovery` and a 600-second budget
+also returned unknown: 21,247 nodes, 606.09 seconds including reductions.
+The different budgets and ordering do not support a speed comparison. No
+positive assignment or portable refusal was obtained from either replay.
+
+Rook independently reviewed the immutable modular-colouring proof at journal
+41883: rebuilt four small signings, counted every unordered pair, and checked
+the specialization, balanced quotient kernel and exceptional-degree argument.
+No error was found. That review certifies neither this room's checker source
+nor the project's unresolved milestone; independent source integration remains
+separate.
+
+Further experimental ordering used binary and ternary signed quotients,
+including short recovery rows, before 600-second standard-library branching
+budgets. It returned unknown at (p,w)=(4,4),(8,8),(16,16), after respectively
+39,074, 10,487 and 6,669 nodes. These are scoped search failures, not proofs of
+infeasibility, and no exact-shell witness was produced.
+
+The final direct installed-solver attempts at (p,w)=(4,4) and (8,8) also
+returned unknown at their 600-second budgets. All discovery processes ended
+without a positive assignment. No all-pairs upper bound below the target has
+been obtained. The task remains open: the next useful advance needs a genuine
+formal-shell solution, a different exact construction, or an obstruction that
+covers every permitted pair; further fixed-order root probes cannot by
+themselves exclude the whole resistant family proved compatible above.
+
+### Sorrel: reconcile the stopped continuation
+
+24 November 2026. Reconstructed the three complete per-path diffs for stopped
+run `66ee535d9a86472d96059c8f3909b1fd`, contribution `fe33972`, against
+its recorded base `aa045c1`; every removed/context line matched that base.
+The candidate source retains every current function and all current tests;
+its changes add bounded aggregates, modular-colouring lifts and independent
+edge patches. Retained the later shared 900-second residue audit and its
+incomplete order-256 row alongside the candidate's new sections. No recorded
+failure was replaced. All 47 focused tests pass (26.826 seconds); the shared
+baseline's 41 tests had passed separately. This resolves source overlap only;
+the all-pairs acceptance and provisional priority remain unchanged.
