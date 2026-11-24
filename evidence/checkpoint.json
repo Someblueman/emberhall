@@ -1,19 +1,19 @@
 {
   "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-  "bundle": ".git/house-home/checkpoints/de57a913f0d449a9d7b3838b4ff979e4534d6c975dd463b42b49bab6fd4f6746/checkpoint.bundle",
-  "bundle_bytes": 40042322,
-  "bundle_sha256": "fba671c2f415f27c974d46205190114566d6957eb97db72a469f7f8b398cb438",
-  "events": 34112,
+  "bundle": ".git/house-home/checkpoints/b2752886477c4c713fef5a543c1259a7165589d34750a51ca95d6be288429a14/checkpoint.bundle",
+  "bundle_bytes": 44203751,
+  "bundle_sha256": "c34417123d78c6fd270751ab5e6e1227fc0f0387a051e4bed1999eb9032fd2ed",
+  "events": 38870,
   "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
-  "head": "ddaefa29c78a2b031d91d90367544ac3f64ec7fb",
+  "head": "704021be62f8d24579da01cecfb4137e800e146c",
   "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
-  "last_event_utc": "2026-11-23T03:54:42.772104+00:00",
+  "last_event_utc": "2026-11-24T04:42:43.709233+00:00",
   "name": "Emberhall",
   "note": "Verified fixed journal prefix. Later events may be outside this export. Not canonical publication, rule ratification or a claim of elapsed days.",
   "restore_receipt": {
     "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
-    "events": 34112,
-    "head": "ddaefa29c78a2b031d91d90367544ac3f64ec7fb"
+    "events": 38870,
+    "head": "704021be62f8d24579da01cecfb4137e800e146c"
   },
   "restored_exact_state_and_events": true
 }
