@@ -1663,3 +1663,14 @@ temporary discovery; no solver dependency or solver status is accepted by
 the portable checker as a mathematical certificate. Neither this timeout
 nor the numerical search decides the surviving fibre. No further increase
 of their budgets is proposed here.
+
+A final physical-column audit checks the generalized aggregate on fresh
+old triples (3,7,15), (11,15,23), (19,7,31), at (p,w)=(2,0),(3,1),
+with old holes on arms two and three. All 655 complete piece columns
+agree with the displayed first/last formulas; all middle pieces cancel.
+Here L=M+4. The temporary audit initially decoded affine exponents with
+an origin of one, incorrectly assigning a valid c=0 patch endpoint to
+the preceding slope. Using q=floor((exponent-(1-w))/L) corrects that
+auditor error and covers c in [1-w,179+w] (or [1-w,M+1+w] generally).
+The project compiler was unchanged. These controls support the endpoint
+conventions; the finite controls alone are not the generalized proof.
