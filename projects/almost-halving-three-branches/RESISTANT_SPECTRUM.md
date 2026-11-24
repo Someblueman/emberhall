@@ -842,3 +842,84 @@ probe at 32nd roots was interrupted before its first scale phase completed;
 it supplies no classification or impossibility result and is not part of the
 shipped checker. Increasing the root order alone has not resolved the remaining
 odd-hole supports, including the original shallow-hole and long-tip support.
+
+#### Complete integer-parity relaxation with bounded arithmetic
+
+The checker now separates three questions: a zero group; an integer aggregate
+solution with the required parities; and a literal physical signing. Only the
+last would construct a pair. The new integer relaxation deliberately omits
+|S_j|<=n_j, where S_j is the sum of signs in a column group of multiplicity n_j.
+For example S_1+3S_2=0 admits odd aggregates (-3,1), but two singleton groups
+cannot realize them. Every output retains `all_pairs_decided: false`.
+
+For a residue-column matrix C, ask C*S=0 with S congruent to n modulo two.
+Integer Euclidean row and column operations give U*C*V=D with U,V unimodular
+and D diagonal (ordering the diagonal divisors is unnecessary). For pivot d,
+the original row combination U_i*C has gcd |d|. Its primitive coefficients
+must have even dot product with n. This is also sufficient for **unbounded**
+aggregates: the pivot coordinates of V^-1*n are even, so they can be changed
+to zero by adding twice an integer vector. Free coordinates impose no equation.
+`residue_integer_parity` checks this exact criterion. Large coefficients or an
+expired work budget yield unknown, never compatibility or refusal by exhaustion.
+
+`residue_dyadic_parity` computes the same criterion with bounded arithmetic.
+Let H be the largest squared column norm, r=min(number of rows,number of
+columns), and B=1+r*ceil(bit_length(H)/2). Hadamard bounds every nonzero minor
+strictly below 2^B. Consequently every nonzero Smith divisor has two-adic
+valuation below B. Elimination modulo 2^B chooses an entry of least valuation,
+normalizes its odd factor by modular inversion, and clears its row and column.
+No hidden nonzero divisor can be lost modulo this modulus. Every visible pivot
+forces its transformed aggregate coordinate even; these parity conditions are
+therefore exactly the integer conditions above, not merely a small-modulus
+probe. The all-zero matrix is harmless. Required B exceeding the bit budget,
+or time exhaustion, still returns unknown.
+
+A refusal in either algorithm consists only of integer row weights w and a
+positive divisor d. The independent verifier checks d divides **every exact**
+column dot product w*C_j, then checks sum((w*C_j/d)*n_j) is odd. This proves
+the contradiction without trusting either elimination, its rank or its modulus.
+Weights are reduced into [-d,d) modulo 2d; this preserves divisibility and the
+primitive parity, and keeps the portable proof short even when elimination
+used large integers.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 31921 --holes 1:2 1:4 --period 16 --dyadic --seconds 30 --write /tmp/integer-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/integer-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 7981 --holes 1:19 1:790119 --period 256 --dyadic --seconds 30
+```
+
+The finer period-sixteen grouping has no individually forced odd zero group,
+but the integer checker recovers the eighth-root parity contradiction. On the
+original odd-hole support at t=7981, the Euclidean version with a 256-bit limit
+returns unknown at orders 64,128,256. The bounded modular version completes
+all three, including order 256 in about 3.4 seconds in the recorded probe, and
+reports compatible **unbounded aggregates**. This is a limitation result for
+that relaxation, not a physical signing.
+
+Controls compare both algorithms with complete tiny integer-lattice enumeration,
+compare them on larger random integer matrices, independently verify every
+refusal, reject altered divisors and weights, and check resource-limit results.
+A deliberately scaled equation invisible modulo 2^30 still refuses after the
+Hadamard-sized saturation, guarding against treating a fixed small modulus as
+complete. The full physical shell equations and literal bounds remain necessary.
+
+Compatibility can now be independently checked as well. With
+`--retain-residue-witness --write FILE`, the dyadic solver records a vector
+of aggregate residues modulo 2^B. The small verifier recomputes the Hadamard
+bound, checks every aggregate parity and every modular row, and never runs
+elimination. This is sufficient for an exact **unbounded integer** solution:
+in integral Smith coordinates, d_i*y_i=0 modulo 2^B and v_2(d_i)<B force
+every constrained y_i even. Set those coordinates to zero and retain the free
+coordinate parities; the inverse unimodular change of coordinates gives an
+exact integer kernel vector with the required original parities. This argument
+asserts no bounds on its coordinates and does not round it to literal signs.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-parity 7981 --holes 1:19 1:790119 --period 256 --dyadic --seconds 30 --retain-residue-witness --write /tmp/unbounded-aggregates.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/unbounded-aggregates.json
+```
+
+Recorded: 513-bit modulus, 784 aggregate residues, independent verification
+passes. The CLI prints a short summary and keeps the vector in the requested
+file. All 41 focused tests pass, including compatibility-witness mutations and
+saved status/scope checks. No large certificate or transcript is added to Git.

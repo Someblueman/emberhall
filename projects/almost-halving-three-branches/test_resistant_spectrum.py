@@ -174,6 +174,133 @@ class SpectrumTests(unittest.TestCase):
             else:
                 with self.assertRaises(ValueError): rs.verify_residue_zero_certificate(groups, certificate)
 
+    def test_integer_residue_parities_against_exhaustive_small_lattices(self):
+        rng = random.Random(92753)
+        for _ in range(150):
+            period, size = rng.randrange(1, 4), rng.randrange(1, 4)
+            groups = {}
+            while len(groups) < size:
+                groups[tuple(rng.randrange(-2, 3) for _ in range(period))] = rng.randrange(1, 4)
+            items = sorted(groups.items())
+            # In <=3 variables with entries <=2, rank-two primitive kernel
+            # coordinates are 2x2 minors of magnitude <=8; rank one needs
+            # no larger coordinates. Thus this is a complete tiny control.
+            truth = any(all(sum(column[r]*value for (column, _), value in zip(items, values)) == 0
+                            for r in range(period))
+                        for values in itertools.product(*(range(-8+count%2, 9, 2)
+                                                          for _, count in items)))
+            result = rs.residue_integer_parity(groups, seconds=5)
+            self.assertNotEqual(result['status'], 'unknown')
+            self.assertEqual(result['status'] == 'compatible_unbounded_aggregates', truth)
+            self.assertFalse(result['all_pairs_decided'])
+            if not truth:
+                self.assertTrue(rs.verify_residue_parity_certificate(groups, result['certificate']))
+            dyadic = rs.residue_dyadic_parity(groups, seconds=5, retain_witness=True)
+            self.assertEqual(dyadic['status'], result['status'])
+            if not truth:
+                certificate = dyadic['certificate']
+                self.assertTrue(rs.verify_residue_parity_certificate(groups, certificate))
+                self.assertLessEqual(max(abs(w) for w in certificate['weights']), certificate['divisor'])
+            else:
+                self.assertTrue(rs.verify_residue_aggregate_witness(groups,dyadic['witness']))
+        # Compatibility allows group sums outside their physical bounds.
+        groups = {(1,): 1, (3,): 1}
+        self.assertEqual(rs.residue_integer_parity(groups)['status'], 'compatible_unbounded_aggregates')
+        self.assertFalse(any(a+3*b == 0 for a, b in itertools.product((-1, 1), repeat=2)))
+
+    def test_integer_residue_certificates_and_resource_limits(self):
+        holes, scale = [(1, 2), (1, 4)], 31921
+        groups = rs.residue_shell_groups((99*scale, 79*scale, 23*scale), holes, 16)
+        # Finer groups hide the earlier single-group zero, but its parity
+        # consequence must survive refinement of the residue quotient.
+        self.assertIsNone(rs.residue_zero_certificate(groups))
+        result = rs.residue_integer_parity(groups)
+        self.assertEqual(result['status'], 'support_refused_by_residue_parity')
+        certificate = result['certificate']
+        saved = dict(result, mode='residue_parity', t=scale, period=16, holes=holes)
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        for damaged in (dict(certificate, divisor=0),
+                        dict(certificate, divisor=certificate['divisor']*2),
+                        dict(certificate, weights=[0]*16), dict(certificate, weights=[1])):
+            with self.assertRaises(ValueError): rs.verify_residue_parity_certificate(groups, damaged)
+        limited = rs.residue_integer_parity(groups, max_bits=1)
+        self.assertEqual(limited['status'], 'unknown')
+        self.assertEqual(limited['reason'], 'coefficient_limit')
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            limited = rs.residue_integer_parity(groups, seconds=0.1)
+        self.assertEqual(limited['status'], 'unknown')
+        self.assertEqual(limited['reason'], 'time_limit')
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(limited, mode='residue_parity', t=scale, period=16, holes=holes))
+        with self.assertRaises(ValueError): rs.residue_integer_parity(groups, seconds=0)
+
+    def test_dyadic_saturation_and_large_coefficient_differential_controls(self):
+        # Every equation is zero modulo 2**30, but dividing out the common
+        # power exposes an impossible parity. A small fixed modulus misses it.
+        groups = {(1 << 30,): 1, (1 << 31,): 2}
+        result = rs.residue_dyadic_parity(groups)
+        self.assertEqual(result['status'], 'support_refused_by_residue_parity')
+        self.assertTrue(rs.verify_residue_parity_certificate(groups, result['certificate']))
+        self.assertGreater(result['modulus_bits'], 30)
+        self.assertEqual(rs.residue_dyadic_parity(groups, max_bits=8)['status'], 'unknown')
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            self.assertEqual(rs.residue_dyadic_parity(groups, seconds=0.1)['status'], 'unknown')
+        rng = random.Random(56420)
+        for _ in range(100):
+            groups = {}
+            while len(groups) < 4:
+                groups[tuple(rng.randrange(-32, 33) for _ in range(4))] = rng.randrange(1, 5)
+            exact = rs.residue_integer_parity(groups, seconds=5)
+            dyadic = rs.residue_dyadic_parity(groups, seconds=5)
+            self.assertNotEqual(exact['status'], 'unknown')
+            self.assertEqual(exact['status'], dyadic['status'])
+            if 'certificate' in dyadic:
+                self.assertTrue(rs.verify_residue_parity_certificate(groups, dyadic['certificate']))
+
+    def test_resistant_residue_phase_cover_and_unknowns(self):
+        for period in (4, 8, 16, 32):
+            for m in (1, 2, 3):
+                scale = 7980*m+1
+                for moving in (False, True):
+                    def signature(t):
+                        holes = {(1,19*t if moving else 19),(1,99*t)}
+                        groups = rs.residue_shell_groups((99*t,79*t,23*t),holes,period)
+                        return {(column,count%2) for column,count in groups.items()}
+                    self.assertEqual(signature(scale), signature(scale+2*period))
+        result = rs.resistant_residue_audit(16, seconds=20)
+        self.assertTrue(result['complete'])
+        self.assertEqual([r['cases'] for r in result['reports']], [4, 8, 16])
+        self.assertTrue(all(r['compatible'] == r['cases'] for r in result['reports']))
+        limited = rs.resistant_residue_audit(4, seconds=20, max_bits=1)
+        self.assertFalse(limited['complete'])
+        self.assertEqual(limited['reports'][0]['unknown'], 4)
+        with patch.object(rs.time, 'monotonic', side_effect=itertools.count()):
+            self.assertFalse(rs.resistant_residue_audit(4, seconds=0.1)['complete'])
+        with self.assertRaises(ValueError): rs.resistant_residue_audit(3)
+        with self.assertRaises(ValueError): rs.resistant_residue_audit(512)
+
+    def test_independent_aggregate_witness_and_saved_scope(self):
+        groups = {(1,):1,(3,):1}
+        result = rs.residue_dyadic_parity(groups,retain_witness=True)
+        witness = result['witness']
+        self.assertTrue(rs.verify_residue_aggregate_witness(groups,witness))
+        changed = witness['aggregate_residues'][:]
+        changed[0] ^= 2  # parity preserved, equation broken
+        for damaged in (dict(witness,modulus_bits=witness['modulus_bits']-1),
+                        dict(witness,aggregate_residues=changed),
+                        dict(witness,aggregate_residues=witness['aggregate_residues'][:-1])):
+            with self.assertRaises(ValueError): rs.verify_residue_aggregate_witness(groups,damaged)
+        scale, holes = 7981, [(1,19),(1,790119)]
+        groups = rs.residue_shell_groups((99*scale,79*scale,23*scale),holes,16)
+        result = rs.residue_dyadic_parity(groups,retain_witness=True)
+        saved = dict(result,mode='residue_parity',t=scale,period=16,holes=holes)
+        verified = rs.verify_saved(saved)
+        self.assertTrue(verified['verified'])
+        self.assertIn('no literal signing',verified['claim'])
+        self.assertFalse(verified['all_pairs_decided'])
+        del saved['witness']
+        with self.assertRaises(ValueError): rs.verify_saved(saved)
+
     def test_parity_quotient_against_every_literal_solution(self):
         rng = random.Random(428)
         for size in range(1,8):

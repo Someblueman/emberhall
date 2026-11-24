@@ -124,6 +124,295 @@ def verify_residue_zero_certificate(groups, certificate):
     return True
 
 
+def verify_residue_parity_certificate(groups, certificate):
+    """Verify an integer row combination whose primitive coefficients have odd parity.
+
+    Each aggregate sign sum has the parity of its group multiplicity. If
+    w*C is divisible by d, then (w*C/d)*S=0 is a necessary integer equation.
+    An odd value of (w*C/d)*counts contradicts it. Only integer arithmetic
+    enters this checker; no diagonalization or rank claim is trusted.
+    """
+    weights, divisor = certificate['weights'], certificate['divisor']
+    if (not groups or type(divisor) is not int or divisor < 1 or not weights
+            or any(type(w) is not int for w in weights)):
+        raise ValueError('invalid residue parity certificate')
+    parity = 0
+    for column, count in groups.items():
+        if len(column) != len(weights) or type(count) is not int or count < 1:
+            raise ValueError('invalid residue group')
+        value = sum(a*b for a, b in zip(weights, column))
+        if value % divisor:
+            raise ValueError('row combination is not divisible by the claimed divisor')
+        parity ^= (value//divisor*count) % 2
+    if not parity:
+        raise ValueError('row combination has no parity contradiction')
+    return True
+
+
+def residue_integer_parity(groups, seconds=10, max_bits=1024):
+    """Decide unbounded integer aggregate feasibility with prescribed parities.
+
+    Integer Euclidean row/column operations diagonalize C to U*C*V=D,
+    with U,V unimodular. At a diagonal pivot d the primitive row U*C/d
+    must have even dot product with the group counts. These conditions are
+    sufficient for unbounded aggregates, since V preserves the integer
+    lattice. They say nothing about the bounds |S_j|<=count_j. Resource
+    limits return unknown; every refusal has a separately checked witness.
+    """
+    if (not groups or not math.isfinite(seconds) or seconds <= 0
+            or type(max_bits) is not int or max_bits < 1):
+        raise ValueError('require nonempty groups and positive resource limits')
+    items = sorted(groups.items())
+    period, size = len(items[0][0]), len(items)
+    if (not period or any(len(c) != period or any(type(x) is not int for x in c)
+                          or type(n) is not int or n < 1 for c, n in items)):
+        raise ValueError('invalid residue groups')
+    matrix = [[column[r] for column, _ in items] for r in range(period)]
+    transform = [[int(i == j) for j in range(period)] for i in range(period)]
+    peak_bits = max(abs(x).bit_length() for row in matrix for x in row)
+    started, rank = time.monotonic(), 0
+
+    def limited():
+        reason = ('coefficient_limit' if peak_bits > max_bits else
+                  'time_limit' if time.monotonic()-started >= seconds else None)
+        return (dict(status='unknown', reason=reason, pivots=rank,
+                     all_pairs_decided=False) if reason else None)
+
+    for k in range(min(period, size)):
+        stopped = limited()
+        if stopped:
+            return stopped
+        position = min(((abs(matrix[i][j]), i, j)
+                        for i in range(k, period) for j in range(k, size) if matrix[i][j]),
+                       default=None)
+        if position is None:
+            break
+        _, i, j = position
+        matrix[k], matrix[i] = matrix[i], matrix[k]
+        transform[k], transform[i] = transform[i], transform[k]
+        for row in matrix:
+            row[k], row[j] = row[j], row[k]
+        while True:
+            stopped = limited()
+            if stopped:
+                return stopped
+            i = next((i for i in range(k+1, period) if matrix[i][k]), None)
+            if i is not None:
+                quotient = matrix[i][k]//matrix[k][k]
+                matrix[i] = [x-quotient*y for x, y in zip(matrix[i], matrix[k])]
+                transform[i] = [x-quotient*y for x, y in zip(transform[i], transform[k])]
+                peak_bits = max(peak_bits, *(abs(x).bit_length()
+                                            for x in matrix[i]+transform[i]))
+                if matrix[i][k]:
+                    matrix[k], matrix[i] = matrix[i], matrix[k]
+                    transform[k], transform[i] = transform[i], transform[k]
+                continue
+            j = next((j for j in range(k+1, size) if matrix[k][j]), None)
+            if j is not None:
+                quotient = matrix[k][j]//matrix[k][k]
+                for row in matrix:
+                    row[j] -= quotient*row[k]
+                    peak_bits = max(peak_bits, abs(row[j]).bit_length())
+                if matrix[k][j]:
+                    for row in matrix:
+                        row[k], row[j] = row[j], row[k]
+                continue
+            break
+        rank += 1
+        weights = transform[k]
+        dots = [sum(a*b for a, b in zip(weights, column)) for column, _ in items]
+        divisor = math.gcd(*dots)
+        if divisor != abs(matrix[k][k]):
+            raise AssertionError('unimodular diagonal pivot has the wrong row gcd')
+        if sum(value//divisor*count for value, (_, count) in zip(dots, items)) % 2:
+            certificate = dict(weights=[(w+divisor) % (2*divisor)-divisor for w in weights],
+                               divisor=divisor)
+            verify_residue_parity_certificate(groups, certificate)
+            return dict(status='support_refused_by_residue_parity', certificate=certificate,
+                        pivots=rank, all_pairs_decided=False)
+    return dict(status='compatible_unbounded_aggregates', pivots=rank,
+                all_pairs_decided=False)
+
+
+def verify_residue_aggregate_witness(groups, witness):
+    """Independently verify unbounded compatibility from a Hadamard-sized modular vector."""
+    items = sorted(groups.items())
+    if not items:
+        raise ValueError('require nonempty groups')
+    period = len(items[0][0])
+    if (not period or any(len(c)!=period or any(type(x) is not int for x in c)
+                          or type(n) is not int or n<1 for c,n in items)):
+        raise ValueError('invalid residue groups')
+    norm_squared = max(sum(x*x for x in c) for c,_ in items)
+    required = 1+min(period,len(items))*((norm_squared.bit_length()+1)//2)
+    bits, values = witness['modulus_bits'], witness['aggregate_residues']
+    if type(bits) is not int or bits != required or len(values) != len(items):
+        raise ValueError('witness modulus does not meet the exact minor bound')
+    modulus = 1 << bits
+    if any(type(value) is not int or not 0<=value<modulus or value%2 != count%2
+           for value,(_,count) in zip(values,items)):
+        raise ValueError('aggregate witness has invalid residues or parities')
+    if any(sum(value*column[r] for value,(column,_) in zip(values,items)) % modulus
+           for r in range(period)):
+        raise ValueError('aggregate witness fails a modular shell row')
+    return True
+
+
+def residue_dyadic_parity(groups, seconds=10, max_bits=1024, retain_witness=False):
+    """The same complete unbounded relaxation, using bounded powers-of-two arithmetic.
+
+    A Hadamard bound makes the modulus large enough to see every nonzero
+    elementary divisor's two-adic valuation. Thus this is not a fixed small
+    congruence probe. Modular row operations provide the same independently
+    checkable integer parity certificates as Euclidean diagonalization.
+    """
+    if (not groups or not math.isfinite(seconds) or seconds <= 0
+            or type(max_bits) is not int or max_bits < 1):
+        raise ValueError('require nonempty groups and positive resource limits')
+    items = sorted(groups.items())
+    period, size = len(items[0][0]), len(items)
+    if (not period or any(len(c) != period or any(type(x) is not int for x in c)
+                          or type(n) is not int or n < 1 for c, n in items)):
+        raise ValueError('invalid residue groups')
+    norm_squared = max(sum(x*x for x in column) for column, _ in items)
+    bits = 1+min(period,size)*((norm_squared.bit_length()+1)//2)
+    if bits > max_bits:
+        return dict(status='unknown', reason='coefficient_limit', required_bits=bits,
+                    pivots=0, all_pairs_decided=False)
+    modulus, mask = 1 << bits, (1 << bits)-1
+    matrix = [[column[r] & mask for column, _ in items] for r in range(period)]
+    transform = [[int(i == j) for j in range(period)] for i in range(period)]
+    operations, parities = [], [count%2 for _,count in items]
+    started, rank = time.monotonic(), 0
+
+    def timed_out():
+        return time.monotonic()-started >= seconds
+
+    def unknown():
+        return dict(status='unknown', reason='time_limit', modulus_bits=bits,
+                    pivots=rank, all_pairs_decided=False)
+
+    for k in range(min(period,size)):
+        if timed_out():
+            return unknown()
+        position = min((((matrix[i][j] & -matrix[i][j]).bit_length()-1, i, j)
+                        for i in range(k,period) for j in range(k,size) if matrix[i][j]),
+                       default=None)
+        if position is None:
+            break
+        valuation, i, j = position
+        divisor = 1 << valuation
+        matrix[k], matrix[i] = matrix[i], matrix[k]
+        transform[k], transform[i] = transform[i], transform[k]
+        for row in matrix:
+            row[k], row[j] = row[j], row[k]
+        if retain_witness and k != j:
+            operations.append(('swap',k,j))
+            parities[k],parities[j] = parities[j],parities[k]
+        inverse = pow(matrix[k][k]//divisor, -1, modulus)
+        matrix[k] = [x*inverse & mask for x in matrix[k]]
+        transform[k] = [x*inverse & mask for x in transform[k]]
+        for i in range(k+1,period):
+            if timed_out():
+                return unknown()
+            quotient = matrix[i][k]//divisor
+            if quotient:
+                matrix[i] = [(x-quotient*y) & mask for x,y in zip(matrix[i],matrix[k])]
+                transform[i] = [(x-quotient*y) & mask for x,y in zip(transform[i],transform[k])]
+        for j in range(k+1,size):
+            if timed_out():
+                return unknown()
+            quotient = matrix[k][j]//divisor
+            if quotient:
+                for row in matrix:
+                    row[j] = (row[j]-quotient*row[k]) & mask
+                if retain_witness:
+                    operations.append(('add',k,j,quotient))
+                    parities[k] ^= (quotient&1)*parities[j]
+        rank += 1
+        weights = transform[k]
+        # Exact dots, not residues, are passed to the independent checker.
+        dots = [sum(a*b for a,b in zip(weights,column)) for column,_ in items]
+        if any(value % divisor for value in dots):
+            raise AssertionError('dyadic pivot does not divide the original row combination')
+        if sum(value//divisor*count for value,(_,count) in zip(dots,items)) % 2:
+            certificate = dict(weights=[(w+divisor) % (2*divisor)-divisor for w in weights],
+                               divisor=divisor)
+            verify_residue_parity_certificate(groups,certificate)
+            return dict(status='support_refused_by_residue_parity', certificate=certificate,
+                        modulus_bits=bits, pivots=rank, all_pairs_decided=False)
+    result = dict(status='compatible_unbounded_aggregates', modulus_bits=bits,
+                  pivots=rank, all_pairs_decided=False)
+    if retain_witness:
+        if any(parities[:rank]):
+            raise AssertionError('diagonal aggregate parities disagree with row certificates')
+        values = [0]*rank+parities[rank:]
+        for operation in reversed(operations):
+            _,k,j = operation[:3]
+            if operation[0]=='swap':
+                values[k],values[j] = values[j],values[k]
+            else:
+                values[k] = (values[k]-operation[3]*values[j]) & mask
+        witness = dict(modulus_bits=bits,aggregate_residues=values)
+        verify_residue_aggregate_witness(groups,witness)
+        result['witness'] = witness
+    return result
+
+
+def resistant_residue_audit(max_period=256, seconds=900, max_bits=1024):
+    """Audit every resistant scale phase for fixed odd and moving odd holes.
+
+    For period p, increasing t by 2p preserves all residue columns and
+    multiplicities modulo two on these supports. All varying segments in the
+    chosen representatives exceed p; the fixed shallow patch is unchanged.
+    The exact 2p/gcd(7980,2p) scale phases
+    therefore cover every t=7980m+1, m>=1, at each listed period. This is
+    only an unbounded integer relaxation audit, never a literal signing.
+    """
+    if (type(max_period) is not int or not 4 <= max_period <= 256 or max_period & (max_period-1)
+            or not math.isfinite(seconds) or seconds <= 0):
+        raise ValueError('require a power-of-two maximum period in 4..256 and a positive budget')
+    started, reports, cache, complete = time.monotonic(), [], {}, True
+    period = 4
+    while period <= max_period:
+        phases = 2*period//math.gcd(7980,2*period)
+        report = dict(period=period,scale_phases=phases,cases=0,compatible=0,refused=0,unknown=0)
+        for m in range(1,phases+1):
+            scale = 7980*m+1
+            lengths = [99*scale,79*scale,23*scale]
+            for mode, shallow in (('fixed',19),('moving',19*scale)):
+                remaining = seconds-(time.monotonic()-started)
+                if remaining <= 0:
+                    return dict(complete=False,reason='time_limit',reports=reports+[report],
+                                all_pairs_decided=False)
+                holes = [(1,shallow),(1,99*scale)]
+                groups = residue_shell_groups(lengths,holes,period)
+                key = tuple(sorted((column,count%2) for column,count in groups.items()))
+                if key not in cache:
+                    cache[key] = residue_dyadic_parity(groups,remaining,max_bits)
+                result = cache[key]
+                report['cases'] += 1
+                if result['status']=='compatible_unbounded_aggregates':
+                    report['compatible'] += 1
+                elif result['status']=='support_refused_by_residue_parity':
+                    report['refused'] += 1
+                    verify_residue_parity_certificate(groups,result['certificate'])
+                    if 'first_refusal' not in report:
+                        report['first_refusal'] = dict(result,mode='residue_parity',t=scale,
+                                                       holes=holes,period=period,support_kind=mode)
+                else:
+                    report['unknown'] += 1
+                    complete = False
+                    if 'first_unknown' not in report:
+                        report['first_unknown'] = dict(t=scale,support_kind=mode,
+                                                      reason=result.get('reason','unknown'))
+        reports.append(report)
+        period *= 2
+    return dict(complete=complete,reports=reports,distinct_signatures=len(cache),
+                scope='unbounded integer aggregate parities on two named supports only',
+                all_pairs_decided=False)
+
+
 def residue_gap_representatives(length, hole_count):
     """Cover every ordered placement of <=2 arm holes up to mod-eight columns.
 
@@ -1650,8 +1939,11 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
-    if saved.get('mode')=='residue_zero':
-        if saved.get('status')!='support_refused_by_odd_group':
+    if saved.get('mode') in ('residue_zero','residue_parity'):
+        parity = saved['mode']=='residue_parity'
+        expected = 'support_refused_by_residue_parity' if parity else 'support_refused_by_odd_group'
+        aggregate = parity and saved.get('status')=='compatible_unbounded_aggregates'
+        if saved.get('status')!=expected and not aggregate:
             raise ValueError('no saved residue refusal')
         scale = saved['t']
         if type(scale) is not int or scale < 1:
@@ -1660,7 +1952,16 @@ def verify_saved(saved):
         if len(holes) != 2:
             raise ValueError('require exactly two holes')
         groups = residue_shell_groups([99*scale,79*scale,23*scale],holes,saved['period'])
-        verify_residue_zero_certificate(groups,saved['certificate'])
+        if aggregate:
+            if 'witness' not in saved:
+                raise ValueError('no saved aggregate compatibility witness')
+            verify_residue_aggregate_witness(groups,saved['witness'])
+            return dict(verified=True,claim='unbounded residue aggregates exist; no literal signing claimed',
+                        all_pairs_decided=False)
+        if parity:
+            verify_residue_parity_certificate(groups,saved['certificate'])
+        else:
+            verify_residue_zero_certificate(groups,saved['certificate'])
         return dict(verified=True,claim='this exact two-hole support is impossible for every word',
                     all_pairs_decided=False)
     if saved.get('mode')=='coarse':
@@ -1734,26 +2035,52 @@ def main():
     p.add_argument('--full-partition-bound',type=int,help='report inherited full-partition upper bound at a scale')
     p.add_argument('--fourth-root-census',action='store_true',help='replay the unrestricted two-hole mod-eight method limitation')
     p.add_argument('--residue-zero',type=int,metavar='SCALE',help='seek a portable unrestricted support refusal at this scale')
+    p.add_argument('--residue-parity',type=int,metavar='SCALE',help='decide the unbounded integer residue-aggregate relaxation')
+    p.add_argument('--max-bits',type=int,default=1024,help='integer coefficient limit for residue-parity elimination')
+    p.add_argument('--dyadic',action='store_true',help='use Hadamard-bounded powers-of-two residue elimination')
+    p.add_argument('--retain-residue-witness',action='store_true',help='save independently verifiable aggregate compatibility with --dyadic and --write')
+    p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
-    if args.residue_zero is not None:
+    if args.audit_resistant_residues:
+        result = resistant_residue_audit(args.period,args.seconds,args.max_bits)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps(result,sort_keys=True))
+        return
+    if args.residue_zero is not None or args.residue_parity is not None:
+        if args.residue_zero is not None and args.residue_parity is not None:
+            p.error('choose one residue analysis')
+        parity = args.residue_parity is not None
+        scale = args.residue_parity if parity else args.residue_zero
+        if args.retain_residue_witness and not (parity and args.dyadic and args.write):
+            p.error('--retain-residue-witness requires --residue-parity, --dyadic and --write')
         if not args.holes:
-            p.error('--residue-zero requires --holes ARM:DEPTH ARM:DEPTH')
+            p.error('residue analysis requires --holes ARM:DEPTH ARM:DEPTH')
         try:
             holes = [tuple(map(int,text.split(':'))) for text in args.holes]
             if any(len(hole)!=2 for hole in holes):
                 raise ValueError('require arm:depth holes')
-            groups = residue_shell_groups([99*args.residue_zero,79*args.residue_zero,
-                                           23*args.residue_zero],holes,args.period)
+            groups = residue_shell_groups([99*scale,79*scale,23*scale],holes,args.period)
+            if parity:
+                solver = residue_dyadic_parity if args.dyadic else residue_integer_parity
+                result = (solver(groups,args.seconds,args.max_bits,args.retain_residue_witness)
+                          if args.dyadic else solver(groups,args.seconds,args.max_bits))
         except (ValueError,TypeError) as error:
             p.error(str(error))
-        certificate = residue_zero_certificate(groups)
-        result = dict(mode='residue_zero',t=args.residue_zero,holes=holes,period=args.period,
-                      status='support_refused_by_odd_group' if certificate else 'unknown',
-                      certificate=certificate,all_pairs_decided=False)
+        if parity:
+            result.update(mode='residue_parity',t=scale,holes=holes,period=args.period)
+        else:
+            certificate = residue_zero_certificate(groups)
+            result = dict(mode='residue_zero',t=scale,holes=holes,period=args.period,
+                          status='support_refused_by_odd_group' if certificate else 'unknown',
+                          certificate=certificate,all_pairs_decided=False)
         if args.write:
             with open(args.write,'w') as f: json.dump(result,f)
-        print(json.dumps(result,sort_keys=True))
+        summary = {k:v for k,v in result.items() if k!='witness'}
+        if 'witness' in result:
+            summary['witness_residues'] = len(result['witness']['aggregate_residues'])
+        print(json.dumps(summary,sort_keys=True))
         return
     if args.fourth_root_census:
         print(json.dumps(fourth_root_mod8_census(),sort_keys=True))
