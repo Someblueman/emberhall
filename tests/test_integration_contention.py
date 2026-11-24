@@ -1,4 +1,13 @@
-"""Kernel contention and review demand at the trusted integration boundary."""
+"""Kernel contention and review demand at the trusted integration boundary.
+
+The installation failure at original line 56 is consistent with a reproduced
+startup/admission race: process lifetime does not establish action admission.
+Delaying BOOT by two seconds reproduced a terminal response, not a stuck lock:
+``ValueError: action needs its assigned active, awake resident and fixed room``.
+The original failed run did not retain its worker response in the test log.
+Observe successful source validation before ending the requester, then exercise
+the real blocking lock and terminal replay. This is a fixture repair only.
+"""
 import fcntl
 import json
 import os
@@ -13,6 +22,12 @@ from house.home import Coordinator
 
 
 class ContentionTests(MailboxCase):
+    def worker_diagnostics(self, job):
+        path = self.private / 'jobs' / job
+        return {name: (path / name).read_text()[-4000:]
+                for name in ('result.json', 'stdout.log', 'stderr.log')
+                if (path / name).exists()}
+
     def setUp(self):
         super().setUp()
         self.arrive()
@@ -23,6 +38,16 @@ class ContentionTests(MailboxCase):
         self.coordinator.finish(self.run, {'outcome': 'success', 'exit_code': 0,
                                            'usage': {}, 'elapsed_seconds': 1})
     def test_waiting_worker_survives_requester_exit_and_replays(self):
+        self.waiting_worker_survives_requester_exit()
+
+    def test_slow_worker_startup_survives_requester_exit_and_replays(self):
+        # Startup is deliberately longer than the old one-second guess.
+        boot = mailbox_jobs.BOOT.replace('raise SystemExit',
+            'import time;time.sleep(2);raise SystemExit')
+        with patch.object(mailbox_jobs, 'BOOT', boot):
+            self.waiting_worker_survives_requester_exit()
+
+    def waiting_worker_survives_requester_exit(self):
         author = 'contention-author'
         self.record.append('life', 'watch-keeper', {'kind': 'run-start', 'run': author,
             'resident': 'author', 'agent': 'codex', 'model': 'gpt-6.1-sol',
@@ -35,25 +60,17 @@ class ContentionTests(MailboxCase):
         contribution(workspace, self.base, self.private / author / 'contribution.json', journal_artifacts={})
         self.record.append('life', 'watch-keeper', {'kind': 'run-finish', 'run': author,
             'outcome': 'success', 'exit_code': 0, 'usage': {}, 'elapsed_seconds': 1})
-        # The inherited fixture's runtime replaces execute; use the unmodified pinned archive.
-        import zipfile
-        from tests.support import SOURCE
-        runtime = self.private / 'contention.pyz'
-        with zipfile.ZipFile(runtime, 'w') as archive:
-            for file in (SOURCE / 'house').glob('*.py'):
-                archive.writestr('house/' + file.name, file.read_bytes())
-        self.record._mailbox_runtime = runtime
+        admitted = self.admission_runtime()
         argv = ['integrate', author, '--as', self.resident, '--reject', 'Retain this rejection.']
         with (self.private / 'integration.lock').open('a+b') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             job = mailbox_jobs.enqueue(self.record, self.run, argv, 'contention-request')
             mailbox_jobs.tick(self.record)
             child = self.record._mailbox_processes[job]
-            time.sleep(1)
-            self.assertIsNone(child.poll())
+            self.wait_for_admission(admitted, child, job)
             self.assertTrue(source_delivery.integration_inflight(self.record, self.private))
             self.finish_resident()
-            self.assertIsNone(child.poll())
+            self.assertIsNone(child.poll(), self.worker_diagnostics(job))
         child.wait(timeout=20)
         with patch('house.mailbox_jobs.group_members', return_value=[]), patch('house.mailbox_jobs.group_stopped', return_value=True):
             self.coordinator.reap()
@@ -63,6 +80,42 @@ class ContentionTests(MailboxCase):
         self.assertEqual(mailbox_jobs.enqueue(self.record, self.run, argv, 'contention-request'), job)
         self.assertEqual(mailbox_jobs.result(self.record, job), result)
         self.assertFalse(source_delivery.integration_inflight(self.record, self.private))
+
+    def admission_runtime(self):
+        # Observe admission in the real worker before ending its requester.
+        # A live process alone does not mean execute/source validation ran.
+        # Only add a marker after successful source validation; keep execute,
+        # the kernel lock and every integration decision unchanged.
+        import zipfile
+        from tests.support import SOURCE
+        runtime = self.private / 'contention.pyz'
+        admitted = self.private / 'contention-admitted'
+        with zipfile.ZipFile(runtime, 'w') as archive:
+            for file in (SOURCE / 'house').glob('*.py'):
+                content = file.read_bytes()
+                if file.name == 'integrate.py':
+                    content += ("\n_original_source = source\n"
+                        "def source(*args, **kwargs):\n"
+                        "    value = _original_source(*args, **kwargs)\n"
+                        f"    Path({str(admitted)!r}).touch()\n"
+                        "    return value\n").encode()
+                archive.writestr('house/' + file.name, content)
+        self.record._mailbox_runtime = runtime
+        return admitted
+
+    def wait_for_admission(self, admitted, child, job):
+        self.addCleanup(self.stop_worker, child)
+        deadline = time.monotonic() + 20
+        while not admitted.exists() and child.poll() is None and time.monotonic() < deadline:
+            time.sleep(0.01)
+        self.assertTrue(admitted.exists(), self.worker_diagnostics(job))
+        self.assertIsNone(child.poll(), self.worker_diagnostics(job))
+
+    @staticmethod
+    def stop_worker(child):
+        if child.poll() is None:
+            child.kill()
+        child.wait(timeout=5)
 
     def test_timeout_waiting_for_lock_and_queued_cancellation(self):
         author = 'timeout-author'
@@ -77,6 +130,7 @@ class ContentionTests(MailboxCase):
         contribution(workspace, self.base, self.private / author / 'contribution.json', journal_artifacts={})
         self.record.append('life', 'watch-keeper', {'kind': 'run-finish', 'run': author,
             'outcome': 'success', 'exit_code': 0, 'usage': {}, 'elapsed_seconds': 1})
+        admitted = self.admission_runtime()
         argv = ['integrate', author, '--as', self.resident, '--reject', 'A rejection.']
         with (self.private / 'integration.lock').open('a+b') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -84,8 +138,7 @@ class ContentionTests(MailboxCase):
             mailbox_jobs.tick(self.record)
             child = self.record._mailbox_processes[job]
             queued = mailbox_jobs.enqueue(self.record, self.run, argv, 'queued-request')
-            time.sleep(1)
-            self.assertIsNone(child.poll())
+            self.wait_for_admission(admitted, child, job)
             self.finish_resident()
             self.assertFalse(mailbox_jobs.result(self.record, queued)['ok'])
             path = self.private / 'jobs' / job / 'job.json'
