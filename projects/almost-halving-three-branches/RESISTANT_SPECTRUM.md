@@ -1390,3 +1390,74 @@ A final boundary audit covers the allowed case q|2w but q does not divide w:
 recount passed at six scales, checking 23,712 complete columns; the permanent
 column test now includes these three cases as well. This closes a test gap in
 the geometric endpoint handling, without changing the compiler or its scope.
+
+### The growing-block lift is far from an exact pair on its support
+
+Sorrel, 24 November 2026. This is a limitation of a construction, **not an
+all-pairs obstruction**. For every odd t>=3, put P=(t-1)/2 and use the
+recorded old signs and the inserted word +^P -^P on each old edge. Its
+physical holes are 1:19t and 1:99t. Let K be its exact signed shell
+polynomial. Then
+
+    ||K||_1 = 500t-256.
+
+Consequently every exact target-size pair on this same retained support
+must differ from this lift at at least ceil((500t-256)/16) vertex signs.
+Global complementation of the lift gives the same bound. At t=7981 this
+is 249,391 sign changes out of 1,604,180 retained vertices. In particular
+this modularly compatible construction cannot be repaired by changing a
+bounded number of signs as t increases. The statement permits arbitrary
+new signs and words on that support; it assumes no repetition in the
+candidate exact pair. It makes no claim about moving either hole.
+
+Here is a finite symbolic calculation proving the norm for every scale,
+rather than extrapolating from samples. Write t=2P+1. Each old sign is
+an interval of length one. Each inserted edge has intervals
+
+    [e*t+1, e*t+P] with sign +1,
+    [e*t+P+1, (e+1)*t-1] with sign -1.
+
+For a signed interval [l,r] on arm a, its no-hole physical shell columns
+sum to constant coefficient intervals [l+1,r+1] with sign s,
+[n_a*t+1-r,n_a*t+1-l] with sign -s, and
+[n_b*t+l+1,n_b*t+r+1] with sign -s for each other arm b.
+For each hole, the distance image is an interval [u,v]; add coefficient
+-s on [u,v] and +s on [u+1,v+1]. Distances to a same-arm hole have a
+constant slope on the interval because holes are old endpoints; an old
+hole itself has no sign. The centre is handled by its four no-hole
+monomials and four hole monomials, with centre sign -1.
+
+Represent an interval by a positive coefficient jump at its left endpoint
+and the negative jump at one past its right endpoint. Every jump exponent
+is affine aP+b. `growing_lift_shell_events` compiles these rules into 745
+nonzero affine jumps. Sort by (2a+b,a). For each adjacent pair, the checker
+verifies that their exponent difference AP+B has A>=0 and 2A+B>=0.
+This proves that this order holds for every integer P>=2, including ties
+at P=2. Between jumps the shell coefficient is the cumulative jump sum.
+Multiplying the absolute value of that sum by the affine interval length
+and summing gives exactly 1000P+244. The final cumulative sum is zero.
+P=1 is checked separately by coincident-event aggregation and gives 1244,
+the same formula. Thus the norm identity holds at every odd t>=3.
+
+Finally, every retained physical vertex column has norm at most eight:
+four no-hole monomials and two monomials per hole. Collisions only lower
+this bound. Flipping h signs therefore changes K by norm at most 16h,
+by the triangle inequality. A balanced exact homometric pair has K=0
+(the signed shell identity is K=2(1-z)Delta), proving the stated Hamming
+bound. This also explains why equality of modular profiles and a defect
+of only one at distance one do not mean that the full error is small.
+
+Replay from the repository root, without constructing the large tree:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --lift-repair-bound 7981 --write /tmp/lift-repair.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/lift-repair.json
+```
+
+The recorded output has shell_l1=3990244 and minimum_sign_changes=249391.
+All 52 focused tests pass (28.127 seconds). New controls reconstruct all
+shell coefficients from physical vertex columns at t=3,5,7,11,101 and
+independently from unordered pair distances at t=3,5; check the column
+norm bound at every retained vertex in those five trees; and reject
+altered saved bounds. A scale exceeding 10^80 is checked symbolically.
+The main resistant-family acceptance remains unmet.

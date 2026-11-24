@@ -179,6 +179,72 @@ class SpectrumTests(unittest.TestCase):
                     return result
                 self.assertEqual(reduced(left),reduced(right))
 
+    def test_growing_lift_compressed_runs_against_physical_shells(self):
+        for scale in (3,5,7,11,101):
+            half = (scale-1)//2
+            lengths = [n*scale for n in (99,79,23)]
+            holes = {(1,19*scale),(1,99*scale)}
+            signs = {(0,0):-1}
+            signs.update({(a,d):rs.residue_lift_sign(half,scale,(a,d))
+                          for a,n in enumerate(lengths,1) for d in range(1,n+1)})
+            actual = fc.shell_rows(lengths,holes,signs)
+            recovered = {}
+            for lo,hi,value in rs.growing_lift_shell_runs(scale):
+                self.assertGreaterEqual(lo,0)
+                self.assertLessEqual(lo,hi)
+                for e in range(lo,hi+1):
+                    self.assertNotIn(e,recovered)
+                    recovered[e] = value
+            self.assertEqual(recovered,actual)
+            self.assertEqual(sum(abs(c) for c in actual.values()),500*scale-256)
+            # The column bound used for arbitrary alternative signings is
+            # independent of the chosen lift, including at hole neighbours.
+            self.assertTrue(all(sum(abs(c) for c in fc.shell_column(lengths,holes,v).values())<=8
+                                for v in signs if v not in holes))
+
+    def test_growing_lift_runs_against_unordered_distances(self):
+        from collections import Counter
+        # This control counts actual pairs, independently of shell_column.
+        for scale in (3,5):
+            sides = {1:[], -1:[]}
+            for v in [(0,0)]+[(a,d) for a,n in enumerate((99,79,23),1)
+                               for d in range(1,n*scale+1)]:
+                sign = rs.residue_lift_sign((scale-1)//2,scale,v)
+                if sign: sides[sign].append(v)
+            difference = Counter()
+            for sign,vertices in sides.items():
+                for i,(a,d) in enumerate(vertices):
+                    for b,e in vertices[:i]:
+                        distance = abs(d-e) if a==b else d+e
+                        difference[distance] += sign
+            expected = defaultdict(int)
+            for e,c in difference.items():
+                expected[e] += 2*c
+                expected[e+1] -= 2*c
+            expected = {e:c for e,c in expected.items() if c}
+            actual = {e:c for lo,hi,c in rs.growing_lift_shell_runs(scale)
+                         for e in range(lo,hi+1)}
+            self.assertEqual(actual,expected)
+
+    def test_growing_lift_symbolic_repair_bound_and_damage(self):
+        import copy
+        for scale in (3,5,7981,15961,10**80+1):
+            result = rs.growing_lift_repair_bound(scale)
+            self.assertEqual(result['shell_l1'],500*scale-256)
+            self.assertEqual(result['minimum_sign_changes'],(500*scale-241)//16)
+            self.assertFalse(result['all_pairs_decided'])
+            self.assertTrue(rs.verify_saved(result)['verified'])
+        result = rs.growing_lift_repair_bound(7981)
+        for key,value in (('shell_l1',0),('minimum_sign_changes',1),
+                          ('column_l1_upper_bound',7),('all_pairs_decided',True),
+                          ('t',True),('retained_vertices',0),('norm_in_half_scale',[0,0])):
+            damaged = copy.deepcopy(result)
+            damaged[key] = value
+            with self.assertRaises(ValueError): rs.verify_saved(damaged)
+        for scale in (True,1,2,4,-3,3.0):
+            with self.assertRaises(ValueError): rs.growing_lift_repair_bound(scale)
+            with self.assertRaises(ValueError): rs.growing_lift_shell_runs(scale)
+
     def test_residue_lift_all_orders_and_certificate_controls(self):
         for m in (1,2,7,10**25):
             growing = rs.residue_lift_plan([3990*m])

@@ -869,6 +869,110 @@ def residue_lift_plan(periods, index=1):
                 scope='literal balanced pair; distance multiplicities equal modulo each listed period only')
 
 
+def growing_lift_shell_events():
+    """Exact K coefficient jumps at affine exponents a*P+b, t=2P+1.
+
+    Each old edge has P plus signs followed by P minus signs. A constant
+    interval of signs maps to four shell intervals and two per hole. The
+    holes are old edge endpoints, so no interval crosses a hole. Runtime
+    and output size are independent of P. P>=1 is not expanded here.
+    """
+    from residue_2660 import FRONTIER
+    events = defaultdict(int)
+    def add(x,y): return x[0]+y[0],x[1]+y[1]
+    def sub(x,y): return x[0]-y[0],x[1]-y[1]
+    def old(d): return 2*d,d
+    one = (0,1)
+    def interval(lo,hi,value):
+        events[lo] += value
+        events[add(hi,one)] -= value
+    def column(arm,lo,hi,sign):
+        n = old(len(FRONTIER[arm-1]))
+        interval(add(lo,one),add(hi,one),sign)
+        interval(sub(add(n,one),hi),sub(add(n,one),lo),-sign)
+        for j,word in enumerate(FRONTIER,1):
+            if j!=arm:
+                offset = add(old(len(word)),one)
+                interval(add(offset,lo),add(offset,hi),-sign)
+        for h in (19,99):
+            hole = old(h)
+            if arm!=1:
+                left,right = add(lo,hole),add(hi,hole)
+            # Compare at P=2; the enclosing old edge never crosses a hole.
+            elif 2*hi[0]+hi[1] < 2*hole[0]+hole[1]:
+                left,right = sub(hole,hi),sub(hole,lo)
+            else:
+                left,right = sub(lo,hole),sub(hi,hole)
+            interval(left,right,-sign)
+            interval(add(left,one),add(right,one),sign)
+    # Centre sign is -1. These are its physical shell monomials.
+    centre = [((0,1),1)]+[(add(old(len(w)),one),-1) for w in FRONTIER]
+    for h in (19,99): centre.extend(((old(h),-1),(add(old(h),one),1)))
+    for exponent,value in centre: interval(exponent,exponent,-value)
+    for arm,word in enumerate(FRONTIER,1):
+        for d,ch in enumerate(word,1):
+            sign = {'+':1,'-':-1,'0':0}[ch]
+            if sign: column(arm,old(d),old(d),sign)
+        for edge in range(len(word)):
+            column(arm,(2*edge,edge+1),(2*edge+1,edge),1)
+            column(arm,(2*edge+1,edge+1),(2*edge+2,edge),-1)
+    return {key:value for key,value in events.items() if value}
+
+
+def growing_lift_shell_runs(scale):
+    """Nonzero inclusive coefficient runs of K, without expanding the tree."""
+    if type(scale) is not int or scale<3 or scale%2!=1:
+        raise ValueError('require odd scale>=3')
+    half = (scale-1)//2
+    events = defaultdict(int)
+    for (a,b),value in growing_lift_shell_events().items():
+        events[a*half+b] += value
+    runs,value,previous = [],0,None
+    for exponent,change in sorted(events.items()):
+        if previous is not None and exponent>previous and value:
+            if runs and runs[-1][1]+1==previous and runs[-1][2]==value:
+                runs[-1][1] = exponent-1
+            else: runs.append([previous,exponent-1,value])
+        value += change
+        previous = exponent
+    if value: raise AssertionError('shell polynomial did not terminate')
+    return runs
+
+
+def growing_lift_repair_bound(scale):
+    """A Hamming lower bound from this lift to any exact pair on its support.
+
+    Prove the affine jump order for every P>=2, then sum interval lengths
+    times absolute coefficients symbolically. P=1 is checked separately.
+    A physical column has coefficient l1 norm <=8, so a sign flip changes
+    K by norm <=16. This excludes bounded/local repairs, not other pairs.
+    """
+    if type(scale) is not int or scale<3 or scale%2!=1:
+        raise ValueError('require odd scale>=3')
+    events = growing_lift_shell_events()
+    ordered = sorted(events,key=lambda x:(2*x[0]+x[1],x[0]))
+    norm = [0,0]
+    value = 0
+    for left,right in zip(ordered,ordered[1:]):
+        value += events[left]
+        a,b = right[0]-left[0],right[1]-left[1]
+        if a<0 or 2*a+b<0:
+            raise AssertionError('affine order is not proved for every P>=2')
+        norm[0] += a*abs(value)
+        norm[1] += b*abs(value)
+    if value+events[ordered[-1]]:
+        raise AssertionError('formal shell polynomial did not terminate')
+    if norm!=[1000,244]: raise AssertionError('unexpected symbolic shell norm')
+    smallest = sum((hi-lo+1)*abs(c) for lo,hi,c in growing_lift_shell_runs(3))
+    if smallest!=1244: raise AssertionError('exceptional endpoint scale differs')
+    shell_norm = 500*scale-256
+    return dict(mode='growing_lift_repair_bound',t=scale,
+                shell_l1=shell_norm,minimum_sign_changes=(shell_norm+15)//16,
+                retained_vertices=201*scale-1,column_l1_upper_bound=8,
+                norm_in_half_scale=norm,all_pairs_decided=False,
+                scope='distance from the named growing-block lift; identical two-hole support only')
+
+
 def verify_residue_lift(saved):
     expected = residue_lift_plan(saved.get('periods'),saved.get('index'))
     # Strict JSON comparison also rejects booleans masquerading as integer data.
@@ -2275,6 +2379,11 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='growing_lift_repair_bound':
+        expected = growing_lift_repair_bound(saved.get('t'))
+        if json.dumps(saved,sort_keys=True)!=json.dumps(expected,sort_keys=True):
+            raise ValueError('saved repair bound does not match the symbolic shell calculation')
+        return dict(verified=True,all_pairs_decided=False,claim=expected['scope'])
     if saved.get('mode')=='split_endpoints':
         _,rows=split_endpoint_system()
         if not verify_refusal(list(rows.values()),saved.get('certificate',[])):
@@ -2376,6 +2485,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--residue-lift',nargs='+',type=int,metavar='ORDER',
                    help='construct a resistant subfamily passing all listed distance-residue tests')
+    p.add_argument('--lift-repair-bound',type=int,metavar='SCALE',
+                   help='prove a sign-change lower bound for the growing-block modular lift')
     p.add_argument('--lift-index',type=int,default=1,help='positive index in the residue-lift subfamily')
     p.add_argument('--hole',type=int,default=19,help='old first-arm vertex omitted in moving mode, 1..98')
     p.add_argument('--half',type=int,default=3990)
@@ -2419,6 +2530,12 @@ def main():
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     args = p.parse_args()
+    if args.lift_repair_bound is not None:
+        result = growing_lift_repair_bound(args.lift_repair_bound)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(result,f)
+        print(json.dumps(result,sort_keys=True))
+        return
     if args.split_endpoints:
         result=split_endpoint_refusal()
         if args.write:
