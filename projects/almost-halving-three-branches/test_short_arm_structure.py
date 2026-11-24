@@ -1,6 +1,10 @@
 """Independent recurrence and local-identity checks for the uniform theorem."""
 from itertools import product
 import random
+import json
+from pathlib import Path
+import subprocess
+import sys
 import unittest
 
 from short_arm_structure import (classify, coefficients, explicit_stream,
@@ -69,6 +73,23 @@ class ShortArmStructureTest(unittest.TestCase):
                 self.assertEqual(X[b-1], -x[-1]+y[-1]-1)
                 self.assertEqual(X[2*b-1], -x[0]-y[b-2]+y[-1])
                 self.assertEqual(Y[2*b-2], x[0]-x[-1]+1)
+
+    def test_cli_literal_minus_words(self):
+        script = Path(__file__).with_name("short_arm_structure.py")
+        for x, y, q, kind in (("--", "++", "-1", "B"),
+                              ("----", "++++", "-1", "B"),
+                              ("+--+", "+--+", "1", "A")):
+            run = subprocess.run([sys.executable, str(script), "--classify", x, y, q],
+                                 capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            self.assertEqual(json.loads(run.stdout)["type"], kind)
+        invalid = subprocess.run([sys.executable, str(script), "--classify", "--x", "++", "-1"],
+                                 capture_output=True, text=True)
+        self.assertEqual(invalid.returncode, 2)
+        proof = subprocess.run([sys.executable, str(script), "--prove"],
+                               capture_output=True, text=True)
+        self.assertEqual(proof.returncode, 0, proof.stderr)
+        self.assertEqual(json.loads(proof.stdout)["algebra"], "PASS")
 
     def test_validation(self):
         for x, y, q in (([1]*3, [1]*3, 1), ([1]*4, [1]*2, 1), ([0, 1], [1, 1], 1), ([1.0, 1], [1, 1], 1), ([True, 1], [1, 1], 1)):

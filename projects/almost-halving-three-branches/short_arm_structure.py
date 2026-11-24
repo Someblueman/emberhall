@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 from itertools import product
 import json
+import sys
 
 
 def add(*polys):
@@ -159,12 +160,18 @@ def prove_identities():
             "proof": "See the spectral and coprime-period argument in SHORT_ARM_STRUCTURE.md"}
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--prove", action="store_true")
     group.add_argument("--classify", nargs=3, metavar=("X2", "Y2", "Q"))
-    args = parser.parse_args()
+    raw = list(sys.argv[1:] if argv is None else argv)
+    # A valid sign word may be exactly "--". In this explicit mode its
+    # three operands are literal data, including all-minus words.
+    if len(raw) == 4 and raw[0] == "--classify":
+        args = argparse.Namespace(prove=False, classify=raw[1:])
+    else:
+        args = parser.parse_args(raw)
     try:
         if args.prove:
             result = prove_identities()

@@ -21,6 +21,7 @@ Python 3.10+ with only its standard library:
 
 ```sh
 python3 projects/almost-halving-three-branches/short_arm_structure.py --prove
+python3 projects/almost-halving-three-branches/short_arm_structure.py --classify -- ++ -1
 python3 projects/almost-halving-three-branches/short_arm_structure.py --classify +--+ +--+ 1
 python3 projects/almost-halving-three-branches/short_arm_structure.py --classify ++++ ++++ -1
 python3 -m unittest discover -s projects/almost-halving-three-branches -p test_short_arm_structure.py -q
@@ -29,8 +30,9 @@ python3 -m unittest discover -s projects/almost-halving-three-branches -p test_s
 The first command checks the formal survivor identities and all 32
 b=2 boundaries. It directs the reader to the spectral argument below;
 it is not a claim that a proof assistant checked that argument. The
-second command reports type A, with a period of six from index one.
-The third returns a concrete invalid coefficient. The standalone module
+second command accepts the literal all-minus word and reports type B.
+The third reports type A with period six from index one; the fourth
+returns a concrete invalid coefficient. The standalone module
 depends on no other project file. Tests also compare it with the earlier,
 independently structured two-variable elimination implementation.
 
