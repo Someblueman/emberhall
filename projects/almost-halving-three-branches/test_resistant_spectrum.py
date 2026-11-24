@@ -14,6 +14,113 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_flat_any_holes_support_count_against_physical_columns(self):
+        rng = random.Random(9309)
+        for pieces,width,length in ((2,0,200),(2,1,60),(3,1,60)):
+            scale = pieces*length+1
+            lengths = [n*scale for n in (99,79,23)]
+            baseline = {(0,0):1}
+            for arm,n in enumerate((99,79,23),1):
+                for edge in range(n):
+                    signs = [rng.choice((-1,1)) for _ in range(pieces)]
+                    for part,sign in enumerate(signs):
+                        lo = edge*scale+part*length+1
+                        baseline.update({(arm,d):sign for d in range(lo,lo+length)})
+                    baseline[arm,(edge+1)*scale] = rng.choice((-1,1))
+            nohole = fc.shell_rows(lengths,set(),baseline)
+            if length>178:
+                longest = current = 0
+                for exponent in range(max(nohole)+1):
+                    current = current+1 if nohole.get(exponent,0) else 0
+                    longest = max(longest,current)
+                self.assertGreaterEqual(longest,length-178)
+            # Cross a piece interior; also remove the centre in one case.
+            for holes in ({(1,length//2),(3,scale+length+2)},
+                          {(0,0),(2,2*scale-1)}):
+                corrected = dict(baseline)
+                for arm,n in enumerate((99,79,23),1):
+                    for edge in range(n):
+                        for part in range(pieces):
+                            lo = edge*scale+part*length+1
+                            for offset in range(width):
+                                corrected[arm,lo+offset] *= -1
+                                corrected[arm,lo+length-1-offset] *= -1
+                for hole in holes: corrected[hole] = 0
+                with_holes = fc.shell_rows(lengths,holes,baseline)
+                actual = fc.shell_rows(lengths,holes,corrected)
+                def support_difference(left,right):
+                    return sum(left.get(e,0)!=right.get(e,0) for e in left.keys()|right.keys())
+                self.assertLessEqual(support_difference(with_holes,nohole),804*pieces+812)
+                changed = sum(corrected[v]!=baseline[v] for v in baseline)
+                self.assertLessEqual(support_difference(actual,with_holes),8*changed)
+                bound = rs.flat_piece_any_holes_bound(length,pieces,width)
+                self.assertLessEqual(support_difference(actual,nohole),bound['correction_support_upper_bound'])
+
+    def test_flat_any_holes_threshold_and_saved_controls(self):
+        for pieces,width in ((2,0),(2,1),(3,7),(100,50)):
+            threshold = 804*pieces+3216*pieces*width+1007
+            self.assertEqual(rs.flat_piece_any_holes_bound(threshold-1,pieces,width)['status'],
+                             'not_decided_by_bound')
+            result = rs.flat_piece_any_holes_bound(threshold,pieces,width)
+            self.assertEqual(result['status'],'flat_ansatz_refused')
+            self.assertTrue(rs.verify_saved(result)['verified'])
+        for m in (1,2,10**50):
+            result = rs.flat_piece_any_holes_bound(3990*m)
+            self.assertEqual(result['t'],7980*m+1)
+            self.assertEqual(result['status'],'flat_ansatz_refused')
+            self.assertFalse(result['all_pairs_decided'])
+        for field,value in (('status','all_pairs_refused'),('t',1),
+                            ('correction_support_upper_bound',0),('all_pairs_decided',True)):
+            damaged = dict(result)
+            damaged[field] = value
+            with self.assertRaises(ValueError): rs.verify_saved(damaged)
+        for length,pieces,width in ((0,2,0),(1,1,0),(3,2,2),(True,2,0),(3,2,-1)):
+            with self.assertRaises(ValueError): rs.flat_piece_any_holes_bound(length,pieces,width)
+
+    def test_bulk_refusal_independent_of_piece_count_and_patch(self):
+        keys,expected = rs.split_bulk_system()
+        expected = {q:{keys[i]:c for i,c in row.items()} for q,row in expected.items()}
+        for pieces,width in ((2,0),(2,1),(2,3),(3,0),(3,2),(4,1),(7,2),(10,0)):
+            source,formal = rs.split_edge_system(19,width,pieces,1)
+            actual = defaultdict(lambda:defaultdict(int))
+            for (q,c),row in formal.items():
+                if q%pieces: continue
+                for i,value in row.items():
+                    key = source[i]
+                    if key[0]=='half':
+                        _,arm,edge,part = key
+                        # Middle pieces must cancel; retain their identities
+                        # until after aggregation to catch an omitted endpoint.
+                        label = ('first',arm,edge) if part==0 else (
+                            ('last',arm,edge) if part==pieces-1 else key)
+                    else: label = key
+                    actual[q//pieces][label] += value
+            actual = {q:{key:c for key,c in row.items() if c}
+                      for q,row in actual.items() if any(row.values())}
+            self.assertEqual(actual,expected)
+            offsets = [c for q,c in formal]
+            self.assertGreaterEqual(min(offsets),1-width)
+            self.assertLessEqual(max(offsets),179+width)
+
+    def test_bulk_refusal_binary_replay_and_damage(self):
+        from functools import reduce
+        keys,rows = rs.split_bulk_system()
+        saved = rs.split_bulk_refusal()
+        self.assertEqual((len(keys),len(rows)),(402,179))
+        # Reconstruct and XOR binary equations without verify_refusal.
+        binary = []
+        for row in rows.values():
+            total = sum(row.values())
+            self.assertEqual(total%2,0)
+            binary.append((sum(1<<i for i,c in row.items() if c%2),total//2%2))
+        self.assertEqual(reduce(lambda a,j:(a[0]^binary[j][0],a[1]^binary[j][1]),
+                                saved['certificate'],(0,0)),(0,1))
+        self.assertTrue(rs.verify_saved(saved)['verified'])
+        self.assertFalse(rs.verify_saved(saved)['all_pairs_decided'])
+        for bad in ([],saved['certificate'][:-1],saved['certificate']+[len(rows)]):
+            damaged = dict(saved,certificate=bad)
+            with self.assertRaises(ValueError): rs.verify_saved(damaged)
+
     def test_split_edge_columns_against_every_physical_shell(self):
         import full_shorter_coupling as physical
         for hole,patch,pieces,period in ((19,0,2,1),(7,1,2,1),(19,2,2,1),(19,0,3,1),
@@ -178,6 +285,72 @@ class SpectrumTests(unittest.TestCase):
                     for d,n in profile.items(): result[d%period] += n
                     return result
                 self.assertEqual(reduced(left),reduced(right))
+
+    def test_growing_lift_compressed_runs_against_physical_shells(self):
+        for scale in (3,5,7,11,101):
+            half = (scale-1)//2
+            lengths = [n*scale for n in (99,79,23)]
+            holes = {(1,19*scale),(1,99*scale)}
+            signs = {(0,0):-1}
+            signs.update({(a,d):rs.residue_lift_sign(half,scale,(a,d))
+                          for a,n in enumerate(lengths,1) for d in range(1,n+1)})
+            actual = fc.shell_rows(lengths,holes,signs)
+            recovered = {}
+            for lo,hi,value in rs.growing_lift_shell_runs(scale):
+                self.assertGreaterEqual(lo,0)
+                self.assertLessEqual(lo,hi)
+                for e in range(lo,hi+1):
+                    self.assertNotIn(e,recovered)
+                    recovered[e] = value
+            self.assertEqual(recovered,actual)
+            self.assertEqual(sum(abs(c) for c in actual.values()),500*scale-256)
+            # The column bound used for arbitrary alternative signings is
+            # independent of the chosen lift, including at hole neighbours.
+            self.assertTrue(all(sum(abs(c) for c in fc.shell_column(lengths,holes,v).values())<=8
+                                for v in signs if v not in holes))
+
+    def test_growing_lift_runs_against_unordered_distances(self):
+        from collections import Counter
+        # This control counts actual pairs, independently of shell_column.
+        for scale in (3,5):
+            sides = {1:[], -1:[]}
+            for v in [(0,0)]+[(a,d) for a,n in enumerate((99,79,23),1)
+                               for d in range(1,n*scale+1)]:
+                sign = rs.residue_lift_sign((scale-1)//2,scale,v)
+                if sign: sides[sign].append(v)
+            difference = Counter()
+            for sign,vertices in sides.items():
+                for i,(a,d) in enumerate(vertices):
+                    for b,e in vertices[:i]:
+                        distance = abs(d-e) if a==b else d+e
+                        difference[distance] += sign
+            expected = defaultdict(int)
+            for e,c in difference.items():
+                expected[e] += 2*c
+                expected[e+1] -= 2*c
+            expected = {e:c for e,c in expected.items() if c}
+            actual = {e:c for lo,hi,c in rs.growing_lift_shell_runs(scale)
+                         for e in range(lo,hi+1)}
+            self.assertEqual(actual,expected)
+
+    def test_growing_lift_symbolic_repair_bound_and_damage(self):
+        import copy
+        for scale in (3,5,7981,15961,10**80+1):
+            result = rs.growing_lift_repair_bound(scale)
+            self.assertEqual(result['shell_l1'],500*scale-256)
+            self.assertEqual(result['minimum_sign_changes'],(500*scale-241)//16)
+            self.assertFalse(result['all_pairs_decided'])
+            self.assertTrue(rs.verify_saved(result)['verified'])
+        result = rs.growing_lift_repair_bound(7981)
+        for key,value in (('shell_l1',0),('minimum_sign_changes',1),
+                          ('column_l1_upper_bound',7),('all_pairs_decided',True),
+                          ('t',True),('retained_vertices',0),('norm_in_half_scale',[0,0])):
+            damaged = copy.deepcopy(result)
+            damaged[key] = value
+            with self.assertRaises(ValueError): rs.verify_saved(damaged)
+        for scale in (True,1,2,4,-3,3.0):
+            with self.assertRaises(ValueError): rs.growing_lift_repair_bound(scale)
+            with self.assertRaises(ValueError): rs.growing_lift_shell_runs(scale)
 
     def test_residue_lift_all_orders_and_certificate_controls(self):
         for m in (1,2,7,10**25):

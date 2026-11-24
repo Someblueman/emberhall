@@ -1390,3 +1390,287 @@ A final boundary audit covers the allowed case q|2w but q does not divide w:
 recount passed at six scales, checking 23,712 complete columns; the permanent
 column test now includes these three cases as well. This closes a test gap in
 the geometric endpoint handling, without changing the compiler or its scope.
+
+### The growing-block lift is far from an exact pair on its support
+
+Sorrel, 24 November 2026. This is a limitation of a construction, **not an
+all-pairs obstruction**. For every odd t>=3, put P=(t-1)/2 and use the
+recorded old signs and the inserted word +^P -^P on each old edge. Its
+physical holes are 1:19t and 1:99t. Let K be its exact signed shell
+polynomial. Then
+
+    ||K||_1 = 500t-256.
+
+Consequently every exact target-size pair on this same retained support
+must differ from this lift at at least ceil((500t-256)/16) vertex signs.
+Global complementation of the lift gives the same bound. At t=7981 this
+is 249,391 sign changes out of 1,604,180 retained vertices. In particular
+this modularly compatible construction cannot be repaired by changing a
+bounded number of signs as t increases. The statement permits arbitrary
+new signs and words on that support; it assumes no repetition in the
+candidate exact pair. It makes no claim about moving either hole.
+
+Here is a finite symbolic calculation proving the norm for every scale,
+rather than extrapolating from samples. Write t=2P+1. Each old sign is
+an interval of length one. Each inserted edge has intervals
+
+    [e*t+1, e*t+P] with sign +1,
+    [e*t+P+1, (e+1)*t-1] with sign -1.
+
+For a signed interval [l,r] on arm a, its no-hole physical shell columns
+sum to constant coefficient intervals [l+1,r+1] with sign s,
+[n_a*t+1-r,n_a*t+1-l] with sign -s, and
+[n_b*t+l+1,n_b*t+r+1] with sign -s for each other arm b.
+For each hole, the distance image is an interval [u,v]; add coefficient
+-s on [u,v] and +s on [u+1,v+1]. Distances to a same-arm hole have a
+constant slope on the interval because holes are old endpoints; an old
+hole itself has no sign. The centre is handled by its four no-hole
+monomials and four hole monomials, with centre sign -1.
+
+Represent an interval by a positive coefficient jump at its left endpoint
+and the negative jump at one past its right endpoint. Every jump exponent
+is affine aP+b. `growing_lift_shell_events` compiles these rules into 745
+nonzero affine jumps. Sort by (2a+b,a). For each adjacent pair, the checker
+verifies that their exponent difference AP+B has A>=0 and 2A+B>=0.
+This proves that this order holds for every integer P>=2, including ties
+at P=2. Between jumps the shell coefficient is the cumulative jump sum.
+Multiplying the absolute value of that sum by the affine interval length
+and summing gives exactly 1000P+244. The final cumulative sum is zero.
+P=1 is checked separately by coincident-event aggregation and gives 1244,
+the same formula. Thus the norm identity holds at every odd t>=3.
+
+Finally, every retained physical vertex column has norm at most eight:
+four no-hole monomials and two monomials per hole. Collisions only lower
+this bound. Flipping h signs therefore changes K by norm at most 16h,
+by the triangle inequality. A balanced exact homometric pair has K=0
+(the signed shell identity is K=2(1-z)Delta), proving the stated Hamming
+bound. This also explains why equality of modular profiles and a defect
+of only one at distance one do not mean that the full error is small.
+
+Replay from the repository root, without constructing the large tree:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --lift-repair-bound 7981 --write /tmp/lift-repair.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/lift-repair.json
+```
+
+The recorded output has shell_l1=3990244 and minimum_sign_changes=249391.
+All 52 focused tests pass (28.127 seconds). New controls reconstruct all
+shell coefficients from physical vertex columns at t=3,5,7,11,101 and
+independently from unordered pair distances at t=3,5; check the column
+norm bound at every retained vertex in those five trees; and reject
+altered saved bounds. A scale exceeding 10^80 is checked symbolically.
+The main resistant-family acceptance remains unmet.
+
+### Flat interiors fail even with arbitrary finite endpoint patches
+
+Sorrel, continuation. The earlier unpatched flat-piece refusal can be
+strengthened without a sign search or a larger patch census.
+
+**Scoped theorem.** Let p>=2,w>=0,L>=179+2w and t=pL+1. In each old
+edge, divide the t-1 inserted vertices into p successive pieces of L
+vertices. Allow arbitrary independent signs on all retained old vertices
+and on the first and last w vertices of each piece. Require only that
+each remaining piece interior is constant, with its own independent sign.
+No such signing gives balanced homometric sets. This holds with the named
+holes 19t and 99t; in fact it holds for any choice of holes among the old
+vertices. It excludes neither holes inside inserted pieces nor nonconstant
+interiors such as the surviving period-two attempt.
+
+**Proof.** Compile (1-z)K with affine exponents qL+c as above. Every offset
+lies in [1-w,179+w]. Thus L>=179+2w makes specialization injective on
+these formal exponents. A true zero therefore makes every formal row zero.
+Retain the rows with q divisible by p, divide q by p, then sum all offsets
+c. Any individual old or patch column cancels, because multiplying a
+monomial by 1-z gives opposite coefficients with the same slope q.
+Every hole correction also cancels in this sum: its two terms differ by
+one in c. This is independent of the old hole's position. Constant
+interiors have only their two geometric endpoints. Among pieces r=0..p-1,
+only the first and last endpoints can have slope divisible by p.
+
+Write f_(a,e),l_(a,e) for those first and last interior signs, on old edge
+e=0..n_a-1, where (n_1,n_2,n_3)=(99,79,23). Their necessary aggregate
+columns, now polynomials in a formal Y, are explicitly
+
+    f_(a,e): Y^e + Y^(n_a-e) - sum_(b!=a) Y^(e+n_b),
+    l_(a,e): -Y^(e+1) - Y^(n_a-e-1) + sum_(b!=a) Y^(e+n_b+1).
+
+No old sign, patch sign, hole choice, p, w or L remains. These formulas
+also provide an independent construction of `split_bulk_system`, rather
+than relying on extraction from the full compiler.
+
+Sum the necessary coefficient equations at slopes q with q mod 8 in
+{4,5,6,7}. This fixed square wave selects 88 of the 179 rows. The resulting
+integer equation has exactly 24 coefficients +2 and 25 coefficients -2;
+all other coefficients vanish. These counts follow just by evaluating the
+two displayed columns at the square-wave indicator for e=0..n_a-1, a
+finite integer calculation retained in `split_bulk_refusal`. For a direct hand calculation, let f(q) be one when q mod 8 is in
+{4,5,6,7} and zero otherwise. The selected coefficient of a first sign is
+f(e)+f(n_a-e)-sum_(b!=a)f(e+n_b); for a last sign it is
+-f(e+1)-f(n_a-e-1)+sum_(b!=a)f(e+n_b+1). Both coefficients vanish
+identically on arms two and three. On arm one, the first coefficient is
+-2 for e=0 mod 8, +2 for e=4 mod 8 and zero otherwise; the last is
+-2 for e=3 mod 8, +2 for e=7 mod 8 and zero otherwise. Among e=0..98
+these give 13+12 negative and 12+12 positive terms. Dividing by
+two gives a sum of 49 signed odd integers equal to zero, which is
+impossible. Equivalently the selected binary rows XOR to 0=1. The
+portable verifier rebuilds the independent columns and checks that XOR;
+it uses no search, rank estimate, sampled scale or time limit.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --split-bulk --write /tmp/flat-bulk.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/flat-bulk.json
+```
+
+For the named two holes this rules out *every fixed finite patch width*
+on sufficiently long flat pieces, strengthening the earlier width-zero
+and width-one results. It also tells a builder exactly why merely making
+such patches wider cannot produce an infinite flat-interior family.
+The period-two repeating interiors have zero-mean possibilities and are
+not covered by this argument. The task's unrestricted acceptance remains
+unmet; no new all-pairs upper bound is asserted.
+
+### Moving the two holes cannot rescue two flat halves
+
+The bulk obstruction also yields a deliberately conservative bound covering
+**any two physical holes**, including holes inside a piece or at the centre.
+It remains a theorem about flat interiors, not arbitrary third words.
+
+Let p>=2,w>=0,L>=2w+1,t=pL+1, with the same aligned pieces as above.
+If
+
+    L >= 804p + 3216pw + 1007,
+
+no balanced homometric signing can be constant on the piece interiors,
+even with arbitrary old signs, arbitrary endpoint patches of width w,
+and arbitrary positions of the two holes. In particular p=2,w=0 requires
+only L>=2615. Every resistant t=7980m+1 has L=3990m, so **two flat
+halves per old edge fail for every resistant scale and every two-hole
+support**. This strengthens the aligned-hole theorem in a different
+direction; it is not the unrestricted all-pairs acceptance result.
+
+To prove the bound, extend a proposed signing to a baseline full-support
+signing: keep arbitrary signs at every old vertex, make each entire piece
+constant with its interior sign, and assign a sign to any old hole. The
+full-support no-hole polynomial K_0 has derivative (1-z)K_0 with offsets
+in [1,179]. The independent bulk columns and square-wave contradiction
+above apply unchanged, since all individual old columns and hole columns
+had cancelled in the aggregate.
+
+Consequently at least one slope cluster has a nonzero total jump. If all
+cumulative jumps between clusters were zero, every cluster total would
+be zero, contradicting the bulk certificate. Thus K_0 is nonzero on a
+whole interval between consecutive slope clusters. That interval contains
+at least L-178 coefficient positions: a cluster's largest possible
+exponent is qL+179 and the next cluster's smallest possible exponent is
+(q+1)L+1. This argument requires L>178, which the stated threshold ensures.
+
+Now count how many coefficient positions can change. The baseline source
+signs consist of 201p constant intervals and 202 individual old vertices.
+For one arbitrary hole h its correction to K is
+
+    -(1-z) sum_v s_0(v) z^dist(v,h).
+
+The distance map is affine with slope +1 or -1 on each interval, except
+that at most one interval must split at a same-arm hole. The image sum
+of each resulting constant interval is geometric; multiplication by
+1-z leaves at most two coefficient positions. Each old point also gives
+at most two. Thus this correction has support size at most
+2(201p+202+1)=402p+406, independently of the hole's location. For two
+holes the union has size at most 804p+812. Overlaps and cancellations
+can only reduce it.
+
+The actual source differs from the baseline at at most 402pw endpoint
+patch vertices and two holes. In the shell operator with those holes,
+each changed source vertex affects at most eight coefficient positions:
+four no-hole terms plus two terms per hole. Hence these source changes
+add at most 8(402pw+2) positions. Altogether K-K_0 is supported at at
+most
+
+    804p + 3216pw + 828
+
+positions. It cannot cancel a nonzero interval of length L-178 exceeding
+that number. A balanced homometric pair requires K=0, giving the bound.
+This proof counts support, not coefficient magnitudes, so it permits
+arbitrary signs and accidental collisions at the moving holes.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --flat-any-holes 3990 --write /tmp/flat-any-holes.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/flat-any-holes.json
+```
+
+Recorded output: t=7981, unavoidable nonzero support at least 3812,
+possible correction support at most 2436, status flat_ansatz_refused.
+At or below the threshold the checker returns not_decided_by_bound,
+never an exhaustive search conclusion. It also accepts enormous integer
+scales without expanding the tree. New finite controls independently
+compare the support-count decomposition with physical columns, including
+an interior hole and a missing centre, and check both sides of the exact
+strict-inequality threshold. Saved altered bounds are rejected.
+
+
+The same hand calculation gives a structural extension: replace the old
+arm lengths by A=8u+3, B=8v+7, C=8r+7, for nonnegative integers u,v,r,
+in any arm order. The other two arms still vanish, and the distinguished
+arm contributes 4u+1 nonzero coefficients, all +/-2. Thus the same
+flat-interior obstruction holds. Put N=A+B+C and
+M=max(A+B,A+C,B+C). The aligned-old-hole threshold becomes L>=M+1+2w;
+the support-count argument for any two holes becomes
+
+    L >= M + 4Np + 16Npw + 4N + 25.
+
+Indeed there are Np intervals, N+1 old points, and at most one split per
+hole; the unavoidable plateau has length L-M. These are scoped theorems
+about the same aligned constant interiors. The command-line checker in
+this contribution deliberately reports only the original (99,79,23)
+case. This extension asserts no unrestricted homometric upper bound.
+
+### The nonconstant sign fibre remains unresolved
+
+The same building stretch pursued the surviving p=2, word-period-two,
+patch-width-four system. Joint closure again retained 2,682 signs, rational
+nullity 132 and 133 binary free coordinates; it completed in 435.379
+seconds. A separately recovered rational kernel and a second representation
+inferred from the retained recovery rows were both checked against the
+untouched formal equations. No numerical rank assumption was used.
+
+A temporary numerical local search chose 132 original coordinates as signs
+and penalized each recovered coordinate by (abs(value)-1)^2. A floating
+change of basis reduced its largest recovery coefficient from roughly
+70,000 to 1.287. Its final observed report, at 630 seconds, had visited
+31,930,344 sign flips over 639 restarts without finding a zero penalty;
+the attempt was then stopped. Those figures describe a heuristic attempt,
+not an exact minimum, an exhaustive refusal or evidence against other
+words. A numerical candidate would still have had to pass the untouched
+integer shell equations. No such candidate was produced.
+
+All 56 permanent focused tests pass (28.470 seconds). The temporary discovery
+programs add no dependency to the standard-library checker. The remaining
+obstacle is still a literal exact-shell signing of an infinite resistant
+family, or an obstruction allowing arbitrary nonconstant words and every
+permitted hole support. Wider flat patches and relocating the holes within
+the flat ansatz are now excluded under the stated bounds; that does not
+close the nonlinear periodic fibre or the main task.
+
+A separate discovery attempt used the already installed constraint solver on
+2,682 Boolean signs, 2,558 distinct untouched integer shell rows after the
+verified signed quotient, and 2,549 necessary binary echelon rows. It fixed
+the retained centre positive to remove global complementation. With two
+workers and a 1,050-second solve limit it returned **UNKNOWN**, after
+1,051.790 seconds overall, 18,680 branches and 258 conflicts. It produced
+neither a witness nor an exhaustive refusal. The solver was used only for
+temporary discovery; no solver dependency or solver status is accepted by
+the portable checker as a mathematical certificate. Neither this timeout
+nor the numerical search decides the surviving fibre. No further increase
+of their budgets is proposed here.
+
+A final physical-column audit checks the generalized aggregate on fresh
+old triples (3,7,15), (11,15,23), (19,7,31), at (p,w)=(2,0),(3,1),
+with old holes on arms two and three. All 655 complete piece columns
+agree with the displayed first/last formulas; all middle pieces cancel.
+Here L=M+4. The temporary audit initially decoded affine exponents with
+an origin of one, incorrectly assigning a valid c=0 patch endpoint to
+the preceding slope. Using q=floor((exponent-(1-w))/L) corrects that
+auditor error and covers c in [1-w,179+w] (or [1-w,M+1+w] generally).
+The project compiler was unchanged. These controls support the endpoint
+conventions; the finite controls alone are not the generalized proof.
