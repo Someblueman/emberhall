@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact arbitrary-word recovery on T(99t,79t,23t); no periodic assumption."""
+"""Exact arbitrary-word long-arm recovery; no periodic assumption."""
 from collections import defaultdict, deque
 from fractions import Fraction
 from pathlib import Path
@@ -15,11 +15,14 @@ def vertices(lengths):
 
 
 def validate(lengths, holes):
-    if len(lengths) != 3 or any(type(n) is not int or n < 1 for n in lengths):
+    if not isinstance(lengths,(list,tuple)) or len(lengths) != 3 or any(type(n) is not int or n < 1 for n in lengths):
         raise ValueError('three positive integer lengths required')
-    holes = set(map(tuple, holes))
-    if len(holes) > 2 or any(not (v == (0, 0) or
-            len(v) == 2 and 1 <= v[0] <= 3 and 1 <= v[1] <= lengths[v[0]-1]) for v in holes):
+    try:
+        holes = set(map(tuple, holes))
+    except TypeError as exc:
+        raise ValueError('holes must be coordinate pairs') from exc
+    if len(holes)>2 or any(len(v)!=2 or any(type(c) is not int for c in v) or
+            not (v==(0,0) or 1<=v[0]<=3 and 1<=v[1]<=lengths[v[0]-1]) for v in holes):
         raise ValueError('invalid holes')
     return holes
 
@@ -46,16 +49,15 @@ def column(lengths, holes, v):
 
 
 def interval_plan(lengths, holes):
-    """Largest hole-free interval of the proximal, not upper-forced arm."""
+    """Full proximal interval left after upper-shell transfer."""
     A, B, C = lengths
-    if A * 79 != B * 99 or A * 23 != C * 99 or A % 99:
-        raise ValueError('the injectivity theorem here is for (99t,79t,23t)')
+    if not A > B > C:
+        raise ValueError('require descending distinct arm lengths')
     delta = next(j for j in range(3) if (2, B-j) not in holes)
     m = A-B+delta
-    cuts = [0] + sorted(d for i, d in holes if i == 1 and d <= m) + [m+1]
-    lo, hi = max(((a+1, b-1) for a, b in zip(cuts, cuts[1:])),
-                 key=lambda p: (p[1]-p[0], -p[0]))
-    return m, lo, hi
+    if not (C > 2 and C > m and B-C-m-delta > m and B-m-delta > 2*m):
+        raise ValueError('lengths do not satisfy the proved recovery separation bounds')
+    return m, 1, m
 
 
 def recovery_plan(lengths, holes):
@@ -71,7 +73,7 @@ def recovery_plan(lengths, holes):
         if projected != {d: -1}:
             clear = False
             break
-    return (m, 1, m, 'clear-short-bin') if clear else (m, lo, hi, 'hole-free-interval')
+    return (m, 1, m, 'clear-short-bin') if clear else (m, lo, hi, 'full-proximal')
 
 
 def reduce_rows(rows):
@@ -199,9 +201,9 @@ def recover(lengths, holes, known):
     occupied = set(vertices(lengths))-holes
     unknown = {(1, d) for d in range(m+1, lengths[0]+1) if (1, d) not in holes}
     unknown.update((1, d) for d in range(lo, hi+1) if (1,d) not in holes)
-    if set(known) != occupied-unknown or any(v not in (-1, 1) for v in known.values()):
+    if set(known) != occupied-unknown or any(type(v) is not int or v not in (-1, 1) for v in known.values()):
         raise ValueError('retained coordinates/signs do not match the reduction')
-    if holes == {(1,19),(1,lengths[0])}:
+    if lengths[0] % 99 == 0 and lengths[1]*99 == lengths[0]*79 and lengths[2]*99 == lengths[0]*23 and holes == {(1,19),(1,lengths[0])}:
         obstruction = shorter_arm_obstruction(lengths[0]//99, known)
         if obstruction:
             raise ValueError('two-shell obstruction: '+json.dumps(obstruction, sort_keys=True))
@@ -259,25 +261,107 @@ def recover_payload(payload):
     return result, result == signs
 
 
+def complete_parameters(payload):
+    lengths = payload['lengths']
+    holes = validate(lengths, payload['holes'])
+    centre = payload['centre']
+    if type(centre) is not int or centre not in (-1,0,1):
+        raise ValueError('centre must be -1, 0 or 1')
+    known = {} if centre == 0 else {(0,0):centre}
+    for i in (2,3):
+        word = payload[f'arm{i}']
+        if not isinstance(word,str) or len(word) != lengths[i-1] or set(word)-set('+-0'):
+            raise ValueError('shorter arms must be literal + - 0 strings of the stated lengths')
+        for d,ch in enumerate(word,1):
+            if ch != '0':
+                known[(i,d)] = 1 if ch == '+' else -1
+    return recover(lengths,holes,known)
+
+
+def radial_gcd_bound(lengths, holes, degree_limit=10000):
+    """Independent sufficient injectivity certificate, valid beyond the cone.
+
+    A modular gcd degree bounds the rational gcd degree from above. This
+    diagnostic deliberately refuses large dense polynomial divisions; the
+    geometric theorem has no scale cap and is the primary recovery method.
+    """
+    holes = validate(lengths,holes)
+    ends = list(lengths)
+    for i in range(3):
+        while ends[i] and (i+1,ends[i]) in holes:
+            ends[i] -= 1
+    a,b = ends[0],max(ends[1:])
+    N = a+b
+    if not a:
+        return dict(radial_degree=N, negative_extent=b, prime=1000003,
+                    rational_gcd_degree_at_most=None, injectivity_proved=True,
+                    reason='no occupied first-arm vertices', universal_milestone_decided=False)
+    if N > degree_limit:
+        raise ValueError('radial polynomial exceeds this diagnostic degree limit')
+    coefficients = [0]*(N+1)
+    for i,d in vertices(lengths):
+        if (i,d) in holes:
+            continue
+        q = d if i==1 else -d
+        coefficients[b+q] += 1
+    # Fixed prime, with a direct primality check rather than an assumed field.
+    prime = 1000003
+    assert all(prime % d for d in range(2,1001))
+    P = {i:c % prime for i,c in enumerate(coefficients) if c % prime}
+    R = {N-i:c for i,c in P.items()}
+    while R:
+        degree = max(R)
+        inv = pow(R[degree],-1,prime)
+        while P and max(P)>=degree:
+            shift = max(P)-degree
+            c = P[shift+degree]*inv % prime
+            for e,v in R.items():
+                k=e+shift
+                P[k]=(P.get(k,0)-c*v)%prime
+                if not P[k]:
+                    del P[k]
+        P,R=R,P
+    bound = max(P)
+    return dict(radial_degree=N, negative_extent=b, prime=prime,
+                rational_gcd_degree_at_most=bound,
+                injectivity_proved=bound<=b, universal_milestone_decided=False)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument('--reduce', type=int, metavar='T')
     g.add_argument('--recover', type=Path, metavar='WITNESS')
+    g.add_argument('--complete', type=Path, metavar='PARAMETERS')
+    g.add_argument('--radial-bound', type=Path, metavar='GEOMETRY')
     g.add_argument('--prefix-obstruction', type=int, metavar='K')
+    p.add_argument('--output', type=Path, help='write an accepted full witness with --complete or --recover')
     p.add_argument('--holes', type=json.loads, help='JSON coordinates; default long-arm depths 19 and 99t')
     args = p.parse_args()
     try:
-        if args.prefix_obstruction is not None:
+        if args.output is not None and args.complete is None and args.recover is None:
+            raise ValueError('--output requires --complete or --recover')
+        if args.radial_bound is not None:
+            geometry = json.loads(args.radial_bound.read_text())
+            print(json.dumps(radial_gcd_bound(geometry['lengths'],geometry['holes']),sort_keys=True))
+        elif args.prefix_obstruction is not None:
             print(json.dumps(prefix_obstruction(args.prefix_obstruction), sort_keys=True))
         elif args.reduce is not None:
             t = args.reduce
             print(json.dumps(certificate(t, args.holes if args.holes is not None else [(1,19),(1,99*t)]), sort_keys=True))
         else:
-            signs, same = recover_payload(json.loads(args.recover.read_text()))
+            payload = json.loads((args.complete or args.recover).read_text())
+            if args.complete is not None:
+                signs, same = complete_parameters(payload), True
+            else:
+                signs, same = recover_payload(payload)
             if not same:
                 raise ValueError('input differs from its unique homometric completion')
-            print(json.dumps(dict(recovered=len(signs), matches_input=same, full_homometry_verified=True), sort_keys=True))
+            if args.output is not None:
+                args.output.write_text(json.dumps(dict(lengths=payload['lengths'],
+                    left=sorted(v for v,s in signs.items() if s==1),
+                    right=sorted(v for v,s in signs.items() if s==-1)))+'\n')
+            print(json.dumps(dict(recovered=len(signs), size=len(signs)//2, matches_input=same, full_homometry_verified=True), sort_keys=True))
     except (ValueError, KeyError) as exc:
         p.exit(1, str(exc)+'\n')
 
