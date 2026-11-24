@@ -134,6 +134,46 @@ class SpectrumTests(unittest.TestCase):
                         dict(saved, holes=holes+holes[:1]), dict(saved, status='unknown')):
             with self.assertRaises(ValueError): rs.verify_saved(changed)
 
+    def test_eighth_root_fixed_holes_infinite_obstruction(self):
+        target = (-2, 1, -1, 1, -2, 1, 0, 0)
+        weights = [-25, -15, -1, 25, 7, 17, -1, -39]
+        holes = {(1, 2), (1, 4)}
+        expected_columns = {
+            target, (-2,1,0,0,-2,1,-1,1), (-1,1,-3,1,0,0,-1,1),
+            (0,-3,2,-2,1,0,0,0), (0,-1,1,-1,1,-2,1,-1),
+            (0,0,-1,1,-1,1,-3,1), (1,-2,1,-2,1,0,0,-1),
+            (1,-2,1,-1,0,-1,1,-1), (1,0,0,-1,1,-2,1,-2)}
+        for scale in (1, 9, 17, 25, 33, 31921):
+            lengths = (99*scale, 79*scale, 23*scale)
+            # These classes exhaust all columns symbolically for t=1 mod8:
+            # centre, the two retained vertices before/among the holes,
+            # then eight residues beyond them, and eight on each other arm.
+            classes = [(0, 0), (1, 1), (1, 3)]
+            classes += [(1, d) for d in range(5, 13)]
+            classes += [(a, d) for a in (2, 3) for d in range(1, 9)]
+            columns = set()
+            for vertex in classes:
+                column = [0]*8
+                for exponent, value in fc.shell_column(lengths, holes, vertex).items():
+                    column[exponent % 8] += value
+                columns.add(tuple(column))
+            self.assertEqual(columns, expected_columns)
+            groups = rs.residue_shell_groups(lengths, holes, 8)
+            self.assertEqual(set(groups), expected_columns)
+            count = (201*scale-17)//8
+            self.assertEqual(groups[target], count)
+            self.assertTrue(all(sum(a*b for a, b in zip(weights, column))
+                                == (64 if column == target else 0) for column in groups))
+            certificate = dict(column=list(target), count=count, weights=weights, coefficient=64)
+            if scale % 16 == 1:
+                self.assertTrue(rs.verify_residue_zero_certificate(groups, certificate))
+                saved = dict(mode='residue_zero', t=scale, period=8,
+                             holes=sorted(holes), status='support_refused_by_odd_group',
+                             certificate=certificate)
+                self.assertTrue(rs.verify_saved(saved)['verified'])
+            else:
+                with self.assertRaises(ValueError): rs.verify_residue_zero_certificate(groups, certificate)
+
     def test_parity_quotient_against_every_literal_solution(self):
         rng = random.Random(428)
         for size in range(1,8):

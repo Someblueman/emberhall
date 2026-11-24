@@ -787,3 +787,58 @@ support before checking the certificate. Unknown searches are not accepted as
 certificates. The 35 focused tests pass, including JSON-shaped hole coordinates
 and saved-certificate mutations. The census and certificate checks use only the
 standard library and take seconds, independently of the physical scale.
+
+#### A further unrestricted refusal at eighth roots
+
+The same checker yields another infinite support obstruction. On
+T(99t,79t,23t), **holes (1,2),(1,4) cannot attain the target when t=1 modulo
+16**, with arbitrary signs on every retained vertex. In the resistant family
+this covers m=0 modulo 4. The fourth-root mixed-hole proof above leaves these
+scales open, so this is an additional refusal, not a repeat of that result.
+
+For t=1 modulo 8 the arm lengths have residues 3,7,7. Reducing their physical
+columns modulo z^8-1 gives exactly these nine vectors:
+
+```text
+(-2, 1,-1, 1,-2, 1, 0, 0)  target
+(-2, 1, 0, 0,-2, 1,-1, 1)
+(-1, 1,-3, 1, 0, 0,-1, 1)
+( 0,-3, 2,-2, 1, 0, 0, 0)
+( 0,-1, 1,-1, 1,-2, 1,-1)
+( 0, 0,-1, 1,-1, 1,-3, 1)
+( 1,-2, 1,-2, 1, 0, 0,-1)
+( 1,-2, 1,-1, 0,-1, 1,-1)
+( 1, 0, 0,-1, 1,-2, 1,-2)
+```
+
+This is a bounded symbolic calculation: substitute the length residues into
+the physical column formula, treating the centre, first-arm depths 1 and 3,
+first-arm depths at least 5 in eight residue classes, and the eight classes
+on each other arm. Those classes exhaust the vertices; beyond depth 4 both
+hole distances are affine, so adding eight changes no column.
+
+Weights (-25,-15,-1,25,7,17,-1,-39) have dot product 64 with the target and
+zero with all eight other columns. The target group consists of the centre,
+long-arm depths 4 modulo 8 except the removed depth 4, and depths 0 modulo 8
+on the other arms. Its size is
+
+    1 + (99t-11)/8 + (79t-7)/8 + (23t-7)/8 = (201t-17)/8.
+
+It is odd exactly when t=1 modulo 16. Its forced zero sign sum is impossible.
+This proof is independent of larger-root searches and assumes no word period.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --residue-zero 31921 --holes 1:2 1:4 --period 8 --write /tmp/eighth-root-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/eighth-root-refusal.json
+```
+
+The additional test checks every symbolic column class, its multiplicity and
+all dot products at both parities of t=1 modulo 8, rejects the even-count
+certificate, and verifies a portable refusal on a resistant scale. No surviving
+support is thereby constructed or ruled out; the global task remains open.
+
+Both contributions pass all 36 focused tests. An exploratory integer-lattice
+probe at 32nd roots was interrupted before its first scale phase completed;
+it supplies no classification or impossibility result and is not part of the
+shipped checker. Increasing the root order alone has not resolved the remaining
+odd-hole supports, including the original shallow-hole and long-tip support.
