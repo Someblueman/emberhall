@@ -2163,6 +2163,200 @@ def verify_periodic_phase_refusal(certificate):
     except (KeyError,ValueError,TypeError,IndexError):return False
 
 
+def _antiperiod_two_system(hole):
+    """Untouched period-four rows with s(k+2)=-s(k); no endpoint phases.
+
+    Four consecutive levels of any such interior determine these rows.
+    The additional binary equalities express exactly the named sign flip,
+    rather than a consequence claimed for unrestricted words.
+    """
+    if type(hole) is not int or not 1<=hole<=97 or hole%2!=1:
+        raise ValueError('require an odd hole from 1 to 97')
+    labels=moving_folded_labels()
+    positions={k:i for i,k in enumerate(labels)}
+    stencils=moving_folded_stencils(hole)[1]
+    rows=[]
+    for level in range(4):
+        row_block=[]
+        for stencil in stencils.values():
+            row=defaultdict(int)
+            for (*label,d),c in stencil.items():
+                row[4*positions[tuple(label)]+(level+d)%4]+=c
+            row_block.append({i:c for i,c in row.items() if c})
+        rows.extend(row_block)
+    size=4*len(labels)
+    equations=[((1<<(4*j+a))|(1<<(4*j+a+2)),1)
+               for j in range(size//4) for a in range(2)]
+    return size,rows,equations
+
+
+def antiperiod_two_refusal(hole=97):
+    """Check just the linear span of original mod-eight row polynomials.
+
+    No polynomial products or bounded search are used. Failure to find 1
+    in this span is unknown, not a signing or a compatibility theorem.
+    """
+    size,rows,equations=_antiperiod_two_system(hole)
+    compiled=binary_shell_quadratics(size,rows,seconds=30,max_free=192,
+                                    extra_binary=equations)
+    result=dict(kind='moving-antiperiod-two-v1',hole=hole,period=4,
+                sign_shift=2,shift_factor=-1,status='unknown',
+                literal_existence_decided=False,all_pairs_decided=False)
+    if not compiled['complete'] or compiled.get('parity_conflict'):
+        return result
+    result['free_count']=len(compiled['free'])
+    basis={}
+    for index,(mask,rhs) in enumerate(compiled['quadratic_rows']):
+        polynomial,raw=mask<<1|rhs,1<<index
+        while polynomial and polynomial.bit_length()-1 in basis:
+            old,history=basis[polynomial.bit_length()-1]
+            polynomial^=old;raw^=history
+        if polynomial:
+            basis[polynomial.bit_length()-1]=polynomial,raw
+            if polynomial==1:
+                result.update(status='refused',identity=dict(
+                    polynomial=1,raw=raw,multipliers=[]))
+                if not verify_antiperiod_two_refusal(result):
+                    raise AssertionError('antiperiodic input-span proof failed replay')
+                break
+    return result
+
+
+def verify_antiperiod_two_refusal(certificate):
+    """Recompile the physical rows modulo eight and XOR the named inputs."""
+    try:
+        if (certificate.get('kind')!='moving-antiperiod-two-v1' or
+                certificate.get('status')!='refused' or
+                type(certificate.get('period')) is not int or certificate['period']!=4 or
+                type(certificate.get('sign_shift')) is not int or certificate['sign_shift']!=2 or
+                type(certificate.get('shift_factor')) is not int or certificate['shift_factor']!=-1 or
+                certificate.get('literal_existence_decided') is not False or
+                certificate.get('all_pairs_decided') is not False):return False
+        size,rows,equations=_antiperiod_two_system(certificate['hole'])
+        compiled=binary_shell_quadratics(size,rows,seconds=30,max_free=192,
+                                        extra_binary=equations)
+        if (not compiled['complete'] or compiled.get('parity_conflict') or
+                type(certificate.get('free_count')) is not int or
+                certificate['free_count']!=len(compiled['free'])):return False
+        identity=certificate['identity']
+        if (type(identity.get('polynomial')) is not int or identity['polynomial']!=1 or
+                identity.get('multipliers')!=[]):return False
+        raw=identity['raw']
+        if (type(raw) is not int or raw<0 or
+                raw.bit_length()>len(compiled['quadratic_rows'])):return False
+        value=0
+        for index,(mask,rhs) in enumerate(compiled['quadratic_rows']):
+            if raw>>index&1:value^=mask<<1|rhs
+        return value==1
+    except (KeyError,TypeError,ValueError,IndexError,AttributeError):
+        return False
+
+
+def _antiperiod_two_odd_rows(hole):
+    """Substitute the exact signed alias into untouched four-residue rows."""
+    _,original,_=_antiperiod_two_system(hole)
+    rows=[]
+    for row in original:
+        combined=defaultdict(int)
+        for i,c in row.items():
+            label,level=divmod(i,4)
+            combined[2*label+level%2]+=c*(-1 if level>=2 else 1)
+        rows.append({i:c for i,c in combined.items() if c})
+    return rows
+
+
+def antiperiod_two_odd_refusal(hole=97):
+    """Eliminate modulo four, retaining a directly checked integer identity.
+
+    For an odd integer vector s=1-2b, A*s=0 implies A*b=A*1/2.
+    Unit pivots and at most two divisions by two decide that congruence.
+    Two bit planes retain each input-row weight modulo four; the checker
+    uses only the final ordinary integer weighted sum, not this algorithm.
+    A compatible congruence remains unknown about integer or literal signs.
+    """
+    rows=_antiperiod_two_odd_rows(hole)
+    result=dict(kind='moving-antiperiod-two-odd-v1',hole=hole,period=4,
+                sign_shift=2,shift_factor=-1,status='unknown',
+                literal_existence_decided=False,all_pairs_decided=False)
+    # All rows have even coefficient sum in this scoped odd-hole system.
+    if any(sum(row.values())%2 for row in rows):
+        raise AssertionError('unexpected odd raw row')
+    def scale(low,high,factor):
+        return ((0,0),(low,high),(0,low),(low,high^low))[factor%4]
+    def add(low,high,a,b):
+        return low^a,high^b^(low&a)
+    modulus=4
+    active={i:({j:c%4 for j,c in row.items() if c%4},
+               sum(row.values())//2%4,1<<i,0) for i,row in enumerate(rows)}
+    answer=None
+    while active:
+        bad=next((i for i,(row,rhs,_,_) in active.items() if not row and rhs),None)
+        if bad is not None:
+            answer=active[bad][2:];break
+        active={i:item for i,item in active.items() if item[0]}
+        if not active:break
+        options=[(len(row),i,next(j for j,c in row.items() if c%2))
+                 for i,(row,_,_,_) in active.items() if any(c%2 for c in row.values())]
+        if not options:
+            bad=next((i for i,(_,rhs,_,_) in active.items() if rhs%2),None)
+            if bad is not None:
+                answer=scale(*active[bad][2:],modulus//2);break
+            modulus//=2
+            if modulus==1:break
+            active={i:({j:c//2%modulus for j,c in row.items() if c//2%modulus},
+                       rhs//2%modulus,low,high)
+                    for i,(row,rhs,low,high) in active.items()}
+            continue
+        _,rid,pivot=min(options)
+        row,rhs,low,high=active.pop(rid)
+        inverse=pow(row[pivot],-1,modulus)
+        row={j:c*inverse%modulus for j,c in row.items()}
+        rhs=rhs*inverse%modulus
+        low,high=scale(low,high,inverse)
+        for i,(other,value,a,b) in list(active.items()):
+            if pivot not in other:continue
+            factor=other[pivot]
+            for j,c in row.items():
+                updated=(other.get(j,0)-factor*c)%modulus
+                if updated:other[j]=updated
+                elif j in other:del other[j]
+            a,b=add(a,b,*scale(low,high,-factor))
+            active[i]=other,(value-factor*rhs)%modulus,a,b
+    if answer is not None:
+        result.update(status='refused',divisor=4,weights=[hex(v) for v in answer])
+        if not verify_antiperiod_two_odd_refusal(result):
+            raise AssertionError('odd-integer identity failed replay')
+    return result
+
+
+def verify_antiperiod_two_odd_refusal(certificate):
+    """Check one integer row with odd coefficient sum; no elimination or lift."""
+    try:
+        if (certificate.get('kind')!='moving-antiperiod-two-odd-v1' or
+                certificate.get('status')!='refused' or
+                type(certificate.get('period')) is not int or certificate['period']!=4 or
+                type(certificate.get('sign_shift')) is not int or certificate['sign_shift']!=2 or
+                type(certificate.get('shift_factor')) is not int or certificate['shift_factor']!=-1 or
+                type(certificate.get('divisor')) is not int or certificate['divisor']!=4 or
+                certificate.get('literal_existence_decided') is not False or
+                certificate.get('all_pairs_decided') is not False):return False
+        rows=_antiperiod_two_odd_rows(certificate['hole'])
+        weights=certificate['weights']
+        if not isinstance(weights,list) or len(weights)!=2:return False
+        if any(not isinstance(v,str) or not v.startswith('0x') or
+               len(v)>2+(len(rows)+3)//4 for v in weights):return False
+        low,high=map(lambda v:int(v,16),weights)
+        if min(low,high)<0 or max(low,high).bit_length()>len(rows):return False
+        combined=defaultdict(int)
+        for index,row in enumerate(rows):
+            weight=(low>>index&1)+2*(high>>index&1)
+            for i,c in row.items():combined[i]+=weight*c
+        return (all(c%4==0 for c in combined.values()) and
+                sum(combined.values())//4%2==1)
+    except (KeyError,TypeError,ValueError,IndexError,AttributeError):
+        return False
+
+
 def interior_rank_matrix(hole=19,prime=5):
     """Evaluate the unrestricted Laurent shell matrix at z=2 over a small prime field.
 
@@ -2237,6 +2431,91 @@ def verify_interior_rank_certificate(certificate):
                 matrix[r][j:] = [(a-factor*b)%prime for a,b in
                                  zip(matrix[r][j:],matrix[j][j:])]
     return True
+
+
+# F4=F2[z]/(z*z+z+1); integer2 represents z, not an integer scalar.
+_GF4_PRODUCTS=((0,0,0,0),(0,1,2,3),(0,2,3,1),(0,3,1,2))
+_GF4_INVERSES=(0,1,3,2)
+
+
+def interior_binary_rank_matrix(hole=19):
+    """Evaluate the unrestricted Laurent matrix over F4 at z=2."""
+    if type(hole) is not int or not 1<=hole<=97 or hole%2!=1:
+        raise ValueError('require an odd hole from 1 to 97')
+    labels=moving_folded_labels()
+    positions={k:i for i,k in enumerate(labels)}
+    stencils=moving_folded_stencils(hole)[1]
+    if any(sum(row.values())%2 for row in stencils.values()):
+        raise AssertionError('odd shell sum prevents the odd-integer conclusion')
+    rows=[]
+    for stencil in stencils.values():
+        row={}
+        for (*label,shift),coefficient in stencil.items():
+            if coefficient%2:
+                i=positions[tuple(label)]
+                value=row.get(i,0)^{-1:3,0:1,1:2}[shift]
+                if value:row[i]=value
+                else:row.pop(i,None)
+        rows.append(row)
+    return labels,rows
+
+
+def interior_binary_rank_certificate(hole=19):
+    """Select a nonzero F4 minor, certifying independence over F2(z)."""
+    labels,rows=interior_binary_rank_matrix(hole)
+    basis={}
+    for original in rows:
+        row=dict(original)
+        while row:
+            pivot=min(row)
+            if pivot not in basis:
+                inverse=_GF4_INVERSES[row[pivot]]
+                basis[pivot]={i:_GF4_PRODUCTS[c][inverse] for i,c in row.items()}
+                break
+            factor=row[pivot]
+            for i,c in basis[pivot].items():
+                value=row.get(i,0)^_GF4_PRODUCTS[c][factor]
+                if value:row[i]=value
+                else:row.pop(i,None)
+    if len(basis)!=len(rows):
+        raise ValueError('no full binary Laurent rank certificate obtained')
+    return dict(kind='moving-binary-interior-rank-v1',hole=hole,
+                field_polynomial=7,evaluation=2,columns=sorted(basis),
+                rows=len(rows),variables=len(labels),odd_integer_windows_possible=True,
+                literal_existence_decided=False,all_pairs_decided=False)
+
+
+def verify_interior_binary_rank_certificate(certificate):
+    """Check the selected square minor with a separate row-pivot algorithm."""
+    try:
+        if (certificate.get('kind')!='moving-binary-interior-rank-v1' or
+                type(certificate.get('field_polynomial')) is not int or
+                certificate['field_polynomial']!=7 or
+                type(certificate.get('evaluation')) is not int or certificate['evaluation']!=2 or
+                certificate.get('odd_integer_windows_possible') is not True or
+                certificate.get('literal_existence_decided') is not False or
+                certificate.get('all_pairs_decided') is not False):return False
+        labels,rows=interior_binary_rank_matrix(certificate['hole'])
+        columns=certificate['columns']
+        if (not isinstance(columns,list) or len(columns)!=len(rows) or
+                any(type(i) is not int or not 0<=i<len(labels) for i in columns) or
+                len(set(columns))!=len(columns) or columns!=sorted(columns) or
+                type(certificate.get('rows')) is not int or certificate['rows']!=len(rows) or
+                type(certificate.get('variables')) is not int or certificate['variables']!=len(labels)):return False
+        matrix=[[row.get(i,0) for i in columns] for row in rows]
+        for j in range(len(rows)):
+            pivot=next((i for i in range(j,len(rows)) if matrix[i][j]),None)
+            if pivot is None:return False
+            matrix[j],matrix[pivot]=matrix[pivot],matrix[j]
+            inverse=_GF4_INVERSES[matrix[j][j]]
+            for i in range(j+1,len(rows)):
+                factor=_GF4_PRODUCTS[matrix[i][j]][inverse]
+                if factor:
+                    matrix[i][j:]=[a^_GF4_PRODUCTS[b][factor] for a,b in
+                                    zip(matrix[i][j:],matrix[j][j:])]
+        return True
+    except (KeyError,TypeError,ValueError,IndexError,AttributeError):
+        return False
 
 
 def moving_folded_residual(scale,coordinates,hole=19,reduced=False):
@@ -4143,6 +4422,24 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-binary-interior-rank-v1':
+        if not verify_interior_binary_rank_certificate(saved):
+            raise ValueError('invalid binary unrestricted interior rank certificate')
+        return dict(verified=True,hole=saved['hole'],rank=saved['rows'],
+                    claim='every finite window of integer shell rows admits odd integer values; endpoint traces excluded',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-antiperiod-two-odd-v1':
+        if not verify_antiperiod_two_odd_refusal(saved):
+            raise ValueError('invalid odd-integer sign-flip refusal')
+        return dict(verified=True,hole=saved['hole'],period=4,sign_shift=2,
+                    claim='no odd integer interior values reversing after two levels',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-antiperiod-two-v1':
+        if not verify_antiperiod_two_refusal(saved):
+            raise ValueError('invalid sign-flip period-four refusal')
+        return dict(verified=True,hole=saved['hole'],period=4,sign_shift=2,
+                    claim='interiors whose signs reverse after two levels only',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-open-phase-signs-v1':
         verify_open_phase_signs(saved)
         return dict(verified=True,hole=saved['hole'],length=saved['length'],first=saved['first'],
@@ -4462,6 +4759,9 @@ def main():
     p.add_argument('--open-phase-example',action='store_true',help='emit a checked two-centre window at hole 19 or 97, without search')
     p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
     p.add_argument('--first-level',type=int,default=3,help='first absolute centre level for --open-phase-window')
+    p.add_argument('--interior-binary-rank',action='store_true',help='certify unrestricted Laurent row rank in characteristic two')
+    p.add_argument('--antiperiod-two-odd-refusal',action='store_true',help='seek a linear odd-integer obstruction to signs reversing after two levels')
+    p.add_argument('--antiperiod-two-refusal',action='store_true',help='seek an original-row refusal for signs reversing after two levels')
     p.add_argument('--periodic-phase-refusal',action='store_true',help='seek a checked phase refusal at the even --period')
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
@@ -4477,6 +4777,24 @@ def main():
             with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate) if certificate['status']=='local_signing'
                          else certificate,indent=2));return
+    if args.interior_binary_rank:
+        certificate=interior_binary_rank_certificate(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,indent=2)
+        print(json.dumps(certificate,indent=2))
+        return
+    if args.antiperiod_two_odd_refusal:
+        certificate=antiperiod_two_odd_refusal(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,indent=2)
+        print(json.dumps(certificate,indent=2))
+        return
+    if args.antiperiod_two_refusal:
+        certificate=antiperiod_two_refusal(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,indent=2)
+        print(json.dumps(certificate,indent=2))
+        return
     if args.periodic_phase_refusal:
         prior=None
         if args.resume_phase:

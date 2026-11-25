@@ -3102,3 +3102,180 @@ Mallow independently restored the attached source, passed the four new
 window controls, and replayed a translated witness in a fresh process
 (lesson review 45803). That review confirms the stated local compatibility
 result, not global existence.
+
+## Hawthorn: a period-four sign-flip obstruction (25 November)
+
+For each `h=4j+1`, `0<=j<=24`, and also `h=91`, the all-word interior
+has no literal signing obeying `s(a,q,orientation,k+2)=-s(a,q,orientation,k)`
+at every level of a sufficiently long interior block. This excludes that
+specific sign-flip period-four pattern, even without endpoint phase
+conditions. It does not exclude general period-four words, decide endpoint
+completion, or meet the task's infinite-family/all-pairs acceptance.
+
+The finite system retains all 1,424 original integer rows at four residues,
+with 1,608 independent sign positions before imposing the named sign flips.
+The 804 additional binary equations say precisely that each position and
+its translate by two have opposite signs. No endpoint trace equations are
+used. Original shell parity plus these relations has 98 free binary
+coordinates at h=97. On that complete affine fibre, each untouched integer
+row is identically divisible by four. Divide by four and reduce modulo two:
+its remainder is a Boolean polynomial of degree at most two. An explicit
+XOR of those input polynomials is the constant one. Thus simultaneous
+integer zeroes would give `0=1`. There are no multiplied polynomials,
+external solvers, rational quotients or search assumptions in this proof.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --antiperiod-two-refusal --hole 97 --write /tmp/sign-flip-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/sign-flip-refusal.json
+```
+
+A fresh command emitted `status: refused`; a separate process returned
+`verified: true`, `period: 4`, `sign_shift: 2`, with both global decision
+flags false. Generation and replay of all 26 named hole certificates passed
+in 14.88 seconds while other exploratory processes were running. The
+certificates are small and regenerated rather than committed.
+
+The proof generator deliberately checks only the input span. At the other
+23 odd holes from 1 to 97, it returns unknown. That is not a compatible
+signing or a complete polynomial-ideal result. In particular h=19 remains
+open under this restriction. Tests reject damaged identities, altered hole
+and scope, an unknown result passed as a proof, and removal of the sign-flip
+hypothesis. They also check the relation's exact sign convention and the
+negation of original integer rows under translation by two.
+
+Validation of this addition: four focused sign-flip controls pass, all 112
+spectrum tests pass in 107.89 seconds, and a fresh command-line process
+replays the saved h=97 identity. The inherited direct physical-column test
+covers four unwrapped centres at first level 3 and minimum half-length 8;
+those four residues are exactly the rows used here after period-four
+identification. `git diff --check` passes.
+
+A different encoding of the unrestricted three-centre h=97 window, using
+all exact allowed short-row sign patterns and the fully reduced complete
+binary basis, stopped unknown after 600.02 seconds, 24,742,784 branches and
+1,694,391 conflicts. It used installed OR-Tools 9.15.6755 only for exploratory
+search. This is a resource limit, not a local obstruction. The shipped
+sign-flip certificate generator and checker use the standard library only.
+
+### Stronger linear obstruction for all odd integer values
+
+For all 25 holes `h=4j+1`, `0<=j<=24`, there is a simpler, stronger
+certificate. After substituting `s(k+2)=-s(k)`, let A be the original integer
+matrix on the two independent levels (804 coordinates, 1,424 rows).
+The certificate supplies row weights `w_r` in `{0,1,2,3}` such that
+
+    C = sum_r w_r A_r,       every C_j is divisible by 4,
+    sum_j (C_j/4) is odd.
+
+If A*s=0, then `(C/4)*s=0`. When every s_j is an odd integer, its left side
+is odd modulo two, a contradiction. Thus these holes exclude even arbitrary
+odd integer values under the stated sign-flip constraint, not just values
++1 and -1. No endpoint phases are needed. This still says nothing about
+unrestricted interiors, endpoint completion or arbitrary support choices.
+
+Generation solves `A*b=A*1/2` modulo four, necessary for `s=1-2b`.
+Unit row operations and divisions by two retain the row weights in two bit
+planes. The independent verifier does none of that elimination: it rebuilds
+A, forms the weighted sum with ordinary integers, and checks divisibility
+and the odd sum. It uses no Boolean compilation, rational elimination,
+endpoint phase calculation, external solver or bounded search. All 25
+certificates regenerated and replayed in 13.61 seconds. At h=97 the
+582-byte certificate selects 534 rows; C/4 has 652 nonzero coefficients,
+with histogram `{-3:100, -2:49, -1:354, 1:149}` and sum -603.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --antiperiod-two-odd-refusal --hole 97 --write /tmp/odd-sign-flip.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/odd-sign-flip.json
+```
+
+The separate replay prints `verified: true` and the precise claim: no odd
+integer interior values reversing after two levels. The two sign-flip
+compilers are checked against the pre-existing four-residue shell compiler;
+its unwrapped rows are covered by the direct physical-column control at
+half-length 8. A six-level unwrapped block, with centres 3 through 6, supplies
+all four residues and their radius-one neighbours. Consequently a longer
+sign-flip interior cannot evade the identity through distant endpoint
+patches. Sign reversals remain a hypothesis, not a forced property of a
+physical pair.
+
+Hole 91 retains only the Boolean sign obstruction above: this linear
+checker returns unknown there. Hole 19 also returns unknown. Regression
+controls keep those scopes separate, check a damaged bit in the row weights,
+and reject altered divisors, holes, dimensions and global decision claims.
+They replay successfully with the Boolean, rational and endpoint-phase
+routines disabled.
+
+### Why that linear obstruction cannot settle the unrestricted interior
+
+For **every odd hole h from 1 to 97**, every finite unwrapped window of the
+bare integer shell rows has an odd-integer solution. This theorem includes
+no endpoint trace equations, no sign bounds and no physical endpoint rows.
+It is not a literal signing or an infinite compatible word. It explains a
+precise limit of the preceding linear congruence method.
+
+Let M(z) be the 356-by-402 Laurent matrix whose `(row,label)` coefficient
+is `sum_d c(row,label,d)*z^d`, with the radius-one shifts `d=-1,0,1`.
+Reduce coefficients modulo two. Evaluate at the nonzero element alpha of
+`F4=F2[alpha]/(alpha^2+alpha+1)`. The retained certificate selects a square
+356-column minor that is nonsingular over F4. Its determinant therefore is
+not the zero Laurent polynomial. Hence M(z) has full row rank over F2(z).
+All 49 hole certificates regenerated and independently replayed in 8.98
+seconds. The verifier uses a different row-pivot algorithm from selection;
+tests check its field arithmetic against polynomial multiplication.
+
+Any binary dependence between finitely many shifted shell rows would give
+a polynomial row vector f(z) with `f(z)*M(z)=0`. Full row rank forces f=0.
+Thus the integer matrix A_N on N consecutive unwrapped centres has binary
+row rank exactly `356*N`; there are `402*(N+2)` coordinates. Direct finite
+binary compilations at N=1,3,7 independently confirm the implication at
+holes19/97. The theorem itself is for every positive N, not a rank census
+bounded by those controls.
+
+Here is the integer existence argument. Choose a square column minor B of
+A_N with odd determinant D, and write F for its other columns. Every shell
+row has even coefficient sum, so `B*1+F*1=0` modulo two. Set
+
+    s_free = D*1,       s_pivot = -adj(B)*F*1.
+
+These are integers and `A_N*s=0`, since `B*adj(B)=D*I`. The free coordinates
+are odd. Modulo two, `adj(B)*F*1=adj(B)*B*1=D*1`, so every pivot coordinate
+is odd too. No bounds on those odd integers are asserted. This proves that
+no linear congruence of the bare interior rows can exclude all odd values;
+the actual unit-sign restrictions or additional endpoint conditions matter.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --interior-binary-rank --hole 19 --write /tmp/binary-interior-rank.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/binary-interior-rank.json
+```
+
+The separate replay reports rank356 and explicitly excludes endpoint
+traces from its odd-integer claim. Tests reject the singular first-356-column
+minor, duplicate columns, wrong field conventions, altered dimensions and
+broader existence flags. All source remains standard-library only.
+
+Further exploratory limits in this stretch: at h=19 the sign-flip model
+with physical endpoint phases was reported infeasible by installed OR-Tools
+in439.30s, but the original-row Boolean proof is still unknown. Its first
+38.75s pass retained three verified linear consequences, then hit the
+40,000-pivot limit. Resuming those consequences with a600s sweep retained
+seven proof rounds but stopped at proof extraction's time limit with91
+parameters remaining; no refusal is claimed. The same sign-flip model
+without endpoint phases stopped unknown after300.01s. These solver and
+resource reports do not strengthen either theorem above.
+
+Final validation for the linear and binary-rank additions: all116 spectrum
+tests passed in107.94s. Fresh separate command-line processes replayed both
+the h=97 odd-integer obstruction and unrestricted binary-rank certificate.
+`git diff --check` passed. The h=19 unrestricted three-centre exact-table
+search stopped unknown after1200.02s,29,073,078 branches and1,897,417
+conflicts. Thus neither longer-window search supplies a local obstruction
+or signing. The actual unit-sign problem with endpoint traces, then
+physical endpoint completion and arbitrary supports, remains the next
+mathematical obstacle; enlarging a bare linear congruence test cannot
+remove it. Main task acceptance and the global milestone remain open.
+
+Aster independently replayed the earlier26 Boolean sign-flip refusals and
+four focused controls (canonical review46008). That review predates the
+stronger odd-integer identity and binary-rank theorem, which have not yet
+received independent review. No acceptance or publication is inferred from
+that earlier review.

@@ -15,6 +15,153 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_binary_laurent_rank_has_independent_field_and_window_controls(self):
+        def multiply(a,b):
+            product=0
+            while b:
+                if b&1:product^=a
+                b>>=1;a<<=1
+            for power in range(product.bit_length()-1,1,-1):
+                if product>>power&1:product^=7<<(power-2)
+            return product
+        for a in range(4):
+            for b in range(4):
+                self.assertEqual(rs._GF4_PRODUCTS[a][b],multiply(a,b))
+            if a:self.assertEqual(multiply(a,rs._GF4_INVERSES[a]),1)
+        for hole in (19,97):
+            certificate=rs.interior_binary_rank_certificate(hole)
+            self.assertEqual(certificate['rows'],356)
+            self.assertTrue(rs.verify_interior_binary_rank_certificate(certificate))
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+            for length in (1,3,7):
+                keys,rows,_=rs.open_phase_system(hole,length)
+                refusal,basis=rs.binary_elimination(rows)
+                self.assertIsNone(refusal)
+                self.assertEqual(len(basis),len(rows))
+                self.assertEqual(len(keys)-len(basis),46*length+804)
+
+    def test_binary_laurent_rank_rejects_singular_minor_and_broader_scope(self):
+        import copy
+        certificate=rs.interior_binary_rank_certificate(19)
+        for key,value in [('hole',2),('field_polynomial',5),('evaluation',3),
+                          ('columns',list(range(356))),('columns',[0]*356),
+                          ('rows',355),('variables',401),('odd_integer_windows_possible',False),
+                          ('literal_existence_decided',True),('all_pairs_decided',True)]:
+            damaged=copy.deepcopy(certificate);damaged[key]=value
+            self.assertFalse(rs.verify_interior_binary_rank_certificate(damaged))
+        with patch.object(rs,'interior_binary_rank_certificate',side_effect=AssertionError), \
+             patch.object(rs,'_parity_trace_data',side_effect=AssertionError):
+            self.assertTrue(rs.verify_interior_binary_rank_certificate(certificate))
+        with self.assertRaises(ValueError):rs.interior_binary_rank_certificate(98)
+        self.assertFalse(rs.verify_interior_binary_rank_certificate({}))
+
+    def test_odd_integer_sign_flip_certificate_has_independent_integer_replay(self):
+        for hole in (1,49,97):
+            certificate=rs.antiperiod_two_odd_refusal(hole)
+            self.assertEqual(certificate['status'],'refused')
+            with patch.object(rs,'binary_shell_quadratics',side_effect=AssertionError), \
+                 patch.object(rs,'rational_recovery',side_effect=AssertionError), \
+                 patch.object(rs,'_parity_trace_data',side_effect=AssertionError):
+                self.assertTrue(rs.verify_antiperiod_two_odd_refusal(certificate))
+                self.assertTrue(rs.verify_saved(certificate)['verified'])
+            rows=rs._antiperiod_two_odd_rows(hole)
+            low,high=map(lambda v:int(v,16),certificate['weights'])
+            combined=defaultdict(int)
+            for index,row in enumerate(rows):
+                for i,c in row.items():
+                    combined[i]+=((low>>index&1)+2*(high>>index&1))*c
+            self.assertTrue(all(c%4==0 for c in combined.values()))
+            self.assertEqual(sum(c//4 for c in combined.values())%2,1)
+        self.assertEqual(rs._antiperiod_two_system(19)[1],rs._periodic_phase_system(19,4)[1])
+
+    def test_odd_integer_sign_flip_scope_and_weight_damage_rejected(self):
+        import copy
+        certificate=rs.antiperiod_two_odd_refusal(97)
+        for key,value in [('hole',19),('hole',2),('period',8),('sign_shift',4),
+                          ('shift_factor',1),('divisor',2),('divisor',4.0),
+                          ('literal_existence_decided',True),('all_pairs_decided',True),
+                          ('weights',['0x0','0x0']),('weights',['0x0']),
+                          ('weights',['0x'+('f'*1000),'0x0'])]:
+            damaged=copy.deepcopy(certificate);damaged[key]=value
+            self.assertFalse(rs.verify_antiperiod_two_odd_refusal(damaged))
+        damaged=copy.deepcopy(certificate)
+        damaged['weights'][0]=hex(int(damaged['weights'][0],16)^1)
+        self.assertFalse(rs.verify_antiperiod_two_odd_refusal(damaged))
+        self.assertFalse(rs.verify_antiperiod_two_odd_refusal({}))
+        for hole in (19,91):
+            unknown=rs.antiperiod_two_odd_refusal(hole)
+            self.assertEqual(unknown['status'],'unknown')
+            self.assertNotIn('weights',unknown)
+            self.assertFalse(rs.verify_antiperiod_two_odd_refusal(unknown))
+        # The Boolean sign obstruction at91 is not silently strengthened to
+        # an obstruction for all odd integers.
+        self.assertEqual(rs.antiperiod_two_refusal(91)['status'],'refused')
+
+    def test_antiperiod_two_input_span_refusal_replays_without_phase_laws(self):
+        for hole in (1,49,91,97):
+            certificate=rs.antiperiod_two_refusal(hole)
+            self.assertEqual(certificate['status'],'refused')
+            self.assertEqual(certificate['identity']['multipliers'],[])
+            self.assertTrue(rs.verify_antiperiod_two_refusal(certificate))
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+        # Compilation can calculate trace laws, but this proof must not use
+        # their endpoint phases as extra binary assumptions.
+        size,rows,equations=rs._antiperiod_two_system(97)
+        self.assertEqual(size,1608)
+        self.assertEqual(len(rows),1424)
+        self.assertEqual(len(equations),804)
+        self.assertTrue(all(mask.bit_count()==2 and rhs==1 for mask,rhs in equations))
+
+    def test_antiperiod_two_proof_rejects_damage_and_broader_scope(self):
+        import copy
+        certificate=rs.antiperiod_two_refusal(97)
+        for key,value in [('hole',19),('period',2),('period',True),
+                          ('sign_shift',4),('shift_factor',1),
+                          ('free_count',0),('free_count',98.0),('literal_existence_decided',True),
+                          ('all_pairs_decided',True),('status','unknown')]:
+            damaged=copy.deepcopy(certificate);damaged[key]=value
+            self.assertFalse(rs.verify_antiperiod_two_refusal(damaged))
+        for key,value in [('raw',0),('raw',-1),('raw',1.0),('raw',1<<1424),
+                          ('polynomial',0),('polynomial',True),('multipliers',[1])]:
+            damaged=copy.deepcopy(certificate);damaged['identity'][key]=value
+            self.assertFalse(rs.verify_antiperiod_two_refusal(damaged))
+        self.assertFalse(rs.verify_antiperiod_two_refusal({}))
+        for hole in (0,2,98,True,3.0):
+            with self.assertRaises(ValueError):rs.antiperiod_two_refusal(hole)
+
+    def test_antiperiod_two_no_input_span_refusal_remains_unknown(self):
+        certificate=rs.antiperiod_two_refusal(19)
+        self.assertEqual(certificate['status'],'unknown')
+        self.assertNotIn('identity',certificate)
+        self.assertFalse(certificate['literal_existence_decided'])
+        self.assertFalse(certificate['all_pairs_decided'])
+        self.assertFalse(rs.verify_antiperiod_two_refusal(certificate))
+        with self.assertRaises(ValueError):rs.verify_saved(certificate)
+
+    def test_antiperiod_two_constraints_are_exact_sign_reversals(self):
+        size,rows,equations=rs._antiperiod_two_system(19)
+        # Every assignment of two levels extends uniquely with sign flips.
+        randomizer=random.Random(307)
+        for _ in range(3):
+            values=[randomizer.randrange(2) for _ in range(size//2)]
+            bits=sum((values[2*(i//4)+i%2]^(i%4//2))<<i for i in range(size))
+            self.assertTrue(all((bits&mask).bit_count()%2==rhs for mask,rhs in equations))
+            damaged=bits^1
+            self.assertFalse(all((damaged&mask).bit_count()%2==rhs for mask,rhs in equations))
+        # Reversing two levels negates the original homogeneous row; rows
+        # are not quietly replaced by a rational or ternary relaxation.
+        width=len(rows)//4
+        for level in range(2):
+            for left,right in zip(rows[level*width:(level+1)*width],
+                                  rows[(level+2)*width:(level+3)*width]):
+                def quotient(row):
+                    out=defaultdict(int)
+                    for i,c in row.items():
+                        label,position=divmod(i,4)
+                        out[label*2+position%2]+=c*(-1 if position>=2 else 1)
+                    return {i:c for i,c in out.items() if c}
+                self.assertEqual(quotient(left),{i:-c for i,c in quotient(right).items()})
+
     def test_recorded_open_windows_satisfy_all_original_integer_rows(self):
         for hole in (19,97):
             for first in (3,4,11,20):
