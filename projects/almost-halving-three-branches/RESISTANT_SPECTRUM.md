@@ -3779,3 +3779,398 @@ mathematical obstacle is a compatible overlapping unit-sign extension with
 both physical endpoints, or an unrestricted obstruction; the three-term
 recovery exposes a smaller core and its exact extra sign restrictions.
 Repeating these recorded solver caps is not a demonstrated next step.
+
+## Tern: one-slice transfer states, with both endpoint interfaces
+
+25 November 2026. **Acceptance remains unmet; priority stays provisional.**
+Rook's inspected continuation was recovered in private commit `523d097`,
+not inferred from the stale room's earlier failed searches. The new work
+below does not decide any accepted path length or arbitrary hole support.
+
+### The unreduced strip needs one slice of memory, not two
+
+For every `1<=h<=98`, each **unreduced** interior shell stencil has offsets
+exactly `{-1,0}` or `{0,1}`. This follows directly from the physical column
+form: an interior exponent is `Q*t+u*r+c`, with `c` zero or one. A row
+at `Q*t+u*r` therefore uses only source levels `r` and `r-u`. In particular
+no unreduced row uses all three levels `r-1,r,r+1`. This is stronger than
+merely bounding the radius by one. Opposite-tail substitution can destroy
+this property, so it must not silently be applied to the new graph.
+
+Let `P` be the 178 stencils with offsets `{-1,0}`, and `F` the 178 with
+`{0,1}`. Define a transition from a 402-sign slice U to another slice V by
+all P rows centred at the level of V and all F rows centred at the level
+of U. These are 356 original integer equations on the two slices. A
+vertex of the graph stores **one** 402-sign slice, so the unphased graph
+has at most `2^402` vertices, rather than the earlier `2^804` bound.
+No graph has been enumerated. This finite reduction is not the acceptance
+result.
+
+Here are the exact endpoint conventions, for `t=2L+1>=9`:
+
+* Prefix: all physical left rows, and P centred at 2. Quantify the 200
+  retained old-grid signs and slice 1, leaving slice 2 as the initial state.
+* Core: transitions from slice j to j+1 for `j=2..L-2`.
+* Suffix: F centred at L-1, and all physical right rows. Quantify slice L,
+  leaving slice L-1 as the terminal state.
+
+Thus the core has exactly **L-3 edges**. Every P centre `2..L-1` occurs
+once: centre 2 is in the prefix and the rest in the core. Every F centre
+`2..L-1` occurs once: centre L-1 is in the suffix and the rest in the core.
+The physical left and right rows are also retained once. This partition
+proves equivalence to the complete shell system on the named support,
+including the shortest allowed scale t=9. `adjacent_transfer_blocks(h)`
+returns these three constant-size prototypes in original literal coordinates.
+It never substitutes an absent hole vertex or identifies two levels.
+
+Balance remains a separate necessary condition for the target pair. It can
+be carried as an integer path weight: prefix weight is the sum of its 200
+old-grid signs and its slices 1 and 2; each core edge adds the sum of its
+new slice; the suffix adds slice L. Their total is the full signed word
+sum, which must be zero. Therefore unweighted reachability alone must not
+be reported as a balanced physical pair.
+
+The five endpoint-derived traces can optionally prune each edge. All five
+use two levels with offsets `{-1,0}`. On edge j to j+1 their right sides
+are `(j mod 2,j mod 2,(j+1) mod 2,(j+1) mod 2,0)`. The phased graph has
+at most `2^403` vertices if this parity is included in the state; the
+unphased `2^402` bound concerns integer shells alone. Physical endpoints
+force the absolute phase; it is not a selectable free phase.
+
+### Saturate a local window before treating it as a path
+
+`adjacent_phase_system(h,n,f)` includes **every** original interior row
+whose support lies in levels `f..f+n-1`, and every contained absolute
+trace, for `f>=2`. It has `402n` literal signs, `356(n-1)` integer rows,
+and `5(n-1)` traces. The old open-centre window retains only rows at its
+listed centres; its outside levels do not yet satisfy all contained rows.
+That distinction explains why an open witness cannot simply be assumed to
+supply an extendible boundary state.
+
+The recorded h=43 three-centre word restricts to three consecutive states
+(two compatible transitions) at levels 3,4,5. This is the **same** recorded
+word, not a newly found extension. Repackage it and independently replay
+all its integer rows and traces, using only the standard library:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-phase-example --hole 43 --write /tmp/adjacent-word.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/adjacent-word.json
+```
+
+Both actual commands returned `verified: true`, `levels: 3`, and both
+existence-decision flags false. The checker rejects an altered active sign,
+wrong dimensions, wrong minimum half-length, shifted phase and scope flags.
+`--adjacent-phase-window N --first-level F` exposes a bounded standard-library
+search of this stronger local system; a limit is unknown, never refusal.
+A two-level h=43 run stopped unknown at its 100,000-node cap in 8.057 seconds,
+despite the independently known positive path. This is a control against
+mistaking search failure for impossibility.
+
+The tests compare the **entire** prefix/core/suffix matrix with independent
+physical shell columns at (t,h)=(9,1),(9,43),(11,19),(11,97),(15,98), including
+all retained vertices and row multiplicities. They check the two-level row
+support for every one of the 98 holes, and compare the saturated rows and
+traces with all contained rows in a larger open window. These controls do
+not audit an infinite construction: none has been produced.
+
+### An integral one-step driver, not a unit-sign construction
+
+There is a further exact result for **each h=24..98**. On one transition,
+write s for the previous 402 coordinates, v for the next third arm's 46
+coordinates, and x for the next first/second arms' 356 coordinates. The
+356 original rows have the form
+
+    B_h x + A_h s + C_h v = 0.
+
+`B_h` is unimodular. The new generator proves this by explicit **integer
+original-row combinations**, one for each target coordinate, giving
+
+    x_i = sum_j D_(i,j) (s,v)_j.
+
+The independent checker forms every claimed weighted sum of the untouched
+original rows and requires its target block to be the corresponding unit
+vector. Thus its integer weight matrix W satisfies W*B_h=I, proving
+unimodularity and uniqueness. It also substitutes all 356 recovery formulas
+back into every original row, checking the converse without redoing the
+elimination. There are 448 free original coordinates, precisely s and v;
+none is a new linear combination masquerading as a literal sign.
+All 356 coefficient sums are odd. Consequently **any** odd integer initial
+slice and **any** sequence of odd integer third-arm controls extend uniquely
+to an odd integer interior word. This claim is independent of L, by the
+transition partition. It includes neither physical endpoints nor unit bounds.
+
+This is a finite, exact certificate for each of 75 possible h values, not
+an extrapolation from sampled h or sampled scales. The all-75 test regenerates
+and checks every identity. No assertion about the exceptional h=23 or an
+integral recurrence at h<=22 is made. For h=43, all formulas have at most
+47 terms and coefficients of magnitude at most four; 112 are single signed
+copies. Of the remaining formulas, 119 depend only on the previous slice,
+and 125 depend on its values and the next third arm. The 119 fixed forms
+already give necessary unit conditions on every state with a successor.
+
+Generate and replay one certificate, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-driver --hole 43 --write /tmp/integral-driver.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/integral-driver.json
+```
+
+Both actual commands reported `verified: true`, 448 inputs and 356 recovered
+coordinates, with both existence-decision flags false. The certificate is
+regenerated outside Git. `adjacent_driver_step(certificate,previous,third)`
+evaluates the recurrence and deliberately returns nonunit values rather than
+silently clipping them or claiming a signing.
+
+The endpoint phase laws also simplify under this recurrence. For odd values
+write s_i=1-2b_i. A recovered coordinate gives the exact integer formula
+
+    b_i = (1-sum_j D_(i,j))/2 + sum_j D_(i,j)*b_j.
+
+Pull each of the five trace equations back through these formulas modulo
+two. All next-third-arm terms cancel: each becomes a parity observable of
+**one previous state**. Pulling the same observable on the next state back
+again gives itself plus drift `(1,1,1,1,0)`, independent of the controls.
+`adjacent_driver_phase_laws` checks these polynomial identities directly;
+the all-75 test checks all five cancellations and drifts at every h=24..98.
+At h=43 these five single-state masks have rank five and required values
+`(1,0,1,0,1)` on an even level. Odd levels reverse the first four values.
+Thus only the initial five phase conditions need be imposed in a recurrence
+search: exact evolution preserves every later absolute trace. At this hole,
+the phase-admissible state bound improves further to `2^397` per level
+parity, or `2^398` with both parities included. This does not enumerate those
+states or decide their unit-compatible transitions.
+
+The actual recorded unit word is reconstructed exactly from its slice at
+level 3 and third-arm slice at level 4. In contrast, keeping that same
+phase-correct unit initial slice and choosing all 46 next third-arm signs
+positive yields **49 nonunit outputs**, first `(arm=1,q=1,s=+1)` with value
+3, and maximum magnitude seven. The untouched integer rows still hold.
+This explicit failure shows why integral, odd and phase-correct evolution
+is not the missing unit construction. Random odd controls over eight steps
+also retain all original integer rows and every absolute trace, while
+producing nonunit values. Damaged coefficient identities and omitted or
+duplicated recoveries are rejected.
+
+The recurrence also strengthens the recorded word's extension failure.
+Its fully constrained last middle slice (level 5) has **55** next first/second
+arm values forced to be nonunit **regardless of all 46 next-third-arm
+choices**. This is stronger than freezing the old outside level 6. The first
+failure is next `(arm=1,q=45,s=+1)=-3`. In the canonical two-level system,
+its recovery is the sum of original rows 10,163,164,269,353 with weights
+-1,-1,+1,+1,+1; its 13 input terms all belong to the previous slice.
+The new test evaluates them on the stored level-5 word. Thus that state
+cannot be repaired by any next control, at any sufficiently large L.
+This is a fixed-state refusal only: another unit state may have a successor.
+
+### Reverse the interior without assuming reversible physical endpoints
+
+Put `G(a,q,s)=(a,q+s,-s)`, swapping the two orientations within each old
+edge. G is an involution of the 402 labels. For every h=1..98, the complete
+transition row multiset is unchanged, up to multiplying equations by -1,
+under `(U,V) -> (G V,G U)`. `adjacent_time_reversal(h)` checks this exact
+integer permutation with row multiplicities; all 98 checks passed. Hence
+T(U,V) holds if and only if T(G V,G U) holds. This is an **interior**
+symmetry; the physical endpoint predicates have not been identified.
+
+For h=24..98, the same certified forward driver therefore recovers a
+predecessor: apply it to G of the current state and G of a proposed previous
+third arm, then apply G to its output. `adjacent_driver_predecessor` does
+this and reproduces the actual stored transition from slice 3 to slice 4.
+For the recorded h=43 slice 3, it also proves **43 forced nonunit
+predecessor values**, regardless of all previous third-arm choices; one
+is `(arm=1,q=45,s=-1)=3`. Combined with the 55 forced successor failures
+at slice 5, this known two-edge path is blocked at both ends even after
+freeing every outside sign. It is not evidence that every path is blocked.
+
+At h=43, G swaps phase masks 0 and 1, swaps 2 and 3, and fixes 4.
+The paired masks have opposite prescribed values; every mask has even
+cardinality. Thus no phase-correct unit state can satisfy G U=U or G U=-U:
+in either case its first two observables would be equal. This is a direct
+parity proof, not failed search. It rules out folding a construction about
+a single state, while leaving folds about an edge open.
+
+We tested the four-state cycle
+`A,B,G B,G A`. By reversibility its four edges require just
+T(A,B), T(B,G B), T(G A,A); the fourth is automatic. Give A the even
+phase and B the odd phase: G supplies the correct phases of the other two.
+This differs from imposing a sign reversal after two levels. The exact
+period-four shell model with these identifications has 580 signs after
+forced copies, 976 integer rows and all 20 original trace equations.
+It was a construction ansatz, not a constructed cycle; its bounded outcomes follow below.
+
+### Bounded constructive attempts and the exact remaining obstacle
+
+Discovery used already-installed CP-SAT, one worker; the shipped generator
+and all identity checkers remain standard-library-only. These different
+models/phases do not establish a solver performance ordering.
+
+* Four consecutive states starting at level 2, with exact row tables and
+  reduced binary consequences: UNKNOWN after 1198.685 seconds,
+  18,932,849 branches and 2,719,113 conflicts. It has 1,272 signs after
+  forced copies, 732 integer rows and all 15 absolute traces.
+* Three consecutive states starting at level 2, adding all one-step recovery
+  equalities and imposing the five initial single-state phases: UNKNOWN
+  after 300.044 seconds, 16,280 branches and no reported conflicts. It
+  has 982 signs after copies and 488 original integer rows. Its middle
+  state would be an odd-level state with both a predecessor and successor;
+  the known three-state word instead has an even middle level.
+* The mirror period-four ansatz above: the solver reported INFEASIBLE
+  after 60.908 seconds, 1,917,846 branches and 165,752 conflicts. This is
+  recorded as a solver report, **not a portable obstruction certificate**.
+  The existing Boolean cubic identity engine reduced its 94 binary
+  parameters to 93 but stopped unknown at 20,000 pivots (30.386 seconds).
+  A 40,000-pivot extraction also stopped unknown, with 93 parameters,
+  after 182.446 seconds. No contradictory identity was produced. Its
+  necessary dyadic equations for b in s=1-2b were compatible at every
+  tested modulus four through 256; those checks prove no exact odd
+  solution or unit solution.
+
+The earlier complete 129-test suite passed in 315.932 seconds before the
+three additional driver tests. All six adjacent/driver tests then passed
+in 76.083 seconds, including every integral driver and phase law for all
+75 holes and every reversal for all 98 holes. The final focused trajectory
+test also passed after adding the two-end dead-state and phase-reflection
+controls. Separate command-line generation and replay of the actual local
+word and of the h=43 integral-driver identities passed.
+
+No new physical pair, indefinitely extendible unit word, or all-pairs bound
+has been obtained. A next constructive step must choose third-arm controls
+so **all** recovered values stay unit indefinitely, with balance and both
+physical endpoints, or replace that step by a rigorous unrestricted
+obstruction. The recurrence proves that integrality, oddness and phase
+propagation alone will not settle it. Do not freeze the recorded path's
+middle endpoints or repeat these same caps as though they were fresh work.
+
+The four-state driver model starting at level 3, with all 1,068 recovery
+rows in addition to the 732 original nonzero rows after copies and the
+five initial phase conditions, also ended UNKNOWN after 1200.048 seconds
+(15,654 branches, no reported conflicts). Its outside signs were changeable
+hints from the recorded word, not fixed assumptions.
+
+### A bounded drift forces every long core slice to be balanced
+
+There is a stronger necessary condition for **every odd h=25..97**, not
+just a restriction on the stored word. Let S_r be the sum of all 402 signs
+in folded slice r. Exact substitution in the one-step recovery gives
+
+    S_(r+1) = S_r = S.
+
+Define g_r as a weighted sum of that slice, with the following integer
+weights on labels (arm,q,orientation). Unlisted parity cases have weight zero.
+
+| Arm | Orientation | Range | Weight |
+| --- | --- | --- | --- |
+| 1 | + | q<h, q odd | -2 |
+| 1 | + | q>=h | (-1)^q |
+| 1 | - | q<=h, q odd | +2 |
+| 1 | - | q>h | -(-1)^q |
+| 2 or 3 | + | q even | +2 |
+| 2 or 3 | - | q even | -2 |
+
+The sum of absolute weights is exactly 402. Pulling this linear form
+through two consecutive certified recoveries gives the exact identity
+
+    g_(r+2) - g_r = -2 S.
+
+`adjacent_balance_drift` checks both identities by direct integer
+coefficient substitution, including cancellation of every third-arm
+control. It does not trust the exploratory control-space calculation
+that suggested them. Its new test regenerates the identities for **all
+37 odd holes** in the stated range.
+
+**Bound.** On a unit path, |g_r|<=402 and S is even. In 405 consecutive
+states there are 202 two-step advances from the first state, so
+`|404 S|<=804`. A nonzero even S would make the left side at least 808.
+Therefore **every unit path with at least 405 states has S=0**. This also
+excludes every nonzero-S component from containing a cycle.
+
+For a resistant scale, L=3990m with m>=1. The full physical core has L-2
+states, at least 3988, so every one of its slices 2..L-1 must contain
+exactly 201 signs of each kind, for these 37 named moving-hole supports.
+The old-grid signs and the outer slices 1,L still obey their physical
+endpoint equations and the overall balance condition; they are not covered
+by this assertion. No other two-hole support has been excluded.
+
+The recorded h=43 middle slices 3,4,5 each have S=-8. More generally no
+word in their conserved-sum component can be extended indefinitely as
+unit signs, even apart from their particular two dead-end states. A random
+odd-control trajectory verifies both exact identities while retaining S=-8
+and producing nonunit values; the bound requires actual unit signs.
+
+The next construction search must therefore work in the **S=0 component**.
+A new three-state, first-level-2 search imposes that necessary condition
+alongside the original rows and all ten phase traces. This condition was
+not assumed for the preceding short-window searches and is not inferred
+from their failures. It still does not decide an infinite balanced path,
+either physical endpoint, or the all-pairs milestone.
+
+The same `--adjacent-driver --hole 43` generation and `--verify` replay
+commands above now also check the balance-drift identities and report
+`long_core_zero_sum_after_states: 405`. The all-37 drift test passed in
+19.930 seconds. This is a necessary condition on the named supports, not
+an upper bound excluding their zero-sum component.
+
+### An actual balanced two-edge path, in both starting parities
+
+The new balanced three-state search returned a candidate in **2.656 seconds**
+(614,199 branches and 7,464 conflicts). Direct substitution accepted all
+712 original integer rows, all ten absolute phase traces, every unit sign,
+and zero sum in each of the three states. It uses 1,206 original signs;
+the discovery model had 982 after necessary signed copies. This is a new
+finite witness, not a completed resistant pair.
+
+The stored path begins at level 2. Reversing it with G supplies a valid path
+at odd starting levels; translation by two supplies every other start of
+the same parity. The generator rebuilds and checks all requested equations
+at **every** requested start rather than trusting either transformation:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-balanced-example --hole 43 --first-level 2 --write /tmp/balanced-path.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/balanced-path.json
+```
+
+Both actual commands reported `verified: true` and `slice_sums: [0,0,0]`,
+with both existence-decision flags false. Tests cover starts 2,3,4,11,
+reject a false balance claim on the old unbalanced word, and compare the
+complete physical matrix at the new minimum half-length L=5, t=11.
+
+This particular balanced path is also a dead end at both boundaries:
+its initial state forces 43 nonunit predecessor coordinates, and its last
+state forces 47 nonunit successor coordinates, independently of all outer
+third-arm choices. Tests keep both failures. Its odd middle state does
+have a unit predecessor and successor, disproving the possible local
+odd-phase obstruction suggested by the earlier timeouts. The reversed
+word likewise supplies an even middle state. Neither fact asserts that
+these two-edge paths can be joined together.
+
+The subsequent **balanced four-state** search retained the original 1,068
+integer rows, all 15 traces and the necessary zero slice sum, with 1,272
+signs after copies. It ended UNKNOWN after 181.072 seconds (8,410,067
+branches and 695,610 conflicts). No longer word or obstruction was emitted.
+This run leaves a checked balanced two-edge witness and the exact zero-sum
+core reduction; it does not decide whether even three consecutive compatible
+core edges exist, much less join the physical endpoints. Acceptance and the
+arbitrary-triple milestone remain unmet.
+
+Final verification: all eight adjacent/driver/balance tests passed together
+in 82.252 seconds after the last changes. Regenerate these checks with
+`python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -k adjacent -v`.
+The actual balanced-example and integral-driver command-line generation and
+separate verification commands above also passed; `git diff --check` is clean.
+
+### Independent conflict recovery (Mica, 25 November)
+
+Recovered the missing continuation from fixed-channel inspection of contribution
+`277aaf335ce4f74c077965f9d4a5d86d2a0be9ae`, against shared source `5180629`.
+The three complete per-path diffs reconstructed against their recorded base;
+only the missing adjacent-state work was added. The current endpoint compiler,
+high-arm recovery, folded stencils and open witness functions remain unchanged.
+Eight focused adjacent-state tests passed in 70.798 seconds, including all 75
+driver holes, all 37 drift holes, complete physical-column comparisons and
+corruption rejection. The existing full endpoint compiler comparison passed
+separately. Balanced-example and integral-driver generation and separate replay
+both passed using the standard library. These checks recover the continuation;
+they do not establish the infinite-family acceptance result. Next work remains
+a compatible zero-sum unit-control path with both physical endpoints, or an
+unrestricted obstruction. Independent integration of this repaired source is
+still required before treating it as shared source.

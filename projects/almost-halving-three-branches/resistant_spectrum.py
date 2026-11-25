@@ -2004,6 +2004,414 @@ def open_phase_system(hole=19, length=1, first=3):
     return keys,rows,equations
 
 
+def adjacent_transfer_blocks(hole=19):
+    """Exact full-shell prefix, one-slice transition, and suffix prototypes.
+
+    In the prefix, slice indices are 1,2 and edge keys denote old grid
+    vertices. In the suffix, indices 0,1 mean L-1,L. In a transition they
+    mean j,j+1. Prefix/suffix outer signs are existentially quantified when
+    viewing the shell problem as a finite graph. This does not impose
+    balance or decide any graph's accepted path lengths.
+    """
+    left,stencils,right=moving_folded_stencils(hole)
+    prefix=[]; transition=[]; suffix=[]
+    for row in left.values():
+        prefix.append({(('edge',a,q) if d==0 else
+                        ('slice',a,q,1 if d>0 else -1,abs(d))):c
+                       for (a,q,d),c in row.items()})
+    for stencil in stencils.values():
+        offsets={k[-1] for k in stencil}
+        if offsets not in ({-1,0},{0,1}):
+            raise AssertionError('interior row needs more than one transition')
+        centre=1 if offsets=={-1,0} else 0
+        transition.append({('slice',*k,centre+d):c for (*k,d),c in stencil.items()})
+        if centre:
+            prefix.append({('slice',*k,2+d):c for (*k,d),c in stencil.items()})
+        else:
+            suffix.append({('slice',*k,d):c for (*k,d),c in stencil.items()})
+    for row in right.values():
+        suffix.append({('slice',*k,1+d):c for (*k,d),c in row.items()})
+    return dict(prefix=prefix,transition=transition,suffix=suffix,
+                state_signs=402,path_edges_offset=-3)
+
+
+def adjacent_time_reversal(hole=19):
+    """Certify T(s,t) iff T(G*t,G*s), for interior shells only.
+
+    G swaps the two orientations within each old edge:
+    (arm,q,orientation) -> (arm,q+orientation,-orientation).
+    The full row multiset, including multiplicities, is compared up to
+    multiplication of an equation by -1. Physical endpoints are excluded.
+    """
+    from collections import Counter
+    labels=moving_folded_labels();positions={k:i for i,k in enumerate(labels)}
+    permutation=[positions[a,q+s,-s] for a,q,s in labels]
+    keys,rows,_=adjacent_phase_system(hole,2,2)
+    mapping={i:2*permutation[i//2]+1-i%2 for i in range(len(keys))}
+    def normalize(row):
+        terms=tuple(sorted(row.items()))
+        return min(terms,tuple((i,-c) for i,c in terms))
+    before=Counter(normalize(row) for row in rows)
+    after=Counter(normalize({mapping[i]:c for i,c in row.items()}) for row in rows)
+    if before!=after:raise ValueError('interior is not invariant under the proposed reversal')
+    if any(permutation[permutation[i]]!=i for i in range(len(labels))):
+        raise AssertionError('reversal is not an involution')
+    return permutation
+
+
+def adjacent_integral_driver(hole=43):
+    """Recover the next two long arms from this slice and next third arm.
+
+    The retained row-combination identities certify both directions without
+    trusting this targeted elimination. No unit-value condition is removed.
+    """
+    if type(hole) is not int or not 24<=hole<=98:
+        raise ValueError('integral driver requires 24<=hole<=98')
+    keys,original,_=adjacent_phase_system(hole,2,2)
+    targets={i for i,(a,q,s,k) in enumerate(keys) if k==3 and a<3}
+    rows=[{i:Fraction(c) for i,c in row.items()} for row in original]
+    weights=[{i:Fraction(1)} for i in range(len(rows))]
+    pivots=[]
+    while targets:
+        degree,p=min((sum(i in row for row in rows),i) for i in targets)
+        if not degree:raise AssertionError('singular next-arm block')
+        ri=min((j for j,row in enumerate(rows) if p in row),key=lambda j:len(rows[j]))
+        row=rows.pop(ri);weight=weights.pop(ri);factor=row[p]
+        row={i:c/factor for i,c in row.items()}
+        weight={i:c/factor for i,c in weight.items()}
+        pivots.append((p,row,weight));targets.remove(p)
+        for other,w in zip(rows,weights):
+            factor=other.get(p,0)
+            if not factor:continue
+            for destination,source in ((other,row),(w,weight)):
+                for i,c in source.items():
+                    value=destination.get(i,0)-factor*c
+                    if value:destination[i]=value
+                    else:destination.pop(i,None)
+    free=sorted(set(range(len(keys)))-{p for p,row,w in pivots})
+    expressions={i:{i:Fraction(1)} for i in free};recovery_weights={}
+    for p,row,weight in reversed(pivots):
+        expression=defaultdict(Fraction);w=defaultdict(Fraction,weight)
+        for i,c in row.items():
+            if i==p:continue
+            for j,d in expressions[i].items():expression[j]-=c*d
+            for j,d in recovery_weights.get(i,{}).items():w[j]-=c*d
+        expressions[p]={j:c for j,c in expression.items() if c}
+        recovery_weights[p]={j:c for j,c in w.items() if c}
+    recoveries=[]
+    for p in sorted(recovery_weights):
+        e=expressions[p];w=recovery_weights[p]
+        if any(c.denominator!=1 for z in (e,w) for c in z.values()):
+            raise AssertionError('next-arm driver is not integral')
+        recoveries.append(dict(target=p,expression=[[j,int(c)] for j,c in sorted(e.items())],
+                               row_weights=[[j,int(c)] for j,c in sorted(w.items())]))
+    certificate=dict(kind='moving-adjacent-integral-driver-v1',hole=hole,variables=len(keys),
+                     inputs=free,recoveries=recoveries,literal_existence_decided=False,
+                     all_pairs_decided=False)
+    verify_adjacent_integral_driver(certificate)
+    return certificate
+
+
+def verify_adjacent_integral_driver(certificate):
+    """Direct integer identities: each recovery follows from the original rows,
+    and substituting every recovery annihilates every original row.
+    """
+    if (certificate.get('kind')!='moving-adjacent-integral-driver-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped integral driver')
+    hole=certificate['hole']
+    if type(hole) is not int or not 24<=hole<=98:
+        raise ValueError('integral driver requires 24<=hole<=98')
+    keys,rows,_=adjacent_phase_system(hole,2,2)
+    targets={i for i,(a,q,s,k) in enumerate(keys) if k==3 and a<3}
+    free=sorted(set(range(len(keys)))-targets)
+    if certificate.get('variables')!=len(keys) or certificate.get('inputs')!=free:
+        raise ValueError('wrong driver dimensions or free coordinates')
+    expressions={i:{i:1} for i in free};seen=set()
+    def unpack(items,allowed):
+        out={}
+        for i,c in items:
+            if (type(i) is not int or i not in allowed or i in out or
+                    type(c) is not int or not c):raise ValueError('invalid driver coefficient')
+            out[i]=c
+        return out
+    for recovery in certificate['recoveries']:
+        p=recovery['target']
+        if type(p) is not int or p not in targets or p in seen:
+            raise ValueError('invalid or repeated driver target')
+        seen.add(p);e=unpack(recovery['expression'],set(free))
+        if sum(e.values())%2!=1:raise ValueError('driver does not preserve odd values')
+        weights=unpack(recovery['row_weights'],set(range(len(rows))))
+        actual=defaultdict(int)
+        for rid,weight in weights.items():
+            for i,c in rows[rid].items():actual[i]+=weight*c
+        wanted={p:1,**{i:-c for i,c in e.items()}}
+        if {i:c for i,c in actual.items() if c}!=wanted:
+            raise ValueError('driver recovery is not the claimed original-row combination')
+        expressions[p]=e
+    if seen!=targets:raise ValueError('incomplete next-arm recovery')
+    for row in rows:
+        actual=defaultdict(int)
+        for i,c in row.items():
+            for j,d in expressions[i].items():actual[j]+=c*d
+        if any(actual.values()):raise ValueError('driver fails an original transition row')
+    return True
+
+
+def adjacent_driver_step(certificate,previous,third):
+    """Evaluate the certified recurrence; outputs need not have magnitude one."""
+    verify_adjacent_integral_driver(certificate)
+    if (len(previous)!=402 or len(third)!=46 or
+            any(type(v) is not int for v in itertools.chain(previous,third))):
+        raise ValueError('require 402 previous integer values and 46 third-arm values')
+    values={2*i:v for i,v in enumerate(previous)}
+    values.update({2*(356+i)+1:v for i,v in enumerate(third)})
+    for recovery in certificate['recoveries']:
+        values[recovery['target']]=sum(c*values[i] for i,c in recovery['expression'])
+    return [values[2*i+1] for i in range(402)]
+
+
+def adjacent_driver_phase_laws(certificate):
+    """Check five single-state phase observables and their control-free drift.
+
+    For odd integers s=1-2b and integral recovery s_p=sum(c_i*s_i),
+    b_p=(1-sum(c_i))/2+sum(c_i*b_i). All identities below are over F_2.
+    """
+    verify_adjacent_integral_driver(certificate)
+    expressions={z['target']:dict(z['expression']) for z in certificate['recoveries']}
+    _,_,traces=adjacent_phase_system(certificate['hole'],2,2)
+    def pull(mask):
+        out=0;constant=0
+        for i in range(804):
+            if not (mask>>i&1):continue
+            if i not in expressions:out^=1<<i
+            else:
+                e=expressions[i]
+                constant^=((1-sum(e.values()))//2)%2
+                for j,c in e.items():
+                    if c%2:out^=1<<j
+        return out,constant
+    laws=[]
+    for j,(mask,rhs) in enumerate(traces):
+        left,constant=pull(mask)
+        if any(left>>i&1 for i in range(1,804,2)):
+            raise ValueError('trace still depends on next third-arm input')
+        following=sum(1<<(i+1) for i in range(0,804,2) if left>>i&1)
+        updated,drift=pull(following)
+        if updated!=left or drift!=(j<4):
+            raise ValueError('phase does not have the claimed one-step drift')
+        compressed=sum(1<<(i//2) for i in range(0,804,2) if left>>i&1)
+        laws.append(dict(mask=hex(compressed),phase_at_even_left=rhs^constant,drift=drift))
+    return laws
+
+
+def adjacent_driver_predecessor(certificate,current,third):
+    """Recover a previous slice from this one and its previous third arm.
+
+    This uses the independently checked row reversal, not a second inverse
+    whose correctness is assumed. Unit bounds still must be checked.
+    """
+    permutation=adjacent_time_reversal(certificate['hole'])
+    if len(current)!=402 or len(third)!=46:
+        raise ValueError('require 402 current values and 46 previous third-arm values')
+    reversed_current=[current[i] for i in permutation]
+    reversed_third=[third[permutation[356+i]-356] for i in range(46)]
+    reversed_previous=adjacent_driver_step(certificate,reversed_current,reversed_third)
+    return [reversed_previous[i] for i in permutation]
+
+
+def adjacent_balance_drift(certificate):
+    """Certify conserved slice sum and bounded two-step drift at odd holes 25..97.
+
+    Every identity is checked by substitution in the certified one-step
+    recovery. In particular no numerical eigenvalue or kernel computation
+    is trusted. A unit path of at least 405 states must have slice sum zero.
+    """
+    verify_adjacent_integral_driver(certificate)
+    hole=certificate['hole']
+    if hole%2!=1:raise ValueError('balance drift requires an odd hole from 25 through 97')
+    expressions={z['target']:dict(z['expression']) for z in certificate['recoveries']}
+    def pull(coefficients):
+        out=defaultdict(int)
+        for j,c in enumerate(coefficients):
+            if not c:continue
+            i=2*j+1
+            for k,d in expressions.get(i,{i:1}).items():out[k]+=c*d
+        return {i:c for i,c in out.items() if c}
+    if pull([1]*402)!={2*i:1 for i in range(402)}:
+        raise ValueError('slice sum is not conserved')
+    g=[]
+    for a,q,s in moving_folded_labels():
+        if a==1 and s==1:
+            value=(-2 if q%2 else 0) if q<hole else (-1 if q%2 else 1)
+        elif a==1:
+            value=(2 if q%2 else 0) if q<=hole else (1 if q%2 else -1)
+        else:value=(2 if q%2==0 else 0)*s
+        g.append(value)
+    difference=defaultdict(int,pull(g))
+    for i,c in enumerate(g):difference[2*i]-=c
+    if any(c for i,c in difference.items() if i%2):
+        raise ValueError('observable depends on the next third-arm controls')
+    u=[difference[2*i] for i in range(402)]
+    twice=defaultdict(int,pull(u))
+    for i,c in enumerate(u):twice[2*i]+=c
+    if {i:c for i,c in twice.items() if c}!={2*i:-2 for i in range(402)}:
+        raise ValueError('two-step drift is not minus twice the slice sum')
+    if sum(map(abs,g))!=402:raise ValueError('wrong unit observable bound')
+    return dict(hole=hole,observable=g,unit_bound=402,minimum_states_for_zero_sum=405,
+                claim='slice sum is conserved and g(r+2)-g(r)=-2*slice_sum; unit paths with 405 states have zero slice sum')
+
+
+def adjacent_phase_system(hole=19, levels=4, first=2):
+    """Every interior equation wholly supported on consecutive folded levels.
+
+    Unlike open_phase_system, retain both halves of the shell equations on
+    the outer transitions. Each unreduced stencil uses exactly {-1,0} or
+    {0,1}; hence every row belongs to one edge, with no third-level memory.
+    Coordinates stay original, label-major, with no periodic identification.
+    Physical endpoint equations and balance are not imposed here.
+    """
+    if (type(levels) is not int or not 2<=levels<=66 or
+            type(first) is not int or first<2):
+        raise ValueError('require 2..66 levels and first level at least two')
+    _,stencils,_,laws,_ = _parity_trace_data(hole)
+    keys=[(*k,level) for k in moving_folded_labels()
+          for level in range(first,first+levels)]
+    positions={k:i for i,k in enumerate(keys)}
+    rows=[]; equations=[]
+    for left in range(first,first+levels-1):
+        for stencil in stencils.values():
+            offsets={k[-1] for k in stencil}
+            if offsets not in ({-1,0},{0,1}):
+                raise AssertionError('interior row needs more than one transition')
+            centre=left+(offsets=={-1,0})
+            rows.append({positions[(*k,centre+d)]:c for (*k,d),c in stencil.items()})
+        for j,law in enumerate(laws):
+            if {k[-1] for k in law['observable']}!={-1,0}:
+                raise AssertionError('phase trace needs more than one transition')
+            mask=0
+            for a,q,s,d in law['observable']:
+                mask ^= 1<<positions[a,q,s,left+1+d]
+            rhs=left%2 if j<2 else (left+1)%2 if j<4 else 0
+            equations.append((mask,rhs))
+    return keys,rows,equations
+
+
+def verify_adjacent_phase_signs(certificate):
+    """Check a saturated local path, never an endpoint completion."""
+    if (certificate.get('kind')!='moving-adjacent-phase-signs-v1' or
+            certificate.get('status')!='local_signing' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped adjacent-level signing')
+    keys,rows,equations=adjacent_phase_system(certificate['hole'],certificate['levels'],
+                                             certificate['first'])
+    if (certificate.get('variables')!=len(keys) or
+            certificate.get('minimum_half')!=certificate['first']+certificate['levels']):
+        raise ValueError('wrong adjacent window dimensions')
+    encoded=certificate['bits']
+    if (not isinstance(encoded,str) or not encoded.startswith('0x') or
+            len(encoded)>2+(len(keys)+3)//4):
+        raise ValueError('invalid adjacent window bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>len(keys):
+        raise ValueError('adjacent window bits exceed coordinates')
+    if any(sum(c*(1-2*(bits>>i&1)) for i,c in row.items()) for row in rows):
+        raise ValueError('adjacent window fails an original integer row')
+    if any((mask&bits).bit_count()%2!=rhs for mask,rhs in equations):
+        raise ValueError('adjacent window fails an endpoint-derived trace')
+    if 'balanced_slices' in certificate:
+        if type(certificate['balanced_slices']) is not bool:
+            raise ValueError('invalid slice balance claim')
+        if certificate['balanced_slices']:
+            for level in range(certificate['first'],certificate['first']+certificate['levels']):
+                if sum(1-2*(bits>>i&1) for i,key in enumerate(keys) if key[-1]==level):
+                    raise ValueError('adjacent window has a nonzero slice sum')
+    return True
+
+
+def adjacent_balanced_example(hole=43, first=2):
+    """An actual balanced two-edge path, with both absolute starting parities.
+
+    Odd starts use the checked time reversal, not an unsupported translation
+    by one. This finite path is a dead end at both boundaries.
+    """
+    if hole!=43 or type(hole) is not int or type(first) is not int or first<2:
+        raise ValueError('require hole 43 and first level at least two')
+    encoded='0x3da898936a6826acb561ff04ca375eded77ef1ecf5b7700593ffaf5b4faf4394ea1cf9b1b4be46fd64d3e73f53ecdac43ea4583b5980c99b00f282dc7c5298a84462eff70a1d1a013f19839330054185b407dd36080c425928dc7c8e738a2325a8f8882d991eb157aa8b497c248194f458837382fe4f094cfafec1de1af343155beabd7e1a20516f4090dce74d949ee03ed33959120b96'
+    bits=int(encoded,16)
+    original,_,_=adjacent_phase_system(43,3,2)
+    values={key:bits>>i&1 for i,key in enumerate(original)}
+    keys,_,_=adjacent_phase_system(43,3,first)
+    labels=moving_folded_labels();permutation=adjacent_time_reversal(43)
+    positions={label:i for i,label in enumerate(labels)}
+    result_bits=0
+    for i,(*label,level) in enumerate(keys):
+        offset=level-first
+        if first%2:
+            source_label=labels[permutation[positions[tuple(label)]]]
+            source=(*source_label,4-offset)
+        else:source=(*label,2+offset)
+        result_bits|=values[source]<<i
+    certificate=dict(kind='moving-adjacent-phase-signs-v1',hole=43,levels=3,first=first,
+                     minimum_half=first+3,variables=len(keys),status='local_signing',
+                     balanced_slices=True,bits=hex(result_bits),
+                     literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_phase_signs(certificate)
+    return certificate
+
+
+def adjacent_phase_example(hole=43, first=3):
+    """Restrict a checked open witness to its fully constrained middle levels.
+
+    This repackages the recorded word; it is not a new longer signing.
+    """
+    source=open_phase_example(hole,first)
+    levels=source['length']
+    oldkeys,_,_=open_phase_system(hole,levels,first)
+    oldbits=int(source['bits'],16)
+    bits_by_key={k:oldbits>>i&1 for i,k in enumerate(oldkeys)}
+    keys,_,_=adjacent_phase_system(hole,levels,first)
+    result=dict(kind='moving-adjacent-phase-signs-v1',hole=hole,levels=levels,first=first,
+                minimum_half=first+levels,variables=len(keys),status='local_signing',
+                bits=hex(sum(bits_by_key[k]<<i for i,k in enumerate(keys))),
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_phase_signs(result)
+    return result
+
+
+def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000):
+    """Bounded standard-library search of actual consecutive transfer states."""
+    if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
+            or type(nodes) is not int or nodes<1):
+        raise ValueError('require positive finite search limits')
+    started=time.monotonic()
+    keys,rows,equations=adjacent_phase_system(hole,levels,first)
+    refusal,basis=binary_elimination(rows)
+    if refusal is not None:raise AssertionError('incompatible adjacent parity window')
+    for mask,rhs in equations:
+        while mask:
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs;break
+            old,b=basis[pivot];mask^=old;rhs^=b
+        if not mask and rhs:raise AssertionError('incompatible adjacent trace')
+    result=dict(kind='moving-adjacent-phase-signs-v1',hole=hole,levels=levels,first=first,
+                minimum_half=first+levels,variables=len(keys),status='unknown',
+                literal_existence_decided=False,all_pairs_decided=False)
+    remaining=seconds-(time.monotonic()-started)
+    if remaining<=0:return result
+    engine=make_engine(len(keys),rows,reduced_binary_basis(basis),remaining,nodes,'connected')
+    status,values=engine.run({})
+    result.update(search_status=status,nodes=engine.nodes,elapsed=time.monotonic()-started)
+    if values is not None:
+        if any(v not in (-1,1) for v in values):raise AssertionError('incomplete adjacent signing')
+        result.update(status='local_signing',bits=hex(sum((v==-1)<<i for i,v in enumerate(values))))
+        verify_adjacent_phase_signs(result)
+    return result
+
+
 def verify_open_phase_signs(certificate):
     """Check actual integer signs and every trace, without any search engine.
 
@@ -4717,6 +5125,24 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-adjacent-integral-driver-v1':
+        verify_adjacent_integral_driver(saved)
+        result=dict(verified=True,hole=saved['hole'],inputs=448,recovered=356,
+                    claim='exact integral one-step interior recurrence; every recovered unit condition and both physical endpoints remain required',
+                    literal_existence_decided=False,all_pairs_decided=False)
+        if saved['hole']%2:
+            result['long_core_zero_sum_after_states']=adjacent_balance_drift(saved)['minimum_states_for_zero_sum']
+        return result
+    if saved.get('kind')=='moving-adjacent-phase-signs-v1':
+        verify_adjacent_phase_signs(saved)
+        keys,_,_=adjacent_phase_system(saved['hole'],saved['levels'],saved['first'])
+        bits=int(saved['bits'],16)
+        sums=[sum(1-2*(bits>>i&1) for i,key in enumerate(keys) if key[-1]==level)
+              for level in range(saved['first'],saved['first']+saved['levels'])]
+        return dict(verified=True,hole=saved['hole'],levels=saved['levels'],
+                    slice_sums=sums,
+                    claim='finite adjacent-level path including endpoint-derived traces; physical endpoints excluded',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-periodic-phase-odd-v1':
         verify_periodic_phase_odd(saved)
         return dict(verified=True,hole=saved['hole'],period=2,
@@ -5071,7 +5497,11 @@ def main():
     p.add_argument('--open-phase-odd',type=int,metavar='LENGTH',help='construct a finite odd-integer window with endpoint traces')
     p.add_argument('--open-phase-example',action='store_true',help='emit a checked window: two centres at 19/97, three at 43 (odd start)')
     p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
-    p.add_argument('--first-level',type=int,default=3,help='first absolute centre level for --open-phase-window')
+    p.add_argument('--adjacent-phase-window',type=int,metavar='LEVELS',help='search all interior equations contained in consecutive folded levels')
+    p.add_argument('--adjacent-phase-example',action='store_true',help='repackage the recorded open word as a checked adjacent-level path')
+    p.add_argument('--adjacent-driver',action='store_true',help='certify the integral one-step recurrence at a moving hole 24..98')
+    p.add_argument('--adjacent-balanced-example',action='store_true',help='emit the checked balanced three-state path at hole 43, either starting parity')
+    p.add_argument('--first-level',type=int,default=3,help='first centre in open mode, or first slice in adjacent mode')
     p.add_argument('--interior-binary-rank',action='store_true',help='certify unrestricted Laurent row rank in characteristic two')
     p.add_argument('--antiperiod-two-odd-refusal',action='store_true',help='seek a linear odd-integer obstruction to signs reversing after two levels')
     p.add_argument('--antiperiod-two-refusal',action='store_true',help='seek an original-row refusal for signs reversing after two levels')
@@ -5079,6 +5509,28 @@ def main():
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.adjacent_balanced_example:
+        certificate=adjacent_balanced_example(args.hole,args.first_level)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_driver:
+        certificate=adjacent_integral_driver(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_phase_example:
+        certificate=adjacent_phase_example(args.hole,args.first_level)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_phase_window is not None:
+        certificate=adjacent_phase_search(args.hole,args.adjacent_phase_window,
+                                         args.first_level,args.seconds,args.nodes)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate) if certificate['status']=='local_signing'
+                         else certificate,indent=2));return
     if args.periodic_phase_odd:
         certificate=periodic_phase_odd_example(args.hole,args.seconds)
         if args.write:

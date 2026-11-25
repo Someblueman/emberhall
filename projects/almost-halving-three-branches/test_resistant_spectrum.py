@@ -15,6 +15,225 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_adjacent_balanced_word_both_parities_and_dead_boundaries(self):
+        driver=rs.adjacent_integral_driver(43)
+        permutation=rs.adjacent_time_reversal(43)
+        labels=rs.moving_folded_labels()
+        for first in (2,3,4,11):
+            certificate=rs.adjacent_balanced_example(43,first)
+            self.assertEqual(rs.verify_saved(certificate)['slice_sums'],[0,0,0])
+        certificate=rs.adjacent_balanced_example(43,2)
+        keys,_,_=rs.adjacent_phase_system(43,3,2)
+        bits=int(certificate['bits'],16)
+        values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+        counts=[]
+        for level,reverse in ((2,True),(4,False)):
+            state=[values[(*label,level)] for label in labels]
+            if reverse:state=[state[i] for i in permutation]
+            bad=0
+            for z in driver['recoveries']:
+                if all(i%2==0 for i,c in z['expression']):
+                    bad+=abs(sum(c*state[i//2] for i,c in z['expression']))!=1
+            counts.append(bad)
+        self.assertEqual(counts,[43,47])
+        with self.assertRaises(ValueError):
+            rs.verify_adjacent_phase_signs(dict(rs.adjacent_phase_example(43,3),
+                                               balanced_slices=True))
+        with self.assertRaises(ValueError):
+            rs.adjacent_balanced_example(19,2)
+
+    def test_adjacent_balance_drift_all_37_odd_holes(self):
+        for hole in range(25,98,2):
+            law=rs.adjacent_balance_drift(rs.adjacent_integral_driver(hole))
+            self.assertEqual(law['unit_bound'],402)
+            self.assertEqual(law['minimum_states_for_zero_sum'],405)
+        with self.assertRaises(ValueError):
+            rs.adjacent_balance_drift(rs.adjacent_integral_driver(24))
+
+    def test_adjacent_integral_driver_all_75_holes(self):
+        for hole in range(24,99):
+            certificate=rs.adjacent_integral_driver(hole)
+            self.assertEqual(len(certificate['inputs']),448)
+            self.assertEqual(len(certificate['recoveries']),356)
+            laws=rs.adjacent_driver_phase_laws(certificate)
+            self.assertEqual([x['drift'] for x in laws],[1,1,1,1,0])
+        for hole in (True,0,19,23,99):
+            with self.assertRaises(ValueError):rs.adjacent_integral_driver(hole)
+
+    def test_adjacent_driver_random_odd_trajectory_and_actual_unit_word(self):
+        rng=random.Random(20261125)
+        certificate=rs.adjacent_integral_driver(43)
+        source=rs.open_phase_example(43)
+        oldkeys,_,_=rs.open_phase_system(43,3,3)
+        oldbits=int(source['bits'],16)
+        old={k:1-2*(oldbits>>i&1) for i,k in enumerate(oldkeys)}
+        labels=rs.moving_folded_labels()
+        previous=[old[(*label,3)] for label in labels]
+        third=[old[(*label,4)] for label in labels if label[0]==3]
+        following=rs.adjacent_driver_step(certificate,previous,third)
+        self.assertEqual(following,[old[(*label,4)] for label in labels])
+        previous_third=[old[(*label,3)] for label in labels if label[0]==3]
+        self.assertEqual(rs.adjacent_driver_predecessor(certificate,following,previous_third),
+                         previous)
+        permutation=rs.adjacent_time_reversal(43)
+        reversed_previous=[previous[i] for i in permutation]
+        forced_predecessor=[]
+        for recovery in certificate['recoveries']:
+            if all(i%2==0 for i,c in recovery['expression']):
+                value=sum(c*reversed_previous[i//2] for i,c in recovery['expression'])
+                if abs(value)!=1:
+                    forced_predecessor.append((labels[permutation[recovery['target']//2]],value))
+        self.assertEqual(len(forced_predecessor),43)
+        self.assertIn(((1,45,-1),3),forced_predecessor)
+        failed=rs.adjacent_driver_step(certificate,previous,[1]*46)
+        bad=[(labels[i],v) for i,v in enumerate(failed) if abs(v)!=1]
+        self.assertEqual(len(bad),49)
+        self.assertEqual(bad[0],((1,1,1),3))
+        self.assertEqual(max(map(abs,failed)),7)
+        # The recorded last middle state is a genuine dead end, even if
+        # its entire next third arm and the old outside level are replaced.
+        last=[old[(*label,5)] for label in labels]
+        forced=[]
+        for recovery in certificate['recoveries']:
+            if all(i%2==0 for i,c in recovery['expression']):
+                value=sum(c*last[i//2] for i,c in recovery['expression'])
+                if abs(value)!=1:forced.append((labels[recovery['target']//2],value))
+        self.assertEqual(len(forced),55)
+        self.assertEqual(forced[0],((1,45,1),-3))
+        # Arbitrary odd controls preserve the exact shells and phases, but
+        # deliberately do not preserve the unit-value requirement.
+        nonunit=False
+        drift=rs.adjacent_balance_drift(certificate)
+        observable=drift['observable'];history=[]
+        for first in range(3,11):
+            history.append((sum(c*v for c,v in zip(observable,previous)),sum(previous)))
+            third=[rng.choice((-3,-1,1,3)) for _ in range(46)]
+            following=rs.adjacent_driver_step(certificate,previous,third)
+            self.assertTrue(all(v%2 for v in following))
+            nonunit |= any(abs(v)!=1 for v in following)
+            _,rows,traces=rs.adjacent_phase_system(43,2,first)
+            values=[v for pair in zip(previous,following) for v in pair]
+            self.assertTrue(all(sum(c*values[i] for i,c in row.items())==0 for row in rows))
+            bits=sum((((1-v)//2)%2)<<i for i,v in enumerate(values))
+            self.assertTrue(all((mask&bits).bit_count()%2==rhs for mask,rhs in traces))
+            previous=following
+        self.assertTrue(nonunit)
+        self.assertEqual({total for value,total in history},{-8})
+        self.assertTrue(all(history[i+2][0]-history[i][0]==-2*history[i][1]
+                            for i in range(len(history)-2)))
+        laws=rs.adjacent_driver_phase_laws(certificate)
+        basis={}
+        for law in laws:
+            mask=int(law['mask'],16)
+            while mask:
+                p=mask.bit_length()-1
+                if p not in basis:basis[p]=mask;break
+                mask^=basis[p]
+        self.assertEqual(len(basis),5)
+        masks=[int(law['mask'],16) for law in laws]
+        self.assertTrue(all(mask.bit_count()%2==0 for mask in masks))
+        for i,j in enumerate((1,0,3,2,4)):
+            reflected=sum(1<<permutation[k] for k in range(402) if masks[i]>>k&1)
+            self.assertEqual(reflected,masks[j])
+
+    def test_adjacent_driver_damaged_row_identities_are_rejected(self):
+        import copy
+        certificate=rs.adjacent_integral_driver(43)
+        self.assertTrue(rs.verify_saved(certificate)['verified'])
+        for change in ('coefficient','weight','target','missing','duplicate','scope'):
+            damaged=copy.deepcopy(certificate)
+            row=damaged['recoveries'][0]
+            if change=='coefficient':row['expression'][0][1]+=2
+            elif change=='weight':row['row_weights'][0][1]+=1
+            elif change=='target':row['target']=damaged['inputs'][0]
+            elif change=='missing':damaged['recoveries'].pop()
+            elif change=='duplicate':row['expression'].append(row['expression'][0])
+            else:damaged['all_pairs_decided']=True
+            with self.assertRaises(ValueError):rs.verify_adjacent_integral_driver(damaged)
+
+    def test_adjacent_blocks_recover_complete_physical_matrix(self):
+        from collections import Counter
+        def canonical(rows):
+            return Counter(tuple(sorted((k,c) for k,c in row.items() if c))
+                           for row in rows if any(row.values()))
+        for scale,hole in ((9,1),(9,43),(11,19),(11,43),(11,97),(15,98)):
+            half=scale//2
+            blocks=rs.adjacent_transfer_blocks(hole)
+            compiled=[]
+            def physical(row,offset):
+                out=defaultdict(int)
+                for key,c in row.items():
+                    if key[0]=='edge':_,a,q=key;vertex=(a,q*scale)
+                    else:
+                        _,a,q,s,j=key;vertex=(a,q*scale+s*(j+offset))
+                    out[vertex]+=c
+                return dict(out)
+            compiled.extend(physical(row,0) for row in blocks['prefix'])
+            for j in range(2,half-1):
+                compiled.extend(physical(row,j) for row in blocks['transition'])
+            compiled.extend(physical(row,half-1) for row in blocks['suffix'])
+            expected=defaultdict(lambda:defaultdict(int))
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            vertices=[(0,0)]+[(a,d) for a,n in enumerate(lengths,1)
+                                    for d in range(1,n+1) if (a,d) not in holes]
+            for vertex in vertices:
+                for exponent,c in fc.shell_column(lengths,holes,vertex).items():
+                    expected[exponent][vertex]+=c
+            self.assertEqual(canonical(compiled),canonical(expected.values()))
+            self.assertEqual({v for row in compiled for v in row},set(vertices))
+            self.assertEqual(blocks['state_signs'],402)
+            self.assertEqual(len(range(2,half-1)),half+blocks['path_edges_offset'])
+
+    def test_adjacent_rows_are_exactly_all_contained_interior_rows(self):
+        for hole in range(1,99):
+            blocks=rs.adjacent_transfer_blocks(hole)
+            permutation=rs.adjacent_time_reversal(hole)
+            self.assertEqual(len(set(permutation)),402)
+            self.assertEqual(len(blocks['transition']),356)
+            self.assertTrue(all({k[-1] for k in row}=={0,1}
+                                for row in blocks['transition']))
+        for hole,first,levels in ((1,3,4),(19,3,3),(43,3,4),(97,4,5),(98,3,2)):
+            keys,rows,phases=rs.adjacent_phase_system(hole,levels,first)
+            positions={k:i for i,k in enumerate(keys)}
+            oldkeys,oldrows,oldphases=rs.open_phase_system(hole,levels,first)
+            contained=[]
+            for row in oldrows:
+                if all(oldkeys[i] in positions for i in row):
+                    contained.append({positions[oldkeys[i]]:c for i,c in row.items()})
+            contained_phases=[]
+            for mask,rhs in oldphases:
+                terms=[oldkeys[i] for i in range(len(oldkeys)) if mask>>i&1]
+                if all(k in positions for k in terms):
+                    contained_phases.append((sum(1<<positions[k] for k in terms),rhs))
+            self.assertEqual(normalized(rows),normalized(contained))
+            self.assertEqual(set(phases),set(contained_phases))
+            self.assertEqual((len(keys),len(rows),len(phases)),
+                             (402*levels,356*(levels-1),5*(levels-1)))
+        for levels,first in ((1,2),(True,2),(67,2),(2,1),(2,2.0)):
+            with self.assertRaises(ValueError):rs.adjacent_phase_system(19,levels,first)
+
+    def test_adjacent_positive_path_restriction_and_corruption(self):
+        # Two consecutive transitions from Rook's actual three-centre word.
+        old=rs.open_phase_example(43)
+        oldkeys,_,_=rs.open_phase_system(43,3,3)
+        oldbits=int(old['bits'],16)
+        values={k:oldbits>>i&1 for i,k in enumerate(oldkeys)}
+        keys,rows,phases=rs.adjacent_phase_system(43,3,3)
+        bits=sum(values[k]<<i for i,k in enumerate(keys))
+        certificate=dict(kind='moving-adjacent-phase-signs-v1',status='local_signing',
+                         hole=43,levels=3,first=3,minimum_half=6,variables=len(keys),
+                         bits=hex(bits),literal_existence_decided=False,all_pairs_decided=False)
+        self.assertTrue(rs.verify_adjacent_phase_signs(certificate))
+        self.assertTrue(rs.verify_saved(certificate)['verified'])
+        active=next(iter(rows[0]))
+        for key,value in (('bits',hex(bits^(1<<active))),('bits','0x'+'f'*10000),
+                          ('minimum_half',5),('variables',len(keys)-1),('first',4),
+                          ('literal_existence_decided',True),('all_pairs_decided',True)):
+            with self.assertRaises(ValueError):
+                rs.verify_adjacent_phase_signs(dict(certificate,**{key:value}))
+        with self.assertRaises(ValueError):rs.adjacent_phase_search(seconds=float('inf'))
+
     def test_power_two_solution_against_small_exhaustion(self):
         rng=random.Random(20261125)
         for modulus in (2,4,8):
