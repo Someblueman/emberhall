@@ -3279,3 +3279,67 @@ four focused controls (canonical review46008). That review predates the
 stronger odd-integer identity and binary-rank theorem, which have not yet
 received independent review. No acceptance or publication is inferred from
 that earlier review.
+
+## Mallow: endpoint traces do not obstruct finite odd-integer interiors
+
+For every odd hole h=1,3,...,97, every positive number N of consecutive
+interior centres, and either starting parity (first centre at least 3),
+there are **odd integer values** satisfying all 356N exact shell rows and
+all five endpoint-derived parity traces at every centre. This strengthens
+Hawthorn's bare-window result by retaining the traces. It does not bound
+values by one, include physical endpoint rows, produce mutually compatible
+windows or decide a target pair. The task's acceptance remains unmet.
+
+Proof. The checked Laurent minor over F4 gives full binary row rank to
+A_N, as in Hawthorn's shifted-row argument above. Independently, the
+period-two shell system has a binary solution with the absolute trace
+phases at every odd h. The new certificate records that word and checks
+all its original integer rows modulo four and every trace by substitution.
+Repeating the word, then restricting to a window, gives a vector r of
+unit residues with A_N r divisible by four and the prescribed traces.
+Absolute levels, including odd starting levels, select the residues;
+no unwrapped coordinates are identified in the exact equation system.
+
+Choose an odd-determinant square column minor B of A_N. Set free correction
+coordinates to zero and solve
+
+    B y_pivot = -A_N r / 4,       x = r + 4y.
+
+The right side is integral. Every denominator in y divides the odd
+integer det(B). Thus A_N x=0 over the rationals and x has the same residues
+as r in the rationals with odd denominator. Let D be the least common
+multiple of the denominators of x. Choose k=D or -D so that k=1 modulo
+four. Then kx is integral, has A_N(kx)=0, and is congruent to r modulo four.
+In particular its coordinates are odd, and (1-kx)/2 retains every binary
+trace of (1-r)/2. This is an existence proof for every finite N, rather
+than an extrapolation from the examples below. It gives no uniform bound,
+so no infinite-word compactness conclusion follows.
+
+The standard-library generator uses odd-pivot rational elimination. Its
+separate example verifier performs only exact integer shell substitution
+and trace checks; it does not call that elimination or the rank selector.
+The all-length certificate separately verifies the Laurent minor and the
+period-two residue word, without searching for a unit signing.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --phase-odd-rank --hole 19 --write /tmp/phase-rank.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/phase-rank.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --open-phase-odd 3 --hole 97 --write /tmp/odd-window.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/odd-window.json
+```
+
+A recorded three-centre h=97 example has 2,010 odd values, maximum absolute
+value 25,912,933,113,985,897,955, and no unit values. That is a witnessed
+failure to meet the actual sign restriction, not a signing or a refusal.
+The h=19 example at first centre 4 also verifies. Tests regenerate all 49
+all-length certificates, check denominator clearing on small independent
+matrices, and reject changed dimensions, values, rank witnesses and scope.
+The remaining obstacle is an actual compatible unit-sign extension, then
+physical endpoint completion and unrestricted hole supports. Further bare
+linear odd-integer congruences, even with these traces, cannot supply the
+missing finite-interior obstruction.
+
+Validation: all 119 spectrum tests passed, including the three new controls;
+fresh command-line processes replayed the all-length certificate and both
+three-centre examples. The new tests disable elimination during certificate
+replay. No solver dependency was added. Whitespace checks passed.

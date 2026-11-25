@@ -15,6 +15,47 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_phase_odd_rank_all_odd_holes_and_independent_replay(self):
+        for hole in range(1,98,2):
+            certificate=rs.phase_odd_rank_certificate(hole)
+            with patch.object(rs,'phase_odd_rank_certificate',side_effect=AssertionError), \
+                    patch.object(rs,'binary_elimination',side_effect=AssertionError):
+                self.assertTrue(rs.verify_phase_odd_rank(certificate))
+        for field,value in [('hole',18),('period',True),('variables',1),
+                            ('bits','0x0'),('literal_existence_decided',True),
+                            ('all_pairs_decided',True)]:
+            damaged=dict(certificate);damaged[field]=value
+            with self.assertRaises(ValueError):rs.verify_phase_odd_rank(damaged)
+        damaged=dict(certificate,rank=dict(certificate['rank'],hole=19))
+        with self.assertRaises(ValueError):rs.verify_phase_odd_rank(damaged)
+
+    def test_odd_residue_lift_exact_arithmetic_and_scope(self):
+        # The odd denominator three must be cleared with a multiplier 1 mod 4.
+        self.assertEqual(rs.odd_residue_lift(2,[{0:3,1:1}],[1,1]),[1,-3])
+        rows=[{0:3,1:1},{1:3,2:1}]
+        values=rs.odd_residue_lift(3,rows,[1,1,1])
+        self.assertTrue(all((x-1)%4==0 for x in values))
+        self.assertTrue(all(sum(c*values[i] for i,c in row.items())==0 for row in rows))
+        for rows,residues in [([{0:2,1:2}],[1,1]),([{0:3,1:1}],[1,-1]),
+                              ([{0:3,1:1}],[True,1]),([{0:3,1:1}],[1])]:
+            with self.assertRaises(ValueError):rs.odd_residue_lift(2,rows,residues)
+
+    def test_open_phase_odd_exact_windows_and_damaged_values(self):
+        for hole,first in [(19,4),(97,3)]:
+            certificate=rs.open_phase_odd_example(hole,3,first)
+            with patch.object(rs,'odd_residue_lift',side_effect=AssertionError), \
+                    patch.object(rs,'binary_elimination',side_effect=AssertionError):
+                self.assertTrue(rs.verify_open_phase_odd(certificate))
+            self.assertGreater(max(map(abs,certificate['values'])),1)
+            for field,value in [('variables',1),('values',certificate['values'][:-1]),
+                                ('literal_existence_decided',True),('all_pairs_decided',True)]:
+                with self.assertRaises(ValueError):
+                    rs.verify_open_phase_odd(dict(certificate,**{field:value}))
+            for value in [True,0,certificate['values'][0]+4]:
+                damaged=dict(certificate,values=list(certificate['values']))
+                damaged['values'][0]=value
+                with self.assertRaises(ValueError):rs.verify_open_phase_odd(damaged)
+
     def test_binary_laurent_rank_has_independent_field_and_window_controls(self):
         def multiply(a,b):
             product=0

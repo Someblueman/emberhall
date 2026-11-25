@@ -2025,6 +2025,145 @@ def verify_open_phase_signs(certificate):
     return True
 
 
+def phase_odd_rank_certificate(hole=19):
+    """Finite witnesses for the all-length odd-integer phase-window theorem."""
+    size,rows,equations=_periodic_phase_system(hole,2)
+    refusal,basis=binary_elimination(rows)
+    if refusal is not None: raise ValueError('period-two parity conflict')
+    for mask,rhs in equations:
+        while mask:
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs; break
+            old,value=basis[pivot]; mask^=old; rhs^=value
+        if not mask and rhs: raise ValueError('period-two trace conflict')
+    bits=0
+    for pivot,(mask,rhs) in sorted(basis.items()):
+        if (mask&bits).bit_count()%2!=rhs: bits|=1<<pivot
+    result=dict(kind='moving-phase-odd-rank-v1',hole=hole,
+                rank=interior_binary_rank_certificate(hole),period=2,
+                bits=hex(bits),variables=size,
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_phase_odd_rank(result)
+    return result
+
+
+def verify_phase_odd_rank(certificate):
+    """Replay the Laurent minor and a trace-compatible mod-four word.
+
+    Full binary row rank lifts any mod-four kernel vector to an exact
+    odd-integer vector with the same residues (proof in the companion text).
+    """
+    if (certificate.get('kind')!='moving-phase-odd-rank-v1' or
+            type(certificate.get('period')) is not int or certificate['period']!=2 or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require scoped all-length odd phase certificate')
+    rank=certificate.get('rank',{})
+    if (rank.get('hole')!=certificate.get('hole') or
+            not verify_interior_binary_rank_certificate(rank)):
+        raise ValueError('invalid Laurent binary rank witness')
+    size,rows,equations=_periodic_phase_system(certificate['hole'],2)
+    encoded=certificate.get('bits')
+    if (certificate.get('variables')!=size or not isinstance(encoded,str) or
+            not encoded.startswith('0x') or len(encoded)>2+(size+3)//4):
+        raise ValueError('invalid periodic residue word')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>size: raise ValueError('residue word exceeds dimensions')
+    if any(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())%4 for row in rows):
+        raise ValueError('periodic word fails a shell modulo four')
+    if any((mask&bits).bit_count()%2!=rhs for mask,rhs in equations):
+        raise ValueError('periodic word fails an endpoint trace')
+    return True
+
+
+def odd_residue_lift(size, rows, residues):
+    """Lift a mod-four kernel vector through an odd row minor.
+
+    All rows must be independent mod two. Exact rational elimination uses
+    only odd pivots; an odd common denominator preserves every residue.
+    This makes arbitrary odd integers, never a unit-sign construction.
+    """
+    if (len(residues)!=size or any(type(x) is not int or x%2!=1 for x in residues)
+            or any(sum(c*residues[i] for i,c in row.items())%4 for row in rows)):
+        raise ValueError('require an odd mod-four kernel vector')
+    basis=[]
+    for original in rows:
+        row={i:Fraction(c) for i,c in original.items() if c}
+        rhs=Fraction(-sum(c*residues[i] for i,c in original.items())//4)
+        for pivot,old,value in basis:
+            factor=row.pop(pivot,0)
+            if factor:
+                rhs-=factor*value
+                for i,c in old.items():
+                    if i==pivot: continue
+                    updated=row.get(i,0)-factor*c
+                    if updated: row[i]=updated
+                    else: row.pop(i,None)
+        candidates=[i for i,c in row.items() if c.numerator%2]
+        if not candidates: raise ValueError('rows do not have full binary row rank')
+        pivot=max(candidates); divisor=row[pivot]
+        row={i:c/divisor for i,c in row.items()}; rhs/=divisor
+        basis.append((pivot,row,rhs))
+    correction=[Fraction(0) for _ in range(size)]
+    for pivot,row,rhs in reversed(basis):
+        correction[pivot]=rhs-sum(c*correction[i] for i,c in row.items() if i!=pivot)
+    values=[r+4*y for r,y in zip(residues,correction)]
+    denominator=math.lcm(*(v.denominator for v in values))
+    if denominator%2!=1: raise AssertionError('an odd minor acquired an even denominator')
+    multiplier=denominator if denominator%4==1 else -denominator
+    lifted=[int(v*multiplier) for v in values]
+    if (any((v-r)%4 for v,r in zip(lifted,residues)) or
+            any(sum(c*lifted[i] for i,c in row.items()) for row in rows)):
+        raise AssertionError('odd residue lift failed exact substitution')
+    return lifted
+
+
+def open_phase_odd_example(hole=19,length=3,first=3):
+    """A finite exact odd-integer kernel vector with all endpoint traces."""
+    keys,rows,equations=open_phase_system(hole,length,first)
+    refusal,basis=binary_elimination(rows)
+    if refusal is not None: raise ValueError('shell parity conflict')
+    basis=dict(basis)
+    for mask,rhs in equations:
+        while mask:
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs; break
+            old,value=basis[pivot]; mask^=old; rhs^=value
+        if not mask and rhs: raise ValueError('trace parity conflict')
+    bits=0
+    for pivot,(mask,rhs) in sorted(basis.items()):
+        if (mask&bits).bit_count()%2!=rhs: bits|=1<<pivot
+    residues=[1-2*(bits>>i&1) for i in range(len(keys))]
+    values=odd_residue_lift(len(keys),rows,residues)
+    result=dict(kind='moving-open-phase-odd-v1',hole=hole,length=length,first=first,
+                variables=len(keys),values=values,literal_existence_decided=False,
+                all_pairs_decided=False)
+    verify_open_phase_odd(result)
+    return result
+
+
+def verify_open_phase_odd(certificate):
+    """Substitute every integer and trace; no elimination or rank oracle."""
+    if (certificate.get('kind')!='moving-open-phase-odd-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped odd-integer window')
+    keys,rows,equations=open_phase_system(certificate['hole'],certificate['length'],
+                                         certificate['first'])
+    values=certificate.get('values')
+    if (certificate.get('variables')!=len(keys) or not isinstance(values,list) or
+            len(values)!=len(keys) or any(type(v) is not int or v%2!=1 for v in values)):
+        raise ValueError('invalid odd window values')
+    if any(sum(c*values[i] for i,c in row.items()) for row in rows):
+        raise ValueError('odd window fails an exact shell row')
+    bits=sum(1<<i for i,v in enumerate(values) if (1-v)//2%2)
+    if any((mask&bits).bit_count()%2!=rhs for mask,rhs in equations):
+        raise ValueError('odd window fails an endpoint trace')
+    return True
+
+
 def open_phase_example(hole=19,first=3):
     """Actual two-centre signings at either starting parity, at holes 19/97.
 
@@ -4422,6 +4561,16 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-phase-odd-rank-v1':
+        verify_phase_odd_rank(saved)
+        return dict(verified=True,hole=saved['hole'],
+                    claim='every finite interior window admits exact odd integer values including endpoint traces; unit signs and physical endpoint rows excluded',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-open-phase-odd-v1':
+        verify_open_phase_odd(saved)
+        return dict(verified=True,hole=saved['hole'],length=saved['length'],
+                    claim='finite exact odd-integer window including endpoint traces; unit signs not asserted',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-binary-interior-rank-v1':
         if not verify_interior_binary_rank_certificate(saved):
             raise ValueError('invalid binary unrestricted interior rank certificate')
@@ -4756,6 +4905,8 @@ def main():
     p.add_argument('--resume-phase',help='recheck and reuse partial phase identities from this JSON file')
     p.add_argument('--cubic-sweep',action='store_true',help='continue examining phase products after the nonlinear pivot store fills')
     p.add_argument('--retain-quadratics',action='store_true',help='retain checked phase quadratic consequences and reuse them in the next pass')
+    p.add_argument('--phase-odd-rank',action='store_true',help='certify odd-integer phase compatibility for every finite interior length')
+    p.add_argument('--open-phase-odd',type=int,metavar='LENGTH',help='construct a finite odd-integer window with endpoint traces')
     p.add_argument('--open-phase-example',action='store_true',help='emit a checked two-centre window at hole 19 or 97, without search')
     p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
     p.add_argument('--first-level',type=int,default=3,help='first absolute centre level for --open-phase-window')
@@ -4766,6 +4917,16 @@ def main():
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.phase_odd_rank:
+        certificate=phase_odd_rank_certificate(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.open_phase_odd is not None:
+        certificate=open_phase_odd_example(args.hole,args.open_phase_odd,args.first_level)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
     if args.open_phase_example:
         certificate=open_phase_example(args.hole,args.first_level)
         if args.write:
