@@ -1,8 +1,8 @@
-# Held-out sediment comparison: first one hundred eight independent indices
+# Held-out sediment comparison: first one hundred eighteen independent indices
 
 Sorrel, Gorse, Mica, Fern, Hawthorn, Aster and Rook, 25 November 2026. **Interim scientific results, not completed calibration.**
-Indices 1000..1107 were each executed exactly once under the registration
-`729ae32e453bb4a0dc9ff299428431b1e31a9250b114f21bd5955b4c5197b965`. All 3,240 cells are retained in
+Indices 1000..1117 were each executed exactly once under the registration
+`729ae32e453bb4a0dc9ff299428431b1e31a9250b114f21bd5955b4c5197b965`. All 3,540 cells are retained in
 [heldout_results.csv](heldout_results.csv), including failed and missing cells.
 The model/extension/runner/test pins are unchanged from the pre-draw hash freeze
 in [HELDOUT_PROTOCOL.md](HELDOUT_PROTOCOL.md). That document records the initial
@@ -10,11 +10,11 @@ Git sequencing correction; it must accompany these results.
 
 ## What was executed
 
-The one hundred eight-index slice requested 3,240 cells, attempted 3,240, passed 3,038,
-failed 202, missing 0. These are **one hundred eight independent latent draws**,
-not 3,240 independent observations. The full registered study requests 3,840 cells
-across 128 latent draws: 3,240 attempted, 3,038 passed,
-202 failed, 600 missing. Cases, designs and methods
+The one hundred eighteen-index slice requested 3,540 cells, attempted 3,540, passed 3,332,
+failed 208, missing 0. These are **one hundred eighteen independent latent draws**,
+not 3,540 independent observations. The full registered study requests 3,840 cells
+across 128 latent draws: 3,540 attempted, 3,332 passed,
+208 failed, 300 missing. Cases, designs and methods
 within each index are paired. No fit was repeated, discarded, or given an
 outcome-dependent budget. Each fit used 50,000 particles, at most 20 cooperative
 seconds and the remaining portion of its fixed 600-second index allowance.
@@ -129,6 +129,16 @@ seconds and the remaining portion of its fixed 600-second index allowance.
 | 1105 | 280.966 | 30 | 0 | 0 |
 | 1106 | 280.099 | 30 | 0 | 0 |
 | 1107 | 331.980 | 27 | 3 | 0 |
+| 1108 | 320.490 | 28 | 2 | 0 |
+| 1109 | 298.785 | 30 | 0 | 0 |
+| 1110 | 296.565 | 30 | 0 | 0 |
+| 1111 | 278.755 | 30 | 0 | 0 |
+| 1112 | 266.387 | 30 | 0 | 0 |
+| 1113 | 337.643 | 29 | 1 | 0 |
+| 1114 | 385.671 | 28 | 2 | 0 |
+| 1115 | 310.707 | 29 | 1 | 0 |
+| 1116 | 305.145 | 30 | 0 | 0 |
+| 1117 | 325.579 | 30 | 0 | 0 |
 
 Runtime provenance (the first 88 receipts share identical protocol and source hashes; indices 1000..1017 and 1028..1087 recorded `"python":"3.13.2"` and indices 1018..1027 recorded `"python":"3.15.2"`):
 
@@ -137,16 +147,17 @@ Runtime provenance (the first 88 receipts share identical protocol and source ha
 - 1088..1097: Python `3.13.2`, with the same protocol and source hashes as
   the preceding receipts.
 - 1098..1107: Python `3.13.2`, with unchanged protocol and source hashes.
+- 1108..1117: Python `3.13.2`, with unchanged protocol and source hashes.
 
 The CSV uses empty cells for absent scientific quantities, lowercase booleans,
 and full round-trip Python numeric precision. Failure status, not a zero or an
 imputed posterior, explains an empty scientific value. Its SHA-256 is
-`8d61e6940deb7dd864412503f9544e81cbf3c7daa0f2ae07584952c280d6a611`.
+`29692907785ff463bdaafcc98261c476c26003a9f21176c76324b289cfa9cbd0`.
 The 300 new CSV cells were decoded back and compared field-for-field with
-the original receipts. The earlier 2,940 rows were preserved byte-for-byte.
+the original receipts. The earlier 3,240 rows were preserved byte-for-byte.
 The frozen validator passed without changing the registration.
 
-Across the one hundred eight-index slice, all statuses are retained: `FAILED_IMPORTANCE_DIAGNOSTICS`: 95, `FAILED_TIME_BUDGET`: 107, `PASS_DIAGNOSTICS`: 3038.
+Across the one hundred eighteen-index slice, all statuses are retained: `FAILED_IMPORTANCE_DIAGNOSTICS`: 98, `FAILED_TIME_BUDGET`: 110, `PASS_DIAGNOSTICS`: 3332.
 No fit was retried or given an outcome-dependent budget. Cooperative deadlines
 and host speed can alter failure status; passing summaries remain selected by
 the numerical and time-budget screens. The absence of missing cells establishes
@@ -154,57 +165,57 @@ completed accounting; it does not establish successful inference.
 
 ## Coverage and directional declarations
 
-Each row requests one hundred eight indices in this interim slice and 128 in the complete
+Each row requests one hundred eighteen indices in this interim slice and 128 in the complete
 registration. Coverage and wrong-order fractions are **selected**: coverage
 uses successful fits; wrong order uses directional declarations among successes.
 Unresolved successful fits are not declarations. Wilson intervals below are
 marginal 95% intervals, with no multiplicity correction. E means exponential;
-G means Gaussian material. F/M are failed/missing within the one hundred eight-index slice.
+G means Gaussian material. F/M are failed/missing within the one hundred eighteen-index slice.
 At equality either directional declaration is wrong, and unresolved does not
 mean equality was detected. The misspecified cases test explicit stress laws,
 not calibration to the baseline prior or to real sediment records.
 
 | Case | Design | Method | Pass | F/M | Covered/pass [95%] | Wrong/declared [95%] |
 |---|---|---|---:|---:|---|---|
-| baseline | balanced | E | 106 | 2/0 | 99/106 [0.8699,0.9676] | 1/35 [0.005061,0.1453] |
-| baseline | balanced | G | 106 | 2/0 | 97/106 [0.8465,0.9547] | 1/34 [0.005211,0.1492] |
-| baseline | proxy-rich | E | 105 | 3/0 | 96/105 [0.8451,0.9543] | 1/44 [0.004023,0.1181] |
-| baseline | proxy-rich | G | 106 | 2/0 | 94/106 [0.8125,0.934] | 1/46 [0.003848,0.1134] |
-| baseline | date-rich | E | 100 | 8/0 | 91/100 [0.8377,0.9519] | 0/22 [0,0.1487] |
-| baseline | date-rich | G | 103 | 5/0 | 95/103 [0.8542,0.9601] | 0/21 [0,0.1546] |
-| simultaneous | balanced | E | 104 | 4/0 | 95/104 [0.8437,0.9538] | 9/9 [0.7009,1] |
-| simultaneous | balanced | G | 107 | 1/0 | 99/107 [0.8594,0.9616] | 8/8 [0.6756,1] |
-| simultaneous | proxy-rich | E | 103 | 5/0 | 93/103 [0.8304,0.9464] | 10/10 [0.7225,1] |
-| simultaneous | proxy-rich | G | 102 | 6/0 | 90/102 [0.8055,0.9314] | 12/12 [0.7575,1] |
-| simultaneous | date-rich | E | 96 | 12/0 | 89/96 [0.8571,0.9642] | 7/7 [0.6457,1] |
-| simultaneous | date-rich | G | 105 | 3/0 | 100/105 [0.8933,0.9795] | 5/5 [0.5655,1] |
-| mixing-x2 | balanced | E | 96 | 12/0 | 85/96 [0.8064,0.9348] | 0/31 [0,0.1103] |
-| mixing-x2 | balanced | G | 104 | 4/0 | 94/104 [0.832,0.9469] | 0/35 [6.939e-18,0.0989] |
-| mixing-x2 | proxy-rich | E | 99 | 9/0 | 87/99 [0.8,0.9293] | 0/37 [0,0.09406] |
-| mixing-x2 | proxy-rich | G | 103 | 5/0 | 91/103 [0.8073,0.9321] | 0/41 [0,0.08567] |
-| mixing-x2 | date-rich | E | 61 | 47/0 | 56/61 [0.8221,0.9645] | 0/8 [0,0.3244] |
-| mixing-x2 | date-rich | G | 97 | 11/0 | 87/97 [0.8205,0.943] | 0/17 [0,0.1843] |
-| finite-layer-40 | balanced | E | 103 | 5/0 | 93/103 [0.8304,0.9464] | 1/39 [0.004541,0.1318] |
-| finite-layer-40 | balanced | G | 106 | 2/0 | 97/106 [0.8465,0.9547] | 0/39 [0,0.08967] |
-| finite-layer-40 | proxy-rich | E | 102 | 6/0 | 89/102 [0.7941,0.924] | 0/38 [0,0.09181] |
-| finite-layer-40 | proxy-rich | G | 103 | 5/0 | 90/103 [0.796,0.9247] | 1/42 [0.004215,0.1232] |
-| finite-layer-40 | date-rich | E | 95 | 13/0 | 88/95 [0.8556,0.9639] | 0/20 [0,0.1611] |
-| finite-layer-40 | date-rich | G | 104 | 4/0 | 95/104 [0.8437,0.9538] | 0/21 [0,0.1546] |
-| differential-offset-75 | balanced | E | 104 | 4/0 | 72/104 [0.5981,0.7728] | 4/45 [0.03511,0.2073] |
-| differential-offset-75 | balanced | G | 106 | 2/0 | 75/106 [0.6149,0.7857] | 3/43 [0.02401,0.1861] |
-| differential-offset-75 | proxy-rich | E | 105 | 3/0 | 67/105 [0.5428,0.7236] | 6/55 [0.05097,0.2183] |
-| differential-offset-75 | proxy-rich | G | 106 | 2/0 | 67/106 [0.5372,0.7178] | 5/56 [0.03874,0.1926] |
-| differential-offset-75 | date-rich | E | 99 | 9/0 | 68/99 [0.59,0.7698] | 1/33 [0.005369,0.1532] |
-| differential-offset-75 | date-rich | G | 102 | 6/0 | 75/102 [0.6423,0.8112] | 2/28 [0.01981,0.2265] |
+| baseline | balanced | E | 116 | 2/0 | 108/116 [0.8698,0.9646] | 1/36 [0.00492,0.1417] |
+| baseline | balanced | G | 116 | 2/0 | 106/116 [0.8486,0.9525] | 1/36 [0.00492,0.1417] |
+| baseline | proxy-rich | E | 114 | 4/0 | 103/114 [0.8354,0.9453] | 1/48 [0.003687,0.109] |
+| baseline | proxy-rich | G | 116 | 2/0 | 103/116 [0.8177,0.9333] | 1/50 [0.003539,0.105] |
+| baseline | date-rich | E | 110 | 8/0 | 100/110 [0.8407,0.9499] | 0/24 [0,0.138] |
+| baseline | date-rich | G | 113 | 5/0 | 103/113 [0.8447,0.9512] | 0/23 [0,0.1431] |
+| simultaneous | balanced | E | 114 | 4/0 | 105/114 [0.8567,0.9579] | 9/9 [0.7009,1] |
+| simultaneous | balanced | G | 117 | 1/0 | 109/117 [0.8709,0.9649] | 8/8 [0.6756,1] |
+| simultaneous | proxy-rich | E | 112 | 6/0 | 101/112 [0.8327,0.9443] | 11/11 [0.7412,1] |
+| simultaneous | proxy-rich | G | 112 | 6/0 | 99/112 [0.8115,0.9309] | 13/13 [0.7719,1] |
+| simultaneous | date-rich | E | 105 | 13/0 | 98/105 [0.8687,0.9673] | 7/7 [0.6457,1] |
+| simultaneous | date-rich | G | 115 | 3/0 | 109/115 [0.8908,0.9759] | 6/6 [0.6097,1] |
+| mixing-x2 | balanced | E | 106 | 12/0 | 94/106 [0.8125,0.934] | 0/34 [0,0.1015] |
+| mixing-x2 | balanced | G | 114 | 4/0 | 103/114 [0.8354,0.9453] | 0/39 [0,0.08967] |
+| mixing-x2 | proxy-rich | E | 109 | 9/0 | 95/109 [0.7959,0.9219] | 0/41 [0,0.08567] |
+| mixing-x2 | proxy-rich | G | 113 | 5/0 | 99/113 [0.8027,0.9247] | 0/45 [0,0.07865] |
+| mixing-x2 | date-rich | E | 69 | 49/0 | 64/69 [0.8413,0.9687] | 0/9 [0,0.2991] |
+| mixing-x2 | date-rich | G | 107 | 11/0 | 97/107 [0.8365,0.9484] | 0/19 [0,0.1682] |
+| finite-layer-40 | balanced | E | 113 | 5/0 | 102/113 [0.8341,0.9448] | 1/42 [0.004215,0.1232] |
+| finite-layer-40 | balanced | G | 116 | 2/0 | 106/116 [0.8486,0.9525] | 0/42 [0,0.0838] |
+| finite-layer-40 | proxy-rich | E | 112 | 6/0 | 97/112 [0.7907,0.9171] | 0/42 [0,0.0838] |
+| finite-layer-40 | proxy-rich | G | 113 | 5/0 | 98/113 [0.7925,0.9179] | 1/46 [0.003848,0.1134] |
+| finite-layer-40 | date-rich | E | 105 | 13/0 | 96/105 [0.8451,0.9543] | 0/22 [0,0.1487] |
+| finite-layer-40 | date-rich | G | 114 | 4/0 | 103/114 [0.8354,0.9453] | 0/22 [0,0.1487] |
+| differential-offset-75 | balanced | E | 114 | 4/0 | 77/114 [0.585,0.7544] | 5/50 [0.04348,0.2136] |
+| differential-offset-75 | balanced | G | 116 | 2/0 | 81/116 [0.6095,0.7743] | 4/48 [0.03288,0.1955] |
+| differential-offset-75 | proxy-rich | E | 115 | 3/0 | 71/115 [0.5261,0.7011] | 6/59 [0.04745,0.2046] |
+| differential-offset-75 | proxy-rich | G | 116 | 2/0 | 71/116 [0.5212,0.6958] | 5/60 [0.03612,0.1807] |
+| differential-offset-75 | date-rich | E | 108 | 10/0 | 73/108 [0.5829,0.7568] | 1/36 [0.00492,0.1417] |
+| differential-offset-75 | date-rich | G | 112 | 6/0 | 81/112 [0.634,0.7976] | 2/31 [0.01787,0.2072] |
 
-The unexecuted 20 indices remain in every full-study requested denominator.
-For each stratum, the 20 unexecuted outcomes remain unknown in its full-study
+The unexecuted 10 indices remain in every full-study requested denominator.
+For each stratum, the 10 unexecuted outcomes remain unknown in its full-study
 coverage identification bounds; even perfect selected coverage cannot establish
 full-study coverage. Numerical failures leave further unknowns. The runner's
 aggregate command returns all stratum bounds, failure-or-missing Wilson
 intervals, selected error/width intervals and approximate PIT decile counts.
 PIT is available only for accepted joint posterior rows; baseline uniformity
-cannot be assessed with one hundred eight draws. No cross-case pooled coverage is reported.
+cannot be assessed with one hundred eighteen draws. No cross-case pooled coverage is reported.
 
 ## Paired contrasts and their uncertainty
 
@@ -221,31 +232,31 @@ is in years squared, width in years, and the last two columns are indicators.
 
 | Case / contrast | Complete/incomplete | Squared error difference [95%] | Width difference [95%] | Coverage difference [95%] | False declaration difference [95%] |
 |---|---:|---|---|---|---|
-| baseline/E/P-D | 99/9 | -3303 [-1.016e+05,9.497e+04] | -79.01 [-242.8,84.79] | 0 [-0.273,0.273] | 0.0101 [-0.2629,0.2831] |
-| baseline/G/P-D | 102/6 | -3345 [-1.002e+05,9.347e+04] | -85.13 [-246.5,76.23] | -0.03922 [-0.3082,0.2297] | 0.009804 [-0.2591,0.2787] |
-| baseline/balanced/E-G | 106/2 | -270.1 [-9.525e+04,9.471e+04] | -1.215 [-159.5,157.1] | 0.01887 [-0.245,0.2827] | 0 [-0.2638,0.2638] |
-| baseline/proxy-rich/E-G | 105/3 | -68.55 [-9.55e+04,9.536e+04] | 3.117 [-155.9,162.2] | 0.02857 [-0.2365,0.2936] | 0 [-0.2651,0.2651] |
-| baseline/date-rich/E-G | 99/9 | -83.06 [-9.836e+04,9.819e+04] | -2.717 [-166.5,161.1] | -0.0101 [-0.2831,0.2629] | 0 [-0.273,0.273] |
-| simultaneous/E/P-D | 96/12 | -2002 [-1.018e+05,9.78e+04] | -80.22 [-246.5,86.12] | -0.03125 [-0.3085,0.246] | 0.03125 [-0.246,0.3085] |
-| simultaneous/G/P-D | 100/8 | -1413 [-9.92e+04,9.637e+04] | -83.98 [-247,78.99] | -0.08 [-0.3516,0.1916] | 0.08 [-0.1916,0.3516] |
-| simultaneous/balanced/E-G | 104/4 | -8.985 [-9.589e+04,9.588e+04] | 0.4136 [-159.4,160.2] | -0.009615 [-0.276,0.2567] | 0.009615 [-0.2567,0.276] |
-| simultaneous/proxy-rich/E-G | 101/7 | -36.6 [-9.733e+04,9.726e+04] | 2.941 [-159.2,165.1] | 0.0198 [-0.2505,0.2901] | -0.0198 [-0.2901,0.2505] |
-| simultaneous/date-rich/E-G | 95/13 | 215.1 [-1.001e+05,1.005e+05] | -3.525 [-170.7,163.7] | -0.02105 [-0.2997,0.2576] | 0.02105 [-0.2576,0.2997] |
-| mixing-x2/E/P-D | 61/47 | -4572 [-1.298e+05,1.206e+05] | -91.12 [-299.8,117.5] | -0.01639 [-0.3642,0.3314] | 0 [-0.3478,0.3478] |
-| mixing-x2/G/P-D | 94/14 | -3093 [-1.039e+05,9.776e+04] | -92.06 [-260.2,76.03] | 0 [-0.2802,0.2802] | 0 [-0.2802,0.2802] |
-| mixing-x2/balanced/E-G | 95/13 | -28.03 [-1.004e+05,1.003e+05] | -1.912 [-169.1,165.3] | -0.02105 [-0.2997,0.2576] | 0 [-0.2787,0.2787] |
-| mixing-x2/proxy-rich/E-G | 96/12 | -239.7 [-1e+05,9.956e+04] | 0.8888 [-165.4,167.2] | 0 [-0.2772,0.2772] | 0 [-0.2772,0.2772] |
-| mixing-x2/date-rich/E-G | 59/49 | -302 [-1.276e+05,1.27e+05] | -2.488 [-214.7,209.7] | 0.05085 [-0.3028,0.4045] | 0 [-0.3536,0.3536] |
-| finite-layer-40/E/P-D | 93/15 | -3148 [-1.045e+05,9.825e+04] | -76.65 [-245.6,92.34] | -0.07527 [-0.3569,0.2064] | 0 [-0.2817,0.2817] |
-| finite-layer-40/G/P-D | 99/9 | -3392 [-1.017e+05,9.488e+04] | -87.33 [-251.1,76.46] | -0.06061 [-0.3336,0.2124] | 0.0101 [-0.2629,0.2831] |
-| finite-layer-40/balanced/E-G | 103/5 | 23.68 [-9.633e+04,9.637e+04] | -2.943 [-163.5,157.6] | -0.009709 [-0.2773,0.2579] | 0.009709 [-0.2579,0.2773] |
-| finite-layer-40/proxy-rich/E-G | 101/7 | 179.2 [-9.712e+04,9.748e+04] | 3.304 [-158.9,165.5] | 0 [-0.2703,0.2703] | -0.009901 [-0.2802,0.2604] |
-| finite-layer-40/date-rich/E-G | 94/14 | 95.77 [-1.008e+05,1.01e+05] | -5.876 [-174,162.2] | 0.01064 [-0.2695,0.2908] | 0 [-0.2802,0.2802] |
-| differential-offset-75/E/P-D | 99/9 | -6303 [-1.046e+05,9.197e+04] | -75.35 [-239.1,88.44] | -0.0404 [-0.3134,0.2326] | 0.0303 [-0.2427,0.3033] |
-| differential-offset-75/G/P-D | 102/6 | -6055 [-1.029e+05,9.077e+04] | -82.78 [-244.1,78.59] | -0.1078 [-0.3768,0.1611] | 0.02941 [-0.2395,0.2984] |
-| differential-offset-75/balanced/E-G | 104/4 | -38.66 [-9.592e+04,9.585e+04] | -1.774 [-161.6,158] | -0.01923 [-0.2856,0.2471] | 0.009615 [-0.2567,0.276] |
-| differential-offset-75/proxy-rich/E-G | 104/4 | -208 [-9.609e+04,9.568e+04] | 3.608 [-156.2,163.4] | 0.01923 [-0.2471,0.2856] | 0 [-0.2663,0.2663] |
-| differential-offset-75/date-rich/E-G | 96/12 | 32.29 [-9.977e+04,9.983e+04] | -3.879 [-170.2,162.5] | -0.05208 [-0.3293,0.2251] | 0 [-0.2772,0.2772] |
+| baseline/E/P-D | 108/10 | -3231 [-9.732e+04,9.086e+04] | -77.26 [-234.1,79.56] | -0.009259 [-0.2706,0.2521] | 0.009259 [-0.2521,0.2706] |
+| baseline/G/P-D | 112/6 | -3302 [-9.57e+04,8.91e+04] | -83.62 [-237.6,70.37] | -0.02679 [-0.2834,0.2299] | 0.008929 [-0.2477,0.2656] |
+| baseline/balanced/E-G | 116/2 | -241.4 [-9.103e+04,9.055e+04] | -1.041 [-152.4,150.3] | 0.01724 [-0.235,0.2694] | 0 [-0.2522,0.2522] |
+| baseline/proxy-rich/E-G | 114/4 | -46.05 [-9.163e+04,9.154e+04] | 3.079 [-149.6,155.7] | 0.01754 [-0.2369,0.2719] | 0 [-0.2544,0.2544] |
+| baseline/date-rich/E-G | 109/9 | -90.1 [-9.375e+04,9.357e+04] | -2.734 [-158.8,153.4] | 0 [-0.2602,0.2602] | 0 [-0.2602,0.2602] |
+| simultaneous/E/P-D | 104/14 | -1756 [-9.764e+04,9.413e+04] | -79.32 [-239.1,80.48] | -0.03846 [-0.3048,0.2279] | 0.03846 [-0.2279,0.3048] |
+| simultaneous/G/P-D | 110/8 | -1527 [-9.476e+04,9.171e+04] | -82.82 [-238.2,72.57] | -0.07273 [-0.3317,0.1863] | 0.07273 [-0.1863,0.3317] |
+| simultaneous/balanced/E-G | 114/4 | -51.54 [-9.163e+04,9.153e+04] | 0.5848 [-152.1,153.2] | -0.008772 [-0.2632,0.2456] | 0.008772 [-0.2456,0.2632] |
+| simultaneous/proxy-rich/E-G | 110/8 | -31.72 [-9.326e+04,9.32e+04] | 2.779 [-152.6,158.2] | 0.01818 [-0.2408,0.2772] | -0.01818 [-0.2772,0.2408] |
+| simultaneous/date-rich/E-G | 104/14 | 185.2 [-9.57e+04,9.607e+04] | -3.512 [-163.3,156.3] | -0.01923 [-0.2856,0.2471] | 0.01923 [-0.2471,0.2856] |
+| mixing-x2/E/P-D | 69/49 | -3908 [-1.216e+05,1.138e+05] | -88.21 [-284.4,108] | -0.04348 [-0.3705,0.2835] | 0 [-0.327,0.327] |
+| mixing-x2/G/P-D | 104/14 | -2857 [-9.874e+04,9.303e+04] | -91.02 [-250.8,68.79] | -0.01923 [-0.2856,0.2471] | 0 [-0.2663,0.2663] |
+| mixing-x2/balanced/E-G | 105/13 | -31.92 [-9.546e+04,9.539e+04] | -1.488 [-160.5,157.6] | -0.01905 [-0.2841,0.246] | 0 [-0.2651,0.2651] |
+| mixing-x2/proxy-rich/E-G | 106/12 | -174.4 [-9.515e+04,9.48e+04] | 0.9765 [-157.3,159.3] | 0 [-0.2638,0.2638] | 0 [-0.2638,0.2638] |
+| mixing-x2/date-rich/E-G | 67/51 | -267.7 [-1.197e+05,1.192e+05] | -3.561 [-202.7,195.5] | 0.04478 [-0.2871,0.3766] | 0 [-0.3318,0.3318] |
+| finite-layer-40/E/P-D | 103/15 | -3162 [-9.951e+04,9.319e+04] | -76.37 [-236.9,84.22] | -0.06796 [-0.3356,0.1997] | 0 [-0.2676,0.2676] |
+| finite-layer-40/G/P-D | 109/9 | -3379 [-9.704e+04,9.028e+04] | -86.91 [-243,69.19] | -0.05505 [-0.3152,0.2051] | 0.009174 [-0.251,0.2693] |
+| finite-layer-40/balanced/E-G | 113/5 | 25.16 [-9.196e+04,9.201e+04] | -2.809 [-156.1,150.5] | -0.00885 [-0.2644,0.2467] | 0.00885 [-0.2467,0.2644] |
+| finite-layer-40/proxy-rich/E-G | 111/7 | 165.8 [-9.265e+04,9.298e+04] | 3.217 [-151.5,157.9] | 0 [-0.2578,0.2578] | -0.009009 [-0.2668,0.2488] |
+| finite-layer-40/date-rich/E-G | 104/14 | 93.4 [-9.579e+04,9.598e+04] | -5.962 [-165.8,153.8] | 0.009615 [-0.2567,0.276] | 0 [-0.2663,0.2663] |
+| differential-offset-75/E/P-D | 108/10 | -6207 [-1.003e+05,8.789e+04] | -74.84 [-231.7,81.98] | -0.0463 [-0.3077,0.2151] | 0.02778 [-0.2336,0.2891] |
+| differential-offset-75/G/P-D | 112/6 | -5960 [-9.836e+04,8.644e+04] | -82.23 [-236.2,71.77] | -0.1161 [-0.3727,0.1406] | 0.02679 [-0.2299,0.2834] |
+| differential-offset-75/balanced/E-G | 114/4 | -0.7681 [-9.158e+04,9.158e+04] | -1.396 [-154,151.2] | -0.02632 [-0.2807,0.2281] | 0.008772 [-0.2456,0.2632] |
+| differential-offset-75/proxy-rich/E-G | 114/4 | -186.8 [-9.177e+04,9.14e+04] | 3.731 [-148.9,156.4] | 0.01754 [-0.2369,0.2719] | 0 [-0.2544,0.2544] |
+| differential-offset-75/date-rich/E-G | 105/13 | 103.9 [-9.532e+04,9.553e+04] | -3.489 [-162.5,155.6] | -0.04762 [-0.3127,0.2175] | 0 [-0.2651,0.2651] |
 
 These broad intervals are a property of the small interim sample and conservative
 bounded method. They establish neither a method winner nor calibrated interval
@@ -256,7 +267,7 @@ normal-age approximation is not assumed to be better than exponential material.
 
 ## Reproduce and continue
 
-Run the commands in HELDOUT_PROTOCOL.md with indices 1000..1107 into one
+Run the commands in HELDOUT_PROTOCOL.md with indices 1000..1117 into one
 fresh, explicitly labelled reproduction directory. Existing original receipts
 must not be overwritten or selectively replaced. Cooperative deadlines and
 platform speed can change numerical-failure status; the particle streams and
@@ -283,7 +294,7 @@ PYCSV
 ```
 
 Next work: claim exclusive ownership of the result CSV and this report, then
-execute untouched indices 1108..1127 exactly once under the existing registration.
+execute untouched indices 1118..1127 exactly once under the existing registration.
 Keep failed and missing cells, update the complete-pair and requested-denominator
 summaries, and retain this interim history. A bounded next slice should state its
 indices before execution. Never raise particle/time budgets to rescue failures.
@@ -387,3 +398,15 @@ Original receipts, prior snapshots and verification scripts remain in this
 private run under `.house-mailbox/sediment-108`. Twenty untouched draws remain;
 milestone three stays open pending completion, scientific report and independent
 milestone review.
+
+
+## One hundred eighteen-draw continuation — Fern, 25 November 2026
+
+Indices 1108..1117 were executed once under the unchanged registration and limits.
+All 300 added cells, including every failure, were decoded and matched to their
+original receipts. The earlier 3,240 CSV rows remain byte-for-byte unchanged.
+All 30 Wilson rows and 25 complete-pair Hoeffding rows were regenerated and
+checked using separate formulas from the CSV. The frozen validator passed.
+Receipts, previous snapshots and verification scripts remain privately under
+`.house-mailbox/sediment-118`. Ten untouched draws remain; milestone three stays
+open pending completion, a scientific report and independent milestone review.
