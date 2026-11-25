@@ -1939,26 +1939,146 @@ def verify_parity_completion_certificate(certificate):
         return False
 
 
-def _period_two_phase_system(hole):
-    """Original two-periodic integer rows and the checked endpoint traces."""
+def _periodic_phase_system(hole,period):
+    """Original even-periodic integer rows and checked absolute endpoint traces."""
+    if type(period) is not int or period<2 or period%2:
+        raise ValueError("require a positive even period")
     _,stencils,_,laws,_ = _parity_trace_data(hole)
-    keys = [(*k,j) for k in moving_folded_labels() for j in (0,1)]
+    keys = [(*k,j) for k in moving_folded_labels() for j in range(period)]
     positions = {k:i for i,k in enumerate(keys)}
     original = []
-    for level in (0,1):
+    for level in range(period):
         for stencil in stencils.values():
             row = defaultdict(int)
-            for (*k,d),c in stencil.items(): row[positions[(*k,(level+d)%2)]] += c
+            for (*k,d),c in stencil.items(): row[positions[(*k,(level+d)%period)]] += c
             original.append({i:c for i,c in row.items() if c})
     equations = []
-    for level in (0,1):
+    for level in range(period):
         for j,law in enumerate(laws):
             mask = 0
             rhs = (level-1)%2 if j<2 else level%2 if j<4 else 0
             for a,q,s,d in law['observable']:
-                mask ^= 1<<positions[a,q,s,(level+d)%2]
+                mask ^= 1<<positions[a,q,s,(level+d)%period]
             equations.append((mask,rhs))
     return len(keys),original,equations
+
+
+def _period_two_phase_system(hole):
+    return _periodic_phase_system(hole,2)
+
+
+def open_phase_system(hole=19, length=1, first=3):
+    """A finite necessary interior window, with distinct free end levels.
+
+    Coordinates are label-major, then absolute level first-1..first+length.
+    No two levels are identified. Physical shells and endpoint-derived
+    parity traces are retained at centres first..first+length-1.
+    """
+    if (type(length) is not int or not 1<=length<=64 or
+            type(first) is not int or first<3):
+        raise ValueError('require 1..64 window rows and first level at least three')
+    _,stencils,_,laws,_=_parity_trace_data(hole)
+    keys=[(*k,level) for k in moving_folded_labels()
+          for level in range(first-1,first+length+1)]
+    positions={k:i for i,k in enumerate(keys)}
+    rows=[];equations=[]
+    for level in range(first,first+length):
+        for stencil in stencils.values():
+            rows.append({positions[(*k,level+d)]:c for (*k,d),c in stencil.items()})
+        for j,law in enumerate(laws):
+            mask=0
+            for a,q,s,d in law['observable']:
+                mask ^= 1<<positions[a,q,s,level+d]
+            rhs=(level-1)%2 if j<2 else level%2 if j<4 else 0
+            equations.append((mask,rhs))
+    return keys,rows,equations
+
+
+def verify_open_phase_signs(certificate):
+    """Check actual integer signs and every trace, without any search engine.
+
+    A passing window is only local compatibility, not an endpoint completion
+    or an infinite construction. In particular it decides no physical pair.
+    """
+    if (certificate.get('kind')!='moving-open-phase-signs-v1' or
+            certificate.get('status')!='local_signing' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped local signing')
+    keys,rows,equations=open_phase_system(certificate['hole'],certificate['length'],
+                                         certificate['first'])
+    if (certificate.get('variables')!=len(keys) or
+            certificate.get('minimum_half')!=certificate['first']+certificate['length']+1):
+        raise ValueError('wrong open window dimensions')
+    encoded=certificate['bits']
+    if (not isinstance(encoded,str) or not encoded.startswith('0x') or
+            len(encoded)>2+(len(keys)+3)//4):
+        raise ValueError('invalid window bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>len(keys):raise ValueError('window bits exceed coordinates')
+    for row in rows:
+        if sum(c*(1-2*(bits>>i&1)) for i,c in row.items()):
+            raise ValueError('open window fails an original integer row')
+    for mask,rhs in equations:
+        if (mask&bits).bit_count()%2!=rhs:
+            raise ValueError('open window fails an endpoint-derived trace')
+    return True
+
+
+def open_phase_example(hole=19,first=3):
+    """Actual two-centre signings at either starting parity, at holes 19/97.
+
+    Translation by two preserves every integer row and trace phase. The
+    label-major ordering is unchanged; the checker still rebuilds every
+    requested row. Different windows need not agree on shared coordinates.
+    Recorded assignments came from an installed solver; replay never uses it.
+    """
+    examples={
+        (19,1): '0xee490e16ab666c12d2222540342c6a4527a6bfb7c04c9f6ea5218796e6010ee6052e619621e620ac3db0ec87ade7095adf7a52c3bee01f17c99964b605812724a7e837248fbef09e7f4ccadb7e48c0f46428e1a3edb6536197a6868d669ca6a5876ff03ee7a62084acc0c020ecc202e4a20cc08e008e8684ac06e08402ee68602a48486a40c0886e060eca8886e02ef0fc8280707ddbe3106120472465302007340015161244171305056743260120524730607331017015206004644315665e85640ee86c86a43c38',
+        (19,0): '0xd7540b2c6e605b6b494acb778640707cf568a0929d9a77da1cd00ce8602f630966e91feb57a46d06002df02ece8ced63e6272128b1740320a025fd0e7f141686484bfc6e548991b31d0731e870e3a46fed64af24a4f2f0ce42ec027d251fed36478981eac14a4ac66ee42e0ea228ec022ec02842a404e0ce840c8062c4040820a0ac840ea0a8a08e6c06606862accee74aee8cad02b07e747417124100153337263174670307022500050560612102431052453201216101650263321516511a0c4359197ed27af778',
+        (97,1): '0x26c05eda0a124e2c6480e666404b6d9f8064008c4e0c012402081efe82f088edeb05e2310600a6c877a0d2e9e422004834c2690d2a8124ed8da0dab2610584e34f8cf88631ffe418681cbaf4714a84b36703c600f1f2f438c807e5efb442e86f1b64e18220e6a6a7cbc802f88aff8c2cf8348ba1f780a649078b6b2db7ba6c4c2658681e7a45edece6130887e1e5f27c82640fb4fa4f08214cc2d98130266dc1a153e1302245db92a42eeede160f0b0621731c0c010d42064b855f25d066bce07062944937d731d3af',
+        (97,0): '0x1794f40e8152401c5a4f6d895ca9c8c804a19ec80804274f3d8eceee0048ae51b3cd2703e0d1e1e9aed1633186e1a84e39de66e9f193e27d2400232121b9f8f8ce9879ee04f87f37f8f400c8b9fef0ec099ff8700113f77fd83766f85a373f6646e8ec2f57f96044b7f373fc7e799e49a0f4b0096e5d2fb8bf4928b097bfb85e1b70369de6b08c0466f53a080c3817b599898cf7efeb74470b181a1b09ec8100e0a7cd3d5b032102052131978f337f5e08579c6c8d13e7ec7448ea1341b407316942c9f9b35311ad3e',
+    }
+    if (type(hole) is not int or hole not in (19,97) or
+            type(first) is not int or first<3):
+        raise ValueError('require hole 19 or 97 and first level at least three')
+    certificate=dict(kind='moving-open-phase-signs-v1',hole=hole,length=2,first=first,
+                     minimum_half=first+3,variables=1608,status='local_signing',
+                     bits=examples[hole,first%2],
+                     literal_existence_decided=False,all_pairs_decided=False)
+    verify_open_phase_signs(certificate)
+    return certificate
+
+
+def open_phase_search(hole=19,length=1,first=3,seconds=30,nodes=100000):
+    """Standard-library literal search; only checked positive windows survive."""
+    if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
+            or type(nodes) is not int or nodes<1):
+        raise ValueError('require positive finite search limits')
+    started=time.monotonic()
+    keys,rows,equations=open_phase_system(hole,length,first)
+    refusal,basis=binary_elimination(rows)
+    if refusal is not None:raise AssertionError('unexpected incompatible open parity window')
+    for mask,rhs in equations:
+        while mask:
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs;break
+            old,b=basis[pivot];mask^=old;rhs^=b
+        if not mask and rhs:raise AssertionError('incompatible endpoint-derived open trace')
+    remaining=seconds-(time.monotonic()-started)
+    result=dict(kind='moving-open-phase-signs-v1',hole=hole,length=length,first=first,
+                minimum_half=first+length+1,variables=len(keys),status='unknown',
+                literal_existence_decided=False,all_pairs_decided=False)
+    if remaining<=0:return result
+    engine=make_engine(len(keys),rows,reduced_binary_basis(basis),remaining,nodes,'connected')
+    status,values=engine.run({})
+    result.update(search_status=status,nodes=engine.nodes,elapsed=time.monotonic()-started)
+    if values is not None:
+        if any(v not in (-1,1) for v in values):raise AssertionError('incomplete local signing')
+        result.update(status='local_signing',bits=hex(sum((v==-1)<<i for i,v in enumerate(values))))
+        verify_open_phase_signs(result)
+    return result
 
 
 def period_two_phase_refusal(hole=19,seconds=300,max_pivots=40000):
@@ -1995,6 +2115,52 @@ def verify_period_two_phase_refusal(certificate):
                                        certificate['cubic_proof'],extra_binary=equations)
     except (KeyError,ValueError,TypeError,IndexError):
         return False
+
+
+def periodic_phase_refusal(hole=19,period=4,seconds=300,max_pivots=12000,prior=None,sweep=False,
+                           retain_quadratics=False):
+    """Retain original-row identities for a specified even periodic interior."""
+    started=time.monotonic()
+    trace=parity_trace_certificate(hole)
+    size,rows,equations=_periodic_phase_system(hole,period)
+    remaining=seconds-(time.monotonic()-started)
+    if remaining<=0:raise ValueError('no time remains for proof extraction')
+    previous=[]
+    if prior is not None:
+        if (prior.get('kind')!='moving-periodic-phase-v1' or prior.get('hole')!=hole
+                or prior.get('period')!=period or prior.get('trace')!=trace
+                or prior.get('status')!='unknown'
+                or prior.get('all_pairs_decided') is not False
+                or prior.get('literal_existence_decided') is not False):
+            raise ValueError('resume requires the same unknown phase system')
+        previous=prior.get('cubic_proof')
+        if not isinstance(previous,list):raise ValueError('invalid prior proof rounds')
+    analysis=cubic_shell_analysis(size,rows,remaining,max_pivots,True,
+                                  extra_binary=equations,initial_proofs=previous,sweep=sweep,
+                                  retain_quadratics=retain_quadratics)
+    return dict(kind='moving-periodic-phase-v1',hole=hole,period=period,
+                status=analysis.get('status','unknown'),trace=trace,
+                cubic_proof=analysis.get('cubic_proof',[]),
+                history=analysis.get('history',[]),stage=analysis.get('stage'),
+                free_count=analysis.get('free_count'),
+                remaining_variables=analysis.get('remaining_variables'),
+                elapsed=time.monotonic()-started,
+                literal_existence_decided=False,all_pairs_decided=False)
+
+
+def verify_periodic_phase_refusal(certificate):
+    """Rebuild the scope and check every retained polynomial identity."""
+    if (certificate.get('kind')!='moving-periodic-phase-v1' or
+            certificate.get('status')!='refused' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):return False
+    try:
+        trace=certificate['trace']
+        if trace['hole']!=certificate['hole'] or not verify_parity_trace_certificate(trace):
+            return False
+        size,rows,equations=_periodic_phase_system(certificate['hole'],certificate['period'])
+        return verify_cubic_shell_proof(size,rows,certificate['cubic_proof'],equations)
+    except (KeyError,ValueError,TypeError,IndexError):return False
 
 
 def interior_rank_matrix(hole=19,prime=5):
@@ -2391,27 +2557,54 @@ def binary_shell_quadratics(size, original, seconds=30, max_free=256, extra_bina
                 product_coordinates=n*(n-1)//2,elapsed=time.monotonic()-started)
 
 
-def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proof=False):
+def _mapped_boolean_product(polynomial,mapping,output_bytes):
+    """XOR mapped monomials without repeatedly copying a wide integer."""
+    if polynomial.bit_count()<64:
+        row=0
+        while polynomial:
+            bit=polynomial&-polynomial;polynomial^=bit
+            row^=1<<mapping[bit.bit_length()-1]
+        return row
+    packed=bytearray(output_bytes)
+    while polynomial:
+        bit=polynomial&-polynomial;polynomial^=bit
+        position=mapping[bit.bit_length()-1]
+        packed[position//8]^=1<<(position%8)
+    return int.from_bytes(packed,'little')
+
+
+def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proof=False,sweep=False,
+                       linear_first=False,quadratic_limit=0):
     """Bounded degree-three Boolean ideal relaxation, with x*x=x.
 
     Input monomials are constant, singletons, then colexicographic pairs.
     Multiply an independent quadratic basis by every binary variable and
     eliminate in constant/singleton/pair/triple order. A zero constant is a
     necessary condition, not a witness. Resource stops are always unknown.
+    With sweep, a full pivot store discards further nonlinear pivots but
+    examines subsequent products. At most variables+1 additional linear
+    pivots are retained. Discarding any row prevents a compatibility claim.
+    linear_first returns checked input-span linear rows before multiplication.
+    quadratic_limit retains up to sixteen new checked quadratic rows for a
+    caller that will explicitly extend its next round's premises.
     """
-    if (type(variables) is not int or not 0<=variables<=128
+    if (type(variables) is not int or not 0<=variables<=192
             or type(max_pivots) is not int or max_pivots<1
             or type(seconds) not in (int,float) or not math.isfinite(seconds)
-            or seconds<=0):
-        raise ValueError('require 0..128 variables and positive limits')
+            or seconds<=0 or type(quadratic_limit) is not int or not 0<=quadratic_limit<=16):
+        raise ValueError('require 0..192 variables and positive limits')
     quadratics=list(quadratics)
     terms=[()]+[(i,) for i in range(variables)]+list(
         (i,j) for j in range(variables) for i in range(j))
     width=len(terms)
+    output_bytes=(width+variables*(variables-1)*(variables-2)//6+7)//8
     if any(type(row) is not int or row<0 or row.bit_length()>width
            for row in quadratics):
         raise ValueError('invalid quadratic polynomial')
-    started=time.monotonic();basis={};processed=0;products=0
+    started=time.monotonic();basis={};processed=0;products=0;discarded=0
+    # A sweep normally reaches its time bound. Keep time for extracting the
+    # identities already found; otherwise that bound would erase all proof.
+    search_seconds=seconds*.8 if (sweep or quadratic_limit) and proof else seconds
     proof_nodes=[];proof_ids={}
     def certificate(node):
         active=1<<node;raw=0;multipliers=[0]*len(independent);visited=0
@@ -2428,28 +2621,48 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proo
             raise TimeoutError('Boolean certificate extraction time limit')
         return dict(raw=raw,multipliers=multipliers)
     def result(status,stage):
+        if discarded and status=='compatible_cubic_relaxation':
+            status,stage='unknown','pivot_limit'
         linear=[row for p,row in sorted(basis.items()) if p<=variables]
         out=dict(status=status,complete=status!='unknown',stage=stage,
                     variables=variables,rank=len(basis),products=products,
-                    processed=processed,linear_polynomials=linear,
+                    processed=processed,discarded=discarded,linear_polynomials=linear,
                     literal_existence_decided=False,
                     elapsed=time.monotonic()-started)
         if proof:
             try:
                 out['proof']=[dict(polynomial=basis[p],**certificate(proof_ids[p]))
                               for p in ([0] if status=='refused' else sorted(basis)) if p<=variables]
+                if quadratic_limit and independent and not out['proof']:
+                    span={q.bit_length()-1:q for q in independent}
+                    more=[]
+                    for p,row in sorted(basis.items()):
+                        if not variables<p<width:continue
+                        reduced=row
+                        while reduced and reduced.bit_length()-1 in span:
+                            reduced^=span[reduced.bit_length()-1]
+                        if reduced:
+                            span[reduced.bit_length()-1]=reduced
+                            more.append(dict(polynomial=row,**certificate(proof_ids[p])))
+                            if len(more)>=quadratic_limit:break
+                    out['quadratic_proof']=more
             except TimeoutError:
-                out.update(proof=[],status='unknown',complete=False,stage='proof_time_limit',
+                out.update(proof=[],quadratic_proof=[],status='unknown',complete=False,stage='proof_time_limit',
                            algebra_status=status)
         out['elapsed']=time.monotonic()-started
         return out
     def insert(row,source):
+        nonlocal discarded
         parents=array('I') if proof else None
         while row:
-            if time.monotonic()-started>=seconds:return 'time_limit'
+            if time.monotonic()-started>=search_seconds:return 'time_limit'
             p=row.bit_length()-1
             if p not in basis:
-                if len(basis)>=max_pivots:return 'pivot_limit'
+                if len(basis)>=max_pivots:
+                    if not sweep or source[0]=='input':return 'pivot_limit'
+                    if p>variables:
+                        discarded+=1
+                        return 'discarded'
                 basis[p]=row
                 if proof:
                     proof_ids[p]=len(proof_nodes)
@@ -2465,6 +2678,8 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proo
     # Only quadratic pivots exist here. Their span equals the input span,
     # so multiplying this basis generates the same truncated ideal space.
     independent=list(basis.values())
+    if linear_first and any(p<=variables for p in basis):
+        return result('unknown','linear_reduction')
     def position(term):
         if len(term)==1:return 1+term[0]
         if len(term)==2:
@@ -2474,15 +2689,12 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proo
     # One multiplier map at a time bounds auxiliary memory independently
     # of the number of products. All powers are reduced before elimination.
     for variable in range(variables):
-        mapping=[1<<position(tuple(sorted(set(term+(variable,))))) for term in terms]
+        mapping=[position(tuple(sorted(set(term+(variable,))))) for term in terms]
         for label,polynomial in enumerate(independent):
-            if time.monotonic()-started>=seconds:return result('unknown','time_limit')
-            row=0
-            while polynomial:
-                bit=polynomial&-polynomial
-                row^=mapping[bit.bit_length()-1]
-                polynomial^=bit
+            if time.monotonic()-started>=search_seconds:return result('unknown','time_limit')
+            row=_mapped_boolean_product(polynomial,mapping,output_bytes)
             stop=insert(row,('product',label,variable));products+=1;processed+=1
+            if stop=='discarded':continue
             if stop:return result('refused' if stop=='conflict' else 'unknown',stop)
     return result('compatible_cubic_relaxation','complete')
 
@@ -2508,9 +2720,13 @@ def verify_boolean_cubic_identity(quadratics, variables, identity):
         if raw>>i&1:value^=q
     terms=[()]+[(i,) for i in range(variables)]+[
         (i,j) for j in range(variables) for i in range(j)]
-    positions={term:i for i,term in enumerate(terms)}
-    positions.update({(i,j,k):len(terms)+k*(k-1)*(k-2)//6+j*(j-1)//2+i
-                      for k in range(variables) for j in range(k) for i in range(j)})
+    def position(term):
+        if not term:return 0
+        if len(term)==1:return 1+term[0]
+        if len(term)==2:
+            i,j=term;return 1+variables+j*(j-1)//2+i
+        i,j,k=term
+        return len(terms)+k*(k-1)*(k-2)//6+j*(j-1)//2+i
     for variable in range(variables):
         # Reorder the sum: multiply each aggregate quadratic just once.
         q=0
@@ -2518,17 +2734,40 @@ def verify_boolean_cubic_identity(quadratics, variables, identity):
             if m>>variable&1:q^=row
         while q:
             bit=q&-q;term=terms[bit.bit_length()-1];q^=bit
-            value^=1<<positions[tuple(sorted(set(term+(variable,))))]
+            value^=1<<position(tuple(sorted(set(term+(variable,)))))
     if value!=target:raise ValueError('Boolean cubic polynomial identity failed')
     return True
 
 
+def append_checked_quadratics(polynomials,variables,identities):
+    """Append independent quadratic consequences after checking each identity."""
+    if not isinstance(identities,list) or not identities:raise ValueError('empty quadratic round')
+    polynomials=list(polynomials)
+    span={}
+    def insert(row):
+        while row and row.bit_length()-1 in span:row^=span[row.bit_length()-1]
+        if not row:return False
+        span[row.bit_length()-1]=row
+        return True
+    for row in polynomials:insert(row)
+    width=1+variables+variables*(variables-1)//2
+    appended=[]
+    for identity in identities:
+        if not isinstance(identity,dict):raise ValueError('invalid quadratic identity')
+        verify_boolean_cubic_identity(polynomials,variables,identity)
+        row=identity['polynomial']
+        if not variables+1<row.bit_length()<=width or not insert(row):
+            raise ValueError('require new quadratic consequences')
+        appended.append(row)
+    return list(polynomials)+appended
+
+
 def verify_cubic_shell_proof(size, original, proofs, extra_binary=()):
-    """Verify affine reductions ending in 1=0, conditional on extra_binary.
+    """Verify quadratic extensions and affine reductions ending in 1=0.
 
     Scoped callers must establish why any additional conditions are necessary.
     """
-    compiled=binary_shell_quadratics(size,original,seconds=300,max_free=128,
+    compiled=binary_shell_quadratics(size,original,seconds=300,max_free=192,
                                     extra_binary=extra_binary)
     if not compiled['complete'] or compiled.get('parity_conflict'):
         raise ValueError('require a complete compatible original parity fibre')
@@ -2536,6 +2775,10 @@ def verify_cubic_shell_proof(size, original, proofs, extra_binary=()):
     polynomials=[m<<1|b for m,b in compiled['quadratic_rows']]
     variables=len(compiled['free'])
     for index,identities in enumerate(proofs):
+        if isinstance(identities,dict):
+            if set(identities)!={'quadratics'}:raise ValueError('invalid quadratic round')
+            polynomials=append_checked_quadratics(polynomials,variables,identities['quadratics'])
+            continue
         if not isinstance(identities,list) or not identities:raise ValueError('empty cubic proof round')
         linear=[]
         for identity in identities:
@@ -2555,8 +2798,8 @@ def verify_cubic_shell_proof(size, original, proofs, extra_binary=()):
 
 def boolean_linear_substitution(variables, linear):
     """Parameterize binary linear zero-polynomials in free original bits."""
-    if type(variables) is not int or not 0<=variables<=128:
-        raise ValueError('require 0..128 binary variables')
+    if type(variables) is not int or not 0<=variables<=192:
+        raise ValueError('require 0..192 binary variables')
     linear=list(linear)
     basis={}
     for row in linear:
@@ -2586,8 +2829,8 @@ def boolean_linear_substitution(variables, linear):
 
 def substitute_boolean_quadratics(polynomials, expressions, new_variables):
     """Exact polynomial substitution in F_2[x]/(x_i^2-x_i), degree<=2."""
-    if type(new_variables) is not int or not 0<=new_variables<=128:
-        raise ValueError('require 0..128 new variables')
+    if type(new_variables) is not int or not 0<=new_variables<=192:
+        raise ValueError('require 0..192 new variables')
     expressions=list(expressions)
     old_variables=len(expressions)
     if any(type(e) is not int or e<0 or e.bit_length()>new_variables+1
@@ -2623,10 +2866,11 @@ def substitute_boolean_quadratics(polynomials, expressions, new_variables):
 
 
 def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000, proof=False,
-                         extra_binary=()):
+                         extra_binary=(),initial_proofs=(),sweep=False,retain_quadratics=False):
     """Lift necessary mod-eight shell quadratics; no arbitrary-support claim."""
+    if retain_quadratics and not proof:raise ValueError('quadratic reuse requires explicit proofs')
     started=time.monotonic()
-    compiled=binary_shell_quadratics(size,original,seconds,max_free=128,
+    compiled=binary_shell_quadratics(size,original,seconds,max_free=192,
                                     extra_binary=extra_binary)
     if not compiled['complete']:return compiled
     if compiled['parity_conflict']:
@@ -2636,18 +2880,49 @@ def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000, proof=Fal
     polynomials=[mask<<1|rhs for mask,rhs in compiled['quadratic_rows']]
     variables=len(compiled['free']);history=[];parameter_ids=list(compiled['free']);proofs=[]
     recovery=[1<<(i+1) for i in range(variables)]
+    for identities in initial_proofs:
+        if isinstance(identities,dict):
+            if set(identities)!={'quadratics'}:raise ValueError('invalid prior quadratic round')
+            polynomials=append_checked_quadratics(polynomials,variables,identities['quadratics'])
+            if proof:proofs.append(identities)
+            continue
+        if not isinstance(identities,list):raise ValueError('invalid prior proof round')
+        if not identities:continue
+        linear=[]
+        for identity in identities:
+            verify_boolean_cubic_identity(polynomials,variables,identity)
+            row=identity['polynomial']
+            if not row or row.bit_length()>variables+1:
+                raise ValueError('prior consequence must be nonzero and linear')
+            linear.append(row)
+        free,expressions=boolean_linear_substitution(variables,linear)
+        if len(free)>=variables:raise ValueError('prior round does not reduce parameters')
+        polynomials=substitute_boolean_quadratics(polynomials,expressions,len(free))
+        recovery=substitute_boolean_quadratics(recovery,expressions,len(free))
+        parameter_ids=[parameter_ids[i] for i in free]
+        variables=len(free)
+        if proof:proofs.append(identities)
     while True:
         remaining=seconds-(time.monotonic()-started)
         if remaining<=0:
             result=dict(complete=False,status='unknown',stage='substitution_time_limit')
             break
-        result=boolean_cubic_lift(polynomials,variables,remaining,max_pivots,proof)
-        if proof:proofs.append(result.pop('proof'))
+        result=boolean_cubic_lift(polynomials,variables,remaining,max_pivots,proof,sweep,
+                                  linear_first=True,quadratic_limit=16 if retain_quadratics else 0)
+        more=result.pop('quadratic_proof',[])
+        if proof:
+            identities=result.pop('proof')
+            if identities:proofs.append(identities)
         history.append({k:v for k,v in result.items() if k!='linear_polynomials'})
         if result['status']=='refused':break
         if result['stage']=='proof_time_limit':break
         linear=result['linear_polynomials']
-        if not linear:break
+        if not linear:
+            if more:
+                polynomials=append_checked_quadratics(polynomials,variables,more)
+                proofs.append(dict(quadratics=more))
+                continue
+            break
         free,expressions=boolean_linear_substitution(variables,linear)
         polynomials=substitute_boolean_quadratics(polynomials,expressions,len(free))
         recovery=substitute_boolean_quadratics(recovery,expressions,len(free))
@@ -3868,6 +4143,17 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-open-phase-signs-v1':
+        verify_open_phase_signs(saved)
+        return dict(verified=True,hole=saved['hole'],length=saved['length'],first=saved['first'],
+                    claim='finite interior window with distinct free end levels only',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-periodic-phase-v1':
+        if not verify_periodic_phase_refusal(saved):
+            raise ValueError('invalid endpoint-phase periodic refusal')
+        return dict(verified=True,hole=saved['hole'],period=saved['period'],
+                    claim='specified periodic interior with physical endpoint phases only',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-period-two-phase-v1':
         if not verify_period_two_phase_refusal(saved):
             raise ValueError('invalid endpoint-phase period-two refusal')
@@ -4170,9 +4456,41 @@ def main():
                    help='classify all constant-row two-level parity laws and endpoint phases')
     p.add_argument('--parity-completion',action='store_true',
                    help='certify a full mod-four shell signing for the parity of --half')
+    p.add_argument('--resume-phase',help='recheck and reuse partial phase identities from this JSON file')
+    p.add_argument('--cubic-sweep',action='store_true',help='continue examining phase products after the nonlinear pivot store fills')
+    p.add_argument('--retain-quadratics',action='store_true',help='retain checked phase quadratic consequences and reuse them in the next pass')
+    p.add_argument('--open-phase-example',action='store_true',help='emit a checked two-centre window at hole 19 or 97, without search')
+    p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
+    p.add_argument('--first-level',type=int,default=3,help='first absolute centre level for --open-phase-window')
+    p.add_argument('--periodic-phase-refusal',action='store_true',help='seek a checked phase refusal at the even --period')
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.open_phase_example:
+        certificate=open_phase_example(args.hole,args.first_level)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.open_phase_window is not None:
+        certificate=open_phase_search(args.hole,args.open_phase_window,args.first_level,args.seconds,args.nodes)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate) if certificate['status']=='local_signing'
+                         else certificate,indent=2));return
+    if args.periodic_phase_refusal:
+        prior=None
+        if args.resume_phase:
+            with open(args.resume_phase) as f:prior=json.load(f)
+        certificate=periodic_phase_refusal(args.hole,args.period,args.seconds,args.cubic_pivots,prior,
+                                           args.cubic_sweep,args.retain_quadratics)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        result=(verify_saved(certificate) if certificate['status']=='refused' else
+                dict(status=certificate['status'],history=certificate['history'],
+                     stage=certificate['stage'],free_count=certificate['free_count'],
+                     remaining_variables=certificate['remaining_variables'],all_pairs_decided=False))
+        print(json.dumps(result|dict(elapsed=certificate['elapsed']),sort_keys=True))
+        return
     if args.period_two_phase_refusal:
         certificate = period_two_phase_refusal(args.hole,args.seconds,args.cubic_pivots)
         if args.write:

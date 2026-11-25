@@ -2798,3 +2798,307 @@ with longer even or nonperiodic interiors and their physical endpoints, then
 allow arbitrary hole positions. The present identities do not exclude those
 possibilities and give no all-pairs obstruction or infinite target
 construction. The broader task and every-triple milestone remain open.
+
+
+## Hawthorn: original-row phase proofs beyond period two (25 November)
+
+The all-pairs acceptance is still open. The phase proof entry point now accepts
+an explicitly named even period. It retains every original sign and every
+interior row, plus all five independently checked absolute endpoint phases at
+each residue. Odd periods are rejected because they identify opposite absolute
+trace phases. A refusal concerns a repeating interior block containing every
+row residue and its two neighbouring levels; it does not impose or exclude
+unrestricted nonperiodic words or other physical hole placements.
+
+The Boolean engine now admits up to 192 free binary coordinates, enough for
+the 188-coordinate period-four fibre at h=19. A larger model still reports a
+dimension limit. Its multiplier map stores monomial positions rather than
+one-bit integers. For 188 variables and multiplier 187, those positions occupy
+651,228 bytes on this interpreter; the former one-bit representation would
+occupy an estimated 2,549,643,788 bytes from Python integer digit sizes. This
+estimate describes the map alone, not total search memory. The verifier also
+computes triple indices directly rather than materializing every triple.
+Elimination storage remains bounded by the requested pivot count and can
+still be substantial; resource exhaustion is unknown, never a refusal.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --periodic-phase-refusal --period 4 --hole 19 --seconds 600 --cubic-pivots 12000 --write /tmp/phase-four.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/phase-four.json
+```
+
+Only a generated refusal can pass the second command. As a positive control
+for the proof machinery, the general entry point at period two, h=97 and
+40,000 pivots regenerated the known refusal in 13.07 seconds; a fresh process
+accepted it. Changing its period, hole, scope flags or proof is rejected.
+The old period-two command and certificate format remain supported.
+
+The first h=19 period-four run stopped unknown after 442.42 seconds:
+the first 12,000-pivot pass supplied three explicitly verified linear
+consequences, reducing 188 parameters to 185; the second pass hit the same
+pivot limit without another consequence. Each saved identity was checked by
+polynomial multiplication against its original-round inputs. These three
+constraints are not a contradiction or a literal witness.
+
+A continuation need not rediscover those consequences. `--resume-phase`
+accepts an unknown certificate for the same hole, period and checked trace,
+rebuilds the original shell parity fibre, and verifies every retained identity
+before applying its affine substitution. A final refusal retains the entire
+proof chain for independent replay. For example:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --periodic-phase-refusal --period 4 --hole 19 --seconds 1200 --cubic-pivots 24000 --resume-phase /tmp/phase-four.json --write /tmp/phase-four-next.json
+```
+
+Replaying the initial partial result restored 185 parameters. The time budget
+is checked between algebraic stages; verification of a retained proof may
+run beyond a very short budget. A six-period request reports unknown with
+`dimension_limit` and 278 free coordinates; it is not silently treated as a
+refusal. Large generated proof files remain outside Git.
+
+Validation: all 98 focused tests pass (145.64 seconds). They include the
+general certificate round trip and damaged scopes, and period-four and
+period-six rows compared coefficient by coefficient with independently folded
+original physical shell columns. Wide polynomial controls cover 188 and 192
+variables, check explicit identities, and reject damaged identities. Resume
+controls reject altered identities and mismatched scopes, preserve exact
+recovery, and replay an independently checked final contradiction after a
+resumed reduction. The expanded final resume control also passes separately.
+
+
+The deeper h=19 run, with 24,000 pivots per pass and a 1,200-second
+budget, stopped unknown after 1,044.14 seconds. It again reduced 188 to 185
+parameters and obtained no further consequence before the next pivot limit.
+Doubling this cap did not strengthen the retained reduction. At h=97 the
+initial period-four run stopped unknown after 900.05 seconds: 187 parameters
+became 184, then certificate extraction reached its time limit. Only the
+first checked reduction was retained for a subsequent resume attempt.
+
+
+A real h=97 resume used the retained three consequences, rechecked them,
+and found three more: 184 parameters became 181 before the 600-second budget
+expired. Independent replay by polynomial multiplication verified both
+reduction rounds, 187 to 184 to 181. The next unfinished pass hit its time
+limit at 11,297 pivots; it supplies no refusal. To reproduce this sequence,
+use h=97 and period four with 24,000 pivots, first for 900 seconds, then
+resume its saved unknown certificate for 600 seconds. Timing affects how
+many consequences a run retains; every retained identity remains checked.
+
+
+The final h=97 continuation rechecked that entire chain, then stopped at its
+24,000-pivot cap after 360.04 seconds without another consequence. The
+retained result is six checked necessary constraints and 181 parameters,
+not a contradiction. Repeating the same cap on the same reduced system has
+no demonstrated benefit. The next substantive step needs a stronger bounded
+algebraic strategy or a new mathematical argument about literal words;
+all permitted holes and unrestricted nonperiodic interiors remain open.
+No literal witness, all-pairs obstruction, task acceptance or project
+completion is claimed.
+
+## Rook: a bounded sweep and cheaper replay (25 November)
+
+The latest predecessor commit was absent from this assigned clone. The trusted
+integration inspection supplied an untruncated patch against its exact base
+`26c74e5`; applying it restored the three advertised blob hashes. Recovery
+commit `704b05e` preserves that contribution separately. Its 98 tests passed
+before further changes. Nothing was published from this private room.
+
+At h=97, period four, the unchanged proof generator with only 3,000 pivots per
+pass reproduced six checked necessary constraints in 100.23 seconds, leaving
+187 -> 184 -> 181 binary parameters. Separate replay rebuilt the original
+shell parity fibre and checked all six polynomial identities. This is the
+same retained reduction as the predecessor's 24,000-pivot attempts, not six
+additional constraints and not a contradiction.
+
+The optional `--cubic-sweep` keeps examining products after its pivot store
+fills. It discards new nonlinear pivots at that bound but allows at most n+1
+additional linear pivots, where n is the current number of parameters.
+Each retained row still has an identity using the original quadratic basis:
+discarded rows are never premises. The unchanged independent polynomial
+checker verifies these identities. If any row was discarded, finishing the
+sweep reports unknown rather than compatibility; a checked identity 1=0 can
+still prove a refusal. A proof-producing sweep reserves one fifth of its
+remaining time for extraction, since stopping precisely at the search
+deadline otherwise loses identities that cannot be extracted in time.
+
+A small exact control has quadratics [33,70,124] in the documented Boolean
+monomial encoding. A four-pivot ordinary pass stops unknown. The sweep
+discards two rows and later produces the independently checked identity
+1=0. Exhaustive controls on 100 small systems check every retained
+consequence against every actual Boolean solution, validate the explicit
+identities, and enforce the pivot bound.
+
+Dense product construction now toggles a byte buffer before making its wide
+integer. Sparse products keep the direct path. This changes neither the
+monomials nor their cancellation. An illustrative dense 188-variable local
+control took 0.0299 seconds with repeated wide-integer XORs and 0.0070 seconds
+with packing; this is not a general timing guarantee. Tests cover monomial
+sets, the packing threshold, collisions, and wide 188/192-variable maps.
+
+The full unchanged-order packed baseline reproduced exactly the same six
+identities in 44.00 seconds, versus the earlier 100.23-second observation.
+Inspection then showed that **every multiplier in all six identities is
+zero**: these are linear consequences of the quadratic input span, not
+consequences requiring cubic products. The engine now applies input-span
+linear rows before multiplication. A 1,400-pivot run reproduced both
+reductions in 18.24 seconds; the first two passes used zero products and
+had ranks 1,400 and 1,397. Its final unreduced pass examined seven products
+before its cap. Timing varies; the checked equations do not.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --periodic-phase-refusal --period 4 --hole 97 --seconds 120 --cubic-pivots 1400 --write /tmp/phase-linear.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --periodic-phase-refusal --period 4 --hole 97 --seconds 240 --cubic-pivots 12000 --retain-quadratics --write /tmp/phase-quadratic.json
+```
+
+The second command retains **four additional independent quadratic
+consequences**, beyond the reduced input span on 181 parameters. Its first
+cubic pass found them; the next pass, using all four as premises, found
+nothing more at the same cap. This observed run took 128.78 seconds.
+Each quadratic round is stored as `{"quadratics": [identities...]}` amid
+the existing affine-reduction rounds. Replay checks every identity against
+the preceding premises, requires new quadratic rows, then explicitly adds
+them to the next round. Modified, duplicate and malformed rounds are
+rejected. A partial chain is never accepted as a refusal: a final checked
+constant contradiction is still required. Resume rechecks both kinds of
+round. Up to sixteen new quadratic rows are retained per pass; their proof
+extraction also receives the reserved time. Large certificates stay out of Git.
+A fresh process replayed the six linear and four quadratic identities in
+16.59 seconds, preserving the entire chain exactly, using `--resume-phase`
+with the second saved file and a one-pivot cap for the subsequent search.
+
+The bounded sweeps did not strengthen the six linear constraints. The
+packed natural-order continuation examined 97,251 products; reverse and
+sparse-row-order probes examined 47,696 and 47,831. All stopped unknown
+with 181 parameters. An earlier sweep without extraction time reached its
+deadline and retained no proof, which motivated the explicit reservation.
+These are witnessed limits of the strategies, not impossibility results.
+
+Validation: all 104 focused tests passed in 118.08 seconds; six selected
+quadratic controls also passed after the final replay guards. They include
+checked quadratic reuse and resume, rejection of damaged or redundant
+premises, and an explicit quadratic round followed by a separately checked
+contradiction. The task's all-pairs acceptance remains unmet.
+
+The h=97 continuation at 24,000 pivots rechecked the full chain and then
+found no further linear or quadratic consequence (126.12 seconds total).
+At h=19, the input-span prepass gives the known three linear consequences,
+188 -> 185 parameters. A subsequent 12,000-pivot pass found no new quadratic
+row (64.66 seconds total). These differences concern the stated periodic
+models; neither result licenses excluding unrestricted interiors.
+Flipping one bit of an actual retained quadratic identity was rejected by a
+fresh CLI resume with `Boolean cubic polynomial identity failed`.
+
+The final h=19 continuation combined quadratic reuse with a 12,000-pivot
+sweep. It checked 97,680 products, discarded 86,647 new nonlinear rows, and
+stopped unknown after 481.19 seconds with the same 185 parameters and no
+additional consequence. The earlier three checked identities were preserved.
+The remaining obstacle is literal solvability with unrestricted interiors
+and physical endpoints, followed by all permitted supports. These bounded
+degree-three strategies supply neither a literal construction nor an
+all-pairs obstruction; repeating the same caps has no demonstrated benefit.
+
+Finally the legacy `--period-two-phase-refusal --hole 19 --seconds 180
+--cubic-pivots 40000` path regenerated its scoped refusal in 85.56 seconds.
+A fresh process accepted the saved certificate with `--verify`. Both retained
+the period-two-only scope and false literal-existence/all-pairs flags. This
+checks the actual older CLI format after the new quadratic-round support;
+it adds no broader mathematical claim.
+
+
+## Hawthorn: source recovery and independent replay (25 November)
+
+Recovered Rook's stopped contribution `48530606` from the complete trusted
+inspection patch, without publishing its rejected integration. All three
+reconstructed blobs match the patch's recorded hashes; private commit
+`5c40898` preserves them exactly. Lesson
+`hawthorn-rook-source-recovery-20261125` stores immutable copies of the
+source, tests and preceding record, so later readers need not recover a room.
+
+All 104 focused tests passed in 93.94 seconds. A fresh period-four, h=97
+run with 1,400 pivots reproduced the two checked input-span reductions
+187 -> 184 -> 181 in 13.95 seconds. A separate one-pivot resume replayed
+both proof rounds unchanged. Both runs report unknown; neither the
+unrestricted-sign problem nor the all-pairs acceptance is settled. This
+recovery supplies reviewable source and replay evidence, not a new theorem.
+
+
+## Hawthorn: actual open interior windows, without periodic identification
+
+The next model leaves both ends free and every folded level distinct. For
+centres `first..first+length-1` it retains all 356 original integer shell
+rows at each centre and all five endpoint-derived trace phases. Coordinates
+run from `first-1` through `first+length`. These are necessary equations for
+any physical solution with `L>=first+length+1`; they omit other centres and
+the physical endpoint equations. No periodicity is imposed.
+
+At both `first=3` and `first=4`, h=19 and h=97 admit literal signings for the
+**specified two-centre window**. Each example supplies all 1,608 signs and passes all
+712 integer rows and ten trace equations. The installed OR-Tools solver
+found the odd-start examples in 9.21 and 5.54 seconds, and the even-start
+examples in 546.68 and 8.05 seconds, after explicitly adding the checked
+binary echelon equations; neither the shipped checker nor
+the example command imports that solver. This is finite local compatibility,
+not a physical endpoint completion, an infinite construction or all-pairs
+acceptance. In particular it does not rule out a contradiction at other
+centres outside a chosen window or on a larger window. Translation by two
+preserves both integer coefficients and trace phases, so these four words
+supply checked local signings at every starting level at least three.
+Different windows need not agree on shared coordinates.
+
+The following standard-library command emits and checks the recorded h=97
+example; h=19 and `--first-level 4` (or any level at least three) are also
+available. The saved file can be checked independently.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --open-phase-example --hole 97 --write /tmp/open-window.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/open-window.json
+```
+
+The recorded run reports `verified: true`, `length: 2`, `first: 3`, and
+both existence and all-pairs decision flags false. For a fresh search use
+`--open-phase-window 1 --hole 19 --seconds 30 --nodes 100000`; the
+standard-library engine found and checked a one-centre signing. A two-centre
+h=19 search exhausted one million nodes in 126.09 seconds and stayed unknown.
+A resource stop never turns into a negative mathematical conclusion.
+
+The two examples starting at 3 **cannot simply be continued with their signs
+fixed**. At the next centre, 5, row `(0,+)` uses only their already supplied
+coordinates and sums to -2 for each. This is an exact check of these two
+words, not a claim that every two-centre signing fails to extend. The
+regression tests retain this failure to prevent mistaking local compatibility
+for a construction. Other tests compare every open-window coefficient with
+direct physical distance-shell columns, keep both end levels distinct, and
+reject altered signs, scope and dimensions.
+
+The unrestricted interior and arbitrary-support problems remain open.
+
+
+Continuation limits (installed OR-Tools 9.15.6755, one search worker):
+
+| Necessary model | Holes h | Seconds per case | Outcome |
+| --- | --- | --- | --- |
+| Three consecutive unwrapped centres | 19, 97 | 600 | unknown |
+| Two centres plus every contained neighbouring shell row | 19, 97 | 300 | unknown |
+| Period four, with checked affine consequences | 19, 97 | 600 | unknown |
+| Period six, with the complete binary echelon constraints | 19 | 1200 | unknown |
+
+The guarded model retains 1,068 integer rows on the same four sign levels:
+712 original window rows and 356 neighbouring rows whose entire support is
+already present. These searches add no dependency to generation or replay.
+Their unknown outcomes are resource limits, not impossibility certificates.
+Joint rational, binary and ternary closure on those guarded integer rows
+made only the existing binary identifications; neither hole gained a new
+ternary copy or short recovery row. Repeating these caps has no demonstrated
+benefit. What is missing is a compatible overlapping extension, followed by
+physical endpoint completion and arbitrary supports.
+
+Validation: the 106-test suite passed in 107.21 seconds before the final
+example data, then five focused window controls passed in 2.95 seconds,
+including both parities and translations. The physical-column comparison
+also passed at the advertised minimum half-length. A separate command-line
+process verified the h=97 example translated to first level 20. The main
+task and the arbitrary-triple milestone remain unfinished.
+
+Mallow independently restored the attached source, passed the four new
+window controls, and replayed a translated witness in a fresh process
+(lesson review 45803). That review confirms the stated local compatibility
+result, not global existence.

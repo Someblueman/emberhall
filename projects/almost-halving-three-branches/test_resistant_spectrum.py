@@ -15,6 +15,317 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_recorded_open_windows_satisfy_all_original_integer_rows(self):
+        for hole in (19,97):
+            for first in (3,4,11,20):
+                certificate=rs.open_phase_example(hole,first)
+                self.assertTrue(rs.verify_open_phase_signs(certificate))
+                bits=int(certificate['bits'],16)
+                _,rows,equations=rs.open_phase_system(hole,2,first)
+                self.assertEqual(len(rows),712)
+                self.assertTrue(all(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())==0
+                                    for row in rows))
+                self.assertTrue(all((mask&bits).bit_count()%2==rhs for mask,rhs in equations))
+        with self.assertRaises(ValueError):rs.open_phase_example(1)
+        with self.assertRaises(ValueError):rs.open_phase_example(19,2)
+
+    def test_recorded_windows_are_not_unchecked_constructions(self):
+        # These particular words cannot simply be extended: the next
+        # centre already has a nonzero shell row using only fixed signs.
+        for hole in (19,97):
+            certificate=rs.open_phase_example(hole)
+            bits=int(certificate['bits'],16)
+            oldkeys,_,_=rs.open_phase_system(hole,2,3)
+            values={k:1-2*(bits>>i&1) for i,k in enumerate(oldkeys)}
+            keys,rows,_=rs.open_phase_system(hole,3,3)
+            row_keys=list(rs.moving_folded_stencils(hole)[1])
+            next_row=rows[2*len(row_keys)+row_keys.index((0,1))]
+            self.assertTrue(all(keys[i] in values for i in next_row))
+            self.assertEqual(sum(c*values[keys[i]] for i,c in next_row.items()),-2)
+
+    def test_open_window_rows_match_physical_columns_without_identifying_ends(self):
+        for hole in (19,97):
+            first,length=3,4
+            scale=2*(first+length+1)+1  # The advertised minimum half-length.
+            coordinates,rows,equations=rs.open_phase_system(hole,length,first)
+            positions={k:i for i,k in enumerate(coordinates)}
+            expected=defaultdict(lambda:defaultdict(int))
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            for arm,n in enumerate(lengths,1):
+                for depth in range(1,n+1):
+                    q,r=divmod(depth,scale)
+                    if not r:continue
+                    if r>scale//2:q,r,orientation=q+1,scale-r,-1
+                    else:orientation=1
+                    for exponent,c in fc.shell_column(lengths,holes,(arm,depth)).items():
+                        expected[exponent][arm,q,orientation,r]+=c
+            row_keys=list(rs.moving_folded_stencils(hole)[1])
+            for level in range(first,first+length):
+                for offset,(q,orientation) in enumerate(row_keys):
+                    physical=expected[q*scale+orientation*level]
+                    self.assertTrue(all(k in positions for k,c in physical.items() if c))
+                    self.assertEqual({positions[k]:c for k,c in physical.items() if c},
+                                     rows[(level-first)*len(row_keys)+offset])
+            # Both boundary levels are actual distinct coordinates, even
+            # though an even periodic quotient would alias some of them.
+            self.assertEqual(len(coordinates),402*(length+2))
+            for label in rs.moving_folded_labels():
+                self.assertNotEqual(positions[(*label,first-1)],positions[(*label,first+length)])
+            self.assertEqual(len(equations),5*length)
+        for length,first in ((0,3),(True,3),(65,3),(1,2),(1,3.0)):
+            with self.assertRaises(ValueError):rs.open_phase_system(19,length,first)
+
+    def test_open_window_positive_search_and_damaged_witness(self):
+        certificate=rs.open_phase_search(19,1,3,seconds=10,nodes=10000)
+        self.assertEqual(certificate['status'],'local_signing')
+        self.assertTrue(rs.verify_open_phase_signs(certificate))
+        verified=rs.verify_saved(certificate)
+        self.assertFalse(verified['literal_existence_decided'])
+        self.assertFalse(verified['all_pairs_decided'])
+        _,rows,_=rs.open_phase_system(19,1,3)
+        active=next(iter(rows[0]))
+        for key,value in (('bits',hex(int(certificate['bits'],16)^(1<<active))),
+                          ('bits','0x'+('f'*10000)),('first',4),('minimum_half',99),
+                          ('literal_existence_decided',True),('all_pairs_decided',True)):
+            damaged=dict(certificate);damaged[key]=value
+            with self.assertRaises(ValueError):rs.verify_open_phase_signs(damaged)
+        with self.assertRaises(ValueError):rs.open_phase_search(seconds=float('inf'))
+
+    def test_quadratic_consequences_are_checked_reused_and_resumed(self):
+        # xy=x and yz=y imply xy=xz, a new quadratic relation.
+        polynomials=[18,68]
+        with self.assertRaises(ValueError):rs.cubic_shell_analysis(3,[],retain_quadratics=True)
+        result=rs.boolean_cubic_lift(polynomials,3,proof=True,quadratic_limit=16)
+        identities=result['quadratic_proof']
+        self.assertEqual([i['polynomial'] for i in identities],[48])
+        self.assertEqual(rs.append_checked_quadratics(polynomials,3,identities),[18,68,48])
+        compiled=dict(complete=True,parity_conflict=False,free=[0,1,2],
+                      quadratic_rows=[(9,0),(34,0)])
+        with patch.object(rs,'binary_shell_quadratics',return_value=compiled):
+            analysis=rs.cubic_shell_analysis(3,[],proof=True,retain_quadratics=True)
+            self.assertEqual(analysis['cubic_proof'],[dict(quadratics=identities)])
+            replay=rs.cubic_shell_analysis(3,[],proof=True,initial_proofs=analysis['cubic_proof'])
+            self.assertEqual(replay['remaining_variables'],3)
+            self.assertEqual(replay['cubic_proof'],analysis['cubic_proof'])
+            with self.assertRaises(ValueError):
+                rs.verify_cubic_shell_proof(3,[],analysis['cubic_proof'])
+        damaged=dict(identities[0]);damaged['polynomial']^=1
+        for bad in ([damaged],identities+identities,[],[None]):
+            with self.assertRaises(ValueError):rs.append_checked_quadratics(polynomials,3,bad)
+        limited=rs.boolean_cubic_lift(polynomials,3,proof=True,max_pivots=1,quadratic_limit=16)
+        self.assertEqual(limited.get('quadratic_proof',[]),[])
+
+    def test_quadratic_round_followed_by_a_checked_contradiction(self):
+        polynomials=[18,68,3,8]  # Also x=1 and z=0: inconsistent.
+        identity=dict(polynomial=48,raw=0,multipliers=[4,1,0,0])
+        expanded=rs.append_checked_quadratics(polynomials,3,[identity])
+        final=rs.boolean_cubic_lift(expanded,3,proof=True)
+        self.assertEqual(final['status'],'refused')
+        proofs=[dict(quadratics=[identity]),final['proof']]
+        compiled=dict(complete=True,parity_conflict=False,free=[0,1,2],
+                      quadratic_rows=[(q>>1,q&1) for q in polynomials])
+        with patch.object(rs,'binary_shell_quadratics',return_value=compiled):
+            self.assertTrue(rs.verify_cubic_shell_proof(3,[],proofs))
+            with self.assertRaises(ValueError):
+                rs.verify_cubic_shell_proof(3,[],[proofs[0],proofs[0],proofs[1]])
+            with self.assertRaises(ValueError):
+                rs.cubic_shell_analysis(3,[],proof=True,
+                    initial_proofs=[dict(quadratics=[identity],untrusted=True)])
+
+    def test_linear_consequences_are_used_before_cubic_products(self):
+        # x+xy=0 and y+xy=0 already imply x=y by addition alone.
+        # A product pass cannot improve that reduction's provenance.
+        polynomials=[10,12]
+        result=rs.boolean_cubic_lift(polynomials,2,proof=True,linear_first=True)
+        self.assertEqual(result['stage'],'linear_reduction')
+        self.assertEqual(result['products'],0)
+        self.assertEqual(result['proof'][0]['polynomial'],6)
+        self.assertTrue(rs.verify_boolean_cubic_identity(polynomials,2,result['proof'][0]))
+        self.assertTrue(all(not m for m in result['proof'][0]['multipliers']))
+        compiled=dict(complete=True,parity_conflict=False,free=[0,1],
+                      quadratic_rows=[(5,0),(6,0)])
+        with patch.object(rs,'binary_shell_quadratics',return_value=compiled):
+            analysis=rs.cubic_shell_analysis(2,[],proof=True)
+        self.assertEqual(analysis['remaining_variables'],1)
+        self.assertEqual(analysis['history'][0]['stage'],'linear_reduction')
+        self.assertEqual(analysis['history'][0]['products'],0)
+        self.assertEqual(analysis['recovery'][0],analysis['recovery'][1])
+
+    def test_packed_boolean_products_against_monomial_sets(self):
+        rng=random.Random(3111)
+        for n in (4,16):
+            terms=[()]+[(i,) for i in range(n)]+[(i,j) for j in range(n) for i in range(j)]
+            all_terms=terms+[(i,j,k) for k in range(n) for j in range(k) for i in range(j)]
+            positions={term:i for i,term in enumerate(all_terms)}
+            for variable in (0,n//2,n-1):
+                products=[tuple(sorted(set(term)|{variable})) for term in terms]
+                mapping=[positions[term] for term in products]
+                for count in (1,min(63,len(terms)),min(64,len(terms)),len(terms)//2):
+                    selected=rng.sample(range(len(terms)),count)
+                    polynomial=sum(1<<i for i in selected)
+                    expected=set()
+                    for i in selected:expected.symmetric_difference_update((products[i],))
+                    result=rs._mapped_boolean_product(polynomial,mapping,(len(all_terms)+7)//8)
+                    self.assertEqual(result,sum(1<<positions[term] for term in expected))
+        # Arbitrary wide maps test packing independently of the monomial
+        # index formula, including collisions that must cancel by XOR.
+        for width in (188,192):
+            output_bits=1+width+width*(width-1)//2+width*(width-1)*(width-2)//6
+            mapping=[rng.randrange(output_bits) for _ in range(200)]
+            mapping[0]=mapping[1]
+            for count in (1,63,64,128,200):
+                selected=rng.sample(range(200),count)
+                expected=set()
+                for i in selected:expected.symmetric_difference_update((mapping[i],))
+                result=rs._mapped_boolean_product(sum(1<<i for i in selected),mapping,(output_bits+7)//8)
+                self.assertEqual(result,sum(1<<i for i in expected))
+
+    def test_capped_sweep_finds_a_later_checked_contradiction(self):
+        # Three Boolean equations with no common assignment. The first
+        # variable's products fill a four-pivot store before a later product
+        # exposes 1=0. Discarded rows must never become proof premises.
+        polynomials=[33,70,124]
+        old=rs.boolean_cubic_lift(polynomials,3,max_pivots=4,proof=True)
+        self.assertEqual(old['status'],'unknown')
+        result=rs.boolean_cubic_lift(polynomials,3,max_pivots=4,proof=True,sweep=True)
+        self.assertEqual(result['status'],'refused')
+        self.assertGreater(result['discarded'],0)
+        self.assertLessEqual(result['rank'],4+3+1)
+        self.assertEqual(result['proof'][0]['polynomial'],1)
+        self.assertTrue(rs.verify_boolean_cubic_identity(polynomials,3,result['proof'][0]))
+        damaged=dict(result['proof'][0]);damaged['raw']^=1
+        with self.assertRaises(ValueError):
+            rs.verify_boolean_cubic_identity(polynomials,3,damaged)
+
+    def test_capped_sweep_consequences_against_exhaustive_models(self):
+        rng=random.Random(3107)
+        for n in range(2,6):
+            # The implementation uses colexicographic pair order.
+            terms=[()]+[(i,) for i in range(n)]+[(i,j) for j in range(n) for i in range(j)]
+            def evaluate(polynomial,assignment):
+                return sum(all(assignment>>i&1 for i in term)
+                           for j,term in enumerate(terms) if polynomial>>j&1)%2
+            for _ in range(25):
+                polynomials=[rng.randrange(1,1<<len(terms)) for _ in range(n)]
+                models=[a for a in range(1<<n)
+                        if all(evaluate(q,a)==0 for q in polynomials)]
+                cap=n+1
+                result=rs.boolean_cubic_lift(polynomials,n,max_pivots=cap,proof=True,sweep=True)
+                self.assertLessEqual(result['rank'],cap+n+1)
+                if result['discarded']:
+                    self.assertNotEqual(result['status'],'compatible_cubic_relaxation')
+                if result['status']=='refused':self.assertEqual(models,[])
+                for identity in result['proof']:
+                    self.assertTrue(rs.verify_boolean_cubic_identity(polynomials,n,identity))
+                    self.assertTrue(all(evaluate(identity['polynomial'],a)==0 for a in models))
+
+    def test_resume_rechecks_partial_boolean_identities(self):
+        # Independent algebraic control: x+xy=0 and y+xy=0 imply x=y.
+        compiled=dict(complete=True,parity_conflict=False,free=[0,1],
+                      quadratic_rows=[(5,0),(6,0)])
+        identity=dict(raw=3,multipliers=[],polynomial=6)
+        with patch.object(rs,'binary_shell_quadratics',return_value=compiled):
+            result=rs.cubic_shell_analysis(2,[],proof=True,initial_proofs=[[identity]])
+            self.assertEqual(result['remaining_variables'],1)
+            self.assertEqual(result['recovery'][0],result['recovery'][1])
+            self.assertEqual(result['cubic_proof'][0],[identity])
+            damaged=dict(identity);damaged['polynomial']^=1
+            with self.assertRaises(ValueError):
+                rs.cubic_shell_analysis(2,[],proof=True,initial_proofs=[[damaged]])
+        inconsistent=dict(compiled,quadratic_rows=[(5,0),(6,0),(1,0),(2,1)])
+        with patch.object(rs,'binary_shell_quadratics',return_value=inconsistent):
+            result=rs.cubic_shell_analysis(2,[],proof=True,initial_proofs=[[identity]])
+            self.assertEqual(result['status'],'refused')
+            self.assertTrue(rs.verify_cubic_shell_proof(2,[],result['cubic_proof']))
+        for prior in ({},dict(kind='moving-periodic-phase-v1',hole=97,period=4)):
+            with self.assertRaises(ValueError):
+                rs.periodic_phase_refusal(19,4,seconds=5,prior=prior)
+
+    def test_general_phase_refusal_roundtrip_and_scope_damage(self):
+        certificate=rs.periodic_phase_refusal(97,2,seconds=120,max_pivots=40000)
+        self.assertEqual(certificate['status'],'refused')
+        self.assertTrue(rs.verify_saved(certificate)['verified'])
+        for key,value in (('period',4),('period',3),('hole',19),
+                          ('all_pairs_decided',True),('literal_existence_decided',True),
+                          ('cubic_proof',[]),('status','unknown')):
+            damaged=dict(certificate);damaged[key]=value
+            self.assertFalse(rs.verify_periodic_phase_refusal(damaged))
+
+    def test_periodic_phase_rows_against_original_physical_columns(self):
+        # Independently fold physical vertices, then compare each interior
+        # coefficient, rather than evaluating only selected sign assignments.
+        for period in (4,6):
+            scale,hole=23,19
+            labels=rs.moving_folded_labels()
+            positions={k:i for i,k in enumerate(labels)}
+            _,rows,_=rs._periodic_phase_system(hole,period)
+            stencils=rs.moving_folded_stencils(hole)[1]
+            expected=defaultdict(lambda:defaultdict(int))
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            for arm,n in enumerate(lengths,1):
+                for depth in range(1,n+1):
+                    q,r=divmod(depth,scale)
+                    if not r:continue
+                    if r>scale//2:q,r,orientation=q+1,scale-r,-1
+                    else:orientation=1
+                    index=positions[arm,q,orientation]*period+r%period
+                    for exponent,c in fc.shell_column(lengths,holes,(arm,depth)).items():
+                        expected[exponent][index]+=c
+            keys=list(stencils)
+            for level in range(3,3+period):
+                for offset,(q,orientation) in enumerate(keys):
+                    physical={i:c for i,c in expected[q*scale+orientation*level].items() if c}
+                    self.assertEqual(physical,rows[(level%period)*len(keys)+offset])
+
+    def test_even_period_phase_system_projects_to_period_two(self):
+        size2,rows2,equations2=rs._period_two_phase_system(19)
+        labels=rs.moving_folded_labels()
+        for period in (4,6):
+            size,rows,equations=rs._periodic_phase_system(19,period)
+            self.assertEqual(size,len(labels)*period)
+            def project(row):
+                out=defaultdict(int)
+                for i,c in row.items():
+                    label,phase=divmod(i,period)
+                    out[2*label+phase%2]+=c
+                return {i:c for i,c in out.items() if c}
+            count=len(rows2)//2
+            for level in range(period):
+                self.assertEqual([project(r) for r in rows[level*count:(level+1)*count]],
+                                 rows2[(level%2)*count:(level%2+1)*count])
+            for index,(mask,rhs) in enumerate(equations):
+                folded=0
+                while mask:
+                    bit=mask&-mask;mask^=bit
+                    label,phase=divmod(bit.bit_length()-1,period)
+                    folded^=1<<(2*label+phase%2)
+                self.assertEqual((folded,rhs),equations2[index%10])
+        for invalid in (0,1,3,True,4.0):
+            with self.assertRaises(ValueError):rs._periodic_phase_system(19,invalid)
+
+    def test_wide_cubic_proof_and_sparse_monomial_indices(self):
+        # Multiply q=(1+x_0*x_last) by x_0; the retained linear identity
+        # exercises high triple positions without constructing all triples.
+        for variables in (3,128,188,192):
+            pair=1+variables+(variables-1)*(variables-2)//2
+            polynomials=[1|(1<<pair),1<<1]
+            result=rs.boolean_cubic_lift(polynomials,variables,seconds=10,
+                                         max_pivots=20,proof=True)
+            self.assertEqual(result['status'],'refused')
+            for identity in result['proof']:
+                self.assertTrue(rs.verify_boolean_cubic_identity(polynomials,variables,identity))
+            bad=dict(result['proof'][0]);bad['polynomial']^=2
+            with self.assertRaises(ValueError):
+                rs.verify_boolean_cubic_identity(polynomials,variables,bad)
+        with self.assertRaises(ValueError):
+            rs.boolean_cubic_lift([],193)
+        free,expressions=rs.boolean_linear_substitution(188,[2^4])
+        self.assertEqual(len(free),187)
+        self.assertEqual(expressions[0],expressions[1])
+        self.assertEqual(rs.substitute_boolean_quadratics([2^4],expressions,187),[0])
+
     def test_cubic_proof_with_explicit_additional_binary_conditions(self):
         rows = [{i:1 for i in range(4)}]
         extra = [(1,0),(2,0),(4,0)]
