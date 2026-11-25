@@ -1967,6 +1967,114 @@ def _period_two_phase_system(hole):
     return _periodic_phase_system(hole,2)
 
 
+def open_phase_system(hole=19, length=1, first=3):
+    """A finite necessary interior window, with distinct free end levels.
+
+    Coordinates are label-major, then absolute level first-1..first+length.
+    No two levels are identified. Physical shells and endpoint-derived
+    parity traces are retained at centres first..first+length-1.
+    """
+    if (type(length) is not int or not 1<=length<=64 or
+            type(first) is not int or first<3):
+        raise ValueError('require 1..64 window rows and first level at least three')
+    _,stencils,_,laws,_=_parity_trace_data(hole)
+    keys=[(*k,level) for k in moving_folded_labels()
+          for level in range(first-1,first+length+1)]
+    positions={k:i for i,k in enumerate(keys)}
+    rows=[];equations=[]
+    for level in range(first,first+length):
+        for stencil in stencils.values():
+            rows.append({positions[(*k,level+d)]:c for (*k,d),c in stencil.items()})
+        for j,law in enumerate(laws):
+            mask=0
+            for a,q,s,d in law['observable']:
+                mask ^= 1<<positions[a,q,s,level+d]
+            rhs=(level-1)%2 if j<2 else level%2 if j<4 else 0
+            equations.append((mask,rhs))
+    return keys,rows,equations
+
+
+def verify_open_phase_signs(certificate):
+    """Check actual integer signs and every trace, without any search engine.
+
+    A passing window is only local compatibility, not an endpoint completion
+    or an infinite construction. In particular it decides no physical pair.
+    """
+    if (certificate.get('kind')!='moving-open-phase-signs-v1' or
+            certificate.get('status')!='local_signing' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped local signing')
+    keys,rows,equations=open_phase_system(certificate['hole'],certificate['length'],
+                                         certificate['first'])
+    if (certificate.get('variables')!=len(keys) or
+            certificate.get('minimum_half')!=certificate['first']+certificate['length']+1):
+        raise ValueError('wrong open window dimensions')
+    encoded=certificate['bits']
+    if (not isinstance(encoded,str) or not encoded.startswith('0x') or
+            len(encoded)>2+(len(keys)+3)//4):
+        raise ValueError('invalid window bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>len(keys):raise ValueError('window bits exceed coordinates')
+    for row in rows:
+        if sum(c*(1-2*(bits>>i&1)) for i,c in row.items()):
+            raise ValueError('open window fails an original integer row')
+    for mask,rhs in equations:
+        if (mask&bits).bit_count()%2!=rhs:
+            raise ValueError('open window fails an endpoint-derived trace')
+    return True
+
+
+def open_phase_example(hole=19):
+    """Two actual adjacent shell levels, with both end levels left distinct.
+
+    These tiny recorded assignments were found by an installed solver;
+    their replay uses only the integer checker above, never that solver.
+    """
+    examples={
+        19: '0xee490e16ab666c12d2222540342c6a4527a6bfb7c04c9f6ea5218796e6010ee6052e619621e620ac3db0ec87ade7095adf7a52c3bee01f17c99964b605812724a7e837248fbef09e7f4ccadb7e48c0f46428e1a3edb6536197a6868d669ca6a5876ff03ee7a62084acc0c020ecc202e4a20cc08e008e8684ac06e08402ee68602a48486a40c0886e060eca8886e02ef0fc8280707ddbe3106120472465302007340015161244171305056743260120524730607331017015206004644315665e85640ee86c86a43c38',
+        97: '0x26c05eda0a124e2c6480e666404b6d9f8064008c4e0c012402081efe82f088edeb05e2310600a6c877a0d2e9e422004834c2690d2a8124ed8da0dab2610584e34f8cf88631ffe418681cbaf4714a84b36703c600f1f2f438c807e5efb442e86f1b64e18220e6a6a7cbc802f88aff8c2cf8348ba1f780a649078b6b2db7ba6c4c2658681e7a45edece6130887e1e5f27c82640fb4fa4f08214cc2d98130266dc1a153e1302245db92a42eeede160f0b0621731c0c010d42064b855f25d066bce07062944937d731d3af',
+    }
+    if type(hole) is not int or hole not in examples:
+        raise ValueError('recorded examples are available at holes 19 and 97')
+    certificate=dict(kind='moving-open-phase-signs-v1',hole=hole,length=2,first=3,
+                     minimum_half=6,variables=1608,status='local_signing',bits=examples[hole],
+                     literal_existence_decided=False,all_pairs_decided=False)
+    verify_open_phase_signs(certificate)
+    return certificate
+
+
+def open_phase_search(hole=19,length=1,first=3,seconds=30,nodes=100000):
+    """Standard-library literal search; only checked positive windows survive."""
+    if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
+            or type(nodes) is not int or nodes<1):
+        raise ValueError('require positive finite search limits')
+    started=time.monotonic()
+    keys,rows,equations=open_phase_system(hole,length,first)
+    refusal,basis=binary_elimination(rows)
+    if refusal is not None:raise AssertionError('unexpected incompatible open parity window')
+    for mask,rhs in equations:
+        while mask:
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs;break
+            old,b=basis[pivot];mask^=old;rhs^=b
+        if not mask and rhs:raise AssertionError('incompatible endpoint-derived open trace')
+    remaining=seconds-(time.monotonic()-started)
+    result=dict(kind='moving-open-phase-signs-v1',hole=hole,length=length,first=first,
+                minimum_half=first+length+1,variables=len(keys),status='unknown',
+                literal_existence_decided=False,all_pairs_decided=False)
+    if remaining<=0:return result
+    engine=make_engine(len(keys),rows,reduced_binary_basis(basis),remaining,nodes,'connected')
+    status,values=engine.run({})
+    result.update(search_status=status,nodes=engine.nodes,elapsed=time.monotonic()-started)
+    if values is not None:
+        if any(v not in (-1,1) for v in values):raise AssertionError('incomplete local signing')
+        result.update(status='local_signing',bits=hex(sum((v==-1)<<i for i,v in enumerate(values))))
+        verify_open_phase_signs(result)
+    return result
+
+
 def period_two_phase_refusal(hole=19,seconds=300,max_pivots=40000):
     """Generate a scoped Boolean identity, retaining no solver-only refusal."""
     started = time.monotonic()
@@ -4029,6 +4137,11 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-open-phase-signs-v1':
+        verify_open_phase_signs(saved)
+        return dict(verified=True,hole=saved['hole'],length=saved['length'],first=saved['first'],
+                    claim='finite interior window with distinct free end levels only',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-periodic-phase-v1':
         if not verify_periodic_phase_refusal(saved):
             raise ValueError('invalid endpoint-phase periodic refusal')
@@ -4340,10 +4453,24 @@ def main():
     p.add_argument('--resume-phase',help='recheck and reuse partial phase identities from this JSON file')
     p.add_argument('--cubic-sweep',action='store_true',help='continue examining phase products after the nonlinear pivot store fills')
     p.add_argument('--retain-quadratics',action='store_true',help='retain checked phase quadratic consequences and reuse them in the next pass')
+    p.add_argument('--open-phase-example',action='store_true',help='emit a checked two-centre window at hole 19 or 97, without search')
+    p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
+    p.add_argument('--first-level',type=int,default=3,help='first absolute centre level for --open-phase-window')
     p.add_argument('--periodic-phase-refusal',action='store_true',help='seek a checked phase refusal at the even --period')
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.open_phase_example:
+        certificate=open_phase_example(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.open_phase_window is not None:
+        certificate=open_phase_search(args.hole,args.open_phase_window,args.first_level,args.seconds,args.nodes)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate) if certificate['status']=='local_signing'
+                         else certificate,indent=2));return
     if args.periodic_phase_refusal:
         prior=None
         if args.resume_phase:

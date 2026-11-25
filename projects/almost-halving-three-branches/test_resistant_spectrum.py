@@ -15,6 +15,80 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_recorded_open_windows_satisfy_all_original_integer_rows(self):
+        for hole in (19,97):
+            certificate=rs.open_phase_example(hole)
+            self.assertTrue(rs.verify_open_phase_signs(certificate))
+            bits=int(certificate['bits'],16)
+            _,rows,equations=rs.open_phase_system(hole,2,3)
+            self.assertEqual(len(rows),712)
+            self.assertTrue(all(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())==0
+                                for row in rows))
+            self.assertTrue(all((mask&bits).bit_count()%2==rhs for mask,rhs in equations))
+        with self.assertRaises(ValueError):rs.open_phase_example(1)
+
+    def test_recorded_windows_are_not_unchecked_constructions(self):
+        # These particular words cannot simply be extended: the next
+        # centre already has a nonzero shell row using only fixed signs.
+        for hole in (19,97):
+            certificate=rs.open_phase_example(hole)
+            bits=int(certificate['bits'],16)
+            oldkeys,_,_=rs.open_phase_system(hole,2,3)
+            values={k:1-2*(bits>>i&1) for i,k in enumerate(oldkeys)}
+            keys,rows,_=rs.open_phase_system(hole,3,3)
+            row_keys=list(rs.moving_folded_stencils(hole)[1])
+            next_row=rows[2*len(row_keys)+row_keys.index((0,1))]
+            self.assertTrue(all(keys[i] in values for i in next_row))
+            self.assertEqual(sum(c*values[keys[i]] for i,c in next_row.items()),-2)
+
+    def test_open_window_rows_match_physical_columns_without_identifying_ends(self):
+        for hole in (19,97):
+            scale,first,length=23,3,4
+            coordinates,rows,equations=rs.open_phase_system(hole,length,first)
+            positions={k:i for i,k in enumerate(coordinates)}
+            expected=defaultdict(lambda:defaultdict(int))
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            for arm,n in enumerate(lengths,1):
+                for depth in range(1,n+1):
+                    q,r=divmod(depth,scale)
+                    if not r:continue
+                    if r>scale//2:q,r,orientation=q+1,scale-r,-1
+                    else:orientation=1
+                    for exponent,c in fc.shell_column(lengths,holes,(arm,depth)).items():
+                        expected[exponent][arm,q,orientation,r]+=c
+            row_keys=list(rs.moving_folded_stencils(hole)[1])
+            for level in range(first,first+length):
+                for offset,(q,orientation) in enumerate(row_keys):
+                    physical=expected[q*scale+orientation*level]
+                    self.assertTrue(all(k in positions for k,c in physical.items() if c))
+                    self.assertEqual({positions[k]:c for k,c in physical.items() if c},
+                                     rows[(level-first)*len(row_keys)+offset])
+            # Both boundary levels are actual distinct coordinates, even
+            # though an even periodic quotient would alias some of them.
+            self.assertEqual(len(coordinates),402*(length+2))
+            for label in rs.moving_folded_labels():
+                self.assertNotEqual(positions[(*label,first-1)],positions[(*label,first+length)])
+            self.assertEqual(len(equations),5*length)
+        for length,first in ((0,3),(True,3),(65,3),(1,2),(1,3.0)):
+            with self.assertRaises(ValueError):rs.open_phase_system(19,length,first)
+
+    def test_open_window_positive_search_and_damaged_witness(self):
+        certificate=rs.open_phase_search(19,1,3,seconds=10,nodes=10000)
+        self.assertEqual(certificate['status'],'local_signing')
+        self.assertTrue(rs.verify_open_phase_signs(certificate))
+        verified=rs.verify_saved(certificate)
+        self.assertFalse(verified['literal_existence_decided'])
+        self.assertFalse(verified['all_pairs_decided'])
+        _,rows,_=rs.open_phase_system(19,1,3)
+        active=next(iter(rows[0]))
+        for key,value in (('bits',hex(int(certificate['bits'],16)^(1<<active))),
+                          ('bits','0x'+('f'*10000)),('first',4),('minimum_half',99),
+                          ('literal_existence_decided',True),('all_pairs_decided',True)):
+            damaged=dict(certificate);damaged[key]=value
+            with self.assertRaises(ValueError):rs.verify_open_phase_signs(damaged)
+        with self.assertRaises(ValueError):rs.open_phase_search(seconds=float('inf'))
+
     def test_quadratic_consequences_are_checked_reused_and_resumed(self):
         # xy=x and yz=y imply xy=xz, a new quadratic relation.
         polynomials=[18,68]
