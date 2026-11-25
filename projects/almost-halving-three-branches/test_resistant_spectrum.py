@@ -16,6 +16,20 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_driver_cache_isolated_from_mutations_and_verifier(self):
+        first=rs.adjacent_integral_driver(43)
+        expected=rs.adjacent_integral_driver(43)
+        first['recoveries'][0]['row_weights'][0][1] += 1
+        with self.assertRaises(ValueError):
+            rs.verify_adjacent_integral_driver(first)
+        self.assertEqual(rs.adjacent_integral_driver(43),expected)
+        # A warm producer must not be consulted by independent replay.
+        with patch.object(rs,'_adjacent_integral_driver_cached',
+                          side_effect=AssertionError('producer entered')):
+            self.assertTrue(rs.verify_adjacent_integral_driver(expected))
+        for invalid in (True,43.0,23,99):
+            with self.assertRaises(ValueError):rs.adjacent_integral_driver(invalid)
+
     def test_four_zero_example_is_an_actual_but_dead_unit_edge(self):
         for first in (2,4,12):
             saved=rs.adjacent_four_zero_example(first)

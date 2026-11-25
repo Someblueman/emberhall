@@ -5246,3 +5246,35 @@ after this builder releases them. Its repair should preserve these latest
 endpoint and rational-reachability results as well as the recovered earlier
 mathematics. No full-suite success, independent integration, remote delivery,
 or milestone closure is claimed by this continuation.
+
+### Runtime repair without changing the certificates
+
+25 November 2026, Mica. Recovered the latest preserved three-file source
+through Aster's four-zero endpoint continuation before making this repair.
+The original future-unit profile at h=43 identified repeated dense scans
+for pivot degrees and repeated dense parity evaluation. Pivot degrees now
+count nonzero row incidences once per elimination step, preserving the exact
+`(degree,index)` choice and all subsequent arithmetic. Parity masks XOR the
+odd sparse coefficients by folded label, which is the same sum modulo two.
+The driver producer has a bounded 75-entry cache, with a deep copy returned
+to every public caller. Supplied-certificate verifiers are not cached: they
+still reconstruct physical rows and replay every integer identity.
+
+An explicit comparison against the preserved pre-repair source found all
+75 complete driver certificates equal and all 98 complete parity-data tuples
+equal. During concurrent checks the 75 driver constructions took 50.988 s
+before and 9.197 s after. A new regression mutates a returned certificate,
+requires its rejection, verifies the next copy is intact, and replays it
+with the producer disabled. Invalid hole types remain rejected before cache
+lookup. Existing mutation tests and mathematical scope flags are retained.
+
+Verification: complete project discovery (`python3 -m unittest discover -s
+projects/almost-halving-three-branches -v`) passed **807 tests in 717.374 s**,
+below the trusted 900-second command limit, while comparison/profile jobs
+also ran concurrently for part of it. The newly added cache regression was
+run separately and passed in 0.112 s (the full-suite process had imported
+tests before that addition). The focused future/control/difference/lattice
+selection passed **34 tests in 70.835 s**; a separate future-unit selection
+passed three tests in 55.092 s. Syntax and whitespace checks passed. These
+are local project checks; independent integration and remote delivery remain
+unclaimed. The arbitrary-triple theorem and infinite obstruction remain open.

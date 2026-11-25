@@ -6,6 +6,8 @@ none of the reductions here decides arbitrary homometric pairs.
 import argparse
 from collections import defaultdict
 from fractions import Fraction
+from functools import lru_cache
+from copy import deepcopy
 import json
 import heapq
 import itertools
@@ -1768,9 +1770,14 @@ def _parity_trace_data(hole):
         lambda q,u: (q%4==1 if u==1 else q%4==2))
     laws = []
     evaluated = []
+    positions = {k:i for i,k in enumerate(labels)}
     for row in interior.values():
-        evaluated.append(sum((sum(row.get((*k,d),0) for d in (-1,0,1))%2)<<i
-                             for i,k in enumerate(labels)))
+        # Addition modulo two is XOR, including repeated folded labels.
+        mask = 0
+        for (*label,offset),coefficient in row.items():
+            if coefficient % 2:
+                mask ^= 1 << positions[tuple(label)]
+        evaluated.append(mask)
     for selector in selectors:
         rows = [key for key in sorted(interior) if selector(*key)]
         coefficients = set()
@@ -2067,13 +2074,26 @@ def adjacent_integral_driver(hole=43):
     """
     if type(hole) is not int or not 24<=hole<=98:
         raise ValueError('integral driver requires 24<=hole<=98')
+    return deepcopy(_adjacent_integral_driver_cached(hole))
+
+
+@lru_cache(maxsize=75)
+def _adjacent_integral_driver_cached(hole):
+    # Cache only producer output. Public callers receive independent copies;
+    # verifiers still reconstruct rows and check every supplied coefficient.
     keys,original,_=adjacent_phase_system(hole,2,2)
     targets={i for i,(a,q,s,k) in enumerate(keys) if k==3 and a<3}
     rows=[{i:Fraction(c) for i,c in row.items()} for row in original]
     weights=[{i:Fraction(1)} for i in range(len(rows))]
     pivots=[]
     while targets:
-        degree,p=min((sum(i in row for row in rows),i) for i in targets)
+        # Count sparse incidences once instead of scanning every row for
+        # every target. The (degree,index) ordering and pivot stay identical.
+        degrees = dict.fromkeys(targets,0)
+        for row in rows:
+            for i in row:
+                if i in degrees: degrees[i] += 1
+        degree,p=min((degree,i) for i,degree in degrees.items())
         if not degree:raise AssertionError('singular next-arm block')
         ri=min((j for j,row in enumerate(rows) if p in row),key=lambda j:len(rows[j]))
         row=rows.pop(ri);weight=weights.pop(ri);factor=row[p]
