@@ -145,6 +145,36 @@ class SpectrumTests(unittest.TestCase):
                 saved['assignment'][1][1]*=-1
                 with self.assertRaises(ValueError):rs.verify_saved(saved)
 
+    def test_boolean_cubic_certificates_are_explicit_polynomial_identities(self):
+        rng=random.Random(9817)
+        for n in range(1,6):
+            for _ in range(10):
+                rows=[rng.getrandbits(1+n+n*(n-1)//2) for _ in range(4)]
+                report=rs.boolean_cubic_lift(rows,n,proof=True)
+                for identity in report['proof']:
+                    self.assertTrue(rs.verify_boolean_cubic_identity(rows,n,identity))
+                    damaged=dict(identity,polynomial=identity['polynomial']^1)
+                    with self.assertRaises(ValueError):rs.verify_boolean_cubic_identity(rows,n,damaged)
+                if report['status']=='refused':
+                    self.assertIn(1,[identity['polynomial'] for identity in report['proof']])
+
+    def test_cubic_shell_refusal_certificate_rejects_damage(self):
+        rows=[dict(enumerate(word)) for word in ((1,1,1,1),(1,-1,1,-1),
+                                               (1,1,-1,-1),(1,-1,-1,1))]
+        report=rs.cubic_shell_analysis(4,rows,proof=True)
+        self.assertEqual(report['status'],'refused')
+        self.assertTrue(rs.verify_cubic_shell_proof(4,rows,report['cubic_proof']))
+        import copy
+        damaged=copy.deepcopy(report['cubic_proof'])
+        damaged[-1][0]['raw']^=1
+        with self.assertRaises(ValueError):rs.verify_cubic_shell_proof(4,rows,damaged)
+        saved=dict(mode='folded_cubic',status='refused',all_pairs_decided=False,
+                   half=3990,period=4,patch=2,hole=19,cubic_proof=report['cubic_proof'])
+        with patch.object(rs,'compile_moving_folded',return_value=(list(range(4)),rows)):
+            self.assertTrue(rs.verify_saved(saved)['verified'])
+            with self.assertRaises(ValueError):rs.verify_saved(dict(saved,all_pairs_decided=True))
+            with self.assertRaises(ValueError):rs.verify_saved(dict(saved,joint_history=[]))
+
     def test_relational_shells_preserve_every_literal_solution(self):
         rng = random.Random(43272)
         systems = [(9,[{0:1,2:-1,4:1,8:1,3:1,5:-1},

@@ -2204,8 +2204,8 @@ in negative-sign bits, whereas the literal engine uses positive-sign bits;
 the right side is therefore adjusted by the equation mask's parity.
 Any positive assignment is restored through all aliases and checked against
 every untouched input shell row, then saved in the existing `moving_folded`
-witness format for independent `--verify`. A cubic diagnostic or its resource
-stop is not a saved refusal certificate.
+witness format for independent `--verify`. A resource stop is not a refusal
+certificate; an explicit identity chain from `--cubic-proof` is checked as below.
 
 Controls independently construct the full cubic monomial space for sixty
 small systems, compare its rank and contradiction result, exhaustively
@@ -2213,3 +2213,51 @@ check every affine substitution on small cubes, and check the bit-convention
 conversion in exact search. A driver control verifies a positive signing
 against untouched rows and rejects an altered sign. No large proof bundle
 or extra dependency is committed.
+
+With `--joint-fields --seconds 1200 --cubic-pivots 30000`, the existing
+joint reduction retains 86 binary parameters. Its cubic lift reaches
+30,000 pivots after 27,699 products and derives no additional linear
+constraint. Total observed time is 545.14 seconds, including 18.51 seconds
+for the lift. It remains `unknown`; this bounded probe gives no improvement
+on that joint-field fibre.
+
+#### Checked cubic identities give a scoped infinite refusal
+
+`--cubic-proof` records XOR dependencies during elimination and extracts
+explicit identities of the form sum(q_i*l_i)=p, with affine binary
+multipliers l_i. The small quadratic source basis is rebuilt from the original
+rows. The verifier adds the indicated source polynomials and their multiplied
+combinations, reducing repeated variables by x_i squared=x_i, and checks the
+claimed polynomial coefficient by coefficient. It does not repeat cubic
+elimination, trust a reported rank, or trust an alias from the generator.
+It checks each linear reduction in order and requires the final identity
+p=1. Grouping products by their multiplier variable keeps verification small.
+Proof generation currently uses the original shell system, without
+`--joint-fields`; this avoids trusting a prior quotient in the certificate.
+
+For moving holes **97t and 99t**, L=3990, p=4 and w=2, the first bounded
+lift gives nine linear constraints, reducing 90 parameters to 81. The next
+lift obtains the constant contradiction at rank 9,547 after 6,322 products.
+A fresh process reproduces this result. Explicit proof generation takes
+23.91 seconds observed, and the separate identity verifier accepts it:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-cubic --cubic-proof --hole 97 --period 4 --seconds 300 --cubic-pivots 20000 --write /tmp/cubic97-proof.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/cubic97-proof.json
+```
+
+The exact conclusion is nonexistence **within this periodic-interior word
+model**, for these holes and every resistant index m odd. This follows from
+the checked polynomial contradiction and the unchanged compiled system under
+L increasing by whole periods. It excludes neither arbitrary words on that
+support nor any other support. It is not the task's all-pairs obstruction.
+
+The original-support integer search using the five cubic constraints ends
+unknown after 600.01 seconds and 155,820 nodes, leaving 88 free bits. Eight
+further bounded probes at h=5,13,29,41,57,73,85,93 also stop unknown with
+88 parameters; these probes select possible searches, not a support theorem.
+
+All **80 focused tests pass** (57.07 seconds observed), including fifty
+independent small polynomial-identity controls, damaged proof rejection,
+scope rejection, and the existing physical shell and direct-distance controls.
+Certificates are regenerated outside Git; no large evidence file is added.

@@ -11,6 +11,7 @@ import heapq
 import itertools
 import math
 import time
+from array import array
 import reduced_folded_fibre as rf
 from literal_shell_search import LiteralSearch
 
@@ -1940,7 +1941,7 @@ def binary_shell_quadratics(size, original, seconds=30, max_free=256):
                 product_coordinates=n*(n-1)//2,elapsed=time.monotonic()-started)
 
 
-def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000):
+def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proof=False):
     """Bounded degree-three Boolean ideal relaxation, with x*x=x.
 
     Input monomials are constant, singletons, then colexicographic pairs.
@@ -1961,25 +1962,45 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000):
            for row in quadratics):
         raise ValueError('invalid quadratic polynomial')
     started=time.monotonic();basis={};processed=0;products=0
+    proof_nodes=[];proof_ids={}
+    def certificate(node):
+        active=1<<node;raw=0;multipliers=[0]*len(independent)
+        while active:
+            index=active.bit_length()-1;active^=1<<index
+            source,parents=proof_nodes[index]
+            if source[0]=='input':raw^=1<<source[1]
+            else:multipliers[source[1]]^=1<<source[2]
+            for parent in parents:active^=1<<parent
+        return dict(raw=raw,multipliers=multipliers)
     def result(status,stage):
         linear=[row for p,row in sorted(basis.items()) if p<=variables]
-        return dict(status=status,complete=status!='unknown',stage=stage,
+        out=dict(status=status,complete=status!='unknown',stage=stage,
                     variables=variables,rank=len(basis),products=products,
                     processed=processed,linear_polynomials=linear,
                     literal_existence_decided=False,
                     elapsed=time.monotonic()-started)
-    def insert(row):
+        if proof:
+            out['proof']=[dict(polynomial=basis[p],**certificate(proof_ids[p]))
+                          for p in ([0] if status=='refused' else sorted(basis)) if p<=variables]
+        return out
+    def insert(row,source):
+        parents=array('I') if proof else None
         while row:
             if time.monotonic()-started>=seconds:return 'time_limit'
             p=row.bit_length()-1
             if p not in basis:
                 if len(basis)>=max_pivots:return 'pivot_limit'
                 basis[p]=row
+                if proof:
+                    proof_ids[p]=len(proof_nodes)
+                    proof_nodes.append((source,parents))
                 return 'conflict' if p==0 else None
+            if proof:parents.append(proof_ids[p])
             row^=basis[p]
         return None
-    for row in quadratics:
-        stop=insert(row);processed+=1
+    independent=[]
+    for label,row in enumerate(quadratics):
+        stop=insert(row,('input',label));processed+=1
         if stop:return result('refused' if stop=='conflict' else 'unknown',stop)
     # Only quadratic pivots exist here. Their span equals the input span,
     # so multiplying this basis generates the same truncated ideal space.
@@ -1994,16 +2015,78 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000):
     # of the number of products. All powers are reduced before elimination.
     for variable in range(variables):
         mapping=[1<<position(tuple(sorted(set(term+(variable,))))) for term in terms]
-        for polynomial in independent:
+        for label,polynomial in enumerate(independent):
             if time.monotonic()-started>=seconds:return result('unknown','time_limit')
             row=0
             while polynomial:
                 bit=polynomial&-polynomial
                 row^=mapping[bit.bit_length()-1]
                 polynomial^=bit
-            stop=insert(row);products+=1;processed+=1
+            stop=insert(row,('product',label,variable));products+=1;processed+=1
             if stop:return result('refused' if stop=='conflict' else 'unknown',stop)
     return result('compatible_cubic_relaxation','complete')
+
+
+def verify_boolean_cubic_identity(quadratics, variables, identity):
+    """Check one explicit sum q_i*l_i=p, without cubic elimination."""
+    quadratics=list(quadratics);basis={}
+    for row in quadratics:
+        while row:
+            p=row.bit_length()-1
+            if p not in basis:basis[p]=row;break
+            row^=basis[p]
+    independent=list(basis.values())
+    raw=identity.get('raw');multipliers=identity.get('multipliers')
+    target=identity.get('polynomial')
+    if (type(raw) is not int or raw<0 or raw.bit_length()>len(quadratics)
+            or type(target) is not int or target<0 or not isinstance(multipliers,list)
+            or len(multipliers) not in (0,len(independent)) or any(type(m) is not int or m<0
+            or m.bit_length()>variables for m in multipliers)):
+        raise ValueError('invalid Boolean cubic identity')
+    value=0
+    for i,q in enumerate(quadratics):
+        if raw>>i&1:value^=q
+    terms=[()]+[(i,) for i in range(variables)]+[
+        (i,j) for j in range(variables) for i in range(j)]
+    positions={term:i for i,term in enumerate(terms)}
+    positions.update({(i,j,k):len(terms)+k*(k-1)*(k-2)//6+j*(j-1)//2+i
+                      for k in range(variables) for j in range(k) for i in range(j)})
+    for variable in range(variables):
+        # Reorder the sum: multiply each aggregate quadratic just once.
+        q=0
+        for row,m in zip(independent,multipliers):
+            if m>>variable&1:q^=row
+        while q:
+            bit=q&-q;term=terms[bit.bit_length()-1];q^=bit
+            value^=1<<positions[tuple(sorted(set(term+(variable,))))]
+    if value!=target:raise ValueError('Boolean cubic polynomial identity failed')
+    return True
+
+
+def verify_cubic_shell_proof(size, original, proofs):
+    """Verify a chain of affine reductions ending in the explicit identity 1=0."""
+    compiled=binary_shell_quadratics(size,original,seconds=300,max_free=128)
+    if not compiled['complete'] or compiled.get('parity_conflict'):
+        raise ValueError('require a complete compatible original parity fibre')
+    if not isinstance(proofs,list) or not proofs:raise ValueError('no cubic proof')
+    polynomials=[m<<1|b for m,b in compiled['quadratic_rows']]
+    variables=len(compiled['free'])
+    for index,identities in enumerate(proofs):
+        if not isinstance(identities,list) or not identities:raise ValueError('empty cubic proof round')
+        linear=[]
+        for identity in identities:
+            verify_boolean_cubic_identity(polynomials,variables,identity)
+            row=identity['polynomial']
+            if not row or row.bit_length()>variables+1:raise ValueError('require nonzero linear consequences')
+            linear.append(row)
+        if 1 in linear:
+            if index!=len(proofs)-1:raise ValueError('trailing proof after contradiction')
+            return True
+        free,expressions=boolean_linear_substitution(variables,linear)
+        if len(free)>=variables:raise ValueError('cubic proof did not reduce parameters')
+        polynomials=substitute_boolean_quadratics(polynomials,expressions,len(free))
+        variables=len(free)
+    raise ValueError('cubic proof has no constant contradiction')
 
 
 def boolean_linear_substitution(variables, linear):
@@ -2075,7 +2158,7 @@ def substitute_boolean_quadratics(polynomials, expressions, new_variables):
     return out
 
 
-def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000):
+def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000, proof=False):
     """Lift necessary mod-eight shell quadratics; no arbitrary-support claim."""
     started=time.monotonic()
     compiled=binary_shell_quadratics(size,original,seconds,max_free=128)
@@ -2085,14 +2168,15 @@ def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000):
     remaining=seconds-(time.monotonic()-started)
     if remaining<=0:return dict(complete=False,status='unknown',stage='compilation')
     polynomials=[mask<<1|rhs for mask,rhs in compiled['quadratic_rows']]
-    variables=len(compiled['free']);history=[];parameter_ids=list(compiled['free'])
+    variables=len(compiled['free']);history=[];parameter_ids=list(compiled['free']);proofs=[]
     recovery=[1<<(i+1) for i in range(variables)]
     while True:
         remaining=seconds-(time.monotonic()-started)
         if remaining<=0:
             result=dict(complete=False,status='unknown',stage='substitution_time_limit')
             break
-        result=boolean_cubic_lift(polynomials,variables,remaining,max_pivots)
+        result=boolean_cubic_lift(polynomials,variables,remaining,max_pivots,proof)
+        if proof:proofs.append(result.pop('proof'))
         history.append({k:v for k,v in result.items() if k!='linear_polynomials'})
         if result['status']=='refused':break
         linear=result['linear_polynomials']
@@ -2103,6 +2187,7 @@ def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000):
         parameter_ids=[parameter_ids[i] for i in free]
         variables=len(free)
     result['history']=history
+    if proof:result['cubic_proof']=proofs
     result['remaining_variables']=variables
     result['recovery']=recovery
     result['parameter_ids']=parameter_ids
@@ -3316,6 +3401,13 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('mode')=='folded_cubic':
+        if saved.get('status')!='refused' or saved.get('all_pairs_decided') is not False or 'joint_history' in saved:
+            raise ValueError('no scoped cubic refusal certificate')
+        keys,rows=compile_moving_folded(saved['half'],saved['period'],saved['patch'],saved['hole'])
+        verify_cubic_shell_proof(len(keys),rows,saved.get('cubic_proof'))
+        return dict(verified=True,claim='only the named periodic-interior ansatz is refused by Boolean identities',
+                    all_pairs_decided=False)
     if saved.get('mode')=='moving_folded':
         keys,rows=compile_moving_folded(saved['half'],saved['period'],saved['patch'],saved['hole'])
         if (saved.get('minimum_half')!=2*saved['patch']+4+saved['period']
@@ -3557,6 +3649,7 @@ def main():
     p.add_argument('--folded-cubic',action='store_true',help='bounded Boolean degree-three lift of folded shell equations')
     p.add_argument('--cubic-pivots',type=int,default=20000,help='maximum stored Boolean lift pivots; reaching it is unknown')
     p.add_argument('--cubic-search',action='store_true',help='reserve half the post-closure budget for exact integer search')
+    p.add_argument('--cubic-proof',action='store_true',help='retain explicit Boolean polynomial identities for independent refusal verification')
     p.add_argument('--bounded',action='store_true',help='seek exact residue sums within physical group bounds; failure is unknown')
     p.add_argument('--retain-residue-witness',action='store_true',help='save independently verifiable aggregate compatibility with --dyadic and --write')
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
@@ -3565,6 +3658,8 @@ def main():
     if args.folded_cubic:
         if args.cubic_pivots<1 or not math.isfinite(args.seconds) or args.seconds<=0:
             p.error('require positive --seconds and --cubic-pivots')
+        if args.cubic_proof and args.joint_fields:
+            p.error('--cubic-proof currently requires the original unquotiented shell rows')
         started=time.monotonic()
         keys,rows=compile_moving_folded(args.half,args.period,args.folded_patch,args.hole)
         source_rows=rows
@@ -3579,7 +3674,7 @@ def main():
             result=dict(status='refused_by_joint_fields',complete=True)
         elif remaining<=0 or (joint is not None and not joint['complete']):
             result=dict(status='unknown',stage='joint_fields',complete=False)
-        else:result=cubic_shell_analysis(size,rows,remaining/2 if args.cubic_search else remaining,args.cubic_pivots)
+        else:result=cubic_shell_analysis(size,rows,remaining/2 if args.cubic_search else remaining,args.cubic_pivots,args.cubic_proof)
         if args.cubic_search and 'recovery' in result and result.get('status')!='refused':
             basis=cubic_sign_basis(size,rows,result)
             remaining=args.seconds-(time.monotonic()-started)
@@ -3602,12 +3697,13 @@ def main():
                       literal_existence_decided=False,elapsed=time.monotonic()-started)
         if 'assignment' in result:
             result.update(mode='moving_folded',method='cubic_assisted',status='sat',
+                          complete=True,literal_existence_decided=True,
                           minimum_half=2*args.folded_patch+4+args.period,
                           half_residue=args.half%args.period)
         if args.write:
             with open(args.write,'w') as f:json.dump(result,f)
         print(json.dumps({k:v for k,v in result.items() if k not in
-                          ('free','parameter_ids','recovery','linear_polynomials','assignment')},sort_keys=True))
+                          ('free','parameter_ids','recovery','linear_polynomials','assignment','cubic_proof')},sort_keys=True))
         return
     if args.relation_search and not args.folded_relations:
         p.error('--relation-search requires --folded-relations')
