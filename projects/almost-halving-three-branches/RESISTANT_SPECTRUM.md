@@ -3603,3 +3603,136 @@ of solver performance. Scratch assignments and search logs are not added
 to Git. The acceptance result remains unmet: find a compatible exact
 unit-sign extension, then satisfy physical endpoints and unrestricted
 hole supports. Repeating this cap is not the next mathematical step.
+
+## Rook: forced opposite tails for every moving hole
+
+25 November 2026. The exact radius-one reduction now covers **every**
+`1<=h<=98`, rather than only `h<=42`. This is a representation theorem
+on the named support `(1,ht),(1,99t)`, not a construction, an obstruction,
+or the task's acceptance result. The arbitrary-pair milestone stays open.
+
+For `43<=h<=98`, odd `t=2L+1>=9`, put `E=(h+79)t+1`.
+Above E the only nonzero physical shell columns are
+
+    -x_(e-79t-1) - y_(e-99t),       E<e<=178t.
+
+To check the cutoff directly in the displayed physical columns, all
+third-arm terms are at most `max(122t,(h+23)t+1)`, first-arm hole terms
+at most `max(h,99-h)t+1`, and second-arm hole terms at most E.
+All are at most E. The first-arm/23t cross terms end at 122t;
+only the first-arm/79t and second-arm/99t cross terms remain above E.
+The long-tip vertices are holes or cancel against their endpoint terms.
+Thus every literal solution necessarily has
+
+    x_(d+20t-1) = -y_d,       (h-20)t+2<=d<=79t.
+
+This removes exactly `(99-h)t-1` first-arm signs, at depths
+`ht+1..99t-1`. Keep first-arm depths `1..ht-1` and both other arms.
+At the immediately preceding row, e=E, the first-arm coordinate would be
+**the hole ht**. That row instead says
+
+    y_((h-20)t+1) = y_(79t).
+
+The exceptional second-arm sign is retained, and its unchanged row stays
+in the reduced left boundary system. Pairing it with a first-arm sign
+would silently invent a vertex at the hole. It must not be substituted.
+For h<=42 the earlier 56t-pair argument and reduction are unchanged.
+
+For all h, substitute the removed first-arm sign into each corresponding
+second-arm column, `C_2(d)-C_1(d+20t-1)`. Every affine shift is still -1,
+0 or 1. Therefore the complete reduced strip has the same left levels
+0,1, interior centres `2..L-1`, right level L, and **L-2** appended edges.
+Its slice width is `2(max(43,h)+102)` signs. Deep holes have `(h+102)t`
+retained sources including the centre, rather than the shallow case's
+`145t-1`. The graph-state bound is `2^(4(max(43,h)+102))`; for example
+h=43 uses 580 stored signs, h=97 uses 796, and h=98 uses 800.
+These bounds do not enumerate a graph or decide its accepted lengths.
+
+The existing audit command now accepts reduced mode for all holes:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --moving-strip-audit 9 --moving-reduced --hole 97
+```
+
+New tests compare **every coefficient of every reduced physical column**
+for all 98 holes at t=9. Separate t=9,11,15 deep-hole controls reconstruct
+all high rows, check the exceptional row, and compare complete restored
+random-sign shell residuals at h=43,44,97,98. In particular they check the
+boundary h=43 and the almost-empty tail h=98; no sign is assigned to a hole.
+
+### A common smaller core, with explicit nonlinear sign conditions
+
+There is a stronger exact elimination if unit conditions are kept separately.
+For all h, every original row with `122t<e<=178t` is
+
+    -x_(e-79t-1) - y_(e-99t) + y_(e-ht-1) - y_(e-ht) = 0,
+
+where out-of-arm y coordinates and the missing x coordinate are omitted.
+The same cutoff bounds above prove that these are the entire high rows.
+Thus, for `43t<=a<=99t-1`, `a!=ht`, recover
+
+    x_a = -y_(a-20t+1) + y_(a+(79-h)t) - y_(a+(79-h)t+1).
+
+The only high row without a recovered x is the exceptional equality already
+stated. This leaves a common first-arm core `1..43t-1` for **all** holes.
+Unlike the opposite-tail substitution, this requires extra unit conditions:
+for `a<ht`, all three y coordinates exist, and `-A+B-C` is a sign exactly
+when `A=B or C=B`. Its only forbidden patterns are `A=C=-B`, which would
+restore a value of magnitude three. For `a>ht`, the last two terms are
+outside the arm, so the restored sign is automatically `-A`.
+
+Consequently the full physical problem is exactly equivalent to: choose
+signs on the centre, first-arm core and both other arms; satisfy all original
+low shell rows after this linear recovery; impose the exceptional equality
+when present; and exclude those two three-sign patterns at every removed
+coordinate below the hole. Forward implication follows from the high rows;
+reverse implication follows by substitution into every original row and the
+explicit unit conditions. Balance, if separately required, is evaluated on
+the restored full word. This equivalence does not solve its smaller core.
+It retains `145t-1` sources for h<=42, or `145t` for h>=43, before the
+additional constraints; it makes no radius-one claim for this stronger model.
+
+`moving_high_arm_relations(t,h)` returns every integer recovery expression
+and the exceptional high row. Its new test independently reconstructs every
+original high coefficient for all 98 holes at t=9, checks the exact number
+of removed coordinates, and exhausts all eight three-sign assignments.
+The preceding radius-one change passed all 125 existing/new tests; the
+additional recovery test passed separately after this additive helper.
+
+The broader three-centre experiment used the untouched 1,068 shell rows,
+15 traces, and reduced binary consequences of width at most 32. Installed
+CP-SAT, one worker, presolve disabled, returned UNKNOWN at 120 seconds each
+for h=1,49,3,47,95,25 (18,162; 18,147; 18,047; 28,542; 19,126; 24,725
+branches respectively). No candidate was emitted. This is a witnessed
+failed search, not a lower bound or a reason to repeat those caps.
+
+### A positive three-centre window at h=43
+
+The reduced representation did find a new local signing. At h=43, centres
+3,4,5 admit **2,010 original unit signs**, satisfying all 1,068 untouched
+integer shell rows and all 15 absolute parity traces. Translation by two
+supplies the same local witness at every odd first centre >=3, for
+`L>=first+4`. It is not an extension of the earlier h=19/97 words and
+makes no assertion at an even first centre for h=43.
+
+The research model substituted the forced opposite tails, leaving 1,562
+variables, 732 nonzero integer rows and the mapped traces. Before search,
+its entire row set was compared with the transformed original rows and
+eight random assignments checked the trace transformation. Installed
+CP-SAT, one worker, symmetry detection disabled, used exact allowed-sign
+row tables and returned a candidate in 6.571 seconds (1,658,024 branches,
+25,988 conflicts). The original integer verifier then accepted the full
+2,010-sign word. Replay uses only the standard library, not that solver:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --open-phase-example --hole 43 --write /tmp/three-centres.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/three-centres.json
+```
+
+The recorded example is embedded in the existing generator. Focused tests
+check all its original rows and traces at starts 3 and 11, reject unsupported
+even starts and a changed active sign, and compare all coefficients with
+physical shell columns at the advertised minimum half-length. Separate
+command-line generation and replay both report verified=true with both
+existence-decision flags false. Physical endpoints, arbitrary hole supports,
+and a compatible arbitrarily long word remain unresolved.

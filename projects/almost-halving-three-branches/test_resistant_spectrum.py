@@ -279,18 +279,27 @@ class SpectrumTests(unittest.TestCase):
                 self.assertEqual(quotient(left),{i:-c for i,c in quotient(right).items()})
 
     def test_recorded_open_windows_satisfy_all_original_integer_rows(self):
-        for hole in (19,97):
+        for hole in (19,43,97):
             for first in (3,4,11,20):
+                if hole==43 and first%2==0:
+                    with self.assertRaises(ValueError):rs.open_phase_example(hole,first)
+                    continue
                 certificate=rs.open_phase_example(hole,first)
                 self.assertTrue(rs.verify_open_phase_signs(certificate))
                 bits=int(certificate['bits'],16)
-                _,rows,equations=rs.open_phase_system(hole,2,first)
-                self.assertEqual(len(rows),712)
+                length=3 if hole==43 else 2
+                _,rows,equations=rs.open_phase_system(hole,length,first)
+                self.assertEqual(len(rows),356*length)
                 self.assertTrue(all(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())==0
                                     for row in rows))
                 self.assertTrue(all((mask&bits).bit_count()%2==rhs for mask,rhs in equations))
         with self.assertRaises(ValueError):rs.open_phase_example(1)
         with self.assertRaises(ValueError):rs.open_phase_example(19,2)
+        certificate=rs.open_phase_example(43)
+        _,rows,_=rs.open_phase_system(43,3,3)
+        changed=int(certificate['bits'],16)^(1<<next(iter(rows[0])))
+        with self.assertRaises(ValueError):
+            rs.verify_open_phase_signs(dict(certificate,bits=hex(changed)))
 
     def test_recorded_windows_are_not_unchecked_constructions(self):
         # These particular words cannot simply be extended: the next
@@ -307,8 +316,8 @@ class SpectrumTests(unittest.TestCase):
             self.assertEqual(sum(c*values[keys[i]] for i,c in next_row.items()),-2)
 
     def test_open_window_rows_match_physical_columns_without_identifying_ends(self):
-        for hole in (19,97):
-            first,length=3,4
+        for hole in (19,43,97):
+            first,length=3,3 if hole==43 else 4
             scale=2*(first+length+1)+1  # The advertised minimum half-length.
             coordinates,rows,equations=rs.open_phase_system(hole,length,first)
             positions={k:i for i,k in enumerate(coordinates)}
@@ -1238,8 +1247,82 @@ class SpectrumTests(unittest.TestCase):
             for a,q,s in rs.moving_folded_labels(True):
                 self.assertTrue(all(c in (-1,0,1) for Q,u,c,v in
                                     rs._moving_strip_column(a,q,s,0,hole,True)))
-        # The tail proof is not extended beyond its stated hole range.
-        with self.assertRaises(ValueError):rs.moving_folded_stencils(43,reduced=True)
+
+    def test_deep_hole_forced_tails_and_exceptional_unpaired_vertex(self):
+        generator=random.Random(20261125)
+        for scale,hole in ((9,43),(11,44),(15,97),(9,98)):
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            cutoff=(hole+79)*scale+1
+            high=defaultdict(dict)
+            for arm,n in enumerate(lengths,1):
+                for d in range(1,n+1):
+                    if (arm,d) in holes:continue
+                    for e,c in fc.shell_column(lengths,holes,(arm,d)).items():
+                        if e>=cutoff:high[e][arm,d]=c
+            exceptional=(hole-20)*scale+1
+            self.assertEqual(high[cutoff],{(2,exceptional):-1,(2,79*scale):1})
+            for e in range(cutoff+1,178*scale+1):
+                self.assertEqual(high[e],{(1,e-79*scale-1):-1,(2,e-99*scale):-1})
+            reduced={(0,0):1}
+            reduced.update({(a,d):generator.choice((-1,1))
+                            for a,n in enumerate((hole*scale-1,79*scale,23*scale),1)
+                            for d in range(1,n+1)})
+            restored=dict(reduced)
+            restored.update({(1,d+20*scale-1):-reduced[2,d]
+                             for d in range(exceptional+1,79*scale+1)})
+            self.assertEqual(len(restored),201*scale-1)
+            self.assertNotIn((1,hole*scale),restored)
+            self.assertEqual(rs.moving_folded_residual(scale,reduced,hole,reduced=True),
+                             fc.shell_rows(lengths,holes,restored))
+            # The unpaired coordinate remains in the reduced shell equation.
+            residual=rs.moving_folded_residual(scale,reduced,hole,reduced=True)
+            self.assertEqual(residual.get(cutoff,0),
+                             reduced[2,79*scale]-reduced[2,exceptional])
+            self.assertEqual(len(rs.moving_folded_labels(True,hole)),2*(hole+102))
+
+    def test_reduced_complete_matrix_for_every_hole(self):
+        for hole in range(1,99):
+            audit=rs.moving_folded_audit(9,hole,reduced=True)
+            self.assertEqual(audit['slice_signs'],2*(max(43,hole)+102))
+            expected=(145*9-1 if hole<=42 else (hole+102)*9)
+            self.assertEqual(audit['matched_source_columns'],expected)
+        for hole in (True,0,99):
+            with self.assertRaises(ValueError):rs.moving_folded_labels(True,hole)
+            with self.assertRaises(ValueError):rs.moving_folded_stencils(hole,True)
+
+    def test_high_arm_recovery_from_every_original_high_row(self):
+        scale=9
+        for hole in range(1,99):
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}
+            high=defaultdict(lambda:defaultdict(int))
+            recovery,remaining=rs.moving_high_arm_relations(scale,hole)
+            for arm,n in enumerate(lengths,1):
+                for d in range(1,n+1):
+                    vertex=arm,d
+                    if vertex in holes:continue
+                    for e,c in fc.shell_column(lengths,holes,vertex).items():
+                        if e>122*scale:high[e][vertex]+=c
+            expected={}
+            for vertex,expression in recovery.items():
+                # The target occurs once, with coefficient -1. Every other
+                # coefficient must be the claimed integer recovery expression.
+                e=vertex[1]+79*scale+1
+                expected[e]={vertex:-1,**expression}
+            if remaining:expected[(hole+79)*scale+1]=remaining
+            actual={e:{v:c for v,c in row.items() if c}
+                    for e,row in high.items() if any(row.values())}
+            self.assertEqual(actual,expected)
+            self.assertEqual(len(recovery),56*scale-(hole>=43))
+            self.assertTrue(all(len(row)==(3 if vertex[1]<hole*scale else 1)
+                                for vertex,row in recovery.items()))
+        for a,b,c in itertools.product((-1,1),repeat=3):
+            value=-a+b-c
+            self.assertEqual(abs(value)==1,a==b or c==b)
+            self.assertEqual(abs(value)==3,a==c and a!=b)
+        for scale,hole in ((True,19),(7,19),(10,19),(9,True),(9,0),(9,99)):
+            with self.assertRaises(ValueError):rs.moving_high_arm_relations(scale,hole)
 
     def test_moving_strip_complete_matrix_and_direct_distance_counts(self):
         from collections import Counter
