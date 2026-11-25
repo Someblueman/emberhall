@@ -3570,3 +3570,36 @@ compatible unit-sign extension or a replayable obstruction, followed by the
 physical endpoints and unrestricted supports. These experiments do not justify
 repeating the same caps or marking the main task complete. Only this concise
 record changes; the existing generator, tests and milestone status are unchanged.
+
+
+## Rook: direct sign repair does not yet extend the open window
+
+25 November 2026. A different constructive attempt worked directly on the
+2,010 unit signs of the h=97 three-centre window (first centre 3), with
+1,068 untouched integer shell rows and 15 absolute trace equations. For
+bits x, its unweighted repair cost was the sum of squared shell residuals
+divided by four, plus the number of failed traces. Thus zero, and only
+zero, would pass the local equations. This still omits physical endpoints.
+
+The scratch search chose a violated row, scored its incident single-bit
+flips with positive adaptive row weights, occasionally chose a random
+incident flip, and increased weights when no improving flip was available.
+It restarted after 200,000 iterations. All 8,240 incident flip updates on
+the independently verified two-centre h=97 word agreed with direct exact
+integer and trace recomputation. This checks the incremental arithmetic,
+not search completeness.
+
+Two seeds each ran to a 600-second cap without a zero-cost word. Their
+best costs were 100 and 97 after 264,660,000 and 291,940,000 iterations,
+respectively. These are search observations, not lower bounds.
+
+A full three-centre assignment from this attempt, failing 117 shell rows
+and two traces, was passed as a changeable hint to installed CP-SAT. With
+all original equations and reduced binary consequences of width at most
+32, one worker and hint repair enabled, it returned UNKNOWN after 240.006
+seconds (3,590 branches, no reported conflicts). It emitted no word.
+This is a failed constructive attempt, not an obstruction or a comparison
+of solver performance. Scratch assignments and search logs are not added
+to Git. The acceptance result remains unmet: find a compatible exact
+unit-sign extension, then satisfy physical endpoints and unrestricted
+hole supports. Repeating this cap is not the next mathematical step.
