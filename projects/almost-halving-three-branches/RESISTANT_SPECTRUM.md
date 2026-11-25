@@ -3343,3 +3343,124 @@ Validation: all 119 spectrum tests passed, including the three new controls;
 fresh command-line processes replayed the all-length certificate and both
 three-centre examples. The new tests disable elimination during certificate
 replay. No solver dependency was added. Whitespace checks passed.
+
+## Hawthorn: one compatible bounded odd word for the entire interior
+
+For **each of the 49 odd holes `h=1,3,...,97`**, the exact checker now
+constructs a single period-two odd-integer word on all 402 folded labels.
+Repeating that word supplies every overlapping interior window at once,
+including all five endpoint-derived parity traces at every absolute level.
+All 49 words have absolute values below `10^51`, a uniform bound
+**independent of the window length**. This strengthens finite-window odd-integer existence: the
+windows are restrictions of one compatible infinite word, rather than
+separate solutions whose values might grow with their length.
+
+This is an interior relaxation theorem. The values are not unit signs;
+none of the 49 generated words has even one unit coordinate. It supplies
+neither the physical endpoint shell rows nor actual subsets of a tripod.
+The arbitrary-pair task and arbitrary-triple milestone remain unfinished,
+and priority remains provisional. Existing period-two Boolean refusals are
+consistent with this result: the unit-value condition does real work.
+
+### Exact construction and why the finite check proves all lengths
+
+Write A for the untouched period-two integer shell matrix and E for a
+rational kernel parametrization, so `A E=0`. The implementation reuses exact
+rational recovery and checks that identity against every original row. Let
+Q be the largest power of two dividing any denominator in E. Thus every
+coefficient of `Q E` has odd denominator. Such denominators are invertible
+modulo `M=4Q`; all following modular computations use these exact inverses.
+Choose integer free parameters f satisfying these linear congruences:
+
+* For every coordinate i, `2 Q (E f)_i = 2Q (mod 4Q)`.
+* For each trace with support S and required bit r,
+  `Q sum_{i in S}(E f)_i = Q (|S|-2r) (mod 4Q)`.
+
+The first congruence says that each rational coordinate of `E f` is an odd
+integer in the ring of rationals with odd denominator. The second says
+`sum_{i in S}(1-(E f)_i)/2 = r (mod 2)`, exactly the required trace.
+A unit-pivot elimination solves these congruences over a power of two.
+When no odd pivot remains, either an odd right side proves inconsistency,
+or every coefficient and right side is divided by two and the modulus is
+halved. Each saved pivot retains its own modulus during back substitution.
+The candidate parameters are substituted into the initial congruences
+before use; incompatible congruences never become a physical refusal.
+
+All denominators of `v=E f` are now odd. Clear their common denominator with
+a multiplier d chosen to satisfy `d=1 (mod 4)` (use D or -D). The integer
+word `s=d v` remains odd, has `A s=0` exactly, and preserves every trace.
+The portable verifier independently substitutes s into the original
+periodic integer rows and traces, without using the kernel, parameters,
+modular solver, or a rank claim. Exact generation and replay succeeded for
+all 49 holes. This finite collection of checked integer words is the
+computational lemma; there is no inference from solver infeasibility.
+
+Finally, assign label i at absolute level k the value `s[i,k mod 2]`.
+Every unwrapped interior row is precisely its corresponding periodic row
+under this substitution, and every trace phase is two-periodic. Consequently
+all centres, arbitrarily long windows, and their overlaps satisfy the same
+original equations. The maximum of the 804 absolute word values is the
+claimed length-independent bound. No limiting argument or endpoint repair
+is used. An argument requiring every compatible odd interior word to grow without
+bound therefore cannot work. The actual unit bound, or the missing physical
+endpoint equations, must matter.
+
+### Reproduction and observed limits
+
+The generator and verifier use only the Python standard library:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --periodic-phase-odd --hole 97 --write /tmp/periodic-odd.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/periodic-odd.json
+```
+
+A real run returned `verified: true`, `period: 2`, and both decision flags
+false in each separate process. The h=97 word has 804 coordinates, maximum
+absolute value `81200807355445727931196536007292526841450371294017`, and no
+unit coordinate. Across all 49 generated words the largest power Q was
+`4194304` and the largest absolute value had 51 decimal digits. No generated
+word data or solver dependency is added to the repository.
+
+New controls compare the power-of-two solver to exhaustive enumeration on
+small systems, replay all 49 words with the generator's two main oracles
+disabled, restrict h=19 and h=97 to overlapping windows starting at levels
+3, 4 and 99, and reject altered values, dimensions, periods and scope flags.
+An additional direct check expands the h=19 and h=97 words onto all
+4,622 retained physical columns at t=23, putting zero on old-grid vertices.
+Every interior physical shell residual vanishes; 533 and 529 boundary
+residuals respectively remain nonzero. This uses the original physical
+column routine rather than the periodic compiler, and explicitly witnesses
+why interior compatibility must not be read as a physical completion.
+A kernel resource stop reports unknown and cannot emit a verified word.
+
+Separate exploratory attempts retained the *actual* small bounds. Integer
+searches for period-two odd values bounded by three at h=19 and h=97 stayed
+unknown after 120 seconds each. Three-centre unwrapped odd searches with
+that bound stayed unknown after 300 seconds each; an independent integer
+programming engine also stayed unknown for h=97 after 120 seconds. A further h=97 three-centre run with explicit binary parity channels and
+all binary echelon constraints stayed unknown after 600 seconds. These
+are witnessed search limits, not lower bounds on the necessary amplitudes.
+
+Final validation: all 122 spectrum tests passed in 394.780 seconds. The
+additional original-physical-column control passed separately in 5.308
+seconds; the strengthened all-49 bound and non-unit control passed in
+108.944 seconds. Both fresh command-line processes verified h=97.
+`py_compile` and `git diff --check` passed. Exact-kernel attempts to include
+six independent endpoint levels at both ends, period two, half-length 18,
+h=19 and h=97, reached 300-second resource limits and stayed unknown. No
+endpoint solution or refusal is claimed from those attempts. The finished
+slice is the compatible bounded odd interior theorem, not the main task.
+
+### Integration reconciliation (Hawthorn, 25 November)
+
+Reconciled preserved candidate `d036bbe` against accepted source `1b068be`
+from common ancestor `4e6b6b9`. All six overlapping insertion points had
+empty current and ancestor sides; retaining the candidate additions produces
+no deletions from accepted source in any of the three owned files. No other
+paths were changed. The reconciled full spectrum suite passes **123 tests
+in 259.022 seconds**, including all 49 odd holes, independent direct
+substitution, translated overlapping windows and original physical-column
+controls. The hole-97 command-line construction also verifies; Python
+compilation and whitespace checks pass. This repairs source coexistence,
+not the unresolved unit-sign or physical-endpoint problem. Independent
+integration and publication are not claimed here.

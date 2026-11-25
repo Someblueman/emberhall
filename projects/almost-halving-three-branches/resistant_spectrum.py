@@ -2025,6 +2025,120 @@ def verify_open_phase_signs(certificate):
     return True
 
 
+def power_two_solution(size, rows, rhs, modulus):
+    """Solve linear congruences over a power of two using unit pivots.
+
+    Dividing an entirely even residual system halves its modulus. Earlier
+    pivot equations keep their own modulus during reverse substitution.
+    None means incompatible congruences, never a refusal of physical pairs.
+    """
+    if (type(size) is not int or size<1 or type(modulus) is not int or
+            modulus<2 or modulus&(modulus-1) or len(rows)!=len(rhs) or
+            any(type(b) is not int for b in rhs) or
+            any(type(i) is not int or not 0<=i<size or type(c) is not int
+                for row in rows for i,c in row.items())):
+        raise ValueError('require integer rows and a power-of-two modulus')
+    active=[({i:c%modulus for i,c in row.items() if c%modulus},b%modulus)
+            for row,b in zip(rows,rhs)]
+    pivots=[]; mod=modulus
+    while active:
+        if any(not row and b for row,b in active): return None
+        active=[(row,b) for row,b in active if row]
+        if not active: break
+        options=[(len(row),j,next(i for i,c in row.items() if c%2))
+                 for j,(row,b) in enumerate(active) if any(c%2 for c in row.values())]
+        if not options:
+            if any(b%2 for row,b in active): return None
+            mod//=2
+            if mod==1: break
+            active=[({i:c//2%mod for i,c in row.items() if c//2%mod},b//2%mod)
+                    for row,b in active]
+            continue
+        _,j,pivot=min(options); row,b=active.pop(j)
+        inverse=pow(row[pivot],-1,mod)
+        row={i:c*inverse%mod for i,c in row.items()}; b=b*inverse%mod
+        pivots.append((pivot,row,b,mod))
+        for j,(other,value) in enumerate(active):
+            factor=other.get(pivot,0)
+            if not factor: continue
+            for i,c in row.items():
+                updated=(other.get(i,0)-factor*c)%mod
+                if updated: other[i]=updated
+                else: other.pop(i,None)
+            active[j]=other,(value-factor*b)%mod
+    values=[0]*size
+    for pivot,row,b,mod in reversed(pivots):
+        values[pivot]=(b-sum(c*values[i] for i,c in row.items() if i!=pivot))%mod
+    if any((sum(c*values[i] for i,c in row.items())-b)%modulus
+           for row,b in zip(rows,rhs)):
+        raise AssertionError('modular solution failed substitution')
+    return values
+
+
+def periodic_phase_odd_example(hole=19, seconds=120):
+    """One compatible infinite period-two odd word, excluding physical ends.
+
+    Work in the rational shell kernel, impose oddness and all trace phases
+    over a sufficiently large power of two, then clear an odd denominator.
+    The returned word is checked by direct integer substitution.
+    """
+    size,rows,traces=_periodic_phase_system(hole,2)
+    kernel=rational_recovery(size,rows,seconds)
+    if not kernel['complete']: raise ValueError('rational kernel resource limit; unknown')
+    expressions=kernel['expressions']; free=kernel['free']
+    if not free: raise ValueError('no nonzero rational kernel')
+    positions={i:j for j,i in enumerate(free)}
+    scale=max(c.denominator&-c.denominator for e in expressions.values() for c in e.values())
+    modulus=4*scale
+    coefficients={i:{positions[j]:(c*scale).numerator*
+                    pow((c*scale).denominator,-1,modulus)%modulus
+                    for j,c in e.items()} for i,e in expressions.items()}
+    congruences=[{j:2*c%modulus for j,c in coefficients[i].items() if 2*c%modulus}
+                 for i in range(size)]
+    rhs=[2*scale]*size
+    for mask,phase in traces:
+        row=defaultdict(int)
+        for i in range(size):
+            if mask>>i&1:
+                for j,c in coefficients[i].items(): row[j]=(row[j]+c)%modulus
+        congruences.append({j:c for j,c in row.items() if c})
+        rhs.append(scale*(mask.bit_count()-2*phase)%modulus)
+    parameters=power_two_solution(len(free),congruences,rhs,modulus)
+    if parameters is None: raise ValueError('periodic odd congruences incompatible')
+    values=[sum((c*parameters[positions[j]] for j,c in expressions[i].items()),Fraction(0))
+            for i in range(size)]
+    denominator=math.lcm(*(v.denominator for v in values))
+    if denominator%2!=1: raise AssertionError('odd congruences left an even denominator')
+    multiplier=denominator if denominator%4==1 else -denominator
+    values=[int(v*multiplier) for v in values]
+    result=dict(kind='moving-periodic-phase-odd-v1',hole=hole,period=2,
+                variables=size,values=values,literal_existence_decided=False,
+                all_pairs_decided=False)
+    verify_periodic_phase_odd(result)
+    return result
+
+
+def verify_periodic_phase_odd(certificate):
+    """Check every exact periodic shell and trace; no kernel or solver oracle."""
+    if (certificate.get('kind')!='moving-periodic-phase-odd-v1' or
+            type(certificate.get('period')) is not int or certificate['period']!=2 or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped period-two odd interior word')
+    size,rows,traces=_periodic_phase_system(certificate['hole'],2)
+    values=certificate.get('values')
+    if (type(certificate.get('variables')) is not int or certificate['variables']!=size or
+            not isinstance(values,list) or len(values)!=size or
+            any(type(v) is not int or v%2!=1 for v in values)):
+        raise ValueError('invalid periodic odd values')
+    if any(sum(c*values[i] for i,c in row.items()) for row in rows):
+        raise ValueError('periodic odd word fails an exact shell row')
+    bits=sum(1<<i for i,v in enumerate(values) if (1-v)//2%2)
+    if any((mask&bits).bit_count()%2!=phase for mask,phase in traces):
+        raise ValueError('periodic odd word fails an endpoint-derived trace')
+    return True
+
+
 def phase_odd_rank_certificate(hole=19):
     """Finite witnesses for the all-length odd-integer phase-window theorem."""
     size,rows,equations=_periodic_phase_system(hole,2)
@@ -4561,6 +4675,11 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-periodic-phase-odd-v1':
+        verify_periodic_phase_odd(saved)
+        return dict(verified=True,hole=saved['hole'],period=2,
+                    claim='one compatible infinite periodic odd interior word with all endpoint-derived traces; unit signs and physical endpoint rows excluded',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-phase-odd-rank-v1':
         verify_phase_odd_rank(saved)
         return dict(verified=True,hole=saved['hole'],
@@ -4905,6 +5024,7 @@ def main():
     p.add_argument('--resume-phase',help='recheck and reuse partial phase identities from this JSON file')
     p.add_argument('--cubic-sweep',action='store_true',help='continue examining phase products after the nonlinear pivot store fills')
     p.add_argument('--retain-quadratics',action='store_true',help='retain checked phase quadratic consequences and reuse them in the next pass')
+    p.add_argument('--periodic-phase-odd',action='store_true',help='construct one compatible infinite period-two odd interior word with all parity traces')
     p.add_argument('--phase-odd-rank',action='store_true',help='certify odd-integer phase compatibility for every finite interior length')
     p.add_argument('--open-phase-odd',type=int,metavar='LENGTH',help='construct a finite odd-integer window with endpoint traces')
     p.add_argument('--open-phase-example',action='store_true',help='emit a checked two-centre window at hole 19 or 97, without search')
@@ -4917,6 +5037,11 @@ def main():
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.periodic_phase_odd:
+        certificate=periodic_phase_odd_example(args.hole,args.seconds)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
     if args.phase_odd_rank:
         certificate=phase_odd_rank_certificate(args.hole)
         if args.write:

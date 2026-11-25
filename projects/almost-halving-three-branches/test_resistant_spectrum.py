@@ -15,6 +15,81 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_power_two_solution_against_small_exhaustion(self):
+        rng=random.Random(20261125)
+        for modulus in (2,4,8):
+            for _ in range(35):
+                rows=[{i:rng.randrange(-4,5) for i in range(3)} for _ in range(4)]
+                rhs=[rng.randrange(modulus) for _ in rows]
+                expected=next((x for x in itertools.product(range(modulus),repeat=3)
+                               if all((sum(c*x[i] for i,c in row.items())-b)%modulus==0
+                                      for row,b in zip(rows,rhs))),None)
+                actual=rs.power_two_solution(3,rows,rhs,modulus)
+                self.assertEqual(actual is None,expected is None)
+                if actual is not None:
+                    self.assertTrue(all((sum(c*actual[i] for i,c in row.items())-b)%modulus==0
+                                        for row,b in zip(rows,rhs)))
+        self.assertIsNone(rs.power_two_solution(1,[{0:4}],[2],8))
+        self.assertEqual(rs.power_two_solution(1,[{0:4}],[4],8),[1])
+        for modulus in (True,0,1,3,6):
+            with self.assertRaises(ValueError):rs.power_two_solution(1,[{0:1}],[1],modulus)
+
+    def test_periodic_odd_all_holes_with_independent_substitution(self):
+        for hole in range(1,98,2):
+            certificate=rs.periodic_phase_odd_example(hole)
+            with patch.object(rs,'rational_recovery',side_effect=AssertionError), \
+                    patch.object(rs,'power_two_solution',side_effect=AssertionError):
+                self.assertTrue(rs.verify_periodic_phase_odd(certificate))
+            self.assertLess(max(map(abs,certificate['values'])),10**51)
+            self.assertFalse(any(abs(v)==1 for v in certificate['values']))
+        for field,value in [('period',True),('period',4),('variables',True),
+                            ('values',certificate['values'][:-1]),('hole',18),
+                            ('literal_existence_decided',True),('all_pairs_decided',True)]:
+            with self.assertRaises(ValueError):
+                rs.verify_periodic_phase_odd(dict(certificate,**{field:value}))
+        for value in (True,0,certificate['values'][0]+4):
+            damaged=dict(certificate,values=list(certificate['values']))
+            damaged['values'][0]=value
+            with self.assertRaises(ValueError):rs.verify_periodic_phase_odd(damaged)
+
+    def test_periodic_odd_restricts_to_compatible_translated_windows(self):
+        for hole in (19,97):
+            certificate=rs.periodic_phase_odd_example(hole)
+            labels=rs.moving_folded_labels()
+            periodic={(*label,j):certificate['values'][2*i+j]
+                      for i,label in enumerate(labels) for j in range(2)}
+            for first,length in ((3,3),(4,8),(99,7)):
+                keys,_,_=rs.open_phase_system(hole,length,first)
+                values=[periodic[(*key[:3],key[3]%2)] for key in keys]
+                window=dict(kind='moving-open-phase-odd-v1',hole=hole,length=length,
+                            first=first,variables=len(keys),values=values,
+                            literal_existence_decided=False,all_pairs_decided=False)
+                self.assertTrue(rs.verify_open_phase_odd(window))
+                # The same absolute coordinate has the same value in every window.
+                self.assertEqual(values[0],periodic[(*keys[0][:3],(first-1)%2)])
+        with patch.object(rs,'rational_recovery',return_value={'complete':False}):
+            with self.assertRaisesRegex(ValueError,'unknown'):
+                rs.periodic_phase_odd_example(19)
+
+    def test_periodic_odd_against_original_physical_columns(self):
+        for hole in (19,97):
+            certificate=rs.periodic_phase_odd_example(hole)
+            word={(*label,j):certificate['values'][2*i+j]
+                  for i,label in enumerate(rs.moving_folded_labels()) for j in range(2)}
+            half=11; scale=2*half+1
+            lengths=[n*scale for n in (99,79,23)]
+            holes={(1,hole*scale),(1,99*scale)}; coordinates={(0,0):0}
+            for arm,n in enumerate(lengths,1):
+                for depth in range(1,n+1):
+                    if (arm,depth) in holes: continue
+                    q,level=divmod(depth,scale); orientation=1
+                    if level>half: q+=1; level=scale-level; orientation=-1
+                    coordinates[arm,depth]=word[arm,q,orientation,level%2] if level else 0
+            residual=fc.shell_rows(lengths,holes,coordinates)
+            self.assertFalse(any(v for e,v in residual.items()
+                                 if 2<=min(e%scale,scale-e%scale)<=half-1))
+            self.assertTrue(residual)  # The physical endpoints have not been solved.
+
     def test_phase_odd_rank_all_odd_holes_and_independent_replay(self):
         for hole in range(1,98,2):
             certificate=rs.phase_odd_rank_certificate(hole)
