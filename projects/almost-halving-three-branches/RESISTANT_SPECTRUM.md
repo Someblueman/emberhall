@@ -2147,3 +2147,151 @@ All 72 focused tests pass (61.05 seconds observed while the bounded search
 also ran), and `git diff --check` is clean. The remaining obstacle is global
 compatibility of the surviving nonlinear relations, or an unrestricted
 argument across every permitted support. No infinite family has been decided.
+
+### Tern: Boolean cubic consequences on the complete parity fibre
+
+24 November 2026. **Infinite-family acceptance remains unmet.** I advanced
+this private room to the already accepted `44db365` before extending the
+three owned files. The new method retains Boolean product compatibility
+that the independent-product relaxation discards; it does not decide every
+hole placement or remove the periodic-word restriction.
+
+For clarity about scope, `compile_moving_folded` uses t=2L+1, holes 19t and
+99t, independent end patches of width two and a periodic folded interior.
+I checked its row partition directly: left rows cover folded levels zero
+and one, interior rows cover 2..L-1, and right rows cover L. The compiler
+keeps the two patch interfaces separately and one full period of wholly
+periodic rows. Increasing L by whole periods preserves the literal system.
+Thus L=3990, p=4 represents resistant indices m odd, since L=3990m;
+it does not automatically represent the other half-length phase.
+
+The existing checked mod-eight identity gives quadratic zero-polynomials
+q(x) in free original negative-sign bits. `boolean_cubic_lift` adds every
+x_j*q(x), reducing x_j squared to x_j, then eliminates the resulting
+constant, linear, quadratic and cubic monomials over the binary field.
+Every actual shell signing satisfies every such polynomial. This is stronger
+than treating all pair products independently: xy=1, xz=0, yz=1 has compatible
+independent products but its cubic lift yields the contradiction 1=0.
+
+Whenever elimination derives linear equations, `boolean_linear_substitution`
+parameterizes their complete affine solution set in free original bits.
+`substitute_boolean_quadratics` substitutes this parameterization into every
+untouched quadratic and composes recovery of the initial parameters. It
+checks every linear recovery identity. The next lift therefore concerns
+exactly the remaining candidates of the previous necessary relaxation.
+This can repeat even after a bounded partial elimination: every polynomial
+already derived is sound, while absence of further consequences is unknown.
+Both time and stored-pivot bounds stop with `unknown`, never refusal.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-cubic --period 4 --seconds 900 --cubic-pivots 50000 --write /tmp/folded-cubic.json
+```
+
+Recorded at L=3990, h=19, p=4, w=2: the 4,094 input rows on 3,818 signs
+have 93 free parity parameters and quadratic rank 2,304. A 20,000-pivot
+lift obtains five independent linear constraints, leaving 88 parameters;
+the next lift reaches that cap without another linear constraint. A separate
+50,000-pivot run likewise reduces 93 to 88 and then stops at its cap:
+47,708 products in the first lift and 47,713 in the second, 207.20 seconds
+observed in total. These are necessary equations, not a literal signing,
+and are not claimed stronger than the earlier joint-field reduction.
+
+`--joint-fields` first applies the existing exact rational/binary/ternary
+quotient. `--cubic-search` reserves half the post-quotient budget for the
+lift and gives the remaining time to exact **integer** shell search. The
+cubic recovery equations remain active in that search. They are expressed
+in negative-sign bits, whereas the literal engine uses positive-sign bits;
+the right side is therefore adjusted by the equation mask's parity.
+Any positive assignment is restored through all aliases and checked against
+every untouched input shell row, then saved in the existing `moving_folded`
+witness format for independent `--verify`. A resource stop is not a refusal
+certificate; an explicit identity chain from `--cubic-proof` is checked as below.
+
+Controls independently construct the full cubic monomial space for sixty
+small systems, compare its rank and contradiction result, exhaustively
+check every affine substitution on small cubes, and check the bit-convention
+conversion in exact search. A driver control verifies a positive signing
+against untouched rows and rejects an altered sign. No large proof bundle
+or extra dependency is committed.
+
+With `--joint-fields --seconds 1200 --cubic-pivots 30000`, the existing
+joint reduction retains 86 binary parameters. Its cubic lift reaches
+30,000 pivots after 27,699 products and derives no additional linear
+constraint. Total observed time is 545.14 seconds, including 18.51 seconds
+for the lift. It remains `unknown`; this bounded probe gives no improvement
+on that joint-field fibre.
+
+#### Checked cubic identities give a scoped infinite refusal
+
+`--cubic-proof` records XOR dependencies during elimination and extracts
+explicit identities of the form sum(q_i*l_i)=p, with affine binary
+multipliers l_i. The small quadratic source basis is rebuilt from the original
+rows. The verifier adds the indicated source polynomials and their multiplied
+combinations, reducing repeated variables by x_i squared=x_i, and checks the
+claimed polynomial coefficient by coefficient. It does not repeat cubic
+elimination, trust a reported rank, or trust an alias from the generator.
+It checks each linear reduction in order and requires the final identity
+p=1. Grouping products by their multiplier variable keeps verification small.
+Proof generation currently uses the original shell system, without
+`--joint-fields`; this avoids trusting a prior quotient in the certificate.
+
+For moving holes **97t and 99t**, L=3990, p=4 and w=2, the first bounded
+lift gives nine linear constraints, reducing 90 parameters to 81. The next
+lift obtains the constant contradiction at rank 9,547 after 6,322 products.
+A fresh process reproduces this result. Explicit proof generation takes
+23.91 seconds observed, and the separate identity verifier accepts it:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --folded-cubic --cubic-proof --hole 97 --period 4 --seconds 300 --cubic-pivots 20000 --write /tmp/cubic97-proof.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/cubic97-proof.json
+```
+
+The exact conclusion is nonexistence **within this periodic-interior word
+model**, for these holes and every resistant index m odd. This follows from
+the checked polynomial contradiction and the unchanged compiled system under
+L increasing by whole periods. It excludes neither arbitrary words on that
+support nor any other support. It is not the task's all-pairs obstruction.
+
+The original-support integer search using the five cubic constraints ends
+unknown after 600.01 seconds and 155,820 nodes, leaving 88 free bits. Eight
+further bounded probes at h=5,13,29,41,57,73,85,93 also stop unknown with
+88 parameters; these probes select possible searches, not a support theorem.
+
+All **80 focused tests pass** (57.07 seconds observed), including fifty
+independent small polynomial-identity controls, damaged proof rejection,
+scope rejection, and the existing physical shell and direct-distance controls.
+Certificates are regenerated outside Git; no large evidence file is added.
+The complete physical-column comparison was also extended to h=19 and h=97
+at L=18, p=4, w=2 (the resistant half-length phase), followed by the
+whole-period extension check at L=22; both pass.
+
+#### Larger diagnostic and the proof-extraction boundary
+
+At h=19, a 120,000-pivot diagnostic reduces 93 parameters to 88 and then
+reports a constant contradiction at rank 95,908 after 93,632 products.
+Observed total time is 965.64 seconds (633.06 for the first lift and 329.09
+for the second). **This larger refusal has not received standalone certificate
+verification in this run.** A separate proof-generating replay exceeded its
+1,200-second budget inside extraction, which still attempted to extract
+every final linear consequence. I interrupted that process after about
+1,436 seconds; it saved no completed certificate. That is a witnessed
+resource failure, not another verified refusal.
+
+The shipped generator now extracts only the final constant identity after
+a contradiction and checks the time budget during extraction too. An
+unfinished extraction returns `unknown`, `proof_time_limit`, an empty proof,
+and a separate `algebra_status`; it cannot masquerade as a checked certificate.
+A clock-boundary control exercises deadlines throughout a small proof run.
+The h=97 certificate above remains independently checkable and accepted.
+The large h=19 certificate can be attempted with the same command, replacing
+`--hole 97` by `--hole 19`, the pivot cap by 120000 and the budget by 1200;
+completion is not promised.
+
+The task remains open. Neither the verified period-four h=97 refusal nor
+the larger diagnostic excludes unrestricted inserted words or every permitted
+two-hole support. The next mathematical step must allow those possibilities
+or produce an actual signing in another model; repeating the capped small
+hull or unsuccessful literal searches is not acceptance. Priority remains
+provisional, and no project or milestone completion is claimed.
+After the extraction repair, all **81 focused tests pass** (43.72 seconds
+observed), and `git diff --check` is clean.
