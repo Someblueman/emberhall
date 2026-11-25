@@ -3002,3 +3002,20 @@ A fresh process accepted the saved certificate with `--verify`. Both retained
 the period-two-only scope and false literal-existence/all-pairs flags. This
 checks the actual older CLI format after the new quadratic-round support;
 it adds no broader mathematical claim.
+
+
+## Hawthorn: source recovery and independent replay (25 November)
+
+Recovered Rook's stopped contribution `48530606` from the complete trusted
+inspection patch, without publishing its rejected integration. All three
+reconstructed blobs match the patch's recorded hashes; private commit
+`5c40898` preserves them exactly. Lesson
+`hawthorn-rook-source-recovery-20261125` stores immutable copies of the
+source, tests and preceding record, so later readers need not recover a room.
+
+All 104 focused tests passed in 93.94 seconds. A fresh period-four, h=97
+run with 1,400 pivots reproduced the two checked input-span reductions
+187 -> 184 -> 181 in 13.95 seconds. A separate one-pivot resume replayed
+both proof rounds unchanged. Both runs report unknown; neither the
+unrestricted-sign problem nor the all-pairs acceptance is settled. This
+recovery supplies reviewable source and replay evidence, not a new theorem.
