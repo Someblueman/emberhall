@@ -16,6 +16,160 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_two_power_target_ladder_beyond_the_binary_test(self):
+        saved=rs.adjacent_odd_mod_four_separation()
+        edge=rs.adjacent_four_zero_example();word=int(edge['bits'],16)
+        source=[1-2*(word>>(2*i)&1) for i in range(402)]
+        target=source[:];driver=rs.adjacent_integral_driver(97)
+        for _ in range(12):target=rs.adjacent_driver_step(driver,target,[1]*46)
+        positions={k:i for i,k in enumerate(rs.moving_folded_labels())}
+        shifted=target[:];lifted=target[:]
+        for label,c in saved['perturbation']:
+            i=positions[tuple(label)];shifted[i]+=4*c;lifted[i]+=8*c
+        self.assertTrue(rs.adjacent_odd_two_power_target(source,shifted,12,power=1))
+        self.assertFalse(rs.adjacent_odd_two_power_target(source,shifted,12,power=2))
+        self.assertTrue(rs.adjacent_odd_two_power_target(source,lifted,12,power=3))
+        with self.assertRaises(ValueError):rs.adjacent_odd_two_power_target(source,target,12,power=0)
+
+    def test_physical_odd_residue_examples_in_independent_shell_columns(self):
+        for half in (18,19,22):
+            saved=rs.physical_odd_residue_example(half%2)
+            self.assertTrue(rs.verify_saved(saved)['verified'])
+            keys,_=rs.compile_moving_folded(half,2,6,97)
+            packed=int(saved['packed_bits'],16)
+            values={key:1-2*((packed>>(3*i))&7) for i,key in enumerate(keys)}
+            scale=2*half+1;lengths=[n*scale for n in (99,79,23)]
+            holes={(1,97*scale),(1,99*scale)};residual=defaultdict(int)
+            for arm,n in enumerate((0,*lengths)):
+                for depth in (range(1,n+1) if arm else (0,)):
+                    if (arm,depth) in holes:continue
+                    q,level=divmod(depth,scale);orientation=1
+                    if level>half:q+=1;level=scale-level;orientation=-1
+                    if level<=6:key=('left',arm,q,orientation*level)
+                    elif level>=half-6:key=('right',arm,q,orientation,level-half)
+                    else:key=('period',arm,q,orientation,level%2)
+                    for distance,c in fc.shell_column(lengths,holes,(arm,depth)).items():
+                        residual[distance]+=c*values[key]
+            self.assertTrue(all(v%16==0 for v in residual.values()),half)
+            self.assertTrue(any(residual.values()))
+            self.assertTrue(any(abs(v)!=1 for v in values.values()))
+
+    def test_physical_odd_residue_scope_and_corruption(self):
+        import copy
+        saved=rs.physical_odd_residue_example(0)
+        for field,value in [('hole',95),('sign_modulus',8),('unit_signing',True),
+                            ('odd_integer_residues_only',False),('half_parity',True)]:
+            bad=copy.deepcopy(saved);bad[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):rs.verify_saved(bad)
+        bad=copy.deepcopy(saved);bad['packed_bits']=hex(int(saved['packed_bits'],16)^(1<<3))
+        with self.assertRaises(ValueError):rs.verify_saved(bad)
+        with self.assertRaises(ValueError):rs.physical_odd_residue_example(2)
+
+    def test_two_power_diagonal_profile_under_integer_basis_changes(self):
+        columns=[{i:c} for i,c in enumerate((1,2,2,4,8))]+[{},{}]
+        expected=[1,2,1,1]
+        self.assertEqual(rs._two_power_diagonal_profile(columns,size=6),expected)
+        rng=random.Random(9716)
+        for _ in range(24):
+            i,j=rng.sample(range(6),2);factor=rng.choice((-3,-1,1,3))
+            for col in columns:
+                value=col.get(i,0)+factor*col.get(j,0)
+                if value:col[i]=value
+                else:col.pop(i,None)
+            i,j=rng.sample(range(7),2);factor=rng.choice((-3,-1,1,3))
+            for row,c in columns[j].copy().items():
+                columns[i][row]=columns[i].get(row,0)+factor*c
+            self.assertEqual(rs._two_power_diagonal_profile(columns,size=6),expected)
+        self.assertEqual(rs._two_power_diagonal_profile([{0:8}],size=1),[0,0,0,1])
+        self.assertEqual(rs._two_power_diagonal_profile([{0:8}],size=1,power=3),[])
+
+    def test_two_adic_reachability_certificate_and_scope(self):
+        import copy
+        saved=rs.adjacent_two_adic_reachability()
+        result=rs.verify_saved(saved)
+        self.assertEqual(result['remaining_two_power_factors'],[2,2,4,8])
+        self.assertEqual(result['two_primary_saturation_index'],128)
+        edge=rs.adjacent_four_zero_example();word=int(edge['bits'],16)
+        source=[1-2*(word>>(2*i)&1) for i in range(402)]
+        target=rs.adjacent_driver_step(rs.adjacent_integral_driver(97),source,[1]*46)
+        labels=rs.moving_folded_labels();positions={k:i for i,k in enumerate(labels)}
+        shifted=target[:]
+        for label,c in saved['perturbation']:shifted[positions[tuple(label)]]+=4*c
+        self.assertTrue(rs.adjacent_odd_mod_four_target(source,shifted,1))
+        _,rows,_=rs.adjacent_phase_system(97,2,2)
+        original=[v for pair in zip(source,target) for v in pair]
+        changed=[v for pair in zip(source,shifted) for v in pair]
+        self.assertTrue(all(sum(c*original[i] for i,c in row.items())==0 for row in rows))
+        self.assertTrue(all(sum(c*changed[i] for i,c in row.items())%4==0 for row in rows))
+        self.assertTrue(any(sum(c*changed[i] for i,c in row.items())%8 for row in rows))
+        for field,value in [('two_primary_saturation_index',16),('sign_residue_modulus',8),
+                            ('largest_two_power_factor',4),('stable_after',10),
+                            ('odd_prime_obstructions_decided',True)]:
+            bad=copy.deepcopy(saved);bad[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):rs.verify_saved(bad)
+        bad=copy.deepcopy(saved);bad['profiles'][0][-1]=0
+        with self.assertRaises(ValueError):rs.verify_saved(bad)
+
+    def test_odd_mod_four_separation_certificate_and_corruption(self):
+        saved=rs.adjacent_odd_mod_four_separation()
+        replay=rs.verify_saved(saved)
+        self.assertEqual(replay['rank_mod_two'],394)
+        self.assertEqual(replay['rational_rank'],398)
+        self.assertEqual(saved['ranks_mod_two'],[46,92,138,184,230,276,322,368,394,394])
+        import copy
+        for field,value in [('separator','0x0'),('rank',393),('stable_after',8),
+                            ('unit_bounds_included',True),('hole',95)]:
+            bad=copy.deepcopy(saved);bad[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):rs.verify_saved(bad)
+        bad=copy.deepcopy(saved);bad['perturbation'][0][1]+=1
+        with self.assertRaises(ValueError):rs.verify_saved(bad)
+
+    def test_odd_mod_four_targets_against_original_rows(self):
+        saved=rs.adjacent_odd_mod_four_separation()
+        labels=rs.moving_folded_labels();positions={k:i for i,k in enumerate(labels)}
+        edge=rs.adjacent_four_zero_example()
+        word=int(edge['bits'],16)
+        source=[1-2*(word>>(2*i)&1) for i in range(402)]
+        driver=rs.adjacent_integral_driver(97)
+        def direct_residue_test(target,steps):
+            # Independent elimination of untouched shell rows modulo four.
+            keys,rows,_=rs.adjacent_phase_system(97,steps+1,2)
+            basis={}
+            equations=[]
+            for row in rows:
+                self.assertEqual(sum(row.values())%2,0)
+                equations.append((sum(1<<i for i,c in row.items() if c%2),
+                                  (sum(row.values())//2)%2))
+            for i,(*label,level) in enumerate(keys):
+                if level in (2,2+steps):
+                    values=source if level==2 else target
+                    equations.append((1<<i,((1-values[positions[tuple(label)]])//2)%2))
+            for mask,rhs in equations:
+                while mask:
+                    pivot=mask.bit_length()-1
+                    if pivot not in basis:basis[pivot]=(mask,rhs);break
+                    old,b=basis[pivot];mask^=old;rhs^=b
+                if not mask and rhs:return False
+            return True
+        for steps in (1,2,9,12):
+            target=source[:]
+            for step in range(steps):
+                target=rs.adjacent_driver_step(driver,target,
+                                              [3 if (i+step)%3 else -1 for i in range(46)])
+            self.assertTrue(rs.adjacent_odd_mod_four_target(source,target,steps))
+            self.assertTrue(direct_residue_test(target,steps))
+            shifted=target[:]
+            for label,c in saved['perturbation']:shifted[positions[tuple(label)]]+=2*c
+            self.assertFalse(rs.adjacent_odd_mod_four_target(source,shifted,steps))
+            self.assertFalse(direct_residue_test(shifted,steps))
+            for w in ([1]*402,rs._adjacent_moment_coefficients(97),
+                      rs._adjacent_orientation_coefficients(97),
+                      rs._adjacent_alternating_coefficients(97)):
+                self.assertEqual(sum(c*x for c,x in zip(w,target)),
+                                 sum(c*x for c,x in zip(w,shifted)))
+        with self.assertRaises(ValueError):rs.adjacent_odd_mod_four_target(source,[0]*402,12)
+        with self.assertRaises(ValueError):rs.adjacent_odd_mod_four_target(source,source,0)
+
     def test_driver_cache_isolated_from_mutations_and_verifier(self):
         first=rs.adjacent_integral_driver(43)
         expected=rs.adjacent_integral_driver(43)

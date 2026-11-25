@@ -5278,3 +5278,214 @@ selection passed **34 tests in 70.835 s**; a separate future-unit selection
 passed three tests in 55.092 s. Syntax and whitespace checks passed. These
 are local project checks; independent integration and remote delivery remain
 unclaimed. The arbitrary-triple theorem and infinite obstruction remain open.
+
+### Aster: an exact modulo-four gap beyond the recorded observables
+
+25 November continuation. The source-access block is
+resolved: lesson `aster-spectrum-source-delivery-20261125` attaches all three
+exact files from runtime repair finish 48544. Their hashes match that finish;
+private recovery commit `c036694` preserves them without changing their content.
+Prior access-related rejections remain recorded.
+
+At h=97, rational reachability plus the five recorded single-state phase
+traces still does **not** imply reachability by odd integer controls. This
+is a free-interior statement, not an obstruction for target pairs.
+
+Write an odd state as x=1-2b and an odd third-arm control as u=1-2v. The
+certified integer recurrence becomes, modulo two,
+
+    b_next = M b + B v + d,
+    d_i = (1 - sum_j M_ij - sum_j B_ij)/2.
+
+The reachable changes after n steps form
+`K_n = span_F2(B, MB, ..., M^(n-1)B)`. Exact binary elimination gives ranks
+`46,92,138,184,230,276,322,368,394,394`. The verifier also checks directly
+that M maps the resulting space into itself. Thus K_n=K_9 for every n>=9;
+the exact residue quotient has dimension eight. This is a complete
+modulo-four criterion for odd integer controls, without unit bounds.
+`adjacent_odd_mod_four_target` implements the affine criterion for any
+positive length, including lengths before stabilization.
+
+Here is a concrete strict separation. Set all unspecified coordinates of z
+to zero and set the following original folded labels:
+
+| Label (arm,q,orientation) | z |
+|---|---:|
+| (1,0,+) | 99 |
+| (1,1,+) | 2 |
+| (1,2,+) | -99 |
+| (1,97,+) | -2 |
+| (1,1,-) | 1 |
+| (1,4,+) | -1 |
+
+Direct substitution gives S(z)=W(z)=D(z)=A(z)=0. The parity vector z mod two
+also annihilates each of the five recorded phase masks. Nevertheless a
+supplied binary covector annihilates every column of K_9 and pairs to one
+with z. The checker reconstructs the control space and verifies each of
+these statements; it does not trust a claimed rank or separator.
+
+For any n>=12, source odd integer state x, and target y obtainable using
+n odd integer control words, the target y+2z has exactly the same four
+observables and five phase values as y. The earlier rational theorem
+therefore makes y+2z rationally reachable in n steps. It is not reachable
+with odd integer controls: in bit coordinates its difference is z mod two,
+which the separator excludes from every K_n. One may take x to be the
+first state of the stored four-zero unit edge and evolve any odd controls;
+this also keeps all four exact observables zero and the absolute phase
+values correct. The new target is an odd integer word, **not a unit word**.
+No claim is made about physical endpoints or all pairs.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-odd-mod-four-separation --write /tmp/mod-four-gap.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/mod-four-gap.json
+```
+
+Both commands replayed successfully: binary rank 394, rational rank 398,
+residue quotient dimension eight. Independent test elimination of the
+untouched original shell rows modulo four agrees with positive and
+perturbed negative endpoint cases at lengths 1,2,9,12. Corrupted scope,
+ranks, stabilization, perturbation and separator are rejected.
+
+This is compatible with Fern's complete physical modulo-four completions:
+those choose compatible endpoint residues, while this result separates
+incompatible prescribed endpoints. It supplies no new physical refusal.
+Two further three-state, four-zero discovery searches at h=95 and h=93
+returned UNKNOWN after 180 seconds each (29,517/14,375 branches and
+2,689/3,648 conflicts). No failed branch is promoted to an obstruction.
+The remaining project obstacle is still a long unit path with both physical
+interfaces, or an obstruction over every permitted pair. Priority remains
+provisional and the task's infinite-family acceptance remains unmet.
+
+### The complete power-of-two interior restriction at h=97
+
+A second continuation goes beyond the binary gap. Let K_n now denote the
+**integer** control matrix with columns B,MB,...,M^(n-1)B, using the same
+bit-coordinate recurrence before reduction. Over the 2-adic integers, its
+nonzero Smith factors for n=9 and n=10 have valuations
+
+    394 factors of valuation 0; two of valuation 1;
+    one of valuation 2; one of valuation 3.
+
+Equivalently the factors are 394 units and 2,2,4,8, up to odd units. The
+2-primary index in the saturated rank-398 observable kernel is therefore
+128. **This does not claim that the full integer index is 128:** odd-prime
+factors have not been decided.
+
+The standard-library replay constructs both matrices modulo 16. It removes
+odd pivots using invertible row and column operations in that ring. With
+no odd pivot left, it divides the remaining even matrix by two and
+continues at half the modulus. The counts are [394,2,1,1] for both lengths.
+The independently checked rational rank at length nine is exactly 398, so
+there are no additional nonzero factors hidden at valuation four or above.
+Tests also preserve this profile under integer row and column basis changes.
+No large integer Smith computation or external algebra package is required.
+
+Here is why the two finite computations prove stabilization at **every**
+length n>=9. The images over the 2-adic integers are nested; their rational
+span is the same four-observable kernel. The equal finite indices 128 at
+lengths nine and ten force the images to be equal. Since K_10 contains
+M K_9, that image is M-invariant and all further control columns remain in
+it. The largest nonunit factor is eight. Subject to the **exact** four
+observable evolution equations, membership in this image is consequently
+decided by bit residues modulo eight, equivalently sign residues modulo
+sixteen. This exhausts power-of-two obstructions for unrestricted odd
+integer controls in this interior. It does not prove an actual integer
+path, resolve odd-prime obstructions, impose unit magnitudes, or handle
+physical endpoints.
+
+Modulo four really is insufficient. For the same six-coordinate z above,
+a second supplied covector q with coefficients modulo four satisfies
+q K_10=0 modulo four but q(2z)=2 modulo four. Stability propagates that
+identity to every later control image. Thus, for any reachable odd target
+y at length n>=12, y+4z passes the modulo-four reachability test but fails
+modulo eight. It preserves all four exact observables and all five phase
+traces. The checker directly verifies the covector on every control column;
+the original-row test also exhibits an actual one-edge assignment whose
+shifted endpoint passes every shell modulo four and fails a shell modulo
+eight. These shifted endpoints are odd integer words, not unit signings.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-two-adic-reachability --write /tmp/two-adic-interior.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/two-adic-interior.json
+```
+
+The two explicit higher factors explain what a rational construction plus
+only binary phase checks can miss. Fern's physical modulo-four completion
+still stands: this is an obstruction for prescribed endpoints, not a
+refusal of every completion. A useful next step is to test both physical
+interfaces at sign residues modulo sixteen before spending more time
+trying to lift a particular endpoint choice to unit signs.
+
+### Full physical endpoint compatibility in odd residues modulo sixteen
+
+At h=97 there are now compact, independently replayable **odd-valued**
+completions of every physical shell modulo sixteen, for every L>=18 and
+both parities of L. This includes t=7980m+1, L=3990m, m>=1. The holes are
+97t and 99t on arm one. The centre is exactly +1. These are not unit
+signings: some coordinates have absolute value greater than one.
+
+The two stored words use the existing period-two interior and six free
+levels at each physical endpoint. Discovery used only the standard-library
+`power_two_solution` on the original quotient rows, solving
+
+    C b = (C 1)/2 (mod 8),  b_centre=0,  x=1-2b.
+
+The even and odd half-length runs took 104.275 and 107.545 seconds and each
+returned 6,230 residues. Replay substitutes x directly into every original
+integer quotient row and checks divisibility by sixteen. It rejects scope,
+centre, dimension and residue damage. The packed words occupy under ten
+kilobytes together; no generated witness bundle or dependency is needed.
+
+The length extension uses the same explicit row partition as the earlier
+modulo-four completion: left centres 2..7, right centres L-7..L-1, interior
+representatives 8,9. For L>=18 these do not overlap; all omitted interior
+centres repeat one representative. The two endpoint templates depend only
+on L modulo two. The verifier checks that each base quotient equals its
+L+2 quotient. This proves an infinite extension, rather than extrapolating
+from a finite count of lengths.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --physical-odd-residue-example --half 3990 --write /tmp/physical-odd-residues.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/physical-odd-residues.json
+```
+
+The even command above and the odd `--half 3991` replay successfully.
+Independent expansion into `full_shorter_coupling.shell_column` at L=18,19,22
+checks the actual physical distances, rather than compiler self-consistency:
+every shell sum is zero modulo sixteen, and some exact sums are nonzero.
+The focused original-column and corruption tests pass in 0.751 seconds.
+
+Consequently the new modulo-eight separation for prescribed endpoint
+states does not prohibit all physical endpoint choices at this residue precision.
+Higher-power endpoint obstructions and the restriction to actual unit
+signs remain separate questions. The missing infinite-family construction
+or all-pairs obstruction is still missing.
+
+The library also exposes `adjacent_odd_two_power_target(source,target,steps,power)`
+for prescribed hole-97 odd integer states. It decides reachability of their
+sign residues modulo `2**(power+1)`. For long lengths it uses the proved
+K_n=K_9 equality over the 2-adic integers, keeping only nine control blocks;
+the affine source evolution still uses the requested length. Appending the
+target difference to the control matrix enlarges its finite residue image
+exactly when the target is refused. Image sizes follow from the diagonal
+profiles. A twelve-step test rejects y+4z modulo eight while accepting y+8z
+modulo sixteen, using an actual evolved odd target y. Acceptance here means
+residue compatibility, not exact integer or unit-sign reachability.
+
+Construction follow-up: the h=79 three-state four-zero search returned
+UNKNOWN after 600.035 seconds, 801,770 branches and 18,906 conflicts. A new
+h=97 three-state search from odd starting level three, with the first
+neutral-group sum fixed to +2, was stopped to isolate final checks; it
+returned UNKNOWN at 133.399 seconds, 12,538 branches and 1,925 conflicts.
+Neither produced a two-edge unit witness. The first full project run passed
+810 tests in 935.563 seconds while discovery jobs were also active; that
+wall time exceeds the 900-second integration budget and is not recorded as
+a runtime acceptance. The final-tree isolated run is reported below.
+
+Final isolated verification of this continuation: all **815 project tests
+passed in 801.480 seconds**, inside the 900-second review budget. The
+modulo-four separation, two-adic certificate, both physical residue words
+and their separate CLI replay succeeded; syntax and whitespace checks pass.
+This is local project-slice validation, not independent integration or
+mathematical milestone acceptance. The exact unit-sign construction and
+all-pairs obstruction remain unresolved.

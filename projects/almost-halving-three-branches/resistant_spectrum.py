@@ -1956,6 +1956,151 @@ def verify_parity_completion_certificate(certificate):
         return False
 
 
+def physical_odd_residue_example(half_parity=0):
+    """Full h=97 physical shells modulo 16, with odd values, not unit signs."""
+    if type(half_parity) is not int or half_parity not in (0,1):
+        raise ValueError('require half parity zero or one')
+    words={
+        0:(
+            '0xdf57842200437019a244409c5e167f0bcf7421782a7386137ffd1e2498060911df4217511682f24530e82170acfe13ce5d'
+            '30bf89c4aa7348aaddfbc9f99e3fe1e1e434fb79825d2b8f4690ad06f46b5c6c0160cd01df17e2a388175e97d5c096f90c6a'
+            '1c9b8ea1c073d0f22df9a8baae34bf7652a10e408677c2f8d292016d0daf7167d32180447498da960a12d8dc03479ce79403'
+            '023b70585c38dfffc5c387186a702dbd87e9ec2fc661ba26bc0b15483c06c3585116e70016c94d472eec34f7ce76fe38dc44'
+            '2802dbb802595a36b40de7930830e9df1fc7cb9ddaa1b8701d8386b7fb1fdde2ac30a1eab6d1a22fb2e5e98cde91eb71e8a4'
+            '7a19034497a15e393f98d2214eb66a572fb684fc0844cb7f9bb0013b4b1a8dc743515634a233c84592627a0a700f8f65898f'
+            '0dffb1773c5f203387f6a7b9f7500263e07b1401ac061e22c428062070c5c931655865c1a250873ef0139468ae1426430b46'
+            'c0893900f98f378f1f3817c6350f0591716a41ae8d8b10bcc60d1ae8368bc2dbd0aff41b716d842889b6cea10d7924089089'
+            '6c47efa04b9d4a181728279c08c675b24097b4ce427892fda905b2b030ee82f7024663e26d7a72b004c6003c8491d87d4db5'
+            'ee1c020c0a311902f5d271ca76cc54230e600c4f68150d426384f00703308d9618c514f3e33a29136fdd1e435ae26f3f067f'
+            'b62ce194b7f61061244544584e37812fa2fa5c75cb8776be0ae0e0fa947005d51b43a5bf2d9ba61b0f3a9743d6a8419d7aea'
+            '6a3a8714f4ba33ca335f489b521cc0b6ed846f6c7f98ce91056c42a82d7f8e10d20ac866a419b2d74638090a13e91e38b040'
+            '3f17b8273018bed732c2850563bec601ca260689788650e1d503d0d98945282d20ba2fd4fceea6aa128f4d088c5281783072'
+            '1c62d5588c4c079ed16e37b9ad26f4d56535fc5bccc6bcf24a6a9aa0d79731f162a04cf6f41ed9c32b89e42ad04785fbabdc'
+            'f21840d1701202c4fcf021b392805454b8b38fc819ccc048e80966eab159a10881268cce89950e4b03f9c7399e567b005741'
+            '0156191f2f0be59ef8e064bf4e40872bcb92dfa5d3834b28c651a346141fc501451b100a140339efa42b82f26d76fa08bc50'
+            '13804b1ede18826ef5bf8805ee21f1332cb65b6e21c50802701aae159f407ce5d50820a191e645390c1bea780eb7db43a742'
+            'baa689b8199b01e8622f674136ef41dcb0fbd0a9e1fc53413fc08990093b81961b83f1fa9abe5eed7d3d6cabc0719c75afa0'
+            'f92685e078ee61ab000fa4dee4580bf481038370389827c918833eff8bac183ed3da48a88ebc0124ad28424355b07784a991'
+            '430afdef7c6f75dbe0829873a17d56c6082771eb4c3feb37bc54662b141aa94f1058eba4800479536b0a5162d680f9772565'
+            'df684a2e64df3a72a2b6a581f78c7340c79147c58ae747bd1ed1045ed115eec5b80393147e8f2ce461931f0c11e0df4f119e'
+            'ca309c20f8c6d80daf002e3b0fe77a37d2868c5d288264ac3aec8e593f29bc817c53584a4a5af0069bf123688d52bdcd0f29'
+            '004d7b2779e1bdb75f820a61ce85f55b18209dc7ad30ffacdefd009cac50abb16d0477fe100011635decec51bb5a1bc49f81'
+            'c6fbb579bd91fc298aead29207f631830309c51e162b9d1efc7b55917ec4568b16800e4cd1fb7cb219865a7c2ec7803d3dd1'
+            '7728704e43796346e2600c27c5697b47692bea1ea36d4eea747d0b9756021827a73ba0412b384f967bfa8d64d2b5037fe130'
+            '27817c2e2fbbbadc90e03001b5a957c5fe6036667630489b1522dd0229b8636ffc82d0b2eeca6155c41f16eb727ebb5f3034'
+            '1b1bf681707f2b42652b77e314d8822e2c450af2918d088d7451f42dc39dff7346dd728239ad31ebf2f1d78462f402204153'
+            '82099ea312c1260b80c6f206e1b1be97a3453c68c7d388260a839ec0eb94f08bc614a53585a565cf0071bb183088d56b1c80'
+            'da900cd5b0779e98dd4db8a0a61d685757319209dc42d00fd2cc6fd01fcab518ba16c64707e001c10235dec6c49bb5a03c59'
+            'f89c77ba9782592da295ceac11200b60e0f0b084ee6f5559d1efa71961cce66d6bb7d800acc586b3dde011bd0664ecc38be9'
+            '9f273364005423e6dc898aa0cfa098dcb5760e60de97ec8aec6f5a02f285679b5dfd527a05c9d816e6c39b123f61202dc824'
+            '1cfdf11fddc6264cf70048c2291c8f6d7efe4cd8c1fdb9f0747ed805984e0808452ce38ca14f43125b03927c547448ef25ac'
+            '3140e7ba461057c50d067e4366203dc1883576ffc089ee050192faca7aac27e7053fd4aaa23ba52500b36330f5fb5201c8ed'
+            '2539fd0ff186a30d45116b4e4d312771701a5437146e5e827881d3149a01bba9041fe446f9d1b1b789086d5234ea5048e64d'
+            '6b640786d337d73ec836bdfe3d20b602438384c2044fa694c07e5e3dcfde67577188131a16b81e59c08e1a65326c4181d7fe'
+            '22981cf7af32a35cc4a4c867420b3f877246a7842c11b605b84f9bdaf21ca977f3fe2e448d4b23f90eb346eecc36bdd72f4d'
+            '0b490814eae8c146d73b89fa00102cb831744f3a1bd9f74112502f0770eff1ce438e68cdcb939dd4b8cffd2f33c77c21068e'
+            '5f7b4b0daf7bb79341439284b00418af689c83f5d948b7dfbcaa50235f560ba1a55066efcb90595fe888113a87b0ccf9a0d7'
+            '289cf78d2d545cc0de545d17a7c43b5a3844ad98295014957a5902166b9544c1bb2014060040d98e474310bb5ccf7012b2ed'
+            'effcd7aa3cf2424a9a9c6a45e724fb0f570fb02135834d07121c7c433d8aa52680ef946a60feb045822498a4c5230abfc507'
+            'a5b6f825276700431211db47929110a0d7b83f815425c7dd842f90500f74389bc06384264c4c297ded5a12123b8d1a8674a1'
+            'b7f4dc889ee2cf364c457bc0d2e7c24df9c6fec36cad3dc35abf9d88c7540cbe9b1263783ccd0e8d730563961bd46794bc96'
+            '02c18f81d106ba86d5a376936825768c9c310da7fa128c7e86d4535c5122d107482df7bbe9249bbedf0854ff49c457c0a998'
+            '80d37f870402db1d8293ff0ac7901251d68e97b7334f8ff1644f05ceba869608c51237efb86fe9440776b19afb9c62118604'
+            '402dfdf36019a94cddda68e25cb1fde0a4fb12ef9117273592acb842c20e67c6b47d8ac5496f15e126b1c7409a7a4f7b3c9a'
+            '3116ccc691365021c3cf078ec0079e1f819903028fe3295f241a12ffd78e2edb4afc94fe46693b4d5acc5430155350da8cd3'
+            '18d95f191862c736f418b23821b950e10c47540f9f125dfe96243d2e2c84410d1be08662e0'
+        ),
+        1:(
+            '0x81d02ea48a4ccb1823c1f5a825fafff5c886c0bf6c014713a01f21c911ccf71b29a1c2e8297f5c05a5d6703a780983e38f'
+            '025022e087f88634b20a19a8866d0620e44213b81b308fff7071f2c2e975f7207207dc0fe8085d62af8fd598f200255147d3'
+            '197d292fc0502c00b6f9e0920945fb9f541085c3dd75884029351b1907ae303871a6321398a0718c21d802ae19d13a8b4320'
+            'c37000187d48e99fc51cb3849336909128cb1f70459ebc13ac01f1080eddcbf403e3cb06ca700302c38ca6cc138ab7c6e4c7'
+            '1b1a5af3013a3fc7add38fc0601a995223680b22fb5a03786b1ef06420f8eb582154418227a360c6950f0089d612bcaebc12'
+            '3093a4978d6fb3107345aa09ab00de9d08ca578bed207edfe619d827631f8981c4fef65803f3a081149dcaadbb16238447cd'
+            '002b01427bc3cb91c2d83254746b29dbb000d81c3b0b18e8204ac2046a04d67058ec182d01b140b1b700c1af06da9380cc86'
+            '38eaf6b1bc0c19adff0086060e85a1672e18ba5a9d01f43000446ac0af89b9290898349a4cb5854fa0d216da0e0b1e6e41f2'
+            'fbec188a208619e0095a035c03230da9828ea6e6a80c5706a6432aa249f225baffe804ef2ff5a428d01e9243da408186123a'
+            '36a1ab10a0450387d8e77408c29805095107f448318ab42180be314e0a00f028a230ecdca7b94f072481815298d8755100f0'
+            '42841d0e8580631757d18540f229e63ed246b94248bd11c004170a72bcc28b03fcf5470218514596c77c8081731e09e2b59a'
+            '053d42dbe991a81c53d1b6f8e13fe3ee8462efbc86b678785eaf43fd41e467ce18159b04fc1634607a3d8a1973d438f297f2'
+            '27901e2f903b8b262dc0bcd367115fb8809cd7c16e91335819d818e89e968d044dd900ebc031e3d3358e5ee4d49414e84535'
+            '772f2fc6e93780c706ec2e99d4ebe654cf2ffb416b054d885518aa08a5bd88d0333b28e0ed5499f11e0910541656e9b68bba'
+            'f44006428c96d4c40dc5cba3fbbeaa28e5c37d63d422046d5a88b0e74acc7a4e2f7a39505806237a0685e0226bdb1d196d69'
+            '6a688f6cd15b4364d7d021453c38a2c01d94ac6911f121e0eeb01834764e857d37ffdab86410c235dc39411eec9336962cae'
+            '187dc8c731fe2ec0d4499d811eee48724631a7fbf168b554ded8aeab40a41ce0b124f17b044dd67745d44397415a88a631d7'
+            '496a57ebed8d8423031db43bc0c61d2fdb3eef86584f26019cda1f50fa7e4041f10cda3b486bf3caf71a9584bf4657ed894d'
+            '9b33055a903393e15080cfb387001860858f830a8b8dd4bb8537b57e98002a38e03e713fbd8d86c4181499d1000758a138d6'
+            '2c2c6972bbe4e2e84db29b9c2b5f3c03f7cfb4883468c43dc8b40d9eaba114280e2113451877b5ee75d67fe07f0f6ae2ec5f'
+            'ee2add8dbcfdf1df6c9f7563fb3a380b5e03dc76bad279e8340ca38cd8d6cb655dedd2cc4fd47d20fbccbba221e1dee4bc15'
+            '69dea79421c3a430768aecaf4a63baeef36e20546a92bc65d4f4ca7dbb67a81138069ff2e7bff917898ba091a81f34840ab4'
+            '066977c9faf7ce22d875275b7a507f770535c999bc0b1768fb9bcfe4a26d251f28377d1c1a83c8e42410dae668b3c7b68383'
+            '1cadf7e143c0d4b7e0358e91fc9f58c1e969bd9bec0cc768ecbf255b0301a9849f9a0fe96bccba359818cca7d73c19d6ef1a'
+            'fca3aa6a82270dbb0315010859489081881651fc308828bdc39c637ad5e91043e06662e7b27bf840005591cbde71a0dd3a55'
+            '96674581975a5e5e2e8cdf29b9c2b5f3c03f7cfb4883468c43dcfb03c5eabe0113c7fe503451f73d46c6dd678e40f4b7a836'
+            'a57ee2bc18dbc7db1f778937763f33a2f8b5d03dc4eba8e79e3340a238dd0d6b965586dd78c4f6c7d58fbdc3ba101e196e4a'
+            'd1169d5d4e554386630364aac9f4a63beec73ee2054728eb864d4740a9dbb71aae121069ffaf3b1fb17880b00a1900338830'
+            'a35864947e1faf3d6805e7d245b7a517f4f05b5f19a3c1b16e8f38ace1ca8ec3d0728277e9d3297c8642410dae268f3cfb6c'
+            '3871d6de1e10bc2c8b7d635b5d1dc9f58cfdde836f3cfe0f7c8ecb72456cba237bca69018c8ec047befa0254eaed43529f75'
+            '906eceb825f02a514b426a9a4da223416417180e50e029588a4a94e189e1d96e1f76934bc0c127bd615b12a03ee3a31b7bbf'
+            '6506d3d0d78699102ce106c3e196923ad8077376e4046919ddbb0f3f74831bb948c47edfb056cd60ad37205453cd2d6268a5'
+            '0b07a3c4fd4a0b460fa1cbc4a510f30072e2dcf57a7902490f4aea7671fad747f9001ac84061c43cd8e1851e546e3f97f702'
+            '7602697d11d5a463de312241e3ca7d185be693cfd4bdf1648bacc1eb240322e743f28670211338e37289f5fd9d11ff804af1'
+            '08ca818188c090bf6eb50587d3280059aef1272a4b3e6492288ce93c40435a6509fd8dd868221f4abcf415d5ec01e97e0aa6'
+            '77683bdbb32840995ccb73686df82f47154adb5802fe1928fd8319f438b86d80b00b010e76255a66361265787d662419e7dc'
+            'efd51402eff32600023e1fa8ca3e9662f16fb834c98c56afe580d08cbf1d19a9f1c1318d7c7239f1cc837350c8f8aeaade3f'
+            '48ab15f20423faad1c3e5850ca6ef2d8b34833913a7f5329f60c58cc6dfe771a29f9b45f994c0dec5f583d9df5876f8a403e'
+            '487c2b09ca96b8671f40f68db683355dd1b2923cfe60ab0cfe7bfae0889c5ba0e96433ac21ebeb7d7a71c238b16bedf65dca'
+            '9c44dff97de3e50f9d9ecaf0c7164b0b001ed053a9c32150d4784eef14231fb4deaef8f268028fea755e25b885d00779a38a'
+            '388b5a6790265f3b75ccb733b60d960c843dd82e941a1aa78e1dc3d67e44c01f5985eb70128b5358ddbe2bc900d27789f9b5'
+            '8011421d54285895a3d4333a65c8308ac5d1a1ec8664e1655647319e89c32ccf0527b0c3e98ac6016222d20bed47124ef620'
+            '0173fe102dbc163629426f075f0080c2d0d563968536868f9c48049d43e18a4ea8a2d751903bc026c6eb7930ae5d8831ac2c'
+            'e0b08b497202ed0d961f9d683158200e0a1865135a382a242e95d997b90dc8ba02f718bcb24c2007e931ed60413efbcc4386'
+            '9eaa88685b92023011bcb0c9cccb1eecf7a4379bfc84c90611017040060ed435aeb166c8369d6d3f43d4e798634a8f949283'
+            '0631c1c189188c6c8dcfd8640461430db835fe8a5aa51c1f16602a728471f7654464da506031df826c42c96a8cd8a68021fc'
+            '1cceb7809aa5a47bc0fa6da0adfec14b59de9cbc907bcf3f9e7b56b8e049c0849d30798268'
+        ),
+    }
+    keys,_=compile_moving_folded(18+half_parity,2,6,97)
+    saved=dict(kind='moving-physical-odd-residue-example-v1',hole=97,
+               half_parity=half_parity,minimum_half=18,period=2,patch=6,
+               sign_modulus=16,variables=len(keys),packed_bits=words[half_parity],
+               odd_integer_residues_only=True,unit_signing=False,
+               literal_existence_decided=False,all_pairs_decided=False)
+    verify_physical_odd_residue_example(saved)
+    return saved
+
+
+def verify_physical_odd_residue_example(saved):
+    if (saved.get('kind')!='moving-physical-odd-residue-example-v1'
+            or type(saved.get('half_parity')) is not int or saved['half_parity'] not in (0,1)
+            or any(type(saved.get(k)) is not int or saved[k]!=v for k,v in
+                   dict(hole=97,minimum_half=18,period=2,patch=6,sign_modulus=16).items())
+            or saved.get('odd_integer_residues_only') is not True
+            or any(saved.get(k) is not False for k in
+                   ('unit_signing','literal_existence_decided','all_pairs_decided'))):
+        raise ValueError('require the scoped physical odd-residue example')
+    half=18+saved['half_parity'];keys,rows=compile_moving_folded(half,2,6,97)
+    encoded=saved['packed_bits']
+    if not isinstance(encoded,str) or len(encoded)>2+(3*len(keys)+3)//4:
+        raise ValueError('oversized packed residues')
+    word=int(encoded,16)
+    if (word<0 or word.bit_length()>3*len(keys) or type(saved.get('variables')) is not int
+            or saved['variables']!=len(keys)):
+        raise ValueError('incorrect residue dimension')
+    values=[1-2*((word>>(3*i))&7) for i in range(len(keys))]
+    if values[keys.index(('left',0,0,0))]!=1:
+        raise ValueError('the physical centre must be positive one')
+    if not any(abs(v)!=1 for v in values):raise ValueError('example is asserted nonunit')
+    if any(sum(c*values[i] for i,c in row.items())%16 for row in rows):
+        raise ValueError('odd residues fail an original physical shell row')
+    if (keys,rows)!=compile_moving_folded(half+2,2,6,97):
+        raise ValueError('physical quotient does not extend to the next length')
+    return dict(verified=True,hole=97,minimum_half=18,half_parity=saved['half_parity'],
+                sign_modulus=16,odd_integer_residues_only=True,unit_signing=False,
+                literal_existence_decided=False,all_pairs_decided=False,
+                claim='full physical shell completion in odd residues modulo 16; no unit signing')
+
+
 def _periodic_phase_system(hole,period):
     """Original even-periodic integer rows and checked absolute endpoint traces."""
     if type(period) is not int or period<2 or period%2:
@@ -3441,6 +3586,307 @@ def verify_adjacent_rational_reachability(saved):
     return dict(verified=True,hole=saved['hole'],steps=12,rank=rank,
                 rational_only=True,literal_existence_decided=False,all_pairs_decided=False,
                 claim='S,W,D and odd-hole A completely characterize rational interior reachability; unit signs, phases and endpoints remain required')
+
+
+def _adjacent_binary_control_system(hole=97):
+    """Odd integer recovery in bit coordinates b=(1-x)/2, modulo two."""
+    driver=adjacent_integral_driver(hole)
+    verify_adjacent_integral_driver(driver)
+    source=[0]*402;controls=[0]*46;shift=0
+    for recovery in driver['recoveries']:
+        target=recovery['target']//2
+        total=sum(c for i,c in recovery['expression'])
+        if total%2!=1:raise AssertionError('recovery does not preserve odd integers')
+        shift ^= (((1-total)//2)%2)<<target
+        for i,c in recovery['expression']:
+            if c%2:
+                columns=controls if i%2 else source
+                index=i//2-356 if i%2 else i//2
+                columns[index] ^= 1<<target
+    for i in range(46):controls[i] ^= 1<<(356+i)
+    return source,controls,shift
+
+
+def _binary_column_apply(columns,word):
+    result=0
+    while word:
+        bit=word&-word
+        result ^= columns[bit.bit_length()-1]
+        word ^= bit
+    return result
+
+
+def _binary_span_remainder(basis,word):
+    for pivot in sorted(basis,reverse=True):
+        if word>>pivot&1:word ^= basis[pivot]
+    return word
+
+
+def _binary_control_space(source,controls,steps=402):
+    basis={};ranks=[];vectors=controls
+    for _ in range(steps):
+        previous=len(basis)
+        for word in vectors:
+            word=_binary_span_remainder(basis,word)
+            if word:basis[word.bit_length()-1]=word
+        ranks.append(len(basis))
+        if len(basis)==previous:break
+        vectors=[_binary_column_apply(source,word) for word in vectors]
+    return basis,ranks
+
+
+def adjacent_odd_mod_four_target(source,target,steps,hole=97):
+    """Exact mod-four reachability with unrestricted odd integer controls.
+
+    True permits a mod-four residue path only; unit bounds and physical ends
+    are absent. False excludes an actual odd-integer path of this length.
+    """
+    if (type(steps) is not int or steps<1 or len(source)!=402 or len(target)!=402
+            or any(type(v) is not int or v%2!=1 for v in (*source,*target))):
+        raise ValueError('require two odd integer slices and a positive step count')
+    A,B,shift=_adjacent_binary_control_system(hole)
+    basis,_=_binary_control_space(A,B,steps)
+    word=sum((((1-v)//2)%2)<<i for i,v in enumerate(source))
+    for _ in range(steps):word=_binary_column_apply(A,word)^shift
+    word ^= sum((((1-v)//2)%2)<<i for i,v in enumerate(target))
+    return _binary_span_remainder(basis,word)==0
+
+
+def adjacent_odd_mod_four_separation():
+    """A strict gap beyond four exact observables and five phase traces."""
+    A,B,_=_adjacent_binary_control_system(97)
+    _,ranks=_binary_control_space(A,B)
+    saved=dict(kind='moving-adjacent-odd-mod-four-separation-v1',hole=97,
+               ranks_mod_two=ranks,rank=394,stable_after=9,
+               perturbation=[[[1,0,1],99],[[1,1,1],2],[[1,2,1],-99],
+                             [[1,97,1],-2],[[1,1,-1],1],[[1,4,1],-1]],
+               separator='0xb4b4b34b4b42d2d2d2d2d2d2d2d2d2cd2d2d2d2d2d2d2d2d2d01e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1',
+               minimum_steps=12,unit_bounds_included=False,
+               physical_endpoints_included=False,literal_existence_decided=False,
+               all_pairs_decided=False)
+    verify_adjacent_odd_mod_four_separation(saved)
+    return saved
+
+
+def verify_adjacent_odd_mod_four_separation(saved):
+    """Rebuild the exact recurrence and its invariant binary control space."""
+    if (saved.get('kind')!='moving-adjacent-odd-mod-four-separation-v1'
+            or type(saved.get('hole')) is not int or saved['hole']!=97
+            or type(saved.get('minimum_steps')) is not int or saved['minimum_steps']!=12
+            or any(saved.get(k) is not False for k in
+                   ('unit_bounds_included','physical_endpoints_included',
+                    'literal_existence_decided','all_pairs_decided'))):
+        raise ValueError('require a scoped hole-97 odd-integer separation')
+    A,B,_=_adjacent_binary_control_system(97)
+    basis,ranks=_binary_control_space(A,B)
+    if (saved.get('ranks_mod_two')!=ranks or saved.get('rank')!=len(basis)
+            or type(saved.get('rank')) is not int
+            or type(saved.get('stable_after')) is not int
+            or saved['stable_after']!=len(ranks)-1 or ranks[-1]!=ranks[-2]):
+        raise ValueError('incorrect binary control-space ranks or stabilization')
+    # Directly check invariance, not merely an unchanged last rank.
+    if any(_binary_span_remainder(basis,_binary_column_apply(A,v)) for v in basis.values()):
+        raise ValueError('claimed control space is not invariant')
+    separator=int(saved['separator'],16)
+    if separator<=0 or separator.bit_length()>402 or any(
+            (separator&v).bit_count()%2 for v in basis.values()):
+        raise ValueError('separator does not annihilate every reachable control change')
+    labels=moving_folded_labels();positions={k:i for i,k in enumerate(labels)};z={}
+    for label,c in saved['perturbation']:
+        key=tuple(label)
+        if key not in positions or type(c) is not int or not c or positions[key] in z:
+            raise ValueError('invalid perturbation coordinate')
+        z[positions[key]]=c
+    observables=[[1]*402,_adjacent_moment_coefficients(97),
+                 _adjacent_orientation_coefficients(97),_adjacent_alternating_coefficients(97)]
+    if any(sum(w[i]*c for i,c in z.items()) for w in observables):
+        raise ValueError('perturbation changes an exact observable')
+    bits=sum(1<<i for i,c in z.items() if c%2)
+    phases=adjacent_driver_phase_laws(adjacent_integral_driver(97))
+    if any((int(law['mask'],16)&bits).bit_count()%2 for law in phases):
+        raise ValueError('perturbation changes a recorded phase trace')
+    if (separator&bits).bit_count()%2!=1:
+        raise ValueError('separator does not exclude the perturbation')
+    # The separately verified rational theorem supplies the comparison.
+    rational=adjacent_rational_reachability(97)
+    verify_adjacent_rational_reachability(rational)
+    return dict(verified=True,hole=97,rank_mod_two=len(basis),quotient_dimension=402-len(basis),
+                rational_rank=rational['rank'],minimum_steps=12,
+                unit_bounds_included=False,physical_endpoints_included=False,
+                literal_existence_decided=False,all_pairs_decided=False,
+                claim='rational reachability and five phase traces do not imply odd-integer reachability')
+
+
+def _adjacent_integer_control_columns(hole,steps,modulus):
+    driver=adjacent_integral_driver(hole)
+    verify_adjacent_integral_driver(driver)
+    source=[{} for _ in range(402)];controls=[{} for _ in range(46)]
+    for rec in driver['recoveries']:
+        for i,c in rec['expression']:
+            columns=controls if i%2 else source
+            index=i//2-356 if i%2 else i//2
+            columns[index][rec['target']//2]=c%modulus
+    for i in range(46):controls[i][356+i]=1
+    columns=[];vectors=controls
+    for _ in range(steps):
+        columns.extend(vectors);following=[]
+        for vector in vectors:
+            out=defaultdict(int)
+            for i,c in vector.items():
+                for j,d in source[i].items():out[j]=(out[j]+c*d)%modulus
+            following.append({j:c for j,c in out.items() if c})
+        vectors=following
+    return columns
+
+
+def _two_power_diagonal_profile(columns,size=402,power=4):
+    """Smith valuations below power, using invertible operations modulo 2**power.
+
+    Odd pivots are units; remove their row and column. When no unit remains,
+    every remaining entry is even, so divide by two and continue in the
+    smaller residue ring. This never uses unbounded integer elimination.
+    """
+    if type(power) is not int or power<1:raise ValueError('require positive precision')
+    modulus=1<<power;rows={i:{} for i in range(size)};incidence=defaultdict(set)
+    for j,column in enumerate(columns):
+        for i,c in column.items():
+            if type(i) is not int or not 0<=i<size or type(c) is not int:
+                raise ValueError('invalid integer matrix column')
+            if c%modulus:rows[i][j]=c%modulus;incidence[j].add(i)
+    profile=[];pivots=0
+    while rows:
+        choices=[(len(row)*len(incidence[j]),i,j) for i,row in rows.items()
+                 for j,c in row.items() if c%2]
+        if not choices:
+            profile.append(pivots-sum(profile))
+            if modulus==2 or not any(rows.values()):break
+            for row in rows.values():
+                for j in row:row[j]//=2
+            modulus//=2
+            continue
+        _,i,j=min(choices);pivot=rows.pop(i);inverse=pow(pivot[j],-1,modulus)
+        for k in pivot:incidence[k].discard(i)
+        for r in list(incidence[j]):
+            row=rows[r];multiple=row[j]*inverse
+            for k,c in pivot.items():
+                value=(row.get(k,0)-multiple*c)%modulus
+                if value:row[k]=value;incidence[k].add(r)
+                elif k in row:del row[k];incidence[k].discard(r)
+        if incidence[j]:raise AssertionError('unit pivot column was not eliminated')
+        pivots+=1
+        for r in [r for r,row in rows.items() if not row]:del rows[r]
+    profile.append(pivots-sum(profile))
+    while profile and profile[-1]==0:profile.pop()
+    return profile
+
+
+def adjacent_odd_two_power_target(source,target,steps,power=3):
+    """Exact hole-97 endpoint test for odd signs modulo 2**(power+1).
+
+    This permits arbitrary odd integer residues, not just unit signs. For
+    steps>=9 the verified two-adic stabilization replaces K_steps by K_9.
+    """
+    if (type(steps) is not int or steps<1 or type(power) is not int or power<1
+            or len(source)!=402 or len(target)!=402
+            or any(type(v) is not int or v%2!=1 for v in (*source,*target))):
+        raise ValueError('require odd integer slices and positive length and precision')
+    modulus=1<<power;driver=adjacent_integral_driver(97)
+    verify_adjacent_integral_driver(driver)
+    state=[((1-v)//2)%modulus for v in source]
+    for _ in range(steps):
+        following=[0]*402
+        for rec in driver['recoveries']:
+            value=(1-sum(c for i,c in rec['expression']))//2
+            value+=sum(c*state[i//2] for i,c in rec['expression'] if not i%2)
+            following[rec['target']//2]=value%modulus
+        # Zero control bits mean third-arm signs +1.
+        state=following
+    delta={i:(((1-v)//2)-state[i])%modulus for i,v in enumerate(target)}
+    delta={i:c for i,c in delta.items() if c}
+    columns=_adjacent_integer_control_columns(97,min(steps,9),modulus)
+    profile=_two_power_diagonal_profile(columns,power=power)
+    augmented=_two_power_diagonal_profile(columns+[delta],power=power)
+    # Inclusion of finite modules is equality exactly when their orders agree.
+    def log_order(counts):return sum((power-i)*count for i,count in enumerate(counts))
+    return log_order(profile)==log_order(augmented)
+
+
+def adjacent_two_adic_reachability():
+    """Exact 2-primary control index, without asserting integer or unit reachability."""
+    profiles=[_two_power_diagonal_profile(_adjacent_integer_control_columns(97,n,16))
+              for n in (9,10)]
+    saved=dict(kind='moving-adjacent-two-adic-reachability-v1',hole=97,
+               control_steps=[9,10],modulus=16,profiles=profiles,
+               perturbation=adjacent_odd_mod_four_separation()['perturbation'],
+               higher_separator='0x90909090909797979797970909090909090909090909090909090909090909797979797979797979797979797979797979797012121212121212121212121212121212121212121212121237373737373737373737373737373737373737373737373737',
+               rank=398,two_primary_saturation_index=128,largest_two_power_factor=8,
+               stable_after=9,sign_residue_modulus=16,
+               rational_observable_equalities_required=True,
+               odd_prime_obstructions_decided=False,unit_bounds_included=False,
+               physical_endpoints_included=False,literal_existence_decided=False,
+               all_pairs_decided=False)
+    verify_adjacent_two_adic_reachability(saved)
+    return saved
+
+
+def verify_adjacent_two_adic_reachability(saved):
+    if (saved.get('kind')!='moving-adjacent-two-adic-reachability-v1'
+            or type(saved.get('hole')) is not int or saved['hole']!=97
+            or saved.get('control_steps')!=[9,10]
+            or type(saved.get('modulus')) is not int or saved['modulus']!=16
+            or saved.get('rational_observable_equalities_required') is not True
+            or any(saved.get(k) is not False for k in
+                   ('odd_prime_obstructions_decided','unit_bounds_included',
+                    'physical_endpoints_included','literal_existence_decided','all_pairs_decided'))):
+        raise ValueError('require a scoped hole-97 two-adic control theorem')
+    limits=dict(rank=398,two_primary_saturation_index=128,largest_two_power_factor=8,
+                stable_after=9,sign_residue_modulus=16)
+    if any(type(saved.get(k)) is not int or saved[k]!=v for k,v in limits.items()):
+        raise ValueError('incorrect claimed two-adic theorem parameters')
+    profiles=[_two_power_diagonal_profile(_adjacent_integer_control_columns(97,n,16))
+              for n in (9,10)]
+    packed=int(saved['higher_separator'],16)
+    if packed<=0 or packed.bit_length()>804:raise ValueError('invalid higher separator')
+    q=[(packed>>(2*i))&3 for i in range(402)]
+    columns=_adjacent_integer_control_columns(97,10,4)
+    if any(sum(q[i]*c for i,c in col.items())%4 for col in columns):
+        raise ValueError('higher separator does not annihilate the control module')
+    labels=moving_folded_labels();positions={k:i for i,k in enumerate(labels)};z={}
+    for label,c in saved['perturbation']:
+        key=tuple(label)
+        if key not in positions or type(c) is not int or not c or positions[key] in z:
+            raise ValueError('invalid higher perturbation')
+        z[positions[key]]=c
+    observables=[[1]*402,_adjacent_moment_coefficients(97),
+                 _adjacent_orientation_coefficients(97),_adjacent_alternating_coefficients(97)]
+    if any(sum(w[i]*c for i,c in z.items()) for w in observables):
+        raise ValueError('higher perturbation changes an exact observable')
+    bits=sum(1<<i for i,c in z.items() if c%2)
+    if any((int(law['mask'],16)&bits).bit_count()%2 for law in
+           adjacent_driver_phase_laws(adjacent_integral_driver(97))):
+        raise ValueError('higher perturbation changes a phase trace')
+    if sum(q[i]*2*c for i,c in z.items())%4!=2:
+        raise ValueError('higher separator does not exclude twice the bit perturbation')
+    rational=adjacent_rational_reachability(97)
+    verify_adjacent_rational_reachability(rational)
+    if (profiles!=[[394,2,1,1]]*2 or saved.get('profiles')!=profiles
+            or sum(profiles[0])!=rational['ranks_mod_three'][8]
+            or rational['rank']!=398):
+        raise ValueError('modular diagonal factors or rational rank do not agree')
+    index=1<<sum(i*count for i,count in enumerate(profiles[0]))
+    expected=dict(rank=398,two_primary_saturation_index=index,largest_two_power_factor=8,
+                  stable_after=9,sign_residue_modulus=16)
+    if any(type(saved.get(k)) is not int or saved[k]!=v for k,v in expected.items()):
+        raise ValueError('incorrect index, stabilization or required sign precision')
+    return dict(verified=True,hole=97,rank=398,unit_factors=394,
+                remaining_two_power_factors=[2,2,4,8],two_primary_saturation_index=index,
+                stable_after=9,sign_residue_modulus=16,
+                rational_observable_equalities_required=True,
+                mod_four_pass_mod_eight_refuse=True,
+                odd_prime_obstructions_decided=False,unit_bounds_included=False,
+                physical_endpoints_included=False,literal_existence_decided=False,
+                all_pairs_decided=False,
+                claim='exact observable evolution plus sign residues modulo 16 exhaust power-of-two interior obstructions')
 
 
 def adjacent_conserved_observables(certificate):
@@ -6537,6 +6983,10 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 def verify_saved(saved):
     if saved.get('kind')=='moving-adjacent-orientation-endpoint-v1':
         return verify_adjacent_orientation_endpoint(saved)
+    if saved.get('kind')=='moving-adjacent-two-adic-reachability-v1':
+        return verify_adjacent_two_adic_reachability(saved)
+    if saved.get('kind')=='moving-adjacent-odd-mod-four-separation-v1':
+        return verify_adjacent_odd_mod_four_separation(saved)
     if saved.get('kind')=='moving-adjacent-rational-reachability-v1':
         return verify_adjacent_rational_reachability(saved)
     if saved.get("kind")=="moving-adjacent-successor-lattice-v1":
@@ -6667,6 +7117,8 @@ def verify_saved(saved):
         return dict(verified=True,hole=saved['hole'],
                     claim='period-two interiors with physical endpoint phases only',
                     literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-physical-odd-residue-example-v1':
+        return verify_physical_odd_residue_example(saved)
     if saved.get('kind')=='moving-parity-completion-v1':
         if not verify_parity_completion_certificate(saved):
             raise ValueError('invalid mod-four shell completion')
@@ -6961,6 +7413,7 @@ def main():
                    help='certify an alternating parity observable on unrestricted interior words')
     p.add_argument('--parity-traces',action='store_true',
                    help='classify all constant-row two-level parity laws and endpoint phases')
+    p.add_argument('--physical-odd-residue-example',action='store_true',help='replay full physical shells modulo 16 at hole 97, using odd integer values rather than unit signs')
     p.add_argument('--parity-completion',action='store_true',
                    help='certify a full mod-four shell signing for the parity of --half')
     p.add_argument('--resume-phase',help='recheck and reuse partial phase identities from this JSON file')
@@ -6977,6 +7430,8 @@ def main():
     p.add_argument('--adjacent-pair-refusal-example',type=int,nargs='?',const=2,metavar='FIRST',help='emit an actual edge passing unary but failing paired future tests; even start, default 2')
     p.add_argument('--adjacent-orientation-endpoint',action='store_true',help='prove the physical prefix forces D+2*S=0')
     p.add_argument('--adjacent-four-zero-example',action='store_true',help='replay a unit edge in S=W=D=A=0; it is dead at both outside boundaries')
+    p.add_argument('--adjacent-two-adic-reachability',action='store_true',help='certify all power-of-two interior restrictions at hole 97, with exact observable equalities')
+    p.add_argument('--adjacent-odd-mod-four-separation',action='store_true',help='certify an odd-integer obstruction beyond the four observables and five phase traces at hole 97')
     p.add_argument('--adjacent-rational-reachability',action='store_true',help='check the twelve-step rational interior theorem, without unit, phase or endpoint constraints')
     p.add_argument('--adjacent-lattice-example',action='store_true',help='describe and enumerate all controls of the stored fixed source')
     p.add_argument('--lattice-limit',type=int,default=256,help='cap emitted successor controls; exhaustion is reported explicitly')
@@ -7039,6 +7494,16 @@ def main():
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
         print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_two_adic_reachability:
+        certificate=adjacent_two_adic_reachability()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_odd_mod_four_separation:
+        certificate=adjacent_odd_mod_four_separation()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_adjacent_odd_mod_four_separation(certificate),indent=2));return
     if args.adjacent_rational_reachability:
         certificate=adjacent_rational_reachability(args.hole)
         if args.write:
@@ -7181,6 +7646,11 @@ def main():
                   else dict(status=certificate['status'],all_pairs_decided=False))
         print(json.dumps(result|dict(elapsed=certificate['elapsed']),sort_keys=True))
         return
+    if args.physical_odd_residue_example:
+        certificate=physical_odd_residue_example(args.half%2)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
     if args.parity_completion:
         certificate = parity_completion_certificate(args.hole,args.half%2)
         if args.write:
