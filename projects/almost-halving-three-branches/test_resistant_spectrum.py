@@ -17,15 +17,17 @@ def normalized(rows):
 class SpectrumTests(unittest.TestCase):
     def test_recorded_open_windows_satisfy_all_original_integer_rows(self):
         for hole in (19,97):
-            certificate=rs.open_phase_example(hole)
-            self.assertTrue(rs.verify_open_phase_signs(certificate))
-            bits=int(certificate['bits'],16)
-            _,rows,equations=rs.open_phase_system(hole,2,3)
-            self.assertEqual(len(rows),712)
-            self.assertTrue(all(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())==0
-                                for row in rows))
-            self.assertTrue(all((mask&bits).bit_count()%2==rhs for mask,rhs in equations))
+            for first in (3,4,11,20):
+                certificate=rs.open_phase_example(hole,first)
+                self.assertTrue(rs.verify_open_phase_signs(certificate))
+                bits=int(certificate['bits'],16)
+                _,rows,equations=rs.open_phase_system(hole,2,first)
+                self.assertEqual(len(rows),712)
+                self.assertTrue(all(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())==0
+                                    for row in rows))
+                self.assertTrue(all((mask&bits).bit_count()%2==rhs for mask,rhs in equations))
         with self.assertRaises(ValueError):rs.open_phase_example(1)
+        with self.assertRaises(ValueError):rs.open_phase_example(19,2)
 
     def test_recorded_windows_are_not_unchecked_constructions(self):
         # These particular words cannot simply be extended: the next
@@ -43,7 +45,8 @@ class SpectrumTests(unittest.TestCase):
 
     def test_open_window_rows_match_physical_columns_without_identifying_ends(self):
         for hole in (19,97):
-            scale,first,length=23,3,4
+            first,length=3,4
+            scale=2*(first+length+1)+1  # The advertised minimum half-length.
             coordinates,rows,equations=rs.open_phase_system(hole,length,first)
             positions={k:i for i,k in enumerate(coordinates)}
             expected=defaultdict(lambda:defaultdict(int))

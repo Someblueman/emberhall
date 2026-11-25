@@ -3030,18 +3030,23 @@ run from `first-1` through `first+length`. These are necessary equations for
 any physical solution with `L>=first+length+1`; they omit other centres and
 the physical endpoint equations. No periodicity is imposed.
 
-At `first=3`, both h=19 and h=97 admit literal signings for the **specified
-two-centre window**. Each example supplies all 1,608 signs and passes all
+At both `first=3` and `first=4`, h=19 and h=97 admit literal signings for the
+**specified two-centre window**. Each example supplies all 1,608 signs and passes all
 712 integer rows and ten trace equations. The installed OR-Tools solver
-found them in 9.21 and 5.54 seconds respectively after explicitly adding
-the checked binary echelon equations; neither the shipped checker nor
+found the odd-start examples in 9.21 and 5.54 seconds, and the even-start
+examples in 546.68 and 8.05 seconds, after explicitly adding the checked
+binary echelon equations; neither the shipped checker nor
 the example command imports that solver. This is finite local compatibility,
 not a physical endpoint completion, an infinite construction or all-pairs
 acceptance. In particular it does not rule out a contradiction at other
-centres or on a larger window.
+centres outside a chosen window or on a larger window. Translation by two
+preserves both integer coefficients and trace phases, so these four words
+supply checked local signings at every starting level at least three.
+Different windows need not agree on shared coordinates.
 
 The following standard-library command emits and checks the recorded h=97
-example; h=19 is also available. The saved file can be checked independently.
+example; h=19 and `--first-level 4` (or any level at least three) are also
+available. The saved file can be checked independently.
 
 ```sh
 python3 projects/almost-halving-three-branches/resistant_spectrum.py --open-phase-example --hole 97 --write /tmp/open-window.json
@@ -3055,7 +3060,7 @@ standard-library engine found and checked a one-centre signing. A two-centre
 h=19 search exhausted one million nodes in 126.09 seconds and stayed unknown.
 A resource stop never turns into a negative mathematical conclusion.
 
-The two recorded examples **cannot simply be continued with their signs
+The two examples starting at 3 **cannot simply be continued with their signs
 fixed**. At the next centre, 5, row `(0,+)` uses only their already supplied
 coordinates and sums to -2 for each. This is an exact check of these two
 words, not a claim that every two-centre signing fails to extend. The
@@ -3064,9 +3069,4 @@ for a construction. Other tests compare every open-window coefficient with
 direct physical distance-shell columns, keep both end levels distinct, and
 reject altered signs, scope and dimensions.
 
-The unwrapped parity fibre has 845, 891, 983 and 1,167 free bits for one,
-two, four and eight centres before deleting unused coordinates, at both
-holes. Exploratory input-span elimination of their mod-eight quadratics
-found no affine consequence in these windows. Thus the six known periodic
-affine constraints do not automatically survive this change of model.
 The unrestricted interior and arbitrary-support problems remain open.

@@ -2025,20 +2025,26 @@ def verify_open_phase_signs(certificate):
     return True
 
 
-def open_phase_example(hole=19):
-    """Two actual adjacent shell levels, with both end levels left distinct.
+def open_phase_example(hole=19,first=3):
+    """Actual two-centre signings at either starting parity, at holes 19/97.
 
-    These tiny recorded assignments were found by an installed solver;
-    their replay uses only the integer checker above, never that solver.
+    Translation by two preserves every integer row and trace phase. The
+    label-major ordering is unchanged; the checker still rebuilds every
+    requested row. Different windows need not agree on shared coordinates.
+    Recorded assignments came from an installed solver; replay never uses it.
     """
     examples={
-        19: '0xee490e16ab666c12d2222540342c6a4527a6bfb7c04c9f6ea5218796e6010ee6052e619621e620ac3db0ec87ade7095adf7a52c3bee01f17c99964b605812724a7e837248fbef09e7f4ccadb7e48c0f46428e1a3edb6536197a6868d669ca6a5876ff03ee7a62084acc0c020ecc202e4a20cc08e008e8684ac06e08402ee68602a48486a40c0886e060eca8886e02ef0fc8280707ddbe3106120472465302007340015161244171305056743260120524730607331017015206004644315665e85640ee86c86a43c38',
-        97: '0x26c05eda0a124e2c6480e666404b6d9f8064008c4e0c012402081efe82f088edeb05e2310600a6c877a0d2e9e422004834c2690d2a8124ed8da0dab2610584e34f8cf88631ffe418681cbaf4714a84b36703c600f1f2f438c807e5efb442e86f1b64e18220e6a6a7cbc802f88aff8c2cf8348ba1f780a649078b6b2db7ba6c4c2658681e7a45edece6130887e1e5f27c82640fb4fa4f08214cc2d98130266dc1a153e1302245db92a42eeede160f0b0621731c0c010d42064b855f25d066bce07062944937d731d3af',
+        (19,1): '0xee490e16ab666c12d2222540342c6a4527a6bfb7c04c9f6ea5218796e6010ee6052e619621e620ac3db0ec87ade7095adf7a52c3bee01f17c99964b605812724a7e837248fbef09e7f4ccadb7e48c0f46428e1a3edb6536197a6868d669ca6a5876ff03ee7a62084acc0c020ecc202e4a20cc08e008e8684ac06e08402ee68602a48486a40c0886e060eca8886e02ef0fc8280707ddbe3106120472465302007340015161244171305056743260120524730607331017015206004644315665e85640ee86c86a43c38',
+        (19,0): '0xd7540b2c6e605b6b494acb778640707cf568a0929d9a77da1cd00ce8602f630966e91feb57a46d06002df02ece8ced63e6272128b1740320a025fd0e7f141686484bfc6e548991b31d0731e870e3a46fed64af24a4f2f0ce42ec027d251fed36478981eac14a4ac66ee42e0ea228ec022ec02842a404e0ce840c8062c4040820a0ac840ea0a8a08e6c06606862accee74aee8cad02b07e747417124100153337263174670307022500050560612102431052453201216101650263321516511a0c4359197ed27af778',
+        (97,1): '0x26c05eda0a124e2c6480e666404b6d9f8064008c4e0c012402081efe82f088edeb05e2310600a6c877a0d2e9e422004834c2690d2a8124ed8da0dab2610584e34f8cf88631ffe418681cbaf4714a84b36703c600f1f2f438c807e5efb442e86f1b64e18220e6a6a7cbc802f88aff8c2cf8348ba1f780a649078b6b2db7ba6c4c2658681e7a45edece6130887e1e5f27c82640fb4fa4f08214cc2d98130266dc1a153e1302245db92a42eeede160f0b0621731c0c010d42064b855f25d066bce07062944937d731d3af',
+        (97,0): '0x1794f40e8152401c5a4f6d895ca9c8c804a19ec80804274f3d8eceee0048ae51b3cd2703e0d1e1e9aed1633186e1a84e39de66e9f193e27d2400232121b9f8f8ce9879ee04f87f37f8f400c8b9fef0ec099ff8700113f77fd83766f85a373f6646e8ec2f57f96044b7f373fc7e799e49a0f4b0096e5d2fb8bf4928b097bfb85e1b70369de6b08c0466f53a080c3817b599898cf7efeb74470b181a1b09ec8100e0a7cd3d5b032102052131978f337f5e08579c6c8d13e7ec7448ea1341b407316942c9f9b35311ad3e',
     }
-    if type(hole) is not int or hole not in examples:
-        raise ValueError('recorded examples are available at holes 19 and 97')
-    certificate=dict(kind='moving-open-phase-signs-v1',hole=hole,length=2,first=3,
-                     minimum_half=6,variables=1608,status='local_signing',bits=examples[hole],
+    if (type(hole) is not int or hole not in (19,97) or
+            type(first) is not int or first<3):
+        raise ValueError('require hole 19 or 97 and first level at least three')
+    certificate=dict(kind='moving-open-phase-signs-v1',hole=hole,length=2,first=first,
+                     minimum_half=first+3,variables=1608,status='local_signing',
+                     bits=examples[hole,first%2],
                      literal_existence_decided=False,all_pairs_decided=False)
     verify_open_phase_signs(certificate)
     return certificate
@@ -4461,7 +4467,7 @@ def main():
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
     if args.open_phase_example:
-        certificate=open_phase_example(args.hole)
+        certificate=open_phase_example(args.hole,args.first_level)
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate),indent=2));return
