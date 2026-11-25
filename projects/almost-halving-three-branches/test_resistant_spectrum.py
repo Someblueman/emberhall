@@ -15,6 +15,118 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_odd_period_driver_uses_checked_interior_refusal(self):
+        for period,hole in ((1,19),(3,97),(5,1)):
+            half = 8+period
+            with patch.object(rs,'joint_sign_closure',side_effect=AssertionError('search entered')):
+                saved = rs.moving_folded_search(half,period,2,hole)
+            self.assertEqual(saved['status'],'ansatz_refused_by_interior_cocycle')
+            self.assertTrue(rs.verify_saved(saved)['verified'])
+            for change in ({'hole':hole+1},{'half':half-1},
+                           {'certificate':saved['certificate']|{'rhs':0}},
+                           {'period':2,'minimum_half':10,'half_residue':half%2},
+                           {'all_pairs_decided':True}):
+                with self.assertRaises(ValueError): rs.verify_saved(saved|change)
+        with patch.object(rs,'interior_parity_cocycle',side_effect=AssertionError('even period filtered')):
+            with patch.object(rs,'joint_sign_closure',return_value={
+                    'history':[],'conflict':False,'complete':False}):
+                result = rs.moving_folded_search(12,2,2,19)
+        self.assertNotEqual(result['status'],'ansatz_refused_by_interior_cocycle')
+
+    def test_unrestricted_cocycle_all_supports_and_damage(self):
+        for hole in range(1,99):
+            certificate = rs.interior_parity_cocycle(hole)
+            self.assertEqual(len(certificate['shell_rows']),176)
+            self.assertEqual(len(certificate['left_rows']),264)
+            # Independent closed formula from the physical column exponents.
+            # The first/last-arm cross lengths 79 and 23 agree modulo eight.
+            f = lambda q: int(q%8>=4)
+            expected = set()
+            for a,q,orientation in rs.moving_folded_labels():
+                if a==1:
+                    before = q<hole or (q==hole and orientation==-1)
+                    direct = f(q) if before else f(q)^f(q-hole)
+                    reflected = f(hole-q) if before else 0
+                else:
+                    direct = f(q)^f(q+7)^f(q+hole)
+                    reflected = f(7-q)
+                minus,plus = ((direct,reflected) if orientation==1
+                              else (reflected,direct))
+                if minus: expected.add((a,q,orientation,-1))
+                if plus: expected.add((a,q,orientation,0))
+            self.assertEqual(set(map(tuple,certificate['observable'])),expected)
+            self.assertTrue(rs.verify_interior_parity_cocycle(certificate))
+            self.assertEqual(rs.verify_saved(certificate)['initial_phase'],1)
+            for change in ({'rhs':0},{'initial_phase':0},{'hole':0},
+                           {'shell_rows':certificate['shell_rows'][:-1]},
+                           {'left_rows':certificate['left_rows'][:-1]},
+                           {'observable':certificate['observable'][:-1]},
+                           {'observable':certificate['observable']*2},
+                           {'all_pairs_decided':True},
+                           {'literal_existence_decided':True}):
+                damaged = certificate | change
+                self.assertFalse(rs.verify_interior_parity_cocycle(damaged))
+                with self.assertRaises(ValueError): rs.verify_saved(damaged)
+
+    def test_cocycle_against_independent_distance_shells(self):
+        # Build K columns by directly counting distances in the retained tree.
+        # Neither the folded stencil compiler nor shell_column constructs them.
+        for scale,hole in ((9,19),(11,97)):
+            lengths = [99*scale,79*scale,23*scale]
+            holes = {(1,hole*scale),(1,99*scale)}
+            vertices = [(0,0)]+[(a,d) for a,n in enumerate(lengths,1)
+                                for d in range(1,n+1) if (a,d) not in holes]
+            certificate = rs.interior_parity_cocycle(hole)
+            half = scale//2
+            checks = []
+            initial_rows = {q*scale+d for q,d in certificate['left_rows']}
+            initial = set()
+            for a,q,s,d in certificate['observable']:
+                v = a,q*scale+s*(2+d)
+                initial.symmetric_difference_update((v,))
+            checks.append((initial_rows,initial))
+            for level in range(2,half):
+                shell_rows = {q*scale+s*level for q,s in certificate['shell_rows']}
+                difference = set()
+                for a,q,s,d in certificate['observable']:
+                    for shift in (0,1):
+                        v = a,q*scale+s*(level+d+shift)
+                        difference.symmetric_difference_update((v,))
+                checks.append((shell_rows,difference))
+            sums = [0]*len(checks)
+            for v in vertices:
+                shell = defaultdict(int)
+                for w in vertices:
+                    if w==v: continue
+                    distance = abs(v[1]-w[1]) if v[0]==w[0] else v[1]+w[1]
+                    shell[distance] += 1
+                column = defaultdict(int,{1:-2})
+                for distance,count in shell.items():
+                    column[distance] += count
+                    column[distance+1] -= count
+                for i,(rows,expected) in enumerate(checks):
+                    value = sum(column.get(e,0) for e in rows)
+                    self.assertEqual(value%2,int(v in expected))
+                    sums[i] += value
+            self.assertTrue(all(total%4==2 for total in sums))
+
+    def test_cocycle_matches_periodic_binary_systems(self):
+        labels = rs.moving_folded_labels()
+        positions = {key:i for i,key in enumerate(labels)}
+        for hole in (1,19,43,97,98):
+            stencils = rs.moving_folded_stencils(hole)[1]
+            for period in (1,2,3,4):
+                rows = []
+                for level in range(period):
+                    for terms in stencils.values():
+                        row = defaultdict(int)
+                        for (a,q,s,d),c in terms.items():
+                            row[((level+d)%period)*402+positions[a,q,s]] += c
+                        rows.append({i:c for i,c in row.items() if c})
+                refusal,_ = rs.binary_elimination(rows)
+                self.assertEqual(refusal is not None,period%2==1)
+                # Even-period compatibility here is only a binary relaxation.
+
     def test_unrestricted_interior_minor_and_damaged_certificate(self):
         for hole in (1,19,43,79,97,98):
             certificate = rs.interior_rank_certificate(hole)

@@ -2419,3 +2419,164 @@ uses a nonzero specialized two-arm determinant to prove full row rank over
 Q(z); it does not decide sign feasibility, physical endpoints, or arbitrary
 hole placements. This preserves the interior result only; the resistant-family
 task and the project's global milestone remain unresolved.
+
+## Rook: an absolute parity phase for unrestricted moving-hole words
+
+25 November 2026. **The resistant-family acceptance is still unmet.** This
+identity applies to every literal word on the support with holes `ht,99t`,
+for every `1<=h<=98`, odd `t=2L+1>=9`. There is no periodicity assumption
+and the third word remains free. Other hole placements are outside its scope.
+
+Use the existing 402 slice labels `i=(arm,q,orientation)` and write
+`x[i,r]=1-2*b[i,r]`, with bits b. For each of the 356 interior shell rows,
+let `c[j,i,d]` be its integer coefficient at shift `d=-1,0,1`. Its necessary
+binary equation at level r is
+
+    sum_(i,d) (c[j,i,d] mod 2)*b[i,r+d] = sum_(i,d)c[j,i,d]/2 mod 2.
+
+The coefficient sums are even. Select precisely the 176 shell rows whose
+coarse shell index Q is `4,5,6,7 modulo 8`, using both orientations. XOR
+their left sides as a Laurent polynomial vector P(z) over the binary field.
+For every h, the XOR of their right sides is one, and
+
+    P_i(-1)+P_i(0)+P_i(1) = 0,
+    P_i(z) = (1+z) * (P_i(-1)*z^-1 + P_i(1)).
+
+Here P_i(d) means a coefficient, rather than evaluation at d. Define the
+explicit two-level parity observable
+
+    J_r = sum_i [P_i(-1)*b[i,r-1] + P_i(1)*b[i,r]] mod 2.
+
+The coefficients have a short closed description. Let `f(q)=1` for
+`q mod 8` in 4..7, otherwise zero; additions below are modulo two. For a
+first-arm label, say it is before the hole when `q<h` or `q=h,s=-1`.
+Before the hole put `D=f(q), R=f(h-q)`; after it put
+`D=f(q)+f(q-h), R=0`. On either other arm put
+`D=f(q)+f(q+7)+f(q+h), R=f(7-q)`. For orientation +, the coefficients
+`(P_i(-1),P_i(1))` are `(D,R)`; for orientation -, they are `(R,D)`.
+This follows by selecting the physical column exponents; the cross lengths
+79 and 23 agree modulo eight. An independent formula control matches every
+coefficient of all 98 generated observables.
+
+Then **J_r + J_(r+1) = 1** at every interior centre `2<=r<=L-1`.
+There is also an absolute starting phase. XOR the 264 left boundary shell
+rows with the same coarse index selection, now using offsets -1,0,1.
+Their left side is exactly J_2 and their right side is one. Consequently
+
+    J_r = (r-1) mod 2,             2<=r<=L.
+
+For resistant `L=3990m`, the right endpoint must in particular have J_L=1.
+This is a necessary condition, not evidence that the endpoint can be met.
+XORing the recurrence over any putative odd-period bi-infinite interior
+gives `0=1`. Thus **no odd-period literal interior exists**, for any of the
+98 supports. The result also excludes an eventually odd-period interior
+when its repeating portion contains all the required translated equations.
+Even-period interiors, unrestricted nonperiodic words, and other supports
+are not excluded.
+
+The certificate records the actual observable and both fixed lists of source
+rows. The separate verifier checks each polynomial coefficient directly,
+including the left boundary phase; it performs no rank inference, parity
+elimination or sign search. All 98 values of h are checked, the entire finite
+parameter domain of this identity. Tests additionally reconstruct columns
+by direct distance counts on retained physical vertices, independently of
+the shell-column and folded compilers. They check the selected integer row
+sums modulo four as well as every vertex coefficient modulo two. Damaged
+observables, row lists, phases and scope claims are rejected.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --interior-cocycle --hole 19 --write /tmp/interior-phase.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/interior-phase.json
+```
+
+The recorded generation and separate verification both return `verified:true`,
+`initial_phase:1`, and `all_pairs_decided:false`. At h=19 the observable has
+356 terms; neither its size nor its phase is a count of literal solutions.
+The earlier unrestricted rank contribution is preserved without alteration.
+
+### What the unrestricted-window attempt did not decide
+
+I next retained independent levels, with no repetition and no physical endpoint
+identifications. For width W the rows are the integer interior stencil at each
+centre 1 through W-2, and coordinate `(i,r+d)` has index `(r+d)*402+i`.
+`joint_sign_closure` was given 180 seconds per window, with short recovery
+active. Observed outcomes were:
+
+| Width | h=19 | h=97 |
+| --- | --- | --- |
+| 4 | stable relaxation, 1.66 s | stable relaxation, 3.89 s |
+| 8 | stable relaxation, 87.85 s | budget stop during ternary reduction |
+| 16 | budget stop during rational reduction | budget stop during ternary reduction |
+
+A stable relaxation is not a literal signing. No window produced a
+contradiction. Two exact period-two *interior-only* searches also returned
+unknown at 300 seconds, after 62,215 and 84,055 nodes respectively. These
+measurements neither certify compatible signs nor refuse a support.
+
+The exact remaining obstacle is the simultaneous literal cube and physical
+endpoints, with the shortest word unrestricted; the alternating parity phase
+handles only a necessary affine consequence. Even resolving all 98 moving
+supports would still leave arbitrary hole positions, including holes on
+different arms. No all-pairs upper bound below the target, infinite target
+construction, project completion or milestone completion is claimed.
+
+A final constructive probe used h=1, L=3990, period six, patch width two,
+and the proved opposite-tail elimination before recovering a rational kernel.
+Exact recovery took 578.51 seconds and left 178 original free signs; it checked
+its basis against every input row. A seeded numerical search on that literal
+free cube then ran for 600 seconds (776,000 proposed flips), without obtaining
+zero residual or an exact candidate. Total observed time was 1,179.00 seconds.
+The numerical prototype is not shipped and supplies no refusal certificate.
+An attempted modular reconstruction shortcut also did not produce a verified
+rational basis and was not used. These are witnessed failed attempts, not a
+claim about the nonexistence of a target pair. The retained deliverable is the
+exact parity law and its checker; the broader task remains open.
+
+Validation for the retained deliverable: all 87 focused tests passed in
+53.27 seconds. After adding the independent closed-formula control, that
+changed test passed separately in 6.35 seconds. The final documentation-only
+addition passes `git diff --check`; no unchanged suite was repeated.
+
+### Applying the law before sign search
+
+The moving-folded driver now returns a checked interior refusal on odd periods,
+before entering joint-field or literal search. Its existing bound
+`L>=2w+4+p` leaves fully periodic centres `w+2..L-w-2`, at least p centres.
+XORing the alternating identities over one complete odd period gives 0=1.
+The separate verifier rebuilds the model's length and phase constraints,
+requires the same hole parameter in the identity, and rejects an even period,
+a damaged identity, or a model too short for the argument. Even periods retain
+the existing search behavior. This still refuses only the named periodic model.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --moving-folded --period 3 --half 11 --folded-patch 2 --hole 19 --write /tmp/odd-interior.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/odd-interior.json
+```
+
+The recorded driver run returns `ansatz_refused_by_interior_cocycle` in
+0.024 seconds; separate verification returns `verified:true` and keeps
+`all_pairs_decided:false`. All 88 focused tests pass in 54.14 seconds,
+including bypass, even-period preservation and damaged-scope controls.
+
+### Reconciled contribution — Linnet, 25 November 2026
+
+Restored Rook's parity theorem and odd-period shortcut from trusted inspection
+of stopped run `63271a9219f640318dd7f6ef0c9b1c70`, commit `61f5eb7`, onto
+installed base `2939d1b`. The three pre-existing rank functions and their
+controls are unchanged; their duplicate additions caused the earlier conflict.
+The resulting Python source and test blobs exactly match the preserved
+candidate (`e2844e1` and `b82b9ba`). All 88 focused tests pass (53.08 seconds),
+both documented certificate round trips verify, and `git diff --check` passes.
+This is a source reconciliation, not another mathematical result. Independent
+trusted integration remains the delivery gate; no wider acceptance is claimed.
+
+### Resubmitted after an access-only refusal — Fern, 25 November 2026
+
+The prior contribution received a terminal review refusal because bounded test
+and documentation inspection was unavailable, not because a defect was found.
+This submission restores its complete trusted, untruncated diff from stopped
+run `b6ecc3931e8647a4a944d0f37bc1037b`, commit `ef4fd68`, onto the same base.
+Both Python blobs retain the hashes recorded above. A fresh independent review
+is required; the earlier refusal remains part of the record.
+Fresh local validation: all 88 focused tests pass in 49.14 seconds, both
+documented certificate round trips verify, and `git diff --check` passes.

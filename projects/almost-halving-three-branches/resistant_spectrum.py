@@ -1640,6 +1640,85 @@ def moving_folded_stencils(h=19,reduced=False):
     return trim(left),trim(interior),trim(right)
 
 
+def interior_parity_cocycle(hole=19):
+    """Certify a parity observable alternating on every unrestricted interior.
+
+    No levels are identified. Fixed shell weights Q mod 8 in 4..7 give
+    P(S)b=1, with P(S)=(1+S)Q(S) over F_2 and Q supported at -1,0.
+    This excludes odd-period interiors, not physical endpoint completion.
+    """
+    left,stencils,_ = moving_folded_stencils(hole)
+    selected = [list(key) for key in sorted(stencils) if key[0]%8 >= 4]
+    coefficients = defaultdict(int)
+    rhs = 0
+    for key in selected:
+        row = stencils[tuple(key)]
+        if sum(row.values())%2:
+            raise ValueError('shell row has odd coefficient sum')
+        rhs ^= sum(row.values())//2%2
+        for coordinate,c in row.items(): coefficients[coordinate] ^= c%2
+    observable = []
+    for a,q,s in moving_folded_labels():
+        if coefficients[a,q,s,-1]: observable.append([a,q,s,-1])
+        if coefficients[a,q,s,1]: observable.append([a,q,s,0])
+    certificate = dict(kind='moving-interior-cocycle-v1',hole=hole,
+                       shell_rows=selected,observable=observable,rhs=rhs,
+                       left_rows=[list(key) for key in sorted(left) if key[0]%8>=4],
+                       initial_phase=1,
+                       literal_existence_decided=False,all_pairs_decided=False)
+    if not verify_interior_parity_cocycle(certificate):
+        raise ValueError('alternating observable identity not obtained')
+    return certificate
+
+
+def verify_interior_parity_cocycle(certificate):
+    """Check the polynomial identity directly, without parity elimination."""
+    if (certificate.get('kind')!='moving-interior-cocycle-v1' or
+            type(certificate.get('rhs')) is not int or certificate['rhs']!=1 or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False): return False
+    try: left,stencils,_ = moving_folded_stencils(certificate.get('hole'))
+    except (TypeError,ValueError): return False
+    rows = certificate.get('shell_rows')
+    if rows != [list(key) for key in sorted(stencils) if key[0]%8 >= 4]:
+        return False
+    observable = certificate.get('observable')
+    labels = set(moving_folded_labels())
+    if not isinstance(observable,list) or not observable: return False
+    if any(not isinstance(key,list) or len(key)!=4 or
+           any(type(v) is not int for v in key) or tuple(key[:3]) not in labels or
+           key[3] not in (-1,0) for key in observable): return False
+    if len(set(map(tuple,observable)))!=len(observable): return False
+    lhs,rhs = set(),0
+    for key in rows:
+        row = stencils[tuple(key)]
+        total = sum(row.values())
+        if total%2: return False
+        rhs ^= total//2%2
+        for coordinate,c in row.items():
+            if c%2: lhs.symmetric_difference_update((coordinate,))
+    difference = set()
+    for a,q,s,d in observable:
+        difference.symmetric_difference_update(((a,q,s,d),(a,q,s,d+1)))
+    if rhs!=1 or lhs!=difference: return False
+    left_rows = certificate.get('left_rows')
+    if (left_rows != [list(key) for key in sorted(left) if key[0]%8>=4] or
+            type(certificate.get('initial_phase')) is not int or
+            certificate['initial_phase']!=1): return False
+    lhs,rhs = set(),0
+    for key in left_rows:
+        row = left[tuple(key)]
+        total = sum(row.values())
+        if total%2: return False
+        rhs ^= total//2%2
+        for coordinate,c in row.items():
+            if c%2: lhs.symmetric_difference_update((coordinate,))
+    initial = set()
+    for a,q,s,d in observable:
+        initial.symmetric_difference_update(((a,q,s*(2+d)),))
+    return rhs==1 and lhs==initial
+
+
 def interior_rank_matrix(hole=19,prime=5):
     """Evaluate the unrestricted Laurent shell matrix at z=2 over a small prime field.
 
@@ -1829,6 +1908,11 @@ def moving_folded_search(half=3990,period=4,patch=2,hole=19,seconds=900,nodes=10
                 variables=len(keys),rows=len(rows),minimum_half=2*patch+4+period,
                 half_residue=half%period,all_pairs_decided=False)
     def done(status,**extra):return dict(result,status=status,elapsed=time.monotonic()-start,**extra)
+    if period%2:
+        # Fully periodic centres patch+2 .. half-patch-2 contain at least
+        # one whole period by the compiler's minimum-half validation.
+        return done('ansatz_refused_by_interior_cocycle',
+                    certificate=interior_parity_cocycle(hole))
     certificate,basis=binary_elimination(rows)
     if certificate is not None:return done('ansatz_refused_by_parity',certificate=certificate)
     remaining=seconds-(time.monotonic()-start)
@@ -3488,6 +3572,12 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-interior-cocycle-v1':
+        if not verify_interior_parity_cocycle(saved):
+            raise ValueError('invalid unrestricted interior parity cocycle')
+        return dict(verified=True,claim='unrestricted interior alternating parity only',
+                    hole=saved['hole'],odd_periods_excluded=True,initial_phase=1,
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-interior-rank-v1':
         if not verify_interior_rank_certificate(saved):
             raise ValueError('invalid unrestricted interior rank certificate')
@@ -3508,6 +3598,14 @@ def verify_saved(saved):
                 or saved.get('half_residue')!=saved['half']%saved['period']
                 or saved.get('all_pairs_decided') is not False):
             raise ValueError('incorrect moving-folded family scope')
+        if saved.get('status')=='ansatz_refused_by_interior_cocycle':
+            certificate = saved.get('certificate',{})
+            if (saved['period']%2!=1 or not isinstance(certificate,dict) or
+                    certificate.get('hole')!=saved['hole'] or
+                    not verify_interior_parity_cocycle(certificate)):
+                raise ValueError('invalid odd-period interior refusal')
+            return dict(verified=True,claim='only the named odd-period interior ansatz is refused',
+                        all_pairs_decided=False)
         if saved.get('status')=='ansatz_refused_by_parity':
             if not verify_refusal(rows,saved.get('certificate',[])):
                 raise ValueError('invalid moving-folded parity refusal')
@@ -3750,7 +3848,17 @@ def main():
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
     p.add_argument('--interior-rank',action='store_true',
                    help='certify unrestricted interior rank over the rational function field')
+    p.add_argument('--interior-cocycle',action='store_true',
+                   help='certify an alternating parity observable on unrestricted interior words')
     args = p.parse_args()
+    if args.interior_cocycle:
+        certificate = interior_parity_cocycle(args.hole)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate) |
+                         dict(shell_rows=len(certificate['shell_rows']),
+                              observable_terms=len(certificate['observable'])),sort_keys=True))
+        return
     if args.interior_rank:
         certificate = interior_rank_certificate(args.hole)
         verified = verify_interior_rank_certificate(certificate)
