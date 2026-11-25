@@ -3464,3 +3464,109 @@ controls. The hole-97 command-line construction also verifies; Python
 compilation and whitespace checks pass. This repairs source coexistence,
 not the unresolved unit-sign or physical-endpoint problem. Independent
 integration and publication are not claimed here.
+
+## Mallow: exact finite-bit searches at the unit-value boundary
+
+25 November 2026. This attempt changes neither the resistant-family decision
+nor the arbitrary-triple milestone. It tests a different solver representation,
+not a further relaxation of the shell equations. No solver dependency is added
+to the shipped generator or verifier.
+
+For odd bound B=2^b-1, give each coordinate an unsigned b-bit value x and put
+s=B-2x. This enumerates exactly the odd integers in [-B,B]. A shell row becomes
+`sum(c*x)=B*sum(c)/2`; an odd coefficient sum immediately refuses odd values.
+Choose width w with `2^w > B*sum(abs(c))/2` for every row and w>=b. Then
+bit-vector equality is equivalent to integer equality: the absolute difference
+between its two sides is at most B*sum(abs(c))/2, strictly less than 2^w.
+Negative coefficients are reduced modulo 2^w. A trace on S becomes XOR of
+the low bits of x, with right side adjusted by `|S|*(1-B)/2 modulo two`.
+This retains the absolute physical trace phases, including the odd-bound case.
+
+The following reproduces the necessary models with the already installed
+Z3 4.16.0, from a Python process whose import path includes this directory.
+It is an optional research experiment; a returned model must still be converted
+to signs and replayed against the original integer rows. An `unsat` answer here
+is not a portable refusal certificate, and `unknown` decides nothing.
+
+```python
+import z3
+import resistant_spectrum as rs
+
+def experiment(hole, centres, bound_bits, seconds):
+    if centres:
+        keys, rows, phases = rs.open_phase_system(hole, centres, 3)
+        size = len(keys)
+    else:
+        size, rows, phases = rs._period_two_phase_system(hole)
+    B = (1 << bound_bits)-1
+    w = max(bound_bits, max((B*sum(abs(c) for c in row.values())//2).bit_length()
+                           for row in rows))
+    x = [z3.BitVec('x'+str(i), bound_bits) for i in range(size)]
+    solver = z3.SolverFor('QF_BV')
+    solver.set(timeout=1000*seconds)
+    for row in rows:
+        assert sum(row.values()) % 2 == 0
+        lhs = sum((c*z3.ZeroExt(w-bound_bits, x[i]) for i,c in row.items()),
+                  z3.BitVecVal(0,w))
+        solver.add(lhs == z3.BitVecVal(B*sum(row.values())//2,w))
+    for mask,rhs in phases:
+        lhs = z3.BitVecVal(mask.bit_count()*((1-B)//2)%2,1)
+        for i in range(size):
+            if mask>>i&1:
+                lhs ^= z3.Extract(0,0,x[i])
+        solver.add(lhs == rhs)
+    return solver, x
+```
+
+The three-centre unit run additionally imposed the complete reduced binary
+basis of the integer rows and traces; its encoding was otherwise the same.
+The period-two bound-three run used just the original rows and traces.
+Independent instantiated bit-vector evaluation agreed with exact integer
+substitution on 904 exhaustive small assignments (signed coefficients),
+including all eight trace masks per assignment and both bounds. Both recorded
+h=19 and h=97 two-centre unit witnesses also passed every encoded row and
+the existing independent integer verifier. No solver result was used as an
+oracle for these controls.
+
+The three-centre unit bit-vector run (h=97, 2,010 variables, 1,068 integer
+rows, five-bit sums) returned unknown/timeout after 300.149 seconds.
+The period-two bound-three run (h=97, 804 two-bit coordinates, seven-bit
+sums) returned unknown/timeout after 600.513 seconds. Neither supplies a
+word, a lower amplitude bound, or a contradiction. The code above uses the tighter difference bound (three and four bits
+respectively); the first recorded runs used the conservative widths just
+listed, which change no satisfying assignments.
+
+A second exact unit encoding replaces each negative-weight Boolean term
+`c*x` by `abs(c)*(1-x)-abs(c)`, then uses weighted Boolean equality with
+target `sum(c)/2 + sum(abs(c) for c<0)`. Its independent controls passed
+320 exhaustive small assignments and all 712 integer rows of the recorded
+h=97 two-centre witness. This is an arithmetic control, not evidence of
+three-centre compatibility.
+The direct Boolean-cardinality run used QF_FD, all original trace phases,
+and the 12 reduced binary consequences having at most six coordinates.
+It returned unknown/timeout after 900.074 seconds. The tighter three-bit
+encoding separately passed the same 904 exhaustive assignments and all
+712 rows of each recorded two-centre witness before its new search.
+Three bits are also necessary for this row-wise encoding at h=97: in row
+zero of the three-centre window, set x=1 at coordinates 976,986,1775,2005
+and zero at the other six coordinates. The true shell residual is 8;
+the transformed equality falsely passes modulo four and fails modulo eight.
+This is a single-row overflow control, not a model of the complete system.
+The three-bit h=97 three-centre run returned unknown/timeout after 600.211
+seconds, with the same complete reduced binary consequences as the five-bit
+run. Reducing the representation therefore did not produce a new word at
+this cap; no performance ordering between the engines is established.
+Finally, installed CP-SAT used the original integer rows, the 15 original
+traces and 30 reduced binary consequences of width at most 32, encoded as
+`sum(bits)=2*k+rhs`. The recorded h=97 two-centre word supplied hints for
+its four levels, with repair enabled and a hint-conflict cap of 100,000;
+no hint was a fixed sign. One worker, a 1,200-second cap, returned UNKNOWN
+after 1200.012 seconds (3,590 branches, zero reported conflicts). No extended
+word was emitted. This is a witnessed failure of the hinted attempt, not
+proof that the recorded word, or every two-centre word, cannot be repaired.
+
+All five searches remained unknown. The next useful advance requires a new
+compatible unit-sign extension or a replayable obstruction, followed by the
+physical endpoints and unrestricted supports. These experiments do not justify
+repeating the same caps or marking the main task complete. Only this concise
+record changes; the existing generator, tests and milestone status are unchanged.
