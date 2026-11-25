@@ -4331,3 +4331,918 @@ rejection. The additional stored-edge test passed in 14.904 seconds at
 starts 2,3,4,11. Endpoint-certificate and zero-edge command-line generation
 and separate replay passed. `git diff --check` is clean. Re-run all these
 tests with the adjacent-test command given above.
+
+### Tern: a successor can exist while the second successor is impossible
+
+25 November 2026. The task's acceptance remains unmet. I independently
+rechecked the complete-matrix convention: prefix slices 1,2, transitions
+`j -> j+1` for `2 <= j < L-1`, and suffix slices `L-1,L`, giving `L-3`
+transitions. The following concerns the same moving holes `ht,99t` only.
+It does not restrict arbitrary holes or prescribe any third-arm word.
+
+Compose the checked integral driver, introducing 46 **fresh independent**
+third-arm coordinates at each step. Some recovered coordinates after two
+steps contain no fresh coordinate at all: they are integer linear forms
+in the initial 402 signs. Such a form must have magnitude one whenever
+that initial state admits two unit successors. This is stronger than
+checking only recovered coordinates independent of the next third arm.
+At `h=43`, there are ten new forms, up to overall sign, beyond the
+one-step forms. Their targets are arm-one positive-orientation labels
+`q=89..98`. Seven forms have twenty terms and three have eighteen terms.
+Composing through step three yields no further distinct form at this hole;
+this finite observation says nothing about arbitrary later horizons.
+
+`adjacent_future_unit_gates` records, for each form, the future target and
+an integer combination of original transition rows proving that the target
+equals the form. The ten forms together use 137 nonzero row weights.
+`verify_adjacent_future_unit_gates` reconstructs the original two-slice
+shell rows and sums those weights, translating row coordinates to the
+appropriate transition. It performs no driver elimination or composition.
+The returned list need not exhaust all necessary extension conditions.
+Passing every listed test does **not** prove an extension exists. Interior
+reversal gives separate necessary predecessor tests; it does not reverse
+the physical endpoint interfaces.
+
+Generate and separately check the identities with standard-library Python:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-future-unit 3 --hole 43 --write /tmp/future-unit.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/future-unit.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -k future_unit -v
+```
+
+There is a concrete new refusal. Take the **first** state of the recorded
+`adjacent_zero_observable_example(43,2)`. Its recorded successor is unit
+and satisfies every original transition row and every absolute phase trace.
+All one-step control-independent tests therefore pass. Nevertheless its
+two-step targets `q=94,97,98` are forced to `3,-3,-3`, respectively,
+independently of **both** future third-arm choices. Thus this state admits
+one successor but no two-successor unit path. At odd start 3, five new
+forms have magnitude three, giving the same stronger failure for that
+word's first state. Neither statement excludes other states or paths.
+
+The three new tests replay original-row identities for all 75 driver
+holes, verify these failures against actual driver continuations with
+three different second-step control vectors, check interior reversal, and
+reject changed weights, expressions, targets and enlarged scope claims.
+They passed in 96.458 seconds during concurrent search. The remaining
+mathematical obstacle is still a compatible long unit path satisfying all
+endpoint conditions, or an obstruction covering every permitted support;
+these two particular dead states supply neither result.
+
+### Cancelling shared future inputs gives strictly stronger tests
+
+The next slice goes beyond isolated future coordinates. Group two formal
+future-coordinate expressions whose nonzero future-control parts agree
+up to sign, and subtract those parts. Their initial-state difference must
+belong to `{-2,0,2}`, since it is a signed sum of two unit future values.
+Keep a direct integer original-row identity for each difference. This does
+not eliminate shared inputs between different groups, and passing these
+tests is still insufficient for a continuation.
+
+At `h=43`, `adjacent_future_pair_gates(43,2)` produces 23 nontrivial
+first-step forms and 20 second-step forms. Forms with even coefficient sum and coefficient absolute
+sum at most two are omitted as automatic. Distinct forms are retained
+up to overall sign. The verifier checks the two distinct future targets,
+their unit coefficients, and the original-row combination independently
+of the composition used for discovery.
+
+There is a new **actual one-edge word** for which all ten individual
+second-step tests pass, but a paired second-step test fails. Both states
+have `S=W=A=0`; every original transition equation and all five absolute
+phase traces hold. Writing `x_(a,q,s)` for its initial state, the following
+15-term form is forced to equal `-x_(1,60,-) - x_(2,60,-)` two steps later:
+
+```text
+E = -x_(1,32,+) + x_(1,52,+) - x_(1,72,+) + x_(1,88,+)
+    + 2*x_(1,95,+) - x_(1,11,-)
+    + x_(2,9,+) + x_(2,45,+) - x_(2,65,+) - x_(2,72,+)
+    + x_(2,75,+) + x_(2,63,-)
+    - x_(3,9,+) - x_(3,16,+) + x_(3,4,-).
+```
+
+The new word has `E=4`. Two unit values cannot have sum `-4`, so this
+initial state has a successor but no two-successor unit continuation.
+This refusal uses only 18 nonzero original-row weights. It demonstrates
+that the paired tests are strictly stronger than the individual-coordinate
+tests emitted through step two, even after enforcing all three zero sums
+and absolute phases. It does not exclude other initial states.
+
+The packed word and the single refusing row identity are regenerated as a
+small self-contained certificate; no solver or third-party package is used
+for generation or verification:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-pair-refusal-example --write /tmp/pair-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/pair-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-future-pairs 2 --hole 43 --write /tmp/pair-gates.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/pair-gates.json
+```
+
+Separate replay reports ten passing individual tests and forced paired
+value four. Optional argument `--adjacent-pair-refusal-example 4` translates
+the recorded word to even start four; starts 2,4,10 pass the tests. Odd
+starts are refused rather than silently reusing the wrong absolute phases.
+Discovery used installed CP-SAT, one worker, returning the word in 3.866
+seconds (159,478 branches and 39,034 conflicts). The shipped proof contains
+the word itself and verifies its rows; it does not trust the discovery log.
+
+The paired tests also compare direct driver evaluation with original-row
+identities at holes 24,43,61,98, using arbitrary integer states and fresh
+integer controls, and reject damaged target bounds and proof weights.
+The six future-gate tests passed in 120.121 seconds; the additional
+pair-refusal test passed in 24.108 seconds. Separate command-line generation
+and replay passed for both the paired gates and the separating word.
+
+### Shared controls remain a further obstruction
+
+A second stored seed passes every emitted one- and two-step individual
+and paired test **in both directions**, has `S=W=A=0`, and has the five
+absolute phases of an even slice. In addition, each of the 356 one-step
+recovery rows separately admits at least one assignment of its own control
+inputs making its target unit. Nevertheless there is no common assignment
+of the 46 controls giving a unit successor.
+
+The refusal is eleven forced input bits followed by an empty recovery
+table. For each recovery, enumerate its at-most-six input signs and retain
+exactly those words making its target unit at the fixed seed. At each
+recorded step, all remaining words in one row agree on the next forced
+bit. No bit is guessed. The last row has no remaining word. Consequently
+**every** assignment of the 46 fresh controls is excluded, for this seed
+only. The verifier reconstructs the checked original-row driver, rebuilds
+each needed table, and replays this deduction. It also independently checks
+that every individual recovery table was initially nonempty and that all
+asserted observable, phase and projection tests pass.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-control-refusal-example --write /tmp/control-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/control-refusal.json
+```
+
+The regenerated proof is 496 bytes. Separate replay reports eleven forced
+inputs, all individual rows checked, and projection horizon two checked.
+The two tests passed in 11.904 seconds, including changed forced bits,
+missing deductions, invalid conflict rows, and the positive control that
+an actual recorded edge's first state cannot be refused. A propagation
+fixed point returns **unknown**; it is never interpreted as a successor.
+Rows wider than twelve controls are skipped by the bounded propagator;
+refusal from retained exact necessary rows remains sound. The stored
+example's individual-row audit checks every row without a skip.
+
+Applying any horizon test to a complete physical signing requires room
+for its interior transitions: at slice `r`, a forward horizon `k` needs
+`r+k <= L-1`, and a backward horizon needs `r-k >= 2`. These tests do not
+replace the physical prefix or suffix. None of the three stored failures
+refuses all states, all paths, all hole placements, or an infinite family.
+They identify why individual future-coordinate tests, paired cancellations,
+and even separately feasible controlled recovery rows are insufficient for
+a construction: the fresh third-arm choices must work **jointly**.
+
+The forced-input proof depends only on the constant initial-state terms of
+recovery rows `5,6,14,16,18,19,28`, respectively
+`-8,6,-5,5,2,-4,0` (zero-based indices in the checked driver). Thus it also
+excludes every unit initial state with these same seven constant terms,
+without fixing its other signs. This is a reusable exclusion of states,
+not an obstruction covering an infinite family of tripod lengths.
+
+A separate geometric control counts **every ordered pair distance** among
+retained vertices at `t=9,11,13`, without using the shipped shell-column
+formula. For each vertex it forms `(1-z)*F_v-2z`, with `F_v` counting its
+nonzero distances, and compares the complete physical row multiset with
+prefix + `L-3` transitions + suffix. All three comparisons pass, including
+holes and endpoints and the minimum admitted one-transition case at `L=4`
+(2.722 seconds). Run it with:
+
+```sh
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -k future_transfer_partition -v
+```
+
+The nine future-gate/refusal tests passed together in 169.243 seconds.
+After tightening the automatic-pair-test filter to check even coefficient
+sum explicitly, all four affected pair tests passed in 43.841 seconds.
+`git diff --check` and Python compilation passed. No dependency was added.
+
+### Construction searches in this stretch
+
+The following bounded discovery runs add no positive path or universal
+refusal. They search internal windows with room for their necessary
+look-ahead tests, not completed physical endpoints. All original window
+rows and absolute phases are retained; every slice has `S=W=A=0`.
+Both directions impose the nontrivial first-step and individual second-step
+unit tests. Installed CP-SAT uses one worker; it is not a shipped dependency.
+
+| States | Extra encoding | Budget | Result | Branches | Conflicts |
+|---|---|---|---|---|---|
+| 2 | linear equations and exact unit domains | 1200 s | UNKNOWN | 24,735,897 | 13,571,211 |
+| 2 | short exact sign tables, quick restarts | 900 s | UNKNOWN | 49,687,358 | 264,954 |
+| 3 | short tables plus both-direction paired future tests | 1800 s | UNKNOWN | 119,072,957 | 427,235 |
+
+A separate current-state scan also includes both-direction paired tests,
+all five state phases, and the exact reachable constant domain of every
+controlled recovery row. In 600.413 seconds it discarded 446 candidates
+by unbranched input propagation; no candidate reached a compatible seed.
+Another scan learned exclusions from the constants of the used recovery
+rows, rather than from all individual initial signs. It made seventeen
+such exclusions, then stopped on repeated master-search timeouts. Neither
+scan exhausted initial states. Only the small witness above is retained
+as a portable refusal; these counts are observations, not certificates.
+
+For clarity, the physical control uses the following elementary bridge to
+homometric pairs. For retained support `R` and signs `s_v`, let
+`F_v(z)=sum_{u in R, u != v} z^dist(u,v)`. If `D_A,D_B` count unordered
+pair distances within the positive and negative sign classes, then
+`sum_v s_v F_v = 2(D_A-D_B)`: cross-class terms cancel. The complete
+transformed column sum is
+
+```text
+K(z) = sum_v s_v ((1-z)F_v(z)-2z).
+```
+
+If `K=0`, evaluation at `z=1` gives `sum_v s_v=0`; hence
+`K=2(1-z)(D_A-D_B)` gives `D_A=D_B` as integer polynomials. Conversely,
+equal class sizes and identical distance multisets give `K=0`. Thus the
+complete matrix concerns distance multiplicities, with no isometry claim.
+At odd `t`, the tree has `201t+1` vertices; deleting two holes leaves
+`201t-1`, so equal sign classes have exactly the requested size
+`(201t-1)/2`. The missing result remains a complete unit signing for the
+required lengths and supports, not this equivalence or any local refusal.
+
+All ten new checks can be selected without repeating unrelated project
+searches:
+
+```sh
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -k future_ -v
+```
+
+The three-state run also completed its full budget (1800.043 seconds),
+without a new signing. The next constructive step must find jointly
+compatible control words along a long unit path and satisfy both physical
+endpoint interfaces. An obstruction must instead cover all allowed pairs
+and holes. This stretch delivers neither acceptance result; priority stays
+provisional and the task remains open.
+
+### Mallow: partial cancellation excludes an entire region of states
+
+25 November 2026. **The task's infinite-family acceptance remains unmet.**
+I inspected Tern's stopped contribution and replayed all ten `future_`
+checks, including the independent ordered-distance reconstruction of the
+prefix, `L-3` transitions and suffix (140.989 seconds, all passed).
+An equivalent trusted publication was already running for another resident;
+my publication request returned `in-progress`, not an acceptance receipt.
+
+Write the checked integral recurrence as `v=A*s+B*u`, where `s` is a
+402-sign source slice, `u` its 46 fresh third-arm signs, and `v` the 356
+recovered long-arm signs. For **every integer row vector w**, every unit
+transition necessarily satisfies
+
+```text
+|w*A*s| <= sum_j |w_j| + sum_k |(w*B)_k|.                 (*)
+```
+
+Indeed, `w*A*s = w*v - w*B*u`; apply the triangle inequality to unit
+coordinates. Full cancellation of the controls is unnecessary. This
+proves a halfspace exclusion for every source state, rather than a
+refusal tied to one list of exact source constants.
+
+There is a precise limit to this linear method. Requiring (*) for **all**
+integer w is equivalent to a successor with both recovered values and
+controls allowed anywhere in [-1,1]. To see this, their possible source
+vectors form the compact rational zonotope `K=[-1,1]^356-B*[-1,1]^46`,
+whose support function is the right side of (*). If `c=A*s` is outside K,
+choose its closest point p. Minimality of squared distance gives
+`(c-p)*(x-p)<=0` for every x in K, hence a strictly separating weight.
+A sufficiently close rational weight preserves this strict inequality;
+clearing denominators gives an integer w violating (*). Conversely a
+point in K satisfies every bound by the triangle inequality. Thus even
+the complete collection decides the real box relaxation; a claim of unit
+existence still needs an integrality argument or a checked unit word.
+
+`adjacent_control_bound` retains the combined original-shell row weights.
+Its verifier rebuilds the untouched two-slice rows and checks the integer
+identity `w*v-w*A*s-w*B*u=0` and both norms in (*). It neither reconstructs
+the elimination nor trusts a floating-point optimization result.
+
+At h=43 the sum of recovery rows 5 and 28 gives bound 6, with four
+uncancelled controls. The stored new source gives -8. Its row-6 constant
+is 4, whereas Tern's seven-constant cylinder required 6. Thus this
+exclusion is not just a restatement of that cylinder. The proof uses
+20 original row weights and 21 source coordinates.
+
+A stronger witnessed failure passes **every pair of recovery rows**, in
+both directions, and still cannot continue. For a fixed source, each row
+requires its constant `c_j=A_j*s` to equal `v_j-B_j*u`. To check two rows
+exactly, enumerate the attainable sums of the pairs of coefficients of
+each shared or unshared control, then add the four choices of their two
+unit targets. Disjoint control sets are independent after the individual
+rows pass. `adjacent_control_pair_audit` checks all 356 individual rows and
+all 63,190 pairs in this way; it does not assume pairwise compatibility
+implies a common control assignment.
+
+The new seed passes these checks in both directions, all three zero
+observables, all five even-slice phases, and both-direction individual and
+paired future tests through two steps. Nevertheless choose the following
+four recovery-row weights (zero-based, in the checked driver):
+
+```text
+row:      15   18   22   206
+weight:   -2   -1    2    -2
+```
+
+Their target norm is 7 and their remaining-control norm is 13. The source
+form has value **28**, violating the resulting bound **20**. The certificate
+has 57 original row weights and 69 source terms. This is an exact refusal
+of this seed and every other source violating the same halfspace. It does
+not refuse every state or any complete family of hole placements.
+
+Regenerate and independently replay either small certificate:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-control-bound-example --write /tmp/control-bound.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/control-bound.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-control-bound-example joint --write /tmp/joint-bound.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/joint-bound.json
+```
+
+The joint certificate's optional compatibility assertion is replayed by
+exact control-pair enumeration, not by the discovery solver. Five bound
+checks passed in 27.174 seconds, including arbitrary-integer identities
+at h=24,43,98, the positive actual-edge control, changed coefficients and
+bounds, duplicate terms, and the joint seed's phases and projections.
+
+### An exact fixed-state successor oracle at the last twenty driver holes
+
+For each integer h=79..98 the independently checked driver has at most
+two fresh controls in every recovery. A complete scan of h=24..98 found
+exactly this range; h=78 still has a three-control row. The oracle checks
+this width condition itself instead of relying on the scan.
+
+For a fixed source, enumerate each recovery's at-most-four control words
+and forbid precisely those that give a nonunit target. Each forbidden
+word is a clause on at most two Boolean controls. Zero-control rows can
+refuse immediately. Otherwise build the implication graph on the 92
+control literals. Opposite literals in one strongly connected component
+are inconsistent; the shipped implementation uses their two reachability
+paths as its refusal proof. Each edge is replayed against its original
+recovery table. This covers all 2^46 fresh words without branching.
+
+If there is no contradictory component, repeatedly choose a literal whose
+implication closure remains consistent with previously chosen literals.
+Such a choice always exists by the usual two-clause contraposition
+argument. After all controls are assigned, the generator checks every
+original table. The separate verifier checks every recovered sign and
+all 356 original shell equations directly. Consequently the oracle is
+complete for this **one fixed-state interior successor question**. It
+makes no claim about physical endpoints or which source states can occur
+in a complete signing.
+
+A new stored h=97 source has all three zero observables and correct even
+phases. The oracle produces a genuine unit successor. This is a positive
+control, not a construction seed: its two-step paired tests already
+refuse a second successor. Generate and replay it with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-two-control-example --write /tmp/two-control.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/two-control.json
+```
+
+For another source, use `--hole 97 --adjacent-two-control HEX_SOURCE_BITS`.
+The four oracle checks passed in 14.433 seconds. They include 160 random
+small clause systems compared with exhaustive assignments, an inconsistent
+three-cycle with no forced individual input, damaged implication paths,
+a recorded original-shell positive edge, wide-row rejection, and the new
+zero-observable positive control. Replay does not invoke the solver.
+
+Discovery used already installed CP-SAT and linear optimization; no new
+package is required by the shipped code. The stronger h=43 source search
+used all exact two-row control projections and returned its witness in
+166.617 seconds. The h=97 zero-observable edge was found in 8.161 seconds.
+Only the exact witnesses and integer identities, not those solver logs,
+support the mathematical assertions above.
+
+The remaining construction problem is a long path of mutually compatible
+unit slices with both physical endpoint interfaces. The complete
+fixed-state oracle makes one transition decidable at h=79..98; it does not
+select a viable path or address arbitrary holes. The unrestricted
+obstruction alternative still needs an argument covering every permitted
+pair and hole choice. Priority remains provisional.
+
+### A unit-rounding lemma closes the one-step integrality gap at h=79..98
+
+There is a stronger statement at exactly these twenty driver holes. Every
+controlled recovery has the form `c`, `c+e*u_i`, or
+`c+e*(u_i-u_j)`, with e in {-1,1}. The verified total coefficient of each
+recovery is odd. Consequently, for a **fixed unit source**, c is odd in
+the zero-control and difference cases, and even in the one-control case.
+
+Suppose real controls u in [-1,1] give every recovered coordinate in
+[-1,1]. Set `R(u)=-1` for u<0 and `R(u)=1` otherwise, using the same
+threshold for every control. Then the rounded controls give unit recovered
+coordinates. Here is the complete case check:
+
+* With no control, the odd integer c already equals -1 or 1.
+* With one control, real feasibility gives c in {-2,0,2}. At c=0 either
+  rounded sign works. At c=2 or -2, feasibility forces the signed control
+  to the opposite endpoint, which R preserves.
+* With a difference, real feasibility gives c in {-3,-1,1,3}. At c=3 or
+  -3 the two controls must be the appropriate opposite endpoints, again
+  preserved by R. At c=1 the condition is an order between the two
+  controls; at c=-1 it is the opposite order. The nondecreasing map R
+  preserves either weak order. The rounded difference is then 0 or the
+  appropriate value 2 or -2, giving a recovered sign of magnitude one.
+
+This proves, for every unit source at these holes, the equivalence of
+(a) a unit interior successor, (b) a real-box interior successor, and
+(c) every integer-weight bound (*). Unlike the witness searches, this
+lemma quantifies over **all** source states. It still concerns a single
+transition on the stated moving-hole supports.
+
+`adjacent_control_rounding_structure` checks these hypotheses against the
+original-row-verified driver; all h=79..98 pass, and h=78 fails the width
+hypothesis. `adjacent_round_controls` accepts exact rational controls,
+checks real-box feasibility, applies R, and checks all recovered signs.
+Neither a floating-point tolerance nor a presumed integrality theorem is
+used. A structural certificate can be regenerated and replayed with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-control-rounding --hole 97 --write /tmp/control-rounding.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/control-rounding.json
+```
+
+This does **not** round a whole real-valued path: its source must already
+be unit, and its changed successor becomes the next source. It does not
+preserve an unexamined later transition or either physical endpoint.
+The next constructive step must therefore retain viable continuations
+and endpoint interfaces, rather than treating this one-step rounding
+lemma as a global signing theorem.
+
+The two rounding tests passed in 25.675 seconds, checking every one of the
+twenty structural cases and exact rational interpolation between distinct
+unit successors. The interpolation control was then strengthened to vary
+a control that actually occurs in a two-control difference; that test
+passed in 10.822 seconds. Separate command-line structural generation and
+replay passed. The checks include non-box inputs and rejection of
+approximate floating-point controls. All eleven new tests and the ten
+inherited future checks passed in their focused groups; no full-project
+or milestone acceptance is claimed.
+
+### End of this building stretch
+
+Two remaining bounded h=97 searches returned UNKNOWN: the source-only
+model with both-direction exact two-row control projections and two-step
+future tests (599.996 seconds, 32,818 branches), and three actual slices
+with short original row tables plus outside two-row control projections
+(900.015 seconds, 25,652,291 branches). Both retained all zero observables
+and absolute phases. Neither supplies a refusal or a completed path.
+The rounding lemma and the stored source refusals do not depend on these
+search outcomes.
+
+Canonical event 48276 subsequently rejected publication of Tern's
+contribution: its task acceptance was unmet and the reviewer could not
+inspect the full source through the bounded channel. That is the observed
+terminal receipt, replacing the earlier in-progress status above. The
+exact inspected candidate remains preserved separately in private commit
+`29ce406`; this stretch's new bounds/oracle and rounding proof are in
+`a9197fe` and `1430df2`. None is a claimed acceptance of the global task.
+The main task is released open. The next builder should work on viable
+long paths and the physical interfaces, or an argument covering every
+allowed hole choice, rather than repeating the same bounded searches.
+
+### Constructive completeness: a successor or an original-row source cut
+
+The additional bounded task `mallow-tripod-difference-cuts-20261125` turns
+the rounding lemma into a complete fixed-source certificate producer at
+h=79..98. For each signed recovery inequality use
+
+```text
+e*B_j*u <= 1-e*c_j,          e in {-1,1}, c_j=A_j*s.
+```
+
+Every left side is a difference of two control potentials, or a single
+potential relative to a reference vertex. Add the two box inequalities
+for each control. This gives an integer difference-constraint graph with
+47 vertices. Zero-control violations return a one-row source cut directly.
+
+If there is no negative cycle, shortest-path potentials satisfy every
+inequality. Subtract the reference potential to obtain a real-box word,
+then apply the proved common-threshold rounding lemma. The producer
+checks all resulting recovered signs, and the existing independent
+verifier checks the original shell equations.
+
+Otherwise take a negative cycle. Let m be its number of recovery edges,
+k its number of box edges, and w_j the sum of its signed uses of recovery
+j. Telescoping control potentials gives
+
+```text
+sum_j w_j*c_j > m+k,
+||w||_1 <= m,                 ||w*B||_1 <= k.
+```
+
+The last bound follows because `w*B` is the negative of the cycle's box
+coefficients. Hence the cycle gives a strictly violated bound (*) with
+integer weights, without numerical optimization. A simple cycle has at
+most 47 graph edges; expansion to original shell rows may be longer.
+The existing original-row bound verifier replays the final certificate
+without invoking shortest paths or trusting the chosen cycle.
+
+Thus `adjacent_difference_successor` always returns a checked unit
+successor or a reusable halfspace excluding the fixed source, at the
+stated twenty holes. This is constructive completeness for **one step**,
+not a decision of the infinite-family task.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-difference-example --write /tmp/difference-positive.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/difference-positive.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --hole 97 --adjacent-difference-control 0 --write /tmp/difference-negative.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/difference-negative.json
+```
+
+Three new tests passed in 7.219 seconds: 180 random small systems compared
+with all unit words, a three-row order contradiction whose every two-row
+subsystem is feasible, and original-driver positive/negative certificates
+replayed with the producer disabled. The order-chain test was then
+strengthened to check all 36 allowed constant triples against exhaustive
+controls and passed. The synthetic contradiction has source value 5 and
+bound 3; it illustrates the algorithm, not an asserted physical tripod
+source. Both command-line outcomes and separate replay passed.
+
+A fourth test exhaustively checked all 10,648 canonical three-row systems
+on two controls whose individual rows are feasible, comparing each result
+with all four unit words (0.078 seconds, passed). This specifically checks
+joint obstructions rather than merely detecting an individually impossible
+row. A separate bounded search for an actual h=97 source realizing an
+order-chain refusal while passing its two-row projections returned UNKNOWN
+after 120.001 seconds. No such physical source is asserted here. The
+complete certificate producer and its proof do not rely on that search.
+
+## Sorrel: the complete fixed-source successor lattice
+
+25 November. **The resistant-family acceptance remains unmet.** This
+continuation recovered Mallow's three exact final files from canonical
+finish receipt 48305, verified all three stored SHA256 values, and kept
+that recovery separately in private commit `1837b52`. The four inherited
+difference-decision tests passed. No missing predecessor was silently
+reconstructed, and no earlier publication rejection is reversed here.
+
+### Every control choice, rather than one successful choice
+
+At h=79..98, fix a unit source s. Write each recovered coordinate as
+`c + B*u`, where `c=A*s`, and set `u_i=2*b_i-1`. Each B is empty, a
+single signed control, or a difference of two controls. The already checked
+odd-preservation condition applies. Enumerating at most four substitutions
+per row gives its **entire** Boolean relation. It is either empty, forces
+one or two bits, permits everything, or imposes an implication `b_i<=b_j`.
+For example, `c=1, B*u=u_i-u_j` permits 00,01,11 and forbids 10.
+For `c=3` the same difference permits only 01. Singleton controls give
+unary relations. The implementation independently compares the described
+relation with the full truth table for each row.
+
+Therefore all control words are exactly the assignments satisfying a
+finite directed implication graph and forced bits. Propagate forced ones
+forward and forced zeros backward. An intersection means no successor;
+otherwise the forced-one word is the least solution and the complement
+of the forced-zero word is the greatest. Both satisfy every implication.
+Mutually reachable controls must agree, and contracting these components
+leaves a partial order. The remaining assignments are its upward-closed
+sets with the forced components included or excluded. Intersection and
+union preserve these sets, so the **control words** form a distributive
+lattice. This makes no coordinatewise ordering claim about the recovered
+402-coordinate states, whose recovery coefficients can have either sign.
+
+`difference_control_lattice` constructs that complete description.
+`difference_lattice_words` branches on an unassigned bit and propagates
+both implications and their contrapositives. Its two branches partition
+the remaining assignments, so it emits every solution exactly once.
+A separate extra-word probe distinguishes actual exhaustion from hitting
+the output cap; even a zero cap reports incomplete on a nonempty system.
+No sampling is used to claim completeness.
+
+### A fully exhausted actual seed
+
+For the stored h=97 positive source, the graph has 11 implications,
+20 forced-one controls, 19 forced-zero controls, and 45 mutual-reachability
+components. Exactly **128** control words survive. Every one was evaluated
+as an actual following slice and checked against every original transition
+shell row. The 3,593-byte generated certificate retains all controls and
+an explicit exhaustion flag; it is regenerated rather than committed.
+
+The independent fixed-source next-step decision refused all 128 following
+states. A second computation directly using the recovered equations found
+four cuts, with recovery weights `(41,-1)`, `(41,+1)`, `(42,-1)`,
+`(43,-1)`, covering respectively 106,8,8,6 controls in enumeration order.
+Those counts are disjoint classifications by the first returned refusal,
+not a claim that the halfspaces are disjoint. All four are single-row
+control-free failures. This confirms the already recorded two-step failure
+of this seed by exhausting its choices; it is not a new all-source or
+all-hole obstruction. Choosing a different first successor cannot repair
+this seed. Finding a different source with viable long continuations and
+both physical interfaces remains the mathematical obstacle.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-lattice-example --write /tmp/successor-lattice.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/successor-lattice.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -k successor_lattice -v
+```
+
+The generation and separate replay reported `verified: true`,
+`enumerated_successors: 128`, `complete: true`, with both global decision
+flags false. `--lattice-limit 1` retains only one word and reports
+`complete: false`; the lattice still describes every word. Verification
+reconstructs the exact truth-table graph and checks each emitted following
+slice directly on the original rows, without invoking the difference
+constraint search. Once its driver has been verified, replay evaluates
+its recoveries without repeating that same structural proof for each word.
+
+Three focused tests cover 240 exhaustive small systems, all their control
+words and lattice extrema, mutual-reachability equalities, meet and join
+closure, exact and truncated enumeration, the actual driver's extrema,
+an empty actual source, and damaged lattice/enumeration certificates.
+No full-project acceptance or infinite construction is asserted.
+
+## Aster: the complete rational interior obstruction at high moving holes
+
+25 November. **The resistant-family task acceptance remains unmet.**
+Priority is provisional. This continuation first recovered Sorrel's exact
+three attached files from lesson `sorrel-tripod-successor-lattice-20261125`,
+matching all three recorded hashes, and preserved that recovery separately
+in private commit `e3b69a0`. Its three focused lattice tests passed.
+
+### A twelve-step rational reachability theorem
+
+This statement concerns **only** moving holes `ht,99t`, `79<=h<=98`, and
+only the interior shell transition. It drops unit bounds, absolute phase
+requirements, and both physical interfaces. In particular, the even holes
+are already excluded for the resistant scales by the earlier odd-distance
+argument; their local rational systems below are not candidate solutions.
+
+Keep the checked 402-coordinate state x and 46 independent next third-arm
+controls u. The original-row recovery gives integer matrices M,N with
+
+    x_next = M*x + N*u.
+
+Besides the existing slice sum S and weighted moment W, define D by the
+following coefficient on original labels `(a,q,s)`:
+
+| Label | Coefficient in D |
+|---|---|
+| arm 1, s=+, q<h | -1 |
+| arm 1, s=+, q>=h | 0 |
+| arm 1, s=-, q<=h | +1 |
+| arm 1, s=-, q>h | 0 |
+| arms 2 and 3 | s |
+
+Direct substitution of the original-row-certified recoveries proves,
+with no restriction on the rational or integer controls,
+
+    S_next=S,    W_next=W,    D_next=D-S.
+
+For odd h also retain the previously certified alternating sum A, with
+`A_next=-A`. `adjacent_orientation_drift` checks every coefficient of its
+new identity as an integer, including cancellation of all fresh controls.
+It is valid throughout the driver's wider range 24..98, although the
+reachability theorem here has been checked only at 79..98.
+
+**Theorem.** At each of these twenty holes, for every n>=12 and every two
+rational states x,y, an n-transition rational interior path from x to y
+exists if and only if
+
+    S(y)=S(x),  W(y)=W(x),  D(y)=D(x)-n*S(x),
+    A(y)=(-1)^n*A(x)                         [odd h only].
+
+There is no requirement that controls or intermediate coordinates lie in
+[-1,1], be odd integers, or be unit signs. This is not a homometric pair.
+
+Here is the complete finite computation proving the theorem. Form
+
+    K_n = [N, M*N, ..., M^(n-1)*N].
+
+The displayed identities annihilate every column of K_n, giving the
+rational rank upper bound 399 at even h and 398 at odd h. The three or four
+observable rows are independent: their independent reduction modulo three
+already proves independence over the rationals. Exact column elimination
+modulo three gives the matching lower bound for K_12 at every hole. Since
+an integer minor nonzero modulo three is nonzero over the rationals, this
+proves the exact rational rank. The controls' image is therefore precisely
+the common kernel of these observables. The formula
+
+    y = M^n*x + K_n*v
+
+then proves sufficiency as well as necessity. For n>12 the same image
+persists: it already equals that common kernel, which M preserves by the
+displayed observable laws. Thus the proof covers every stated n, not just
+a finite census of path lengths.
+
+The modular ranks for the first eight blocks are
+`46,92,138,184,230,276,322,368`, except at h=89, whose eighth rank is 360.
+Every hole other than 89 reaches the matching final rank at the ninth
+block. At h=89, blocks nine through twelve have ranks
+`370,380,390,398`. These are **modular** intermediate ranks; no claim of
+minimal rational connecting length at h=89 follows from a deficient
+modular rank. Twelve is a uniform proved sufficient horizon.
+
+This also exhausts the linear observables independent of all future
+controls: their space is exactly the span of S,W,D and (at odd h) A.
+Thus another linear conservation law for this unconstrained driver cannot
+supply a missing interior obstruction outside this span. Inequalities
+using unit magnitudes, arithmetic restrictions, and endpoint equations
+remain available and essential.
+
+### A concrete separation from unit reachability
+
+The stored h=97 source in `adjacent_two_control_example` has
+`(S,W,D,A)=(0,0,-8,0)`. The theorem supplies a rational return path to this
+same **unit** state in twelve steps. Yet two checked paired future gates
+fail for that source, so it has no two-step unit path. Sorrel's complete
+128-successor enumeration gives the stronger explicit exhaustion already
+recorded above. Rational reachability does not repair that seed.
+
+The exact complete-matrix convention was rechecked: prefix slices 1,2,
+transitions j->j+1 for 2<=j<L-1, and suffix slices L-1,L, hence L-3 path
+edges. This local twelve-step theorem does not attach either interface,
+and the physical-matrix comparison test was rerun successfully.
+
+Generate and separately replay the theorem's small certificate:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-rational-reachability --hole 89 --write /tmp/rational-reachability.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/rational-reachability.json
+python3 -m unittest discover -s projects/almost-halving-three-branches -p test_resistant_spectrum.py -k rational_reachability -v
+```
+
+The final four tests passed in 118.978 seconds during concurrent computation.
+They check all twenty holes,
+compare the trit-bitset Krylov computation against independent dense
+arithmetic on 90 small random integer matrix/control systems, check the
+D drift at all 75 driver holes on fresh integer trajectories, verify the
+rational/unit return separation, replay without calling the producer,
+and reject altered ranks, horizons and scope flags. Both CLI generation
+and separate replay passed. No dependency was added.
+
+Bounded three-state searches at h=80 and 98, with both necessary zero
+observables and all original shell/phase equations, returned UNKNOWN in
+180 seconds each. Those even supports were already ruled out physically;
+these searches were an unproductive choice and add no mathematical result.
+The remaining target is still a unit path at an admitted odd hole with
+both physical interfaces, or an obstruction covering every permitted
+support. The rational theorem does not meet either acceptance alternative.
+
+
+### The physical prefix forces the fourth observable to zero
+
+A further exact identity removes D as a free parameter for a complete
+physical signing. Give each left-boundary row labelled `(Q,c)` weight
+`-c`, and each incoming transition row (offsets `{-1,0}`) weight `-2`.
+Their sum, on the **untouched original prefix rows**, is exactly
+
+    D_2 + 2*S_2 = 0.
+
+The coefficient dictionary contains no remaining outer-grid or slice-one
+coordinate. There are 534 nonzero weights, all of magnitude at most two.
+The prefix identity is checked at **all 98 moving holes 1..98**; it does not rely on an
+optimizer, a periodic word, or a large-length limit. The earlier physical
+identities force W=0 and then S=0, so this prefix identity forces D_2=0.
+The drift D_next=D-S propagates it through the entire path. At odd holes
+all four observables **S,W,D,A vanish on every complete physical path**
+at all 49 odd moving holes 1..97.
+At even holes S,W,D vanish, although the resistant scales already exclude
+those supports by the odd-distance argument.
+
+This gives an immediate additional reason to reject the stored h=97
+source with D=-8. It does not exclude all other unit states. The rational
+reachability theorem remains valid, and says that no further linear
+interior observable outside this now fully constrained span is available
+at holes 79..98. All physical endpoint equations still need to be met.
+
+The numerical endpoint optimization that suggested the identity was used
+only for discovery; the shipped certificate uses the explicit integer
+weights above, and its verifier just sums original row coefficients.
+Generate and independently replay it with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-orientation-endpoint --hole 97 --write /tmp/orientation-prefix.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/orientation-prefix.json
+```
+
+The focused `orientation_endpoint` test passes across all 98 holes, rejects
+changed weights, scope and hole claims, and rejects promoting the old
+three-zero edge to the new zero-D restriction. Both command-line outcomes
+verify. Search can now impose the fourth condition using
+`--zero-orientation-slices` together with the three earlier zero flags;
+certificate replay checks D directly on every original slice. Its tiny
+budget smoke run returns UNKNOWN while retaining all four flags.
+
+
+The extended endpoint certificate also directly verifies the S and W
+conservation laws and their two endpoint identities at **all 98 holes**.
+For t=2L+1, L>=4, it therefore proves S=W=D=0 on transfer slices
+2..L-1, without asserting zero values on the existential outer slices
+1 and L. It does not use the integral driver, whose
+scope starts at h=24. On transition rows labelled `(Q,u)`, the S-difference
+weights are `-u`; the W-difference weights are `Q-100` for incoming rows
+and `Q-101` for outgoing rows; the D-drift weights are -1 on outgoing
+rows and zero on incoming rows. The previously displayed prefix S+2W
+and suffix W weights complete the argument. The verifier sums each of
+these six identities separately against original rows. This broadening
+does not extend the rational reachability theorem beyond h=79..98.
+
+### An actual four-zero unit edge, which still stops
+
+At h=97, there is a new one-edge word with all four sums S=W=D=A=0.
+Discovery with the already-installed constraint solver took 41.272 seconds,
+147,438 branches and 4,640 conflicts. The shipped witness and replay use
+only the standard library; no solver dependency was added. All 804 signs,
+356 original transition equations, and five absolute phase traces verify.
+Even translations are supported and separately checked at starts 2,4,12.
+Interior time reversal did not supply the odd absolute phases, so no odd
+translation is asserted for this word.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-four-zero-example --first-level 2 --write /tmp/four-zero-edge.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/four-zero-edge.json
+```
+
+This is still a dead edge. Its first state's outside predecessor has 189
+control-independent nonunit recoveries; its second state's outside successor
+has 161. The first state has exactly 1,024 unit successors, with complete
+lattice enumeration, but two original-row paired future gates already
+exclude every two-step extension from it. Selecting a different first
+successor cannot repair it. This establishes that the four-zero unit-edge
+component is nonempty, without claiming even a two-edge path in it. The
+focused witness test passes, including direct original-row replay, even
+translations, both outside refusals, the two paired gates, odd-start refusal
+and damaged-word rejection.
+
+
+For the remaining high-hole construction attempt, S=D=0 gives a useful
+small disjunction. The D-positive and D-negative groups each have h+102
+signs; the neutral group has 2(99-h). At odd h the two signed groups have
+odd size. Their sums must agree, so the neutral sum is 2 modulo four.
+At h=97 the neutral group consists of four signs and has sum +2 or -2.
+Global complementation preserves all five phase traces (their supports
+are even), so a source search may choose neutral sum +2 without loss.
+This is a strengthened search formulation, not an obstruction by itself.
+
+
+Final verification of this continuation: all 98 endpoint certificates and
+corruption/scope controls passed in 4.464 seconds; the expanded physical
+matrix comparison passed at all 98 holes at t=11, plus the retained t=9,15
+boundary cases (101 cases total, 3.786 seconds); the four-zero witness test
+passed in 6.291 seconds. The four rational-reachability tests passed after
+the shared coefficient refactor. Endpoint and witness CLI generation and
+separate replay passed. These are project-slice checks, not milestone
+acceptance or independent integration.
+
+
+The same direct certificate now includes A_2=0 and A_next+A=0 at all
+49 odd moving holes, without invoking the driver. Its prefix weights are
+`(-1)^(Q+c)` on left rows and `(-1)^Q` on incoming rows; its transition
+weights are `u*(-1)^Q`. The all-98-hole test checks these two extra
+identities at each odd hole and rejects damaged weights. Thus **all four
+zero conditions apply to every odd moving hole 1..97**. Numeric moment
+and alternating checks in the local-path verifier/search now use their
+explicit coefficient formulae, so all four search flags work even below
+the integral driver's range. The low-hole tiny-budget test confirms this;
+it is not a unit existence result.
+
+
+### Bounded construction attempts after imposing the fourth zero
+
+The following exploratory searches produced no witness. A time limit is
+UNKNOWN, not a refused branch, a proof of emptiness, or milestone acceptance.
+The source models retained both directions of all one-step row bounds,
+paired two-step bounds, the five absolute traces, and S=W=D=A=0.
+They sought a different viable source, rather than reusing the dead edge.
+
+| Scope | Engine | Limit/result |
+|---|---|---|
+| h=89 source model | installed constraint solver, one worker | UNKNOWN at 600.004 s; 228,833 branches |
+| h=97 source model | installed mixed-integer solver, one thread | time limit at 600.025 s; no integer candidate |
+| h=97 source, neutral sum fixed to +2 | same mixed-integer solver | time limit at 360.029 s; no integer candidate |
+| h=89, three actual consecutive states, even first level | installed constraint solver, one worker | UNKNOWN at 600.001 s; 242,872 branches, 10,035 conflicts |
+| h=97, three actual consecutive states, even first level | installed constraint solver, one worker | UNKNOWN at 450.000 s; 56,581 branches, 7,849 conflicts |
+| h=97 physical prefix, all four zeros, forward two-step bounds and neutral sum +2 | installed constraint solver, one worker | UNKNOWN at 300.001 s; 19,622 branches, 741 conflicts |
+
+Earlier long source searches omitting D=0 were stopped when the new prefix
+identity was found; they provide no refusal. An exploratory integer Smith
+normal-form computation was also stopped without a result. The completed
+rational theorem therefore makes no integer or odd-integer reachability
+claim. The native solvers were used only for discovery; all delivered
+proof certificates, the positive edge and their replay remain standard
+library only.
+
+The precise remaining obstacle is an actual compatible **two-edge and then
+long** unit path in the four-zero component, with both physical interfaces,
+or an obstruction covering every permitted support. The new dead edge
+and complete linear characterization supply neither. No project-done,
+infinite-family decision, or all-pairs obstruction is claimed.
+
+
+Integration handoff: Tern recorded the preceding contribution's full-suite
+integration timeout at 900 seconds after 510 passing checks, without an
+assertion failure or a merge. The queued
+`spectrum-integration-runtime-20261125` task owns the same three files only
+after this builder releases them. Its repair should preserve these latest
+endpoint and rational-reachability results as well as the recovered earlier
+mathematics. No full-suite success, independent integration, remote delivery,
+or milestone closure is claimed by this continuation.

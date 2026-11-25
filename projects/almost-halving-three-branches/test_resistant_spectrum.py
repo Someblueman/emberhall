@@ -16,6 +16,636 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_four_zero_example_is_an_actual_but_dead_unit_edge(self):
+        for first in (2,4,12):
+            saved=rs.adjacent_four_zero_example(first)
+            result=rs.verify_saved(saved)
+            self.assertTrue(result['verified'])
+            self.assertTrue(result['zero_orientation_slices_checked'])
+        bits=int(saved['bits'],16)
+        states=[[1-2*(bits>>(2*i+j)&1) for i in range(402)] for j in range(2)]
+        driver=rs.adjacent_integral_driver(97)
+        self.assertTrue(rs.adjacent_unit_boundary_obstructions(driver,states[0],True))
+        self.assertTrue(rs.adjacent_unit_boundary_obstructions(driver,states[1]))
+        pairs=rs.adjacent_future_pair_gates(97,2)
+        self.assertEqual(len(rs.adjacent_future_pair_obstructions(pairs,states[0])),2)
+        enumeration=rs.difference_lattice_words(rs.adjacent_successor_lattice(97,states[0]),1024)
+        self.assertTrue(enumeration['complete'])
+        self.assertEqual(len(enumeration['words']),1024)
+        with self.assertRaises(ValueError):rs.adjacent_four_zero_example(3)
+        saved['bits']=hex(bits^1)
+        with self.assertRaises(ValueError):rs.verify_saved(saved)
+
+    def test_orientation_endpoint_all_98_holes_and_damaged_weights(self):
+        import copy
+        for h in range(1,99):
+            saved=rs.adjacent_orientation_endpoint(h)
+            result=rs.verify_saved(saved)
+            self.assertTrue(result['verified'])
+            self.assertEqual(result['alternating_zero_forced'],bool(h%2))
+        for field in ('row_weights','drift_weights','sum_weights','moment_weights',
+                      'prefix_balance_weights','suffix_moment_weights','hole',
+                      'minimum_half','literal_existence_decided'):
+            bad=copy.deepcopy(saved)
+            if field.endswith('weights'):bad[field][0][1]+=1
+            elif field=='hole':bad[field]=0
+            elif field=='minimum_half':bad[field]=3
+            else:bad[field]=True
+            with self.assertRaises(ValueError):rs.verify_saved(bad)
+        for field in ('alternating_prefix_weights','alternating_transfer_weights'):
+            bad=rs.adjacent_orientation_endpoint(1);bad[field][0][1]+=1
+            with self.assertRaises(ValueError):rs.verify_saved(bad)
+        # The old three-zero edge is checked as a genuine local signing,
+        # but its nonzero D cannot be promoted to the new restriction.
+        edge=rs.adjacent_zero_observable_example(43,2)
+        rs.verify_adjacent_phase_signs(edge)
+        edge['zero_orientation_slices']=True
+        with self.assertRaisesRegex(ValueError,'orientation sum'):
+            rs.verify_adjacent_phase_signs(edge)
+        edge['zero_orientation_slices']=1
+        with self.assertRaisesRegex(ValueError,'zero-orientation claim'):
+            rs.verify_adjacent_phase_signs(edge)
+        result=rs.adjacent_phase_search(1,2,2,seconds=.001,nodes=1,
+                                      balanced=True,zero_moment=True,
+                                      zero_alternating=True,zero_orientation=True)
+        self.assertTrue(result['zero_orientation_slices'])
+        self.assertEqual(result['status'],'unknown')
+
+    def test_rational_reachability_ternary_columns_against_dense_arithmetic(self):
+        rng=random.Random(603625)
+        def encode(v):
+            return (sum(1<<i for i,c in enumerate(v) if c%3==1),
+                    sum(1<<i for i,c in enumerate(v) if c%3==2))
+        def rank(rows):
+            basis={}
+            for row in rows:
+                row=[v%3 for v in row]
+                for p,b in sorted(basis.items()):
+                    c=row[p];row=[(v-c*w)%3 for v,w in zip(row,b)]
+                if any(row):
+                    p=next(i for i,v in enumerate(row) if v)
+                    c=pow(row[p],-1,3);basis[p]=[v*c%3 for v in row]
+            return len(basis)
+        for _ in range(90):
+            n=rng.randrange(1,9);m=rng.randrange(1,5)
+            columns=[[rng.randrange(-3,4) for _ in range(n)] for _ in range(n)]
+            controls=[[rng.randrange(-3,4) for _ in range(n)] for _ in range(m)]
+            expected=[];all_columns=[];vectors=controls
+            for step in range(7):
+                all_columns+=vectors;expected.append(rank(all_columns))
+                vectors=[[sum(columns[j][i]*v[j] for j in range(n))%3
+                          for i in range(n)] for v in vectors]
+            self.assertEqual(rs._ternary_krylov_ranks(list(map(encode,columns)),
+                                                    list(map(encode,controls)),7),expected)
+        with self.assertRaises(ValueError):rs._ternary_krylov_ranks([(1,1)],[(0,0)],1)
+
+    def test_rational_reachability_all_twenty_holes_and_scope(self):
+        import copy
+        for h in range(79,99):
+            saved=rs.adjacent_rational_reachability(h)
+            self.assertEqual(saved['rank'],398 if h%2 else 399)
+            ranks=saved['ranks_mod_three']
+            self.assertEqual(ranks[-1],saved['rank'])
+            self.assertEqual(next(i+1 for i,v in enumerate(ranks) if v==saved['rank']),
+                             12 if h==89 else 9)
+        # Replay never calls the theorem producer or a unit search.
+        saved=rs.adjacent_rational_reachability(89)
+        with patch.object(rs,'adjacent_rational_reachability',side_effect=AssertionError('producer')):
+            self.assertTrue(rs.verify_saved(saved)['verified'])
+        for field in ('rank','steps','ranks_mod_three','rational_only','unit_bounds_included',
+                      'phase_constraints_included','physical_endpoints_included',
+                      'literal_existence_decided','all_pairs_decided'):
+            bad=copy.deepcopy(saved)
+            if field=='ranks_mod_three':bad[field][0]+=1
+            elif type(bad[field]) is bool:bad[field]=not bad[field]
+            else:bad[field]+=1
+            with self.assertRaises(ValueError):rs.verify_saved(bad)
+        with self.assertRaises(ValueError):rs.adjacent_rational_reachability(78)
+
+    def test_rational_reachability_orientation_drift_on_integer_trajectories(self):
+        rng=random.Random(9180)
+        for h in range(24,99):
+            driver=rs.adjacent_integral_driver(h);weights=rs.adjacent_orientation_drift(driver)
+            state=[rng.randrange(-3,4) for _ in range(402)]
+            following=rs.adjacent_driver_step(driver,state,[rng.randrange(-5,6) for _ in range(46)])
+            self.assertEqual(sum(w*v for w,v in zip(weights,following)),
+                             sum(w*v for w,v in zip(weights,state))-sum(state))
+
+    def test_rational_reachability_return_does_not_imply_a_unit_return(self):
+        seed=rs.adjacent_two_control_example();bits=int(seed['state_bits'],16)
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        driver=rs.adjacent_integral_driver(97)
+        laws=rs.adjacent_conserved_observables(driver)
+        observables=[[1]*402,laws['moment'],rs.adjacent_orientation_drift(driver),laws['alternating']]
+        self.assertEqual([sum(w*v for w,v in zip(row,state)) for row in observables],
+                         [0,0,-8,0])
+        # Those values permit an even-length rational return, but a checked
+        # triangle bound rules out every two-step unit path from this state.
+        gates=rs.adjacent_future_pair_gates(97,2)
+        self.assertTrue(rs.adjacent_future_pair_obstructions(gates,state))
+
+    def test_successor_lattice_describes_every_small_control_word(self):
+        rng=random.Random(81603)
+        for trial in range(240):
+            n=rng.randrange(1,6);rows=[];constants=[]
+            for _ in range(rng.randrange(10)):
+                ids=rng.sample(range(n),rng.randrange(min(n,2)+1));B={}
+                if ids:
+                    B[ids[0]]=rng.choice((-1,1))
+                    if len(ids)==2:B[ids[1]]=-B[ids[0]]
+                rows.append(B)
+                constants.append(rng.choice([c for c in range(-5,6)
+                                             if (c+sum(B.values()))%2]))
+            lattice=rs.difference_control_lattice(rows,constants,n)
+            actual=set();described=set()
+            for bits in itertools.product((0,1),repeat=n):
+                if all(abs(c+sum(a*(2*bits[i]-1) for i,a in B.items()))==1
+                       for B,c in zip(rows,constants)):actual.add(bits)
+                if (lattice['status']=='lattice' and
+                        all(bits[i] for i in lattice['forced_one']) and
+                        all(not bits[i] for i in lattice['forced_zero']) and
+                        all(bits[i]<=bits[j] for i,j in lattice['implications'])):
+                    described.add(bits)
+            self.assertEqual(actual,described)
+            enumeration=rs.difference_lattice_words(lattice,1<<n)
+            self.assertTrue(enumeration['complete'])
+            enumerated={tuple(int(word,16)>>i&1 for i in range(n))
+                        for word in enumeration['words']}
+            self.assertEqual(actual,enumerated)
+            self.assertEqual(len(actual),len(enumeration['words']))
+            capped=rs.difference_lattice_words(lattice,1)
+            self.assertEqual(capped['complete'],len(actual)<=1)
+            self.assertEqual(len(capped['words']),min(1,len(actual)))
+
+            if actual:
+                least=tuple(min(v[i] for v in actual) for i in range(n))
+                greatest=tuple(max(v[i] for v in actual) for i in range(n))
+                self.assertEqual(tuple((v+1)//2 for v in lattice['least']),least)
+                self.assertEqual(tuple((v+1)//2 for v in lattice['greatest']),greatest)
+                for component in lattice['components']:
+                    self.assertTrue(all(len({bits[i] for i in component})==1 for bits in actual))
+                for a,b in itertools.product(actual,repeat=2):
+                    self.assertIn(tuple(min(x,y) for x,y in zip(a,b)),actual)
+                    self.assertIn(tuple(max(x,y) for x,y in zip(a,b)),actual)
+
+    def test_successor_lattice_actual_extrema_and_empty_control(self):
+        example=rs.adjacent_two_control_example()
+        bits=int(example['state_bits'],16);state=[1-2*(bits>>i&1) for i in range(402)]
+        lattice=rs.adjacent_successor_lattice(97,state)
+        self.assertEqual(lattice['status'],'lattice')
+        driver=rs.adjacent_integral_driver(97)
+        for key in ('least','greatest'):
+            following=rs.adjacent_driver_step(driver,state,lattice[key])
+            self.assertEqual(set(following),{-1,1})
+        self.assertEqual(rs.adjacent_successor_lattice(97,[1]*402)['status'],'empty')
+        with self.assertRaises(ValueError):rs.difference_control_lattice([{0:1,1:1}],[1],2)
+        with self.assertRaises(ValueError):rs.difference_control_lattice([{}],[],0)
+        # A cycle means equality, and an incoming forced one propagates.
+        equal=rs.difference_control_lattice([{0:1,1:-1},{1:1,0:-1}],[1,1],3)
+        self.assertIn([0,1],equal['components'])
+        forced=rs.difference_control_lattice([{0:1,1:-1},{0:1}],[1,-2],2)
+        self.assertEqual(forced['forced_one'],[0,1])
+
+    def test_successor_lattice_certificate_damage_and_caps(self):
+        import copy
+        saved=rs.adjacent_lattice_example(1)
+        with patch.object(rs,'_difference_control_decision',side_effect=AssertionError('no decision search')):
+            self.assertTrue(rs.verify_saved(saved)['verified'])
+        for field in ('complete','words'):
+            bad=copy.deepcopy(saved)
+            if field=='complete':bad['enumeration'][field]=not bad['enumeration'][field]
+            else:bad['enumeration'][field]=[]
+            with self.assertRaises(ValueError):rs.verify_saved(bad)
+        bad=copy.deepcopy(saved);bad['lattice']['forced_one']=[]
+        with self.assertRaises(ValueError):rs.verify_saved(bad)
+        free=rs.difference_control_lattice([],[],3)
+        self.assertEqual(rs.difference_lattice_words(free,0),dict(words=[],complete=False))
+        self.assertTrue(rs.difference_lattice_words(free,8)['complete'])
+        self.assertFalse(rs.difference_lattice_words(free,7)['complete'])
+        self.assertEqual(rs.difference_lattice_words(rs.difference_control_lattice([],[],0),1),
+                         dict(words=['0x0'],complete=True))
+        with self.assertRaises(ValueError):rs.difference_lattice_words(free,-1)
+
+    def test_difference_decision_against_exhaustive_unit_controls(self):
+        rng=random.Random(9027)
+        for _ in range(180):
+            n=rng.randrange(1,5);rows=[];constants=[]
+            for j in range(rng.randrange(1,9)):
+                indices=rng.sample(range(n),rng.randrange(min(2,n)+1))
+                B={}
+                if indices:
+                    a=rng.choice((-1,1));B[indices[0]]=a
+                    if len(indices)==2:B[indices[1]]=-a
+                c=rng.choice([c for c in range(-5,6) if (c+sum(B.values()))%2])
+                rows.append(B);constants.append(c)
+            feasible=any(all(abs(c+sum(a*(1-2*(bits>>i&1)) for i,a in B.items()))==1
+                             for B,c in zip(rows,constants)) for bits in range(1<<n))
+            result=rs._difference_control_decision(rows,constants,n)
+            self.assertEqual(result['status']=='successor',feasible)
+            if not feasible:
+                combined=defaultdict(int)
+                for j,w in result['weights']:
+                    for i,a in rows[j].items():combined[i]+=w*a
+                self.assertGreater(sum(w*constants[j] for j,w in result['weights']),
+                                   sum(abs(w) for j,w in result['weights'])+sum(map(abs,combined.values())))
+
+    def test_difference_negative_cycle_produces_a_strict_source_cut(self):
+        rows=[{0:1},{0:1,1:-1},{1:1}];constants=[-2,1,2]
+        result=rs._difference_control_decision(rows,constants,2)
+        self.assertEqual(result['status'],'refused')
+        self.assertEqual(dict(result['weights']),{0:-1,1:1,2:1})
+        for values in itertools.product((-2,0,2),(-3,-1,1,3),(-2,0,2)):
+            feasible=any(all(abs(c+sum(a*(1-2*(bits>>i&1)) for i,a in B.items()))==1
+                             for B,c in zip(rows,values)) for bits in range(4))
+            outcome=rs._difference_control_decision(rows,list(values),2)
+            self.assertEqual(outcome['status']=='successor',feasible)
+        # Each two-row subsystem is feasible; their joint order chain is not.
+        for indices in itertools.combinations(range(3),2):
+            self.assertEqual(rs._difference_control_decision([rows[i] for i in indices],
+                             [constants[i] for i in indices],2)['status'],'successor')
+        with self.assertRaises(ValueError):rs._difference_control_decision([{0:1,1:1}],[1],2)
+        with self.assertRaises(ValueError):rs._difference_control_decision([{0:1}],[1],2)
+
+    def test_difference_all_three_row_two_control_systems(self):
+        canonical=[({},c) for c in (-1,1)]
+        for i,sign,c in itertools.product(range(2),(-1,1),(-2,0,2)):
+            canonical.append(({i:sign},c))
+        for sign,c in itertools.product((-1,1),(-3,-1,1,3)):
+            canonical.append(({0:sign,1:-sign},c))
+        count=0
+        for system in itertools.product(canonical,repeat=3):
+            rows=[B for B,c in system];constants=[c for B,c in system]
+            feasible=any(all(abs(c+sum(a*values[i] for i,a in B.items()))==1
+                             for B,c in system) for values in itertools.product((-1,1),repeat=2))
+            result=rs._difference_control_decision(rows,constants,2)
+            self.assertEqual(result['status']=='successor',feasible)
+            count+=1
+        self.assertEqual(count,10648)
+
+    def test_difference_actual_driver_certificates_replay_without_the_solver(self):
+        positive=rs.adjacent_two_control_example();bits=int(positive['state_bits'],16)
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        success=rs.adjacent_difference_successor(97,state)
+        self.assertEqual(success['proof']['status'],'successor')
+        refusal=rs.adjacent_difference_successor(97,[1]*402)
+        self.assertEqual(refusal['kind'],'moving-adjacent-control-bound-refusal-v1')
+        with patch.object(rs,'_difference_control_decision',side_effect=AssertionError('no search in replay')):
+            self.assertTrue(rs.verify_saved(success)['verified'])
+            self.assertTrue(rs.verify_saved(refusal)['verified'])
+
+    def test_control_rounding_hypotheses_all_twenty_holes(self):
+        for hole in range(79,99):
+            cert=rs.adjacent_control_rounding_structure(hole)
+            self.assertTrue(cert['fixed_state_real_box_equivalent'])
+        for hole in (43,78):
+            with self.assertRaises(ValueError):rs.adjacent_control_rounding_structure(hole)
+        cert=rs.adjacent_control_rounding_structure(97)
+        with self.assertRaises(ValueError):
+            rs.verify_adjacent_control_rounding_structure(dict(cert,fixed_state_real_box_equivalent=False))
+
+    def test_control_rounding_exact_rational_successor(self):
+        cert=rs.adjacent_two_control_example();bits=int(cert['state_bits'],16)
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        first=int(cert['proof']['control_bits'],16)
+        driver=rs.adjacent_integral_driver(97)
+        tables=[rs._adjacent_control_table(row,state) for row in driver['recoveries']]
+        second=None
+        difference_inputs=sorted({i for inputs,allowed in tables if len(inputs)==2 for i in inputs})
+        for i in difference_inputs:
+            result=rs._two_control_solve(tables+[([i],[1-(first>>i&1)])],46)
+            if result['status']=='successor':second=int(result['control_bits'],16);break
+        self.assertIsNotNone(second,'positive control must exercise nontrivial rounding')
+        a=[1-2*(first>>i&1) for i in range(46)]
+        b=[1-2*(second>>i&1) for i in range(46)]
+        structure=rs.adjacent_control_rounding_structure(97)
+        for weight in (Fraction(1,2),Fraction(1,3)):
+            controls=[weight*x+(1-weight)*y for x,y in zip(a,b)]
+            self.assertTrue(any(abs(v)<1 for v in controls))
+            rounded=rs.adjacent_round_controls(structure,state,controls)
+            following=rs.adjacent_driver_step(driver,state,rounded)
+            self.assertTrue(all(abs(v)==1 for v in following))
+        with self.assertRaises(ValueError):rs.adjacent_round_controls(structure,state,[0.0]*46)
+        with self.assertRaises(ValueError):rs.adjacent_round_controls(structure,[1]*402,[0]*46)
+        with self.assertRaises(ValueError):rs.adjacent_round_controls(structure,state,[2]*46)
+
+    def test_two_control_solver_against_exhaustive_boolean_systems(self):
+        rng=random.Random(739)
+        for _ in range(160):
+            n=rng.randrange(1,6);tables=[]
+            for row in range(rng.randrange(1,12)):
+                inputs=sorted(rng.sample(range(n),rng.randrange(min(2,n)+1)))
+                allowed=[word for word in range(1<<len(inputs)) if rng.randrange(2)]
+                tables.append((inputs,allowed))
+            solutions=[bits for bits in range(1<<n) if all(
+                sum((bits>>i&1)<<j for j,i in enumerate(inputs)) in allowed
+                for inputs,allowed in tables)]
+            proof=rs._two_control_solve(tables,n)
+            self.assertEqual(proof['status']=='successor',bool(solutions))
+            self.assertTrue(rs._verify_two_control_proof(tables,n,proof))
+
+    def test_two_control_cycle_refusal_without_forced_inputs(self):
+        import copy
+        tables=[([0,1],[1,2]),([1,2],[1,2]),([0,2],[1,2])]
+        proof=rs._two_control_solve(tables,3)
+        self.assertEqual(proof['status'],'refused')
+        self.assertTrue(rs._verify_two_control_proof(tables,3,proof))
+        self.assertIn('paths',proof)
+        changed=copy.deepcopy(proof);changed['paths'][0].pop()
+        with self.assertRaises(ValueError):rs._verify_two_control_proof(tables,3,changed)
+        changed=copy.deepcopy(proof);changed['paths'][0][0][3]=1
+        with self.assertRaises(ValueError):rs._verify_two_control_proof(tables,3,changed)
+        with self.assertRaises(ValueError):rs._two_control_solve([([0,1,2],[0])],3)
+
+    def test_two_control_actual_shell_successor_and_refusal(self):
+        cert=rs.open_phase_example(97,3);bits=int(cert['bits'],16)
+        keys,_,_=rs.open_phase_system(97,2,3)
+        state=[1-2*(bits>>i&1) for i,key in enumerate(keys) if key[-1]==3]
+        proof=rs.adjacent_two_control_successor(97,state)
+        self.assertEqual(proof['proof']['status'],'successor')
+        with patch.object(rs,'_two_control_solve',side_effect=AssertionError('no solver in replay')):
+            self.assertTrue(rs.verify_saved(proof)['verified'])
+        for hole in (97,98):
+            refusal=rs.adjacent_two_control_successor(hole,[1]*402)
+            self.assertEqual(refusal['proof']['status'],'refused')
+            self.assertTrue(rs.verify_adjacent_two_control_successor(refusal))
+        with self.assertRaises(ValueError):rs.adjacent_two_control_successor(43,[1]*402)
+
+    def test_two_control_zero_observable_positive_control_has_no_second_step(self):
+        cert=rs.adjacent_two_control_example();self.assertEqual(cert['proof']['status'],'successor')
+        bits=int(cert['state_bits'],16);state=[1-2*(bits>>i&1) for i in range(402)]
+        driver=rs.adjacent_integral_driver(97);laws=rs.adjacent_conserved_observables(driver)
+        for weights in ([1]*402,laws['moment'],laws['alternating']):
+            self.assertEqual(sum(c*v for c,v in zip(weights,state)),0)
+        for law in rs.adjacent_driver_phase_laws(driver):
+            self.assertEqual((int(law['mask'],16)&bits).bit_count()%2,law['phase_at_even_left'])
+        self.assertTrue(rs.adjacent_future_pair_obstructions(rs.adjacent_future_pair_gates(97,2),state))
+
+    def test_control_bound_joint_seed_passes_every_pair_projection(self):
+        cert=rs.adjacent_control_bound_example(True);bound=cert['inequality']
+        self.assertEqual(rs.verify_adjacent_control_bound_refusal(cert),28)
+        self.assertEqual(bound['bound'],20)
+        bits=int(cert['state_bits'],16);state=[1-2*(bits>>i&1) for i in range(402)]
+        audit=rs.adjacent_control_pair_audit(43,state)
+        self.assertTrue(audit['compatible']);self.assertEqual(audit['all_pairs'],63190)
+        driver=rs.adjacent_integral_driver(43);laws=rs.adjacent_conserved_observables(driver)
+        for weights in ([1]*402,laws['moment'],laws['alternating']):
+            self.assertEqual(sum(c*v for c,v in zip(weights,state)),0)
+        for law in rs.adjacent_driver_phase_laws(driver):
+            self.assertEqual((int(law['mask'],16)&bits).bit_count()%2,law['phase_at_even_left'])
+        for reverse in (False,True):
+            self.assertFalse(rs.adjacent_future_unit_obstructions(rs.adjacent_future_unit_gates(43,2),state,reverse))
+            self.assertFalse(rs.adjacent_future_pair_obstructions(rs.adjacent_future_pair_gates(43,2),state,reverse))
+
+    def test_control_bound_identity_with_arbitrary_integers(self):
+        rng=random.Random(814)
+        for hole in (24,43,98):
+            driver=rs.adjacent_integral_driver(hole)
+            for combinations in (((5,1),(28,1)),((0,3),(90,-2),(200,4))):
+                bound=rs.adjacent_control_bound(hole,combinations)
+                self.assertTrue(rs.verify_adjacent_control_bound(bound))
+                state=[rng.randrange(-5,6) for _ in range(402)]
+                controls=[rng.randrange(-5,6) for _ in range(46)]
+                following=rs.adjacent_driver_step(driver,state,controls)
+                source=sum(c*state[i] for i,c in bound['expression'])
+                recovered=sum(c*following[i] for i,c in bound['targets'])
+                fresh=sum(c*controls[i] for i,c in bound['controls'])
+                self.assertEqual(recovered,source+fresh)
+        with self.assertRaises(ValueError):rs.adjacent_control_bound(43,())
+        with self.assertRaises(ValueError):rs.adjacent_control_bound(43,((5,1),(5,-1)))
+
+    def test_control_bound_compact_refusal_and_independent_replay(self):
+        certificate=rs.adjacent_control_bound_example()
+        self.assertEqual(rs.verify_adjacent_control_bound_refusal(certificate),-8)
+        bound=certificate['inequality']
+        self.assertEqual(bound['bound'],6)
+        self.assertEqual(len(bound['targets']),2)
+        self.assertTrue(bound['controls']) # unlike the earlier full-cancellation pair tests
+        self.assertEqual(sum(abs(c) for i,c in bound['controls']),4)
+        with patch.object(rs,'adjacent_integral_driver',side_effect=AssertionError('no elimination')):
+            self.assertEqual(rs.verify_saved(certificate)['value'],-8)
+        complement=dict(certificate,state_bits=hex(int(certificate['state_bits'],16)^((1<<402)-1)))
+        self.assertEqual(rs.verify_adjacent_control_bound_refusal(complement),8)
+
+    def test_control_bound_rejects_damaged_proofs(self):
+        import copy
+        original=rs.adjacent_control_bound()
+        for name in ('targets','expression','controls','row_weights'):
+            damaged=copy.deepcopy(original);damaged[name][0][1]+=2
+            with self.assertRaises(ValueError):rs.verify_adjacent_control_bound(damaged)
+            damaged=copy.deepcopy(original);damaged[name].append(damaged[name][0])
+            with self.assertRaises(ValueError):rs.verify_adjacent_control_bound(damaged)
+        for value in (5,7,True):
+            with self.assertRaises(ValueError):rs.verify_adjacent_control_bound(dict(original,bound=value))
+        with self.assertRaises(ValueError):rs.adjacent_control_bound_value(original,[1]*401)
+        with self.assertRaises(ValueError):rs.adjacent_control_bound_value(original,[True]*402)
+
+    def test_control_bound_cannot_refuse_an_actual_successor(self):
+        cert=rs.adjacent_zero_observable_example(43,2)
+        keys,rows,_=rs.adjacent_phase_system(43,2,2);bits=int(cert['bits'],16)
+        state=[1-2*(bits>>i&1) for i,key in enumerate(keys) if key[-1]==2]
+        bound=rs.adjacent_control_bound()
+        self.assertLessEqual(abs(rs.adjacent_control_bound_value(bound,state)),bound['bound'])
+        self.assertTrue(rs.adjacent_control_pair_audit(43,state)['compatible'])
+        refusal=dict(kind='moving-adjacent-control-bound-refusal-v1',hole=43,
+                     state_bits=hex(sum((v==-1)<<i for i,v in enumerate(state))),inequality=bound,
+                     literal_existence_decided=False,all_pairs_decided=False)
+        with self.assertRaises(ValueError):rs.verify_adjacent_control_bound_refusal(refusal)
+
+    def test_future_transfer_partition_against_direct_pair_distances(self):
+        from collections import Counter
+        # Count actual distances, without the shell-column formula or the
+        # folded compiler. Both boundary interfaces must match as well.
+        for scale in (9,11,13):
+            half=scale//2;lengths=[n*scale for n in (99,79,23)]
+            holes={(1,43*scale),(1,99*scale)}
+            vertices=[(0,0)]+[(a,d) for a,n in enumerate(lengths,1)
+                       for d in range(1,n+1) if (a,d) not in holes]
+            physical=defaultdict(dict)
+            for vertex in vertices:
+                a,d=vertex;counts=Counter()
+                for other in vertices:
+                    if other==vertex:continue
+                    b,e=other
+                    counts[abs(d-e) if a==b else d+e]+=1
+                # The shipped homogeneous rows are (1-z)*F_v-2z, where
+                # F_v counts nonzero distances from v to retained vertices.
+                column=defaultdict(int)
+                for distance,count in counts.items():
+                    column[distance]+=count;column[distance+1]-=count
+                column[1]-=2
+                for distance,c in column.items():
+                    if c:physical[distance][vertex]=c
+            blocks=rs.adjacent_transfer_blocks(43);actual=[]
+            def append(rows,offset):
+                for row in rows:
+                    physical_row=defaultdict(int)
+                    for key,c in row.items():
+                        if key[0]=='edge':vertex=(key[1],key[2]*scale)
+                        else:
+                            _,a,q,s,r=key;vertex=(a,q*scale+s*(r+offset))
+                        physical_row[vertex]+=c
+                    actual.append(tuple(sorted((v,c) for v,c in physical_row.items() if c)))
+            append(blocks['prefix'],0)
+            transitions=list(range(2,half-1))
+            self.assertEqual(len(transitions),half-3)
+            for j in transitions:append(blocks['transition'],j)
+            append(blocks['suffix'],half-1)
+            expected=Counter(tuple(sorted(row.items())) for row in physical.values())
+            self.assertEqual(Counter(actual),expected)
+
+    def test_future_control_refusal_covers_all_inputs_without_guessing(self):
+        import copy
+        certificate=rs.adjacent_control_refusal_example()
+        result=rs.verify_saved(certificate)
+        self.assertTrue(result['verified'])
+        self.assertEqual(result['forced_inputs'],11)
+        self.assertTrue(result['individual_rows_checked'])
+        self.assertEqual(result['projection_horizon_checked'],2)
+        self.assertFalse(result['all_pairs_decided'])
+        for mutation in ('forced_bit','no_trace','conflict','scope','projection'):
+            changed=copy.deepcopy(certificate)
+            if mutation=='forced_bit':changed['trace'][0][2]^=1
+            if mutation=='no_trace':changed['trace']=[]
+            if mutation=='conflict':changed['conflict']=356
+            if mutation=='scope':changed['all_pairs_decided']=True
+            if mutation=='projection':changed['projection_horizon']=3
+            with self.assertRaises(ValueError):rs.verify_adjacent_control_refusal(changed)
+
+    def test_future_control_propagation_cannot_refuse_an_actual_successor(self):
+        first=2;word=rs.adjacent_zero_observable_example(43,first)
+        keys,_,_=rs.adjacent_phase_system(43,2,first);bits=int(word['bits'],16)
+        values={k:1-2*(bits>>i&1) for i,k in enumerate(keys)}
+        state=[values[(*label,first)] for label in rs.moving_folded_labels()]
+        result=rs.adjacent_control_refusal(43,state)
+        self.assertEqual(result['status'],'unknown')
+        with self.assertRaises(ValueError):rs.verify_saved(result)
+        with self.assertRaises(ValueError):rs.adjacent_control_refusal(43,state[:-1])
+
+    def test_future_pair_refusal_separates_the_unary_tests(self):
+        import copy
+        for first in (2,4,10):
+            certificate=rs.adjacent_pair_refusal_example(first)
+            result=rs.verify_saved(certificate)
+            self.assertEqual(result['passing_unit_gates'],10)
+            self.assertEqual(result['forced_pair_value'],4)
+            self.assertEqual(result['initial_level'],first)
+            self.assertFalse(result['all_pairs_decided'])
+        for mutation in ('path','missing_unary','pair','scope'):
+            changed=copy.deepcopy(certificate)
+            if mutation=='path':changed['path']['bits']=hex(int(changed['path']['bits'],16)^1)
+            if mutation=='missing_unary':changed['unit_gates']['gates'].pop()
+            if mutation=='pair':changed['pair_gate']['gates'][0]['expression'][0][1]+=1
+            if mutation=='scope':changed['all_pairs_decided']=True
+            with self.assertRaises(ValueError):rs.verify_adjacent_pair_refusal(changed)
+        with self.assertRaises(ValueError):rs.adjacent_pair_refusal_example(3)
+
+    def test_future_pairs_direct_rows_and_arbitrary_control_evaluation(self):
+        rng=random.Random(4343)
+        for hole in (24,43,61,98):
+            certificate=rs.adjacent_future_pair_gates(hole,2)
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+            if hole==43:
+                self.assertEqual(sum(g['step']==1 for g in certificate['gates']),23)
+                self.assertEqual(sum(g['step']==2 for g in certificate['gates']),20)
+            driver=rs.adjacent_integral_driver(hole)
+            initial=[rng.randrange(-3,4) for _ in range(402)]
+            states=[initial]
+            for step in range(2):
+                states.append(rs.adjacent_driver_step(driver,states[-1],
+                              [rng.randrange(-3,4) for _ in range(46)]))
+            for gate in certificate['gates']:
+                value=sum(c*initial[i] for i,c in gate['expression'])
+                self.assertEqual(value,sum(c*states[gate['step']][i]
+                                           for i,c in gate['targets']))
+
+    def test_future_pairs_fail_only_beyond_actual_recorded_successor(self):
+        certificate=rs.adjacent_future_pair_gates(43,2)
+        labels=rs.moving_folded_labels();permutation=rs.adjacent_time_reversal(43)
+        for first,count in ((2,1),(3,6)):
+            word=rs.adjacent_zero_observable_example(43,first)
+            keys,_,_=rs.adjacent_phase_system(43,2,first)
+            bits=int(word['bits'],16)
+            values={k:1-2*(bits>>i&1) for i,k in enumerate(keys)}
+            initial=[values[(*label,first)] for label in labels]
+            failures=rs.adjacent_future_pair_obstructions(certificate,initial)
+            self.assertEqual(len(failures),count)
+            self.assertTrue(all(g['step']==2 for g in failures))
+            reversed_state=[initial[i] for i in permutation]
+            reverse=rs.adjacent_future_pair_obstructions(certificate,reversed_state,True)
+            self.assertEqual([g['value'] for g in reverse],[g['value'] for g in failures])
+            with self.assertRaises(ValueError):
+                rs.adjacent_future_pair_obstructions(certificate,initial[:-1])
+
+    def test_future_pairs_reject_damaged_proof_and_target_bound(self):
+        import copy
+        certificate=rs.adjacent_future_pair_gates(43,2)
+        for mutation in ('weight','expression','target_coefficient','duplicate','scope'):
+            changed=copy.deepcopy(certificate)
+            if mutation=='weight':changed['gates'][0]['row_weights'][0][2]+=1
+            if mutation=='expression':changed['gates'][0]['expression'][0][1]+=1
+            if mutation=='target_coefficient':changed['gates'][0]['targets'][0][1]=2
+            if mutation=='duplicate':changed['gates'][0]['targets'][1][0]=changed['gates'][0]['targets'][0][0]
+            if mutation=='scope':changed['literal_existence_decided']=True
+            with self.assertRaises(ValueError):rs.verify_adjacent_future_pair_gates(changed)
+        for horizon in (True,0,7):
+            with self.assertRaises(ValueError):rs.adjacent_future_pair_gates(43,horizon)
+
+    def test_future_unit_original_row_identities_all_driver_holes(self):
+        counts=[]
+        for hole in range(24,99):
+            certificate=rs.adjacent_future_unit_gates(hole,3)
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+            self.assertTrue(all(g['step'] in (2,3) for g in certificate['gates']))
+            counts.append(len(certificate['gates']))
+        self.assertEqual(counts[43-24],10)
+
+    def test_future_unit_excludes_second_successor_of_actual_edge(self):
+        certificate=rs.adjacent_future_unit_gates(43,3)
+        driver=rs.adjacent_integral_driver(43)
+        for first,expected in ((2,3),(3,5)):
+            word=rs.adjacent_zero_observable_example(43,first)
+            keys,_,_=rs.adjacent_phase_system(43,2,first)
+            bits=int(word['bits'],16)
+            values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+            state=[values[(*label,first)] for label in rs.moving_folded_labels()]
+            following=[values[(*label,first+1)] for label in rs.moving_folded_labels()]
+            # An actual successor proves that all first-step necessary tests pass.
+            self.assertEqual(rs.adjacent_driver_step(driver,state,following[356:]),following)
+            self.assertEqual(rs.adjacent_unit_boundary_obstructions(driver,state),[])
+            failures=rs.adjacent_future_unit_obstructions(certificate,state)
+            self.assertEqual(len(failures),expected)
+            self.assertTrue(all(g['step']==2 and abs(g['value'])==3 for g in failures))
+            # Unrestricted third-arm inputs, even nonunit ones, cannot repair
+            # these particular second-step values.
+            for third in ([1]*46,[-1]*46,list(range(46))):
+                second=rs.adjacent_driver_step(driver,following,third)
+                labels=rs.moving_folded_labels()
+                for gate in certificate['gates']:
+                    self.assertEqual(sum(c*state[i] for i,c in gate['expression']),
+                                     second[gate['target']])
+            permutation=rs.adjacent_time_reversal(43)
+            reversed_state=[state[i] for i in permutation]
+            reverse=rs.adjacent_future_unit_obstructions(certificate,reversed_state,True)
+            self.assertEqual([g['value'] for g in reverse],[g['value'] for g in failures])
+            self.assertEqual([g['target'] for g in reverse],
+                             [list(labels[permutation[labels.index(tuple(g['target']))]])
+                              for g in failures])
+
+    def test_future_unit_rejects_damaged_proof_and_scope(self):
+        import copy
+        certificate=rs.adjacent_future_unit_gates(43,3)
+        for mutation in ('weight','expression','target','scope','boolean'):
+            changed=copy.deepcopy(certificate)
+            if mutation=='weight':changed['gates'][0]['row_weights'][0][2]+=1
+            if mutation=='expression':changed['gates'][0]['expression'][0][1]+=1
+            if mutation=='target':changed['gates'][0]['target']+=1
+            if mutation=='scope':changed['all_pairs_decided']=True
+            if mutation=='boolean':changed['gates'][0]['row_weights'][0][0]=True
+            with self.assertRaises(ValueError):rs.verify_adjacent_future_unit_gates(changed)
+        for horizon in (True,1,7):
+            with self.assertRaises(ValueError):rs.adjacent_future_unit_gates(43,horizon)
+        with self.assertRaises(ValueError):rs.adjacent_future_unit_obstructions(certificate,[1]*401)
+
     def test_adjacent_zero_observable_examples_both_phases(self):
         driver=rs.adjacent_integral_driver(43)
         for first in (2,3,4,11):
@@ -244,7 +874,7 @@ class SpectrumTests(unittest.TestCase):
         def canonical(rows):
             return Counter(tuple(sorted((k,c) for k,c in row.items() if c))
                            for row in rows if any(row.values()))
-        for scale,hole in ((9,1),(9,43),(11,19),(11,43),(11,97),(15,98)):
+        for scale,hole in ((9,1),(9,43),(15,98))+tuple((11,h) for h in range(1,99)):
             half=scale//2
             blocks=rs.adjacent_transfer_blocks(hole)
             compiled=[]

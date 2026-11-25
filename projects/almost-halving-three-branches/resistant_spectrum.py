@@ -2246,6 +2246,1183 @@ def adjacent_unit_boundary_obstructions(certificate,state,reverse=False):
     return obstructions
 
 
+def _adjacent_future_expansions(hole,horizon):
+    """Formal driver substitutions with original-row provenance."""
+    driver=adjacent_integral_driver(hole)
+    recoveries={z['target']//2:z for z in driver['recoveries']}
+    expressions=[{i:1} for i in range(402)]
+    weights=[{} for _ in range(402)]
+    for step in range(1,horizon+1):
+        following=[];following_weights=[]
+        for target in range(402):
+            if target>=356:
+                following.append({402+46*(step-1)+target-356:1})
+                following_weights.append({})
+                continue
+            recovery=recoveries[target]
+            expression=defaultdict(int)
+            weight=defaultdict(int,{(step-1,j):c for j,c in recovery['row_weights']})
+            for i,c in recovery['expression']:
+                if i%2:
+                    expression[402+46*(step-1)+i//2-356]+=c
+                else:
+                    for j,d in expressions[i//2].items():expression[j]+=c*d
+                    for j,d in weights[i//2].items():weight[j]+=c*d
+            following.append({j:c for j,c in expression.items() if c})
+            following_weights.append({j:c for j,c in weight.items() if c})
+        expressions,weights=following,following_weights
+        yield step,expressions,weights
+
+
+def adjacent_future_unit_gates(hole=43, horizon=3):
+    """New control-independent unit tests after two or more transitions.
+
+    The first-step tests are already available from the driver. Keep one
+    representative of each new expression up to sign. Every emitted test
+    includes an integer combination of original transition rows proving
+    that expression equals a particular future coordinate. No completeness
+    of the projection, nor existence of any continuation, is asserted.
+    """
+    if type(horizon) is not int or not 2<=horizon<=6:
+        raise ValueError('require a future horizon from two through six')
+    seen=set();gates=[]
+    for step,expressions,weights in _adjacent_future_expansions(hole,horizon):
+        for target,expression in enumerate(expressions[:356]):
+            if any(i>=402 for i in expression):continue
+            terms=tuple(sorted(expression.items()))
+            canonical=min(terms,tuple((i,-c) for i,c in terms))
+            if canonical in seen:continue
+            seen.add(canonical)
+            if step==1:continue
+            gates.append(dict(step=step,target=target,expression=[list(z) for z in terms],
+                              row_weights=[[edge,row,c] for (edge,row),c in
+                                           sorted(weights[target].items())]))
+    certificate=dict(kind='moving-adjacent-future-unit-v1',hole=hole,horizon=horizon,
+                     gates=gates,literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_future_unit_gates(certificate)
+    return certificate
+
+
+def verify_adjacent_future_unit_gates(certificate):
+    """Sum untouched shell rows; do not trust the driver or its composition."""
+    if (certificate.get('kind')!='moving-adjacent-future-unit-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False or
+            type(certificate.get('horizon')) is not int or
+            not 2<=certificate['horizon']<=6 or
+            type(certificate.get('hole')) is not int or
+            not 24<=certificate['hole']<=98):
+        raise ValueError('require a scoped future-unit certificate')
+    # These two-level rows are built directly from physical shell stencils.
+    keys,rows,_=adjacent_phase_system(certificate['hole'],2,2)
+    labels=moving_folded_labels()
+    if not isinstance(certificate.get('gates'),list):raise ValueError('invalid unit gates')
+    for gate in certificate['gates']:
+        step=gate.get('step');target=gate.get('target')
+        if (type(step) is not int or not 2<=step<=certificate['horizon'] or
+                type(target) is not int or not 0<=target<356):
+            raise ValueError('invalid future target')
+        expected=defaultdict(int);expected[(*labels[target],step)]=1
+        seen=set()
+        for i,c in gate['expression']:
+            if (type(i) is not int or not 0<=i<402 or i in seen or
+                    type(c) is not int or not c):raise ValueError('invalid gate expression')
+            seen.add(i);expected[(*labels[i],0)]-=c
+        actual=defaultdict(int);seen=set()
+        for edge,row,c in gate['row_weights']:
+            if (type(edge) is not int or not 0<=edge<step or
+                    type(row) is not int or not 0<=row<len(rows) or
+                    (edge,row) in seen or type(c) is not int or not c):
+                raise ValueError('invalid future row weight')
+            seen.add((edge,row))
+            for i,d in rows[row].items():
+                a,q,s,level=keys[i]
+                actual[a,q,s,edge+level-2]+=c*d
+        if {k:v for k,v in actual.items() if v}!={k:v for k,v in expected.items() if v}:
+            raise ValueError('future coordinate does not equal its stated initial expression')
+    return True
+
+
+def adjacent_future_unit_obstructions(certificate,state,reverse=False):
+    """Refuse this state only, when a certified future value is nonunit.
+
+    Passing is necessary, never sufficient, for an extension of the stated
+    horizon. Reversal concerns the interior and does not move physical ends.
+    """
+    verify_adjacent_future_unit_gates(certificate)
+    if (type(reverse) is not bool or len(state)!=402 or
+            any(type(v) is not int or v not in (-1,1) for v in state)):
+        raise ValueError('require 402 unit signs and a Boolean direction')
+    permutation=adjacent_time_reversal(certificate['hole']) if reverse else list(range(402))
+    result=[]
+    for gate in certificate['gates']:
+        value=sum(c*state[permutation[i]] for i,c in gate['expression'])
+        if abs(value)!=1:
+            result.append(dict(step=gate['step'],target=list(
+                moving_folded_labels()[permutation[gate['target']]]),value=value))
+    return result
+
+
+def adjacent_future_pair_gates(hole=43,horizon=2):
+    """Cancel equal nonzero future-control vectors between two coordinates.
+
+    The resulting initial-state form must belong to {-2,0,2}. Individual
+    future coordinates may still depend on the controls. This is only a
+    necessary projection, not an existential elimination of every control.
+    """
+    if type(horizon) is not int or not 1<=horizon<=6:
+        raise ValueError('require a pair horizon from one through six')
+    gates=[];seen=set()
+    for step,expressions,weights in _adjacent_future_expansions(hole,horizon):
+        groups=defaultdict(list)
+        for target,expression in enumerate(expressions):
+            controls=tuple(sorted((i,c) for i,c in expression.items() if i>=402))
+            if not controls:continue
+            sign=1 if controls[0][1]>0 else -1
+            groups[tuple((i,c*sign) for i,c in controls)].append((target,sign))
+        for group in groups.values():
+            for (j,s),(k,t) in itertools.combinations(group,2):
+                expression=defaultdict(int);weight=defaultdict(int)
+                for target,sign in ((j,s),(k,-t)):
+                    for i,c in expressions[target].items():expression[i]+=sign*c
+                    for i,c in weights[target].items():weight[i]+=sign*c
+                terms=tuple(sorted((i,c) for i,c in expression.items() if c))
+                if any(i>=402 for i,c in terms):raise AssertionError('controls did not cancel')
+                if sum(abs(c) for i,c in terms)<=2 and sum(c for i,c in terms)%2==0:continue
+                canonical=min(terms,tuple((i,-c) for i,c in terms))
+                if canonical in seen:continue
+                seen.add(canonical)
+                gates.append(dict(step=step,targets=[[j,s],[k,-t]],
+                                  expression=[list(z) for z in terms],
+                                  row_weights=[[edge,row,c] for (edge,row),c in
+                                               sorted(weight.items()) if c]))
+    certificate=dict(kind='moving-adjacent-future-pair-v1',hole=hole,horizon=horizon,
+                     gates=gates,literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_future_pair_gates(certificate)
+    return certificate
+
+
+def verify_adjacent_future_pair_gates(certificate):
+    """Verify each two-coordinate identity by direct original-row summation."""
+    if (certificate.get('kind')!='moving-adjacent-future-pair-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False or
+            type(certificate.get('horizon')) is not int or
+            not 1<=certificate['horizon']<=6 or
+            type(certificate.get('hole')) is not int or
+            not 24<=certificate['hole']<=98 or
+            not isinstance(certificate.get('gates'),list)):
+        raise ValueError('require a scoped future-pair certificate')
+    keys,rows,_=adjacent_phase_system(certificate['hole'],2,2)
+    labels=moving_folded_labels()
+    for gate in certificate['gates']:
+        step=gate.get('step');expected=defaultdict(int)
+        if type(step) is not int or not 1<=step<=certificate['horizon']:
+            raise ValueError('invalid future-pair step')
+        targets=gate.get('targets')
+        if not isinstance(targets,list) or len(targets)!=2:
+            raise ValueError('require two future coordinates')
+        seen=set()
+        for i,c in targets:
+            if (type(i) is not int or not 0<=i<402 or i in seen or
+                    type(c) is not int or c not in (-1,1)):
+                raise ValueError('invalid future-pair target')
+            seen.add(i);expected[(*labels[i],step)]+=c
+        seen=set()
+        for i,c in gate['expression']:
+            if (type(i) is not int or not 0<=i<402 or i in seen or
+                    type(c) is not int or not c):raise ValueError('invalid pair expression')
+            seen.add(i);expected[(*labels[i],0)]-=c
+        actual=defaultdict(int);seen=set()
+        for edge,row,c in gate['row_weights']:
+            if (type(edge) is not int or not 0<=edge<step or
+                    type(row) is not int or not 0<=row<len(rows) or
+                    (edge,row) in seen or type(c) is not int or not c):
+                raise ValueError('invalid future-pair row weight')
+            seen.add((edge,row))
+            for i,d in rows[row].items():
+                a,q,s,level=keys[i]
+                actual[a,q,s,edge+level-2]+=c*d
+        if {k:v for k,v in actual.items() if v}!={k:v for k,v in expected.items() if v}:
+            raise ValueError('future pair does not equal its stated initial expression')
+    return True
+
+
+def adjacent_future_pair_obstructions(certificate,state,reverse=False):
+    """A failed test forbids the stated horizon, while passing is inconclusive."""
+    verify_adjacent_future_pair_gates(certificate)
+    if (type(reverse) is not bool or len(state)!=402 or
+            any(type(v) is not int or v not in (-1,1) for v in state)):
+        raise ValueError('require 402 unit signs and a Boolean direction')
+    permutation=adjacent_time_reversal(certificate['hole']) if reverse else list(range(402))
+    labels=moving_folded_labels()
+    return [dict(step=g['step'],targets=[[list(labels[permutation[i]]),c]
+                                       for i,c in g['targets']],value=value)
+            for g in certificate['gates']
+            if (value:=sum(c*state[permutation[i]] for i,c in g['expression'])) not in (-2,0,2)]
+
+
+def adjacent_pair_refusal_example(first=2):
+    """An actual zero-observable edge passing unary but failing paired gates."""
+    if type(first) is not int or first<2 or first%2:
+        raise ValueError('the recorded pair-refusal word has an even first level')
+    bits='0x315e1594b5da299c3c3a13f56f4f6692b22ebe3e0bd4a93333003f0f31d1f850e41a43908009e2e1292182c1cf11a42009021246061638a8fa3c2c2ed42f8d99cedd17d5d1c5ff791e69cf6370570dc3fbff3a6ad43e7b4bf3afc0fbe73be4cecbd847dc4'
+    path=dict(kind='moving-adjacent-phase-signs-v1',hole=43,levels=2,first=first,
+              minimum_half=first+2,variables=804,status='local_signing',bits=bits,
+              balanced_slices=True,zero_moment_slices=True,zero_alternating_slices=True,
+              literal_existence_decided=False,all_pairs_decided=False)
+    units=adjacent_future_unit_gates(43,2)
+    pairs=adjacent_future_pair_gates(43,2)
+    # Keep just one directly checked original-row identity for the refusal.
+    pairs['gates']=[next(g for g in pairs['gates'] if g['step']==2)]
+    certificate=dict(kind='moving-adjacent-pair-refusal-v1',path=path,
+                     unit_gates=units,pair_gate=pairs,
+                     literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_pair_refusal(certificate)
+    return certificate
+
+
+def verify_adjacent_pair_refusal(certificate):
+    """Check the actual edge, the passing unary tests, and a paired refusal."""
+    if (certificate.get('kind')!='moving-adjacent-pair-refusal-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped pair-refusal certificate')
+    path=certificate['path'];units=certificate['unit_gates'];pairs=certificate['pair_gate']
+    verify_adjacent_phase_signs(path)
+    if (path['levels']!=2 or any(path.get(k) is not True for k in
+            ('balanced_slices','zero_moment_slices','zero_alternating_slices')) or
+            units['hole']!=path['hole'] or pairs['hole']!=path['hole'] or
+            units['horizon']!=2 or pairs['horizon']!=2 or
+            len(pairs['gates'])!=1 or pairs['gates'][0]['step']!=2):
+        raise ValueError('inconsistent edge, horizon or balance claims')
+    keys,_,_=adjacent_phase_system(path['hole'],2,path['first'])
+    bits=int(path['bits'],16)
+    values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+    state=[values[(*label,path['first'])] for label in moving_folded_labels()]
+    # A shortened list cannot support the claimed comparison with all unary
+    # tests emitted by this compiler. Compare expressions, not proof weights.
+    complete=adjacent_future_unit_gates(path['hole'],2)
+    canonical=lambda gates:sorted(tuple(tuple(z) for z in g['expression']) for g in gates)
+    if canonical(units['gates'])!=canonical(complete['gates']):
+        raise ValueError('incomplete unary comparison')
+    if adjacent_future_unit_obstructions(units,state):
+        raise ValueError('the initial state already fails a unary future test')
+    failures=adjacent_future_pair_obstructions(pairs,state)
+    if not failures:raise ValueError('no paired refusal at the initial state')
+    return failures[0]['value']
+
+
+def _adjacent_control_table(recovery,state):
+    """Exact allowed input words for one recovered unit coordinate."""
+    terms=[(i//2-356,c) for i,c in recovery['expression'] if i%2]
+    if len(terms)>12:return None
+    constant=sum(c*state[i//2] for i,c in recovery['expression'] if not i%2)
+    allowed=[mask for mask in range(1<<len(terms))
+             if abs(constant+sum(c*(1-2*(mask>>j&1))
+                                for j,(i,c) in enumerate(terms)))==1]
+    return [i for i,c in terms],allowed
+
+
+def adjacent_control_refusal(hole,state):
+    """Try unbranched exact table propagation on the 46 fresh controls.
+
+    A fixed point is unknown, not a continuation. Wide rows can be skipped:
+    a contradiction in the retained exact necessary tables remains sound.
+    """
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit integer signs')
+    driver=adjacent_integral_driver(hole)
+    tables=[_adjacent_control_table(recovery,state) for recovery in driver['recoveries']]
+    assigned={};trace=[]
+    result=dict(kind='moving-adjacent-control-refusal-v1',hole=hole,
+                state_bits=hex(sum((v==-1)<<i for i,v in enumerate(state))),
+                trace=trace,status='unknown',literal_existence_decided=False,all_pairs_decided=False)
+    # Prefer a direct empty-table witness to irrelevant earlier deductions.
+    for row,table in enumerate(tables):
+        if table is not None and not table[1]:
+            result.update(status='refused',conflict=row)
+            verify_adjacent_control_refusal(result)
+            return result
+    while True:
+        progress=False
+        for row,table in enumerate(tables):
+            if table is None:continue
+            inputs,allowed=table
+            possible=[mask for mask in allowed if all(i not in assigned or
+                      (mask>>j&1)==assigned[i] for j,i in enumerate(inputs))]
+            if not possible:
+                result.update(status='refused',conflict=row)
+                verify_adjacent_control_refusal(result)
+                return result
+            for j,i in enumerate(inputs):
+                if i in assigned:continue
+                values={mask>>j&1 for mask in possible}
+                if len(values)==1:
+                    assigned[i]=values.pop();trace.append([row,i,assigned[i]])
+                    progress=True
+        if not progress:return result
+
+
+def verify_adjacent_control_refusal(certificate):
+    """Replay forced inputs and an empty row; never assume a guessed input."""
+    if (certificate.get('kind')!='moving-adjacent-control-refusal-v1' or
+            certificate.get('status')!='refused' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped control-refusal proof')
+    encoded=certificate.get('state_bits')
+    if not isinstance(encoded,str) or not encoded.startswith('0x') or len(encoded)>103:
+        raise ValueError('invalid initial-state bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>402:raise ValueError('initial state exceeds 402 signs')
+    state=[1-2*(bits>>i&1) for i in range(402)]
+    driver=adjacent_integral_driver(certificate['hole']);assigned={}
+    if 'rowwise_tables_nonempty' in certificate:
+        if certificate['rowwise_tables_nonempty'] is not True:
+            raise ValueError('invalid individual-row feasibility claim')
+        for recovery in driver['recoveries']:
+            table=_adjacent_control_table(recovery,state)
+            if table is None or not table[1]:
+                raise ValueError('an individual recovery already has no unit input word')
+    def possibilities(row):
+        if type(row) is not int or not 0<=row<len(driver['recoveries']):
+            raise ValueError('invalid recovery row')
+        table=_adjacent_control_table(driver['recoveries'][row],state)
+        if table is None:raise ValueError('control row exceeds the table width limit')
+        inputs,allowed=table
+        return inputs,[mask for mask in allowed if all(i not in assigned or
+                      (mask>>j&1)==assigned[i] for j,i in enumerate(inputs))]
+    for row,i,bit in certificate['trace']:
+        if (type(i) is not int or not 0<=i<46 or i in assigned or
+                type(bit) is not int or bit not in (0,1)):
+            raise ValueError('invalid or repeated forced input')
+        inputs,possible=possibilities(row)
+        if i not in inputs or not possible:
+            raise ValueError('a forced input has no supporting nonempty row')
+        j=inputs.index(i)
+        if {mask>>j&1 for mask in possible}!={bit}:
+            raise ValueError('the input is not forced by this row')
+        assigned[i]=bit
+    if possibilities(certificate['conflict'])[1]:raise ValueError('the final row is not empty')
+    if 'projection_horizon' in certificate:
+        if certificate['projection_horizon']!=2 or type(certificate['projection_horizon']) is not int:
+            raise ValueError('only the stated two-step projection comparison is supported')
+        if type(certificate.get('first')) is not int or certificate['first']!=2:
+            raise ValueError('the phase comparison uses even start two')
+        laws=adjacent_conserved_observables(driver)
+        if any(sum(c*v for c,v in zip(coefficients,state)) for coefficients in
+               ([1]*402,laws['moment'],laws['alternating'] or [])):
+            raise ValueError('the seed has a nonzero observable')
+        for law in adjacent_driver_phase_laws(driver):
+            if (int(law['mask'],16)&bits).bit_count()%2!=law['phase_at_even_left']:
+                raise ValueError('the seed has the wrong absolute phase')
+        units=adjacent_future_unit_gates(certificate['hole'],2)
+        pairs=adjacent_future_pair_gates(certificate['hole'],2)
+        for reverse in (False,True):
+            if (adjacent_unit_boundary_obstructions(driver,state,reverse) or
+                    adjacent_future_unit_obstructions(units,state,reverse) or
+                    adjacent_future_pair_obstructions(pairs,state,reverse)):
+                raise ValueError('the seed fails the claimed necessary projection')
+    return True
+
+
+def adjacent_control_refusal_example():
+    """All emitted two-step unary/pair tests pass, yet no successor exists."""
+    bits=int('134ae68361fe8254fc2285d82c0250f05eab442834d2023e685ff6f6de366da11ac434beebc9fa7fe4f1b8c6300663e7cddb8',16)
+    certificate=adjacent_control_refusal(43,[1-2*(bits>>i&1) for i in range(402)])
+    certificate.update(projection_horizon=2,first=2,rowwise_tables_nonempty=True)
+    verify_adjacent_control_refusal(certificate)
+    return certificate
+
+
+def adjacent_control_bound(hole=43, combinations=((5,1),(28,1))):
+    """A source-state halfspace necessary for any unit successor.
+
+    If v=A*s+B*u is the original-row driver, each integer row weight w
+    gives |w*A*s| <= ||w||_1 + ||w*B||_1. Controls need not cancel.
+    Retain an untouched-row identity, so replay needs no elimination.
+    """
+    driver=adjacent_integral_driver(hole)
+    targets=defaultdict(int);expression=defaultdict(int)
+    controls=defaultdict(int);weights=defaultdict(int);seen=set()
+    for row,c in combinations:
+        if (type(row) is not int or not 0<=row<len(driver['recoveries']) or
+                row in seen or type(c) is not int or not c):
+            raise ValueError('require distinct recovery rows with nonzero integer weights')
+        seen.add(row);rec=driver['recoveries'][row]
+        targets[rec['target']//2]+=c
+        for i,a in rec['expression']:
+            if i%2:controls[i//2-356]+=c*a
+            else:expression[i//2]+=c*a
+        for i,a in rec['row_weights']:weights[i]+=c*a
+    def items(values):return [[i,c] for i,c in sorted(values.items()) if c]
+    result=dict(kind='moving-adjacent-control-bound-v1',hole=hole,
+                targets=items(targets),expression=items(expression),controls=items(controls),
+                row_weights=items(weights),
+                bound=sum(abs(c) for c in targets.values())+sum(abs(c) for c in controls.values()),
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_control_bound(result)
+    return result
+
+
+def verify_adjacent_control_bound(certificate):
+    """Check the complete integer row identity and its triangle bound."""
+    if (certificate.get('kind')!='moving-adjacent-control-bound-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False or
+            type(certificate.get('hole')) is not int or not 24<=certificate['hole']<=98):
+        raise ValueError('require a scoped control-bound certificate')
+    _,rows,_=adjacent_phase_system(certificate['hole'],2,2)
+    def unpack(name,limit):
+        terms={}
+        for i,c in certificate[name]:
+            if (type(i) is not int or not 0<=i<limit or i in terms or
+                    type(c) is not int or not c):raise ValueError('invalid '+name)
+            terms[i]=c
+        return terms
+    targets=unpack('targets',356);source=unpack('expression',402)
+    controls=unpack('controls',46);weights=unpack('row_weights',len(rows))
+    if not targets:raise ValueError('empty target combination')
+    expected=defaultdict(int);actual=defaultdict(int)
+    for i,c in targets.items():expected[2*i+1]+=c
+    for i,c in source.items():expected[2*i]-=c
+    for i,c in controls.items():expected[2*(356+i)+1]-=c
+    for row,c in weights.items():
+        for i,a in rows[row].items():actual[i]+=c*a
+    if {i:c for i,c in actual.items() if c}!={i:c for i,c in expected.items() if c}:
+        raise ValueError('control bound fails its original-row identity')
+    bound=sum(map(abs,targets.values()))+sum(map(abs,controls.values()))
+    if type(certificate.get('bound')) is not int or certificate['bound']!=bound:
+        raise ValueError('wrong control bound')
+    return True
+
+
+def adjacent_control_bound_value(certificate,state):
+    verify_adjacent_control_bound(certificate)
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit integer signs')
+    return sum(c*state[i] for i,c in certificate['expression'])
+
+
+def adjacent_control_pair_audit(hole,state):
+    """Check every pair of controlled recovery rows, without fixing controls.
+
+    A pass is only pairwise compatibility, not a common 46-control word.
+    Disjoint control sets are independent once each individual row passes.
+    """
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit signs')
+    driver=adjacent_integral_driver(hole);constants=[];controls=[];cache={}
+    for j,row in enumerate(driver['recoveries']):
+        table=_adjacent_control_table(row,state)
+        if table is None:raise ValueError('control pair audit requires row width at most twelve')
+        if not table[1]:return dict(compatible=False,rows=[j])
+        constants.append(sum(c*state[i//2] for i,c in row['expression'] if not i%2))
+        controls.append({i//2-356:c for i,c in row['expression'] if i%2})
+    checked=0
+    for i,B in enumerate(controls):
+        for j,C in enumerate(controls[:i]):
+            if not B.keys()&C.keys():continue
+            terms=tuple(sorted((B.get(k,0),C.get(k,0)) for k in B.keys()|C.keys()))
+            if terms not in cache:
+                reachable={(0,0)}
+                for a,b in terms:
+                    reachable={(x+s*a,y+s*b) for x,y in reachable for s in (-1,1)}
+                cache[terms]={(x+s,y+t) for x,y in reachable for s in (-1,1) for t in (-1,1)}
+            checked+=1
+            if (constants[i],constants[j]) not in cache[terms]:
+                return dict(compatible=False,rows=[j,i])
+    return dict(compatible=True,individual_rows=len(controls),
+                all_pairs=len(controls)*(len(controls)-1)//2,overlapping_pairs=checked)
+
+
+def adjacent_control_bound_example(joint=False):
+    """A new seed lies outside the predecessor's seven-constant cylinder."""
+    result=dict(kind='moving-adjacent-control-bound-refusal-v1',hole=43,
+                state_bits='0xc584f4fd148fb74f4e2434b8cbfa9d1fc773760f3744fbc69ff2e1db86281ad0fc5d0f3af0296a900660a22482f538b0e2a2',
+                inequality=adjacent_control_bound(),
+                literal_existence_decided=False,all_pairs_decided=False)
+    if joint:
+        result.update(state_bits='0xab9911e5ce7f9774bfff8e6dad141b1a03517736b8fad80bd5904cc32bb28ff56a9e931a6ae50922c4a23a08a7210b51a3b8',
+                      inequality=adjacent_control_bound(43,((15,-2),(18,-1),(22,2),(206,-2))),
+                      pairwise_control_compatible=True)
+    verify_adjacent_control_bound_refusal(result)
+    return result
+
+
+def verify_adjacent_control_bound_refusal(certificate):
+    if (certificate.get('kind')!='moving-adjacent-control-bound-refusal-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped control-bound refusal')
+    inequality=certificate['inequality']
+    verify_adjacent_control_bound(inequality)
+    if type(certificate.get('hole')) is not int or certificate['hole']!=inequality['hole']:
+        raise ValueError('inconsistent hole')
+    encoded=certificate.get('state_bits')
+    if not isinstance(encoded,str) or not encoded.startswith('0x') or len(encoded)>103:
+        raise ValueError('invalid state bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>402:raise ValueError('state exceeds 402 signs')
+    value=sum(c*(1-2*(bits>>i&1)) for i,c in inequality['expression'])
+    if abs(value)<=inequality['bound']:raise ValueError('the state satisfies this bound')
+    if 'pairwise_control_compatible' in certificate:
+        if certificate['pairwise_control_compatible'] is not True:
+            raise ValueError('invalid pairwise compatibility claim')
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        permutation=adjacent_time_reversal(certificate['hole'])
+        for values in (state,[state[i] for i in permutation]):
+            if not adjacent_control_pair_audit(certificate['hole'],values)['compatible']:
+                raise ValueError('a pair of recovery rows already refuses this state')
+    return value
+
+
+def _two_control_solve(tables,variables):
+    """Exact two-SAT with replayable implication paths, not search exhaustion."""
+    graph=[[] for _ in range(2*variables)]
+    for row,(inputs,allowed) in enumerate(tables):
+        if len(inputs)>2 or len(set(inputs))!=len(inputs):
+            raise ValueError('require at most two distinct controls per row')
+        if any(type(i) is not int or not 0<=i<variables for i in inputs):
+            raise ValueError('invalid control index')
+        if not inputs and not allowed:return dict(status='refused',empty_row=row)
+        for word in range(1<<len(inputs)):
+            if word in allowed:continue
+            for j,i in enumerate(inputs):
+                other=1-j if len(inputs)==2 else j
+                source=2*i+(word>>j&1)
+                target=2*inputs[other]+1-(word>>other&1)
+                graph[source].append((target,row,word))
+    # All 92 literal closures are small. Retaining predecessor edges gives
+    # short proofs without relying on SCC numbering or solver conventions.
+    closures=[];parents=[]
+    for start in range(2*variables):
+        parent={start:None};queue=[start]
+        for source in queue:
+            for target,row,word in graph[source]:
+                if target not in parent:
+                    parent[target]=(source,row,word);queue.append(target)
+        closures.append(set(parent));parents.append(parent)
+    def path(start,end):
+        result=[]
+        while end!=start:
+            source,row,word=parents[start][end]
+            result.append([source,end,row,word]);end=source
+        return result[::-1]
+    for start in range(0,2*variables,2):
+        if start+1 in closures[start] and start in closures[start+1]:
+            return dict(status='refused',start=start,
+                        paths=[path(start,start+1),path(start+1,start)])
+    chosen=set()
+    for i in range(variables):
+        if 2*i in chosen or 2*i+1 in chosen:continue
+        for bit in (0,1):
+            trial=chosen|closures[2*i+bit]
+            if all(literal^1 not in trial for literal in trial):
+                chosen=trial;break
+        else:raise AssertionError('consistent implication closures failed to extend')
+    bits=sum((2*i+1 in chosen)<<i for i in range(variables))
+    if any(sum((bits>>i&1)<<j for j,i in enumerate(inputs)) not in allowed
+           for inputs,allowed in tables):
+        raise AssertionError('two-SAT output fails an original table')
+    return dict(status='successor',control_bits=hex(bits))
+
+
+def _verify_two_control_proof(tables,variables,proof):
+    """Replay clauses only; no implication search or satisfiability solver."""
+    if any(len(inputs)>2 for inputs,allowed in tables):raise ValueError('wide control row')
+    if proof.get('status')=='successor':
+        encoded=proof.get('control_bits')
+        if not isinstance(encoded,str) or not encoded.startswith('0x'):
+            raise ValueError('invalid control bits')
+        bits=int(encoded,16)
+        if bits<0 or bits.bit_length()>variables:raise ValueError('too many control bits')
+        if any(sum((bits>>i&1)<<j for j,i in enumerate(inputs)) not in allowed
+               for inputs,allowed in tables):raise ValueError('controls fail an original table')
+        return True
+    if proof.get('status')!='refused':raise ValueError('unknown control result')
+    if 'empty_row' in proof:
+        row=proof['empty_row']
+        if type(row) is not int or not 0<=row<len(tables) or tables[row]!=([],[]):
+            raise ValueError('invalid empty uncontrolled row')
+        return True
+    start=proof.get('start')
+    if type(start) is not int or not 0<=start<2*variables or start%2:
+        raise ValueError('invalid conflicting literal')
+    paths=proof.get('paths')
+    if not isinstance(paths,list) or len(paths)!=2:raise ValueError('require both implication paths')
+    for route,begin,end in zip(paths,(start,start^1),(start^1,start)):
+        current=begin
+        for source,target,row,word in route:
+            if (any(type(v) is not int for v in (source,target,row,word)) or
+                    source!=current or not 0<=row<len(tables)):
+                raise ValueError('invalid implication edge')
+            inputs,allowed=tables[row]
+            if not inputs or not 0<=word<1<<len(inputs) or word in allowed:
+                raise ValueError('the row does not forbid this control word')
+            edges=[]
+            for j,i in enumerate(inputs):
+                other=1-j if len(inputs)==2 else j
+                edges.append((2*i+(word>>j&1),2*inputs[other]+1-(word>>other&1)))
+            if (source,target) not in edges:raise ValueError('invalid clause implication')
+            current=target
+        if current!=end:raise ValueError('incomplete contradiction path')
+    return True
+
+
+def adjacent_two_control_successor(hole,state):
+    """Decide every fresh-control assignment where all driver rows have width <=2.
+
+    This is a complete fixed-state interior successor decision, not a test
+    of physical endpoints or of which states can occur in a complete pair.
+    """
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit signs')
+    driver=adjacent_integral_driver(hole)
+    tables=[_adjacent_control_table(row,state) for row in driver['recoveries']]
+    if any(table is None or len(table[0])>2 for table in tables):
+        raise ValueError('not every recovery has at most two fresh controls')
+    result=dict(kind='moving-adjacent-two-control-v1',hole=hole,
+                state_bits=hex(sum((v==-1)<<i for i,v in enumerate(state))),
+                proof=_two_control_solve(tables,46),
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_two_control_successor(result)
+    return result
+
+
+def verify_adjacent_two_control_successor(certificate):
+    if (certificate.get('kind')!='moving-adjacent-two-control-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped two-control result')
+    encoded=certificate.get('state_bits')
+    if not isinstance(encoded,str) or not encoded.startswith('0x') or len(encoded)>103:
+        raise ValueError('invalid source bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>402:raise ValueError('too many source bits')
+    state=[1-2*(bits>>i&1) for i in range(402)]
+    driver=adjacent_integral_driver(certificate['hole'])
+    tables=[_adjacent_control_table(row,state) for row in driver['recoveries']]
+    if any(table is None or len(table[0])>2 for table in tables):raise ValueError('wide control row')
+    _verify_two_control_proof(tables,46,certificate['proof'])
+    if certificate['proof']['status']=='successor':
+        controls=int(certificate['proof']['control_bits'],16)
+        following=adjacent_driver_step(driver,state,[1-2*(controls>>i&1) for i in range(46)])
+        if any(abs(v)!=1 for v in following):raise ValueError('nonunit successor')
+        keys,rows,_=adjacent_phase_system(certificate['hole'],2,2)
+        values=[v for pair in zip(state,following) for v in pair]
+        if any(sum(c*values[i] for i,c in row.items()) for row in rows):
+            raise ValueError('successor fails an original shell equation')
+    return True
+
+
+def adjacent_control_rounding_structure(hole=97):
+    result=dict(kind='moving-adjacent-control-rounding-v1',hole=hole,
+                fixed_state_real_box_equivalent=True,
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_control_rounding_structure(result)
+    return result
+
+
+def verify_adjacent_control_rounding_structure(certificate):
+    """Check the difference-control hypotheses of the rounding lemma."""
+    if (certificate.get('kind')!='moving-adjacent-control-rounding-v1' or
+            certificate.get('fixed_state_real_box_equivalent') is not True or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped unit-rounding structure')
+    driver=adjacent_integral_driver(certificate['hole'])
+    for row in driver['recoveries']:
+        coefficients=[c for i,c in row['expression'] if i%2]
+        if (len(coefficients)>2 or any(abs(c)!=1 for c in coefficients) or
+                len(coefficients)==2 and sum(coefficients)!=0):
+            raise ValueError('recovery is not a unit coefficient or a control difference')
+        # This parity is also checked with the original-row identities.
+        if sum(c for i,c in row['expression'])%2!=1:
+            raise ValueError('recovery does not preserve odd values')
+    return True
+
+
+def adjacent_round_controls(certificate,state,controls):
+    """Round an exact real-box successor with one common threshold at zero.
+
+    Accept rationals only: no approximate feasibility assertion is trusted.
+    The source stays fixed. This is not rounding an entire path at once.
+    """
+    verify_adjacent_control_rounding_structure(certificate)
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit source signs')
+    if (len(controls)!=46 or any(type(v) not in (int,Fraction) or not -1<=v<=1
+                                for v in controls)):
+        raise ValueError('require 46 exact rational controls in the unit interval')
+    driver=adjacent_integral_driver(certificate['hole'])
+    values={2*i:v for i,v in enumerate(state)}
+    values.update({2*(356+i)+1:v for i,v in enumerate(controls)})
+    if any(abs(sum(c*values[i] for i,c in row['expression']))>1
+           for row in driver['recoveries']):
+        raise ValueError('the rational successor is outside the unit box')
+    rounded=[-1 if v<0 else 1 for v in controls]
+    following=adjacent_driver_step(driver,state,rounded)
+    if any(abs(v)!=1 for v in following):raise AssertionError('unit-rounding lemma failed')
+    return rounded
+
+
+def _difference_control_decision(control_rows,constants,variables):
+    """Exact potentials or a violated norm cut from a negative cycle.
+
+    Every inequality is x_target-x_source <= 1-sign*constant. Box
+    edges use a reference potential. Cycle weights telescope, leaving
+    an integer combination of recovery rows; no floating point is used.
+    """
+    if len(control_rows)!=len(constants):raise ValueError('mismatched control rows')
+    reference=variables;edges=[]
+    for row,(B,c) in enumerate(zip(control_rows,constants)):
+        if (type(c) is not int or (c+sum(B.values()))%2!=1 or len(B)>2 or
+                any(type(i) is not int or not 0<=i<variables or type(a) is not int or abs(a)!=1
+                    for i,a in B.items()) or len(B)==2 and sum(B.values())!=0):
+            raise ValueError('require integral odd-preserving difference rows')
+        if not B:
+            if abs(c)>1:return dict(status='refused',weights=[[row,1 if c>0 else -1]])
+            continue
+        for sign in (-1,1):
+            positive=next((i for i,a in B.items() if sign*a==1),reference)
+            negative=next((i for i,a in B.items() if sign*a==-1),reference)
+            edges.append((negative,positive,1-sign*c,row,sign))
+    for i in range(variables):
+        edges.extend(((reference,i,1,None,0),(i,reference,1,None,0)))
+    size=variables+1;distance=[0]*size;parent=[None]*size
+    for iteration in range(size):
+        changed=None
+        for eid,(source,target,cost,row,sign) in enumerate(edges):
+            candidate=distance[source]+cost
+            if candidate<distance[target]:
+                distance[target]=candidate;parent[target]=eid;changed=target
+        if changed is None:
+            controls=[-1 if distance[i]<distance[reference] else 1 for i in range(variables)]
+            if any(abs(c+sum(a*controls[i] for i,a in B.items()))!=1
+                   for B,c in zip(control_rows,constants)):
+                raise AssertionError('potential rounding failed a recovery')
+            return dict(status='successor',controls=controls)
+    current=changed
+    for _ in range(size):current=edges[parent[current]][0]
+    start=current;weights=defaultdict(int);cycle_cost=0
+    while True:
+        source,target,cost,row,sign=edges[parent[current]]
+        cycle_cost+=cost
+        if row is not None:weights[row]+=sign
+        current=source
+        if current==start:break
+    weights={row:w for row,w in weights.items() if w}
+    combined=defaultdict(int)
+    for row,w in weights.items():
+        for i,a in control_rows[row].items():combined[i]+=w*a
+    bound=sum(abs(w) for w in weights.values())+sum(abs(a) for a in combined.values())
+    value=sum(w*constants[row] for row,w in weights.items())
+    if cycle_cost>=0 or value<=bound:raise AssertionError('negative cycle failed to give a strict norm cut')
+    return dict(status='refused',weights=[[row,w] for row,w in sorted(weights.items())])
+
+
+def adjacent_difference_successor(hole,state):
+    """Complete fixed-source unit decision, with a reusable halfspace on failure."""
+    adjacent_control_rounding_structure(hole)
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit source signs')
+    driver=adjacent_integral_driver(hole);B=[];constants=[]
+    for rec in driver['recoveries']:
+        B.append({i//2-356:c for i,c in rec['expression'] if i%2})
+        constants.append(sum(c*state[i//2] for i,c in rec['expression'] if not i%2))
+    outcome=_difference_control_decision(B,constants,46)
+    bits=hex(sum((v==-1)<<i for i,v in enumerate(state)))
+    if outcome['status']=='refused':
+        result=dict(kind='moving-adjacent-control-bound-refusal-v1',hole=hole,
+                    state_bits=bits,inequality=adjacent_control_bound(hole,outcome['weights']),
+                    literal_existence_decided=False,all_pairs_decided=False)
+    else:
+        result=dict(kind='moving-adjacent-two-control-v1',hole=hole,state_bits=bits,
+                    proof=dict(status='successor',control_bits=hex(sum((v==-1)<<i
+                              for i,v in enumerate(outcome['controls'])))),
+                    literal_existence_decided=False,all_pairs_decided=False)
+    verify_saved(result)
+    return result
+
+
+def difference_control_lattice(control_rows, constants, variables):
+    """All unit controls as an implication lattice; bit one means sign +1.
+
+    This compiles every row by at most four exact substitutions. It never
+    substitutes a successful example for the full successor relation.
+    """
+    if type(variables) is not int or variables < 0 or len(control_rows)!=len(constants):
+        raise ValueError('require a nonnegative control count and matching rows')
+    implications=set(); fixed={}; impossible=False
+    for B,c in zip(control_rows,constants):
+        if (type(c) is not int or (c+sum(B.values()))%2!=1 or len(B)>2 or
+                any(type(i) is not int or not 0<=i<variables or type(a) is not int
+                    or abs(a)!=1 for i,a in B.items()) or
+                len(B)==2 and sum(B.values())!=0):
+            raise ValueError('require odd-preserving difference rows')
+        indices=sorted(B)
+        allowed={bits for bits in itertools.product((0,1),repeat=len(indices))
+                 if abs(c+sum(B[i]*(2*b-1) for i,b in zip(indices,bits)))==1}
+        if not allowed:
+            impossible=True; continue
+        local_fixed={}
+        for j,i in enumerate(indices):
+            values={bits[j] for bits in allowed}
+            if len(values)==1:
+                b=next(iter(values)); local_fixed[i]=b
+                if i in fixed and fixed[i]!=b:impossible=True
+                fixed[i]=b
+        local_edges=set()
+        if len(indices)==2:
+            i,j=indices
+            if (1,0) not in allowed:local_edges.add((i,j))
+            if (0,1) not in allowed:local_edges.add((j,i))
+        # Independent truth-table check of the claimed local description.
+        described={bits for bits in itertools.product((0,1),repeat=len(indices))
+                   if all(bits[indices.index(i)]==b for i,b in local_fixed.items())
+                   and all(bits[indices.index(i)]<=bits[indices.index(j)]
+                           for i,j in local_edges)}
+        if described!=allowed:raise AssertionError('row is not an implication relation')
+        implications.update(local_edges)
+    reach=[1<<i for i in range(variables)]
+    for i,j in implications:reach[i]|=1<<j
+    for k in range(variables):
+        for i in range(variables):
+            if reach[i]>>k&1:reach[i]|=reach[k]
+    ones=0; zeros=0
+    for i,b in fixed.items():
+        if b:ones|=reach[i]
+        else:
+            zeros|=sum(1<<j for j in range(variables) if reach[j]>>i&1)
+    impossible=impossible or bool(ones&zeros)
+    if impossible:return dict(status='empty',variables=variables)
+    # Mutual reachability identifies controls that must always agree.
+    components=[]; unseen=set(range(variables))
+    while unseen:
+        i=min(unseen)
+        component=[j for j in sorted(unseen) if reach[i]>>j&1 and reach[j]>>i&1]
+        components.append(component); unseen.difference_update(component)
+    least=[2*(ones>>i&1)-1 for i in range(variables)]
+    greatest=[1-2*(zeros>>i&1) for i in range(variables)]
+    return dict(status='lattice',variables=variables,
+                implications=[list(edge) for edge in sorted(implications)],
+                forced_one=[i for i in range(variables) if ones>>i&1],
+                forced_zero=[i for i in range(variables) if zeros>>i&1],
+                components=components,least=least,greatest=greatest)
+
+
+def difference_lattice_words(lattice, limit=256):
+    """Enumerate at most limit controls; completeness requires exhausting a probe.
+
+    Branches propagate implications in both directions. The cap is never
+    interpreted as exhaustion. Controls are listed in increasing bit order.
+    """
+    if type(limit) is not int or limit<0:raise ValueError('require a nonnegative limit')
+    if lattice['status']=='empty':return dict(words=[],complete=True)
+    n=lattice['variables'];all_bits=(1<<n)-1
+    reach=[1<<i for i in range(n)]
+    for i,j in lattice['implications']:reach[i]|=1<<j
+    for k in range(n):
+        for i in range(n):
+            if reach[i]>>k&1:reach[i]|=reach[k]
+    before=[sum(1<<j for j in range(n) if reach[j]>>i&1) for i in range(n)]
+    initial_one=sum(1<<i for i in lattice['forced_one'])
+    initial_zero=sum(1<<i for i in lattice['forced_zero'])
+    def visit(one,zero):
+        if one&zero:return
+        unknown=all_bits^(one|zero)
+        if not unknown:
+            yield one;return
+        i=unknown.bit_length()-1
+        yield from visit(one,zero|before[i])
+        yield from visit(one|reach[i],zero)
+    iterator=visit(initial_one,initial_zero)
+    words=list(itertools.islice(iterator,limit))
+    complete=next(iterator,None) is None
+    return dict(words=[hex(word) for word in words],complete=complete)
+
+
+def adjacent_successor_lattice(hole,state):
+    """Compactly describe every successor, without imposing future viability."""
+    adjacent_control_rounding_structure(hole)
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit source signs')
+    driver=adjacent_integral_driver(hole); rows=[]; constants=[]
+    for rec in driver['recoveries']:
+        rows.append({i//2-356:c for i,c in rec['expression'] if i%2})
+        constants.append(sum(c*state[i//2] for i,c in rec['expression'] if not i%2))
+    lattice=difference_control_lattice(rows,constants,46)
+    if lattice['status']=='lattice':
+        for extremum in ('least','greatest'):
+            following=adjacent_driver_step(driver,state,lattice[extremum])
+            if any(abs(v)!=1 for v in following):raise AssertionError('invalid lattice extremum')
+    return lattice
+
+
+def adjacent_lattice_example(limit=256):
+    seed=adjacent_two_control_example()
+    bits=int(seed['state_bits'],16)
+    state=[1-2*(bits>>i&1) for i in range(402)]
+    lattice=adjacent_successor_lattice(97,state)
+    return dict(kind='moving-adjacent-successor-lattice-v1',hole=97,
+                state_bits=seed['state_bits'],lattice=lattice,
+                enumeration=difference_lattice_words(lattice,limit),limit=limit,
+                literal_existence_decided=False,all_pairs_decided=False)
+
+
+def verify_adjacent_successor_lattice(saved):
+    if (saved.get('kind')!='moving-adjacent-successor-lattice-v1' or
+            saved.get('literal_existence_decided') is not False or
+            saved.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped successor lattice')
+    bits=int(saved['state_bits'],16)
+    if bits<0 or bits.bit_length()>402:raise ValueError('invalid source signs')
+    state=[1-2*(bits>>i&1) for i in range(402)]
+    lattice=adjacent_successor_lattice(saved['hole'],state)
+    if saved['lattice']!=lattice:raise ValueError('lattice differs from exact recovery truth tables')
+    enumeration=difference_lattice_words(lattice,saved['limit'])
+    if saved['enumeration']!=enumeration:raise ValueError('incorrect enumeration or exhaustion claim')
+    driver=adjacent_integral_driver(saved['hole'])
+    keys,rows,_=adjacent_phase_system(saved['hole'],2,2)
+    for word in enumeration['words']:
+        controls=int(word,16)
+        # The driver was verified above; evaluate it without redoing the
+        # same structural proof once per emitted word.
+        coordinates={2*i:v for i,v in enumerate(state)}
+        coordinates.update({2*(356+i)+1:2*(controls>>i&1)-1 for i in range(46)})
+        for recovery in driver['recoveries']:
+            coordinates[recovery['target']]=sum(c*coordinates[i] for i,c in recovery['expression'])
+        following=[coordinates[2*i+1] for i in range(402)]
+        values=[v for pair in zip(state,following) for v in pair]
+        if any(abs(v)!=1 for v in following) or any(
+                sum(c*values[i] for i,c in row.items()) for row in rows):
+            raise ValueError('enumerated successor fails an original shell row')
+    return dict(verified=True,hole=saved['hole'],
+                enumerated_successors=len(enumeration['words']),complete=enumeration['complete'],
+                literal_existence_decided=False,all_pairs_decided=False,
+                claim='all successors of this fixed source are described; no future or endpoint claim')
+
+
+def adjacent_two_control_example():
+    """A zero-observable, even-phase source with a genuine one-edge continuation.
+
+    Its failed two-step pair tests prevent a second successor, so this is
+    a positive control for the oracle, never a proposed construction seed.
+    """
+    bits=int('16ad29251a7af07a2131b9bc87dd324940aeafb8ffbf756384e86337e02d190167aa295c1798a842df550d15365b14cef2fc8',16)
+    return adjacent_two_control_successor(97,[1-2*(bits>>i&1) for i in range(402)])
+
+
+def _adjacent_orientation_coefficients(hole):
+    if type(hole) is not int or not 1<=hole<=98:
+        raise ValueError('orientation formula requires holes 1..98')
+    return [(-1 if q<hole else 0) if a==1 and s==1 else
+            (1 if q<=hole else 0) if a==1 else s
+            for a,q,s in moving_folded_labels()]
+
+
+def _adjacent_moment_coefficients(hole):
+    _adjacent_orientation_coefficients(hole)
+    result=[]
+    for a,q,s in moving_folded_labels():
+        C={1:hole-101,2:123-hole,3:179-hole}[a]
+        value=C-q if s==1 else -C-1+q
+        if a==1:value+=201*(q>=hole) if s==1 else -201*(q>hole)
+        result.append(value)
+    return result
+
+
+def _adjacent_alternating_coefficients(hole):
+    _adjacent_orientation_coefficients(hole)
+    if not hole%2:raise ValueError('alternating identity requires an odd moving hole')
+    return [s*(-1 if q%2 else 1) for a,q,s in moving_folded_labels()]
+
+
+def adjacent_orientation_endpoint(hole=97):
+    """Original-row identities force S=W=D=0 at every moving hole 1..98."""
+    _adjacent_orientation_coefficients(hole)
+    left,stencils,_=moving_folded_stencils(hole)
+    weights=[-c for Q,c in left]
+    weights += [-2 for row in stencils.values() if {k[-1] for k in row}=={-1,0}]
+    saved=dict(kind='moving-adjacent-orientation-endpoint-v1',hole=hole,
+               minimum_half=4,
+               row_weights=[[i,c] for i,c in enumerate(weights) if c],
+               literal_existence_decided=False,all_pairs_decided=False)
+    def encode(values):return [[i,c] for i,c in enumerate(values) if c]
+    incoming=[key for key,row in stencils.items() if {k[-1] for k in row}=={-1,0}]
+    outgoing=[key for key,row in stencils.items() if {k[-1] for k in row}=={0,1}]
+    _,_,right=moving_folded_stencils(hole)
+    saved.update(drift_weights=encode([-1 if {k[-1] for k in row}=={0,1} else 0
+                                       for row in stencils.values()]),
+                 sum_weights=encode([-u for Q,u in stencils]),
+                 moment_weights=encode([Q-(100 if {k[-1] for k in row}=={-1,0} else 101)
+                                         for (Q,u),row in stencils.items()]),
+                 prefix_balance_weights=encode([2*Q-201 for Q,c in left]+
+                                               [2*Q-201 for Q,u in incoming]),
+                 suffix_moment_weights=encode([101-Q for Q,u in outgoing]+
+                                              [101-Q-(u==1) for Q,u in right]))
+    if hole%2:
+        saved['alternating_prefix_weights']=encode([(-1)**(Q+c) for Q,c in left]+
+                                                   [(-1)**Q for Q,u in incoming])
+        saved['alternating_transfer_weights']=encode([u*(-1)**Q for Q,u in stencils])
+    verify_adjacent_orientation_endpoint(saved)
+    return saved
+
+
+def verify_adjacent_orientation_endpoint(saved):
+    if (saved.get('kind')!='moving-adjacent-orientation-endpoint-v1' or
+            type(saved.get('minimum_half')) is not int or saved['minimum_half']!=4 or
+            saved.get('literal_existence_decided') is not False or
+            saved.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped orientation endpoint identity')
+    coefficients=_adjacent_orientation_coefficients(saved['hole'])
+    blocks=adjacent_transfer_blocks(saved['hole']);labels=moving_folded_labels()
+    moment=_adjacent_moment_coefficients(saved['hole'])
+    def target(values,level):return {('slice',*k,level):v for k,v in zip(labels,values) if v}
+    def difference(values):
+        return {**target(values,1),**target([-v for v in values],0)}
+    checks=[('prefix','row_weights',target([v+2 for v in coefficients],2)),
+            ('transition','drift_weights',{**target(coefficients,1),
+                                          **target([1-v for v in coefficients],0)}),
+            ('transition','sum_weights',difference([1]*402)),
+            ('transition','moment_weights',difference(moment)),
+            ('prefix','prefix_balance_weights',target([1+2*v for v in moment],2)),
+            ('suffix','suffix_moment_weights',target(moment,0))]
+    if saved['hole']%2:
+        alternating=_adjacent_alternating_coefficients(saved['hole'])
+        checks += [('prefix','alternating_prefix_weights',target(alternating,2)),
+                   ('transition','alternating_transfer_weights',
+                    {**target(alternating,1),**target(alternating,0)})]
+    for block,field,wanted in checks:
+        rows=blocks[block];actual=defaultdict(int);seen=set()
+        for i,c in saved[field]:
+            if (type(i) is not int or not 0<=i<len(rows) or i in seen or
+                    type(c) is not int or not c):raise ValueError('invalid original-row weight')
+            seen.add(i)
+            for k,v in rows[i].items():actual[k]+=c*v
+        if {k:v for k,v in actual.items() if v}!=wanted:
+            raise ValueError('original-row combination fails '+field)
+    return dict(verified=True,hole=saved['hole'],alternating_zero_forced=bool(saved['hole']%2),literal_existence_decided=False,
+                all_pairs_decided=False,
+                claim='for L>=4, original-row identities force S=W=D=0 on transfer states 2..L-1 of a complete signing at this moving hole; unit existence remains open')
+
+
+def adjacent_orientation_drift(certificate):
+    """An exact additional observable D(next)=D(previous)-S(previous).
+
+    All fresh controls cancel as integers. This is a linear identity, not
+    a unit continuation, an absolute phase law, or an endpoint condition.
+    """
+    verify_adjacent_integral_driver(certificate)
+    weights=_adjacent_orientation_coefficients(certificate['hole'])
+    pulled=defaultdict(int)
+    for rec in certificate['recoveries']:
+        for i,c in rec['expression']:
+            pulled[i]+=weights[rec['target']//2]*c
+    for j in range(356,402):pulled[2*j+1]+=weights[j]
+    wanted={2*j:v-1 for j,v in enumerate(weights) if v!=1}
+    if {i:c for i,c in pulled.items() if c}!=wanted:
+        raise ValueError('orientation drift fails an original-row recovery identity')
+    return weights
+
+
+def _ternary_krylov_ranks(columns, controls, steps):
+    """Ranks of [B,AB,...] over F_3; columns use disjoint trit bitsets."""
+    size=len(columns)
+    if type(steps) is not int or steps<1:raise ValueError('positive step count required')
+    for a,b in itertools.chain(columns,controls):
+        if (type(a) is not int or type(b) is not int or a<0 or b<0 or
+                a&b or (a|b).bit_length()>size):
+            raise ValueError('invalid ternary column')
+    basis={};vectors=list(controls);ranks=[]
+    for step in range(steps):
+        for a,b in vectors:
+            while a|b:
+                pivot=(a|b).bit_length()-1
+                if pivot not in basis:
+                    basis[pivot]=(b,a) if b>>pivot&1 else (a,b)
+                    break
+                c,d=basis[pivot]
+                a,b=ternary_add((a,b),(d,c) if a>>pivot&1 else (c,d))
+        ranks.append(len(basis))
+        if step==steps-1:break
+        following=[]
+        for a,b in vectors:
+            value=(0,0)
+            for mask,negative in ((a,False),(b,True)):
+                while mask:
+                    bit=mask&-mask;index=bit.bit_length()-1;mask-=bit
+                    column=columns[index]
+                    value=ternary_add(value,column[::-1] if negative else column)
+            following.append(value)
+        vectors=following
+    return ranks
+
+
+def _adjacent_rational_reachability_data(hole):
+    if type(hole) is not int or not 79<=hole<=98:
+        raise ValueError('rational reachability currently covers holes 79..98')
+    driver=adjacent_integral_driver(hole)
+    drift=adjacent_orientation_drift(driver)
+    laws=adjacent_conserved_observables(driver)
+    observables=[[1]*402,laws['moment'],drift]
+    if hole%2:observables.append(laws['alternating'])
+    # Independence modulo three also proves independence over Q.
+    independent=ternary_echelon([{i:c for i,c in enumerate(w) if c}
+                                for w in observables])
+    if not independent['complete'] or len(independent['basis'])!=len(observables):
+        raise AssertionError('dependent claimed observable family')
+    source=[{} for _ in range(402)];controls=[{} for _ in range(46)]
+    for rec in driver['recoveries']:
+        for i,c in rec['expression']:
+            column=controls[i//2-356] if i%2 else source[i//2]
+            column[rec['target']//2]=c
+    for i in range(46):controls[i][356+i]=1
+    def encode(column):
+        return (sum(1<<i for i,c in column.items() if c%3==1),
+                sum(1<<i for i,c in column.items() if c%3==2))
+    ranks=_ternary_krylov_ranks(list(map(encode,source)),list(map(encode,controls)),12)
+    rank=402-len(observables)
+    if ranks[-1]!=rank:
+        raise AssertionError('modular lower bound does not reach rational upper bound')
+    return ranks,rank
+
+
+def adjacent_rational_reachability(hole=97):
+    """Complete rational reachability, expressly dropping unit/phase/end bounds.
+
+    This theorem locates the nonlinear obstacle; it is not a signing result.
+    Twelve unrestricted rational control words connect exactly the states obeying
+    the S,W,D (and odd-hole A) evolution laws.
+    """
+    ranks,rank=_adjacent_rational_reachability_data(hole)
+    return dict(kind='moving-adjacent-rational-reachability-v1',hole=hole,
+                steps=12,rank=rank,ranks_mod_three=ranks,rational_only=True,
+                unit_bounds_included=False,phase_constraints_included=False,
+                physical_endpoints_included=False,literal_existence_decided=False,
+                all_pairs_decided=False)
+
+
+def verify_adjacent_rational_reachability(saved):
+    if (saved.get('kind')!='moving-adjacent-rational-reachability-v1' or
+            saved.get('rational_only') is not True or
+            any(saved.get(k) is not False for k in
+                ('unit_bounds_included','phase_constraints_included',
+                 'physical_endpoints_included','literal_existence_decided','all_pairs_decided')) or
+            type(saved.get('steps')) is not int or saved['steps']!=12):
+        raise ValueError('require the scoped twelve-step rational theorem')
+    ranks,rank=_adjacent_rational_reachability_data(saved['hole'])
+    actual=saved.get('ranks_mod_three')
+    if (type(saved.get('rank')) is not int or saved['rank']!=rank or
+            not isinstance(actual,list) or any(type(v) is not int for v in actual) or actual!=ranks):
+        raise ValueError('incorrect exact rank computation')
+    return dict(verified=True,hole=saved['hole'],steps=12,rank=rank,
+                rational_only=True,literal_existence_decided=False,all_pairs_decided=False,
+                claim='S,W,D and odd-hole A completely characterize rational interior reachability; unit signs, phases and endpoints remain required')
+
+
 def adjacent_conserved_observables(certificate):
     """Check a conserved moment at every hole; an alternating sum at odd holes.
 
@@ -2444,19 +3621,27 @@ def verify_adjacent_phase_signs(certificate):
         if type(certificate['zero_moment_slices']) is not bool:
             raise ValueError('invalid zero-moment claim')
         if certificate['zero_moment_slices']:
-            coefficients=adjacent_conserved_observables(
-                adjacent_integral_driver(certificate['hole']))['moment']
+            coefficients=_adjacent_moment_coefficients(certificate['hole'])
             weights=dict(zip(moving_folded_labels(),coefficients))
             for level in range(certificate['first'],certificate['first']+certificate['levels']):
                 if sum(weights[key[:-1]]*(1-2*(bits>>i&1))
                        for i,key in enumerate(keys) if key[-1]==level):
                     raise ValueError('adjacent window has a nonzero conserved moment')
+    if 'zero_orientation_slices' in certificate:
+        if type(certificate['zero_orientation_slices']) is not bool:
+            raise ValueError('invalid zero-orientation claim')
+        if certificate['zero_orientation_slices']:
+            weights=dict(zip(moving_folded_labels(),
+                             _adjacent_orientation_coefficients(certificate['hole'])))
+            for level in range(certificate['first'],certificate['first']+certificate['levels']):
+                if sum(weights[key[:-1]]*(1-2*(bits>>i&1))
+                       for i,key in enumerate(keys) if key[-1]==level):
+                    raise ValueError('adjacent window has a nonzero orientation sum')
     if 'zero_alternating_slices' in certificate:
         if type(certificate['zero_alternating_slices']) is not bool:
             raise ValueError('invalid zero alternating-sum claim')
         if certificate['zero_alternating_slices']:
-            coefficients=adjacent_conserved_observables(
-                adjacent_integral_driver(certificate['hole']))['alternating']
+            coefficients=_adjacent_alternating_coefficients(certificate['hole'])
             if coefficients is None:raise ValueError('alternating law requires an odd hole')
             weights=dict(zip(moving_folded_labels(),coefficients))
             for level in range(certificate['first'],certificate['first']+certificate['levels']):
@@ -2517,6 +3702,26 @@ def adjacent_zero_observable_example(hole=43,first=2):
     return certificate
 
 
+def adjacent_four_zero_example(first=2):
+    """An actual h97 unit edge in S=W=D=A=0, not an extendible path.
+
+    Its first state fails paired two-step gates and its second state has
+    control-free successor obstructions. Every requested absolute phase
+    is replayed. Only even starts are asserted; interior reversal alone
+    does not supply the absolute phases at odd starts.
+    """
+    if type(first) is not int or first<2 or first%2:
+        raise ValueError('the recorded four-zero edge requires an even first level')
+    encoded='0x6bda42718c4a3f4cc03bcedf01c02ff6bfe34841cff703f0fc58bed8cd40f0e0fb3793fde085b7f309213f397e5faae7df70c70ac4aa203686b72b105543c5b0713cbab201883021d5b615c64888edb2b1e19d864d1165acb9ee4822a5cc796fc1f672534'
+    bits=int(encoded,16)
+    saved=dict(kind='moving-adjacent-phase-signs-v1',hole=97,levels=2,first=first,
+               minimum_half=first+2,variables=804,status='local_signing',bits=hex(bits),
+               balanced_slices=True,zero_moment_slices=True,zero_alternating_slices=True,
+               zero_orientation_slices=True,literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_phase_signs(saved)
+    return saved
+
+
 def adjacent_phase_example(hole=43, first=3):
     """Restrict a checked open witness to its fully constrained middle levels.
 
@@ -2537,10 +3742,11 @@ def adjacent_phase_example(hole=43, first=3):
 
 
 def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000,
-                          balanced=False,zero_moment=False,zero_alternating=False):
+                          balanced=False,zero_moment=False,zero_alternating=False,
+                          zero_orientation=False):
     """Bounded standard-library search of actual consecutive transfer states."""
     if (type(balanced) is not bool or type(zero_moment) is not bool or
-            type(zero_alternating) is not bool or
+            type(zero_alternating) is not bool or type(zero_orientation) is not bool or
             type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
             or type(nodes) is not int or nodes<1):
         raise ValueError('require positive finite search limits')
@@ -2552,13 +3758,18 @@ def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000,
         rows += [{i:1 for i,key in enumerate(keys) if key[-1]==level}
                  for level in range(first,first+levels)]
     if zero_moment:
-        coefficients=adjacent_conserved_observables(adjacent_integral_driver(hole))['moment']
+        coefficients=_adjacent_moment_coefficients(hole)
         weights=dict(zip(moving_folded_labels(),coefficients))
         rows += [{i:weights[key[:-1]] for i,key in enumerate(keys)
                   if key[-1]==level and weights[key[:-1]]}
                  for level in range(first,first+levels)]
+    if zero_orientation:
+        weights=dict(zip(moving_folded_labels(),_adjacent_orientation_coefficients(hole)))
+        rows += [{i:weights[key[:-1]] for i,key in enumerate(keys)
+                  if key[-1]==level and weights[key[:-1]]}
+                 for level in range(first,first+levels)]
     if zero_alternating:
-        coefficients=adjacent_conserved_observables(adjacent_integral_driver(hole))['alternating']
+        coefficients=_adjacent_alternating_coefficients(hole)
         if coefficients is None:raise ValueError('alternating law requires an odd hole')
         weights=dict(zip(moving_folded_labels(),coefficients))
         rows += [{i:weights[key[:-1]] for i,key in enumerate(keys) if key[-1]==level}
@@ -2578,6 +3789,7 @@ def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000,
     if balanced:result['balanced_slices']=True
     if zero_moment:result['zero_moment_slices']=True
     if zero_alternating:result['zero_alternating_slices']=True
+    if zero_orientation:result['zero_orientation_slices']=True
     remaining=seconds-(time.monotonic()-started)
     if remaining<=0:return result
     engine=make_engine(len(keys),rows,reduced_binary_basis(basis),remaining,nodes,'connected')
@@ -5303,6 +6515,60 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-adjacent-orientation-endpoint-v1':
+        return verify_adjacent_orientation_endpoint(saved)
+    if saved.get('kind')=='moving-adjacent-rational-reachability-v1':
+        return verify_adjacent_rational_reachability(saved)
+    if saved.get("kind")=="moving-adjacent-successor-lattice-v1":
+        return verify_adjacent_successor_lattice(saved)
+    if saved.get('kind')=='moving-adjacent-control-rounding-v1':
+        verify_adjacent_control_rounding_structure(saved)
+        return dict(verified=True,hole=saved['hole'],
+                    fixed_state_real_box_equivalent=True,literal_existence_decided=False,
+                    all_pairs_decided=False,
+                    claim='a fixed unit source has a unit interior successor iff it has a real-box successor')
+    if saved.get('kind')=='moving-adjacent-two-control-v1':
+        verify_adjacent_two_control_successor(saved)
+        return dict(verified=True,hole=saved['hole'],status=saved['proof']['status'],
+                    literal_existence_decided=False,all_pairs_decided=False,
+                    claim='complete fixed-state interior unit-successor decision; physical endpoints are excluded')
+    if saved.get('kind')=='moving-adjacent-control-bound-refusal-v1':
+        value=verify_adjacent_control_bound_refusal(saved)
+        return dict(verified=True,hole=saved['hole'],value=value,
+                    bound=saved['inequality']['bound'],literal_existence_decided=False,
+                    all_pairs_decided=False,
+                    claim='this state has no unit successor; the same bound excludes every violating state')
+    if saved.get('kind')=='moving-adjacent-control-bound-v1':
+        verify_adjacent_control_bound(saved)
+        return dict(verified=True,hole=saved['hole'],bound=saved['bound'],
+                    literal_existence_decided=False,all_pairs_decided=False,
+                    claim='necessary source-state inequality for every unit interior transition')
+    if saved.get('kind')=='moving-adjacent-control-refusal-v1':
+        verify_adjacent_control_refusal(saved)
+        return dict(verified=True,hole=saved['hole'],forced_inputs=len(saved['trace']),
+                    projection_horizon_checked=saved.get('projection_horizon'),
+                    individual_rows_checked=saved.get('rowwise_tables_nonempty',False),
+                    claim='this fixed unit state has no interior unit successor; all fresh third-arm assignments are covered by forced-input propagation',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-adjacent-pair-refusal-v1':
+        value=verify_adjacent_pair_refusal(saved)
+        return dict(verified=True,hole=saved['path']['hole'],
+                    initial_level=saved['path']['first'],passing_unit_gates=len(saved['unit_gates']['gates']),
+                    forced_pair_value=value,
+                    claim='this initial state has an interior unit successor but no two-step interior unit extension, despite passing the emitted individual-coordinate two-step tests',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-adjacent-future-pair-v1':
+        verify_adjacent_future_pair_gates(saved)
+        return dict(verified=True,hole=saved['hole'],horizon=saved['horizon'],
+                    gates_checked=len(saved['gates']),
+                    claim='necessary paired-coordinate future tests from original interior rows; passing does not prove an extension; physical endpoints excluded',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-adjacent-future-unit-v1':
+        verify_adjacent_future_unit_gates(saved)
+        return dict(verified=True,hole=saved['hole'],horizon=saved['horizon'],
+                    gates_checked=len(saved['gates']),
+                    claim='necessary future unit tests from original interior rows; passing does not prove an extension; physical endpoints excluded',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-adjacent-right-moment-v1':
         verify_adjacent_right_moment(saved)
         return dict(verified=True,hole=saved['hole'],
@@ -5328,6 +6594,7 @@ def verify_saved(saved):
                     slice_sums=sums,
                     zero_moment_slices_checked=saved.get('zero_moment_slices',False),
                     zero_alternating_slices_checked=saved.get('zero_alternating_slices',False),
+                    zero_orientation_slices_checked=saved.get('zero_orientation_slices',False),
                     claim='finite adjacent-level path including endpoint-derived traces; physical endpoints excluded',
                     literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-periodic-phase-odd-v1':
@@ -5685,6 +6952,21 @@ def main():
     p.add_argument('--open-phase-example',action='store_true',help='emit a checked window: two centres at 19/97, three at 43 (odd start)')
     p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
     p.add_argument('--adjacent-phase-window',type=int,metavar='LEVELS',help='search all interior equations contained in consecutive folded levels')
+    p.add_argument('--adjacent-future-unit',type=int,metavar='HORIZON',help='certify new control-independent future unit tests, horizon 2..6')
+    p.add_argument('--adjacent-future-pairs',type=int,metavar='HORIZON',help='certify paired-coordinate future tests, horizon 1..6')
+    p.add_argument('--adjacent-pair-refusal-example',type=int,nargs='?',const=2,metavar='FIRST',help='emit an actual edge passing unary but failing paired future tests; even start, default 2')
+    p.add_argument('--adjacent-orientation-endpoint',action='store_true',help='prove the physical prefix forces D+2*S=0')
+    p.add_argument('--adjacent-four-zero-example',action='store_true',help='replay a unit edge in S=W=D=A=0; it is dead at both outside boundaries')
+    p.add_argument('--adjacent-rational-reachability',action='store_true',help='check the twelve-step rational interior theorem, without unit, phase or endpoint constraints')
+    p.add_argument('--adjacent-lattice-example',action='store_true',help='describe and enumerate all controls of the stored fixed source')
+    p.add_argument('--lattice-limit',type=int,default=256,help='cap emitted successor controls; exhaustion is reported explicitly')
+    p.add_argument('--adjacent-difference-example',action='store_true',help='generate a positive fixed-source difference-constraint decision')
+    p.add_argument('--adjacent-difference-control',metavar='SOURCE_BITS',help='exact fixed-source decision with an original-row halfspace refusal')
+    p.add_argument('--adjacent-control-rounding',action='store_true',help='certify the fixed-source unit-rounding property of difference controls')
+    p.add_argument('--adjacent-two-control-example',action='store_true',help='emit a checked one-edge positive control at hole 97; not two-step extendible')
+    p.add_argument('--adjacent-two-control',metavar='SOURCE_BITS',help='exact interior successor decision when each recovery uses at most two fresh controls')
+    p.add_argument('--adjacent-control-bound-example',nargs='?',const='pair',choices=('pair','joint'),help='emit a source-state bound; joint passes every two-row control projection')
+    p.add_argument('--adjacent-control-refusal-example',action='store_true',help='emit a seed passing unary/pair tests but admitting no unit successor')
     p.add_argument('--adjacent-phase-example',action='store_true',help='repackage the recorded open word as a checked adjacent-level path')
     p.add_argument('--adjacent-driver',action='store_true',help='certify the integral one-step recurrence at a moving hole 24..98')
     p.add_argument('--adjacent-right-moment',action='store_true',help='certify that the physical right endpoint forces the conserved interior moment to zero')
@@ -5692,6 +6974,7 @@ def main():
     p.add_argument('--adjacent-zero-example',action='store_true',help='emit a checked one-edge path with S=W=A=0 at hole 43, either starting parity; both ends are dead')
     p.add_argument('--balanced-slices',action='store_true',help='restrict adjacent-window search to zero-sum slices')
     p.add_argument('--zero-moment-slices',action='store_true',help='restrict adjacent-window search to the conserved moment required by the right endpoint')
+    p.add_argument('--zero-orientation-slices',action='store_true',help='restrict adjacent-window search to D=0, required by the physical prefix and slice balance')
     p.add_argument('--zero-alternating-slices',action='store_true',help='at odd driver holes restrict adjacent-window search to the alternating sum required by the left endpoint')
     p.add_argument('--first-level',type=int,default=3,help='first centre in open mode, or first slice in adjacent mode')
     p.add_argument('--interior-binary-rank',action='store_true',help='certify unrestricted Laurent row rank in characteristic two')
@@ -5726,11 +7009,87 @@ def main():
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_four_zero_example:
+        certificate=adjacent_four_zero_example(args.first_level)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_orientation_endpoint:
+        certificate=adjacent_orientation_endpoint(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_rational_reachability:
+        certificate=adjacent_rational_reachability(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_lattice_example:
+        certificate=adjacent_lattice_example(args.lattice_limit)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_difference_example:
+        seed=adjacent_two_control_example();bits=int(seed['state_bits'],16)
+        certificate=adjacent_difference_successor(97,[1-2*(bits>>i&1) for i in range(402)])
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_difference_control is not None:
+        bits=int(args.adjacent_difference_control,16)
+        if bits<0 or bits.bit_length()>402:raise ValueError('source bits exceed 402 signs')
+        certificate=adjacent_difference_successor(args.hole,[1-2*(bits>>i&1) for i in range(402)])
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_control_rounding:
+        certificate=adjacent_control_rounding_structure(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_two_control_example:
+        certificate=adjacent_two_control_example()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_two_control is not None:
+        bits=int(args.adjacent_two_control,16)
+        if bits<0 or bits.bit_length()>402:raise ValueError('source bits exceed 402 signs')
+        certificate=adjacent_two_control_successor(args.hole,[1-2*(bits>>i&1) for i in range(402)])
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_control_bound_example:
+        certificate=adjacent_control_bound_example(args.adjacent_control_bound_example=='joint')
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_control_refusal_example:
+        certificate=adjacent_control_refusal_example()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_pair_refusal_example is not None:
+        certificate=adjacent_pair_refusal_example(args.adjacent_pair_refusal_example)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_future_pairs is not None:
+        certificate=adjacent_future_pair_gates(args.hole,args.adjacent_future_pairs)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_future_unit is not None:
+        certificate=adjacent_future_unit_gates(args.hole,args.adjacent_future_unit)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
     if args.adjacent_phase_window is not None:
         certificate=adjacent_phase_search(args.hole,args.adjacent_phase_window,
                                          args.first_level,args.seconds,args.nodes,
                                          balanced=args.balanced_slices,
                                          zero_moment=args.zero_moment_slices,
+                                         zero_orientation=args.zero_orientation_slices,
                                          zero_alternating=args.zero_alternating_slices)
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f)
