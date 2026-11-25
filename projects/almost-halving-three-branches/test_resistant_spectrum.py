@@ -16,6 +16,74 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_exact_integer_control_theorem_and_corruption(self):
+        saved=rs.adjacent_integer_reachability()
+        # Replay must reconstruct exact columns, not trust its producer.
+        with patch.object(rs,'adjacent_integer_reachability',side_effect=AssertionError):
+            result=rs.verify_saved(saved)
+        self.assertEqual(result['integer_saturation_index'],128)
+        self.assertTrue(result['odd_prime_obstructions_decided'])
+        self.assertFalse(result['unit_bounds_included'])
+        for field,value in [('hole',95),('stable_after',True),
+                            ('integer_saturation_index',64),('sign_residue_modulus',8),
+                            ('omitted_coordinates',[64,98,150,390]),
+                            ('excluded_control_columns',[396,398]),
+                            ('nonunit_smith_factors',[2,2,2,16]),
+                            ('odd_prime_obstructions_decided',False),
+                            ('unit_bounds_included',True),('physical_endpoints_included',True),
+                            ('literal_existence_decided',True),('all_pairs_decided',True)]:
+            with self.subTest(field=field),self.assertRaises(ValueError):
+                rs.verify_saved(dict(saved,**{field:value}))
+        with self.assertRaises(ValueError):
+            rs.verify_saved(dict(saved,minor_abs_determinant=saved['minor_abs_determinant']+2))
+        # A composite modulus with a genuine nonunit residual must not pass.
+        self.assertEqual(rs._unit_pivot_count([{0:1},{1:3}],2,15),1)
+        # Even an invertible matrix can stall without a unit entry: this helper
+        # promises only a lower bound, never a false nonsurjectivity theorem.
+        self.assertEqual(rs._unit_pivot_count([{0:3,1:5},{0:5,1:3}],2,15),0)
+        with self.assertRaises(ValueError):
+            rs._integral_kernel_projection([[2,1]],[0])
+
+    def test_sparse_determinant_against_permutation_definition(self):
+        rng=random.Random(2817)
+        for size in range(1,6):
+            for _ in range(12):
+                matrix=[[rng.randrange(-3,4) for _ in range(size)] for _ in range(size)]
+                total=0
+                for permutation in itertools.permutations(range(size)):
+                    inversions=sum(permutation[i]>permutation[j]
+                                   for i in range(size) for j in range(i+1,size))
+                    product=(-1)**inversions
+                    for i,j in enumerate(permutation):product*=matrix[i][j]
+                    total+=product
+                columns=[{i:matrix[i][j] for i in range(size) if matrix[i][j]}
+                         for j in range(size)]
+                self.assertEqual(rs._sparse_abs_determinant(columns,size),abs(total))
+
+    def test_odd_integer_target_requires_exact_observables(self):
+        # Nonzero S,D,A exercise the drift and alternating sign, rather than
+        # hiding them behind the four-zero physical restriction.
+        source=[-1]+[1]*401
+        target=source[:];driver=rs.adjacent_integral_driver(97)
+        for _ in range(9):target=rs.adjacent_driver_step(driver,target,[1]*46)
+        self.assertTrue(rs.adjacent_odd_integer_target(source,target,9))
+        changed=target[:];changed[0]+=16
+        # The same sign residues alone do not certify exact integer reachability.
+        self.assertTrue(rs.adjacent_odd_two_power_target(source,changed,9,power=3))
+        self.assertFalse(rs.adjacent_odd_integer_target(source,changed,9))
+        perturbation={97:1,64:-107,98:1,150:-1,391:106}
+        weights=[[1]*402,rs._adjacent_moment_coefficients(97),
+                 rs._adjacent_orientation_coefficients(97),rs._adjacent_alternating_coefficients(97)]
+        self.assertTrue(all(sum(w[i]*c for i,c in perturbation.items())==0 for w in weights))
+        sharp=target[:]
+        for i,c in perturbation.items():sharp[i]+=8*c
+        self.assertTrue(all((a-b)%8==0 for a,b in zip(sharp,target)))
+        self.assertFalse(rs.adjacent_odd_integer_target(source,sharp,9))
+        for steps in (True,8):
+            with self.assertRaises(ValueError):rs.adjacent_odd_integer_target(source,target,steps)
+        changed[0]=True
+        with self.assertRaises(ValueError):rs.adjacent_odd_integer_target(source,changed,9)
+
     def test_two_power_target_ladder_beyond_the_binary_test(self):
         saved=rs.adjacent_odd_mod_four_separation()
         edge=rs.adjacent_four_zero_example();word=int(edge['bits'],16)

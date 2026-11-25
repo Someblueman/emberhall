@@ -3725,7 +3725,7 @@ def _adjacent_integer_control_columns(hole,steps,modulus):
         for i,c in rec['expression']:
             columns=controls if i%2 else source
             index=i//2-356 if i%2 else i//2
-            columns[index][rec['target']//2]=c%modulus
+            columns[index][rec['target']//2]=c if modulus is None else c%modulus
     for i in range(46):controls[i][356+i]=1
     columns=[];vectors=controls
     for _ in range(steps):
@@ -3733,7 +3733,9 @@ def _adjacent_integer_control_columns(hole,steps,modulus):
         for vector in vectors:
             out=defaultdict(int)
             for i,c in vector.items():
-                for j,d in source[i].items():out[j]=(out[j]+c*d)%modulus
+                for j,d in source[i].items():
+                    out[j]+=c*d
+                    if modulus is not None:out[j]%=modulus
             following.append({j:c for j,c in out.items() if c})
         vectors=following
     return columns
@@ -3887,6 +3889,170 @@ def verify_adjacent_two_adic_reachability(saved):
                 physical_endpoints_included=False,literal_existence_decided=False,
                 all_pairs_decided=False,
                 claim='exact observable evolution plus sign residues modulo 16 exhaust power-of-two interior obstructions')
+
+
+def _sparse_abs_determinant(columns, size):
+    """Fraction-free elimination, with arbitrary row/column pivot order.
+
+    Pivot permutations can change the sign, which is deliberately discarded.
+    Every division is checked exact; no modular reconstruction is used.
+    """
+    if len(columns)!=size:raise ValueError('require a square integer matrix')
+    rows={i:{j:col[i] for j,col in enumerate(columns) if col.get(i)}
+          for i in range(size)}
+    previous=1
+    for _ in range(size-1):
+        choices=((abs(c).bit_length(),len(row),i,j)
+                 for i,row in rows.items() for j,c in row.items())
+        try:_,_,i,j=min(choices)
+        except ValueError:return 0
+        pivot_row=rows.pop(i);pivot=pivot_row[j]
+        for k,row in rows.items():
+            coefficient=row.pop(j,0)
+            if not coefficient and pivot==previous:continue
+            following={}
+            for l in row.keys()|pivot_row.keys():
+                if l==j:continue
+                numerator=pivot*row.get(l,0)-coefficient*pivot_row.get(l,0)
+                value,remainder=divmod(numerator,previous)
+                if remainder:raise AssertionError('non-exact determinant division')
+                if value:following[l]=value
+            rows[k]=following
+        previous=pivot
+    return abs(next(iter(next(iter(rows.values())).values()),0))
+
+
+def _unit_pivot_count(columns, size, modulus):
+    """A lower bound on invertible pivots over a possibly composite ring.
+
+    Stalling need not mean deficient rank. Reaching size proves surjectivity.
+    """
+    if modulus==1:return size
+    rows={i:{j:col[i]%modulus for j,col in enumerate(columns)
+             if col.get(i,0)%modulus} for i in range(size)}
+    count=0
+    while rows:
+        selected=None
+        for i in sorted(rows,key=lambda i:(len(rows[i]),i)):
+            for j,c in sorted(rows[i].items()):
+                if math.gcd(c,modulus)==1:
+                    selected=i,j;break
+            if selected is not None:break
+        if selected is None:break
+        i,j=selected;row=rows.pop(i);inverse=pow(row[j],-1,modulus)
+        row={k:c*inverse%modulus for k,c in row.items() if k!=j}
+        for other in rows.values():
+            factor=other.pop(j,0)
+            if not factor:continue
+            for k,c in row.items():
+                value=(other.get(k,0)-factor*c)%modulus
+                if value:other[k]=value
+                else:other.pop(k,None)
+        count+=1
+    return count
+
+
+def _integral_kernel_projection(observables, omitted):
+    """Check that forgetting omitted coordinates identifies ker_Z(O) with Z^r."""
+    n=len(observables);size=len(observables[0])
+    if len(omitted)!=n or len(set(omitted))!=n:
+        raise ValueError('wrong observable projection')
+    matrix=[[Fraction(w[j]) for j in omitted]+[Fraction(i==k) for k in range(n)]
+            for i,w in enumerate(observables)]
+    for j in range(n):
+        pivot=next((i for i in range(j,n) if matrix[i][j]),None)
+        if pivot is None:raise ValueError('singular observable projection')
+        matrix[j],matrix[pivot]=matrix[pivot],matrix[j]
+        factor=matrix[j][j];matrix[j]=[v/factor for v in matrix[j]]
+        for i in range(n):
+            if i!=j:
+                factor=matrix[i][j]
+                matrix[i]=[v-factor*w for v,w in zip(matrix[i],matrix[j])]
+    retained=[i for i in range(size) if i not in omitted]
+    for j in retained:
+        if any(sum(matrix[i][n+k]*observables[k][j] for k in range(n)).denominator!=1
+               for i in range(n)):
+            raise ValueError('observable projection does not have an integer inverse')
+    return retained
+
+
+def adjacent_integer_reachability():
+    """A compact exact-integer interior theorem, excluding unit bounds and ends."""
+    saved=dict(kind='moving-adjacent-integer-reachability-v1',hole=97,
+               omitted_coordinates=[64,98,150,391],
+               excluded_control_columns=[396,398,*range(400,414)],
+               minor_abs_determinant=21253302052902143478468167626261164687938471616947851377116060559954773950619597569460710575543899478328832,
+               rank=398,integer_saturation_index=128,stable_after=9,
+               nonunit_smith_factors=[2,2,4,8],sign_residue_modulus=16,
+               odd_prime_obstructions_decided=True,
+               rational_observable_equalities_required=True,
+               unit_bounds_included=False,physical_endpoints_included=False,
+               literal_existence_decided=False,all_pairs_decided=False)
+    return saved
+
+
+def verify_adjacent_integer_reachability(saved):
+    if (saved.get('kind')!='moving-adjacent-integer-reachability-v1'
+            or type(saved.get('hole')) is not int or saved['hole']!=97
+            or saved.get('omitted_coordinates')!=[64,98,150,391]
+            or saved.get('excluded_control_columns')!=[396,398,*range(400,414)]
+            or saved.get('nonunit_smith_factors')!=[2,2,4,8]
+            or saved.get('odd_prime_obstructions_decided') is not True
+            or saved.get('rational_observable_equalities_required') is not True
+            or any(saved.get(k) is not False for k in
+                   ('unit_bounds_included','physical_endpoints_included',
+                    'literal_existence_decided','all_pairs_decided'))):
+        raise ValueError('require a scoped hole-97 integer control theorem')
+    for key,value in dict(rank=398,integer_saturation_index=128,stable_after=9,
+                          sign_residue_modulus=16).items():
+        if type(saved.get(key)) is not int or saved[key]!=value:
+            raise ValueError('wrong integer theorem parameter')
+    determinant=saved.get('minor_abs_determinant')
+    if type(determinant) is not int or determinant<=0:
+        raise ValueError('invalid claimed minor determinant')
+    driver=adjacent_integral_driver(97)
+    laws=adjacent_conserved_observables(driver)
+    observables=[[1]*402,laws['moment'],adjacent_orientation_drift(driver),laws['alternating']]
+    retained=_integral_kernel_projection(observables,saved['omitted_coordinates'])
+    columns=_adjacent_integer_control_columns(97,10,None)
+    if any(sum(w[i]*c for i,c in col.items()) for col in columns for w in observables):
+        raise ValueError('control leaves the exact observable kernel')
+    projected=[{i:col[k] for i,k in enumerate(retained) if col.get(k)} for col in columns[:414]]
+    excluded=set(saved['excluded_control_columns'])
+    minor=[col for i,col in enumerate(projected) if i not in excluded]
+    if _sparse_abs_determinant(minor,398)!=determinant:
+        raise ValueError('wrong exact control minor determinant')
+    odd_part=determinant
+    while odd_part%2==0:odd_part//=2
+    if _unit_pivot_count(projected,398,odd_part)!=398:
+        raise ValueError('odd-prime control surjectivity was not proved')
+    profiles=[_two_power_diagonal_profile(columns[:46*n]) for n in (9,10)]
+    if profiles!=[[394,2,1,1]]*2:
+        raise ValueError('wrong two-primary control indices')
+    return dict(verified=True,hole=97,rank=398,integer_saturation_index=128,
+                stable_after=9,nonunit_smith_factors=[2,2,4,8],sign_residue_modulus=16,
+                odd_prime_obstructions_decided=True,unit_bounds_included=False,
+                physical_endpoints_included=False,literal_existence_decided=False,
+                all_pairs_decided=False,
+                claim='exact observable evolution plus sign residues modulo 16 decide odd-integer interior reachability after at least nine steps')
+
+
+def adjacent_odd_integer_target(source,target,steps):
+    """Exact unrestricted odd-integer control reachability at h97, steps>=9.
+
+    Uses the independently replayable integer theorem; neither endpoint
+    equations nor magnitude-one conditions are imposed by this query.
+    """
+    if (type(steps) is not int or steps<9 or len(source)!=402 or len(target)!=402
+            or any(type(v) is not int or v%2!=1 for v in (*source,*target))):
+        raise ValueError('require odd integer states and at least nine steps')
+    weights=[[1]*402,_adjacent_moment_coefficients(97),
+             _adjacent_orientation_coefficients(97),_adjacent_alternating_coefficients(97)]
+    before=[sum(c*v for c,v in zip(w,source)) for w in weights]
+    after=[sum(c*v for c,v in zip(w,target)) for w in weights]
+    if after!=[before[0],before[1],before[2]-steps*before[0],(-1)**steps*before[3]]:
+        return False
+    return adjacent_odd_two_power_target(source,target,steps,power=3)
 
 
 def adjacent_conserved_observables(certificate):
@@ -6985,6 +7151,8 @@ def verify_saved(saved):
         return verify_adjacent_orientation_endpoint(saved)
     if saved.get('kind')=='moving-adjacent-two-adic-reachability-v1':
         return verify_adjacent_two_adic_reachability(saved)
+    if saved.get('kind')=='moving-adjacent-integer-reachability-v1':
+        return verify_adjacent_integer_reachability(saved)
     if saved.get('kind')=='moving-adjacent-odd-mod-four-separation-v1':
         return verify_adjacent_odd_mod_four_separation(saved)
     if saved.get('kind')=='moving-adjacent-rational-reachability-v1':
@@ -7431,6 +7599,7 @@ def main():
     p.add_argument('--adjacent-orientation-endpoint',action='store_true',help='prove the physical prefix forces D+2*S=0')
     p.add_argument('--adjacent-four-zero-example',action='store_true',help='replay a unit edge in S=W=D=A=0; it is dead at both outside boundaries')
     p.add_argument('--adjacent-two-adic-reachability',action='store_true',help='certify all power-of-two interior restrictions at hole 97, with exact observable equalities')
+    p.add_argument('--adjacent-integer-reachability',action='store_true',help='certify the exact integer control index and nine-step stabilization at hole 97')
     p.add_argument('--adjacent-odd-mod-four-separation',action='store_true',help='certify an odd-integer obstruction beyond the four observables and five phase traces at hole 97')
     p.add_argument('--adjacent-rational-reachability',action='store_true',help='check the twelve-step rational interior theorem, without unit, phase or endpoint constraints')
     p.add_argument('--adjacent-lattice-example',action='store_true',help='describe and enumerate all controls of the stored fixed source')
@@ -7496,6 +7665,11 @@ def main():
         print(json.dumps(verify_saved(certificate),sort_keys=True));return
     if args.adjacent_two_adic_reachability:
         certificate=adjacent_two_adic_reachability()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_integer_reachability:
+        certificate=adjacent_integer_reachability()
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
         print(json.dumps(verify_saved(certificate),sort_keys=True));return

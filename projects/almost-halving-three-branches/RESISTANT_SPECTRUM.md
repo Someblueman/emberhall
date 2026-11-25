@@ -5489,3 +5489,142 @@ and their separate CLI replay succeeded; syntax and whitespace checks pass.
 This is local project-slice validation, not independent integration or
 mathematical milestone acceptance. The exact unit-sign construction and
 all-pairs obstruction remain unresolved.
+
+### Sorrel: exact integer control, not just two-adic control, at h=97
+
+The odd-prime uncertainty in the preceding interior theorem can now be
+removed. For every n>=9 the **integer** image of
+
+    K_n = [B, MB, ..., M^(n-1)B]
+
+is the same lattice in the exact four-observable integer kernel. Its
+index is 128 and its nonunit Smith factors are exactly 2,2,4,8. This is
+an unrestricted-integer control theorem, **not a unit-sign construction**.
+Physical endpoints are still excluded.
+
+Here is a proof with a compact standard-library replay. Let O have rows
+S,W,D,A in that order. Forget state coordinates 64,98,150,391, using the
+existing zero-based `moving_folded_labels()` order. The omitted 4-by-4
+observable matrix is invertible. Its inverse times every retained column
+of O is integral. The verifier checks all 398 such columns by exact
+four-dimensional rational arithmetic. Consequently projection identifies
+ker_Z(O) with Z^398: each retained integer word has a unique integer
+completion in the four omitted positions. This proves saturation directly;
+it does not infer it from a rational rank.
+
+Construct K_10 over the integers, without reducing its entries. Every
+column has all four observables zero, checked directly. Project K_9 onto
+the retained coordinates and select all its 414 columns except
+
+    396, 398, 400,401,402,403,404,405,406,407,408,409,410,411,412,413.
+
+The resulting square minor has absolute determinant
+
+    21253302052902143478468167626261164687938471616947851377116060559954773950619597569460710575543899478328832.
+
+Call this integer d, and write d=512N with N odd. The index I of the
+projected K_9 image divides d, since the selected columns already generate
+a full-rank sublattice of index d. Now reduce **all** 414 projected columns
+modulo N. Ordinary elimination finds 398 unit pivots in Z/NZ. Each pivot
+is checked coprime to N before inversion; no factorization or assumption
+that this composite modulus is a field is used. Thus the projected image
+is all of (Z/NZ)^398. If any prime dividing N divided I, reduction modulo
+that prime could not be surjective. Hence I has no odd factor. The already
+checked profiles [394,2,1,1] modulo sixteen at n=9 and n=10 give
+v_2(I)=7, so I=128.
+
+This also proves stabilization over Z, not only over the two-adic integers.
+The K_10 image contains the K_9 image, so its index divides 128; its same
+two-primary profile forces that index to be 128. The images are equal.
+Since M K_9 is contained in K_10, the common image is M-invariant and
+contains every later control column. There are 398 nonzero Smith factors,
+so the displayed profile accounts for every factor; the only nonunit
+factors are 2,2,4,8. In particular eight times the saturated observable
+kernel is contained in this control image.
+
+For two prescribed odd integer states x,y and n>=9, this yields an exact
+criterion for a path using arbitrary **odd integer** controls. First require
+
+    S(y)=S(x), W(y)=W(x), D(y)=D(x)-n*S(x), A(y)=(-1)^n*A(x).
+
+Then test their sign residues modulo sixteen with the existing affine
+bit-coordinate query. To see sufficiency, evolve x with control signs all
++1 to an odd baseline z. The required control displacement in bit
+coordinates is (z-y)/2, an integer in ker_Z(O) precisely when the exact
+equalities hold. Residue acceptance writes this displacement as a control
+image vector plus eight times an integer vector. The latter vector is
+also in the exact observable kernel. Eight times that kernel lies in the
+control image, so the exact displacement lies in it. Necessity follows
+by reducing any exact odd-integer path modulo sixteen.
+
+`adjacent_odd_integer_target(x,y,n)` implements this criterion. It rejects
+lengths below nine, where this stabilization proof does not apply. A test
+uses an actual nine-step odd-integer evolution as a positive case, then
+changes one target coordinate by sixteen: the residues still pass but an
+exact observable changes and the new query rejects it. This guards the
+essential exact-equality hypothesis.
+The query has no absolute starting level and does not assert the five
+physical endpoint-derived phase traces; a physical interface must supply
+those separately.
+
+The precision sixteen is also sharp. In the same zero-based state order,
+let z have coordinates z_97=1, z_64=-107, z_98=1, z_150=-1, z_391=106,
+with all others zero. It has all four observables zero. The test shifts an
+actual nine-step target y to y+8z. All exact observables and sign residues
+modulo eight remain unchanged, but the modulo-sixteen query refuses it.
+Equivalently 4z is outside the integer control image. By the proved
+stabilization, shifting **any** reachable target this way at any n>=9
+produces the same refusal. These are unrestricted odd integer targets,
+not magnitude-one states.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-integer-reachability --write /tmp/integer-interior.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/integer-interior.json
+```
+
+Replay independently constructs the original checked driver, exact control
+columns and integer projection. Fraction-free determinant elimination
+checks every division exact, permitting row and column pivot permutations
+because only the absolute determinant is needed. Its small-matrix tests
+compare with the defining permutation expansion, including singular
+matrices. Composite-ring tests ensure a nonunit pivot cannot be inverted
+and emphasize that a stalled unit-pivot search alone proves no refusal.
+Certificate controls reject altered scope, determinant, index and precision.
+
+The old broad source-availability blocker is resolved: this continuation
+started from the three hash-checked immutable attachments in Aster's lesson
+`aster-tripod-two-adic-endpoints-20261125`, recovered in commit 16624c6.
+That provenance does not assert acceptance of the earlier contribution.
+Before using the transfer, Sorrel reran its independent physical-column
+comparison: all 98 holes at t=11 and the retained t=9,15 endpoint cases
+passed in 2.032 seconds. Prefix and suffix plus transitions j=2..L-2 cover
+every original row; the states are 2..L-1 and the edge count is L-3.
+The main task still requires an infinite unit-sign family or an all-pairs
+obstruction. Its priority remains provisional and its acceptance is unmet.
+
+Two further bounded unit-sign searches retained every original transition
+row, the five absolute phase traces, and S=W=D=A=0 on all three states,
+starting at level two. The h=81 installed constraint solver returned UNKNOWN
+after 600.008 seconds (32,232 branches, 13,156 conflicts). A separate h=97
+pseudo-Boolean model in the already-installed satisfiability solver returned
+unknown after 600.147 seconds (1,614,349 conflicts, 3,781,414 decisions).
+Global complementation allowed fixing the first sign in each search.
+Neither is an emptiness proof. No new solver dependency is shipped.
+
+The remaining obstacle is now specifically **unit magnitudes and physical
+interfaces**, rather than any unresolved prime in unrestricted interior
+integer control at h=97. The exact target query can reject incompatible
+prescribed unit interfaces before an expensive attempt to join them, but
+its acceptance must not be promoted to a unit path. It does not extend to
+every other hole or to arbitrary homometric pairs.
+
+Local verification of the integer continuation: the complete project suite
+passed **818 tests in 871.286 seconds**, within the 900-second review budget.
+Both CLI generation and a separate saved-certificate replay returned
+`verified: true`, `integer_saturation_index: 128`, and `stable_after: 9`.
+The determinant definition checks and the nonzero-observable, residue-only
+false-positive and sharp-precision endpoint tests passed. Syntax and
+whitespace checks passed. This is builder validation, not independent
+integration or the project's infinite-family acceptance.
