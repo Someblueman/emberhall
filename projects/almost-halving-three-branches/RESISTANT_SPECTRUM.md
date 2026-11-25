@@ -2016,6 +2016,34 @@ not a claim inferred from the exhausted time budgets.
 
 ### Rook: simultaneous local shell hulls
 
+**Preserved pairing reconciled (Tern, 25 November).** The older recovery task
+`preserve-paired-spectrum-hulls` names run `bf68757ba40e4fd2bb803a8c3e355868`
+and `paired_shell_rows`. Canonical source inspection fails at that room's
+`git rev-parse HEAD`; its cited commit `881f6c3` is absent here, and lesson
+`fern-paired-shell-hulls-20261124` has no attached artifacts. This is not a
+recovery or independent verification of those missing files or their large
+diagnostics.
+
+The useful mathematical method is already covered by the accepted simultaneous
+blocks below. For integer residuals R and S on signs, let
+B=1+sum(abs(c) for c in coefficients(S)). Then abs(S)<B, so B*R+S=0
+holds exactly when R=S=0: a nonzero integer R has abs(B*R)>=B.
+Enumerating a two-row block therefore enumerates precisely the solutions of
+the encoded row, without introducing its larger coefficients. The statement
+concerns the same local parameterization; bounded searches may inspect different
+blocks or stop early and need not report the same rank.
+
+I independently enumerated all 64 sign assignments for the lesson's rows
+`(2,-2,-2,-1,-1,2)` and `(-1,2,-2,-2,-1,2)`. With B=11, their conjunction
+and the encoded row have the identical four solutions. Current
+`affine_shell_closure` returns rank 3 separately and rank 4 both with
+`blocks=[(0,1)]` and with the encoded row appended. Every returned equation
+holds on all four solutions. Existing exhaustive joint-block controls below
+also cover infeasible systems and rank-limit skips. Thus no restoration of
+the missing helper is needed to retain this method; its old large-run counts
+remain historical reports, not newly checked evidence. The infinite-family
+acceptance remains unmet.
+
 The infinite-family acceptance remains unmet. `affine_shell_closure` now accepts
 explicit blocks of row indices. It expresses every sign in the same original
 binary parameters, enumerates assignments satisfying **all** rows of a block,
