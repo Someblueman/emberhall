@@ -1,5 +1,6 @@
 """Audit every compiled equation against original physical shell columns."""
 from collections import defaultdict
+from fractions import Fraction
 import unittest
 import itertools
 import functools
@@ -15,6 +16,91 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_adjacent_zero_observable_examples_both_phases(self):
+        driver=rs.adjacent_integral_driver(43)
+        for first in (2,3,4,11):
+            cert=rs.adjacent_zero_observable_example(43,first)
+            self.assertTrue(rs.verify_saved(cert)['verified'])
+            keys,rows,phases=rs.adjacent_phase_system(43,2,first)
+            bits=int(cert['bits'],16)
+            values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+            self.assertEqual(len(rows),356)
+            self.assertEqual(len(phases),5)
+            states=[[values[(*label,level)] for label in rs.moving_folded_labels()]
+                    for level in (first,first+1)]
+            counts=[len(rs.adjacent_unit_boundary_obstructions(driver,state,reverse))
+                    for state,reverse in zip(states,(True,False))]
+            self.assertEqual(counts,[47,55] if first%2 else [49,50])
+        with self.assertRaises(ValueError):rs.adjacent_zero_observable_example(25)
+
+    def test_adjacent_prefix_alternating_all_37_odd_holes(self):
+        for hole in range(25,98,2):
+            laws=rs.adjacent_conserved_observables(rs.adjacent_integral_driver(hole))
+            rows=rs.adjacent_transfer_blocks(hole)['prefix']
+            weights=rs.adjacent_endpoint_row_weights(hole)['alternating_prefix_weights']
+            combined=defaultdict(Fraction)
+            for index,n,d in weights:
+                for key,c in rows[index].items():combined[key]+=Fraction(n,d)*c
+            self.assertEqual({k:v for k,v in combined.items() if v},
+                             {('slice',*label,2):w
+                              for label,w in zip(rs.moving_folded_labels(),laws['alternating'])})
+
+    def test_adjacent_prefix_balance_all_75_holes(self):
+        for hole in range(24,99):
+            driver=rs.adjacent_integral_driver(hole)
+            moment=rs.adjacent_conserved_observables(driver)['moment']
+            rows=rs.adjacent_transfer_blocks(hole)['prefix']
+            weights=rs.adjacent_endpoint_row_weights(hole)['prefix_balance_weights']
+            combined=defaultdict(Fraction)
+            for index,n,d in weights:
+                for key,c in rows[index].items():combined[key]+=Fraction(n,d)*c
+            self.assertEqual({k:v for k,v in combined.items() if v},
+                             {('slice',*label,2):1+2*w
+                              for label,w in zip(rs.moving_folded_labels(),moment)})
+
+    def test_adjacent_right_moment_all_75_holes(self):
+        for hole in range(24,99):
+            certificate=rs.adjacent_right_moment_identity(hole)
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+            if hole==43:
+                self.assertEqual(len(certificate['row_weights']),531)
+                damaged=dict(certificate,row_weights=[list(z) for z in certificate['row_weights']])
+                damaged['row_weights'][0][1]+=1
+                with self.assertRaises(ValueError):rs.verify_adjacent_right_moment(damaged)
+                duplicated=dict(certificate,row_weights=certificate['row_weights']*2)
+                with self.assertRaises(ValueError):rs.verify_adjacent_right_moment(duplicated)
+                damaged=dict(certificate,prefix_balance_weights=[])
+                with self.assertRaises(ValueError):rs.verify_adjacent_right_moment(damaged)
+
+    def test_adjacent_unit_boundary_obstructions_and_actual_continuation(self):
+        driver=rs.adjacent_integral_driver(43)
+        cert=rs.adjacent_balanced_example()
+        keys,_,_=rs.adjacent_phase_system(43,3,2)
+        bits=int(cert['bits'],16)
+        values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+        states=[[values[(*label,level)] for label in rs.moving_folded_labels()]
+                for level in (2,3,4)]
+        self.assertEqual(len(rs.adjacent_unit_boundary_obstructions(driver,states[0],True)),43)
+        self.assertEqual(len(rs.adjacent_unit_boundary_obstructions(driver,states[2])),47)
+        laws=rs.adjacent_conserved_observables(driver)
+        self.assertEqual([sum(c*v for c,v in zip(laws['moment'],state))
+                          for state in states],[-128,-128,-128])
+        self.assertEqual([sum(c*v for c,v in zip(laws['alternating'],state))
+                          for state in states],[-8,8,-8])
+        with self.assertRaises(ValueError):
+            rs.verify_adjacent_phase_signs(dict(cert,zero_moment_slices=True))
+        with self.assertRaises(ValueError):
+            rs.verify_adjacent_phase_signs(dict(cert,zero_alternating_slices=True))
+        # These directions have actual witnesses, independently checked above.
+        for state,reverse in ((states[0],False),(states[1],False),
+                              (states[1],True),(states[2],True)):
+            self.assertEqual(rs.adjacent_unit_boundary_obstructions(driver,state,reverse),[])
+        with self.assertRaises(ValueError):
+            rs.adjacent_unit_boundary_obstructions(driver,[True]*402)
+        damaged=dict(driver,recoveries=driver['recoveries'][:-1])
+        with self.assertRaises(ValueError):
+            rs.adjacent_unit_boundary_obstructions(damaged,states[0])
+
     def test_adjacent_balanced_word_both_parities_and_dead_boundaries(self):
         driver=rs.adjacent_integral_driver(43)
         permutation=rs.adjacent_time_reversal(43)
@@ -53,6 +139,8 @@ class SpectrumTests(unittest.TestCase):
     def test_adjacent_integral_driver_all_75_holes(self):
         for hole in range(24,99):
             certificate=rs.adjacent_integral_driver(hole)
+            laws=rs.adjacent_conserved_observables(certificate)
+            self.assertEqual(len(laws['moment']),402)
             self.assertEqual(len(certificate['inputs']),448)
             self.assertEqual(len(certificate['recoveries']),356)
             laws=rs.adjacent_driver_phase_laws(certificate)

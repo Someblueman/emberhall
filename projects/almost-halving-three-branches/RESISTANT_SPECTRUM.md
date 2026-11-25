@@ -4174,3 +4174,150 @@ they do not establish the infinite-family acceptance result. Next work remains
 a compatible zero-sum unit-control path with both physical endpoints, or an
 unrestricted obstruction. Independent integration of this repaired source is
 still required before treating it as shared source.
+
+### Aster: a conserved moment that the physical right end forces to zero
+
+For every driver hole `24 <= h <= 98`, define coefficients on a slice's
+original labels `(a,q,s)`. Put
+
+    C_1=h-101, C_2=123-h, C_3=179-h.
+    w(a,q,+)=C_a-q;  w(a,q,-)=-C_a-1+q.
+
+On arm 1 only, add 201 to the positive-orientation coefficient when
+`q >= h`, and subtract 201 from the negative-orientation coefficient when
+`q > h`. Write `W_r = sum w(a,q,s) x(a,q,s,r)`.
+
+**Necessary condition:** every complete physical signing in this folded
+support has `W_r=0` throughout its transfer path, not merely a constant
+unspecified moment. This does not impose a periodic word or freeze a third
+arm. The reasoning has two separately checked parts:
+
+1. Substitute the certified one-step recovery into `W_(r+1)`. All 46 new
+   third-arm coefficients cancel, and the remaining coefficients are
+   exactly those of `W_r`. `adjacent_conserved_observables` checks this
+   equality of integer coefficient dictionaries, not a numerical spectrum.
+2. The incoming moment of the physical suffix is a rational linear
+   combination of its original shell rows. `adjacent_right_moment_identity`
+   supplies this combination; its separate verifier simply sums the original
+   rows and compares every coefficient. Therefore the physical suffix
+   forces `W_(L-1)=0`. Conservation propagates it back to slice 2.
+
+There is a companion left-end identity: the original prefix rows imply
+`S_2 + 2 W_2 = 0`, where `S` is the ordinary slice sum. The certificate's
+`prefix_balance_weights` are checked by a second direct row summation.
+Ordinary slice sum is also conserved by the driver at every hole 24..98.
+Consequently every complete signing in this support has **both `S=0` and
+`W=0` on every transfer slice**, at every admitted length. For complete
+physical signings this removes the earlier requirement of 405 states and
+extends the balance conclusion to even holes. The earlier 405-state theorem
+still applies to sufficiently long *free-end* paths without using endpoints.
+
+The discovered endpoint combinations simplify to explicit integer weights
+on the existing stencil row labels. No elimination is needed to generate
+or check a certificate:
+
+| Identity | Original row | Weight |
+|---|---|---|
+| suffix `W` | transition row `(Q,u)` with offsets `{0,1}` | `101-Q` |
+| suffix `W` | right-boundary row `(Q,u)` | `101-Q-[u=1]` |
+| prefix `S+2W` | left-boundary row `(Q,c)` | `2Q-201` |
+| prefix `S+2W` | transition row `(Q,u)` with offsets `{-1,0}` | `2Q-201` |
+| prefix `A`, odd h only | left-boundary row `(Q,c)` | `(-1)^(Q+c)` |
+| prefix `A`, odd h only | transition row `(Q,u)` with offsets `{-1,0}` | `(-1)^Q` |
+
+`adjacent_endpoint_row_weights` encodes these weights in the exact original
+row order. Each claimed identity is proved by summing its original rows,
+including all boundary coordinates, and comparing with the stated single
+slice observable. All 75 driver holes and all 37 odd-hole alternating
+identities are finite, independently replayable checks.
+
+The convention is the existing complete-matrix decomposition: prefix
+slices 1,2, transitions `j -> j+1` for `2 <= j < L-1`, and suffix slices
+`L-1,L`, hence `L-3` path edges. This statement concerns that decomposition
+at `L >= 4`, with both holes on arm 1 at `ht` and `99t`, `t=2L+1`.
+It is not an unrestricted theorem about all placements of two holes.
+
+At h=43 the witness has 531 nonzero original-row weights, all integers of
+absolute value at most 100. Generate and independently replay it with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-right-moment --hole 43 --write /tmp/right-moment.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/right-moment.json
+```
+
+The stored balanced three-state word has moments `[-128,-128,-128]`.
+Thus it cannot occur anywhere in a complete right-end-compatible signing,
+even if arbitrarily many exterior levels could be supplied. Its zero
+ordinary slice sums alone did not reveal this failure. At odd holes only,
+the additional coefficients `s*(-1)^q` give a sum `A` that changes sign each
+step; the stored word has `[-8,8,-8]`. Another original-prefix row identity
+forces `A_2=0`, so **every complete signing at odd driver holes also has
+`A_r=0` throughout its path**. The certificate's optional
+`alternating_prefix_weights` records this identity. The same alternating law
+failed at even h=24 and is explicitly not claimed there.
+
+The shipped standard-library window search can impose the necessary
+conditions with `--balanced-slices --zero-moment-slices` and, at odd holes,
+`--zero-alternating-slices`. Certificate replay
+rechecks any asserted zero moment directly on every original slice.
+`adjacent_unit_boundary_obstructions` separately reports nonunit recovered
+coordinates independent of every outside third-arm choice. Nonempty output
+proves a particular state's dead boundary; an empty output does not establish
+an extension.
+
+Bounded discovery used the already-installed CP-SAT with one worker,
+unrestricted original signs merged only by certified binary copy relations,
+all original rows, all absolute phase traces, and zero ordinary slice sums.
+Complement symmetry was fixed at one sign; every trace has even size.
+All runs below returned **UNKNOWN**, not a refused window:
+
+| h | States | Additional condition | Seconds | Branches | Conflicts |
+|---|---:|---|---:|---:|---:|
+| 25 | 4 | none | 180.008 | 14,932 | 3,653 |
+| 61 | 4 | none | 179.999 | 15,326 | 3,113 |
+| 97 | 4 | none | 180.001 | 15,667 | 1,912 |
+| 43 | 4 | zero conserved moment on every slice | 180.000 | 14,675 | 3,185 |
+| 43 | 3 | zero conserved moment on every slice | 180.003 | 418,977 | 11,116 |
+| 43 | 3 | zero conserved moment and alternating sum on every slice | 180.002 | 219,318 | 6,039 |
+
+These runs emitted no new signing or portable refusal. The standard-library
+search's tiny-budget command also returned scoped `unknown` with both new
+restriction flags preserved. No CP-SAT or symbolic-algebra dependency was
+added to the shipped generator or verifier.
+
+The three-state, all-three-zero system, including every absolute trace,
+still admits odd-integer congruence solutions modulo 8, 32 and 512.
+The existing exact power-of-two solver found and substituted each solution
+(0.192, 0.201 and 0.191 seconds). Thus these tested linear congruences do not
+remove the remaining unit-sign obstacle; compatibility at these moduli is
+not an exact odd-integer or unit-sign construction.
+
+There are nevertheless actual **one-edge unit paths in `S=W=A=0`**, at
+both starting parities, with 804 signs, all 356 original rows and all five
+absolute traces checked. Discovery took 0.310 seconds (5,521 branches,
+147 conflicts) at even start and 0.241 seconds (5,008 branches, 69 conflicts)
+at odd start. Regenerate and separately replay either stored word with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-zero-example --hole 43 --first-level 2 --write /tmp/zero-edge.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/zero-edge.json
+```
+
+Use first level 3 for the odd word. Even translation preserves each word's
+absolute phases; starts 2,3,4,11 are independently checked. The even word's
+two outside boundaries force 49 and 50 nonunit coordinates, and the odd
+word's force 47 and 55. These are dead edges, not extendible paths. They
+show the three-zero component is nonempty, but not that even two compatible
+edges exist in it. Do not freeze these endpoints in the next search.
+
+The new obstacle for construction is a compatible unit path in **all three**
+`S=0`, `W=0`, and (at odd holes) `A=0`, then the remaining physical endpoint equations. No complete
+pair, infinite family, or all-pairs obstruction is claimed here.
+
+Verification: the 12 adjacent-state tests passed in 308.843 seconds,
+including all 75 driver and endpoint identities, all 37 alternating
+identities, original physical-matrix comparisons and damaged-certificate
+rejection. The additional stored-edge test passed in 14.904 seconds at
+starts 2,3,4,11. Endpoint-certificate and zero-edge command-line generation
+and separate replay passed. `git diff --check` is clean. Re-run all these
+tests with the adjacent-test command given above.
