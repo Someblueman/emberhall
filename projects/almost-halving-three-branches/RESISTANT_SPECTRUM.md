@@ -2323,3 +2323,99 @@ hull or unsuccessful literal searches is not acceptance. Priority remains
 provisional, and no project or milestone completion is claimed.
 After the extraction repair, all **81 focused tests pass** (43.72 seconds
 observed), and `git diff --check` is clean.
+
+## Fern: unrestricted interior rank and the third word as a rational driver
+
+25 November 2026. **The task acceptance remains unmet.** This result concerns
+all words in the moving-hole interior, without periodic identifications. It
+neither supplies signs nor excludes a support. The separate endpoint equations
+and the condition that every coordinate is a sign remain essential.
+
+For every integer h in 1..98, form the 356 by 402 Laurent matrix M_h(z)
+from `moving_folded_stencils(h)[1]`: the coefficient of coordinate (a,q,s)
+in row (Q,u) is the sum of c*z^d over that row's entries (a,q,s,d).
+The recurrence on folded levels is exactly M_h(S)x=0, with S the shift
+x_r -> x_(r+1). The previously checked radius-one physical-column derivation
+and row partition apply unchanged.
+
+**Result.** Over Q(z), M_h has rank 356. More specifically its square minor
+on all 198 first-arm and 158 second-arm coordinates is invertible. Hence
+its rational-function kernel has dimension 46, and projection onto the
+46 third-arm coordinates is an isomorphism. The entire third word is an
+arbitrary rational-function driver at this level of relaxation; the other
+two words are uniquely recovered over Q(z). This is not a statement that
+arbitrary third-arm *signs* extend to signs, or that the endpoints can be met.
+
+**Checkable proof.** Specialize z=2 in a small prime field. For each of the 98 h values
+the specified 356 by 356 minor has a nonzero determinant for a certified
+prime from the fixed list 5,7,11,13,17,19. A prime is tried only until the
+minor is nonsingular; a singular specialization is not a rank refusal.
+This proves its Laurent determinant is not the zero polynomial over Q:
+an identically zero integer Laurent polynomial would evaluate to zero here.
+There are only 356 rows, so the rank is exactly 356. Writing M=[A B],
+the kernel is precisely {(-A^-1 B y,y): y in Q(z)^46}, proving the driver
+statement. The finite enumeration is over the complete parameter range h,
+not over scales or sign words; the field argument handles arbitrary levels.
+
+A further consequence gives the exact size of the unclosed interior problem.
+For W>=3 independent levels, retain the equations centred at 1..W-2.
+They have rank 356(W-2) over Q and nullity **46W+712**. Any finite rational
+linear dependence among these rows would, after collecting shifts, give a
+Laurent-polynomial left dependence on M_h, which full row rank excludes.
+The row count gives equality. The 712 term is the two unclosed endpoint
+levels; this formula includes neither physical endpoint constraints.
+
+There are also nonzero finitely supported rational interior solutions:
+choose a nonzero vector in the Q(z) kernel and clear its denominators.
+A nonzero finite sequence cannot be periodic on the full integer line.
+Thus linear interior equations alone cannot imply a fixed period for all
+*rational* solutions. They might still imply strong restrictions after the
+sign and physical boundary conditions are imposed. A periodic refusal cannot
+be promoted to an unrestricted refusal by citing this rank calculation.
+
+The selector uses sparse elimination. A separate verifier reconstructs the
+physical stencil specialization, selects exactly the two-arm minor, and uses
+row swaps to check its determinant. It rejects changed scope and malformed
+minors. Certificates are small and generated outside Git:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --interior-rank --hole 19 --write /tmp/interior-rank.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/interior-rank.json
+```
+
+The full h=1..98 census verifies every two-arm minor (36.44 seconds
+observed after the repair). An initial fixed
+modulo-five run certified full row rank for all h but needed third-arm
+columns at 24 positions. It therefore did not prove the stronger driver
+claim; selecting a nonsingular specialization for the *fixed* two-arm
+minor repairs that gap.
+Independent finite-window modular controls at h=1,19,98 and W=3,4,7
+reproduce the proved rank and nullity; specialization controls clear the
+negative Laurent exponent before reducing modulo five. The pre-existing
+81 tests plus two new certificate tests passed together (83 tests, 52.91
+seconds); all three new tests, including the later finite-window control,
+were then run separately. No large certificate bundle is committed.
+
+A separate bounded exploratory prefix attempt retained physical left rows
+and all interior centres before width 2,4,8, without repetition, at h=19,97.
+Joint rational/binary/ternary closure found no contradiction at widths 2,4;
+width 8 stopped at its 45-second budget during rational recovery. These
+are witnessed failed attempts, not feasibility certificates. They add no
+unrestricted obstruction and are not shipped as a second search mode.
+
+The remaining mathematical obstacle is to meet both endpoints with *sign*
+values in the rationally driven system, or to exclude all allowed supports.
+The new result removes a tempting linear shortcut; it does not close the
+infinite resistant family, and no project completion is claimed.
+
+### Independent preservation — Hawthorn, 25 November 2026
+
+Reconciled Fern's preserved commit `0938ac8` through trusted source inspection;
+all three file changes apply cleanly to the preceding source. Re-ran the full
+98-support certificate census: 74 minors certified modulo five, 23 modulo seven,
+and one modulo eleven (38.79 seconds). All 84 focused tests pass (48.40 seconds),
+and the command-line certificate write/read round trip verifies. The argument
+uses a nonzero specialized two-arm determinant to prove full row rank over
+Q(z); it does not decide sign feasibility, physical endpoints, or arbitrary
+hole placements. This preserves the interior result only; the resistant-family
+task and the project's global milestone remain unresolved.

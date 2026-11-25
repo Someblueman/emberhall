@@ -1640,6 +1640,82 @@ def moving_folded_stencils(h=19,reduced=False):
     return trim(left),trim(interior),trim(right)
 
 
+def interior_rank_matrix(hole=19,prime=5):
+    """Evaluate the unrestricted Laurent shell matrix at z=2 over a small prime field.
+
+    A nonzero maximal minor here proves the same minor is nonzero over
+    Q(z). No period or endpoint identification is imposed on the words.
+    """
+    if prime not in (5,7,11,13,17,19): raise ValueError('unsupported certificate prime')
+    labels = moving_folded_labels()
+    positions = {label:i for i,label in enumerate(labels)}
+    rows = []
+    for _,terms in sorted(moving_folded_stencils(hole)[1].items()):
+        row = defaultdict(int)
+        for (a,q,s,d),c in terms.items():
+            row[positions[a,q,s]] += c*pow(2,d,prime)
+        rows.append({i:c%prime for i,c in row.items() if c%prime})
+    return labels,rows
+
+
+def interior_rank_certificate(hole=19):
+    """Select a maximal minor; the separate verifier checks its determinant."""
+    for prime in (5,7,11,13,17,19):
+        labels,rows = interior_rank_matrix(hole,prime)
+        basis = {}
+        for original in rows:
+            row = {i:c for i,c in original.items() if i<356}
+            while row:
+                pivot = min(row)
+                if pivot not in basis:
+                    inverse = pow(row[pivot],-1,prime)
+                    basis[pivot] = {i:c*inverse%prime for i,c in row.items()}
+                    break
+                factor = row[pivot]
+                for i,c in basis[pivot].items():
+                    value = (row.get(i,0)-factor*c)%prime
+                    if value: row[i] = value
+                    else: row.pop(i,None)
+        if len(basis)==len(rows):
+            return dict(kind='moving-interior-rank-v1',hole=hole,
+                        prime=prime,evaluation=2,columns=sorted(basis),
+                        rows=len(rows),variables=len(labels),free_arm=3,
+                        literal_existence_decided=False,all_pairs_decided=False)
+    raise ValueError('no two-arm minor found; not a rank refusal')
+
+
+def verify_interior_rank_certificate(certificate):
+    """Rebuild a square minor and eliminate by row swaps, without the selector."""
+    if (certificate.get('kind')!='moving-interior-rank-v1' or
+            certificate.get('prime') not in (5,7,11,13,17,19) or certificate.get('evaluation')!=2 or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        return False
+    prime = certificate.get('prime')
+    try: labels,rows = interior_rank_matrix(certificate.get('hole'),prime)
+    except (TypeError,ValueError): return False
+    columns = certificate.get('columns')
+    if (not isinstance(columns,list) or len(columns)!=len(rows) or
+            any(type(i) is not int or not 0<=i<len(labels) for i in columns) or
+            len(set(columns))!=len(columns) or certificate.get('rows')!=len(rows)
+            or certificate.get('variables')!=len(labels) or
+            certificate.get('free_arm')!=3 or columns!=list(range(356))):
+        return False
+    # This fixed column order and row-pivot algorithm differs from selection.
+    matrix = [[row.get(i,0) for i in columns] for row in rows]
+    for j in range(len(rows)):
+        pivot = next((r for r in range(j,len(rows)) if matrix[r][j]),None)
+        if pivot is None: return False
+        matrix[j],matrix[pivot] = matrix[pivot],matrix[j]
+        inverse = pow(matrix[j][j],-1,prime)
+        for r in range(j+1,len(rows)):
+            factor = matrix[r][j]*inverse%prime
+            if factor:
+                matrix[r][j:] = [(a-factor*b)%prime for a,b in
+                                 zip(matrix[r][j:],matrix[j][j:])]
+    return True
+
+
 def moving_folded_residual(scale,coordinates,hole=19,reduced=False):
     """Evaluate every exact physical shell row through the moving-hole strip."""
     if type(scale) is not int or scale<9 or scale%2!=1:
@@ -3412,6 +3488,13 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-interior-rank-v1':
+        if not verify_interior_rank_certificate(saved):
+            raise ValueError('invalid unrestricted interior rank certificate')
+        return dict(verified=True,rank=saved['rows'],
+                    rational_function_nullity=saved['variables']-saved['rows'],
+                    claim='unrestricted interior rational rank only',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('mode')=='folded_cubic':
         if saved.get('status')!='refused' or saved.get('all_pairs_decided') is not False or 'joint_history' in saved:
             raise ValueError('no scoped cubic refusal certificate')
@@ -3665,7 +3748,20 @@ def main():
     p.add_argument('--retain-residue-witness',action='store_true',help='save independently verifiable aggregate compatibility with --dyadic and --write')
     p.add_argument('--audit-resistant-residues',action='store_true',help='audit all resistant scale phases through --period')
     p.add_argument('--holes',nargs=2,metavar='ARM:DEPTH',help='exactly two physical holes, centre is 0:0')
+    p.add_argument('--interior-rank',action='store_true',
+                   help='certify unrestricted interior rank over the rational function field')
     args = p.parse_args()
+    if args.interior_rank:
+        certificate = interior_rank_certificate(args.hole)
+        verified = verify_interior_rank_certificate(certificate)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(certificate,f)
+        print(json.dumps({k:v for k,v in certificate.items() if k!='columns'} |
+                         dict(verified=verified,
+                              rational_function_nullity=(certificate['variables']-
+                                                        certificate['rows']) if verified else None),
+                         sort_keys=True))
+        return
     if args.folded_cubic:
         if args.cubic_pivots<1 or not math.isfinite(args.seconds) or args.seconds<=0:
             p.error('require positive --seconds and --cubic-pivots')

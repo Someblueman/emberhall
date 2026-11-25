@@ -15,6 +15,54 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_unrestricted_interior_minor_and_damaged_certificate(self):
+        for hole in (1,19,43,79,97,98):
+            certificate = rs.interior_rank_certificate(hole)
+            self.assertEqual(certificate['rows'],356)
+            self.assertEqual(certificate['variables'],402)
+            self.assertEqual(certificate['free_arm'],3)
+            self.assertEqual(certificate['columns'],list(range(356)))
+            self.assertTrue(rs.verify_interior_rank_certificate(certificate))
+            report = rs.verify_saved(certificate)
+            self.assertEqual(report['rational_function_nullity'],46)
+            self.assertFalse(report['literal_existence_decided'])
+            for change in ({'hole':0},{'prime':4},{'evaluation':1},
+                           {'columns':certificate['columns'][:-1]},
+                           {'columns':[0]*356},{'variables':401},
+                           {'free_arm':1},
+                           {'all_pairs_decided':True},
+                           {'literal_existence_decided':True}):
+                damaged = certificate | change
+                self.assertFalse(rs.verify_interior_rank_certificate(damaged))
+                with self.assertRaises(ValueError):rs.verify_saved(damaged)
+
+    def test_interior_specialization_matches_integer_stencil_evaluation(self):
+        labels,actual = rs.interior_rank_matrix(19)
+        # Multiply by two to clear every possible z^-1 term first;
+        # specialization and reduction must commute, including cancellation.
+        expected = []
+        for _,terms in sorted(rs.moving_folded_stencils(19)[1].items()):
+            row = defaultdict(int)
+            for (a,q,s,d),c in terms.items():
+                self.assertIn(d,(-1,0,1))
+                row[labels.index((a,q,s))] += c*2**(d+1)
+            expected.append({i:c*3%5 for i,c in row.items() if c%5})
+        self.assertEqual(actual,expected)
+
+    def test_finite_unrestricted_interior_windows_have_predicted_rank(self):
+        labels = rs.moving_folded_labels()
+        positions = {label:i for i,label in enumerate(labels)}
+        for hole in (1,19,98):
+            stencils = rs.moving_folded_stencils(hole)[1]
+            for width in (3,4,7):
+                rows = [{(r+d)*402+positions[a,q,s]:c
+                         for (a,q,s,d),c in row.items()}
+                        for r in range(1,width-1) for row in stencils.values()]
+                report = rs.ternary_analysis(402*width,rows)
+                self.assertTrue(report['complete'])
+                self.assertEqual(report['rank'],356*(width-2))
+                self.assertEqual(report['nullity'],46*width+712)
+
     def test_boolean_cubic_lift_matches_independent_macaulay_space(self):
         rng=random.Random(3759)
         for n in range(1,6):
