@@ -314,6 +314,16 @@ class SpectrumTests(unittest.TestCase):
             next_row=rows[2*len(row_keys)+row_keys.index((0,1))]
             self.assertTrue(all(keys[i] in values for i in next_row))
             self.assertEqual(sum(c*values[keys[i]] for i,c in next_row.items()),-2)
+        # The new three-centre word also needs repair before extension.
+        certificate=rs.open_phase_example(43)
+        bits=int(certificate['bits'],16)
+        oldkeys,_,_=rs.open_phase_system(43,3,3)
+        values={k:1-2*(bits>>i&1) for i,k in enumerate(oldkeys)}
+        keys,rows,_=rs.open_phase_system(43,4,3)
+        contained=[row for row in rows[1068:] if all(keys[i] in values for i in row)]
+        self.assertEqual(len(contained),178)
+        self.assertEqual(sum(bool(sum(c*values[keys[i]] for i,c in row.items()))
+                             for row in contained),74)
 
     def test_open_window_rows_match_physical_columns_without_identifying_ends(self):
         for hole in (19,43,97):
@@ -1347,14 +1357,18 @@ class SpectrumTests(unittest.TestCase):
                          {d:c for d,c in expected.items() if c})
 
     def test_moving_folded_compiler_against_all_physical_columns_and_phases(self):
-        for half,period,width,hole in ((10,1,2,19),(12,2,2,1),(14,3,3,98),
-                                       (18,4,2,7),(18,4,2,19),(18,4,2,97)):
-            keys,rows=rs.compile_moving_folded(half,period,width,hole)
+        cases=[(10,1,2,19),(12,2,2,1),(14,3,3,98),
+               (18,4,2,7),(18,4,2,19),(18,4,2,97)]
+        cases=[(*case,False) for case in cases]+[
+            (14,4,2,hole,True) for hole in (1,19,42,43,44,97,98)]
+        for half,period,width,hole,reduced in cases:
+            keys,rows=rs.compile_moving_folded(half,period,width,hole,reduced)
             scale=2*half+1
             positions={key:i for i,key in enumerate(keys)}
             expected=defaultdict(lambda:defaultdict(int))
             covered=set()
-            for arm,n in enumerate((0,99*scale,79*scale,23*scale)):
+            first=(max(43,hole)*scale-1) if reduced else 99*scale
+            for arm,n in enumerate((0,first,79*scale,23*scale)):
                 for depth in (range(1,n+1) if arm else (0,)):
                     if (arm,depth) in ((1,hole*scale),(1,99*scale)):continue
                     if arm==0:key=('left',0,0,0)
@@ -1368,14 +1382,24 @@ class SpectrumTests(unittest.TestCase):
                             elif r>=half-width:key=('right',arm,q,orientation,r-half)
                             else:key=('period',arm,q,orientation,r%period)
                     covered.add(key)
-                    for e,c in fc.shell_column([99*scale,79*scale,23*scale],
-                                              {(1,hole*scale),(1,99*scale)},(arm,depth)).items():
+                    column=defaultdict(int,fc.shell_column([99*scale,79*scale,23*scale],
+                                              {(1,hole*scale),(1,99*scale)},(arm,depth)))
+                    if (reduced and arm==2 and depth>(max(43,hole)-20)*scale
+                            and not (hole>=43 and depth==(hole-20)*scale+1)):
+                        for e,c in fc.shell_column([99*scale,79*scale,23*scale],
+                                {(1,hole*scale),(1,99*scale)},(1,depth+20*scale-1)).items():
+                            column[e]-=c
+                    for e,c in column.items():
                         expected[e][positions[key]]+=c
             self.assertEqual(covered,set(keys))
             self.assertEqual(normalized(rows),normalized(expected.values()))
-            next_keys,next_rows=rs.compile_moving_folded(half+period,period,width,hole)
+            next_keys,next_rows=rs.compile_moving_folded(half+period,period,width,hole,reduced)
             self.assertEqual(keys,next_keys)
             self.assertEqual(normalized(rows),normalized(next_rows))
+            if reduced:
+                target_keys,target_rows=rs.compile_moving_folded(3990,period,width,hole,True)
+                self.assertEqual(keys,target_keys)
+                self.assertEqual(normalized(rows),normalized(target_rows))
         for half,period,width in ((10,0,2),(10,1,1),(3,1,2),(True,1,2)):
             with self.assertRaises(ValueError):rs.compile_moving_folded(half,period,width)
 

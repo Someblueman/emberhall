@@ -3736,3 +3736,46 @@ physical shell columns at the advertised minimum half-length. Separate
 command-line generation and replay both report verified=true with both
 existence-decision flags false. Physical endpoints, arbitrary hole supports,
 and a compatible arbitrarily long word remain unresolved.
+
+The stored three-centre word cannot be extended with its supplied signs
+fixed: 178 shell rows at the next centre use only already supplied signs,
+and 74 of those are nonzero. A regression test preserves this failure.
+A longer compatible word must therefore change some signs; the local
+positive result does not certify an extendible boundary state.
+
+The full endpoint compiler now also exposes the proved opposite-tail mode:
+`compile_moving_folded(L,p,w,h,reduced=True)`. It keeps the physical left
+and right rows as well as periodic interior representatives. Independent
+complete-column tests cover h=1,19,42,43,44,97,98 at L=14,p=4,w=2, compare
+extension by a whole period, and compare that entire equation system with
+L=3990. This does not apply the stronger three-term recovery, whose extra
+unit conditions must not be lost. The default unreduced compiler and the
+existing command-line search keep their previous behavior.
+
+At h=43 the existing period-two proof engine also produced a scoped refusal
+in 60.639 seconds; a separate command-line process replayed it successfully:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --period-two-phase-refusal --hole 43 --seconds 300 --cubic-pivots 40000 --write /tmp/h43-period-two.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/h43-period-two.json
+```
+
+This excludes only period-two interiors carrying the physical endpoint
+phases, not the new three-centre word or unrestricted words. The generated
+certificate stays outside Git. Two further exact-table, one-worker h=43
+searches ended UNKNOWN at 600 seconds each: four unwrapped centres
+(1,852 reduced variables, 976 integer rows; 14,081,815 branches,
+1,479,919 conflicts), and a period-four interior (1,160 reduced variables,
+976 integer rows; 11,356,650 branches, 1,913,297 conflicts). Both retained
+the physical parity traces. Neither emitted a candidate or a refusal.
+
+Finally the h=43 reduced full endpoint system at L=3990,p=4,w=2 had
+2,755 signs and 2,807 integer rows (maximum width ten). Exact allowed-sign
+row tables, one worker and normalized centre sign returned UNKNOWN after
+600.010 seconds, 13,674,806 branches and 1,508,974 conflicts. No full word
+was emitted. The complete physical-column and whole-period checks above
+validate the equations, not feasibility. Acceptance remains unmet. The next
+mathematical obstacle is a compatible overlapping unit-sign extension with
+both physical endpoints, or an unrestricted obstruction; the three-term
+recovery exposes a smaller core and its exact extra sign restrictions.
+Repeating these recorded solver caps is not a demonstrated next step.

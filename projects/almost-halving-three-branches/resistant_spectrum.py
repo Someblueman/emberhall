@@ -2874,11 +2874,13 @@ def moving_folded_audit(scale,hole=19,reduced=False):
                 all_pairs_decided=False,literal_existence_decided=False)
 
 
-def compile_moving_folded(half,period,patch=2,h=19):
+def compile_moving_folded(half,period,patch=2,h=19,reduced=False):
     """Exact periodic-interior quotient of the all-word moving-hole strip.
 
     End patches are independent. The result extends to every sufficiently
     large half-length with the same residue modulo period, not other supports.
+    Reduced mode uses only the forced opposite-tail substitutions, so every
+    retained sign assignment restores unit values on the removed coordinates.
     """
     if (any(type(v) is not int for v in (half,period,patch,h)) or patch<2
                     or period<1 or half<2*patch+4+period or not 1<=h<99):
@@ -2896,17 +2898,18 @@ def compile_moving_folded(half,period,patch=2,h=19):
         for k,c in terms:row[index(k)]+=c
         row={i:c for i,c in row.items() if c}
         if row:rows.append(row)
-    left,interior,right=moving_folded_stencils(h)
+    left,interior,right=moving_folded_stencils(h,reduced)
     for terms in left.values():add([(('left',a,q,d),c) for (a,q,d),c in terms.items()])
     levels=sorted(set(range(2,patch+2))|set(range(half-patch-1,half))|set(range(patch+2,patch+2+period)))
     for r in levels:
         for terms in interior.values():add([(coordinate(a,q,s,r+d),c) for (a,q,s,d),c in terms.items()])
     for terms in right.values():add([(('right',a,q,s,j),c) for (a,q,s,j),c in terms.items()])
     # Record every sign, even when its shell coefficient cancels.
-    for arm,n in enumerate((99,79,23),1):
+    first_extent=max(43,h) if reduced else 99
+    for arm,n in enumerate((first_extent,79,23),1):
         for q in range(1,n+1):
-            if (arm,q) not in ((1,h),(1,99)):index(('left',arm,q,0))
-    for arm,q,orientation in moving_folded_labels():
+            if (arm,q) not in ((1,h),(1,first_extent)):index(('left',arm,q,0))
+    for arm,q,orientation in moving_folded_labels(reduced,h):
         for level in range(1,patch+1):index(coordinate(arm,q,orientation,level))
         for offset in range(-patch,1):index(coordinate(arm,q,orientation,half+offset))
         for residue in range(period):index(('period',arm,q,orientation,residue))
