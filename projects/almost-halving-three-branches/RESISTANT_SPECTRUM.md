@@ -4279,11 +4279,21 @@ All runs below returned **UNKNOWN**, not a refused window:
 | 43 | 4 | zero conserved moment on every slice | 180.000 | 14,675 | 3,185 |
 | 43 | 3 | zero conserved moment on every slice | 180.003 | 418,977 | 11,116 |
 | 43 | 3 | zero conserved moment and alternating sum on every slice | 180.002 | 219,318 | 6,039 |
+| 43 | 2 | all three zero sums, plus every control-independent unit recovery at both outside boundaries | 180.002 | 250,243 | 11,488 |
+| 97 | 3 | all three zero sums on every slice | 300.001 | 40,649 | 5,701 |
+| 25 | 3 | all three zero sums on every slice | 300.002 | 121,794 | 18,382 |
 
 These runs emitted no new signing or portable refusal. The standard-library
 search's tiny-budget command also returned scoped `unknown` with both new
 restriction flags preserved. No CP-SAT or symbolic-algebra dependency was
 added to the shipped generator or verifier.
+
+The two-state model with the 462 outside unit-recovery gates has 1,266 sign
+variables including its necessary auxiliary unit values. The existing local
+affine closure, without absolute phase equations, reached a nonconflicting
+fixed point at rank 820, free dimension 446, in 0.082 seconds. Its first
+round added no equations and skipped 26 rows at local rank cap 12. This
+bounded local closure is not a global completeness or feasibility result.
 
 The three-state, all-three-zero system, including every absolute trace,
 still admits odd-integer congruence solutions modulo 8, 32 and 512.
