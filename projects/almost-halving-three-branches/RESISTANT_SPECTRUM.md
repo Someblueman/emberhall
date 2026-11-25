@@ -2755,3 +2755,46 @@ process separately verifies its saved certificate. Changing a proof bit, the
 hole parameter, the claim scope, or removing the proof is rejected. The
 original-row path uses no rational or ternary quotient. `git diff --check`
 passes. No all-pairs or project acceptance is claimed.
+
+## Mica: replayed phase refusals at further holes (25 November)
+
+Using the accepted original-row compiler unchanged at source `c500500`,
+I generated and replayed the period-two phase refusal at further holes:
+
+| h | Generation plus first replay, seconds | Proof rounds | Separate CLI replay |
+| --- | ---: | ---: | --- |
+| 1 | 128.38 | 2 | accepted |
+| 3 | 118.49 | 2 | accepted |
+| 21 | 110.29 | 2 | accepted |
+| 49 | 60.31 | 2 | accepted |
+| 97 | 14.05 | 1 | accepted |
+
+For each row, reproduce with the existing commands, substituting its h:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --period-two-phase-refusal --hole 1 --seconds 300 --cubic-pivots 40000 --write /tmp/phase-refusal.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/phase-refusal.json
+```
+
+These are polynomial identities on the original integer shell parity fibre,
+with all five physically forced trace phases. The same necessity argument as
+for h=19 applies: a sufficiently long period-two block in a full signing
+would satisfy the rebuilt finite system and hence the checked identity
+`1=0`. Free endpoint patches cannot repair that block. No large certificates
+are committed; the commands regenerate them. This extends the scoped theorem,
+not the task's all-pairs acceptance. There is no new implementation behavior,
+and unchanged test suites were not repeated.
+
+A separate exact compilation at h=19 exposes the next resource boundary.
+With the trace phases, periods 2, 4, 6 and 8 have respectively 94, 188, 278
+and 373 free binary coordinates. The original-row cubic engine accepts at
+most 128; increasing the period therefore does not just repeat the successful
+proof command. Period four's 188-coordinate mod-eight compilation succeeds,
+but it is not a contradiction or a literal signing. Periods six and eight
+stop at the quadratic compiler's 256-coordinate dimension guard.
+
+The remaining mathematical obstacle is unchanged: decide literal signings
+with longer even or nonperiodic interiors and their physical endpoints, then
+allow arbitrary hole positions. The present identities do not exclude those
+possibilities and give no all-pairs obstruction or infinite target
+construction. The broader task and every-triple milestone remain open.
