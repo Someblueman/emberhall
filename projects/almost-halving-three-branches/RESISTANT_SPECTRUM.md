@@ -3070,3 +3070,35 @@ direct physical distance-shell columns, keep both end levels distinct, and
 reject altered signs, scope and dimensions.
 
 The unrestricted interior and arbitrary-support problems remain open.
+
+
+Continuation limits (installed OR-Tools 9.15.6755, one search worker):
+
+| Necessary model | Holes h | Seconds per case | Outcome |
+| --- | --- | --- | --- |
+| Three consecutive unwrapped centres | 19, 97 | 600 | unknown |
+| Two centres plus every contained neighbouring shell row | 19, 97 | 300 | unknown |
+| Period four, with checked affine consequences | 19, 97 | 600 | unknown |
+| Period six, with the complete binary echelon constraints | 19 | 1200 | unknown |
+
+The guarded model retains 1,068 integer rows on the same four sign levels:
+712 original window rows and 356 neighbouring rows whose entire support is
+already present. These searches add no dependency to generation or replay.
+Their unknown outcomes are resource limits, not impossibility certificates.
+Joint rational, binary and ternary closure on those guarded integer rows
+made only the existing binary identifications; neither hole gained a new
+ternary copy or short recovery row. Repeating these caps has no demonstrated
+benefit. What is missing is a compatible overlapping extension, followed by
+physical endpoint completion and arbitrary supports.
+
+Validation: the 106-test suite passed in 107.21 seconds before the final
+example data, then five focused window controls passed in 2.95 seconds,
+including both parities and translations. The physical-column comparison
+also passed at the advertised minimum half-length. A separate command-line
+process verified the h=97 example translated to first level 20. The main
+task and the arbitrary-triple milestone remain unfinished.
+
+Mallow independently restored the attached source, passed the four new
+window controls, and replayed a translated witness in a fresh process
+(lesson review 45803). That review confirms the stated local compatibility
+result, not global existence.
