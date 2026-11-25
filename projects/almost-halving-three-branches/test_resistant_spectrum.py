@@ -15,6 +15,38 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_cubic_proof_with_explicit_additional_binary_conditions(self):
+        rows = [{i:1 for i in range(4)}]
+        extra = [(1,0),(2,0),(4,0)]
+        # These phases force all four signs positive. The row is zero mod four
+        # but not mod eight, so the contradiction has a one-input certificate.
+        analysis = rs.cubic_shell_analysis(4,rows,proof=True,extra_binary=extra)
+        self.assertEqual(analysis['status'],'refused')
+        self.assertTrue(rs.verify_cubic_shell_proof(4,rows,analysis['cubic_proof'],extra))
+        with self.assertRaises(ValueError):
+            rs.verify_cubic_shell_proof(4,rows,analysis['cubic_proof'])
+        conflict = rs.binary_shell_quadratics(4,rows,extra_binary=[(15,1)])
+        self.assertTrue(conflict['parity_conflict'])
+        for equation in ((16,0),(-1,0),(1,2),(True,0)):
+            with self.assertRaises(ValueError):
+                rs.binary_shell_quadratics(4,rows,extra_binary=[equation])
+        with patch.object(rs,'joint_sign_closure',side_effect=AssertionError('quotient entered')):
+            size,original,equations = rs._period_two_phase_system(19)
+        self.assertEqual((size,len(original),len(equations)),(804,712,10))
+        compiled = rs.binary_shell_quadratics(size,original,extra_binary=equations)
+        self.assertEqual(len(compiled['free']),94)
+        for mask,rhs in equations:
+            residual = 0
+            for i in range(size):
+                if mask>>i&1:
+                    a,b = compiled['expressions'][i]; residual ^= a; rhs ^= b
+            self.assertEqual((residual,rhs),(0,0))
+        # Scoped refusal checks reject missing proof and unsupported claims.
+        for certificate in ({'kind':'moving-period-two-phase-v1','status':'unknown'},
+                            {'kind':'moving-period-two-phase-v1','status':'refused',
+                             'all_pairs_decided':True}):
+            self.assertFalse(rs.verify_period_two_phase_refusal(certificate))
+
     def test_mod_four_completion_every_odd_support_and_damage(self):
         for hole in range(1,99,2):
             for parity in (0,1):

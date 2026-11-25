@@ -2687,3 +2687,71 @@ five-law classification for all 98 h, all 98 completions for odd h and both
 length parities, reject damaged certificates, and check expanded assignments
 against independently generated physical shell columns at several lengths.
 Both documented certificate round trips verify; `git diff --check` passes.
+
+### A replayable obstruction to period two with the physical phases
+
+For **h=19**, the period-two interior equations and the five endpoint-forced
+trace phases have no literal signing. Unlike the earlier interior-only
+searches, this statement retains the absolute phases inherited from the
+physical endpoints. It excludes a period-two block containing both complete
+translated row parities, with neighbouring levels inside the repeating
+block, in any full solution on this support. In particular widening the
+free endpoint patches cannot rescue a sufficiently long period-two interior.
+Other even periods, other h, unrestricted nonperiodic interiors and arbitrary
+hole placements are not decided by this certificate.
+
+The finite system has 804 original signs and 712 interior row instances.
+The ten trace conditions (five at each level parity), together with the
+original shell parity equations, leave 94 free binary coordinates. No
+rational or ternary quotient is used in the retained proof. A Boolean cubic lift gives 15 checked linear consequences;
+a second lift on 79 coordinates gives 41 more; on the remaining 38
+coordinates a final explicit polynomial combination is the identity `1=0`.
+The first lift hit its 40,000-pivot limit, but the 15 retained consequences
+have explicit identities; completeness of that lift is unnecessary.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --period-two-phase-refusal --hole 19 --seconds 300 --cubic-pivots 40000 --write /tmp/period-two-phase.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/period-two-phase.json
+```
+
+Generation can return unknown on a slower machine. The separate verifier
+first checks the five trace laws and endpoint identities. It rebuilds the
+original period-two shell rows and their affine binary fibre, includes the
+ten checked phase equations, and verifies the saved Boolean identities by
+multiplication. It performs binary elimination but no rational or ternary
+quotient, external solving, or cubic search. The generic
+quadratic compiler now accepts explicit additional binary conditions, while
+this scoped wrapper establishes why its conditions are necessary. No external
+solver or new dependency is used by the shipped generation or replay path.
+The roughly 470-kilobyte generated certificate is not committed.
+
+The path to this certificate included a temporary probe with already installed
+OR-Tools 9.15.6755. The original phase-constrained interior model returned
+unknown after 300 seconds. Its exact reduced equations (580 signed coordinates, rational nullity 95)
+returned infeasible in 85.33 seconds. This solver report motivated proof extraction; it is not
+the proof accepted by the checker. A 20,000-pivot Boolean pass left 91
+parameters without a contradiction. An independent temporary Z3 probe stopped
+unknown. A direct handwritten interior search stopped unknown after 900.07
+seconds and 122,303 nodes. These limits are not impossibility results.
+
+The full period-two model with six free endpoint levels, h=19 and L=3990
+also stopped unknown after 602.22 seconds without completing a joint-closure
+round. The new phase certificate explains why further sign branching in
+this particular period-two model cannot produce a solution. The broader
+resistant-family acceptance and the every-triple milestone remain unmet.
+
+Further temporary exact probes found no witness: the raw period-two endpoint
+model stopped unknown at 1,200.32 seconds (35,908 branches); its analytically
+opposite-tail-reduced version stopped unknown at 900.10 seconds (35,984
+branches); the period-four model stopped unknown at 900.48 seconds (40,215
+branches). These installed-solver probes add no dependency and supply no
+refusal claim. The retained period-two obstruction instead comes from the
+original-row polynomial certificate described above.
+
+Final validation: all 93 focused tests pass in 130.37 seconds; the expanded
+additional-condition test also passes separately. The public original-row
+proof command regenerates a verified refusal in 178.04 seconds, and a fresh
+process separately verifies its saved certificate. Changing a proof bit, the
+hole parameter, the claim scope, or removing the proof is rejected. The
+original-row path uses no rational or ternary quotient. `git diff --check`
+passes. No all-pairs or project acceptance is claimed.

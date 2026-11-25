@@ -1939,6 +1939,64 @@ def verify_parity_completion_certificate(certificate):
         return False
 
 
+def _period_two_phase_system(hole):
+    """Original two-periodic integer rows and the checked endpoint traces."""
+    _,stencils,_,laws,_ = _parity_trace_data(hole)
+    keys = [(*k,j) for k in moving_folded_labels() for j in (0,1)]
+    positions = {k:i for i,k in enumerate(keys)}
+    original = []
+    for level in (0,1):
+        for stencil in stencils.values():
+            row = defaultdict(int)
+            for (*k,d),c in stencil.items(): row[positions[(*k,(level+d)%2)]] += c
+            original.append({i:c for i,c in row.items() if c})
+    equations = []
+    for level in (0,1):
+        for j,law in enumerate(laws):
+            mask = 0
+            rhs = (level-1)%2 if j<2 else level%2 if j<4 else 0
+            for a,q,s,d in law['observable']:
+                mask ^= 1<<positions[a,q,s,(level+d)%2]
+            equations.append((mask,rhs))
+    return len(keys),original,equations
+
+
+def period_two_phase_refusal(hole=19,seconds=300,max_pivots=40000):
+    """Generate a scoped Boolean identity, retaining no solver-only refusal."""
+    started = time.monotonic()
+    trace = parity_trace_certificate(hole)
+    size,rows,equations = _period_two_phase_system(hole)
+    remaining = seconds-(time.monotonic()-started)
+    if remaining<=0: raise ValueError('no time remains for proof extraction')
+    analysis = cubic_shell_analysis(size,rows,remaining,max_pivots,
+                                    True,extra_binary=equations)
+    return dict(kind='moving-period-two-phase-v1',hole=hole,
+                status=analysis.get('status','unknown'),trace=trace,
+                cubic_proof=analysis.get('cubic_proof',[]),
+                elapsed=time.monotonic()-started,
+                literal_existence_decided=False,all_pairs_decided=False)
+
+
+def verify_period_two_phase_refusal(certificate):
+    """Rebuild the original binary fibre; multiply saved Boolean identities.
+
+    No rational/ternary quotient, external solver or cubic search is used.
+    """
+    if (certificate.get('kind')!='moving-period-two-phase-v1' or
+            certificate.get('status')!='refused' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False): return False
+    try:
+        trace = certificate['trace']
+        if trace['hole']!=certificate['hole'] or not verify_parity_trace_certificate(trace):
+            return False
+        size,rows,equations = _period_two_phase_system(certificate['hole'])
+        return verify_cubic_shell_proof(size,rows,
+                                       certificate['cubic_proof'],extra_binary=equations)
+    except (KeyError,ValueError,TypeError,IndexError):
+        return False
+
+
 def interior_rank_matrix(hole=19,prime=5):
     """Evaluate the unrestricted Laurent shell matrix at z=2 over a small prime field.
 
@@ -2243,7 +2301,7 @@ def parity_refusal(rows):
     return binary_elimination(rows)[0]
 
 
-def binary_shell_quadratics(size, original, seconds=30, max_free=256):
+def binary_shell_quadratics(size, original, seconds=30, max_free=256, extra_binary=()):
     """Exact shell equations modulo eight on the complete parity fibre.
 
     Write s_i=(-1)**(a_i*x+b_i). Parity makes every row divisible by
@@ -2263,6 +2321,18 @@ def binary_shell_quadratics(size, original, seconds=30, max_free=256):
     certificate,basis=binary_elimination(original)
     if certificate is not None:
         return dict(complete=True,parity_conflict=True,certificate=certificate)
+    for mask,rhs in extra_binary:
+        if (type(mask) is not int or mask<0 or mask.bit_length()>size or
+                type(rhs) is not int or rhs not in (0,1)):
+            raise ValueError('invalid additional binary equation')
+        while mask:
+            pivot=mask.bit_length()-1
+            if pivot not in basis:
+                basis[pivot]=mask,rhs
+                break
+            old,b=basis[pivot];mask^=old;rhs^=b
+        if not mask and rhs:
+            return dict(complete=True,parity_conflict=True)
     free=[i for i in range(size) if i not in basis]
     n=len(free)
     if n>max_free:
@@ -2453,9 +2523,13 @@ def verify_boolean_cubic_identity(quadratics, variables, identity):
     return True
 
 
-def verify_cubic_shell_proof(size, original, proofs):
-    """Verify a chain of affine reductions ending in the explicit identity 1=0."""
-    compiled=binary_shell_quadratics(size,original,seconds=300,max_free=128)
+def verify_cubic_shell_proof(size, original, proofs, extra_binary=()):
+    """Verify affine reductions ending in 1=0, conditional on extra_binary.
+
+    Scoped callers must establish why any additional conditions are necessary.
+    """
+    compiled=binary_shell_quadratics(size,original,seconds=300,max_free=128,
+                                    extra_binary=extra_binary)
     if not compiled['complete'] or compiled.get('parity_conflict'):
         raise ValueError('require a complete compatible original parity fibre')
     if not isinstance(proofs,list) or not proofs:raise ValueError('no cubic proof')
@@ -2548,10 +2622,12 @@ def substitute_boolean_quadratics(polynomials, expressions, new_variables):
     return out
 
 
-def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000, proof=False):
+def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000, proof=False,
+                         extra_binary=()):
     """Lift necessary mod-eight shell quadratics; no arbitrary-support claim."""
     started=time.monotonic()
-    compiled=binary_shell_quadratics(size,original,seconds,max_free=128)
+    compiled=binary_shell_quadratics(size,original,seconds,max_free=128,
+                                    extra_binary=extra_binary)
     if not compiled['complete']:return compiled
     if compiled['parity_conflict']:
         return dict(complete=True,status='refused_by_parity',literal_existence_decided=False)
@@ -3792,6 +3868,12 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-period-two-phase-v1':
+        if not verify_period_two_phase_refusal(saved):
+            raise ValueError('invalid endpoint-phase period-two refusal')
+        return dict(verified=True,hole=saved['hole'],
+                    claim='period-two interiors with physical endpoint phases only',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-parity-completion-v1':
         if not verify_parity_completion_certificate(saved):
             raise ValueError('invalid mod-four shell completion')
@@ -4088,7 +4170,17 @@ def main():
                    help='classify all constant-row two-level parity laws and endpoint phases')
     p.add_argument('--parity-completion',action='store_true',
                    help='certify a full mod-four shell signing for the parity of --half')
+    p.add_argument('--period-two-phase-refusal',action='store_true',
+                   help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.period_two_phase_refusal:
+        certificate = period_two_phase_refusal(args.hole,args.seconds,args.cubic_pivots)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(certificate,f)
+        result = (verify_saved(certificate) if certificate['status']=='refused'
+                  else dict(status=certificate['status'],all_pairs_decided=False))
+        print(json.dumps(result|dict(elapsed=certificate['elapsed']),sort_keys=True))
+        return
     if args.parity_completion:
         certificate = parity_completion_certificate(args.hole,args.half%2)
         if args.write:
