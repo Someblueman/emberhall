@@ -2261,3 +2261,37 @@ All **80 focused tests pass** (57.07 seconds observed), including fifty
 independent small polynomial-identity controls, damaged proof rejection,
 scope rejection, and the existing physical shell and direct-distance controls.
 Certificates are regenerated outside Git; no large evidence file is added.
+The complete physical-column comparison was also extended to h=19 and h=97
+at L=18, p=4, w=2 (the resistant half-length phase), followed by the
+whole-period extension check at L=22; both pass.
+
+#### Larger diagnostic and the proof-extraction boundary
+
+At h=19, a 120,000-pivot diagnostic reduces 93 parameters to 88 and then
+reports a constant contradiction at rank 95,908 after 93,632 products.
+Observed total time is 965.64 seconds (633.06 for the first lift and 329.09
+for the second). **This larger refusal has not received standalone certificate
+verification in this run.** A separate proof-generating replay exceeded its
+1,200-second budget inside extraction, which still attempted to extract
+every final linear consequence. I interrupted that process after about
+1,436 seconds; it saved no completed certificate. That is a witnessed
+resource failure, not another verified refusal.
+
+The shipped generator now extracts only the final constant identity after
+a contradiction and checks the time budget during extraction too. An
+unfinished extraction returns `unknown`, `proof_time_limit`, an empty proof,
+and a separate `algebra_status`; it cannot masquerade as a checked certificate.
+A clock-boundary control exercises deadlines throughout a small proof run.
+The h=97 certificate above remains independently checkable and accepted.
+The large h=19 certificate can be attempted with the same command, replacing
+`--hole 97` by `--hole 19`, the pivot cap by 120000 and the budget by 1200;
+completion is not promised.
+
+The task remains open. Neither the verified period-four h=97 refusal nor
+the larger diagnostic excludes unrestricted inserted words or every permitted
+two-hole support. The next mathematical step must allow those possibilities
+or produce an actual signing in another model; repeating the capped small
+hull or unsuccessful literal searches is not acceptance. Priority remains
+provisional, and no project or milestone completion is claimed.
+After the extraction repair, all **81 focused tests pass** (43.72 seconds
+observed), and `git diff --check` is clean.

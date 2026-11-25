@@ -1964,13 +1964,18 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proo
     started=time.monotonic();basis={};processed=0;products=0
     proof_nodes=[];proof_ids={}
     def certificate(node):
-        active=1<<node;raw=0;multipliers=[0]*len(independent)
+        active=1<<node;raw=0;multipliers=[0]*len(independent);visited=0
         while active:
+            if visited%1024==0 and time.monotonic()-started>=seconds:
+                raise TimeoutError('Boolean certificate extraction time limit')
+            visited+=1
             index=active.bit_length()-1;active^=1<<index
             source,parents=proof_nodes[index]
             if source[0]=='input':raw^=1<<source[1]
             else:multipliers[source[1]]^=1<<source[2]
             for parent in parents:active^=1<<parent
+        if time.monotonic()-started>=seconds:
+            raise TimeoutError('Boolean certificate extraction time limit')
         return dict(raw=raw,multipliers=multipliers)
     def result(status,stage):
         linear=[row for p,row in sorted(basis.items()) if p<=variables]
@@ -1980,8 +1985,13 @@ def boolean_cubic_lift(quadratics, variables, seconds=30, max_pivots=20000, proo
                     literal_existence_decided=False,
                     elapsed=time.monotonic()-started)
         if proof:
-            out['proof']=[dict(polynomial=basis[p],**certificate(proof_ids[p]))
-                          for p in ([0] if status=='refused' else sorted(basis)) if p<=variables]
+            try:
+                out['proof']=[dict(polynomial=basis[p],**certificate(proof_ids[p]))
+                              for p in ([0] if status=='refused' else sorted(basis)) if p<=variables]
+            except TimeoutError:
+                out.update(proof=[],status='unknown',complete=False,stage='proof_time_limit',
+                           algebra_status=status)
+        out['elapsed']=time.monotonic()-started
         return out
     def insert(row,source):
         parents=array('I') if proof else None
@@ -2179,6 +2189,7 @@ def cubic_shell_analysis(size, original, seconds=30, max_pivots=20000, proof=Fal
         if proof:proofs.append(result.pop('proof'))
         history.append({k:v for k,v in result.items() if k!='linear_polynomials'})
         if result['status']=='refused':break
+        if result['stage']=='proof_time_limit':break
         linear=result['linear_polynomials']
         if not linear:break
         free,expressions=boolean_linear_substitution(variables,linear)

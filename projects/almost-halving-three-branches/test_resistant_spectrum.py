@@ -175,6 +175,22 @@ class SpectrumTests(unittest.TestCase):
             with self.assertRaises(ValueError):rs.verify_saved(dict(saved,all_pairs_decided=True))
             with self.assertRaises(ValueError):rs.verify_saved(dict(saved,joint_history=[]))
 
+    def test_cubic_proof_budget_covers_extraction(self):
+        rows=[(1<<4)|1,1<<5,(1<<6)|1]
+        extraction_stops=0
+        # Move the deadline across every clock boundary of this small run;
+        # no fixed count of internal elimination operations is assumed.
+        for cutoff in range(1,100):
+            calls=itertools.count()
+            with patch.object(rs.time,'monotonic',side_effect=lambda:float(next(calls)>=cutoff)):
+                report=rs.boolean_cubic_lift(rows,3,seconds=.5,proof=True)
+            if report['stage']=='proof_time_limit':
+                extraction_stops+=1
+                self.assertEqual(report['status'],'unknown')
+                self.assertFalse(report['complete'])
+                self.assertEqual(report['proof'],[])
+        self.assertGreater(extraction_stops,0)
+
     def test_relational_shells_preserve_every_literal_solution(self):
         rng = random.Random(43272)
         systems = [(9,[{0:1,2:-1,4:1,8:1,3:1,5:-1},
@@ -370,7 +386,8 @@ class SpectrumTests(unittest.TestCase):
                          {d:c for d,c in expected.items() if c})
 
     def test_moving_folded_compiler_against_all_physical_columns_and_phases(self):
-        for half,period,width,hole in ((10,1,2,19),(12,2,2,1),(14,3,3,98),(18,4,2,7)):
+        for half,period,width,hole in ((10,1,2,19),(12,2,2,1),(14,3,3,98),
+                                       (18,4,2,7),(18,4,2,19),(18,4,2,97)):
             keys,rows=rs.compile_moving_folded(half,period,width,hole)
             scale=2*half+1
             positions={key:i for i,key in enumerate(keys)}
