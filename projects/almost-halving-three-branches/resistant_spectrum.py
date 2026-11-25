@@ -2221,6 +2221,118 @@ def adjacent_driver_predecessor(certificate,current,third):
     return [reversed_previous[i] for i in permutation]
 
 
+def adjacent_unit_boundary_obstructions(certificate,state,reverse=False):
+    """Necessary unit tests independent of every outside third-arm sign.
+
+    A nonempty result proves that this particular state has no unit
+    successor (or predecessor). An empty result is deliberately inconclusive:
+    the remaining recoveries still share 46 controls and must all be unit.
+    Each returned value follows from the driver's original-row identities.
+    """
+    verify_adjacent_integral_driver(certificate)
+    if (type(reverse) is not bool or len(state)!=402 or
+            any(type(v) is not int or v not in (-1,1) for v in state)):
+        raise ValueError('require 402 unit integer signs and a Boolean direction')
+    labels=moving_folded_labels()
+    permutation=adjacent_time_reversal(certificate['hole']) if reverse else list(range(402))
+    previous=[state[i] for i in permutation]
+    obstructions=[]
+    for recovery in certificate['recoveries']:
+        if any(i%2 for i,c in recovery['expression']):continue
+        value=sum(c*previous[i//2] for i,c in recovery['expression'])
+        if abs(value)!=1:
+            target=permutation[recovery['target']//2]
+            obstructions.append(dict(target=list(labels[target]),value=value))
+    return obstructions
+
+
+def adjacent_conserved_observables(certificate):
+    """Check a conserved moment at every hole; an alternating sum at odd holes.
+
+    Discovery used rational nullspaces; proof uses only substitution in the
+    driver's checked integer identities, with all 46 controls unrestricted.
+    No assertion that these exhaust all invariants is needed or made.
+    """
+    verify_adjacent_integral_driver(certificate)
+    hole=certificate['hole'];moment=[];alternating=[]
+    for a,q,s in moving_folded_labels():
+        C={1:hole-101,2:123-hole,3:179-hole}[a]
+        value=C-q if s==1 else -C-1+q
+        if a==1:value+=201*(q>=hole) if s==1 else -201*(q>hole)
+        moment.append(value)
+        alternating.append(s*(-1 if q%2 else 1))
+    expressions={z['target']:dict(z['expression']) for z in certificate['recoveries']}
+    laws=[(moment,1),([1]*402,1)]
+    if hole%2:laws.append((alternating,-1))
+    for coefficients,multiplier in laws:
+        pulled=defaultdict(int)
+        for j,c in enumerate(coefficients):
+            for i,d in expressions.get(2*j+1,{2*j+1:1}).items():pulled[i]+=c*d
+        if {i:c for i,c in pulled.items() if c}!={2*i:multiplier*c
+                for i,c in enumerate(coefficients) if c}:
+            raise ValueError('proposed observable fails its exact propagation law')
+    return dict(moment=moment,alternating=alternating if hole%2 else None,
+                claim='weighted moment is conserved; at odd holes the alternating sum changes sign each step; physical endpoints excluded')
+
+
+def adjacent_endpoint_row_weights(hole=43):
+    """Explicit original-row identities; their verifier performs no elimination."""
+    if type(hole) is not int or not 24<=hole<=98:
+        raise ValueError('endpoint moments require 24<=hole<=98')
+    left,stencils,right=moving_folded_stencils(hole)
+    incoming=[key for key,row in stencils.items() if {k[-1] for k in row}=={-1,0}]
+    outgoing=[key for key,row in stencils.items() if {k[-1] for k in row}=={0,1}]
+    suffix=[101-Q for Q,u in outgoing]+[101-Q-(u==1) for Q,u in right]
+    prefix=[2*Q-201 for Q,c in left]+[2*Q-201 for Q,u in incoming]
+    def encode(values):return [[i,v,1] for i,v in enumerate(values) if v]
+    result=dict(row_weights=encode(suffix),prefix_balance_weights=encode(prefix))
+    if hole%2:
+        alternating=[-1 if (Q+c)%2 else 1 for Q,c in left]
+        alternating += [-1 if Q%2 else 1 for Q,u in incoming]
+        result['alternating_prefix_weights']=encode(alternating)
+    return result
+
+
+def adjacent_right_moment_identity(hole=43):
+    """Certify endpoint conditions on the conserved and alternating sums."""
+    result=dict(kind='moving-adjacent-right-moment-v1',hole=hole,
+                literal_existence_decided=False,all_pairs_decided=False)
+    result.update(adjacent_endpoint_row_weights(hole))
+    verify_adjacent_right_moment(result)
+    return result
+
+
+def verify_adjacent_right_moment(certificate):
+    """Check only the row identity, independently of its elimination search."""
+    if (certificate.get('kind')!='moving-adjacent-right-moment-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False):
+        raise ValueError('require a scoped right-end moment identity')
+    driver=adjacent_integral_driver(certificate['hole'])
+    laws=adjacent_conserved_observables(driver);moment=laws['moment']
+    blocks=adjacent_transfer_blocks(certificate['hole'])
+    def check(rows,weights,coefficients,level):
+        combined=defaultdict(Fraction);seen=set()
+        for index,numerator,denominator in weights:
+            if (any(type(v) is not int for v in (index,numerator,denominator)) or
+                    not 0<=index<len(rows) or index in seen or not numerator or denominator<=0):
+                raise ValueError('invalid original-row weight')
+            seen.add(index)
+            for key,c in rows[index].items():
+                combined[key]+=Fraction(numerator,denominator)*c
+        target={('slice',*label,level):v
+                for label,v in zip(moving_folded_labels(),coefficients) if v}
+        if {k:v for k,v in combined.items() if v}!=target:
+            raise ValueError('endpoint row combination does not equal the observable')
+    check(blocks['suffix'],certificate['row_weights'],moment,0)
+    if 'prefix_balance_weights' in certificate:
+        check(blocks['prefix'],certificate['prefix_balance_weights'],[1+2*w for w in moment],2)
+    if 'alternating_prefix_weights' in certificate:
+        if laws['alternating'] is None:raise ValueError('alternating law requires an odd hole')
+        check(blocks['prefix'],certificate['alternating_prefix_weights'],laws['alternating'],2)
+    return True
+
+
 def adjacent_balance_drift(certificate):
     """Certify conserved slice sum and bounded two-step drift at odd holes 25..97.
 
@@ -2328,6 +2440,29 @@ def verify_adjacent_phase_signs(certificate):
             for level in range(certificate['first'],certificate['first']+certificate['levels']):
                 if sum(1-2*(bits>>i&1) for i,key in enumerate(keys) if key[-1]==level):
                     raise ValueError('adjacent window has a nonzero slice sum')
+    if 'zero_moment_slices' in certificate:
+        if type(certificate['zero_moment_slices']) is not bool:
+            raise ValueError('invalid zero-moment claim')
+        if certificate['zero_moment_slices']:
+            coefficients=adjacent_conserved_observables(
+                adjacent_integral_driver(certificate['hole']))['moment']
+            weights=dict(zip(moving_folded_labels(),coefficients))
+            for level in range(certificate['first'],certificate['first']+certificate['levels']):
+                if sum(weights[key[:-1]]*(1-2*(bits>>i&1))
+                       for i,key in enumerate(keys) if key[-1]==level):
+                    raise ValueError('adjacent window has a nonzero conserved moment')
+    if 'zero_alternating_slices' in certificate:
+        if type(certificate['zero_alternating_slices']) is not bool:
+            raise ValueError('invalid zero alternating-sum claim')
+        if certificate['zero_alternating_slices']:
+            coefficients=adjacent_conserved_observables(
+                adjacent_integral_driver(certificate['hole']))['alternating']
+            if coefficients is None:raise ValueError('alternating law requires an odd hole')
+            weights=dict(zip(moving_folded_labels(),coefficients))
+            for level in range(certificate['first'],certificate['first']+certificate['levels']):
+                if sum(weights[key[:-1]]*(1-2*(bits>>i&1))
+                       for i,key in enumerate(keys) if key[-1]==level):
+                    raise ValueError('adjacent window has a nonzero alternating sum')
     return True
 
 
@@ -2362,6 +2497,26 @@ def adjacent_balanced_example(hole=43, first=2):
     return certificate
 
 
+def adjacent_zero_observable_example(hole=43,first=2):
+    """A checked one-edge unit path in S=W=A=0, in either absolute parity.
+
+    Both stored edges are dead at both boundaries, not extendible cores.
+    Translation by two preserves every absolute trace; every requested
+    location is verified again against the original rows.
+    """
+    if type(hole) is not int or hole!=43 or type(first) is not int or first<2:
+        raise ValueError('require hole 43 and first level at least two')
+    words={
+        0:'0xf7bbfa15f7733735be3f227de2b707ffbf6375e97f7e7e797f3eff523bffb9a63f1d5a3f59fe3bf0beaaf133f28c2ebd187ae946e80a005d03804384002421c008555838955d48471cb904cccc8517a687908ea85800885cc04846431f0244318a92f2620',
+        1:'0xa73d36f7ff717b3ff73533fdaff4df4edf6ffc3f7f667d7e7dfdff34e3af8ba27b2f3a310be32ff83f2af0aefb00fe5f3873c21b50301231430039004324503401859c52801d4c4ed6d015ceec0c8cacf500e4881c0c00d800a74802268560889216a8e3c'}
+    certificate=dict(kind='moving-adjacent-phase-signs-v1',hole=hole,levels=2,first=first,
+                     minimum_half=first+2,variables=804,status='local_signing',
+                     balanced_slices=True,zero_moment_slices=True,zero_alternating_slices=True,
+                     bits=words[first%2],literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_phase_signs(certificate)
+    return certificate
+
+
 def adjacent_phase_example(hole=43, first=3):
     """Restrict a checked open witness to its fully constrained middle levels.
 
@@ -2381,13 +2536,33 @@ def adjacent_phase_example(hole=43, first=3):
     return result
 
 
-def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000):
+def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000,
+                          balanced=False,zero_moment=False,zero_alternating=False):
     """Bounded standard-library search of actual consecutive transfer states."""
-    if (type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
+    if (type(balanced) is not bool or type(zero_moment) is not bool or
+            type(zero_alternating) is not bool or
+            type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0
             or type(nodes) is not int or nodes<1):
         raise ValueError('require positive finite search limits')
     started=time.monotonic()
     keys,rows,equations=adjacent_phase_system(hole,levels,first)
+    if balanced:
+        # A restriction of the search, not a claim that every short path is
+        # balanced. Long odd-hole paths obey the separately checked drift law.
+        rows += [{i:1 for i,key in enumerate(keys) if key[-1]==level}
+                 for level in range(first,first+levels)]
+    if zero_moment:
+        coefficients=adjacent_conserved_observables(adjacent_integral_driver(hole))['moment']
+        weights=dict(zip(moving_folded_labels(),coefficients))
+        rows += [{i:weights[key[:-1]] for i,key in enumerate(keys)
+                  if key[-1]==level and weights[key[:-1]]}
+                 for level in range(first,first+levels)]
+    if zero_alternating:
+        coefficients=adjacent_conserved_observables(adjacent_integral_driver(hole))['alternating']
+        if coefficients is None:raise ValueError('alternating law requires an odd hole')
+        weights=dict(zip(moving_folded_labels(),coefficients))
+        rows += [{i:weights[key[:-1]] for i,key in enumerate(keys) if key[-1]==level}
+                 for level in range(first,first+levels)]
     refusal,basis=binary_elimination(rows)
     if refusal is not None:raise AssertionError('incompatible adjacent parity window')
     for mask,rhs in equations:
@@ -2400,6 +2575,9 @@ def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000):
     result=dict(kind='moving-adjacent-phase-signs-v1',hole=hole,levels=levels,first=first,
                 minimum_half=first+levels,variables=len(keys),status='unknown',
                 literal_existence_decided=False,all_pairs_decided=False)
+    if balanced:result['balanced_slices']=True
+    if zero_moment:result['zero_moment_slices']=True
+    if zero_alternating:result['zero_alternating_slices']=True
     remaining=seconds-(time.monotonic()-started)
     if remaining<=0:return result
     engine=make_engine(len(keys),rows,reduced_binary_basis(basis),remaining,nodes,'connected')
@@ -5125,6 +5303,13 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-adjacent-right-moment-v1':
+        verify_adjacent_right_moment(saved)
+        return dict(verified=True,hole=saved['hole'],
+                    ordinary_balance_forced='prefix_balance_weights' in saved,
+                    alternating_balance_forced='alternating_prefix_weights' in saved,
+                    claim='physical right endpoint forces the conserved interior weighted moment to zero; unit existence is not decided',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-adjacent-integral-driver-v1':
         verify_adjacent_integral_driver(saved)
         result=dict(verified=True,hole=saved['hole'],inputs=448,recovered=356,
@@ -5141,6 +5326,8 @@ def verify_saved(saved):
               for level in range(saved['first'],saved['first']+saved['levels'])]
         return dict(verified=True,hole=saved['hole'],levels=saved['levels'],
                     slice_sums=sums,
+                    zero_moment_slices_checked=saved.get('zero_moment_slices',False),
+                    zero_alternating_slices_checked=saved.get('zero_alternating_slices',False),
                     claim='finite adjacent-level path including endpoint-derived traces; physical endpoints excluded',
                     literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-periodic-phase-odd-v1':
@@ -5500,7 +5687,12 @@ def main():
     p.add_argument('--adjacent-phase-window',type=int,metavar='LEVELS',help='search all interior equations contained in consecutive folded levels')
     p.add_argument('--adjacent-phase-example',action='store_true',help='repackage the recorded open word as a checked adjacent-level path')
     p.add_argument('--adjacent-driver',action='store_true',help='certify the integral one-step recurrence at a moving hole 24..98')
+    p.add_argument('--adjacent-right-moment',action='store_true',help='certify that the physical right endpoint forces the conserved interior moment to zero')
     p.add_argument('--adjacent-balanced-example',action='store_true',help='emit the checked balanced three-state path at hole 43, either starting parity')
+    p.add_argument('--adjacent-zero-example',action='store_true',help='emit a checked one-edge path with S=W=A=0 at hole 43, either starting parity; both ends are dead')
+    p.add_argument('--balanced-slices',action='store_true',help='restrict adjacent-window search to zero-sum slices')
+    p.add_argument('--zero-moment-slices',action='store_true',help='restrict adjacent-window search to the conserved moment required by the right endpoint')
+    p.add_argument('--zero-alternating-slices',action='store_true',help='at odd driver holes restrict adjacent-window search to the alternating sum required by the left endpoint')
     p.add_argument('--first-level',type=int,default=3,help='first centre in open mode, or first slice in adjacent mode')
     p.add_argument('--interior-binary-rank',action='store_true',help='certify unrestricted Laurent row rank in characteristic two')
     p.add_argument('--antiperiod-two-odd-refusal',action='store_true',help='seek a linear odd-integer obstruction to signs reversing after two levels')
@@ -5509,6 +5701,16 @@ def main():
     p.add_argument('--period-two-phase-refusal',action='store_true',
                    help='seek a Boolean refusal of period-two interiors with endpoint phases')
     args = p.parse_args()
+    if args.adjacent_zero_example:
+        certificate=adjacent_zero_observable_example(args.hole,args.first_level)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_right_moment:
+        certificate=adjacent_right_moment_identity(args.hole)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
     if args.adjacent_balanced_example:
         certificate=adjacent_balanced_example(args.hole,args.first_level)
         if args.write:
@@ -5526,7 +5728,10 @@ def main():
         print(json.dumps(verify_saved(certificate),indent=2));return
     if args.adjacent_phase_window is not None:
         certificate=adjacent_phase_search(args.hole,args.adjacent_phase_window,
-                                         args.first_level,args.seconds,args.nodes)
+                                         args.first_level,args.seconds,args.nodes,
+                                         balanced=args.balanced_slices,
+                                         zero_moment=args.zero_moment_slices,
+                                         zero_alternating=args.zero_alternating_slices)
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate) if certificate['status']=='local_signing'
