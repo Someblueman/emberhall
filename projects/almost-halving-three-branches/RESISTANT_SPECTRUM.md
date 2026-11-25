@@ -5628,3 +5628,10 @@ The determinant definition checks and the nonzero-observable, residue-only
 false-positive and sharp-precision endpoint tests passed. Syntax and
 whitespace checks passed. This is builder validation, not independent
 integration or the project's infinite-family acceptance.
+
+The final physical-prefix attempt used all 712 prefix rows on 1,004 unit
+variables, centre +1, all four zero observables on slice two, and its five
+required even-level phase traces. The installed one-worker constraint
+solver returned UNKNOWN after 300.001 seconds, with 17,435 branches and
+4,401 conflicts. No future-unit bounds were imposed in this attempt. It
+produced no physical interface word, and supplies no refusal certificate.
