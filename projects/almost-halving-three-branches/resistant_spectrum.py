@@ -1581,8 +1581,11 @@ def verify_coarse_assignment(hole,assignment):
 
 
 
-def moving_folded_labels(reduced=False):
-    return [(a,q,s) for a,n in enumerate((43 if reduced else 99,79,23),1)
+def moving_folded_labels(reduced=False,hole=19):
+    """Slice labels; reduced first-arm extent is max(43,hole)."""
+    if type(hole) is not int or not 1<=hole<99:
+        raise ValueError('require 1<=hole<=98')
+    return [(a,q,s) for a,n in enumerate((max(43,hole) if reduced else 99,79,23),1)
             for s in (1,-1) for q in (range(n) if s==1 else range(1,n+1))]
 def _moving_affine_column(a,q,alpha,beta,h=19):
     if a==0:return [(0,0,1,1),(79,0,1,-1),(23,0,1,-1),(99,0,0,-1),(h,0,0,-1),(h,0,1,1)]
@@ -1598,7 +1601,12 @@ def _moving_affine_column(a,q,alpha,beta,h=19):
 
 def _moving_strip_column(a,q,alpha,beta,h,reduced):
     terms=_moving_affine_column(a,q,alpha,beta,h)
-    tail=(a==2 and (q>23 or (q==23 and (alpha>0 or (alpha==0 and beta>=1)))))
+    cutoff=max(43,h)-20
+    tail=(a==2 and (q>cutoff or
+          (q==cutoff and (alpha>0 or (alpha==0 and beta>=1)))))
+    # For a deep hole, this second-arm vertex would restore the missing
+    # first-arm vertex h*t. Its sign stays independent, not paired with a hole.
+    if h>=43 and (q,alpha,beta)==(cutoff,0,1):tail=False
     if reduced and tail:
         terms += [(Q,u,c,-value) for Q,u,c,value in
                   _moving_affine_column(1,q+20,alpha,beta-1,h)]
@@ -1610,11 +1618,13 @@ def moving_folded_stencils(h=19,reduced=False):
 
     Left rows have folded level 0 or 1, interior rows 2..L-1, and
     right rows L, where t=2L+1. This is not an existence decision.
+    Reduced mode substitutes the forced opposite tails for every h;
+    at h>=43 it leaves the exceptional second-arm source unpaired.
     """
-    if type(h) is not int or not 1<=h<(43 if reduced else 99):
-        raise ValueError('require 1<=h<=42 when reduced, otherwise 1<=h<99')
+    if type(h) is not int or not 1<=h<99:
+        raise ValueError('require 1<=h<99')
     interior=defaultdict(lambda:defaultdict(int));left=defaultdict(lambda:defaultdict(int));right=defaultdict(lambda:defaultdict(int))
-    for a,q,s in moving_folded_labels(reduced):
+    for a,q,s in moving_folded_labels(reduced,h):
         for Q,u,c,v in _moving_strip_column(a,q,s,0,h,reduced):interior[Q,u][a,q,s,-u*c]+=v
         for j in (-1,0):
             for Q,u,c,v in _moving_strip_column(a,q,s,s*j,h,reduced):
@@ -1628,10 +1638,10 @@ def moving_folded_stencils(h=19,reduced=False):
                     else:continue
                 right[row][a,q,s,j]+=v
     sources=[(0,0,0)]
-    for a,n in enumerate((43 if reduced else 99,79,23),1):
+    for a,n in enumerate((max(43,h) if reduced else 99,79,23),1):
         for d in range(-2,3):
             for q in (range(1,n+1) if d<=0 else range(n)):
-                if (a,q,d) not in ((1,h,0),(1,43 if reduced else 99,0)):sources.append((a,q,d))
+                if (a,q,d) not in ((1,h,0),(1,max(43,h) if reduced else 99,0)):sources.append((a,q,d))
     for a,q,d in sources:
         for Q,u,c,v in _moving_strip_column(a,q,0,d,h,reduced):
             assert u==0
@@ -2279,7 +2289,7 @@ def verify_open_phase_odd(certificate):
 
 
 def open_phase_example(hole=19,first=3):
-    """Actual two-centre signings at either starting parity, at holes 19/97.
+    """Checked windows: two centres at holes 19/97, three at hole 43.
 
     Translation by two preserves every integer row and trace phase. The
     label-major ordering is unchanged; the checker still rebuilds every
@@ -2292,11 +2302,13 @@ def open_phase_example(hole=19,first=3):
         (97,1): '0x26c05eda0a124e2c6480e666404b6d9f8064008c4e0c012402081efe82f088edeb05e2310600a6c877a0d2e9e422004834c2690d2a8124ed8da0dab2610584e34f8cf88631ffe418681cbaf4714a84b36703c600f1f2f438c807e5efb442e86f1b64e18220e6a6a7cbc802f88aff8c2cf8348ba1f780a649078b6b2db7ba6c4c2658681e7a45edece6130887e1e5f27c82640fb4fa4f08214cc2d98130266dc1a153e1302245db92a42eeede160f0b0621731c0c010d42064b855f25d066bce07062944937d731d3af',
         (97,0): '0x1794f40e8152401c5a4f6d895ca9c8c804a19ec80804274f3d8eceee0048ae51b3cd2703e0d1e1e9aed1633186e1a84e39de66e9f193e27d2400232121b9f8f8ce9879ee04f87f37f8f400c8b9fef0ec099ff8700113f77fd83766f85a373f6646e8ec2f57f96044b7f373fc7e799e49a0f4b0096e5d2fb8bf4928b097bfb85e1b70369de6b08c0466f53a080c3817b599898cf7efeb74470b181a1b09ec8100e0a7cd3d5b032102052131978f337f5e08579c6c8d13e7ec7448ea1341b407316942c9f9b35311ad3e',
     }
-    if (type(hole) is not int or hole not in (19,97) or
-            type(first) is not int or first<3):
-        raise ValueError('require hole 19 or 97 and first level at least three')
-    certificate=dict(kind='moving-open-phase-signs-v1',hole=hole,length=2,first=first,
-                     minimum_half=first+3,variables=1608,status='local_signing',
+    examples[43,1] = '0x38dbf2814695bbe8b4ae342e9db08c4b63795ad2e01cff55b5675e1eb0875f8005f629fd68be60fead897cda84933533cc5f3c8f07bde542cce0da60d3e4fdaedfbdd0a8cd80d9ac39323f1589bff01057e2bf1d3204f9883281fe1b42dae1cdb172c722aa14d3813e3fb4754e1795bb2b10c47a4cf093744ee28b4be2869ef3e50bffd0ceb11cfa1cfc2b9bf619affb6e56719d271bc7d294f5e9daf9acf968da128c24116a879daaaa2e5a271a2ec5011b39ed7afc15087fcd2f0f646dfdfd43b89c79bf62defdafc87e97a4a3ce4bd1a73baaff758ff9384b71d63d0d4a9a99f6589373458d79626e04a1fffca1ae4dea5a16661a68c3a406e7c'
+    if (type(hole) is not int or hole not in (19,43,97) or
+            type(first) is not int or first<3 or (hole==43 and first%2==0)):
+        raise ValueError('require hole 19/97, or hole 43 at an odd first level, first>=3')
+    length=3 if hole==43 else 2
+    certificate=dict(kind='moving-open-phase-signs-v1',hole=hole,length=length,first=first,
+                     minimum_half=first+length+1,variables=402*(length+2),status='local_signing',
                      bits=examples[hole,first%2],
                      literal_existence_decided=False,all_pairs_decided=False)
     verify_open_phase_signs(certificate)
@@ -2771,6 +2783,32 @@ def verify_interior_binary_rank_certificate(certificate):
         return False
 
 
+def moving_high_arm_relations(scale,hole=19):
+    """Exact recovery from all physical rows above 122*t, for every hole.
+
+    Return expressions for first-arm depths 43*t..99*t-1 except the hole,
+    and the one remaining high-row equation when hole>=43. Expressions
+    may take values +/-3: callers must retain their unit-sign condition.
+    No endpoint completion or literal existence is asserted.
+    """
+    if type(scale) is not int or scale<9 or scale%2!=1:
+        raise ValueError('require odd scale>=9')
+    if type(hole) is not int or not 1<=hole<99:
+        raise ValueError('require 1<=hole<=98')
+    recovery={}
+    for depth in range(43*scale,99*scale):
+        if depth==hole*scale:continue
+        row=defaultdict(int)
+        for d,c in ((depth-20*scale+1,-1),
+                    (depth+(79-hole)*scale,1),
+                    (depth+(79-hole)*scale+1,-1)):
+            if 1<=d<=79*scale:row[2,d]+=c
+        recovery[1,depth]={v:c for v,c in row.items() if c}
+    remaining=({(2,(hole-20)*scale+1):-1,(2,79*scale):1}
+               if hole>=43 else {})
+    return recovery,remaining
+
+
 def moving_folded_residual(scale,coordinates,hole=19,reduced=False):
     """Evaluate every exact physical shell row through the moving-hole strip."""
     if type(scale) is not int or scale<9 or scale%2!=1:
@@ -2814,32 +2852,35 @@ def moving_folded_audit(scale,hole=19,reduced=False):
         put(q*scale+s*half,[((a,k*scale+u*(half+j)),c) for (a,k,u,j),c in row.items()])
     lengths=[n*scale for n in (99,79,23)]
     holes={(1,hole*scale),(1,99*scale)}
-    source_lengths=[43*scale-1,79*scale,23*scale] if reduced else lengths
+    source_lengths=[max(43,hole)*scale-1,79*scale,23*scale] if reduced else lengths
     vertices=[(0,0)]+[(a,d) for a,n in enumerate(source_lengths,1) for d in range(1,n+1)
                       if (a,d) not in holes]
     expected=defaultdict(dict)
     for vertex in vertices:
         column=defaultdict(int,physical.shell_column(lengths,holes,vertex))
         a,d=vertex
-        if reduced and a==2 and d>23*scale:
+        if (reduced and a==2 and d>(max(43,hole)-20)*scale
+                and not (hole>=43 and d==(hole-20)*scale+1)):
             for exponent,c in physical.shell_column(lengths,holes,(1,d+20*scale-1)).items():
                 column[exponent]-=c
         for exponent,c in column.items():
             if c:expected[exponent][vertex]=c
     if {e:r for e,r in actual.items() if r}!=dict(expected):
         raise AssertionError('moving strip differs from the physical shell matrix')
-    slices=290 if reduced else 402
+    slices=2*(max(43,hole)+102) if reduced else 402
     return dict(t=scale,hole=hole,reduced=reduced,matched_physical_columns=201*scale-1,
                 matched_source_columns=len(vertices),matched_shell_rows=len(expected),
                 slice_signs=slices,row_radius=1,stored_slice_signs=2*slices,path_edges=half-2,
                 all_pairs_decided=False,literal_existence_decided=False)
 
 
-def compile_moving_folded(half,period,patch=2,h=19):
+def compile_moving_folded(half,period,patch=2,h=19,reduced=False):
     """Exact periodic-interior quotient of the all-word moving-hole strip.
 
     End patches are independent. The result extends to every sufficiently
     large half-length with the same residue modulo period, not other supports.
+    Reduced mode uses only the forced opposite-tail substitutions, so every
+    retained sign assignment restores unit values on the removed coordinates.
     """
     if (any(type(v) is not int for v in (half,period,patch,h)) or patch<2
                     or period<1 or half<2*patch+4+period or not 1<=h<99):
@@ -2857,17 +2898,18 @@ def compile_moving_folded(half,period,patch=2,h=19):
         for k,c in terms:row[index(k)]+=c
         row={i:c for i,c in row.items() if c}
         if row:rows.append(row)
-    left,interior,right=moving_folded_stencils(h)
+    left,interior,right=moving_folded_stencils(h,reduced)
     for terms in left.values():add([(('left',a,q,d),c) for (a,q,d),c in terms.items()])
     levels=sorted(set(range(2,patch+2))|set(range(half-patch-1,half))|set(range(patch+2,patch+2+period)))
     for r in levels:
         for terms in interior.values():add([(coordinate(a,q,s,r+d),c) for (a,q,s,d),c in terms.items()])
     for terms in right.values():add([(('right',a,q,s,j),c) for (a,q,s,j),c in terms.items()])
     # Record every sign, even when its shell coefficient cancels.
-    for arm,n in enumerate((99,79,23),1):
+    first_extent=max(43,h) if reduced else 99
+    for arm,n in enumerate((first_extent,79,23),1):
         for q in range(1,n+1):
-            if (arm,q) not in ((1,h),(1,99)):index(('left',arm,q,0))
-    for arm,q,orientation in moving_folded_labels():
+            if (arm,q) not in ((1,h),(1,first_extent)):index(('left',arm,q,0))
+    for arm,q,orientation in moving_folded_labels(reduced,h):
         for level in range(1,patch+1):index(coordinate(arm,q,orientation,level))
         for offset in range(-patch,1):index(coordinate(arm,q,orientation,half+offset))
         for residue in range(period):index(('period',arm,q,orientation,residue))
@@ -4975,7 +5017,7 @@ def main():
     p.add_argument('--folded-hulls',action='store_true',help='diagnose joint row correlations in one periodic moving-hole strip')
     p.add_argument('--hull-rank',type=int,default=16,help='maximum local binary rank in folded hull diagnostics, 0..16')
     p.add_argument('--moving-strip-audit',type=int,metavar='SCALE',help='compare every moving-hole strip column with the physical shell matrix')
-    p.add_argument('--moving-reduced',action='store_true',help='eliminate forced opposite tails in the moving strip audit, hole<=42')
+    p.add_argument('--moving-reduced',action='store_true',help='eliminate forced opposite tails in the moving strip audit, all holes 1..98')
     p.add_argument('--folded-patch',type=int,default=2,help='independent patch width in the moving folded strip')
     p.add_argument('--edge-patch',type=int,default=0,help='free endpoint vertices in moving or split-edge mode')
     p.add_argument('--split-edge',action='store_true',help='independent constant edge pieces; t=pieces*L+1')
@@ -5027,7 +5069,7 @@ def main():
     p.add_argument('--periodic-phase-odd',action='store_true',help='construct one compatible infinite period-two odd interior word with all parity traces')
     p.add_argument('--phase-odd-rank',action='store_true',help='certify odd-integer phase compatibility for every finite interior length')
     p.add_argument('--open-phase-odd',type=int,metavar='LENGTH',help='construct a finite odd-integer window with endpoint traces')
-    p.add_argument('--open-phase-example',action='store_true',help='emit a checked two-centre window at hole 19 or 97, without search')
+    p.add_argument('--open-phase-example',action='store_true',help='emit a checked window: two centres at 19/97, three at 43 (odd start)')
     p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
     p.add_argument('--first-level',type=int,default=3,help='first absolute centre level for --open-phase-window')
     p.add_argument('--interior-binary-rank',action='store_true',help='certify unrestricted Laurent row rank in characteristic two')
