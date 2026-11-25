@@ -15,6 +15,118 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_mod_four_completion_every_odd_support_and_damage(self):
+        for hole in range(1,99,2):
+            for parity in (0,1):
+                certificate = rs.parity_completion_certificate(hole,parity)
+                self.assertTrue(rs.verify_saved(certificate)['verified'])
+        for hole in (2,42,98):
+            with self.assertRaises(ValueError): rs.parity_completion_certificate(hole)
+        certificate = rs.parity_completion_certificate(89)
+        for change in ({'minimum_half':17},{'patch':5},{'period':4},
+                       {'half_parity':2},{'bits':'-1'},{'bits':'0'},
+                       {'bits':'0x1'+'0'*certificate['variables']},
+                       {'literal_existence_decided':True},{'all_pairs_decided':True}):
+            self.assertFalse(rs.verify_parity_completion_certificate(certificate|change))
+        with patch.object(rs,'binary_elimination',side_effect=AssertionError('solver entered')):
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+
+    def test_mod_four_completion_expanded_into_physical_shells(self):
+        for half,hole in ((18,19),(19,89),(20,97),(23,89)):
+            certificate = rs.parity_completion_certificate(hole,half%2)
+            keys,_ = rs.compile_moving_folded(18+half%2,2,6,hole)
+            bits = int(certificate['bits'],16)
+            signs = {key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+            scale = 2*half+1
+            lengths = [n*scale for n in (99,79,23)]
+            holes = {(1,hole*scale),(1,99*scale)}
+            residual = defaultdict(int)
+            for arm,n in enumerate((0,*lengths)):
+                for depth in (range(1,n+1) if arm else (0,)):
+                    if (arm,depth) in holes: continue
+                    q,level = divmod(depth,scale)
+                    orientation = 1
+                    if level>half:
+                        q += 1; level = scale-level; orientation = -1
+                    if level<=6:
+                        key = ('left',arm,q,orientation*level)
+                    elif level>=half-6:
+                        key = ('right',arm,q,orientation,level-half)
+                    else:
+                        key = ('period',arm,q,orientation,level%2)
+                    for distance,c in fc.shell_column(lengths,holes,(arm,depth)).items():
+                        residual[distance] += c*signs[key]
+            self.assertTrue(all(v%4==0 for v in residual.values()),(half,hole))
+            self.assertTrue(any(residual.values())) # This witness is not an integer solution.
+
+    def test_complete_parity_traces_all_supports_and_damaged_certificates(self):
+        import copy
+        for hole in range(1,99):
+            certificate = rs.parity_trace_certificate(hole)
+            self.assertTrue(rs.verify_parity_trace_certificate(certificate),hole)
+            self.assertEqual(rs.verify_saved(certificate)['drift'],[1,1,1,1,0])
+        certificate = rs.parity_trace_certificate(19)
+        mutations = []
+        for path,value in ((('hole',),0),(('all_pairs_decided',),True),
+                           (('phases_at_two',),[1,0,0,0,0]),
+                           (('laws',1,'drift'),0),
+                           (('laws',2,'observable'),[]),
+                           (('endpoints','left',1,'phase'),0),
+                           (('endpoints','right',0,'mask'),1),
+                           (('endpoints','right',2,'shell_rows'),[])):
+            damaged = copy.deepcopy(certificate)
+            target = damaged
+            for key in path[:-1]: target = target[key]
+            target[path[-1]] = value
+            mutations.append(damaged)
+        for damaged in mutations:
+            self.assertFalse(rs.verify_parity_trace_certificate(damaged))
+            with self.assertRaises(ValueError): rs.verify_saved(damaged)
+        # The separate verifier must not ask the producer to approve its output.
+        with patch.object(rs,'parity_trace_certificate',side_effect=AssertionError('producer entered')):
+            self.assertTrue(rs.verify_saved(certificate)['verified'])
+
+    def test_parity_trace_phases_against_physical_shell_rows(self):
+        # Independent physical matrix, with every level distinct and no period.
+        # Carry augmented right sides in a fresh elimination, then ask whether
+        # each predicted observable is actually implied by physical equations.
+        # Odd h: even h already has the known odd-distance obstruction.
+        for scale,hole in ((9,1),(9,19),(9,97),(11,19)):
+            lengths = [n*scale for n in (99,79,23)]
+            holes = {(1,hole*scale),(1,99*scale)}
+            vertices = [(0,0)]+[(a,d) for a,n in enumerate(lengths,1)
+                               for d in range(1,n+1) if (a,d) not in holes]
+            positions = {v:i for i,v in enumerate(vertices)}
+            rows = defaultdict(dict)
+            for vertex in vertices:
+                for distance,c in fc.shell_column(lengths,holes,vertex).items():
+                    if c: rows[distance][vertex] = c
+            basis = {}
+            for row in rows.values():
+                self.assertEqual(sum(row.values())%2,0)
+                v = sum(1<<positions[k] for k,c in row.items() if c%2)
+                rhs = sum(row.values())//2%2
+                while v:
+                    pivot = v.bit_length()-1
+                    if pivot not in basis:
+                        basis[pivot] = v,rhs
+                        break
+                    w,b = basis[pivot]; v ^= w; rhs ^= b
+                if not v: self.assertEqual(rhs,0)
+            laws = rs.parity_trace_certificate(hole)['laws']
+            for level in range(2,scale//2+1):
+                for i,law in enumerate(laws):
+                    v = 0
+                    for a,q,s,d in law['observable']:
+                        v ^= 1<<positions[a,q*scale+s*(level+d)]
+                    rhs = 0
+                    while v:
+                        pivot = v.bit_length()-1
+                        self.assertIn(pivot,basis)
+                        w,b = basis[pivot]; v ^= w; rhs ^= b
+                    expected = ((level-1)%2 if i<2 else level%2 if i<4 else 0)
+                    self.assertEqual(rhs,expected,(scale,hole,level,i))
+
     def test_odd_period_driver_uses_checked_interior_refusal(self):
         for period,hole in ((1,19),(3,97),(5,1)):
             half = 8+period

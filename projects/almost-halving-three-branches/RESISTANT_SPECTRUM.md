@@ -2580,3 +2580,110 @@ Both Python blobs retain the hashes recorded above. A fresh independent review
 is required; the earlier refusal remains part of the record.
 Fresh local validation: all 88 focused tests pass in 49.14 seconds, both
 documented certificate round trips verify, and `git diff --check` passes.
+
+## Fern: all constant-row parity traces, and complete mod-four completions
+
+25 November 2026. **The resistant-family acceptance remains unmet.** Both
+results below concern holes `ht,99t` on the first arm, with the third word
+unrestricted. Neither decides integer signings or other hole placements.
+
+### Five traces, with phases fixed by both physical endpoints
+
+For every `1<=h<=98`, the 356-by-402 interior binary matrix evaluated at
+shift one has rank 351. The following five independent shell selectors
+span its complete left kernel. In the table, `+` and `-` are shell-row
+orientations, and every listed residue is selected.
+
+| Law | Positive row indices | Negative row indices |
+| --- | --- | --- |
+| 1 | 4,5,6,7 modulo 8 | 4,5,6,7 modulo 8 |
+| 2 | 3,4,5,6 modulo 8 | 0,5,6,7 modulo 8 |
+| 3 | 0 modulo 4 | 3 modulo 4 |
+| 4 | 2 modulo 4 | 1 modulo 4 |
+| 5 | 1 modulo 4 | 2 modulo 4 |
+
+For each selector, XOR its integer shell rows modulo two to obtain
+`P_i(-1),P_i(0),P_i(1)` as in Rook's notation. Define
+
+    J^j_r = sum_i [P^j_i(-1)*b[i,r-1] + P^j_i(1)*b[i,r]] mod 2.
+
+Every selected vector has `P(-1)+P(0)+P(1)=0`. Direct substitution gives
+`J^j_r+J^j_(r+1)=d_j`, where `d=(1,1,1,1,0)`.
+The five resulting observables are independent. Rank 351 and these five
+independent dependencies prove completeness **for constant combinations
+of the 356 row types whose sum is a two-level first difference**. This
+makes no completeness claim for shifted combinations, longer recurrences,
+nonlinear consequences, or the whole shell system.
+
+The left physical rows imply, at level 2,
+
+    J1=1,  J2+J3=1,  J4+J5=0.
+
+The right physical rows imply, at level L,
+
+    J1+J2=0,  J3+J4=0,  J5=0.
+
+These are exactly the three-dimensional spaces of endpoint-determined
+combinations on each side: the verifier tests every one of the 31
+nonzero combinations. Their common space has dimension one and fixes
+`J1+J2+J3+J4+J5=0` on both sides. The union has rank five. Propagating
+the recurrences therefore forces, for **every** level `2<=r<=L`,
+
+    (J1,J2,J3,J4,J5) = (r-1,r-1,r,r,0) mod 2.
+
+There is no inconsistency between these endpoint traces for either parity
+of L. This strengthens the necessary conditions without refusing a support.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --parity-traces --hole 19 --write /tmp/parity-traces.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/parity-traces.json
+```
+
+### The entire linear binary relaxation has an infinite completion
+
+For every **odd** `h` from 1 through 97 and every `L>=18`, there is an
+explicit sign assignment to the entire physical support for which every
+integer shell row is divisible by four. Thus the full necessary linear
+binary system, not merely the five traces, is compatible on all these
+supports and lengths. In particular this covers every resistant scale
+`t=7980m+1`, `m>=1`, for these holes. Even h is outside this construction
+and is already excluded at resistant scales by the odd-distance obstruction.
+
+The certificate has a period-two folded interior, six independently signed
+levels at each endpoint, and independent old vertices. For each of the 49
+odd h and each parity of L, exact binary elimination produces one witness
+at L=18 or 19. The separate verifier does **no elimination**: it substitutes
+all recovered signs into every untouched integer quotient row and checks
+zero modulo four, including the physical endpoints and a positive centre.
+
+This is an infinite extension, rather than an extrapolation from two lengths.
+For patch width six, left-touching centres are 2..7, right-touching centres
+are L-7..L-1, and the two interior residue representatives are 8 and 9.
+At L>=18 these ranges do not overlap; every omitted centre sees only the
+period-two interior. Its row equals one of the two representative rows.
+The right-coordinate names depend only on L modulo two. These facts make
+the quotient identical for all larger L of the same parity; the verifier
+also guards its implementation by comparing L with L+2.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --parity-completion --hole 89 --half 3990 --write /tmp/mod-four-completion.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/mod-four-completion.json
+```
+
+The first attempt with three free endpoint levels worked on 48 odd supports
+but failed at h=89 for both length parities. Widths four and five also failed
+there; six succeeded. A period-two interior with only two free endpoint
+levels failed even at h=19. These failures concern the restricted quotient,
+not unrestricted words. No large certificate files are committed.
+
+The precise remaining obstacle is to raise these modular signings to exact
+integer zero in every shell while meeting both endpoints, or to find an
+obstruction using more than this linear binary relaxation. A modulo-four
+completion is neither a literal solution nor a target pair. It does not
+exclude stronger congruences or nonlinear binary consequences.
+
+Validation: all 92 focused tests pass in 91.43 seconds. They regenerate the
+five-law classification for all 98 h, all 98 completions for odd h and both
+length parities, reject damaged certificates, and check expanded assignments
+against independently generated physical shell columns at several lengths.
+Both documented certificate round trips verify; `git diff --check` passes.

@@ -1719,6 +1719,226 @@ def verify_interior_parity_cocycle(certificate):
     return rhs==1 and lhs==initial
 
 
+def _parity_trace_basis(vectors):
+    """Binary row basis retaining source-row combinations (small exact matrices)."""
+    basis = {}
+    for index,vector in enumerate(vectors):
+        source = 1 << index
+        while vector:
+            pivot = vector.bit_length()-1
+            if pivot not in basis:
+                basis[pivot] = vector,source
+                break
+            row,proof = basis[pivot]
+            vector ^= row
+            source ^= proof
+    return basis
+
+
+def _parity_trace_reduce(vector,basis):
+    source = 0
+    while vector:
+        pivot = vector.bit_length()-1
+        if pivot not in basis: break
+        row,proof = basis[pivot]
+        vector ^= row
+        source ^= proof
+    return vector,source
+
+
+def _parity_trace_data(hole):
+    left,interior,right = moving_folded_stencils(hole)
+    labels = moving_folded_labels()
+    # The five fixed shell selectors, the same for every hole 1..98.
+    selectors = (
+        lambda q,u: q%8>=4,
+        lambda q,u: (q%8 in (3,4,5,6) if u==1 else q%8 in (0,5,6,7)),
+        lambda q,u: (q%4==0 if u==1 else q%4==3),
+        lambda q,u: (q%4==2 if u==1 else q%4==1),
+        lambda q,u: (q%4==1 if u==1 else q%4==2))
+    laws = []
+    evaluated = []
+    for row in interior.values():
+        evaluated.append(sum((sum(row.get((*k,d),0) for d in (-1,0,1))%2)<<i
+                             for i,k in enumerate(labels)))
+    for selector in selectors:
+        rows = [key for key in sorted(interior) if selector(*key)]
+        coefficients = set()
+        drift = 0
+        for key in rows:
+            row = interior[key]
+            if sum(row.values())%2: raise ValueError('odd shell sum')
+            drift ^= sum(row.values())//2%2
+            coefficients.symmetric_difference_update(k for k,c in row.items() if c%2)
+        observable = sorted((*k,d) for k in labels for d in (-1,0)
+                            if (*k,-1 if d==-1 else 1) in coefficients)
+        laws.append(dict(shell_rows=[list(k) for k in rows],
+                         observable=[list(k) for k in observable],drift=drift))
+    return left,interior,right,laws,evaluated
+
+
+def parity_trace_certificate(hole=19):
+    """Complete constant-row two-level parity laws, including both endpoints.
+
+    This classifies one precise method. It does not decide the literal cube.
+    """
+    left,_,right,laws,_ = _parity_trace_data(hole)
+    endpoints = {}
+    for name,rows,masks in (('left',left,(1,6,24)),('right',right,(3,12,16))):
+        keys = sorted(rows)
+        coordinates = sorted({k for row in rows.values() for k in row})
+        indices = {k:i for i,k in enumerate(coordinates)}
+        vectors = [sum((c%2)<<indices[k] for k,c in rows[key].items()) for key in keys]
+        basis = _parity_trace_basis(vectors)
+        proofs = []
+        for mask in masks:
+            target = set()
+            for i,law in enumerate(laws):
+                if mask>>i&1:
+                    for a,q,s,d in law['observable']:
+                        target.symmetric_difference_update(((a,q,s*(2+d)) if name=='left'
+                                                            else (a,q,s,d),))
+            residual,source = _parity_trace_reduce(sum(1<<indices[k] for k in target),basis)
+            if residual: raise ValueError('endpoint identity not obtained')
+            selected = [key for j,key in enumerate(keys) if source>>j&1]
+            phase = 0
+            for key in selected: phase ^= sum(rows[key].values())//2%2
+            proofs.append(dict(mask=mask,shell_rows=[list(k) for k in selected],phase=phase))
+        endpoints[name] = proofs
+    certificate = dict(kind='moving-parity-trace-v1',hole=hole,laws=laws,
+                       endpoints=endpoints,phases_at_two=[1,1,0,0,0],
+                       literal_existence_decided=False,all_pairs_decided=False)
+    if not verify_parity_trace_certificate(certificate):
+        raise ValueError('parity trace classification failed')
+    return certificate
+
+
+def verify_parity_trace_certificate(certificate):
+    """Rebuild shell rows, check identities, ranks and every endpoint combination."""
+    if (certificate.get('kind')!='moving-parity-trace-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False): return False
+    try:
+        left,interior,right,laws,evaluated = _parity_trace_data(certificate.get('hole'))
+        if certificate.get('laws')!=laws or certificate.get('phases_at_two')!=[1,1,0,0,0]:
+            return False
+        labels = moving_folded_labels()
+        positions = {(*k,d):2*i+(d==0) for i,k in enumerate(labels) for d in (-1,0)}
+        observables = []
+        for law in laws:
+            lhs = set()
+            for key in law['shell_rows']:
+                lhs.symmetric_difference_update(k for k,c in interior[tuple(key)].items() if c%2)
+            difference = set()
+            for a,q,s,d in law['observable']:
+                difference.symmetric_difference_update(((a,q,s,d),(a,q,s,d+1)))
+            if lhs!=difference: return False
+            observables.append(sum(1<<positions[tuple(k)] for k in law['observable']))
+        # 356 row types, rank 351 at z=1: precisely five dependencies.
+        # Their five independent observables prove these are all such laws.
+        if (len(evaluated)!=356 or len(_parity_trace_basis(evaluated))!=351 or
+                len(_parity_trace_basis(observables))!=5 or
+                [law['drift'] for law in laws]!=[1,1,1,1,0]): return False
+        for name,rows,masks in (('left',left,(1,6,24)),('right',right,(3,12,16))):
+            proofs = certificate['endpoints'][name]
+            if not isinstance(proofs,list) or len(proofs)!=3: return False
+            coordinates = sorted({k for row in rows.values() for k in row})
+            indices = {k:i for i,k in enumerate(coordinates)}
+            vectors = [sum((c%2)<<indices[k] for k,c in row.items()) for row in rows.values()]
+            basis = _parity_trace_basis(vectors)
+            if any(sum(row.values())%2 for row in rows.values()): return False
+            augmented = [v | ((sum(row.values())//2%2)<<len(indices))
+                         for v,row in zip(vectors,rows.values())]
+            if len(_parity_trace_basis(augmented))!=len(basis): return False
+            for proof,mask in zip(proofs,masks):
+                if type(proof['mask']) is not int or proof['mask']!=mask: return False
+                source = proof['shell_rows']
+                if not isinstance(source,list) or len(source)>len(rows): return False
+                if len(set(map(tuple,source)))!=len(source): return False
+                lhs = set(); rhs = 0
+                for key in source:
+                    row = rows[tuple(key)]
+                    if sum(row.values())%2: return False
+                    rhs ^= sum(row.values())//2%2
+                    lhs.symmetric_difference_update(k for k,c in row.items() if c%2)
+                target = set()
+                for i,law in enumerate(laws):
+                    if mask>>i&1:
+                        for a,q,s,d in law['observable']:
+                            target.symmetric_difference_update(((a,q,s*(2+d)) if name=='left'
+                                                                else (a,q,s,d),))
+                if lhs!=target or type(proof['phase']) is not int or proof['phase']!=rhs:
+                    return False
+                expected = {1:1,6:1,24:0}.get(mask,0)
+                if rhs!=expected: return False
+            # Check all 31 nonzero combinations: exactly this 3-space is fixed
+            # by each endpoint. No extra endpoint-determined law is omitted.
+            span = {0}
+            for mask in masks: span |= {v^mask for v in tuple(span)}
+            for mask in range(1,32):
+                target = 0
+                for i,law in enumerate(laws):
+                    if mask>>i&1:
+                        for a,q,s,d in law['observable']:
+                            k = (a,q,s*(2+d)) if name=='left' else (a,q,s,d)
+                            target ^= 1<<indices[k]
+                residual,_ = _parity_trace_reduce(target,basis)
+                if (not residual)!=(mask in span): return False
+        return True
+    except (KeyError,TypeError,ValueError,IndexError):
+        return False
+
+
+def parity_completion_certificate(hole=19,half_parity=0):
+    """A full mod-four shell signing, not an integer shell solution.
+
+    Two-periodic bits and six free endpoint levels suffice. The fixed
+    quotient extends to every L>=18 of this parity, with t=2L+1.
+    """
+    if type(half_parity) is not int or half_parity not in (0,1):
+        raise ValueError('require half parity zero or one')
+    keys,rows = compile_moving_folded(18+half_parity,2,6,hole)
+    refusal,basis = binary_elimination(rows)
+    if refusal is not None: raise ValueError('no mod-four completion in this quotient')
+    bits = 0
+    for pivot,(mask,rhs) in sorted(basis.items()):
+        if rhs ^ ((mask & bits).bit_count()%2): bits |= 1<<pivot
+    if bits>>keys.index(('left',0,0,0))&1: bits ^= (1<<len(keys))-1
+    certificate = dict(kind='moving-parity-completion-v1',hole=hole,
+                       half_parity=half_parity,minimum_half=18,period=2,patch=6,
+                       bits=hex(bits),variables=len(keys),
+                       literal_existence_decided=False,all_pairs_decided=False)
+    if not verify_parity_completion_certificate(certificate):
+        raise ValueError('invalid mod-four completion')
+    return certificate
+
+
+def verify_parity_completion_certificate(certificate):
+    """Substitute actual signs in every untouched integer row modulo four."""
+    try:
+        parity = certificate['half_parity']
+        if (certificate.get('kind')!='moving-parity-completion-v1' or
+                type(parity) is not int or parity not in (0,1) or
+                certificate.get('minimum_half')!=18 or certificate.get('period')!=2 or
+                certificate.get('patch')!=6 or
+                certificate.get('literal_existence_decided') is not False or
+                certificate.get('all_pairs_decided') is not False): return False
+        keys,rows = compile_moving_folded(18+parity,2,6,certificate['hole'])
+        encoded = certificate['bits']
+        if not isinstance(encoded,str) or len(encoded)>2+(len(keys)+3)//4: return False
+        bits = int(encoded,16)
+        if (bits<0 or bits.bit_length()>len(keys) or certificate.get('variables')!=len(keys)
+                or bits>>keys.index(('left',0,0,0))&1): return False
+        if any(sum(c*(1-2*(bits>>i&1)) for i,c in row.items())%4 for row in rows):
+            return False
+        # A guard on the compiler's canonical quotient and endpoint conventions.
+        # The length-independent extension is proved by the row partition.
+        if (keys,rows)!=compile_moving_folded(20+parity,2,6,certificate['hole']): return False
+        return True
+    except (KeyError,ValueError,TypeError):
+        return False
+
+
 def interior_rank_matrix(hole=19,prime=5):
     """Evaluate the unrestricted Laurent shell matrix at z=2 over a small prime field.
 
@@ -3572,6 +3792,20 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-parity-completion-v1':
+        if not verify_parity_completion_certificate(saved):
+            raise ValueError('invalid mod-four shell completion')
+        return dict(verified=True,hole=saved['hole'],minimum_half=18,
+                    half_parity=saved['half_parity'],
+                    claim='all shell equations hold modulo four only; no integer signing claimed',
+                    literal_existence_decided=False,all_pairs_decided=False)
+    if saved.get('kind')=='moving-parity-trace-v1':
+        if not verify_parity_trace_certificate(saved):
+            raise ValueError('invalid two-level parity trace certificate')
+        return dict(verified=True,hole=saved['hole'],laws=5,
+                    phases_at_two=[1,1,0,0,0],drift=[1,1,1,1,0],
+                    claim='complete constant-row two-level parity laws and endpoint phases only',
+                    literal_existence_decided=False,all_pairs_decided=False)
     if saved.get('kind')=='moving-interior-cocycle-v1':
         if not verify_interior_parity_cocycle(saved):
             raise ValueError('invalid unrestricted interior parity cocycle')
@@ -3850,7 +4084,23 @@ def main():
                    help='certify unrestricted interior rank over the rational function field')
     p.add_argument('--interior-cocycle',action='store_true',
                    help='certify an alternating parity observable on unrestricted interior words')
+    p.add_argument('--parity-traces',action='store_true',
+                   help='classify all constant-row two-level parity laws and endpoint phases')
+    p.add_argument('--parity-completion',action='store_true',
+                   help='certify a full mod-four shell signing for the parity of --half')
     args = p.parse_args()
+    if args.parity_completion:
+        certificate = parity_completion_certificate(args.hole,args.half%2)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),sort_keys=True))
+        return
+    if args.parity_traces:
+        certificate = parity_trace_certificate(args.hole)
+        if args.write:
+            with open(args.write,'w') as f: json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),sort_keys=True))
+        return
     if args.interior_cocycle:
         certificate = interior_parity_cocycle(args.hole)
         if args.write:
