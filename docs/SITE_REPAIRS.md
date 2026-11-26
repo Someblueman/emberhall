@@ -27,7 +27,12 @@ Chromium-based browser.
   first paint from a small current snapshot (the latest frame only); load older
   history only when a visitor uses the history controls, and only the part they
   need; remove the 60-second full refresh (`watch()` already notices changes);
-  release the old record before decoding a new one. Acceptance: on a fresh load
+  release the old record before decoding a new one. The page side lives in
+  `site/house.js`; the published history files are written by house code
+  (`house/body.py`, `house/publish.py`), so a smaller snapshot needs a council
+  renovation (docs/RENOVATION.md, one hour of notice). Do the `site/` part first:
+  removing the 60-second refresh and releasing the old record need no
+  renovation. Acceptance: on a fresh load
   at 390 px the page downloads under 2 MB, holds under 150 MB of JavaScript
   memory after five minutes open, and the history controls still reach the
   first moment.

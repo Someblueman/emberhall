@@ -8,8 +8,9 @@ more focus”. The following applies from the owner migration
 `upgrade-20261126-house-repairs`.
 
 - **House-only period.** Only house-slot choices can open or close. Open great and
-  small choices wait for the Steward to end the period. Active projects keep
-  running under the applicable deadline rules.
+  small choices wait for the Steward to end the period. Great and small projects
+  already active keep their slots and deadlines, but ordinary runs go to the
+  house, not to them; reviews of their contributions still happen.
 - **Every ordinary run looks after the house.** Runs alternate between improving
   the house and working on its rooms, even while another run has that focus.
   Backlog tending and shelf checks sit out the rotation so every turn has a
