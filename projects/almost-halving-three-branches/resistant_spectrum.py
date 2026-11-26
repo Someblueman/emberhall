@@ -3911,7 +3911,9 @@ def _sparse_abs_determinant(columns, size):
             coefficient=row.pop(j,0)
             if not coefficient and pivot==previous:continue
             following={}
-            for l in row.keys()|pivot_row.keys():
+            # A zero pivot-column coefficient cannot introduce pivot-row support.
+            support=row.keys() if not coefficient else row.keys()|pivot_row.keys()
+            for l in support:
                 if l==j:continue
                 numerator=pivot*row.get(l,0)-coefficient*pivot_row.get(l,0)
                 value,remainder=divmod(numerator,previous)
@@ -4010,6 +4012,10 @@ def verify_adjacent_integer_reachability(saved):
     determinant=saved.get('minor_abs_determinant')
     if type(determinant) is not int or determinant<=0:
         raise ValueError('invalid claimed minor determinant')
+    # Every full-rank minor is divisible by the claimed saturation index.
+    # Compatible claims still require the full exact determinant replay below.
+    if determinant%saved['integer_saturation_index']:
+        raise ValueError('minor determinant is incompatible with the saturation index')
     driver=adjacent_integral_driver(97)
     laws=adjacent_conserved_observables(driver)
     observables=[[1]*402,laws['moment'],adjacent_orientation_drift(driver),laws['alternating']]
@@ -6749,7 +6755,7 @@ def rational_recovery(size,original,seconds=30):
     for r,row in enumerate(original):
         if any(type(i) is not int or not 0<=i<size or type(c) is not int for i,c in row.items()):
             raise ValueError('invalid integer shell row')
-        row = {i:Fraction(c) for i,c in row.items() if c}
+        row = {i:c for i,c in row.items() if c}
         if row:
             rows[r] = row
             for i in row: columns[i].add(r)
@@ -6763,18 +6769,20 @@ def rational_recovery(size,original,seconds=30):
         degree,p = heapq.heappop(heap)
         if p not in columns or degree!=len(columns[p]): continue
         r = min(columns[p],key=lambda r:(len(rows[r]),r))
-        row = rows.pop(r)
-        factor = row[p]
-        row = {i:c/factor for i,c in row.items()}
+        original_pivot = rows.pop(r)
+        pivot = original_pivot[p]
+        row = {i:Fraction(c,pivot) for i,c in original_pivot.items()}
         pivots.append((p,row))
         for i in row: columns[i].remove(r)
         for other in list(columns[p]):
             if time.monotonic()-start>=seconds: return limited()
             target = rows[other]
             factor = target[p]
-            for i,c in row.items():
+            # Nonzero row scaling preserves the rational equation. Keeping
+            # active rows primitive avoids repeated Fraction normalization.
+            for i in target.keys()|original_pivot.keys():
                 old = target.get(i,0)
-                value = old-factor*c
+                value = pivot*old-factor*original_pivot.get(i,0)
                 if value:
                     target[i] = value
                     if not old: columns[i].add(other)
@@ -6782,6 +6790,10 @@ def rational_recovery(size,original,seconds=30):
                     del target[i]
                     columns[i].remove(other)
             if not target: del rows[other]
+            else:
+                divisor = math.gcd(*target.values())
+                if divisor>1:
+                    for i in target: target[i] //= divisor
         del columns[p]
         for i in row:
             if i in columns:
@@ -6791,19 +6803,27 @@ def rational_recovery(size,original,seconds=30):
             heap = [(len(v),i) for i,v in columns.items()]
             heapq.heapify(heap)
     free = sorted(set(range(size))-{p for p,_ in pivots})
-    expressions = {i:{i:Fraction(1)} for i in free}
+    expressions = {i:{i:1} for i in free}
     for p,row in reversed(pivots):
         if time.monotonic()-start>=seconds: return limited()
-        out = defaultdict(Fraction)
+        out = defaultdict(int)
         for i,c in row.items():
             if i!=p:
+                if c.denominator==1: c = c.numerator
                 for j,d in expressions[i].items(): out[j] -= c*d
         expressions[p] = {j:c for j,c in out.items() if c}
+    # One common nonzero scale makes the original-equation audit an exact
+    # integer zero test, including kernels with nonintegral coefficients.
+    scale = math.lcm(*(c.denominator for e in expressions.values() for c in e.values()))
+    integral = {}
+    for i,e in expressions.items():
+        if time.monotonic()-start>=seconds: return limited()
+        integral[i] = {j:c.numerator*(scale//c.denominator) for j,c in e.items()}
     for row in original:
         if time.monotonic()-start>=seconds: return limited()
-        out = defaultdict(Fraction)
+        out = defaultdict(int)
         for i,c in row.items():
-            for j,d in expressions[i].items(): out[j] += c*d
+            for j,d in integral[i].items(): out[j] += c*d
         if any(out.values()): raise AssertionError('rational kernel fails an original row')
     normalized = []
     for i,e in expressions.items():
