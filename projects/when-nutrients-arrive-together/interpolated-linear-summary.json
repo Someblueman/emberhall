@@ -1,0 +1,117 @@
+{
+  "summary": [
+    {
+      "mesh": 0.25,
+      "communities": 12,
+      "maximum_relative_covariance_error": 0.004554035096344483,
+      "maximum_correlation_error": 0.00031374807429584983,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.02857142857142836,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    },
+    {
+      "mesh": 0.125,
+      "communities": 12,
+      "maximum_relative_covariance_error": 0.0011387815479494748,
+      "maximum_correlation_error": 7.935871327632849e-05,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    },
+    {
+      "mesh": 0.0625,
+      "communities": 12,
+      "maximum_relative_covariance_error": 0.00028467217537718866,
+      "maximum_correlation_error": 1.993214095133422e-05,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    },
+    {
+      "mesh": 0.03125,
+      "communities": 12,
+      "maximum_relative_covariance_error": 7.116576052528145e-05,
+      "maximum_correlation_error": 4.989533783361644e-06,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    }
+  ],
+  "maximum_lyapunov_relative_residual": 3.1862506000535584e-16
+}

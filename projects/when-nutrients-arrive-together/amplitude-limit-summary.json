@@ -1,0 +1,200 @@
+{
+  "planned": 12,
+  "successful": 12,
+  "failures": [],
+  "summary": [
+    {
+      "fraction": 1.0,
+      "communities": 12,
+      "maximum_relative_trajectory_error": 0.009369849219178175,
+      "maximum_relative_covariance_error": 0.004500045313211296,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0071428571428572285,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.01433700965465301,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0071428571428571175,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.016085797307934357,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    },
+    {
+      "fraction": 0.5,
+      "communities": 12,
+      "maximum_relative_trajectory_error": 0.004691526539291288,
+      "maximum_relative_covariance_error": 0.0022809183045254915,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0071428571428572285,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.01433700965465301,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.016085797307934357,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    },
+    {
+      "fraction": 0.25,
+      "communities": 12,
+      "maximum_relative_trajectory_error": 0.002347532727988802,
+      "maximum_relative_covariance_error": 0.001148570771575748,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0071428571428572285,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.01433700965465301,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.016085797307934357,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    },
+    {
+      "fraction": 0.125,
+      "communities": 12,
+      "maximum_relative_trajectory_error": 0.001174237118995572,
+      "maximum_relative_covariance_error": 0.0005763678982744617,
+      "maximum_absolute_score_changes": {
+        "correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.0,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.016085797307934357,
+          "same_diet_pair_auc": 0.0,
+          "single_linkage_guild_auc": 0.0
+        }
+      }
+    }
+  ],
+  "seed_errors": {
+    "4": [
+      0.009044055746790835,
+      0.004521958820060463,
+      0.0022610725528883205,
+      0.001130564350145547
+    ],
+    "5": [
+      0.009369849219178175,
+      0.004691526539291288,
+      0.002347532727988802,
+      0.001174237118995572
+    ],
+    "6": [
+      0.00903927634753845,
+      0.0045298108619056055,
+      0.0022675593498585754,
+      0.0011344430535547775
+    ],
+    "7": [
+      0.008182249754103494,
+      0.00409115460152332,
+      0.0020456580224464584,
+      0.0010228430427947986
+    ],
+    "8": [
+      0.008731229910909463,
+      0.0043657018614414594,
+      0.002182973548600368,
+      0.001091537297352781
+    ],
+    "9": [
+      0.008920661092456697,
+      0.004452483450520773,
+      0.002224380880010312,
+      0.0011117391929635634
+    ],
+    "10": [
+      0.00875184422765781,
+      0.004375585787800145,
+      0.002187808832343102,
+      0.0010938993842714215
+    ],
+    "11": [
+      0.008281860966743673,
+      0.004140402322730888,
+      0.002070134983291709,
+      0.0010350550067016867
+    ],
+    "12": [
+      0.008984473405844169,
+      0.004496189816894863,
+      0.002249198463175041,
+      0.0011248948032854989
+    ],
+    "13": [
+      0.009082892045675202,
+      0.004538687965843473,
+      0.0022687786512371553,
+      0.001134265776240447
+    ],
+    "14": [
+      0.008836953099376531,
+      0.0044177549490968535,
+      0.002208801543748655,
+      0.001104391487841891
+    ],
+    "15": [
+      0.008445306594362361,
+      0.004220858968452061,
+      0.0021100605008887463,
+      0.0010549628244845219
+    ]
+  },
+  "tighter_solver_checks": [
+    {
+      "seed": 4,
+      "fraction": 0.125,
+      "relative_difference": 3.0928590600541885e-07
+    }
+  ]
+}

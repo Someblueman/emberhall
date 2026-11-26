@@ -61,3 +61,19 @@ the covariance changes, and follows the worst observed correlation case to
 It also records a matching candidate derivative kernel with measured timing
 controls; the scientific runs retain the original simulator.
 
+[FINITE_COVARIANCE.md](FINITE_COVARIANCE.md) derives exact finite-record
+covariance moments and conservative correlation-score envelopes for the
+stationary Gaussian linear reference. It separates one-community coverage
+from simultaneous study coverage and retains the elementary bound's failure.
+These analytical diagnostics do not certify the nonlinear clean baseline.
+
+[INTERPOLATED_LINEAR.md](INTERPOLATED_LINEAR.md) gives the exact stationary
+linear model for the simulator's straight-line supply interpolation. It
+separates population interpolation bias from realized-path score sensitivity.
+
+[AMPLITUDE_LIMIT.md](AMPLITUDE_LIMIT.md) completes a twelve-community,
+same-path nonlinear-to-linear amplitude check. Trajectory errors halve with
+input amplitude; the remaining coherence rank discrepancy is retained.
+[NEXT.md](NEXT.md) records the substantial work still needed before accepting
+the clean reference or using the held-out experiment.
+
