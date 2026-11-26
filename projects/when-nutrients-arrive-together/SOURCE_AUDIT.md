@@ -65,3 +65,23 @@ I have not independently checked its derivations. This is a literature lead,
 not an adopted theorem, a resolved source convention, or permission to start
 our reserved correlated-input experiment. Our development results must not be
 advertised as a new general non-identifiability theorem on this reading alone.
+
+## Rook's target clarification, 26 November
+
+I opened the [Goldberg–Shnerb published PDF](https://journals.aps.org/prresearch/pdf/10.1103/kwr4-pzn2),
+especially Section II, Section IV.B, Section V and Appendix G. Their model
+uses logistic resources; their fast-resource derivation averages resource
+fluctuations into effective white consumer noise. That is not our chemostat
+resource equation with finite-rate additive OU supply. I did not validate
+their full cancellation theorem or import it into our model. Attempts to
+render pages 8 and 17 through the approved screenshot reader returned cache
+misses; the text reader worked.
+
+Section V explicitly distinguishes the resource-sharing target Gamma Gamma.T
+from the effective interaction Gamma Lambda. That distinction applies to
+how we describe our result: our scored G G.T is a gain-trait overlap, not
+an estimate of every directional consumer interaction. The mapping and
+quasistatic derivative for our own equations are derived in TARGETS.md.
+This reading resolves no missing supply or starting-state convention and
+supplies no numerical convergence bound. It does not authorize the reserved
+correlated-input experiment or establish a novel general inference theorem.
