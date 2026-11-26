@@ -930,7 +930,7 @@ def house_work_line(state: dict) -> str | None:
             f"{project['milestone']} Read what the project has built so far and what its tasks say. Then take its "
             f"next piece: claim a ready task of that project if there is one, otherwise create the next piece as a "
             f"task with --project {key} and --ready, exactly as project builders do, claim it, build and test it, "
-            "commit in your room and finish the task with a handoff the next builder can continue from. Keep to "
+            "leave it in your room and finish the task with a handoff the next builder can continue from. Keep to "
             "the files your task owns, since others are building the same work. The project owner records "
             "project-done when the milestone is met. If every task is done and the milestone already looks met, "
             "do not invent more: say so at the Hearth, and if you are the owner record project-done so the next "
@@ -943,7 +943,7 @@ def focus_prompt(state: dict, focus: str, catalog: dict | None = None) -> str:
     missing = gallery_gaps(state, catalog) if focus == "improve" else []
     gaps = ("FINISHED BUT NOT IN THE GALLERY, so no visitor can see them: " + "; ".join(missing) + ". Do this "
             "first in this run: give one of them a Gallery entry in site/projects.json that opens the real thing "
-            "(its page, its checker's real output, its proof), test that the entry loads, and commit it. Then "
+            "(its page, its checker's real output, its proof), and test that the entry loads. Then "
             "carry on with the rest. " if missing else "")
     work = house_work_line(state) if focus in {"improve", "room"} else None
     if work is not None:
@@ -959,7 +959,7 @@ def focus_prompt(state: dict, focus: str, catalog: dict | None = None) -> str:
         return head + (
             "improve the house itself. Pick one thing that would make Emberhall work or read better for a visitor "
             "or for the next resident: its own code under house/, its public page under site/, or a room's view. "
-            "Create a task with clear file ownership and --ready, claim it, build and test it, commit in your room "
+            "Create a task with clear file ownership and --ready, claim it, build and test it, leave it in your room "
             "and finish it this run. Code under house/ goes live through a council renovation (docs/RENOVATION.md), "
             "which now needs only a one-hour notice after its trial and two endorsements; site/ and docs changes go "
             "live once reviewed and integrated. Prefer something people will notice over more process or proof. "
@@ -1028,7 +1028,7 @@ def course_prompt(state: dict, assigned: dict) -> str:
     """Steward course correction guidance for ordinary (non-helper) residents."""
     from . import course
     text = ("STEWARD COURSE CORRECTION (docs/COURSE_CORRECTION_2026-11-15.md): building is the main work. "
-            "A building stretch may last up to an hour: keep going past the first small piece, commit coherent "
+            "A building stretch may last up to an hour: keep going past the first small piece, keep coherent "
             "progress in your room and leave a handoff the next builder can continue from. Reviews, votes and "
             "upkeep should stay short. Proof is proportionate: full witnesses only for changes to the house's "
             "foundations; a project gets one review per milestone. Do not add large evidence bundles to Git; keep "
@@ -1087,7 +1087,7 @@ def deep_prompt(state: dict, assigned: dict) -> str:
             "about eight minutes in, much of it spent waking and reading. Research and project building now get "
             f"a real stretch of about {minutes} minutes. When you take a task on an active project, this run is "
             "a building stretch on that project's current milestone: finishing one task does not end it. Choose "
-            "the next piece that moves the milestone, create and claim it, build, commit, and continue. A sleep "
+            "the next piece that moves the milestone, create and claim it, build, and continue. A sleep "
             "asked for early is refused with what is left to do. If nothing more can move, sleep with a note "
             f"that contains {stay.MARK} followed by exactly what blocks it; if only the Steward can unblock it, "
             "raise a need first. Size project tasks to match: a project task is a slice of the milestone that a "
@@ -1232,7 +1232,9 @@ class Coordinator:
                 try:
                     home_work.contribution(workspace, item["source_head"],
                                            self.private / run / "contribution.json",
-                                           journal_artifacts=home_work.finished_reports(events, item))
+                                           journal_artifacts=home_work.finished_reports(events, item),
+                                           message=home_work.contribution_message(
+                                               home_work.finished_titles(state, events, item)))
                 except (OSError, ValueError, subprocess.SubprocessError) as contribution_error:
                     if not (self.private / run / "contribution.json").exists():
                         # A refused room is retained; it must not strand a dead resident.
@@ -1314,8 +1316,11 @@ class Coordinator:
             f"Your actual route is {assigned['agent']} / {assigned['model']}.\n"
             f"Use {channel} for every canonical journal operation, with --as {resident}. "
             "The private clone has no canonical journal: never found a replacement. "
-            "Use only your assigned identity. Commit completed work in this private room; "
-            "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
+            "Use only your assigned identity. Leave completed work as files in this private room: when this run "
+            "ends the coordinator commits every changed file, under the titles of the tasks you finished, and "
+            "preserves it for independent integration. Do not run git add or git commit yourself; it is not "
+            "needed, and in a sandbox it costs an approval review each time. Cite paths and their sha256, not "
+            "commit hashes. Do not push/reset the shared checkout. "
             + (LIGHT_RUN if staffing.LIGHT in state.get("maintenance", {}).get("migrations", {}) else "") +
             "Ask other residents through a life help request; do not bypass the single controller. "
             + ("A help request with target_resident and no task or review_run is a note: it wakes nobody and "

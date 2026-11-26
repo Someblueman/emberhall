@@ -63,6 +63,38 @@ def finished_reports(events: list[dict], run: dict) -> dict[str, dict]:
     return result
 
 
+FALLBACK_MESSAGE = "Preserve resident contribution"
+SUBJECT_LIMIT = 72
+
+
+def finished_titles(state: dict, events: list[dict], run: dict) -> list[str]:
+    """Titles of tasks this run's resident finished during this launch, in finish order."""
+    launched = run.get("launched_sequence")
+    if not launched:
+        return []
+    end = run.get("ended_sequence", len(events) + 1)
+    titles: list[str] = []
+    for event in events[launched:end - 1]:
+        if event["op"] == "finish" and event["actor"] == run["resident"]:
+            task = state.get("tasks", {}).get(event["data"]["task"], {})
+            title = " ".join(str(task.get("title") or event["data"]["task"]).split())
+            if title and title not in titles:
+                titles.append(title)
+    return titles
+
+
+def contribution_message(titles: list[str]) -> str:
+    """A commit message naming the finished work; residents no longer write their own."""
+    if not titles:
+        return FALLBACK_MESSAGE
+    subject = titles[0]
+    if len(subject) > SUBJECT_LIMIT:
+        subject = subject[:SUBJECT_LIMIT - 3].rstrip() + "..."
+    if len(titles) == 1:
+        return subject
+    return subject + "\n\nAlso finished in this run:\n" + "".join(f"- {t}\n" for t in titles[1:])
+
+
 def recorded_report_changes(workspace: Path, base: str, head: str,
                             journal_artifacts: dict[str, dict]) -> dict[str, dict]:
     """Classify scheduling only; never approve a report's claims or publish it."""
@@ -173,7 +205,8 @@ def _classify_working(workspace: Path, changed: list[str],
     return sorted(safe), sorted(excluded, key=lambda e: e["path"])
 
 
-def _commit_safe(workspace: Path, parent: str, safe: list[str], destination: Path) -> tuple[str, bool]:
+def _commit_safe(workspace: Path, parent: str, safe: list[str], destination: Path,
+                 message: str = FALLBACK_MESSAGE) -> tuple[str, bool]:
     """Build the candidate commit with a private temporary index.
 
     The room index bytes and any pre-existing index.lock stay untouched.
@@ -203,7 +236,7 @@ def _commit_safe(workspace: Path, parent: str, safe: list[str], destination: Pat
         commit = subprocess.run(
             ["git", "-C", str(workspace), "-c", "commit.gpgsign=false",
              "-c", "user.name=Emberhall resident", "-c", "user.email=resident@local",
-             "commit-tree", tree, "-p", parent, "-m", "Preserve resident contribution"],
+             "commit-tree", tree, "-p", parent, "-m", message],
             check=True, capture_output=True, text=True, env=env).stdout.strip()
         subprocess.run(["git", "-C", str(workspace), "update-ref", "HEAD", commit],
                        check=True, capture_output=True)
@@ -214,7 +247,7 @@ def _commit_safe(workspace: Path, parent: str, safe: list[str], destination: Pat
 
 
 def contribution(workspace: Path, base: str, destination: Path, *,
-                 journal_artifacts: dict[str, dict]) -> dict:
+                 journal_artifacts: dict[str, dict], message: str = FALLBACK_MESSAGE) -> dict:
     """Capture a standalone candidate commit without changing source or losing work.
 
     Safe finished bytes are queued even when unrelated worktree state is
@@ -238,7 +271,7 @@ def contribution(workspace: Path, base: str, destination: Path, *,
     safe, excluded = _classify_working(workspace, working, journal_artifacts)
     head = parent
     if safe:
-        head, _moved = _commit_safe(workspace, parent, safe, destination)
+        head, _moved = _commit_safe(workspace, parent, safe, destination, message)
     paths_text = git(workspace, "diff", "--name-only", base, head)
     paths = paths_text.splitlines() if paths_text else []
     if paths:

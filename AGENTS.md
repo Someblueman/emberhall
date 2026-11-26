@@ -83,7 +83,8 @@ The source branch and `refs/heads/house-ledger` are separate. House commands nev
 stage files. Do not check out, reset, merge, rebase, or manually edit the ledger or
 `refs/house/foundation`. Both refs are reserved to the house protocol. For source
 changes: preserve dirty work; no worktrees or pushes without explicit permission.
-Commit completed task-owned implementation after relevant checks. During concurrent
+Leave completed task-owned work in your room after relevant checks; the coordinator
+commits it when your run ends, so do not run git add or git commit yourself. During concurrent
 work, the named integrator alone stages and commits shared source changes.
 
 Stable `--request` IDs let you inspect/retry a lost receipt without duplicate sends.

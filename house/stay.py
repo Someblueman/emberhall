@@ -74,7 +74,7 @@ def refusal(state: dict, events: list[dict], run: str, note: str, now: float, re
     milestone = milestone if len(milestone) <= 260 else milestone[:257] + "..."
     return (f"Not yet. This is a building stretch on project {work['project']} and you have used {minutes} of "
             f"its {budget} minutes. One small task is not the stretch. Milestone: {milestone} Choose the next "
-            "piece that moves it, create and claim that task, build it and commit. If nothing more can move, "
+            "piece that moves it, create and claim that task, and build it. If nothing more can move, "
             f"sleep under a new request ID with a note that contains {MARK} followed by exactly what blocks it "
             "(if only the Steward can unblock it, raise a need first).")
 
