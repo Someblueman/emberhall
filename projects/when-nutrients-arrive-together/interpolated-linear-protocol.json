@@ -1,0 +1,36 @@
+{
+  "code_sha256": {
+    "interpolated_linear.py": "9f5db548774b25f034393e82f321e30bd123d98e8a7c0ff57676e3dee0523faf",
+    "linear_calibration.py": "447d347fca81cbce0177f3ab80dfeb1044c74915353b3644521d405791ad016c",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "linear_welch.py": "60c006973cd2a5883c1f7fef6cd616252af669ad130fab7945bf48a56478060e",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "input_rate": 1.0,
+  "meshes": [
+    0.25,
+    0.125,
+    0.0625,
+    0.03125
+  ],
+  "numpy": "2.4.6",
+  "observation_interval": 1.0,
+  "scipy": "1.18.0",
+  "scope": "stationary local-linear population interpolation bias; not same-path or nonlinear bounds",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "segment": 30,
+  "stationary_input_variance": 0.005
+}

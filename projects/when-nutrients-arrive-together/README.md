@@ -67,3 +67,7 @@ stationary Gaussian linear reference. It separates one-community coverage
 from simultaneous study coverage and retains the elementary bound's failure.
 These analytical diagnostics do not certify the nonlinear clean baseline.
 
+[INTERPOLATED_LINEAR.md](INTERPOLATED_LINEAR.md) gives the exact stationary
+linear model for the simulator's straight-line supply interpolation. It
+separates population interpolation bias from realized-path score sensitivity.
+
