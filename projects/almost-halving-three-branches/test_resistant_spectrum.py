@@ -274,6 +274,121 @@ class SpectrumTests(unittest.TestCase):
                        {'first':1},{'hole':78},{'zero_observables':1},
                        {'hole':80,'zero_observables':True}):
             with self.assertRaises(ValueError):rs.adjacent_continuation_search(**kwargs)
+    def test_source_phase_pullback_and_drift_against_original_integer_edges(self):
+        rng=random.Random(771998)
+        for hole in range(69,99):
+            driver=rs.adjacent_integral_driver(hole)
+            laws=rs._adjacent_source_phase_data(hole)
+            for trial in range(3):
+                source=[1+2*rng.randrange(-3,4) for _ in range(402)]
+                controls=[1+2*rng.randrange(-3,4) for _ in range(46)]
+                target=rs.adjacent_driver_step(driver,source,controls)
+                self.assertTrue(all(v%2 for v in target))
+                edge=[v for pair in zip(source,target) for v in pair]
+                parity=lambda mask,word:sum((1-v)//2 for i,v in enumerate(word) if mask>>i&1)%2
+                for first in (2,3):
+                    _,_,equations=rs.adjacent_phase_system(hole,2,first)
+                    for (mask,rhs),(source_mask,base,drift) in zip(equations,laws):
+                        # Evaluate original trace rows on actual odd integers;
+                        # do not substitute the producer's bit expressions here.
+                        self.assertEqual(parity(mask,edge)^rhs,
+                                         parity(source_mask,source)^base^((first%2)*drift))
+                        self.assertEqual(parity(source_mask,target),
+                                         parity(source_mask,source)^drift)
+
+    def test_phased_split_decision_preserves_absolute_source_eligibility(self):
+        import copy
+        old=rs.adjacent_two_control_example();bits=int(old['state_bits'],16)
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        saved=rs.adjacent_split_successor(97,state,2)
+        self.assertTrue(rs.verify_saved(saved)['phase_preserved'])
+        control_bits=int(saved['branches'][-1]['control_bits'],16)
+        target=rs.adjacent_driver_step(rs.adjacent_integral_driver(97),state,
+                                     [1-2*(control_bits>>i&1) for i in range(46)])
+        self.assertTrue(rs.adjacent_source_phase_audit(97,target,3)['eligible'])
+        for first in (3,True,1):
+            bad=copy.deepcopy(saved);bad['absolute_first']=first
+            with self.assertRaises(ValueError):rs.verify_saved(bad)
+            with self.assertRaises(ValueError):rs.adjacent_split_successor(97,state,first)
+
+    def test_split_successor_covers_thirty_holes_and_all_fixed_sign_sources(self):
+        # Structure is independent of the 402 source signs: no source sampling
+        # is used to justify the all-source claim.
+        for hole in range(69,99):
+            driver=rs.adjacent_integral_driver(hole)
+            split=set(range(max(0,79-hole)))
+            for recovery in driver['recoveries']:
+                self.assertLessEqual(sum(i%2 and i//2-356 not in split
+                                         for i,c in recovery['expression']),2)
+
+    def test_split_tables_against_exhaustive_original_control_equations(self):
+        rng=random.Random(783169)
+        for trial in range(60):
+            # Use a tiny independent affine system in the actual driver index
+            # convention. Enumerate the untouched equations, not compiled tables.
+            state=[1-2*rng.randrange(2) for _ in range(402)]
+            equations=[];recoveries=[]
+            for _ in range(rng.randrange(1,9)):
+                terms={i:rng.choice((-2,-1,1,2))
+                       for i in rng.sample(range(5),rng.randrange(1,5))}
+                # Splitting 0,1,2 leaves at most the two controls 3,4.
+                constant=rng.randrange(-4,5)
+                equations.append((terms,constant))
+                recoveries.append(dict(expression=[[0,constant*state[0]]]+
+                    [[2*(356+i)+1,c] for i,c in terms.items()]))
+            driver=dict(recoveries=recoveries);split=[0,1,2]
+            actual=set()
+            for word in range(8):
+                tables=rs._split_control_tables(driver,state,split,word)
+                proof=rs._two_control_solve(tables,5)
+                rs._verify_two_control_proof(tables,5,proof)
+                branch=[]
+                for bits in range(32):
+                    if all(sum((bits>>i&1)<<j for j,i in enumerate(inputs)) in allowed
+                           for inputs,allowed in tables):branch.append(bits)
+                self.assertEqual(proof['status']=='successor',bool(branch))
+                actual.update(branch)
+            expected={bits for bits in range(32)
+                      if all(abs(c+sum(a*(1-2*(bits>>i&1)) for i,a in terms.items()))==1
+                             for terms,c in equations)}
+            self.assertEqual(actual,expected)
+
+    def test_split_successor_real_threshold_failure_and_original_shells(self):
+        example=rs.adjacent_threshold_failure_example()
+        source=int(example['state_bits'],16)
+        state=[1-2*(source>>i&1) for i in range(402)]
+        driver=rs.adjacent_integral_driver(78)
+        real=rs.adjacent_driver_step(driver,state,[0]*46)
+        rounded=rs.adjacent_driver_step(driver,state,[1]*46)
+        _,rows,_=rs.adjacent_phase_system(78,2,2)
+        physical=[v for pair in zip(state,real) for v in pair]
+        self.assertTrue(all(abs(v)<=1 for v in real))
+        self.assertTrue(all(sum(c*physical[i] for i,c in row.items())==0 for row in rows))
+        self.assertEqual(rounded[54],-3)
+        self.assertEqual(rs.verify_saved(example['unit_successor'])['status'],'successor')
+        self.assertEqual(rs.adjacent_split_successor(69,[1]*402)['status'],'refused')
+        # At h=97 the new construction agrees with the retained exact oracle.
+        old=rs.adjacent_two_control_example();bits=int(old['state_bits'],16)
+        self.assertEqual(rs.adjacent_split_successor(97,[1-2*(bits>>i&1) for i in range(402)])['status'],
+                         old['proof']['status'])
+
+    def test_split_successor_rejects_missing_branches_and_damaged_proofs(self):
+        import copy
+        refusal=rs.adjacent_split_successor(78,[1]*402)
+        self.assertEqual(len(refusal['branches']),2)
+        for mutate in (lambda x:x['branches'].pop(),
+                       lambda x:x['split'].append(1),
+                       lambda x:x.update(status='unknown'),
+                       lambda x:x.update(hole=True),
+                       lambda x:x.update(all_pairs_decided=True),
+                       lambda x:x['branches'][0].update(empty_row=-1)):
+            bad=copy.deepcopy(refusal);mutate(bad)
+            with self.assertRaises(ValueError):rs.verify_saved(bad)
+        positive=rs.adjacent_threshold_failure_example()['unit_successor']
+        positive['branches'][-1]['control_bits']='0x0'
+        with self.assertRaises(ValueError):rs.verify_saved(positive)
+        for hole in (68,99,True):
+            with self.assertRaises(ValueError):rs.adjacent_split_successor(hole,[1]*402)
 
     def test_primitive_recovery_against_dense_rational_equations(self):
         # Independent left-to-right dense Gauss-Jordan elimination over Q.
