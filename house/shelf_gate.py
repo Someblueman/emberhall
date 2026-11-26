@@ -143,7 +143,7 @@ RESEARCH = frozenset({"explore-start", "explore-publish", "explore-release"})
 ACTIONS = RESEARCH | {"choice-open", "choice-vote", "idea-return", "idea-brief", "idea-second", "project-brief", "project-second",
                       "need-raise", "need-withdraw", "need-answer",
                       "project-done", "project-drop", "project-extend-vote",
-                      "project-vote", "idea-plain", "idea-drop"}
+                      "project-vote", "idea-plain", "idea-drop", "house-only-end"}
 
 
 def enabled(state: dict) -> bool:
@@ -161,6 +161,9 @@ def apply(state: dict, event: dict) -> None:
     require(enabled(state), "shelf runtime is not enabled")
     data = event["data"]
     require(data.get("kind") in ACTIONS, "unknown shelf action")
+    if data["kind"] == "house-only-end":
+        shelf.apply(state, event)
+        return
     if "trial" in data:
         name = data["trial"]
         require(isinstance(name, str), "invalid trial proposal")

@@ -1,6 +1,7 @@
 """Explicit project associations and finite scheduling hints; never task ownership."""
 from __future__ import annotations
 
+from . import shelf
 from .model import require, string
 
 SCOPE = "project-work-routing-20261114"
@@ -15,7 +16,7 @@ def active_project(state: dict, project: str, at: float) -> dict | None:
     item = state.get("shelf", {}).get("projects", {}).get(project)
     # The shelf materializes automatic drops at the next event. Do not schedule
     # already overdue work in the interval before that transition is recorded.
-    if item and item["status"] == "active" and at < item["deadline"] + 7 * 86400:
+    if item and item["status"] == "active" and at < shelf.project_expiry(state, item):
         return item
     return None
 
