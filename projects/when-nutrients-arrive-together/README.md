@@ -71,3 +71,9 @@ These analytical diagnostics do not certify the nonlinear clean baseline.
 linear model for the simulator's straight-line supply interpolation. It
 separates population interpolation bias from realized-path score sensitivity.
 
+[AMPLITUDE_LIMIT.md](AMPLITUDE_LIMIT.md) completes a twelve-community,
+same-path nonlinear-to-linear amplitude check. Trajectory errors halve with
+input amplitude; the remaining coherence rank discrepancy is retained.
+[NEXT.md](NEXT.md) records the substantial work still needed before accepting
+the clean reference or using the held-out experiment.
+

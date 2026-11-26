@@ -50,3 +50,49 @@ nonlinear derivative, and constant-supply equilibrium preservation. The
 experiment writes settings and hashes before solving. Source conventions,
 nonlinear stationarity, forcing and record-length convergence, community-level
 precision, and independent milestone review remain separate requirements.
+
+## Completed results
+
+All twelve planned communities completed all four fractions: 48 successful
+nonlinear solves, no failed communities. The preselected tighter solve also
+completed. There was no selection or replacement of paths. Source and library
+versions are in amplitude-limit-protocol.json; amplitude-limit-summary.json
+retains all score targets, per-community trajectory errors and the solver check.
+
+| Input fraction | Maximum scaled trajectory relative error | Maximum scaled covariance relative error |
+|---|---:|---:|
+| 1 | 0.00936985 | 0.00450005 |
+| 1/2 | 0.00469153 | 0.00228092 |
+| 1/4 | 0.00234753 | 0.00114857 |
+| 1/8 | 0.00117424 | 0.00057637 |
+
+Every community's trajectory error decreases under every halving. The 36
+within-community consecutive error ratios range from 1.99551 to 2.00352,
+consistent with the finite-path first-order scaled-response prediction.
+The tighter solver changes the fraction-one-eighth response by 3.09e-7 in
+the same normalized units, versus nonlinear-to-linear error 0.00113 in that
+community. This representative check supports resolving the measured
+trajectory discrepancy; it does not bound every score or realization.
+
+Maximum absolute differences from the exact linear response's *finite-path*
+scores are reported separately below. The AUC columns take maxima over all
+four fractions and twelve communities; rank columns retain each fraction.
+
+| Metric | Rank, 1 | Rank, 1/2 | Rank, 1/4 | Rank, 1/8 | Pair AUC, all | Guild AUC, all |
+|---|---:|---:|---:|---:|---:|---:|
+| Correlation | 0.007143 | 0.007143 | 0.007143 | 0 | 0 | 0 |
+| Absolute correlation | 0.014337 | 0.014337 | 0.014337 | 0 | 0 | 0 |
+| Cross-power | 0.007143 | 0 | 0 | 0 | 0 | 0 |
+| Coherence | 0.016086 | 0.016086 | 0.016086 | 0.016086 | 0 | 0 |
+
+The remaining coherence rank discrepancy is retained. These four amplitudes
+do not establish its limiting behavior or diagnose its cause; a small
+trajectory/covariance error alone cannot certify an ordering. No new smaller
+fraction was selected after observing it. Agreement of both classification
+targets likewise does not certify accurate overlap ranking.
+
+All 49 project checks pass. These results support using the local-linear
+model as a controlled approximation along these twelve finite paths, with
+explicit measured errors. They do not transfer its Gaussian probability
+bounds to nonlinear populations, demonstrate nonlinear stationarity, or
+complete the clean convergence and community-precision requirements.

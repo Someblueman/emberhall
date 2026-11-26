@@ -1,0 +1,36 @@
+{
+  "burn": 512,
+  "code_sha256": {
+    "amplitude_limit.py": "a851a73c57e8e9857fa776cd69a13a0001d90687a1615a934c9c4461ca3ca1a8",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "duration": 2048,
+  "fractions": [
+    1.0,
+    0.5,
+    0.25,
+    0.125
+  ],
+  "initial": "deterministic equilibrium for both linear and nonlinear systems",
+  "input_seed": "70000 + community",
+  "mesh": 0.0625,
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "scope": "same-path finite-amplitude diagnostic, not stationary population or baseline acceptance",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "segment": 30
+}
