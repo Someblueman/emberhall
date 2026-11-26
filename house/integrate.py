@@ -661,6 +661,12 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
         workspace, report = source(record, run, actor, admitted=job,
             allow_absent_workspace=accepted.get("status") in {"integrated", "rejected", "conflict", "tests-failed"})
         head = git(record.root, "rev-parse", "HEAD")
+        if accepted.get("status") == "prepared" and prepared_is_stale(record, accepted, head):
+            # Shared source moved after this candidate was tested, so it can
+            # never fast-forward. Keep the old receipt for the record and
+            # prepare (or reject) afresh against the current source.
+            path.replace(path.with_name("integration-stale-" + uuid.uuid4().hex + ".json"))
+            accepted = {}
         if accepted:
             if accepted.get("status") == "integrated":
                 # Both fields exist in durable receipts: normal merges record
@@ -750,6 +756,18 @@ def integrate(record: Record, run: str, actor: str, *, publish: bool = False,
             return publish_prepared(record, run, actor, report, path, receipt, admitted=job)
         save_result(record, actor, path, receipt)
         return receipt
+
+
+def prepared_is_stale(record: Record, receipt: dict, head: str) -> bool:
+    """A prepared candidate tested on an older source that is not yet part of it."""
+    base, target = receipt.get("base", ""), receipt.get("candidate_head", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", base) or not re.fullmatch(r"[0-9a-f]{40}", target):
+        return False
+    if head == base:
+        return False
+    included = subprocess.run(["git", "merge-base", "--is-ancestor", target, head],
+                              cwd=record.root, capture_output=True).returncode == 0
+    return not included
 
 
 def publish_prepared(record: Record, run: str, actor: str, report: dict, path: Path,

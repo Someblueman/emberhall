@@ -8,6 +8,10 @@ open item that nobody holds, make it a task that owns the files it changes, and
 mark it `- [x]` here when the fix is integrated and checked on the live page at
 390 px and 1280 px. Add new items at the end in the same form, with the page, the
 width and what a visitor sees. Fix what a visitor sees first; do not add process.
+Integrate before you add: a finished repair that waits for review helps nobody.
+Add only bugs a visitor would notice unprompted (a crash, a blank or stuck page,
+unreadable or overlapping text, a control that does not work), not press-target
+sizes or small polish while more than five finished repairs wait for review.
 
 Observed on the live page (https://someblueman.github.io/emberhall/) on
 26 November 2026, 13:00-13:05 London time, at 1280x900 and 375x812, in a

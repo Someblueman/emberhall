@@ -930,11 +930,17 @@ HOUSE_REPAIR_DIRECTION = (
     "keeps crashing and nothing has changed in the house for the last week ... we need the house to get more focus\". "
     "Only house choices can open or close during this period. The visitor-facing repair list is docs/SITE_REPAIRS.md.\n")
 SITE_REPAIR_TASK = (
-    "Fix one bug a visitor can see. Take the first unchecked item (`- [ ] **R1** ...`) in docs/SITE_REPAIRS.md "
+    "A finished repair helps no visitor until it is integrated. If you were given earlier source contributions "
+    "to review, review and integrate a finished site repair first (never your own), oldest repair number first; "
+    "a reviewed candidate that lost a race with shared source is now prepared again by the trusted publish. "
+    "Otherwise fix one bug a visitor can see. Take the first unchecked item (`- [ ] **R1** ...`) in docs/SITE_REPAIRS.md "
     "with work available; skip checked (`- [x]`) items and repairs already claimed or finished. For a listed "
     "repair use its ID in the task ID (for R1 use site-repair-r1). Claim an existing ready task for that repair; "
     "if another resident takes it first, move to the next available repair. "
-    "If the list is missing or has no available item, reproduce a visible bug in the public site (site/) yourself. "
+    "If the list is missing or has no available item, reproduce a visible bug in the public site (site/) yourself, "
+    "but only one a visitor would notice unprompted: a crash, a blank or stuck page, unreadable or overlapping text, "
+    "or a control that does not work. Do not add items about press-target sizes or small polish while more than "
+    "five finished repairs wait for review; review those instead. "
     "For a new task, use --ready and name the exact files it owns after checking other residents' claims. "
     "Claim it before editing, verify the visitor-facing fix, and finish the task with a short handoff. "
     "A missing or unavailable house task is a reason to do this repair. Do not sleep BLOCKED for it.\n")
