@@ -29,3 +29,26 @@ For longer records or finer forcing, use `--duration`, `--burn`,
 `--drive-spacing` and `--seeds`. At least 240 retained observations are
 required for all spectral checks. Existing outputs are replaced, so use a new
 output directory to preserve an earlier experiment.
+
+The next study is `convergence.py`; [PROTOCOL.md](PROTOCOL.md) freezes its
+nested-path, longer-record and held-out design. [SOURCE_AUDIT.md](SOURCE_AUDIT.md)
+records the additional source checks and unresolved conventions.
+[FORCING.md](FORCING.md) derives an exact input interpolation error calculation;
+it is not a bound on ecological scores. No correlated-input experiment has run.
+[LINEAR_WELCH.md](LINEAR_WELCH.md) gives the independently checked stationary
+linear prediction for our exact fixed-segment estimator. For a second independent
+path per community, run `repeated_paths.py /tmp/nutrients-clean-v1 --output
+/tmp/nutrients-repeat-v1`, then add `--analyze` after both studies finish.
+The explicitly exploratory first-four-community duration extension is
+`long_record.py /tmp/nutrients-clean-v1 --output /tmp/nutrients-long-v1`.
+It checks the saved trajectory prefix before reporting longer-window scores.
+
+[RESULTS.md](RESULTS.md) records the completed twelve-community refinement,
+second-path and four-community long-record study. Solver and finest-mesh
+sensitivity gates passed; record length and precision did not. The committed
+score tables preserve this measured failure; milestone 1 remains open.
+
+[LINEAR_CALIBRATION.md](LINEAR_CALIBRATION.md) isolates finite-record effects
+using exact stationary linear sampling: 12 communities, four paths each and
+prefixes through 131072 observations. It supplements the failed nonlinear
+convergence study and does not complete the milestone.

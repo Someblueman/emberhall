@@ -1,0 +1,24 @@
+{
+  "burn": 512,
+  "code_sha256": "d6c52f8d5e55f79e18a8099a3cb18e23b0f826d27e6216427c5e3b3451ac6395",
+  "duration": 4608,
+  "input_seed_offset": 40000,
+  "mesh": 0.0625,
+  "parent_sha256": "1e9388f8d69d51f2010ae1bf8fa7df175d557df3fdeb62efa8680914a3f6c752",
+  "purpose": "separate input-path variation from community variation; no new clean acceptance",
+  "rtol": 1e-08,
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ]
+}
