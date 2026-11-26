@@ -83,6 +83,49 @@ class IntegrationTests(HouseCase):
         self.assertEqual(integrate(self.record, "one", "bob"), accepted)
         self.assertEqual((self.repo / "document.txt").read_text(), "uncommitted next task\n")
 
+    def stale_prepared(self, run):
+        """A tested candidate whose publish lost the race with another change to shared source."""
+        self.candidate(run, "first\n")
+        with patch("house.integrate.publish_prepared",
+                   side_effect=ValueError("shared source changed during review; candidate retained")):
+            with self.assertRaisesRegex(ValueError, "shared source changed"):
+                integrate(self.record, run, "alice", publish=True)
+        path = self.private / run / "integration.json"
+        self.assertEqual(json.loads(path.read_text())["status"], "prepared")
+        (self.repo / "other.txt").write_text("unrelated\n")
+        git(self.repo, "add", "other.txt")
+        git(self.repo, "-c", "commit.gpgsign=false", "-c", "user.name=Test", "-c", "user.email=test@local",
+            "commit", "-m", "Unrelated change")
+        return path
+
+    def test_stale_prepared_candidate_is_prepared_again_and_integrates(self):
+        path = self.stale_prepared("one")
+        result = integrate(self.record, "one", "bob", publish=True)
+        self.assertEqual(result["status"], "integrated")
+        self.assertEqual((self.repo / "document.txt").read_text(), "first\n")
+        self.assertEqual((self.repo / "other.txt").read_text(), "unrelated\n")
+        stale = list((self.private / "one").glob("integration-stale-*.json"))
+        self.assertEqual(len(stale), 1)
+        self.assertEqual(json.loads(stale[0].read_text())["status"], "prepared")
+        self.assertEqual(json.loads(path.read_text())["status"], "integrated")
+
+    def test_stale_prepared_candidate_can_be_rejected(self):
+        self.stale_prepared("one")
+        head = git(self.repo, "rev-parse", "HEAD")
+        result = integrate(self.record, "one", "bob", reject="Project dropped")
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(git(self.repo, "rev-parse", "HEAD"), head)
+        self.assertEqual((self.repo / "document.txt").read_text(), "base\n")
+
+    def test_current_prepared_candidate_still_refuses_rejection(self):
+        self.candidate("one", "first\n")
+        with patch("house.integrate.publish_prepared", side_effect=ValueError("interrupted")):
+            with self.assertRaisesRegex(ValueError, "interrupted"):
+                integrate(self.record, "one", "alice", publish=True)
+        with self.assertRaisesRegex(ValueError, "reject does not merge"):
+            integrate(self.record, "one", "bob", reject="No")
+        self.assertEqual(integrate(self.record, "one", "bob", publish=True)["status"], "integrated")
+
     def test_failed_receipt_survives_missing_source_room(self):
         self.assert_missing_terminal_replay("failed", "invalid\n")
 
