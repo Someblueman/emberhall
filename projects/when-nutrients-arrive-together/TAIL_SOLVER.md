@@ -26,3 +26,14 @@ Budget: one additional long solve, expected about 25 minutes from the prior
 ```
 OPENBLAS_NUM_THREADS=1 python3 projects/when-nutrients-arrive-together/tail_solver.py --baseline /tmp/nutrients-coherence-extension-fbc0 --output /tmp/nutrients-tail-solver-d200
 ```
+
+After completion, replay all 180 before/after/difference score values and
+all trajectory-error summaries from the hash-bound arrays, then export the
+compact protocol, score table and summary. The exporter refuses changed
+source, libraries, baseline identities or trajectory hashes. Score comparison
+uses 1e-12 absolute/relative numerical tolerance, not a claim of symbolic
+equality; trajectory-error reductions use the same recorded operations.
+
+```
+OPENBLAS_NUM_THREADS=1 python3 projects/when-nutrients-arrive-together/tail_solver_report.py --baseline /tmp/nutrients-coherence-extension-fbc0 --study /tmp/nutrients-tail-solver-d200 --output /tmp/nutrients-tail-solver-report-d200
+```
