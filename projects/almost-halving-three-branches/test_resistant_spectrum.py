@@ -16,6 +16,83 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_primitive_recovery_against_dense_rational_equations(self):
+        # Independent left-to-right dense Gauss-Jordan elimination over Q.
+        # Its pivot order differs from the production sparse degree heuristic.
+        def dense_rank(rows,size):
+            matrix=[[Fraction(row.get(i,0)) for i in range(size)] for row in rows]
+            rank=0
+            for column in range(size):
+                pivot=next((j for j in range(rank,len(matrix)) if matrix[j][column]),None)
+                if pivot is None: continue
+                matrix[rank],matrix[pivot]=matrix[pivot],matrix[rank]
+                scale=matrix[rank][column]
+                matrix[rank]=[c/scale for c in matrix[rank]]
+                for j in range(len(matrix)):
+                    if j!=rank:
+                        scale=matrix[j][column]
+                        matrix[j]=[c-scale*d for c,d in zip(matrix[j],matrix[rank])]
+                rank+=1
+            return rank
+
+        rng=random.Random(491607)
+        systems=[[],[{}, {0:0}], [{0:6,1:10,2:15}],
+                 [{0:2,1:3},{0:-4,1:-6}],
+                 [{0:1,1:1},{0:1,1:-1}],
+                 [{0:6,1:10,4:15},{0:-9,2:14},{1:5,2:-7},
+                  {2:21,3:-25},{3:10,4:9}]]
+        systems += [[{i:c for i in range(5) if (c:=rng.randrange(-5,6))}
+                     for _ in range(rng.randrange(1,8))] for _ in range(32)]
+        for rows in systems:
+            with self.subTest(rows=rows):
+                result=rs.rational_recovery(5,rows,seconds=5)
+                self.assertTrue(result['complete'])
+                self.assertTrue(result['kernel_verified'])
+                self.assertEqual(result['rank'],dense_rank(rows,5))
+                free=result['free']; expressions=result['expressions']
+                self.assertEqual(len(free),5-result['rank'])
+                self.assertEqual(dense_rank(result['normalized_rows'],5),result['rank'])
+                for i in free: self.assertEqual(expressions[i],{i:1})
+                # Each basis vector satisfies the ORIGINAL rational equations;
+                # matching nullities makes the parametrization onto the kernel.
+                for j in free:
+                    vector=[expressions[i].get(j,0) for i in range(5)]
+                    for row in rows+result['normalized_rows']:
+                        self.assertEqual(sum(c*vector[i] for i,c in row.items()),0)
+                expected={v for v in itertools.product((-1,1),repeat=5)
+                          if all(sum(c*v[i] for i,c in row.items())==0 for row in rows)}
+                recovered=set()
+                for signs in itertools.product((-1,1),repeat=len(free)):
+                    values=dict(zip(free,signs))
+                    vector=tuple(sum(c*values[j] for j,c in expressions[i].items())
+                                 for i in range(5))
+                    if all(abs(c)==1 for c in vector): recovered.add(vector)
+                self.assertEqual(recovered,expected)
+        for row in ({True:1},{5:1},{0:True},{0:Fraction(1,2)}):
+            with self.assertRaises(ValueError): rs.rational_recovery(5,[row])
+
+    def test_integer_minor_fast_rejection_keeps_exact_replay(self):
+        saved=rs.adjacent_integer_reachability()
+        with patch.object(rs,'_sparse_abs_determinant',side_effect=AssertionError):
+            for value in (True,0,-128,1,saved['minor_abs_determinant']+2):
+                with self.assertRaises(ValueError):
+                    rs.verify_saved(dict(saved,minor_abs_determinant=value))
+        # Divisibility is only a cheap necessary check. A different divisible
+        # claim must reach the exact determinant comparison and be rejected.
+        with patch.object(rs,'_sparse_abs_determinant',
+                          return_value=saved['minor_abs_determinant']) as replay:
+            with self.assertRaisesRegex(ValueError,'wrong exact control minor'):
+                rs.verify_saved(dict(saved,minor_abs_determinant=saved['minor_abs_determinant']+128))
+            replay.assert_called_once()
+
+    def test_sparse_determinant_zero_coefficient_nontrivial_scaling(self):
+        import math
+        # Diagonal rows have zero pivot-column coefficients but still need
+        # Bareiss scaling when the pivot differs from the previous pivot.
+        for diagonal in ((2,3,5,7),(-2,4,-6,9),(6,10,15,21)):
+            columns=[{i:c} for i,c in enumerate(diagonal)]
+            self.assertEqual(rs._sparse_abs_determinant(columns,4),abs(math.prod(diagonal)))
+
     def test_exact_integer_control_theorem_and_corruption(self):
         saved=rs.adjacent_integer_reachability()
         # Replay must reconstruct exact columns, not trust its producer.

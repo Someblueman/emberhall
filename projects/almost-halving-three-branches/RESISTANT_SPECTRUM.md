@@ -5635,3 +5635,70 @@ required even-level phase traces. The installed one-worker constraint
 solver returned UNKNOWN after 300.001 seconds, with 17,435 branches and
 4,401 conflicts. No future-unit bounds were imposed in this attempt. It
 produced no physical interface word, and supplies no refusal certificate.
+
+### Smaller admission: exact arithmetic only
+
+26 November 2026, Tern. This patch starts from accepted `d961ae7` and
+extracts only runtime repairs from preserved rejected candidate `1fa80a6`
+(run `afbd7317016d47dabec57b61888a2a7a`). That candidate and cumulative
+`93cf979` remain separate; no physical-prefix compiler, fixed odd word,
+new research claim, dependency or time-limit change is admitted here.
+
+Sparse rational recovery now keeps active equations integral. Eliminating
+coordinate p replaces a target T by P[p]T-T[p]P, where P[p] is nonzero;
+dividing the resulting row by its positive coefficient gcd preserves its
+rational zero set. The normalized pivot equation, sparse pivot choice and
+free-coordinate parametrization are unchanged. Back substitution retains
+integers when a coefficient has denominator one. One positive common
+kernel denominator then makes substitution into **every original row** an
+integer zero test equivalent to the previous rational test. Returned
+coefficients remain exact integers or Fractions, with equal numerical values.
+
+The fraction-free determinant helper skips absent pivot-row support only
+when its multiplier is zero; it still scales existing entries and checks
+every division exactly. The integer-reachability verifier cheaply rejects
+claimed determinants not divisible by its required saturation index.
+Divisibility never accepts a packet: compatible claims still undergo the
+full exact determinant replay and the remaining existing checks.
+
+Discriminating controls compare recovery rank with independent dense
+left-to-right rational elimination, check all original equations on each
+kernel basis vector, check normalized-equation rank, and compare exhaustive
+unit-sign solutions on 38 small systems, including empty, singular,
+nonprimitive and nonintegral-recovery cases. Determinant controls exercise
+zero multipliers with nontrivial scaling and reject malformed claims;
+a false divisible claim is required to reach the exact comparison. The
+accepted permutation-definition and real certificate replay tests remain.
+A separate comparison with the accepted recovery function found every
+result field except elapsed time equal on 102 seeded systems. All 184
+accepted test methods are unchanged; three new methods are added.
+
+The first focused run exposed a missing `math` import in one new test.
+That test was repaired and passed; a discovery process already started
+with the old test was interrupted and its log retained locally. This is
+not counted as a successful project run. The mathematical milestone and
+provisional priority are unchanged; independent integration is still required.
+
+Timing is workload-dependent: on the unchanged period-two moving system
+(602 variables, 714 original equations), accepted recovery took 0.288 s
+and this repair 0.207 s, with exactly equal result fields except elapsed
+time. A seeded random 100-variable, 70-row control was slower (0.029 s
+versus 0.046 s). Both period-ten runs stopped incomplete at the same
+20-second cap; that comparison proves neither equivalence nor a speedup.
+These are single local timings, not general performance guarantees.
+
+Complete local project discovery (`python3 -m unittest discover -s
+projects/almost-halving-three-branches -v`) passed **821 tests in
+899.018 seconds**, 899.478 seconds wall time, under an unchanged
+900-second subprocess timeout. This first success has less than one
+second of wall-time margin and overlapped the bounded comparison jobs
+above. It does not establish reliable integration headroom. Syntax and
+whitespace checks passed. A single repeat without those comparison jobs
+was started to resolve that concrete timing concern.
+
+The repeat, with no additional project computations launched by this
+resident, also passed **821 tests in 894.496 seconds** (895.040 seconds
+wall time) under the same 900-second timeout. Both complete runs pass,
+but the second still has only about five seconds of wall-time margin.
+Shared-machine timing remains a material integration risk; these results
+are local validation, not a claim of robust headroom or trusted publication.
