@@ -3036,6 +3036,175 @@ def _verify_two_control_proof(tables,variables,proof):
     return True
 
 
+def _split_control_tables(driver,state,split,word):
+    """Substitute a complete split word before making binary truth tables."""
+    fixed={i:1-2*(word>>j&1) for j,i in enumerate(split)}
+    tables=[]
+    for recovery in driver['recoveries']:
+        constant=0;terms={}
+        for i,c in recovery['expression']:
+            if not i%2:constant+=c*state[i//2]
+            else:
+                control=i//2-356
+                if control in fixed:constant+=c*fixed[control]
+                else:terms[control]=c
+        inputs=sorted(terms)
+        if len(inputs)>2:raise ValueError('split leaves a wide control row')
+        allowed=[bits for bits in range(1<<len(inputs))
+                 if abs(constant+sum(terms[i]*(1-2*(bits>>j&1))
+                                     for j,i in enumerate(inputs)))==1]
+        tables.append((inputs,allowed))
+    # Returned words still use all 46 original controls, including the split.
+    tables.extend(([i],[(word>>j)&1]) for j,i in enumerate(split))
+    return tables
+
+
+@lru_cache(maxsize=75)
+def _adjacent_source_phase_data(hole):
+    """Pull back all five absolute traces and certify their affine drift."""
+    driver=adjacent_integral_driver(hole)
+    expressions={row['target']:dict(row['expression']) for row in driver['recoveries']}
+    def pullback(mask):
+        result=0;constant=0
+        for i in range(804):
+            if not mask>>i&1:continue
+            expression=expressions.get(i,{i:1})
+            total=sum(expression.values())
+            if total%2!=1:raise AssertionError('driver does not preserve odd values')
+            constant^=((1-total)//2)&1
+            for j,c in expression.items():
+                if c%2:result^=1<<j
+        return result,constant
+    _,_,equations=adjacent_phase_system(hole,2,2)
+    laws=[]
+    for mask,rhs in equations:
+        pulled,constant=pullback(mask)
+        if any(pulled>>i&1 for i in range(1,804,2)):
+            raise AssertionError('absolute trace still depends on fresh controls')
+        source=sum((pulled>>(2*i)&1)<<i for i in range(402))
+        following,drift=pullback(sum((source>>i&1)<<(2*i+1) for i in range(402)))
+        if following!=sum((source>>i&1)<<(2*i) for i in range(402)):
+            raise AssertionError('source phase does not propagate independently of controls')
+        laws.append((source,rhs^constant,drift))
+    if len(laws)!=5 or [drift for mask,rhs,drift in laws]!=[1,1,1,1,0]:
+        raise AssertionError('unexpected phase drift')
+    # The absolute-level convention is independently reconstructed at odd level.
+    _,_,odd_equations=adjacent_phase_system(hole,2,3)
+    if odd_equations!=[(mask,rhs^(j<4)) for j,(mask,rhs) in enumerate(equations)]:
+        raise AssertionError('unexpected absolute phase convention')
+    return tuple(laws)
+
+
+def adjacent_source_phase_audit(hole,state,first=2):
+    """All five absolute edge traces are a source-only eligibility test.
+
+    Every odd-integer driver transition propagates the first four bits by
+    a flip and the fifth unchanged, independently of the new controls.
+    """
+    if type(first) is not int or first<2:
+        raise ValueError('require an absolute level at least two')
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit source signs')
+    bits=sum((v==-1)<<i for i,v in enumerate(state))
+    laws=_adjacent_source_phase_data(hole)
+    observed=[(mask&bits).bit_count()%2 for mask,rhs,drift in laws]
+    expected=[rhs^((first%2)*drift) for mask,rhs,drift in laws]
+    return dict(eligible=observed==expected,observed=observed,expected=expected,
+                phase_preserved_by_every_successor=True)
+
+
+def adjacent_split_successor(hole,state,first=None):
+    """Decide any fixed unit source at h=69..98 by at most 1024 two-SAT calls.
+
+    An optional absolute first level checks the source-only phase eligibility.
+    Physical endpoints, source reachability and all-pairs existence are excluded.
+    """
+    if type(hole) is not int or not 69<=hole<=98:
+        raise ValueError('split theorem requires holes 69..98')
+    if len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state):
+        raise ValueError('require 402 unit source signs')
+    driver=adjacent_integral_driver(hole)
+    if first is not None and not adjacent_source_phase_audit(hole,state,first)['eligible']:
+        raise ValueError('source fails an absolute phase trace')
+    split=list(range(max(0,79-hole)))
+    result=dict(kind='moving-adjacent-split-successor-v1',hole=hole,
+                state_bits=hex(sum((v==-1)<<i for i,v in enumerate(state))),
+                split=split,branches=[],status='refused',
+                literal_existence_decided=False,all_pairs_decided=False)
+    if first is not None:result['absolute_first']=first
+    for word in range(1<<len(split)):
+        tables=_split_control_tables(driver,state,split,word)
+        proof=_two_control_solve(tables,46)
+        result['branches'].append(proof)
+        if proof['status']=='successor':
+            result['status']='successor';break
+    verify_adjacent_split_successor(result)
+    return result
+
+
+def verify_adjacent_split_successor(certificate):
+    """Replay every split branch and its clauses against the original driver."""
+    if (certificate.get('kind')!='moving-adjacent-split-successor-v1' or
+            certificate.get('literal_existence_decided') is not False or
+            certificate.get('all_pairs_decided') is not False or
+            type(certificate.get('hole')) is not int or not 69<=certificate['hole']<=98):
+        raise ValueError('require a scoped split-successor certificate')
+    encoded=certificate.get('state_bits')
+    if not isinstance(encoded,str) or not encoded.startswith('0x') or len(encoded)>103:
+        raise ValueError('invalid source bits')
+    bits=int(encoded,16)
+    if bits<0 or bits.bit_length()>402:raise ValueError('source bits exceed 402 signs')
+    state=[1-2*(bits>>i&1) for i in range(402)]
+    if 'absolute_first' in certificate:
+        if not adjacent_source_phase_audit(certificate['hole'],state,certificate['absolute_first'])['eligible']:
+            raise ValueError('source fails an absolute phase trace')
+    split=list(range(max(0,79-certificate['hole'])))
+    if (certificate.get('split')!=split or
+            any(type(i) is not int for i in certificate['split'])):
+        raise ValueError('incorrect split coverage')
+    driver=adjacent_integral_driver(certificate['hole'])
+    branches=certificate.get('branches')
+    if not isinstance(branches,list) or not 1<=len(branches)<=1<<len(split):
+        raise ValueError('invalid split branch count')
+    status=certificate.get('status')
+    if status not in ('successor','refused'):raise ValueError('unknown split result')
+    if status=='refused' and len(branches)!=1<<len(split):
+        raise ValueError('missing refusal branch')
+    for word,proof in enumerate(branches):
+        expected='successor' if status=='successor' and word==len(branches)-1 else 'refused'
+        if proof.get('status')!=expected:raise ValueError('inconsistent split branch status')
+        tables=_split_control_tables(driver,state,split,word)
+        _verify_two_control_proof(tables,46,proof)
+    if status=='successor':
+        controls=int(branches[-1]['control_bits'],16)
+        following=adjacent_driver_step(driver,state,[1-2*(controls>>i&1) for i in range(46)])
+        if any(abs(v)!=1 for v in following):raise ValueError('nonunit split successor')
+        _,rows,_=adjacent_phase_system(certificate['hole'],2,2)
+        values=[v for pair in zip(state,following) for v in pair]
+        if any(sum(c*values[i] for i,c in row.items()) for row in rows):
+            raise ValueError('split successor fails an original shell row')
+    result=dict(verified=True,hole=certificate['hole'],status=status,
+                split_controls=len(split),branches=len(branches),
+                literal_existence_decided=False,all_pairs_decided=False)
+    if 'absolute_first' in certificate:
+        result.update(absolute_first=certificate['absolute_first'],phase_preserved=True)
+    return result
+
+
+def adjacent_threshold_failure_example():
+    """An exact real successor at h=78 whose common-zero-threshold image fails."""
+    bits=int('18fbe30162c36702fbc48da01f301609a18686249018094b4232e344bbdf97bcdbb3297fc17d8334004380063c3491f30b664',16)
+    state=[1-2*(bits>>i&1) for i in range(402)]
+    driver=adjacent_integral_driver(78)
+    real=adjacent_driver_step(driver,state,[0]*46)
+    rounded=adjacent_driver_step(driver,state,[1]*46)
+    if any(abs(v)>1 for v in real) or rounded[54]!=-3:
+        raise AssertionError('threshold counterexample failed')
+    return dict(state_bits=hex(bits),hole=78,rational_controls=[0]*46,
+                failed_coordinate=54,rounded_value=-3,
+                unit_successor=adjacent_split_successor(78,state))
+
+
 def adjacent_two_control_successor(hole,state):
     """Decide every fresh-control assignment where all driver rows have width <=2.
 
@@ -7598,6 +7767,8 @@ def verify_saved(saved):
         return verify_adjacent_switch_family(saved)
     if saved.get('kind')=='moving-adjacent-source-fibre-v1':
         return verify_adjacent_source_fibre(saved)
+    if saved.get('kind')=='moving-adjacent-split-successor-v1':
+        return verify_adjacent_split_successor(saved)
     if saved.get('kind')=='moving-adjacent-orientation-endpoint-v1':
         return verify_adjacent_orientation_endpoint(saved)
     if saved.get('kind')=='moving-adjacent-two-adic-reachability-v1':
@@ -8066,6 +8237,8 @@ def main():
     p.add_argument('--adjacent-control-rounding',action='store_true',help='certify the fixed-source unit-rounding property of difference controls')
     p.add_argument('--adjacent-two-control-example',action='store_true',help='emit a checked one-edge positive control at hole 97; not two-step extendible')
     p.add_argument('--adjacent-two-control',metavar='SOURCE_BITS',help='exact interior successor decision when each recovery uses at most two fresh controls')
+    p.add_argument('--adjacent-split-control',metavar='SOURCE_BITS',help='exact fixed-source interior successor at holes 69..98, at most ten split controls')
+    p.add_argument('--split-absolute-phase',action='store_true',help='require source phase eligibility at --first-level in the split decision')
     p.add_argument('--adjacent-control-bound-example',nargs='?',const='pair',choices=('pair','joint'),help='emit a source-state bound; joint passes every two-row control projection')
     p.add_argument('--adjacent-control-refusal-example',action='store_true',help='emit a seed passing unary/pair tests but admitting no unit successor')
     p.add_argument('--adjacent-phase-example',action='store_true',help='repackage the recorded open word as a checked adjacent-level path')
@@ -8183,6 +8356,14 @@ def main():
         print(json.dumps(verify_saved(certificate),indent=2));return
     if args.adjacent_two_control_example:
         certificate=adjacent_two_control_example()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_split_control is not None:
+        bits=int(args.adjacent_split_control,16)
+        if bits<0 or bits.bit_length()>402:raise ValueError('source bits exceed 402 signs')
+        certificate=adjacent_split_successor(args.hole,[1-2*(bits>>i&1) for i in range(402)],
+                                            args.first_level if args.split_absolute_phase else None)
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate),indent=2));return

@@ -5946,3 +5946,182 @@ observables, no Hamming cap, with the signs of the nearest-edge real
 relaxation used only as discovery hints. The installed one-worker solver
 returned UNKNOWN at 300.006 seconds, 15,260 branches and 3,952 conflicts.
 No signing or refusal certificate was emitted; no improvement is inferred.
+### Sorrel: a complete split-control decision at holes 69 through 98
+
+26 November 2026. **The infinite resistant family remains undecided.**
+This continuation starts from accepted source `85b354a`, preserving all
+187 existing spectrum tests. Mallow's stopped `84a711a` continuation was
+inspected through the fixed channel, but is not silently incorporated.
+These additions concern a different exact one-step decision, with no
+claim of physical interface compatibility or an all-pairs obstruction.
+
+For every h=69,...,98 and **every** fixed 402-coordinate unit source,
+its interior unit successor can be decided with at most 1,024 two-SAT
+instances on 46 Boolean controls. This quantifies over all source words,
+not a sampled census of them. By default it omits the five absolute phase
+traces; the optional phase check below imposes them. Neither mode asserts
+that a decided source occurs in a physical pair. The construction uses
+the existing integral driver, whose row
+identities are independently replayed against the original shell equations.
+
+For h<79, split the first 79-h original third-arm controls; for h>=79,
+split none. Deleting those columns leaves at most two controls in every
+recovery expression. The structural test checks this property directly
+for all thirty values of h, independently of the source values. Thus,
+after each of the at most 2^10 split assignments, each required output
+sign gives a truth table on at most two remaining Boolean variables.
+An excluded two-bit word is a two-literal clause; an excluded one-bit
+word is a unit clause; an empty constant table refuses the branch.
+The retained two-SAT engine either supplies all original control signs,
+or supplies implication paths from a literal to its complement and back.
+
+`verify_adjacent_split_successor` reconstructs those original-coordinate
+tables and replays the clause paths. A refusal must cover every split
+assignment, in order, without a missing branch. A success is additionally
+substituted into every original integer shell row. The verifier never
+runs a satisfiability search. There is no timeout-to-refusal conversion.
+This is a fixed-source decision; repeating it across a path still leaves
+the choice among successor words, source reachability and both physical
+interfaces unresolved.
+
+#### Pull back the five phases before choosing the fresh controls
+
+The phase-aware form makes the existing phase conservation explicit in
+driver coordinates. Write b=(1-x)/2 for odd integer signs or values.
+For each recovery x'=sum(c_i*x_i), its odd coefficient sum gives
+
+    b' = (1-sum(c_i))/2 + sum(c_i*b_i).
+
+Substitute this affine expression into each of the five original binary
+trace equations. Every fresh-control coefficient cancels modulo two.
+The result is five affine tests on the source alone. Pulling each source
+mask forward once gives the **same** mask, with constant flip one for
+the first four and zero for the fifth. The producer checks these complete
+formal bit identities, not sampled words, and reconstructs the original
+absolute trace equations independently at levels two and three. This
+agrees with their prescribed alternating phase; no free phase is chosen.
+
+Thus an eligible source has its five required traces on **every** odd
+integer driver edge, and every unit successor is eligible at the next
+absolute level. This removes phase selection from successor branching;
+it does not remove integer unit constraints or either physical interface.
+`adjacent_source_phase_audit` checks eligibility. Passing an absolute
+`first` level to `adjacent_split_successor` requires it and records that
+level in the replayable certificate. An ineligible source raises an
+explicit error, rather than reporting an unphased impossibility.
+
+For the retained even-phase h=97 source, both generation and a separate
+replay pass with:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --hole 97 --first-level 2 --split-absolute-phase --adjacent-split-control 0x16ad29251a7af07a2131b9bc87dd324940aeafb8ffbf756384e86337e02d190167aa295c1798a842df550d15365b14cef2fc8 --write /tmp/phased-split.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/phased-split.json
+```
+
+#### Why common-threshold rounding cannot simply move down one hole
+
+At h=78, `adjacent_threshold_failure_example()` contains a fixed unit
+source for which all 46 controls equal to zero give an exact rational
+successor in the box [-1,1]. All original integer shell rows vanish on
+this rational edge. Rounding these controls with the previously proved
+rule R(u)=-1 for u<0, R(u)=1 otherwise gives output coordinate 54 equal
+to -3. Its three control coefficients are -1,-1,-1 and its source
+constant is zero. This is a counterexample to extending **that rounding
+map**, not an integrality gap: the same source has a genuine unit
+successor, with negative-control bit word `0xc00000` (the other controls
+are positive). The split-control checker verifies that successor. Its
+source sign sum is 46, so it is explicitly not a balanced physical
+interface or a candidate for the resistant-family construction.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --hole 78 --adjacent-split-control 0x18fbe30162c36702fbc48da01f301609a18686249018094b4232e344bbdf97bcdbb3297fc17d8334004380063c3491f30b664 --write /tmp/split-successor.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/split-successor.json
+```
+
+The four new tests check the structural property at all thirty holes,
+compare the split compiler with exhaustive original-equation signs on
+60 seeded small affine systems, replay the rational rounding failure
+and actual unit edge, and reject missing branches, altered scope and
+damaged clauses or controls. All four passed in 8.088 seconds. No new
+dependency or large certificate is committed. Installed constraint-solving
+packages were used only for local discovery of the displayed source;
+the source and every mathematical assertion above replay without them.
+
+Two additional controls evaluate the five original trace equations on
+90 fresh odd-integer edges at both starting parities, check their source
+pullback and drift, and reject a changed absolute level in a saved
+phase-aware decision. All six new controls passed in 17.426 seconds.
+An abstract-syntax comparison confirms all 187 accepted spectrum test
+methods are unchanged. Both CLI examples also passed a separate replay.
+
+The first full project attempt, started before the phase extension, hit
+its unchanged 900-second cap during `test_real_cli_core_replay`, with no
+assertion failure printed. It overlapped local discovery computations;
+it is not counted as a full-suite success. Final-source validation is
+recorded below separately.
+
+A subsequent physical-interface construction attempt used h=77, all
+712 prefix rows, the 356 original rows from slice two to slice three,
+S=W=D=A=0 on both slices, and the five source-only absolute phase
+tests at level two. There were 1,406 unit variables and 1,076 integer
+zero rows; the centre was fixed positive using global sign symmetry.
+The already-installed one-worker constraint solver, with a 900-second
+search limit and no objective, returned **UNKNOWN** after 900.147 seconds
+overall, 67,205 branches and 7,871 conflicts. No assignment was produced.
+This is a witnessed failed attempt to reach a physical interface, not
+an infeasibility certificate, a unit path, or an infinite obstruction.
+
+Final-source full project discovery passed **827 tests in 819.217 seconds**
+(819.741 seconds wall time), within the unchanged 900-second cap. No other
+discovery computation was launched by this resident during that run.
+Syntax and whitespace checks also passed. These are local builder checks,
+not independent integration, a performance guarantee or milestone acceptance.
+
+The next obstacle remains a unit word satisfying both physical interfaces,
+or an argument quantifying over every permitted pair and hole placement.
+The split theorem alone supplies neither; priority remains provisional.
+
+
+### Fern: reconcile the split decision with the accepted fibre work
+
+26 November 2026. Recovered Sorrel's preserved local contribution
+`f57aeab` (base `85b354a`) and reconciled its three owned files with
+accepted `643be30`. The old `integration-28f20c490a8749cc8e6ebbc7c6fa886b`
+merge log records conflicts in the document and tests; the accepted source
+has since added a verifier-dispatch conflict too. All three are additive:
+retain both document continuations, both sets of tests, and all four
+certificate dispatches (split, source fibre, switching family and radius).
+No accepted implementation or test method is removed or replaced.
+
+An abstract-syntax comparison preserves all 203 accepted spectrum test
+methods and all 193 methods in Sorrel's contribution, yielding 209 methods.
+The split-focused run passed seven tests in 7.025 seconds, including the
+existing split-edge test. The six recovered controls retain the independent
+small-equation exhaustion, original shell substitutions, all-thirty-hole
+structural check, phase drift and deliberately damaged certificate checks.
+Sorrel's test counts and timings above describe that historical contribution;
+they are not claims about the current merged source.
+
+The split oracle extends the fixed-source one-edge decision down to h=69;
+the accepted complete-fibre certificates still concern two edges at h>=79.
+Neither line supplies a compatible path between both physical interfaces.
+The general target and infinite-family acceptance remain unmet, and priority
+remains provisional.
+
+Final merged-source validation passed **843 tests in 894.052 seconds**
+(894.796 seconds wall time), under the unchanged 900-second subprocess cap,
+with no competing local discovery computation. The narrow margin remains a
+validation timing risk, not a performance guarantee. Both documented split
+CLI examples (h=97 with absolute phase, h=78 without) generated a successor
+certificate and passed a separate `--verify` process. Syntax and whitespace
+checks passed. All 227 accepted functions outside the dispatcher and CLI
+entry point have identical abstract syntax; all six recovered functions
+match Sorrel's contribution.
+
+A later independent review of Tern's cyclic-mirror contribution `8916a7a`
+reported a separate integration conflict at journal event 50935. It is not
+silently incorporated into this repair; preserve that contribution and
+reconcile it against this combined source next. This completed repair is
+source maintenance, not acceptance of the general mathematical milestone.
