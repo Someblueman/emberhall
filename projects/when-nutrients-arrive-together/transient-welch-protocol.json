@@ -1,0 +1,44 @@
+{
+  "burns": [
+    0,
+    128,
+    512,
+    2048
+  ],
+  "code_sha256": {
+    "TRANSIENT_WELCH.md": "9de478fea6ee2c843ae346bade2722c67e753225ebb53ec9d37b6e41e856428b",
+    "finite_covariance.py": "f3f959c2e88344727a442b0c757fad352b6408672c994fa1279f89aad6110d77",
+    "linear_calibration.py": "447d347fca81cbce0177f3ab80dfeb1044c74915353b3644521d405791ad016c",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "linear_welch.py": "60c006973cd2a5883c1f7fef6cd616252af669ad130fab7945bf48a56478060e",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f",
+    "transient_welch.py": "f620ab476615ad946eae798d36f1f25bbfb4cbaf6125192c4b6d63def0c0217f"
+  },
+  "hop": 15,
+  "lengths": [
+    4096,
+    65536
+  ],
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "scope": "exact finite-horizon linear expected raw spectra and centered covariance; no nonlinear or expected coherence guarantee",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "segment": 30,
+  "starts": [
+    "equilibrium",
+    "baseline-tangent"
+  ]
+}

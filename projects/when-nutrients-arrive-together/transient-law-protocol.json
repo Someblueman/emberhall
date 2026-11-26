@@ -1,0 +1,38 @@
+{
+  "burns": [
+    0,
+    16,
+    32,
+    64,
+    128,
+    512
+  ],
+  "code_sha256": {
+    "TRANSIENT_LAW.md": "7187fc7af214d96382b410d3fda4ca51a236145802a20623abebe1f9aacc7872",
+    "linear_calibration.py": "447d347fca81cbce0177f3ab80dfeb1044c74915353b3644521d405791ad016c",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f",
+    "transient_law.py": "dbad1006a9538887e9f65e09d4947e7f68fcedcda0aca2787762e65f79ae1dda"
+  },
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "scope": "full-state Gaussian starting-law distance; covers every finite future statistic in the supplied linear model",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "starts": [
+    "equilibrium",
+    "baseline-tangent"
+  ]
+}

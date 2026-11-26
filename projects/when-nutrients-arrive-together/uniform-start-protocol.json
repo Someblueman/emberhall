@@ -1,0 +1,39 @@
+{
+  "burns": [
+    0,
+    16,
+    32,
+    64,
+    128,
+    512
+  ],
+  "code_sha256": {
+    "linear_calibration.py": "447d347fca81cbce0177f3ab80dfeb1044c74915353b3644521d405791ad016c",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f",
+    "transient_law.py": "dbad1006a9538887e9f65e09d4947e7f68fcedcda0aca2787762e65f79ae1dda",
+    "uniform_start.py": "0d4df8fb758886d1ae455abe553de1170e44d8d9c34911063a3ea4c3f8a86093"
+  },
+  "construction_sha256": "b0a97fa400abdd0b2c7fcf042ba484d73b7e119982b3477bbb0b5242243f417f",
+  "initial_amount_bounds": [
+    0.5,
+    2.0
+  ],
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "scope": "uniform pointwise deterministic initial-mean family, supplied Gaussian linear model only",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ]
+}

@@ -62,6 +62,13 @@ function polygon(g, coords, fill, stroke = "none", width = 1) {
 function line(g, coords, stroke, width = 1, extra = {}) {
   return el("polyline", {points: points(coords), fill: "none", stroke, "stroke-width": width, ...extra}, g);
 }
+// A compound path keeps each opaque scenery stroke separate while sharing one DOM node.
+// Use only for adjacent lines with identical paint; figures, labels and hit targets stay separate.
+function sceneryLines(g, segments, stroke, width = 1) {
+  if(!segments.length)return null;
+  const d=segments.map(coords=>coords.map((coord,i)=>`${i?"L":"M"}${p(...coord).join(" ")}`).join(" ")).join(" ");
+  return el("path",{d,fill:"none",stroke,"stroke-width":width,"data-scenery-lines":"true"},g);
+}
 function box(g, x, y, w, d, h, colors = ["#9d7850", "#654d38", "#7f6144"], z = 0) {
   polygon(g, [[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]], colors[1]);
   polygon(g, [[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]], colors[2]);
@@ -435,7 +442,9 @@ function grounds(g,span,depth,layouts) {
   // Footing and the hall floor that joins the wings.
   box(g,-9,-9,span+18,depth+8,11,["#8d8a72","#4f5a4d","#69705c"],-11);
   polygon(g,[[180,0],[180+HALL,0],[180+HALL,depth-10],[180,depth-10]],"#a38b62","#8a7650",1);
-  for(let n=1;n<(depth-10)/16;n++) line(g,[[180,n*16],[180+HALL,n*16]],"#8a7650",1);
+  const hallBoards=[];
+  for(let n=1;n<(depth-10)/16;n++) hallBoards.push([[180,n*16],[180+HALL,n*16]]);
+  sceneryLines(g,hallBoards,"#8a7650",1);
   polygon(g,[[188,14],[172+HALL,14],[172+HALL,depth-24],[188,depth-24]],"#8c4f43","#c9a36b",1.5);
   polygon(g,[[193,20],[167+HALL,20],[167+HALL,depth-30],[193,depth-30]],"none","#c9a36b",.8);
   // The front path runs from the garden gate to the door.
@@ -453,10 +462,12 @@ function grounds(g,span,depth,layouts) {
   }
   tree(g,-45,-50,1.05);tree(g,span+40,-48,.9);
   // A low fence and gate along the front of the garden.
+  const fencePosts=[];
   for(let x=-64;x<=span+64;x+=16) {
     if(Math.abs(x-px)<12)continue;
-    line(g,[[x,-72,0],[x,-72,12]],"#b9a67c",2);
+    fencePosts.push([[x,-72,0],[x,-72,12]]);
   }
+  sceneryLines(g,fencePosts,"#b9a67c",2);
   line(g,[[-64,-72,9],[px-12,-72,9]],"#b9a67c",1.5);line(g,[[px+12,-72,9],[span+64,-72,9]],"#b9a67c",1.5);
   const [lx,ly]=p(px+16,-66,0);
   el("line",{x1:lx,y1:ly,x2:lx,y2:ly-30,stroke:"#3c4a44","stroke-width":2.5},g);
@@ -852,8 +863,11 @@ function drawHouse() {
     box(g,x,y,180,depth,11,colors,-11);
     const floor=polygon(g,[[x,y],[x+180,y],[x+180,y+depth],[x,y+depth]],awake?"#b99b6d":"#78816a","#b2a178",1);
     floor.setAttribute("class","floor");
-    for(let n=1;n<depth/16;n++) line(g,[[x,y+n*16],[x+180,y+n*16]],awake?"#8f7c58":"#68765f",1);
-    for(let n=0;n<Math.floor(depth/16);n++) line(g,[[x+(n%2?55:115),y+n*16],[x+(n%2?55:115),y+(n+1)*16]],"#7b785c",1);
+    const floorBoards=[],floorJoints=[];
+    for(let n=1;n<depth/16;n++) floorBoards.push([[x,y+n*16],[x+180,y+n*16]]);
+    for(let n=0;n<Math.floor(depth/16);n++) floorJoints.push([[x+(n%2?55:115),y+n*16],[x+(n%2?55:115),y+(n+1)*16]]);
+    sceneryLines(g,floorBoards,awake?"#8f7c58":"#68765f",1);
+    sceneryLines(g,floorJoints,"#7b785c",1);
     if(status!=="construction") {
       polygon(g,[[x,y],[x+180,y],[x+180,y,62],[x,y,62]],awake?"#aab29a":"#657f70","#c2b998",1);
       polygon(g,[[x,y],[x,y+depth],[x,y+depth,62],[x,y,62]],awake?"#899e87":"#4a6c60","#a7ac8b",1);

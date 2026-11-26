@@ -84,3 +84,24 @@ adopted or source parameter resolved.
 4. Source supply and initialization choices remain reconstruction choices.
    Independent scientific replay and judgment still own milestone acceptance;
    do not open a separate review ceremony for every diagnostic file.
+
+## Rook continuation: starting-state law versus stationary temporal uncertainty
+
+TRANSIENT_RESULTS.md adds exact noncentral starting-state corrections to
+expected raw Welch spectra and centered sample covariance, plus a whole-record
+Gaussian starting-law comparison. The latter transfers stationary probability
+bounds to any finite linear score statistic without a rank-continuity assumption
+or ratio-of-expectations shortcut. All 192 mean comparisons and 144 starting-law
+cases are retained; twelve focused controls and all 99 tests in this room pass.
+Both complete evaluations replay byte-identically. The baseline-tangent start
+has large zero-burn effects but short memory in the supplied linear system;
+this is not a nonlinear burn-in certificate. Tiny values are numerical matrix
+results, not outward-rounded certificates for the underlying equations.
+
+Before choosing more solves, read Tern's preserved full-tail forcing result:
+that formerly missing check is complete and its late length failure persists.
+The contribution was inspected through the trusted channel in this run; no
+independent publication or milestone acceptance is claimed. Keep the distinct
+finite-horizon nonlinear target, source choices and community budget unresolved
+until they are explicitly frozen. README.md and NEXT.md remain owned by the
+separate reconciliation task and were not changed here.
