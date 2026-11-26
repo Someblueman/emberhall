@@ -4379,6 +4379,128 @@ def adjacent_phase_example(hole=43, first=3):
     return result
 
 
+def bounded_sign_slack(bound):
+    """Positive weights representing every integer from zero through bound.
+
+    Their signed sums are exactly -bound,-bound+2,...,bound. Thus a row
+    a.x - weights.z = 0 expresses |a.x| <= bound when the parities agree.
+    """
+    if type(bound) is not int or bound < 0:
+        raise ValueError('require a nonnegative integer bound')
+    weights=[];remaining=bound;power=1
+    while remaining:
+        value=min(power,remaining)
+        weights.append(value);remaining-=value;power*=2
+    return weights
+
+
+def adjacent_continuation_cut(refusal,positions,start):
+    """Compile a replayed successor refusal into an exact unit slack row.
+
+    positions maps the 402 source coordinates of the refused next edge to
+    the target slice of the edge being searched. No arbitrary inequality
+    or search exhaustion is accepted as a cut.
+    """
+    verify_adjacent_control_bound_refusal(refusal)
+    if (len(positions)!=402 or len(set(positions))!=402 or
+            any(type(i) is not int or i<0 for i in positions) or
+            type(start) is not int or start<=max(positions)):
+        raise ValueError('require distinct original positions before auxiliary signs')
+    inequality=refusal['inequality'];bound=inequality['bound']
+    if (sum(c for i,c in inequality['expression'])-bound)%2:
+        raise ValueError('control bound does not have the source sign parity')
+    row={positions[i]:c for i,c in inequality['expression']}
+    weights=bounded_sign_slack(bound)
+    row.update({start+j:-w for j,w in enumerate(weights)})
+    return row,start+len(weights)
+
+
+def adjacent_continuation_search(hole=97,first=2,seconds=30,nodes=100000,
+                                 max_rounds=16,seed=None,zero_observables=False):
+    """Search an edge, learn exact cuts from dead targets, and try again.
+
+    All cuts are necessary for any unit successor and have independent
+    original-row identities. This is bounded discovery, never a negative
+    certificate. A positive path is replayed on all original rows/traces.
+    Physical prefix/suffix are not imposed. The optional four-zero restriction
+    is propagated and checked on every slice of any returned path.
+    """
+    if (type(first) is not int or first<2 or
+            type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<=0 or
+            type(nodes) is not int or nodes<1 or type(max_rounds) is not int or max_rounds<1 or
+            type(zero_observables) is not bool):
+        raise ValueError('require positive finite search budgets and a valid first level')
+    started=time.monotonic();adjacent_control_rounding_structure(hole)
+    keys,original,equations=adjacent_phase_system(hole,2,first)
+    labels=moving_folded_labels();index={key:i for i,key in enumerate(keys)}
+    positions=[index[(*label,first+1)] for label in labels]
+    # The original homogeneous rows and each even-weight phase mask are
+    # invariant under global sign reversal, justifying the first-sign gauge.
+    if any(mask.bit_count()%2 for mask,rhs in equations):
+        raise AssertionError('global reversal does not preserve a phase trace')
+    if zero_observables:
+        alternating=_adjacent_alternating_coefficients(hole)
+        if alternating is None:raise ValueError('four-zero restriction requires an odd hole')
+        for weights in ([1]*402,_adjacent_moment_coefficients(hole),
+                        _adjacent_orientation_coefficients(hole),alternating):
+            for level in (first,first+1):
+                original.append({index[(*label,level)]:c
+                                 for label,c in zip(labels,weights) if c})
+    cuts=[];seen=set();history=[];used_nodes=0
+    if seed is not None:
+        verify_adjacent_control_bound_refusal(seed)
+        if seed['hole']!=hole:raise ValueError('seed cut has a different hole')
+        cuts.append(seed)
+        seen.add((seed['inequality']['bound'],tuple(map(tuple,seed['inequality']['expression']))))
+    def done(status,**fields):
+        return dict(status=status,hole=hole,first=first,history=history,cuts=cuts,
+                    elapsed=time.monotonic()-started,nodes=used_nodes,
+                    physical_endpoints_included=False,zero_observables=zero_observables,
+                    literal_existence_decided=False,all_pairs_decided=False,**fields)
+    for iteration in range(max_rounds):
+        rows=list(original);size=len(keys)
+        for cut in cuts:
+            row,size=adjacent_continuation_cut(cut,positions,size);rows.append(row)
+        refusal,basis=binary_elimination(rows)
+        if refusal is not None:return done('unknown',stop='cut_system_parity_refused')
+        for mask,rhs in equations:
+            while mask:
+                pivot=mask.bit_length()-1
+                if pivot not in basis:
+                    basis[pivot]=mask,rhs;break
+                old,b=basis[pivot];mask^=old;rhs^=b
+            if not mask and rhs:return done('unknown',stop='cut_system_phase_refused')
+        remaining=seconds-(time.monotonic()-started)
+        if remaining<=0 or used_nodes>=nodes:return done('unknown',stop='budget')
+        engine=make_engine(size,rows,reduced_binary_basis(basis),remaining,nodes-used_nodes,'connected')
+        status,values=engine.run({0:1});used_nodes+=engine.nodes
+        history.append(dict(round=iteration,status=status,nodes=engine.nodes,cuts=len(cuts)))
+        if values is None:return done('unknown',stop='edge_search_'+status)
+        middle=[values[i] for i in positions]
+        decision=adjacent_difference_successor(hole,middle)
+        if decision['kind']=='moving-adjacent-control-bound-refusal-v1':
+            signature=(decision['inequality']['bound'],
+                       tuple(map(tuple,decision['inequality']['expression'])))
+            if signature in seen:raise AssertionError('repeated cut did not exclude its state')
+            seen.add(signature);cuts.append(decision);continue
+        controls=int(decision['proof']['control_bits'],16)
+        following=adjacent_driver_step(adjacent_integral_driver(hole),middle,
+                                      [1-2*(controls>>i&1) for i in range(46)])
+        assignment={key:values[i] for i,key in enumerate(keys)}
+        assignment.update({(*label,first+2):value for label,value in zip(labels,following)})
+        pathkeys,_,_=adjacent_phase_system(hole,3,first)
+        path=dict(kind='moving-adjacent-phase-signs-v1',hole=hole,levels=3,first=first,
+                  minimum_half=first+3,variables=len(pathkeys),status='local_signing',
+                  bits=hex(sum((assignment[key]==-1)<<i for i,key in enumerate(pathkeys))),
+                  literal_existence_decided=False,all_pairs_decided=False)
+        if zero_observables:
+            path.update(balanced_slices=True,zero_moment_slices=True,
+                        zero_orientation_slices=True,zero_alternating_slices=True)
+        verify_adjacent_phase_signs(path)
+        return done('local_signing',path=path)
+    return done('unknown',stop='round_budget')
+
+
 def adjacent_phase_search(hole=19, levels=4, first=2, seconds=30, nodes=100000,
                           balanced=False,zero_moment=False,zero_alternating=False,
                           zero_orientation=False):
@@ -7613,6 +7735,9 @@ def main():
     p.add_argument('--open-phase-example',action='store_true',help='emit a checked window: two centres at 19/97, three at 43 (odd start)')
     p.add_argument('--open-phase-window',type=int,metavar='LENGTH',help='search a finite integer interior window with free distinct end levels')
     p.add_argument('--adjacent-phase-window',type=int,metavar='LEVELS',help='search all interior equations contained in consecutive folded levels')
+    p.add_argument('--adjacent-continuation-search',type=int,metavar='ROUNDS',help='bounded two-edge discovery by replayed dead-target cuts; no negative certificate')
+    p.add_argument('--continuation-seed',help='optional saved fixed-source successor refusal for continuation discovery')
+    p.add_argument('--continuation-four-zero',action='store_true',help='restrict continuation discovery to S=W=D=A=0 at an odd driver hole')
     p.add_argument('--adjacent-future-unit',type=int,metavar='HORIZON',help='certify new control-independent future unit tests, horizon 2..6')
     p.add_argument('--adjacent-future-pairs',type=int,metavar='HORIZON',help='certify paired-coordinate future tests, horizon 1..6')
     p.add_argument('--adjacent-pair-refusal-example',type=int,nargs='?',const=2,metavar='FIRST',help='emit an actual edge passing unary but failing paired future tests; even start, default 2')
@@ -7763,6 +7888,18 @@ def main():
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate),indent=2));return
+    if args.adjacent_continuation_search is not None:
+        seed=None
+        if args.continuation_seed:
+            with open(args.continuation_seed) as f:seed=json.load(f)
+        certificate=adjacent_continuation_search(args.hole,args.first_level,args.seconds,
+                                                args.nodes,args.adjacent_continuation_search,seed,args.continuation_four_zero)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        summary={k:v for k,v in certificate.items() if k not in ('cuts','path')}
+        summary['cuts']=len(certificate['cuts'])
+        if 'path' in certificate:summary['path_replay']=verify_saved(certificate['path'])
+        print(json.dumps(summary,indent=2));return
     if args.adjacent_phase_window is not None:
         certificate=adjacent_phase_search(args.hole,args.adjacent_phase_window,
                                          args.first_level,args.seconds,args.nodes,

@@ -5702,3 +5702,85 @@ wall time) under the same 900-second timeout. Both complete runs pass,
 but the second still has only about five seconds of wall-time margin.
 Shared-machine timing remains a material integration risk; these results
 are local validation, not a claim of robust headroom or trusted publication.
+
+### Mallow: learn a necessary continuation cut from a dead target
+
+26 November 2026. **No infinite family is decided.** This is a bounded
+construction attempt on the accepted exact-runtime base, not a stronger
+integer-reachability theorem or a new physical endpoint certificate.
+
+`adjacent_continuation_search` searches a unit edge x -> y, then asks the
+existing exact difference-control oracle whether y has a unit successor.
+If it does, the returned three-state path is checked against every
+original adjacent shell row and absolute phase trace. If it does not, the
+oracle supplies a replayable original-row identity proving
+`|a.y| <= b` for every source with a unit successor, violated by this y.
+The next edge search includes that necessary inequality. It never cuts a
+state merely because a later search timed out.
+
+The inequality is encoded exactly using logarithmically many auxiliary
+unit signs: positive weights summing to b whose subset sums cover every
+integer from 0 through b. Starting with powers 1,2,4,... and a final
+remainder gives that property, since each next weight is at most one plus
+the preceding total. Their signed sums are precisely -b,-b+2,...,b.
+The checked parity of a.y equals b, so `a.y - sum(weights*slack) = 0`
+is equivalent to the inequality on unit y. Every cut is replayed before
+compilation. This preserves every extendible edge; it does not assert
+that enough cuts will be discovered within any practical budget.
+
+I checked the level convention in `adjacent_phase_system`: N slices have
+402N original coordinates and N-1 transitions, each with 356 shell rows
+and five absolute phase equations. A three-state result therefore covers
+two interior edges, not a physical prefix or suffix. Global reversal of
+all original and auxiliary signs preserves the homogeneous rows; the
+search explicitly checks that each phase mask has even weight before
+fixing its first sign. `--continuation-four-zero` additionally imposes
+S=W=D=A=0 at an odd driver hole and replays those restrictions on every
+returned slice. Physical endpoints remain excluded.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-continuation-search 32 --hole 97 --first-level 2 --seconds 600 --nodes 10000000 --write /tmp/continuation.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-continuation-search 2 --continuation-four-zero --hole 97 --first-level 2 --seconds 30 --nodes 100000 --write /tmp/continuation-four-zero.json
+```
+
+A saved optional `--continuation-seed` is an existing fixed-source
+successor-refusal packet, not an arbitrary proposed inequality. The
+output's `cuts` can each be replayed by `verify_saved`; a positive `path`
+uses the existing adjacent-path verifier. Search exhaustion, parity
+refusal, and every budget stop still return **unknown**, not a negative
+certificate. The wrapper output itself is a discovery log, not a new
+accepted certificate kind.
+
+Initial local observations: direct three-state discovery was unknown at
+300.040 s / 418,454 nodes. A 60.016 s seeded-cut attempt was unknown at
+142,634 nodes, retaining only its initial known dead-state cut. The
+four-zero command was unknown at 30.018 s / 68,409 nodes, with no cut
+learned. None of these runs found an extendible edge. They are different
+budgets/search spaces and support no performance comparison.
+
+Five new controls cover exact slack intervals, exclusion of an actual
+dead state while retaining a source with a known successor, damaged-cut
+rejection, a real learned-cut iteration, unknown/budget scope, and positive
+three-state assembly against the retained h=43 path at both starting
+parities. Twenty focused tests including existing oracle, bound, rounding,
+and driver controls passed before the optional four-zero extension;
+the final focused rerun is recorded below. No accepted test was changed.
+
+The longer unseeded command also returned unknown at 600.014 s /
+4,775,196 nodes, with **no candidate edge and no cut learned**. Thus the
+live attempts have not demonstrated that the decomposition improves
+construction search; only the controls exercise a successful learned-cut
+iteration. Increasing budgets alone is not an evidenced next advance.
+The final focused rerun passed all 20 selected tests in 9.191 s. AST
+comparison confirms all 187 previously accepted test methods unchanged;
+five methods are added. Full project validation is recorded below.
+
+Final full discovery passed **826 tests in 757.113 s** (757.903 s wall)
+under the unchanged 900-second subprocess limit, with no competing local
+experiment. Syntax and whitespace checks passed. This single run establishes
+local validation, not a speedup or trusted integration. The task acceptance
+remains unmet. A next builder needs a new construction/analytic approach to
+unit paths and both physical interfaces, or an obstruction over every
+permitted pair; these bounded failures do not justify larger repeats alone.
