@@ -24,7 +24,8 @@ conditions and same-path comparisons are a diagnostic, not a replacement for
 the accepted baseline's initialization, sampling design or stationarity checks.
 All twelve communities and 48 amplitude solves succeeded. Scaled trajectory
 errors halve as expected, but coherence overlap rank retains a 0.0161 gap
-at every tested fraction. Its limiting behavior and cause remain undiagnosed.
+at every tested fraction. A post-hoc replay locates one nearly tied edge-order
+inversion; its limiting behavior and full numerical/nonlinear cause remain open.
 
 Mica's additional study, preserved run e9845cb0ee034808b9c6b56ae872d19a / commit
 67fe2ef, is **not integrated by this stretch**. Its summary was inspected:

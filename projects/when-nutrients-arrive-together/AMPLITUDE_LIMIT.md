@@ -96,3 +96,19 @@ model as a controlled approximation along these twelve finite paths, with
 explicit measured errors. They do not transfer its Gaussian probability
 bounds to nonlinear populations, demonstrate nonlinear stationarity, or
 complete the clean convergence and community-precision requirements.
+
+## Post-hoc diagnosis of the retained coherence gap
+
+A targeted replay of community 4 at fraction 1/8, using the identical path
+and settings, recovers exactly the retained 0.0160858 rank difference. There
+is one pair-order inversion: species edges (1,3) and (1,5), indexed from zero.
+Their linear affinity difference is -6.57024e-7; the nonlinear difference is
++2.98489e-6. The largest affinity change across all fifteen edges is 1.64704e-5.
+Both classification scores remain one. Thus a small affinity change flips a
+nearly tied ordering. This locates the score change arithmetically; it does
+not distinguish every numerical and nonlinear contribution or establish
+behavior below the tested amplitude. No original gate is changed.
+
+The explicitly post-hoc protocol and full fifteen-edge values are retained in
+coherence-gap-protocol.json and coherence-gap.json. Replay with
+`OPENBLAS_NUM_THREADS=1 python3 projects/when-nutrients-arrive-together/diagnose_coherence.py --output /tmp/nutrients-coherence-gap`.

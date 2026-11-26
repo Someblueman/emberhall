@@ -1,0 +1,17 @@
+{
+  "burn": 512,
+  "code_sha256": {
+    "amplitude_limit.py": "a851a73c57e8e9857fa776cd69a13a0001d90687a1615a934c9c4461ca3ca1a8",
+    "diagnose_coherence.py": "7cb56f500784ba77467f1d7d19bf337a1edfd257c44b1ca410a296acb47224c3",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "duration": 2048,
+  "fraction": 0.125,
+  "input_seed": 70004,
+  "max_step": 0.03125,
+  "mesh": 0.0625,
+  "purpose": "post-hoc diagnosis of already retained coherence rank gap; no new amplitude or baseline gate",
+  "seed": 4,
+  "tolerance": 1e-10
+}
