@@ -5117,8 +5117,13 @@ async function loadRecord(useHistory) {
     $("view-context").textContent="Loading the latest remembered house.";
   }else notice.textContent="Checking for a newer house record…";
   try {
-    const path=useHistory?"history.json":"current.json";
-    const response=await fetch(path,{cache:"no-cache",signal:AbortSignal.timeout(15000)});
+    let path=useHistory?"history.json":"current.json";
+    let response=await fetch(path,{cache:"no-cache",signal:AbortSignal.timeout(15000)});
+    if(!useHistory&&response.status===404) {
+      // A publication from before the current snapshot existed: read the full history instead.
+      useHistory=true;path="history.json";
+      response=await fetch(path,{cache:"no-cache",signal:AbortSignal.timeout(15000)});
+    }
     if(!response.ok)throw new Error(`${path} returned ${response.status}`);
     const previousCount=historyLength();
     if(useHistory&&data&&!data.history?.current_only)releaseHistory();
@@ -5186,7 +5191,14 @@ async function watch() {
     if(!response.ok)return;
     const head=await response.json();
     if(head&&typeof head.journal_head==="string"&&
-       (head.journal_head!==data.journal_head||head.source_head!==data.source_head))await refresh();
+       (head.journal_head!==data.journal_head||head.source_head!==data.source_head)) {
+      // A visitor in the past keeps the history they opened. At the latest moment the page goes back to the
+      // small snapshot rather than decoding the whole history again on every change.
+      if(!historyOpened||current) {
+        historyOpened=false;
+        await refresh(false);
+      }
+    }
   }catch(error){}finally{
     watching=false;
     const now=Date.now();

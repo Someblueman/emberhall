@@ -6,6 +6,7 @@ import fcntl
 import gzip
 import json
 import os
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
@@ -26,7 +27,10 @@ BRANCH = "codex/house-pages"
 # Fail locally before GitHub's 100 MiB limit. On 17 November (evening) the history passed 64 MiB and
 # the page stood still for forty minutes; it is now published in sealed parts, so nothing nears this.
 MAX_PUBLIC_BLOB = 64 * 1024 * 1024
-CURRENT_SNAPSHOT_MAX_BYTES = 1_400_000
+# The present view a visitor downloads first. Above the target the publisher still publishes and warns:
+# a page that loads a little more is better than a house that stops publishing. Only the hard limit fails.
+CURRENT_SNAPSHOT_TARGET_BYTES = 1_400_000
+CURRENT_SNAPSHOT_MAX_BYTES = 8_000_000
 # A sealed part of the node table is closed once its JSON reaches this size and never changes again.
 PART_TARGET = 8 * 1024 * 1024
 # A rebuild replays this many events at a time and saves its place this often (see history()).
@@ -304,7 +308,7 @@ def current_snapshot_files(snapshot: dict) -> dict[str, bytes]:
         body = json.dumps(projection, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode()
     except (KeyError, IndexError, TypeError, RecursionError) as error:
         raise ValueError("Malformed current snapshot cache") from error
-    if len(body) <= CURRENT_SNAPSHOT_MAX_BYTES:
+    if len(body) <= min(CURRENT_SNAPSHOT_TARGET_BYTES, CURRENT_SNAPSHOT_MAX_BYTES):
         return {"current.json": body}
     # GitHub Pages serves these as static files. Keep the complete projection
     # in a gzip companion when the plain JSON will not fit the transfer budget.
@@ -318,6 +322,9 @@ def current_snapshot_files(snapshot: dict) -> dict[str, bytes]:
     if size > CURRENT_SNAPSHOT_MAX_BYTES:
         raise ValueError(f"The current snapshot is {size:,} bytes and exceeds its first-paint size budget "
                          f"of {CURRENT_SNAPSHOT_MAX_BYTES:,} bytes")
+    if size > CURRENT_SNAPSHOT_TARGET_BYTES:
+        print(f"house publish: the current snapshot is {size:,} bytes, over its "
+              f"{CURRENT_SNAPSHOT_TARGET_BYTES:,}-byte target; slim the latest frame", file=sys.stderr)
     return {"current.json": manifest, path: compressed}
 
 

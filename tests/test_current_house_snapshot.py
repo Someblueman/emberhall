@@ -1,6 +1,7 @@
 """Exercise the complete latest frame and the publication transfer budget."""
 import copy
 import gzip
+import io
 import json
 import random
 from unittest.mock import patch
@@ -134,6 +135,15 @@ class CurrentSnapshotPublicationTests(HouseCase):
         newer=json.loads(self.record.git('show',ref+':current.json'))
         self.assertEqual(newer['history']['total_frames'],out['history']['total_frames']+1)
         self.assertNotEqual(newer['journal_head'],out['journal_head'])
+
+    def test_over_target_snapshot_still_publishes_with_a_warning(self):
+        latest = frame(2, description="words " * 1000)
+        source = fixture([frame(1), latest])
+        with patch.object(publisher, 'CURRENT_SNAPSHOT_TARGET_BYTES', 10), \
+                patch('sys.stderr', new_callable=io.StringIO) as err:
+            files = publisher.current_snapshot_files(source)
+        self.assertIn('current.json', files)
+        self.assertIn('over its 10-byte target', err.getvalue())
 
     def test_size_failure_does_not_change_publication_or_source_refs(self):
         publisher.publish(self.record)

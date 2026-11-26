@@ -23,7 +23,7 @@ const get=id=>nodes[id]??={
 };
 const document={getElementById:get,querySelector:()=>null,activeElement:null,
  addEventListener(k,fn){assert.equal(k,'DOMContentLoaded');loaded.push(fn);}};
-let now=0,head='one',size=3,decodeFailure=false,compressed=false,pauseHistory;
+let now=0,head='one',size=3,decodeFailure=false,compressed=false,currentMissing=false,pauseHistory;
 const gzipPath='current/0123456789abcdef.json.gz';
 const frames=()=>Array.from({length:size},(_,i)=>({seq:i+1,scars:[]}));
 const history=()=>({version:1,journal_head:head,source_head:'source',frames:frames(),scars:{}});
@@ -33,6 +33,7 @@ let beforeParse=()=>{};
 const fetch=async url=>{
  calls.push(url.split('?')[0]);
  if(url.startsWith('head.json'))return {ok:true,json:async()=>({journal_head:head,source_head:'source'})};
+ if(url==='current.json'&&currentMissing)return {ok:false,status:404};
  if(url==='current.json')return {ok:true,json:async()=>{
    const snapshot=current();
    if(compressed)return {...snapshot,frames:undefined,gzip:gzipPath};
@@ -132,16 +133,20 @@ assert.equal(run('frame.seq'),1);assert.deepEqual(calls,['history.json']);
     def test_replacement_releases_the_old_graph_before_parse_and_keeps_selection(self):
         self.run_page(r'''
 await start();await move(2);calls.length=0;
-const old=run('data');
 head='two';size=4;
+// A visitor in the past keeps the history they opened; a journal change does not reload it.
+await ctx.watch();
+assert.deepEqual(calls.splice(0),['head.json']);
+assert.equal(run('frame.seq'),2);assert.equal(run('data.frames.length'),3);
+const old=run('data');
 beforeParse=()=>{
  assert.equal(old.frames.length,1);
  assert.equal(run('data.frames.length'),1);
  assert.equal(run('frame.seq'),2);assert.equal(run('historyLength()'),3);
 };
 decodeFailure=true;
-await ctx.watch();
-assert.deepEqual(calls.splice(0),['head.json','history.json']);
+await run('refresh(true)');
+assert.deepEqual(calls.splice(0),['history.json']);
 assert.match(get('error').textContent,/last remembered snapshot/);
 assert.equal(run('frame.seq'),2);assert.equal(run('current'),false);
 decodeFailure=false;size=2;await click('record-retry');
@@ -151,4 +156,29 @@ assert.equal(get('record-load').hidden,true);
 assert.equal(run('data.frames.length'),4);assert.equal(run('frame.seq'),2);
 assert.equal(run('data.journal_head'),'two');
 calls.length=0;await ctx.watch();assert.deepEqual(calls,['head.json']);
+''')
+
+    def test_latest_visitor_returns_to_the_snapshot_after_history(self):
+        self.run_page(r'''
+await start();await move(1);
+click('present');assert.equal(run('frame.seq'),3);assert.equal(run('current'),true);
+calls.length=0;head='two';size=4;
+await ctx.watch();
+assert.deepEqual(calls.splice(0),['head.json','current.json']);
+assert.equal(run('data.frames.length'),1);assert.equal(run('frame.seq'),4);
+assert.equal(run('historyOpened'),false);
+await ctx.watch();assert.deepEqual(calls,['head.json']);
+''')
+
+    def test_publication_without_a_snapshot_reads_the_full_history(self):
+        self.run_page(r'''
+currentMissing=true;
+await start();
+assert.deepEqual(calls.splice(0),['current.json','history.json']);
+assert.equal(run('frame.seq'),3);assert.equal(run('data.frames.length'),3);
+assert.equal(get('record-load').hidden,true);
+currentMissing=false;head='two';size=4;
+await ctx.watch();
+assert.deepEqual(calls.splice(0),['head.json','current.json']);
+assert.equal(run('data.frames.length'),1);assert.equal(run('frame.seq'),4);
 ''')
