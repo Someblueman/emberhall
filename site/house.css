@@ -1106,7 +1106,10 @@ footer a {
   padding-top: 12px;
 }
 .room-shelf-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 0;
   margin-top: 6px;
   color: var(--gold);
   font-size: 13px;
@@ -1163,7 +1166,7 @@ footer a {
 .vote-bell { margin:1rem 0; }
 
 /* The collection is a place to use completed work, with its record kept below. */
-.gallery-invitation { display:inline-block; margin:18px 0 4px; color:var(--gold); border-bottom:1px solid var(--gold); }
+.gallery-invitation { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; margin:10px 0 4px; color:var(--gold); border-bottom:1px solid var(--gold); }
 .view-status { display:flex; align-items:baseline; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
 .view-status .view-context { margin:0; }
 .content-view > section + section { margin-top:22px; }
