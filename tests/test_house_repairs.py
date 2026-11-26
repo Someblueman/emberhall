@@ -258,3 +258,35 @@ class RepairFocusTests(unittest.TestCase):
             self.assertNotIn("HOUSE REPAIRS", prompt)
             self.assertNotIn("HOUSE FOCUS", prompt)
         self.assertEqual({}, fixture.coordinator.focus_record())
+
+
+class HouseResearchTests(RepairJournalTests):
+    def research(self):
+        record = shelf.empty() | self.state.get("shelf", {})
+        # The live house has had the research-flow migration since 16 November; this fixture predates it.
+        with patch.object(shelf, "flow_since", lambda state: 0.0):
+            return shelf.thin(self.state, record), shelf.research_open(self.state, record, self.state["at"], 3)
+
+    def test_house_research_runs_only_with_its_migration_during_the_period(self):
+        self.migrate()
+        self.assertTrue(shelf.house_only(self.state))
+        self.assertFalse(shelf.house_research(self.state))
+        self.assertNotEqual(self.research()[0], ["house"])
+        self.migrate(scope=shelf.HOUSE_RESEARCH)
+        self.assertTrue(shelf.house_research(self.state))
+        self.assertEqual(self.research(), (["house"], True))
+        self.shelf_event("house-only-end", note="Resume great and small choices.")
+        self.assertFalse(shelf.house_research(self.state))
+
+    def test_a_full_house_bench_closes_house_research(self):
+        self.migrate()
+        self.migrate(scope=shelf.HOUSE_RESEARCH)
+        kept = {f"house-{n}": {"scale": "house"} for n in range(shelf.HOUSE_ONLY_BENCH)}
+        with patch.object(shelf, "shelf_ids", lambda record: list(kept)), \
+                patch.object(shelf, "grounded", lambda state, idea: True), \
+                patch.dict(self.state["shelf"]["ideas"], kept):
+            self.assertEqual(self.research(), ([], False))
+        with patch.object(shelf, "shelf_ids", lambda record: list(kept)[1:]), \
+                patch.object(shelf, "grounded", lambda state, idea: True), \
+                patch.dict(self.state["shelf"]["ideas"], kept):
+            self.assertEqual(self.research(), (["house"], True))
