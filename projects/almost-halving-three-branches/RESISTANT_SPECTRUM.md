@@ -5784,3 +5784,165 @@ local validation, not a speedup or trusted integration. The task acceptance
 remains unmet. A next builder needs a new construction/analytic approach to
 unit paths and both physical interfaces, or an obstruction over every
 permitted pair; these bounded failures do not justify larger repeats alone.
+
+### Fern: exact source fibres and a failed switching construction
+
+26 November 2026. **Acceptance remains unmet; priority stays provisional.**
+This continuation uses accepted `f005282`; Sorrel's separate `f57aeab`
+was inspected, not incorporated or independently endorsed here. No infinite
+resistant family, physical endpoint completion, or all-pairs obstruction is
+claimed.
+
+I rechecked the transfer convention: the prefix leaves slice 2, the suffix
+leaves slice L-1, and the core has L-3 edges. The independent physical-distance
+column test at h=43 and t=9,11,13 passed again, including both interfaces.
+Thus a two-edge interior certificate is still far short of L=3990m.
+
+#### Cover every middle word for one fixed source
+
+For fixed unit x, the checked driver writes every middle coordinate as
+`y_j=c_j(x)+B_j.u`, with all 46 third-arm controls u unrestricted unit signs.
+The first 356 affine forms must have absolute value one; the last 46
+coordinates are u itself. At holes 79..98 the existing exact difference
+oracle decides whether a proposed y has any unit successor. Its negative
+answer supplies an original-row identity `|a.y|<=b` necessary for every
+extendible y. Substitution yields an affine inequality on u. No sampled
+word or chosen lattice extremum replaces the complete fibre.
+
+`adjacent_source_fibre_search` branches over the control cube, retaining both
+signs at every split. A refusal leaf names an affine form whose entire
+integer interval on that partial cube misses its permitted band. For a form
+`c+q.u`, that interval is its assigned centre plus or minus the sum of the
+absolute unassigned coefficients. The verifier reconstructs every first-edge
+form, checks every second-edge original-row bound, and visits both children
+of every split. It does not rerun discovery. A complete cover excludes every
+middle and final word for this source. A budget stop returns unknown and
+carries no cover. A positive packet is substituted into all original rows;
+its absolute phase result at first level 2 is reported separately, never assumed.
+
+The retained earlier h=97 source gives a 611-node cover with three bounds
+(search timer 0.584 seconds in the initial run). The four-zero source gives
+8,433 nodes and two bounds (search timer 1.657 seconds). Earlier paired gates already excluded these
+particular sources: these covers validate the new complete-fibre mechanism,
+not a stronger obstruction for those words.
+
+From the repository root, standard library only:
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-difference-example --write /tmp/source.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-source-fibre /tmp/source.json --hole 97 --seconds 60 --nodes 100000 --write /tmp/fibre.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/fibre.json
+```
+
+The real command-line replay reported `status=refused`, `cover_nodes=611`,
+`cuts=3`, with both global decision flags false.
+
+#### An entire switching family stays blocked
+
+The stored four-zero edge admits 17 explicitly retained, disjoint switches
+of four original signs each: seven affect only its source and ten only its
+target. Every switch has zero signed sum in every original integer row,
+even intersection with every absolute trace, and zero change in S,W,D,A
+on both slices. Disjointness makes all 2^17=131,072 subset choices distinct
+valid edges, without enumerating them.
+
+This construction cannot escape the dead edge. One checked next-edge
+recovery forces coordinate `(arm=1,q=97,orientation=+1)` to -9, independently
+of fresh controls. Each switch leaves that recovery unchanged, so every
+target in the family has no unit successor. More strongly, a retained
+original-row two-step pair identity has value 4 on the source and is
+unchanged by all seven source switches; its permitted unit range is
+{-2,0,2}. Therefore all 128 source variants have no two-step continuation,
+even through middle words outside the switching family. This is a finite
+family of local states, not an infinite family of refuting tripods.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-switch-family --write /tmp/switches.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/switches.json
+```
+
+Both actual processes reported 17 switches, 131,072 edges, 128 source
+variants, invariant target value -9 with bound 1, and source pair value 4.
+
+#### A sparse exact bound on how far a repair must move
+
+A different witness excludes a whole Hamming ball about the stored edge.
+Let v be any three-state unit signing of the original interior rows R,
+without assuming balance or absolute phases. Let D count differences from
+the stored edge on v's first two states. Put C equal to minus the stored
+signs on those 804 coordinates and zero on the final 402. Then
+
+    2D = 804 + C.v.
+
+The 43 retained integer row weights w, all of magnitude at most two, give
+`||C-R^T w||_1=732`. Since R.v=0 and every coordinate of v has magnitude one,
+
+    2D = 804 + (C-R^T w).v >= 804-732 = 72.
+
+Thus **every two-edge unit path changes at least 36 signs** of this edge.
+This is an exact inequality on all such paths, not a failed neighborhood
+search, and uses neither endpoint phases nor slice observables. It still
+leaves every edge outside that radius and both physical interfaces open.
+
+Discovery used the already installed numerical linear optimizer to propose
+weights; replay uses only these small integers, untouched original rows,
+and a triangle inequality. The larger numerical relaxation estimate is not
+claimed as a proved bound. The small-radius construction attempt (at most
+32 changed signs, with phases and four zero observables) was reported
+infeasible by the installed discovery solver in 0.105 seconds; the exact
+36-sign certificate independently explains its failure.
+
+```sh
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --adjacent-radius-example --write /tmp/radius.json
+python3 projects/almost-halving-three-branches/resistant_spectrum.py --verify /tmp/radius.json
+```
+
+Both real processes reported `distance_lower_bound=36`, `residual_norm=732`,
+`denominator=1`, `original_rows=43`; both global decision flags remain false.
+
+The remaining mathematical obstacle is an extendible unit path, sufficiently
+far from these blocked edges, that also joins both physical interfaces for
+all indices in a resistant family; or a bound over every permitted pair.
+These local exclusions do not supply either result. Enlarging the same
+bounded search is not itself evidence of progress.
+
+The same sparse weights also exclude a neighborhood of the **whole** switch
+family. Switching a block changes C on four disjoint coordinates. The worst
+residual norm is the base 732 plus the positive changes from the 17 blocks,
+namely 766; no subset enumeration is needed. Consequently every three-state
+unit path differs by **at least 19 signs from every edge** in the family.
+The switch-family verifier checks this calculation and reports
+`family_distance_lower_bound=19`, `worst_residual_norm=766`.
+
+A further construction attempt allowed at most 160 sign changes from the
+stored edge, retaining every original row, all absolute phases and S=W=D=A=0
+on all three slices. The already installed one-worker discovery solver
+returned UNKNOWN at 300.002 seconds, 38,662 branches and 2,201 conflicts.
+No signing or negative certificate was emitted. This changed neighborhood
+is not excluded by the 36-sign bound and remains unresolved.
+
+The eleven new focused controls cover exhaustive small-cube comparisons,
+real refusal replay with discovery disabled, damaged/incomplete proof
+rejection, exact pullbacks, a genuine h=43 positive path, unknown budget
+scope, random switch subsets, metric algebra and radius damage. Full project
+validation and the final source-preservation check are recorded below.
+
+Validation: the first complete discovery passed 832 tests in 799.847 seconds
+(800.476 seconds wall), before the final five new controls were added.
+Final discovery under the unchanged 900-second limit **timed out at
+900.096 seconds**, with 830 completed progress markers and no failure marker.
+The deterministic final discovery order contains 837 tests; the interruption
+was in the final eight-test module, `test_word_transfer_compression`.
+A separate verbose replay of that entire module passed all eight tests in
+38.239 seconds (38.363 seconds wall). Thus the final 837 distinct tests are
+covered by the interrupted run plus its tail replay, with one overlap; this
+is **not** an uninterrupted final full-suite pass. Integration timing remains
+a material risk. No accepted test was weakened: AST comparison preserves
+all 192 accepted spectrum methods and adds eleven controls. Syntax and
+whitespace checks passed. No generated search or proof bundles enter Git.
+
+Final constructive attempt: all original rows, phases and four zero slice
+observables, no Hamming cap, with the signs of the nearest-edge real
+relaxation used only as discovery hints. The installed one-worker solver
+returned UNKNOWN at 300.006 seconds, 15,260 branches and 3,952 conflicts.
+No signing or refusal certificate was emitted; no improvement is inferred.

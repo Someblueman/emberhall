@@ -3326,6 +3326,309 @@ def adjacent_successor_lattice(hole,state):
     return lattice
 
 
+def _affine_cube_interval(row, assigned):
+    """Range of an affine integer form on a partially assigned sign cube."""
+    constant, coefficients, bound = row
+    centre = constant + sum(c*assigned[i] for i,c in coefficients.items() if i in assigned)
+    radius = sum(abs(c) for i,c in coefficients.items() if i not in assigned)
+    return centre-radius, centre+radius
+
+
+def _affine_cube_cover(rows, variables, visit, seconds=30, nodes=100000):
+    """Exact binary cover; visit may append necessary inequalities to rows.
+
+    A leaf names a row whose entire interval misses its permitted band.
+    An interrupted subtree is never a refusal. No numerical optimizer or
+    solver exhaustion is part of the returned proof.
+    """
+    started=time.monotonic(); used=0; assigned={}
+    def search():
+        nonlocal used
+        if used>=nodes or time.monotonic()-started>=seconds:
+            return 'unknown',None
+        used+=1
+        for index,row in enumerate(rows):
+            low,high=_affine_cube_interval(row,assigned)
+            if low>row[2] or high < -row[2]:return 'refused',{'row':index}
+        if len(assigned)==variables:
+            outcome=visit([assigned[i] for i in range(variables)])
+            if outcome is not None:return 'path',outcome
+            # The callback must have added a checked separating inequality.
+            for index,row in enumerate(rows):
+                low,high=_affine_cube_interval(row,assigned)
+                if low>row[2] or high < -row[2]:return 'refused',{'row':index}
+            raise AssertionError('complete failed word has no separating row')
+        # Prefer a variable in a tight row, then high incidence. No branching
+        # choice is trusted by replay; both signs are retained in every split.
+        scores=defaultdict(int)
+        for row in rows:
+            low,high=_affine_cube_interval(row,assigned)
+            margin=min(row[2]-low,high+row[2])
+            for i,c in row[1].items():
+                if i not in assigned:scores[i]+=abs(c)*(1+(margin<=2))
+        i=max((i for i in range(variables) if i not in assigned),
+              key=lambda i:(scores[i],-i))
+        children=[]
+        for value in (-1,1):
+            assigned[i]=value
+            status,proof=search()
+            if status!='refused':
+                assigned.pop(i);return status,proof
+            children.append(proof)
+        assigned.pop(i)
+        return 'refused',{'split':i,'minus':children[0],'plus':children[1]}
+    status,proof=search()
+    return dict(status=status,proof=proof,nodes=used,seconds=time.monotonic()-started)
+
+
+def _verify_affine_cube_cover(rows, variables, proof):
+    """Replay every branch and every integer interval, without discovery."""
+    assigned={};count=0
+    def check(node):
+        nonlocal count
+        count+=1
+        if not isinstance(node,dict):raise ValueError('invalid cube-cover node')
+        if set(node)=={'row'}:
+            index=node['row']
+            if type(index) is not int or not 0<=index<len(rows):raise ValueError('invalid cover row')
+            low,high=_affine_cube_interval(rows[index],assigned)
+            if not (low>rows[index][2] or high < -rows[index][2]):
+                raise ValueError('cover leaf does not exclude its whole cube')
+            return
+        if set(node)!={'split','minus','plus'}:raise ValueError('incomplete binary cover')
+        i=node['split']
+        if type(i) is not int or not 0<=i<variables or i in assigned:
+            raise ValueError('invalid or repeated cover split')
+        for key,value in (('minus',-1),('plus',1)):
+            assigned[i]=value;check(node[key])
+        assigned.pop(i)
+    check(proof)
+    return count
+
+
+def _adjacent_source_fibre(hole,state):
+    """All middle coordinates as affine forms in the 46 free third signs."""
+    driver=adjacent_integral_driver(hole)
+    forms=[None]*356+[(0,{i:1}) for i in range(46)]
+    for rec in driver['recoveries']:
+        constant=sum(c*state[i//2] for i,c in rec['expression'] if not i%2)
+        controls={i//2-356:c for i,c in rec['expression'] if i%2}
+        forms[rec['target']//2]=(constant,controls)
+    return forms,[(c,B,1) for c,B in forms[:356]]
+
+
+def _adjacent_pullback_bound(bound,forms):
+    """Substitute the entire first-edge fibre into a necessary second bound."""
+    constant=0;coefficients=defaultdict(int)
+    for j,w in bound['expression']:
+        c,B=forms[j];constant+=w*c
+        for i,a in B.items():coefficients[i]+=w*a
+    return constant,{i:c for i,c in coefficients.items() if c},bound['bound']
+
+
+def adjacent_source_fibre_search(hole,state,seconds=30,nodes=100000):
+    """Two-step decision on one fixed source, with a replayable cube cover.
+
+    Every possible middle state is retained. The 46 controls are never
+    restricted to one lattice extremum or to a sampled successor word.
+    This supplies no obstruction for any other source or physical support.
+    """
+    adjacent_control_rounding_structure(hole)
+    if (len(state)!=402 or any(type(v) is not int or v not in (-1,1) for v in state)
+            or seconds<=0 or type(nodes) is not int or nodes<1):
+        raise ValueError('require a unit source and positive search budgets')
+    forms,rows=_adjacent_source_fibre(hole,state);cuts=[]
+    def visit(controls):
+        middle=[c+sum(a*controls[i] for i,a in B.items()) for c,B in forms]
+        if any(abs(v)!=1 for v in middle):raise AssertionError('nonunit first successor')
+        decision=adjacent_difference_successor(hole,middle)
+        if decision['kind']=='moving-adjacent-control-bound-refusal-v1':
+            bound=decision['inequality'];verify_adjacent_control_bound(bound)
+            cuts.append(bound);rows.append(_adjacent_pullback_bound(bound,forms))
+            return None
+        bits=int(decision['proof']['control_bits'],16)
+        following=adjacent_driver_step(adjacent_integral_driver(hole),middle,
+                                      [1-2*(bits>>i&1) for i in range(46)])
+        return [middle,following]
+    outcome=_affine_cube_cover(rows,46,visit,seconds,nodes)
+    packet=dict(kind='moving-adjacent-source-fibre-v1',hole=hole,
+                state_bits=hex(sum((v==-1)<<i for i,v in enumerate(state))),
+                status=outcome['status'],cuts=cuts,nodes=outcome['nodes'],seconds=outcome['seconds'],
+                literal_existence_decided=False,all_pairs_decided=False)
+    if outcome['status']=='refused':packet['cover']=outcome['proof']
+    elif outcome['status']=='path':
+        packet['states']=[packet['state_bits']]+[hex(sum((v==-1)<<i for i,v in enumerate(word)))
+                                               for word in outcome['proof']]
+    verify_adjacent_source_fibre(packet)
+    return packet
+
+
+def verify_adjacent_source_fibre(packet):
+    """Check a complete fixed-source cover, a real path, or scoped unknown."""
+    if (packet.get('kind')!='moving-adjacent-source-fibre-v1' or
+            packet.get('literal_existence_decided') is not False or
+            packet.get('all_pairs_decided') is not False):raise ValueError('require a scoped source fibre')
+    def decode(encoded):
+        if not isinstance(encoded,str) or not encoded.startswith('0x') or len(encoded)>103:
+            raise ValueError('invalid state encoding')
+        bits=int(encoded,16)
+        if bits<0 or bits.bit_length()>402:raise ValueError('invalid state bits')
+        return [1-2*(bits>>i&1) for i in range(402)]
+    state=decode(packet['state_bits']);hole=packet['hole']
+    forms,rows=_adjacent_source_fibre(hole,state)
+    for bound in packet['cuts']:
+        if bound['hole']!=hole:raise ValueError('cut belongs to another hole')
+        verify_adjacent_control_bound(bound)
+        rows.append(_adjacent_pullback_bound(bound,forms))
+    status=packet['status'];count=0;phase_correct=None
+    if status=='refused':
+        count=_verify_affine_cube_cover(rows,46,packet['cover'])
+        if 'states' in packet:raise ValueError('refusal cannot carry a path')
+    elif status=='path':
+        if len(packet['states'])!=3 or packet['states'][0]!=packet['state_bits']:
+            raise ValueError('wrong source or path length')
+        states=[decode(word) for word in packet['states']]
+        keys,original,traces=adjacent_phase_system(hole,3,2)
+        values=[states[key[-1]-2][i//3] for i,key in enumerate(keys)]
+        if any(sum(c*values[i] for i,c in row.items()) for row in original):
+            raise ValueError('path fails an original integer shell')
+        bits=sum((v==-1)<<i for i,v in enumerate(values))
+        phase_correct=all((mask&bits).bit_count()%2==rhs for mask,rhs in traces)
+        if 'cover' in packet:raise ValueError('path cannot carry a refusal')
+    elif status=='unknown':
+        if 'cover' in packet or 'states' in packet:raise ValueError('unknown carries a decision')
+    else:raise ValueError('invalid source-fibre status')
+    return dict(verified=True,status=status,cover_nodes=count,phase_correct=phase_correct,
+                cuts=len(packet['cuts']),literal_existence_decided=False,all_pairs_decided=False,
+                claim='two interior edges from this fixed source only; both physical interfaces excluded')
+
+
+def adjacent_radius_example():
+    """A sparse exact radius obstruction, discovered by an untrusted LP."""
+    packet=dict(kind='moving-adjacent-radius-v1',edge=adjacent_four_zero_example(),
+                denominator=1,row_weights=[[37, -1], [105, 1], [357, 1], [363, 1], [367, -1], [374, -1], [382, 1], [386, -1], [390, 1], [392, -1], [394, 1], [395, 1], [400, 1], [402, -1], [408, -1], [411, -1], [416, -1], [419, 1], [422, -1], [427, -1], [430, 1], [434, 1], [438, 1], [446, -1], [457, 1], [463, -1], [469, -1], [484, -1], [490, 1], [496, -1], [502, 1], [529, 1], [535, -1], [541, 1], [547, -1], [627, -1], [631, 1], [680, 1], [690, -1], [691, -2], [692, -1], [704, 1], [707, 1]],distance_lower_bound=36,
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_radius(packet)
+    return packet
+
+
+def verify_adjacent_radius(packet):
+    """Integer triangle inequality over original three-state rows only.
+
+    If C is minus the stored signs on the first two states (zero on the
+    third), 2D=804+C.v. For R.v=0 and unit v, any integer row weights w
+    give 2*d*D >= 804*d - ||d*C-R.T*w||_1. No relaxation is trusted.
+    """
+    if (packet.get('kind')!='moving-adjacent-radius-v1' or
+            packet.get('literal_existence_decided') is not False or
+            packet.get('all_pairs_decided') is not False):raise ValueError('require a scoped radius proof')
+    edge=packet['edge'];verify_adjacent_phase_signs(edge)
+    if edge['levels']!=2:raise ValueError('radius centre must be an edge')
+    d=packet['denominator']
+    if type(d) is not int or d<=0:raise ValueError('require a positive integer denominator')
+    keys,rows,_=adjacent_phase_system(edge['hole'],3,edge['first'])
+    bits=int(edge['bits'],16);C=[0]*len(keys)
+    for i in range(402):
+        for offset in (0,1):C[3*i+offset]=-(1-2*(bits>>(2*i+offset)&1))
+    residual=[d*c for c in C];seen=set()
+    for j,w in packet['row_weights']:
+        if (type(j) is not int or not 0<=j<len(rows) or j in seen or
+                type(w) is not int or not w):raise ValueError('invalid original-row radius weight')
+        seen.add(j)
+        for i,c in rows[j].items():residual[i]-=w*c
+    norm=sum(abs(c) for c in residual)
+    numerator=804*d-norm;lower=-((-numerator)//(2*d))
+    if type(packet['distance_lower_bound']) is not int or packet['distance_lower_bound']!=lower:
+        raise ValueError('incorrect radius lower bound')
+    return dict(verified=True,distance_lower_bound=lower,residual_norm=norm,denominator=d,
+                original_rows=len(seen),literal_existence_decided=False,all_pairs_decided=False,
+                claim='every three-state unit interior path differs from this stored edge in at least this many first-two-state signs; no phase or balance assumption and no physical endpoint conclusion')
+
+
+def adjacent_switch_family_example():
+    """A whole failed construction family, proved without listing its words."""
+    packet=dict(kind='moving-adjacent-switch-family-v1',edge=adjacent_four_zero_example(),
+                switches=[[1, 113, 589, 793], [5, 117, 585, 789], [13, 125, 577, 781], [15, 127, 575, 779], [17, 129, 573, 777], [37, 149, 397, 713], [51, 163, 411, 727], [55, 167, 415, 731], [63, 175, 423, 739], [69, 181, 429, 745], [198, 310, 430, 746], [210, 322, 418, 734], [222, 334, 406, 722], [238, 350, 558, 762], [240, 352, 560, 764], [248, 360, 568, 772], [264, 376, 584, 788]],
+                obstruction=adjacent_control_bound(97,((97,1),)),
+                radius=adjacent_radius_example(),family_distance_lower_bound=19,
+                source_gate=dict(kind='moving-adjacent-future-pair-v1',hole=97,horizon=2,
+                                 gates=[adjacent_future_pair_gates(97,2)['gates'][285]],
+                                 literal_existence_decided=False,all_pairs_decided=False),
+                literal_existence_decided=False,all_pairs_decided=False)
+    verify_adjacent_switch_family(packet)
+    return packet
+
+
+def verify_adjacent_switch_family(packet):
+    """Independent switches preserve every row; one next coordinate stays nonunit."""
+    if (packet.get('kind')!='moving-adjacent-switch-family-v1' or
+            packet.get('literal_existence_decided') is not False or
+            packet.get('all_pairs_decided') is not False):raise ValueError('require a scoped switch family')
+    edge=packet['edge'];verify_adjacent_phase_signs(edge)
+    if edge['levels']!=2:raise ValueError('switch family requires one interior edge')
+    keys,rows,traces=adjacent_phase_system(edge['hole'],2,edge['first'])
+    bits=int(edge['bits'],16);values=[1-2*(bits>>i&1) for i in range(len(keys))]
+    bound=packet['obstruction'];verify_adjacent_control_bound(bound)
+    if bound['hole']!=edge['hole'] or bound['controls']:
+        raise ValueError('require a control-free next-edge obstruction at the same hole')
+    expression=dict(bound['expression'])
+    value=sum(c*values[2*j+1] for j,c in expression.items())
+    if abs(value)<=bound['bound']:raise ValueError('base target is not refused')
+    source_gate=packet['source_gate'];verify_adjacent_future_pair_gates(source_gate)
+    if source_gate['hole']!=edge['hole'] or len(source_gate['gates'])!=1:
+        raise ValueError('require one source gate at the same hole')
+    gate=source_gate['gates'][0]
+    if gate['step']!=2:raise ValueError('require a two-step source gate')
+    source_expression=dict(gate['expression'])
+    source_value=sum(c*values[2*j] for j,c in source_expression.items())
+    if abs(source_value)<=2:raise ValueError('source does not violate its pair gate')
+    used=set()
+    observables=[[1]*402,_adjacent_moment_coefficients(edge['hole']),
+                 _adjacent_orientation_coefficients(edge['hole'])]
+    if edge['hole']%2:observables.append(_adjacent_alternating_coefficients(edge['hole']))
+    for switch in packet['switches']:
+        if (not isinstance(switch,list) or not switch or len(set(switch))!=len(switch) or
+                any(type(i) is not int or not 0<=i<len(keys) or i in used for i in switch)):
+            raise ValueError('require nonempty disjoint original-coordinate switches')
+        used.update(switch)
+        if any(sum(row.get(i,0)*values[i] for i in switch) for row in rows):
+            raise ValueError('switch changes an original integer shell')
+        mask=sum(1<<i for i in switch)
+        if any((mask&trace).bit_count()%2 for trace,rhs in traces):
+            raise ValueError('switch changes an absolute phase')
+        if any(sum(w[i//2]*values[i] for i in switch if i%2==level)
+               for w in observables for level in (0,1)):
+            raise ValueError('switch changes a slice observable')
+        if sum(expression.get(i//2,0)*values[i] for i in switch if i%2):
+            raise ValueError('switch changes the next-edge obstruction')
+        if sum(source_expression.get(i//2,0)*values[i] for i in switch if i%2==0):
+            raise ValueError('switch changes the two-step source obstruction')
+    radius=packet['radius'];verify_adjacent_radius(radius)
+    if radius['edge']!=edge:raise ValueError('radius uses another centre edge')
+    _,path_rows,_=adjacent_phase_system(edge['hole'],3,edge['first'])
+    d=radius['denominator'];C=[0]*1206;combined=[0]*1206
+    for i,v in enumerate(values):C[3*(i//2)+i%2]=-d*v
+    for j,w in radius['row_weights']:
+        for i,c in path_rows[j].items():combined[i]+=w*c
+    worst_norm=sum(abs(c-w) for c,w in zip(C,combined))
+    # Disjoint supports make these independent local changes to the norm.
+    for switch in packet['switches']:
+        positions=[3*(i//2)+i%2 for i in switch]
+        change=sum(abs(-C[i]-combined[i])-abs(C[i]-combined[i]) for i in positions)
+        worst_norm+=max(0,change)
+    numerator=804*d-worst_norm;uniform_lower=-((-numerator)//(2*d))
+    if (type(packet['family_distance_lower_bound']) is not int or
+            packet['family_distance_lower_bound']!=uniform_lower):
+        raise ValueError('incorrect uniform switching-family radius')
+    return dict(verified=True,switches=len(packet['switches']),edges=1<<len(packet['switches']),
+                family_distance_lower_bound=uniform_lower,worst_residual_norm=worst_norm,
+                source_variants=1<<sum(any(i%2==0 for i in switch) for switch in packet['switches']),
+                source_pair_value=source_value,
+                invariant_obstruction_value=value,bound=bound['bound'],
+                literal_existence_decided=False,all_pairs_decided=False,
+                claim='every switching-family target is dead; all source variants have no two-step continuation; every unit path stays at least the stated distance from the whole edge family; physical endpoints excluded')
+
+
 def adjacent_lattice_example(limit=256):
     seed=adjacent_two_control_example()
     bits=int(seed['state_bits'],16)
@@ -7289,6 +7592,12 @@ def search(half=3990, period=1, seconds=30, nodes=10000, patch_width=40, free_or
 
 
 def verify_saved(saved):
+    if saved.get('kind')=='moving-adjacent-radius-v1':
+        return verify_adjacent_radius(saved)
+    if saved.get('kind')=='moving-adjacent-switch-family-v1':
+        return verify_adjacent_switch_family(saved)
+    if saved.get('kind')=='moving-adjacent-source-fibre-v1':
+        return verify_adjacent_source_fibre(saved)
     if saved.get('kind')=='moving-adjacent-orientation-endpoint-v1':
         return verify_adjacent_orientation_endpoint(saved)
     if saved.get('kind')=='moving-adjacent-two-adic-reachability-v1':
@@ -7747,6 +8056,9 @@ def main():
     p.add_argument('--adjacent-integer-reachability',action='store_true',help='certify the exact integer control index and nine-step stabilization at hole 97')
     p.add_argument('--adjacent-odd-mod-four-separation',action='store_true',help='certify an odd-integer obstruction beyond the four observables and five phase traces at hole 97')
     p.add_argument('--adjacent-rational-reachability',action='store_true',help='check the twelve-step rational interior theorem, without unit, phase or endpoint constraints')
+    p.add_argument('--adjacent-radius-example',action='store_true',help='check a sparse original-row lower bound on distance to any two-edge unit path')
+    p.add_argument('--adjacent-switch-family',action='store_true',help='replay an entire independent-switch family of dead-end edges')
+    p.add_argument('--adjacent-source-fibre',metavar='FILE',help='decide two interior edges from the state_bits of a saved fixed-source packet')
     p.add_argument('--adjacent-lattice-example',action='store_true',help='describe and enumerate all controls of the stored fixed source')
     p.add_argument('--lattice-limit',type=int,default=256,help='cap emitted successor controls; exhaustion is reported explicitly')
     p.add_argument('--adjacent-difference-example',action='store_true',help='generate a positive fixed-source difference-constraint decision')
@@ -7827,6 +8139,24 @@ def main():
         certificate=adjacent_rational_reachability(args.hole)
         if args.write:
             with open(args.write,'w') as f:json.dump(certificate,f,sort_keys=True)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_radius_example:
+        certificate=adjacent_radius_example()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_switch_family:
+        certificate=adjacent_switch_family_example()
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
+        print(json.dumps(verify_saved(certificate),sort_keys=True));return
+    if args.adjacent_source_fibre:
+        with open(args.adjacent_source_fibre) as f:seed=json.load(f)
+        bits=int(seed['state_bits'],16)
+        if bits<0 or bits.bit_length()>402:raise ValueError('invalid seed bits')
+        certificate=adjacent_source_fibre_search(args.hole,[1-2*(bits>>i&1) for i in range(402)],args.seconds,args.nodes)
+        if args.write:
+            with open(args.write,'w') as f:json.dump(certificate,f)
         print(json.dumps(verify_saved(certificate),sort_keys=True));return
     if args.adjacent_lattice_example:
         certificate=adjacent_lattice_example(args.lattice_limit)
