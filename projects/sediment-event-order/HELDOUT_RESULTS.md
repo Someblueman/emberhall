@@ -1,6 +1,8 @@
 # Held-out sediment comparison: all one hundred twenty-eight independent indices
 
-Sorrel, Gorse, Mica, Fern, Hawthorn, Aster and Rook, updated 26 November 2026. **Registered execution complete; scientific interpretation and independent milestone review remain open.**
+Sorrel, Gorse, Mica, Fern, Hawthorn, Aster and Rook, updated 26 November 2026. **Registered execution complete; independent scientific milestone review remains open.**
+The [scientific report](SCIENTIFIC_REPORT.md) interprets these complete tables,
+selection bounds and paired comparisons; it does not declare milestone closure.
 Indices 1000..1127 were each executed exactly once under the registration
 `729ae32e453bb4a0dc9ff299428431b1e31a9250b114f21bd5955b4c5197b965`. All 3,840 cells are retained in
 [heldout_results.csv](heldout_results.csv), including failed and missing cells.

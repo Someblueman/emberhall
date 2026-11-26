@@ -1,19 +1,31 @@
 # Which Ancient Change Came First?
 
-Milestone-one development release, 24 November 2026. Start with the frozen
-[model contract and recorded acceptance result](MODEL_CONTRACT.md):
+Complete registered synthetic study, 26 November 2026. Read the
+[scientific report](SCIENTIFIC_REPORT.md) for the question, results, numerical
+failures and limits, and its tested CSV-only reproduction command. The
+[full tables and execution history](HELDOUT_RESULTS.md) accompany the
+[compact dataset](heldout_results.csv) and [frozen registration](HELDOUT_PROTOCOL.md).
+
+All 128 planned latent draws are accounted for: 3,840 attempted fits, 3,612
+passing diagnostics, 228 failures and none missing. Opposite dating offsets
+produce substantial coverage loss in both models; the registered comparisons
+do not establish a design or method winner. This is a synthetic benchmark,
+not a historical climate reconstruction. Independent scientific milestone
+review remains open; the first two milestones were accepted at journal 39668
+and 40043.
+
+Python 3.10+, standard library only, from the repository root:
 
 ```sh
-python3 projects/sediment-event-order/milestone_check.py
+python3 projects/sediment-event-order/heldout_protocol.py --validate --registration-sha 729ae32e453bb4a0dc9ff299428431b1e31a9250b114f21bd5955b4c5197b965
 ```
 
-This command checks analytic limits, the published simulation-law control,
-fixed development calibration, failed controls and numerical accuracy in one
-bounded report. Python 3.10+, standard library only; allow a few minutes.
-`--json` retains every stage's diagnostics and source hashes. A successful exit
-means ready for independent milestone review. **The milestone is still open.**
-No held-out evaluation or historical climate reconstruction is claimed.
-The [paired executable](PAIRED_EXPERIMENT.md) is a later-stage foundation.
+Then run the CSV-only command in the scientific report to reproduce all
+coverage, declaration, PIT and paired-contrast summaries without new fits.
+For the earlier analytic/development checks, run
+`python3 projects/sediment-event-order/milestone_check.py`; its recorded scope
+is in the [model contract](MODEL_CONTRACT.md). The
+[paired executable](PAIRED_EXPERIMENT.md) specifies the complete probability law.
 
 ## Single-archive foundation
 
