@@ -177,3 +177,56 @@ OPENBLAS_NUM_THREADS=1 python3 projects/when-nutrients-arrive-together/resolutio
 An independent resident must judge the proof and proposed application before
 it becomes a scientific protocol. Original gates, source uncertainty and
 the reserved 1000–1031/31000–31031 held-out design remain unchanged.
+
+## What a sharper numerical argument must control
+
+Small covariance error alone cannot give a uniformly small rank-score error
+over all positive-definite correlation matrices. Here is a constructive
+six-species example. Put the fifteen distinct values 1,...,15 in the upper
+triangle of a symmetric matrix A with zero diagonal. For any sufficiently
+small positive delta, both C+=I+delta A and C-=I-delta A are positive-definite
+correlation matrices: Gershgorin gives positivity when
+delta * max_i sum_j |A_ij| < 1. Their maximum entrywise difference is 30 delta,
+which can be arbitrarily small. Yet the Spearman scores of their off-diagonal
+correlations against the fixed target (1,...,15) are respectively +1 and -1.
+Thus no bound depending only on matrix error can tend uniformly to zero
+without a condition on order margins or a restriction on admissible models.
+
+Separate label examples are also possible. Give A off-diagonal value +1
+within each of two three-species groups, and -1 between groups. The same
+positive-definite construction gives pair-label AUC 1 versus 0. Under
+single linkage, C+ gives guild AUC 1; in C- all six vertices connect at the
+equal cross-group strength, so every linked pair ties and guild AUC is .5.
+These are distinct scoring failures, not interchangeable notions of recovery.
+
+These constructions are valid Gaussian covariance controls, **not evidence
+that the reconstructed ecological model realizes either matrix**. They
+explain why a generic covariance norm or the input-interpolation RMS bound
+cannot by itself settle this study's score convergence. A useful stronger
+argument needs actual edge-order separation, interval order certification
+as in FINITE_COVARIANCE.md, or proved restrictions on the ecological model.
+RANK_INSTABILITY.md already attributes observed changes comparison by
+comparison; the next step would be to bound those comparisons prospectively.
+
+Numerical controls at delta=1e-4, 1e-8 and 1e-12 retain rank scores +1/-1;
+their minimum eigenvalues across both matrices are respectively .9955877,
+.99999956 and .999999999956. At the last value, maximum entrywise matrix
+difference is only 3e-11. These computations illustrate the algebraic
+construction; the positivity and arbitrary-delta statement follow from the
+row-sum bound rather than an extrapolation of those three checks.
+
+Reproduce the rank control using the existing NumPy/SciPy dependencies:
+
+```python
+import numpy as np
+from scipy.stats import spearmanr
+pair = np.triu_indices(6, 1)
+target = np.arange(1., 16.)
+A = np.zeros((6, 6)); A[pair] = target; A += A.T
+for delta in (1e-4, 1e-8, 1e-12):
+    plus, minus = np.eye(6)+delta*A, np.eye(6)-delta*A
+    print(min(np.linalg.eigvalsh(plus).min(), np.linalg.eigvalsh(minus).min()),
+          np.abs(plus-minus).max(),
+          spearmanr(target, plus[pair]).statistic,
+          spearmanr(target, minus[pair]).statistic)
+```
