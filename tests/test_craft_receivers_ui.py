@@ -67,7 +67,7 @@ vm.runInContext(`
   const missing=document.createElement('section');renderCraftReceiving(missing,undefined,{});
   assert(walk(missing).some(n=>n.textContent.includes('older publication')));
   let jumped=null;
-  jumpToSequence=(seq)=>{jumped=seq;current=false};
+  jumpToSequence=(seq,afterJump)=>{jumped=seq;current=false;afterJump?.()};
   const expected=report.receiving.rows[0].examples[0];
   document.querySelector=selector=>walk(panel).find(n=>n.dataset?.craftReturn&&
     selector.includes('"'+n.dataset.craftReturn+'"'));
