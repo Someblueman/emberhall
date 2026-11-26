@@ -138,6 +138,9 @@ main {
   padding:0 5%;
 }
 .view-nav a {
+  display:flex;
+  align-items:center;
+  min-height:44px;
   border:1px solid var(--line);
   border-radius:24px;
   padding:7px 14px;
