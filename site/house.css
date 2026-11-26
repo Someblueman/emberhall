@@ -286,6 +286,9 @@ main {
   justify-content:space-between;
   gap:16px;
 }
+.time-heading .pill {
+  min-height:44px;
+}
 .time-heading strong {
   display:block;
   font:normal 20px Georgia,serif;
