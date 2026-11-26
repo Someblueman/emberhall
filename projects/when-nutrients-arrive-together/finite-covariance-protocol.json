@@ -1,0 +1,38 @@
+{
+  "alpha": 0.05,
+  "bounds": [
+    "chebyshev",
+    "gaussian-quadratic",
+    "gaussian-studywise"
+  ],
+  "code_sha256": {
+    "finite_covariance.py": "f3f959c2e88344727a442b0c757fad352b6408672c994fa1279f89aad6110d77",
+    "linear_calibration.py": "447d347fca81cbce0177f3ab80dfeb1044c74915353b3644521d405791ad016c",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "model": "exact stationary local-linear Gaussian; no nonlinear or source-replication guarantee",
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "scope": "first two marginal per community/window; last joint over 12 communities and four windows; all joint over covariance entries and derived correlation scores",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "windows": [
+    4096,
+    20000,
+    65536,
+    131072
+  ]
+}

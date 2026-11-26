@@ -61,3 +61,9 @@ the covariance changes, and follows the worst observed correlation case to
 It also records a matching candidate derivative kernel with measured timing
 controls; the scientific runs retain the original simulator.
 
+[FINITE_COVARIANCE.md](FINITE_COVARIANCE.md) derives exact finite-record
+covariance moments and conservative correlation-score envelopes for the
+stationary Gaussian linear reference. It separates one-community coverage
+from simultaneous study coverage and retains the elementary bound's failure.
+These analytical diagnostics do not certify the nonlinear clean baseline.
+
