@@ -76,3 +76,16 @@ source audit did not establish exact paper replication.
 See CROSSCHECK.md for commands, source links, margins and accepted-protocol relationship.
 The small numerical records under crosscheck-data/ are primary experiment data;
 binary trajectories and supplies are regenerated outside Git.
+
+## Conditional further refinement of the sensitive path
+
+A post-hoc exact OU bridge (seed 600006) refines community 6, drive 0
+from mesh 1/16 to 1/32 while preserving every old endpoint exactly.
+The log-abundance RMS change is 0.00018225; the largest
+absolute score change is 0.0250. The absolute-correlation guild
+score changes by 0.0000.
+The solve uses tolerance 1e-10 and maximum step 1/64. This is a
+conditional refinement of the existing path, not a new independent path.
+It neither removes the witnessed coarser-mesh failure nor establishes
+a continuum bound. The covariance/endpoints control brings the test count
+to fourteen; the receipt is retained with the other numerical records.

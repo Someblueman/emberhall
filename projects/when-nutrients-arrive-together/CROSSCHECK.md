@@ -148,3 +148,22 @@ solver too. Its original score is recovered from the stored fine score minus
 the stored fine-minus-middle difference; a middle trajectory RMS is unavailable
 because the original middle array was not retained. Score differences are
 reported directly, including numerical subtraction roundoff.
+
+## Conditional finer-path diagnostic
+
+For the newly sensitive community six, drive zero, ou_bridge.py inserts one
+conditional midpoint per existing interval without moving any endpoint. With
+stationary variance V=A²/2 and a=exp(-omega*h/2), the centered midpoint has
+conditional mean a*(q_left+q_right)/(1+a²) and variance V*(1-a²)/(1+a²).
+The Gaussian Markov law makes these bridge noises independent across intervals
+conditional on all endpoints. A joint-covariance control checks the resulting
+left/midpoint/right law against the stationary OU covariance, as well as exact
+endpoint preservation.
+
+```
+python3 projects/when-nutrients-arrive-together/ou_bridge.py /tmp/nutrient-convergence
+```
+
+This post-hoc diagnostic fixes bridge seed600006 and refines the existing
+1/16 supply to 1/32. It does not regenerate an unrelated path or alter the
+held-out contract. It is a single coupled refinement, not a continuum bound.
