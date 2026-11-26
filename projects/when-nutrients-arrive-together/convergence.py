@@ -1,9 +1,11 @@
 """Paired clean-reference convergence experiment; see CONVERGENCE.md."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import numpy as np
 import scipy
+from scipy.stats import beta
 from reference import community, ou, simulate, score, interval
 
 METRICS = ('correlation', 'absolute_correlation', 'cpsd', 'coherence')
@@ -31,12 +33,35 @@ def aggregate(records, field):
                             for group in groups.values()]) for k in KEYS} for m in METRICS}
 
 
+def perfect_recovery(records):
+    """A community succeeds only when every drive has perfect guild AUC.
+
+    The binomial interval describes community-level perfect recovery in this
+    experiment, not a confidence interval for mean AUC or a zero-error promise.
+    """
+    groups = {}
+    for row in records:
+        groups.setdefault(row['community'], []).append(row['scores'])
+    result = {}
+    for metric in METRICS:
+        count = sum(all(v[metric]['single_linkage_guild_auc'] >= 1 - 1e-12
+                        for v in group) for group in groups.values())
+        n = len(groups)
+        result[metric] = dict(successes=count, communities=n,
+            exact_ci95=([float(beta.ppf(.025, count, n-count+1)) if count else 0.,
+                         float(beta.ppf(.975, count+1, n-count)) if count < n else 1.]
+                        if n else None))
+    return result
+
+
 def run(output, communities=12, drives=2, duration=4096, burn=1024,
-        finest=.0625, segments=(16, 30, 60), resume=False, max_attempts=None):
+        finest=.0625, segments=(16, 30, 60), resume=False, max_attempts=None, report_only=False):
     if communities < 2 or drives < 1 or duration - burn < 480 or burn < 0:
         raise ValueError('need two communities, one drive, nonnegative burn and 480 samples')
     if finest <= 0 or not np.isclose(duration / (4 * finest), round(duration / (4 * finest))):
         raise ValueError('duration must divide the coarsest mesh exactly')
+    if report_only and not resume:
+        raise ValueError('report-only requires an existing experiment and --resume')
     if max_attempts is not None and max_attempts < 1:
         raise ValueError('max_attempts must be positive')
     if output.exists() and not resume:
@@ -46,7 +71,8 @@ def run(output, communities=12, drives=2, duration=4096, burn=1024,
     output.mkdir(parents=True, exist_ok=resume)
     config = dict(communities=communities, drives=drives, duration=duration,
                   burn=burn, finest=finest, segments=list(segments),
-                  numpy=np.__version__, scipy=scipy.__version__)
+                  numpy=np.__version__, scipy=scipy.__version__,
+                  model_sha256=hashlib.sha256(Path(__file__).with_name('reference.py').read_bytes()).hexdigest())
     if resume:
         if json.loads((output / 'config.json').read_text()) != config:
             raise ValueError('resume configuration differs from frozen experiment')
@@ -59,9 +85,13 @@ def run(output, communities=12, drives=2, duration=4096, burn=1024,
     completed = {(r['community'], r['drive']) for r in records + failures}
     if len(completed) != len(records) + len(failures):
         raise ValueError('duplicate attempt identities in checkpoint')
+    planned = {(s, d) for s in range(communities) for d in range(drives)}
+    if not completed <= planned or any(r['input_seed'] != 200000 + 1000*r['community'] + r['drive']
+                                       for r in records + failures):
+        raise ValueError('checkpoint identities differ from frozen seed schedule')
     remaining = [(s, d) for s in range(communities) for d in range(drives)
                  if (s, d) not in completed]
-    scheduled = set(remaining if max_attempts is None else remaining[:max_attempts])
+    scheduled = set() if report_only else set(remaining if max_attempts is None else remaining[:max_attempts])
     for seed in range(communities):
         uptake, gain, labels = community(seed)
         for drive in range(drives):
@@ -115,7 +145,22 @@ def run(output, communities=12, drives=2, duration=4096, burn=1024,
                   complete=len(records)+len(failures) == communities*drives,
                   failures=failures, complete_communities=len({r['community'] for r in complete}),
                   status='diagnostic; conditional on success if any failure; not milestone acceptance',
+                  perfect_guild_recovery=perfect_recovery(complete),
                   summaries={field: aggregate(complete, field) for field in fields} if complete else {})
+    gates = {}
+    for field in ('middle_to_fine', 'short_to_full'):
+        gates[field] = {}
+        for metric in METRICS:
+            gates[field][metric] = {}
+            for key in KEYS:
+                ci = report['summaries'].get(field, {}).get(metric, {}).get(key, {}).get('ci95')
+                worst = max((abs(r[field][metric][key]) for r in records), default=None)
+                gates[field][metric][key] = dict(ci95=ci, worst_absolute_change=worst,
+                    inside_margins=bool(ci is not None and ci[0] >= -.03 and ci[1] <= .03
+                                        and worst is not None and worst <= .10))
+    report['exploratory_gates'] = gates
+    report['candidate_stable'] = bool(report['complete'] and not failures and all(
+        v['inside_margins'] for field in gates.values() for metric in field.values() for v in metric.values()))
     (output / 'report.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
     return report
 
@@ -129,6 +174,7 @@ if __name__ == '__main__':
     parser.add_argument('--burn', type=int, default=1024)
     parser.add_argument('--finest', type=float, default=.0625)
     parser.add_argument('--resume', action='store_true')
+    parser.add_argument('--report-only', action='store_true')
     parser.add_argument('--max-attempts', type=int)
     args = parser.parse_args()
     run(**vars(args))

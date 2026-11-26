@@ -25,6 +25,10 @@ Average drives within each community before computing Student-t intervals over
 communities. Report signed paired differences, and inspect absolute differences
 and worst-community changes to prevent cancellation from hiding sensitivity.
 A zero-width interval from perfect AUC values is not a population guarantee.
+Also report exact binomial intervals for the proportion of communities whose
+guild AUC is perfect on every drive. This is a separate estimand from mean AUC;
+a single imperfect drive makes that community nonperfect. Even twelve perfect
+communities have a two-sided exact lower bound of only about 0.735.
 The twelve-community design is an uncertainty measurement, not an assertion
 that twelve is adequate. Missing drives exclude that community from the
 summary; all failures remain in the report and any summary is conditional.
@@ -76,3 +80,26 @@ only completed successes or recorded failures. A process interruption may
 require repeating its unfinished realization; it is not a biological failure.
 `complete: false` in the report means the planned experiment is unfinished.
 Never interpret its interim intervals as the completed twelve-community result.
+
+To regenerate an interim report without attempting another realization, use
+`--resume --report-only` with the same configuration. The report separates
+per-score exploratory gates from overall completion. Resume also checks the
+unchanged model/estimator source hash and rejects duplicate or out-of-schedule
+attempt identities. The model hash was added to the first live run's metadata
+after launch, while the unchanged pilot source was still being used.
+
+## Equilibrium diagnostics
+
+```
+python3 projects/when-nutrients-arrive-together/equilibrium_diagnostics.py --transient --output /tmp/nutrient-equilibrium.json
+```
+
+This inexpensive companion reports deterministic washout and local-linear
+population scores for signed and absolute correlation. It does not substitute
+for the nonlinear experiment. With stationary linear covariance C and
+angular spectrum S, the one-sided integrated autocorrelation time of species i
+is S_ii(0)/(2 C_ii). The slowest relaxation time is minus the reciprocal of
+the largest real eigenvalue of the stable Jacobian. Neither quantity is a
+certificate for nonlinear stationarity. No infinite-frequency coherence
+integral is attempted: its normalization and sampled bandwidth would require
+a separate derivation.

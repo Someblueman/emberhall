@@ -101,3 +101,11 @@ Lyapunov covariance equation. Agreement checks normalization, forcing power
 and transfer algebra. Eigenvalues must have negative real parts; root residual
 must be below 1e-10. This calculation is local and does not prove the nonlinear
 simulation is stationary or that a finite-window estimator is unbiased.
+
+## Later convergence work
+
+[CONVERGENCE.md](CONVERGENCE.md) fixes the next paired clean experiment and
+records a later successful reading of the supplement. That supplement does
+not specify the unresolved supply and initialization choices above. The new
+experiment retains those explicit choices and does not become an exact
+paper replication merely because its numerical resolution is tightened.

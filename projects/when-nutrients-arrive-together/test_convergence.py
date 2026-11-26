@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 import numpy as np
-from convergence import aggregate, run, METRICS, KEYS
+from convergence import aggregate, run, perfect_recovery, METRICS, KEYS
 
 
 def scores(value):
@@ -11,6 +11,18 @@ def scores(value):
 
 
 class ConvergenceChecks(unittest.TestCase):
+    def test_perfect_observations_do_not_imply_population_certainty(self):
+        rows = [dict(community=c, scores=scores(1.)) for c in range(12) for _ in range(2)]
+        result = perfect_recovery(rows)['coherence']
+        self.assertEqual(result['communities'], 12)
+        self.assertEqual(result['successes'], 12)
+        self.assertAlmostEqual(result['exact_ci95'][0], .025**(1/12))
+        self.assertEqual(result['exact_ci95'][1], 1.)
+        rows[0]['scores']['coherence']['single_linkage_guild_auc'] = .99
+        result = perfect_recovery(rows)['coherence']
+        self.assertEqual(result['successes'], 11)
+        self.assertLess(result['exact_ci95'][1], 1.)
+
     def test_uncertainty_unit_is_community_not_drive(self):
         records = [dict(community=c, scores=scores(v))
                    for c, v in [(0, 0), (0, 2), (1, 5), (1, 7)]]
@@ -56,6 +68,10 @@ class ConvergenceChecks(unittest.TestCase):
             self.assertFalse(first['complete'])
             self.assertEqual(first['complete_communities'], 0)
             self.assertEqual(second['completed_attempts'], 2)
+            self.assertFalse(second['candidate_stable'])
+            with patch('convergence.simulate', side_effect=AssertionError('report must not simulate')):
+                snapshot = run(target, communities=2, duration=512, burn=32, resume=True, report_only=True)
+            self.assertEqual(snapshot['completed_attempts'], 2)
             import json
             rows = [json.loads(line) for line in (target/'records.jsonl').read_text().splitlines()]
             self.assertEqual([r['input_seed'] for r in rows], [200000, 200001])
