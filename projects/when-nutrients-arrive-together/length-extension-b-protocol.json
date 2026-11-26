@@ -1,0 +1,21 @@
+{
+  "baseline_retained": 4096,
+  "burn": 512,
+  "code_sha256": {
+    "extend_length.py": "90628324c4125215aa53de84cdc9d68260d3ae423e712328c13a2ce5e5823bde",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "communities": [
+    12,
+    13,
+    14,
+    15
+  ],
+  "mesh": 0.0625,
+  "numpy": "2.4.6",
+  "retained": 20000,
+  "scipy": "1.18.0",
+  "segment": 30,
+  "supply_seed_offset": 20000,
+  "tolerance": 1e-08
+}

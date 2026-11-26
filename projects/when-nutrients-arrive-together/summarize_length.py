@@ -73,6 +73,30 @@ def summarize(partitions, output):
         str(r['seed']): all(abs(r['scores']['20000'][m][t] - r['scores']['10000'][m][t])
                            <= (.10 if t == 'overlap_spearman' else .05)
                            for m in METRICS for t in TARGETS) for r in good}
+    # The earlier four trajectories were deliberately not committed. Their
+    # published table is rounded to eight significant digits; retain that limit.
+    prior = Path(__file__).with_name('long-record-scores.csv')
+    old = {}
+    for row in csv.DictReader(prior.open()):
+        key = (int(row['seed']), int(row['observations']), row['metric'])
+        if key in old:
+            raise ValueError('duplicate prior score')
+        old[key] = float(row['overlap_spearman'])
+    common = (2048, 4096, 8192, 16384, 20000)
+    expected = {(s, n, m) for s in range(4, 8) for n in common for m in METRICS}
+    if set(old) != expected or not all(np.isfinite(v) and -1 <= v <= 1 for v in old.values()):
+        raise ValueError('invalid prior four-community table')
+    if len(good) == 8:
+        joined = dict(old)
+        joined.update({(r['seed'], n, m): r['scores'][str(n)][m]['overlap_spearman']
+                       for r in good for n in common for m in METRICS})
+        summary['all_twelve_overlap'] = {
+            str(n): {m: interval([joined[s, n, m] for s in range(4, 16)])
+                     for m in METRICS} for n in common}
+        summary['paired_all_twelve_overlap'] = {
+            m: interval([joined[s, 20000, m]-joined[s, 4096, m] for s in range(4, 16)])
+            for m in METRICS}
+    summary['prior_csv_sha256'] = hashlib.sha256(prior.read_bytes()).hexdigest()
     output.mkdir(parents=True, exist_ok=True)
     (output / 'summary.json').write_text(json.dumps(summary, indent=2, allow_nan=False) + '\n')
     with (output / 'scores.csv').open('w', newline='') as stream:

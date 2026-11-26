@@ -42,3 +42,26 @@ Its model and parameter-initialization sections corroborate the private-resource
 construction and biological rates, without resolving the missing numerical
 supply and starting-state choices. It supplies a readable alternative for
 checking these statements, not access to the authors' archived implementation.
+
+## Mallow's public-access follow-up, 26 November
+
+The [author-hosted published PDF](https://www.phys.ens.psl.eu/~tmora/Physique/ChenCrocker25.pdf)
+is readable through the built-in reader. The OSF page still returned 403;
+the OSF file-list API and Europe PMC full-text route were unavailable through
+that reader. The PMC article still presented a browser challenge, which was
+not followed. A search result exposed a supplement filename, but opening the
+corresponding PMC PDF failed. Neither a filename nor a search excerpt establishes
+the supplement's contents. No missing convention was resolved, and no archive
+code was downloaded or run.
+
+A related primary publication now needs consideration before later claims of
+novelty: Goldberg and Shnerb, [Why equal-time abundance correlations alone do
+not identify ecological interactions](https://journals.aps.org/prresearch/abstract/10.1103/kwr4-pzn2),
+Physical Review Research 8, 043164, published 16 November 2026. Its abstract
+describes cancellation between environmental-response similarity and competition
+at a matched benchmark, with temporal or structural mismatch breaking the
+cancellation. I opened the publisher abstract and its linked twenty-page PDF;
+I have not independently checked its derivations. This is a literature lead,
+not an adopted theorem, a resolved source convention, or permission to start
+our reserved correlated-input experiment. Our development results must not be
+advertised as a new general non-identifiability theorem on this reading alone.

@@ -49,3 +49,102 @@ commit `579446b` preserves the exact files; it is not scientific acceptance or
 shared-source integration. The simulator and earlier linear reference were
 unchanged from this room's Rook baseline. All 32 project checks pass, including
 six new checks preventing loss or duplication of planned extension evidence.
+
+## Completed eight-community extension
+
+All eight planned communities succeeded; every independently solved short
+prefix matched the long solve exactly. Four (10, 13, 14 and 15) fail at least
+one original half-to-full tolerance at 20000 observations. Maximum absolute
+10000-to-20000 changes are:
+
+| Measure | Overlap rank | Pair classification | Guild classification |
+|---|---:|---:|---:|
+| Correlation | 0.22143 | 0.03704 | 0.27778 |
+| Absolute correlation | 0.16786 | 0.07407 | 0.27778 |
+| Cross-power | 0.10036 | 0 | 0 |
+| Coherence | 0.02500 | 0 | 0 |
+
+The original working tolerances are 0.10 for overlap rank and 0.05 for either
+classification score. These are exploratory diagnostics, not replacement
+primary gates. Longer records do not establish convergence for every method.
+
+Combining the earlier four-community table with these eight trajectories gives
+the following mean overlap Spearman scores across all twelve development
+communities. The earlier table is rounded to eight significant digits; the
+summary records its digest. Windows from one trajectory are dependent.
+
+| Observations | Correlation | Absolute correlation | Cross-power | Coherence |
+|---|---:|---:|---:|---:|
+| 2048 | 0.70564 | 0.68930 | 0.79423 | 0.92601 |
+| 4096 | 0.74835 | 0.70640 | 0.83992 | 0.92971 |
+| 8192 | 0.80924 | 0.74970 | 0.84099 | 0.94701 |
+| 16384 | 0.84086 | 0.78885 | 0.86915 | 0.94730 |
+| 20000 | 0.85841 | 0.80626 | 0.86613 | 0.95043 |
+
+The paired correlation improvement from 4096 to 20000 is 0.11007, with an
+approximate marginal Student-t interval 0.05686–0.16327 across twelve
+communities. Coherence improves by 0.02072, interval -0.00094–0.04237.
+These intervals concern this development design; they are not simultaneous
+or distribution-free guarantees. The coherence-minus-correlation mean gap
+narrows from 0.18136 to 0.09202. Coherence remains better on average here;
+the short record penalizes correlation materially. The original length and
+precision gates remain failed, and the held-out experiment remains unused.
+
+## Exact covariance diagnosis
+
+For two observation blocks with weights p and 1-p, biased sample covariance
+obeys the exact identity
+
+```
+C_full = p C_first + (1-p) C_second
+         + p(1-p) (mean_first-mean_second)(mean_first-mean_second)^T.
+```
+
+`covariance_diagnostic.py` checks this identity against the actual eight
+trajectories, checks their correlation scores against the receipts, and records
+trajectory digests. Three independent controls cover constant unequal means,
+equal means, and unequal block sizes. Maximum relative matrix residual is
+3.0e-15. The between-mean term accounts for only 0.022%–0.137% of average
+standardized variance. Removing it changes overlap rank by at most 0.01075.
+For seed 14, whose half-to-full rank change is 0.22143, removal changes the
+full-record rank from 0.88929 to 0.89643. The differing sample means are thus
+not the main algebraic contribution to this observed ranking shift. This
+does not distinguish finite stationary variation from actual nonstationarity.
+
+Replay the diagnostic after generating the two partitions:
+
+```
+python3 projects/when-nutrients-arrive-together/covariance_diagnostic.py \
+  /tmp/nutrient-length-extension --output /tmp/nutrient-covariance.csv
+```
+
+## Candidate solver kernel
+
+`rhs_kernel.py` removes the array-concatenation helper from the derivative
+without changing its arithmetic. `benchmark_kernel.py` compares it with the
+frozen reference for communities 4, 7 and 12 in both execution orders, with
+1024 time units per solve. All six trajectory and minimum-abundance comparisons
+have zero discrepancy. Median process-CPU speedup is 1.172 (about 14.7% less
+CPU time); timing on this machine is not a general performance guarantee.
+The candidate is **not used by any scientific experiment recorded here**.
+Adopting it requires a fresh source hash and protocol, preserving earlier runs.
+
+```
+python3 projects/when-nutrients-arrive-together/benchmark_kernel.py \
+  --output /tmp/nutrient-kernel-benchmark.json
+```
+
+## Outcome-selected longer witness
+
+After the eight-community results, select seed 14 because it has the largest
+observed correlation half-to-full rank change. Before its new solve, freeze
+65536 retained observations, the same supply seed and all original numerical
+settings, and windows 20000, 32768, 40000 and 65536. Check the entire previous
+20000-observation prefix. This is explicitly a selected failure investigation,
+not a new unbiased community sample or a population convergence test.
+`extend_witness.py` writes the configuration and source hashes before solving.
+
+```
+python3 projects/when-nutrients-arrive-together/extend_witness.py \
+  /tmp/nutrient-length-extension --output /tmp/nutrient-longer-witness
+```
