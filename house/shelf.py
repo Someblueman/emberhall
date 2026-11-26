@@ -220,6 +220,21 @@ def house_only(state: dict) -> bool:
     return repairs_since(state) is not None and "house_only_end" not in state.get("shelf", {})
 
 
+# House research (Steward, 26 November: "we should probably change it so that we can have more research
+# pending for house work as well, it's only 1 project on the shelf now"). The repairs period had stopped
+# every research round, so the house bench emptied. From this migration, while the period lasts, research
+# rounds are for house ideas alone and keep a deeper house bench, so a new house project can start the hour
+# the last one ends. Great and small research stays paused until the period ends.
+HOUSE_RESEARCH = "upgrade-20261126-house-research"
+HOUSE_ONLY_BENCH = 4
+
+
+def house_research(state: dict | None) -> bool:
+    """Whether house-only research rounds run (the period is on and its research migration is installed)."""
+    migrated = HOUSE_RESEARCH in (state or {}).get("maintenance", {}).get("migrations", {})
+    return migrated and house_only(state)
+
+
 def choice_allowed(state: dict, which: str | None) -> bool:
     return which == "house" or not house_only(state)
 
@@ -246,6 +261,10 @@ def thin(state: dict | None, shelf: dict) -> list[str]:
     it, free project slots with fewer than two kept ideas of their scale waiting."""
     if flow_since(state) is None:
         return []
+    if house_research(state):
+        kept = sum(scale(shelf["ideas"][key]) == "house" and grounded(state, shelf["ideas"][key])
+                   for key in shelf_ids(shelf))
+        return ["house"] if kept < HOUSE_ONLY_BENCH else []
     kinds = scales(state)
     kept = {which: sum(scale(shelf["ideas"][key]) == which and grounded(state, shelf["ideas"][key])
                        for key in shelf_ids(shelf)) for which in kinds}
@@ -256,6 +275,8 @@ def thin(state: dict | None, shelf: dict) -> list[str]:
 
 def research_open(state: dict, shelf: dict, at: float, selection_version: int) -> bool:
     """Whether an Explorer round may start now. life.explorer_demand asks the same question."""
+    if house_research(state):
+        return "house" in thin(state, shelf)
     return (len(shelf_ids(shelf)) < 3 or (selection_version >= 3 and great_wanted(shelf))
             or (open_since(state) is not None and research_due(shelf, at, state))
             or (bool(thin(state, shelf)) and shelf_load(state, shelf) < SHELF_CEILING)

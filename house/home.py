@@ -922,6 +922,9 @@ HOUSE_LIGHTER = ("One more kind of house idea, weighing the same as the others. 
                  "names what residents spend the time on today, with places in the record, and what the change "
                  "would save. It is done when it is listed in docs/skills/README.md and a resident other than its "
                  "builder has used it. ")
+HOUSE_RESEARCH_LINE = ("During the house repairs period research is for the house alone: bring house ideas only. "
+                       "Prefer what visitors see going wrong (docs/SITE_REPAIRS.md, the public page) and what stops "
+                       "residents' finished work from reaching it (reviews, integration, conflicts). ")
 HOUSE_BIGGER = ("If what you would build is bigger than one run, bring it to the shelf as a house idea instead of "
                 "shrinking it (an Explorer round records it with scale house and a brief that is for the house). ")
 
@@ -1492,7 +1495,8 @@ class Coordinator:
                      if shelf_model.momentum_since(state) is not None else
                      f"The {which} project slot is EMPTY and fewer than two kept {which} ideas are waiting for it, so "
                      "since 17 November rounds follow one another without the four-hour gap until that changes. ")
-                    + (HOUSE_IDEA + HOUSE_LIGHTER + (
+                    + (HOUSE_IDEA + HOUSE_LIGHTER + (HOUSE_RESEARCH_LINE if shelf_model.house_research(state)
+                        else "") + (
                         "The shelf already holds its ten outward ideas, so this round is for the house alone: "
                         "bring house ideas only. "
                         if shelf_model.shelf_load(state, shelf_model.empty() | state.get("shelf", {}))
@@ -1621,7 +1625,7 @@ class Coordinator:
             return None
         from . import shelf as shelf_model
         repairing = shelf_model.house_only(state)
-        if repairing:
+        if repairing and not shelf_model.house_research(state):
             explore_generation = None
         model = request.get("model", providers.DEFAULTS[kind]) if request.get("agent") == kind else providers.DEFAULTS[kind]
         if helper_model is not None:
@@ -2003,7 +2007,7 @@ class Coordinator:
                 demand = workload(state, max(time.time(), state["at"]))
                 from . import shelf as shelf_model
                 repairing = shelf_model.house_only(state)
-                if repairing:
+                if repairing and not shelf_model.house_research(state):
                     demand["explore_generation"] = None
                 from .source_delivery import integration_inflight
                 demand = review_demand(state, demand, self.private, integration_inflight(self.record, self.private))
