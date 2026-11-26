@@ -158,3 +158,198 @@ class SourceInspectionTests(unittest.TestCase):
         self.assertEqual(args.path, 'document.txt')
         with self.assertRaises(ValueError):
             parse(['integrate', 'one', '--inspect', '--as', 'bob'], 'alice')
+
+    def test_bundle_pages_salvage_exact_unicode_binary_and_deleted_patch(self):
+        import base64
+        import hashlib
+        import subprocess
+        from scripts.salvage_conflict import salvage
+        f = self.f
+        room = f.candidate('one', '😀' * 40_000 + '\n')
+        (room / 'binary.bin').write_bytes(bytes(range(256)) * 40)
+        (room / 'gone.txt').write_text('new\n')
+        self.amend(room)
+        selected = ['document.txt', 'binary.bin', 'gone.txt']
+        expected = subprocess.run(['git', '--literal-pathspecs', 'diff', '--no-ext-diff',
+            '--no-textconv', '--no-renames', '--binary', '--full-index', '--no-color',
+            f.base, git(room, 'rev-parse', 'HEAD'), '--', *selected], cwd=room,
+            capture_output=True, check=True).stdout
+        pages = []; chunks = []; offset = 0
+        while True:
+            page = inspect_contribution(f.record, 'one', 'alice', bundle=True,
+                                        paths=selected, offset=offset)
+            data = base64.b64decode(page['patch_base64'])
+            self.assertLessEqual(len(data), INSPECTION_LIMIT)
+            self.assertLessEqual(len(json.dumps(page, indent=2).encode()), INSPECTION_LIMIT)
+            chunks.append(data)
+            filename = f.repo / ('page-' + str(offset) + '.json')
+            filename.write_text(json.dumps(page)); pages.append(filename)
+            if not page['has_more']:
+                break
+            self.assertGreater(page['through'], offset); offset = page['through']
+        self.assertGreater(len(pages), 1)
+        self.assertEqual(b''.join(chunks), expected)
+        patch = f.repo / 'saved.patch'
+        result = salvage(pages, patch)
+        self.assertEqual(patch.read_bytes(), expected)
+        self.assertEqual(result['sha256'], hashlib.sha256(expected).hexdigest())
+        recovery = f.repo / 'private-recovery'
+        subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout', str(room),
+                        str(recovery)], check=True, capture_output=True)
+        git(recovery, 'checkout', '--detach', f.base)
+        git(recovery, 'apply', '--check', str(patch))
+        git(recovery, 'apply', str(patch))
+        for name in selected:
+            self.assertEqual((recovery / name).read_bytes(), (room / name).read_bytes())
+        self.assertEqual((f.repo / 'document.txt').read_text(), 'base\n')
+        self.assertEqual(git(f.repo, 'rev-parse', 'HEAD'), f.base)
+        with self.assertRaises(FileExistsError):
+            salvage(pages, patch)
+        with self.assertRaises(ValueError):
+            salvage(pages[1:], f.repo / 'bad.patch')
+        self.assertFalse((f.repo / 'bad.patch').exists())
+        corrupted = json.loads(pages[0].read_text()); corrupted['patch_sha256'] = '0' * 64
+        pages[0].write_text(json.dumps(corrupted))
+        with self.assertRaises(ValueError):
+            salvage(pages, f.repo / 'bad.patch')
+        self.assertFalse((f.repo / 'bad.patch').exists())
+
+    def test_preview_conflict_and_clean_are_read_only_and_bound_to_heads(self):
+        f = self.f
+        room = f.candidate('one', 'candidate\n')
+        clean = inspect_contribution(f.record, 'one', 'alice', preview=True)['preview']
+        self.assertEqual(clean['status'], 'clean')
+        (f.repo / 'document.txt').write_text('shared\n')
+        git(f.repo, 'add', 'document.txt')
+        git(f.repo, '-c', 'commit.gpgsign=false', '-c', 'user.name=Test',
+            '-c', 'user.email=test@local', 'commit', '-m', 'Shared change')
+        (f.repo / 'dirty.txt').write_text('keep me\n')
+        def snapshot(repo):
+            gitdir = repo / '.git'
+            if gitdir.is_file():
+                gitdir = __import__('pathlib').Path(git(repo, 'rev-parse', '--absolute-git-dir'))
+            return {str(p.relative_to(gitdir)): p.read_bytes()
+                    for p in gitdir.rglob('*') if p.is_file()}
+        before = snapshot(f.repo), snapshot(room), f.record.read()[2]
+        preview = inspect_contribution(f.record, 'one', 'alice', preview=True)['preview']
+        self.assertEqual(preview['status'], 'conflict')
+        self.assertEqual(preview['base'], f.base)
+        self.assertEqual(preview['current'], git(f.repo, 'rev-parse', 'HEAD'))
+        self.assertEqual(preview['contribution'], git(room, 'rev-parse', 'HEAD'))
+        self.assertEqual(before, (snapshot(f.repo), snapshot(room), f.record.read()[2]))
+        self.assertEqual((f.repo / 'dirty.txt').read_text(), 'keep me\n')
+        self.assertFalse((f.private / 'one/integration.json').exists())
+
+    def test_bundle_options_and_utf8_byte_boundary_are_explicit(self):
+        import base64
+        f = self.f
+        room = f.candidate('one', '😀tail\n')
+        first = inspect_contribution(f.record, 'one', 'alice', bundle=True)
+        patch = base64.b64decode(first['patch_base64'])
+        # Byte pages may begin inside a code point: base64 preserves it exactly.
+        offset = patch.index('😀'.encode()) + 1
+        page = inspect_contribution(f.record, 'one', 'alice', bundle=True, offset=offset)
+        self.assertEqual(base64.b64decode(page['patch_base64']), patch[offset:])
+        for options in ({'paths': ['document.txt']}, {'bundle': True, 'paths': []},
+                        {'bundle': True, 'paths': ['../document.txt']},
+                        {'bundle': True, 'offset': -1}, {'bundle': True, 'offset': len(patch)+1},
+                        {'bundle': True, 'path': 'document.txt'}):
+            with self.assertRaises(ValueError):
+                inspect_contribution(f.record, 'one', 'alice', **options)
+        args = parse(['integrate', 'one', '--inspect', '--bundle', '--paths',
+                      'document.txt', '--offset', '0', '--preview', '--as', 'alice'], 'alice')
+        self.assertTrue(args.bundle and args.preview)
+        self.assertEqual(args.paths, ['document.txt'])
+
+
+    def test_bundle_patch_preserves_deletion_and_executable_mode(self):
+        import base64
+        import subprocess
+        f = self.f
+        (f.repo / 'remove.txt').write_bytes(b'remove this\n')
+        git(f.repo, 'add', 'remove.txt')
+        git(f.repo, '-c', 'commit.gpgsign=false', '-c', 'user.name=Test',
+            '-c', 'user.email=test@local', 'commit', '-m', 'Deletion base')
+        f.base = git(f.repo, 'rev-parse', 'HEAD')
+        room = f.candidate('one', 'first\n')
+        (room / 'remove.txt').unlink()
+        (room / 'document.txt').chmod(0o755)
+        self.amend(room)
+        page = inspect_contribution(f.record, 'one', 'alice', bundle=True)
+        patch = base64.b64decode(page['patch_base64'])
+        self.assertIn(b'deleted file mode 100644', patch)
+        self.assertIn(b'new mode 100755', patch)
+        self.assertIn(b'--- a/remove.txt', patch)
+        self.assertIn(b'+++ /dev/null', patch)
+        self.assertTrue((f.repo / 'remove.txt').exists())
+        self.assertEqual((f.repo / 'document.txt').stat().st_mode & 0o111, 0)
+
+    def test_fixed_channel_patch_export_is_private_retryable_and_never_applies(self):
+        import hashlib
+        from house.home_work import room as make_room
+        from house.resident_actions import execute
+        f = self.f
+        candidate = f.candidate('one', 'candidate 😀\n')
+        f.record.append('life', 'watch-keeper', {'kind': 'run-start', 'run': 'requester',
+            'resident': 'request-reader', 'agent': 'codex', 'model': 'gpt-6.1-sol',
+            'source_head': f.base, 'workspace': 'residents/requester',
+            'policy_revision': 'fixture', 'mode': 'work'})
+        f.record.append('arrive', 'request-reader', {'name': 'Reader'})
+        f.record.append('life', 'watch-keeper', {'kind': 'run-launched', 'run': 'requester',
+                                               'pgid': os.getpid()})
+        requester = make_room(f.record, f.private, 'requester', f.base)
+        argv = ['integrate', 'one', '--export-patch', '--paths', 'document.txt', '--as', 'request-reader']
+        from house.mailbox_jobs import lane
+        item = {'argv': argv, 'run': 'requester', 'resident': 'request-reader'}
+        self.assertEqual(lane(f.record, item), 'worker')
+        item['argv'] = ['integrate', 'one', '--inspect', '--bundle', '--preview',
+                        '--as', 'request-reader']
+        self.assertEqual(lane(f.record, item), 'inspection')
+        before = f.record.read()[2], git(f.repo, 'rev-parse', 'HEAD')
+        result = execute(f.record, requester, 'request-reader', 'requester', argv, 'export-one')
+        patch = requester / result['path']
+        self.assertEqual(hashlib.sha256(patch.read_bytes()).hexdigest(), result['patch_sha256'])
+        self.assertEqual(execute(f.record, requester, 'request-reader', 'requester', argv, 'export-one'), result)
+        self.assertEqual((requester / 'document.txt').read_text(), 'base\n')
+        self.assertEqual((f.repo / 'document.txt').read_text(), 'base\n')
+        self.assertEqual((candidate / 'document.txt').read_text(), 'candidate 😀\n')
+        self.assertEqual(before, (f.record.read()[2], git(f.repo, 'rev-parse', 'HEAD')))
+        with self.assertRaises(ValueError):
+            execute(f.record, candidate, 'request-reader', 'requester', argv, 'wrong-room')
+        patch.write_bytes(b'preserve existing altered patch')
+        with self.assertRaises(ValueError):
+            execute(f.record, requester, 'request-reader', 'requester', argv, 'changed-output')
+        self.assertEqual(patch.read_bytes(), b'preserve existing altered patch')
+        patch.unlink(); patch.symlink_to(requester / 'document.txt')
+        with self.assertRaises(OSError):
+            execute(f.record, requester, 'request-reader', 'requester', argv, 'symlink-output')
+        self.assertEqual((requester / 'document.txt').read_text(), 'base\n')
+
+    def test_preview_does_not_execute_candidate_merge_driver_and_fails_closed(self):
+        import subprocess
+        from unittest.mock import patch
+        f = self.f
+        (f.repo / '.gitattributes').write_text('document.txt merge=untrusted\n')
+        git(f.repo, 'add', '.gitattributes')
+        git(f.repo, '-c', 'commit.gpgsign=false', '-c', 'user.name=Test',
+            '-c', 'user.email=test@local', 'commit', '-m', 'Merge attributes')
+        f.base = git(f.repo, 'rev-parse', 'HEAD')
+        candidate = f.candidate('one', 'candidate\n')
+        marker = candidate / 'driver-was-executed'
+        git(candidate, 'config', 'merge.untrusted.driver', 'touch ' + str(marker))
+        (f.repo / 'document.txt').write_text('shared\n')
+        git(f.repo, 'add', 'document.txt')
+        git(f.repo, '-c', 'commit.gpgsign=false', '-c', 'user.name=Test',
+            '-c', 'user.email=test@local', 'commit', '-m', 'Conflict')
+        result = inspect_contribution(f.record, 'one', 'alice', preview=True)
+        self.assertEqual(result['preview']['status'], 'conflict')
+        self.assertIn('document.txt', result['preview']['output'])
+        self.assertFalse(marker.exists())
+        real_run = subprocess.run
+        def unavailable(command, **kwargs):
+            if 'merge-tree' in command:
+                return subprocess.CompletedProcess(command, 129)
+            return real_run(command, **kwargs)
+        with patch('house.integrate.subprocess.run', side_effect=unavailable):
+            with self.assertRaisesRegex(ValueError, 'preview unavailable'):
+                inspect_contribution(f.record, 'one', 'alice', preview=True)

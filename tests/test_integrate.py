@@ -477,3 +477,36 @@ class InspectionPagingTests(unittest.TestCase):
                 capture_output=True, text=True)
             self.assertEqual(proc.returncode, 2, (bad_args, proc.stdout, proc.stderr))
 
+
+
+class BundleCommandTests(unittest.TestCase):
+    setUp = InspectionPagingTests.setUp
+    commit_files = InspectionPagingTests.commit_files
+    # Keep command-level coverage separate from acceptance tests that start sandbox children.
+    def test_bundle_cli_export_and_refused_modes(self):
+        import base64
+        from scripts.salvage_conflict import salvage
+        f = self.f
+        room = f.candidate("one", "first\n")
+        self.commit_files(room, {"extra.txt": "second 😀\n"})
+        before = git(f.repo, "rev-parse", "HEAD"), (f.repo / "document.txt").read_bytes()
+        command = [sys.executable, "-m", "house.integrate", "--repo", str(f.repo), "one",
+                   "--as", "alice"]
+        proc = subprocess.run(command + ["--inspect", "--bundle", "--paths", "document.txt",
+                              "extra.txt", "--preview"], capture_output=True, text=True, check=True)
+        page = json.loads(proc.stdout)
+        self.assertEqual(page["preview"]["status"], "clean")
+        self.assertEqual(page["selected_paths"], ["document.txt", "extra.txt"])
+        self.assertIn(b"second", base64.b64decode(page["patch_base64"]))
+        saved = f.repo / "inspection.json"; saved.write_text(proc.stdout)
+        output = f.repo / "export.patch"
+        export = subprocess.run([sys.executable, "scripts/salvage_conflict.py", str(saved),
+                                 "--output", str(output)], capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(export.stdout)["sha256"], page["patch_sha256"])
+        self.assertEqual(before, (git(f.repo, "rev-parse", "HEAD"),
+                                 (f.repo / "document.txt").read_bytes()))
+        for options in (["--bundle"], ["--preview"], ["--inspect", "--offset", "0"],
+                        ["--inspect", "--paths", "document.txt"],
+                        ["--inspect", "--bundle", "--content-after", "0"]):
+            refused = subprocess.run(command + options, capture_output=True, text=True)
+            self.assertEqual(refused.returncode, 2, options)

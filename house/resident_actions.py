@@ -25,10 +25,15 @@ def parser():
             mode = command.add_mutually_exclusive_group()
             mode.add_argument("--publish", action="store_true")
             mode.add_argument("--inspect", action="store_true")
+            mode.add_argument("--export-patch", action="store_true")
             mode.add_argument("--reject")
             command.add_argument("--path")
             command.add_argument("--diff-after", type=int)
             command.add_argument("--content-after", type=int)
+            command.add_argument("--bundle", action="store_true")
+            command.add_argument("--paths", nargs="+")
+            command.add_argument("--offset", type=int)
+            command.add_argument("--preview", action="store_true")
         elif name == "view":
             # See one page of your own room rendered (house/view.py); no journal event.
             command.add_argument("path")
@@ -133,15 +138,22 @@ def execute(record: Record, workspace: Path, resident: str, run: str, argv: list
 
         return complete(record, args.task, resident, args.token, requestid)
     if args.command == "integrate":
-        from .integrate import integrate, inspect_contribution, validate_inspect_options
+        from .integrate import integrate, inspect_contribution, validate_inspect_options, export_contribution
+        if args.export_patch:
+            if (args.path is not None or args.bundle or args.offset is not None or args.preview
+                    or args.diff_after is not None or args.content_after is not None):
+                raise ValueError("--export-patch accepts only optional --paths")
+            return export_contribution(record, args.target, resident, workspace, args.paths)
         validate_inspect_options(
             inspect=args.inspect, path=args.path,
             diff_after=args.diff_after, content_after=args.content_after,
+            bundle=args.bundle, paths=args.paths, offset=args.offset, preview=args.preview,
         )
         if args.inspect:
             return inspect_contribution(
                 record, args.target, resident, args.path,
-                diff_after=args.diff_after, content_after=args.content_after)
+                diff_after=args.diff_after, content_after=args.content_after,
+                bundle=args.bundle, paths=args.paths, offset=args.offset, preview=args.preview)
         return integrate(record, args.target, resident, publish=args.publish, reject=args.reject)
     if args.command == "runtime-test":
         from .wake_policy import test_runtime

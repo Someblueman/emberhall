@@ -6,6 +6,7 @@ update or patch overwrite is used on the shared source checkout.
 from __future__ import annotations
 
 import argparse
+import base64
 import codecs
 import fcntl
 import hashlib
@@ -14,7 +15,9 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import stat
 import sys
+import tempfile
 import uuid
 
 from .home_work import git
@@ -73,8 +76,16 @@ def validate_inspect_options(
     path: str | None,
     diff_after: int | None,
     content_after: int | None,
+    bundle: bool = False, paths: list[str] | None = None,
+    offset: int | None = None, preview: bool = False,
 ) -> None:
     """Validate CLI/action option combinations before dispatching inspection."""
+    if (bundle or paths is not None or offset is not None or preview) and not inspect:
+        raise ValueError("bundle and preview options require --inspect")
+    if (paths is not None or offset is not None) and not bundle:
+        raise ValueError("--paths and --offset require --bundle")
+    if bundle and (path is not None or diff_after is not None or content_after is not None):
+        raise ValueError("--bundle cannot combine with single-path cursors")
     if not inspect:
         if path is not None:
             raise ValueError("--path requires --inspect")
@@ -194,6 +205,24 @@ def _stream_bounded_slice(
     return window_bytes[:end], has_more, False, total
 
 
+def _patch_command(report: dict, paths: list[str]) -> list[str]:
+    return ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv",
+            "--no-renames", "--binary", "--full-index", "--no-color",
+            "--src-prefix=a/", "--dst-prefix=b/", "--no-relative", "--ignore-submodules=none",
+            report["base"], report["commit"], "--", *paths]
+
+
+def _selected_paths(changed: list[str], requested: list[str] | None) -> list[str]:
+    selected = changed if requested is None else requested
+    if (not isinstance(selected, list) or not selected or len(selected) > 64
+            or any(not isinstance(path, str) or path not in changed for path in selected)
+            or len(set(selected)) != len(selected)):
+        raise ValueError("requires one to 64 distinct exact changed paths")
+    if len(json.dumps(selected).encode("utf-8")) > INSPECTION_LIMIT // 4:
+        raise ValueError("selected path metadata exceeds response budget")
+    return selected
+
+
 def inspect_contribution(
     record: Record,
     run: str,
@@ -202,19 +231,61 @@ def inspect_contribution(
     *,
     diff_after: int | None = None,
     content_after: int | None = None,
+    bundle: bool = False, paths: list[str] | None = None,
+    offset: int | None = None, preview: bool = False,
 ) -> dict:
     """Read committed bytes only; no acceptance, tests, receipt writes or host paths."""
+    validate_inspect_options(inspect=True, path=path, diff_after=diff_after,
+                             content_after=content_after, bundle=bundle, paths=paths,
+                             offset=offset, preview=preview)
     diff_offset = _validate_cursor(diff_after, "diff_after")
     content_offset = _validate_cursor(content_after, "content_after")
     if content_offset is not None and path is None:
         raise ValueError("content continuation requires an exact changed path")
     workspace, report = source(record, run, actor)
+    selected = paths
     paths = changed_paths(workspace, report["base"], report["commit"])
     if path is not None and path not in paths:
         raise ValueError("inspection path must be an exact changed contribution path")
     diff_start = 0 if diff_offset is None else diff_offset
     result = {"run": run, "base": report["base"], "contribution": report["commit"],
               "paths": paths, "status": "inspection", "limit_bytes": INSPECTION_LIMIT}
+    if preview:
+        result["preview"] = conflict_preview(record.root, workspace, report)
+    if bundle:
+        selected = _selected_paths(paths, selected)
+        start = _validate_cursor(offset, "offset") or 0
+        command = _patch_command(report, selected)
+        # Spool rather than buffer the complete patch. Hash and page the same bytes.
+        with tempfile.TemporaryFile() as stream:
+            subprocess.run(command, cwd=workspace, stdout=stream, check=True, timeout=30)
+            size = stream.tell()
+            if start > size:
+                raise ValueError("bundle offset exceeds size")
+            stream.seek(0)
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+            stream.seek(start)
+            # Budget the complete pretty-printed response, including base64,
+            # path metadata and an optional preview, rather than each field.
+            result["paths"] = selected
+            result.update(bundle=True, selected_paths=selected, offset=start,
+                          through=size, has_more=True, patch_bytes=size,
+                          patch_sha256=digest, patch_base64="")
+            remaining = INSPECTION_LIMIT - len(json.dumps(result, indent=2).encode("utf-8")) - 128
+            if remaining < 4:
+                raise ValueError("bundle path metadata exceeds response budget")
+            chunk = stream.read((remaining // 4) * 3)
+        while True:
+            result.update(bundle=True, selected_paths=selected, offset=start,
+                          through=start + len(chunk), has_more=start + len(chunk) < size,
+                          patch_bytes=size, patch_sha256=digest,
+                          patch_base64=base64.b64encode(chunk).decode("ascii"),
+                          patch_text=chunk.decode("utf-8", "replace"))
+            if len(json.dumps(result, indent=2).encode("utf-8")) <= INSPECTION_LIMIT:
+                return result
+            if not chunk:
+                raise ValueError("bundle metadata exceeds response budget")
+            chunk = chunk[:len(chunk) * 3 // 4]
     command = ["git", "--literal-pathspecs", "diff", "--no-ext-diff", "--no-textconv", "--no-renames",
                "--no-color", report["base"], report["commit"], "--"]
     if path is not None:
@@ -270,6 +341,73 @@ def inspect_contribution(
                             content_has_more=content_has_more,
                         )
     return result
+
+
+def export_contribution(record: Record, run: str, actor: str, room: Path,
+                        paths: list[str] | None = None) -> dict:
+    """Fixed-channel worker export to its authenticated requesting room only."""
+    workspace, report = source(record, run, actor)
+    changed = changed_paths(workspace, report["base"], report["commit"])
+    selected = _selected_paths(changed, paths)
+    command = _patch_command(report, selected)
+    with tempfile.TemporaryFile() as patch:
+        subprocess.run(command, cwd=workspace, stdout=patch, check=True, timeout=30)
+        size = patch.tell(); patch.seek(0)
+        digest = hashlib.file_digest(patch, "sha256").hexdigest()
+        name = "salvage-" + run + "-" + digest + ".patch"
+        directory = os.open(room, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            try:
+                fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=directory)
+            except FileExistsError:
+                fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+                with os.fdopen(fd, "rb") as existing:
+                    info = os.fstat(existing.fileno())
+                    if (not stat.S_ISREG(info.st_mode) or info.st_size != size
+                            or hashlib.file_digest(existing, "sha256").hexdigest() != digest):
+                        raise ValueError("existing export differs; preserve it under another name before retrying")
+            else:
+                try:
+                    patch.seek(0)
+                    with os.fdopen(fd, "wb") as output:
+                        while chunk := patch.read(INSPECTION_LIMIT):
+                            output.write(chunk)
+                        output.flush(); os.fsync(output.fileno())
+                    os.fsync(directory)
+                except BaseException:
+                    # This action created this file exclusively; never remove a prior candidate.
+                    os.unlink(name, dir_fd=directory)
+                    raise
+        finally:
+            os.close(directory)
+    return {"status": "exported", "run": run, "base": report["base"],
+            "contribution": report["commit"], "selected_paths": selected,
+            "path": name, "patch_bytes": size, "patch_sha256": digest}
+
+
+def conflict_preview(shared: Path, workspace: Path, report: dict) -> dict:
+    """Merge exact heads in disposable objects; never touch source refs or indexes."""
+    current = git(shared, "rev-parse", "HEAD")
+    with tempfile.TemporaryDirectory(prefix="house-preview-") as directory:
+        root = Path(directory)
+        subprocess.run(["git", "init", "--bare", "--quiet", str(root)], check=True, timeout=30)
+        objects = []
+        for repo in (shared, workspace):
+            path = Path(git(repo, "rev-parse", "--git-path", "objects"))
+            objects.append(str((path if path.is_absolute() else repo / path).resolve()))
+        (root / "objects/info/alternates").write_text("\n".join(objects) + "\n")
+        with tempfile.TemporaryFile() as output:
+            process = subprocess.run(["git", "--git-dir", str(root), "merge-tree", "--write-tree",
+                                      "--merge-base=" + report["base"], current, report["commit"]],
+                                     stdout=output, stderr=subprocess.DEVNULL, timeout=30)
+            if process.returncode not in (0, 1):
+                raise ValueError("merge-tree preview unavailable")
+            size = output.tell(); output.seek(0)
+            text = output.read(DIAGNOSTIC_LIMIT).decode("utf-8", "replace")
+    return {"base": report["base"], "current": current, "contribution": report["commit"],
+            "status": "conflict" if process.returncode else "clean",
+            "output": text, "truncated": size > DIAGNOSTIC_LIMIT}
 
 
 def failure_diagnostics(log: Path, test_exit: int) -> dict:
@@ -681,15 +819,21 @@ def main():
     parser.add_argument("--path", help="exact changed path to inspect, with committed text when small")
     parser.add_argument("--diff-after", type=int, help="byte offset to continue reading committed diff")
     parser.add_argument("--content-after", type=int, help="byte offset to continue reading committed text for --path")
+    parser.add_argument("--bundle", action="store_true")
+    parser.add_argument("--paths", nargs="+")
+    parser.add_argument("--offset", type=int)
+    parser.add_argument("--preview", action="store_true")
     args = parser.parse_args()
     try:
         validate_inspect_options(
             inspect=args.inspect, path=args.path,
             diff_after=args.diff_after, content_after=args.content_after,
+            bundle=args.bundle, paths=args.paths, offset=args.offset, preview=args.preview,
         )
         record = Record(args.repo)
         result = (inspect_contribution(record, args.run, args.actor, args.path,
-                                       diff_after=args.diff_after, content_after=args.content_after)
+                                       diff_after=args.diff_after, content_after=args.content_after,
+                                       bundle=args.bundle, paths=args.paths, offset=args.offset, preview=args.preview)
                   if args.inspect else
                   integrate(record, args.run, args.actor, publish=args.publish, reject=args.reject))
         print(json.dumps(result, indent=2))
