@@ -33,7 +33,7 @@ def _score(value, bounds):
     low, high = bounds
     if value is None:
         return low, high
-    if isinstance(value, bool) or not isinstance(value, (int, float, np.number)):
+    if isinstance(value, bool) or np.iscomplexobj(value) or not isinstance(value, (int, float, np.number)):
         raise ValueError('score must be a real number or None for failure')
     if not np.isfinite(value) or not low <= value <= high:
         raise ValueError('score outside declared bounds')
@@ -70,7 +70,10 @@ def envelope_interval(envelopes, bounds, alpha):
     low, high = _bounds(bounds)
     if not 0 < alpha < 1:
         raise ValueError('alpha must be strictly between zero and one')
-    observations = np.asarray(list(envelopes), dtype=float)
+    observations = np.asarray(list(envelopes))
+    if np.iscomplexobj(observations):
+        raise ValueError('completion envelopes must be real')
+    observations = observations.astype(float)
     if observations.size == 0:
         return [low, high]
     if (observations.ndim != 2 or observations.shape[1] != 2 or
@@ -91,7 +94,10 @@ def nonnegative_upper(values, radius, alpha):
     Invert its upper crossing. An observation equal to R makes this bet
     uninformative thereafter; return R honestly rather than delete it.
     """
-    values = np.asarray(values, dtype=float)
+    values = np.asarray(values)
+    if np.iscomplexobj(values):
+        raise ValueError('discrepancy observations must be real')
+    values = values.astype(float)
     if (not np.isfinite([radius, alpha]).all() or radius <= 0 or not 0 < alpha < 1 or
         values.ndim != 1 or not np.isfinite(values).all() or
         np.any(values < 0) or np.any(values > radius)):

@@ -45,7 +45,7 @@ class ResolutionPrecisionTests(unittest.TestCase):
         self.assertEqual(envelope_interval([], (-1., 1.), .05), [-1., 1.])
 
     def test_invalid_inputs_do_not_silently_change_design(self):
-        for value in (np.nan, np.inf, 1.1, True, '0.5'):
+        for value in (np.nan, np.inf, 1.1, True, '0.5', np.complex128(.5)):
             with self.assertRaises(ValueError):
                 path_envelopes(value, .5, (0., 1.))
         with self.assertRaises(ValueError):
@@ -53,6 +53,10 @@ class ResolutionPrecisionTests(unittest.TestCase):
         for family in (1, True, 2.5):
             with self.assertRaises(ValueError):
                 paired_population([], (0., 1.), 1, family_size=family)
+        with self.assertRaises(ValueError):
+            nonnegative_upper([.5+1j], 1., .05)
+        with self.assertRaises(ValueError):
+            envelope_interval([(.5+1j, .6)], (0., 1.), .05)
 
     def test_triangle_bound_does_not_allow_signed_cancellation(self):
         paths = [(1., 0.), (0., 1.)]
