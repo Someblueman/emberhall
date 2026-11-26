@@ -74,17 +74,27 @@ def finished_titles(state: dict, events: list[dict], run: dict) -> list[str]:
         return []
     end = run.get("ended_sequence", len(events) + 1)
     titles: list[str] = []
+    seen: set[str] = set()
     for event in events[launched:end - 1]:
         if event["op"] == "finish" and event["actor"] == run["resident"]:
-            task = state.get("tasks", {}).get(event["data"]["task"], {})
-            title = " ".join(str(task.get("title") or event["data"]["task"]).split())
-            if title and title not in titles:
-                titles.append(title)
+            key = str(event["data"]["task"])
+            if key in seen:
+                continue
+            seen.add(key)
+            task = state.get("tasks", {}).get(key, {})
+            titles.append(_one_line(task.get("title")) or _one_line(key) or "untitled task")
     return titles
+
+
+def _one_line(value) -> str:
+    """Printable text on one line; NUL and other control characters cannot reach git argv."""
+    text = "".join(ch if ch.isprintable() else " " for ch in str(value or ""))
+    return " ".join(text.split())
 
 
 def contribution_message(titles: list[str]) -> str:
     """A commit message naming the finished work; residents no longer write their own."""
+    titles = [line for line in (_one_line(title) for title in titles) if line]
     if not titles:
         return FALLBACK_MESSAGE
     subject = titles[0]

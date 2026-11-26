@@ -1,6 +1,5 @@
 """The coordinator's end-of-run commit names the work the resident finished."""
 from pathlib import Path
-import subprocess
 import tempfile
 import unittest
 
@@ -27,6 +26,15 @@ class ContributionMessageTests(unittest.TestCase):
                          ["Prove the first case", "Check the second", "missing"])
         self.assertEqual(finished_titles(state, events, {**run, "ended_sequence": 5}), ["Prove the first case"])
         self.assertEqual(finished_titles(state, events, {"resident": "r1"}), [])
+
+    def test_distinct_tasks_with_one_title_and_unsafe_titles(self):
+        state = {"tasks": {"a": {"title": "Same"}, "b": {"title": "Same"}, "c": {"title": "  \n "},
+                           "d": {"title": "Bad\x00title"}}}
+        events = [event("wake", "r1")] + [event("finish", "r1", task=k) for k in "abcd"]
+        titles = finished_titles(state, events, {"resident": "r1", "launched_sequence": 1})
+        self.assertEqual(titles, ["Same", "Same", "c", "Bad title"])
+        self.assertNotIn("\x00", contribution_message(["x\x00y", "z"]))
+        self.assertEqual(contribution_message(["\x00", " "]), FALLBACK_MESSAGE)
 
     def test_message_shapes(self):
         self.assertEqual(contribution_message([]), FALLBACK_MESSAGE)
