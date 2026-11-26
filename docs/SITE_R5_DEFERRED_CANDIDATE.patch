@@ -1,0 +1,158 @@
+--- a/site/house.js
++++ b/site/house.js
+@@ -1186,6 +1186,37 @@
+   target.focus({preventScroll:true});
+   target.scrollIntoView({block:"start"});
+ }
++// Hidden secondary views need no record DOM. Drop their old rows/listeners so a
++// later snapshot is not retained, then rebuild the visited view from current globals.
++function renderAuxiliaryViews() {
++  const view=document.querySelector?.(".page-view:not([hidden])")?.id;
++  // Embedded/minimal hosts without page-view routing keep the established renderer.
++  if(!view) {
++    if($("budgets"))accounts();if($("shelf"))shelf();
++    if($("voting"))voting();if($("creations"))renderCollection();return;
++  }
++  const clear=id=>$(id)?.replaceChildren();
++  if(view!=="accounts-view")clear("budgets");
++  if(view!=="projects-view"&&view!=="gallery-view") {clear("shelf");clear("finished");}
++  if(view!=="council-view") {
++    // Preserve the same expanded-card memory used by voting() before discarding rows.
++    for(const node of $("voting")?.querySelectorAll("details")||[]) {
++      if(!node.id)continue;
++      if(node.open)votingOpened.add(node.id);else votingOpened.delete(node.id);
++    }
++    clear("voting");
++  }
++  reconcileCreationPicture();
++  if(view!=="gallery-view") {
++    clear("creations");
++    const exhibit=$("gallery-signal-trial");
++    if(exhibit?.tagName==="IFRAME") {exhibit.hidden=true;exhibit.removeAttribute("src");}
++  }
++  if(view==="accounts-view")accounts();
++  if(view==="projects-view"||view==="gallery-view")shelf();
++  if(view==="council-view")voting();
++  if(view==="gallery-view")renderCollection();
++}
+ function showViewForHash(hash, focusTarget=false) {
+   const targetId=String(hash||"").replace(/^#/,"");
+   const roomRoute=targetId.startsWith("room/");
+@@ -1202,7 +1233,7 @@
+   if(frame&&(roomRoute||targetId==="house-view"||!targetId)) {
+     if(!roomRoute)selected=null;
+     render();
+-  }
++  } else if(frame)renderAuxiliaryViews();
+   if(focusTarget) {
+     const target=roomRoute?document.querySelector(".room-card"):$(targetId)||view;
+     target?.focus?.({preventScroll:true});
+@@ -4924,7 +4955,7 @@
+   $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;if($("room-overview"))$("room-overview").hidden=!selected;
+   const navigation=$("room-nav");navigation.replaceChildren();
+   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.id=`room-link-${encodeURIComponent(room.id)}`;button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
+-  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
++  drawHouse();roomPanel();dormControls();renderAuxiliaryViews();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
+   const ambitions=$("ambitions");ambitions.replaceChildren();
+   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
+   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
+@@ -5035,7 +5066,7 @@
+   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
+     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
+   if(changed)render();
+-  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();renderLately();}
++  else {lighting();roomPanel();drawHouse();renderViewContext();renderAuxiliaryViews();renderRecentGrowth();renderLately();}
+   const replacement=$("catchup-seq");
+   if(replacement&&draft!==null)replacement.value=draft;
+   if(focusId)$(focusId)?.focus({preventScroll:true});
+--- /dev/null
++++ b/tests/test_deferred_views.py
+@@ -0,0 +1,88 @@
++"""Secondary views render on entry and release hidden record rows."""
++from pathlib import Path
++import shutil
++import subprocess
++import unittest
++
++ROOT=Path(__file__).resolve().parents[1]
++SCRIPT=r'''
++const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
++class Element {
++ constructor(id='',tag='DIV'){this.id=id;this.tagName=tag;this.children=[];this.attrs={};this.hidden=true;}
++ appendChild(node){this.children.push(node);return node;}
++ replaceChildren(){this.children=[];}
++ querySelectorAll(tag){return this.children.filter(n=>n.tagName===tag.toUpperCase());}
++ setAttribute(k,v){this.attrs[k]=v;}
++ removeAttribute(k){delete this.attrs[k];}
++ focus(){document.activeElement=this;}
++ scrollIntoView(){this.scrolled=true;}
++}
++const ids=['house-view','projects-view','gallery-view','council-view','accounts-view'];
++const nodes={},get=id=>nodes[id]??(nodes[id]=new Element(id));
++ids.forEach(get);get('house-view').hidden=false;
++const document={getElementById:get,activeElement:null,
++ querySelector:s=>s==='.page-view:not([hidden])'?ids.map(get).find(n=>!n.hidden):null,
++ querySelectorAll:s=>s==='.page-view'?ids.map(get):[]};
++const context=vm.createContext({document,Date,Intl,Math,URL});
++const source=fs.readFileSync(process.argv[1],'utf8'),startup=source.lastIndexOf('\nrefresh();');
++assert(startup>0);vm.runInContext(source.slice(0,startup),context);
++const run=s=>vm.runInContext(s,context);
++context.calls={accounts:0,shelf:0,voting:0,collection:0,house:0};
++run(`data={journal_head:'head1'};frame={seq:1};catalogSource='catalog1';
++ const write=(id)=>{const target=document.getElementById(id);target.replaceChildren();target.appendChild({tagName:'P',textContent:frame.seq+':'+catalogSource});};
++ accounts=()=>{calls.accounts++;write('budgets');};
++ shelf=()=>{calls.shelf++;write('shelf');write('finished');};
++ voting=()=>{calls.voting++;write('voting');};
++ renderCollection=()=>{calls.collection++;write('creations');};
++ render=()=>{calls.house++;renderAuxiliaryViews();};
++`);
++for(const id of ['budgets','shelf','finished','voting','creations'])get(id).appendChild({tagName:'P',oldFrame:true});
++run(`renderAuxiliaryViews();`);
++assert.deepEqual(context.calls,{accounts:0,shelf:0,voting:0,collection:0,house:0});
++for(const id of ['budgets','shelf','finished','voting','creations'])assert.equal(get(id).children.length,0);
++run(`showViewForHash('#voting-card',true);`);
++assert.equal(context.calls.voting,1);assert.equal(get('council-view').hidden,false);
++assert.equal(document.activeElement.id,'voting-card');
++const detail=new Element('vote-a','DETAILS');detail.open=true;get('voting').appendChild(detail);
++run(`showViewForHash('#accounts-view');`);
++assert.equal(context.calls.accounts,1);assert.equal(get('voting').children.length,0);
++assert.equal(run(`votingOpened.has('vote-a')`),true);
++run(`frame={seq:2};data={journal_head:'head2'};catalogSource='catalog2';showViewForHash('#projects-view');`);
++assert.equal(context.calls.shelf,1);assert.equal(get('shelf').children[0].textContent,'2:catalog2');
++assert.equal(get('budgets').children.length,0);
++run(`showViewForHash('#finished-card',true);`);
++assert.equal(get('gallery-view').hidden,false);assert.equal(context.calls.collection,1);
++assert.equal(get('finished').children[0].textContent,'2:catalog2');
++assert.equal(get('creations').children[0].textContent,'2:catalog2');
++const iframe=get('gallery-signal-trial');iframe.tagName='IFRAME';iframe.setAttribute('src','old-gallery');
++run(`showViewForHash('#house-view');`);
++assert.equal(context.calls.house,1);assert.equal(get('creations').children.length,0);
++assert.equal(get('shelf').children.length,0);assert.equal(iframe.attrs.src,undefined);assert.equal(iframe.hidden,true);
++// Returning to a view after a frame/catalog change rebuilds it, never shows old rows.
++run(`frame={seq:3};catalogSource='catalog3';showViewForHash('#gallery-view');`);
++assert.equal(get('creations').children[0].textContent,'3:catalog3');
++assert.equal(get('finished').children[0].textContent,'3:catalog3');
++// An unchanged-publication local redraw updates only the active auxiliary view.
++run(`lighting=roomPanel=drawHouse=renderViewContext=renderRecentGrowth=renderLately=()=>{};
++ refreshView(false);`);
++assert.equal(get('creations').children[0].textContent,'3:catalog3');
++assert.equal(context.calls.accounts,1);assert.equal(context.calls.voting,1);
++run(`showViewForHash('#room/hearth');`);
++assert.equal(get('house-view').hidden,false);assert.equal(get('creations').children.length,0);
++// A minimal embedded host without page views retains the established eager renderer.
++context.document.querySelector=()=>null;
++run(`renderAuxiliaryViews();`);
++assert.equal(get('budgets').children[0].textContent,'3:catalog3');
++console.log('initial hidden panels skipped; route aliases, refresh, frame/catalog changes and old DOM release pass');
++'''
++
++
++@unittest.skipUnless(shutil.which('node'),'Node executes the real routing and dispatcher')
++class DeferredViewChecks(unittest.TestCase):
++    def test_secondary_views_are_current_on_entry_and_hidden_rows_are_released(self):
++        result=subprocess.run(['node','-e',SCRIPT,str(ROOT/'site/house.js')],text=True,capture_output=True)
++        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++        self.assertIn('initial hidden panels skipped',result.stdout)
++
++
++if __name__=='__main__':unittest.main()
