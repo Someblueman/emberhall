@@ -16,6 +16,106 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_continuation_positive_assembly_on_original_three_state_path(self):
+        # Exercise assembly with an independently retained h43 path. Only the
+        # discovery oracle is supplied: final replay still checks every original
+        # row and absolute phase, for both starting parities.
+        for first in (2,3):
+            packet=rs.adjacent_balanced_example(first=first)
+            keys,_,_=rs.adjacent_phase_system(43,3,first)
+            bits=int(packet['bits'],16)
+            values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+            edgekeys,_,_=rs.adjacent_phase_system(43,2,first)
+            controls=[values[(*label,first+2)] for label in rs.moving_folded_labels()[356:]]
+            decision={'kind':'moving-adjacent-two-control-v1',
+                      'proof':{'control_bits':hex(sum((v==-1)<<i for i,v in enumerate(controls)))}}
+            class Edge:
+                nodes=1
+                def run(self,initial):return 'sat',[values[key] for key in edgekeys]
+            with patch.object(rs,'adjacent_control_rounding_structure'), \
+                 patch.object(rs,'make_engine',return_value=Edge()), \
+                 patch.object(rs,'adjacent_difference_successor',return_value=decision):
+                result=rs.adjacent_continuation_search(hole=43,first=first)
+            self.assertEqual(result['status'],'local_signing')
+            self.assertEqual(result['path']['bits'],packet['bits'])
+            self.assertTrue(rs.verify_saved(result['path'])['verified'])
+
+    def test_bounded_sign_slack_exact_interval(self):
+        for bound in range(65):
+            weights=rs.bounded_sign_slack(bound)
+            sums={0}
+            for weight in weights:
+                sums={value+sign*weight for value in sums for sign in (-1,1)}
+            self.assertEqual(sums,set(range(-bound,bound+1,2)))
+            self.assertLessEqual(len(weights),bound.bit_length())
+        for value in (-1,True,1.5):
+            with self.assertRaises(ValueError):rs.bounded_sign_slack(value)
+
+    def test_continuation_cut_replays_and_excludes_dead_state(self):
+        packet=rs.adjacent_four_zero_example()
+        keys,_,_=rs.adjacent_phase_system(97,2,2)
+        bits=int(packet['bits'],16)
+        values={key:1-2*(bits>>i&1) for i,key in enumerate(keys)}
+        labels=rs.moving_folded_labels()
+        source=[values[(*label,2)] for label in labels]
+        dead=[values[(*label,3)] for label in labels]
+        refusal=rs.adjacent_difference_successor(97,dead)
+        self.assertEqual(refusal['kind'],'moving-adjacent-control-bound-refusal-v1')
+        # A nontrivial placement detects confusing coordinate and row indices.
+        positions=list(range(803,0,-2))
+        row,end=rs.adjacent_continuation_cut(refusal,positions,804)
+        weights=[-row[i] for i in range(804,end)]
+        possible={0}
+        for weight in weights:
+            possible={v+sign*weight for v in possible for sign in (-1,1)}
+        for state,expected in ((source,True),(dead,False)):
+            total=sum(row[i]*v for i,v in zip(positions,state) if i in row)
+            self.assertEqual(total in possible,expected)
+        altered={**refusal,'inequality':{**refusal['inequality'],
+                                      'bound':refusal['inequality']['bound']+2}}
+        with self.assertRaises(ValueError):rs.adjacent_continuation_cut(altered,positions,804)
+        with self.assertRaises(ValueError):rs.adjacent_continuation_cut(refusal,positions,803)
+
+    def test_continuation_search_learns_a_replayed_cut(self):
+        packet=rs.adjacent_four_zero_example()
+        keys,_,_=rs.adjacent_phase_system(97,2,2)
+        bits=int(packet['bits'],16)
+        signs=[1-2*(bits>>i&1) for i in range(len(keys))]
+        sizes=[];row_counts=[]
+        class Search:
+            nodes=1
+            def __init__(self,first):self.first=first
+            def run(self,initial):return ('sat',signs) if self.first else ('unknown',None)
+        def engine(size,rows,basis,seconds,nodes,order):
+            sizes.append(size);row_counts.append(len(rows))
+            return Search(len(sizes)==1)
+        with patch.object(rs,'make_engine',side_effect=engine):
+            result=rs.adjacent_continuation_search(seconds=10,max_rounds=2,zero_observables=True)
+        self.assertEqual(result['status'],'unknown')
+        self.assertEqual(len(result['cuts']),1)
+        self.assertTrue(result['zero_observables'])
+        self.assertEqual(row_counts,[364,365])
+        self.assertGreater(sizes[1],sizes[0])
+        self.assertTrue(rs.verify_adjacent_control_bound_refusal(result['cuts'][0]))
+        # An actually unextendible target was removed, not a time-limited branch.
+        self.assertEqual(result['history'][1]['cuts'],1)
+
+    def test_continuation_search_budget_and_input_scope(self):
+        # Exhaustion of this discovery engine never becomes a negative proof.
+        class NoPath:
+            nodes=7
+            def run(self,initial):return 'unknown',None
+        with patch.object(rs,'make_engine',return_value=NoPath()):
+            result=rs.adjacent_continuation_search(seconds=10,nodes=100)
+        self.assertEqual(result['status'],'unknown')
+        self.assertEqual(result['nodes'],7)
+        self.assertFalse(result['all_pairs_decided'])
+        self.assertFalse(result['physical_endpoints_included'])
+        for kwargs in ({'seconds':float('inf')},{'nodes':True},{'max_rounds':0},
+                       {'first':1},{'hole':78},{'zero_observables':1},
+                       {'hole':80,'zero_observables':True}):
+            with self.assertRaises(ValueError):rs.adjacent_continuation_search(**kwargs)
+
     def test_primitive_recovery_against_dense_rational_equations(self):
         # Independent left-to-right dense Gauss-Jordan elimination over Q.
         # Its pivot order differs from the production sparse degree heuristic.
