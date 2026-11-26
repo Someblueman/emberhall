@@ -451,6 +451,11 @@ h2 {
 .ambition-card summary,.accounting-notes summary,.shelf-completed > summary,.shelf-idea > summary,.project-details summary {
   cursor:pointer;
 }
+.accounting-notes > summary {
+  box-sizing:border-box;
+  min-height:44px;
+  padding:10px 0;
+}
 .shelf-item > summary {
   font-weight:600;
   overflow-wrap:anywhere;
