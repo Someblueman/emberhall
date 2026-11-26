@@ -255,14 +255,14 @@ persistent Git signing change. Do not duplicate the single coordinator.
 House identity: `9c5a77af-0f1a-4995-8e52-e91c0d814569`.
 Foundation anchor: `74339de5dda84c799fe43650ba273a84de31ba8a`.
 
-The latest verified checkpoint contains **44,830 events**, through
-`c202b61a865c7953265e3c0dee65abed7976e0c6` (2026-11-25 04:49 UTC).
-The fixed-channel checkpoint worker restored the 48,837,356-byte bundle in a
+The latest verified checkpoint contains **49,816 events**, through
+`4fa4daa607f31996095231ecfbc6b0f5131fbf1b` (2026-11-26 04:58 UTC).
+The fixed-channel checkpoint worker restored the 53,664,449-byte bundle in a
 disposable repository and compared every event and the resulting house state.
 The delivered metadata hash, journal head and anchor match the worker's
 compact receipt. The bundle SHA256 is
-`e458ace4a7c697da41ae612e2ebcb0b5270f67ed025de312d38698907bdcab29`.
-The [dated metadata](../evidence/house-checkpoint-44830-f70f218e2e54398a6cbbb05e1efc9b7db31d18887bbacfd15506910a0067de9f.json)
+`ad4b09454ff11b45c594ec9389f0f5da3366b7b6dffbc7b8e2f591c688a2cfd6`.
+The [dated metadata](../evidence/house-checkpoint-49816-a409d602ebddfcf97f9b504094908ab258fb9b74844955c81922d1628fbc6c68.json)
 and [current pointer](../evidence/checkpoint.json) are byte-for-byte identical.
 
 Under the course correction, this bundle stays in the canonical host's private
@@ -271,7 +271,7 @@ clone with an absent journal, after explicitly copying the retained bundle to th
 same relative path, use:
 
 ```sh
-python3 -m house restore .git/house-home/checkpoints/f70f218e2e54398a6cbbb05e1efc9b7db31d18887bbacfd15506910a0067de9f/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
+python3 -m house restore .git/house-home/checkpoints/a409d602ebddfcf97f9b504094908ab258fb9b74844955c81922d1628fbc6c68/checkpoint.bundle --expect-anchor 74339de5dda84c799fe43650ba273a84de31ba8a
 python3 -m house status
 ```
 

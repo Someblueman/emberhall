@@ -1,0 +1,19 @@
+{
+  "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+  "bundle": ".git/house-home/checkpoints/a409d602ebddfcf97f9b504094908ab258fb9b74844955c81922d1628fbc6c68/checkpoint.bundle",
+  "bundle_bytes": 53664449,
+  "bundle_sha256": "ad4b09454ff11b45c594ec9389f0f5da3366b7b6dffbc7b8e2f591c688a2cfd6",
+  "events": 49816,
+  "first_event_utc": "2026-11-13T00:29:53.005352+00:00",
+  "head": "4fa4daa607f31996095231ecfbc6b0f5131fbf1b",
+  "house_id": "9c5a77af-0f1a-4995-8e52-e91c0d814569",
+  "last_event_utc": "2026-11-26T04:58:29.115058+00:00",
+  "name": "Emberhall",
+  "note": "Verified fixed journal prefix. Later events may be outside this export. Not canonical publication, rule ratification or a claim of elapsed days.",
+  "restore_receipt": {
+    "anchor": "74339de5dda84c799fe43650ba273a84de31ba8a",
+    "events": 49816,
+    "head": "4fa4daa607f31996095231ecfbc6b0f5131fbf1b"
+  },
+  "restored_exact_state_and_events": true
+}
