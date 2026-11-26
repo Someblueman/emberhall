@@ -5,7 +5,7 @@ import numpy as np
 
 from resolution_precision import (path_envelopes, community_envelopes,
                                   envelope_interval, paired_population,
-                                  zero_sample_necessary_count)
+                                  zero_sample_necessary_count, nonnegative_upper)
 
 
 class ResolutionPrecisionTests(unittest.TestCase):
@@ -67,6 +67,46 @@ class ResolutionPrecisionTests(unittest.TestCase):
                 probability = 1-.005/radius
                 self.assertLessEqual(probability**n, alpha)
                 self.assertGreater(probability**(n-1), alpha)
+
+    def test_zero_upper_attains_necessary_boundary(self):
+        alpha, epsilon = .05/48, .005
+        n = zero_sample_necessary_count(2., epsilon, alpha)
+        self.assertLessEqual(nonnegative_upper([0.]*n, 2., alpha), epsilon)
+        self.assertGreater(nonnegative_upper([0.]*(n-1), 2., alpha), epsilon)
+        self.assertEqual(nonnegative_upper([0., 2., 0.], 2., alpha), 2.)
+
+    def test_one_sided_anytime_coverage_by_exact_bernoulli_recursion(self):
+        # A success takes the maximum value, so the bet then stays zero.
+        # Only the all-zero prefix can cross; compute its exact probability.
+        alpha = .05
+        for mean in (.01, .1, .4, .9):
+            surviving_zero_probability = 1.
+            crossed = 0.
+            already_crossed = False
+            for n in range(1, 501):
+                surviving_zero_probability *= 1-mean
+                if not already_crossed and nonnegative_upper([0.]*n, 1., alpha) < mean:
+                    crossed += surviving_zero_probability
+                    already_crossed = True
+            self.assertLessEqual(crossed, alpha+1e-14)
+
+    def test_interior_atom_exact_path_crossing_probability(self):
+        atoms, weights, alpha = (0., .25, 1.), (.3, .4, .3), .2
+        mean = sum(x*p for x, p in zip(atoms, weights))
+        active = [(1., 1.)]  # probability, wealth; absorb first crossings
+        crossed = 0.
+        for _ in range(8):
+            remaining = []
+            for probability, wealth in active:
+                for x, weight in zip(atoms, weights):
+                    p, w = probability*weight, wealth*(1-x)/(1-mean)
+                    if w >= 1/alpha:
+                        crossed += p
+                    else:
+                        remaining.append((p, w))
+            active = remaining
+        self.assertLessEqual(crossed, alpha+1e-14)
+        self.assertAlmostEqual(crossed+sum(p for p, w in active), 1.)
 
 
 if __name__ == '__main__':

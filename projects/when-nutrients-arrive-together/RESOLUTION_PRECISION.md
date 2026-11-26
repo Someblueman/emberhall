@@ -58,15 +58,39 @@ every completion of the path-average score and path-average absolute
 difference. Failed paths need not discard their successful siblings.
 The lower and upper endpoint processes are observable bounded functions
 of independently drawn identically configured communities. Apply the
-confidence sequences derived in FRESH_PRECISION.md to each endpoint,
-allocating half of the estimand's alpha to each in advance. The resulting
+confidence sequences derived in FRESH_PRECISION.md to each score endpoint,
+allocating half of the score estimand's alpha to each in advance. The resulting
 outer interval covers every bounded completion's expectation at every
 community count. Undefined failed scores are still undefined; this states
 partial information without inventing their values. Clean acceptance
 separately requires its declared failure rule.
 
+For a discrepancy only an upper bound is needed. Write Z for the
+community-average **upper** discrepancy envelope, bounded by R=b-a.
+At a candidate mean m in [0,R), the process
+
+```
+W_n(m) = product_i [(1-Z_i/R)/(1-m/R)]
+```
+
+is a nonnegative martingale at the true m. Its first crossing of 1/alpha
+has probability at most alpha. Inverting gives the time-uniform upper bound
+
+```
+U_n = R * {1 - exp[(log(alpha) + sum_i log(1-Z_i/R))/n]}.
+```
+
+The unknown completed mean discrepancy is at most E[Z], so this upper bound
+covers every completion too. At n=0 return R. If any Z_i=R, the product is
+zero forever and this particular bet gives only R thereafter. This is a
+deliberate limitation, including after a wholly failed community; do not
+erase such an observation to obtain a useful bound. The code adds a small
+outer numerical allowance; it is ordinary floating point, not rigorous
+interval arithmetic. No lower discrepancy bound beyond zero is reported.
+
 For twelve score means and three comparisons per score, freeze 48 estimands
-and allocate .05/48 to each; the endpoint split uses .05/96. The union bound
+and allocate .05/48 to each. Score endpoints use .05/96 each, whereas the
+one-sided discrepancy bound uses its entire .05/48. The union bound
 gives simultaneous 95% coverage over these estimands and all community
 counts. Correlation between measures and nested paths is allowed. Repeating
 identical paths within a community leaves the interval unchanged. Scanning
@@ -78,16 +102,17 @@ population coverage.
 
 The following are mathematical controls with constant rank .8 and zero
 paired difference, **not ecological observations or promised sample sizes**.
-For the 48-estimand family and failure-aware endpoint split:
+For the 48-estimand family with failure-aware score endpoints and the
+one-sided discrepancy bound:
 
 | Communities | Rank mean interval | Upper mean absolute rank difference |
 |---:|---:|---:|
-| 48 | [.46117, .83765] | .37647 |
-| 96 | [.62140, .81984] | .19844 |
-| 192 | [.70827, .81019] | .10192 |
-| 768 | [.77660, .80260] | .02600 |
-| 3072 | [.79412, .80065] | .00653 |
-| 6144 | [.79706, .80033] | .00327 |
+| 48 | [.46117, .83765] | .26660 |
+| 96 | [.62140, .81984] | .13806 |
+| 192 | [.70827, .81019] | .07027 |
+| 768 | [.77660, .80260] | .01780 |
+| 3072 | [.79412, .80065] | .00447 |
+| 6144 | [.79706, .80033] | .00223 |
 
 At 192 communities the score mean's half-width is about .051, yet numerical
 mean discrepancy is not bounded by .005. Population precision and numerical
@@ -114,8 +139,11 @@ not become independent communities in this one.
 
 With rank discrepancy R=2, epsilon=.005 and alpha=.05/48, even a one-sided
 method needs at least 2744 independent communities to give that upper bound
-on the all-zero sample. Our two-endpoint allocation makes the corresponding
-necessary count 3021. For AUC discrepancy R=1 the counts are 1370 and 1509.
+on the all-zero sample. The one-sided process above attains this count
+(including the code's outer rounding allowance at these parameters).
+Splitting that discrepancy alpha between two endpoints instead would raise
+the necessary count to 3021. For AUC discrepancy R=1 these counts are 1370
+and 1509.
 Even one marginal 95% rank bound requires 1197. These are necessary counts
 for that assurance, not sufficient counts for our mixture or a simulator.
 
@@ -131,11 +159,13 @@ needed to reach a stationary/continuum claim at an affordable cost.
 
 ## Replay
 
-The eight controls check sharp failure envelopes against all bounded
+The eleven controls check sharp failure envelopes against all bounded
 completions on a grid, nested-path invariance, positive uncertainty after
 perfect agreement, failure widening, input rejection and cancellation.
 They also check the adversarial coverage boundary on both sides of the
-necessary integer count, and supplement the exact martingale controls in
+necessary integer count, that the one-sided bound attains it, and exact
+finite-path crossing probabilities for Bernoulli and interior-atom controls.
+They supplement the exact martingale controls in
 test_bounded_precision.py. The compact resolution-budget-controls.csv
 contains only the constant-score mathematical controls above.
 

@@ -84,6 +84,25 @@ def envelope_interval(envelopes, bounds, alpha):
     return [low+(high-low)*lower, low+(high-low)*upper]
 
 
+def nonnegative_upper(values, radius, alpha):
+    """Anytime upper mean bound, optimal on an all-zero bounded sample.
+
+    At mean m, product (1-X/R)/(1-m/R) is a nonnegative martingale.
+    Invert its upper crossing. An observation equal to R makes this bet
+    uninformative thereafter; return R honestly rather than delete it.
+    """
+    values = np.asarray(values, dtype=float)
+    if (not np.isfinite([radius, alpha]).all() or radius <= 0 or not 0 < alpha < 1 or
+        values.ndim != 1 or not np.isfinite(values).all() or
+        np.any(values < 0) or np.any(values > radius)):
+        raise ValueError('need bounded nonnegative observations and valid alpha')
+    if len(values) == 0 or np.any(values == radius):
+        return float(radius)
+    exponent = (math.log(alpha)+float(np.log1p(-values/radius).sum()))/len(values)
+    # Outer numerical endpoint, not an interval-arithmetic certificate.
+    return min(float(radius), float(-radius*np.expm1(exponent))+1e-12*radius)
+
+
 def paired_population(rows, bounds, path_count, *, family_size, family_alpha=.05):
     """Intervals for one target in a predeclared family of paired studies.
 
@@ -105,7 +124,8 @@ def paired_population(rows, bounds, path_count, *, family_size, family_alpha=.05
     alpha = family_alpha/family_size
     return dict(communities=len(scores), paths_per_community=path_count,
                 score_mean=envelope_interval(scores, bounds, alpha),
-                mean_absolute_difference=envelope_interval(deltas, (0., bounds[1]-bounds[0]), alpha),
+                mean_absolute_difference=[0., nonnegative_upper([x[1] for x in deltas],
+                                                               bounds[1]-bounds[0], alpha)],
                 family_size=family_size, family_alpha=family_alpha,
                 scope='prospective fixed-design completion means; no stationary or continuum guarantee')
 
