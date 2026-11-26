@@ -31,12 +31,13 @@ for(const id of ['record-retry','record-load','record-load-status','error','pres
 let respond,calls=0;
 const fetch=()=>{calls++;return new Promise(resolve=>{respond=resolve;});};
 const ctx=vm.createContext({document,fetch,AbortSignal});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 const run=s=>vm.runInContext(s,ctx),get=id=>nodes[id];
 // Drawing is tested separately. Keep the real loader, decoder and catalog gate.
 run('refreshView=()=>{frame=data.frames[index];};bindControls=()=>{controlsReady=true;};');
-const snapshot={version:1,journal_head:'one',source_head:'source',frames:[{seq:1,scars:[]}],scars:{}};
+const snapshot={version:1,journal_head:'one',source_head:'source',frames:[{seq:1,scars:[]}],scars:{},
+ history:{current_only:true,total_frames:1,last_sequence:1}};
 const answer=async(pending,payload,ok=true)=>{respond({ok,status:503,json:async()=>payload});await pending;};
 const retry=()=>get('record-retry').listeners.click();
 (async()=>{
@@ -79,7 +80,7 @@ const retry=()=>get('record-retry').listeners.click();
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_version_three_loads_parts_once_and_reports_a_failing_part(self):
+    def test_version_three_decodes_parts_in_order_and_retries_a_failing_part(self):
         projection = json.loads((ROOT / "site/history.json").read_text())
         wire = encode(projection)
         nodes, size = wire["nodes"], len(wire["nodes"]) // 5
@@ -112,33 +113,29 @@ const fetch=async(url,options)=>{
  return {ok:true,status:200,json:async()=>url===short?input.parts[url].slice(1):input.parts[url]};
 };
 const ctx=vm.createContext({document,fetch,AbortSignal});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 const run=s=>vm.runInContext(s,ctx),get=id=>nodes[id];
 run('refreshView=()=>{frame=data.frames[index];};bindControls=()=>{controlsReady=true;};');
-const forget=()=>run('data=undefined;frame=undefined;historyParts.clear();');
+const forget=()=>run('data=undefined;frame=undefined;');
 const frames=()=>run('JSON.stringify(data.frames)');
 const fetched=()=>log.splice(0).filter(url=>url!=='history.json');
 const paths=Object.keys(input.parts);
 (async()=>{
- await ctx.refresh();const expected=frames();assert(JSON.parse(expected).length>200);log.length=0;
+ await ctx.refresh(true);const expected=frames();assert(JSON.parse(expected).length>200);log.length=0;
  forget();served=input.v3;failing.add(paths[2]);
  await ctx.refresh();
  assert.equal(get('record-load').hidden,false);assert.match(get('error').textContent,/could not be loaded/);
  assert.match(get('view-context').textContent,/^The house record has not loaded|Loading/);
- const first=fetched(),held=run('[...historyParts.keys()]');
- assert(first.includes(paths[2])&&held.length<4&&!held.includes(paths[2]));
- // A retry reuses every part already held and asks only for the rest.
+ assert.deepEqual(fetched(),paths.slice(0,3));
+ // A retry can use the browser cache for earlier parts, with no retained raw nodes.
  failing.clear();await ctx.refresh();
  assert.equal(get('record-load').hidden,true);assert.equal(frames(),expected);
- assert.deepEqual(fetched().sort(),paths.filter(path=>!held.includes(path)).sort());
- assert(notices.some(text=>/Loading the house record… \d of 4 parts/.test(text)),notices.join('|'));
- // Later refreshes fetch only history.json.
- await ctx.refresh();assert.deepEqual(log.splice(0),['history.json']);
- // A publication with one part fewer drops the unlisted part and fetches nothing new.
+ assert.deepEqual(fetched(),paths);
+ assert(notices.some(text=>/Loading the house history… \d of 4 parts/.test(text)),notices.join('|'));
+ // Each manifest controls which immutable parts are fetched.
  served=input.merged;await ctx.refresh();
- assert.equal(frames(),expected);assert.deepEqual(log.splice(0),['history.json']);
- assert.equal(run('JSON.stringify([...historyParts.keys()].sort())'),JSON.stringify(paths.slice(0,3)));
+ assert.equal(frames(),expected);assert.deepEqual(fetched(),paths.slice(0,3));
  // A part that does not hold the promised nodes is refused, and so is a foreign path.
  forget();served=input.v3;short=paths[1];await ctx.refresh();
  assert.equal(get('record-load').hidden,false);assert.equal(run('data'),undefined);log.length=0;
@@ -182,15 +179,15 @@ for(const id of ['record-retry','record-load','record-load-status','error','pres
 let served=input.v2;
 const fetch=async url=>({ok:true,status:200,json:async()=>url==='history.json'?served:input.parts[url]});
 const ctx=vm.createContext({document,fetch,AbortSignal});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 const run=s=>vm.runInContext(s,ctx);
 run('refreshView=()=>{frame=data.frames[index];};bindControls=()=>{controlsReady=true;};');
 const frames=()=>run('JSON.stringify(data.frames)');
 (async()=>{
- await ctx.refresh();const expected=frames();assert(JSON.parse(expected).length>200);
+ await ctx.refresh(true);const expected=frames();assert(JSON.parse(expected).length>200);
  // The same data, chunked into concat nodes, arrives in parts and decodes to identical frames.
- run('data=undefined;frame=undefined;historyParts.clear();');
+ run('data=undefined;frame=undefined;');
  served=input.v4;await ctx.refresh();
  assert.equal(nodes['record-load'].hidden,true);assert.equal(frames(),expected);
  assert.equal(JSON.stringify(ctx.decodePublicHistory(input.whole)),JSON.stringify(ctx.decodePublicHistory(input.v2)));
@@ -202,7 +199,7 @@ const frames=()=>run('JSON.stringify(data.frames)');
  assert.throws(()=>ctx.decodePublicHistory(wire(2,[[0]])),/public history/);
  assert.throws(()=>ctx.decodePublicHistory(wire(3,[[0]])),/public history/);
  // A version 3 publication holding a concat node is refused after its parts are joined.
- run('data=undefined;frame=undefined;historyParts.clear();');
+ run('data=undefined;frame=undefined;');
  served={...input.v4,version:3};await ctx.refresh();
  assert.equal(nodes['record-load'].hidden,false);assert.equal(run('data'),undefined);
 })().catch(error=>{console.error(error);process.exitCode=1;});

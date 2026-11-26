@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = r'''
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));
 const context=vm.createContext({document:{getElementById:()=>null,querySelector:()=>null},Intl,Date,Math,Number,String,Set,Object,Array});
 vm.runInContext(source.slice(0,-tail.length),context);

@@ -89,7 +89,7 @@ const document={body:new Element('body'),activeElement:null,
  getElementById(id){const found=Object.values(nodes).flatMap(all).find(n=>n.id===id);if(found)return found;const node=new Element('div');node.id=id;return nodes[id]=node;},
  createElement:t=>new Element(t),createElementNS:(ns,t)=>new Element(t),querySelectorAll:()=>[]};
 const context=vm.createContext({assert,document,Date,URL});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 data={timezone:'UTC',frames:[]};current=false;selectedFloor=0;
@@ -137,7 +137,7 @@ const views=ids.slice(0,4).map(id=>nodes[id]);
 const document={getElementById:id=>nodes[id]||null,querySelectorAll:s=>s==='.page-view'?views:s==='.view-nav a'?links:[]};
 const listeners={};const window={location:{hash:'#shelf-card'},addEventListener:(k,fn)=>listeners[k]=fn};
 const context=vm.createContext({assert,document,window,links,listeners,Element});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 bindControls();
@@ -186,7 +186,7 @@ const document={getElementById:get,createElement:t=>new Element(t)};
 const all=n=>[n,...n.children.flatMap(all)];
 const visible=n=>n.tag==='details'&&!n.open?[n.textContent,...(n.children[0]?[visible(n.children[0])]:[])].join(' '):[n.textContent,...n.children.map(visible)].join(' ');
 const context=vm.createContext({assert,document,URL,nodes,all,visible});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 data={timezone:'UTC'};const person={name:'Fern',agent:'codex',id:'resident-x'};

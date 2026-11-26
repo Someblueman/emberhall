@@ -20,7 +20,7 @@ const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children
 const root=new Element('div'),nodes={},get=id=>all(root).find(n=>n.id===id)||nodes[id]||null;
 const document={activeElement:null,createElement:t=>new Element(t),getElementById:get};
 const ctx=vm.createContext({assert,document,root,all,text,get,nodes,Element});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const rooms=[{id:'counting',name:'Counting',status:'open',floor:0},

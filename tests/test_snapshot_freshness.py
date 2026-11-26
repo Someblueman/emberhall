@@ -14,7 +14,7 @@ class SnapshotFreshnessTests(unittest.TestCase):
         script = r'''
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync(process.argv[1],'utf8');
-const tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));
 const nodes={};
 const document={body:{classList:{toggle(){}}},getElementById(id){

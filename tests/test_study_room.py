@@ -27,7 +27,7 @@ const text=node=>[node.textContent,...node.children.map(text)].join(' ');
 const all=node=>[node,...node.children.flatMap(all)];
 const root=new Element('div');
 const ctx=vm.createContext({assert,document,URL,root,nodes,text,all,Element});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 data={timezone:'UTC'};frame={residents:[{id:'r',name:'Rowan'}]};

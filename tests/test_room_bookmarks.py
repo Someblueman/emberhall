@@ -30,7 +30,7 @@ const listeners={},addresses=['#room/sun%20room'];let cursor=0;
 const window={location:{hash:addresses[0]},addEventListener:(k,fn)=>listeners[k]=fn,
  history:{pushState(a,b,hash){addresses.splice(++cursor);addresses.push(hash);window.location.hash=hash;}}};
 const ctx=vm.createContext({assert,document,window,Date,URL,card,links});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 const run=s=>vm.runInContext(s,ctx),text=n=>[n.textContent,...n.children.map(text)].join(' ');
 run(`

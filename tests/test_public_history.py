@@ -152,7 +152,7 @@ class PublicHistoryTests(unittest.TestCase):
         projection['literal'] = {'ref': 4, '__proto__': {'polluted': True}}
         script = r'''
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const source=fs.readFileSync('site/house.js','utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync('site/house.js','utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));const ctx=vm.createContext({});vm.runInContext(source.slice(0,-tail.length),ctx);
 const input=JSON.parse(fs.readFileSync(0,'utf8'));
 const decoded=ctx.decodePublicHistory(input.wire);

@@ -19,7 +19,7 @@ const document={getElementById:id=>nodes[id]||null,createElement:tag=>new Elemen
 const text=node=>[node.textContent,...node.children.map(text)].join(' ');
 const all=node=>[node,...node.children.flatMap(all)];
 const context=vm.createContext({assert,document,URL,nodes,text,all,Intl,Date,Math});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 data={timezone:'UTC'};current=false;

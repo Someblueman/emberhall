@@ -39,7 +39,7 @@ def historical_prefix():
 ARCHIVE_READER = r"""
 const fs = require('node:fs'), vm = require('node:vm');
 const source = fs.readFileSync(process.argv[1], 'utf8');
-const startup = 'refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const startup = 'refresh();\nsetInterval(watch,10000);\n';
 if (!source.endsWith(startup)) throw Error('Check how the archive reader starts');
 const context = vm.createContext({document: {}, ...JSON.parse(fs.readFileSync(0, 'utf8'))});
 vm.runInContext(source.slice(0, -startup.length), context);

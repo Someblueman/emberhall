@@ -21,7 +21,7 @@ const root=new Element('section'),document={getElementById:()=>root,createElemen
 const text=n=>[n.textContent,...n.children.map(text)].join(' ');
 const all=n=>[n,...n.children.flatMap(all)];
 const context=vm.createContext({assert,document,URL,root,text,all});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 data={timezone:'UTC'};frame={};voting();assert.match(text(root),/unavailable/);
@@ -84,7 +84,7 @@ class Element {
 const root=new Element('section'),document={getElementById:()=>root,createElement:tag=>new Element(tag)};
 const text=n=>[n.textContent,...n.children.map(text)].join(' ');
 const context=vm.createContext({assert,document,URL,root,text});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 data={timezone:'UTC'};

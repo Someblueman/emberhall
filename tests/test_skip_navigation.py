@@ -49,7 +49,7 @@ const document={activeElement:null,getElementById:node,
 const window={location:{hash:''},addEventListener(){}};
 const ctx=vm.createContext({assert,document,window,views,card});
 const source=fs.readFileSync(process.argv[1],'utf8');
-const tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 bindControls();

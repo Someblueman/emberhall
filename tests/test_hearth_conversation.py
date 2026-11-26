@@ -23,7 +23,7 @@ const root=new Element('div');
 const document={activeElement:null,createElement:tag=>new Element(tag),
   querySelector:()=>root,getElementById:id=>all(root).find(n=>n.id===id)||null};
 const ctx=vm.createContext({assert,document,console,Intl,Date,Math,root,all,text});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const get=id=>document.getElementById(id);

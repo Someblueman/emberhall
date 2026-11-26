@@ -114,7 +114,7 @@ function findByIdInAll(id) {
   return null;
 }
 
-const trimmed = code.replace(/refresh\(\);\s*setInterval\(refresh,60000\);setInterval\(watch,10000\);\s*$/, "");
+const trimmed = code.replace(/refresh\(\);\s*setInterval\(watch,10000\);\s*$/, "");
 const context = {
   document,
   window: { innerHeight: 900, location: { hash: "" }, addEventListener() {} },

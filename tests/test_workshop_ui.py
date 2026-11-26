@@ -32,7 +32,7 @@ const nodes={},document={body:new Element('body'),activeElement:null,
   const node=new Element('div');node.id=id;return nodes[id]=node;},
  createElement:t=>new Element(t),createElementNS:(ns,t)=>new Element(t),querySelectorAll:()=>[]};
 const context=vm.createContext({assert,document,nodes,text,all,Date,URL});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 const fixture=JSON.parse(fs.readFileSync(0,'utf8')||'null');context.fixture=fixture;
 vm.runInContext(`

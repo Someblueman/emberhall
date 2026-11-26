@@ -35,7 +35,7 @@ document.activeElement=document.body;
 let respond;
 const fetch=()=>new Promise(resolve=>{respond=resolve;});
 const ctx=vm.createContext({assert,document,fetch,AbortSignal,structuredClone,console});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 // Unrelated drawing is outside this regression; real render, roomPanel and refresh run.
@@ -45,14 +45,14 @@ const moment=(seq,op,title)=>({seq,at:100+seq,event:{op,title,actor:'a'},
 const first=moment(1,'task','build');first.tasks=[{id:'build',title:'Build Parlor'}];
 const second=moment(2,'finish','build');
 data={version:1,journal_head:'a',source_head:'source',timezone:'Europe/London',observed_at:110,
- frames:[first,second],scars:{},commits:[]};index=1;selected='parlor';controlsReady=true;render();
+ frames:[first,second],scars:{},commits:[]};index=1;selected='parlor';controlsReady=true;historyOpened=true;render();
 `,ctx);
 const get=id=>document.getElementById(id), run=s=>vm.runInContext(s,ctx);
 const snapshot=()=>run('structuredClone(data)');
 const complete=async(next,ok=true)=>{const pending=ctx.refresh();respond({ok,status:503,json:async()=>next});await pending;};
 (async()=>{
   get('catchup-seq').value='2';get('catchup-apply').focus();
-  await complete(snapshot()); // same-head minute refresh
+  await complete(snapshot()); // an explicit reload of the same publication
   assert.equal(get('catchup-seq').value,'2');
   assert.equal(document.activeElement,get('catchup-apply'));
   assert.equal(document.activeElement.focusOptions.preventScroll,true);

@@ -21,6 +21,11 @@ class GallerySignalTrialTests(unittest.TestCase):
         Object.defineProperty(exhibit, 'src', {set(path) { this.attrs.src = path; loads++; }});
         const entry = catalog.find(p => p.id === 'signal-garden');
         const page = 'projects/signal-garden/gallery.html';
+        const gallery = nodes['gallery-view'] = new Element('section');
+        gallery.hidden = true;
+        renderCollection();
+        assert.equal(loads, 0);
+        gallery.hidden = false;
         function check(visible) {
           renderCollection();
           assert.equal(exhibit.hidden, !visible);

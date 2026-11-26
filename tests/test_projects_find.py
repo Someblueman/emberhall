@@ -71,7 +71,7 @@ const find=id=>document.getElementById(id),query=value=>{
 const visibleItems=()=>all(root).filter(
  n=>typeof n.getAttribute('data-find')==='string'&&!n.classList.contains('projects-find-hidden'));
 const ctx=vm.createContext({assert,document,root,all,text,find,query,visibleItems,URL,AbortSignal});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 data={timezone:'Europe/London',observed_at:1800000000,frames:[],journal_head:'head',source_head:'src'};

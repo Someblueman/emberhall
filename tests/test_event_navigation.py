@@ -27,7 +27,7 @@ const document={getElementById:get,activeElement:null,addEventListener:(k,fn)=>{
 }};
 const ctx=vm.createContext({assert,document,get,nodes});
 const source=fs.readFileSync(process.argv[1]+'/site/house.js','utf8');
-const tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(inline,ctx);assert.equal(loaded.length,1);loaded[0]();
 vm.runInContext(`

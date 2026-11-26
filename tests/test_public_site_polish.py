@@ -54,7 +54,7 @@ const ctx = vm.createContext({
   fetch: async () => ({ ok: true, json: async () => payload }),
 });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), ctx);
 (async () => {
@@ -123,7 +123,7 @@ const all = n => [n, ...n.children.flatMap(all)];
 const text = n => [n.textContent, ...n.children.map(text)].filter(Boolean).join(" ");
 const ctx = vm.createContext({ assert, document, URL, Intl, Date });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), ctx);
 vm.runInContext(`
@@ -185,7 +185,7 @@ const fs = require("node:fs"), vm = require("node:vm"), assert = require("node:a
 const document = { getElementById: () => null, querySelector: () => null };
 const ctx = vm.createContext({ assert, document });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), ctx);
 const entry = JSON.parse(process.argv[2]);

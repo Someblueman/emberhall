@@ -38,7 +38,7 @@
     .growth-list .small { margin-top:.25rem; }
     .growth-event:focus-visible { outline-offset:4px; }
   </style>
-  <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;load-recovery=1&amp;rooms=fit-1&amp;living=26&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2&amp;bookmarks=1&amp;room-visits=1&amp;hearth-speaker=1&amp;study-keeps=1&amp;study-filters=1&amp;beds-runs=1&amp;council-links=1&amp;door=1&amp;interiors=2" defer></script>
+  <script src="house.js?v=choice-progress-1&amp;workshop=search-1&amp;load-recovery=1&amp;rooms=fit-1&amp;living=26&amp;council=room-2&amp;balance=legend-1&amp;assay=2&amp;skein=2&amp;bookmarks=1&amp;room-visits=1&amp;hearth-speaker=1&amp;study-keeps=1&amp;study-filters=1&amp;beds-runs=1&amp;council-links=1&amp;door=1&amp;interiors=2&amp;current=1" defer></script>
 </head>
 <body>
   <a class="skip-link" id="skip-content" href="#house-view">Skip to content</a>
@@ -86,7 +86,6 @@
     <section id="record-load" class="record-load" aria-label="House record" hidden>
       <p id="error" role="alert"></p>
       <button id="record-retry" class="quiet-button" type="button">Try again</button>
-      <p class="small">The house also tries again automatically once a minute.</p>
       <p class="small">You can open these finished creations while the house record is unavailable. They do not need the journal.</p>
       <ul class="direct-visits" aria-label="Open a finished creation">
         <li><a href="projects/lantern-loop/index.html">Watch Lantern Loop →</a></li>
@@ -194,13 +193,16 @@
       const form = document.getElementById("event-navigation");
       const input = document.getElementById("event-number");
       const result = document.getElementById("event-number-result");
+      let submission = 0;
       document.getElementById("event-open").disabled = false;
       input.addEventListener("input", () => {
+        submission++;
         input.removeAttribute("aria-invalid");
         result.textContent = "";
       });
-      form.addEventListener("submit", event => {
+      form.addEventListener("submit", async event => {
         event.preventDefault();
+        const request = ++submission;
         const value = input.value.trim();
         const sequence = Number(value);
         if (!/^[0-9]+$/.test(value) || !Number.isSafeInteger(sequence) || sequence < 1) {
@@ -210,6 +212,15 @@
           return;
         }
         input.removeAttribute("aria-invalid");
+        if (typeof data !== "undefined" && data?.history?.current_only) {
+          result.textContent = "Loading the house history…";
+          const ready = await withHistory(() => true);
+          if (request !== submission) return;
+          if (!ready) {
+            result.textContent = data.history?.current_only ? "Try again when the house history is available." : "";
+            return;
+          }
+        }
         const frames = typeof data !== "undefined" && data?.frames;
         if (!Array.isArray(frames) || !frames.length) {
           result.textContent = "The house history has not loaded yet. Try again when the remembered house appears.";

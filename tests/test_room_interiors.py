@@ -18,7 +18,7 @@ const document={createElementNS:(_,tag)=>new Element(tag)};
 const all=node=>[node,...node.children.flatMap(all)];
 const text=node=>[node.textContent,...node.children.map(text)].join(' ');
 const context=vm.createContext({document,assert,Element,all,text});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 function render(room){const root=new Element('g');furnishings(root,room,0,0,false,[]);return root;}

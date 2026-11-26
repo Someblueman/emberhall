@@ -18,7 +18,7 @@ const root=new Element('div'),nodes={};
 const document={createElement:t=>new Element(t),activeElement:null,
  getElementById:id=>all(root).find(n=>n.id===id)||nodes[id]||null};
 const ctx=vm.createContext({assert,document,root,all,text,nodes,Element,Intl});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const people=Array.from({length:14},(_,i)=>({id:'r'+i,name:'Resident '+String(i).padStart(2,'0'),

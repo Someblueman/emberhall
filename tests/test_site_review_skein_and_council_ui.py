@@ -49,7 +49,7 @@ const text = n => [n.textContent, ...n.children.map(text)].filter(Boolean).join(
 const manifest = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 const ctx = vm.createContext({ assert, document, URL, Intl, Date, AbortSignal, fetch: async () => ({ ok: true, json: async () => manifest }) });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), ctx);
 (async () => {
@@ -153,7 +153,7 @@ const visible = n => n.tag === "details" && !n.open
   : [n.textContent, ...n.children.map(visible)].join(" ");
 const ctx = vm.createContext({ assert, document, URL, Intl, Date });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), ctx);
 vm.runInContext(`

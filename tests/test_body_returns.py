@@ -82,7 +82,7 @@ class DormViewTests(unittest.TestCase):
         source = Path(__file__).resolve().parents[1] / "site" / "house.js"
         script = r'''
 const fs=require("node:fs"),vm=require("node:vm"),assert=require("node:assert/strict");
-const source=fs.readFileSync(process.argv[1],"utf8"),tail="refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const source=fs.readFileSync(process.argv[1],"utf8"),tail="refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 const context=vm.createContext({assert});
 vm.runInContext(source.slice(0,-tail.length),context);

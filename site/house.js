@@ -26,8 +26,9 @@ const descriptions = {
 };
 let data, frame, index = 0, current = true, selected = null;
 let catalog = null, catalogSource = null;
-let refreshing = false, controlsReady = false, selectedFloor = 0, dormPage = 0;
-let recoveryReady = false;
+let controlsReady = false, selectedFloor = 0, dormPage = 0;
+let refreshPending = null, recoveryReady = false, historyOpened = false, retryHistory = false;
+let historyNavigation = 0;
 const DISPLAY_BUNKS = 6;
 let bedsState = {query:"",agent:"all",presence:"all",page:0,open:null};
 let roomBounds = {}, wholeBounds = "0 0 900 700";
@@ -683,7 +684,7 @@ function roomFact(id) {
   // Earlier snapshots recorded that residents spoke, not what they said; only count words this publication keeps.
   if(id==="hearth"){if(!Array.isArray(frame.hearth))return "";const n=hearthConversation(data?.frames,frame).length;return n?count(n,"public message kept","public messages kept"):"";}
   if(id==="chronicle"){const n=(frame.rooms||[]).reduce((sum,room)=>sum+(room.history?.length||0),0);return n?count(n,"room entry","room entries"):"";}
-  if(id==="parlor"){if(!Array.isArray(data?.frames)||!data.frames.length)return "";const digest=buildCatchupDigest(data.frames,index,catchupStartSeq);const n=digest.tasks.length+digest.rooms.length+digest.projects.length;return n?count(n,"change to catch up on","changes to catch up on"):"";}
+  if(id==="parlor"){if(data?.history?.current_only||!Array.isArray(data?.frames)||!data.frames.length)return "";const digest=buildCatchupDigest(data.frames,index,catchupStartSeq);const n=digest.tasks.length+digest.rooms.length+digest.projects.length;return n?count(n,"change to catch up on","changes to catch up on"):"";}
   return "";
 }
 function clip(value,limit) {value=String(value||"");return value.length>limit?value.slice(0,limit-1).trimEnd()+"…":value;}
@@ -798,7 +799,10 @@ function renderLately() {
   if(!host||!host.replaceChildren)return;
   host.replaceChildren();
   const items=latelyEvents(6);
-  if(!items.length){html("li","lately-empty","Nothing recorded yet.",host);return;}
+  if(!items.length) {
+    const message=data.history?.current_only&&historyLength()>1?"Open house history to see earlier activity.":"Nothing recorded yet.";
+    html("li","lately-empty",message,host);return;
+  }
   items.forEach((item,n)=>{
     const row=html("li",n===0&&current&&observationTime()-item.at<600?"lately-fresh":"",undefined,host);
     const button=html("button","lately-item",undefined,row);
@@ -1133,7 +1137,7 @@ function renderWorkshopTasks(content) {
   renderBoard();
 }
 function visibleScars() {
-  const marks=[...frame.scars];
+  const marks=frame.scars.map(s=>({...data?.scars?.[s.id],...s}));
   effectiveTasks().filter(t=>t.expired).forEach(t=>{const id=`lease:${t.id}:${t.generation}`;if(!marks.some(s=>s.id===id))marks.push({id,room:"workshop",kind:"expired",title:"A lease ran out",detail:t.title,task:t.id,sequence:frame.seq,basis:"Inferred from the observation clock; fate unconfirmed",mended:false});});
   return marks;
 }
@@ -1189,6 +1193,7 @@ function showViewForHash(hash, focusTarget=false) {
     if(!roomRoute)selected=null;
     render();
   }
+  if(frame&&viewId==="gallery-view")renderCollection();
   if(focusTarget) {
     const target=roomRoute?document.querySelector(".room-card"):$(targetId)||view;
     target?.focus?.({preventScroll:true});
@@ -1275,10 +1280,10 @@ function renderBedsRuns(card,resident,summaryId) {
       html("p","small",`Started ${clock(run.start,{year:"numeric"})} · event ${run.sequence}`,entry);
       html("p","small",`${run.status} · ${run.outcome}${run.end?` · ${run.status==="ended"?"end":"result"} receipt ${clock(run.end,{year:"numeric"})}, event ${run.last_sequence}`:" · no end receipt"}`,entry);
       for(const [label,seq] of [["start",run.sequence],[run.status==="ended"?"end":"result",run.end?run.last_sequence:null]]) {
-        if(Number.isInteger(seq)&&seq<=frame.seq&&data.frames.some(moment=>moment.seq===seq)) {
+        if(Number.isInteger(seq)&&seq<=frame.seq&&hasPublishedSequence(seq)) {
           const jump=html("button","quiet-button",`Visit ${label} event ${seq}`,entry);
           jump.id=`beds-event-${label}-${run.id}`;jump.type="button";
-          jump.addEventListener("click",()=>{jumpToSequence(seq);($(summaryId)||$("beds-list"))?.focus({preventScroll:true});});
+          jump.addEventListener("click",()=>jumpToSequence(seq,()=>($(summaryId)||$("beds-list"))?.focus({preventScroll:true})));
         }
       }
     });
@@ -1350,17 +1355,34 @@ function renderBedsDirectory(content) {
   });
   draw();
 }
-function findScarTargetIndex(scar) {
-  if(!scar||typeof scar!=="object")return -1;
-  if(/inferred/i.test(String(scar.basis||"")))return -1;
-  if(!Number.isInteger(scar.sequence)||scar.sequence<=0)return -1;
-  if(frame&&Number.isInteger(frame.seq)&&scar.sequence>frame.seq)return -1;
-  return data.frames.findIndex(f=>f.seq===scar.sequence);
+function canVisitScar(scar) {
+  if(!scar||/inferred/i.test(String(scar.basis||"")))return false;
+  return Number.isInteger(scar.sequence)&&scar.sequence>0&&scar.sequence<=frame.seq&&hasPublishedSequence(scar.sequence);
 }
-function jumpToSequence(seq) {
-  const target=data.frames.findIndex(f=>f.seq===seq);
-  if(target<0)return;
-  index=target;current=target===data.frames.length-1;render();
+function historyLength() {
+  return data?.history?.total_frames??data?.frames?.length??0;
+}
+function lastHistorySequence() {
+  return data.history?.last_sequence??data.frames.at(-1).seq;
+}
+function hasPublishedSequence(seq) {
+  if(data?.history?.current_only)return Number.isSafeInteger(seq)&&seq>=1&&seq<=lastHistorySequence();
+  return data?.frames?.some(moment=>moment.seq===seq);
+}
+function withHistory(visit) {
+  const request=++historyNavigation;
+  if(!data?.history?.current_only)return visit();
+  return ensureHistory().then(ready=>{
+    if(ready&&request===historyNavigation)return visit();
+  });
+}
+function jumpToSequence(seq, afterJump) {
+  return withHistory(()=>{
+    const target=data.frames.findIndex(f=>f.seq===seq);
+    if(target<0)return;
+    index=target;current=target===data.frames.length-1;render();
+    afterJump?.();
+  });
 }
 // Completion receipts identify real progress even while a great work stays active.
 function projectProgressChanges(previous, project, sequence) {
@@ -1507,7 +1529,9 @@ function renderRecentGrowth() {
     const link=html("a","growth-building","No selected project is active. See the shelf and council choices →",box);
     link.href="#shelf-card";
   }
-  if(changes.length)renderGrowthPages(box,changes);
+  if(data.history?.current_only&&historyLength()>1) {
+    workshopButton(box,"Load room and project history",ensureHistory);
+  }else if(changes.length)renderGrowthPages(box,changes);
   else {
     growthPage=0;
     html("p","growth-empty","No room or project milestone changed in this window. Task activity alone does not count as growth.",box);
@@ -1520,6 +1544,10 @@ function renderRecentGrowth() {
 }
 function renderCatchupPanel(content) {
   const panel=html("div","catchup-panel",undefined,content);
+  if(data.history?.current_only&&historyLength()>1) {
+    workshopButton(panel,"Load events to catch up",ensureHistory);
+    return;
+  }
   const digest=buildCatchupDigest(data.frames,index,catchupStartSeq);
   html("p","small catchup-note",digest.isDefault?`Showing latest ${digest.count} events (${digest.startSeq}–${digest.endSeq}) through this moment. Not a remembered visitor cursor.`:`Showing ${digest.count} events (${digest.startSeq}–${digest.endSeq}) through this moment. Not a remembered visitor cursor.`,panel);
   const controls=html("div","catchup-controls",undefined,panel);
@@ -1707,15 +1735,16 @@ function renderHearth(content) {
       const head=html("p","voice-head",undefined,entry);
       html("strong","",voice.name,head);html("span","small",` · ${ago(voice.at)}`,head);
       html("p","voice-text",voice.text,entry);
-      if(visitable.has(voice.seq)) {
+      if(visitable.has(voice.seq)||(data.history?.current_only&&voice.seq<=frame.seq&&hasPublishedSequence(voice.seq))) {
         const visit=workshopButton(entry,`Visit event ${voice.seq} →`,()=>{
           // Keep a nested trip's origin while published; a lost origin permits a fresh trip.
           if(voice.seq!==frame.seq&&(!hearthTrail||hearthTrail.sequence===frame.seq||
               !data.frames.some(moment=>moment.seq===hearthTrail.sequence)))
             hearthTrail={sequence:frame.seq,current,state:{...hearthState},target:visit.id};
-          hearthState.page=0;jumpToSequence(voice.seq);
-          const target=$(`hearth-message-${voice.seq}`)||document.querySelector?.(".room-card");
-          target?.focus({preventScroll:true});target?.scrollIntoView?.({block:"nearest"});
+          hearthState.page=0;jumpToSequence(voice.seq,()=>{
+            const target=$(`hearth-message-${voice.seq}`)||document.querySelector?.(".room-card");
+            target?.focus({preventScroll:true});target?.scrollIntoView?.({block:"nearest"});
+          });
         });visit.id=`hearth-visit-${voice.seq}`;
         visit.setAttribute("aria-label",`Visit ${voice.name}’s message at event ${voice.seq}`);
       } else html("p","small","Its moment is not available to visit in this publication.",entry);
@@ -1942,7 +1971,7 @@ function countingHistoryOrigin() {
     moment.rooms?.some(room=>room.id==="counting"&&roomStatus(room)==="open"));
 }
 function visitCountingMoment(sequence,target) {
-  if(sequence===frame.seq||!data.frames.some(moment=>moment.seq===sequence))return;
+  if(sequence===frame.seq||!hasPublishedSequence(sequence))return;
   if(!countingHistoryOrigin())countingHistoryTrail={sequence:frame.seq,current,target,
     state:{...countingState},opened:new Set(countingHandoffsOpen)};
   countingState.page=0;
@@ -2075,8 +2104,7 @@ function renderCountingRoom(content) {
       const row=html("div","counting-run",undefined,list);
       const kind=kinds[run.agent]||kinds.unrecorded,lane=run.assignment?.lane||"unrecorded";
       const finishes=finishesOf(run);
-      const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&
-        Array.isArray(data?.frames)&&data.frames.some(f=>f.seq===run.sequence);
+      const hasFrame=Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq&&hasPublishedSequence(run.sequence);
       const info=html("div","counting-run-info",undefined,row);
       html("strong","",`${residentName(run.resident)} · ${kind.name}${run.model?` · ${run.model}`:""}`,info);
       html("span","small",`Lane: ${lane} · ${run.outcome||run.status||"recorded"}${!hasFrame&&Number.isInteger(run.sequence)&&run.sequence>0&&run.sequence<=frame.seq?` · event ${run.sequence}`:""}`,info);
@@ -2285,7 +2313,7 @@ function renderAssayRoom(content) {
       const info=html("div","counting-run-info",undefined,row);
       html("strong","",`${residentName(run.resident)} · ${kind.name}${target?` ← ${residentName(target.resident)} (${targetKind.name})`:""}${cross}`,info);
       html("span","small",`Run ${reviewOutcomeLabel(run)}${tasks.length?` · tasks: ${tasks.join("; ")}`:run.assignment?.help_request?` · ${run.assignment.help_request}`:""}`,info);
-      if(Number.isInteger(run.sequence)&&run.sequence>0&&data.frames?.some(moment=>moment.seq===run.sequence)) {
+      if(Number.isInteger(run.sequence)&&run.sequence>0&&hasPublishedSequence(run.sequence)) {
         const btn=workshopButton(row,`Event ${run.sequence}`,()=>jumpToSequence(run.sequence),"counting-jump");
         btn.id=`assay-jump-${run.sequence}`;
       }
@@ -2326,7 +2354,7 @@ function renderAssayRoom(content) {
         const info=html("div","counting-run-info",undefined,row);
         html("strong","",`${scarGlyph(standing)}${s.title||s.id}`,info);
         html("span","small",`${standing.label} · ${s.room||"house"}${s.detail?` · ${s.detail}`:""}`,info);
-        if(findScarTargetIndex(s)>=0) {
+        if(canVisitScar(s)) {
           const btn=html("button","counting-jump",`Event ${s.sequence}`,row);
           btn.type="button";btn.id=`assay-scar-jump-${s.sequence}`;
           btn.addEventListener("click",()=>jumpToSequence(s.sequence));
@@ -2643,13 +2671,14 @@ function renderChronicleRoom(content) {
         reason.addEventListener("toggle",()=>{if(reason.open)chronicleState.opened.add(key);else chronicleState.opened.delete(key);});
         html("p","small",event.reason,reason);
       }
-      if(data.frames.some(moment=>moment.seq===event.sequence)) {
+      if(hasPublishedSequence(event.sequence)) {
         const visit=html("button","quiet-button","Visit this moment →",entry);
         visit.id=`chronicle-visit-${encodeURIComponent(event.roomId)}-${event.sequence}`;visit.type="button";
         visit.setAttribute("aria-label",`Visit ${event.roomName} at event ${event.sequence}`);
         visit.addEventListener("click",()=>{
-          choose(event.roomId);jumpToSequence(event.sequence);
-          const card=document.querySelector?.(".room-card");card?.focus({preventScroll:true});card?.scrollIntoView({block:"start"});
+          choose(event.roomId);jumpToSequence(event.sequence,()=>{
+            const card=document.querySelector?.(".room-card");card?.focus({preventScroll:true});card?.scrollIntoView({block:"start"});
+          });
         });
       } else html("p","small","This event has no visitable frame in this publication; its recorded change is kept here.",entry);
     });
@@ -3045,7 +3074,7 @@ function roomPanel() {
     const standing=scarStanding(s,markTasks);
     const row=html("div","scar",undefined,marks);html("strong","",`${scarGlyph(standing)}${s.title}`,row);
     html("span","small",s.detail,row);html("span","small",`${standing.label} · Event ${s.sequence} · ${s.basis}${s.lesson_status&&s.lesson_status!=="observed"?` · now ${s.lesson_status}`:""}`,row);
-    if(findScarTargetIndex(s)>=0){
+    if(canVisitScar(s)){
       const btn=html("button","scar-jump",`View event ${s.sequence}`,row);
       btn.type="button";
       btn.addEventListener("click",()=>jumpToSequence(s.sequence));
@@ -3148,8 +3177,7 @@ function renderCraftReceiving(panel,receiving,names) {
         if(seq===null)continue;
         const button=workshopButton(detail,`${label} · event ${seq}`,()=>{
           craftReturn={source:data.source_head,head:data.journal_head,control:`${example.offer}-${key}`};
-          jumpToSequence(seq);
-          if(!current)$("view-latest")?.focus();
+          jumpToSequence(seq,()=>{if(!current)$("view-latest")?.focus();});
         });
         button.dataset.craftReturn=`${example.offer}-${key}`;
       }
@@ -3189,8 +3217,7 @@ function fillCraftOutcomes(panel) {
       const seq=row.examples?.[key];
       if(!Number.isInteger(seq)||seq<report.first||seq>frame.seq)continue;
       workshopButton(detail,`${label} · event ${seq}`,()=>{
-        jumpToSequence(seq);
-        if(!current)$("view-latest")?.focus();
+        jumpToSequence(seq,()=>{if(!current)$("view-latest")?.focus();});
       });
     }
   }
@@ -3496,6 +3523,7 @@ function renderCreationCard(entry,parent) {
     enlarge.setAttribute("aria-haspopup","dialog");
     enlarge.addEventListener("click",()=>livePreview?openRoomCreation(entry,enlarge):openCreationPicture(entry,enlarge));
     const image=html("img","",undefined,enlarge);
+    image.loading="lazy";
     image.src=preview.src;
     image.alt=preview.alt;
     image.width=preview.width;image.height=preview.height;
@@ -3585,7 +3613,7 @@ function renderCollection() {
     const available=current&&known.some(entry=>entry.id==="signal-garden"&&Array.isArray(entry.files)&&
       entry.files.includes(path)&&entry.files.includes("projects/signal-garden/model.js"));
     exhibit.hidden=!available;
-    if(available&&exhibit.getAttribute("src")!==path)exhibit.src=path;
+    if(available&&!$("gallery-view")?.hidden&&exhibit.getAttribute("src")!==path)exhibit.src=path;
     if(!available&&exhibit.hasAttribute("src"))exhibit.removeAttribute("src");
   }
   box.replaceChildren();
@@ -4903,11 +4931,12 @@ function render() {
   const stopped=frame.residents.filter(r=>r.pose==="unconfirmed").length;
   $("presence-line").textContent=`${awake} recorded awake. ${sleepers} recorded asleep. ${stopped} stopped without sleep. ${(t=>t.idle===null?`${t.active} unfinished ${t.active===1?"thread":"threads"}.`:`${t.active} ${t.active===1?"thread":"threads"} in hand or queued, ${t.idle} left idle.`)(threadCounts())}${openNeeds().length ? ` ${openNeeds().length} ${openNeeds().length === 1 ? "need waits" : "needs wait"} for the Steward.` : ""}`;
   renderViewContext();
-  $("history").value=frame.seq;$("present").classList.toggle("active",current);
+  $("history").max=lastHistorySequence();$("history").value=frame.seq;$("present").classList.toggle("active",current);
   $("moment-label").textContent=current?"The latest remembered moment":clock(frame.at);
   const actor=frame.residents.find(r=>r.id===frame.event.actor)?.name||frame.event.actor;
-  $("event-label").textContent=`${frame.seq} / ${data.frames.length} · ${actor} · ${frame.event.op.replaceAll("-"," ")}`;
-  $("previous").disabled=index===0;$("next").disabled=index===data.frames.length-1;$("overview").hidden=!selected;if($("room-overview"))$("room-overview").hidden=!selected;
+  $("event-label").textContent=`${frame.seq} / ${historyLength()} · ${actor} · ${frame.event.op.replaceAll("-"," ")}`;
+  $("previous").disabled=data.history?.current_only?frame.seq===1:index===0;
+  $("next").disabled=frame.seq===lastHistorySequence();$("overview").hidden=!selected;if($("room-overview"))$("room-overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.id=`room-link-${encodeURIComponent(room.id)}`;button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
   drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
@@ -4917,7 +4946,7 @@ function render() {
   const record=$("record");record.replaceChildren();
   html("p","",`Event ${frame.seq} observed ${clock(frame.at)}. Public snapshot exported ${clock(data.observed_at)}.`,record);
   html("code","",`Journal ${data.journal_head.slice(0,12)} · Source ${(data.source_head||"unborn").slice(0,12)}`,record);
-  html("p","",current?"The sky follows the real London clock. This page checks for a newer recorded snapshot every minute.":"The sky and figures follow this event’s clock. Later arrivals, rooms and failures have not happened yet.",record);
+  html("p","",current?"The sky follows the real London clock. This page checks for newer recorded snapshots.":"The sky and figures follow this event’s clock. Later arrivals, rooms and failures have not happened yet.",record);
   const commits=$("commits");commits.replaceChildren();
   const known=data.commits.filter(c=>c.at<=(current?data.observed_at:frame.at)).slice(-3);
   known.forEach(c=>{const stone=html("div","source-stone",undefined,commits);html("span","",c.id.slice(0,9),stone);html("div","",c.title,stone);});
@@ -4931,11 +4960,23 @@ function bindControls() {
     if(linkedRoom()!==null)window.history?.pushState(null,"","#house-view");
     render();
   });
-  $("history").addEventListener("input",e=>{index=Number(e.target.value)-1;current=false;render();});
-  $("present").addEventListener("click",()=>{index=data.frames.length-1;current=true;render();});
-  $("view-latest")?.addEventListener("click",()=>{index=data.frames.length-1;current=true;render();restoreCraftFocus();});
-  $("previous").addEventListener("click",()=>{index=Math.max(0,index-1);current=false;render();});
-  $("next").addEventListener("click",()=>{index=Math.min(data.frames.length-1,index+1);current=false;render();});
+  const visitIndex=target=>{index=target;current=false;render();};
+  const latest=afterJump=>{
+    const show=()=>{index=data.frames.length-1;current=true;render();afterJump?.();};
+    if(data.history?.current_only&&frame.seq!==lastHistorySequence())return withHistory(show);
+    historyNavigation++;show();
+  };
+  $("history").addEventListener("input",e=>{
+    const sequence=Number(e.target.value);
+    return withHistory(()=>{
+      const target=data.frames.findIndex(moment=>moment.seq===sequence);
+      if(target>=0)visitIndex(target);
+    });
+  });
+  $("present").addEventListener("click",()=>latest());
+  $("view-latest")?.addEventListener("click",()=>latest(restoreCraftFocus));
+  $("previous").addEventListener("click",()=>withHistory(()=>visitIndex(Math.max(0,index-1))));
+  $("next").addEventListener("click",()=>withHistory(()=>visitIndex(Math.min(data.frames.length-1,index+1))));
   const showOverview=()=>{choose(null);$("house-view")?.focus?.({preventScroll:true});$("stage")?.scrollIntoView?.({block:"nearest",behavior:"instant"});};
   $("overview").addEventListener("click",showOverview);
   $("room-overview")?.addEventListener("click",showOverview);
@@ -4949,9 +4990,14 @@ function bindControls() {
   controlsReady=true;
 }
 function decodePublicHistory(wire) {
-  // Published v1 snapshots remain readable while the publisher migrates to v2.
+  // Older, unpartitioned publications remain readable.
   if(wire?.version===1)return wire;
-  if(wire?.version!==2&&wire?.version!==4||!Array.isArray(wire.nodes))throw new Error("Unrecognized public history transport");
+  const decoder=historyDecoder(wire?.version);
+  decoder.append(wire.nodes);
+  return decoder.finish(wire.root);
+}
+function historyDecoder(version) {
+  if(version!==2&&version!==4)throw new Error("Unrecognized public history transport");
   const nodes=[];
   function value(item) {
     if(item!==null&&typeof item==="object") {
@@ -4961,55 +5007,51 @@ function decodePublicHistory(wire) {
     }
     return item;
   }
-  for(const node of wire.nodes) {
-    if(Array.isArray(node)&&node.length===1&&Array.isArray(node[0])) {
-      // Version 4 concat: an array holding one inline array of earlier list nodes, joined into one flat list.
-      const refs=node[0];
-      if(wire.version!==4||!refs.length||refs.some(ref=>!Number.isInteger(ref)||ref<0||ref>=nodes.length||!Array.isArray(nodes[ref])))
-        throw new Error("Invalid public history concatenation");
-      nodes.push(refs.flatMap(ref=>nodes[ref]));
+  function append(rawNodes) {
+    if(!Array.isArray(rawNodes))throw new Error("Unrecognized public history transport");
+    for(const node of rawNodes) {
+      if(Array.isArray(node)&&node.length===1&&Array.isArray(node[0])) {
+        // Version 4 concat joins earlier list nodes into one flat list.
+        const refs=node[0];
+        if(version!==4||!refs.length||refs.some(ref=>!Number.isInteger(ref)||ref<0||ref>=nodes.length||!Array.isArray(nodes[ref])))
+          throw new Error("Invalid public history concatenation");
+        nodes.push(refs.flatMap(ref=>nodes[ref]));
+      }
+      else if(Array.isArray(node))nodes.push(node.map(value));
+      else if(node!==null&&typeof node==="object")nodes.push(Object.fromEntries(Object.entries(node).map(([key,item])=>[key,value(item)])));
+      else throw new Error("Invalid public history node");
     }
-    else if(Array.isArray(node))nodes.push(node.map(value));
-    else if(node!==null&&typeof node==="object")nodes.push(Object.fromEntries(Object.entries(node).map(([key,item])=>[key,value(item)])));
-    else throw new Error("Invalid public history node");
   }
-  const root=value(wire.root);
-  if(!root||root.version!==1||Array.isArray(root))throw new Error("Invalid public history root");
-  return root;
+  function finish(reference) {
+    const root=value(reference);
+    if(!root||root.version!==1||Array.isArray(root))throw new Error("Invalid public history root");
+    return root;
+  }
+  return {append,finish};
 }
-// Versions 3 and 4 keep the start of the node table in sealed parts. A part's name carries its hash, so a part
-// held once is never fetched again, and the browser may cache it for ever.
-const historyParts=new Map();
+// Decode one sealed part at a time. References point backwards, and the browser
+// can cache the hash-named files without the page holding their raw node tables.
 async function loadHistoryParts(wire,notice) {
   const parts=wire.parts;
   if(!Array.isArray(parts)||!Array.isArray(wire.nodes)||parts.some(part=>!part||!/^history\/part-\d{4,}-[0-9a-f]{16}\.json$/.test(part.path)||!Number.isInteger(part.nodes)||part.nodes<0))
     throw new Error("Unrecognized public history transport");
-  const listed=new Set(parts.map(part=>part.path));
-  for(const path of [...historyParts.keys()])if(!listed.has(path))historyParts.delete(path);
-  const missing=parts.filter(part=>!historyParts.has(part.path));
-  const first=!data&&missing.length>0;
-  const progress=()=>{
-    if(!first)return;
-    const text=`Loading the house record… ${parts.filter(part=>historyParts.has(part.path)).length} of ${parts.length} parts`;
+  const decoder=historyDecoder(wire.version===4?4:2);
+  for(const [i,part] of parts.entries()) {
+    const text=`Loading the house history… ${i} of ${parts.length} parts`;
     notice.textContent=text;$("view-context").textContent=text;
-  };
-  progress();
-  let failure=null;
-  const worker=async()=>{
-    while(missing.length&&!failure) {
-      const part=missing.shift();
-      try {
-        const response=await fetch(part.path,{signal:AbortSignal.timeout(60000)});
-        if(!response.ok)throw new Error(`History part returned ${response.status}`);
-        const nodes=await response.json();
-        if(!Array.isArray(nodes)||nodes.length!==part.nodes)throw new Error("A history part does not match its listing");
-        historyParts.set(part.path,nodes);progress();
-      }catch(error){failure=failure||error;}
-    }
-  };
-  await Promise.all(Array.from({length:Math.min(3,missing.length)},worker));
-  if(failure)throw failure;
-  return {version:wire.version===4?4:2,root:wire.root,nodes:[].concat(...parts.map(part=>historyParts.get(part.path)),wire.nodes)};
+    const response=await fetch(part.path,{signal:AbortSignal.timeout(60000)});
+    if(!response.ok)throw new Error(`History part returned ${response.status}`);
+    const nodes=await response.json();
+    if(!Array.isArray(nodes)||nodes.length!==part.nodes)throw new Error("A history part does not match its listing");
+    decoder.append(nodes);
+  }
+  decoder.append(wire.nodes);
+  return decoder.finish(wire.root);
+}
+async function readHistory(response,notice) {
+  const wire=await response.json();
+  if(wire?.version===3||wire?.version===4)return loadHistoryParts(wire,notice);
+  return decodePublicHistory(wire);
 }
 function refreshView(changed=false) {
   // Capture immediately before the redraw, after the fetch and any visitor edits.
@@ -5027,35 +5069,87 @@ function refreshView(changed=false) {
   if(focusId)$(focusId)?.focus({preventScroll:true});
   if(searchSelection)$(searchSelection.id)?.setSelectionRange?.(searchSelection.start,searchSelection.end,searchSelection.direction);
 }
-async function refresh() {
-  if(refreshing)return;
-  refreshing=true;
+function refresh(useHistory=historyOpened) {
+  if(!refreshPending)refreshPending=loadRecord(useHistory).finally(()=>{refreshPending=null;});
+  return refreshPending;
+}
+async function ensureHistory() {
+  if(refreshPending)await refreshPending;
+  if(data&&!data.history?.current_only)return true;
+  return refresh(true);
+}
+function releaseHistory() {
+  const history={current_only:true,total_frames:historyLength(),last_sequence:lastHistorySequence()};
+  // Mutate the old projection so an outstanding auxiliary request cannot pin
+  // all its frames. The selected moment stays visible if the replacement fails.
+  data.frames=[frame];
+  data.scars=Object.fromEntries(frame.scars.map(s=>[s.id,data.scars?.[s.id]]));
+  data.history=history;
+  index=0;
+}
+async function readCurrentSnapshot(response) {
+  const wire=await response.json();
+  if(!wire?.gzip)return wire;
+  if(wire.version!==1||typeof wire.gzip!=="string"||!/^current\/[0-9a-f]{16}\.json\.gz$/.test(wire.gzip))
+    throw new Error("Invalid current snapshot path");
+  const compressed=await fetch(wire.gzip,{signal:AbortSignal.timeout(15000)});
+  if(!compressed.ok)throw new Error(`Current snapshot returned ${compressed.status}`);
+  const stream=compressed.body.pipeThrough(new DecompressionStream("gzip"));
+  const snapshot=await new Response(stream).json();
+  if(snapshot.journal_head!==wire.journal_head||snapshot.source_head!==wire.source_head||
+     snapshot.history?.total_frames!==wire.history?.total_frames)
+    throw new Error("Current snapshot does not match its listing");
+  return snapshot;
+}
+async function loadRecord(useHistory) {
   const retry=$("record-retry"), recovery=$("record-load"), notice=$("record-load-status");
-  if(!recoveryReady){retry.addEventListener("click",refresh);recoveryReady=true;}
+  if(!recoveryReady) {
+    retry.addEventListener("click",()=>{if(!refreshPending)return refresh(retryHistory);});
+    recoveryReady=true;
+  }
   retry.setAttribute("aria-disabled","true");retry.textContent="Trying…";
   recovery.setAttribute("aria-busy","true");
-  notice.textContent=!data?"Loading the house record…":!recovery.hidden?"Checking for a newer house record…":"";
-  if(!data)$("view-context").textContent="Loading the latest remembered house.";
+  if(useHistory) {
+    notice.textContent="Loading the house history…";
+    $("view-context").textContent=notice.textContent;
+  }else if(!data) {
+    notice.textContent="Loading the house record…";
+    $("view-context").textContent="Loading the latest remembered house.";
+  }else notice.textContent="Checking for a newer house record…";
   try {
-    const response=await fetch("history.json",{cache:"no-cache",signal:AbortSignal.timeout(15000)});
-    if(!response.ok)throw new Error(`History returned ${response.status}`);
-    const wire=await response.json();
-    const next=decodePublicHistory(wire?.version===3||wire?.version===4?await loadHistoryParts(wire,notice):wire);
-    if(next.version!==1||!Array.isArray(next.frames)||!next.frames.length)throw new Error("Unrecognized house history");
-    if(data&&next.frames.length<data.frames.length)throw new Error("An older publication arrived");
-    await loadCatalog(next.source_head);
-    // Read the selection after the fetch: someone may have scrubbed while it was in flight.
+    const path=useHistory?"history.json":"current.json";
+    const response=await fetch(path,{cache:"no-cache",signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw new Error(`${path} returned ${response.status}`);
+    const previousCount=historyLength();
+    if(useHistory&&data&&!data.history?.current_only)releaseHistory();
+    const next=useHistory?await readHistory(response,notice):await readCurrentSnapshot(response);
+    if(next?.version!==1||!Array.isArray(next.frames)||!next.frames.length||(useHistory&&next.history?.current_only))
+      throw new Error("Unrecognized house record");
+    if(!useHistory) {
+      const history=next.history;
+      if(!history?.current_only||!Number.isSafeInteger(history.total_frames)||history.total_frames<1||
+         history.last_sequence!==history.total_frames||next.frames.length!==1||next.frames[0]?.seq!==history.last_sequence)
+        throw new Error("Unrecognized current snapshot");
+    }
+    if((next.history?.total_frames??next.frames.length)<previousCount)throw new Error("An older publication arrived");
+    // Read the selection after the fetch so navigation during it still wins.
     const nextIndex=current?next.frames.length-1:next.frames.findIndex(moment=>moment.seq===frame.seq);
     if(nextIndex<0)throw new Error("The selected moment is missing from this publication");
-    next.frames.forEach(moment=>{moment.scars=moment.scars.map(s=>({...next.scars[s.id],...s}));});
-    const changed=!data||next.journal_head!==data.journal_head||next.source_head!==data.source_head;
+    const changed=!data||useHistory||next.journal_head!==data.journal_head||next.source_head!==data.source_head;
     if(changed){
+      if(next.source_head!==catalogSource){catalog=null;catalogSource=null;}
+      if(data?.journal_head===next.journal_head&&data?.source_head===next.source_head)next.craft=data.craft;
       data=next;index=nextIndex;
-      $("history").max=data.frames.length;$("history").disabled=false;
+      if(useHistory)historyOpened=true;
+      $("history").disabled=false;
       if(!controlsReady)bindControls();
       refreshView(true);
     }else if(current)refreshView();
     loadCraftOutcomes(data);
+    if(catalogSource!==data.source_head) {
+      await loadCatalog(data.source_head);
+      if(catalog)renderCollection();
+    }
     const recovered=!recovery.hidden;
     recovery.hidden=true;$("error").textContent="";
     notice.textContent=recovered?"The house record is available again.":"";
@@ -5064,23 +5158,28 @@ async function refresh() {
       const view=document.querySelector?.(".page-view:not([hidden])");
       view?.focus({preventScroll:true});view?.scrollIntoView({block:"start"});
     }
+    return true;
   }catch(error){
+    retryHistory=useHistory;
     recovery.hidden=false;notice.textContent="";
-    $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here.":"The house record could not be loaded. You can try again now.";
+    if(data&&useHistory)$("error").textContent="The house history could not be loaded. The last remembered snapshot is still here.";
+    else $("error").textContent=data?"A newer record could not be loaded. The last remembered snapshot is still here.":"The house record could not be loaded. You can try again now.";
     if(!data){
       $("presence-line").textContent="The record is unavailable; no activity is invented.";
       $("view-context").textContent="The house record has not loaded.";
     }
     else if(current)refreshView();
+    else renderViewContext();
+    return false;
   }finally{
-    refreshing=false;recovery.setAttribute("aria-busy","false");
+    recovery.setAttribute("aria-busy","false");
     retry.setAttribute("aria-disabled","false");retry.textContent="Try again";
   }
 }
-let watching=false;
-// Poll the tiny head.json; fetch the full history only when the record moved.
+let watching=false,lastLocalViewRefresh=Date.now();
+// Poll the tiny head. Clock and lease cues age from the loaded frame.
 async function watch() {
-  if(watching||refreshing||!data)return;
+  if(watching||refreshPending||!data)return;
   watching=true;
   try {
     const response=await fetch(`head.json?t=${Date.now()}`,{cache:"no-store",signal:AbortSignal.timeout(5000)});
@@ -5088,7 +5187,13 @@ async function watch() {
     const head=await response.json();
     if(head&&typeof head.journal_head==="string"&&
        (head.journal_head!==data.journal_head||head.source_head!==data.source_head))await refresh();
-  }catch(error){}finally{watching=false;}
+  }catch(error){}finally{
+    watching=false;
+    const now=Date.now();
+    if(current&&!refreshPending&&now-lastLocalViewRefresh>=60000) {
+      lastLocalViewRefresh=now;refreshView();
+    }
+  }
 }
 refresh();
-setInterval(refresh,60000);setInterval(watch,10000);
+setInterval(watch,10000);

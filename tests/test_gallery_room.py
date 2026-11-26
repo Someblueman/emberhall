@@ -19,7 +19,7 @@ const document={createElement:t=>new Element(t),activeElement:null,querySelector
  getElementById:id=>all(root).find(n=>n.id===id)||nodes[id]||null};
 const manifest=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
 const ctx=vm.createContext({assert,document,URL,AbortSignal,root,all,text,nodes,Element,manifest});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 catalog=manifest.projects;current=true;

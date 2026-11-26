@@ -23,7 +23,7 @@ const card=new Element('section');
 const document={activeElement:null,createElement:t=>new Element(t),getElementById:get,
  querySelector:s=>s==='.room-card'?card:null};
 const ctx=vm.createContext({assert,document,root,all,text,get,card,nodes,Element});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const event=(sequence,kind='room-open')=>({sequence,kind,at:1000+sequence,name:'Room '+sequence,actor:'r',purpose:'A place for reading',reason:'Build a place to read' });
@@ -36,7 +36,7 @@ const before=JSON.stringify(frame);
 const change=(id,value)=>{get(id).value=value;get(id).listeners.change();};
 const draw=()=>{root.replaceChildren();renderChronicleRoom(root);};
 let visitedRoom=null,visitedSequence=null;
-choose=id=>{visitedRoom=id;};jumpToSequence=seq=>{visitedSequence=seq;};
+choose=id=>{visitedRoom=id;};jumpToSequence=(seq,afterJump)=>{visitedSequence=seq;afterJump?.();};
 `,ctx);
         vm.runInContext(process.argv[2],ctx);
 '''

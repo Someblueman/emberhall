@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import gzip
 import json
 import os
 from pathlib import Path
@@ -14,7 +15,7 @@ import hashlib
 import marshal
 
 from .body import export_inputs, projection as build_projection, replay, replay_context
-from .door_summary import now_bytes
+from .door_summary import _FrameReader, now_bytes
 from .record import Record
 from .public_history import Encoder, decode
 
@@ -25,6 +26,7 @@ BRANCH = "codex/house-pages"
 # Fail locally before GitHub's 100 MiB limit. On 17 November (evening) the history passed 64 MiB and
 # the page stood still for forty minutes; it is now published in sealed parts, so nothing nears this.
 MAX_PUBLIC_BLOB = 64 * 1024 * 1024
+CURRENT_SNAPSHOT_MAX_BYTES = 1_400_000
 # A sealed part of the node table is closed once its JSON reaches this size and never changes again.
 PART_TARGET = 8 * 1024 * 1024
 # A rebuild replays this many events at a time and saves its place this often (see history()).
@@ -270,9 +272,53 @@ def _history_with_cache(
         "observed_at": observed_at,
         "frames": cache["frames"],
         "nodes": cache["nodes"],
+        "scars": context["scars"],
     }
     return body, {"journal_head": head, "source_head": source_head, "seq": last_seq,
                   "at": final["at"], "history_version": 4}, parts, snapshot
+
+
+def current_snapshot_files(snapshot: dict) -> dict[str, bytes]:
+    """Build the present view by resolving only nodes reachable from the latest frame."""
+    try:
+        frames, nodes = snapshot["frames"], snapshot["nodes"]
+        if not isinstance(frames, list) or not frames or not isinstance(nodes, list):
+            raise ValueError("No current frame to publish")
+        reader = _FrameReader(frames, nodes)
+        last = len(frames) - 1
+        raw = reader._raw(last)
+        if not isinstance(raw, dict):
+            raise ValueError("Invalid current frame")
+        frame = {key: reader.field(last, key) for key in raw}
+        if type(frame.get("seq")) is not int or frame["seq"] < 1:
+            raise ValueError("Invalid current frame sequence")
+        if not isinstance(frame.get("scars"), list):
+            raise ValueError("Invalid current frame scars")
+        scars = {scar["id"]: snapshot["scars"][scar["id"]] for scar in frame["scars"]}
+        projection = build_projection(
+            snapshot["final"], snapshot["head"], snapshot["source_head"],
+            snapshot["observed_at"], snapshot["commits"], [frame], scars,
+        )
+        projection["history"] = {"current_only": True, "total_frames": len(frames),
+                                 "last_sequence": frame["seq"]}
+        body = json.dumps(projection, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode()
+    except (KeyError, IndexError, TypeError, RecursionError) as error:
+        raise ValueError("Malformed current snapshot cache") from error
+    if len(body) <= CURRENT_SNAPSHOT_MAX_BYTES:
+        return {"current.json": body}
+    # GitHub Pages serves these as static files. Keep the complete projection
+    # in a gzip companion when the plain JSON will not fit the transfer budget.
+    compressed = gzip.compress(body, mtime=0)
+    path = f"current/{hashlib.sha256(compressed).hexdigest()[:16]}.json.gz"
+    manifest = json.dumps({
+        "version": 1, "gzip": path, "journal_head": projection["journal_head"],
+        "source_head": projection["source_head"], "history": projection["history"],
+    }, separators=(",", ":")).encode()
+    size = len(manifest) + len(compressed)
+    if size > CURRENT_SNAPSHOT_MAX_BYTES:
+        raise ValueError(f"The current snapshot is {size:,} bytes and exceeds its first-paint size budget "
+                         f"of {CURRENT_SNAPSHOT_MAX_BYTES:,} bytes")
+    return {"current.json": manifest, path: compressed}
 
 
 def chronicle_body(record: Record, contents: dict[str, bytes]) -> bytes:
@@ -331,7 +377,8 @@ def publish(record: Record, *, push=False) -> dict:
             )
         contents.update(parts)
         contents["history.json"] = history_body
-        # Visitors poll this tiny file and fetch the history only when it changes.
+        contents.update(current_snapshot_files(snapshot))
+        # Visitors poll this tiny file and fetch a new snapshot when it changes.
         contents["head.json"] = json.dumps(summary, separators=(",", ":"), sort_keys=True).encode()
         try:
             contents["balance.json"] = json.dumps(building_balance(record, head), separators=(",", ":")).encode()
@@ -368,7 +415,9 @@ def publish(record: Record, *, push=False) -> dict:
                 old_wire = json.loads(record.git("show", previous + ":history.json"))
                 old = decode(old_wire, lambda path: record.git("show", previous + ":" + path))
                 current_wire = old_wire.get("version") == 4
-            if not recovering and current_wire and (old["journal_head"], old["source_head"]) == (summary["journal_head"], summary["source_head"]):
+            if (not recovering and current_wire
+                    and (old["journal_head"], old["source_head"]) == (summary["journal_head"], summary["source_head"])
+                    and record.git("ls-tree", previous, "--", "current.json")):
                 if push:
                     record.git("push", "origin", ref + ":" + ref)
                     if record.git("ls-remote", "origin", ref).decode().split()[0] != previous:
@@ -410,7 +459,7 @@ def main():
     try:
         print(json.dumps(publish(Record(args.repo), push=args.push), indent=2))
     except (ValueError, OSError, subprocess.SubprocessError) as error:
-        print(json.dumps({"published": False, "error": type(error).__name__}))
+        print(json.dumps({"published": False, "error": type(error).__name__, "detail": str(error)}))
         return 2
     return 0
 

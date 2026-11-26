@@ -114,7 +114,7 @@ const document = {
   querySelectorAll: () => []
 };
 
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 if (!code.endsWith(tail)) throw new Error("Expected standard trailing tail in site/house.js");
 
 const context = {
@@ -465,7 +465,7 @@ const document = {
 };
 const ctx = vm.createContext({ assert, document, URL, Intl, Date, Math, Number, String, Boolean, Array, Object, Map, Set, RegExp, Error });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), ctx);
 

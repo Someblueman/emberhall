@@ -23,7 +23,7 @@ const document={getElementById:get,createElement:tag=>new Element(tag),createEle
 const text=n=>[n.textContent,...n.children.map(text)].join(' ');
 const all=n=>[n,...n.children.flatMap(all)];
 const context=vm.createContext({assert,document,nodes,text,all});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 const fern={id:'fern',name:'Fern',room:'door',pose:'standing',presence:'recorded awake',agent:'muse'};

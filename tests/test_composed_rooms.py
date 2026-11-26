@@ -179,7 +179,7 @@ const document={body:new Element('body'),activeElement:null,getElementById:id=>n
   createElement:t=>new Element(t),querySelector:s=>s==='.room-card'?nodes['room-card']:null,querySelectorAll:()=>[]};
 const window={location:{hash:'#house-view'},addEventListener(){},history:{pushState(a,b,h){window.location.hash=h;}}};
 const ctx=vm.createContext({assert,document,window,Date,URL,Intl,Element,nodes});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 drawHouse=()=>{};dormControls=()=>{};accounts=()=>{};shelf=()=>{};voting=()=>{};

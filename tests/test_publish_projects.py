@@ -47,7 +47,8 @@ class ProjectPublicationTests(HouseCase):
         self.assertEqual(self.record.git('show', BRANCH + ':' + target), committed)
         names = set(git(self.repo, 'ls-tree', '-r', '--name-only', BRANCH).splitlines())
         files = {name for project in self.manifest['projects'] for name in project['files']}
-        self.assertEqual(names, files | {'projects.json', 'index.html', 'house.js', 'house.css', 'history.json', 'balance.json', 'head.json', '.nojekyll'})
+        self.assertEqual(names, files | {'projects.json', 'index.html', 'house.js', 'house.css',
+                                        'history.json', 'current.json', 'balance.json', 'head.json', '.nojekyll'})
         self.assertNotIn('projects/night-ferry/PLAYTEST-RECORD.md', names)
 
     def test_rejects_unsafe_missing_untracked_and_symlink(self):

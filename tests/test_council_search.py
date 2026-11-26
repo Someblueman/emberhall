@@ -38,7 +38,7 @@ const document={
 };
 const byId=id=>all(root).find(n=>n.id===id);
 const context=vm.createContext({assert,document,URL,root,text,all,byId});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 """
 

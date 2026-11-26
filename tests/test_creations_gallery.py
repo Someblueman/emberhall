@@ -19,7 +19,7 @@ const root=new Element('div'),document={getElementById:()=>root,querySelector:()
 const all=n=>[n,...n.children.flatMap(all)],text=n=>[n.textContent,...n.children.map(text)].join(' ');
 const manifest=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
 const ctx=vm.createContext({assert,document,URL,AbortSignal,root,all,text,manifest,fetch:async()=>({ok:false})});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const creation={id:'garden',title:'<img src=x>',summary:'Send a picture',category:'creation',action:'Play',href:'projects/garden/'};
@@ -59,6 +59,7 @@ assert.match(text(root),/current published versions/);
   'projects/tessera-loom/gallery-preview.svg|projects/lantern-loop/gallery-preview.svg|projects/night-ferry/gallery-preview.svg|projects/signal-garden/gallery-preview.svg|projects/specimen-cards/gallery-preview.svg|projects/shadow-theatre/gallery-preview.svg|projects/cue-rehearsal/gallery-preview.svg|projects/rain-ledger/gallery-preview.svg|projects/review-skein/gallery-preview.svg|projects/five-marks/gallery-preview.svg|projects/left-glove-post/gallery-preview.svg|projects/bench-for-two/gallery-preview.svg|projects/last-dance-school/gallery-preview.svg|projects/terminal-in-brainfuck/gallery-preview.svg|projects/rail-replacement-geese/gallery-preview.svg|projects/you-were-supposed-to-drop-it/gallery-preview.svg',
   'Every listed real-output browser creation preview shows in the present view');
  for(const image of shown){
+  assert.equal(image.loading,'lazy');
   assert.match(image.alt,/.{40,}/,'Previews carry real alternative text');
   assert.ok(image.width>0&&image.height>0,'Previews declare their dimensions');
   const owner=manifest.projects.find(p=>p.files.includes(image.src));
@@ -133,7 +134,7 @@ const get=id=>(nodes[id]||(nodes[id]=new Element('div')));
 const document={getElementById:get,querySelector:()=>null,createElement:t=>new Element(t)};
 const all=n=>[n,...n.children.flatMap(all)];
 const ctx=vm.createContext({assert,document,all,URL,Intl,Date,Math,Number,String,Set,Object,Array});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 data={timezone:'UTC',observed_at:1000,name:'Emberhall',journal_head:'abc',commits:[],frames:[{seq:1,at:1000,event:{op:'wake',actor:'r1'},

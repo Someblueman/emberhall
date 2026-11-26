@@ -30,7 +30,7 @@ const document={querySelectorAll:()=>[],body:new Element('body'),activeElement:n
     return nodes[id]||(nodes[id]=Object.assign(new Element('div'),{id}));
   }};
 const ctx=vm.createContext({assert,document,fetch:()=>new Promise(()=>{}),AbortSignal,structuredClone,console,window:{location:{hash:""},addEventListener(){}}});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 drawHouse=()=>{};floorControls=()=>{};dormControls=()=>{};accounts=()=>{};shelf=()=>{};lighting=()=>{};

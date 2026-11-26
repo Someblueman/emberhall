@@ -17,7 +17,7 @@ class Element {
   replaceChildren(){this.children=[];}
 }
 const box=new Element(),document={getElementById:()=>box,createElement:()=>new Element()};
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));
 const ctx=vm.createContext({document,assert});
 vm.runInContext(source.slice(0,-tail.length),ctx);

@@ -25,7 +25,7 @@ const find=id=>document.getElementById(id),query=value=>{
  find('gallery-search').value=value;find('gallery-search').listeners.input();
 },activity=value=>{find('gallery-activity').value=value;find('gallery-activity').listeners.change();};
 const ctx=vm.createContext({assert,document,root,all,text,find,query,activity,URL,AbortSignal});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 catalog=[

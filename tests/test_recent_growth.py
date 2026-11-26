@@ -24,7 +24,7 @@ const all=n=>[n,...n.children.flatMap(all)];
 const document={getElementById:id=>nodes[id]||all(nodes['recent-growth']).find(n=>n.id===id)||null,
  createElement:tag=>new Element(tag)};
 const context=vm.createContext({document,assert,nodes,text,all});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),context);
 vm.runInContext(`
 const legacy={id:'hearth',name:'Hearth'};

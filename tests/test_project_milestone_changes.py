@@ -18,7 +18,7 @@ const root=new Element('div'),growth=new Element('div');
 const document={createElement:t=>new Element(t),activeElement:null,
  getElementById:id=>id==='recent-growth'?growth:[...all(root),...all(growth)].find(n=>n.id===id)||null};
 const ctx=vm.createContext({assert,document,root,growth,all,text,Intl});
-const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n';
+const source=fs.readFileSync(process.argv[1],'utf8'),tail='refresh();\nsetInterval(watch,10000);\n';
 assert(source.endsWith(tail));vm.runInContext(source.slice(0,-tail.length),ctx);
 vm.runInContext(`
 const get=id=>document.getElementById(id);

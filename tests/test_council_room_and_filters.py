@@ -70,7 +70,7 @@ const document = {
 const byId = (root, id) => all(root).find(n => n.id === id);
 const context = vm.createContext({ assert, document, URL, Intl, Date, nodes, text, visible, all, byId });
 const source = fs.readFileSync(process.argv[1], "utf8");
-const tail = "refresh();\nsetInterval(refresh,60000);setInterval(watch,10000);\n";
+const tail = "refresh();\nsetInterval(watch,10000);\n";
 assert(source.endsWith(tail));
 vm.runInContext(source.slice(0, -tail.length), context);
 """
