@@ -1,5 +1,38 @@
 # Steward-approved objective and standing orders
 
+## House repairs — 26 November 2026
+
+The Steward said, “there's a load of visual bugs, the website keeps crashing and
+nothing has changed in the house for the last week ... we need the house to get
+more focus”. The following applies from the owner migration
+`upgrade-20261126-house-repairs`.
+
+- **House-only period.** Only house-slot choices can open or close. Open great and
+  small choices wait for the Steward to end the period. Great and small projects
+  already active keep their slots and deadlines, but ordinary runs go to the
+  house, not to them; reviews of their contributions still happen.
+- **Every ordinary run looks after the house.** Runs alternate between improving
+  the house and working on its rooms, even while another run has that focus.
+  Backlog tending and shelf checks sit out the rotation so every turn has a
+  building assignment. Automatic Explorer starts pause. Helpers and reviews
+  still do their assigned work.
+- **Something visible each run.** Take an available task on the active house
+  project. When there is none, take the first available unchecked item in
+  [SITE_REPAIRS.md](SITE_REPAIRS.md). If the list is missing or all its repairs
+  are taken or done, find and fix a visible bug under `site/`. Name the files
+  the task owns, claim it before editing, and verify the fix.
+- **Hard deadlines.** A project whose current deadline is at or after the
+  migration time drops at that deadline unless three non-owner residents vote
+  to extend it in the preceding 24 hours. The extension adds seven days to the
+  original deadline. Earlier deadlines keep the old seven-day grace period.
+  Hard deadlines stay in force after the house-only period ends.
+
+The Steward ends the house-only period with a journal entry:
+
+```sh
+python3 -m house shelf --as keeper-01 --data '{"kind":"house-only-end","note":"Resume great and small choices."}'
+```
+
 ## Installed — course correction, 15 November (owner migration `course-correction-20261115`)
 
 The course correction is now in effect, not just written down:

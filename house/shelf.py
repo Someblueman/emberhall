@@ -206,6 +206,35 @@ def house_work(state: dict) -> str | None:
                  if project["status"] == "active" and slot(project) == "house"), None)
 
 
+# House repairs (Steward, 26 November). The pause ends in the journal; deadline rules keep applying.
+HOUSE_REPAIRS = "upgrade-20261126-house-repairs"
+HOUSE_ONLY_CHOICE = "only house choices can open or close during the house-only period"
+
+
+def repairs_since(state: dict) -> float | None:
+    entry = state.get("maintenance", {}).get("migrations", {}).get(HOUSE_REPAIRS)
+    return None if entry is None else entry["at"]
+
+
+def house_only(state: dict) -> bool:
+    return repairs_since(state) is not None and "house_only_end" not in state.get("shelf", {})
+
+
+def choice_allowed(state: dict, which: str | None) -> bool:
+    return which == "house" or not house_only(state)
+
+
+def hard_deadline(state: dict, project: dict) -> bool:
+    since = repairs_since(state)
+    return since is not None and project["deadline"] >= since
+
+
+def project_expiry(state: dict, project: dict) -> float:
+    if hard_deadline(state, project):
+        return project["deadline"]
+    return project["deadline"] + 7 * DAY
+
+
 def cool(state: dict | None, which: str | None) -> int:
     """How long a kept idea of this scale waits on the shelf before a choice may include it."""
     quick = which == "small" or (which == "house" and house_work_since(state) is not None)
@@ -728,7 +757,7 @@ def advance(state: dict, at: float, sequence: int) -> None:
         elif not state["residents"][expedition["owner"]]["awake"]:
             close_explorer(shelf, "slept", at, sequence)
     for key, project in shelf["projects"].items():
-        if project["status"] == "active" and at >= project["deadline"] + 7 * DAY:
+        if project["status"] == "active" and at >= project_expiry(state, project):
             which = "second" if project["extended"] else "first"
             drop(shelf, key, f"no timely {which}-deadline decision", at, sequence)
     if alone_since(state) is not None and one_family(state, at):
@@ -795,7 +824,14 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
     shelf = state.setdefault("shelf", empty())
     kind = text(data, "kind", 40)
     opened = open_since(state) is not None
-    if kind == "explore-start":
+    if kind == "house-only-end":
+        require(repairs_since(state) is not None, "unknown shelf action")
+        fields(data, {"note"})
+        require(actor == state.get("council", {}).get("authorized_by"),
+                "only the Steward can end the house-only period")
+        require(house_only(state), "the house-only period has already ended")
+        shelf["house_only_end"] = {"note": text(data, "note"), "at": at, "sequence": sequence, "actor": actor}
+    elif kind == "explore-start":
         fields(data, {"round", "expect", "token", "seconds"})
         key = identifier(data, "round")
         require(key not in shelf["rounds"], "Explorer round already used")
@@ -890,13 +926,15 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
         else:
             fields(data, {"choice", "milestones"})
             which = None
+        require(choice_allowed(state, which), HOUSE_ONLY_CHOICE)
         key = identifier(data, "choice")
         require(key not in shelf["choices"], "choice ID already used")
         if which is None:
             require(len(active_projects(shelf)) < 2, "both project slots are occupied")
         else:
             require(slot_free(shelf, which), f"the {which} project slot is occupied")
-        require(not any(c["status"] == "open" for c in shelf["choices"].values()), "a choice is already open")
+        require(not any(c["status"] == "open" and choice_allowed(state, c.get("slot"))
+                        for c in shelf["choices"].values()), "a choice is already open")
         candidates = [idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) != "house"] if which is None else [
             idea for idea in shelf_ids(shelf) if scale(shelf["ideas"][idea]) == which]
         if asked_since(state) is not None:
@@ -958,6 +996,7 @@ def apply(state: dict, event: dict, *, selection_version: int = 1) -> None:
             "counted": idea is None or actor != shelf["ideas"][idea]["author"], "sequence": sequence}
         counted = [v for v in choice["votes"].values() if v["counted"]]
         if len(counted) == 3:
+            require(choice_allowed(state, choice.get("slot")), HOUSE_ONLY_CHOICE)
             # One open round reserves the free slot; closing is the same atomic event.
             if "slot" in choice:
                 require(slot_free(shelf, choice["slot"]), f"the {choice['slot']} project slot is occupied")
@@ -1147,13 +1186,19 @@ def project_action(state: dict, data: dict, actor: str, at: float, sequence: int
         require(at >= project["deadline"] or actor == project["owner"] or steward,
                 "only the project owner or, to drop it, the Steward can close it before its deadline")
     if kind == "project-extend-vote":
-        require(at >= project["deadline"], "deadline has not arrived")
+        deadline = project["deadline"]
+        hard = hard_deadline(state, project)
+        if hard:
+            require(at >= deadline - DAY, "extension votes open one day before the deadline")
+        else:
+            require(at >= deadline, "deadline has not arrived")
         require(not project["extended"], "a project can extend only once")
         require(actor != project["owner"], "project owner cannot vote to extend")
         require(actor not in project["extension_votes"], "resident already voted to extend")
         project["extension_votes"][actor] = {"reason": note, "sequence": sequence}
         if len(project["extension_votes"]) == 3:
-            project.update(extended=True, deadline=at + 7 * DAY, extended_sequence=sequence)
+            project.update(extended=True, deadline=(deadline if hard else at) + 7 * DAY,
+                           extended_sequence=sequence)
     elif kind == "project-done":
         witness = state["tasks"].get(note, {})
         require(witness.get("status") == "done" and bool(witness.get("artifacts")),

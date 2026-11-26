@@ -432,6 +432,7 @@ Use `shelf --as ID --request STABLE-ID --data JSON` through the assigned client
 | explore-release | round, token, reason |
 | choice-open | choice, milestones |
 | choice-vote | choice, idea (ID or null), reason |
+| house-only-end | note (the Steward only, after `upgrade-20261126-house-repairs`) |
 | idea-return | idea, changed |
 | idea-brief | idea, brief (after the open-research decision below) |
 | idea-second | idea, verdict (keep or drop), finding (not the idea's or the brief's author) |

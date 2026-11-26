@@ -187,6 +187,7 @@ HOME_FOCUS = ("improve", "room", "tend", "research")
 # round starts in the next field in turn.
 MIX = "upgrade-20261120-mix-and-house"
 MIX_FOCUS = ("improve", "room", "improve", "research", "improve", "tend", "improve", "checks")
+REPAIR_FOCUS = ("improve", "room")
 FIELD_TURNS = (
     "software people would use: a library someone would import, a tool, or a game that runs",
     "mathematics: a question with a result another mind can check",
@@ -296,11 +297,18 @@ def closing_owner(state: dict, kind: str, at: float, allowed=lambda resident: Tr
 
 def closing_line(state: dict, resident: str) -> str:
     """Tell an owner whose project has nothing left open that the house is waiting for them."""
+    from . import shelf as shelf_model
     lines = []
     for key, project in closing_projects(state).items():
         if project["owner"] != resident:
             continue
         title = state["shelf"]["ideas"].get(project["idea"], {}).get("title", key)
+        if shelf_model.house_only(state) and shelf_model.slot(project) == "house":
+            lines.append(
+                f"YOUR HOUSE PROJECT {key} ({title}) HAS NO OPEN TASK: every task is done. If the milestone is met, "
+                "record shelf kind project-done with the finished task that holds the evidence. Use your house "
+                "focus to fix a visible site bug while the project has no available task.\n")
+            continue
         lines.append(
             f"YOUR PROJECT {key} ({title}) HAS NO OPEN TASK: every task is done and the house is waiting for you, "
             "its owner. Do this first, before anything else in this run. Check its current milestone against the "
@@ -576,7 +584,8 @@ def asked_prompt(state: dict, resident: str) -> str:
     higher = shelf_model.higher_since(state) is not None
     if higher:
         whole = shelf_model.empty() | shelf
-        free = [which for which in ("great", "small") if shelf_model.slot_free(whole, which)]
+        choice_slots = [which for which in shelf_model.scales(state) if shelf_model.choice_allowed(state, which)]
+        free = [which for which in ("great", "small") if which in choice_slots and shelf_model.slot_free(whole, which)]
         text += ("A HIGHER BAR (Steward, 17 November, docs/STEWARD_ORDERS.md and docs/WISHES.md). This replaces "
                  "the paragraph above and every sentence that says the work must benefit the world outside "
                  "Emberhall. A checker for one hobby's story files went from idea to project in thirteen "
@@ -649,11 +658,12 @@ def asked_prompt(state: dict, resident: str) -> str:
                     "to a plain archive list. Open a task with a plain line, build it, finish it this run.\n"
                     if free else ""))
         if shelf_model.lone_since(state) is not None and not any(
-                choice["status"] == "open" for choice in shelf.get("choices", {}).values()):
+                choice["status"] == "open" and shelf_model.choice_allowed(state, choice.get("slot"))
+                for choice in shelf.get("choices", {}).values()):
             def wait(due: float) -> str:
                 minutes = max(1, round((due - now) / 60))
                 return f"{minutes // 60} h {minutes % 60} min" if minutes >= 60 else f"{minutes} min"
-            for which in (which for which in shelf_model.scales(state) if shelf_model.slot_free(whole, which)):
+            for which in (which for which in choice_slots if shelf_model.slot_free(whole, which)):
                 kept = shelf_model.ready(state, which, now)
                 named = lambda keys: "; ".join(f"{key} ({ideas[key]['title']})" for key in keys)
                 if kept["open"]:
@@ -677,7 +687,7 @@ def asked_prompt(state: dict, resident: str) -> str:
                              + f". The choice can open in {wait(first)}; until then leave them be.\n")
         if shelf_model.lone_since(state) is not None:
             for key, choice in shelf.get("choices", {}).items():
-                if choice["status"] != "open":
+                if choice["status"] != "open" or not shelf_model.choice_allowed(state, choice.get("slot")):
                     continue
                 cast = sum(vote["counted"] for vote in choice["votes"].values())
                 named = "; ".join(f"{idea} ({ideas[idea]['title']})" for idea in choice["candidates"])
@@ -915,9 +925,23 @@ HOUSE_LIGHTER = ("One more kind of house idea, weighing the same as the others. 
 HOUSE_BIGGER = ("If what you would build is bigger than one run, bring it to the shelf as a house idea instead of "
                 "shrinking it (an Explorer round records it with scale house and a brief that is for the house). ")
 
+HOUSE_REPAIR_DIRECTION = (
+    "HOUSE REPAIRS (Steward, 26 November, docs/STEWARD_ORDERS.md): \"there's a load of visual bugs, the website "
+    "keeps crashing and nothing has changed in the house for the last week ... we need the house to get more focus\". "
+    "Only house choices can open or close during this period. The visitor-facing repair list is docs/SITE_REPAIRS.md.\n")
+SITE_REPAIR_TASK = (
+    "Fix one bug a visitor can see. Take the first unchecked item (`- [ ] **R1** ...`) in docs/SITE_REPAIRS.md "
+    "with work available; skip checked (`- [x]`) items and repairs already claimed or finished. For a listed "
+    "repair use its ID in the task ID (for R1 use site-repair-r1). Claim an existing ready task for that repair; "
+    "if another resident takes it first, move to the next available repair. "
+    "If the list is missing or has no available item, reproduce a visible bug in the public site (site/) yourself. "
+    "For a new task, use --ready and name the exact files it owns after checking other residents' claims. "
+    "Claim it before editing, verify the visitor-facing fix, and finish the task with a short handoff. "
+    "A missing or unavailable house task is a reason to do this repair. Do not sleep BLOCKED for it.\n")
 
-def house_work_line(state: dict) -> str | None:
-    """What a house-focus run does while a house work is active: advance it. None when there is none."""
+
+def house_work_line(state: dict, at: float | None = None) -> str | None:
+    """What a house-focus run does while there is house project work to take."""
     from . import shelf as shelf_model
     key = shelf_model.house_work(state)
     if key is None:
@@ -925,25 +949,44 @@ def house_work_line(state: dict) -> str | None:
     shelf = state.get("shelf", {})
     project = shelf["projects"][key]
     title = shelf["ideas"][project["idea"]]["title"]
+    if shelf_model.house_only(state):
+        if at is None:
+            at = state["at"]
+        if not any(task.get("project") == key and project_work.available(state, task_id, at)
+                   for task_id, task in state["tasks"].items()):
+            return None
+        return (f"advance the active house project {key}, {title}. Its current milestone: {project['milestone']} "
+                "Claim a ready, available task from that project, build and test it, and finish with a handoff. "
+                "Keep to the files your task owns. If no task is still available when you check, work on a site "
+                "repair instead. " + SITE_REPAIR_TASK)
     return (f"advance the house work now under way instead of picking a separate small thing. It is project {key}, "
             f"{title}, a change to Emberhall itself that several residents build over days. Its current milestone: "
             f"{project['milestone']} Read what the project has built so far and what its tasks say. Then take its "
             f"next piece: claim a ready task of that project if there is one, otherwise create the next piece as a "
             f"task with --project {key} and --ready, exactly as project builders do, claim it, build and test it, "
-            "commit in your room and finish the task with a handoff the next builder can continue from. Keep to "
+            "leave it in your room and finish the task with a handoff the next builder can continue from. Keep to "
             "the files your task owns, since others are building the same work. The project owner records "
             "project-done when the milestone is met. If every task is done and the milestone already looks met, "
             "do not invent more: say so at the Hearth, and if you are the owner record project-done so the next "
             "house work can start.\n")
 
 
-def focus_prompt(state: dict, focus: str, catalog: dict | None = None) -> str:
-    """One resident at a time looks after the house itself, not the current project."""
+def focus_prompt(state: dict, focus: str, catalog: dict | None = None, *, at: float | None = None) -> str:
+    """Tell a resident how to use their house focus."""
+    from . import shelf as shelf_model
+    if shelf_model.house_only(state):
+        head = f"HOUSE FOCUS for this run ({focus}): "
+        work = house_work_line(state, at)
+        if focus == "room":
+            head += "Prefer work on the public rooms. "
+        if work is not None:
+            return head + work
+        return head + "No house project has a task you can claim now. " + SITE_REPAIR_TASK
     head = ("HOUSE FOCUS for this run (instead of the current project; other residents are building that): ")
     missing = gallery_gaps(state, catalog) if focus == "improve" else []
     gaps = ("FINISHED BUT NOT IN THE GALLERY, so no visitor can see them: " + "; ".join(missing) + ". Do this "
             "first in this run: give one of them a Gallery entry in site/projects.json that opens the real thing "
-            "(its page, its checker's real output, its proof), test that the entry loads, and commit it. Then "
+            "(its page, its checker's real output, its proof), and test that the entry loads. Then "
             "carry on with the rest. " if missing else "")
     work = house_work_line(state) if focus in {"improve", "room"} else None
     if work is not None:
@@ -953,13 +996,12 @@ def focus_prompt(state: dict, focus: str, catalog: dict | None = None) -> str:
             work = work[:-1] + (" If its next piece is a room, plan and open it as docs/BUILDING.md describes "
                                 "(life kind room-plan, then room-open).\n")
         return head + work
-    from . import shelf as shelf_model
     bigger = HOUSE_BIGGER if shelf_model.house_work_since(state) is not None else ""
     if focus == "improve":
         return head + (
             "improve the house itself. Pick one thing that would make Emberhall work or read better for a visitor "
             "or for the next resident: its own code under house/, its public page under site/, or a room's view. "
-            "Create a task with clear file ownership and --ready, claim it, build and test it, commit in your room "
+            "Create a task with clear file ownership and --ready, claim it, build and test it, leave it in your room "
             "and finish it this run. Code under house/ goes live through a council renovation (docs/RENOVATION.md), "
             "which now needs only a one-hour notice after its trial and two endorsements; site/ and docs changes go "
             "live once reviewed and integrated. Prefer something people will notice over more process or proof. "
@@ -1028,7 +1070,7 @@ def course_prompt(state: dict, assigned: dict) -> str:
     """Steward course correction guidance for ordinary (non-helper) residents."""
     from . import course
     text = ("STEWARD COURSE CORRECTION (docs/COURSE_CORRECTION_2026-11-15.md): building is the main work. "
-            "A building stretch may last up to an hour: keep going past the first small piece, commit coherent "
+            "A building stretch may last up to an hour: keep going past the first small piece, keep coherent "
             "progress in your room and leave a handoff the next builder can continue from. Reviews, votes and "
             "upkeep should stay short. Proof is proportionate: full witnesses only for changes to the house's "
             "foundations; a project gets one review per milestone. Do not add large evidence bundles to Git; keep "
@@ -1087,7 +1129,7 @@ def deep_prompt(state: dict, assigned: dict) -> str:
             "about eight minutes in, much of it spent waking and reading. Research and project building now get "
             f"a real stretch of about {minutes} minutes. When you take a task on an active project, this run is "
             "a building stretch on that project's current milestone: finishing one task does not end it. Choose "
-            "the next piece that moves the milestone, create and claim it, build, commit, and continue. A sleep "
+            "the next piece that moves the milestone, create and claim it, build, and continue. A sleep "
             "asked for early is refused with what is left to do. If nothing more can move, sleep with a note "
             f"that contains {stay.MARK} followed by exactly what blocks it; if only the Steward can unblock it, "
             "raise a need first. Size project tasks to match: a project task is a slice of the milestone that a "
@@ -1232,7 +1274,9 @@ class Coordinator:
                 try:
                     home_work.contribution(workspace, item["source_head"],
                                            self.private / run / "contribution.json",
-                                           journal_artifacts=home_work.finished_reports(events, item))
+                                           journal_artifacts=home_work.finished_reports(events, item),
+                                           message=home_work.contribution_message(
+                                               home_work.finished_titles(state, events, item)))
                 except (OSError, ValueError, subprocess.SubprocessError) as contribution_error:
                     if not (self.private / run / "contribution.json").exists():
                         # A refused room is retained; it must not strand a dead resident.
@@ -1314,8 +1358,16 @@ class Coordinator:
             f"Your actual route is {assigned['agent']} / {assigned['model']}.\n"
             f"Use {channel} for every canonical journal operation, with --as {resident}. "
             "The private clone has no canonical journal: never found a replacement. "
-            "Use only your assigned identity. Commit completed work in this private room; "
-            "the coordinator preserves it for independent integration. Do not push/reset the shared checkout. "
+            "Use only your assigned identity. Leave completed work as files in this private room: when this run "
+            "ends the coordinator commits every changed file, under the titles of the tasks you finished, and "
+            "preserves it for independent integration. Do not run git add or git commit yourself; it is not "
+            "needed, and in a sandbox it costs an approval review each time. Files matched by .gitignore, such "
+            "as build/ and dist/, are not preserved, so keep deliverables elsewhere. Cite paths and their "
+            "sha256, not commit hashes. Do not push/reset the shared checkout. "
+            "STEWARD RULING on the ratification limit: its full 24-hour window covers rules, wake prompts and "
+            "floors. A renovation of the house's own code needs a one-hour window (Steward upgrade at journal "
+            "event 8163). A renovation enacted after one hour is lawful, not a breach: do not raise needs or "
+            "block work on it. "
             + (LIGHT_RUN if staffing.LIGHT in state.get("maintenance", {}).get("migrations", {}) else "") +
             "Ask other residents through a life help request; do not bypass the single controller. "
             + ("A help request with target_resident and no task or review_run is a note: it wakes nobody and "
@@ -1418,6 +1470,9 @@ class Coordinator:
                 "and explicitly sleep when this assignment ends. Do not research, explore, invent extra work "
                 "or remain in a post-completion wait. Queued contributions do not replace this assignment.\n")
         from . import shelf as shelf_model
+        repairing = shelf_model.house_only(state)
+        repair_focus = (repairing and self.focus in REPAIR_FOCUS and assigned.get("mode") != "review"
+                        and not staffing.helper(assigned))
         if "explore_generation" in assigned and shelf_model.open_since(state) is not None:
             assignment += (
                 "Automatic Explorer assignment: the house wants a research round now. By the Steward's standing "
@@ -1503,7 +1558,8 @@ class Coordinator:
             assignment += course_prompt(state, assigned)
             assignment += deep_prompt(state, assigned)
             assignment += asked_prompt(state, resident)
-            assignment += closing_line(state, resident)
+            if not repairing or repair_focus:
+                assignment += closing_line(state, resident)
             if (self.focus is None and "explore_generation" not in assigned and not help_request
                     and assigned.get("mode") != "review"):
                 assignment += self.gallery_offer(state, run)
@@ -1512,10 +1568,15 @@ class Coordinator:
             journal = self.record.read()[1] if checks.enabled(state) or second else None   # lesson ages
             if not second:
                 assignment += checks.offer(state, resident, journal)
-            if self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
+            if not repairing and self.focus in HOME_FOCUS and "task" not in assigned and not help_request:
                 assignment += focus_prompt(state, self.focus, self.catalog() if showing(state) else None)
             elif second:
                 assignment += checks.focus(state, resident, journal)
+        if repair_focus:
+            assignment += HOUSE_REPAIR_DIRECTION
+            if "task" in assigned or help_request:
+                assignment += "After your assigned work, or if it is unavailable, use your house focus.\n"
+            assignment += focus_prompt(state, self.focus, at=max(time.time(), state["at"]))
         from .body import PUBLIC_HEARTH
         if PUBLIC_HEARTH in state.get("maintenance", {}).get("migrations", {}):
             assignment += ("What you say with `say` is shown publicly at the Hearth on the house's page (local paths "
@@ -1552,6 +1613,10 @@ class Coordinator:
         request = state.get("life", {}).get("requests", {}).get(help_id, {})
         if help_id is not None and request.get("status") == "resolved":
             return None
+        from . import shelf as shelf_model
+        repairing = shelf_model.house_only(state)
+        if repairing:
+            explore_generation = None
         model = request.get("model", providers.DEFAULTS[kind]) if request.get("agent") == kind else providers.DEFAULTS[kind]
         if helper_model is not None:
             if kind != "codex" or helper_model not in staffing.HELPER_MODELS:
@@ -1652,6 +1717,13 @@ class Coordinator:
             "review" if pending_contributions(self.private) else "work")
         if model in staffing.HELPER_MODELS and task_id is not None:
             mode = "review" if state["tasks"][task_id].get("helper") == "review" else "work"
+        if repairing:
+            review_task = state["tasks"].get(task_id or request.get("task"), {})
+            if review_task.get("helper") == "review":
+                mode = "review"
+            self.focus = None
+            if mode != "review" and not staffing.helper({"agent": kind, "model": model}):
+                self.focus = self.home_focus(state)
         try:
             admission = self.life("run-start", run, resident=resident, agent=kind, model=model,
                                   source_head=base, workspace="residents/" + run, policy_revision=policy["revision"],
@@ -1686,8 +1758,10 @@ class Coordinator:
         child = None
         gate_read = gate_write = -1
         try:
+            if repairing and self.focus:
+                self.record_focus(run, self.focus)
             selected_lane = "explore" if explore_generation is not None else "review" if "review_run" in request else "work"
-            if staffing.helper({"agent": kind, "model": model}):
+            if staffing.helper({"agent": kind, "model": model}) or (repairing and mode == "review"):
                 selected_lane = mode
             reason = ("direct" if not scheduled else "requested-provider" if request.get("agent") == kind else
                       "preferred-unavailable" if request.get("agent") else "balanced")
@@ -1804,11 +1878,13 @@ class Coordinator:
         Under the higher bar an empty project slot is expected. A run with nothing else selected then
         works on the house, however recently another did.
         """
-        from . import course
+        from . import course, shelf as shelf_model
+        if shelf_model.house_only(state):
+            count = self.focus_record().get("count", 0)
+            return REPAIR_FOCUS[count % len(REPAIR_FOCUS)]
         if not course.enabled(state):
             return None
         last = self.focus_record()
-        from . import shelf as shelf_model
         whole = shelf_model.empty() | state.get("shelf", {})
         house_first = (idle and shelf_model.higher_since(state) is not None
                        and any(shelf_model.slot_free(whole, which) for which in ("great", "small")))
@@ -1859,6 +1935,10 @@ class Coordinator:
         except (OSError, ValueError):
             return {}
         return value if isinstance(value, dict) else {}
+
+    def record_focus(self, run: str | None, focus: str) -> None:
+        write_private(self.private / "home-focus.json", {"run": run, "focus": focus, "at": time.time(),
+            "count": self.focus_record().get("count", 0) + (run is not None)})
 
     def renovate(self) -> bool:
         """Hold admissions for a queued owner upgrade or enacted renovation.
@@ -1915,6 +1995,10 @@ class Coordinator:
             for _ in range(staffing.capacity(self.record.read()[0])["total_limit"]):
                 state = self.record.read()[0]
                 demand = workload(state, max(time.time(), state["at"]))
+                from . import shelf as shelf_model
+                repairing = shelf_model.house_only(state)
+                if repairing:
+                    demand["explore_generation"] = None
                 from .source_delivery import integration_inflight
                 demand = review_demand(state, demand, self.private, integration_inflight(self.record, self.private))
                 if not demand["wanted_starts"]:
@@ -1950,12 +2034,14 @@ class Coordinator:
                                               candidates if demand["uncovered_tasks"] else [],
                                               [key for key, _ in pending])
                 task_args = {}
-                # One resident at a time looks after the house itself rather than the current project.
+                # During repairs, starts add their own focus, including ordinary help runs.
                 focus = None
-                if (not pending and demand["explore_generation"] is None and (not selected or "task" in selected)
+                if (not repairing and not pending and demand["explore_generation"] is None
+                        and (not selected or "task" in selected)
                         and not any("ballot_choice" in state["tasks"][key] for key in demand["ready_tasks"])):
                     focus = self.home_focus(state, idle=not selected)
-                if focus:
+                selected_task = state["tasks"].get((selected or {}).get("task"), {})
+                if focus or (repairing and not pending and selected_task.get("helper") != "review"):
                     request, backlog, explore = (None, {}), False, None
                 elif selected and "task" in selected:
                     request = (None, {})
@@ -1991,9 +2077,7 @@ class Coordinator:
                                  focus=focus, **task_args)
                 if focus:
                     # Recorded even when the start failed, so a refused start is not retried every tick.
-                    write_private(self.private / "home-focus.json", {
-                        "run": run, "focus": focus, "at": time.time(),
-                        "count": self.focus_record().get("count", 0) + (run is not None)})
+                    self.record_focus(run, focus)
                 if run is None:
                     break
                 started.append(run)
