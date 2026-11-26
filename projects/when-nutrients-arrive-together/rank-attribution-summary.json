@@ -1,0 +1,86 @@
+{
+  "community": 9,
+  "drive": 0,
+  "selection": "post-hoc replay of the largest previously reported coherence length change; not a new population sample",
+  "maximum_reference_score_discrepancy": 0.0,
+  "reference_agreement_within_1e_8": true,
+  "reference_csv_sha256": "9277f569834a0f928ba89b2d2701760d3e4f8dc2a7afa8971a35beadbcab4844",
+  "receipt_sha256": "af5dfe028ea33b689d0b02aae604fde992e34aa463cbaaeab0f8b44426428155",
+  "protocol_sha256": "12e885079cb29b1066d7ca64050697a3cbad1872ab9178df65133b702c1569d1",
+  "exporter_sha256": "1710b4c52419200320beee68d693834b00535af1ef53288e9fcc59f69cc25dc8",
+  "scope": "exact score-change attribution on one selected finite path; no stationarity, continuum or population inference",
+  "methods": {
+    "correlation": {
+      "score_change": 0.06428571428571417,
+      "attribution_sum": 0.0642857142857143,
+      "changed_comparisons": 14,
+      "total_comparisons": 105,
+      "normalization_changed": false,
+      "before_scores": {
+        "overlap_spearman": 0.657142857142857,
+        "same_diet_pair_auc": 0.9629629629629629,
+        "single_linkage_guild_auc": 1.0
+      },
+      "after_scores": {
+        "overlap_spearman": 0.7214285714285712,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "maximum_raw_measure_change": 0.06380195663740945
+    },
+    "absolute_correlation": {
+      "score_change": 0.10357142857142854,
+      "attribution_sum": 0.10357142857142856,
+      "changed_comparisons": 17,
+      "total_comparisons": 105,
+      "normalization_changed": false,
+      "before_scores": {
+        "overlap_spearman": 0.4357142857142856,
+        "same_diet_pair_auc": 0.9259259259259259,
+        "single_linkage_guild_auc": 1.0
+      },
+      "after_scores": {
+        "overlap_spearman": 0.5392857142857141,
+        "same_diet_pair_auc": 0.9814814814814815,
+        "single_linkage_guild_auc": 1.0
+      },
+      "maximum_raw_measure_change": 0.06380195663740945
+    },
+    "cpsd": {
+      "score_change": 0.021428571428571352,
+      "attribution_sum": 0.021428571428571425,
+      "changed_comparisons": 8,
+      "total_comparisons": 105,
+      "normalization_changed": false,
+      "before_scores": {
+        "overlap_spearman": 0.6285714285714286,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "after_scores": {
+        "overlap_spearman": 0.6499999999999999,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "maximum_raw_measure_change": 0.03267959929174618
+    },
+    "coherence": {
+      "score_change": 0.20357142857142874,
+      "attribution_sum": 0.20357142857142857,
+      "changed_comparisons": 19,
+      "total_comparisons": 105,
+      "normalization_changed": false,
+      "before_scores": {
+        "overlap_spearman": 0.7464285714285712,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "after_scores": {
+        "overlap_spearman": 0.95,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "maximum_raw_measure_change": 0.005675187157417355
+    }
+  }
+}

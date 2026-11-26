@@ -1,0 +1,141 @@
+{
+  "scope": "Post-hoc question in one fixed local-linear community. Exact stationary Gaussian samples of the interpolated-input model, not nonlinear communities or a population validation.",
+  "planned": 512,
+  "attempted": 512,
+  "successful": 512,
+  "failures": [],
+  "events": {
+    "observed_severity": {
+      "known_exceedances": 0,
+      "unknown": 0,
+      "planned_paths": 512,
+      "fixed_n_marginal95_completion_interval": [
+        0.0,
+        0.007178950026259453
+      ]
+    },
+    "original_rank_margin": {
+      "known_exceedances": 19,
+      "unknown": 0,
+      "planned_paths": 512,
+      "fixed_n_marginal95_completion_interval": [
+        0.02248745162331635,
+        0.057345886813724295
+      ]
+    }
+  },
+  "diagnostics": [
+    {
+      "metric": "correlation",
+      "target": "overlap_spearman",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.06632254464285714,
+      "q95_absolute_length_change": 0.16428571428571426,
+      "maximum_absolute_length_change": 0.3571428571428572,
+      "limiting_score": 0.8892857142857141
+    },
+    {
+      "metric": "correlation",
+      "target": "same_diet_pair_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.019892939814814818,
+      "q95_absolute_length_change": 0.07407407407407407,
+      "maximum_absolute_length_change": 0.2222222222222222,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "correlation",
+      "target": "single_linkage_guild_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.02879050925925926,
+      "q95_absolute_length_change": 0.2777777777777778,
+      "maximum_absolute_length_change": 0.4629629629629629,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "absolute_correlation",
+      "target": "overlap_spearman",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.09509626116071428,
+      "q95_absolute_length_change": 0.24642857142857147,
+      "maximum_absolute_length_change": 0.4678571428571428,
+      "limiting_score": 0.7928571428571427
+    },
+    {
+      "metric": "absolute_correlation",
+      "target": "same_diet_pair_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.033275462962962965,
+      "q95_absolute_length_change": 0.12962962962962965,
+      "maximum_absolute_length_change": 0.2962962962962963,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "absolute_correlation",
+      "target": "single_linkage_guild_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.03938802083333333,
+      "q95_absolute_length_change": 0.2777777777777778,
+      "maximum_absolute_length_change": 0.4629629629629629,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "cpsd",
+      "target": "overlap_spearman",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.07116350446428568,
+      "q95_absolute_length_change": 0.1766071428571428,
+      "maximum_absolute_length_change": 0.29999999999999993,
+      "limiting_score": 0.9214285714285713
+    },
+    {
+      "metric": "cpsd",
+      "target": "same_diet_pair_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 3.6168981481481425e-05,
+      "q95_absolute_length_change": 0.0,
+      "maximum_absolute_length_change": 0.01851851851851849,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "cpsd",
+      "target": "single_linkage_guild_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.0,
+      "q95_absolute_length_change": 0.0,
+      "maximum_absolute_length_change": 0.0,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "coherence",
+      "target": "overlap_spearman",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.033461216517857134,
+      "q95_absolute_length_change": 0.09642857142857125,
+      "maximum_absolute_length_change": 0.17142857142857137,
+      "limiting_score": 0.9357142857142854
+    },
+    {
+      "metric": "coherence",
+      "target": "same_diet_pair_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.0,
+      "q95_absolute_length_change": 0.0,
+      "maximum_absolute_length_change": 0.0,
+      "limiting_score": 1.0
+    },
+    {
+      "metric": "coherence",
+      "target": "single_linkage_guild_auc",
+      "successful_paths": 512,
+      "mean_absolute_length_change": 0.0,
+      "q95_absolute_length_change": 0.0,
+      "maximum_absolute_length_change": 0.0,
+      "limiting_score": 1.0
+    }
+  ],
+  "mesh_lyapunov_relative_residual": 7.616900737717152e-17,
+  "protocol_sha256": "c0cb7739a3f953e6b3455180ad4fc00f6de355df8806a674b5e0b29fa1858783",
+  "ordered_receipt_hash_digest": "052890b9978dd1f9c461c366f71352e3d070090d79100a8765b11b1164b6d383",
+  "maximum_stationarity_covariance_residual": 6.071532165918825e-18
+}

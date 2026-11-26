@@ -1,0 +1,921 @@
+{
+  "scope": "Selected after observing the largest coherence length change. One dependent path; original gates unchanged; no new community, held-out or correlated-input experiment.",
+  "receipt": {
+    "status": "success",
+    "protocol_sha256": "f786c39637f275a97fe229c1b203b98bca2a6bc7d1bbd42d2a751d3dfd3c6b6a",
+    "previous_receipt_sha256": "af5dfe028ea33b689d0b02aae604fde992e34aa463cbaaeab0f8b44426428155",
+    "minimum_supply": 0.6116181022152953,
+    "minimum_abundance": 6.3508651507974605,
+    "maximum_prefix_error": 0.0,
+    "trajectory_sha256": "5f7b8188229de7a3e1eaf0fabc1e406910b1bf75d7902964a4e12e5333e1fb95",
+    "elapsed_seconds": 1385.2090523339575
+  },
+  "windows": {
+    "4096": {
+      "scores": {
+        "correlation": {
+          "overlap_spearman": 0.657142857142857,
+          "same_diet_pair_auc": 0.9629629629629629,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.4357142857142856,
+          "same_diet_pair_auc": 0.9259259259259259,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.6285714285714286,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.7464285714285712,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "second_half_scores": {
+        "correlation": {
+          "overlap_spearman": 0.8035714285714284,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.6964285714285713,
+          "same_diet_pair_auc": 0.9814814814814815,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.6964285714285713,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.7999999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "stationarity_descriptive": {
+        "half_mean_shift_in_sd": [
+          0.12347147388330063,
+          0.08008530771268939,
+          0.1056602587745821,
+          0.12101786664041957,
+          0.12895616471931293,
+          0.13510800244562404
+        ],
+        "half_variance_ratio": [
+          1.1672614590514316,
+          1.0654561737879396,
+          1.0641661293735427,
+          1.010748747821889,
+          1.0793403260885506,
+          0.9904355738058114
+        ]
+      }
+    },
+    "8192": {
+      "scores": {
+        "correlation": {
+          "overlap_spearman": 0.7214285714285712,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.5392857142857141,
+          "same_diet_pair_auc": 0.9814814814814815,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.6499999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.95,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "second_half_scores": {
+        "correlation": {
+          "overlap_spearman": 0.7785714285714285,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7321428571428571,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.8821428571428571,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.8749999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "stationarity_descriptive": {
+        "half_mean_shift_in_sd": [
+          0.04058856799266677,
+          0.028945429768380403,
+          0.06028440379934259,
+          0.008664350453150022,
+          0.2118343011106925,
+          0.03245323276039762
+        ],
+        "half_variance_ratio": [
+          0.9295520377036236,
+          0.9999749602463097,
+          0.9740097967519412,
+          0.9685458751594115,
+          1.0493675785677554,
+          0.9911030960355298
+        ]
+      }
+    },
+    "16384": {
+      "scores": {
+        "correlation": {
+          "overlap_spearman": 0.7499999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.6357142857142856,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.7749999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.9571428571428571,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "second_half_scores": {
+        "correlation": {
+          "overlap_spearman": 0.6678571428571428,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.657142857142857,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.7357142857142855,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.9178571428571428,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "stationarity_descriptive": {
+        "half_mean_shift_in_sd": [
+          0.15536309144477659,
+          0.06548959080135594,
+          0.04764591924142712,
+          0.06193174711196811,
+          0.00919435470379244,
+          0.06412114932704234
+        ],
+        "half_variance_ratio": [
+          1.063471130360797,
+          1.0176733764698727,
+          0.939633051686034,
+          0.9639156076008925,
+          1.130588127266579,
+          1.0004253304443698
+        ]
+      }
+    },
+    "32768": {
+      "scores": {
+        "correlation": {
+          "overlap_spearman": 0.6107142857142855,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.6499999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.7214285714285712,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.9607142857142855,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "second_half_scores": {
+        "correlation": {
+          "overlap_spearman": 0.657142857142857,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7214285714285712,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.7499999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.9178571428571428,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "stationarity_descriptive": {
+        "half_mean_shift_in_sd": [
+          0.024270060596783737,
+          0.030551795974779746,
+          0.01932226031945106,
+          0.03861928087307176,
+          0.0757231084451467,
+          0.045830355228163894
+        ],
+        "half_variance_ratio": [
+          1.0449832724188277,
+          0.9859823278193028,
+          1.0012955368106962,
+          0.9295509870421871,
+          1.044909457284001,
+          1.0300626726458761
+        ]
+      }
+    },
+    "65536": {
+      "scores": {
+        "correlation": {
+          "overlap_spearman": 0.7,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7571428571428571,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.8107142857142855,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.9178571428571428,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "second_half_scores": {
+        "correlation": {
+          "overlap_spearman": 0.7249999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7071428571428571,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "cpsd": {
+          "overlap_spearman": 0.7999999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "coherence": {
+          "overlap_spearman": 0.9214285714285713,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "stationarity_descriptive": {
+        "half_mean_shift_in_sd": [
+          0.052881862321317856,
+          0.014597139883001714,
+          0.013222877561355931,
+          0.02134559615353198,
+          0.013744017165797606,
+          0.009835827019725102
+        ],
+        "half_variance_ratio": [
+          0.9794158943395832,
+          0.9947821138597297,
+          1.002862526760826,
+          0.993269667849045,
+          1.0555037362645532,
+          1.0090866662068108
+        ]
+      }
+    }
+  },
+  "rank_changes": {
+    "8192": {
+      "correlation": {
+        "score_change": 0.06428571428571417,
+        "attribution_sum": 0.0642857142857143,
+        "changed_comparisons": 14,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 0,
+            "second": 6,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.03313258967920385,
+            "after_gap": 0.009400250722799031,
+            "contribution": 0.039285714285714285
+          },
+          {
+            "first": 0,
+            "second": 4,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.048619494478282455,
+            "after_gap": 0.009812915688728954,
+            "contribution": 0.025
+          },
+          {
+            "first": 12,
+            "second": 13,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.010843241173085882,
+            "after_gap": -0.03642459358636002,
+            "contribution": 0.017857142857142856
+          }
+        ]
+      },
+      "absolute_correlation": {
+        "score_change": 0.10357142857142854,
+        "attribution_sum": 0.10357142857142856,
+        "changed_comparisons": 17,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 0,
+            "second": 6,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.03313258967920385,
+            "after_gap": 0.009400250722799031,
+            "contribution": 0.039285714285714285
+          },
+          {
+            "first": 0,
+            "second": 2,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.042082011860016894,
+            "after_gap": 0.00042029817525193747,
+            "contribution": 0.03571428571428571
+          },
+          {
+            "first": 0,
+            "second": 4,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.048619494478282455,
+            "after_gap": 0.009812915688728954,
+            "contribution": 0.025
+          }
+        ]
+      },
+      "cpsd": {
+        "score_change": 0.021428571428571352,
+        "attribution_sum": 0.021428571428571425,
+        "changed_comparisons": 8,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 4,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.007866798948677412,
+            "after_gap": -0.0010086333810044208,
+            "contribution": 0.014285714285714285
+          },
+          {
+            "first": 7,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.02370983837166472,
+            "after_gap": -0.003625307688480215,
+            "contribution": 0.010714285714285713
+          },
+          {
+            "first": 8,
+            "second": 11,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.005361473581967202,
+            "after_gap": -0.000372656025338404,
+            "contribution": 0.010714285714285713
+          }
+        ]
+      },
+      "coherence": {
+        "score_change": 0.20357142857142874,
+        "attribution_sum": 0.20357142857142857,
+        "changed_comparisons": 19,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 6,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0003071343357868967,
+            "after_gap": -0.0010636298409521002,
+            "contribution": 0.02857142857142857
+          },
+          {
+            "first": 2,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0007214051247173632,
+            "after_gap": -0.0005996907041933492,
+            "contribution": 0.025
+          },
+          {
+            "first": 6,
+            "second": 11,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0002291062513602427,
+            "after_gap": -0.0005838757132962554,
+            "contribution": 0.021428571428571425
+          }
+        ]
+      }
+    },
+    "16384": {
+      "correlation": {
+        "score_change": 0.028571428571428692,
+        "attribution_sum": 0.02857142857142857,
+        "changed_comparisons": 10,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 9,
+            "second": 10,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.03656999364496174,
+            "after_gap": 0.00020519518516762866,
+            "contribution": -0.021428571428571425
+          },
+          {
+            "first": 8,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.023651802516381357,
+            "after_gap": -0.013534866971823111,
+            "contribution": 0.017857142857142856
+          },
+          {
+            "first": 3,
+            "second": 8,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.0166556471497636,
+            "after_gap": 0.013900657237274773,
+            "contribution": 0.014285714285714285
+          }
+        ]
+      },
+      "absolute_correlation": {
+        "score_change": 0.09642857142857142,
+        "attribution_sum": 0.09642857142857142,
+        "changed_comparisons": 13,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 0,
+            "second": 9,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.0015898294934730134,
+            "after_gap": 0.0830414263281492,
+            "contribution": 0.03214285714285714
+          },
+          {
+            "first": 9,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.03656999364496174,
+            "after_gap": -0.00020519518516762866,
+            "contribution": 0.021428571428571425
+          },
+          {
+            "first": 4,
+            "second": 6,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.00041266496592992294,
+            "after_gap": 0.00995017544249429,
+            "contribution": 0.014285714285714285
+          }
+        ]
+      },
+      "cpsd": {
+        "score_change": 0.125,
+        "attribution_sum": 0.12499999999999999,
+        "changed_comparisons": 20,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 2,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.019252299314980542,
+            "after_gap": -0.003135196006017407,
+            "contribution": 0.025
+          },
+          {
+            "first": 2,
+            "second": 3,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.010233105331132034,
+            "after_gap": -0.0029369626182928193,
+            "contribution": 0.021428571428571425
+          },
+          {
+            "first": 6,
+            "second": 11,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0003894887174608029,
+            "after_gap": -0.00953703332945087,
+            "contribution": 0.021428571428571425
+          }
+        ]
+      },
+      "coherence": {
+        "score_change": 0.0071428571428571175,
+        "attribution_sum": 0.007142857142857142,
+        "changed_comparisons": 7,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 8,
+            "second": 11,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0003879837174042568,
+            "after_gap": -0.00038951643741134707,
+            "contribution": 0.010714285714285713
+          },
+          {
+            "first": 4,
+            "second": 11,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -6.59340173899685e-05,
+            "after_gap": 2.5730512561067875e-05,
+            "contribution": -0.007142857142857143
+          },
+          {
+            "first": 5,
+            "second": 14,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.005215723636870312,
+            "after_gap": -0.00041087896806801805,
+            "contribution": -0.007142857142857143
+          }
+        ]
+      }
+    },
+    "32768": {
+      "correlation": {
+        "score_change": -0.13928571428571435,
+        "attribution_sum": -0.1392857142857143,
+        "changed_comparisons": 12,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 2,
+            "second": 10,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.01339244230416679,
+            "after_gap": 0.02949792433068166,
+            "contribution": -0.025
+          },
+          {
+            "first": 2,
+            "second": 3,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.013758232569618452,
+            "after_gap": 0.014074330541271291,
+            "contribution": -0.021428571428571425
+          },
+          {
+            "first": 2,
+            "second": 11,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.030026244781118476,
+            "after_gap": 0.010999440907635742,
+            "contribution": -0.017857142857142856
+          }
+        ]
+      },
+      "absolute_correlation": {
+        "score_change": 0.014285714285714346,
+        "attribution_sum": 0.014285714285714287,
+        "changed_comparisons": 12,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 9,
+            "second": 10,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.00020519518516762866,
+            "after_gap": 0.005216956311251009,
+            "contribution": -0.021428571428571425
+          },
+          {
+            "first": 8,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.013534866971823111,
+            "after_gap": -0.0076130020220811275,
+            "contribution": 0.017857142857142856
+          },
+          {
+            "first": 3,
+            "second": 8,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.013900657237274773,
+            "after_gap": 0.006068005162197082,
+            "contribution": 0.014285714285714285
+          }
+        ]
+      },
+      "cpsd": {
+        "score_change": -0.053571428571428714,
+        "attribution_sum": -0.05357142857142857,
+        "changed_comparisons": 24,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 6,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0015865917155392026,
+            "after_gap": -0.0021597595287340694,
+            "contribution": 0.02857142857142857
+          },
+          {
+            "first": 2,
+            "second": 10,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.003135196006017407,
+            "after_gap": 0.004710165144789851,
+            "contribution": -0.025
+          },
+          {
+            "first": 3,
+            "second": 6,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.0017848251032637902,
+            "after_gap": 0.0047659564455418656,
+            "contribution": 0.025
+          }
+        ]
+      },
+      "coherence": {
+        "score_change": 0.0035714285714284477,
+        "attribution_sum": 0.0035714285714285713,
+        "changed_comparisons": 4,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 2,
+            "second": 8,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.00043326006015377463,
+            "after_gap": 0.00038177229749137545,
+            "contribution": -0.007142857142857143
+          },
+          {
+            "first": 5,
+            "second": 14,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.00041087896806801805,
+            "after_gap": 0.00010801351120545699,
+            "contribution": 0.007142857142857143
+          },
+          {
+            "first": 6,
+            "second": 9,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.00010969998758927771,
+            "after_gap": -0.00020424444682492376,
+            "contribution": 0.007142857142857143
+          }
+        ]
+      }
+    },
+    "65536": {
+      "correlation": {
+        "score_change": 0.08928571428571441,
+        "attribution_sum": 0.08928571428571429,
+        "changed_comparisons": 12,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 3,
+            "second": 6,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.011856988266825044,
+            "after_gap": 0.022299159228076734,
+            "contribution": 0.025
+          },
+          {
+            "first": 6,
+            "second": 11,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.008782098633189494,
+            "after_gap": -0.005238216328374538,
+            "contribution": 0.021428571428571425
+          },
+          {
+            "first": 3,
+            "second": 9,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.006761953171135055,
+            "after_gap": 0.004717614496400915,
+            "contribution": 0.017857142857142856
+          }
+        ]
+      },
+      "absolute_correlation": {
+        "score_change": 0.1071428571428572,
+        "attribution_sum": 0.10714285714285714,
+        "changed_comparisons": 17,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 6,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.010311991406940998,
+            "after_gap": -0.01176306709370075,
+            "contribution": 0.02857142857142857
+          },
+          {
+            "first": 3,
+            "second": 6,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.011856988266825044,
+            "after_gap": 0.01421358985304708,
+            "contribution": 0.025
+          },
+          {
+            "first": 9,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.005216956311251009,
+            "after_gap": -0.0022670917370545864,
+            "contribution": 0.021428571428571425
+          }
+        ]
+      },
+      "cpsd": {
+        "score_change": 0.0892857142857143,
+        "attribution_sum": 0.08928571428571427,
+        "changed_comparisons": 8,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 2,
+            "second": 3,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0021039682279820546,
+            "after_gap": -0.0018488281594498841,
+            "contribution": 0.021428571428571425
+          },
+          {
+            "first": 3,
+            "second": 9,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.0002070474885482003,
+            "after_gap": 0.0038401655667182066,
+            "contribution": 0.017857142857142856
+          },
+          {
+            "first": 8,
+            "second": 10,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.003686025872012144,
+            "after_gap": -0.008013960259325374,
+            "contribution": 0.017857142857142856
+          }
+        ]
+      },
+      "coherence": {
+        "score_change": -0.042857142857142705,
+        "attribution_sum": -0.04285714285714286,
+        "changed_comparisons": 5,
+        "total_comparisons": 105,
+        "normalization_changed": false,
+        "largest_contributions": [
+          {
+            "first": 2,
+            "second": 11,
+            "before_sign": -1.0,
+            "after_sign": 1.0,
+            "before_gap": -0.00021029286694880414,
+            "after_gap": 0.00012482719759682832,
+            "contribution": -0.017857142857142856
+          },
+          {
+            "first": 5,
+            "second": 12,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.0008949299670086841,
+            "after_gap": -0.0007344910155108186,
+            "contribution": -0.010714285714285713
+          },
+          {
+            "first": 5,
+            "second": 14,
+            "before_sign": 1.0,
+            "after_sign": -1.0,
+            "before_gap": 0.00010801351120545699,
+            "after_gap": -0.00037500229026618537,
+            "contribution": -0.007142857142857143
+          }
+        ]
+      }
+    }
+  }
+}

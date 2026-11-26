@@ -1,0 +1,31 @@
+{
+  "bridge_seed": 90900,
+  "burn": 512,
+  "coarse_spacing": 0.0625,
+  "community": 9,
+  "drive": 0,
+  "duration": 66048,
+  "input_seed": 80900,
+  "lengths": [
+    4096,
+    8192,
+    16384,
+    32768,
+    65536
+  ],
+  "max_step": 0.03125,
+  "numpy": "2.4.6",
+  "prefix_tolerance": 1e-06,
+  "retained": 65536,
+  "rtol": 1e-09,
+  "scipy": "1.18.0",
+  "scope": "Selected after observing the largest coherence length change. One dependent path; original gates unchanged; no new community, held-out or correlated-input experiment.",
+  "sources": {
+    "coherence_extension.py": "0c17537182ed0cd60e9f2e9376ff81394b1e8766de0674ef558d20a2e2f0048f",
+    "convergence.py": "fd93943547c922049db70e5321b7aa61284b1b75d8564b109665fea999f87143",
+    "ou_bridge.py": "fefd976120cf52535eda211a934ee4164d76962bdf13cce652a04c0e274bed88",
+    "rank_attribution.py": "1710b4c52419200320beee68d693834b00535af1ef53288e9fcc59f69cc25dc8",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "spacing": 0.03125
+}

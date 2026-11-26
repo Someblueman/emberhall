@@ -1,0 +1,50 @@
+{
+  "bridge_seed": "90000 + 100*community",
+  "burn": 512,
+  "checkpoints": [
+    0,
+    32,
+    64,
+    128,
+    256,
+    512,
+    1023
+  ],
+  "coarse_spacing": 0.0625,
+  "duration": 1024,
+  "initial_conditions": [
+    "all amounts one",
+    "constant-mean-supply equilibrium"
+  ],
+  "input_seed": "80000 + 100*community",
+  "max_step": 0.03125,
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "scope": "fixed development cohort, one reused input prefix each; no population or stationarity certificate",
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "solver_control_seed": 4,
+  "solver_control_step": 0.015625,
+  "solver_control_tolerance": 1e-11,
+  "sources": {
+    "burn_coupling.py": "c497c7e63e91f51583056cf63bd2d6ec980791e375d003104bca4723f11427db",
+    "convergence.py": "fd93943547c922049db70e5321b7aa61284b1b75d8564b109665fea999f87143",
+    "linear_reference.py": "70d79e686ae7dc73dd1dff728f155a4139e4049b16046bb543914d3776c1ec52",
+    "ou_bridge.py": "fefd976120cf52535eda211a934ee4164d76962bdf13cce652a04c0e274bed88",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "spacing": 0.03125,
+  "tolerance": 1e-09
+}

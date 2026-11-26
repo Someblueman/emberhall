@@ -1,0 +1,46 @@
+{
+  "planned": 12,
+  "attempted": 12,
+  "successful": 12,
+  "failures": [],
+  "complete": true,
+  "maximum_replay_discrepancy": 4.811429032969272e-13,
+  "replay_absolute_tolerance": 1e-12,
+  "auditor_sha256": "3ec0f05b08a46a99fe5c6bd2bfe781fe3eb187095623aee4964b4f5e011ee8b8",
+  "protocol_sha256": "a0dedcd3eefd827bedd9646c63df77e4ba57003094abee8b0811831097946c5a",
+  "receipt_sha256": {
+    "4": "25c693b6936e453b15cf9b27739a0e3701a1d9b1aab9357e03f16e7ad96179bc",
+    "5": "b3b70b1b753844c5cf675aa93f015bc3229f84ce10d2cd06bb2024a489ec84d9",
+    "6": "6a13e49cd874d2782bf404d755a693123024789b4c9bd85f885f315057778aa0",
+    "7": "529650f0ddc7eac5856a49104999bf0498823ce226766e88275fb4ce51344f47",
+    "8": "f2777854d78cc71b8e289ca751c2243452b5ea47144dea020ff44b818a2c3ca7",
+    "9": "dfe9a56de7cb753d1b7723095688400f74286445cc78ceaf61f9cdd4cd73030f",
+    "10": "5f69c72e303e810fcb83c976bc46511bdce63fa1c468ad2fea0178b967a897cf",
+    "11": "8af9ab01f4e31745835c99a9a45081649dd6b05b4cfc09ea1fb4c11703b26311",
+    "12": "dc1e079be93a411b44ddd3c53490f3b03d5c5e74eea3548c786b2dc78c06738c",
+    "13": "40c0f98ac314cfc7a5c7da58285a5fff84b292eba19bb81c2434d4a461c50b02",
+    "14": "6ff2a9fd9bcc4c2ade1dd5b39c69e707dfb59963ef9535bf601ec82ee32456d1",
+    "15": "37414585fe71b4fbb1e7674977f017cb3e52caf14e029004bb825fef567a4e1b"
+  },
+  "scope": "fixed development cohort, one reused input prefix each; no population or stationarity certificate",
+  "maximum_checkpoint_log_difference": {
+    "0": 3.6088347367116675,
+    "32": 0.01015939095333751,
+    "64": 0.0005482164272088141,
+    "128": 1.5882673807254832e-06,
+    "256": 2.1298074415199153e-11,
+    "512": 0.0,
+    "1023": 0.0
+  },
+  "linear_relaxation_time_range": [
+    8.984693213856085,
+    11.896411027462646
+  ],
+  "maximum_equilibrium_residual": 3.3900660056929155e-13,
+  "maximum_post_burn_log_difference": 0.0,
+  "maximum_post_burn_standardized_difference": 0.0,
+  "maximum_post_burn_resource_difference": 0.0,
+  "maximum_absolute_score_difference": 0.0,
+  "maximum_solver_control_post_burn_log_difference": 2.8186215583758667e-08,
+  "maximum_solver_control_state_difference": 2.290452409958732e-07
+}
