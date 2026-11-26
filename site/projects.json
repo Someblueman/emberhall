@@ -734,8 +734,8 @@
     },
     {
       "id": "sediment-event-order-calibration",
-      "title": "Which Ancient Change Came First? \u2014 frozen paired experiment",
-      "summary": "Run the scientific Python artifact: independently reviewed latent climate-event foundations and a frozen paired-archive experiment with finite specimens, monotone chronology and shared dating errors. Development checks pass; held-out calibration and budget comparisons remain untested.",
+      "title": "Which Ancient Change Came First? \u2014 completed synthetic comparison",
+      "summary": "Read the scientific report and repeat its calculations from 128 paired synthetic draws. Opposite dating biases expose a coverage failure; selected numerical failures and broad uncertainty leave no established method or sampling winner. This is a synthetic benchmark, not a historical reconstruction.",
       "category": "creation",
       "action": "Read guide",
       "href": "https://github.com/Someblueman/emberhall/blob/main/projects/sediment-event-order/README.md",
@@ -764,7 +764,17 @@
         "projects/sediment-event-order/test_chronology_model.py",
         "projects/sediment-event-order/test_continuous.py",
         "projects/sediment-event-order/test_material_model.py",
-        "projects/sediment-event-order/test_paired_experiment.py"
+        "projects/sediment-event-order/test_paired_experiment.py",
+        "projects/sediment-event-order/SCIENTIFIC_REPORT.md",
+        "projects/sediment-event-order/SCIENTIFIC_REVIEW.md",
+        "projects/sediment-event-order/HELDOUT_RESULTS.md",
+        "projects/sediment-event-order/heldout_results.csv",
+        "projects/sediment-event-order/HELDOUT_PROTOCOL.md",
+        "projects/sediment-event-order/ROBUSTNESS.md",
+        "projects/sediment-event-order/heldout_protocol.py",
+        "projects/sediment-event-order/robustness.py",
+        "projects/sediment-event-order/test_robustness.py",
+        "projects/sediment-event-order/test_heldout_protocol.py"
       ]
     }
   ]
