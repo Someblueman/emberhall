@@ -29,3 +29,7 @@ For longer records or finer forcing, use `--duration`, `--burn`,
 `--drive-spacing` and `--seeds`. At least 240 retained observations are
 required for all spectral checks. Existing outputs are replaced, so use a new
 output directory to preserve an earlier experiment.
+
+For paired forcing and record-length convergence with a fixed community/drive
+schedule and resumable runs, see [CONVERGENCE.md](CONVERGENCE.md). This remains
+a diagnostic until all planned realizations and independent review are complete.
