@@ -16,6 +16,165 @@ def normalized(rows):
 
 
 class SpectrumTests(unittest.TestCase):
+    def test_radius_sparse_integer_identity_and_metric_coordinates(self):
+        packet=rs.adjacent_radius_example();result=rs.verify_saved(packet)
+        self.assertEqual(result['distance_lower_bound'],36)
+        self.assertEqual(result['residual_norm'],732)
+        self.assertEqual(result['original_rows'],43)
+        self.assertFalse(result['all_pairs_decided'])
+        keys,rows,_=rs.adjacent_phase_system(97,3,2)
+        centre=int(packet['edge']['bits'],16);combined=defaultdict(int)
+        for j,w in packet['row_weights']:
+            for i,c in rows[j].items():combined[i]+=w*c
+        rng=random.Random(93226)
+        for _ in range(20):
+            values=[rng.choice((-1,1)) for key in keys]
+            distance=sum(values[3*i+j]!=(1-2*(centre>>(2*i+j)&1))
+                         for i in range(402) for j in (0,1))
+            C=[-(1-2*(centre>>(2*(i//3)+i%3)&1)) if i%3<2 else 0 for i in range(1206)]
+            self.assertEqual(2*distance,804+sum((C[i]-combined[i])*v
+                for i,v in enumerate(values))+sum(combined[i]*v for i,v in enumerate(values)))
+
+    def test_radius_rejects_damaged_bound_weights_and_scope(self):
+        packet=rs.adjacent_radius_example()
+        for mutation in ('bound','weight','denominator','duplicate','scope'):
+            changed=rs.deepcopy(packet)
+            if mutation=='bound':changed['distance_lower_bound']+=1
+            if mutation=='weight':changed['row_weights'][0][0]=-1
+            if mutation=='denominator':changed['denominator']=0
+            if mutation=='duplicate':changed['row_weights'].append(changed['row_weights'][0])
+            if mutation=='scope':changed['all_pairs_decided']=True
+            with self.assertRaises(ValueError):rs.verify_saved(changed)
+        # Changing a coefficient must be evaluated, never accepted on trust.
+        changed=rs.deepcopy(packet);changed['row_weights'][0][1]+=1
+        with self.assertRaises(ValueError):rs.verify_saved(changed)
+
+    def test_switch_family_proves_all_words_without_enumeration(self):
+        packet=rs.adjacent_switch_family_example()
+        with patch.object(rs,'adjacent_switch_family_example',side_effect=AssertionError), \
+             patch.object(rs,'adjacent_future_pair_gates',side_effect=AssertionError), \
+             patch.object(rs,'adjacent_integral_driver',side_effect=AssertionError):
+            result=rs.verify_saved(packet)
+        self.assertEqual(result['edges'],131072)
+        self.assertEqual(result['source_variants'],128)
+        self.assertEqual(result['source_pair_value'],4)
+        self.assertEqual(result['family_distance_lower_bound'],19)
+        self.assertEqual(result['worst_residual_norm'],766)
+        self.assertEqual(result['invariant_obstruction_value'],-9)
+        self.assertEqual(result['bound'],1)
+        self.assertFalse(result['all_pairs_decided'])
+
+    def test_switch_family_random_words_replay_full_original_edges(self):
+        rng=random.Random(1795685);packet=rs.adjacent_switch_family_example()
+        edge=packet['edge'];bits=int(edge['bits'],16)
+        for _ in range(20):
+            changed=rs.deepcopy(edge);word=bits
+            for switch in packet['switches']:
+                if rng.randrange(2):
+                    for i in switch:word^=1<<i
+            changed['bits']=hex(word)
+            self.assertTrue(rs.verify_adjacent_phase_signs(changed))
+            middle=[1-2*(word>>(2*i+1)&1) for i in range(402)]
+            source=[1-2*(word>>(2*i)&1) for i in range(402)]
+            self.assertEqual(sum(c*middle[j] for j,c in packet['obstruction']['expression']),-9)
+            self.assertEqual(sum(c*source[j] for j,c in packet['source_gate']['gates'][0]['expression']),4)
+
+    def test_switch_family_rejects_overlap_broken_shell_and_damaged_identities(self):
+        packet=rs.adjacent_switch_family_example()
+        for mutation in ('overlap','single','target_identity','source_identity','radius','scope'):
+            changed=rs.deepcopy(packet)
+            if mutation=='overlap':changed['switches'].append(changed['switches'][0])
+            if mutation=='single':changed['switches'][0]=[changed['switches'][0][0]]
+            if mutation=='target_identity':changed['obstruction']['row_weights'][0][1]+=1
+            if mutation=='source_identity':changed['source_gate']['gates'][0]['expression'][0][1]+=1
+            if mutation=='radius':changed['family_distance_lower_bound']+=1
+            if mutation=='scope':changed['literal_existence_decided']=True
+            with self.assertRaises(ValueError):rs.verify_saved(changed)
+
+    def test_affine_cube_cover_against_exhaustive_small_cubes(self):
+        rng=random.Random(261126)
+        for trial in range(100):
+            n=rng.randrange(1,6)
+            rows=[(rng.randrange(-4,5),{i:rng.choice((-2,-1,1,2)) for i in range(n)
+                    if rng.randrange(2)},rng.randrange(3)) for _ in range(rng.randrange(1,9))]
+            actual=[word for word in itertools.product((-1,1),repeat=n)
+                    if all(abs(c+sum(a*word[i] for i,a in B.items()))<=b for c,B,b in rows)]
+            result=rs._affine_cube_cover(rows,n,lambda word:word,10,10000)
+            self.assertEqual(result['status'],'path' if actual else 'refused')
+            if actual:self.assertIn(tuple(result['proof']),actual)
+            else:self.assertGreater(rs._verify_affine_cube_cover(rows,n,result['proof']),0)
+        unknown=rs._affine_cube_cover([],4,lambda word:word,10,1)
+        self.assertEqual(unknown['status'],'unknown')
+        self.assertIsNone(unknown['proof'])
+
+    def test_source_fibre_refusal_replays_without_discovery(self):
+        seed=rs.adjacent_two_control_example();bits=int(seed['state_bits'],16)
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        packet=rs.adjacent_source_fibre_search(97,state,10,20000)
+        self.assertEqual(packet['status'],'refused')
+        self.assertGreater(len(packet['cuts']),0)
+        with patch.object(rs,'adjacent_source_fibre_search',side_effect=AssertionError), \
+             patch.object(rs,'adjacent_difference_successor',side_effect=AssertionError), \
+             patch.object(rs,'_affine_cube_cover',side_effect=AssertionError):
+            result=rs.verify_saved(packet)
+        self.assertGreater(result['cover_nodes'],1)
+        self.assertFalse(result['all_pairs_decided'])
+        self.assertFalse(result['literal_existence_decided'])
+
+    def test_source_fibre_cover_damage_and_incomplete_branches_rejected(self):
+        import copy
+        packet=rs.adjacent_source_fibre_search(97,[1]*402,10,100)
+        self.assertEqual(packet['status'],'refused')
+        self.assertEqual(rs.verify_saved(packet)['cover_nodes'],1)
+        damaged=copy.deepcopy(packet);damaged['cover']={'split':0,'minus':packet['cover']}
+        with self.assertRaises(ValueError):rs.verify_saved(damaged)
+        damaged=copy.deepcopy(packet);damaged['cover']={'row':-1}
+        with self.assertRaises(ValueError):rs.verify_saved(damaged)
+        damaged=copy.deepcopy(packet);damaged['cover']={'split':0,'minus':{'split':0,
+            'minus':packet['cover'],'plus':packet['cover']},'plus':packet['cover']}
+        with self.assertRaises(ValueError):rs.verify_saved(damaged)
+        with self.assertRaises(ValueError):rs._verify_affine_cube_cover([(0,{0:1},1)],1,{'row':0})
+        damaged=copy.deepcopy(packet);damaged['all_pairs_decided']=True
+        with self.assertRaises(ValueError):rs.verify_saved(damaged)
+
+    def test_source_fibre_pullback_is_the_exact_bound_on_every_control_word(self):
+        rng=random.Random(4821)
+        state=[rng.choice((-1,1)) for _ in range(402)]
+        forms,_=rs._adjacent_source_fibre(97,state)
+        bound=rs.adjacent_control_bound(97,((5,1),(28,-1)))
+        c,B,b=rs._adjacent_pullback_bound(bound,forms)
+        for _ in range(30):
+            u=[rng.choice((-1,1)) for _ in range(46)]
+            y=[v+sum(a*u[i] for i,a in terms.items()) for v,terms in forms]
+            self.assertEqual(c+sum(a*u[i] for i,a in B.items()),
+                             sum(w*y[j] for j,w in bound['expression']))
+        packet=rs.adjacent_source_fibre_search(97,[1]*402,10,100)
+        packet['cuts']=[rs.deepcopy(bound)]
+        packet['cuts'][0]['bound']+=1
+        with self.assertRaises(ValueError):rs.verify_saved(packet)
+
+    def test_source_fibre_actual_positive_path_and_phase_damage(self):
+        source=rs.adjacent_balanced_example();bits=int(source['bits'],16)
+        states=[hex(sum(((bits>>(3*i+j))&1)<<i for i in range(402))) for j in range(3)]
+        packet=dict(kind='moving-adjacent-source-fibre-v1',hole=43,state_bits=states[0],
+                    states=states,status='path',cuts=[],literal_existence_decided=False,
+                    all_pairs_decided=False)
+        self.assertTrue(rs.verify_saved(packet)['phase_correct'])
+        packet['states'][2]=hex(int(packet['states'][2],16)^1)
+        with self.assertRaises(ValueError):rs.verify_saved(packet)
+
+    def test_source_fibre_budget_never_becomes_a_refusal(self):
+        seed=rs.adjacent_two_control_example();bits=int(seed['state_bits'],16)
+        state=[1-2*(bits>>i&1) for i in range(402)]
+        packet=rs.adjacent_source_fibre_search(97,state,10,1)
+        self.assertEqual(packet['status'],'unknown')
+        self.assertNotIn('cover',packet)
+        self.assertEqual(rs.verify_saved(packet)['status'],'unknown')
+        packet['cover']={'row':0}
+        with self.assertRaises(ValueError):rs.verify_saved(packet)
+        for bad in ([],[0]*402,[True]*402):
+            with self.assertRaises(ValueError):rs.adjacent_source_fibre_search(97,bad)
+
     def test_continuation_positive_assembly_on_original_three_state_path(self):
         # Exercise assembly with an independently retained h43 path. Only the
         # discovery oracle is supplied: final replay still checks every original
