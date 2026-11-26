@@ -5940,3 +5940,9 @@ is **not** an uninterrupted final full-suite pass. Integration timing remains
 a material risk. No accepted test was weakened: AST comparison preserves
 all 192 accepted spectrum methods and adds eleven controls. Syntax and
 whitespace checks passed. No generated search or proof bundles enter Git.
+
+Final constructive attempt: all original rows, phases and four zero slice
+observables, no Hamming cap, with the signs of the nearest-edge real
+relaxation used only as discovery hints. The installed one-worker solver
+returned UNKNOWN at 300.006 seconds, 15,260 branches and 3,952 conflicts.
+No signing or refusal certificate was emitted; no improvement is inferred.
