@@ -1,0 +1,41 @@
+{
+  "community": 6,
+  "drive": 0,
+  "duration": 4096,
+  "burn": 1024,
+  "finest": 0.0625,
+  "model_sha256": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f",
+  "original": {
+    "max_step": 0.03125,
+    "rtol": 1e-08
+  },
+  "refined": {
+    "max_step": 0.015625,
+    "rtol": 1e-10
+  },
+  "log_rms": 2.9209478871296326e-08,
+  "maximum_absolute_log_change": 1.604034940427823e-07,
+  "score_differences": {
+    "correlation": {
+      "overlap_spearman": 0.0,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    },
+    "absolute_correlation": {
+      "overlap_spearman": 0.0,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    },
+    "cpsd": {
+      "overlap_spearman": 0.0,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    },
+    "coherence": {
+      "overlap_spearman": 0.0,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    }
+  },
+  "limitation": "one realization only; not a bound for all communities"
+}

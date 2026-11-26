@@ -27,7 +27,9 @@ and worst-community changes to prevent cancellation from hiding sensitivity.
 A zero-width interval from perfect AUC values is not a population guarantee.
 Also report exact binomial intervals for the proportion of communities whose
 guild AUC is perfect on every drive. This is a separate estimand from mean AUC;
-a single imperfect drive makes that community nonperfect. Even twelve perfect
+a single imperfect drive makes that community nonperfect. This estimates
+the chance of perfection on the fixed number of sampled drives, not on all
+possible environmental paths. Even twelve perfect
 communities have a two-sided exact lower bound of only about 0.735.
 The twelve-community design is an uncertainty measurement, not an assertion
 that twelve is adequate. Missing drives exclude that community from the
@@ -40,14 +42,12 @@ change exceeds 0.10. These are practical exploratory tolerances, not a theorem
 about bias or simultaneous 95% coverage. A failure means extend or revise the
 clean experiment, not select a favorable metric or seed. Mean shifts in units
 of standard deviation and variance ratios between halves are descriptive;
-they do not prove stationarity. A clean-baseline freeze requires independent
+they do not prove stationarity. The accepted project gates are separate; a clean-baseline freeze requires independent
 scientific review, sufficient precision, and no unresolved failure.
 
-Held-out correlated inputs reserve community seeds 100–123 and input seeds
-400000 onward. Do not inspect these while choosing resolution, duration,
-segments, correlation strengths or comparisons. The clean model, estimator,
-practical margins and analysis must be frozen and reviewed first; the
-correlated-input intervention itself still needs its own written protocol.
+This cross-check does not define or amend the accepted held-out protocol.
+The project's accepted PROTOCOL.md owns that contract. Its seed reservations
+and milestone gates remain unchanged; no correlated-input experiment has run.
 
 ## Source audit
 
@@ -67,12 +67,13 @@ account, shell networking or dependency was obtained.
 ## Run
 
 ```
-python3 projects/when-nutrients-arrive-together/convergence.py --output /tmp/nutrient-convergence
+python3 projects/when-nutrients-arrive-together/paired_crosscheck.py --output /tmp/nutrient-convergence
 ```
 
 Use a new directory. Configuration is written before simulation; each completed
 realization is appended immediately, failures retained, and fine trajectories
-saved for analysis. The final report is written only after all attempts.
+saved for analysis. The report is written after the requested bounded batch; its complete flag
+distinguishes a partial batch from all planned attempts.
 
 For a bounded building stretch append `--max-attempts 2`. Continue with the
 same arguments plus `--resume`; this rejects configuration changes and skips
@@ -103,3 +104,47 @@ the largest real eigenvalue of the stable Jacobian. Neither quantity is a
 certificate for nonlinear stationarity. No infinite-frequency coherence
 integral is attempted: its normalization and sampled bandwidth would require
 a separate derivation.
+
+A separate, preselected solver check uses community zero and drive zero:
+
+```
+python3 projects/when-nutrients-arrive-together/solver_refinement.py /tmp/nutrient-convergence
+```
+
+It regenerates the same exact OU path and compares the saved finest-forcing
+trajectory with a maximum solver step halved again and tolerance 1e-10.
+This is a representative check, not a uniform error bound. It requires the
+saved trajectory array, verifies the model hash, and records every score
+difference rather than just a maximum across unrelated metrics.
+
+## Relationship to the accepted project
+
+This private room started from the Rook pilot, before the preserved Sorrel and
+Mallow studies were integrated. Journal event 50348 announced their integration
+while this run was computing. I then opened accepted README.md, PROTOCOL.md,
+convergence.py and LENGTH_EXTENSION.md at commit 925a2656. They already cover
+nested meshes, repeated paths, longer nonlinear records and linear Welch
+calibration. Do not duplicate those investigations or replace their files.
+
+The additional data here use community seeds 0–11, two new paths per community,
+burn-in 1024 and 3072 retained samples. They are an additional parameterized
+cross-check, not an exact replay of the accepted twelve-community study
+(seeds 4–15, burn-in 512 and 4096 retained samples). Our exploratory margins
+are separate diagnostics and do not amend its original scientific gates.
+The planned two-community length extension was cancelled before any solve
+because the accepted work already goes substantially further. The exact
+binomial summary and newly readable supplement are retained as additions.
+
+The complete new-path results exposed a forcing-sensitive case at community
+six, drive zero. A second solver-refinement check targets that case after
+seeing its failure. It is an explicit post-hoc diagnostic, not a replacement
+for the preselected check or a reason to exclude the realization.
+The cross-check's reference.py hash was compared byte-for-byte with accepted
+925a2656; simulator and estimator source are identical.
+
+For that post-hoc case, run solver_refinement.py with `--seed 6 --drive 0`
+and again with `--stride 2`. The second invocation tightens the middle-mesh
+solver too. Its original score is recovered from the stored fine score minus
+the stored fine-minus-middle difference; a middle trajectory RMS is unavailable
+because the original middle array was not retained. Score differences are
+reported directly, including numerical subtraction roundoff.

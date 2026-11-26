@@ -1,0 +1,15 @@
+{
+  "communities": 12,
+  "drives": 2,
+  "duration": 4096,
+  "burn": 1024,
+  "finest": 0.0625,
+  "segments": [
+    16,
+    30,
+    60
+  ],
+  "numpy": "2.4.6",
+  "scipy": "1.18.0",
+  "model_sha256": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+}

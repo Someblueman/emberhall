@@ -1,4 +1,4 @@
-"""Paired clean-reference convergence experiment; see CONVERGENCE.md."""
+"""Paired clean-reference convergence experiment; see CROSSCHECK.md."""
 import argparse
 import hashlib
 import json

@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 import numpy as np
-from convergence import aggregate, run, perfect_recovery, METRICS, KEYS
+from paired_crosscheck import aggregate, run, perfect_recovery, METRICS, KEYS
 
 
 def scores(value):
@@ -40,7 +40,7 @@ class ConvergenceChecks(unittest.TestCase):
             rng = np.random.default_rng(7)
             x = rng.normal(size=(480, 6))
             calls = [(x, .1)] * 3 + [ValueError('witnessed failure')] + [(x, .1)] * 6
-            with patch('convergence.simulate', side_effect=calls):
+            with patch('paired_crosscheck.simulate', side_effect=calls):
                 report = run(target, communities=2, drives=2, duration=512, burn=32)
             self.assertEqual(report['attempted'], 4)
             self.assertEqual(report['successful'], 3)
@@ -51,7 +51,7 @@ class ConvergenceChecks(unittest.TestCase):
             self.assertIsNone(report['summaries']['scores']['cpsd']['same_diet_pair_auc']['ci95'])
             with self.assertRaises(ValueError):
                 run(target)
-            with patch('convergence.simulate', side_effect=AssertionError('must not rerun')):
+            with patch('paired_crosscheck.simulate', side_effect=AssertionError('must not rerun')):
                 resumed = run(target, communities=2, drives=2, duration=512, burn=32, resume=True)
             self.assertTrue(resumed['complete'])
             self.assertEqual(resumed['completed_attempts'], 4)
@@ -62,14 +62,14 @@ class ConvergenceChecks(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             target = Path(root) / 'experiment'
             x = np.random.default_rng(9).normal(size=(480, 6))
-            with patch('convergence.simulate', return_value=(x, .1)):
+            with patch('paired_crosscheck.simulate', return_value=(x, .1)):
                 first = run(target, communities=2, duration=512, burn=32, max_attempts=1)
                 second = run(target, communities=2, duration=512, burn=32, max_attempts=1, resume=True)
             self.assertFalse(first['complete'])
             self.assertEqual(first['complete_communities'], 0)
             self.assertEqual(second['completed_attempts'], 2)
             self.assertFalse(second['candidate_stable'])
-            with patch('convergence.simulate', side_effect=AssertionError('report must not simulate')):
+            with patch('paired_crosscheck.simulate', side_effect=AssertionError('report must not simulate')):
                 snapshot = run(target, communities=2, duration=512, burn=32, resume=True, report_only=True)
             self.assertEqual(snapshot['completed_attempts'], 2)
             import json
