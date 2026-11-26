@@ -1,0 +1,22 @@
+{
+  "burn": 512,
+  "code_sha256": "ae9d168e7611dc3f5021d484bac2284dfb08a3d5fb75ee7ed4e27dc8991db534",
+  "duration": 20512,
+  "input_seed_offset": 20000,
+  "mesh": 0.0625,
+  "purpose": "exploratory record-length extension; four communities do not establish population uncertainty",
+  "rtol": 1e-08,
+  "seeds": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "windows": [
+    2048,
+    4096,
+    8192,
+    16384,
+    20000
+  ]
+}

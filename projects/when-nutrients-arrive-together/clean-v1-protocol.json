@@ -1,0 +1,65 @@
+{
+  "burn": 512,
+  "code_sha256": {
+    "convergence.py": "fd93943547c922049db70e5321b7aa61284b1b75d8564b109665fea999f87143",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "duration": 4608,
+  "held_out": {
+    "community_seeds": [
+      1000,
+      1031
+    ],
+    "correlations": [
+      0,
+      0.25,
+      0.5,
+      0.75
+    ],
+    "input_seed_offset": 30000,
+    "status": "reserved; not executed; see PROTOCOL.md"
+  },
+  "input_seed_offset": 20000,
+  "meshes": [
+    0.25,
+    0.125,
+    0.0625
+  ],
+  "primary_segment": 30,
+  "rtol": 1e-08,
+  "sample_interval": 1,
+  "seeds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "segments": [
+    16,
+    30,
+    60
+  ],
+  "solver_check_max_step": 0.03125,
+  "solver_check_rtol": 1e-10,
+  "thresholds": {
+    "forcing_auc": 0.03,
+    "forcing_overlap": 0.05,
+    "length_auc": 0.05,
+    "length_overlap": 0.1,
+    "mean_ci_half_width": 0.1,
+    "solver_score": 0.005
+  },
+  "version": 1,
+  "versions": {
+    "numpy": "2.4.6",
+    "scipy": "1.18.0"
+  }
+}

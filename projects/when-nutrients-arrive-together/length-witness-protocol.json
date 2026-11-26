@@ -1,0 +1,24 @@
+{
+  "burn": 512,
+  "code_sha256": {
+    "extend_witness.py": "3b6404e09c9a4a0bae024a5b2af7e94c47576f0f97ebd9245bf61e073ac9da84",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f"
+  },
+  "mesh": 0.0625,
+  "numpy": "2.4.6",
+  "prefix_sha256": "c3b5aef1b45800603a3ab8795c05b5f49d76479dcfe6d8e148025d835985aa0a",
+  "purpose": "exploratory single-witness diagnosis; not population acceptance",
+  "retained": 65536,
+  "scipy": "1.18.0",
+  "seed": 14,
+  "segment": 30,
+  "selection": "largest observed correlation half-to-full rank change among communities 8\u201315",
+  "supply_seed": 20014,
+  "tolerance": 1e-08,
+  "windows": [
+    20000,
+    32768,
+    40000,
+    65536
+  ]
+}
