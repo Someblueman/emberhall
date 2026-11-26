@@ -1,0 +1,31 @@
+{
+  "baseline_protocol_sha256": "f786c39637f275a97fe229c1b203b98bca2a6bc7d1bbd42d2a751d3dfd3c6b6a",
+  "baseline_receipt_sha256": "39a085872c171d2b08b3d44ca03a454728bcf1a95c70936dfbea9a660a251d98",
+  "baseline_sha256": "5f7b8188229de7a3e1eaf0fabc1e406910b1bf75d7902964a4e12e5333e1fb95",
+  "bridge_seed": 90900,
+  "burn": 512,
+  "coarse_spacing": 0.0625,
+  "community": 9,
+  "drive": 0,
+  "duration": 66048,
+  "input_seed": 80900,
+  "lengths": [
+    4096,
+    8192,
+    16384,
+    32768,
+    65536
+  ],
+  "max_step": 0.03125,
+  "numpy": "2.4.6",
+  "rtol": 1e-11,
+  "scipy": "1.18.0",
+  "scope": "One selected development path; tolerance sensitivity only; original gates unchanged",
+  "solver_margin": 0.005,
+  "sources": {
+    "ou_bridge.py": "fefd976120cf52535eda211a934ee4164d76962bdf13cce652a04c0e274bed88",
+    "reference.py": "9e979c25b3c3add94b72fc73557a6a49c5fd48a1286946fd8d6ca8e1679d068f",
+    "tail_solver.py": "0424544b84a950e8655d707dee9a0ee373fdef069951289c738467647a037999"
+  },
+  "spacing": 0.03125
+}

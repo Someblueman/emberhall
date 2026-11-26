@@ -23,6 +23,13 @@ selected community 9 long record, binding its exact prior trajectory and
 all numerical source identities. It retains every score target at all five
 lengths. This checks tolerance sensitivity on the tail; it cannot supply
 the still-missing full-tail forcing-mesh check or a continuum error bound.
+The control completed in 39.9 minutes: all sixty score comparisons remain
+unchanged, maximum log error 5.80e-8, RMS 6.33e-9. All 180 recorded score
+values and trajectory-error summaries replay; four identity/score tamper
+controls fail closed. See the compact tail-solver files and completed report.
+The .10714 late absolute-correlation rank change therefore survives this
+tolerance control. All 87 project tests pass. Use the measured runtime in
+future budgets; the 25-minute estimate was optimistic.
 
 RESOLUTION_PRECISION.md and resolution_precision.py separate finite-record
 population score precision from expected absolute paired resolution drift.

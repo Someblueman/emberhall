@@ -37,3 +37,41 @@ equality; trajectory-error reductions use the same recorded operations.
 ```
 OPENBLAS_NUM_THREADS=1 python3 projects/when-nutrients-arrive-together/tail_solver_report.py --baseline /tmp/nutrients-coherence-extension-fbc0 --study /tmp/nutrients-tail-solver-d200 --output /tmp/nutrients-tail-solver-report-d200
 ```
+
+## Completed full-record tolerance control
+
+The tighter solve succeeded in 2391.9 seconds (39.9 minutes), compared with
+1385.2 seconds for the saved baseline. Retain this measured cost rather
+than the optimistic 25-minute estimate. Minimum consumer abundance was
+6.350865. All sixty before/after score comparisons are unchanged, including
+the entire 65536-observation window; maximum absolute score difference is
+zero at ordinary recorded precision, inside the original .005 margin.
+This does not assert exact trajectories: maximum log-abundance difference
+is 5.80e-8 and RMS difference 6.33e-9 over the full record.
+
+| Prefix length | Maximum log-abundance difference | RMS difference |
+|---:|---:|---:|
+| 4096 | 3.6083e-8 | 6.3421e-9 |
+| 8192 | 3.6949e-8 | 6.2090e-9 |
+| 16384 | 4.3181e-8 | 6.3008e-9 |
+| 32768 | 5.3902e-8 | 6.3070e-9 |
+| 65536 | 5.7998e-8 | 6.3280e-9 |
+
+The exporter independently recomputed all 180 before/after/difference
+score values from the two hash-bound trajectories and replayed every
+trajectory-error reduction and margin decision. Four copied-receipt
+tamper controls rejected changed score values, protocol, numerical source
+identity and refined trajectory identity. Original arrays were untouched.
+The compact tail-solver-scores.csv retains all twenty measure/window rows;
+tail-solver-protocol.json and tail-solver-summary.json bind exact settings,
+source identities, full receipt, exporter and both trajectory identities.
+Full arrays remain outside Git and are regenerated from the recorded seeds.
+
+This rules out score sensitivity to the tested tolerance change as an
+explanation of this selected record's witnessed length changes. In particular,
+the absolute-correlation rank change .10714 from 32768 to 65536 remains.
+It is not a second integration-method check, a full-tail forcing refinement,
+a rigorous ODE error bound, a new independent path or population evidence.
+The original failed length and precision gates remain failed, and milestone
+acceptance and the reserved intervention remain blocked on the stated
+scientific prerequisites rather than being certified by this control.

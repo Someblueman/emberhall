@@ -1,0 +1,15 @@
+{
+  "all_scores_inside_original_solver_margin": true,
+  "elapsed_seconds": 2391.9209886669996,
+  "exporter_sha256": "23416ad4660b235cf6ee8999f6c73c63c5685f3298a6223248ba8f4e8ff2fd7a",
+  "maximum_absolute_score_delta": 0.0,
+  "maximum_log_error": 5.799810920414927e-08,
+  "protocol_sha256": "96079ae0605a57b4da50a0c8785e2f90a005b247540b4edd88025e4701d22c1d",
+  "receipt_sha256": "2cd34cbf17969408d44fc040e7731a8f87804c7f047942d6734f46ac981cf2d1",
+  "replayed_score_values": 180,
+  "rms_log_error": 6.328028960732131e-09,
+  "scope": "One selected development path; tolerance sensitivity only; original gates unchanged",
+  "scores_sha256": "cd778cb7e13f064ce173765aeeac77f1f95e58dda3dc9d5ad4b06ab894750729",
+  "status": "success",
+  "trajectory_sha256": "211262a6c74ffd23342ef3b797911b594f83cd3b9f8a71c3524592a8fb1ec39b"
+}

@@ -46,7 +46,11 @@ There is nevertheless no infinite all-positive-input limit under this guard.
 At any fixed positive mesh and positive OU rate, stationary sampled OU is
 a Gaussian AR(1) with correlation exp(-omega*h) strictly between zero and
 one. Its innovation variance is positive. Its dependence decays geometrically;
-the stationary process is ergodic. A nonpositive endpoint has strictly
+the stationary process is ergodic. Explicitly, its stationary centered
+solution is the convergent moving average sum_(k>=0) a^k epsilon_(n-k),
+where a=exp(-omega*h) and epsilon are independent Gaussian innovations.
+It is a shift-equivariant measurable function of an ergodic independent
+innovation sequence, which establishes that ergodicity. A nonpositive endpoint has strictly
 positive Gaussian probability. The ergodic frequency of that event equals
 that probability almost surely, so an infinite endpoint sequence eventually
 fails the guard with probability one. Consequently success probabilities
