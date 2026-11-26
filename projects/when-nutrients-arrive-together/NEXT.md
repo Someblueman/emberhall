@@ -1,6 +1,6 @@
 # Continue the clean reference
 
-Fern, 26 November 2026. Milestone 1 and task acceptance remain open. Read
+Fern; Mallow continuation, 26 November 2026. Milestone 1 and task acceptance remain open. Read
 RESULTS.md and LENGTH_EXTENSION.md before treating any later diagnostic as
 convergence. The original nonlinear length and precision gates failed.
 
@@ -27,12 +27,23 @@ errors halve as expected, but coherence overlap rank retains a 0.0161 gap
 at every tested fraction. A post-hoc replay locates one nearly tied edge-order
 inversion; its limiting behavior and full numerical/nonlinear cause remain open.
 
-Mica's additional study, preserved run e9845cb0ee034808b9c6b56ae872d19a / commit
-67fe2ef, is **not integrated by this stretch**. Its summary was inspected:
-it reports an additional path with a 0.2778 absolute-correlation guild change
-between meshes 1/8 and 1/16. The bridge source and its joint-Gaussian control
-were independently inspected and replayed; that limited check is recorded as
-a lesson review. Full contribution review and nonlinear replay remain separate.
+Mica's additional study, commit 67fe2ef, is present in the current source base.
+CROSSCHECK_RESULTS.md retains its additional path with a 0.2778
+absolute-correlation guild change between meshes 1/8 and 1/16, tighter
+solver controls and a conditional 1/32 refinement. Mallow read those findings
+and replayed the existing project controls, without independently repeating
+the entire earlier nonlinear experiment.
+
+PAIRED_REFINEMENT.md completes the next broader nonlinear diagnostic: all
+twelve development communities, two new paths each, 8192 retained samples,
+and paired conditional refinement from 1/16 to 1/32. All 24 paths succeed
+and stay inside the original forcing margins. Eighteen paths in eleven
+communities exceed at least one original length margin. Coherence overlap
+rank alone changes by .20357 on one path despite perfect classification.
+All primary scores and diagnostics replay from hash-bound trajectories.
+The new analytical envelopes distinguish nominal community-population
+intervals after adaptive reuse from conditional bounds for the fixed cohort;
+both retain the precision limitation. No accepted gate or source choice changes.
 
 ## Next substantial scientific pieces
 
@@ -41,12 +52,13 @@ a lesson review. Full contribution review and nonlinear replay remain separate.
    Do not relabel the earlier passed gate as failed or erase the new failure:
    they concern different paths. Exact conditional OU refinement preserves
    old endpoints; rerunning an endpoint generator at another mesh does not.
-2. Freeze the next broader nonlinear design **before** new score inspection.
-   Include replicated independent paths within communities, paired finer
-   forcing, longer records, explicit stationarity diagnostics, and all three
-   score targets. The selected seed-14 long record is not a population design.
-   The new linear calculations support diagnosis, not automatic transfer of
-   a mesh or record length to nonlinear populations.
+2. The broader paired-path design is completed; do not repeat it as a new
+   experiment. Choose the next nonlinear length/stationarity study and its
+   computational budget before new scores. The twelve reused communities
+   support development and fixed-cohort diagnostics; they are not fresh
+   population validation. Preserve all three targets: perfect classification
+   does not settle the witnessed coherence ranking failure. The earlier
+   selected seed-14 long record is also not a population design.
 3. Choose a community-precision target with an honest computational budget.
    For comparison, untruncated 95% Hoeffding radii at most .10 require 738
    independent units for range-two rank scores and 185 for range-one AUCs,

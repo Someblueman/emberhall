@@ -7,10 +7,31 @@ from unittest.mock import patch
 import numpy as np
 
 from paired_refinement import configuration, digest, evaluate, write_json
-from refinement_report import audit
+from refinement_report import audit, cohort_envelopes
 
 
 class RefinementAuditChecks(unittest.TestCase):
+    def test_fixed_cohort_envelopes_cover_binomial_control_and_retain_failures(self):
+        from scipy.stats import binom
+        from test_paired_refinement import row
+        config = dict(communities=list(range(4, 16)), drives=[0, 1])
+        intervals = []
+        for successes in range(25):
+            rows = [row(4+i//2, i%2, float(i < successes)) for i in range(24)]
+            bound = cohort_envelopes(rows, config)['envelopes']['scores']['correlation']['same_diet_pair_auc']
+            intervals.append(bound['marginal95'])
+        # Exact enumeration of all binomial counts, independent of the bound's
+        # implementation; a perfect observed sample must retain uncertainty.
+        for probability in np.linspace(0, 1, 101):
+            coverage = sum(binom.pmf(k, 24, probability) for k, (low, high) in enumerate(intervals)
+                           if low <= probability <= high)
+            self.assertGreaterEqual(coverage, .95-1e-12)
+        self.assertLess(intervals[-1][0], 1)
+        rows[0]['status'] = 'failure'
+        bounds = cohort_envelopes(rows, config)['envelopes']['scores']['correlation']['same_diet_pair_auc']
+        self.assertAlmostEqual(bounds['empirical_completion_range'][1]-bounds['empirical_completion_range'][0], 1/24)
+        self.assertEqual(cohort_envelopes(rows[:-1], config)['status'], 'incomplete; no bound reported')
+
     def test_score_replay_rejects_plausible_but_false_receipt(self):
         with tempfile.TemporaryDirectory() as root:
             study = Path(root)

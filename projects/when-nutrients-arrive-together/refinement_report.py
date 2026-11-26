@@ -21,6 +21,38 @@ def check_table(actual, expected):
             raise ValueError('receipt scores/diagnostics differ from trajectories')
 
 
+def cohort_envelopes(rows, config):
+    """Conditional input-path bounds for a fixed cohort, including failures.
+
+    Lower/upper bounded completions bracket undefined failed-path scores.
+    Hoeffding on the lower and upper completions, with a union bound, encloses
+    every possible bounded completion's expectation. No success conditioning.
+    """
+    n = len(config['communities'])*len(config['drives'])
+    if len(rows) != n:
+        return dict(status='incomplete; no bound reported')
+    result = {}
+    family = 3*len(METRICS)*len(TARGETS)
+    for field in ('scores', 'forcing_delta', 'length_delta'):
+        result[field] = {}
+        for metric in METRICS:
+            result[field][metric] = {}
+            for target in TARGETS:
+                low, high = ((-1., 1.) if target == 'overlap_spearman' else (0., 1.))
+                if field != 'scores':
+                    low, high = low-high, high-low
+                lower = np.mean([r[field][metric][target] if r['status']=='success' else low for r in rows])
+                upper = np.mean([r[field][metric][target] if r['status']=='success' else high for r in rows])
+                radius = (high-low)*np.sqrt(np.log(40)/(2*n))
+                simultaneous = (high-low)*np.sqrt(np.log(40*family)/(2*n))
+                result[field][metric][target] = dict(empirical_completion_range=[float(lower), float(upper)],
+                    marginal95=[float(lower-radius), float(upper+radius)],
+                    simultaneous95=[float(lower-simultaneous), float(upper+simultaneous)])
+    return dict(independent_input_paths=n, simultaneous_targets=family,
+                scope='Conditional on these fixed communities and pre-input design history. Expected averages over new independent input paths; not a population of communities. Failed scores span their full bounded range; no success-only conditioning. Envelopes are untruncated.',
+                envelopes=result)
+
+
 def audit(study):
     protocol = study/'protocol.json'
     config = json.loads(protocol.read_text())
@@ -65,8 +97,10 @@ def export(study, output):
     good = [r for r in rows if r['status'] == 'success']
     report.update(protocol_sha256=digest(study/'protocol.json'), receipt_sha256=hashes,
                   exporter_sha256=digest(Path(__file__)),
-                  audited='all stored scores, segment changes, stationarity and mesh RMS replayed from hash-bound trajectories',
-                  total_solve_seconds=sum(r['elapsed_seconds'] for r in rows))
+                  audited='all primary scores, segment changes, stationarity and mesh RMS replayed from hash-bound trajectories; representative tighter-solver receipts retained but their arrays are not archived',
+                  community_population_coverage_scope='The community-population intervals and radii in summaries are nominal fixed-design references. The adaptive design reuses development communities; post-selection population coverage is not certified. Fixed-cohort conditional path envelopes are reported separately. No held-out validation.',
+                  sum_realization_elapsed_seconds=sum(r['elapsed_seconds'] for r in rows))
+    report['fixed_cohort_path_envelopes'] = cohort_envelopes(rows, config)
     if good:
         report.update(maximum_log_rms=max(r['log_rms'] for r in good),
             minimum_supply=min(r['minimum_supply'] for r in good),
