@@ -901,6 +901,8 @@ footer a {
 }
 .room-nav button {
   max-width:100%;
+  min-height:44px;
+  min-width:44px;
 }
 /* Who is home and recent recorded overlap: snapshot-only, no live claim or heartbeat. Family colour is set inline by JS only when the run records its agent; unrecorded stays neutral. */
 .presence-section {
