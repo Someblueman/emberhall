@@ -1,0 +1,119 @@
+{
+  "seed": 14,
+  "status": "success",
+  "minimum_supply": 0.6310145028557197,
+  "prefix_max_error": 0.0,
+  "minimum_abundance": 15.038922816549324,
+  "scores": {
+    "20000": {
+      "correlation": {
+        "overlap_spearman": 0.8892857142857141,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "absolute_correlation": {
+        "overlap_spearman": 0.8749999999999999,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "cpsd": {
+        "overlap_spearman": 0.8178571428571428,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "coherence": {
+        "overlap_spearman": 0.95,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      }
+    },
+    "32768": {
+      "correlation": {
+        "overlap_spearman": 0.807142857142857,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "absolute_correlation": {
+        "overlap_spearman": 0.7714285714285712,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "cpsd": {
+        "overlap_spearman": 0.8785714285714284,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "coherence": {
+        "overlap_spearman": 0.9357142857142854,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      }
+    },
+    "40000": {
+      "correlation": {
+        "overlap_spearman": 0.7928571428571427,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "absolute_correlation": {
+        "overlap_spearman": 0.7749999999999999,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "cpsd": {
+        "overlap_spearman": 0.8785714285714284,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "coherence": {
+        "overlap_spearman": 0.95,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      }
+    },
+    "65536": {
+      "correlation": {
+        "overlap_spearman": 0.9035714285714285,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "absolute_correlation": {
+        "overlap_spearman": 0.8607142857142854,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "cpsd": {
+        "overlap_spearman": 0.8964285714285712,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      },
+      "coherence": {
+        "overlap_spearman": 0.9464285714285712,
+        "same_diet_pair_auc": 1.0,
+        "single_linkage_guild_auc": 1.0
+      }
+    }
+  },
+  "second_half_scores": {
+    "correlation": {
+      "overlap_spearman": 0.9107142857142855,
+      "same_diet_pair_auc": 1.0,
+      "single_linkage_guild_auc": 1.0
+    },
+    "absolute_correlation": {
+      "overlap_spearman": 0.8035714285714284,
+      "same_diet_pair_auc": 1.0,
+      "single_linkage_guild_auc": 1.0
+    },
+    "cpsd": {
+      "overlap_spearman": 0.8999999999999999,
+      "same_diet_pair_auc": 1.0,
+      "single_linkage_guild_auc": 1.0
+    },
+    "coherence": {
+      "overlap_spearman": 0.9392857142857142,
+      "same_diet_pair_auc": 1.0,
+      "single_linkage_guild_auc": 1.0
+    }
+  }
+}

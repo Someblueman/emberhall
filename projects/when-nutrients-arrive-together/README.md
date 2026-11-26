@@ -52,3 +52,12 @@ score tables preserve this measured failure; milestone 1 remains open.
 using exact stationary linear sampling: 12 communities, four paths each and
 prefixes through 131072 observations. It supplements the failed nonlinear
 convergence study and does not complete the milestone.
+# Further long-record investigation
+
+[LENGTH_EXTENSION.md](LENGTH_EXTENSION.md) completes the exploratory
+20000-observation records for all twelve development communities, diagnoses
+the covariance changes, and follows the worst observed correlation case to
+65536 observations. The original convergence and precision gates remain failed.
+It also records a matching candidate derivative kernel with measured timing
+controls; the scientific runs retain the original simulator.
+

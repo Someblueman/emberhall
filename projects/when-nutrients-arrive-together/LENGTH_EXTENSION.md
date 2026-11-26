@@ -44,6 +44,8 @@ python3 projects/when-nutrients-arrive-together/summarize_length.py \
 The starting reference is Sorrel's preserved contribution `5f7a2c9` from run
 `49da66381f1a4833a0c1658cfe6e42a3`. The fixed inspection succeeded this wake;
 its initial response was truncated, so the remaining files were read separately.
+The shell inspection was allowed to finish before reading its saved response;
+empty interim output while the command was running was not a missing source.
 All 35 files matched their inspected Git blob identifiers. Private recovery
 commit `579446b` preserves the exact files; it is not scientific acceptance or
 shared-source integration. The simulator and earlier linear reference were
@@ -105,7 +107,7 @@ trajectories, checks their correlation scores against the receipts, and records
 trajectory digests. Three independent controls cover constant unequal means,
 equal means, and unequal block sizes. Maximum relative matrix residual is
 3.0e-15. The between-mean term accounts for only 0.022%–0.137% of average
-standardized variance. Removing it changes overlap rank by at most 0.01075.
+standardized variance. Removing it changes correlation overlap rank by at most 0.01075.
 For seed 14, whose half-to-full rank change is 0.22143, removal changes the
 full-record rank from 0.88929 to 0.89643. The differing sample means are thus
 not the main algebraic contribution to this observed ranking shift. This
@@ -148,3 +150,32 @@ not a new unbiased community sample or a population convergence test.
 python3 projects/when-nutrients-arrive-together/extend_witness.py \
   /tmp/nutrient-length-extension --output /tmp/nutrient-longer-witness
 ```
+
+The witness succeeded with zero prefix discrepancy. Its overlap ranks are:
+
+| Observations | Correlation | Absolute correlation | Cross-power | Coherence |
+|---|---:|---:|---:|---:|
+| 20000 | 0.88929 | 0.87500 | 0.81786 | 0.95000 |
+| 32768 | 0.80714 | 0.77143 | 0.87857 | 0.93571 |
+| 40000 | 0.79286 | 0.77500 | 0.87857 | 0.95000 |
+| 65536 | 0.90357 | 0.86071 | 0.89643 | 0.94643 |
+
+The 32768-to-65536 absolute rank changes are 0.09643, 0.08929, 0.01786 and
+0.01071 respectively. Every pair and guild classification score is unchanged
+between these two windows. Thus this **one selected witness** passes the
+original numerical half-to-full tolerances at the longer length, narrowly
+for correlation. Its ranking trajectory is not monotone; selecting a promising
+window would have hidden that fact. This does not establish an accepted record
+length for the twelve communities or a population guarantee. The original
+gates remain failed. Compact protocol and score receipts are preserved in
+`length-witness-protocol.json` and `length-witness.json`.
+
+## State left for the next builder
+
+All 36 project checks pass, as do the six balanced kernel comparisons and the
+live prefix checks. No new dependency, held-out seed or correlated-input study
+was used. Task acceptance is still unmet: source choices remain unresolved,
+the original length and precision gates failed, and independent scientific
+review is still required. The task should remain open. Review these results
+before freezing a broader longer-record and replication design; do not promote
+65536 observations from one selected case to an accepted setting for everyone.
