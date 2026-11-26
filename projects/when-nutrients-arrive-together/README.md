@@ -77,3 +77,10 @@ input amplitude; the remaining coherence rank discrepancy is retained.
 [NEXT.md](NEXT.md) records the substantial work still needed before accepting
 the clean reference or using the held-out experiment.
 
+[PAIRED_REFINEMENT.md](PAIRED_REFINEMENT.md) records 24 new nonlinear paths
+with paired 1/16-to-1/32 forcing and 4096-to-8192 record comparisons. All
+observed forcing margins pass; eighteen paths exceed a length margin. The
+report audits every score from saved trajectories and separates fixed-cohort
+input uncertainty from population claims after adaptive community reuse.
+The compact protocol, scores and summary are linked from that report.
+

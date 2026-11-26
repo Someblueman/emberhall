@@ -1,0 +1,1086 @@
+{
+  "attempted": 24,
+  "audited": "all primary scores, segment changes, stationarity and mesh RMS replayed from hash-bound trajectories; representative tighter-solver receipts retained but their arrays are not archived",
+  "caveat": "Development diagnostic, not clean-baseline acceptance. Communities are independent units; paths and windows are not. Marginal t intervals are approximate; Hoeffding bounds are conservative and not simultaneous. Failure excludes its entire community from conditional means.",
+  "community_population_coverage_scope": "The community-population intervals and radii in summaries are nominal fixed-design references. The adaptive design reuses development communities; post-selection population coverage is not certified. Fixed-cohort conditional path envelopes are reported separately. No held-out validation.",
+  "complete": true,
+  "complete_communities": 12,
+  "exporter_sha256": "f1844fe7f11938c0885f049e25a96b867644fb5b5195b12598e91ba29042ce3d",
+  "failures": [],
+  "fixed_cohort_path_envelopes": {
+    "envelopes": {
+      "forcing_delta": {
+        "absolute_correlation": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              -0.0012629518164612118,
+              -0.0012629518164612118
+            ],
+            "marginal95": [
+              -1.1101481959714394,
+              1.1076222923385168
+            ],
+            "simultaneous95": [
+              -1.558225635223918,
+              1.5556997315909955
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              -0.0015432098765432074,
+              -0.0015432098765432074
+            ],
+            "marginal95": [
+              -0.5559858319540323,
+              0.5528994122009459
+            ],
+            "simultaneous95": [
+              -0.7800245515802716,
+              0.7769381318271852
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          }
+        },
+        "coherence": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.0005944355294316278,
+              0.0005944355294316278
+            ],
+            "marginal95": [
+              -1.1082908086255465,
+              1.1094796796844097
+            ],
+            "simultaneous95": [
+              -1.5563682478780252,
+              1.5575571189368884
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          }
+        },
+        "correlation": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              -7.367302069384112e-05,
+              -7.367302069384112e-05
+            ],
+            "marginal95": [
+              -1.108958917175672,
+              1.1088115711342843
+            ],
+            "simultaneous95": [
+              -1.5570363564281506,
+              1.556889010386763
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              -4.625929269271485e-18,
+              -4.625929269271485e-18
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          }
+        },
+        "cpsd": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.0014886274135213807,
+              0.0014886274135213807
+            ],
+            "marginal95": [
+              -1.1073966167414568,
+              1.1103738715684994
+            ],
+            "simultaneous95": [
+              -1.5554740559939355,
+              1.558451310820978
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          }
+        }
+      },
+      "length_delta": {
+        "absolute_correlation": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.06326253856377223,
+              0.06326253856377223
+            ],
+            "marginal95": [
+              -1.045622705591206,
+              1.1721477827187503
+            ],
+            "simultaneous95": [
+              -1.4937001448436846,
+              1.620225221971229
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.03549382716049383,
+              0.03549382716049383
+            ],
+            "marginal95": [
+              -0.5189487949169952,
+              0.5899364492379829
+            ],
+            "simultaneous95": [
+              -0.7429875145432345,
+              0.8139751688642223
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.09336419753086421,
+              0.09336419753086421
+            ],
+            "marginal95": [
+              -0.46107842454662484,
+              0.6478068196083533
+            ],
+            "simultaneous95": [
+              -0.6851171441728642,
+              0.8718455392345926
+            ]
+          }
+        },
+        "coherence": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.019795786723551968,
+              0.019795786723551968
+            ],
+            "marginal95": [
+              -1.0890894574314263,
+              1.12868103087853
+            ],
+            "simultaneous95": [
+              -1.537166896683905,
+              1.5767584701310087
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          }
+        },
+        "correlation": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.05960274621275632,
+              0.05960274621275632
+            ],
+            "marginal95": [
+              -1.0492824979422217,
+              1.1684879903677345
+            ],
+            "simultaneous95": [
+              -1.4973599371947004,
+              1.6165654296202132
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.03009259259259259,
+              0.03009259259259259
+            ],
+            "marginal95": [
+              -0.5243500294848965,
+              0.5845352146700816
+            ],
+            "simultaneous95": [
+              -0.7483887491111358,
+              0.808573934296321
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.05015432098765432,
+              0.05015432098765432
+            ],
+            "marginal95": [
+              -0.5042883010898347,
+              0.6045969430651434
+            ],
+            "simultaneous95": [
+              -0.7283270207160741,
+              0.8286356626913827
+            ]
+          }
+        },
+        "cpsd": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.011307094598767891,
+              0.011307094598767891
+            ],
+            "marginal95": [
+              -1.0975781495562102,
+              1.120192338753746
+            ],
+            "simultaneous95": [
+              -1.545655588808689,
+              1.5682697780062247
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.0015432098765432074,
+              0.0015432098765432074
+            ],
+            "marginal95": [
+              -0.5528994122009459,
+              0.5559858319540323
+            ],
+            "simultaneous95": [
+              -0.7769381318271852,
+              0.7800245515802716
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.0,
+              0.0
+            ],
+            "marginal95": [
+              -0.5544426220774891,
+              0.5544426220774891
+            ],
+            "simultaneous95": [
+              -0.7784813417037284,
+              0.7784813417037284
+            ]
+          }
+        }
+      },
+      "scores": {
+        "absolute_correlation": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.732090273835262,
+              0.732090273835262
+            ],
+            "marginal95": [
+              0.17764765175777297,
+              1.286532895912751
+            ],
+            "simultaneous95": [
+              -0.04639106786846636,
+              1.5105716155389906
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.9583333333333334,
+              0.9583333333333334
+            ],
+            "marginal95": [
+              0.6811120222945888,
+              1.235554644372078
+            ],
+            "simultaneous95": [
+              0.5690926624814692,
+              1.3475740041851976
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.9791666666666666,
+              0.9791666666666666
+            ],
+            "marginal95": [
+              0.701945355627922,
+              1.2563879777054112
+            ],
+            "simultaneous95": [
+              0.5899259958148024,
+              1.3684073375185308
+            ]
+          }
+        },
+        "coherence": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.9543732191876112,
+              0.9543732191876112
+            ],
+            "marginal95": [
+              0.39993059711012213,
+              1.5088158412651003
+            ],
+            "simultaneous95": [
+              0.1758918774838828,
+              1.7328545608913397
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              1.0,
+              1.0
+            ],
+            "marginal95": [
+              0.7227786889612555,
+              1.2772213110387445
+            ],
+            "simultaneous95": [
+              0.6107593291481358,
+              1.3892406708518643
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              1.0,
+              1.0
+            ],
+            "marginal95": [
+              0.7227786889612555,
+              1.2772213110387445
+            ],
+            "simultaneous95": [
+              0.6107593291481358,
+              1.3892406708518643
+            ]
+          }
+        },
+        "correlation": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.8021409867811382,
+              0.8021409867811382
+            ],
+            "marginal95": [
+              0.24769836470364914,
+              1.3565836088586272
+            ],
+            "simultaneous95": [
+              0.023659645077409808,
+              1.5806223284848666
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              0.9760802469135802,
+              0.9760802469135802
+            ],
+            "marginal95": [
+              0.6988589358748356,
+              1.2533015579523248
+            ],
+            "simultaneous95": [
+              0.586839576061716,
+              1.3653209177654444
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              0.9768518518518517,
+              0.9768518518518517
+            ],
+            "marginal95": [
+              0.6996305408131072,
+              1.2540731628905963
+            ],
+            "simultaneous95": [
+              0.5876111809999875,
+              1.366092522703716
+            ]
+          }
+        },
+        "cpsd": {
+          "overlap_spearman": {
+            "empirical_completion_range": [
+              0.8444206057379647,
+              0.8444206057379647
+            ],
+            "marginal95": [
+              0.28997798366047567,
+              1.3988632278154538
+            ],
+            "simultaneous95": [
+              0.06593926403423633,
+              1.6229019474416932
+            ]
+          },
+          "same_diet_pair_auc": {
+            "empirical_completion_range": [
+              1.0,
+              1.0
+            ],
+            "marginal95": [
+              0.7227786889612555,
+              1.2772213110387445
+            ],
+            "simultaneous95": [
+              0.6107593291481358,
+              1.3892406708518643
+            ]
+          },
+          "single_linkage_guild_auc": {
+            "empirical_completion_range": [
+              1.0,
+              1.0
+            ],
+            "marginal95": [
+              0.7227786889612555,
+              1.2772213110387445
+            ],
+            "simultaneous95": [
+              0.6107593291481358,
+              1.3892406708518643
+            ]
+          }
+        }
+      }
+    },
+    "independent_input_paths": 24,
+    "scope": "Conditional on these fixed communities and pre-input design history. Expected averages over new independent input paths; not a population of communities. Failed scores span their full bounded range; no success-only conditioning. Envelopes are untruncated.",
+    "simultaneous_targets": 36
+  },
+  "half_variance_ratio_range": [
+    0.7413695054549668,
+    1.2560924831760827
+  ],
+  "maximum_half_mean_shift_in_sd": 0.29624712325049396,
+  "maximum_log_rms": 0.00018957310285467325,
+  "maximum_segment_changes": {
+    "absolute_correlation": {
+      "overlap_spearman": 0.0,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    },
+    "coherence": {
+      "overlap_spearman": 0.05183201354778799,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    },
+    "correlation": {
+      "overlap_spearman": 0.0,
+      "same_diet_pair_auc": 0.0,
+      "single_linkage_guild_auc": 0.0
+    },
+    "cpsd": {
+      "overlap_spearman": 0.15357142857142847,
+      "same_diet_pair_auc": 0.01851851851851849,
+      "single_linkage_guild_auc": 0.0
+    }
+  },
+  "minimum_observed_abundance": 6.345055090515874,
+  "minimum_supply": 0.5927119546250572,
+  "planned": 24,
+  "protocol_sha256": "12e885079cb29b1066d7ca64050697a3cbad1872ab9178df65133b702c1569d1",
+  "receipt_sha256": {
+    "10:0": "65969a11738ab13fec63f5978f1b6f7c7115f7162f17a044e3377a9300053664",
+    "10:1": "7fee0d286f1cac8c4fb8f13a1fd6e254a0b4278199de36e5f2e0964bb472c6ab",
+    "11:0": "4c9c70683ad95b400b91cb7cfcd9e2a5d2de7f8a81e7b41ff502a02a33f66e20",
+    "11:1": "aceb3cb53181a36dc6a52d01f3277cf3a7c9b02854b9c45892031eeac5b8197d",
+    "12:0": "bcb59efbc7578e1a688e1bfecada6c69289f58b5b3c0d1f9bfb8814cbbe7b68c",
+    "12:1": "26bd6e7542e1e8e7ab3375d38cadc88a049539b5f2ab219abaf745dfe612795d",
+    "13:0": "7424ecc5a5e9524c61b34d10d9eca8bf58557d66ee1989a19d74a419995050cf",
+    "13:1": "b214cad2f3367ac4bb923e4292a96a2f0401269501f31a0fb91f3b3c562fcfce",
+    "14:0": "e1012364490c083bbcc11f1f12f132854f64845c356f2eec2eb11c36652f3de9",
+    "14:1": "a327cf29a6f6835a42de431354b732e1bcb8ffed79a475f08f0eabf818fc89f3",
+    "15:0": "41278a84a9a821cd3c418538b0ae9cc16493e3eba06268a75c051a4753033c2f",
+    "15:1": "f3a067a2faf35ced9b1907d390bcc5f7683983b937d1e33c43cb32f779ca5b50",
+    "4:0": "8af34d593ba846e63c3fd7861ee034e184ac97e96656e4d71a730f4b52d0b8b6",
+    "4:1": "43ac54e8401483508b5da9fecd545161df01c0125281fbdb361535ecd76c8f39",
+    "5:0": "d7461850a70291655d068d47e12af3bf1fccde309953a282403cea2fcbcd1d30",
+    "5:1": "424d8b333f3d0658c35f86a7e0583cd3c084bf016dd5af078a4abfe2b4c5e527",
+    "6:0": "c0a3a3c6601359e03a8f4c93199a616f9db18b7f14eac60e063d3841efcae874",
+    "6:1": "e1ff1f5c4c4a16a53d4039fa420edd25f71480cdf2b5286d5d40e04f7cedeb9c",
+    "7:0": "6c60632065770aed99b7cc377609c8ce314da16ee9c9e9f4ff0aeda56ad2ee57",
+    "7:1": "d563fbdf9857888b60a5874b7d4d808c5f06457881bc7e7e9df4125c0427b359",
+    "8:0": "9e399978e9ddd6b9b66aadc788ea069ccab77f3961f102ea60ba6a47a83da7b3",
+    "8:1": "230db9af39e54f71026d1072b9d8e05202fdccc2538a6772334ef30a5610d1db",
+    "9:0": "5d16a6941f6958bc99716f7ae38269d25dbb1c3e538aaaf745f3f2cb8d617e96",
+    "9:1": "ec00842329210ee65e5d9458331ccdd41b778421cf8b4c3748f45766146fbf70"
+  },
+  "solver_checks": [
+    {
+      "checks": [
+        {
+          "log_rms": 4.358595421243842e-09,
+          "mesh": 0.0625,
+          "score_delta": {
+            "absolute_correlation": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            },
+            "coherence": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            },
+            "correlation": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            },
+            "cpsd": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            }
+          }
+        },
+        {
+          "log_rms": 6.601669778947335e-09,
+          "mesh": 0.03125,
+          "score_delta": {
+            "absolute_correlation": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            },
+            "coherence": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            },
+            "correlation": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            },
+            "cpsd": {
+              "overlap_spearman": 0.0,
+              "same_diet_pair_auc": 0.0,
+              "single_linkage_guild_auc": 0.0
+            }
+          }
+        }
+      ],
+      "community": 4,
+      "drive": 0
+    }
+  ],
+  "sum_realization_elapsed_seconds": 11189.881281207083,
+  "summaries": {
+    "forcing_delta": {
+      "absolute_correlation": {
+        "overlap_spearman": {
+          "ci95": [
+            -0.007093113121776239,
+            0.004567209488853815
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.03214285714285714,
+          "mean": -0.0012629518164612118,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            -0.0038331850188540366,
+            0.000746765265767622
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.01851851851851849,
+          "mean": -0.0015432098765432074,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        }
+      },
+      "coherence": {
+        "overlap_spearman": {
+          "ci95": [
+            -0.0008038016969027827,
+            0.0019926727557660383
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.010723864871956201,
+          "mean": 0.0005944355294316278,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        }
+      },
+      "correlation": {
+        "overlap_spearman": {
+          "ci95": [
+            -0.004792596151018896,
+            0.004645250109631213
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.03214285714285725,
+          "mean": -7.367302069384112e-05,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            -0.0025085420831395004,
+            0.002508542083139491
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0185185185185186,
+          "mean": -4.625929269271485e-18,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        }
+      },
+      "cpsd": {
+        "overlap_spearman": {
+          "ci95": [
+            -0.00010455376742802549,
+            0.003081808594470787
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.014298486495941565,
+          "mean": 0.0014886274135213807,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        }
+      }
+    },
+    "length_delta": {
+      "absolute_correlation": {
+        "overlap_spearman": {
+          "ci95": [
+            0.029117496144796397,
+            0.09740758098274807
+          ],
+          "communities_with_any_margin_exceedance": 8,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.2609473785509334,
+          "mean": 0.06326253856377223,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.01093657960450388,
+            0.060051074716483785
+          ],
+          "communities_with_any_margin_exceedance": 6,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.2222222222222222,
+          "mean": 0.03549382716049383,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.04041919967680597,
+            0.14630919538492246
+          ],
+          "communities_with_any_margin_exceedance": 8,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.42592592592592593,
+          "mean": 0.09336419753086421,
+          "n": 12
+        }
+      },
+      "coherence": {
+        "overlap_spearman": {
+          "ci95": [
+            -0.004359830212154456,
+            0.04395140365925839
+          ],
+          "communities_with_any_margin_exceedance": 1,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.20357142857142874,
+          "mean": 0.019795786723551968,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        }
+      },
+      "correlation": {
+        "overlap_spearman": {
+          "ci95": [
+            0.014925360414963236,
+            0.10428013201054939
+          ],
+          "communities_with_any_margin_exceedance": 5,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.2305630947470576,
+          "mean": 0.05960274621275632,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.0034116795612042818,
+            0.0567735056239809
+          ],
+          "communities_with_any_margin_exceedance": 6,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.2592592592592593,
+          "mean": 0.03009259259259259,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            -0.022353322175602208,
+            0.12266196415091085
+          ],
+          "communities_with_any_margin_exceedance": 8,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.42592592592592593,
+          "mean": 0.05015432098765432,
+          "n": 12
+        }
+      },
+      "cpsd": {
+        "overlap_spearman": {
+          "ci95": [
+            -0.023226681720355115,
+            0.0458408709178909
+          ],
+          "communities_with_any_margin_exceedance": 5,
+          "hoeffding_marginal_radius95": 1.5682005513993709,
+          "maximum_individual_absolute_value": 0.14642857142857135,
+          "mean": 0.011307094598767891,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            -0.000746765265767622,
+            0.0038331850188540366
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.01851851851851849,
+          "mean": 0.0015432098765432074,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "communities_with_any_margin_exceedance": 0,
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.0,
+          "mean": 0.0,
+          "n": 12
+        }
+      }
+    },
+    "scores": {
+      "absolute_correlation": {
+        "overlap_spearman": {
+          "ci95": [
+            0.7011433623050816,
+            0.7630371853654425
+          ],
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.8714285714285712,
+          "mean": 0.732090273835262,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.9335634649479142,
+            0.9831032017187521
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 0.9583333333333331,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.948023846645245,
+            1.0103094866880882
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 0.9791666666666666,
+          "n": 12
+        }
+      },
+      "coherence": {
+        "overlap_spearman": {
+          "ci95": [
+            0.943660561256259,
+            0.965085877118963
+          ],
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.982142857142857,
+          "mean": 0.954373219187611,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 1.0,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 1.0,
+          "n": 12
+        }
+      },
+      "correlation": {
+        "overlap_spearman": {
+          "ci95": [
+            0.7655169416887547,
+            0.8387650318735217
+          ],
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.9357142857142854,
+          "mean": 0.8021409867811382,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            0.959928209547292,
+            0.9922322842798686
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 0.9760802469135803,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            0.9425022247171893,
+            1.0112014789865142
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 0.9768518518518517,
+          "n": 12
+        }
+      },
+      "cpsd": {
+        "overlap_spearman": {
+          "ci95": [
+            0.809240037964532,
+            0.8796011735113974
+          ],
+          "hoeffding_marginal_radius95": 0.7841002756996854,
+          "maximum_individual_absolute_value": 0.9571428571428571,
+          "mean": 0.8444206057379647,
+          "n": 12
+        },
+        "same_diet_pair_auc": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 1.0,
+          "n": 12
+        },
+        "single_linkage_guild_auc": {
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "hoeffding_marginal_radius95": 0.3920501378498427,
+          "maximum_individual_absolute_value": 1.0,
+          "mean": 1.0,
+          "n": 12
+        }
+      }
+    }
+  }
+}
