@@ -1,0 +1,317 @@
+{
+  "status": "Local-linear diagnostics, not a stationary-law certificate for the nonlinear model.",
+  "records": [
+    {
+      "community": 0,
+      "slowest_linear_relaxation_time": 10.069758722509407,
+      "integrated_linear_correlation_times": [
+        7.810610367813687,
+        8.637213421596957,
+        7.168455240306639,
+        8.001678961715651,
+        6.519915219323156,
+        7.457125348920211
+      ],
+      "lyapunov_residual": 8.469905956069376e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.9283213751387869,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.8638048316928478,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 4.796163466380676e-14
+    },
+    {
+      "community": 1,
+      "slowest_linear_relaxation_time": 10.227402915005214,
+      "integrated_linear_correlation_times": [
+        7.407483614664889,
+        7.389491998375271,
+        7.6384397750702355,
+        8.059223326310557,
+        7.179752098480167,
+        8.323494387368244
+      ],
+      "lyapunov_residual": 1.1058862159352145e-17,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.8745575889338377,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.8458835696245317,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 4.836131495267182e-13
+    },
+    {
+      "community": 2,
+      "slowest_linear_relaxation_time": 9.192033248728357,
+      "integrated_linear_correlation_times": [
+        7.497796962683556,
+        7.01720658617869,
+        8.262193217727454,
+        6.734902156935053,
+        8.433667649662814,
+        6.859996022873136
+      ],
+      "lyapunov_residual": 7.48099499014998e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.825,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.932142857142857,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 8.982148358427366e-12
+    },
+    {
+      "community": 3,
+      "slowest_linear_relaxation_time": 9.576842091935863,
+      "integrated_linear_correlation_times": [
+        7.088876764866168,
+        7.890129763761591,
+        8.01912489794563,
+        6.977247891988897,
+        7.6453797206471235,
+        8.04734311698023
+      ],
+      "lyapunov_residual": 8.782037597132586e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.8775696086884129,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.620196851761465,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 4.192202140984591e-13
+    },
+    {
+      "community": 4,
+      "slowest_linear_relaxation_time": 10.048706274600946,
+      "integrated_linear_correlation_times": [
+        7.405828579405279,
+        6.950902041571783,
+        7.4140893312270375,
+        7.07317592498135,
+        7.979259729621493,
+        7.463981684801651
+      ],
+      "lyapunov_residual": 1.1058862159352145e-17,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.9526366627921061,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7649690275328731,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 6.972200594645983e-14
+    },
+    {
+      "community": 5,
+      "slowest_linear_relaxation_time": 10.954003618760678,
+      "integrated_linear_correlation_times": [
+        9.016283035436446,
+        6.860651959770572,
+        8.509890559677762,
+        7.685094551603539,
+        8.05695116278674,
+        7.049430092241187
+      ],
+      "lyapunov_residual": 9.215718466126788e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.9311889330481938,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7882040680887783,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 1.894484569220367e-12
+    },
+    {
+      "community": 6,
+      "slowest_linear_relaxation_time": 9.672354569676465,
+      "integrated_linear_correlation_times": [
+        7.912314482665434,
+        7.298450959133146,
+        7.979724291267081,
+        7.688238922645723,
+        7.311768294987232,
+        6.718281806939807
+      ],
+      "lyapunov_residual": 1.4907779871675686e-17,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.9285714285714284,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7857142857142856,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 4.489741911584133e-13
+    },
+    {
+      "community": 7,
+      "slowest_linear_relaxation_time": 9.69298071990295,
+      "integrated_linear_correlation_times": [
+        7.2147993187346255,
+        8.254796866165753,
+        8.469741348935013,
+        7.6866130639446055,
+        7.0719139551034615,
+        6.970934100779335
+      ],
+      "lyapunov_residual": 9.223341762652076e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.95,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.9357142857142854,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 1.0578204978628492e-12
+    },
+    {
+      "community": 8,
+      "slowest_linear_relaxation_time": 10.773076093658021,
+      "integrated_linear_correlation_times": [
+        7.362414868343116,
+        7.578848084637549,
+        7.306804484439981,
+        7.911347759534811,
+        7.6890708294582515,
+        8.563027673507401
+      ],
+      "lyapunov_residual": 8.348356728138384e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.9285714285714284,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7999999999999999,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 2.9753977059954195e-13
+    },
+    {
+      "community": 9,
+      "slowest_linear_relaxation_time": 10.507722747673293,
+      "integrated_linear_correlation_times": [
+        9.096370726576291,
+        7.484144410368241,
+        7.0954691020342775,
+        6.898663736462816,
+        10.000918708030873,
+        7.4684401614593625
+      ],
+      "lyapunov_residual": 9.974659986866641e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.8892857142857141,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.7928571428571427,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 6.350475700855895e-14
+    },
+    {
+      "community": 10,
+      "slowest_linear_relaxation_time": 9.92514346033191,
+      "integrated_linear_correlation_times": [
+        7.433267241838211,
+        7.278571226039341,
+        8.302099964918462,
+        7.659744349096492,
+        7.340864724236473,
+        7.581610518795256
+      ],
+      "lyapunov_residual": 6.5052130349130266e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.8960631034158174,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.8781418413475012,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 3.042011087472929e-13
+    },
+    {
+      "community": 11,
+      "slowest_linear_relaxation_time": 11.896411027462646,
+      "integrated_linear_correlation_times": [
+        7.778819937239361,
+        8.747029717945333,
+        8.046262977376827,
+        7.2504818067717425,
+        7.7575973063915225,
+        8.317109878453689
+      ],
+      "lyapunov_residual": 9.922143944136874e-18,
+      "population_linear_scores": {
+        "correlation": {
+          "overlap_spearman": 0.8857142857142855,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        },
+        "absolute_correlation": {
+          "overlap_spearman": 0.8607142857142854,
+          "same_diet_pair_auc": 1.0,
+          "single_linkage_guild_auc": 1.0
+        }
+      },
+      "constant_supply_max_log_distance_after_512": 5.617728504603292e-13
+    }
+  ]
+}
