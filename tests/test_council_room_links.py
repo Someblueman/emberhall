@@ -27,6 +27,24 @@ draw();
 class CouncilRoomLinksTests(unittest.TestCase):
     run_renderer = council.CouncilRoomAndFiltersTests.run_renderer
 
+    def test_real_view_routing_focuses_the_connected_decision(self):
+        self.run_renderer("const routeToView=showViewForHash;\n" + SETUP + r"""
+showViewForHash=routeToView;
+const houseView=$('house-view'),councilView=$('council-view');
+houseView.hidden=false;councilView.hidden=true;
+document.querySelectorAll=selector=>selector==='.page-view'?[houseView,councilView]:[];
+document.querySelector=selector=>selector==='.page-view:not([hidden])'
+  ?[houseView,councilView].find(view=>!view.hidden):null;
+// Routing mounts the auxiliary view again. Its new decision must receive focus,
+// rather than the detached element rendered while the room was still visible.
+link('council-proposal-one').listeners.click[0]({preventDefault(){}});
+const decision=byId(nodes.voting,'vote-rule-one');
+assert(decision.open);assert(document.activeElement===decision,'The mounted decision receives focus');
+assert.equal(window.location.hash,'#council-view');
+assert(houseView.hidden);assert(!councilView.hidden);
+assert.equal(frame.seq,2);assert.equal(current,false);
+""")
+
     def test_exact_proposal_opens_despite_filters_without_advancing_history(self):
         self.run_renderer(SETUP + r"""
 votingState={query:'cannot match',status:'enacted',kind:'choices'};voting();

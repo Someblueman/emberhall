@@ -4581,7 +4581,9 @@ function openCouncilRecord(kind,id) {
   if(typeof window!=="undefined"&&window.location?.hash!=="#council-view")
     window.history?.pushState(null,"","#council-view");
   showViewForHash("#council-view");
-  target.focus({preventScroll:true});target.scrollIntoView?.({block:"start"});
+  // Routing rebuilds the Council list; focus its mounted record, not the old node.
+  const mountedTarget=$(targetId);
+  mountedTarget?.focus({preventScroll:true});mountedTarget?.scrollIntoView?.({block:"start"});
   return true;
 }
 function councilRecordLink(parent,kind,record) {
