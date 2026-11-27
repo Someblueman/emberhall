@@ -1164,7 +1164,7 @@ footer a {
 .renovation-commit { margin:0; }
 .renovation-files { margin:0; padding-left:18px; display:grid; gap:3px; }
 .vote-summary-banner { margin:0 0 12px; padding:9px 12px; border:1px solid var(--gold); border-radius:8px; background:color-mix(in srgb, var(--gold) 8%, transparent); color:var(--paper); }
-.vote-round { border-top:1px solid var(--line); padding:.7rem 0; }
+.vote-round { border-top:1px solid var(--line); padding:.7rem 0; overflow-wrap:anywhere; }
 .vote-round summary { cursor:pointer; overflow-wrap:anywhere; }
 .vote-summary { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 8px; }
 .vote-tags { display:inline-flex; flex-wrap:wrap; gap:5px; }
