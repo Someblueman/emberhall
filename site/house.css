@@ -1096,6 +1096,12 @@ footer a {
 .resident-history summary, .remembered-residents summary {
   cursor:pointer;
   color:var(--gold);
+  min-height:44px;
+  padding:14px 0;
+}
+.resident-history summary:focus-visible, .remembered-residents summary:focus-visible {
+  outline:2px solid var(--gold);
+  outline-offset:3px;
 }
 .resident-history code {
   display:block;
