@@ -1237,6 +1237,37 @@ function skipToContent(event) {
   target.focus({preventScroll:true});
   target.scrollIntoView({block:"start"});
 }
+// Hidden secondary views need no record DOM. Drop their old rows/listeners so a
+// later snapshot is not retained, then rebuild the visited view from current globals.
+function renderAuxiliaryViews() {
+  const view=document.querySelector?.(".page-view:not([hidden])")?.id;
+  // Embedded/minimal hosts without page-view routing keep the established renderer.
+  if(!view) {
+    if($("budgets"))accounts();if($("shelf"))shelf();
+    if($("voting"))voting();if($("creations"))renderCollection();return;
+  }
+  const clear=id=>$(id)?.replaceChildren();
+  if(view!=="accounts-view")clear("budgets");
+  if(view!=="projects-view"&&view!=="gallery-view") {clear("shelf");clear("finished");}
+  if(view!=="council-view") {
+    // Preserve the same expanded-card memory used by voting() before discarding rows.
+    for(const node of $("voting")?.querySelectorAll("details")||[]) {
+      if(!node.id)continue;
+      if(node.open)votingOpened.add(node.id);else votingOpened.delete(node.id);
+    }
+    clear("voting");
+  }
+  reconcileCreationPicture();
+  if(view!=="gallery-view") {
+    clear("creations");
+    const exhibit=$("gallery-signal-trial");
+    if(exhibit?.tagName==="IFRAME") {exhibit.hidden=true;exhibit.removeAttribute("src");}
+  }
+  if(view==="accounts-view")accounts();
+  if(view==="projects-view"||view==="gallery-view")shelf();
+  if(view==="council-view")voting();
+  if(view==="gallery-view")renderCollection();
+}
 function showViewForHash(hash, focusTarget=false) {
   const targetId=String(hash||"").replace(/^#/,"");
   const roomRoute=targetId.startsWith("room/");
@@ -1253,8 +1284,7 @@ function showViewForHash(hash, focusTarget=false) {
   if(frame&&(roomRoute||targetId==="house-view"||!targetId)) {
     if(!roomRoute)selected=null;
     render();
-  }
-  if(frame&&viewId==="gallery-view")renderCollection();
+  } else if(frame)renderAuxiliaryViews();
   if(focusTarget) {
     const target=roomRoute?document.querySelector(".room-card"):$(targetId)||view;
     target?.focus?.({preventScroll:true});
@@ -5000,7 +5030,7 @@ function render() {
   $("next").disabled=frame.seq===lastHistorySequence();$("overview").hidden=!selected;if($("room-overview"))$("room-overview").hidden=!selected;
   const navigation=$("room-nav");navigation.replaceChildren();
   floorRooms(frame,selectedFloor).forEach(room=>{const button=html("button",`room-${roomStatus(room)}`,room.name+(roomStatus(room)==="construction"?" · building":roomStatus(room)==="closed"?" · closed":""),navigation);button.id=`room-link-${encodeURIComponent(room.id)}`;button.dataset.room=room.id;button.setAttribute("aria-pressed",String(selected===room.id));button.addEventListener("click",()=>choose(room.id));});
-  drawHouse();roomPanel();dormControls();accounts();shelf();voting();renderCollection();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
+  drawHouse();roomPanel();dormControls();renderAuxiliaryViews();renderResidentPulse();renderRecentGrowth();renderLately();lighting();
   const ambitions=$("ambitions");ambitions.replaceChildren();
   if(!frame.ambitions.length)html("p","empty-note","No ambition has been recorded at this point. The next resident can leave a long thread.",ambitions);
   frame.ambitions.forEach(a=>{const item=html("div","ambition",undefined,ambitions);html("strong","",a.title,item);html("p","",a.description,item);html("span","small",`${a.status} · Next: ${a.next_step}`,item);});
@@ -5124,7 +5154,7 @@ function refreshView(changed=false) {
   const searchSelection=selectionId?{id:selectionId,start:document.activeElement.selectionStart,
     end:document.activeElement.selectionEnd,direction:document.activeElement.selectionDirection}:null;
   if(changed)render();
-  else {lighting();accounts();roomPanel();drawHouse();renderViewContext();renderCollection();renderRecentGrowth();renderLately();}
+  else {lighting();roomPanel();drawHouse();renderViewContext();renderAuxiliaryViews();renderRecentGrowth();renderLately();}
   const replacement=$("catchup-seq");
   if(replacement&&draft!==null)replacement.value=draft;
   if(focusId)$(focusId)?.focus({preventScroll:true});
@@ -5223,7 +5253,7 @@ async function loadRecord(useHistory) {
     loadCraftOutcomes(data);
     if(catalogSource!==data.source_head) {
       await loadCatalog(data.source_head);
-      if(catalog)renderCollection();
+      if(catalog)renderAuxiliaryViews();
     }
     const recovered=!recovery.hidden;
     recovery.hidden=true;$("error").textContent="";
