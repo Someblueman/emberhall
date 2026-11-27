@@ -259,7 +259,7 @@ main {
   font-size:11px;
   letter-spacing:.6px;
   color:var(--muted);
-  margin:-18px 0 20px;
+  margin:8px 0 18px;
 }
 .quiet-button,.pill {
   background:transparent;
@@ -722,7 +722,7 @@ footer a {
     min-height:310px;
   }
   .map-hint {
-    margin:-12px 0 20px;
+    margin:8px 0 18px;
     font-size:10px;
   }
   .time-machine {
@@ -1126,11 +1126,12 @@ footer a {
 
 .catchup-panel{margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--line);display:grid;gap:.6rem}
 .catchup-controls{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
-.catchup-controls input{width:5.5rem;padding:.28rem .4rem;border-radius:.35rem;border:1px solid var(--line);background:var(--room);color:inherit;font:inherit}
+.catchup-controls button,.catchup-panel .workshop-pages button,.catchup-jump{min-height:44px}
+.catchup-controls input{box-sizing:border-box;min-height:44px;width:5.5rem;padding:.28rem .4rem;border-radius:.35rem;border:1px solid var(--line);background:var(--room);color:inherit;font:inherit}
 .catchup-heading{margin:.35rem 0 .15rem;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;opacity:.82}
 .catchup-list{display:grid;gap:.35rem}
 .catchup-item{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.88rem}
-.catchup-jump{flex:0 0 auto}
+.catchup-jump{flex:0 0 auto;min-width:44px}
 
 /* Council records remain readable on a phone; reasons are plain text. */
 .council-room-panel { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); display:grid; gap:10px; }
@@ -1481,7 +1482,7 @@ footer a {
 .room-marks > summary { cursor:pointer; color:var(--muted); font-size:13px; margin-bottom:8px; }
 .room-lead { font:600 14px/1.4 system-ui,sans-serif; color:var(--gold); margin:4px 0 12px; }
 .room-about { margin-top:18px; padding-top:12px; border-top:1px solid var(--line); }
-.room-about > summary { cursor:pointer; color:var(--muted); font-size:13px; }
+.room-about > summary { cursor:pointer; color:var(--muted); font-size:13px; min-height:44px; box-sizing:border-box; padding:12px 0; }
 .lessons { display:grid; gap:14px; margin:6px 0 4px; }
 .lesson { padding:0 0 12px; border-bottom:1px solid var(--line); }
 .lesson-title { font:600 15px/1.3 Georgia,serif; margin:0 0 4px; text-transform:capitalize; }
