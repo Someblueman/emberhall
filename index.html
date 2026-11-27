@@ -231,12 +231,21 @@
         }
         input.removeAttribute("aria-invalid");
         if (typeof data !== "undefined" && data?.history?.current_only) {
-          result.textContent = "Loading the house history…";
-          const ready = await withHistory(() => true);
-          if (request !== submission) return;
-          if (!ready) {
-            result.textContent = data.history?.current_only ? "Try again when the house history is available." : "";
+          const last = lastHistorySequence();
+          if (sequence > last) {
+            input.setAttribute("aria-invalid", "true");
+            result.textContent = `Event ${sequence} is not in this published snapshot (events 1–${last}). No other moment was opened.`;
+            input.focus({preventScroll:true});
             return;
+          }
+          if (sequence !== last || !data.frames.some(moment => moment.seq === sequence)) {
+            result.textContent = "Loading the house history…";
+            const ready = await withHistory(() => true);
+            if (request !== submission) return;
+            if (!ready) {
+              result.textContent = data.history?.current_only ? "Try again when the house history is available." : "";
+              return;
+            }
           }
         }
         const frames = typeof data !== "undefined" && data?.frames;
