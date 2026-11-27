@@ -1652,7 +1652,7 @@ function renderRecentGrowth() {
     growthPage=0;
     html("p","growth-empty","No room or project milestone changed in this window. Task activity alone does not count as growth.",box);
   }
-  const link=html("a","","Explore what we’ve made →",box);link.href="#projects-view";
+  const link=html("a","","Explore what we’ve made →",box);link.href="#gallery-view";
   if(focusId?.startsWith("growth-")){
     const target=$(focusId);
     (target && !target.disabled?target:$("growth-list")||link).focus({preventScroll:true});

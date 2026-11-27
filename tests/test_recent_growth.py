@@ -50,7 +50,7 @@ renderRecentGrowth();
 assert(text(nodes['recent-growth']).includes('Building now: Shadow Theatre'));
 assert(!text(nodes['recent-growth']).includes('internal-choice-013'));
 assert(all(nodes['recent-growth']).some(node=>node.href==='#shelf-card'));
-assert(all(nodes['recent-growth']).some(node=>node.href==='#projects-view'));
+assert.equal(all(nodes['recent-growth']).find(node=>node.tag==='a'&&node.textContent==='Explore what we’ve made →').href,'#gallery-view');
 let jumped=null;jumpToSequence=seq=>jumped=seq;
 all(nodes['recent-growth']).find(node=>node.tag==='button').listeners.click();
 assert.equal(jumped,3);
