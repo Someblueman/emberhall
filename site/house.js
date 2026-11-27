@@ -62,6 +62,13 @@ function polygon(g, coords, fill, stroke = "none", width = 1) {
 function line(g, coords, stroke, width = 1, extra = {}) {
   return el("polyline", {points: points(coords), fill: "none", stroke, "stroke-width": width, ...extra}, g);
 }
+// A compound path keeps each opaque scenery stroke separate while sharing one DOM node.
+// Use only for adjacent lines with identical paint; figures, labels and hit targets stay separate.
+function sceneryLines(g, segments, stroke, width = 1) {
+  if(!segments.length)return null;
+  const d=segments.map(coords=>coords.map((coord,i)=>`${i?"L":"M"}${p(...coord).join(" ")}`).join(" ")).join(" ");
+  return el("path",{d,fill:"none",stroke,"stroke-width":width,"data-scenery-lines":"true"},g);
+}
 function box(g, x, y, w, d, h, colors = ["#9d7850", "#654d38", "#7f6144"], z = 0) {
   polygon(g, [[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]], colors[1]);
   polygon(g, [[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]], colors[2]);
@@ -149,7 +156,8 @@ function figure(g, resident, x, y) {
   el("circle",{cx,cy:cy-height-7,r:9,fill:skin},group);
   el("path",{d:`M${cx-9} ${cy-height-8}q-2-13 9-12q12 0 9 13q-6-7-18-1`,fill:["#514239","#7c5f42","#c4b995"][hash(resident.id)%3]},group);
   el("text",{x:cx,y:cy-height-24,"text-anchor":"middle","font-size":18,fill:kind.color,"font-family":"system-ui,sans-serif"},group,kind.mark);
-  el("text",{x:cx,y:cy+21,"text-anchor":"middle",class:"resident-label"},group,resident.name);
+  // Awake residents have a collision-checked name tag; repeating the name at
+  // their feet creates a second, overlapping label in a crowded room.
 }
 function furnishings(g, room, x, y, lit, residents) {
   if(room === "door") {
@@ -435,7 +443,9 @@ function grounds(g,span,depth,layouts) {
   // Footing and the hall floor that joins the wings.
   box(g,-9,-9,span+18,depth+8,11,["#8d8a72","#4f5a4d","#69705c"],-11);
   polygon(g,[[180,0],[180+HALL,0],[180+HALL,depth-10],[180,depth-10]],"#a38b62","#8a7650",1);
-  for(let n=1;n<(depth-10)/16;n++) line(g,[[180,n*16],[180+HALL,n*16]],"#8a7650",1);
+  const hallBoards=[];
+  for(let n=1;n<(depth-10)/16;n++) hallBoards.push([[180,n*16],[180+HALL,n*16]]);
+  sceneryLines(g,hallBoards,"#8a7650",1);
   polygon(g,[[188,14],[172+HALL,14],[172+HALL,depth-24],[188,depth-24]],"#8c4f43","#c9a36b",1.5);
   polygon(g,[[193,20],[167+HALL,20],[167+HALL,depth-30],[193,depth-30]],"none","#c9a36b",.8);
   // The front path runs from the garden gate to the door.
@@ -453,10 +463,12 @@ function grounds(g,span,depth,layouts) {
   }
   tree(g,-45,-50,1.05);tree(g,span+40,-48,.9);
   // A low fence and gate along the front of the garden.
+  const fencePosts=[];
   for(let x=-64;x<=span+64;x+=16) {
     if(Math.abs(x-px)<12)continue;
-    line(g,[[x,-72,0],[x,-72,12]],"#b9a67c",2);
+    fencePosts.push([[x,-72,0],[x,-72,12]]);
   }
+  sceneryLines(g,fencePosts,"#b9a67c",2);
   line(g,[[-64,-72,9],[px-12,-72,9]],"#b9a67c",1.5);line(g,[[px+12,-72,9],[span+64,-72,9]],"#b9a67c",1.5);
   const [lx,ly]=p(px+16,-66,0);
   el("line",{x1:lx,y1:ly,x2:lx,y2:ly-30,stroke:"#3c4a44","stroke-width":2.5},g);
@@ -770,29 +782,68 @@ function ago(at) {
   return `${Math.floor(diff/86400)}d ${current?"ago":"earlier"}`;
 }
 // Name tags hang over everyone who is awake: who they are and what they hold.
+function drawingTextWidth(map,text,className,fallback) {
+  if(!map?.ownerDocument?.createElementNS)return text.length*fallback;
+  const probe=el("text",{class:className,visibility:"hidden","aria-hidden":"true"},map,text);
+  const width=probe.getComputedTextLength();probe.remove();
+  return Number.isFinite(width)&&width>0?width:text.length*fallback;
+}
+function layoutNameTags(tags,labels=[]) {
+  const gap=6,obstacles=labels.map(l=>({x:l.x-l.width/2-4,top:l.y-20,
+    width:l.width+8,height:l.fact?44:28})),placed=[];
+  const overlaps=(a,b)=>a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&
+    a.top<b.top+b.height+gap&&a.top+a.height+gap>b.top;
+  for(const tag of tags) {
+    const candidates=[tag.cx,tag.cx-tag.width-12,tag.cx+tag.width+12].map(cx=>{
+      const box={...tag,cx,x:cx-tag.width/2,height:38};
+      let hits;
+      // Every move passes at least one obstacle permanently. Unlike a fixed
+      // retry cap, this terminates clear of every finite set of earlier boxes.
+      while((hits=obstacles.filter(other=>overlaps(box,other))).length)
+        box.top=Math.min(...hits.map(other=>other.top))-box.height-gap;
+      return box;
+    });
+    candidates.sort((a,b)=>Math.hypot(a.cx-tag.cx,a.top-tag.top)-Math.hypot(b.cx-tag.cx,b.top-tag.top));
+    const box=candidates[0];placed.push(box);obstacles.push(box);
+  }
+  return placed;
+}
+function includeTagBounds(bounds,tags) {
+  const [x,y,width,height]=bounds.split(" ").map(Number);
+  if(!tags.length)return bounds;
+  const left=Math.min(x,...tags.map(t=>t.x-12)),top=Math.min(y,...tags.map(t=>t.top-12));
+  const right=Math.max(x+width,...tags.map(t=>t.x+t.width+12));
+  const bottom=Math.max(y+height,...tags.map(t=>t.top+t.height+12));
+  return `${left} ${top} ${right-left} ${bottom-top}`;
+}
 function nameTags(map,placed,labels=[]) {
   const awake=placed.filter(item=>!["sleeping","unconfirmed"].includes(item.resident.pose));
   const latest=current?latelyEvents(1)[0]:null;
   const where={door:"just in, reading the record",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room",study:"in the study",parlor:"in the parlor",gallery:"in the gallery",chronicle:"in the chronicle",assay:"in the assay room"};
-  const boxes=[];
-  awake.forEach(item=>{
+  const specifications=awake.map(item=>{
     const r=item.resident,[cx,cy]=p(item.px,item.py,0),kind=kinds[r.agent]||kinds.unrecorded;
     const work=heldWork(r.id),second=work?clip(work,34):(where[r.room]||"here");
-    const width=Math.max(r.name.length*7.6,second.length*5.9)+22;
-    let top=cy-118;
-    // Step a tag upward until it clears the ones already hung.
-    // ... and the room names: a tag hung over "The Door" hid the name of the room.
-    const covers=at=>labels.some(l=>Math.abs(l.x-cx)<(l.width+width)/2+4&&at<l.y+(l.fact?24:8)&&at+38>l.y-20);
-    for(let step=0;step<12&&(boxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+4&&Math.abs(b.top-top)<42)||covers(top));step++)top-=44;
-    boxes.push({cx,top,width});
+    const width=Math.max(drawingTextWidth(map,r.name,"life-name",13)+20,
+      drawingTextWidth(map,second,"life-work",11)+10)+10;
+    return {resident:r,cx,anchorX:cx,cy,kind,work,second,width,top:cy-118};
+  });
+  const boxes=layoutNameTags(specifications,labels);
+  if(!boxes.length)return boxes;
+  const stems=el("g",{class:"life-stems","pointer-events":"none"},map);
+  if(map?.ownerDocument?.createElementNS) {
+    const firstLabel=map.querySelector?.(".room-label");
+    if(firstLabel)map.insertBefore(stems,firstLabel);
+  }
+  boxes.forEach(({resident:r,cx,anchorX,cy,kind,work,second,width,top})=>{
     const fresh=latest&&latest.actor===r.id&&observationTime()-latest.at<600;
     const tag=el("g",{class:`life-tag${fresh?" life-tag-fresh":""}${work?" life-tag-working":""}`,"pointer-events":"none","data-tag":r.id},map);
-    el("line",{x1:cx,y1:top+36,x2:cx,y2:cy-58,class:"life-stem"},tag);
+    el("line",{x1:cx,y1:top+36,x2:anchorX,y2:cy-58,class:"life-stem"},stems);
     el("rect",{x:cx-width/2,y:top,width,height:38,rx:8,class:"life-box"},tag);
     el("circle",{cx:cx-width/2+11,cy:top+13,r:3.5,fill:kind.color,class:"life-dot"},tag);
     el("text",{x:cx-width/2+20,y:top+17,class:"life-name"},tag,r.name);
     el("text",{x:cx-width/2+10,y:top+31,class:"life-work"},tag,second);
   });
+  return boxes;
 }
 function renderLately() {
   const host=$("lately");
@@ -852,8 +903,11 @@ function drawHouse() {
     box(g,x,y,180,depth,11,colors,-11);
     const floor=polygon(g,[[x,y],[x+180,y],[x+180,y+depth],[x,y+depth]],awake?"#b99b6d":"#78816a","#b2a178",1);
     floor.setAttribute("class","floor");
-    for(let n=1;n<depth/16;n++) line(g,[[x,y+n*16],[x+180,y+n*16]],awake?"#8f7c58":"#68765f",1);
-    for(let n=0;n<Math.floor(depth/16);n++) line(g,[[x+(n%2?55:115),y+n*16],[x+(n%2?55:115),y+(n+1)*16]],"#7b785c",1);
+    const floorBoards=[],floorJoints=[];
+    for(let n=1;n<depth/16;n++) floorBoards.push([[x,y+n*16],[x+180,y+n*16]]);
+    for(let n=0;n<Math.floor(depth/16);n++) floorJoints.push([[x+(n%2?55:115),y+n*16],[x+(n%2?55:115),y+(n+1)*16]]);
+    sceneryLines(g,floorBoards,awake?"#8f7c58":"#68765f",1);
+    sceneryLines(g,floorJoints,"#7b785c",1);
     if(status!=="construction") {
       polygon(g,[[x,y],[x+180,y],[x+180,y,62],[x,y,62]],awake?"#aab29a":"#657f70","#c2b998",1);
       polygon(g,[[x,y],[x,y+depth],[x,y+depth,62],[x,y,62]],awake?"#899e87":"#4a6c60","#a7ac8b",1);
@@ -891,10 +945,17 @@ function drawHouse() {
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
   });
   if(rooms.length) garden(el("g",{"pointer-events":"none"},map),span,totalDepth);
-  roomLabels.forEach(r=>el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name));
+  roomLabels.forEach(r=>{
+    el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name);
+    r.width=Math.max(drawingTextWidth(map,r.name,"room-label",21),
+      r.fact?drawingTextWidth(map,r.fact,"room-fact",13):0);
+  });
   roomLabels.forEach(r=>{if(r.fact)el("text",{x:r.x,y:r.y+17,class:"room-fact","text-anchor":"middle","pointer-events":"none"},map,r.fact);});
-  nameTags(map,placed,roomLabels);
-  map.setAttribute("viewBox",selected?roomBounds[selected]||wholeBounds:wholeBounds);
+  const tags=nameTags(map,placed,roomLabels);
+  wholeBounds=includeTagBounds(wholeBounds,tags);
+  const selectedBounds=selected&&roomBounds[selected]
+    ?includeTagBounds(roomBounds[selected],tags.filter(tag=>tag.resident.room===selected)):null;
+  map.setAttribute("viewBox",selectedBounds||wholeBounds);
 }
 function effectiveTasks() {const at=observationTime();return frame.tasks.map(t=>({...t,expired:t.status==="claimed"&&t.until<=at}));}
 function taskReadinessLabel(t) {

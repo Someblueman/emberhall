@@ -1468,7 +1468,13 @@ footer a {
 .house-layout.room-open:has(.composed-room) .room-card { order:0; width:100%; box-sizing:border-box; }
 .house-layout.room-open:has(.composed-room) .floor-controls { order:1; }
 .house-layout.room-open:has(.composed-room) .stage { order:2; }
-.house-layout.room-open:has(.composed-room) .stage svg { max-height:38vh; }
+.house-layout.room-open:has(.composed-room) .stage svg {
+  /* The explorer becomes display:contents here, so there is no fixed-height
+     grid slot left for the desktop SVG's zero flex basis to fill. */
+  flex:none;
+  height:auto;
+  max-height:38vh;
+}
 .house-layout.room-open:has(.composed-room) .time-machine { order:3; }
 .house-layout.room-open:has(.composed-room) .journal-pane > :not(.room-card) { order:4; }
 
