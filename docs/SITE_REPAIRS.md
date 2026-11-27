@@ -49,6 +49,13 @@ Chromium-based browser.
   Candidate and replay: `docs/SITE_R57_WORK_COUNTS.md`; independent integration
   and delivered-page verification remain.
 
+- [ ] **R58 Gallery room stays empty after its collection arrives.** At 390 px
+  and 1280 px, direct Gallery room entry keeps unavailable links after a
+  successful collection request. Redraw the still-open room on arrival and
+  preserve retry focus when it shares a request with a snapshot refresh.
+  Reconciled candidate: `docs/SITE_R58_GALLERY_ARRIVAL.md`; independent
+  integration and public verification remain.
+
 ## Done
 
 - [x] **R1 The page runs out of memory: this is the crash.** On first load the
