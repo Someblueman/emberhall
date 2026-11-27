@@ -313,8 +313,8 @@ input[type=range] {
   background:none;
   border:1px solid var(--line);
   border-radius:50%;
-  width:34px;
-  height:34px;
+  width:44px;
+  height:44px;
   flex:none;
 }
 .time-controls button:disabled {
