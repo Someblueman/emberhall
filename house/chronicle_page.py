@@ -660,6 +660,10 @@ def render_html(
     header a, .site-footer a {{
       color: var(--accent);
       text-underline-offset: 0.2em;
+      display: inline-flex;
+      align-items: center;
+      box-sizing: border-box;
+      min-height: 44px;
     }}
     h1 {{
       margin: 0 0 0.4rem;
@@ -684,6 +688,8 @@ def render_html(
     .browse-options label {{
       background: var(--card);
       border: 1px solid var(--border);
+      box-sizing: border-box;
+      min-height: 44px;
       padding: 0.65rem;
       border-radius: 4px;
       cursor: pointer;
@@ -694,7 +700,7 @@ def render_html(
     h2 {{ font-size: 1.2rem; }}
     @supports selector(main:has(input:checked)) {{
       .browse-controls, .earlier-control, .recent-note {{ display: block; }}
-      .earlier-control {{ padding: 0.5rem 0; cursor: pointer; }}
+      .earlier-control {{ box-sizing: border-box; min-height: 44px; padding: 0.65rem 0; cursor: pointer; }}
       .browse-options label:has(input:checked) {{ border-color: var(--accent); background: var(--accent-wash); }}
       main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry {{ display: none; }}
       main:has(#chronicle-earlier:checked) .recent-note {{ display: none; }}
@@ -729,15 +735,25 @@ def render_html(
       margin: 0.2rem 0 0.4rem;
     }}
     details {{ overflow-wrap: anywhere; }}
-    summary {{ cursor: pointer; color: var(--muted); }}
+    summary {{
+      cursor: pointer;
+      color: var(--muted);
+      box-sizing: border-box;
+      min-height: 44px;
+      padding: 0.75rem 0;
+    }}
     .record {{ margin-top: 0.8rem; font-size: 0.85rem; }}
     .earlier > summary {{ padding: 1rem 0; }}
     .snapshot {{ font-size: 0.85rem; margin-bottom: 1rem; }}
     .links a {{
       color: var(--accent);
+      text-underline-offset: 0.2em;
       margin-right: 0.9rem;
       font-size: 0.9rem;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      box-sizing: border-box;
+      min-height: 44px;
       padding: 0.5rem 0;
       overflow-wrap: anywhere;
     }}
