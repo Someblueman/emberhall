@@ -47,6 +47,9 @@
     .growth-event { display:block; max-width:100%; box-sizing:border-box; padding:.2em 0; line-height:1.65; overflow-wrap:anywhere; text-decoration-thickness:.06em; }
     .growth-list .small { margin-top:.25rem; }
     .growth-event:focus-visible { outline-offset:4px; }
+    /* Keep the native Long threads disclosure comfortable to press. */
+    .ambition-card > summary { box-sizing:border-box; min-height:44px; padding:11px 0; }
+    .ambition-card > summary:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
     /* Completed milestones sit on light parchment in either page theme. */
     .bench-account .milestone-done { color:#4e493b; }
   </style>
