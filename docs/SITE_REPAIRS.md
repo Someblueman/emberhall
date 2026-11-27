@@ -40,6 +40,8 @@ Chromium-based browser.
   long entries such as "Project dropped: Almost Halving a Three-Branched Tree"
   wrap so the link underline and the list's left rule crowd the text. Check the
   spacing of wrapped entries and fix it if it reads as broken.
+  Delivered styles match the reviewed repair; native historical replay is in
+  `docs/SITE_R6_DELIVERY.md`. A live-browser witness remains separate.
 
 - [ ] **R57 Work results never finish loading.** In Accounts at 390 px and
   1280 px, “Work and its first review” stays on “Loading recent work
