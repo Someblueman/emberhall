@@ -237,6 +237,40 @@ class RepairFocusTests(unittest.TestCase):
             self.assertIn("docs/SITE_REPAIRS.md", prompt)
         self.assertEqual(2, coordinator.focus_record()["count"])
 
+    def test_house_research_takes_one_explorer_turn_before_repairs(self):
+        fixture = test_home.HomeTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        fixture.delay = 30
+        coordinator = fixture.coordinator
+
+        def drain():
+            for running in coordinator.running.values():
+                running.process.terminate()
+                running.process.wait(timeout=15)
+            with patch("house.home.group_stopped", return_value=True):
+                fixture.drain()
+
+        def demand(state, at):
+            # One round at a time: an admitted Explorer closes the demand, as explorer_reserved does live.
+            runs = state.get("life", {}).get("runs", {}).values()
+            return None if any("explore_generation" in run for run in runs) else 0
+
+        self.addCleanup(drain)
+        with patch("house.shelf.repairs_since", return_value=1), \
+                patch("house.shelf.house_research", return_value=True), \
+                patch("house.life.explorer_demand", demand):
+            first = coordinator.tick(poll=False)["started"][0]
+            second = coordinator.start("muse")
+        runs = fixture.record.read()[0]["life"]["runs"]
+        self.assertEqual(0, runs[first]["explore_generation"])
+        self.assertNotIn("explore_generation", runs[second])
+        explorer = (coordinator.private / first / "prompt.txt").read_text()
+        self.assertIn("Automatic Explorer assignment", explorer)
+        self.assertNotIn("HOUSE FOCUS for this run", explorer)
+        self.assertIn("HOUSE FOCUS for this run", (coordinator.private / second / "prompt.txt").read_text())
+        self.assertEqual(1, coordinator.focus_record()["count"])
+
     def test_helpers_and_reviews_do_not_take_a_repair_turn(self):
         fixture = test_helper_home.HelperHomeTests()
         fixture.setUp()

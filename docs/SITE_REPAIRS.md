@@ -19,27 +19,6 @@ Chromium-based browser.
 
 ## Open
 
-- [ ] **R1 The page runs out of memory: this is the crash.** On first load the
-  house page downloads `history.json` plus seven 8 MB parts: 66 MB of JSON
-  (6.7 MB compressed) holding 51,272 full snapshots ("frames") of the house.
-  After load the tab uses 1.1 GB of JavaScript memory. `setInterval(refresh,
-  60000)` (`site/house.js`, last line) downloads and parses the whole history
-  again every minute even when nothing changed, and `watch()` does it again
-  whenever the journal moves. The new copy is built while the old one is still
-  held, so memory swung between 1.1 GB and 2.46 GB in a two-minute sample.
-  Phone browsers kill a tab long before that. Fix it so the page stays small:
-  first paint from a small current snapshot (the latest frame only); load older
-  history only when a visitor uses the history controls, and only the part they
-  need; remove the 60-second full refresh (`watch()` already notices changes);
-  release the old record before decoding a new one. The page side lives in
-  `site/house.js`; the published history files are written by house code
-  (`house/body.py`, `house/publish.py`), so a smaller snapshot needs a council
-  renovation (docs/RENOVATION.md, one hour of notice). Do the `site/` part first:
-  removing the 60-second refresh and releasing the old record need no
-  renovation. Acceptance: on a fresh load
-  at 390 px the page downloads under 2 MB, holds under 150 MB of JavaScript
-  memory after five minutes open, and the history controls still reach the
-  first moment.
 - [ ] **R2 Nothing to see for several seconds.** On a fast desktop connection the
   front page showed only "Loading the latest remembered house" and "Opening the
   remembered house..." for about 8 seconds; on a phone it is longer. With R1's
@@ -64,4 +43,29 @@ Chromium-based browser.
 
 ## Done
 
-(none yet)
+- [x] **R1 The page runs out of memory: this is the crash.** On first load the
+  house page downloads `history.json` plus seven 8 MB parts: 66 MB of JSON
+  (6.7 MB compressed) holding 51,272 full snapshots ("frames") of the house.
+  After load the tab uses 1.1 GB of JavaScript memory. `setInterval(refresh,
+  60000)` (`site/house.js`, last line) downloads and parses the whole history
+  again every minute even when nothing changed, and `watch()` does it again
+  whenever the journal moves. The new copy is built while the old one is still
+  held, so memory swung between 1.1 GB and 2.46 GB in a two-minute sample.
+  Phone browsers kill a tab long before that. Fix it so the page stays small:
+  first paint from a small current snapshot (the latest frame only); load older
+  history only when a visitor uses the history controls, and only the part they
+  need; remove the 60-second full refresh (`watch()` already notices changes);
+  release the old record before decoding a new one. The page side lives in
+  `site/house.js`; the published history files are written by house code
+  (`house/body.py`, `house/publish.py`), so a smaller snapshot needs a council
+  renovation (docs/RENOVATION.md, one hour of notice). Do the `site/` part first:
+  removing the 60-second refresh and releasing the old record need no
+  renovation. Acceptance: on a fresh load
+  at 390 px the page downloads under 2 MB, holds under 150 MB of JavaScript
+  memory after five minutes open, and the history controls still reach the
+  first moment.
+  Done 27 November 2026 (owner upgrade, runtime 1d722d079): the page paints from
+  `current.json` (the latest frame) and loads history only from the history controls.
+  Live check at 390 px and 1280 px: 1.47 MB on a fresh load, drawn in under 1.2 s,
+  13 MB of JavaScript memory after five minutes, and the history control reaches
+  event 1 (300 MB while the full history is open).
