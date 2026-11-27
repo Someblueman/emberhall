@@ -32,6 +32,7 @@ let historyNavigation = 0;
 const DISPLAY_BUNKS = 6;
 let bedsState = {query:"",agent:"all",presence:"all",page:0,open:null};
 let roomBounds = {}, wholeBounds = "0 0 900 700";
+let overviewMapScroll = null, overviewMapVisible = false;
 function el(tag, attrs = {}, parent, value) {
   const node = document.createElementNS(SVG, tag);
   Object.entries(attrs).forEach(([key, val]) => node.setAttribute(key, val));
@@ -864,6 +865,10 @@ function renderLately() {
   });
 }
 function drawHouse() {
+  const stage = $("stage");
+  // Remember a visitor's crop before an opened room shrinks the drawing.
+  if(overviewMapVisible && overviewMapScroll!==null && stage?.clientWidth>0 && stage.scrollWidth>stage.clientWidth)
+    overviewMapScroll=stage.scrollLeft;
   const map = $("house");
   map.replaceChildren();
   el("title",{id:"map-title"},map,`${data.name} · floor ${selectedFloor} · event ${frame.seq}`);
@@ -956,6 +961,13 @@ function drawHouse() {
   const selectedBounds=selected&&roomBounds[selected]
     ?includeTagBounds(roomBounds[selected],tags.filter(tag=>tag.resident.room===selected)):null;
   map.setAttribute("viewBox",selectedBounds||wholeBounds);
+  overviewMapVisible=!selected && stage?.clientWidth>0;
+  if(overviewMapVisible && stage.scrollWidth>stage.clientWidth) {
+    // The readable phone map is wider than its viewport. Begin on the house,
+    // then keep the visitor's position through redraws and room visits.
+    if(overviewMapScroll===null)overviewMapScroll=(stage.scrollWidth-stage.clientWidth)/2;
+    stage.scrollLeft=overviewMapScroll;
+  }
 }
 function effectiveTasks() {const at=observationTime();return frame.tasks.map(t=>({...t,expired:t.status==="claimed"&&t.until<=at}));}
 function taskReadinessLabel(t) {
