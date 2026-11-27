@@ -25,7 +25,7 @@ const descriptions = {
   salvage: "Practice bringing a small archive back after a storm, and admitting what cannot be saved."
 };
 let data, frame, index = 0, current = true, selected = null;
-let catalog = null, catalogSource = null;
+let catalog = null, catalogSource = null, catalogPending = null;
 let controlsReady = false, selectedFloor = 0, dormPage = 0;
 let refreshPending = null, recoveryReady = false, historyOpened = false, retryHistory = false;
 let historyNavigation = 0;
@@ -3442,18 +3442,53 @@ function collectionUrl(entry) {
   if((entry.category==="house-tool" || (entry.category==="creation" && entry.action==="Read guide")) && /^https:\/\/github\.com\/Someblueman\/emberhall\/blob\/main\/projects\/[a-z0-9-]+\/README\.md$/.test(href))return href;
   return null;
 }
-async function loadCatalog(sourceHead) {
-  if(!document.querySelector?.("#creations-card")||catalogSource===sourceHead)return;
-  try {
-    const response=await fetch("projects.json",{cache:"no-cache",signal:AbortSignal.timeout(5000)});
-    if(!response.ok)throw new Error("Collection unavailable");
-    const next=await response.json();
-    if(next?.version!==1||!Array.isArray(next.projects))throw new Error("Invalid collection");
-    catalog=next.projects.filter(entry=>entry&&typeof entry.id==="string"&&typeof entry.title==="string"&&typeof entry.summary==="string"&&collectionUrl(entry));
-    catalogSource=sourceHead;
-  } catch {
-    catalog=null;catalogSource=null;
-  }
+function loadCatalog(sourceHead) {
+  if(!document.querySelector?.("#creations-card")||catalogSource===sourceHead)return Promise.resolve(Boolean(catalog));
+  if(catalogPending?.sourceHead===sourceHead)return catalogPending.promise;
+  const request={sourceHead};catalogPending=request;
+  const stillCurrent=()=>catalogPending===request&&(!data||data.source_head===sourceHead);
+  request.promise=(async()=>{
+    try {
+      const response=await fetch("projects.json",{cache:"no-cache",signal:AbortSignal.timeout(5000)});
+      if(!response.ok)throw new Error("Collection unavailable");
+      const next=await response.json();
+      if(next?.version!==1||!Array.isArray(next.projects))throw new Error("Invalid collection");
+      if(!stillCurrent())return false;
+      catalog=next.projects.filter(entry=>entry&&typeof entry.id==="string"&&typeof entry.title==="string"&&typeof entry.summary==="string"&&collectionUrl(entry));
+      catalogSource=sourceHead;return true;
+    } catch {
+      if(stillCurrent()){catalog=null;catalogSource=null;}
+      return false;
+    } finally {
+      if(catalogPending===request)catalogPending=null;
+    }
+  })();
+  return request.promise;
+}
+function renderCatalogRecovery(parent,prefix) {
+  const unavailable=prefix==="gallery-room"?"Creation links are unavailable":"Collection links are unavailable";
+  const status=html("p","empty-note",`${unavailable} right now. The recorded project history is still available.`,parent);
+  status.id=`${prefix}-catalog-status`;status.setAttribute("role","status");
+  const retry=html("button","quiet-button","Try collection again",parent);
+  retry.id=`${prefix}-catalog-retry`;retry.type="button";
+  retry.setAttribute("aria-describedby",status.id);
+  retry.addEventListener("click",async()=>{
+    if(retry.disabled)return;
+    retry.disabled=true;status.textContent="Loading collection links…";
+    const loaded=await loadCatalog(data?.source_head);
+    retry.disabled=false;
+    if(!loaded){status.textContent="Collection links could not be loaded. Try again when your connection is available.";return;}
+    const keepFocus=document.activeElement===retry;
+    // A late response may fill the cache, but must leave a hidden view empty.
+    const view=document.querySelector?.(".page-view:not([hidden])")?.id;
+    if(prefix==="gallery"&&(!view||view==="gallery-view")) {
+      renderCollection();
+      if(keepFocus)($("gallery-search")||$("gallery-view"))?.focus?.({preventScroll:true});
+    } else if(prefix==="gallery-room"&&view==="house-view"&&selected==="gallery") {
+      roomPanel();
+      if(keepFocus)($("gallery-room-display")||document.querySelector?.(".room-card"))?.focus?.({preventScroll:true});
+    }
+  });
 }
 function collectionAction(entry) {
   return entry.action==="Read guide"?"Read guide":entry.action==="Play"?"Play":"Open";
@@ -3709,7 +3744,7 @@ function renderCollection() {
   }
   box.replaceChildren();
   if(!catalog) {
-    html("p","empty-note","Collection links are unavailable in this publication. The recorded project history is still below.",box);
+    renderCatalogRecovery(box,"gallery");
     return;
   }
   html("p","small",current?"Finished works and completed chapters you can use. No account needed.":"Completed by this recorded moment. Links open the current published versions.",box);
@@ -3788,7 +3823,7 @@ function renderGalleryRoom(content) {
   html("h3","","Take something off the shelf",panel);
   html("p","small",current?"Finished works and completed chapters. Open one and try it.":"Finished by this recorded moment. Pictures are hidden; links open current published versions.",panel);
   const entries=completedCatalog().filter(entry=>entry.category==="creation"&&entry.href.startsWith("projects/")&&entry.action!=="Read guide");
-  if(!catalog)html("p","empty-note","Creation links are unavailable in this publication. The full Gallery keeps the recorded project history.",panel);
+  if(!catalog)renderCatalogRecovery(panel,"gallery-room");
   else if(!entries.length)html("p","empty-note","No browser creations were completed by this moment.",panel);
   else {
     const within=entries.filter(entry=>current&&roomCreationUrl(entry));
