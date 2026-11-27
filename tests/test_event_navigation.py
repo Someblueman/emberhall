@@ -33,7 +33,8 @@ vm.runInContext(inline,ctx);assert.equal(loaded.length,1);loaded[0]();
 vm.runInContext(`
 let renders=0;
 render=()=>{renders++;frame=data.frames[index];};
-lighting=accounts=roomPanel=drawHouse=renderViewContext=renderCollection=renderRecentGrowth=renderLately=()=>{};
+// Navigation owns the event draft and focus; panel drawing has its own DOM tests.
+lighting=accounts=roomPanel=drawHouse=renderViewContext=renderCollection=renderAuxiliaryViews=renderRecentGrowth=renderLately=()=>{};
 const input=get('event-number'),result=get('event-number-result');
 const submit=value=>{
  input.value=value;let prevented=false;
