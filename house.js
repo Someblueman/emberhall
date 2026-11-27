@@ -156,7 +156,8 @@ function figure(g, resident, x, y) {
   el("circle",{cx,cy:cy-height-7,r:9,fill:skin},group);
   el("path",{d:`M${cx-9} ${cy-height-8}q-2-13 9-12q12 0 9 13q-6-7-18-1`,fill:["#514239","#7c5f42","#c4b995"][hash(resident.id)%3]},group);
   el("text",{x:cx,y:cy-height-24,"text-anchor":"middle","font-size":18,fill:kind.color,"font-family":"system-ui,sans-serif"},group,kind.mark);
-  el("text",{x:cx,y:cy+21,"text-anchor":"middle",class:"resident-label"},group,resident.name);
+  // Awake residents have a collision-checked name tag; repeating the name at
+  // their feet creates a second, overlapping label in a crowded room.
 }
 function furnishings(g, room, x, y, lit, residents) {
   if(room === "door") {
@@ -781,29 +782,68 @@ function ago(at) {
   return `${Math.floor(diff/86400)}d ${current?"ago":"earlier"}`;
 }
 // Name tags hang over everyone who is awake: who they are and what they hold.
+function drawingTextWidth(map,text,className,fallback) {
+  if(!map?.ownerDocument?.createElementNS)return text.length*fallback;
+  const probe=el("text",{class:className,visibility:"hidden","aria-hidden":"true"},map,text);
+  const width=probe.getComputedTextLength();probe.remove();
+  return Number.isFinite(width)&&width>0?width:text.length*fallback;
+}
+function layoutNameTags(tags,labels=[]) {
+  const gap=6,obstacles=labels.map(l=>({x:l.x-l.width/2-4,top:l.y-20,
+    width:l.width+8,height:l.fact?44:28})),placed=[];
+  const overlaps=(a,b)=>a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&
+    a.top<b.top+b.height+gap&&a.top+a.height+gap>b.top;
+  for(const tag of tags) {
+    const candidates=[tag.cx,tag.cx-tag.width-12,tag.cx+tag.width+12].map(cx=>{
+      const box={...tag,cx,x:cx-tag.width/2,height:38};
+      let hits;
+      // Every move passes at least one obstacle permanently. Unlike a fixed
+      // retry cap, this terminates clear of every finite set of earlier boxes.
+      while((hits=obstacles.filter(other=>overlaps(box,other))).length)
+        box.top=Math.min(...hits.map(other=>other.top))-box.height-gap;
+      return box;
+    });
+    candidates.sort((a,b)=>Math.hypot(a.cx-tag.cx,a.top-tag.top)-Math.hypot(b.cx-tag.cx,b.top-tag.top));
+    const box=candidates[0];placed.push(box);obstacles.push(box);
+  }
+  return placed;
+}
+function includeTagBounds(bounds,tags) {
+  const [x,y,width,height]=bounds.split(" ").map(Number);
+  if(!tags.length)return bounds;
+  const left=Math.min(x,...tags.map(t=>t.x-12)),top=Math.min(y,...tags.map(t=>t.top-12));
+  const right=Math.max(x+width,...tags.map(t=>t.x+t.width+12));
+  const bottom=Math.max(y+height,...tags.map(t=>t.top+t.height+12));
+  return `${left} ${top} ${right-left} ${bottom-top}`;
+}
 function nameTags(map,placed,labels=[]) {
   const awake=placed.filter(item=>!["sleeping","unconfirmed"].includes(item.resident.pose));
   const latest=current?latelyEvents(1)[0]:null;
   const where={door:"just in, reading the record",hearth:"by the hearth",workshop:"in the workshop",archive:"in the archive",council:"at the council table",counting:"in the counting room",study:"in the study",parlor:"in the parlor",gallery:"in the gallery",chronicle:"in the chronicle",assay:"in the assay room"};
-  const boxes=[];
-  awake.forEach(item=>{
+  const specifications=awake.map(item=>{
     const r=item.resident,[cx,cy]=p(item.px,item.py,0),kind=kinds[r.agent]||kinds.unrecorded;
     const work=heldWork(r.id),second=work?clip(work,34):(where[r.room]||"here");
-    const width=Math.max(r.name.length*7.6,second.length*5.9)+22;
-    let top=cy-118;
-    // Step a tag upward until it clears the ones already hung.
-    // ... and the room names: a tag hung over "The Door" hid the name of the room.
-    const covers=at=>labels.some(l=>Math.abs(l.x-cx)<(l.width+width)/2+4&&at<l.y+(l.fact?24:8)&&at+38>l.y-20);
-    for(let step=0;step<12&&(boxes.some(b=>Math.abs(b.cx-cx)<(b.width+width)/2+4&&Math.abs(b.top-top)<42)||covers(top));step++)top-=44;
-    boxes.push({cx,top,width});
+    const width=Math.max(drawingTextWidth(map,r.name,"life-name",13)+20,
+      drawingTextWidth(map,second,"life-work",11)+10)+10;
+    return {resident:r,cx,anchorX:cx,cy,kind,work,second,width,top:cy-118};
+  });
+  const boxes=layoutNameTags(specifications,labels);
+  if(!boxes.length)return boxes;
+  const stems=el("g",{class:"life-stems","pointer-events":"none"},map);
+  if(map?.ownerDocument?.createElementNS) {
+    const firstLabel=map.querySelector?.(".room-label");
+    if(firstLabel)map.insertBefore(stems,firstLabel);
+  }
+  boxes.forEach(({resident:r,cx,anchorX,cy,kind,work,second,width,top})=>{
     const fresh=latest&&latest.actor===r.id&&observationTime()-latest.at<600;
     const tag=el("g",{class:`life-tag${fresh?" life-tag-fresh":""}${work?" life-tag-working":""}`,"pointer-events":"none","data-tag":r.id},map);
-    el("line",{x1:cx,y1:top+36,x2:cx,y2:cy-58,class:"life-stem"},tag);
+    el("line",{x1:cx,y1:top+36,x2:anchorX,y2:cy-58,class:"life-stem"},stems);
     el("rect",{x:cx-width/2,y:top,width,height:38,rx:8,class:"life-box"},tag);
     el("circle",{cx:cx-width/2+11,cy:top+13,r:3.5,fill:kind.color,class:"life-dot"},tag);
     el("text",{x:cx-width/2+20,y:top+17,class:"life-name"},tag,r.name);
     el("text",{x:cx-width/2+10,y:top+31,class:"life-work"},tag,second);
   });
+  return boxes;
 }
 function renderLately() {
   const host=$("lately");
@@ -905,10 +945,17 @@ function drawHouse() {
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
   });
   if(rooms.length) garden(el("g",{"pointer-events":"none"},map),span,totalDepth);
-  roomLabels.forEach(r=>el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name));
+  roomLabels.forEach(r=>{
+    el("text",{x:r.x,y:r.y,class:"room-label","text-anchor":"middle","pointer-events":"none"},map,r.name);
+    r.width=Math.max(drawingTextWidth(map,r.name,"room-label",21),
+      r.fact?drawingTextWidth(map,r.fact,"room-fact",13):0);
+  });
   roomLabels.forEach(r=>{if(r.fact)el("text",{x:r.x,y:r.y+17,class:"room-fact","text-anchor":"middle","pointer-events":"none"},map,r.fact);});
-  nameTags(map,placed,roomLabels);
-  map.setAttribute("viewBox",selected?roomBounds[selected]||wholeBounds:wholeBounds);
+  const tags=nameTags(map,placed,roomLabels);
+  wholeBounds=includeTagBounds(wholeBounds,tags);
+  const selectedBounds=selected&&roomBounds[selected]
+    ?includeTagBounds(roomBounds[selected],tags.filter(tag=>tag.resident.room===selected)):null;
+  map.setAttribute("viewBox",selectedBounds||wholeBounds);
 }
 function effectiveTasks() {const at=observationTime();return frame.tasks.map(t=>({...t,expired:t.status==="claimed"&&t.until<=at}));}
 function taskReadinessLabel(t) {
