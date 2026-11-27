@@ -1508,7 +1508,8 @@ footer a {
 
 .stage { scroll-margin-top:64px; }
 .room-marks { margin-top:14px; }
-.room-marks > summary { cursor:pointer; color:var(--muted); font-size:13px; margin-bottom:8px; }
+.room-marks > summary { cursor:pointer; color:var(--muted); font-size:13px; margin-bottom:8px; box-sizing:border-box; min-height:44px; padding:12px 0; overflow-wrap:anywhere; }
+.room-marks > summary:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
 .room-lead { font:600 14px/1.4 system-ui,sans-serif; color:var(--gold); margin:4px 0 12px; }
 .room-about { margin-top:18px; padding-top:12px; border-top:1px solid var(--line); }
 .room-about > summary { cursor:pointer; color:var(--muted); font-size:13px; min-height:44px; box-sizing:border-box; padding:12px 0; }
