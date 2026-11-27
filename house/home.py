@@ -1732,7 +1732,8 @@ class Coordinator:
             if review_task.get("helper") == "review":
                 mode = "review"
             self.focus = None
-            if mode != "review" and not staffing.helper({"agent": kind, "model": model}):
+            if (mode != "review" and not staffing.helper({"agent": kind, "model": model})
+                    and explore_generation is None):
                 self.focus = self.home_focus(state)
         try:
             admission = self.life("run-start", run, resident=resident, agent=kind, model=model,
@@ -2053,6 +2054,9 @@ class Coordinator:
                 selected_task = state["tasks"].get((selected or {}).get("task"), {})
                 if focus or (repairing and not pending and selected_task.get("helper") != "review"):
                     request, backlog, explore = (None, {}), False, None
+                    if repairing and not focus and shelf_model.house_research(state):
+                        # House research: one Explorer round at a time, before another repair start.
+                        explore = demand["explore_generation"]
                 elif selected and "task" in selected:
                     request = (None, {})
                     backlog, explore = True, None
