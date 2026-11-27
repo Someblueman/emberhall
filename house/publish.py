@@ -6,6 +6,7 @@ import fcntl
 import gzip
 import json
 import os
+import re
 import sys
 from pathlib import Path
 import subprocess
@@ -31,6 +32,13 @@ MAX_PUBLIC_BLOB = 64 * 1024 * 1024
 # a page that loads a little more is better than a house that stops publishing. Only the hard limit fails.
 CURRENT_SNAPSHOT_TARGET_BYTES = 1_400_000
 CURRENT_SNAPSHOT_MAX_BYTES = 8_000_000
+# Cached listings can survive several publications. Keep their immutable targets
+# available without growing the deployed tree indefinitely (no visitor downloads
+# these extra files unless its listing names one).
+CURRENT_RETAINED_COUNT = 32
+CURRENT_RETAINED_BYTES = 32 * 1024 * 1024
+CURRENT_RETENTION_INDEX = "current-retained.json"
+CURRENT_COMPANION = re.compile(r"current/[0-9a-f]{16}\.json\.gz\Z")
 # A sealed part of the node table is closed once its JSON reaches this size and never changes again.
 PART_TARGET = 8 * 1024 * 1024
 # A rebuild replays this many events at a time and saves its place this often (see history()).
@@ -328,6 +336,47 @@ def current_snapshot_files(snapshot: dict) -> dict[str, bytes]:
     return {"current.json": manifest, path: compressed}
 
 
+def retain_current_snapshots(record: Record, previous: str | None, contents: dict[str, bytes]) -> None:
+    """Keep newest-first compressed snapshots across replacement Pages trees."""
+    retained = [path for path in contents if CURRENT_COMPANION.fullmatch(path)]
+    size = sum(len(contents[path]) for path in retained)
+    candidates = []
+    if previous:
+        # The previous listing also bootstraps retention on the first upgraded
+        # publication. A plain (large) snapshot is not a companion listing.
+        for name in ("current.json", CURRENT_RETENTION_INDEX):
+            raw = committed_blob(record, previous, name, optional=True)
+            if raw is None or len(raw) > 4096:
+                continue
+            try:
+                value = json.loads(raw)
+            except (ValueError, UnicodeError):
+                continue
+            if name == "current.json" and isinstance(value, dict):
+                candidates.append(value.get("gzip"))
+            elif name == CURRENT_RETENTION_INDEX and isinstance(value, list):
+                candidates.extend(value[:CURRENT_RETAINED_COUNT])
+    seen = set(retained)
+    for path in candidates:
+        if len(retained) >= CURRENT_RETAINED_COUNT:
+            break
+        if not isinstance(path, str) or not CURRENT_COMPANION.fullmatch(path) or path in seen:
+            continue
+        seen.add(path)
+        body = committed_blob(record, previous, path, optional=True)
+        if body is None or len(body) > MAX_PUBLIC_BLOB or hashlib.sha256(body).hexdigest()[:16] != path[8:24]:
+            continue
+        if size + len(body) > CURRENT_RETAINED_BYTES:
+            # Preserve a contiguous newest-first window rather than keeping
+            # older small files at the expense of a newer snapshot.
+            break
+        contents[path] = body
+        retained.append(path)
+        size += len(body)
+    if retained:
+        contents[CURRENT_RETENTION_INDEX] = json.dumps(retained, separators=(",", ":")).encode()
+
+
 def chronicle_body(record: Record, contents: dict[str, bytes]) -> bytes:
     """The Chronicle Room page for the journal as it stands now."""
     from . import chronicle_page
@@ -392,10 +441,11 @@ def publish(record: Record, *, push=False) -> dict:
         except (OSError, ValueError, subprocess.SubprocessError):
             pass  # The balance is a view; never block publication of the record.
         contents[".nojekyll"] = b""
-        if any(len(body) > MAX_PUBLIC_BLOB for body in contents.values()):
-            raise ValueError("Public snapshot exceeds the publication size budget")
         ref = "refs/heads/" + BRANCH
         previous = record.ref(ref)
+        retain_current_snapshots(record, previous, contents)
+        if any(len(body) > MAX_PUBLIC_BLOB for body in contents.values()):
+            raise ValueError("Public snapshot exceeds the publication size budget")
         parent = previous
         recovering = False
         if push:
