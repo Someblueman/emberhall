@@ -3268,6 +3268,7 @@ function renderCraftOutcomes(parent) {
   const panel=html("section","craft-outcomes counting-panel",undefined,parent);
   panel.style.gridColumn="1 / -1";
   fillCraftOutcomes(panel);
+  loadCraftOutcomes(data);
 }
 function renderCraftReceiving(panel,receiving,names) {
   html("h4","","Tasks offered to a resident",panel);

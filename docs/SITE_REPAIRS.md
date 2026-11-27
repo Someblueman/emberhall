@@ -41,6 +41,14 @@ Chromium-based browser.
   wrap so the link underline and the list's left rule crowd the text. Check the
   spacing of wrapped entries and fix it if it reads as broken.
 
+- [ ] **R57 Work results never finish loading.** In Accounts at 390 px and
+  1280 px, “Work and its first review” stays on “Loading recent work
+  outcomes…” after opening the page. The deferred panel does not exist when
+  the initial snapshot refresh tries to load its data. Start the existing
+  validated loader when this panel is created, including in rooms that use it.
+  Candidate and replay: `docs/SITE_R57_WORK_COUNTS.md`; independent integration
+  and delivered-page verification remain.
+
 ## Done
 
 - [x] **R1 The page runs out of memory: this is the crash.** On first load the
