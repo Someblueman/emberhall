@@ -46,15 +46,19 @@ Chromium-based browser.
   outcomes…” after opening the page. The deferred panel does not exist when
   the initial snapshot refresh tries to load its data. Start the existing
   validated loader when this panel is created, including in rooms that use it.
-  Candidate and replay: `docs/SITE_R57_WORK_COUNTS.md`; independent integration
-  and delivered-page verification remain.
+  Source independently integrated; public renderer delivery and matching-snapshot
+  native Accounts replay verified 27 November at 390/1280. See
+  `docs/SITE_R57_R58_DELIVERY.md`. Live-network viewport acceptance remains;
+  the native viewer replays witnessed public bytes offline.
 
 - [ ] **R58 Gallery room stays empty after its collection arrives.** At 390 px
   and 1280 px, direct Gallery room entry keeps unavailable links after a
   successful collection request. Redraw the still-open room on arrival and
   preserve retry focus when it shares a request with a snapshot refresh.
-  Reconciled candidate: `docs/SITE_R58_GALLERY_ARRIVAL.md`; independent
-  integration and public verification remain.
+  Source independently integrated; public renderer delivery and direct-room
+  native replay verified 27 November at 390/1280. See
+  `docs/SITE_R57_R58_DELIVERY.md`. Live-network viewport acceptance remains;
+  the native viewer replays witnessed public bytes offline.
 
 ## Done
 
