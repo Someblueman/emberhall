@@ -935,16 +935,11 @@ function drawHouse() {
       figure(g,resident,px,py);
       placed.push({resident,px,py});
     });
-    const marks=visibleScars().filter(s=>s.room===room.id);
-    marks.forEach((scar,n)=>{
-      const sx=x+18+(n%7)*20,sy=y+depth-15-Math.floor(n/7)*14;
-      const sg=el("g",{},g);el("title",{},sg,`${scar.title}: ${scar.basis}`);
-      line(sg,[[sx,sy],[sx+5,sy-6],[sx+9,sy],[sx+5,sy+7],[sx+13,sy+11]],scar.mended?"#f0c77b":"#b66f52",3);
-      if(!scar.mended) caption(sg,sx+5,sy-6,5,"!","resident-label");
-    });
+    const scarSummary=drawRoomScars(g,x,y,depth,visibleScars().filter(s=>s.room===room.id));
     const c=p(x+92,y+2,43);
     const roomName=room.name.length>22?room.name.slice(0,21)+"…":room.name;
-    roomLabels.push({x:c[0], y:c[1], width:Math.max(roomName.length*10.5,14*6.6), fact:status==="open"?roomFact(room.id):"", name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
+    const fact=[status==="open"?roomFact(room.id):"",scarSummary].filter(Boolean).join(" · ");
+    roomLabels.push({x:c[0], y:c[1], width:Math.max(roomName.length*10.5,14*6.6), fact, name:roomName+(status==="construction"?" · building":status==="closed"?" · closed":"")});
     const corners=[p(x-25,y-25,80),p(x+210,y-25,80),p(x+210,y+depth+45,-30),p(x-25,y+depth+45,-30)];
     const xs=corners.map(v=>v[0]),ys=corners.map(v=>v[1]);
     roomBounds[room.id]=`${Math.min(...xs)-25} ${Math.min(...ys)-15} ${Math.max(...xs)-Math.min(...xs)+50} ${Math.max(...ys)-Math.min(...ys)+40}`;
@@ -1208,6 +1203,19 @@ function renderWorkshopTasks(content) {
     }
   }
   renderBoard();
+}
+// The floor is a symbol, not an ever-growing receipt list. Keep old damage at
+// the front edge instead of letting it climb over figures and neighbouring rooms.
+// The room's "old marks kept here" disclosure still contains every receipt.
+function drawRoomScars(g,x,y,depth,marks) {
+  if(!marks.length)return "";
+  const sg=el("g",{class:"map-scar-summary"},g);
+  const mended=marks.filter(s=>s.mended).length;
+  el("title",{},sg,`${marks.length} historical ${marks.length===1?"mark":"marks"}, ${mended} mended. Open this room for all receipts. These are not live alerts.`);
+  const sx=x+18,sy=y+depth-15;
+  line(sg,[[sx,sy],[sx+5,sy-6],[sx+9,sy],[sx+5,sy+7],[sx+13,sy+11]],mended===marks.length?"#f0c77b":"#b66f52",3);
+  // Counts join the room's existing fact line, drawn above foreground walls.
+  return `${marks.length} old ${marks.length===1?"mark":"marks"}`;
 }
 function visibleScars() {
   const marks=frame.scars.map(s=>({...data?.scars?.[s.id],...s}));

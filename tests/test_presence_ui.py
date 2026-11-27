@@ -42,7 +42,12 @@ frame.scars=[{id:'run:r1',room:'door',title:'Run interrupted',basis:'Supervisor 
 frame.runs=[{id:'r1',resident:'fern',agent:'muse',start:100,sequence:1,status:'ended',outcome:'interrupted',end:101,last_sequence:2}];
 drawHouse();roomPanel();assert.deepEqual(figures(),['ash']);
 assert.match(door().attrs['aria-label'],/0 residents/);
-assert.match(text(door()),/Run interrupted: Supervisor receipt/);
+assert.match(text(door()),/1 historical mark, 0 mended/);
+assert.match(text(door()),/not live alerts/);
+const marks=all(nodes['room-content']).find(n=>n.tag==='details'&&n.className==='room-marks');
+assert.ok(marks);assert.match(text(marks),/1 old mark kept here/);
+assert.match(text(marks),/Run interrupted/);assert.match(text(marks),/Supervisor receipt/);
+assert.equal(marks.open,undefined); // Receipts remain in a native collapsed disclosure.
 const history=all(nodes['room-content']).find(n=>n.tag==='details'&&text(n).includes('Remembered here'));
 assert.ok(history);assert.match(text(history),/Fern/);assert.match(text(history),/interrupted; no sleep event/);
 assert.match(text(history),/not current occupancy/);assert.match(text(history),/r1/);
@@ -54,11 +59,13 @@ fern.pose='standing';fern.presence='recorded awake';frame.seq=3;
 drawHouse();roomPanel();assert.deepEqual(figures(),['fern','ash']);
 assert.match(text(nodes['room-content']),/Arrived · no later room activity recorded/);
 assert.doesNotMatch(text(nodes['room-content']),/Remembered here/);
-assert.match(text(door()),/Run interrupted/);assert.equal(frame.runs.length,1);
+assert.match(text(door()),/1 historical mark/);
+assert.match(text(nodes['room-content']),/Run interrupted/);assert.equal(frame.runs.length,1);
 // Scrubbing back restores exactly the earlier display state.
 frame=JSON.parse(stopped);drawHouse();roomPanel();assert.deepEqual(figures(),['ash']);
 frame=JSON.parse(prior);drawHouse();roomPanel();assert.deepEqual(figures(),['fern','ash']);
-assert.doesNotMatch(text(door()),/Run interrupted/);
+assert.doesNotMatch(text(door()),/historical mark/);
+assert.doesNotMatch(text(nodes['room-content']),/Run interrupted/);
 // A stopped run at the beds is history, not a sleeping or standing bunk occupant.
 frame.residents[0].room='bedroom';frame.residents[0].pose='unconfirmed';selected='bedroom';
 drawHouse();roomPanel();assert.deepEqual(figures(),['ash']);
