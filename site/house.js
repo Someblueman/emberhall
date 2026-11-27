@@ -94,15 +94,15 @@ function figure(g, resident, x, y) {
   const group = el("g", {"data-resident":resident.id},g);
   el("title", {},group, `${resident.name} · ${kind.name} · ${resident.presence}`);
   if (resident.pose === "sleeping") {
-    box(group,x-15,y-24,31,60,10,["#a98e63","#685e47","#85714f"]);
-    box(group,x-13,y-21,27,53,4,[kind.color,"#77664c","#8f7959"],10);
+    box(group,x-15,y-24,31,50,10,["#a98e63","#685e47","#85714f"]);
+    box(group,x-13,y-21,27,43,4,[kind.color,"#77664c","#8f7959"],10);
     polygon(group,[[x-11,y-19,15],[x+11,y-19,15],[x+11,y-3,15],[x-11,y-3,15]],"#e5d8b9");
     const face = p(x,y-10,18);
     el("ellipse",{cx:face[0],cy:face[1],rx:8,ry:6,fill:skin},group);
     el("path",{d:`M${face[0]-4} ${face[1]}q2 2 4 0`,stroke:"#4c4436",fill:"none"},group);
-    caption(group,x+18,y-9,28,"z", "resident-label");
-    caption(group,x,y+44,0,resident.name,"resident-label");
-    caption(group,x,y+18,17,kind.mark,"resident-label");
+    caption(group,x+6,y-14,27,"z", "resident-label");
+    caption(group,x+4,y-10,1,resident.name,"resident-label");
+    caption(group,x-6,y+14,17,kind.mark,"resident-label");
     return;
   }
   el("ellipse",{cx,cy:cy+3,rx:14,ry:6,fill:"#142725",opacity:.35},group);
