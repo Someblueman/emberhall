@@ -189,6 +189,8 @@ class RepairFocusTests(unittest.TestCase):
         owner_note = home.closing_line(state, "alice")
         self.assertIn("project-done", owner_note)
         self.assertIn("fix a visible site bug", owner_note)
+        self.assertIn("--project rooms and --ready", owner_note)
+        self.assertIn("Do not sleep having done neither", owner_note)
         self.assertIn("No house project has a task you can claim now", home.focus_prompt(state, "room"))
         for task in ({"status": "open", "ready": False, "until": 0},
                      {"status": "claimed", "ready": True, "until": 1100}):

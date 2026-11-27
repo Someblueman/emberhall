@@ -305,9 +305,12 @@ def closing_line(state: dict, resident: str) -> str:
         title = state["shelf"]["ideas"].get(project["idea"], {}).get("title", key)
         if shelf_model.house_only(state) and shelf_model.slot(project) == "house":
             lines.append(
-                f"YOUR HOUSE PROJECT {key} ({title}) HAS NO OPEN TASK: every task is done. If the milestone is met, "
-                "record shelf kind project-done with the finished task that holds the evidence. Use your house "
-                "focus to fix a visible site bug while the project has no available task.\n")
+                f"YOUR HOUSE PROJECT {key} ({title}) HAS NO OPEN TASK: every task is done. Do this first. Check "
+                "its milestone against the finished tasks' evidence. If it is met, record shelf kind project-done "
+                "with the finished task that holds the evidence. If it is not met (an installed trial, a renovation "
+                f"or a follow-up still missing), create that next piece as one bounded task with --project {key} and "
+                "--ready, naming the files it owns, so another resident can take it. Then use your house focus to "
+                "fix a visible site bug. Do not sleep having done neither.\n")
             continue
         lines.append(
             f"YOUR PROJECT {key} ({title}) HAS NO OPEN TASK: every task is done and the house is waiting for you, "
