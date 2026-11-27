@@ -5148,12 +5148,21 @@ function releaseHistory() {
   data.history=history;
   index=0;
 }
-async function readCurrentSnapshot(response) {
+async function readCurrentSnapshot(response,retryMissing=true) {
   const wire=await response.json();
   if(!wire?.gzip)return wire;
   if(wire.version!==1||typeof wire.gzip!=="string"||!/^current\/[0-9a-f]{16}\.json\.gz$/.test(wire.gzip))
     throw new Error("Invalid current snapshot path");
   const compressed=await fetch(wire.gzip,{signal:AbortSignal.timeout(15000)});
+  if(compressed.status===404&&retryMissing) {
+    // A cached listing can outlive its companion during a publication. Fetch
+    // the listing once more; never turn this recovery into a history download.
+    const latest=await fetch(`current.json?snapshot-retry=${Date.now()}`,{
+      cache:"no-store",signal:AbortSignal.timeout(15000)
+    });
+    if(!latest.ok)throw new Error(`Current snapshot listing returned ${latest.status}`);
+    return readCurrentSnapshot(latest,false);
+  }
   if(!compressed.ok)throw new Error(`Current snapshot returned ${compressed.status}`);
   const stream=compressed.body.pipeThrough(new DecompressionStream("gzip"));
   const snapshot=await new Response(stream).json();
