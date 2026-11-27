@@ -93,6 +93,43 @@ assert.equal(input.value,'2');assert.equal(document.activeElement,input);
 submit('20');assert.equal(frame.seq,20);
 ''')
 
+    def test_current_snapshot_lookup_avoids_history_and_old_events_still_load(self):
+        self.run_js(r'''
+(async()=>{
+ seed();data.frames=[frame];data.history={current_only:true,total_frames:50,last_sequence:50};
+ let loads=0;
+ ensureHistory=async()=>{loads++;return false;};
+ submit('50');
+ assert.equal(loads,0);assert.equal(frame.seq,50);assert(current);
+ assert.match(result.textContent,/Opened event 50, the latest/);
+ submit('51');
+ assert.equal(loads,0);assert.equal(frame.seq,50);
+ assert.equal(input.attrs['aria-invalid'],'true');
+ assert.match(result.textContent,/events 1–50/);
+ // A real older-event request still needs history and reports failure honestly.
+ submit('20');await Promise.resolve();await Promise.resolve();await Promise.resolve();
+ assert.equal(loads,1);assert.equal(frame.seq,50);
+ assert.match(result.textContent,/Try again when the house history is available/);
+ ensureHistory=async()=>{loads++;data={frames:[{seq:10},{seq:20},{seq:50}]};return true;};
+ submit('20');await Promise.resolve();await Promise.resolve();await Promise.resolve();
+ assert.equal(loads,2);assert.equal(frame.seq,20);assert(!current);
+ assert.match(result.textContent,/Opened event 20/);
+ // A direct latest jump invalidates an older pending navigation.
+ seed();data.frames=[frame];data.history={current_only:true,total_frames:50,last_sequence:50};
+ let resolveHistory;
+ ensureHistory=()=>new Promise(resolve=>{resolveHistory=resolve;});
+ const old=jumpToSequence(20);jumpToSequence(50);
+ data={frames:[{seq:10},{seq:20},{seq:50}]};resolveHistory(true);await old;
+ assert.equal(frame.seq,50);assert(current);
+ // A retained older frame after a failed refresh is not the latest snapshot.
+ frame={seq:20};data={frames:[frame],history:{current_only:true,total_frames:50,last_sequence:50}};
+ index=0;current=false;loads=0;
+ ensureHistory=async()=>{loads++;data={frames:[{seq:10},{seq:20},{seq:50}]};return true;};
+ const retained=jumpToSequence(20);await retained;
+ assert.equal(loads,1);assert.equal(frame.seq,20);assert(!current);
+})().catch(error=>{console.error(error);process.exitCode=1;});
+''')
+
     def test_static_page_labels_and_publisher_delivery(self):
         page = (ROOT / "site/index.html").read_text()
         self.assertIn('for="event-number"', page)

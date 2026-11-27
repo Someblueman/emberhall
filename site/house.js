@@ -1468,12 +1468,17 @@ function withHistory(visit) {
   });
 }
 function jumpToSequence(seq, afterJump) {
-  return withHistory(()=>{
+  const visit=()=>{
     const target=data.frames.findIndex(f=>f.seq===seq);
     if(target<0)return;
     index=target;current=target===data.frames.length-1;render();
     afterJump?.();
-  });
+  };
+  // The latest moment is already complete in the small current snapshot.
+  if(data?.history?.current_only&&seq===lastHistorySequence()&&data.frames.some(moment=>moment.seq===seq)) {
+    historyNavigation++;return visit();
+  }
+  return withHistory(visit);
 }
 // Completion receipts identify real progress even while a great work stays active.
 function projectProgressChanges(previous, project, sequence) {
