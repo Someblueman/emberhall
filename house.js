@@ -3268,6 +3268,7 @@ function renderCraftOutcomes(parent) {
   const panel=html("section","craft-outcomes counting-panel",undefined,parent);
   panel.style.gridColumn="1 / -1";
   fillCraftOutcomes(panel);
+  loadCraftOutcomes(data);
 }
 function renderCraftReceiving(panel,receiving,names) {
   html("h4","","Tasks offered to a resident",panel);
@@ -3499,11 +3500,16 @@ function renderCatalogRecovery(parent,prefix) {
   retry.setAttribute("aria-describedby",status.id);
   retry.addEventListener("click",async()=>{
     if(retry.disabled)return;
+    const snapshot=data,ownedFocus=document.activeElement===retry||document.activeElement?.id===retry.id;
     retry.disabled=true;status.textContent="Loading collection links…";
     const loaded=await loadCatalog(data?.source_head);
     retry.disabled=false;
+    if(data!==snapshot)return;
     if(!loaded){status.textContent="Collection links could not be loaded. Try again when your connection is available.";return;}
-    const keepFocus=document.activeElement===retry;
+    // Disabling the button can blur it; a shared refresh can also remove it.
+    const focused=document.activeElement;
+    const keepFocus=ownedFocus&&(focused===retry||focused?.id===retry.id||
+      focused===document.body||focused?.isConnected===false);
     // A late response may fill the cache, but must leave a hidden view empty.
     const view=document.querySelector?.(".page-view:not([hidden])")?.id;
     if(prefix==="gallery"&&(!view||view==="gallery-view")) {
@@ -5313,7 +5319,12 @@ async function loadRecord(useHistory) {
     loadCraftOutcomes(data);
     if(catalogSource!==data.source_head) {
       await loadCatalog(data.source_head);
-      if(catalog)renderAuxiliaryViews();
+      if(catalog) {
+        renderAuxiliaryViews();
+        // A retry may already have rebuilt this room and restored focus.
+        if(selected==="gallery"&&$("gallery-room-catalog-retry")&&
+           document.querySelector?.(".page-view:not([hidden])")?.id==="house-view")roomPanel();
+      }
     }
     const recovered=!recovery.hidden;
     recovery.hidden=true;$("error").textContent="";
