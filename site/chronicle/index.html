@@ -3,15 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>Emberhall Chronicle Room</title>
   <style>
     :root {
+      color-scheme: light dark;
       --bg: #f6f2ea;
       --card: #fffdf9;
       --ink: #221f1a;
       --muted: #665e52;
       --border: #dfd6c7;
       --accent: #9b3d1e;
+      --accent-wash: #f7e7db;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #171c22;
+        --card: #202731;
+        --ink: #f4eee3;
+        --muted: #c4bbad;
+        --border: #4b5058;
+        --accent: #ffb387;
+        --accent-wash: #2f251f;
+      }
     }
     body {
       margin: 0;
@@ -29,6 +43,14 @@
       border-bottom: 2px solid var(--border);
       padding-bottom: 1rem;
       margin-bottom: 1.5rem;
+    }
+    header a, .site-footer a {
+      color: var(--accent);
+      text-underline-offset: 0.2em;
+      display: inline-flex;
+      align-items: center;
+      box-sizing: border-box;
+      min-height: 44px;
     }
     h1 {
       margin: 0 0 0.4rem;
@@ -53,6 +75,8 @@
     .browse-options label {
       background: var(--card);
       border: 1px solid var(--border);
+      box-sizing: border-box;
+      min-height: 44px;
       padding: 0.65rem;
       border-radius: 4px;
       cursor: pointer;
@@ -63,8 +87,8 @@
     h2 { font-size: 1.2rem; }
     @supports selector(main:has(input:checked)) {
       .browse-controls, .earlier-control, .recent-note { display: block; }
-      .earlier-control { padding: 0.5rem 0; cursor: pointer; }
-      .browse-options label:has(input:checked) { border-color: var(--accent); background: #f7e7db; }
+      .earlier-control { box-sizing: border-box; min-height: 44px; padding: 0.65rem 0; cursor: pointer; }
+      .browse-options label:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
       main:has(#chronicle-all:checked):not(:has(#chronicle-earlier:checked)) .earlier-entry { display: none; }
       main:has(#chronicle-earlier:checked) .recent-note { display: none; }
       main:has(#chronicle-project:checked) .entry:not(.entry-project), main:has(#chronicle-project:checked) .heading-all, main:has(#chronicle-project:checked) .empty-all, main:has(#chronicle-project:checked) .earlier-control, main:has(#chronicle-project:checked) .recent-note { display: none; }
@@ -105,20 +129,43 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
       margin: 0.2rem 0 0.4rem;
     }
     details { overflow-wrap: anywhere; }
-    summary { cursor: pointer; color: var(--muted); }
+    summary {
+      cursor: pointer;
+      color: var(--muted);
+      box-sizing: border-box;
+      min-height: 44px;
+      padding: 0.75rem 0;
+    }
     .record { margin-top: 0.8rem; font-size: 0.85rem; }
     .earlier > summary { padding: 1rem 0; }
     .snapshot { font-size: 0.85rem; margin-bottom: 1rem; }
     .links a {
       color: var(--accent);
+      text-underline-offset: 0.2em;
       margin-right: 0.9rem;
       font-size: 0.9rem;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      box-sizing: border-box;
+      min-height: 44px;
       padding: 0.5rem 0;
       overflow-wrap: anywhere;
     }
     .links .launch { font-weight: bold; }
+    .site-footer {
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.2rem;
+    }
     a:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    @media (forced-colors: active) {
+      a:focus-visible, summary:focus-visible, input:focus-visible { outline-color: Highlight; }
+    }
   </style>
 </head>
 <body>
@@ -385,6 +432,12 @@ main:has(#chronicle-rejected:checked) .heading-rejected, main:has(#chronicle-rej
   </details>
 </article>
     </section>
+    <footer class="site-footer" aria-label="Emberhall rooms">
+      <a href="../index.html#house-view">House</a>
+      <a href="../index.html#projects-view">Projects</a>
+      <a href="../index.html#gallery-view">Gallery</a>
+      <a href="../index.html#council-view">Council</a>
+    </footer>
   </main>
 </body>
 </html>
