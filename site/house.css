@@ -1649,3 +1649,54 @@ footer a {
   .study-compare-table tbody th { padding-bottom:.2rem; border:0; color:var(--gold); }
   .study-compare-table tbody td::before { content:attr(data-idea); display:block; font-size:.85rem; font-weight:600; margin-bottom:.3rem; }
 }
+
+/* R3: preserve the map's lettering on phones; the room list stays in view. */
+@media (max-width:600px) {
+  .house-layout:not(.room-open) .stage {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    margin:0;
+    max-width:100%;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+  }
+  .house-layout:not(.room-open) .stage svg {
+    flex:none;
+    width:960px;
+    max-width:none;
+    height:auto;
+    min-height:0;
+    max-height:none;
+  }
+  .house-layout:not(.room-open) .stage :is(.map-hint,.room-nav) {
+    position:sticky;
+    left:0;
+    width:100%;
+    box-sizing:border-box;
+    margin:14px 0;
+  }
+  .house-layout:not(.room-open) .room-nav { order:-2; }
+  .house-layout:not(.room-open) .map-hint { order:-1; }
+  .house-layout:not(.room-open) .dorm-pager {
+    flex:none;
+    margin:14px 0;
+    position:sticky;
+    left:0;
+    width:100%;
+    box-sizing:border-box;
+  }
+  .house-layout:not(.room-open) .map-hint::before {
+    content:"Choose a room above, or swipe the map sideways. ";
+  }
+  .house-layout .room-nav button {
+    min-height:44px;
+    font-size:14px;
+    padding:9px 12px;
+  }
+  .house-layout.room-open .stage svg {
+    width:100%;
+    min-height:240px;
+    max-height:none;
+  }
+}
