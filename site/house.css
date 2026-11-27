@@ -1355,7 +1355,7 @@ footer a {
 
 /* Narrow screens: an opened room's details sit straight under the drawing, not at the foot of the page. */
 @media (max-width:1050px) {
-  .house-layout.room-open { display:flex; flex-direction:column; gap:0; }
+  .house-layout.room-open { display:flex; flex-direction:column; align-items:stretch; gap:0; }
   .house-layout.room-open .house-pane, .house-layout.room-open .house-explorer, .house-layout.room-open .journal-pane { display:contents; }
   .house-layout.room-open .floor-controls { order:1; }
   .house-layout.room-open .stage { order:2; }
@@ -1473,7 +1473,7 @@ footer a {
 .composed-gallery [data-opens="creation"] { cursor:pointer; }
 
 /* Enter the room first; Back to rooms restores the complete roof-off overview. */
-.house-layout.room-open:has(.composed-room) { display:flex; flex-direction:column; gap:0; }
+.house-layout.room-open:has(.composed-room) { display:flex; flex-direction:column; align-items:stretch; gap:0; }
 .house-layout.room-open:has(.composed-room) :is(.house-pane,.house-explorer,.journal-pane) { display:contents; }
 .house-layout.room-open:has(.composed-room) .house-pane > :is(.eyebrow,.introduction,.gallery-invitation),
 .house-layout.room-open:has(.composed-room) .lately-strip { display:none; }
