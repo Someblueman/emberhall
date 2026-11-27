@@ -33,6 +33,9 @@
   <style>
     /* Keep the default keyboard ring distinct in both page colour schemes. */
     button:focus-visible,a:focus-visible,[tabindex]:focus-visible { outline-color:var(--gold); }
+    /* Keep long recent-event names inside their cards beside the time. */
+    .lately-what { min-width:0; overflow-wrap:anywhere; }
+    .lately-when { flex-shrink:0; }
     /* Keep the header contact link comfortable to press at either width. */
     .masthead .bell { display:inline-flex; align-items:center; gap:.25em; min-height:44px; }
     /* Recent changes can span several lines beside the card's left rule. */
