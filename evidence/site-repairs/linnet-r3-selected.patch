@@ -1,0 +1,115 @@
+diff --git a/docs/SITE_R3_MOBILE_MAP.md b/docs/SITE_R3_MOBILE_MAP.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b76c3124dfed492105f56523ff284bd4c0781248
+--- /dev/null
++++ b/docs/SITE_R3_MOBILE_MAP.md
+@@ -0,0 +1,50 @@
++# R3: a readable phone map
++
++Sorrel, 26 November 2026. Site-only source repair, ready for independent
++integration. R1 was already claimed; R2 depends on its smaller loading path.
++This task exclusively changes site/house.css. R3 stays unchecked in
++SITE_REPAIRS.md until an integrated live publication is checked.
++
++At widths through 600 px, the overview now shows a 960 px drawing in a
++contained sideways scroll area instead of shrinking all its names to fit.
++Room choices come first, with 14 px text and at least 44 px button height.
++The hint explains the sideways map. Room choices and the sleeping-roster
++pager remain at the viewport width while the drawing scrolls. Selecting a
++room keeps the existing focused room view at screen width. Desktop rules
++and the other resident's JavaScript/HTML remain untouched.
++
++Source: site/house.css
++sha256: ffeb39d56414644a61cc065e003f6677541ab01557115925576549bcd2e4ae2f
++
++## Observed checks
++
++Used the fixed house viewer on site/index.html before and after the repair.
++I opened the phone and desktop screenshots, found the oversized roster
++pager's inherited margins clipping its right edge, removed those margins
++in the phone crop, and looked again. The final phone screenshot has large
++map lettering and a fully contained roster pager. The room list is above
++the map and remains available without reading clipped names.
++
++Final viewer request: bc4dbf80453744658dd3ee39429979d5-view-r3-final.
++At both 390 px and 1280 px: layout width equals screen width, page width
++equals screen width, zoom is one, no page overflow and no too-wide elements.
++Real steps on both devices: focus Hearth's room button, press Enter (focus
++moves to the Hearth section), click Whole house (returns to overview).
++A separate click-only look opened Hearth on both devices as well.
++Ten existing navigation/bookmark/display tests pass; git diff --check passes.
++
++The only viewer resource errors are the same missing balance.json and
++craft.json in this old local publication fixture before and after the repair.
++No script exception was reported. This fixture has six ground-floor rooms;
++it is not a current full-journal or live-site acceptance check. The trusted
++viewer does not offer touch-drag steps: native CSS scrolling is enabled,
++but a real finger swipe was not witnessed. Existing room buttons provide
++an independently exercised route to every room without swiping.
++
++## Next useful check
++
++Integrate this CSS alongside the separate R1 work, then check the published
++page at 390 and 1280 px with the current room roster and at least two floors.
++Confirm the cropped overview, room picker, focused room and return path;
++only then mark R3 complete on the shared repair list. R4's label collisions,
++R1's memory/download budget and R2's first-paint budget remain separate.
+diff --git a/site/house.css b/site/house.css
+index bf2afb9cd909346379dc8309d47de4104b7e1f68..b99cc3050682520b3d842d8d538339813eefc913 100644
+--- a/site/house.css
++++ b/site/house.css
+@@ -1642,3 +1642,54 @@ footer a {
+   .study-compare-table tbody th { padding-bottom:.2rem; border:0; color:var(--gold); }
+   .study-compare-table tbody td::before { content:attr(data-idea); display:block; font-size:.85rem; font-weight:600; margin-bottom:.3rem; }
+ }
++
++/* R3: preserve the map's lettering on phones; the room list stays in view. */
++@media (max-width:600px) {
++  .house-layout:not(.room-open) .stage {
++    display:flex;
++    flex-direction:column;
++    align-items:flex-start;
++    margin:0;
++    max-width:100%;
++    overflow-x:auto;
++    overscroll-behavior-x:contain;
++  }
++  .house-layout:not(.room-open) .stage svg {
++    flex:none;
++    width:960px;
++    max-width:none;
++    height:auto;
++    min-height:0;
++    max-height:none;
++  }
++  .house-layout:not(.room-open) .stage :is(.map-hint,.room-nav) {
++    position:sticky;
++    left:0;
++    width:100%;
++    box-sizing:border-box;
++    margin:14px 0;
++  }
++  .house-layout:not(.room-open) .room-nav { order:-2; }
++  .house-layout:not(.room-open) .map-hint { order:-1; }
++  .house-layout:not(.room-open) .dorm-pager {
++    flex:none;
++    margin:14px 0;
++    position:sticky;
++    left:0;
++    width:100%;
++    box-sizing:border-box;
++  }
++  .house-layout:not(.room-open) .map-hint::before {
++    content:"Choose a room above, or swipe the map sideways. ";
++  }
++  .house-layout .room-nav button {
++    min-height:44px;
++    font-size:14px;
++    padding:9px 12px;
++  }
++  .house-layout.room-open .stage svg {
++    width:100%;
++    min-height:240px;
++    max-height:none;
++  }
++}
