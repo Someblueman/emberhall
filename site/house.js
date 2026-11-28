@@ -413,7 +413,16 @@ function dormControls() {
     $("room-nav").before(controls);
     const count=html("p","",undefined,controls);count.id="dorm-count";count.setAttribute("role","status");
     const row=html("div","dorm-buttons",undefined,controls);
-    [-1,1].forEach(delta=>{const button=html("button","",delta<0?"← Previous":"Next →",row);button.id=delta<0?"dorm-previous":"dorm-next";button.setAttribute("aria-label",delta<0?"Previous remembered residents":"Next remembered residents");button.addEventListener("click",()=>{dormPage+=delta;drawHouse();roomPanel();dormControls();});});
+    [-1,1].forEach(delta=>{const button=html("button","",delta<0?"← Previous":"Next →",row);button.id=delta<0?"dorm-previous":"dorm-next";button.setAttribute("aria-label",delta<0?"Previous remembered residents":"Next remembered residents");button.addEventListener("click",()=>{
+      const hadFocus=document.activeElement===button;
+      dormPage+=delta;drawHouse();roomPanel();dormControls();
+      // Disabling the focused end-page button otherwise drops keyboard focus
+      // onto the document body. Keep the return journey within this pager.
+      if(hadFocus&&button.disabled) {
+        const other=$(delta>0?"dorm-previous":"dorm-next");
+        if(!other.disabled)other.focus();
+      }
+    });});
     const page=html("span","small",undefined,controls);page.id="dorm-page";
   }
   const view=dormView(frame,dormPage);dormPage=view.page;
