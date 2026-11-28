@@ -1972,8 +1972,30 @@ function renderLessons(content) {
     const lesson=lessons.find(item=>item.id===archiveState.trailId);
     trail.hidden=!lesson;
     if(!lesson)return;
+    const addClose=()=>{
+      const close=workshopButton(trail,"Close lesson history",()=>{
+        archiveState.trailId=null;drawTrail();workshopFocus($(`archive-follow-${lesson.id}`)?`archive-follow-${lesson.id}`:"archive-search",true);
+      });close.id="archive-trail-close";
+    };
     html("h3","",`How ${String(lesson.key||"").replaceAll("-"," ")} changed`,trail);
     html("p","small",`${lesson.author} · ${clip(lesson.claim,160)}`,trail);
+    if(data.history?.current_only&&historyLength()>1) {
+      html("p","small","Earlier lesson changes are not loaded yet.",trail);
+      const status=html("p","small","",trail);status.setAttribute("role","status");
+      const load=workshopButton(trail,"Load earlier lesson changes",async()=>{
+        const active=document.activeElement,id=lesson.id;
+        load.disabled=true;status.textContent="Loading earlier lesson changes…";
+        const ready=await ensureHistory();
+        load.disabled=false;
+        if(!ready)status.textContent="Earlier changes could not be loaded. Try again.";
+        if(ready&&selected==="archive"&&archiveState.trailId===id&&
+           (document.activeElement===active||document.activeElement===document.body))
+          workshopFocus("archive-trail",true);
+      });
+      load.id="archive-history-load";
+      addClose();
+      return;
+    }
     html("p","small","Only changes visible in public snapshots, through this moment. Missing snapshots can hide earlier changes. Review counts do not identify reviewers or show their evidence; they do not prove the claim.",trail);
     const changes=archiveLessonChanges(lesson.id,data?.frames,frame);
     const newest=changes.map((change,i)=>({...change,first:i===0})).reverse();
@@ -2002,9 +2024,7 @@ function renderLessons(content) {
     html("span","small",`${start+1}–${Math.min(start+size,newest.length)} of ${newest.length} changed views · newest first`,pages).setAttribute("role","status");
     const older=workshopButton(pages,"Older views",()=>turn(1));older.id="archive-trail-older";older.disabled=start+size>=newest.length;
     pages.hidden=newest.length<=size;pages.setAttribute("style",pages.hidden?"display:none":"");
-    const close=workshopButton(trail,"Close lesson history",()=>{
-      archiveState.trailId=null;drawTrail();workshopFocus($(`archive-follow-${lesson.id}`)?`archive-follow-${lesson.id}`:"archive-search",true);
-    });close.id="archive-trail-close";
+    addClose();
   }
   const comparison=html("section","study-comparison",undefined,panel);
   comparison.id="archive-comparison";comparison.tabIndex=-1;

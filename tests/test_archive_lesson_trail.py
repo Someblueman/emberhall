@@ -27,6 +27,42 @@ class ArchiveLessonTrailTests(unittest.TestCase):
              str(ROOT / 'site/house.js')], capture_output=True, text=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_snapshot_only_trail_loads_history_and_preserves_search(self):
+        self.run_renderer(r'''
+(async()=>{
+const full=data;frame=full.frames[4];
+data={frames:[frame],history:{current_only:true,total_frames:25,last_sequence:25}};
+selected='archive';show();search('shared');get('archive-follow-10').listeners.click();
+assert.doesNotMatch(text(get('archive-trail')),/First available view/);
+const load=get('archive-history-load');load.focus();let calls=0;
+assert(get('archive-trail-close'));
+ensureHistory=async()=>{calls++;data=full;show();return true;};
+await load.listeners.click();
+assert.equal(calls,1);assert.equal(archiveState.query,'shared');assert.equal(archiveState.trailId,10);
+assert.equal(get('archive-history-load'),null);
+assert.match(text(get('archive-trail')),/First available view · event 12/);
+assert.equal(document.activeElement,get('archive-trail'));
+get('archive-visit-10-20').listeners.click();assert.equal(frame.seq,20);
+get('archive-return').listeners.click();assert.equal(frame.seq,25);
+assert.equal(archiveState.query,'shared');
+})();
+''')
+
+    def test_history_failure_retries_and_navigation_keeps_focus(self):
+        self.run_renderer(r'''
+(async()=>{
+data.history={current_only:true,total_frames:25,last_sequence:25};
+selected='archive';show();get('archive-follow-10').listeners.click();
+const load=get('archive-history-load');load.focus();let calls=0;
+ensureHistory=async()=>{calls++;return false;};
+await load.listeners.click();assert(!load.disabled);
+assert.match(text(get('archive-trail')),/could not be loaded. Try again/);
+await load.listeners.click();assert.equal(calls,2);
+ensureHistory=async()=>{delete data.history;show();get('archive-search').focus();return true;};
+await load.listeners.click();assert.equal(document.activeElement,get('archive-search'));
+})();
+''')
+
     def test_sparse_observations_keep_identity_and_hide_future(self):
         self.run_renderer(r'''
 const before=JSON.stringify(data);

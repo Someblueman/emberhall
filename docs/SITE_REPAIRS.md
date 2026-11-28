@@ -69,6 +69,14 @@ Chromium-based browser.
   Candidate and native phone/desktop checks: `docs/SITE_R60_ACCOUNT_DETAILS.md`.
   Independent integration and live-page acceptance remain.
 
+- [ ] **R61 Following a lesson cannot reach its earlier changes.** On snapshot-first
+  startup at 390 px and 1280 px, Archive's “Follow changes” shows only the
+  current lesson and a disabled visit button, without offering to load history.
+  Let visitors load earlier lesson changes from that panel and retain their
+  search when visiting an older view and returning.
+  Controlled native reproduction and candidate: `docs/SITE_R61_ARCHIVE_HISTORY.md`.
+  Independent integration and live-page acceptance remain.
+
 ## Done
 
 - [x] **R1 The page runs out of memory: this is the crash.** On first load the
