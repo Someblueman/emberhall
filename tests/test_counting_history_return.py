@@ -1,7 +1,35 @@
 """Counting event trips restore the visitor's ledger instead of losing its page."""
 import unittest
 import shutil
+import json
+from pathlib import Path
 from tests import test_counting_work_trail as ledger
+
+
+def write_deferred_fixture(destination):
+    """Native-browser reproduction with a delayed, complete retained history."""
+    from tests.test_site_refresh_scheduling import write_missing_snapshot_fixture
+    root = Path(__file__).resolve().parents[1]
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    write_missing_snapshot_fixture(destination, failures=0)
+    history = json.loads((root / "site/history.json").read_text())
+    for moment in history["frames"]:
+        moment["rooms"].append(dict(id="counting", name="Counting Room", status="open"))
+    history["frames"][-1]["runs"] = [dict(
+        id="fixture-run", resident="fixture-reader", agent="codex", sequence=6,
+        start=history["frames"][5]["at"], status="ended", outcome="success", finished_tasks=[])]
+    payload = json.dumps(history).replace("<", "\\u003c")
+    page = destination.read_text().replace(
+        "Controlled missing snapshot fixture", "Controlled deferred run-ledger fixture")
+    page = page.replace("window.fetch=async url=>{", "const historyFixture=" + payload +
+                        ";fixtureSnapshot.frames[0]=structuredClone(historyFixture.frames.at(-1));"
+                        "window.fetch=async url=>{")
+    page = page.replace("if(path==='head.json')", "if(path==='history.json'){"
+                        "await new Promise(resolve=>setTimeout(resolve,250));"
+                        "return {ok:true,json:async()=>structuredClone(historyFixture)};}"
+                        "if(path==='head.json')")
+    destination.write_text(page)
 
 
 @unittest.skipUnless(shutil.which("node"), "Node executes the page renderer")
@@ -36,6 +64,56 @@ assert.equal(JSON.stringify(countingState),saved);
 assert(get('counting-handoffs-run%200').open);
 assert.equal(document.activeElement,get('counting-jump-3'));
 assert.equal(countingHistoryTrail,null);assert.equal(JSON.stringify(data),before);
+''')
+
+    def test_deferred_history_focuses_the_mounted_destination(self):
+        self.run_trip(r'''
+const historyFrames=[...data.frames];
+data.frames=[origin];data.history={current_only:true,last_sequence:20,total_frames:4};index=0;
+let complete;
+ensureHistory=()=>new Promise(resolve=>{complete=()=>{
+ data.frames=historyFrames;delete data.history;resolve(true);
+};});
+const replace=Element.prototype.replaceChildren;
+Element.prototype.replaceChildren=function(){
+ if(all(this).includes(document.activeElement))document.activeElement=null;
+ replace.call(this);
+};
+let scrolled=null;
+Element.prototype.scrollIntoView=function(){scrolled=this;};
+draw();get('counting-jump-3').listeners.click();assert.equal(frame.seq,20);
+complete();Promise.resolve().then(()=>{
+ assert.equal(frame.seq,3);
+ assert(document.activeElement===get('counting-runs'),'focus the new ledger after loading');
+ assert(scrolled===document.activeElement,'bring the mounted destination into view');
+ assert(all(root).includes(document.activeElement),'never focus a detached control');
+ get('counting-history-return').listeners.click();assert.equal(frame.seq,20);
+ assert(document.activeElement===get('counting-jump-3'),'restore the original run button');
+});
+''')
+
+    def test_deferred_trip_cannot_steal_focus_from_newer_navigation(self):
+        self.run_trip(r'''
+const historyFrames=[...data.frames];
+data.frames=[origin];data.history={current_only:true,last_sequence:20,total_frames:4};index=0;
+let complete;
+ensureHistory=()=>new Promise(resolve=>{complete=()=>{
+ data.frames=historyFrames;delete data.history;resolve(true);
+};});
+draw();get('counting-jump-3').listeners.click();
+const newer=new Element('button');document.activeElement=newer;
+historyNavigation++;complete();Promise.resolve().then(()=>{
+ assert.equal(frame.seq,20);assert(document.activeElement===newer,'a cancelled trip must not move focus');
+});
+''')
+
+    def test_trip_before_the_ledger_existed_focuses_the_room_record(self):
+        self.run_trip(r'''
+nodes['room-card']=new Element('section');
+render=()=>{frame=data.frames[index];root.replaceChildren();};
+get('counting-jump-3').listeners.click();
+assert.equal(frame.seq,3);
+assert(document.activeElement===nodes['room-card'],'show the room record when the ledger is absent');
 ''')
 
     def test_handoff_visit_returns_to_historical_origin_after_new_publication(self):
