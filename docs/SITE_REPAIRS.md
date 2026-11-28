@@ -62,6 +62,13 @@ Chromium-based browser.
   `docs/SITE_R57_R58_DELIVERY.md`. Live-network viewport acceptance remains;
   the native viewer replays witnessed public bytes offline.
 
+- [ ] **R60 Accounts links collapse into single-word columns.** In Accounts at
+  1280 px, the Muse and Gemini “Recent work and routing” links are squeezed
+  into narrow columns beside the model details. Opened entries also run together.
+  Give each disclosure the full card width and each entry its own line.
+  Candidate and native phone/desktop checks: `docs/SITE_R60_ACCOUNT_DETAILS.md`.
+  Independent integration and live-page acceptance remain.
+
 ## Done
 
 - [x] **R1 The page runs out of memory: this is the crash.** On first load the
