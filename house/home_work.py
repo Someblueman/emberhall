@@ -9,6 +9,8 @@ import re
 import stat
 import subprocess
 import sys
+import tempfile
+import shutil
 
 from .record import Record
 from .resident_client import client
@@ -256,6 +258,44 @@ def _commit_safe(workspace: Path, parent: str, safe: list[str], destination: Pat
         (destination.parent / (temp_index.name + ".lock")).unlink(missing_ok=True)
 
 
+def retain_source(workspace: Path, base: str, head: str, destination: Path) -> None:
+    """Retain new objects independently of the disposable room, before its report.
+
+    The permanent source object store supplies unchanged history. No alternate
+    points back to the room, and no shared ref or index is written.
+    """
+    store = next((p for p in destination.parents if p.name == "house-home"), None)
+    if store is None:
+        raise ValueError("contribution destination is outside the controller store")
+    common = store.parent
+    git(common, "cat-file", "-e", base + "^{commit}")
+    target = destination.parent / ("source-" + head + ".git")
+    if target.is_symlink():
+        raise ValueError("retained source is a symlink")
+    if target.exists():
+        if (git(target, "rev-parse", "HEAD") != head
+                or git(target, "rev-parse", "--is-bare-repository") != "true"
+                or (target / "objects/info/alternates").read_text().splitlines()
+                != [str((common / "objects").resolve())]):
+            raise ValueError("retained contribution identity changed")
+        return
+    temporary = Path(tempfile.mkdtemp(prefix=".retained-source-", dir=destination.parent))
+    try:
+        subprocess.run(["git", "clone", "--quiet", "--bare", "--no-local", "--no-tags",
+                        "--reference", str(common), str(workspace), str(temporary)],
+                       check=True, capture_output=True, timeout=120)
+        git(temporary, "remote", "remove", "origin")
+        if git(temporary, "rev-parse", "HEAD") != head:
+            raise ValueError("source changed during retention")
+        alternates = temporary / "objects/info/alternates"
+        if alternates.read_text().splitlines() != [str((common / "objects").resolve())]:
+            raise ValueError("retained source has an unexpected object dependency")
+        os.rename(temporary, target)
+    finally:
+        if temporary.exists():
+            shutil.rmtree(temporary)
+
+
 def contribution(workspace: Path, base: str, destination: Path, *,
                  journal_artifacts: dict[str, dict], message: str = FALLBACK_MESSAGE) -> dict:
     """Capture a standalone candidate commit without changing source or losing work.
@@ -298,6 +338,15 @@ def contribution(workspace: Path, base: str, destination: Path, *,
     recorded = recorded_report_changes(workspace, base, head, journal_artifacts)
     if recorded:
         report.update(status="journal-recorded", journal_artifacts=recorded)
+    if paths:
+        try:
+            retain_source(workspace, base, head, destination)
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            # Retention failure must not lose the existing live-room review
+            # path or pretend a deleted room will later be recoverable.
+            report["retained_source_error"] = type(error).__name__
+        else:
+            report["retained_source"] = "git-objects-v1"
     temporary = destination.with_name(destination.name + ".tmp")
     try:
         with temporary.open("w") as output:
