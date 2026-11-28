@@ -2087,11 +2087,18 @@ function countingHistoryOrigin() {
     moment.rooms?.some(room=>room.id==="counting"&&roomStatus(room)==="open"));
 }
 function visitCountingMoment(sequence,target) {
-  if(sequence===frame.seq||!hasPublishedSequence(sequence))return;
+  const focusDestination=()=>{
+    const replacement=$(target);
+    const disclosure=replacement?.closest?.("details");
+    if(disclosure)disclosure.open=true;
+    workshopFocus(replacement?target:$("counting-runs")?"counting-runs":"room-card",true);
+  };
+  if(sequence===frame.seq){focusDestination();return;}
+  if(!hasPublishedSequence(sequence))return;
   if(!countingHistoryOrigin())countingHistoryTrail={sequence:frame.seq,current,target,
     state:{...countingState},opened:new Set(countingHandoffsOpen)};
   countingState.page=0;
-  jumpToSequence(sequence);
+  return jumpToSequence(sequence,focusDestination);
 }
 function renderCountingHistoryReturn(content) {
   const trail=countingHistoryTrail;
@@ -2245,9 +2252,6 @@ function renderCountingRoom(content) {
             const button=workshopButton(item,`Handoff at event ${receipt.sequence}`,()=>{
               countingHandoffsOpen.add(run.id);
               visitCountingMoment(receipt.sequence,id);
-              const replacement=$(id);
-              if(replacement){replacement.closest("details").open=true;replacement.focus({preventScroll:true});}
-              else $("counting-runs")?.focus({preventScroll:true});
             });
             button.id=id;button.setAttribute("aria-label",`Open handoff: ${title} · event ${receipt.sequence}`);
           } else html("span","small",`Event ${receipt.sequence} · outside retained history`,item);
@@ -2270,7 +2274,7 @@ function renderCountingRoom(content) {
         const btn=html("button","counting-jump",`Event ${run.sequence}`,row);
         btn.type="button";btn.id=`counting-jump-${run.sequence}`;
         btn.addEventListener("click",()=>{
-          visitCountingMoment(run.sequence,btn.id);workshopFocus($(btn.id)?btn.id:"counting-runs",true);
+          visitCountingMoment(run.sequence,btn.id);
         });
       }
     });
@@ -4581,7 +4585,9 @@ function openCouncilRecord(kind,id) {
   if(typeof window!=="undefined"&&window.location?.hash!=="#council-view")
     window.history?.pushState(null,"","#council-view");
   showViewForHash("#council-view");
-  target.focus({preventScroll:true});target.scrollIntoView?.({block:"start"});
+  // Routing rebuilds the Council list; focus its mounted record, not the old node.
+  const mountedTarget=$(targetId);
+  mountedTarget?.focus({preventScroll:true});mountedTarget?.scrollIntoView?.({block:"start"});
   return true;
 }
 function councilRecordLink(parent,kind,record) {
