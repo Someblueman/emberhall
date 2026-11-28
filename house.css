@@ -1694,7 +1694,7 @@ footer a {
   }
   .house-layout:not(.room-open) .stage svg {
     flex:none;
-    width:960px;
+    width:var(--phone-map-width,960px);
     max-width:none;
     height:auto;
     min-height:0;

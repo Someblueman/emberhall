@@ -956,6 +956,10 @@ function drawHouse() {
   const selectedBounds=selected&&roomBounds[selected]
     ?includeTagBounds(roomBounds[selected],tags.filter(tag=>tag.resident.room===selected)):null;
   map.setAttribute("viewBox",selectedBounds||wholeBounds);
+  // A fixed phone width shrinks every label as the house gains rooms. Keep
+  // the overview at a readable scale (13-unit names become at least 16px).
+  // Only the phone overview stylesheet consumes this; rooms and desktop fit.
+  map.style?.setProperty?.("--phone-map-width",`${Math.max(960,Math.ceil(Number(wholeBounds.split(" ")[2])*1.25))}px`);
   overviewMapVisible=!selected && stage?.clientWidth>0;
   if(overviewMapVisible && stage.scrollWidth>stage.clientWidth) {
     // The readable phone map is wider than its viewport. Begin on the house,
