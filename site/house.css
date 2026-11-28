@@ -569,6 +569,9 @@ footer a {
   padding: 0.55rem 0;
   border-top: 1px solid var(--line);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  overflow-wrap: anywhere;
   gap: 0.2rem;
 }
 .shelf-idea > summary {
