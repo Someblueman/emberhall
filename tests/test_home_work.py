@@ -43,6 +43,33 @@ class PrivateWorkTests(HouseCase):
         self.assertEqual((second / "source.txt").read_text(), "second\n")
         self.assertEqual(git(self.repo, "worktree", "list", "--porcelain").count("worktree "), 1)
 
+    def test_retained_source_depends_only_on_permanent_objects_and_is_idempotent(self):
+        workspace = room(self.record, self.private, "one", self.base)
+        (workspace / "source.txt").write_text("retained\n")
+        destination = self.private / "one/contribution.json"
+        report = contribution(workspace, self.base, destination, journal_artifacts={})
+        archive = destination.parent / ("source-" + report['commit'] + ".git")
+        self.assertEqual(report['retained_source'], 'git-objects-v1')
+        self.assertEqual((archive / 'objects/info/alternates').read_text().splitlines(),
+                         [str((self.record.common / 'objects').resolve())])
+        self.assertNotIn(str(workspace), (archive / 'config').read_text())
+        before = {str(p.relative_to(archive)): p.read_bytes() for p in archive.rglob('*') if p.is_file()}
+        self.assertEqual(contribution(workspace, self.base, destination, journal_artifacts={}), report)
+        self.assertEqual(before, {str(p.relative_to(archive)): p.read_bytes()
+                                  for p in archive.rglob('*') if p.is_file()})
+
+    def test_retention_failure_keeps_live_room_contribution_without_false_marker(self):
+        workspace = room(self.record, self.private, "one", self.base)
+        (workspace / "source.txt").write_text("keep this\n")
+        destination = self.private / "one/contribution.json"
+        with unittest.mock.patch('house.home_work.retain_source', side_effect=OSError('full')):
+            report = contribution(workspace, self.base, destination, journal_artifacts={})
+        self.assertEqual(report['status'], 'pending-review')
+        self.assertNotIn('retained_source', report)
+        self.assertEqual(report['retained_source_error'], 'OSError')
+        self.assertEqual(json.loads(destination.read_text()), report)
+        self.assertEqual(git(workspace, 'show', report['commit'] + ':source.txt'), 'keep this')
+
     def test_fixed_client_rejects_other_actor_and_global_repo_override(self):
         workspace = room(self.record, self.private, "one", self.base)
         self.record.append("arrive", "watch-keeper", {"name": "Clock"})

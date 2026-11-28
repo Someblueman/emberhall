@@ -2,10 +2,14 @@
 import fcntl
 import json
 import os
+import shutil
+import hashlib
+import base64
+import subprocess
 import unittest
 
 from house.home_work import contribution, git
-from house.integrate import check_plan, inspect_contribution, integrate, INSPECTION_LIMIT
+from house.integrate import check_plan, inspect_contribution, export_contribution, integrate, INSPECTION_LIMIT
 from house.home import pending_contributions
 from house.resident_actions import parse
 from tests import test_integrate
@@ -19,6 +23,61 @@ class SourceInspectionTests(unittest.TestCase):
 
     def amend(self, room):
         contribution(room, self.f.base, self.f.private / 'one/contribution.json', journal_artifacts={})
+
+    def test_deleted_room_retains_exact_inspection_and_export_without_writes(self):
+        f = self.f
+        room = f.candidate('one', 'first\n')
+        original = inspect_contribution(f.record, 'one', 'alice', bundle=True)
+        shutil.rmtree(room)
+        archive = f.private / 'one' / ('source-' + original['contribution'] + '.git')
+        def snapshot(path):
+            return {str(p.relative_to(path)): p.read_bytes() for p in path.rglob('*') if p.is_file()}
+        before = snapshot(archive), f.record.read()[2], git(f.repo, 'rev-parse', 'HEAD')
+        exact = inspect_contribution(f.record, 'one', 'alice', path='document.txt')
+        self.assertEqual(exact['content'], 'first\n')
+        actual = inspect_contribution(f.record, 'one', 'alice', bundle=True, preview=True)
+        self.assertEqual(actual['patch_base64'], original['patch_base64'])
+        self.assertEqual(actual['preview']['status'], 'clean')
+        exported = export_contribution(f.record, 'one', 'alice', f.repo)
+        patch = (f.repo / exported['path']).read_bytes()
+        self.assertEqual(patch, base64.b64decode(original['patch_base64']))
+        self.assertEqual(hashlib.sha256(patch).hexdigest(), original['patch_sha256'])
+        self.assertEqual(before, (snapshot(archive), f.record.read()[2], git(f.repo, 'rev-parse', 'HEAD')))
+        self.assertFalse((f.private / 'one/integration.json').exists())
+        with self.assertRaisesRegex(ValueError, 'different, awake'):
+            inspect_contribution(f.record, 'one', 'author-one', bundle=True)
+        # Inspection fallback does not authorize execution/publication from a bare archive.
+        with self.assertRaises(subprocess.CalledProcessError):
+            integrate(f.record, 'one', 'alice', publish=True)
+
+    def test_missing_or_changed_retained_source_fails_closed(self):
+        f = self.f
+        room = f.candidate('one', 'first\n')
+        report_path = f.private / 'one/contribution.json'
+        report = json.loads(report_path.read_text())
+        archive = report_path.parent / ('source-' + report['commit'] + '.git')
+        shutil.rmtree(room)
+        legacy = dict(report); legacy.pop('retained_source')
+        report_path.write_text(json.dumps(legacy))
+        with self.assertRaisesRegex(ValueError, 'no retained source'):
+            inspect_contribution(f.record, 'one', 'alice', bundle=True)
+        report_path.write_text(json.dumps(report))
+        git(archive, 'update-ref', 'HEAD', f.base)
+        with self.assertRaisesRegex(ValueError, 'identity changed'):
+            inspect_contribution(f.record, 'one', 'alice', bundle=True)
+        (archive / 'objects/info/alternates').write_text(str(room / '.git/objects') + '\n')
+        with self.assertRaisesRegex(ValueError, 'object dependency changed'):
+            inspect_contribution(f.record, 'one', 'alice', bundle=True)
+        shutil.rmtree(archive)
+        with self.assertRaisesRegex(ValueError, 'retained source is unavailable'):
+            export_contribution(f.record, 'one', 'alice', f.repo)
+
+    def test_changed_live_room_does_not_fall_back_to_retained_source(self):
+        f = self.f
+        room = f.candidate('one', 'first\n')
+        git(room, 'update-ref', 'HEAD', f.base)
+        with self.assertRaisesRegex(ValueError, 'identity changed'):
+            inspect_contribution(f.record, 'one', 'alice', bundle=True)
 
     def test_inspection_reads_exact_committed_diff_without_receipt_or_lock_mutation(self):
         f = self.f

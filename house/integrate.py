@@ -39,7 +39,7 @@ JOURNAL_EXCLUDED_FIELDS = frozenset({"candidate", "diagnostics"})
 
 
 def source(record: Record, run: str, actor: str, *, admitted: bool = False,
-           allow_absent_workspace: bool = False):
+           allow_absent_workspace: bool = False, retained_inspection: bool = False):
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", run):
         raise ValueError("invalid run ID")
     state, _, _ = record.read()
@@ -55,6 +55,16 @@ def source(record: Record, run: str, actor: str, *, admitted: bool = False,
     if (any(not isinstance(report.get(key), str) or not re.fullmatch(r"[0-9a-f]{40}", report[key])
             for key in ("base", "commit")) or report["base"] != item["source_head"]):
         raise ValueError("contribution identity changed")
+    if retained_inspection and not workspace.exists() and not workspace.is_symlink():
+        if report.get("retained_source") != "git-objects-v1":
+            raise ValueError("stopped source room is absent and has no retained source")
+        workspace = record.common / "house-home" / run / ("source-" + report["commit"] + ".git")
+        if workspace.is_symlink() or not workspace.is_dir():
+            raise ValueError("retained source is unavailable")
+        if (git(workspace, "rev-parse", "--is-bare-repository") != "true"
+                or (workspace / "objects/info/alternates").read_text().splitlines()
+                != [str((record.common / "objects").resolve())]):
+            raise ValueError("retained source object dependency changed")
     # A terminal receipt outlives its source room. Existing rooms must still
     # match their recorded contribution; missing rooms never authorize new work.
     if (not (allow_absent_workspace and not workspace.exists())
@@ -242,7 +252,7 @@ def inspect_contribution(
     content_offset = _validate_cursor(content_after, "content_after")
     if content_offset is not None and path is None:
         raise ValueError("content continuation requires an exact changed path")
-    workspace, report = source(record, run, actor)
+    workspace, report = source(record, run, actor, retained_inspection=True)
     selected = paths
     paths = changed_paths(workspace, report["base"], report["commit"])
     if path is not None and path not in paths:
@@ -346,7 +356,7 @@ def inspect_contribution(
 def export_contribution(record: Record, run: str, actor: str, room: Path,
                         paths: list[str] | None = None) -> dict:
     """Fixed-channel worker export to its authenticated requesting room only."""
-    workspace, report = source(record, run, actor)
+    workspace, report = source(record, run, actor, retained_inspection=True)
     changed = changed_paths(workspace, report["base"], report["commit"])
     selected = _selected_paths(changed, paths)
     command = _patch_command(report, selected)
