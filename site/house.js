@@ -858,20 +858,31 @@ function nameTags(map,placed,labels=[]) {
 function renderLately() {
   const host=$("lately");
   if(!host||!host.replaceChildren)return;
+  const active=document.activeElement;
+  const restoreFocus=host.contains?.(active);
+  const focusId=restoreFocus?active.id:null;
+  const restore=()=>{
+    if(!restoreFocus)return;
+    const target=(focusId&&$(focusId))||host.querySelector?.("button")||host;
+    if(target===host)host.setAttribute("tabindex","-1");
+    target.focus?.({preventScroll:true});
+  };
   host.replaceChildren();
   const items=latelyEvents(6);
   if(!items.length) {
     const message=data.history?.current_only&&historyLength()>1?"Open house history to see earlier activity.":"Nothing recorded yet.";
-    html("li","lately-empty",message,host);return;
+    html("li","lately-empty",message,host);restore();return;
   }
   items.forEach((item,n)=>{
     const row=html("li",n===0&&current&&observationTime()-item.at<600?"lately-fresh":"",undefined,host);
     const button=html("button","lately-item",undefined,row);
+    button.id=`lately-event-${item.seq}`;
     button.type="button";
     html("span","lately-what",latelySentence(item),button);
     html("span","lately-when",ago(item.at),button);
     button.addEventListener("click",()=>jumpToSequence(item.seq));
   });
+  restore();
 }
 function drawHouse() {
   const stage = $("stage");
